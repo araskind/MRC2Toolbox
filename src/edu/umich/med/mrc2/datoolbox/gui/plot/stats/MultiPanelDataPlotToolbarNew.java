@@ -19,7 +19,7 @@
  *  
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.gui.plot.qc.twod;
+package edu.umich.med.mrc2.datoolbox.gui.plot.stats;
 
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
@@ -40,15 +40,13 @@ import org.jfree.chart.ChartPanel;
 
 import edu.umich.med.mrc2.datoolbox.data.compare.ChartColorOption;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataScale;
-import edu.umich.med.mrc2.datoolbox.data.enums.DataSetQcField;
 import edu.umich.med.mrc2.datoolbox.data.enums.FileSortingOrder;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.plot.PlotToolbar;
-import edu.umich.med.mrc2.datoolbox.gui.plot.stats.StatsPlotType;
 import edu.umich.med.mrc2.datoolbox.gui.utils.ComboBoxRendererWithIcons;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 
-public class TwoDqcPlotToolbar extends PlotToolbar implements ActionListener, ItemListener{
+public class MultiPanelDataPlotToolbarNew extends PlotToolbar implements ActionListener, ItemListener{
 
 	/**
 	 * 
@@ -62,8 +60,7 @@ public class TwoDqcPlotToolbar extends PlotToolbar implements ActionListener, It
 	protected static final Icon sidePanelShowIcon = GuiUtils.getIcon("sidePanelShow", 24);
 	protected static final Icon sidePanelHideIcon = GuiUtils.getIcon("sidePanelHide", 24);		
 
-	private JComboBox<DataSetQcField> statParameterComboBox;
-	private TwoDimQCPlot plot;
+	private MultiPanelDataPlot plot;
 	private JComboBox<StatsPlotType> plotTypeComboBox;
 	private JComboBox<DataScale> dataScaleComboBox;
 	private FileSortingOrder fileSortingOrder;
@@ -72,7 +69,7 @@ public class TwoDqcPlotToolbar extends PlotToolbar implements ActionListener, It
 	private JButton colorOptionButton;
 	private JButton sidePanelButton;
 	
-	public TwoDqcPlotToolbar(TwoDimQCPlot plot, ActionListener secondaryListener) {
+	public MultiPanelDataPlotToolbarNew(MultiPanelDataPlot plot, ActionListener secondaryListener) {
 
 		super(plot);
 		this.plot = plot;
@@ -101,7 +98,8 @@ public class TwoDqcPlotToolbar extends PlotToolbar implements ActionListener, It
 						StatsPlotType.BARCHART,
 						StatsPlotType.LINES,
 						StatsPlotType.SCATTER,
-						StatsPlotType.BOXPLOT
+						StatsPlotType.BOXPLOT_BY_FEATURE,
+						StatsPlotType.BOXPLOT_BY_GROUP,						
 						}));
 		plotTypeComboBox.setSelectedItem(StatsPlotType.BARCHART);
 		plotTypeComboBox.addItemListener(this);
@@ -109,13 +107,13 @@ public class TwoDqcPlotToolbar extends PlotToolbar implements ActionListener, It
 		
 		Map<Object,Icon> imageMap = new HashMap<Object,Icon>();
 		imageMap.put(StatsPlotType.BARCHART, GuiUtils.getIcon("barChart", 24));
-		imageMap.put(StatsPlotType.BOXPLOT, GuiUtils.getIcon("boxplot", 24));
 		imageMap.put(StatsPlotType.LINES, GuiUtils.getIcon("lines", 24));
 		imageMap.put(StatsPlotType.SCATTER, GuiUtils.getIcon("scatter", 24));
+		imageMap.put(StatsPlotType.BOXPLOT_BY_FEATURE, GuiUtils.getIcon("boxplot", 24));
+		imageMap.put(StatsPlotType.BOXPLOT_BY_GROUP, GuiUtils.getIcon("boxplot", 24));
 		
-		ComboBoxRendererWithIcons qcPlotTypeRenderer = 
-				new ComboBoxRendererWithIcons(imageMap);
-		plotTypeComboBox.setRenderer(qcPlotTypeRenderer);
+		plotTypeComboBox.setRenderer(
+				new ComboBoxRendererWithIcons(imageMap));
 		
 		add(plotTypeComboBox);		
 
@@ -149,16 +147,6 @@ public class TwoDqcPlotToolbar extends PlotToolbar implements ActionListener, It
 		add(sortOrderButton);
 		
 		addSeparator(buttonDimension);
-		
-		//	QC fields
-		add(new JLabel("  Parameter: "));
-		statParameterComboBox = new JComboBox<DataSetQcField>();
-		statParameterComboBox.setModel(
-				new DefaultComboBoxModel<DataSetQcField>(DataSetQcField.values()));	
-		statParameterComboBox.setSelectedItem(DataSetQcField.OBSERVATIONS);
-		statParameterComboBox.addItemListener(this);
-		statParameterComboBox.setMaximumSize(new Dimension(120, 26));
-		add(statParameterComboBox);
 		
 		add(Box.createHorizontalGlue());
 		
@@ -251,12 +239,10 @@ public class TwoDqcPlotToolbar extends PlotToolbar implements ActionListener, It
 		if(enabled) {			
 			plotTypeComboBox.addItemListener(this);
 			dataScaleComboBox.addItemListener(this);
-			statParameterComboBox.addItemListener(this);	
 		}
 		else {
 			plotTypeComboBox.removeItemListener(this);
 			dataScaleComboBox.removeItemListener(this);
-			statParameterComboBox.removeItemListener(this);	
 		}
 	}
 
@@ -266,32 +252,8 @@ public class TwoDqcPlotToolbar extends PlotToolbar implements ActionListener, It
 		if(e.getStateChange() == ItemEvent.SELECTED) {
 			
 			toggleItemListeners(false);
-			
-			if(e.getSource().equals(plotTypeComboBox)) {
-				
-				DataScale scale = getDataScale();
-
-				if(getStatsPlotType().equals(StatsPlotType.BOXPLOT)) {
-					
-					statParameterComboBox.setModel(
-							new DefaultComboBoxModel<DataSetQcField>(
-									new DataSetQcField[] {DataSetQcField.RAW_VALUES}));
-					dataScaleComboBox.setSelectedItem(DataScale.RAW);
-				}
-				else {
-					statParameterComboBox.setModel(
-							new DefaultComboBoxModel<DataSetQcField>(DataSetQcField.values()));
-					statParameterComboBox.removeItem(DataSetQcField.RAW_VALUES);
-					dataScaleComboBox.setSelectedItem(scale);
-				}
-			}	
-			if(e.getSource().equals(dataScaleComboBox)) {
-				
-				if(!getDataScale().equals(DataScale.RAW)  && getStatsPlotType().equals(StatsPlotType.BOXPLOT))
-					plotTypeComboBox.setSelectedItem(StatsPlotType.BARCHART);				
-			}
-			toggleItemListeners(true);
 			updatePlot();
+			toggleItemListeners(true);			
 		}		
 	}
 	
@@ -336,14 +298,6 @@ public class TwoDqcPlotToolbar extends PlotToolbar implements ActionListener, It
 		dataScaleComboBox.setSelectedItem(scale);
 	}
 	
-	public DataSetQcField getStatParameter() {
-		return (DataSetQcField) statParameterComboBox.getSelectedItem();
-	}
-	
-	public void setStatParameter(DataSetQcField field) {
-		statParameterComboBox.setSelectedItem(field);
-	}
-
 	public ChartColorOption getChartColorOption() {
 		return chartColorOption;
 	}

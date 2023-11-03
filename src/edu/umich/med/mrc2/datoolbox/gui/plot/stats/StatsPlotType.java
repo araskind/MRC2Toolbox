@@ -26,6 +26,7 @@ public enum StatsPlotType {
 	BARCHART("Barchart"), 
 	LINES("Lines"), 
 	SCATTER("Scatter"), 
+	BOXPLOT("Boxplot"),
 	BOXPLOT_BY_FEATURE("Boxplot (by feature)"),
 	BOXPLOT_BY_GROUP("Boxplot (by group)"),
 	// PARALLEL("Parallel coordinates")

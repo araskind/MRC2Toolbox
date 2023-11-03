@@ -19,40 +19,26 @@
  *
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.data.enums;
+package edu.umich.med.mrc2.datoolbox.utils;
 
-public enum DataScale {
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
-	RAW("Raw"), 
-	LN("ln"),
-	LOG10("log10"),
-	SQRT("Square root"),
-	RANGE("Range (0-100)"), 
-	ZSCORE("Z-score"),
-	PARETO("Pareto");
-
-	private final String uiName;
-
-	DataScale(String uiName) {
-		this.uiName = uiName;
-	}
-
-	public String getName() {
-		return uiName;
-	}
-
-	@Override
-	public String toString() {
-		return uiName;
-	}
+public class NormalizationUtils {
 	
-	public static DataScale getDataScaleByName(String name) {
-		
-		for(DataScale s : DataScale.values()) {
-			
-			if(s.getName().equals(name))
-				return s;
-		}		
-		return null;
-	}
+    public static double[] paretoScale(final double[] sample) {
+    	
+        DescriptiveStatistics stats = new DescriptiveStatistics(sample);
+
+        // Compute mean and standard deviation
+        double mean = stats.getMean();
+        double standardDeviation = stats.getStandardDeviation();
+
+        // initialize the standardizedSample, which has the same length as the sample
+        double[] standardizedSample = new double[sample.length];
+
+        for (int i = 0; i < sample.length; i++) {
+            standardizedSample[i] = (sample[i] - mean) / Math.sqrt(standardDeviation);
+        }
+        return standardizedSample;
+    }
 }

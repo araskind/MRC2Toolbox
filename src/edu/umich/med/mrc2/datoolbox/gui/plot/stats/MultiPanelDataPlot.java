@@ -24,6 +24,7 @@ package edu.umich.med.mrc2.datoolbox.gui.plot.stats;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -48,77 +49,59 @@ import org.jfree.chart.plot.DatasetRenderingOrder;
 import org.jfree.chart.plot.Plot;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
-import org.jfree.chart.renderer.category.BarRenderer;
-import org.jfree.chart.renderer.category.StandardBarPainter;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.chart.ui.RectangleEdge;
 import org.jfree.chart.ui.RectangleInsets;
 import org.jfree.data.Range;
 import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
 
-import edu.umich.med.mrc2.datoolbox.data.DataFileStatisticalSummary;
-import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignFactor;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignSubset;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
-import edu.umich.med.mrc2.datoolbox.data.enums.DataScale;
-import edu.umich.med.mrc2.datoolbox.data.enums.DataSetQcField;
 import edu.umich.med.mrc2.datoolbox.data.enums.FileSortingOrder;
 import edu.umich.med.mrc2.datoolbox.data.enums.PlotDataGrouping;
-import edu.umich.med.mrc2.datoolbox.data.enums.PlotDataType;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
+import edu.umich.med.mrc2.datoolbox.gui.plot.ControlledStatsPlot;
 import edu.umich.med.mrc2.datoolbox.gui.plot.MasterPlotPanel;
-import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.BarChartDataSet;
 import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.BoxAndWhiskerCategoryDatasetCa;
+import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.MsFeatureBarChartDataSet;
 import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.ScatterDataSet;
 import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.TimedScatterDataSet;
+import edu.umich.med.mrc2.datoolbox.gui.plot.renderer.category.VariableCategorySizeBarRenderer;
+import edu.umich.med.mrc2.datoolbox.gui.plot.renderer.category.VariableCategorySizeCategoryAxis;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 
-public class MultiPanelDataPlot extends MasterPlotPanel 
-	implements ActionListener, DataPlotControl {
+public class MultiPanelDataPlot extends MasterPlotPanel implements ActionListener, ControlledStatsPlot {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = -7135007776817939808L;
+	
 	protected CombinedRangeCategoryPlot categoryPlot;
 	protected CombinedRangeXYPlot valuePlot;
-
-	protected StatsPlotType plotType;
-	protected FileSortingOrder sortingOrder;
-	protected DataScale dataScale;
 	protected CategoryAxis categoryAxis;
 	protected NumberAxis yAxis;
 	protected Axis xAxis;
-	protected PlotDataType plotDataType;
-	protected PlotDataGrouping groupingType;
-	protected ExperimentDesignFactor category;
-	protected ExperimentDesignFactor subCategory;
+	
+	protected StatsPlotType plotType;	
 	protected ExperimentDesignSubset activeDesign;
-
 	protected Map<DataPipeline, Collection<MsFeature>> plottedFeaturesMap;
-	protected Collection<DataFileStatisticalSummary> dataSetStats;
-	protected DataSetQcField statsField;
 
-	protected MultiPanelDataPlotToolbar toolbar;
-	private boolean splitByBatch;
+	protected DataPlotControlsPanel dataPlotControlsPanel;
+	protected TwoDimFeatureDataPlotParameterObject plotParameters;
 
-	public MultiPanelDataPlot(StatsPlotType type, PlotDataType dataType) {
+	public MultiPanelDataPlot() {
 
 		super();
-
-		plotType = type;
-		plotDataType = dataType;
-
-		sortingOrder = FileSortingOrder.NAME;
-		dataScale = DataScale.RAW;
-		groupingType = PlotDataGrouping.IGNORE_DESIGN;
-
+		plotType = StatsPlotType.BOXPLOT_BY_FEATURE;
 		initChart();
 		initTitles();
 		initLegend(RectangleEdge.RIGHT, legendVisible);
+		plottedFeaturesMap = 
+				new TreeMap<DataPipeline, Collection<MsFeature>>();
 	}
 
 	@Override
@@ -310,52 +293,20 @@ public class MultiPanelDataPlot extends MasterPlotPanel
 			super.actionPerformed(event);
 	}
 
-	public void updateParametersFromToolbar() {
-
-		plotType = toolbar.getPlotType();
-		sortingOrder = toolbar.getFileOrder();
-		dataScale = toolbar.getPlotScale();
-		groupingType = toolbar.getDataGroupingType();
-		category = toolbar.getCategory();
-		subCategory = toolbar.getSubCategory();
-		splitByBatch = toolbar.splitByBatch();
-
-		initChart();
-		initTitles();
-		initAxes();
-		initLegend(RectangleEdge.RIGHT, legendVisible);
-	}
-
 	public void clearPlotPanel(){
 
 		clearPlotMatrix();
-
-		if (plottedFeaturesMap != null)
-			plottedFeaturesMap.clear();
-
-		if (dataSetStats != null)
-			dataSetStats.clear();
-
-		plotType = toolbar.getPlotType();
-		groupingType = toolbar.getDataGroupingType();
-		sortingOrder = toolbar.getFileOrder();
-		category = toolbar.getCategory();
-		subCategory = toolbar.getSubCategory();
+		plottedFeaturesMap.clear();		
+		plotType = ((MultiPanelDataPlotToolbarNew)toolbar).getStatsPlotType();
 		activeDesign = null;
+		plotParameters = null;
 	}
 
 	public void redrawPlot() {
-
-		if (plotDataType.equals(PlotDataType.FEATURE_DATA)) {
-
-			if (plottedFeaturesMap != null)
-				loadMultipleFeatureData(plottedFeaturesMap);
-		}
-		if (plotDataType.equals(PlotDataType.DATA_SET_STATS)) {
-
-			if (dataSetStats != null)
-				loadDataSetStats(dataSetStats);
-		}
+		
+		if (plottedFeaturesMap != null 
+				&& !plottedFeaturesMap.isEmpty())
+			loadMultipleFeatureData(plottedFeaturesMap);
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -375,24 +326,6 @@ public class MultiPanelDataPlot extends MasterPlotPanel
 		}
 	}
 
-	public void loadDataSetStats(Collection<DataFileStatisticalSummary> dataSetStats2) {
-		// TODO Auto-generated method stub
-
-	}
-
-	public void loadMultipleFeatureData(
-			Map<DataPipeline, Collection<MsFeature>> selectedFeaturesMap,
-			PlotDataGrouping dataGroupingType,
-			ExperimentDesignFactor category2,
-			ExperimentDesignFactor subCategory2) {
-
-		groupingType = dataGroupingType;
-		category = category2;
-		subCategory = subCategory2;
-
-		loadMultipleFeatureData(selectedFeaturesMap);
-	}
-
 	public void loadMultipleFeatureData(Map<DataPipeline, Collection<MsFeature>> pfm) {
 
 		clearPlotMatrix();
@@ -406,6 +339,7 @@ public class MultiPanelDataPlot extends MasterPlotPanel
 		copyFeatureMap(pfm);
 		activeDesign = MRC2ToolBoxCore.getActiveMetabolomicsExperiment().
 				getExperimentDesign().getActiveDesignSubset();
+		updateParametersFromControls();
 
 		// Create and display data set
 		if (plotType.equals(StatsPlotType.BARCHART))
@@ -426,8 +360,12 @@ public class MultiPanelDataPlot extends MasterPlotPanel
 	
 	private void copyFeatureMap(Map<DataPipeline, Collection<MsFeature>> pfm) {
 		
-		plottedFeaturesMap = new TreeMap<DataPipeline, Collection<MsFeature>>();
+		if(pfm.equals(plottedFeaturesMap))
+			return;
+		
+		plottedFeaturesMap.clear();
 		for (Entry<DataPipeline, Collection<MsFeature>> entry : pfm.entrySet()) {
+			
 			plottedFeaturesMap.put(entry.getKey(), 
 					new TreeSet<MsFeature>(new MsFeatureComparator(SortProperty.MZ)));
 			plottedFeaturesMap.get(entry.getKey()).addAll(entry.getValue());
@@ -436,16 +374,17 @@ public class MultiPanelDataPlot extends MasterPlotPanel
 
 	private void createFeatureLinePlot() {
 
-		if(groupingType.equals(PlotDataGrouping.IGNORE_DESIGN)) {
+		if(plotParameters.getGroupingType().equals(PlotDataGrouping.IGNORE_DESIGN)) {
 
 			XYPlot linePlot = getNewLinePlot();
-			if (sortingOrder.equals(FileSortingOrder.TIMESTAMP)) {
+			if (plotParameters.getSortingOrder().equals(FileSortingOrder.TIMESTAMP)) {
 
 				DateAxis dateAxis = new DateAxis("Timestamp");
 				dateAxis.setDateFormatOverride(new SimpleDateFormat("MM/dd HH:mm"));
 				linePlot.setDomainAxis(dateAxis);
 				TimedScatterDataSet tscs = 
-						new TimedScatterDataSet(plottedFeaturesMap, activeDesign, dataScale);
+						new TimedScatterDataSet(
+								plottedFeaturesMap, activeDesign, plotParameters.getDataScale());
 				for(int i=0; i<tscs.getSeriesCount(); i++) {
 
 					linePlot.getRenderer().setSeriesPaint(i, getSeriesPaint(i));
@@ -460,9 +399,10 @@ public class MultiPanelDataPlot extends MasterPlotPanel
 				valuePlot.add(linePlot);
 				valuePlot.getRangeAxis().setRange(new Range(lowerBound, upperBound));
 			}
-			if (sortingOrder.equals(FileSortingOrder.NAME)) {
+			if (plotParameters.getSortingOrder().equals(FileSortingOrder.NAME)) {
 
-				ScatterDataSet scs = new ScatterDataSet(plottedFeaturesMap, activeDesign, dataScale);
+				ScatterDataSet scs = new ScatterDataSet(
+						plottedFeaturesMap, activeDesign, plotParameters.getDataScale());
 				for(int i=0; i<scs.getSeriesCount(); i++) {
 
 					linePlot.getRenderer().setSeriesPaint(i, getSeriesPaint(i));
@@ -489,17 +429,18 @@ public class MultiPanelDataPlot extends MasterPlotPanel
 
 	private void createFeatureScatterPlot() {
 
-		if(groupingType.equals(PlotDataGrouping.IGNORE_DESIGN)) {
+		if(plotParameters.getGroupingType().equals(PlotDataGrouping.IGNORE_DESIGN)) {
 
 			XYPlot scatterPlot = getNewScatterPlot();
 
-			if (sortingOrder.equals(FileSortingOrder.TIMESTAMP)) {
+			if (plotParameters.getSortingOrder().equals(FileSortingOrder.TIMESTAMP)) {
 
 				DateAxis dateAxis = new DateAxis("Timestamp");
 				dateAxis.setDateFormatOverride(new SimpleDateFormat("MM/dd HH:mm"));
 				scatterPlot.setDomainAxis(dateAxis);
 				TimedScatterDataSet tscs = 
-						new TimedScatterDataSet(plottedFeaturesMap, activeDesign, dataScale);
+						new TimedScatterDataSet(
+								plottedFeaturesMap, activeDesign, plotParameters.getDataScale());
 
 				if(tscs.getRangeBounds(true) == null)
 					return;
@@ -518,10 +459,11 @@ public class MultiPanelDataPlot extends MasterPlotPanel
 				valuePlot.add(scatterPlot);
 				valuePlot.getRangeAxis().setRange(new Range(lowerBound, upperBound));
 			}
-			if (sortingOrder.equals(FileSortingOrder.NAME)) {
+			if (plotParameters.getSortingOrder().equals(FileSortingOrder.NAME)) {
 
 				ScatterDataSet scs = 
-						new ScatterDataSet(plottedFeaturesMap, activeDesign, dataScale);
+						new ScatterDataSet(
+								plottedFeaturesMap, activeDesign, plotParameters.getDataScale());
 				for(int i=0; i<scs.getSeriesCount(); i++) {
 
 					scatterPlot.getRenderer().setSeriesPaint(i, getSeriesPaint(i));
@@ -554,12 +496,12 @@ public class MultiPanelDataPlot extends MasterPlotPanel
 			BoxAndWhiskerCategoryDatasetCa ds = new BoxAndWhiskerCategoryDatasetCa(
 					plottedFeaturesMap,
 					boxplotType,
-					sortingOrder,
-					dataScale,
+					plotParameters.getSortingOrder(),
+					plotParameters.getDataScale(),
 					activeDesign,
-					groupingType,
-					category,
-					subCategory);
+					plotParameters.getGroupingType(),
+					plotParameters.getCategory(),
+					plotParameters.getSubCategory());
 
 			boxPlot.setDataset(ds);
 
@@ -577,35 +519,45 @@ public class MultiPanelDataPlot extends MasterPlotPanel
 			for(MsFeature msf : entry.getValue()) {
 				
 				CategoryPlot barChart = getNewBarchart();
-				((BarRenderer)barChart.getRenderer()).setBarPainter(new StandardBarPainter());
+//				((BarRenderer)barChart.getRenderer()).setBarPainter(new StandardBarPainter());
+//
+//				BarChartDataSet ds = new BarChartDataSet(
+//						msf,
+//						entry.getKey(),
+//						plotParameters.getSortingOrder(),
+//						plotParameters.getDataScale(),
+//						activeDesign,
+//						plotParameters.getGroupingType(),
+//						plotParameters.getCategory(),
+//						plotParameters.getSubCategory());
+//
+//				for(int i=0; i<ds.getRowCount(); i++)
+//					((BarRenderer)barChart.getRenderer()).setSeriesPaint(i, ds.getSeriesPaintMap().get(i));
 
-				BarChartDataSet ds = new BarChartDataSet(
-						msf,
-						entry.getKey(),
-						sortingOrder,
-						dataScale,
-						activeDesign,
-						groupingType,
-						category,
-						subCategory);
-
+				MsFeatureBarChartDataSet ds = new MsFeatureBarChartDataSet(msf, plotParameters);
+				VariableCategorySizeBarRenderer renderer = new VariableCategorySizeBarRenderer();
+		        renderer.setDefaultToolTipGenerator(
+		        		new StatsPlotDataFileToolTipGenerator(NumberFormat.getNumberInstance(), null));
 				for(int i=0; i<ds.getRowCount(); i++)
-					((BarRenderer)barChart.getRenderer()).setSeriesPaint(i, ds.getSeriesPaintMap().get(i));
+					renderer.setSeriesPaint(i, ds.getSeriesPaintMap().get(i));
 
+				barChart.setDomainAxis(new VariableCategorySizeCategoryAxis());
+				barChart.setRenderer(renderer);				
 				barChart.setDataset(ds);
 
 				//	TODO add slider to plot to allow adjustment
-				if(ds.getRowCount() == ds.getColumnCount())
-					((BarRenderer)barChart.getRenderer()).setItemMargin(0.02);
+				
+//				if(ds.getRowCount() == ds.getColumnCount())
+//					((BarRenderer)barChart.getRenderer()).setItemMargin(0.02);
 				
 				CategoryAxis axis = barChart.getDomainAxis();
 				axis.setLabel(msf.getName());
 				axis.setCategoryLabelPositions(getCategoryLabelPosition());
 				axis.setMaximumCategoryLabelLines(calculateLineNumberForCategoryLabels());
-
 				axis.setLowerMargin(0.1);
 				axis.setUpperMargin(0.1);
 				axis.setCategoryMargin(0.1);
+				
 				categoryPlot.add(barChart);
 			}
 		}
@@ -615,7 +567,7 @@ public class MultiPanelDataPlot extends MasterPlotPanel
 
 		CategoryLabelPositions pos = CategoryLabelPositions.STANDARD;
 
-		if(groupingType.equals(PlotDataGrouping.IGNORE_DESIGN))
+		if(plotParameters.getGroupingType().equals(PlotDataGrouping.IGNORE_DESIGN))
 			pos = CategoryLabelPositions.UP_45;
 
 		return pos;
@@ -623,28 +575,18 @@ public class MultiPanelDataPlot extends MasterPlotPanel
 
 	private int calculateLineNumberForCategoryLabels() {
 
-		if(groupingType.equals(PlotDataGrouping.IGNORE_DESIGN) || groupingType.equals(PlotDataGrouping.TWO_FACTORS)) {
-
-			if(splitByBatch)
-				return 3;
-			else
+		if(plotParameters.getGroupingType().equals(PlotDataGrouping.IGNORE_DESIGN) 
+				|| plotParameters.getGroupingType().equals(PlotDataGrouping.TWO_FACTORS)) {
 				return 2;
 		}
-		if(groupingType.equals(PlotDataGrouping.ONE_FACTOR)) {
-
-			if(splitByBatch)
-				return 2;
-			else
+		else if(plotParameters.getGroupingType().equals(PlotDataGrouping.ONE_FACTOR)) {
 				return 1;
 		}
-		if(groupingType.equals(PlotDataGrouping.EACH_FACTOR)) {
-
-			if(splitByBatch)
-				return activeDesign.getOrderedDesign().size() + 1;
-			else
-				return activeDesign.getOrderedDesign().size();
+		else if(plotParameters.getGroupingType().equals(PlotDataGrouping.EACH_FACTOR)) {
+			return activeDesign.getOrderedDesign().size();
 		}
-		return 1;
+		else
+			return 1;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -713,36 +655,6 @@ public class MultiPanelDataPlot extends MasterPlotPanel
 	public void setPlotType(StatsPlotType plotType) {
 		this.plotType = plotType;
 	}
-	
-	@Override
-	public FileSortingOrder getSortingOrder() {
-		return sortingOrder;
-	}
-	
-	@Override
-	public void setSortingOrder(FileSortingOrder sortingOrder) {
-		this.sortingOrder = sortingOrder;
-	}
-
-	@Override
-	public PlotDataGrouping getGroupingType() {
-		return groupingType;
-	}
-
-	@Override
-	public void setGroupingType(PlotDataGrouping groupingType) {
-		this.groupingType = groupingType;
-	}
-	
-	@Override
-	public DataScale getDataScale() {
-		return dataScale;
-	}
-	
-	@Override
-	public void setDataScale(DataScale dataScale) {
-		this.dataScale = dataScale;
-	}
 
 	@Override
 	public void toggleLegend() {
@@ -758,7 +670,33 @@ public class MultiPanelDataPlot extends MasterPlotPanel
 		toolbar.toggleLegendIcon(legendVisible);
 	}
 
+	@Override
+	public void updateParametersFromControls() {
+		
+		if(chart == null 
+				|| !((MultiPanelDataPlotToolbarNew)toolbar).getStatsPlotType().equals(plotType)) {
+			
+			plotType = ((MultiPanelDataPlotToolbarNew)toolbar).getStatsPlotType();
+			initChart();
+			initTitles();
+			initAxes();
+			initLegend(RectangleEdge.RIGHT, legendVisible);
+		}
+		dataPlotControlsPanel.updatePlotGroupingOptions(
+				((MultiPanelDataPlotToolbarNew)toolbar).getStatsPlotType());
+		plotParameters = 
+				new TwoDimFeatureDataPlotParameterObject(
+				plottedFeaturesMap,
+				((MultiPanelDataPlotToolbarNew)toolbar).getSortingOrder(), 
+				((MultiPanelDataPlotToolbarNew)toolbar).getDataScale(),
+				((MultiPanelDataPlotToolbarNew)toolbar).getChartColorOption(),
+				dataPlotControlsPanel.getDataGroupingType(), 
+				dataPlotControlsPanel.getCategory(), 
+				dataPlotControlsPanel.getSububCategory());		
 
+	}
 
-
+	public void setDataPlotControlsPanel(DataPlotControlsPanel dataPlotControlsPanel) {
+		this.dataPlotControlsPanel = dataPlotControlsPanel;
+	}
 }

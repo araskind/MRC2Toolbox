@@ -19,10 +19,11 @@
  *
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.gui.plot.qc.twod;
+package edu.umich.med.mrc2.datoolbox.gui.plot;
 
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignFactor;
 import edu.umich.med.mrc2.datoolbox.data.compare.ChartColorOption;
+import edu.umich.med.mrc2.datoolbox.data.enums.DataScale;
 import edu.umich.med.mrc2.datoolbox.data.enums.FileSortingOrder;
 import edu.umich.med.mrc2.datoolbox.data.enums.PlotDataGrouping;
 
@@ -31,61 +32,51 @@ public class TwoDimDataPlotParameterObject {
 	protected FileSortingOrder sortingOrder; 
 	protected ChartColorOption chartColorOption;
 	protected PlotDataGrouping groupingType;
+	protected DataScale dataScale;
 	protected ExperimentDesignFactor category;
 	protected ExperimentDesignFactor subCategory;
 	
 	public TwoDimDataPlotParameterObject(
 			FileSortingOrder sortingOrder, 
+			DataScale dataScale,
 			ChartColorOption chartColorOption,
 			PlotDataGrouping groupingType, 
 			ExperimentDesignFactor category, 
 			ExperimentDesignFactor subCategory) {
 		super();
 		this.sortingOrder = sortingOrder;
+		this.dataScale = dataScale;
 		this.chartColorOption = chartColorOption;
 		this.groupingType = groupingType;
 		this.category = category;
 		this.subCategory = subCategory;
+		if(this.groupingType.equals(PlotDataGrouping.TWO_FACTORS)
+				&& this.subCategory == null)
+			this.groupingType = PlotDataGrouping.ONE_FACTOR;
 	}
 
 	public FileSortingOrder getSortingOrder() {
 		return sortingOrder;
 	}
 
-	public void setSortingOrder(FileSortingOrder sortingOrder) {
-		this.sortingOrder = sortingOrder;
-	}
-
 	public ChartColorOption getChartColorOption() {
 		return chartColorOption;
-	}
-
-	public void setChartColorOption(ChartColorOption chartColorOption) {
-		this.chartColorOption = chartColorOption;
 	}
 
 	public PlotDataGrouping getGroupingType() {
 		return groupingType;
 	}
 
-	public void setGroupingType(PlotDataGrouping groupingType) {
-		this.groupingType = groupingType;
-	}
-
 	public ExperimentDesignFactor getCategory() {
 		return category;
-	}
-
-	public void setCategory(ExperimentDesignFactor category) {
-		this.category = category;
 	}
 
 	public ExperimentDesignFactor getSubCategory() {
 		return subCategory;
 	}
 
-	public void setSubCategory(ExperimentDesignFactor subCategory) {
-		this.subCategory = subCategory;
+	public DataScale getDataScale() {
+		return dataScale;
 	}
 }
 

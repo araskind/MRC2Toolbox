@@ -19,27 +19,26 @@
  *
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.gui.plot.qc.twod;
+package edu.umich.med.mrc2.datoolbox.gui.plot.stats;
 
 import java.util.Collection;
+import java.util.Map;
 
-import edu.umich.med.mrc2.datoolbox.data.DataFileStatisticalSummary;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignFactor;
+import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.compare.ChartColorOption;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataScale;
-import edu.umich.med.mrc2.datoolbox.data.enums.DataSetQcField;
 import edu.umich.med.mrc2.datoolbox.data.enums.FileSortingOrder;
 import edu.umich.med.mrc2.datoolbox.data.enums.PlotDataGrouping;
+import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.gui.plot.TwoDimDataPlotParameterObject;
 
-public class TwoDqcPlotParameterObject extends TwoDimDataPlotParameterObject{
+public class TwoDimFeatureDataPlotParameterObject extends TwoDimDataPlotParameterObject {
 
-	private Collection<DataFileStatisticalSummary> dataSetStats;
-	private DataSetQcField statsField;
-
-	public TwoDqcPlotParameterObject(
-			Collection<DataFileStatisticalSummary> dataSetStats,
-			DataSetQcField statsField,
+	private Map<DataPipeline, Collection<MsFeature>> featuresMap;
+	
+	public TwoDimFeatureDataPlotParameterObject(
+			Map<DataPipeline, Collection<MsFeature>> featuresMap,
 			FileSortingOrder sortingOrder, 
 			DataScale dataScale,
 			ChartColorOption chartColorOption,
@@ -48,25 +47,15 @@ public class TwoDqcPlotParameterObject extends TwoDimDataPlotParameterObject{
 			ExperimentDesignFactor subCategory) {
 		super(sortingOrder, dataScale, chartColorOption, 
 				groupingType, category, subCategory);
-		this.dataSetStats = dataSetStats;
-		this.statsField = statsField;
+
+		this.featuresMap = featuresMap;
 	}
 
-	public Collection<DataFileStatisticalSummary> getDataSetStats() {
-		return dataSetStats;
+	public Map<DataPipeline, Collection<MsFeature>> getFeaturesMap() {
+		return featuresMap;
 	}
 
-	public void setDataSetStats(Collection<DataFileStatisticalSummary> dataSetStats) {
-		this.dataSetStats = dataSetStats;
-	}
-
-	public DataSetQcField getStatsField() {
-		return statsField;
-	}
-
-	public void setStatsField(DataSetQcField statsField) {
-		this.statsField = statsField;
+	public void setFeaturesMap(Map<DataPipeline, Collection<MsFeature>> featuresMap) {
+		this.featuresMap = featuresMap;
 	}
 }
-
-

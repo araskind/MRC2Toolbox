@@ -25,13 +25,13 @@ import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.text.NumberFormat;
 import java.util.Collection;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.axis.DateAxis;
 import org.jfree.chart.axis.NumberAxis;
-import org.jfree.chart.labels.StandardCategoryToolTipGenerator;
 import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.plot.DatasetRenderingOrder;
 import org.jfree.chart.plot.Plot;
@@ -44,9 +44,10 @@ import org.jfree.chart.ui.RectangleInsets;
 import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
 
 import edu.umich.med.mrc2.datoolbox.data.DataFileStatisticalSummary;
-import edu.umich.med.mrc2.datoolbox.data.enums.DataScale;
 import edu.umich.med.mrc2.datoolbox.data.enums.FileSortingOrder;
+import edu.umich.med.mrc2.datoolbox.gui.plot.ControlledStatsPlot;
 import edu.umich.med.mrc2.datoolbox.gui.plot.MasterPlotPanel;
+import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.PlotDataSetUtils;
 import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.QcBarChartDataSet;
 import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.QcBoxPlotDataSet;
 import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.QcScatterDataSet;
@@ -54,65 +55,49 @@ import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.QcTimedScatterSet;
 import edu.umich.med.mrc2.datoolbox.gui.plot.renderer.category.VariableCategorySizeBarRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.plot.renderer.category.VariableCategorySizeCategoryAxis;
 import edu.umich.med.mrc2.datoolbox.gui.plot.stats.DataPlotControlsPanel;
-import edu.umich.med.mrc2.datoolbox.gui.plot.stats.QcPlotType;
+import edu.umich.med.mrc2.datoolbox.gui.plot.stats.StatsPlotDataFileToolTipGenerator;
+import edu.umich.med.mrc2.datoolbox.gui.plot.stats.StatsPlotType;
 import edu.umich.med.mrc2.datoolbox.gui.plot.tooltip.FileStatsBoxAndWhiskerToolTipGenerator;
 
-public class TwoDimQCPlot extends MasterPlotPanel implements ItemListener {
+public class TwoDimQCPlot extends MasterPlotPanel implements ItemListener, ControlledStatsPlot {
 	
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 8509961200306648220L;
 	
-	private QcPlotType plotType;
-	private DataScale dataScale;
-	
-//	private FileSortingOrder sortingOrder;
-//	private ChartColorOption chartColorOption;
-//	private DataSetQcField qcParameter;	
-//	private PlotDataGrouping groupingType;
-//	private ExperimentDesignFactor category;
-//	private ExperimentDesignFactor subCategory;
-//	private boolean splitByBatch;
-////	private ExperimentDesignSubset activeDesign;
-	
+	private StatsPlotType plotType;
 	private TwoDqcPlotParameterObject plotParameters;
-
 	private Collection<DataFileStatisticalSummary> dataSetStats;
 	private Plot activePlot;
 	private DataPlotControlsPanel dataPlotControlsPanel;
 
 	public TwoDimQCPlot() {
-
 		super();
-//		plotType = QcPlotType.BARCHART;
-//		sortingOrder = FileSortingOrder.NAME;		
-//		dataScale = DataScale.RAW;
-//		qcParameter = DataSetQcField.OBSERVATIONS;	
-//		chartColorOption = ChartColorOption.BY_FILE;
 	}
 	
 	public void loadDataSetStats(Collection<DataFileStatisticalSummary> dataSetStats2) {
 		
 		if(dataSetStats2 == null) {
+			this.dataSetStats = null;
 			removeAllDataSets();
 			return;
 		}
 		this.dataSetStats = dataSetStats2;
 		updateParametersFromControls();		
 		
-		if (plotType.equals(QcPlotType.BARCHART))			
+		if (plotType.equals(StatsPlotType.BARCHART))			
 			loadBarChart();
 		
-		if ((plotType.equals(QcPlotType.LINES) || plotType.equals(QcPlotType.SCATTER)) 
+		if ((plotType.equals(StatsPlotType.LINES) || plotType.equals(StatsPlotType.SCATTER)) 
 				&& plotParameters.getSortingOrder().equals(FileSortingOrder.NAME))
 			chart.getXYPlot().setDataset(new QcScatterDataSet(plotParameters));
 		
-		if ((plotType.equals(QcPlotType.LINES) || plotType.equals(QcPlotType.SCATTER)) 
+		if ((plotType.equals(StatsPlotType.LINES) || plotType.equals(StatsPlotType.SCATTER)) 
 				&& plotParameters.getSortingOrder().equals(FileSortingOrder.TIMESTAMP))
 			chart.getXYPlot().setDataset(new QcTimedScatterSet(plotParameters));
 		
-		if (plotType.equals(QcPlotType.BOXPLOT))
+		if (plotType.equals(StatsPlotType.BOXPLOT))
 			chart.getCategoryPlot().setDataset(new QcBoxPlotDataSet(plotParameters));
 	}
 	
@@ -120,7 +105,10 @@ public class TwoDimQCPlot extends MasterPlotPanel implements ItemListener {
 		
 		QcBarChartDataSet ds = new QcBarChartDataSet(plotParameters);		
 		VariableCategorySizeBarRenderer renderer = new VariableCategorySizeBarRenderer();
-        renderer.setDefaultToolTipGenerator(new StandardCategoryToolTipGenerator());
+		
+		NumberFormat dataFormat = 
+				PlotDataSetUtils.getNumberFormatForDataSetQcField(plotParameters.getStatsField());
+        renderer.setDefaultToolTipGenerator(new StatsPlotDataFileToolTipGenerator(dataFormat, null));
 		for(int i=0; i<ds.getRowCount(); i++)
 			renderer.setSeriesPaint(i, ds.getSeriesPaintMap().get(i));
 
@@ -129,6 +117,7 @@ public class TwoDimQCPlot extends MasterPlotPanel implements ItemListener {
 		chart.getCategoryPlot().setDataset(ds);
 	}
 	
+	@Override
 	public void redrawPlot() {
 
 		removeAllDataSets();		
@@ -136,26 +125,28 @@ public class TwoDimQCPlot extends MasterPlotPanel implements ItemListener {
 			loadDataSetStats(dataSetStats);		
 	}	
 	
+	@Override
 	public void updateParametersFromControls() {
 		
-		plotParameters = 
-				new TwoDqcPlotParameterObject(
-				dataSetStats,
-				((TwoDqcPlotToolbar)toolbar).getStatParameter(),
-				((TwoDqcPlotToolbar)toolbar).getSortingOrder(), 
-				((TwoDqcPlotToolbar)toolbar).getChartColorOption(),
-				dataPlotControlsPanel.getDataGroupingType(), 
-				dataPlotControlsPanel.getCategory(), 
-				dataPlotControlsPanel.getSububCategory());		
 		if(chart == null 
-				|| !((TwoDqcPlotToolbar)toolbar).getQcPlotType().equals(plotType)) {
+				|| !((TwoDqcPlotToolbar)toolbar).getStatsPlotType().equals(plotType)) {
 			
-			plotType = ((TwoDqcPlotToolbar)toolbar).getQcPlotType();
+			plotType = ((TwoDqcPlotToolbar)toolbar).getStatsPlotType();
 			initChart();
 			initTitles();
 			initAxes();
 			initLegend(RectangleEdge.RIGHT, legendVisible);
 		}
+		plotParameters = 
+				new TwoDqcPlotParameterObject(
+				dataSetStats,
+				((TwoDqcPlotToolbar)toolbar).getStatParameter(),
+				((TwoDqcPlotToolbar)toolbar).getSortingOrder(), 
+				((TwoDqcPlotToolbar)toolbar).getDataScale(),
+				((TwoDqcPlotToolbar)toolbar).getChartColorOption(),
+				dataPlotControlsPanel.getDataGroupingType(), 
+				dataPlotControlsPanel.getCategory(), 
+				dataPlotControlsPanel.getSububCategory());		
 	}
 	
 	@Override
@@ -255,7 +246,7 @@ public class TwoDimQCPlot extends MasterPlotPanel implements ItemListener {
 	@Override
 	protected void initChart() {
 
-		if (plotType.equals(QcPlotType.BARCHART)) {
+		if (plotType.equals(StatsPlotType.BARCHART)) {
 			
 			chart = ChartFactory.createBarChart("", // title
 					"", // x-axis label - categories
@@ -267,7 +258,7 @@ public class TwoDimQCPlot extends MasterPlotPanel implements ItemListener {
 					false // generate URLs?
 			);			
 		}
-		if (plotType.equals(QcPlotType.BOXPLOT)) {
+		if (plotType.equals(StatsPlotType.BOXPLOT)) {
 
 			BoxAndWhiskerCategoryDataset bwset = null;
 
@@ -282,7 +273,7 @@ public class TwoDimQCPlot extends MasterPlotPanel implements ItemListener {
 			renderer.setMeanVisible(false);
 			renderer.setDefaultToolTipGenerator(new FileStatsBoxAndWhiskerToolTipGenerator());
 		}
-		if (plotType.equals(QcPlotType.SCATTER)) {
+		if (plotType.equals(StatsPlotType.SCATTER)) {
 
 			chart = ChartFactory.createScatterPlot("", // title
 					"", // x-axis label
@@ -294,7 +285,7 @@ public class TwoDimQCPlot extends MasterPlotPanel implements ItemListener {
 					false // generate URLs?
 			);
 		}
-		if (plotType.equals(QcPlotType.LINES)) {
+		if (plotType.equals(StatsPlotType.LINES)) {
 
 			chart = ChartFactory.createXYLineChart("", // title
 					"", // x-axis label
@@ -372,7 +363,7 @@ public class TwoDimQCPlot extends MasterPlotPanel implements ItemListener {
 			
 			p.clearAnnotations();
 		}
-		numberOfDataSets = 0;
+		numberOfDataSets = 0;		
 	}
 
 	public void toggleLegend() {
@@ -387,37 +378,6 @@ public class TwoDimQCPlot extends MasterPlotPanel implements ItemListener {
 		}
 		toolbar.toggleLegendIcon(legendVisible);
 	}	
-
-//	@Override
-//	public FileSortingOrder getSortingOrder() {
-//		return sortingOrder;		
-//	}
-//
-//	@Override
-//	public void setSortingOrder(FileSortingOrder sortingOrder) {
-//		this.sortingOrder = sortingOrder;
-//		redrawPlot();
-//	}
-//
-//	@Override
-//	public PlotDataGrouping getGroupingType() {
-//		return groupingType;
-//	}
-//
-//	@Override
-//	public void setGroupingType(PlotDataGrouping groupingType) {
-//		this.groupingType = groupingType;
-//		redrawPlot();
-//	}
-
-	public DataScale getDataScale() {
-		return dataScale;
-	}
-
-	public void setDataScale(DataScale dataScale) {
-		this.dataScale = dataScale;
-		redrawPlot();
-	}
 
 	public void setDataPlotControlsPanel(DataPlotControlsPanel dataPlotControlsPanel) {
 		this.dataPlotControlsPanel = dataPlotControlsPanel;

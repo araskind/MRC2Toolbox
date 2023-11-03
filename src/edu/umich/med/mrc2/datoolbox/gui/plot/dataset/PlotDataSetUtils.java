@@ -21,6 +21,7 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.plot.dataset;
 
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -46,12 +47,15 @@ import edu.umich.med.mrc2.datoolbox.data.ExperimentalSample;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.compare.DataFileTimeStampComparator;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataScale;
+import edu.umich.med.mrc2.datoolbox.data.enums.DataSetQcField;
 import edu.umich.med.mrc2.datoolbox.data.enums.FileSortingOrder;
 import edu.umich.med.mrc2.datoolbox.data.enums.PlotDataGrouping;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
+import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.utils.DataSetUtils;
+import edu.umich.med.mrc2.datoolbox.utils.NormalizationUtils;
 
 public class PlotDataSetUtils {
 
@@ -117,15 +121,35 @@ public class PlotDataSetUtils {
 				if (Double.isFinite(ln))
 					scaledData[i] = ln;
 				else
-					scaledData[i] = -10.0d;
+					scaledData[i] = 0.01d;
 			}
 		}
-		if (scale.equals(DataScale.ZSCORE))
-			scaledData = StatUtils.normalize(fdata);
+		if (scale.equals(DataScale.LOG10)) {
 
+			for (int i = 0; i < fdata.length; i++) {
+
+				double ln = Math.log10(fdata[i]);
+
+				if (Double.isFinite(ln))
+					scaledData[i] = ln;
+				else
+					scaledData[i] = 0.01d;
+			}
+		}
+		if (scale.equals(DataScale.SQRT)) {
+			
+			for (int i = 0; i < fdata.length; i++)
+				scaledData[i] = Math.sqrt(fdata[i]);
+		}
 		if (scale.equals(DataScale.RANGE))
 			scaledData = rangeScale(fdata, 0.0d, 100.0d);
 
+		if (scale.equals(DataScale.ZSCORE))
+			scaledData = StatUtils.normalize(fdata);
+		
+		if (scale.equals(DataScale.PARETO))
+			scaledData = NormalizationUtils.paretoScale(fdata);
+		
 		for(int i=0; i<scaledData.length; i++) {
 
 			if(fdata[i] > 0)
@@ -473,6 +497,23 @@ public class PlotDataSetUtils {
 
 		return output;
 	}
+	
+	public static NumberFormat getNumberFormatForDataSetQcField (DataSetQcField field) {
+		
+		if(field.equals(DataSetQcField.RSD) 
+				|| field.equals(DataSetQcField.RSD_TRIM)) {
+			return NumberFormat.getNumberInstance();
+		}
+		else if(field.equals(DataSetQcField.OBSERVATIONS) 
+				|| field.equals(DataSetQcField.MISSING)
+				|| field.equals(DataSetQcField.OUTLIERS)) {
+			return NumberFormat.getIntegerInstance();
+		}
+		else		
+			return MRC2ToolBoxConfiguration.getIntensityFormat();
+	}
+	
+	
 }
 
 

@@ -40,7 +40,7 @@ import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignFactor;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignSubset;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataTypeName;
 import edu.umich.med.mrc2.datoolbox.data.enums.PlotDataGrouping;
-import edu.umich.med.mrc2.datoolbox.gui.plot.qc.twod.TwoDimQCPlot;
+import edu.umich.med.mrc2.datoolbox.gui.plot.ControlledStatsPlot;
 import edu.umich.med.mrc2.datoolbox.gui.utils.SortedComboBoxModel;
 
 public class DataPlotControlsPanel extends JPanel implements ItemListener {
@@ -53,11 +53,11 @@ public class DataPlotControlsPanel extends JPanel implements ItemListener {
 	private JComboBox groupByComboBox;
 	private JComboBox categoryComboBox;
 	private JComboBox subCategoryComboBox;	
-	//	private JCheckBox splitByBatchCheckBox;
-	private TwoDimQCPlot plot;
+
+	private ControlledStatsPlot plot;
 	
 	@SuppressWarnings("unchecked")
-	public DataPlotControlsPanel(TwoDimQCPlot parentPlot) {
+	public DataPlotControlsPanel(ControlledStatsPlot parentPlot) {
 		super();
 
 		this.plot = parentPlot;
@@ -134,14 +134,6 @@ public class DataPlotControlsPanel extends JPanel implements ItemListener {
 		gbc_comboBox_2.gridy = 2;
 		add(subCategoryComboBox, gbc_comboBox_2);
 		
-//		splitByBatchCheckBox = new JCheckBox("Split by batch");
-//		splitByBatchCheckBox.addItemListener(this);
-//		GridBagConstraints gbc_chckbxNewCheckBox = new GridBagConstraints();
-//		gbc_chckbxNewCheckBox.anchor = GridBagConstraints.WEST;
-//		gbc_chckbxNewCheckBox.gridx = 1;
-//		gbc_chckbxNewCheckBox.gridy = 3;
-//		add(splitByBatchCheckBox, gbc_chckbxNewCheckBox);
-		
 		toggleItemListeners(true);
 	}
 
@@ -152,12 +144,10 @@ public class DataPlotControlsPanel extends JPanel implements ItemListener {
 			groupByComboBox.addItemListener(this);
 			categoryComboBox.addItemListener(this);
 			subCategoryComboBox.addItemListener(this);
-//			splitByBatchCheckBox.addItemListener(this);
 		} else {
 			groupByComboBox.removeItemListener(this);
 			categoryComboBox.removeItemListener(this);
 			subCategoryComboBox.removeItemListener(this);
-//			splitByBatchCheckBox.removeItemListener(this);
 		}
 	}
 	
@@ -187,10 +177,42 @@ public class DataPlotControlsPanel extends JPanel implements ItemListener {
 			categoryComboBox.setEnabled(false);
 			subCategoryComboBox.setModel(new DefaultComboBoxModel<ExperimentDesignFactor>());
 			subCategoryComboBox.setEnabled(false);
-//			splitByBatchCheckBox.setSelected(false);
-//			splitByBatchCheckBox.setEnabled(false);
 		}
 		updateFactorSelectors();
+	}
+	
+	@SuppressWarnings("unchecked")
+	public void updatePlotGroupingOptions(StatsPlotType plotType) {
+
+		toggleItemListeners(false);
+		PlotDataGrouping grouping = getDataGroupingType();
+
+		if (plotType.equals(StatsPlotType.BOXPLOT_BY_FEATURE) 
+				|| plotType.equals(StatsPlotType.BOXPLOT_BY_GROUP)) {
+
+			groupByComboBox.setModel(
+					new DefaultComboBoxModel<PlotDataGrouping>(PlotDataGrouping.values()));
+			groupByComboBox.removeItem(PlotDataGrouping.IGNORE_DESIGN);
+			groupByComboBox.setSelectedItem(PlotDataGrouping.EACH_FACTOR);
+			categoryComboBox.setSelectedIndex(-1);
+			subCategoryComboBox.setSelectedIndex(-1);
+			categoryComboBox.setEnabled(false);
+			subCategoryComboBox.setEnabled(false);
+		}
+		if (plotType.equals(StatsPlotType.BARCHART)) {
+
+			groupByComboBox.setModel(
+					new DefaultComboBoxModel<PlotDataGrouping>(PlotDataGrouping.values()));
+			groupByComboBox.setSelectedItem(grouping);
+		}
+		if (plotType.equals(StatsPlotType.LINES) || plotType.equals(StatsPlotType.SCATTER)) {
+
+			groupByComboBox.setModel(new DefaultComboBoxModel<PlotDataGrouping>(
+					new PlotDataGrouping[] { PlotDataGrouping.IGNORE_DESIGN }));
+			groupByComboBox.setSelectedItem(PlotDataGrouping.IGNORE_DESIGN);
+		}
+		updateFactorSelectors();
+		toggleItemListeners(true);
 	}
 	
 	private void updateFactorSelectors() {
@@ -217,14 +239,19 @@ public class DataPlotControlsPanel extends JPanel implements ItemListener {
 		}
 		if (grouping.equals(PlotDataGrouping.TWO_FACTORS)) {
 
-			if (categoryComboBox.getModel().getSize() > 0)
+			if (categoryComboBox.getModel().getSize() > 0) {
 				categoryComboBox.setSelectedIndex(0);
+				categoryComboBox.setEnabled(true);
+			}
+			else
+				categoryComboBox.setEnabled(false);
 
-			if (subCategoryComboBox.getModel().getSize() > 0)
+			if (subCategoryComboBox.getModel().getSize() > 0) {
 				subCategoryComboBox.setSelectedIndex(0);
-
-			categoryComboBox.setEnabled(true);
-			subCategoryComboBox.setEnabled(true);
+				subCategoryComboBox.setEnabled(true);
+			}
+			else
+				subCategoryComboBox.setEnabled(false);
 		}
 	}
 	

@@ -239,8 +239,8 @@ public class MultiPanelDataPlotToolbar extends PlotToolbar implements ItemListen
 		panel.add(splitByBatchCheckBox, gbc_splitByBatchCheckBox);
 
 		setPlotType(plot.getPlotType());
-		setFileOrder(plot.getSortingOrder());
-		setPlotScale(plot.getDataScale());
+//		setFileOrder(plot.getSortingOrder());
+//		setPlotScale(plot.getDataScale());
 
 		toggleItemListeners(true);
 	}
@@ -439,6 +439,7 @@ public class MultiPanelDataPlotToolbar extends PlotToolbar implements ItemListen
 	}
 
 	// Allow sort by sample ID and sample name only with ignore design
+	@SuppressWarnings("unchecked")
 	private void updateFileSortingOptions() {
 
 		PlotDataGrouping grouping = getDataGroupingType();
@@ -458,7 +459,7 @@ public class MultiPanelDataPlotToolbar extends PlotToolbar implements ItemListen
 
 	private void updatePlot() {
 
-		plot.updateParametersFromToolbar();
+		plot.updateParametersFromControls();
 		plot.redrawPlot();
 	}
 

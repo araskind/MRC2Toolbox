@@ -22,26 +22,27 @@
 package edu.umich.med.mrc2.datoolbox.gui.plot.stats;
 
 import java.awt.BorderLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.Collection;
 import java.util.Map;
 
 import javax.swing.Icon;
 
 import bibliothek.gui.dock.common.DefaultSingleCDockable;
-import edu.umich.med.mrc2.datoolbox.data.DataFileStatisticalSummary;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignSubset;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
-import edu.umich.med.mrc2.datoolbox.data.enums.FileSortingOrder;
-import edu.umich.med.mrc2.datoolbox.data.enums.PlotDataType;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
+import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 
-public class DockableDataPlot extends DefaultSingleCDockable {
+public class DockableDataPlot extends DefaultSingleCDockable implements ActionListener{
 
 	private static final Icon componentIcon = GuiUtils.getIcon("boxplot", 16);
 
 	private MultiPanelDataPlot dataPlot;
-	private MultiPanelDataPlotToolbar plotToolbar;
+	private MultiPanelDataPlotToolbarNew plotToolbar;
+	private DataPlotControlsPanel dataPlotControlsPanel;
 
 	public DockableDataPlot(String id, String title) {
 
@@ -49,36 +50,56 @@ public class DockableDataPlot extends DefaultSingleCDockable {
 		setCloseable(false);
 
 		setLayout(new BorderLayout(0, 0));
-		dataPlot = new MultiPanelDataPlot(StatsPlotType.BARCHART, PlotDataType.FEATURE_DATA);
-		dataPlot.setSortingOrder(FileSortingOrder.SAMPLE_NAME);
+		dataPlot = new MultiPanelDataPlot();
 		add(dataPlot, BorderLayout.CENTER);
-		plotToolbar = new MultiPanelDataPlotToolbar(dataPlot);
+		
+		dataPlotControlsPanel = new DataPlotControlsPanel(dataPlot);
+		add(dataPlotControlsPanel, BorderLayout.EAST);
+		dataPlot.setDataPlotControlsPanel(dataPlotControlsPanel);
+		
+		plotToolbar = new MultiPanelDataPlotToolbarNew(dataPlot, this);
+		dataPlot.setToolbar(plotToolbar);
 		add(plotToolbar, BorderLayout.NORTH);
+	}	
+	
+	@Override
+	public void actionPerformed(ActionEvent e) {
+
+		String command = e.getActionCommand();
+		
+		if(command.equals(MainActionCommands.HIDE_CHART_SIDE_PANEL_COMMAND.getName()))
+			setSidePanelVisible(false);
+		
+		if(command.equals(MainActionCommands.SHOW_CHART_SIDE_PANEL_COMMAND.getName()))
+			setSidePanelVisible(true);
+	}	
+	
+	public void setSidePanelVisible(boolean b) {
+		dataPlotControlsPanel.setVisible(b);
 	}
 
-	public FileSortingOrder getFileOrder() {
-		return plotToolbar.getFileOrder();
-	}
-
-	public StatsPlotType getPlotType() {
-		return plotToolbar.getPlotType();
-	}
-
-	public void loadDataSetStats(Collection<DataFileStatisticalSummary> dataSetStats2) {
-		dataPlot.loadDataSetStats(dataSetStats2);
-	}
+//	public FileSortingOrder getFileOrder() {
+//		return plotToolbar.getFileOrder();
+//	}
+//
+//	public StatsPlotType getPlotType() {
+//		return plotToolbar.getPlotType();
+//	}
 
 	public void loadMultipleFeatureData(
 			Map<DataPipeline, Collection<MsFeature>> selectedFeaturesMap) {
 
-		if(!selectedFeaturesMap.isEmpty()) {
-
-			dataPlot.loadMultipleFeatureData(
-					selectedFeaturesMap,
-					plotToolbar.getDataGroupingType(),
-					plotToolbar.getCategory(),
-					plotToolbar.getSubCategory());
+		if(selectedFeaturesMap.isEmpty()) {
+			dataPlot.clearPlotPanel();
+			return;
 		}
+//			dataPlot.loadMultipleFeatureData(
+//					selectedFeaturesMap,
+//					plotToolbar.getDataGroupingType(),
+//					plotToolbar.getCategory(),
+//					plotToolbar.getSubCategory());
+			
+		dataPlot.loadMultipleFeatureData(selectedFeaturesMap);		
 	}
 
 	public void clearPlotPanel() {
@@ -88,19 +109,19 @@ public class DockableDataPlot extends DefaultSingleCDockable {
 //		plotToolbar.setFileOrder(FileSortingOrder.SAMPLE_NAME);
 	}
 
-	public void setFileOrder(FileSortingOrder order) {
-
-		plotToolbar.setFileOrder(order);
-	}
-
-	public void setPlotType(StatsPlotType type) {
-
-		plotToolbar.setPlotType(type);
-	}
+//	public void setFileOrder(FileSortingOrder order) {
+//
+//		plotToolbar.setFileOrder(order);
+//	}
+//
+//	public void setPlotType(StatsPlotType type) {
+//
+//		plotToolbar.setPlotType(type);
+//	}
 
 	public void setActiveDesign(ExperimentDesignSubset activeSubset) {
 
-		plotToolbar.populateCategories(activeSubset);
+		dataPlotControlsPanel.populateCategories(activeSubset);
 		dataPlot.redrawPlot();
 	}
 }
