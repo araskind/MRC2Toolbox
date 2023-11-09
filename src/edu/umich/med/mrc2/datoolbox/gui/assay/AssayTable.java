@@ -48,7 +48,7 @@ public class AssayTable extends BasicTable {
 
 		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		columnModel.getColumnById(AssayTableModel.ASSAY_COLUMN).setCellRenderer(new AssayMethodRenderer());
-		columnModel.getColumnById(AssayTableModel.ASSAY_COLUMN).setMaxWidth(100);
+		setExactColumnWidth(AssayTableModel.ASSAY_ID_COLUMN, 80);
 
 		thf = new TableFilterHeader(this, AutoChoices.ENABLED);
 		finalizeLayout();

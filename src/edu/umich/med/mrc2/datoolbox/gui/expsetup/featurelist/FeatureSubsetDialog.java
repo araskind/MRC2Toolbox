@@ -33,10 +33,12 @@ import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
 
 import javax.swing.ButtonGroup;
@@ -61,16 +63,25 @@ import edu.umich.med.mrc2.datoolbox.data.MsFeatureSet;
 import edu.umich.med.mrc2.datoolbox.data.enums.TableRowSubset;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
+import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
+import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
+import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 
-public class FeatureSubsetDialog extends JDialog implements ItemListener{
+public class FeatureSubsetDialog extends JDialog implements ItemListener, ActionListener, BackedByPreferences{
 
 	/**
 	 *
 	 */
 	private static final long serialVersionUID = 1633596808735466315L;
+	
+	private Preferences preferences;
+	public static final String BASE_DIRECTORY = "BASE_DIRECTORY";
+	private static final String BROWSE_COMMAND = "BROWSE_COMMAND";
+	private File baseDirectory;
+	private File featureListFile;
 
 	private static final Icon newSubsetIcon = GuiUtils.getIcon("newFeatureSubset", 32);
 	private static final Icon editSubsetIcon = GuiUtils.getIcon("editCollection", 32);
@@ -83,6 +94,10 @@ public class FeatureSubsetDialog extends JDialog implements ItemListener{
 	private JLabel numFeaturesLabel;
 	private JRadioButton copyFromExistingSubsetRadioButton;
 	private JRadioButton addFromFeatureTableRadioButton;
+	private JRadioButton createFromFileRadioButton;
+	private JTextField featureListFileTextField;
+
+	private JButton browseButton;
 
 	public FeatureSubsetDialog(MsFeatureSet msFeatureSet, ActionListener listener) {
 
@@ -90,8 +105,8 @@ public class FeatureSubsetDialog extends JDialog implements ItemListener{
 		this.activeSet = msFeatureSet;
 		setModalityType(ModalityType.APPLICATION_MODAL);
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-		setSize(new Dimension(500, 250));
-		setPreferredSize(new Dimension(500, 250));
+		setSize(new Dimension(500, 300));
+		setPreferredSize(new Dimension(500, 300));
 
 		JPanel subsetInfoPanel = new JPanel();
 		subsetInfoPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
@@ -99,9 +114,9 @@ public class FeatureSubsetDialog extends JDialog implements ItemListener{
 
 		GridBagLayout gbl_subsetInfoPanel = new GridBagLayout();
 		gbl_subsetInfoPanel.columnWidths = new int[] { 0, 134, 0, 0 };
-		gbl_subsetInfoPanel.rowHeights = new int[] { 30, 0, 0, 30, 0, 0 };
+		gbl_subsetInfoPanel.rowHeights = new int[] { 30, 0, 0, 30, 0, 0, 0, 0 };
 		gbl_subsetInfoPanel.columnWeights = new double[] { 0.0, 0.0, 0.0, 1.0 };
-		gbl_subsetInfoPanel.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
+		gbl_subsetInfoPanel.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
 		subsetInfoPanel.setLayout(gbl_subsetInfoPanel);
 
 		JLabel lblName = new JLabel("Name ");
@@ -176,11 +191,42 @@ public class FeatureSubsetDialog extends JDialog implements ItemListener{
 
 		featureSetComboBox = new JComboBox<MsFeatureSet>();
 		GridBagConstraints gbc_featureSetComboBox = new GridBagConstraints();
+		gbc_featureSetComboBox.insets = new Insets(0, 0, 5, 0);
 		gbc_featureSetComboBox.gridwidth = 4;
 		gbc_featureSetComboBox.fill = GridBagConstraints.HORIZONTAL;
 		gbc_featureSetComboBox.gridx = 0;
 		gbc_featureSetComboBox.gridy = 4;
 		subsetInfoPanel.add(featureSetComboBox, gbc_featureSetComboBox);
+		
+		createFromFileRadioButton = new JRadioButton("Import feature list from file:");
+		bg.add(createFromFileRadioButton);
+		GridBagConstraints gbc_rdbtnNewRadioButton_2 = new GridBagConstraints();
+		gbc_rdbtnNewRadioButton_2.gridwidth = 2;
+		gbc_rdbtnNewRadioButton_2.anchor = GridBagConstraints.WEST;
+		gbc_rdbtnNewRadioButton_2.insets = new Insets(0, 0, 5, 5);
+		gbc_rdbtnNewRadioButton_2.gridx = 0;
+		gbc_rdbtnNewRadioButton_2.gridy = 5;
+		subsetInfoPanel.add(createFromFileRadioButton, gbc_rdbtnNewRadioButton_2);
+		
+		featureListFileTextField = new JTextField();
+		featureListFileTextField.setEditable(false);
+		GridBagConstraints gbc_textField_2 = new GridBagConstraints();
+		gbc_textField_2.gridwidth = 3;
+		gbc_textField_2.insets = new Insets(0, 0, 0, 5);
+		gbc_textField_2.fill = GridBagConstraints.HORIZONTAL;
+		gbc_textField_2.gridx = 0;
+		gbc_textField_2.gridy = 6;
+		subsetInfoPanel.add(featureListFileTextField, gbc_textField_2);
+		featureListFileTextField.setColumns(10);
+		
+		browseButton = new JButton("Browse");
+		browseButton.setActionCommand(BROWSE_COMMAND);
+		browseButton.addActionListener(this);
+		GridBagConstraints gbc_btnNewButton = new GridBagConstraints();
+		gbc_btnNewButton.fill = GridBagConstraints.HORIZONTAL;
+		gbc_btnNewButton.gridx = 3;
+		gbc_btnNewButton.gridy = 6;
+		subsetInfoPanel.add(browseButton, gbc_btnNewButton);
 
 //		featuresTable = new SubsetFeaturesTable();
 //		getContentPane().add(new JScrollPane(featuresTable), BorderLayout.CENTER);
@@ -195,6 +241,7 @@ public class FeatureSubsetDialog extends JDialog implements ItemListener{
 			featureSetComboBox.setEnabled(false);
 			copyFromExistingSubsetRadioButton.addItemListener(this);
 			addFromFeatureTableRadioButton.addItemListener(this);
+			createFromFileRadioButton.addItemListener(this);
 			dsCommand = MainActionCommands.CREATE_NEW_FEATURE_SUBSET_COMMAND.getName();
 		} else {
 			setTitle("Edit feature subset");
@@ -204,8 +251,7 @@ public class FeatureSubsetDialog extends JDialog implements ItemListener{
 			featureSetComboBox.setEnabled(false);
 			tableRowChoiceComboBox.setEnabled(false);
 			dsCommand = MainActionCommands.SAVE_CHANGES_TO_FEATURE_SUBSET_COMMAND.getName();
-		}
-		
+		}		
 		JPanel panel = new JPanel();
 		FlowLayout flowLayout = (FlowLayout) panel.getLayout();
 		flowLayout.setAlignment(FlowLayout.RIGHT);
@@ -230,6 +276,30 @@ public class FeatureSubsetDialog extends JDialog implements ItemListener{
 		rootPane.setDefaultButton(btnSave);
 
 		pack();
+	}
+	
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+
+		if(e.getActionCommand().equals(BROWSE_COMMAND))
+			selectFeatureListFile();
+	}
+	
+	private void selectFeatureListFile() {
+		
+		JnaFileChooser fc = new JnaFileChooser(baseDirectory);
+		fc.setMode(JnaFileChooser.Mode.Files);
+		fc.addFilter("Text files", "txt", "TXT", "tsv", "TSV");
+		fc.setTitle("Select feature list file");
+		fc.setMultiSelectionEnabled(false);
+		if (fc.showOpenDialog(SwingUtilities.getWindowAncestor(this.getContentPane()))) {
+			
+			featureListFile = fc.getSelectedFile();
+			baseDirectory = featureListFile.getParentFile();
+			featureListFileTextField.setText(featureListFile.getAbsolutePath());
+			savePreferences();
+		}
 	}
 
 	public MsFeatureSet getActiveSet() {
@@ -290,8 +360,10 @@ public class FeatureSubsetDialog extends JDialog implements ItemListener{
 		if (newName.isEmpty())
 			errors.add("Feature subset name cannot be empty.");
 
-		DataAnalysisProject experiment = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
-		Set<MsFeatureSet> allSubsets = experiment.getMsFeatureSetsForDataPipeline(experiment.getActiveDataPipeline());
+		DataAnalysisProject experiment = 
+				MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
+		Set<MsFeatureSet> allSubsets = 
+				experiment.getMsFeatureSetsForDataPipeline(experiment.getActiveDataPipeline());
 		MsFeatureSet existing = null;
 		if (activeSet == null) {
 			existing = allSubsets.stream().filter(s -> s.getName().equalsIgnoreCase(newName)).findFirst().orElse(null);
@@ -301,6 +373,9 @@ public class FeatureSubsetDialog extends JDialog implements ItemListener{
 		}
 		if (existing != null)
 			errors.add("Feature subset \"" + newName + "\" already exists.");
+		
+		if(createFromFileRadioButton.isSelected() && featureListFile == null) 
+			errors.add("Feature list file not selected.");
 
 		return errors;
 	}
@@ -317,11 +392,43 @@ public class FeatureSubsetDialog extends JDialog implements ItemListener{
 			
 			featureSetComboBox.setEnabled(true);			
 			tableRowChoiceComboBox.setEnabled(false);
+			browseButton.setEnabled(false);
 		}
 		if(addFromFeatureTableRadioButton.isSelected()) {
 			
 			featureSetComboBox.setEnabled(false);
 			tableRowChoiceComboBox.setEnabled(true);
+			browseButton.setEnabled(false);
 		}
+		if(createFromFileRadioButton.isSelected()) {
+			
+			featureSetComboBox.setEnabled(false);
+			tableRowChoiceComboBox.setEnabled(false);
+			browseButton.setEnabled(true);
+		}
+	}
+
+	@Override
+	public void loadPreferences(Preferences prefs) {
+		preferences = prefs;
+		baseDirectory =
+			new File(preferences.get(BASE_DIRECTORY,
+				MRC2ToolBoxConfiguration.getDefaultDataDirectory()));
+	}
+
+	@Override
+	public void loadPreferences() {
+		loadPreferences(Preferences.userNodeForPackage(this.getClass()));
+	}
+
+	@Override
+	public void savePreferences() {
+		preferences = Preferences.userNodeForPackage(this.getClass());
+		preferences.put(BASE_DIRECTORY, baseDirectory.getAbsolutePath());
+	}
+
+
+	public File getFeatureListFile() {
+		return featureListFile;
 	}
 }

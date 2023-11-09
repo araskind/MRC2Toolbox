@@ -635,6 +635,8 @@ public class DataExportTask extends AbstractTask {
 			double binnerMass =
 				MsUtils.calculateModifiedMz(msf.getNeutralMass(),
 						AdductManager.getDefaultAdductForPolarity(msf.getPolarity()));
+			
+			//	TODO ?? This is for oligomers?
 			if(msf.getSpectrum().getPrimaryAdduct() != null 
 					&& Math.abs(msf.getSpectrum().getPrimaryAdduct().getCharge()) == 1
 					&& msf.getSpectrum().getPrimaryAdduct().getOligomericState() > 1)

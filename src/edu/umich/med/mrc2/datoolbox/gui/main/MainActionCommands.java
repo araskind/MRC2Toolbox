@@ -521,6 +521,8 @@ public enum MainActionCommands {
 	LOCK_FEATURE_SUBSET_COMMAND("Lock selected feature subset"),
 	UNLOCK_FEATURE_SUBSET_COMMAND("Unlock selected feature subset"),
 	SET_ACTIVE_FEATURE_SUBSET_COMMAND("Set as active feature subset"),
+	CREATE_FEATURE_SUBSET_FROM_EXTERNAL_LIST("Create feature subset from external list"),
+	IMPORT_FEATURE_SUBSET_FROM_EXTERNAL_LIST("Import feature subset from external list"),
 
 	// Design subset commands
 	SHOW_DESIGN_SUBSET_DIALOG_COMMAND("Show design subset editor"),

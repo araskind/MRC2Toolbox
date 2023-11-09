@@ -262,7 +262,7 @@ public class SpectrumMatcher {
 		return Arrays.stream(pattern).
 				map(dp -> new MsPoint(dp.getMz(), 
 						dp.getIntensity() / maxIntensity 
-							* MsUtils.SPECTRUM_NORAMALIZATION_BASE_INTENSITY, 
+							* MsUtils.SPECTRUM_NORMALIZATION_BASE_INTENSITY, 
 							dp.getAdductType(), dp.getRt())).
 				sorted(MsUtils.reverseIntensitySorter).
 				limit(topIons).

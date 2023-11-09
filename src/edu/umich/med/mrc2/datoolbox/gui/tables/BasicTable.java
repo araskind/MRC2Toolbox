@@ -837,8 +837,10 @@ public class BasicTable extends JTable implements ActionListener{
 		
 		TableColumn column = columnModel.getColumnById(columnIdentifier);
 		if(column != null) {
-			column.setWidth(width);
-			column.setResizable(false);
+			column.setPreferredWidth(width);
+			column.setMaxWidth(width);
+			column.setMinWidth(width);
+			//column.setResizable(false);
 		}
 	}
 }

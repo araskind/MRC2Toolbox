@@ -828,6 +828,7 @@ public class MultiFileDataImportDialog extends JDialog
 			//	Create new pipeline and add data to it		
 			newDataPipeline = dataPipelineDefinitionPanel.getDataPipeline();
 			if(existingDataPipeline == null 
+					&& newDataPipeline != null
 					&& MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getDataPipelines().contains(newDataPipeline)) {
 				MessageDialog.showErrorMsg("The experiment already contains data pipeline \n"
 						+ "with selected combination of assay, data acquisition and data analysis methods.\n"

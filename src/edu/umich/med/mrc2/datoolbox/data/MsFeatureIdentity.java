@@ -105,6 +105,7 @@ public class MsFeatureIdentity implements Serializable {
 			return compoundIdentity.getName();
 	}
 	
+	//	TODO fix this mess
 	public String getIdentityName() {
 		
 		if(compoundIdName != null)
@@ -112,6 +113,8 @@ public class MsFeatureIdentity implements Serializable {
 		else if(msRtLibraryMatch != null 
 				&& msRtLibraryMatch.getLibraryTargetName() != null)
 			return msRtLibraryMatch.getLibraryTargetName();
+		else if(compoundIdentity != null)
+			return compoundIdentity.getName();
 		else
 			return null;
 	}

@@ -874,9 +874,9 @@ public class TandemMassSpectrum implements AnnotatedObject, Serializable {
 		double raw = getRawParentIonIntensity();
 		if(raw > 0.001d && !spectrum.isEmpty()) {
 			double norm =  raw /  getTopIntensity() 
-					* MsUtils.SPECTRUM_NORAMALIZATION_BASE_INTENSITY;	
-			if(norm > MsUtils.SPECTRUM_NORAMALIZATION_BASE_INTENSITY)
-				norm = MsUtils.SPECTRUM_NORAMALIZATION_BASE_INTENSITY;
+					* MsUtils.SPECTRUM_NORMALIZATION_BASE_INTENSITY;	
+			if(norm > MsUtils.SPECTRUM_NORMALIZATION_BASE_INTENSITY)
+				norm = MsUtils.SPECTRUM_NORMALIZATION_BASE_INTENSITY;
 			
 			return norm;
 		}

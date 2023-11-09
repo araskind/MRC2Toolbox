@@ -389,7 +389,7 @@ public class MsDataSet extends AbstractXYDataset implements IntervalXYDataset {
 				seriesPointsNorm[j] =
 						new MsPoint(seriesPoints[j].getMz(), 
 								seriesPoints[j].getIntensity() / max 
-								* MsUtils.SPECTRUM_NORAMALIZATION_BASE_INTENSITY);
+								* MsUtils.SPECTRUM_NORMALIZATION_BASE_INTENSITY);
 				allPointsScaled.add(seriesPointsNorm[j]);
 			}
 			msSeriesScaled.put(i, seriesPointsNorm);

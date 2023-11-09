@@ -72,7 +72,9 @@ public class DataExtractionMethodEditorDialog extends JDialog implements ActionL
 	private Preferences preferences;
 	public static final String PREFS_NODE = "edu.umich.med.mrc2.cefanalyzer.gui.DataExtractionMethodEditorDialog";
 	public static final String BASE_DIRECTORY = "BASE_DIRECTORY";
-
+	private static final String BROWSE_COMMAND = "BROWSE_COMMAND";
+	private File baseDirectory;
+	
 	private static final Icon editMethodIcon = GuiUtils.getIcon("editDataProcessingMethod", 32);
 	private static final Icon addMethodIcon = GuiUtils.getIcon("addDataProcessingMethod", 32);
 
@@ -83,9 +85,7 @@ public class DataExtractionMethodEditorDialog extends JDialog implements ActionL
 	private JLabel dateCreatedLabel;
 	private JTextArea descriptionTextArea;
 	private JButton btnBrowse;
-	private static final String BROWSE_COMMAND = "BROWSE_COMMAND";
-
-	private File baseDirectory;
+		
 	private JTextField methodNameTextField;
 	private JLabel idValueLabel;
 	private JLabel methodAuthorLabel;

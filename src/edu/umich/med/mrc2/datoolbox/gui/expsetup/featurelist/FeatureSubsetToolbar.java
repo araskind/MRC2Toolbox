@@ -48,6 +48,7 @@ public class FeatureSubsetToolbar extends CommonToolbar {
 	private static final Icon linkIcon = GuiUtils.getIcon("link", 32);
 	private static final Icon unlinktIcon = GuiUtils.getIcon("unlink", 32);
 	private static final Icon exportFilteredLibraryIcon = GuiUtils.getIcon("exportFilteredLibraryToFile", 32);
+	private static final Icon importIcon = GuiUtils.getIcon("importTextfile", 32);
 
 	@SuppressWarnings("unused")
 	private JButton
@@ -57,7 +58,8 @@ public class FeatureSubsetToolbar extends CommonToolbar {
 		editSubsetButton,
 		exportSubserButton,
 		deleteButton,
-		linkButton;
+		linkButton,
+		importButton;
 
 	private boolean linked;
 
@@ -89,10 +91,9 @@ public class FeatureSubsetToolbar extends CommonToolbar {
 
 		addSeparator(buttonDimension);
 
-		exportSubserButton = GuiUtils.addButton(this, null, exportIcon,
-		commandListener,
-		MainActionCommands.EXPORT_FEATURE_SUBSET_COMMAND.getName(),
-		MainActionCommands.EXPORT_FEATURE_SUBSET_COMMAND.getName(), buttonDimension);
+		exportSubserButton = GuiUtils.addButton(this, null, exportIcon, commandListener,
+				MainActionCommands.EXPORT_FEATURE_SUBSET_COMMAND.getName(),
+				MainActionCommands.EXPORT_FEATURE_SUBSET_COMMAND.getName(), buttonDimension);
 
 		addSeparator(buttonDimension);
 
@@ -100,7 +101,7 @@ public class FeatureSubsetToolbar extends CommonToolbar {
 				MainActionCommands.DELETE_FEATURE_SUBSET_COMMAND.getName(),
 				MainActionCommands.DELETE_FEATURE_SUBSET_COMMAND.getName(), buttonDimension);
 
-		// addSeparator(buttonDimension);
+		//	addSeparator(buttonDimension);
 		//
 		// linkButton = GuiUtils.addButton(this, null, unlinktIcon,
 		// commandListener,

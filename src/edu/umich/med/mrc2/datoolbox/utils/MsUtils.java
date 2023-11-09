@@ -114,7 +114,7 @@ public class MsUtils {
 	public static final double CL_FORMATE_EXCHANGE = 10.0288;
 	
     //	Spectra normalization
-    public static final double SPECTRUM_NORAMALIZATION_BASE_INTENSITY = 999.0d;
+    public static final double SPECTRUM_NORMALIZATION_BASE_INTENSITY = 999.0d;
 
 	public static final IChemObjectBuilder builder = SilentChemObjectBuilder.getInstance();
 	public static final SmilesParser smipar = new SmilesParser(builder);
@@ -1001,13 +1001,13 @@ public class MsUtils {
 		if(charge == 0) {
 			calculatedPattern  =  isoPattern.getIsotopes().stream().
 				map(ic -> new MsPoint(ic.getMass(), ic.getIntensity() 
-						* SPECTRUM_NORAMALIZATION_BASE_INTENSITY)).
+						* SPECTRUM_NORMALIZATION_BASE_INTENSITY)).
 				sorted(mzSorter).collect(Collectors.toList());
 		}
 		else				
 			calculatedPattern =  isoPattern.getIsotopes().stream().
 				map(ic -> new MsPoint((ic.getMass() - MsUtils.ELECTRON_MASS * charge)/charge, ic.getIntensity() 
-						* SPECTRUM_NORAMALIZATION_BASE_INTENSITY)).
+						* SPECTRUM_NORMALIZATION_BASE_INTENSITY)).
 				sorted(mzSorter).collect(Collectors.toList());
 		
 		if(cleanup)
@@ -1186,14 +1186,14 @@ public class MsUtils {
 			if(charge == 0) {
 				return isoPattern.getIsotopes().stream().
 						map(ic -> new MsPoint(ic.getMass(), ic.getIntensity() 
-								* SPECTRUM_NORAMALIZATION_BASE_INTENSITY)).
+								* SPECTRUM_NORMALIZATION_BASE_INTENSITY)).
 						collect(Collectors.toList());
 			}
 			else
 				return isoPattern.getIsotopes().stream().
 						map(ic -> new MsPoint((ic.getMass() - MsUtils.ELECTRON_MASS 
 								* adduct.getCharge())/charge, ic.getIntensity() 
-								* SPECTRUM_NORAMALIZATION_BASE_INTENSITY)).
+								* SPECTRUM_NORMALIZATION_BASE_INTENSITY)).
 						collect(Collectors.toList());
 		}
 		else
@@ -1211,12 +1211,12 @@ public class MsUtils {
 	}
 
 	public static MsPoint[] normalizeAndSortMsPattern(Collection<MsPoint>pattern) {
-		return normalizeAndSortMsPattern(pattern, SPECTRUM_NORAMALIZATION_BASE_INTENSITY);
+		return normalizeAndSortMsPattern(pattern, SPECTRUM_NORMALIZATION_BASE_INTENSITY);
 	}
 	
 	public static MsPoint[] normalizeAndSortMsPattern(MsPoint[] pattern) {
 		return normalizeAndSortMsPattern(
-				Arrays.asList(pattern), SPECTRUM_NORAMALIZATION_BASE_INTENSITY);
+				Arrays.asList(pattern), SPECTRUM_NORMALIZATION_BASE_INTENSITY);
 	}
 	
 	public static Collection<Double> getMassDifferences(

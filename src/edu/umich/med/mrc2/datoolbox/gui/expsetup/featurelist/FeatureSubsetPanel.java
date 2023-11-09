@@ -24,7 +24,13 @@ package edu.umich.med.mrc2.datoolbox.gui.expsetup.featurelist;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.io.File;
+import java.io.IOException;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.TreeSet;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import javax.swing.Icon;
 import javax.swing.JOptionPane;
@@ -34,6 +40,7 @@ import javax.swing.event.ListSelectionEvent;
 import org.apache.commons.lang3.StringUtils;
 
 import edu.umich.med.mrc2.datoolbox.data.CompoundLibrary;
+import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureSet;
 import edu.umich.med.mrc2.datoolbox.data.enums.ParameterSetStatus;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
@@ -48,10 +55,14 @@ import edu.umich.med.mrc2.datoolbox.gui.main.DockableMRC2ToolboxPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.main.PanelList;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
+import edu.umich.med.mrc2.datoolbox.gui.utils.IndeterminateProgressDialog;
+import edu.umich.med.mrc2.datoolbox.gui.utils.LongUpdateTask;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
+import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
+import edu.umich.med.mrc2.datoolbox.utils.DelimitedTextParser;
 
 public class FeatureSubsetPanel extends DockableMRC2ToolboxPanel {
 
@@ -348,20 +359,122 @@ public class FeatureSubsetPanel extends DockableMRC2ToolboxPanel {
 			FeatureDataPanel panel = 
 					(FeatureDataPanel)MRC2ToolBoxCore.getMainWindow().getPanel(PanelList.FEATURE_DATA);
 			newSet.addFeatures(panel.getFeatures(
-					featureSubsetDialog.getFeaturesSelectionToAdd()));			
+					featureSubsetDialog.getFeaturesSelectionToAdd()));
+			
+			addSetListeners(newSet);
+			currentExperiment.addFeatureSetForDataPipeline(newSet, activeDataPipeline);
+			currentExperiment.setActiveFeatureSetForDataPipeline(newSet, activeDataPipeline);		
+			featureSubsetDialog.dispose();
+			return;
 		}
 		if(featureSubsetDialog.getSelectedSourceSubset() != null) {			
 			newSet.addFeatures(featureSubsetDialog.getSelectedSourceSubset().getFeatures());
+			addSetListeners(newSet);
+			currentExperiment.addFeatureSetForDataPipeline(newSet, activeDataPipeline);
+			currentExperiment.setActiveFeatureSetForDataPipeline(newSet, activeDataPipeline);		
+			featureSubsetDialog.dispose();
+			return;
 		}
-		addSetListeners(newSet);
-		currentExperiment.addFeatureSetForDataPipeline(newSet, activeDataPipeline);
-		currentExperiment.setActiveFeatureSetForDataPipeline(newSet, activeDataPipeline);
+		if(featureSubsetDialog.getFeatureListFile() != null) {
+			
+			Collection<MsFeature>listFeatures = new HashSet<MsFeature>();
+			FilterFeaturesByListTask task = 
+					new FilterFeaturesByListTask(
+							newSet, featureSubsetDialog.getFeatureListFile(), listFeatures);
+			IndeterminateProgressDialog idp = new IndeterminateProgressDialog(
+					"Reading feature list ...", this.getContentPane(), task);
+			idp.setLocationRelativeTo(this.getContentPane());
+			idp.setVisible(true);
+//			
+//			if(listFeatures == null || listFeatures.isEmpty()){
+//				
+//				MessageDialog.showErrorMsg(
+//						"No features matching to provided list found in current data set", 
+//						featureSubsetDialog);
+//				return;
+//			}
+//			newSet.addFeatures(listFeatures);
+		}
+	}
+	
+	class FilterFeaturesByListTask extends LongUpdateTask {
 		
-//		addSetListeners(newSet);
-//		activeSet = newSet;
-//		newSet.fireFeatureSetEvent(ParameterSetStatus.CREATED);
+		private MsFeatureSet newSet;
+		private File featureListFile;
+		private Collection<MsFeature>features;
+			
+		public FilterFeaturesByListTask(
+				MsFeatureSet newSet,
+				File featureListFile, 
+				Collection<MsFeature>features) {
+			super();
+			this.newSet = newSet;
+			this.featureListFile = featureListFile;
+			this.features = features;
+		}
+
+		@Override
+		public Void doInBackground() {
+			
+			try {
+				getFeaturesFromExternalList(featureListFile, features);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			return null;
+		}
 		
-		featureSubsetDialog.dispose();
+	    @Override
+	    public void done() {
+	    	
+	    	super.done();
+			if(features == null || features.isEmpty()){
+				
+				MessageDialog.showErrorMsg(
+						"No features matching to provided list found in current data set", 
+						featureSubsetDialog);
+				return;
+			}
+			newSet.addFeatures(features);
+			addSetListeners(newSet);
+			currentExperiment.addFeatureSetForDataPipeline(newSet, activeDataPipeline);
+			currentExperiment.setActiveFeatureSetForDataPipeline(newSet, activeDataPipeline);		
+			featureSubsetDialog.dispose();
+	    }
+	}
+
+	private void getFeaturesFromExternalList(
+			File featureListFile, Collection<MsFeature>features) throws Exception{
+
+		String[][]featureListData =  null;
+		try {
+			featureListData = DelimitedTextParser.parseTextFileWithEncoding(
+					featureListFile, MRC2ToolBoxConfiguration.getTabDelimiter());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		Collection<String>featureIds = new TreeSet<String>();
+		for(int i=0; i<featureListData.length; i++) {
+			
+			if(featureListData[i].length >0) {
+				
+				String fid = featureListData[i][0].trim();
+				if(fid != null && !fid.isEmpty())
+					featureIds.add(fid);
+			}
+		}
+		Map<String, MsFeature> completeMap = 
+				currentExperiment.getMsFeaturesForDataPipeline(activeDataPipeline).stream().
+			collect(Collectors.toMap(MsFeature::getName, Function.identity()));
+		
+		for(String fid : featureIds) {
+
+			MsFeature match = completeMap.get(fid);
+			if(match != null)
+				features.add(match);
+		}
 	}
 
 	@Override
