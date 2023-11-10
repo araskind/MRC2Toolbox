@@ -27,6 +27,8 @@ public enum FeatureListImportFields {
 	mz,
 	rt,
 	rank,
+	foldChange,
+	pValue,
 	smiles,
 	inchiKey,
 	;

@@ -19,7 +19,7 @@
  *  
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.gui.idworks.search.byexp;
+package edu.umich.med.mrc2.datoolbox.gui.idworks.clustree.lookup;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -31,43 +31,38 @@ import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.AutoChoices;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.TableFilterHeader;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.FormattedDecimalRenderer;
-import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.WordWrapCellRenderer;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 
-public class MinimalMSOneFeatureTable extends BasicTable {
+public class LookupFeatureListTable extends BasicTable {
 
 	/**
 	 *
 	 */
 	private static final long serialVersionUID = -3232039944841480790L;
 
-	public MinimalMSOneFeatureTable() {
+	public LookupFeatureListTable() {
 
 		super();
-		model = new MinimalMSOneFeatureTableModel();		
+		model = new LookupFeatureListTableModel();		
 		setModel(model);
-		rowSorter = new TableRowSorter<MinimalMSOneFeatureTableModel>(
-				(MinimalMSOneFeatureTableModel)model);
+		rowSorter = new TableRowSorter<LookupFeatureListTableModel>(
+				(LookupFeatureListTableModel)model);
 		setRowSorter(rowSorter);
 		
-		columnModel.getColumnById(MinimalMSOneFeatureTableModel.SMILES_COLUMN).
-			setCellRenderer(new WordWrapCellRenderer());
-		columnModel.getColumnById(MinimalMSOneFeatureTableModel.INCHI_KEY_COLUMN).
-			setCellRenderer(new WordWrapCellRenderer());
-		columnModel.getColumnById(MinimalMSOneFeatureTableModel.FOLD_CHANGE_COLUMN).
+		columnModel.getColumnById(LookupFeatureListTableModel.FOLD_CHANGE_COLUMN).
 			setCellRenderer(new FormattedDecimalRenderer(
-				MRC2ToolBoxConfiguration.getPpmFormat(), true));
-		columnModel.getColumnById(MinimalMSOneFeatureTableModel.P_VALUE_COLUMN).
+					MRC2ToolBoxConfiguration.getPpmFormat(), true));
+		columnModel.getColumnById(LookupFeatureListTableModel.P_VALUE_COLUMN).
 			setCellRenderer(new FormattedDecimalRenderer(
 					MRC2ToolBoxConfiguration.defaultMzFormat, true, true));
-	
+		
 		thf = new TableFilterHeader(this, AutoChoices.ENABLED);	
 		finalizeLayout();
 	}
 	
 	public void setTableModelFromFeatureCollection(Collection<MinimalMSOneFeature>features) {
 		thf.setTable(null);
-		((MinimalMSOneFeatureTableModel)model).setTableModelFromFeatureCollection(features);
+		((LookupFeatureListTableModel)model).setTableModelFromFeatureCollection(features);
 		thf.setTable(this);
 		adjustColumns();
 	}
@@ -80,7 +75,7 @@ public class MinimalMSOneFeatureTable extends BasicTable {
 
 		return (MinimalMSOneFeature)model.getValueAt(
 				convertRowIndexToModel(row), 
-				model.getColumnIndex(MinimalMSOneFeatureTableModel.FEATURE_COLUMN));
+				model.getColumnIndex(LookupFeatureListTableModel.FEATURE_COLUMN));
 	}
 	
 	public Collection<MinimalMSOneFeature>getSelectedFeatures(){
@@ -90,7 +85,7 @@ public class MinimalMSOneFeatureTable extends BasicTable {
 		if(selectedRows.length == 0)
 			return selectedFeatures;
 		
-		int featureCol = model.getColumnIndex(MinimalMSOneFeatureTableModel.FEATURE_COLUMN);
+		int featureCol = model.getColumnIndex(LookupFeatureListTableModel.FEATURE_COLUMN);
 		for(int i : selectedRows)
 			selectedFeatures.add(
 					(MinimalMSOneFeature)model.getValueAt(convertRowIndexToModel(i), featureCol));
@@ -101,7 +96,7 @@ public class MinimalMSOneFeatureTable extends BasicTable {
 	public Collection<MinimalMSOneFeature>getAllFeatures(){
 		
 		Collection<MinimalMSOneFeature>selectedFeatures = new ArrayList<MinimalMSOneFeature>();
-		int featureCol = model.getColumnIndex(MinimalMSOneFeatureTableModel.FEATURE_COLUMN);
+		int featureCol = model.getColumnIndex(LookupFeatureListTableModel.FEATURE_COLUMN);
 		for(int i=0; i<model.getRowCount(); i++)
 			selectedFeatures.add((MinimalMSOneFeature)model.getValueAt(i, featureCol));
 		

@@ -41,6 +41,8 @@ public class MinimalMSOneFeature implements Serializable, Comparable<MinimalMSOn
 	private double mz;
 	private double rt;
 	private double rank;
+	private double foldChange;
+	private double pValue;
 	private String smiles;
 	private String inchiKey;
 	
@@ -172,6 +174,10 @@ public class MinimalMSOneFeature implements Serializable, Comparable<MinimalMSOn
 				MinimalMSOneFeatureFields.RT.name(), Double.toString(rt));
 		featureElement.setAttribute(
 				MinimalMSOneFeatureFields.Rank.name(), Double.toString(rank));
+		featureElement.setAttribute(
+				MinimalMSOneFeatureFields.FoldChange.name(), Double.toString(foldChange));
+		featureElement.setAttribute(
+				MinimalMSOneFeatureFields.PValue.name(), Double.toString(pValue));
 		
 		return featureElement;
 	}
@@ -186,6 +192,10 @@ public class MinimalMSOneFeature implements Serializable, Comparable<MinimalMSOn
 				featureElement.getAttributeValue(MinimalMSOneFeatureFields.RT.name()));
 		rank = Double.parseDouble(
 				featureElement.getAttributeValue(MinimalMSOneFeatureFields.Rank.name()));
+		foldChange = Double.parseDouble(
+				featureElement.getAttributeValue(MinimalMSOneFeatureFields.FoldChange.name()));
+		pValue = Double.parseDouble(
+				featureElement.getAttributeValue(MinimalMSOneFeatureFields.PValue.name()));
 	}
 
 	public String getSmiles() {
@@ -202,5 +212,21 @@ public class MinimalMSOneFeature implements Serializable, Comparable<MinimalMSOn
 
 	public void setInchiKey(String inchiKey) {
 		this.inchiKey = inchiKey;
+	}
+
+	public double getFoldChange() {
+		return foldChange;
+	}
+
+	public void setFoldChange(double foldChange) {
+		this.foldChange = foldChange;
+	}
+
+	public double getpValue() {
+		return pValue;
+	}
+
+	public void setpValue(double pValue) {
+		this.pValue = pValue;
 	}
 }

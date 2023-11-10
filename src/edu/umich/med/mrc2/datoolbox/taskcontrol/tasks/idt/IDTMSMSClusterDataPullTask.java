@@ -162,7 +162,8 @@ public class IDTMSMSClusterDataPullTask extends IDTMSMSFeatureDataPullTask {
 		defaultClusterAltIdMap = new HashMap<MsFeatureInfoBundleCluster,String>();
 		clusterFeatureIdMap = new TreeMap<String, Collection<String>>();
 		
-		Connection conn = ConnectionManager.getConnection();
+		Connection conn = ConnectionManager.getConnection();		
+		
 		FeatureLookupDataSet flDataSet = dataSet.getFeatureLookupDataSet();
 		if(flDataSet != null && flDataSet.getFeatures().isEmpty()) {
 			try {

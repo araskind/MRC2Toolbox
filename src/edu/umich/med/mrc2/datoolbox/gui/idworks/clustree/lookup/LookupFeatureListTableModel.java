@@ -19,7 +19,7 @@
  *  
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.gui.idworks.search.byexp;
+package edu.umich.med.mrc2.datoolbox.gui.idworks.clustree.lookup;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -29,7 +29,7 @@ import edu.umich.med.mrc2.datoolbox.data.MinimalMSOneFeature;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTableModel;
 import edu.umich.med.mrc2.datoolbox.gui.tables.ColumnContext;
 
-public class MinimalMSOneFeatureTableModel extends BasicTableModel {
+public class LookupFeatureListTableModel extends BasicTableModel {
 
 	/**
 	 *
@@ -42,10 +42,8 @@ public class MinimalMSOneFeatureTableModel extends BasicTableModel {
 	public static final String RANK_COLUMN = "Rank";
 	public static final String FOLD_CHANGE_COLUMN = "Fold change";
 	public static final String P_VALUE_COLUMN = "P-value";
-	public static final String SMILES_COLUMN = "SMILES";
-	public static final String INCHI_KEY_COLUMN = "InChi key";
 
-	public MinimalMSOneFeatureTableModel() {
+	public LookupFeatureListTableModel() {
 		super();
 		columnArray = new ColumnContext[] {
 			new ColumnContext(FEATURE_COLUMN, "Feature name", MinimalMSOneFeature.class, false),
@@ -54,8 +52,6 @@ public class MinimalMSOneFeatureTableModel extends BasicTableModel {
 			new ColumnContext(RANK_COLUMN, RANK_COLUMN, Double.class, false),
 			new ColumnContext(FOLD_CHANGE_COLUMN, FOLD_CHANGE_COLUMN, Double.class, false),
 			new ColumnContext(P_VALUE_COLUMN, P_VALUE_COLUMN, Double.class, false),
-			new ColumnContext(SMILES_COLUMN, SMILES_COLUMN, String.class, false),
-			new ColumnContext(INCHI_KEY_COLUMN, INCHI_KEY_COLUMN, String.class, false),
 		};
 	}
 
@@ -75,9 +71,7 @@ public class MinimalMSOneFeatureTableModel extends BasicTableModel {
 					feature.getRt(),
 					feature.getRank(),
 					feature.getFoldChange(),
-					feature.getpValue(),
-					feature.getSmiles(),
-					feature.getInchiKey()
+					feature.getpValue()
 				};
 			rowData.add(obj);
 		}

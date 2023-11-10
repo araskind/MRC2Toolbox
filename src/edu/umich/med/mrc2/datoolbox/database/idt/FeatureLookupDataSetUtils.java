@@ -54,6 +54,7 @@ public class FeatureLookupDataSetUtils {
 				"0",
 				6);
 		dataSet.setId(newId);
+
 		String query = 
 			"INSERT INTO FEATURE_LOOKUP_DATA_SET " +
 			"(FLDS_ID, NAME, DESCRIPTION, CREATED_BY,  " +
@@ -74,8 +75,9 @@ public class FeatureLookupDataSetUtils {
 		
 		//	Add features
 		query = "INSERT INTO FEATURE_LOOKUP_DATA_SET_COMPONENT "
-				+ "(COMPONENT_ID, FLDS_ID, NAME, MZ, RT, RANK, SMILES, INCHI_KEY) "
-				+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+				+ "(COMPONENT_ID, FLDS_ID, NAME, MZ, RT, RANK, "
+				+ "SMILES, INCHI_KEY, FOLD_CHANGE, P_VALUE) "
+				+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 		
 		ps = conn.prepareStatement(query);
 		ps.setString(2, dataSet.getId());
@@ -104,6 +106,8 @@ public class FeatureLookupDataSetUtils {
 			else
 				ps.setNull(8,  java.sql.Types.NULL);
 			
+			ps.setDouble(9, f.getFoldChange());
+			ps.setDouble(10, f.getpValue());
 			ps.addBatch();
 			counter++;
 			
@@ -148,8 +152,9 @@ public class FeatureLookupDataSetUtils {
 		
 		Connection conn = ConnectionManager.getConnection();
 		String query = "INSERT INTO FEATURE_LOOKUP_DATA_SET_COMPONENT "
-				+ "(COMPONENT_ID, FLDS_ID, NAME, MZ, RT, RANK, SMILES, INCHI_KEY) "
-				+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+				+ "(COMPONENT_ID, FLDS_ID, NAME, MZ, RT, RANK, "
+				+ "SMILES, INCHI_KEY, FOLD_CHANGE, P_VALUE) "
+				+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 		PreparedStatement ps = conn.prepareStatement(query);
 		ps.setString(2, dataSet.getId());
 		int counter = 0;
@@ -177,6 +182,8 @@ public class FeatureLookupDataSetUtils {
 			else
 				ps.setNull(8,  java.sql.Types.NULL);
 			
+			ps.setDouble(9, f.getFoldChange());
+			ps.setDouble(10, f.getpValue());
 			ps.addBatch();
 			counter++;
 			
@@ -193,7 +200,8 @@ public class FeatureLookupDataSetUtils {
 			FeatureLookupDataSet dataSet, Collection<MinimalMSOneFeature>featuresToRemove) throws Exception {
 		
 		Connection conn = ConnectionManager.getConnection();
-		String query = "DELETE FROM FEATURE_LOOKUP_DATA_SET_COMPONENT WHERE COMPONENT_ID = ?";
+		String query = 
+				"DELETE FROM FEATURE_LOOKUP_DATA_SET_COMPONENT WHERE COMPONENT_ID = ?";
 		PreparedStatement ps = conn.prepareStatement(query);
 		int counter = 0;
 		for(MinimalMSOneFeature f : featuresToRemove) {
@@ -258,7 +266,8 @@ public class FeatureLookupDataSetUtils {
 			FeatureLookupDataSet dataSet, Connection conn) throws Exception {
 		
 		String query = 
-				"SELECT COMPONENT_ID, NAME, MZ, RT, RANK, SMILES, INCHI_KEY "
+				"SELECT COMPONENT_ID, NAME, MZ, RT, RANK, "
+				+ "SMILES, INCHI_KEY, FOLD_CHANGE, P_VALUE "
 				+ "FROM FEATURE_LOOKUP_DATA_SET_COMPONENT "
 				+ "WHERE FLDS_ID = ?";
 		PreparedStatement ps = conn.prepareStatement(query);	
@@ -273,7 +282,10 @@ public class FeatureLookupDataSetUtils {
 							rs.getDouble("RT"), 
 							rs.getDouble("RANK"),
 							rs.getString("SMILES"),
-							rs.getString("INCHI_KEY"));						
+							rs.getString("INCHI_KEY"));	
+			
+			feature.setFoldChange(rs.getDouble("FOLD_CHANGE"));
+			feature.setpValue(rs.getDouble("P_VALUE"));
 			dataSet.getFeatures().add(feature);
 		}
 		rs.close();

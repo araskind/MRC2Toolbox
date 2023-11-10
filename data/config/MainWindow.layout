@@ -241,17 +241,17 @@
 													<leaf id="0" nodeId="1672779039466">
 														<placeholders>
 															<placeholder>dock.single.CompoundDatabasePanel</placeholder>
+															<placeholder>dock.single.ExperimentDesignPanel</placeholder>
 															<placeholder>dock.single.MgfPanel</placeholder>
+															<placeholder>dock.single.LabNoteBookPanel</placeholder>
 															<placeholder>dock.single.DataIntegratorPanelClusterDisplayPanel</placeholder>
 															<placeholder>dock.single.CompoundCollectionsPanel</placeholder>
-															<placeholder>dock.single.RawDataExaminerPanel</placeholder>
-															<placeholder>dock.single.CorrelationResultsPanelClusterDisplayPanel</placeholder>
-															<placeholder>dock.single.ExperimentDesignPanel</placeholder>
-															<placeholder>dock.single.LabNoteBookPanel</placeholder>
 															<placeholder>dock.single.MoTrPACDataTrackingPanel</placeholder>
+															<placeholder>dock.single.RawDataExaminerPanel</placeholder>
 															<placeholder>dock.single.MsLibraryPanel</placeholder>
 															<placeholder>dock.single.FeatureDataPanel</placeholder>
 															<placeholder>dock.single.METLIMSPanel</placeholder>
+															<placeholder>dock.single.CorrelationResultsPanelClusterDisplayPanel</placeholder>
 														</placeholders>
 														<placeholder-map>
 															<version>0</version>

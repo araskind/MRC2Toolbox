@@ -163,6 +163,7 @@ public class FeatureListImportPanel extends JPanel implements ActionListener, Ta
 		panel.add(lblNewLabel_1, gbc_lblNewLabel_1);
 		
 		descriptionTextArea = new JTextArea();
+		descriptionTextArea.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
 		descriptionTextArea.setLineWrap(true);
 		descriptionTextArea.setRows(2);
 		descriptionTextArea.setWrapStyleWord(true);
@@ -264,7 +265,8 @@ public class FeatureListImportPanel extends JPanel implements ActionListener, Ta
 		FeatureLookupDataSet dataSet = 
 				featureLookupListSelectorDialog.getSelectedDataSet();
 		if(dataSet == null)
-			return;				
+			return;		
+		
 		featureLookupListSelectorDialog.dispose();		
 		loadDataSet(dataSet);
 		fireFormChangeEvent(ParameterSetStatus.CHANGED);
@@ -360,6 +362,7 @@ public class FeatureListImportPanel extends JPanel implements ActionListener, Ta
 
 	private void readFeaturesFromInputFile(File inputFile) {
 		
+		dataSet = null;
 		String extension  = 
 				FilenameUtils.getExtension(inputFile.getName()).toLowerCase();
 		
@@ -390,6 +393,8 @@ public class FeatureListImportPanel extends JPanel implements ActionListener, Ta
 		int rtIndex = -1;
 		int nameIndex = -1;
 		int rankIndex = -1;
+		int foldChangeIndex = -1;
+		int pValueIndex = -1;
 		int smilesIndex = -1;
 		int inchiKeyIndex = -1;
 		
@@ -407,16 +412,22 @@ public class FeatureListImportPanel extends JPanel implements ActionListener, Ta
 			if(featureData[0][i].equalsIgnoreCase(FeatureListImportFields.rank.name()))
 				rankIndex = i;
 			
+			if(featureData[0][i].equalsIgnoreCase(FeatureListImportFields.foldChange.name()))
+				foldChangeIndex = i;
+			
+			if(featureData[0][i].equalsIgnoreCase(FeatureListImportFields.pValue.name()))
+				pValueIndex = i;
+			
 			if(featureData[0][i].equalsIgnoreCase(FeatureListImportFields.smiles.name()))
 				smilesIndex = i;
 			
 			if(featureData[0][i].equalsIgnoreCase(FeatureListImportFields.inchiKey.name()))
 				inchiKeyIndex = i;
 		}
-		if((mzIndex == -1 || rtIndex == -1) && nameIndex == -1) {
+		if(mzIndex == -1 || rtIndex == -1 || nameIndex == -1) {
 			MessageDialog.showErrorMsg("Invalid file format.\n"
-					+ "First line must include \"MZ\", \"RT\" and/or "
-					+ "\"Name\" columns\n\"Rank\", \"SMILES\" and \"InChiKey\" columns are optional", 
+					+ "First line must include \"MZ\", \"RT\", and \"Name\" columns\n"
+					+ "\"Rank\", \"SMILES\" and \"InChiKey\" columns are optional", 
 					this);
 			return;
 		}
@@ -432,13 +443,19 @@ public class FeatureListImportPanel extends JPanel implements ActionListener, Ta
 					if(nameIndex >= 0)
 						f.setName(featureData[i][nameIndex]);
 					
-					if(rankIndex >= 0)
+					if(rankIndex >= 0 && !featureData[i][rankIndex].isEmpty())
 						f.setRank(Double.parseDouble(featureData[i][rankIndex]));
 					
-					if(smilesIndex >= 0)
+					if(foldChangeIndex >= 0 && !featureData[i][foldChangeIndex].isEmpty())
+						f.setFoldChange(Double.parseDouble(featureData[i][foldChangeIndex]));
+					
+					if(pValueIndex >= 0 && !featureData[i][pValueIndex].isEmpty())
+						f.setpValue(Double.parseDouble(featureData[i][pValueIndex]));
+					
+					if(smilesIndex >= 0 && !featureData[i][smilesIndex].isEmpty())
 						f.setSmiles(featureData[i][smilesIndex]);
 					
-					if(inchiKeyIndex >= 0)
+					if(inchiKeyIndex >= 0 && !featureData[i][inchiKeyIndex].isEmpty())
 						f.setInchiKey(featureData[i][inchiKeyIndex]);
 										
 					features.add(f);

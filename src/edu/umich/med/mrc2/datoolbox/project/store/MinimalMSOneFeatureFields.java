@@ -29,5 +29,7 @@ public enum MinimalMSOneFeatureFields {
 	MZ,
 	RT,
 	Rank,
+	FoldChange,
+	PValue,
 	;
 }

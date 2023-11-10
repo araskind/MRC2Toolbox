@@ -575,6 +575,7 @@ public class MSMSClusteringDBUtils {
 		ps.setString(7, dataSet.getParameters().getId());
 		if(dataSet.getFeatureLookupDataSet() != null) {
 			
+			FeatureLookupDataSetManager.refreshFeatureLookupDataSetList();
 			FeatureLookupDataSet flds = FeatureLookupDataSetManager.getFeatureLookupDataSetById(
 					dataSet.getFeatureLookupDataSet().getId());
 			if(flds == null)
