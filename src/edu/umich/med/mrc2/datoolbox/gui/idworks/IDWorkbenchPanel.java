@@ -433,9 +433,6 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		
 		idSetupDialog = new IDSetupDialog(this);
 		initDataMaps();
-		
-		idTrackerDataExplorerPlotDialog = new IDTrackerDataExplorerPlotFrame(this);
-		idTrackerDataExplorerPlotDialog.setLocationRelativeTo(this.getContentPane());
 	}
 	
 	@Override
@@ -1065,8 +1062,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		
 		msmsFeatureClusterTreePanel.loadFeatureClusters(
 					activeMSMSClusterDataSet.getClusters());
-		lookupFeatureTable.loadDataSet(
-				activeMSMSClusterDataSet.getFeatureLookupDataSet());
+		lookupFeatureTable.loadDataSet(activeMSMSClusterDataSet);
 			
 		activeCluster = null; 
 	}
@@ -1616,7 +1612,12 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		}
 	}
 	
-	private void showIDTrackerDataExplorerDialog() {		
+	private void showIDTrackerDataExplorerDialog() {	
+		
+		if(idTrackerDataExplorerPlotDialog == null) {
+			idTrackerDataExplorerPlotDialog = new IDTrackerDataExplorerPlotFrame(this);
+			idTrackerDataExplorerPlotDialog.setLocationRelativeTo(this.getContentPane());
+		}		
 		idTrackerDataExplorerPlotDialog.setVisible(true);
 	}
 	
@@ -3411,7 +3412,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			
 			Set<MsFeatureInfoBundleCluster> clusters = dataSet.getClusters();
 			msmsFeatureClusterTreePanel.loadFeatureClusters(clusters);
-			lookupFeatureTable.loadDataSet(dataSet.getFeatureLookupDataSet());
+			lookupFeatureTable.loadDataSet(dataSet);
 			activeCluster = null;
 		
 			activeFeatureCollection = new MsFeatureInfoBundleCollection(
@@ -3832,7 +3833,9 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		clearFeatureData();
 		clearDataMaps();
 		clearMSMSClusterData();
-		idTrackerDataExplorerPlotDialog.clearPanels();
+		
+		if(idTrackerDataExplorerPlotDialog != null)
+			idTrackerDataExplorerPlotDialog.clearPanels();
 	}
 	
 	public void clearMSMSFeatureData() {

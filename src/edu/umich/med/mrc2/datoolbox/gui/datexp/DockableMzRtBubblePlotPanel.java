@@ -83,7 +83,7 @@ public class DockableMzRtBubblePlotPanel extends DefaultSingleCDockable
 		plotPanel.setFeaturePlotPopupMenu(new MSFeaturePlotPopupMenu(this));
 		add(plotPanel, BorderLayout.CENTER);
 
-		toolbar = new MzRtPlotToolbar(plotPanel, this);
+		toolbar = new MzRtPlotToolbar(plotPanel, this, this);
 		add(toolbar, BorderLayout.NORTH);
 		settingsToolbar = new MzRtPlotSettingsToolbar(plotPanel, this);
 		add(settingsToolbar, BorderLayout.SOUTH);

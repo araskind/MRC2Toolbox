@@ -23,6 +23,7 @@ package edu.umich.med.mrc2.datoolbox.gui.idworks.clustree.lookup;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -31,6 +32,7 @@ import java.awt.event.ActionListener;
 import java.util.Collection;
 
 import javax.swing.Icon;
+import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -46,16 +48,20 @@ import javax.swing.event.ListSelectionListener;
 import bibliothek.gui.dock.common.DefaultSingleCDockable;
 import edu.umich.med.mrc2.datoolbox.data.MinimalMSOneFeature;
 import edu.umich.med.mrc2.datoolbox.data.msclust.FeatureLookupDataSet;
+import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusterDataSet;
+import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 
 public class DockableLookupFeatureTable extends DefaultSingleCDockable implements ActionListener {
 	
 	private static final Icon componentIcon = GuiUtils.getIcon("editCollection", 16);
 	
+	private MSMSClusterDataSet activeMSMSClusterDataSet;
 	private LookupFeatureListTable featureTable;
 	private ListSelectionListener lsl;
 	private JTextField dataSetNameTextField;
 	private JTextArea descriptionTextArea;
+	private JButton btnToggleList;
 	
 	public DockableLookupFeatureTable(
 			String id, 
@@ -128,29 +134,84 @@ public class DockableLookupFeatureTable extends DefaultSingleCDockable implement
 		gbc_textArea.gridx = 0;
 		gbc_textArea.gridy = 2;
 		panel.add(descriptionTextArea, gbc_textArea);
+		
+		JPanel bpanel = new JPanel();
+		FlowLayout flowLayout = (FlowLayout) bpanel.getLayout();
+		flowLayout.setAlignment(FlowLayout.RIGHT);
+		add(bpanel, BorderLayout.SOUTH);
+		btnToggleList = new JButton(
+				MainActionCommands.SHOW_COMPLETE_LOOKUP_FEATURE_LIST_COMMAND.getName());
+		btnToggleList.setActionCommand(
+				MainActionCommands.SHOW_COMPLETE_LOOKUP_FEATURE_LIST_COMMAND.getName());
+		btnToggleList.addActionListener(this);
+		bpanel.add(btnToggleList);
 	}
 	
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		
 		String command = e.getActionCommand();	
-
+		if(command.equals(MainActionCommands.SHOW_COMPLETE_LOOKUP_FEATURE_LIST_COMMAND.getName())) {
+			showCompleteList();
+		}
+		if(command.equals(MainActionCommands.SHOW_ONLY_MATCHED_LOOKUP_FEATURES_COMMAND.getName())) {
+			showMatchedOnly();
+		}
 	}
 	
+	private void showCompleteList() {
+		
+		if(activeMSMSClusterDataSet == null 
+				|| activeMSMSClusterDataSet.getFeatureLookupDataSet() == null)
+			return;
+		
+		featureTable.getSelectionModel().removeListSelectionListener(lsl);
+		featureTable.setTableModelFromFeatureCollection(
+				activeMSMSClusterDataSet.getFeatureLookupDataSet().getFeatures());
+		featureTable.getSelectionModel().addListSelectionListener(lsl);
+		
+		btnToggleList.setText(
+				MainActionCommands.SHOW_ONLY_MATCHED_LOOKUP_FEATURES_COMMAND.getName());
+		btnToggleList.setActionCommand(
+				MainActionCommands.SHOW_ONLY_MATCHED_LOOKUP_FEATURES_COMMAND.getName());
+	}
+
+	private void showMatchedOnly() {
+		
+		if(activeMSMSClusterDataSet == null 
+				|| activeMSMSClusterDataSet.getFeatureLookupDataSet() == null)
+			return;
+		
+		featureTable.getSelectionModel().removeListSelectionListener(lsl);
+		featureTable.setTableModelFromFeatureCollection(
+				activeMSMSClusterDataSet.getMatchedLookupFeatures());
+		featureTable.getSelectionModel().addListSelectionListener(lsl);
+		
+		btnToggleList.setText(
+				MainActionCommands.SHOW_COMPLETE_LOOKUP_FEATURE_LIST_COMMAND.getName());
+		btnToggleList.setActionCommand(
+				MainActionCommands.SHOW_COMPLETE_LOOKUP_FEATURE_LIST_COMMAND.getName());
+		
+	}
+
 	public MinimalMSOneFeature getSelectedFeature(){
 		return featureTable.getSelectedFeature();
 	}
 
-	public void loadDataSet(FeatureLookupDataSet dataSet) {
+	public void loadDataSet(MSMSClusterDataSet activeMSMSClusterDataSet) {
 		
+		this.activeMSMSClusterDataSet = activeMSMSClusterDataSet;
+		FeatureLookupDataSet dataSet = activeMSMSClusterDataSet.getFeatureLookupDataSet();
 		if(dataSet == null) {
 			clearPanel();
 			return;
 		}
 		dataSetNameTextField.setText(dataSet.getName());
-		descriptionTextArea.setText(dataSet.getDescription());
+		descriptionTextArea.setText(dataSet.getDescription());		
+		Collection<MinimalMSOneFeature>featureList = 
+				activeMSMSClusterDataSet.getMatchedLookupFeatures();
 		featureTable.getSelectionModel().removeListSelectionListener(lsl);
-		featureTable.setTableModelFromFeatureCollection(dataSet.getFeatures());
+		featureTable.setTableModelFromFeatureCollection(featureList);
 		featureTable.getSelectionModel().addListSelectionListener(lsl);
 	}
 	
@@ -166,6 +227,7 @@ public class DockableLookupFeatureTable extends DefaultSingleCDockable implement
 		dataSetNameTextField.setText("");
 		descriptionTextArea.setText("");		
 		featureTable.clearTable();
+		activeMSMSClusterDataSet = null;
 	}
 
 	public LookupFeatureListTable getTable() {

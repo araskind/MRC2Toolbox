@@ -35,6 +35,7 @@ import java.util.stream.Collectors;
 import org.jdom2.Element;
 
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
+import edu.umich.med.mrc2.datoolbox.data.MinimalMSOneFeature;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
@@ -327,6 +328,14 @@ public class MSMSClusterDataSet {
 
 	public FeatureLookupDataSet getFeatureLookupDataSet() {
 		return featureLookupDataSet;
+	}
+	
+	public Collection<MinimalMSOneFeature>getMatchedLookupFeatures(){
+		
+		return clusters.stream().
+				filter(c -> Objects.nonNull(c.getLookupFeature())).
+				map(c -> c.getLookupFeature()).
+				collect(Collectors.toSet());
 	}
 
 	public void setFeatureLookupDataSet(FeatureLookupDataSet featureLookupDataSet) {

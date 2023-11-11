@@ -29,7 +29,6 @@ import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
 
 import edu.umich.med.mrc2.datoolbox.data.ReferenceMsMsLibraryMatch;
-import edu.umich.med.mrc2.datoolbox.data.enums.MSMSMatchType;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.idlevel.IdLevelIcon;
 
 public class ColorCircleFlagRenderer extends DefaultTableCellRenderer {
@@ -75,43 +74,51 @@ public class ColorCircleFlagRenderer extends DefaultTableCellRenderer {
 			ReferenceMsMsLibraryMatch match = (ReferenceMsMsLibraryMatch)value;	
 			if(match.isDecoyMatch()) {
 				
-				if(match.getMatchType().equals(MSMSMatchType.Regular)) {
-					setIcon(new SmallPie(size, 0.5d, Color.RED, 
-							MSMSMatchType.getColorCode(MSMSMatchType.Regular)));
-					setToolTipText("Regular (precursor) match / Decoy");
-				}
-				else if(match.getMatchType().equals(MSMSMatchType.InSource)) {
-					setIcon(new SmallPie(size, 0.5d, Color.RED,  
-							MSMSMatchType.getColorCode(MSMSMatchType.InSource)));
-					setToolTipText("In-source match / Decoy");
-				}
-				else if(match.getMatchType().equals(MSMSMatchType.Hybrid)) {
-					setIcon(new SmallPie(size, 0.5d, Color.RED,  
-							MSMSMatchType.getColorCode(MSMSMatchType.Hybrid)));
-					setToolTipText("Hybrid match / Decoy");
-				}
-				else {
-					setIcon(null);
-					setToolTipText(null);
-				}
+				setIcon(new SmallPie(size, 0.5d, Color.RED, 
+						match.getMatchType().getColorCode()));
+				setToolTipText(match.getMatchType().getName() + " / Decoy");
+				
+//				if(match.getMatchType().equals(MSMSMatchType.Regular)) {
+//					setIcon(new SmallPie(size, 0.5d, Color.RED, 
+//							match.getMatchType().getColorCode()));
+//					setToolTipText(match.getMatchType().getName() + " / Decoy");
+//				}
+//				else if(match.getMatchType().equals(MSMSMatchType.InSource)) {
+//					setIcon(new SmallPie(size, 0.5d, Color.RED,  
+//							match.getMatchType().getColorCode()));
+//					setToolTipText("In-source match / Decoy");
+//				}
+//				else if(match.getMatchType().equals(MSMSMatchType.Hybrid)) {
+//					setIcon(new SmallPie(size, 0.5d, Color.RED,  
+//							match.getMatchType().getColorCode()));
+//					setToolTipText("Hybrid match / Decoy");
+//				}
+//				else {
+//					setIcon(null);
+//					setToolTipText(null);
+//				}
 			}
 			else{
-				if(match.getMatchType().equals(MSMSMatchType.Regular)) {
-					setIcon(new SmallPie(size, 1.0d, Color.GREEN, Color.GREEN));
-					setToolTipText("Regular (precursor) match");
-				}
-				else if(match.getMatchType().equals(MSMSMatchType.InSource)) {
-					setIcon(new SmallPie(size, 1.0d, Color.BLUE, Color.BLUE));
-					setToolTipText("In-source match");
-				}
-				else if(match.getMatchType().equals(MSMSMatchType.Hybrid)) {
-					setIcon(new SmallPie(size, 1.0d, Color.ORANGE, Color.ORANGE));
-					setToolTipText("Hybrid match");
-				}
-				else {
-					setIcon(null);
-					setToolTipText(null);
-				}
+				Color fill = match.getMatchType().getColorCode();
+				setIcon(new SmallPie(size, 1.0d, fill, fill));
+				setToolTipText(match.getMatchType().getName());
+				
+//				if(match.getMatchType().equals(MSMSMatchType.Regular)) {
+//					setIcon(new SmallPie(size, 1.0d, fill, fill));
+//					setToolTipText("Regular (precursor) match");
+//				}
+//				else if(match.getMatchType().equals(MSMSMatchType.InSource)) {
+//					setIcon(new SmallPie(size, 1.0d, fill, fill));
+//					setToolTipText("In-source match");
+//				}
+//				else if(match.getMatchType().equals(MSMSMatchType.Hybrid)) {
+//					setIcon(new SmallPie(size, 1.0d, fill, fill));
+//					setToolTipText("Hybrid match");
+//				}
+//				else {
+//					setIcon(null);
+//					setToolTipText(null);
+//				}
 			}
 		}		
 		return this;

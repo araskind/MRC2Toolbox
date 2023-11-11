@@ -1213,6 +1213,7 @@ public enum MainActionCommands {
 	ADD_SELECTED_TO_EXISTING_FEATURE_COLLECTION("Add selected features to existing collection"),
 	FILTER_SELECTED_MSMS_FEATURES_IN_TABLE("Filter selected features in MSMS feature table"),
 	REMOVE_SELECTED_FROM_ACTIVE_MSMS_FEATURE_COLLECTION("Remove selected features from active feature collection"),
+	RESET_MZ_RT_LIMITS_COMMAND("Reset MZ / RT limits"),
 	
 	//	Compound database curator
 	SHOW_SIMPLE_REDUNDANT_COMPOUND_DATA_PULL_DIALOG("Simple redundant compouds pull setup"),
@@ -1310,6 +1311,11 @@ public enum MainActionCommands {
 	SET_UP_MZ_FREQUENCY_ANALYSIS_COMMAND("Set up M/Z frequency analysis"),
 	RUN_MZ_FREQUENCY_ANALYSIS_COMMAND("Run M/Z frequency analysis"),
 	SAVE_MZ_FREQUENCY_ANALYSIS_RESULTS_COMMAND("Save M/Z frequency analysis results"),
+	
+	//	Lookup feature list panel commands
+	SHOW_COMPLETE_LOOKUP_FEATURE_LIST_COMMAND("Show complete lookup feature list"),
+	SHOW_ONLY_MATCHED_LOOKUP_FEATURES_COMMAND("Show only matched lookup features"),
+	
 	;
 
 	private final String name;

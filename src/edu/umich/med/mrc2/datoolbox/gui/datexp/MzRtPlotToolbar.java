@@ -21,33 +21,84 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.datexp;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.ItemListener;
 
-import edu.umich.med.mrc2.datoolbox.gui.plot.PlotToolbar;
+import javax.swing.Box;
+import javax.swing.Icon;
+import javax.swing.JButton;
 
-public class MzRtPlotToolbar extends PlotToolbar{
+import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
+import edu.umich.med.mrc2.datoolbox.gui.plot.PlotToolbar;
+import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
+
+public class MzRtPlotToolbar extends PlotToolbar implements ActionListener{
 
 	/**
 	 *
 	 */
 	private static final long serialVersionUID = -8756954637925601169L;
+	
+	protected static final Icon sidePanelShowIcon = GuiUtils.getIcon("sidePanelShow", 24);
+	protected static final Icon sidePanelHideIcon = GuiUtils.getIcon("sidePanelHide", 24);
 
-	public MzRtPlotToolbar(DataExplorerPlotPanel parentPlot, ItemListener dropdownListener) {
+	private JButton sidePanelButton;
+	
+	public MzRtPlotToolbar(
+			DataExplorerPlotPanel parentPlot,
+			ItemListener dropdownListener,
+			ActionListener secondaryListener) {
 
 		super(parentPlot);
 
-//		toggleLabelsButton = GuiUtils.addButton(this, null, labelInactiveIcon, commandListener,
-//				LCMSPlotPanel.TOGGLE_ANNOTATIONS_COMMAND, "Hide labels", buttonDimension);
-
-//		addSeparator(buttonDimension);
 		createZoomBlock();
 		addSeparator(buttonDimension);
 		createLegendToggle();
 		addSeparator(buttonDimension);
 		createServiceBlock();
 		toggleLegendIcon(parentPlot.isLegendVisible());
-//		toggleAnnotationsIcon(parentPlot.areAnnotationsVisible());
+		
+		add(Box.createHorizontalGlue());
+		
+		sidePanelButton = GuiUtils.addButton(
+				this, null, sidePanelHideIcon, secondaryListener, 
+				MainActionCommands.HIDE_CHART_SIDE_PANEL_COMMAND.getName(), 
+				MainActionCommands.HIDE_CHART_SIDE_PANEL_COMMAND.getName(), 
+				buttonDimension);
+		sidePanelButton.addActionListener(this);
+		add(sidePanelButton);
+		
 		parentPlot.setToolbar(this);
+		
+		
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		
+		String command = e.getActionCommand();
+		
+		if(command.equals(MainActionCommands.SHOW_CHART_SIDE_PANEL_COMMAND.getName()))
+			setSidePanelVisible(true);
+		
+		if(command.equals(MainActionCommands.HIDE_CHART_SIDE_PANEL_COMMAND.getName())) 
+			setSidePanelVisible(false);
+		
+	}
+		
+	private void setSidePanelVisible(boolean b){
+		
+		if(b) {
+			sidePanelButton.setIcon(sidePanelHideIcon);
+			sidePanelButton.setActionCommand(MainActionCommands.HIDE_CHART_SIDE_PANEL_COMMAND.getName());
+			sidePanelButton.setToolTipText(MainActionCommands.HIDE_CHART_SIDE_PANEL_COMMAND.getName());
+		}
+		else {
+			sidePanelButton.setIcon(sidePanelShowIcon);
+			sidePanelButton.setActionCommand(MainActionCommands.SHOW_CHART_SIDE_PANEL_COMMAND.getName());
+			sidePanelButton.setToolTipText(MainActionCommands.SHOW_CHART_SIDE_PANEL_COMMAND.getName());
+		}
 	}
 }
 

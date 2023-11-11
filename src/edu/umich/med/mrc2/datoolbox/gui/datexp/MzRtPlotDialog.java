@@ -23,6 +23,8 @@ package edu.umich.med.mrc2.datoolbox.gui.datexp;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.Collection;
@@ -41,7 +43,7 @@ import edu.umich.med.mrc2.datoolbox.gui.datexp.dataset.MsFeatureBubbleDataSet;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 
-public class MzRtPlotDialog extends JDialog implements ItemListener {
+public class MzRtPlotDialog extends JDialog implements ItemListener, ActionListener {
 
 	/**
 	 *
@@ -69,7 +71,7 @@ public class MzRtPlotDialog extends JDialog implements ItemListener {
 		plotPanel = new DataExplorerPlotPanel(DataExplorerPlotType.MZRT);
 		panel.add(plotPanel, BorderLayout.CENTER);
 
-		toolbar = new MzRtPlotToolbar(plotPanel, this);
+		toolbar = new MzRtPlotToolbar(plotPanel, this, this);
 		panel.add(toolbar, BorderLayout.NORTH);
 	}
 
@@ -84,5 +86,11 @@ public class MzRtPlotDialog extends JDialog implements ItemListener {
 		plotPanel.removeAllDataSets();
 		MsFeatureBubbleDataSet dataSet = new MsFeatureBubbleDataSet(title, features, DataScale.LN);
 		((XYPlot) plotPanel.getPlot()).setDataset(0, dataSet);
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		// TODO Auto-generated method stub
+		
 	}
 }

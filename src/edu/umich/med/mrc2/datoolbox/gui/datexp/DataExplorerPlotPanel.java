@@ -77,7 +77,7 @@ public class DataExplorerPlotPanel extends MasterPlotPanel {
 		this.plotType = plotType;
 		legendVisible = false;
 		initChart();
-		initLegend(RectangleEdge.RIGHT, legendVisible);
+		initLegend(RectangleEdge.BOTTOM, legendVisible);
 		initPlot();
 		addDoubleClickReset();
 		setPopupMenu(null);

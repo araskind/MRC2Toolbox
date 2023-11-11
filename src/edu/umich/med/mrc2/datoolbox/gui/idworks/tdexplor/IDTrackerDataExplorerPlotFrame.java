@@ -36,14 +36,12 @@ import bibliothek.gui.dock.common.CControl;
 import bibliothek.gui.dock.common.CGrid;
 import bibliothek.gui.dock.common.intern.CDockable;
 import bibliothek.gui.dock.common.theme.ThemeMap;
-import edu.umich.med.mrc2.datoolbox.data.enums.TableRowSubset;
 import edu.umich.med.mrc2.datoolbox.gui.datexp.DockableMzRtMSMSPlotPanel;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.IDWorkbenchPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.PersistentLayout;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
-import edu.umich.med.mrc2.datoolbox.utils.Range;
 
 public class IDTrackerDataExplorerPlotFrame extends JFrame implements PersistentLayout, BackedByPreferences  {
 
@@ -73,8 +71,8 @@ public class IDTrackerDataExplorerPlotFrame extends JFrame implements Persistent
 		super("ID-Tracker data explorer");
 		this.parentPanel = parentPanel;
 		setIconImage(((ImageIcon) bubbleIcon).getImage());
-		setSize(new Dimension(800, 600));
-		setPreferredSize(new Dimension(800, 600));
+		setSize(new Dimension(1200, 600));
+		setPreferredSize(new Dimension(1200, 600));
 		setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
 		getContentPane().setLayout(new BorderLayout(0, 0));
 
@@ -165,15 +163,17 @@ public class IDTrackerDataExplorerPlotFrame extends JFrame implements Persistent
 	@Override
 	public void loadPreferences(Preferences prefs) {
 		preferences = prefs;
-		TableRowSubset msmsRowSubset = TableRowSubset.getSubsetByName(
-				preferences.get(MSMS_FEATURE_TABLE_ROW_SUBSET, TableRowSubset.ALL.name()));
+//		TableRowSubset msmsRowSubset = TableRowSubset.getSubsetByName(
+//				preferences.get(MSMS_FEATURE_TABLE_ROW_SUBSET, TableRowSubset.ALL.name()));
+//		
+//		mzRtMSMSPlotPanel.setActiveTableRowSubset(msmsRowSubset);
+//		
+//		double rtStart = preferences.getDouble(START_RT, 0.0d);
+//		double rtEnd = preferences.getDouble(END_RT, 300.0d);
+//		Range rtRange = new Range(rtStart, rtEnd);
+//		mzRtMSMSPlotPanel.setRtRange(rtRange);
 		
-		mzRtMSMSPlotPanel.setActiveTableRowSubset(msmsRowSubset);
-		
-		double rtStart = preferences.getDouble(START_RT, 0.0d);
-		double rtEnd = preferences.getDouble(END_RT, 300.0d);
-		Range rtRange = new Range(rtStart, rtEnd);
-		mzRtMSMSPlotPanel.setRtRange(rtRange);
+		mzRtMSMSPlotPanel.loadPreferences();
 	}
 
 	@Override
@@ -186,12 +186,13 @@ public class IDTrackerDataExplorerPlotFrame extends JFrame implements Persistent
 	public void savePreferences() {
 		
 		preferences = Preferences.userRoot().node(PREFS_NODE);
-		preferences.put(MSMS_FEATURE_TABLE_ROW_SUBSET, mzRtMSMSPlotPanel.getActiveTableRowSubset().name());		
-		Range rtRange = mzRtMSMSPlotPanel.getRtRange();
-		if(rtRange != null) {
-			preferences.putDouble(START_RT, rtRange.getMin());
-			preferences.putDouble(END_RT, rtRange.getMax());
-		}
+//		preferences.put(MSMS_FEATURE_TABLE_ROW_SUBSET, mzRtMSMSPlotPanel.getActiveTableRowSubset().name());		
+//		Range rtRange = mzRtMSMSPlotPanel.getRtRange();
+//		if(rtRange != null) {
+//			preferences.putDouble(START_RT, rtRange.getMin());
+//			preferences.putDouble(END_RT, rtRange.getMax());
+//		}
+		mzRtMSMSPlotPanel.savePreferences();
 	}
 }
 

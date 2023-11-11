@@ -32,6 +32,7 @@ import java.awt.geom.Ellipse2D;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Objects;
+import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
 
 import javax.swing.Icon;
@@ -46,6 +47,8 @@ import org.jfree.data.xy.XYDataset;
 import bibliothek.gui.dock.common.DefaultSingleCDockable;
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureIdentificationLevel;
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
+import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundleCollection;
+import edu.umich.med.mrc2.datoolbox.data.enums.MSMSMatchType;
 import edu.umich.med.mrc2.datoolbox.data.enums.TableRowSubset;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.gui.datexp.dataset.MSMSFeatureInfoBundleDataSet;
@@ -53,6 +56,7 @@ import edu.umich.med.mrc2.datoolbox.gui.datexp.tooltip.MSMSFeatureInfoBundleTool
 import edu.umich.med.mrc2.datoolbox.gui.idworks.IDWorkbenchPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.DockableMRC2ToolboxPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
+import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.IndeterminateProgressDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.LongUpdateTask;
@@ -60,19 +64,22 @@ import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
 
 public class DockableMzRtMSMSPlotPanel extends DefaultSingleCDockable 
-	implements ActionListener, ItemListener, ChartMouseListener {
+	implements ActionListener, ItemListener, ChartMouseListener, BackedByPreferences {
 
 	private static final Icon bubbleIcon = GuiUtils.getIcon("bubble", 16);
 	private DataExplorerPlotPanel plotPanel;
 	private MzRtPlotToolbar toolbar;
-	private MSMSExplorerPlotSettingsToolbar settingsToolbar;
+	//	private MSMSExplorerPlotSettingsToolbar settingsToolbar;
+	private MZRTPlotSettingsPanel mmzrtPlotSettingsPanel;
 	private MSMSFeatureInfoBundleTooltipGenerator msmsFeatureInfoBundleTooltipGenerator;
 	private DockableMRC2ToolboxPanel parentPanel;
 	private Collection<MSFeatureInfoBundle>msFeatureInfoBundles;
 	private TableRowSubset activeTableRowSubset;
-	private Range rtRange;
+	private Range rtRange, mzRange;
+	private FeaturePlotColorOption plotColorOption;
 	private IndeterminateProgressDialog idp;
 	private static final Shape defaultShape = new Ellipse2D.Double(-3, -3, 6, 6);
+	private Preferences preferences;
 
 	public DockableMzRtMSMSPlotPanel() {
 
@@ -84,10 +91,13 @@ public class DockableMzRtMSMSPlotPanel extends DefaultSingleCDockable
 		plotPanel.setFeaturePlotPopupMenu(new MSMSFeaturePlotPopupMenu(this));
 		add(plotPanel, BorderLayout.CENTER);
 
-		toolbar = new MzRtPlotToolbar(plotPanel, this);
+		toolbar = new MzRtPlotToolbar(plotPanel, this, this);
 		add(toolbar, BorderLayout.NORTH);
-		settingsToolbar = new MSMSExplorerPlotSettingsToolbar(this, this);
-		add(settingsToolbar, BorderLayout.SOUTH);
+//		settingsToolbar = new MSMSExplorerPlotSettingsToolbar(this, this);
+//		add(settingsToolbar, BorderLayout.SOUTH);
+		
+		mmzrtPlotSettingsPanel = new MZRTPlotSettingsPanel(this, this);
+		add(mmzrtPlotSettingsPanel, BorderLayout.EAST);
 		
 		msmsFeatureInfoBundleTooltipGenerator 
 			= new MSMSFeatureInfoBundleTooltipGenerator();
@@ -107,36 +117,75 @@ public class DockableMzRtMSMSPlotPanel extends DefaultSingleCDockable
 			addSelectedFeaturesToExistingMsMsFeatureCollection();	
 
 		if(command.equals(MainActionCommands.FILTER_SELECTED_MSMS_FEATURES_IN_TABLE.getName()))
-			filterSelectedFeaturesInTable();		
+			filterSelectedFeaturesInTable();	
+		
+		if(command.equals(MainActionCommands.HIDE_CHART_SIDE_PANEL_COMMAND.getName()))
+			setSidePanelVisible(false);
+		
+		if(command.equals(MainActionCommands.SHOW_CHART_SIDE_PANEL_COMMAND.getName()))
+			setSidePanelVisible(true);
+	}
+	
+	public void setSidePanelVisible(boolean b) {
+		mmzrtPlotSettingsPanel.setVisible(b);
 	}
 	
 	private void refreshMSMSFeaturePlot() {
 		
+		if(mmzrtPlotSettingsPanel == null)
+			return;
+		
 		plotPanel.removeAllDataSets();
-//		if(msFeatureInfoBundles == null)
-		
+		if(mmzrtPlotSettingsPanel.getTableRowSubset() == null) {
+			
+			MsFeatureInfoBundleCollection fColl = 
+					((IDWorkbenchPanel)parentPanel).getActiveFeatureCollection();
+			if(fColl != null)
+				msFeatureInfoBundles = fColl.getFeatures();
+		}
+		else {
 			msFeatureInfoBundles = ((IDWorkbenchPanel)parentPanel).
-				getMsMsFeatureBundles(settingsToolbar.getTableRowSubset());
-		
-		if(msFeatureInfoBundles == null || msFeatureInfoBundles.isEmpty()) {
-			MessageDialog.showWarningMsg("No features available based on selected settings!", this.getContentPane());
+					getMsMsFeatureBundles(mmzrtPlotSettingsPanel.getTableRowSubset());
+		}
+		if(msFeatureInfoBundles == null 
+				|| msFeatureInfoBundles.isEmpty()) {
+			MessageDialog.showWarningMsg(
+					"No features available based on selected settings!", 
+					this.getContentPane());
 			return;
 		}
-		rtRange = settingsToolbar.getRtRange();
-		Collection<MSFeatureInfoBundle>rtFilteredMsFeatureInfoBundles = msFeatureInfoBundles;
+		rtRange = mmzrtPlotSettingsPanel.getRtRange();
+		mzRange = mmzrtPlotSettingsPanel.getMZRange();
+				
+		Collection<MSFeatureInfoBundle>mzrtFilteredMsFeatureInfoBundles = msFeatureInfoBundles;
 		if(rtRange != null && rtRange.getAverage() > 0) {
-			rtFilteredMsFeatureInfoBundles = 
-					msFeatureInfoBundles.stream().
+			mzrtFilteredMsFeatureInfoBundles = 
+					mzrtFilteredMsFeatureInfoBundles.stream().
 					filter(b -> rtRange.contains(b.getRetentionTime())).
 					collect(Collectors.toList());
 		}
-		if(rtFilteredMsFeatureInfoBundles.isEmpty()) {
-			MessageDialog.showWarningMsg("No features in the selected RT range!", this.getContentPane());
+		if(mzRange != null && mzRange.getAverage() > 0) {
+			
+			mzrtFilteredMsFeatureInfoBundles = 
+					mzrtFilteredMsFeatureInfoBundles.stream().
+					filter(b -> Objects.nonNull(b.getMsFeature().getSpectrum())).
+					filter(b -> Objects.nonNull(b.getMsFeature().getSpectrum().getExperimentalTandemSpectrum())).
+					filter(b -> Objects.nonNull(b.getMsFeature().getSpectrum().getExperimentalTandemSpectrum().getParent())).
+					filter(b -> mzRange.contains(b.getMsFeature().getSpectrum().getExperimentalTandemSpectrum().getParent().getMz())).
+					collect(Collectors.toList());
+		}
+		if(mzrtFilteredMsFeatureInfoBundles.isEmpty()) {
+			MessageDialog.showWarningMsg(
+					"No features in the selected MZ / RT ranges!", 
+					this.getContentPane());
 			return;
 		}
+		plotColorOption = mmzrtPlotSettingsPanel.getFeaturePlotColorOption();
 		CreateMSMSFeatureInfoBundleDataSetTask task = 
-				new CreateMSMSFeatureInfoBundleDataSetTask(rtFilteredMsFeatureInfoBundles);
-		idp = new IndeterminateProgressDialog("Creating new plot ...", this.getContentPane(), task);
+				new CreateMSMSFeatureInfoBundleDataSetTask(
+						mzrtFilteredMsFeatureInfoBundles, plotColorOption);
+		idp = new IndeterminateProgressDialog(
+				"Creating new plot ...", this.getContentPane(), task);
 		idp.setLocationRelativeTo(this.getContentPane());
 		idp.setVisible(true);
 	}
@@ -144,10 +193,13 @@ public class DockableMzRtMSMSPlotPanel extends DefaultSingleCDockable
 	class CreateMSMSFeatureInfoBundleDataSetTask extends LongUpdateTask {
 		
 		private Collection<MSFeatureInfoBundle>featurBundles;
+		private FeaturePlotColorOption colorOption;
 		
 		public CreateMSMSFeatureInfoBundleDataSetTask(
-				Collection<MSFeatureInfoBundle>featurBundles) {
+				Collection<MSFeatureInfoBundle>featurBundles,
+				FeaturePlotColorOption colorOption) {
 			this.featurBundles = featurBundles;
+			this.colorOption = colorOption;
 		}
 
 		@Override
@@ -155,27 +207,49 @@ public class DockableMzRtMSMSPlotPanel extends DefaultSingleCDockable
 
 			try {
 				MSMSFeatureInfoBundleDataSet dataSet = 
-						new MSMSFeatureInfoBundleDataSet(featurBundles);
-				((XYPlot) plotPanel.getPlot()).setDataset(0, dataSet);
-				XYItemRenderer renderer = ((XYPlot) plotPanel.getPlot()).getRenderer(0);
-				renderer.setDefaultShape(defaultShape);
+						new MSMSFeatureInfoBundleDataSet(featurBundles, colorOption);
+				
+				XYItemRenderer renderer = ((XYPlot) plotPanel.getPlot()).getRenderer();
+				if(colorOption.equals(FeaturePlotColorOption.COLOR_BY_ID_LEVEL)) {
+					
+					for(int i=0; i<dataSet.getSeriesCount(); i++) {
 						
-				for(int i=0; i<dataSet.getSeriesCount(); i++) {
-					
-					String seriesName = (String)dataSet.getSeriesKey(i);
-					if(seriesName.equals(MSMSFeatureInfoBundleDataSet.UNKNOWN_SERIES_NAME)) 
-						renderer.setSeriesPaint(i, Color.GRAY);
-					
-					else if(seriesName.equals(MSMSFeatureInfoBundleDataSet.IDENTIFIED_WITHOUT_LEVEL_SERIES_NAME))
-						renderer.setSeriesPaint(i, Color.BLACK);
-					
-					else {
-						MSFeatureIdentificationLevel level = IDTDataCache.getMSFeatureIdentificationLevelByName(seriesName);
-						if(level != null)
-							renderer.setSeriesPaint(i, level.getColorCode());
-					}					
+						String seriesName = (String)dataSet.getSeriesKey(i);
+						if(seriesName.equals(MSMSFeatureInfoBundleDataSet.UNKNOWN_SERIES_NAME)) { 
+							renderer.setSeriesPaint(i, Color.GRAY);
+							renderer.setSeriesShape(i, defaultShape);
+						}
+						else if(seriesName.equals(MSMSFeatureInfoBundleDataSet.IDENTIFIED_WITHOUT_LEVEL_SERIES_NAME)) {
+							renderer.setSeriesPaint(i, Color.BLACK);
+							renderer.setSeriesShape(i, defaultShape);
+						}
+						else {
+							MSFeatureIdentificationLevel level = IDTDataCache.getMSFeatureIdentificationLevelByName(seriesName);
+							if(level != null)
+								renderer.setSeriesPaint(i, level.getColorCode());
+						}					
+					}
 				}
+				if(colorOption.equals(FeaturePlotColorOption.COLOR_BY_MSMS_MATCH_TYPE)) {
+					
+					for(int i=0; i<dataSet.getSeriesCount(); i++) {
+						
+						String seriesName = (String)dataSet.getSeriesKey(i);
+						if(seriesName.equals(MSMSFeatureInfoBundleDataSet.UNKNOWN_SERIES_NAME)) {
+							renderer.setSeriesPaint(i, Color.GRAY);
+							renderer.setSeriesShape(i, defaultShape);
+						}						
+						else {							
+							MSMSMatchType mt = MSMSMatchType.getMSMSMatchTypeByUIName(seriesName);
+							if(mt != null)
+								renderer.setSeriesPaint(i, mt.getColorCode());
+						}					
+					}
+				}				
 				renderer.setDefaultToolTipGenerator(msmsFeatureInfoBundleTooltipGenerator);
+				renderer.setDefaultShape(defaultShape);
+				((XYPlot) plotPanel.getPlot()).setDataset(dataSet);
+				((XYPlot) plotPanel.getPlot()).setRenderer(renderer);
 			}
 			catch (Exception e) {
 				// TODO Auto-generated catch block
@@ -223,14 +297,16 @@ public class DockableMzRtMSMSPlotPanel extends DefaultSingleCDockable
 	@Override
 	public void itemStateChanged(ItemEvent e) {
 				
-		if (e.getItem() instanceof TableRowSubset && e.getStateChange() == ItemEvent.SELECTED) {
-			
-			if(parentPanel instanceof IDWorkbenchPanel) {
-				
-				TableRowSubset subset = (TableRowSubset)e.getItem();
-				msFeatureInfoBundles = ((IDWorkbenchPanel)parentPanel).getMsMsFeatureBundles(subset);
-			}
-		}		
+//		if (e.getItem() instanceof TableRowSubset && e.getStateChange() == ItemEvent.SELECTED) {
+//			
+//			if(parentPanel instanceof IDWorkbenchPanel) {
+//				
+//				TableRowSubset subset = (TableRowSubset)e.getItem();
+//				msFeatureInfoBundles = ((IDWorkbenchPanel)parentPanel).getMsMsFeatureBundles(subset);
+//			}
+//		}		
+		if (e.getStateChange() == ItemEvent.SELECTED) 
+			refreshMSMSFeaturePlot();
 	}
 
 	public TableRowSubset getActiveTableRowSubset() {
@@ -239,7 +315,7 @@ public class DockableMzRtMSMSPlotPanel extends DefaultSingleCDockable
 
 	public void setActiveTableRowSubset(TableRowSubset activeTableRowSubset) {
 		this.activeTableRowSubset = activeTableRowSubset;
-		settingsToolbar.setTableRowSubset(this.activeTableRowSubset);
+		mmzrtPlotSettingsPanel.setTableRowSubset(this.activeTableRowSubset);
 	}
 
 	public Range getRtRange() {
@@ -248,7 +324,7 @@ public class DockableMzRtMSMSPlotPanel extends DefaultSingleCDockable
 
 	public void setRtRange(Range rtRange) {
 		this.rtRange = rtRange;
-		settingsToolbar.setRtRange(this.rtRange);
+		mmzrtPlotSettingsPanel.setRtRange(this.rtRange);
 	}
 	
 	public Collection<MSFeatureInfoBundle>getSelectedFeatures(){
@@ -316,6 +392,23 @@ public class DockableMzRtMSMSPlotPanel extends DefaultSingleCDockable
 		}
 		if(parentPanel instanceof IDWorkbenchPanel)
 			((IDWorkbenchPanel)parentPanel).filterMSMSFeatures(selected);
+	}
+	
+	@Override
+	public void loadPreferences(Preferences prefs) {
+		preferences = prefs;
+		mmzrtPlotSettingsPanel.loadPreferences();
+	}
+
+	@Override
+	public void loadPreferences() {
+		loadPreferences(Preferences.userNodeForPackage(this.getClass()));
+	}
+
+	@Override
+	public void savePreferences() {
+		preferences = Preferences.userNodeForPackage(this.getClass());
+		mmzrtPlotSettingsPanel.savePreferences();
 	}
 }
 

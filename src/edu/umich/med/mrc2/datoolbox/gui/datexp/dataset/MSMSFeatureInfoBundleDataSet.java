@@ -35,6 +35,8 @@ import edu.umich.med.mrc2.datoolbox.data.MSFeatureIdentificationLevel;
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MassSpectrum;
 import edu.umich.med.mrc2.datoolbox.data.TandemMassSpectrum;
+import edu.umich.med.mrc2.datoolbox.data.enums.MSMSMatchType;
+import edu.umich.med.mrc2.datoolbox.gui.datexp.FeaturePlotColorOption;
 
 public class MSMSFeatureInfoBundleDataSet extends AbstractXYDataset{
 
@@ -48,20 +50,71 @@ public class MSMSFeatureInfoBundleDataSet extends AbstractXYDataset{
 	public static final String UNKNOWN_SERIES_NAME = "Unknowns";
 	public static final String IDENTIFIED_WITHOUT_LEVEL_SERIES_NAME = "ID level missing";
 
-	public MSMSFeatureInfoBundleDataSet() {
-		super();
-		seriesMap = new LinkedHashMap<String, MSFeatureInfoBundle[]>();
-	}
-
-	public MSMSFeatureInfoBundleDataSet(Collection<MSFeatureInfoBundle> featureBundles) {
+	public MSMSFeatureInfoBundleDataSet(
+			Collection<MSFeatureInfoBundle> featureBundles, 
+			FeaturePlotColorOption colorOption) {
 
 		super();
 		seriesMap = new LinkedHashMap<String, MSFeatureInfoBundle[]>();
-		populateSeries(featureBundles);
+		populateSeries(featureBundles, colorOption);
 	}
 	
-	private void populateSeries(Collection<MSFeatureInfoBundle> featureBundles) {
+	private void populateSeries(
+			Collection<MSFeatureInfoBundle> featureBundles, 
+			FeaturePlotColorOption colorOption) {
+		
+		if(colorOption.equals(FeaturePlotColorOption.COLOR_BY_ID_LEVEL))			
+			populateSeriesByIDLevel(featureBundles);
+		
+		if(colorOption.equals(FeaturePlotColorOption.COLOR_BY_MSMS_MATCH_TYPE))			
+			populateSeriesByMSMSMatchType(featureBundles);
+		
+		keySet = seriesMap.keySet().toArray(new String[seriesMap.size()]);
+	}
 
+	private void populateSeriesByMSMSMatchType(Collection<MSFeatureInfoBundle> featureBundles) {
+		
+		List<MSFeatureInfoBundle>msmsIdentified = featureBundles.stream().
+				filter(f -> Objects.nonNull(f.getMsFeature().getPrimaryIdentity())).
+				filter(f -> Objects.nonNull(f.getMsFeature().
+						getPrimaryIdentity().getReferenceMsMsLibraryMatch())).
+				filter(f -> !f.getMsFeature().getPrimaryIdentity().
+						getReferenceMsMsLibraryMatch().isDecoyMatch()).
+				collect(Collectors.toList());
+		
+		MSFeatureInfoBundle[]regularMatches = 
+				msmsIdentified.stream().
+				filter(f -> f.getMsFeature().getPrimaryIdentity().
+						getReferenceMsMsLibraryMatch().getMatchType().equals(MSMSMatchType.Regular)).
+				toArray(size -> new MSFeatureInfoBundle[size]);	
+		if(regularMatches.length > 0)
+			seriesMap.put(MSMSMatchType.Regular.getName(), regularMatches);
+		
+		MSFeatureInfoBundle[]inSourceMatches = 
+				msmsIdentified.stream().
+				filter(f -> f.getMsFeature().getPrimaryIdentity().
+						getReferenceMsMsLibraryMatch().getMatchType().equals(MSMSMatchType.InSource)).
+				toArray(size -> new MSFeatureInfoBundle[size]);	
+		if(inSourceMatches.length > 0)
+			seriesMap.put(MSMSMatchType.InSource.getName(), inSourceMatches);
+		
+		MSFeatureInfoBundle[]hybridMatches = 
+				msmsIdentified.stream().
+				filter(f -> f.getMsFeature().getPrimaryIdentity().
+						getReferenceMsMsLibraryMatch().getMatchType().equals(MSMSMatchType.Hybrid)).
+				toArray(size -> new MSFeatureInfoBundle[size]);	
+		if(hybridMatches.length > 0)
+			seriesMap.put(MSMSMatchType.Hybrid.getName(), hybridMatches);
+		
+		MSFeatureInfoBundle[] unknowns = featureBundles.stream().
+				filter(f -> !f.getMsFeature().isIdentified()).
+				toArray(size -> new MSFeatureInfoBundle[size]);		
+		if(unknowns.length > 0)
+			seriesMap.put(UNKNOWN_SERIES_NAME, unknowns);
+	}
+
+	private void populateSeriesByIDLevel(Collection<MSFeatureInfoBundle> featureBundles) {
+		
 		List<MSFeatureInfoBundle> identified = featureBundles.stream().
 				filter(f -> Objects.nonNull(f.getMsFeature().getPrimaryIdentity())).
 				filter(f -> Objects.nonNull(f.getMsFeature().
@@ -93,8 +146,6 @@ public class MSMSFeatureInfoBundleDataSet extends AbstractXYDataset{
 				toArray(size -> new MSFeatureInfoBundle[size]);		
 		if(unknowns.length > 0)
 			seriesMap.put(UNKNOWN_SERIES_NAME, unknowns);
-		
-		keySet = seriesMap.keySet().toArray(new String[seriesMap.size()]);
 	}
 
 	public void addSeries(String seriesName, Collection<MSFeatureInfoBundle> featureBundles) {
@@ -145,9 +196,8 @@ public class MSMSFeatureInfoBundleDataSet extends AbstractXYDataset{
 	@Override
 	public double getYValue(int series, int item) {
 		
-		MassSpectrum sp = seriesMap.get(keySet[series])[item].
-		getMsFeature().getSpectrum();
-		
+		MassSpectrum sp = 
+				seriesMap.get(keySet[series])[item].getMsFeature().getSpectrum();		
 		TandemMassSpectrum msms = seriesMap.get(keySet[series])[item].
 				getMsFeature().getSpectrum().getExperimentalTandemSpectrum();
 		if(msms == null)

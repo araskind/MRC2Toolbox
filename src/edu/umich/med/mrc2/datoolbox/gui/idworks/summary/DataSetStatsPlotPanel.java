@@ -202,7 +202,7 @@ public class DataSetStatsPlotPanel extends MasterPlotPanel {
 		 	collect(Collectors.toCollection(TreeSet::new));
 		 pieChartColorList.clear();
 		 for(MSMSMatchType mt : matchTypes)
-			 pieChartColorList.add(MSMSMatchType.getColorCode(mt));
+			 pieChartColorList.add(mt.getColorCode());
 		 
 		 Collection<String> libIdSet = msmsMatches.stream().
 				map(m -> m.getMatchedLibraryFeature().getMsmsLibraryIdentifier()).
@@ -269,7 +269,7 @@ public class DataSetStatsPlotPanel extends MasterPlotPanel {
 				
 				XYBarRenderer renderer = new XYBarRenderer();
 				renderer.setBarPainter(new StandardXYBarPainter());
-				Color dsColor = ColorUtils.addTrasparency(MSMSMatchType.getColorCode(mt), 120);
+				Color dsColor = ColorUtils.addTrasparency(mt.getColorCode(), 120);
 				pieChartColorList.add(dsColor);
 			    renderer.setDrawBarOutline(false);
 			    renderer.setShadowVisible(false);		    
@@ -304,6 +304,7 @@ public class DataSetStatsPlotPanel extends MasterPlotPanel {
 		histogram.setDataset(dataSet);		 
 	}
 	
+	@SuppressWarnings("unchecked")
 	private PieDataset createPieDataset(DataSetSummaryPlotType plotType) {
 
 		DefaultPieDataset dataset = new DefaultPieDataset();
@@ -347,8 +348,8 @@ public class DataSetStatsPlotPanel extends MasterPlotPanel {
 				collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
 			idCountsByLevel.entrySet().stream().
 			 	forEach(c -> {
-			 				dataset.setValue(c.getKey().name(), c.getValue());
-			 				pieChartColorList.add(MSMSMatchType.getColorCode(c.getKey()));
+			 				dataset.setValue(c.getKey().getName(), c.getValue());
+			 				pieChartColorList.add(c.getKey().getColorCode());
 			 			}
 			 		);
 			return dataset;
