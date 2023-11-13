@@ -41,16 +41,23 @@ public abstract class ColorCodedXYLineAndShapeRenderer extends XYLineAndShapeRen
 	
 	protected XYDataset datasetToRender;
 	protected LookupPaintScale lookupPaintScale;
+	protected ColorGradient colorGradient; 
+	protected ColorScale colorScale;
+	protected Range dataRange;
 	
 	public ColorCodedXYLineAndShapeRenderer(
 			XYDataset datasetToRender, 
 			ColorGradient colorGradient, 
 			ColorScale colorScale) {
-		super();
+		super(false, true);
 		this.datasetToRender = datasetToRender;
+		this.colorGradient = colorGradient;
+		this.colorScale = colorScale;
+	}
+	
+	public void createLookupPaintScale() {
 		
-		//	TODO how to pass range of values of interest
-		Range dataRange = createDataRange();
+		dataRange = createDataRange();
 		lookupPaintScale = ColorCodingUtils.createLookupPaintScale(
 					dataRange, 
 					colorGradient, 
@@ -70,4 +77,12 @@ public abstract class ColorCodedXYLineAndShapeRenderer extends XYLineAndShapeRen
 //	  {
 //		return lookupPaintScale.getPaint(datasetToRender.getYValue(row, column));        
 //    }
+
+	public LookupPaintScale getLookupPaintScale() {
+		return lookupPaintScale;
+	}
+
+	public Range getDataRange() {
+		return dataRange;
+	}
 }

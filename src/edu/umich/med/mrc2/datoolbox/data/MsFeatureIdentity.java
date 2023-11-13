@@ -303,17 +303,17 @@ public class MsFeatureIdentity implements Serializable {
 
 	public MSFeatureIdentificationLevel getIdentificationLevel() {
 		
-		if(compoundIdentity == null)
-			return null;
-		else			
+//		if(compoundIdentity == null)
+//			return null;
+//		else			
 			return identificationLevel;
 	}
 
 	public void setIdentificationLevel(
 			MSFeatureIdentificationLevel identificationStatus) {
-		if(compoundIdentity == null)
-			this.identificationLevel = null;
-		else			
+//		if(compoundIdentity == null)
+//			this.identificationLevel = null;
+//		else			
 			this.identificationLevel = identificationStatus;
 	}
 

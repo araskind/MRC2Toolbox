@@ -39,9 +39,15 @@ import javax.swing.Icon;
 
 import org.jfree.chart.ChartMouseEvent;
 import org.jfree.chart.ChartMouseListener;
+import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.entity.XYItemEntity;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYItemRenderer;
+import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
+import org.jfree.chart.title.PaintScaleLegend;
+import org.jfree.chart.title.Title;
+import org.jfree.chart.ui.RectangleEdge;
+import org.jfree.chart.ui.RectangleInsets;
 import org.jfree.data.xy.XYDataset;
 
 import bibliothek.gui.dock.common.DefaultSingleCDockable;
@@ -49,6 +55,7 @@ import edu.umich.med.mrc2.datoolbox.data.MSFeatureIdentificationLevel;
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundleCollection;
 import edu.umich.med.mrc2.datoolbox.data.enums.MSMSMatchType;
+import edu.umich.med.mrc2.datoolbox.data.enums.MSMSScoringParameter;
 import edu.umich.med.mrc2.datoolbox.data.enums.TableRowSubset;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.gui.datexp.dataset.MSMSFeatureInfoBundleDataSet;
@@ -56,6 +63,7 @@ import edu.umich.med.mrc2.datoolbox.gui.datexp.tooltip.MSMSFeatureInfoBundleTool
 import edu.umich.med.mrc2.datoolbox.gui.idworks.IDWorkbenchPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.DockableMRC2ToolboxPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
+import edu.umich.med.mrc2.datoolbox.gui.plot.renderer.MSMSScoreColorRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.IndeterminateProgressDialog;
@@ -80,6 +88,7 @@ public class DockableMzRtMSMSPlotPanel extends DefaultSingleCDockable
 	private IndeterminateProgressDialog idp;
 	private static final Shape defaultShape = new Ellipse2D.Double(-3, -3, 6, 6);
 	private Preferences preferences;
+	private XYItemRenderer defaultRenderer;
 
 	public DockableMzRtMSMSPlotPanel() {
 
@@ -96,11 +105,18 @@ public class DockableMzRtMSMSPlotPanel extends DefaultSingleCDockable
 //		settingsToolbar = new MSMSExplorerPlotSettingsToolbar(this, this);
 //		add(settingsToolbar, BorderLayout.SOUTH);
 		
-		mmzrtPlotSettingsPanel = new MZRTPlotSettingsPanel(this, this);
+		mmzrtPlotSettingsPanel = new MZRTPlotSettingsPanel(this, this, true);
 		add(mmzrtPlotSettingsPanel, BorderLayout.EAST);
 		
 		msmsFeatureInfoBundleTooltipGenerator 
 			= new MSMSFeatureInfoBundleTooltipGenerator();
+	}
+	
+	private void createDefaultRendrer() {
+		
+		defaultRenderer = new XYLineAndShapeRenderer(false, true);
+		defaultRenderer.setDefaultToolTipGenerator(msmsFeatureInfoBundleTooltipGenerator);
+		defaultRenderer.setDefaultShape(defaultShape);
 	}
 
 	@Override
@@ -205,57 +221,142 @@ public class DockableMzRtMSMSPlotPanel extends DefaultSingleCDockable
 		@Override
 		public Void doInBackground() {
 
-			try {
-				MSMSFeatureInfoBundleDataSet dataSet = 
-						new MSMSFeatureInfoBundleDataSet(featurBundles, colorOption);
+			if(colorOption.equals(FeaturePlotColorOption.COLOR_BY_ID_LEVEL))
+				colorByIdLevel();
+			
+			if(colorOption.equals(FeaturePlotColorOption.COLOR_BY_MSMS_MATCH_TYPE))
+				colorByMatchType();
 				
-				XYItemRenderer renderer = ((XYPlot) plotPanel.getPlot()).getRenderer();
-				if(colorOption.equals(FeaturePlotColorOption.COLOR_BY_ID_LEVEL)) {
-					
-					for(int i=0; i<dataSet.getSeriesCount(); i++) {
-						
-						String seriesName = (String)dataSet.getSeriesKey(i);
-						if(seriesName.equals(MSMSFeatureInfoBundleDataSet.UNKNOWN_SERIES_NAME)) { 
-							renderer.setSeriesPaint(i, Color.GRAY);
-							renderer.setSeriesShape(i, defaultShape);
-						}
-						else if(seriesName.equals(MSMSFeatureInfoBundleDataSet.IDENTIFIED_WITHOUT_LEVEL_SERIES_NAME)) {
-							renderer.setSeriesPaint(i, Color.BLACK);
-							renderer.setSeriesShape(i, defaultShape);
-						}
-						else {
-							MSFeatureIdentificationLevel level = IDTDataCache.getMSFeatureIdentificationLevelByName(seriesName);
-							if(level != null)
-								renderer.setSeriesPaint(i, level.getColorCode());
-						}					
-					}
-				}
-				if(colorOption.equals(FeaturePlotColorOption.COLOR_BY_MSMS_MATCH_TYPE)) {
-					
-					for(int i=0; i<dataSet.getSeriesCount(); i++) {
-						
-						String seriesName = (String)dataSet.getSeriesKey(i);
-						if(seriesName.equals(MSMSFeatureInfoBundleDataSet.UNKNOWN_SERIES_NAME)) {
-							renderer.setSeriesPaint(i, Color.GRAY);
-							renderer.setSeriesShape(i, defaultShape);
-						}						
-						else {							
-							MSMSMatchType mt = MSMSMatchType.getMSMSMatchTypeByUIName(seriesName);
-							if(mt != null)
-								renderer.setSeriesPaint(i, mt.getColorCode());
-						}					
-					}
-				}				
-				renderer.setDefaultToolTipGenerator(msmsFeatureInfoBundleTooltipGenerator);
-				renderer.setDefaultShape(defaultShape);
-				((XYPlot) plotPanel.getPlot()).setDataset(dataSet);
-				((XYPlot) plotPanel.getPlot()).setRenderer(renderer);
-			}
-			catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			if(colorOption.equals(FeaturePlotColorOption.COLOR_BY_NIST_SCORE)
+					|| colorOption.equals(FeaturePlotColorOption.COLOR_BY_ENTROPY_SCORE)
+					|| colorOption.equals(FeaturePlotColorOption.COLOR_BY_DOT_PRODUCT)
+					|| colorOption.equals(FeaturePlotColorOption.COLOR_BY_PROBABILITY)) {
+				colorByScore();
 			}
 			return null;
+		}
+		
+		private void colorByScore() {
+
+			MSMSFeatureInfoBundleDataSet dataSet = 
+					new MSMSFeatureInfoBundleDataSet(featurBundles, colorOption);
+			
+			MSMSScoringParameter scoringParameter = lookupMSMSScoringParameter(colorOption);
+			MSMSScoreColorRenderer scoreRenderer = new 
+					MSMSScoreColorRenderer(dataSet, scoringParameter);
+			scoreRenderer.createLookupPaintScale();
+			
+			for(int i=0; i<dataSet.getSeriesCount(); i++)
+					scoreRenderer.setSeriesShape(i, defaultShape);
+			
+			scoreRenderer.setDefaultToolTipGenerator(msmsFeatureInfoBundleTooltipGenerator);
+			scoreRenderer.setDefaultShape(defaultShape);
+			((XYPlot) plotPanel.getPlot()).setDataset(dataSet);
+			((XYPlot) plotPanel.getPlot()).setRenderer(scoreRenderer);
+			addColorScale(scoreRenderer);
+		}
+		
+		private void addColorScale(MSMSScoreColorRenderer scoreRenderer) {
+			
+			NumberAxis scaleAxis = new NumberAxis();
+			scaleAxis.setRange(
+					scoreRenderer.getDataRange().getMin(), 
+					scoreRenderer.getDataRange().getMax());
+			PaintScaleLegend psl = new PaintScaleLegend(
+					scoreRenderer.getLookupPaintScale(), scaleAxis);
+			psl.setAxisOffset(5.0);
+			psl.setPosition(RectangleEdge.RIGHT);
+			psl.setMargin(new RectangleInsets(5, 5, 5, 5));
+			if(plotPanel.getChart().getSubtitleCount() > 0) {
+				
+				Title currentPsl = plotPanel.getChart().getSubtitle(0);
+				if(currentPsl != null)
+					plotPanel.getChart().removeSubtitle(currentPsl);
+			}
+			plotPanel.getChart().addSubtitle(psl);
+		}
+		
+		private MSMSScoringParameter lookupMSMSScoringParameter(
+				FeaturePlotColorOption plotColorOption) {
+			
+			if(plotColorOption.equals(FeaturePlotColorOption.COLOR_BY_NIST_SCORE))
+				return MSMSScoringParameter.NIST_SCORE;
+			else if(plotColorOption.equals(FeaturePlotColorOption.COLOR_BY_ENTROPY_SCORE))
+				return MSMSScoringParameter.ENTROPY_SCORE;
+			else if(plotColorOption.equals(FeaturePlotColorOption.COLOR_BY_DOT_PRODUCT))
+				return MSMSScoringParameter.DOT_PRODUCT;
+			else if(plotColorOption.equals(FeaturePlotColorOption.COLOR_BY_PROBABILITY))
+				return MSMSScoringParameter.PROBABILITY;
+			else
+				return null;
+		}
+
+		private void colorByMatchType() {
+			
+			MSMSFeatureInfoBundleDataSet dataSet = 
+					new MSMSFeatureInfoBundleDataSet(
+							featurBundles, FeaturePlotColorOption.COLOR_BY_MSMS_MATCH_TYPE);			
+			
+			createDefaultRendrer();
+			for(int i=0; i<dataSet.getSeriesCount(); i++) {
+				
+				String seriesName = (String)dataSet.getSeriesKey(i);
+				if(seriesName.equals(MSMSFeatureInfoBundleDataSet.UNKNOWN_SERIES_NAME)) {
+					defaultRenderer.setSeriesPaint(i, Color.GRAY);
+					defaultRenderer.setSeriesShape(i, defaultShape);
+				}						
+				else {							
+					MSMSMatchType mt = MSMSMatchType.getMSMSMatchTypeByUIName(seriesName);
+					if(mt != null)
+						defaultRenderer.setSeriesPaint(i, mt.getColorCode());
+				}					
+			}
+			defaultRenderer.setDefaultToolTipGenerator(msmsFeatureInfoBundleTooltipGenerator);
+			
+			((XYPlot) plotPanel.getPlot()).setDataset(dataSet);
+			((XYPlot) plotPanel.getPlot()).setRenderer(defaultRenderer);
+			
+			if(plotPanel.getChart().getSubtitleCount() > 0) {
+				
+				Title currentPsl = plotPanel.getChart().getSubtitle(0);
+				if(currentPsl != null)
+					plotPanel.getChart().removeSubtitle(currentPsl);
+			}
+		}
+		
+		private void colorByIdLevel() {
+			
+			MSMSFeatureInfoBundleDataSet dataSet = 
+					new MSMSFeatureInfoBundleDataSet(
+							featurBundles, FeaturePlotColorOption.COLOR_BY_ID_LEVEL);
+			
+			createDefaultRendrer();
+			for(int i=0; i<dataSet.getSeriesCount(); i++) {
+				
+				String seriesName = (String)dataSet.getSeriesKey(i);
+				if(seriesName.equals(MSMSFeatureInfoBundleDataSet.UNKNOWN_SERIES_NAME)) { 
+					defaultRenderer.setSeriesPaint(i, Color.GRAY);
+					defaultRenderer.setSeriesShape(i, defaultShape);
+				}
+				else if(seriesName.equals(MSMSFeatureInfoBundleDataSet.IDENTIFIED_WITHOUT_LEVEL_SERIES_NAME)) {
+					defaultRenderer.setSeriesPaint(i, Color.BLACK);
+					defaultRenderer.setSeriesShape(i, defaultShape);
+				}
+				else {
+					MSFeatureIdentificationLevel level = IDTDataCache.getMSFeatureIdentificationLevelByName(seriesName);
+					if(level != null)
+						defaultRenderer.setSeriesPaint(i, level.getColorCode());
+				}					
+			}
+			((XYPlot) plotPanel.getPlot()).setDataset(dataSet);
+			((XYPlot) plotPanel.getPlot()).setRenderer(defaultRenderer);
+			
+			if(plotPanel.getChart().getSubtitleCount() > 0) {
+				
+				Title currentPsl = plotPanel.getChart().getSubtitle(0);
+				if(currentPsl != null)
+					plotPanel.getChart().removeSubtitle(currentPsl);
+			}
 		}
 	}
 

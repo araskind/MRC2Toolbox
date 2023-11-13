@@ -21,6 +21,8 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.datexp.dataset;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -48,6 +50,7 @@ public class MSMSFeatureInfoBundleDataSet extends AbstractXYDataset{
 	private String[] keySet;
 	
 	public static final String UNKNOWN_SERIES_NAME = "Unknowns";
+	public static final String IDENTIFIED_BY_MSMS_SERIES_NAME = "Identified by MSMS";
 	public static final String IDENTIFIED_WITHOUT_LEVEL_SERIES_NAME = "ID level missing";
 
 	public MSMSFeatureInfoBundleDataSet(
@@ -69,7 +72,32 @@ public class MSMSFeatureInfoBundleDataSet extends AbstractXYDataset{
 		if(colorOption.equals(FeaturePlotColorOption.COLOR_BY_MSMS_MATCH_TYPE))			
 			populateSeriesByMSMSMatchType(featureBundles);
 		
+		if(colorOption.equals(FeaturePlotColorOption.COLOR_BY_NIST_SCORE)
+				|| colorOption.equals(FeaturePlotColorOption.COLOR_BY_ENTROPY_SCORE)
+				|| colorOption.equals(FeaturePlotColorOption.COLOR_BY_DOT_PRODUCT)
+				|| colorOption.equals(FeaturePlotColorOption.COLOR_BY_PROBABILITY)) {
+			populateSeriesForScoreColoring(featureBundles);
+		}		
 		keySet = seriesMap.keySet().toArray(new String[seriesMap.size()]);
+	}
+
+	private void populateSeriesForScoreColoring(Collection<MSFeatureInfoBundle> featureBundles) {
+
+		MSFeatureInfoBundle[]msmsIdentified = featureBundles.stream().
+				filter(f -> Objects.nonNull(f.getMsFeature().getPrimaryIdentity())).
+				filter(f -> Objects.nonNull(f.getMsFeature().
+						getPrimaryIdentity().getReferenceMsMsLibraryMatch())).
+				filter(f -> !f.getMsFeature().getPrimaryIdentity().
+						getReferenceMsMsLibraryMatch().isDecoyMatch()).
+				toArray(size -> new MSFeatureInfoBundle[size]);
+		if(msmsIdentified.length > 0)
+			seriesMap.put(IDENTIFIED_BY_MSMS_SERIES_NAME, msmsIdentified);		
+		
+		MSFeatureInfoBundle[] unknowns = featureBundles.stream().
+				filter(f -> !f.getMsFeature().isIdentified()).
+				toArray(size -> new MSFeatureInfoBundle[size]);		
+		if(unknowns.length > 0)
+			seriesMap.put(UNKNOWN_SERIES_NAME, unknowns);
 	}
 
 	private void populateSeriesByMSMSMatchType(Collection<MSFeatureInfoBundle> featureBundles) {
@@ -231,6 +259,32 @@ public class MSMSFeatureInfoBundleDataSet extends AbstractXYDataset{
 	}
 		
 	public MSFeatureInfoBundle getMsFeatureInfoBundle(int series, int item) {
+		
+		if(series > seriesMap.size() - 1)
+			return null;
+		
+		if(item > seriesMap.get(keySet[series]).length - 1)
+			return null;
+		
 		return (MSFeatureInfoBundle) seriesMap.get(keySet[series])[item];
 	}
+	
+	public Collection<MSFeatureInfoBundle>getAllFeatures(){
+		
+		Collection<MSFeatureInfoBundle>allFeatures = 
+				new ArrayList<MSFeatureInfoBundle>();
+		for(MSFeatureInfoBundle[] v : seriesMap.values()) {
+			
+			allFeatures.addAll(Arrays.asList(v));
+		}
+		return allFeatures;
+	}
 }
+
+
+
+
+
+
+
+

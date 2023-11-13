@@ -80,7 +80,8 @@ public class MZRTPlotSettingsPanel extends
 	
 	public MZRTPlotSettingsPanel(
 			ActionListener actListener, 
-			ItemListener externalItemListener) {
+			ItemListener externalItemListener,
+			boolean isMSMSdata) {
 		
 		super();
 		this.actListener = actListener;
@@ -216,26 +217,28 @@ public class MZRTPlotSettingsPanel extends
 		gbc_lblNewLabel_5.gridy = 4;
 		add(lblNewLabel_5, gbc_lblNewLabel_5);
 		
-		JLabel lblNewLabel_7 = new JLabel("Color by ");
-		GridBagConstraints gbc_lblNewLabel_7 = new GridBagConstraints();
-		gbc_lblNewLabel_7.anchor = GridBagConstraints.EAST;
-		gbc_lblNewLabel_7.insets = new Insets(0, 0, 5, 5);
-		gbc_lblNewLabel_7.gridx = 0;
-		gbc_lblNewLabel_7.gridy = 5;
-		add(lblNewLabel_7, gbc_lblNewLabel_7);
-		
-		plotColorOptionComboBox = new JComboBox<FeaturePlotColorOption>(
-				new DefaultComboBoxModel<FeaturePlotColorOption>(
-						FeaturePlotColorOption.values()));
-		GridBagConstraints gbc_comboBox = new GridBagConstraints();
-		gbc_comboBox.gridwidth = 4;
-		gbc_comboBox.insets = new Insets(0, 0, 5, 5);
-		gbc_comboBox.fill = GridBagConstraints.HORIZONTAL;
-		gbc_comboBox.gridx = 1;
-		gbc_comboBox.gridy = 5;
-		add(plotColorOptionComboBox, gbc_comboBox);
-		plotColorOptionComboBox.addItemListener(externalItemListener);
-		
+		if(isMSMSdata) {
+			
+			JLabel lblNewLabel_7 = new JLabel("Color by ");
+			GridBagConstraints gbc_lblNewLabel_7 = new GridBagConstraints();
+			gbc_lblNewLabel_7.anchor = GridBagConstraints.EAST;
+			gbc_lblNewLabel_7.insets = new Insets(0, 0, 5, 5);
+			gbc_lblNewLabel_7.gridx = 0;
+			gbc_lblNewLabel_7.gridy = 5;
+			add(lblNewLabel_7, gbc_lblNewLabel_7);
+			
+			plotColorOptionComboBox = new JComboBox<FeaturePlotColorOption>(
+					new DefaultComboBoxModel<FeaturePlotColorOption>(
+							FeaturePlotColorOption.values()));
+			GridBagConstraints gbc_comboBox = new GridBagConstraints();
+			gbc_comboBox.gridwidth = 4;
+			gbc_comboBox.insets = new Insets(0, 0, 5, 5);
+			gbc_comboBox.fill = GridBagConstraints.HORIZONTAL;
+			gbc_comboBox.gridx = 1;
+			gbc_comboBox.gridy = 5;
+			add(plotColorOptionComboBox, gbc_comboBox);
+			plotColorOptionComboBox.addItemListener(externalItemListener);
+		}		
 		JLabel lblNewLabel_6 = new JLabel("  ");
 		GridBagConstraints gbc_lblNewLabel_6 = new GridBagConstraints();
 		gbc_lblNewLabel_6.insets = new Insets(0, 0, 5, 5);

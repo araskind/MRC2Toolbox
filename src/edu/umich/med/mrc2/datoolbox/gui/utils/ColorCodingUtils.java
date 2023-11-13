@@ -63,7 +63,7 @@ public class ColorCodingUtils {
 							position, dataRange, lvc, hvc, colorScale, colorValueDistance));
 			position = position + step;
 		}
-		return null;
+		return lookupPaintScale;
 	}
 	
 	private static Color getCellColor(

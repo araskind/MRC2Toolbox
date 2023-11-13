@@ -23,8 +23,12 @@ package edu.umich.med.mrc2.datoolbox.gui.datexp;
 
 public enum FeaturePlotColorOption {
 
-	COLOR_BY_ID_LEVEL("By ID level"),
-	COLOR_BY_MSMS_MATCH_TYPE("By MSMS match type"),
+	COLOR_BY_ID_LEVEL("ID level"),
+	COLOR_BY_MSMS_MATCH_TYPE("MSMS match type"),
+	COLOR_BY_NIST_SCORE("NIST score"),
+	COLOR_BY_ENTROPY_SCORE("Entropy based score"),
+	COLOR_BY_DOT_PRODUCT("Dot-product"),
+	COLOR_BY_PROBABILITY("Probability"),
 	;
 
 	private final String uiName;

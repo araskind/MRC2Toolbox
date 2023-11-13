@@ -68,8 +68,6 @@ public class MzFrequencyTablePopupMenu extends BasicTablePopupMenu {
 			idLevelMenu.setIcon(setIdLevelIcon);
 			populateIdLevelMenu();
 			add(idLevelMenu);
-			
-			addSeparator();
 		}
 		addCopyBlock();
 	}
