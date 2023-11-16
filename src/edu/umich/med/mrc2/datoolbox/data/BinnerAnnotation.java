@@ -38,6 +38,7 @@ public class BinnerAnnotation implements Serializable, Comparable<BinnerAnnotati
 	private String aditionalIsotopes;
 	private double massError;
 	private double kmd;
+	private double rmd;
 	private int molIonNumber;
 	private String chargeCarrier;
 	private String additionalAdducts;
@@ -59,229 +60,199 @@ public class BinnerAnnotation implements Serializable, Comparable<BinnerAnnotati
 		return annotation;
 	}
 
-	/**
-	 * @return the annotation
-	 */
 	public String getAnnotation() {
 		return annotation;
 	}
+	
+	public String getCleanAnnotation() {
+		return replaceMolIonNumber(annotation);
+	}
 
-	/**
-	 * @return the derivations
-	 */
 	public String getDerivations() {
 		return derivations;
 	}
+	
+	public String getCleanDerivations() {
+		return replaceMolIonNumber(derivations);
+	}
 
-	/**
-	 * @return the isotopes
-	 */
 	public String getIsotopes() {
 		return isotopes;
 	}
 
-	/**
-	 * @return the massError
-	 */
 	public double getMassError() {
 		return massError;
 	}
 
-	/**
-	 * @return the molIonNumber
-	 */
 	public int getMolIonNumber() {
 		return molIonNumber;
 	}
 
-	/**
-	 * @return the chargeCarrier
-	 */
 	public String getChargeCarrier() {
 		return chargeCarrier;
 	}
 
-	/**
-	 * @return the additionalAdducts
-	 */
 	public String getAdditionalAdducts() {
 		return additionalAdducts;
 	}
+	
+	public String getCleanAdditionalAdducts() {
+		return replaceMolIonNumber(additionalAdducts);
+	}
 
-	/**
-	 * @return the binNumber
-	 */
 	public int getBinNumber() {
 		return binNumber;
 	}
 
-	/**
-	 * @return the corrClusterNumber
-	 */
 	public int getCorrClusterNumber() {
 		return corrClusterNumber;
 	}
 
-	/**
-	 * @return the rebinSubclusterNumber
-	 */
 	public int getRebinSubclusterNumber() {
 		return rebinSubclusterNumber;
 	}
 
-	/**
-	 * @return the rtSubclusterNumber
-	 */
 	public int getRtSubclusterNumber() {
 		return rtSubclusterNumber;
 	}
 
-	/**
-	 * @param derivations the derivations to set
-	 */
 	public void setDerivations(String derivations) {
 		this.derivations = derivations;
 	}
 
-	/**
-	 * @param isotopes the isotopes to set
-	 */
 	public void setIsotopes(String isotopes) {
 		this.isotopes = isotopes;
 	}
 
-	/**
-	 * @param massError the massError to set
-	 */
 	public void setMassError(double massError) {
 		this.massError = massError;
 	}
 
-	/**
-	 * @param molIonNumber the molIonNumber to set
-	 */
+
 	public void setMolIonNumber(int molIonNumber) {
 		this.molIonNumber = molIonNumber;
 	}
 
-	/**
-	 * @param chargeCarrier the chargeCarrier to set
-	 */
 	public void setChargeCarrier(String chargeCarrier) {
 		this.chargeCarrier = chargeCarrier;
 	}
 
-	/**
-	 * @param additionalAdducts the additionalAdducts to set
-	 */
 	public void setAdditionalAdducts(String additionalAdducts) {
 		this.additionalAdducts = additionalAdducts;
 	}
 
-	/**
-	 * @param binNumber the binNumber to set
-	 */
 	public void setBinNumber(int binNumber) {
 		this.binNumber = binNumber;
 	}
 
-	/**
-	 * @param corrClusterNumber the corrClusterNumber to set
-	 */
 	public void setCorrClusterNumber(int corrClusterNumber) {
 		this.corrClusterNumber = corrClusterNumber;
 	}
 
-	/**
-	 * @param rebinSubclusterNumber the rebinSubclusterNumber to set
-	 */
 	public void setRebinSubclusterNumber(int rebinSubclusterNumber) {
 		this.rebinSubclusterNumber = rebinSubclusterNumber;
 	}
 
-	/**
-	 * @param rtSubclusterNumber the rtSubclusterNumber to set
-	 */
 	public void setRtSubclusterNumber(int rtSubclusterNumber) {
 		this.rtSubclusterNumber = rtSubclusterNumber;
 	}
 
-	/**
-	 * @return the kmd
-	 */
 	public double getKmd() {
 		return kmd;
 	}
 
-	/**
-	 * @param kmd the kmd to set
-	 */
 	public void setKmd(double kmd) {
 		this.kmd = kmd;
 	}
 
-	/**
-	 * @return the isPrimary
-	 */
 	public boolean isPrimary() {
 		return isPrimary;
 	}
 
-	/**
-	 * @param isPrimary the isPrimary to set
-	 */
 	public void setPrimary(boolean isPrimary) {
 		this.isPrimary = isPrimary;
 	}
 
-	/**
-	 * @return the binnerMz
-	 */
 	public double getBinnerMz() {
 		return binnerMz;
 	}
 
-	/**
-	 * @return the binnerRt
-	 */
 	public double getBinnerRt() {
 		return binnerRt;
 	}
 
-	/**
-	 * @param binnerMz the binnerMz to set
-	 */
 	public void setBinnerMz(double binnerMz) {
 		this.binnerMz = binnerMz;
 	}
 
-	/**
-	 * @param binnerRt the binnerRt to set
-	 */
 	public void setBinnerRt(double binnerRt) {
 		this.binnerRt = binnerRt;
 	}
 
+	public String getFeatureName() {
+		return featureName;
+	}
+
+	public void setFeatureName(String featureName) {
+		this.featureName = featureName;
+	}
+	
+	public String getFurtherAnnotations() {
+		return furtherAnnotations;
+	}
+	
+	public String getCleanFurtherAnnotations() {
+		return replaceMolIonNumber(furtherAnnotations);
+	}
+
+	public String getAditionalIsotopes() {
+		return aditionalIsotopes;
+	}
+
+	public void setFurtherAnnotations(String extraAnnotations) {
+		this.furtherAnnotations = extraAnnotations;
+	}
+
+	public void setAditionalIsotopes(String extraIsotopes) {
+		this.aditionalIsotopes = extraIsotopes;
+	}
+
+	public String getAdditionalGroupAnnotations() {
+		return additionalGroupAnnotations;
+	}
+	
+	public String getCleanAdditionalGroupAnnotations() {
+		return replaceMolIonNumber(additionalGroupAnnotations);
+	}
+
+	public void setAdditionalGroupAnnotations(String additionalGroupAnnotations) {
+		this.additionalGroupAnnotations = additionalGroupAnnotations;
+	}
+
+	public double getRmd() {
+		return rmd;
+	}
+
+	public void setRmd(double rmd) {
+		this.rmd = rmd;
+	}
+	
+	private String replaceMolIonNumber(String input) {
+		
+		String moinum = Integer.toString(molIonNumber);
+		return input.replaceAll(moinum, "");
+	}
+	
+	public String getNameWithAnnotation() {
+		return featureName + " " + getCleanAnnotation();
+	}
+	
 	@Override
 	public int compareTo(BinnerAnnotation o) {
 
 		String thisQualifiedName = featureName + annotation;
 		String otherQualifiedName = o.getFeatureName() + o.getAnnotation();
 		return thisQualifiedName.compareTo(otherQualifiedName);
-	}
-
-	/**
-	 * @return the featureName
-	 */
-	public String getFeatureName() {
-		return featureName;
-	}
-
-	/**
-	 * @param featureName the featureName to set
-	 */
-	public void setFeatureName(String featureName) {
-		this.featureName = featureName;
 	}
 
     @Override
@@ -326,48 +297,6 @@ public class BinnerAnnotation implements Serializable, Comparable<BinnerAnnotati
         		+ (rt != null ? rt.hashCode() : 0);
         return hash;
     }
-
-	/**
-	 * @return the extraAnnotations
-	 */
-	public String getFurtherAnnotations() {
-		return furtherAnnotations;
-	}
-
-	/**
-	 * @return the extraIsotopes
-	 */
-	public String getAditionalIsotopes() {
-		return aditionalIsotopes;
-	}
-
-	/**
-	 * @param extraAnnotations the extraAnnotations to set
-	 */
-	public void setFurtherAnnotations(String extraAnnotations) {
-		this.furtherAnnotations = extraAnnotations;
-	}
-
-	/**
-	 * @param extraIsotopes the extraIsotopes to set
-	 */
-	public void setAditionalIsotopes(String extraIsotopes) {
-		this.aditionalIsotopes = extraIsotopes;
-	}
-
-	/**
-	 * @return the additionalGroupAnnotations
-	 */
-	public String getAdditionalGroupAnnotations() {
-		return additionalGroupAnnotations;
-	}
-
-	/**
-	 * @param additionalGroupAnnotations the additionalGroupAnnotations to set
-	 */
-	public void setAdditionalGroupAnnotations(String additionalGroupAnnotations) {
-		this.additionalGroupAnnotations = additionalGroupAnnotations;
-	}
 }
 
 

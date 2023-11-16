@@ -42,7 +42,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.ujmp.core.Matrix;
 
-import com.monitorjbl.xlsx.StreamingReader;
+import com.github.pjfanning.xlsx.StreamingReader;
 
 import edu.umich.med.mrc2.datoolbox.data.BinnerAnnotation;
 import edu.umich.med.mrc2.datoolbox.data.CompoundClassifier;
@@ -565,9 +565,9 @@ public class BinnerClustersImportTask extends AbstractTask {
 				if(currentCell.getCellType().equals(CellType.NUMERIC))
 					ba.setMassError(currentCell.getNumericCellValue());
 
-				currentCell = r.getCell(columnMap.get(BinnerField.KMD));
-				if(currentCell.getCellType().equals(CellType.NUMERIC))
-					ba.setKmd(currentCell.getNumericCellValue());
+//				currentCell = r.getCell(columnMap.get(BinnerField.KMD));
+//				if(currentCell.getCellType().equals(CellType.NUMERIC))
+//					ba.setKmd(currentCell.getNumericCellValue());
 
 				currentCell = r.getCell(columnMap.get(BinnerField.FEATURE_GROUP_NUMBER));
 				if(currentCell.getCellType().equals(CellType.NUMERIC))

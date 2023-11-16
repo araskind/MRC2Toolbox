@@ -55,6 +55,7 @@ import javax.swing.border.TitledBorder;
 
 import org.apache.commons.io.FilenameUtils;
 
+import edu.umich.med.mrc2.datoolbox.data.BinnerAnnotationCluster;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.MinimalMSOneFeature;
 import edu.umich.med.mrc2.datoolbox.data.enums.ParameterSetStatus;
@@ -76,6 +77,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskListener;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.ExtractBinnerAnnotatiosForMSMSFeatureClusteringTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io.ImportMinimalMSOneFeaturesFromCefTask;
 import edu.umich.med.mrc2.datoolbox.utils.DelimitedTextParser;
 
@@ -216,8 +218,18 @@ public class FeatureListImportPanel extends JPanel implements ActionListener, Ta
 			((AbstractTask)e.getSource()).removeTaskListener(this);
 			
 			if (e.getSource().getClass().equals(ImportMinimalMSOneFeaturesFromCefTask.class))
-				finalizeCefImportTask((ImportMinimalMSOneFeaturesFromCefTask)e.getSource());			
+				finalizeCefImportTask((ImportMinimalMSOneFeaturesFromCefTask)e.getSource());	
+			
+			if (e.getSource().getClass().equals(ExtractBinnerAnnotatiosForMSMSFeatureClusteringTask.class))
+				finalizeBinnerImportTask((ExtractBinnerAnnotatiosForMSMSFeatureClusteringTask)e.getSource());			
 		}		
+	}
+
+	private void finalizeBinnerImportTask(ExtractBinnerAnnotatiosForMSMSFeatureClusteringTask task) {
+
+		Collection<BinnerAnnotationCluster> bac = task.getBinnerAnnotationClusters();
+		
+		fireFormChangeEvent(ParameterSetStatus.CHANGED);
 	}
 
 	private void finalizeCefImportTask(ImportMinimalMSOneFeaturesFromCefTask task) {
@@ -249,6 +261,7 @@ public class FeatureListImportPanel extends JPanel implements ActionListener, Ta
 		fc.addFilter("Text files (TAB-separated)", "txt", "TXT", "tsv", "TSV");
 		fc.addFilter("Comma-separated text files", "csv", "CSV");
 		fc.addFilter("CEF files", "cef", "CEF");
+		fc.addFilter("Binner files", "xlsx", "XLSX");
 		fc.setTitle("Read MZ/RT feature list from file");
 		fc.setOpenButtonText("Import feature list from file");
 		fc.setMultiSelectionEnabled(false);
@@ -329,13 +342,25 @@ public class FeatureListImportPanel extends JPanel implements ActionListener, Ta
 	}
 		
 	private void importFromFile(File inputFile) {
-	
-		ReadFeaturesFromInputFileTask task = 
-				new ReadFeaturesFromInputFileTask(inputFile);
-		IndeterminateProgressDialog idp = new IndeterminateProgressDialog(
-				"Getting features for lookup data set ...", this, task);
-		idp.setLocationRelativeTo(this);
-		idp.setVisible(true);
+		
+		String extension  = 
+				FilenameUtils.getExtension(inputFile.getName()).toLowerCase();
+		
+		if(extension.equalsIgnoreCase("xlsx")) {
+
+			ExtractBinnerAnnotatiosForMSMSFeatureClusteringTask task = 
+					new ExtractBinnerAnnotatiosForMSMSFeatureClusteringTask(inputFile);
+			task.addTaskListener(this);
+			MRC2ToolBoxCore.getTaskController().addTask(task);
+		}
+		else {		
+			ReadFeaturesFromInputFileTask task = 
+					new ReadFeaturesFromInputFileTask(inputFile);
+			IndeterminateProgressDialog idp = new IndeterminateProgressDialog(
+					"Getting features for lookup data set ...", this, task);
+			idp.setLocationRelativeTo(this);
+			idp.setVisible(true);
+		}
 	}
 	
 	class ReadFeaturesFromInputFileTask extends LongUpdateTask {

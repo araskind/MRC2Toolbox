@@ -61,6 +61,14 @@ public class MinimalMSOneFeature implements Serializable, Comparable<MinimalMSOn
 	public MinimalMSOneFeature(String id, String name, double mz, double rt, double rank) {
 		this(id, name, mz, rt, rank, null, null);
 	}
+	
+	public MinimalMSOneFeature(BinnerAnnotation annotation) {
+		this(null, 
+			annotation.getNameWithAnnotation(), 
+			annotation.getBinnerMz(), 
+			annotation.getBinnerRt(), 
+			0, null, null);
+	}
 
 	public MinimalMSOneFeature(
 			String dbid,

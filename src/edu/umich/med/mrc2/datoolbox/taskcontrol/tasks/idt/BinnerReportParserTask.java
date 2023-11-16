@@ -32,7 +32,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.TreeMap;
-import java.util.TreeSet;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.poi.ss.usermodel.Cell;
@@ -41,84 +40,206 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 
-import com.monitorjbl.xlsx.StreamingReader;
+import com.github.pjfanning.xlsx.StreamingReader;
 
 import edu.umich.med.mrc2.datoolbox.data.BinnerAnnotation;
 import edu.umich.med.mrc2.datoolbox.data.CompoundClassifier;
 import edu.umich.med.mrc2.datoolbox.data.CompoundIdentity;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
-import edu.umich.med.mrc2.datoolbox.data.MsFeatureCluster;
 import edu.umich.med.mrc2.datoolbox.data.PostProcessorAnnotation;
-import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureComparator;
-import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.enums.BinnerField;
 import edu.umich.med.mrc2.datoolbox.data.enums.BinnerPageNames;
 import edu.umich.med.mrc2.datoolbox.data.enums.BinnerPostProcessorField;
 import edu.umich.med.mrc2.datoolbox.data.enums.BinnerPostProcessorPageNames;
 import edu.umich.med.mrc2.datoolbox.data.enums.CompoundDatabaseEnum;
 import edu.umich.med.mrc2.datoolbox.data.enums.CompoundIdentificationConfidence;
-import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
-import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 
-public class IDTrackerBinnerReportImportTask extends AbstractTask {
+public abstract class BinnerReportParserTask extends AbstractTask {
 
-	private static final String molIonAnnotation = "[M]";
-	private File binnerDataFile;
-	private File postprocessorDataFile;
-	private HashSet<MsFeatureCluster> clusterList;
-	private LIMSExperiment experiment;
-	private ArrayList<String> unassignedFeatures;
-	private Collection<MsFeature>clusteredFeatures;
-	private Collection<PostProcessorAnnotation> ppAnnotations;
-	private Collection<BinnerAnnotation> binnerAnnotations;
+	protected static final String molIonAnnotation = "[M]";
+	protected File binnerDataFile;
+	protected File postprocessorDataFile;	
+	protected Collection<MsFeature>clusteredFeatures;
+	protected Collection<PostProcessorAnnotation> ppAnnotations;
+	protected Collection<BinnerAnnotation> binnerAnnotations;
 
-	public IDTrackerBinnerReportImportTask(File inputFile, File postprocessorDataFile, LIMSExperiment experiment) {
+//	public BinnerReportParserTask(
+//			File inputFile, File postprocessorDataFile, LIMSExperiment experiment) {
+//
+//		super();
+//		this.binnerDataFile = inputFile;
+//		this.postprocessorDataFile = postprocessorDataFile;
+//		this.experiment = experiment;
+//
+//		clusterList = new HashSet<MsFeatureCluster>();
+//		taskDescription = "Parsing Binner report(s)";
+//		unassignedFeatures = new ArrayList<String>();
+//		clusteredFeatures = new TreeSet<MsFeature>(new MsFeatureComparator(SortProperty.Name));
+//	}
 
-		super();
-		this.binnerDataFile = inputFile;
-		this.postprocessorDataFile = postprocessorDataFile;
-		this.experiment = experiment;
+//	@Override
+//	public void run() {
+//
+//		setStatus(TaskStatus.PROCESSING);
+//
+//		if(postprocessorDataFile != null) {
+//
+//			//	Post-processor contains all Binner annotations,
+//			//	no need to import Binner results separately
+//			try {
+//				importPostProcessorResults();
+//			} catch (IOException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//			setStatus(TaskStatus.FINISHED);
+//			return;
+//		}
+//		if(binnerDataFile != null) {
+//			try {
+//				importClusteringResults();
+//			} catch (IOException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}			
+//		}
+//		setStatus(TaskStatus.FINISHED);
+//	}
 
-		clusterList = new HashSet<MsFeatureCluster>();
-		taskDescription = "Parsing Binner report(s)";
-		unassignedFeatures = new ArrayList<String>();
-		clusteredFeatures = new TreeSet<MsFeature>(new MsFeatureComparator(SortProperty.Name));
-	}
+	protected void parseBinnerResults() throws IOException {
 
-	@Override
-	public void run() {
+		if (!binnerDataFile.exists() || !binnerDataFile.canRead()) {
 
-		setStatus(TaskStatus.PROCESSING);
-
-		if(postprocessorDataFile != null) {
-
-			//	Post-processor contains all Binner annotations,
-			//	no need to import Binner results separately
-			try {
-				importPostProcessorResults();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			MessageDialog.showErrorMsg("Can not read Binner results file!");
 			setStatus(TaskStatus.FINISHED);
-			return;
+		} 
+		else {
+			taskDescription = "Parsing Binner output file ...";
+			total = 100;
+			processed = 20;
+			InputStream is = new FileInputStream(binnerDataFile);
+			Workbook workbook = StreamingReader.builder()
+			        .rowCacheSize(100)    // number of rows to keep in memory (defaults to 10)
+			        .bufferSize(4096)     // buffer size to use when reading InputStream to file (defaults to 1024)
+			        .open(is);            // InputStream or File for XLSX file (required)
+
+			binnerAnnotations = null;
+			Sheet corrByClusterSheet = null;
+			for (Sheet sheet : workbook) {
+
+				if(sheet.getSheetName().equalsIgnoreCase(BinnerPageNames.CORRELATIONS_BY_CLUSTER_LOC.getName())) {
+					corrByClusterSheet = sheet;
+					break;
+				}
+			}	
+			if(corrByClusterSheet == null) {
+				
+				MessageDialog.showErrorMsg("Worksheet \"" 
+						+ BinnerPageNames.CORRELATIONS_BY_CLUSTER_LOC.getName() + "not found");
+				setStatus(TaskStatus.FINISHED);
+				return;
+			}
+			binnerAnnotations = parseClusterCorrelationWorksheet(corrByClusterSheet);
 		}
-		if(binnerDataFile != null) {
-			try {
-				importClusteringResults();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}			
-		}
-		setStatus(TaskStatus.FINISHED);
 	}
 
-	private void importPostProcessorResults() throws IOException {
+	protected Collection<BinnerAnnotation> parseClusterCorrelationWorksheet(Sheet sheet) {
+
+		taskDescription = "Parsing Binner output file ...";
+		total = sheet.getLastRowNum();
+		processed = 0;
+		Collection<BinnerAnnotation>annotations = new HashSet<BinnerAnnotation>();
+		Cell currentCell;
+
+		Map<BinnerField, Integer> columnMap = getBinnerColumnMap(sheet.iterator().next());
+		if(!CollectionUtils.containsAll(columnMap.keySet(), Arrays.asList(BinnerField.values()))){
+
+			MessageDialog.showErrorMsg("Binner column naming mismatch!", MRC2ToolBoxCore.getMainWindow());
+			setStatus(TaskStatus.FINISHED);
+			return null;
+		}
+		for (Row r : sheet) {
+			processed++;
+			if(r.getRowNum() > 0 && !r.getCell(0).getStringCellValue().trim().isEmpty()
+					&& !r.getCell(columnMap.get(BinnerField.ANNOTATION)).getStringCellValue().trim().isEmpty()) {
+
+				String featureName = r.getCell(columnMap.get(BinnerField.FEATURE)).getStringCellValue();
+				short fcol = r.getCell(columnMap.get(BinnerField.ANNOTATION)).getCellStyle().getFillForegroundColor();
+				BinnerAnnotation ba =
+						new BinnerAnnotation(featureName,
+								r.getCell(columnMap.get(BinnerField.ANNOTATION)).getStringCellValue());
+				if(fcol == 42)
+					ba.setPrimary(true);
+
+				ba.setDerivations(r.getCell(columnMap.get(BinnerField.DERIVATIONS)).getStringCellValue());
+				ba.setIsotopes(r.getCell(columnMap.get(BinnerField.ISOTOPES)).getStringCellValue());
+
+				currentCell = r.getCell(columnMap.get(BinnerField.MASS_ERROR));
+				if(currentCell.getCellType().equals(CellType.NUMERIC))
+					ba.setMassError(currentCell.getNumericCellValue());
+				
+				currentCell = r.getCell(columnMap.get(BinnerField.RMD));
+				if(currentCell.getCellType().equals(CellType.NUMERIC))
+					ba.setRmd(currentCell.getNumericCellValue());
+
+				currentCell = r.getCell(columnMap.get(BinnerField.FEATURE_GROUP_NUMBER));
+				if(currentCell.getCellType().equals(CellType.NUMERIC))
+					ba.setMolIonNumber((int) currentCell.getNumericCellValue());
+
+				ba.setChargeCarrier(r.getCell(columnMap.get(BinnerField.CHARGE_CARRIER)).getStringCellValue());
+				ba.setAdditionalAdducts(r.getCell(columnMap.get(BinnerField.ADDITIONAL_ADDUCTS)).getStringCellValue());
+
+				currentCell = r.getCell(columnMap.get(BinnerField.BIN));
+				if(currentCell.getCellType().equals(CellType.NUMERIC))
+					ba.setBinNumber((int) currentCell.getNumericCellValue());
+
+				currentCell = r.getCell(columnMap.get(BinnerField.CLUSTER));
+				if(currentCell.getCellType().equals(CellType.NUMERIC))
+					ba.setCorrClusterNumber((int) currentCell.getNumericCellValue());
+
+				currentCell = r.getCell(columnMap.get(BinnerField.REBIN_SUBCLUSTER));
+				if(currentCell.getCellType().equals(CellType.NUMERIC))
+					ba.setRebinSubclusterNumber((int) currentCell.getNumericCellValue());
+
+				currentCell = r.getCell(columnMap.get(BinnerField.RT_SUBCLUSTER));
+				if(currentCell.getCellType().equals(CellType.NUMERIC))
+					ba.setRtSubclusterNumber((int) currentCell.getNumericCellValue());
+
+				currentCell = r.getCell(columnMap.get(BinnerField.MZ));
+				if(currentCell.getCellType().equals(CellType.NUMERIC))
+					ba.setBinnerMz(currentCell.getNumericCellValue());
+
+				currentCell = r.getCell(columnMap.get(BinnerField.RT));
+				if(currentCell.getCellType().equals(CellType.NUMERIC))
+					ba.setBinnerRt(currentCell.getNumericCellValue());
+
+				annotations.add(ba);
+			}
+		}
+		return annotations;
+	}
+
+	protected Map<BinnerField,Integer>getBinnerColumnMap(Row header){
+
+		Map<BinnerField,Integer>columnMap = new TreeMap<BinnerField,Integer>();
+		int headerLength = header.getPhysicalNumberOfCells();
+		for (int i=0; i<headerLength; i++) {
+
+			Cell c = header.getCell(i);
+			for(BinnerField field : BinnerField.values()) {
+
+				if(c.getStringCellValue().equals(field.getName()))
+					columnMap.put(field, i);
+			}
+		}
+		return columnMap;
+	}
+	
+	protected void parsePostProcessorAnnotations() throws IOException {
 
 		if (!postprocessorDataFile.exists() || !postprocessorDataFile.canRead()) {
 
@@ -146,113 +267,7 @@ public class IDTrackerBinnerReportImportTask extends AbstractTask {
 		}
 	}
 
-	private void importClusteringResults() throws IOException {
-
-		if (!binnerDataFile.exists() || !binnerDataFile.canRead()) {
-
-			MessageDialog.showWarningMsg("Can not read Binner results file!");
-			setStatus(TaskStatus.FINISHED);
-		} else {
-			taskDescription = "Parsing Binner output file ...";
-			total = 100;
-			processed = 20;
-			InputStream is = new FileInputStream(binnerDataFile);
-			Workbook workbook = StreamingReader.builder()
-			        .rowCacheSize(100)    // number of rows to keep in memory (defaults to 10)
-			        .bufferSize(4096)     // buffer size to use when reading InputStream to file (defaults to 1024)
-			        .open(is);            // InputStream or File for XLSX file (required)
-
-			binnerAnnotations = null;
-			for (Sheet sheet : workbook) {
-
-				if(sheet.getSheetName().equalsIgnoreCase(BinnerPageNames.CORRELATIONS_BY_CLUSTER_LOC.getName())) {
-
-					binnerAnnotations = parseClusterCorrelationWorksheet(sheet);
-					is.close();
-					break;
-				}
-			}			
-		}
-	}
-
-	private void parsePostProcessorAnnotations() throws Exception {
-
-		taskDescription = "Parsing PostProcessor output file ...";
-		total = 100;
-		processed = 20;
-		InputStream is = new FileInputStream(postprocessorDataFile);
-		Workbook workbook = StreamingReader.builder()
-		        .rowCacheSize(100)    // number of rows to keep in memory (defaults to 10)
-		        .bufferSize(4096)     // buffer size to use when reading InputStream to file (defaults to 1024)
-		        .open(is);            // InputStream or File for XLSX file (required)
-
-		ppAnnotations = new ArrayList<PostProcessorAnnotation>();
-		for (Sheet sheet : workbook) {
-
-			if(sheet.getSheetName().equalsIgnoreCase(BinnerPostProcessorPageNames.ALL_FEATURES.getName())
-					|| sheet.getSheetName().equalsIgnoreCase(BinnerPostProcessorPageNames.ISTD_AND_REDUNDANT.getName())) {
-				ppAnnotations.addAll(parsePostProcessorAnnotationsWorksheet(sheet));
-			}
-		}
-		is.close();
-	}
-
-	private void createClustersFromPostProcessorAnnotations(Collection<PostProcessorAnnotation> ppAnnotations) {
-		// TODO Auto-generated method stub
-//		taskDescription = "Creating clusters from annotations ...";
-//		total = ppAnnotations.size();
-//		processed = 0;
-//		Map<String, Collection<PostProcessorAnnotation>> annotationClusterMap =
-//				new TreeMap<String, Collection<PostProcessorAnnotation>>();
-//
-//		for(PostProcessorAnnotation ppa : ppAnnotations) {
-//
-//			String key = ppa.getBa().getBinNumber() + ";" + ppa.getBa().getCorrClusterNumber() + ";" +
-//					ppa.getBa().getRebinSubclusterNumber();
-//
-//			if(!annotationClusterMap.containsKey(key))
-//				annotationClusterMap.put(key, new HashSet<PostProcessorAnnotation>());
-//
-//			annotationClusterMap.get(key).add(ppa);
-//			processed++;
-//		}
-//		taskDescription = "Mapping features to clusters ...";
-//		total = annotationClusterMap.size();
-//		processed = 0;
-//		for (Entry<String, Collection<PostProcessorAnnotation>> entry : annotationClusterMap.entrySet()) {
-//
-//			MsFeatureCluster newCluster = new MsFeatureCluster();
-//			for(PostProcessorAnnotation ppa : entry.getValue()) {
-//
-//				MsFeature newFeature =
-//					currentProject.getMsFeatureByBinnerNameMzRt(
-//							ppa.getBa().getFeatureName(),
-//							dataPipeline, 
-//							ppa.getBa().getBinnerMz(), 
-//							ppa.getBa().getBinnerRt());
-//
-//				if (newFeature != null) {
-//
-//					newFeature.addPostProcessorAnnotation(ppa);
-//					if(!newCluster.containsFeature(newFeature))
-//						newCluster.addFeature(newFeature, dataPipeline);
-//
-//					clusteredFeatures.add(newFeature);
-//				}
-//				else {
-//					System.out.println(ppa.getBa().getFeatureName());
-//				}
-//			}
-//			if (newCluster.getFeatures().size() > 0) {
-//
-//				newCluster.setClusterCorrMatrix(ClusterUtils.createClusterCorrelationMatrix(newCluster, false));
-//				clusterList.add(newCluster);
-//			}
-//			processed++;
-//		}
-	}
-
-	private Collection<PostProcessorAnnotation> parsePostProcessorAnnotationsWorksheet(Sheet sheet) {
+	protected Collection<PostProcessorAnnotation> parsePostProcessorAnnotationsWorksheet(Sheet sheet) {
 
 		taskDescription = "Parsing PostProcessor output file ...";
 		total = sheet.getLastRowNum();
@@ -329,8 +344,24 @@ public class IDTrackerBinnerReportImportTask extends AbstractTask {
 		}
 		return annotations;
 	}
+	
+	protected Map<BinnerPostProcessorField,Integer>getPostProcessorColumnMap(Row header){
 
-	private void extractClassifier(PostProcessorAnnotation ppa, Row r, Map<BinnerPostProcessorField, Integer> columnMap) {
+		Map<BinnerPostProcessorField,Integer>columnMap = new TreeMap<BinnerPostProcessorField,Integer>();
+		int headerLength = header.getPhysicalNumberOfCells();
+		for (int i=0; i<headerLength; i++) {
+
+			Cell c = header.getCell(i);
+			for(BinnerPostProcessorField field : BinnerPostProcessorField.values()) {
+
+				if(c.getStringCellValue().equals(field.getName()))
+					columnMap.put(field, i);
+			}
+		}
+		return columnMap;
+	}
+
+	protected void extractClassifier(PostProcessorAnnotation ppa, Row r, Map<BinnerPostProcessorField, Integer> columnMap) {
 
 		String superClass = r.getCell(columnMap.get(BinnerPostProcessorField.SUPER_CLASS)).getStringCellValue();
 		String mainClass = r.getCell(columnMap.get(BinnerPostProcessorField.MAIN_CLASS)).getStringCellValue();
@@ -346,7 +377,7 @@ public class IDTrackerBinnerReportImportTask extends AbstractTask {
 		}
 	}
 
-	private void extractSynonyms(PostProcessorAnnotation ppa, Row r, Map<BinnerPostProcessorField, Integer> columnMap) {
+	protected void extractSynonyms(PostProcessorAnnotation ppa, Row r, Map<BinnerPostProcessorField, Integer> columnMap) {
 
 		ppa.addSynonym(r.getCell(columnMap.get(BinnerPostProcessorField.BROAD_NAME)).getStringCellValue(),
 				BinnerPostProcessorField.BROAD_NAME.getName());
@@ -366,7 +397,7 @@ public class IDTrackerBinnerReportImportTask extends AbstractTask {
 				BinnerPostProcessorField.OTHER_NAME4.getName());
 	}
 
-	private CompoundIdentity extractCompoundIdentity(Row r, Map<BinnerPostProcessorField,Integer> columnMap) {
+	protected CompoundIdentity extractCompoundIdentity(Row r, Map<BinnerPostProcessorField,Integer> columnMap) {
 
 		String compoundName = r.getCell(columnMap.get(BinnerPostProcessorField.COMPOUND_NAME)).getStringCellValue();
 		if(compoundName.isEmpty())
@@ -417,7 +448,7 @@ public class IDTrackerBinnerReportImportTask extends AbstractTask {
 		return cid;
 	}
 
-	private BinnerAnnotation extractBinnerAnnotationData(Row r, Map<BinnerPostProcessorField,Integer> columnMap) {
+	protected BinnerAnnotation extractBinnerAnnotationData(Row r, Map<BinnerPostProcessorField,Integer> columnMap) {
 
 		String featureName = r.getCell(columnMap.get(BinnerPostProcessorField.FEATURE)).getStringCellValue();
 		if(featureName.isEmpty())
@@ -477,9 +508,7 @@ public class IDTrackerBinnerReportImportTask extends AbstractTask {
 		return ba;
 	}
 
-
-
-	private void createFeatureClusters(Collection<BinnerAnnotation> annotations) {
+	protected void createFeatureClusters(Collection<BinnerAnnotation> annotations) {
 
 //		taskDescription = "Creating clusters from annotations ...";
 //		total = annotations.size();
@@ -531,129 +560,82 @@ public class IDTrackerBinnerReportImportTask extends AbstractTask {
 //			processed++;
 //		}
 	}
-
-	private Collection<BinnerAnnotation> parseClusterCorrelationWorksheet(Sheet sheet) {
-
-		taskDescription = "Parsing Binner output file ...";
-		total = sheet.getLastRowNum();
-		processed = 0;
-		Collection<BinnerAnnotation>annotations = new HashSet<BinnerAnnotation>();
-		Cell currentCell;
-
-		Map<BinnerField, Integer> columnMap = getBinnerColumnMap(sheet.iterator().next());
-		if(!CollectionUtils.containsAll(columnMap.keySet(), Arrays.asList(BinnerField.values()))){
-
-			MessageDialog.showErrorMsg("Binner column naming mismatch!", MRC2ToolBoxCore.getMainWindow());
-			setStatus(TaskStatus.FINISHED);
-			return null;
-		}
-		for (Row r : sheet) {
-			processed++;
-			if(r.getRowNum() > 0 &&!r.getCell(0).getStringCellValue().trim().isEmpty()
-					&& !r.getCell(columnMap.get(BinnerField.ANNOTATION)).getStringCellValue().trim().isEmpty()) {
-
-				String featureName = r.getCell(columnMap.get(BinnerField.FEATURE)).getStringCellValue();
-				short fcol = r.getCell(columnMap.get(BinnerField.ANNOTATION)).getCellStyle().getFillForegroundColor();
-				BinnerAnnotation ba =
-						new BinnerAnnotation(featureName,
-								r.getCell(columnMap.get(BinnerField.ANNOTATION)).getStringCellValue());
-				if(fcol == 42)
-					ba.setPrimary(true);
-
-				ba.setDerivations(r.getCell(columnMap.get(BinnerField.DERIVATIONS)).getStringCellValue());
-				ba.setIsotopes(r.getCell(columnMap.get(BinnerField.ISOTOPES)).getStringCellValue());
-
-				currentCell = r.getCell(columnMap.get(BinnerField.MASS_ERROR));
-				if(currentCell.getCellType().equals(CellType.NUMERIC))
-					ba.setMassError(currentCell.getNumericCellValue());
-
-				currentCell = r.getCell(columnMap.get(BinnerField.KMD));
-				if(currentCell.getCellType().equals(CellType.NUMERIC))
-					ba.setKmd(currentCell.getNumericCellValue());
-
-				currentCell = r.getCell(columnMap.get(BinnerField.FEATURE_GROUP_NUMBER));
-				if(currentCell.getCellType().equals(CellType.NUMERIC))
-					ba.setMolIonNumber((int) currentCell.getNumericCellValue());
-
-				ba.setChargeCarrier(r.getCell(columnMap.get(BinnerField.CHARGE_CARRIER)).getStringCellValue());
-				ba.setAdditionalAdducts(r.getCell(columnMap.get(BinnerField.ADDITIONAL_ADDUCTS)).getStringCellValue());
-
-				currentCell = r.getCell(columnMap.get(BinnerField.BIN));
-				if(currentCell.getCellType().equals(CellType.NUMERIC))
-					ba.setBinNumber((int) currentCell.getNumericCellValue());
-
-				currentCell = r.getCell(columnMap.get(BinnerField.CLUSTER));
-				if(currentCell.getCellType().equals(CellType.NUMERIC))
-					ba.setCorrClusterNumber((int) currentCell.getNumericCellValue());
-
-				currentCell = r.getCell(columnMap.get(BinnerField.REBIN_SUBCLUSTER));
-				if(currentCell.getCellType().equals(CellType.NUMERIC))
-					ba.setRebinSubclusterNumber((int) currentCell.getNumericCellValue());
-
-				currentCell = r.getCell(columnMap.get(BinnerField.RT_SUBCLUSTER));
-				if(currentCell.getCellType().equals(CellType.NUMERIC))
-					ba.setRtSubclusterNumber((int) currentCell.getNumericCellValue());
-
-				currentCell = r.getCell(columnMap.get(BinnerField.MZ));
-				if(currentCell.getCellType().equals(CellType.NUMERIC))
-					ba.setBinnerMz(currentCell.getNumericCellValue());
-
-				currentCell = r.getCell(columnMap.get(BinnerField.RT));
-				if(currentCell.getCellType().equals(CellType.NUMERIC))
-					ba.setBinnerRt(currentCell.getNumericCellValue());
-
-				annotations.add(ba);
-			}
-		}
-		return annotations;
+	
+	protected void createClustersFromPostProcessorAnnotations(Collection<PostProcessorAnnotation> ppAnnotations) {
+		// TODO Auto-generated method stub
+//		taskDescription = "Creating clusters from annotations ...";
+//		total = ppAnnotations.size();
+//		processed = 0;
+//		Map<String, Collection<PostProcessorAnnotation>> annotationClusterMap =
+//				new TreeMap<String, Collection<PostProcessorAnnotation>>();
+//
+//		for(PostProcessorAnnotation ppa : ppAnnotations) {
+//
+//			String key = ppa.getBa().getBinNumber() + ";" + ppa.getBa().getCorrClusterNumber() + ";" +
+//					ppa.getBa().getRebinSubclusterNumber();
+//
+//			if(!annotationClusterMap.containsKey(key))
+//				annotationClusterMap.put(key, new HashSet<PostProcessorAnnotation>());
+//
+//			annotationClusterMap.get(key).add(ppa);
+//			processed++;
+//		}
+//		taskDescription = "Mapping features to clusters ...";
+//		total = annotationClusterMap.size();
+//		processed = 0;
+//		for (Entry<String, Collection<PostProcessorAnnotation>> entry : annotationClusterMap.entrySet()) {
+//
+//			MsFeatureCluster newCluster = new MsFeatureCluster();
+//			for(PostProcessorAnnotation ppa : entry.getValue()) {
+//
+//				MsFeature newFeature =
+//					currentProject.getMsFeatureByBinnerNameMzRt(
+//							ppa.getBa().getFeatureName(),
+//							dataPipeline, 
+//							ppa.getBa().getBinnerMz(), 
+//							ppa.getBa().getBinnerRt());
+//
+//				if (newFeature != null) {
+//
+//					newFeature.addPostProcessorAnnotation(ppa);
+//					if(!newCluster.containsFeature(newFeature))
+//						newCluster.addFeature(newFeature, dataPipeline);
+//
+//					clusteredFeatures.add(newFeature);
+//				}
+//				else {
+//					System.out.println(ppa.getBa().getFeatureName());
+//				}
+//			}
+//			if (newCluster.getFeatures().size() > 0) {
+//
+//				newCluster.setClusterCorrMatrix(ClusterUtils.createClusterCorrelationMatrix(newCluster, false));
+//				clusterList.add(newCluster);
+//			}
+//			processed++;
+//		}
 	}
 
 
-	private Map<BinnerField,Integer>getBinnerColumnMap(Row header){
 
-		Map<BinnerField,Integer>columnMap = new TreeMap<BinnerField,Integer>();
-		int headerLength = header.getPhysicalNumberOfCells();
-		for (int i=0; i<headerLength; i++) {
-
-			Cell c = header.getCell(i);
-			for(BinnerField field : BinnerField.values()) {
-
-				if(c.getStringCellValue().equals(field.getName()))
-					columnMap.put(field, i);
-			}
-		}
-		return columnMap;
+	public File getBinnerDataFile() {
+		return binnerDataFile;
 	}
+	
 
-	private Map<BinnerPostProcessorField,Integer>getPostProcessorColumnMap(Row header){
-
-		Map<BinnerPostProcessorField,Integer>columnMap = new TreeMap<BinnerPostProcessorField,Integer>();
-		int headerLength = header.getPhysicalNumberOfCells();
-		for (int i=0; i<headerLength; i++) {
-
-			Cell c = header.getCell(i);
-			for(BinnerPostProcessorField field : BinnerPostProcessorField.values()) {
-
-				if(c.getStringCellValue().equals(field.getName()))
-					columnMap.put(field, i);
-			}
-		}
-		return columnMap;
+	public File getPostprocessorDataFile() {
+		return postprocessorDataFile;
 	}
+	
 
-	@Override
-	public Task cloneTask() {
-		return new IDTrackerBinnerReportImportTask(
-				binnerDataFile, postprocessorDataFile, experiment);
+	public Collection<PostProcessorAnnotation> getPpAnnotations() {
+		return ppAnnotations;
 	}
+	
 
-	public HashSet<MsFeatureCluster> getFeatureClusters() {
-		return clusterList;
-	}
-
-	public ArrayList<String> getUnassignedFeatures() {
-		return unassignedFeatures;
-	}
+	public Collection<BinnerAnnotation> getBinnerAnnotations() {
+		return binnerAnnotations;
+	}	
 }
 
 
