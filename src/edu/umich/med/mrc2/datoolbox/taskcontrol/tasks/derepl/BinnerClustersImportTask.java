@@ -414,10 +414,6 @@ public class BinnerClustersImportTask extends AbstractTask {
 		if(currentCell.getCellType().equals(CellType.NUMERIC))
 			ba.setMassError(currentCell.getNumericCellValue());
 
-		currentCell = r.getCell(columnMap.get(BinnerPostProcessorField.KMD));
-		if(currentCell.getCellType().equals(CellType.NUMERIC))
-			ba.setKmd(currentCell.getNumericCellValue());
-
 		currentCell = r.getCell(columnMap.get(BinnerPostProcessorField.FEATURE_GROUP_NUMBER));
 		if(currentCell.getCellType().equals(CellType.NUMERIC))
 			ba.setMolIonNumber((int) currentCell.getNumericCellValue());

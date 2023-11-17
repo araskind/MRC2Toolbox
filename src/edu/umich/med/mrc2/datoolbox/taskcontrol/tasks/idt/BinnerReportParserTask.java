@@ -470,11 +470,7 @@ public abstract class BinnerReportParserTask extends AbstractTask {
 		Cell currentCell = r.getCell(columnMap.get(BinnerPostProcessorField.MASS_ERROR));
 		if(currentCell.getCellType().equals(CellType.NUMERIC))
 			ba.setMassError(currentCell.getNumericCellValue());
-
-		currentCell = r.getCell(columnMap.get(BinnerPostProcessorField.KMD));
-		if(currentCell.getCellType().equals(CellType.NUMERIC))
-			ba.setKmd(currentCell.getNumericCellValue());
-
+		
 		currentCell = r.getCell(columnMap.get(BinnerPostProcessorField.FEATURE_GROUP_NUMBER));
 		if(currentCell.getCellType().equals(CellType.NUMERIC))
 			ba.setMolIonNumber((int) currentCell.getNumericCellValue());

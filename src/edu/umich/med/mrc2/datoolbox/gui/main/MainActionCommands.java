@@ -1261,6 +1261,16 @@ public enum MainActionCommands {
 	SELECT_LOOKUP_FEATURE_LIST_FROM_DATABASE_COMMAND("Select lookup features list from database"),
 	LOAD_LOOKUP_FEATURE_LIST_FROM_DATABASE_COMMAND("Load lookup features list from database"),
 	
+	//	Binner annotations lookup
+	IMPORT_BINNER_ANNOTATIONS_FROM_FILE_COMMAND("Import Binner annotations from file"),
+	SELECT_BINNER_ANNOTATIONS_FROM_DATABASE_COMMAND("Select Binner annotations set from database"),
+	LOAD_BINNER_ANNOTATIONS_FROM_DATABASE_COMMAND("Load Binner annotations set from database"),	
+	ADD_BINNER_ANNOTATIONS_DATA_SET_DIALOG_COMMAND("Create new Binner annotations lookup data set"),
+	ADD_BINNER_ANNOTATIONS_DATA_SET_COMMAND("Save new Binner annotations lookup data set"),
+	EDIT_BINNER_ANNOTATIONS_DATA_SET_DIALOG_COMMAND("Edit selected Binner annotations lookup data set"),
+	EDIT_BINNER_ANNOTATIONS_DATA_SET_COMMAND("Save edited Binner annotations lookup data set"),
+	DELETE_BINNER_ANNOTATIONS_DATA_SET_COMMAND("Delete selected Binner annotations lookup data set"),
+	
 	//	Manual peak integration
 	SHOW_MANUAL_INTEGRATOR_SETTINGS("Show manual integrator settings"),
 	SAVE_MANUAL_INTEGRATOR_SETTINGS("Save manual integrator settings"),

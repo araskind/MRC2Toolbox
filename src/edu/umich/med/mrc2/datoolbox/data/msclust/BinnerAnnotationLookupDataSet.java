@@ -26,21 +26,22 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
 import org.jdom2.Element;
 
-import edu.umich.med.mrc2.datoolbox.data.MinimalMSOneFeature;
+import edu.umich.med.mrc2.datoolbox.data.BinnerAnnotationCluster;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
-import edu.umich.med.mrc2.datoolbox.project.store.FeatureLookupDataSetFields;
-import edu.umich.med.mrc2.datoolbox.project.store.MinimalMSOneFeatureFields;
+import edu.umich.med.mrc2.datoolbox.project.store.BinnerAnnotationClusterFields;
+import edu.umich.med.mrc2.datoolbox.project.store.BinnerAnnotationLookupDataSetFields;
 import edu.umich.med.mrc2.datoolbox.utils.ExperimentUtils;
 
-public class FeatureLookupDataSet implements Comparable<FeatureLookupDataSet>{
+public class BinnerAnnotationLookupDataSet implements Comparable<BinnerAnnotationLookupDataSet>{
 
 	private String id;
 	private String name;
@@ -48,9 +49,9 @@ public class FeatureLookupDataSet implements Comparable<FeatureLookupDataSet>{
 	private LIMSUser createdBy;
 	private Date dateCreated;
 	private Date lastModified;
-	private Set<MinimalMSOneFeature>features;
+	private Set<BinnerAnnotationCluster>annotationClusters;
 	
-	public FeatureLookupDataSet(
+	public BinnerAnnotationLookupDataSet(
 			String name, 
 			String description, 
 			LIMSUser createdBy) {
@@ -58,12 +59,12 @@ public class FeatureLookupDataSet implements Comparable<FeatureLookupDataSet>{
 				new Date(), new Date());
 	}
 	
-	public FeatureLookupDataSet(String name) {
+	public BinnerAnnotationLookupDataSet(String name) {
 		this(name, name, MRC2ToolBoxCore.getIdTrackerUser(), 
 				new Date(), new Date());
 	}
 	
-	public FeatureLookupDataSet(
+	public BinnerAnnotationLookupDataSet(
 			String id, 
 			String name, 
 			String description, 
@@ -74,31 +75,31 @@ public class FeatureLookupDataSet implements Comparable<FeatureLookupDataSet>{
 		this.id = id;
 	}
 
-	public FeatureLookupDataSet(
+	public BinnerAnnotationLookupDataSet(
 			String name, 
 			String description, 
 			LIMSUser createdBy, 
 			Date dateCreated,
 			Date lastModified) {
 		super();
-		this.id = DataPrefix.LOOKUP_FEATURE_DATA_SET.getName() + 
+		this.id = DataPrefix.LOOKUP_BINNER_ANNOTATIONS_DATA_SET.getName() + 
 				UUID.randomUUID().toString().substring(0, 6);
 		this.name = name;
 		this.description = description;
 		this.createdBy = createdBy;
 		this.dateCreated = dateCreated;
 		this.lastModified = lastModified;
-		features = new HashSet<MinimalMSOneFeature>();
+		annotationClusters = new HashSet<BinnerAnnotationCluster>();
 	}
 	
-	public FeatureLookupDataSet(
+	public BinnerAnnotationLookupDataSet(
 			String name, 
 			String description, 
-			Collection<MinimalMSOneFeature> features2) {
+			Collection<BinnerAnnotationCluster> annotationClusters2) {
 
 		this(name, description, MRC2ToolBoxCore.getIdTrackerUser(), 
 				new Date(), new Date());
-		this.features = new HashSet<MinimalMSOneFeature>(features2);
+		this.annotationClusters = new HashSet<BinnerAnnotationCluster>(annotationClusters2);
 	}
 
 	@Override
@@ -110,10 +111,10 @@ public class FeatureLookupDataSet implements Comparable<FeatureLookupDataSet>{
 		if (obj == null)
 			return false;
 
-		if (!FeatureLookupDataSet.class.isAssignableFrom(obj.getClass()))
+		if (!BinnerAnnotationLookupDataSet.class.isAssignableFrom(obj.getClass()))
 			return false;
 
-		final FeatureLookupDataSet other = (FeatureLookupDataSet) obj;
+		final BinnerAnnotationLookupDataSet other = (BinnerAnnotationLookupDataSet) obj;
 
 		if ((this.id == null) ? (other.getId() != null) : !this.id.equals(other.getId()))
 			return false;
@@ -130,7 +131,7 @@ public class FeatureLookupDataSet implements Comparable<FeatureLookupDataSet>{
 	}
 
 	@Override
-	public int compareTo(FeatureLookupDataSet o) {
+	public int compareTo(BinnerAnnotationLookupDataSet o) {
 		return name.compareTo(o.getName());
 	}
 
@@ -187,92 +188,88 @@ public class FeatureLookupDataSet implements Comparable<FeatureLookupDataSet>{
 		this.lastModified = lastModified;
 	}
 
-	public Set<MinimalMSOneFeature> getFeatures() {
-		return features;
+	public Set<BinnerAnnotationCluster> getFeatures() {
+		return annotationClusters;
 	}
 
-	public void setFeatures(Set<MinimalMSOneFeature> features) {
-		this.features = features;
+	public void setFeatures(Set<BinnerAnnotationCluster> features) {
+		this.annotationClusters = features;
 	}
 
 	public Element getXmlElement() {
 
-		Element featureLookupDataSetElement = 
-				new Element(FeatureLookupDataSetFields.FeatureLookupDataSet.name());
-		featureLookupDataSetElement.setAttribute(
-				FeatureLookupDataSetFields.Id.name(), id);	
-		featureLookupDataSetElement.setAttribute(
-				FeatureLookupDataSetFields.Name.name(), name);
-		String descString = description;
-		if(descString == null)
-			descString = "";
-		
-		featureLookupDataSetElement.setAttribute(
-				FeatureLookupDataSetFields.Description.name(), descString);
-		featureLookupDataSetElement.setAttribute(
-				FeatureLookupDataSetFields.CreatedBy.name(), createdBy.getId());	
-		featureLookupDataSetElement.setAttribute(
-				FeatureLookupDataSetFields.DateCreated.name(), 
+		Element binnerAnnotationLookupDataSetElement = 
+				new Element(BinnerAnnotationLookupDataSetFields.BinnerAnnotationLookupDataSet.name());
+		binnerAnnotationLookupDataSetElement.setAttribute(
+				BinnerAnnotationLookupDataSetFields.Id.name(), id);	
+		binnerAnnotationLookupDataSetElement.setAttribute(
+				BinnerAnnotationLookupDataSetFields.Name.name(), name);
+		binnerAnnotationLookupDataSetElement.setAttribute(
+				BinnerAnnotationLookupDataSetFields.Description.name(), Objects.toString(description, ""));
+		binnerAnnotationLookupDataSetElement.setAttribute(
+				BinnerAnnotationLookupDataSetFields.CreatedBy.name(), createdBy.getId());	
+		binnerAnnotationLookupDataSetElement.setAttribute(
+				BinnerAnnotationLookupDataSetFields.DateCreated.name(), 
 				ExperimentUtils.dateTimeFormat.format(dateCreated));
-		featureLookupDataSetElement.setAttribute(
-				FeatureLookupDataSetFields.LastModified.name(), 
+		binnerAnnotationLookupDataSetElement.setAttribute(
+				BinnerAnnotationLookupDataSetFields.LastModified.name(), 
 				ExperimentUtils.dateTimeFormat.format(lastModified));		
 
-        Element featureListElement = 
-        		new Element(FeatureLookupDataSetFields.FeatureList.name());
-        if(!features.isEmpty()) {
+        Element bacListElement = 
+        		new Element(BinnerAnnotationLookupDataSetFields.BAList.name());
+        if(!annotationClusters.isEmpty()) {
         	
-        	for(MinimalMSOneFeature fbc : features)
-        		featureListElement.addContent(fbc.getXmlElement());      	
+        	for(BinnerAnnotationCluster bac : annotationClusters)
+        		bacListElement.addContent(bac.getXmlElement());      	
         }       
-        featureLookupDataSetElement.addContent(featureListElement);
+        binnerAnnotationLookupDataSetElement.addContent(bacListElement);
  	
-		return featureLookupDataSetElement;
+		return binnerAnnotationLookupDataSetElement;
 	}
 	
-	public FeatureLookupDataSet(Element xmlElement) {
+	public BinnerAnnotationLookupDataSet(Element xmlElement) {
 				
-		this.id = xmlElement.getAttributeValue(FeatureLookupDataSetFields.Id.name());
+		this.id = xmlElement.getAttributeValue(BinnerAnnotationLookupDataSetFields.Id.name());
 		if(id == null)
 			this.id = DataPrefix.LOOKUP_FEATURE_DATA_SET.getName() + 
 				UUID.randomUUID().toString().substring(0, 6);
 		
-		this.name = xmlElement.getAttributeValue(FeatureLookupDataSetFields.Name.name());
-		this.description = xmlElement.getAttributeValue(FeatureLookupDataSetFields.Description.name());
+		this.name = xmlElement.getAttributeValue(BinnerAnnotationLookupDataSetFields.Name.name());
+		this.description = xmlElement.getAttributeValue(BinnerAnnotationLookupDataSetFields.Description.name());
 		try {
 			this.dateCreated = ExperimentUtils.dateTimeFormat.parse(
-					xmlElement.getAttributeValue(FeatureLookupDataSetFields.DateCreated.name()));
+					xmlElement.getAttributeValue(BinnerAnnotationLookupDataSetFields.DateCreated.name()));
 		} catch (ParseException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		try {
 			this.lastModified = ExperimentUtils.dateTimeFormat.parse(
-					xmlElement.getAttributeValue(FeatureLookupDataSetFields.LastModified.name()));
+					xmlElement.getAttributeValue(BinnerAnnotationLookupDataSetFields.LastModified.name()));
 		} catch (ParseException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}		
-		String userId =  xmlElement.getAttributeValue(FeatureLookupDataSetFields.CreatedBy.name());
+		String userId =  xmlElement.getAttributeValue(BinnerAnnotationLookupDataSetFields.CreatedBy.name());
 		if(userId != null)
 			this.createdBy = IDTDataCache.getUserById(userId);
 		else
 			this.createdBy = MRC2ToolBoxCore.getIdTrackerUser();
 		
-		features = new HashSet<MinimalMSOneFeature>();
+		annotationClusters = new HashSet<BinnerAnnotationCluster>();
 		
-		List<Element> featureListElements = 
-				xmlElement.getChildren(FeatureLookupDataSetFields.FeatureList.name());
-		if(featureListElements.size() > 0) {
+		List<Element> bacListElements = 
+				xmlElement.getChildren(BinnerAnnotationLookupDataSetFields.BAList.name());
+		if(bacListElements.size() > 0) {
 			
-			List<Element> featureElementList = 
-					featureListElements.get(0).getChildren(MinimalMSOneFeatureFields.MinimalMSOneFeature.name());
-			for(Element featureElement : featureElementList) {
+			List<Element> bacElementList = 
+					bacListElements.get(0).getChildren(BinnerAnnotationClusterFields.BinnerAnnotationCluster.name());
+			for(Element bacElement : bacElementList) {
 				
-				MinimalMSOneFeature newFeature = 
-						new MinimalMSOneFeature(featureElement);
-				if(newFeature != null)
-					features.add(newFeature);
+				BinnerAnnotationCluster newCluster = 
+						new BinnerAnnotationCluster(bacElement);
+				if(newCluster != null)
+					annotationClusters.add(newCluster);
 			}
 		}
 	}
