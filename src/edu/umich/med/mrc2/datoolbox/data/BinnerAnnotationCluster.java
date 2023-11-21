@@ -21,6 +21,8 @@
 
 package edu.umich.med.mrc2.datoolbox.data;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -28,6 +30,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.UUID;
 
+import org.apache.commons.lang.StringUtils;
 import org.jdom2.Element;
 
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
@@ -177,6 +180,19 @@ public class BinnerAnnotationCluster {
 				primaryFeatureAnnotation = annotation;
 			}
 		}
+	}
+	
+	public String toString() {
+		return primaryFeatureAnnotation.getNameWithAnnotation();
+	}
+	
+	public String getAllAnnotationsAsString() {
+		
+		Collection<String>allAnnotations = new ArrayList<String>();
+		annotations.stream().
+			forEach(a -> allAnnotations.add(a.getCleanAnnotation()));
+		
+		return StringUtils.join(allAnnotations, "; ");
 	}
 }
 

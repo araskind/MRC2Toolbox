@@ -82,6 +82,9 @@ public class IDWorkbenchMenuBar extends CommonMenuBar {
 	private static final Icon reloadClusterTreeIcon = GuiUtils.getIcon("rerun", 24);
 	private static final Icon clusteringSummaryIcon = GuiUtils.getIcon("summary", 24);
 	private static final Icon mzFrequencyIcon = GuiUtils.getIcon("mzFrequency", 24);
+	private static final Icon binnerLookupIcon = GuiUtils.getIcon("binnerLookupIcon", 24);
+	
+	//	binnerLookupIcon
 
 	// Menus
 	private JMenu
@@ -115,6 +118,7 @@ public class IDWorkbenchMenuBar extends CommonMenuBar {
 	//	Clustering
 	private JMenuItem
 		activeDataSetSearchMenuItem,
+		binnerLookupSearchMenuItem,
 		reloadActiveClusterSetFeaturesMenuItem,
 		extractMajorClusterFeaturesMenuItem,
 		filterClustersMenuItem,
@@ -229,6 +233,10 @@ public class IDWorkbenchMenuBar extends CommonMenuBar {
 		activeDataSetSearchMenuItem = addItem(clusterMenu, 
 				MainActionCommands.SHOW_ACTIVE_DATA_SET_MZ_RT_SEARCH_DIALOG_COMMAND, 
 				clusterIcon);
+		
+		binnerLookupSearchMenuItem = addItem(clusterMenu, 
+				MainActionCommands.SHOW_ACTIVE_DATA_SET_BINNER_ANNOTATION_SEARCH_DIALOG_COMMAND, 
+				binnerLookupIcon);
 		
 		extractMajorClusterFeaturesMenuItem = addItem(clusterMenu, 
 				MainActionCommands.SETUP_MAJOR_CLUSTER_FEATURE_EXTRACTION_COMMAND, 

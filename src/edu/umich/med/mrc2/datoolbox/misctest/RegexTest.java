@@ -44,6 +44,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -65,6 +67,10 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.UUID;
 import java.util.stream.Collectors;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
@@ -146,6 +152,7 @@ import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.MSMSLibraryUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.MSRTLibraryUtils;
+import edu.umich.med.mrc2.datoolbox.database.idt.UserUtils;
 import edu.umich.med.mrc2.datoolbox.database.lims.LIMSUtils;
 import edu.umich.med.mrc2.datoolbox.database.thermo.CompoundDiscovererUtils;
 import edu.umich.med.mrc2.datoolbox.database.thermo.ThermoSqliteConnectionManager;
@@ -203,15 +210,39 @@ public class RegexTest {
 				MRC2ToolBoxCore.configDir + "MRC2ToolBoxPrefs.txt");
 		MRC2ToolBoxConfiguration.initConfiguration();
 		try {
-			batchDFileRename();
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 	
+	private static void newPass(String pw) {
+		
+		String res = "";
+		try {
+			res = UserUtils.encryptString(pw);
+		} catch (InvalidKeyException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (NoSuchAlgorithmException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (NoSuchPaddingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalBlockSizeException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (BadPaddingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		System.out.println(res);
+	}
+	
 	private static void batchDFileRename() {
 		
-		File sourceDirectory = new File("E:\\_Downloads\\_2_rename\\2023-10-02 Bravo Test");
+		File sourceDirectory = new File("E:\\_Downloads\\_2_rename\\EX01355-POS-B1");
 		IOFileFilter dotDfilter = 
 				FileFilterUtils.makeDirectoryOnly(new RegexFileFilter(".+\\.[dD]$"));
 		Collection<File> dotDfiles = FileUtils.listFilesAndDirs(
@@ -219,7 +250,7 @@ public class RegexTest {
 				DirectoryFileFilter.DIRECTORY,
 				dotDfilter);
 		File renameMapFile = new File(
-				"E:\\_Downloads\\_2_rename\\2023-10-02 Bravo Test\\rename_map.txt");
+				"E:\\_Downloads\\_2_rename\\EX01355-POS-B1\\rename_map.txt");
 		String[][] renameMapping = DelimitedTextParser.parseTextFile(
 				renameMapFile, MRC2ToolBoxConfiguration.getTabDelimiter());
 		Map<String,String>fileNameMap = new TreeMap<String,String>();
@@ -244,8 +275,9 @@ public class RegexTest {
 			if(sInfoRenamed) {
 				
 				Path source = Paths.get(ddf.getAbsolutePath());
+				Path destination = Paths.get(sourceDirectory.getAbsolutePath(), "RENAMED", newFileName);
 				try {
-					Files.move(source, source.resolveSibling(newName));
+					Files.move(source, destination);
 				} catch (IOException e) {
 					e.printStackTrace();
 				}

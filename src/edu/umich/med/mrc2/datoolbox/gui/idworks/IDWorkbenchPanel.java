@@ -153,6 +153,7 @@ import edu.umich.med.mrc2.datoolbox.gui.idworks.nist.nistms.NISTMSSerchSetupDial
 import edu.umich.med.mrc2.datoolbox.gui.idworks.nist.pepsearch.PepSearchSetupDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.nist.pepsearch.io.PepserchResultsImportDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.search.ads.ActiveDataSetMZRTDataSearchDialog;
+import edu.umich.med.mrc2.datoolbox.gui.idworks.search.binner.ActiveDataSetBinnerAnnotationsSearchDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.search.byexp.ExperimentMZRTDataSearchDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.search.dbwide.IDTrackerDataSearchDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.stan.DockableStandardFeatureAnnotationTable;
@@ -302,6 +303,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 	private MSMSClusterFilterDialog msmsClusterFilterDialog;
 	private MajorClusterFeatureExtractionSetupDialog majorClusterFeatureExtractionSetupDialog;
 	private MzFrequencyAnalysisSetupDialog mzFrequencyAnalysisSetupDialog;
+	private ActiveDataSetBinnerAnnotationsSearchDialog activeDataSetBinnerAnnotationsSearchDialog;
 	
 	private static final Icon searchIdTrackerIcon = GuiUtils.getIcon("searchDatabase", 24);
 	private static final Icon searchExperimentIcon = GuiUtils.getIcon("searchIdExperiment", 24);
@@ -594,6 +596,12 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		if (command.equals(MainActionCommands.SEARCH_ACTIVE_DATA_SET_BY_MZ_RT_COMMAND.getName()))
 			searchActiveDataSetBMzRt();	
 		
+		if (command.equals(MainActionCommands.SHOW_ACTIVE_DATA_SET_BINNER_ANNOTATION_SEARCH_DIALOG_COMMAND.getName()))
+			showTrackerSearchByBinnerAnnotationsDialog();
+		
+		if (command.equals(MainActionCommands.SEARCH_ACTIVE_DATA_SET_BY_BINNER_ANNOTATION_COMMAND.getName()))
+			searchActiveDataSetByBinnerAnnotations();
+		
 		if (command.equals(MainActionCommands.NIST_MS_SEARCH_SETUP_COMMAND.getName()))
 			showNistSearchSetup();
 		
@@ -855,6 +863,27 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 				
 		if (command.equals(MainActionCommands.RUN_MZ_FREQUENCY_ANALYSIS_COMMAND.getName()))
 			runMSMSParentIonFrequencyAnalysis();		
+	}
+
+	private void showTrackerSearchByBinnerAnnotationsDialog() {
+
+		Collection<MSFeatureInfoBundle> allFeatures = 
+				msTwoFeatureTable.getBundles(TableRowSubset.ALL);
+		if(allFeatures.isEmpty())
+			return;
+		
+		activeDataSetBinnerAnnotationsSearchDialog = 
+				new ActiveDataSetBinnerAnnotationsSearchDialog(this);
+		activeDataSetBinnerAnnotationsSearchDialog.setLocationRelativeTo(this.getContentPane());
+		activeDataSetBinnerAnnotationsSearchDialog.setVisible(true);
+	}
+
+	private void searchActiveDataSetByBinnerAnnotations() {
+		// TODO Auto-generated method stub
+		
+		
+		
+		activeDataSetBinnerAnnotationsSearchDialog.dispose();
 	}
 
 	private void setUpMSMSParentIonFrequencyAnalysis() {

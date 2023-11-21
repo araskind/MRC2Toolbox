@@ -53,13 +53,13 @@ import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
 
-import edu.umich.med.mrc2.datoolbox.data.MinimalMSOneFeature;
+import edu.umich.med.mrc2.datoolbox.data.BinnerAnnotationCluster;
 import edu.umich.med.mrc2.datoolbox.data.msclust.BinnerAnnotationLookupDataSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.FeatureLookupDataSet;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
-import edu.umich.med.mrc2.datoolbox.main.FeatureLookupDataSetManager;
+import edu.umich.med.mrc2.datoolbox.main.BinnerAnnotationDataSetManager;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 
@@ -259,22 +259,22 @@ public class BinnerAnnotationsLookupDataSetEditorDialog extends JDialog
 		if(nameError != null)
 			errors.add(nameError);
 		
-		if(dataSet == null && binnerAnnotationsImportPanel.getAllFeatures().isEmpty())
-			errors.add("Feature list not specified");
+		if(dataSet == null && binnerAnnotationsImportPanel.getAllClusters().isEmpty())
+			errors.add("Binner annotations list not specified");
 				
 		return errors;
 	}
 	
 	private String validateNameAgainstDatabase(String newName) {
 		
-		FeatureLookupDataSetManager.refreshFeatureLookupDataSetList();
-		FeatureLookupDataSet existing = null;
+		BinnerAnnotationDataSetManager.refreshBinnerAnnotationLookupDataSetList();
+		BinnerAnnotationLookupDataSet existing = null;
 		if(this.dataSet == null) {
-			existing = FeatureLookupDataSetManager.getFeatureLookupDataSetByName(newName);
+			existing = BinnerAnnotationDataSetManager.getBinnerAnnotationDataSetByName(newName);
 		}
 		else {
 			String id = dataSet.getId();
-			existing = FeatureLookupDataSetManager.getFeatureLookupDataSetList().stream().
+			existing = BinnerAnnotationDataSetManager.getBinnerAnnotationLookupDataSetList().stream().
 					filter(f -> !f.getId().equals(id)).
 					filter(f -> f.getName().equalsIgnoreCase(newName)).
 					findFirst().orElse(null);
@@ -287,7 +287,7 @@ public class BinnerAnnotationsLookupDataSetEditorDialog extends JDialog
 	
 	private String validateNameAgainstProject(String newName) {
 		
-		FeatureLookupDataSet existing = null;
+		BinnerAnnotationDataSetManager existing = null;
 		Set<FeatureLookupDataSet> projectFeatureLookupDataSets = 
 				MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment().
 					getMsmsClusterDataSets().stream().
@@ -295,19 +295,20 @@ public class BinnerAnnotationsLookupDataSetEditorDialog extends JDialog
 					map(d -> d.getFeatureLookupDataSet()).collect(Collectors.toSet());
 		if(projectFeatureLookupDataSets.isEmpty())
 			return null;
-		
-		if(this.dataSet == null) {
-			existing = projectFeatureLookupDataSets.stream().
-					filter(d -> d.getName().equals(newName)).
-					findFirst().orElse(null);
-		}
-		else {
-			String id = dataSet.getId();
-			existing = projectFeatureLookupDataSets.stream().
-					filter(f -> !f.getId().equals(id)).
-					filter(f -> f.getName().equalsIgnoreCase(newName)).
-					findFirst().orElse(null);
-		}
+
+		//	TODO
+//		if(this.dataSet == null) {
+//			existing = projectFeatureLookupDataSets.stream().
+//					filter(d -> d.getName().equals(newName)).
+//					findFirst().orElse(null);
+//		}
+//		else {
+//			String id = dataSet.getId();
+//			existing = projectFeatureLookupDataSets.stream().
+//					filter(f -> !f.getId().equals(id)).
+//					filter(f -> f.getName().equalsIgnoreCase(newName)).
+//					findFirst().orElse(null);
+//		}
 		if(existing != null)
 			return "Collection \"" + newName + "\" already exists.";
 		else
@@ -340,12 +341,12 @@ public class BinnerAnnotationsLookupDataSetEditorDialog extends JDialog
 		return binnerAnnotationsImportPanel.getDataSetDescription();
 	}
 	
-	public Collection<MinimalMSOneFeature>getSelectedFeatures(){
-		return binnerAnnotationsImportPanel.getSelectedFeatures();
+	public Collection<BinnerAnnotationCluster>getSelectedClusters(){
+		return binnerAnnotationsImportPanel.getSelectedClusters();
 	}
 	
-	public Collection<MinimalMSOneFeature>getAllFeatures(){
-		return binnerAnnotationsImportPanel.getAllFeatures();
+	public Collection<BinnerAnnotationCluster>getAllClusters(){
+		return binnerAnnotationsImportPanel.getAllClusters();
 	}
 
 	@Override

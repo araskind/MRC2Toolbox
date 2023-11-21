@@ -1090,6 +1090,8 @@ public enum MainActionCommands {
 	SEARCH_IDTRACKER_BY_EXPERIMENT_MZ_RT_COMMAND("Get selected MZ/RT data from MetIDTracker"),
 	SHOW_ACTIVE_DATA_SET_MZ_RT_SEARCH_DIALOG_COMMAND("Active data set search by MZ/RT setup"),
 	SEARCH_ACTIVE_DATA_SET_BY_MZ_RT_COMMAND("Get selected MZ/RT data from active data set"),
+	SHOW_ACTIVE_DATA_SET_BINNER_ANNOTATION_SEARCH_DIALOG_COMMAND("Active data set search using Binner annotations setup"),
+	SEARCH_ACTIVE_DATA_SET_BY_BINNER_ANNOTATION_COMMAND("Search active data set using Binner annotations"),
 	
 	//	Summary
 	SHOW_ACTIVE_DATA_SET_SUMMARY_COMMAND("Show active data set summary"),

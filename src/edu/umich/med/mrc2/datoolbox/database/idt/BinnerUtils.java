@@ -36,6 +36,7 @@ import edu.umich.med.mrc2.datoolbox.data.SimpleAdduct;
 import edu.umich.med.mrc2.datoolbox.data.enums.CompositeAdductComponentType;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
+import edu.umich.med.mrc2.datoolbox.data.msclust.BinnerAnnotationLookupDataSet;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.main.AdductManager;
 import edu.umich.med.mrc2.datoolbox.utils.SQLUtils;
@@ -390,6 +391,130 @@ public class BinnerUtils {
 		ps.executeUpdate();
 		ps.close();	
 		ConnectionManager.releaseConnection(conn);
+	}
+	
+	/*	
+	 * BinnerAnnotations lookup 
+	 * 
+	 * */
+	
+	public static void addBinnerAnnotationLookupDataSet(
+			BinnerAnnotationLookupDataSet newDataSet) throws Exception {
+		
+		Connection conn = ConnectionManager.getConnection();
+		addBinnerAnnotationLookupDataSet(newDataSet, conn);
+		ConnectionManager.releaseConnection(conn);	
+	}
+
+	public static void addBinnerAnnotationLookupDataSet(
+			BinnerAnnotationLookupDataSet newDataSet, Connection conn) throws Exception {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	public static void editBinnerAnnotationLookupDataSetMetadata(
+			BinnerAnnotationLookupDataSet dataSet) throws Exception {
+		
+		Connection conn = ConnectionManager.getConnection();
+//		String query = 
+//				"UPDATE FEATURE_LOOKUP_DATA_SET " +
+//				"SET NAME = ?, DESCRIPTION = ?, LAST_MODIFIED = ? "
+//				+ "WHERE FLDS_ID = ?";
+//		PreparedStatement ps = conn.prepareStatement(query);
+//		ps.setString(1, dataSet.getName());
+//		ps.setString(2, dataSet.getDescription());
+//		ps.setTimestamp(3, new java.sql.Timestamp(new Date().getTime()));
+//		ps.setString(4, dataSet.getId());	
+//		ps.executeUpdate();
+		ConnectionManager.releaseConnection(conn);	
+	}
+	
+	public static void deleteBinnerAnnotationLookupDataSet(
+			BinnerAnnotationLookupDataSet dataSet) throws Exception {
+		
+		Connection conn = ConnectionManager.getConnection();
+//		String query = 
+//				"DELETE FROM FEATURE_LOOKUP_DATA_SET WHERE FLDS_ID = ?";
+//		PreparedStatement ps = conn.prepareStatement(query);
+//		ps.setString(1, dataSet.getId());	
+//		ps.executeUpdate();
+		ConnectionManager.releaseConnection(conn);	
+	}
+	
+	public static Collection<BinnerAnnotationLookupDataSet>
+			getBinnerAnnotationLookupDataSetList() throws Exception {
+		
+		Connection conn = ConnectionManager.getConnection();
+		Collection<BinnerAnnotationLookupDataSet>dataSets = 
+				getBinnerAnnotationLookupDataSetList(conn);
+		ConnectionManager.releaseConnection(conn);	
+		return dataSets;
+	}
+	
+	public static Collection<BinnerAnnotationLookupDataSet>
+			getBinnerAnnotationLookupDataSetList(Connection conn) throws Exception {
+	
+		Collection<BinnerAnnotationLookupDataSet>dataSets = 
+				new TreeSet<BinnerAnnotationLookupDataSet>();
+//		String query = 
+//				"SELECT FLDS_ID, NAME, DESCRIPTION, CREATED_BY, "
+//				+ "DATE_CREATED, LAST_MODIFIED "
+//				+ "FROM FEATURE_LOOKUP_DATA_SET ORDER BY 1";
+//		PreparedStatement ps = conn.prepareStatement(query);		
+//		ResultSet rs = ps.executeQuery();
+//		while(rs.next()) {
+//			FeatureLookupDataSet ds = new FeatureLookupDataSet(
+//					rs.getString("FLDS_ID"), 
+//					rs.getString("NAME"), 
+//					rs.getString("DESCRIPTION"), 
+//					IDTDataCache.getUserById(rs.getString("CREATED_BY")), 
+//					new Date(rs.getTimestamp("DATE_CREATED").getTime()),
+//					new Date(rs.getTimestamp("LAST_MODIFIED").getTime()));
+//			
+////			getFeaturesForFeatureLookupDataSet(ds, conn);			
+//			dataSets.add(ds);
+//		}
+//		rs.close();
+//		ps.close();
+		return dataSets;
+	}
+	
+	public static void getClustersForBinnerAnnotationLookupDataSet(
+			BinnerAnnotationLookupDataSet dataSet) throws Exception {
+		
+		Connection conn = ConnectionManager.getConnection();
+		getClustersForBinnerAnnotationLookupDataSet(dataSet, conn);
+		ConnectionManager.releaseConnection(conn);	
+	}
+	
+	public static void getClustersForBinnerAnnotationLookupDataSet(
+			BinnerAnnotationLookupDataSet dataSet, Connection conn) throws Exception {
+		
+//		String query = 
+//				"SELECT COMPONENT_ID, NAME, MZ, RT, RANK, "
+//				+ "SMILES, INCHI_KEY, FOLD_CHANGE, P_VALUE "
+//				+ "FROM FEATURE_LOOKUP_DATA_SET_COMPONENT "
+//				+ "WHERE FLDS_ID = ?";
+//		PreparedStatement ps = conn.prepareStatement(query);	
+//		ps.setString(1, dataSet.getId());
+//		ResultSet rs = ps.executeQuery();
+//		while(rs.next()) {
+//			MinimalMSOneFeature feature = 
+//					new MinimalMSOneFeature(
+//							rs.getString("COMPONENT_ID"), 
+//							rs.getString("NAME"), 
+//							rs.getDouble("MZ"), 
+//							rs.getDouble("RT"), 
+//							rs.getDouble("RANK"),
+//							rs.getString("SMILES"),
+//							rs.getString("INCHI_KEY"));	
+//			
+//			feature.setFoldChange(rs.getDouble("FOLD_CHANGE"));
+//			feature.setpValue(rs.getDouble("P_VALUE"));
+//			dataSet.getFeatures().add(feature);
+//		}
+//		rs.close();
+//		ps.close();
 	}
 }
 

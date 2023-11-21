@@ -45,6 +45,7 @@ import javax.swing.WindowConstants;
 import edu.umich.med.mrc2.datoolbox.data.msclust.BinnerAnnotationLookupDataSet;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
+import edu.umich.med.mrc2.datoolbox.main.BinnerAnnotationDataSetManager;
 
 public class BinnerAnnotationLookupDataSetSelectorDialog extends JDialog {
 	
@@ -67,9 +68,8 @@ public class BinnerAnnotationLookupDataSetSelectorDialog extends JDialog {
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		
 		fllTable = new BinnerAnnotationLookupDataSetListTable();
-		fllTable.setTableModelFromBinnerAnnotationLookupDataSetList(null	//	TODO
-				//	FeatureLookupDataSetManager.getFeatureLookupDataSetList()
-				);
+		fllTable.setTableModelFromBinnerAnnotationLookupDataSetList(
+				BinnerAnnotationDataSetManager.getBinnerAnnotationLookupDataSetList());
 		fllTable.addMouseListener(
 
 				new MouseAdapter() {

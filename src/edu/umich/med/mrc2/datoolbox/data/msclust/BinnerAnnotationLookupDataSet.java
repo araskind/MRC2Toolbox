@@ -188,7 +188,7 @@ public class BinnerAnnotationLookupDataSet implements Comparable<BinnerAnnotatio
 		this.lastModified = lastModified;
 	}
 
-	public Set<BinnerAnnotationCluster> getFeatures() {
+	public Set<BinnerAnnotationCluster> getBinnerAnnotationClusters() {
 		return annotationClusters;
 	}
 

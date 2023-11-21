@@ -47,12 +47,10 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 
 import edu.umich.med.mrc2.datoolbox.data.BinnerAnnotationCluster;
-import edu.umich.med.mrc2.datoolbox.data.MinimalMSOneFeature;
 import edu.umich.med.mrc2.datoolbox.data.enums.ParameterSetStatus;
 import edu.umich.med.mrc2.datoolbox.data.msclust.BinnerAnnotationLookupDataSet;
 import edu.umich.med.mrc2.datoolbox.gui.communication.FormChangeEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.FormChangeListener;
-import edu.umich.med.mrc2.datoolbox.gui.idworks.search.byexp.MinimalMSOneFeatureTable;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.LongUpdateTask;
 import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
@@ -71,14 +69,14 @@ public class BinnerAnnotationsImportPanel extends JPanel implements ActionListen
 	 */
 	private static final long serialVersionUID = 3411264885987118578L;
 
-	private MinimalMSOneFeatureTable featureTable;
+	private BinnerAnnotationClusterTable clustersTable;
 	private File baseDirectory;
 	private JTextField dataSetNameTextField;
 	private JTextArea descriptionTextArea;
 	private BinnerAnnotationLookupDataSet dataSet;
 	private JButton btnNewButton, dbOpenButton;
 	private BinnerAnnotationLookupDataSetSelectorDialog 
-			binnerAnnotationLookupDataSetSelectorDialog;
+				binnerAnnotationLookupDataSetSelectorDialog;
 	protected Set<FormChangeListener> changeListeners;
 	
 	public BinnerAnnotationsImportPanel() {
@@ -86,8 +84,8 @@ public class BinnerAnnotationsImportPanel extends JPanel implements ActionListen
 		super(new BorderLayout(0,0));
 		changeListeners = ConcurrentHashMap.newKeySet();
 		
-		featureTable = new MinimalMSOneFeatureTable();
-		add(new JScrollPane(featureTable), BorderLayout.CENTER);
+		clustersTable = new BinnerAnnotationClusterTable();
+		add(new JScrollPane(clustersTable), BorderLayout.CENTER);
 		
 		JPanel fileImportPanel = new JPanel();
 		fileImportPanel.setBorder(null);
@@ -274,7 +272,8 @@ public class BinnerAnnotationsImportPanel extends JPanel implements ActionListen
 //		if(dataSet.getFeatures().isEmpty()) 
 //			getClustersForBinnerAnnotationLookupDataSet(dataSet);		
 //		else
-//			featureTable.setTableModelFromFeatureCollection(dataSet.getFeatures());
+			clustersTable.setTableModelFromBinnerAnnotationClusterCollection(
+					dataSet.getBinnerAnnotationClusters());
 	}
 	
 	private void getClustersForBinnerAnnotationLookupDataSet(BinnerAnnotationLookupDataSet dataSet) {
@@ -307,7 +306,8 @@ public class BinnerAnnotationsImportPanel extends JPanel implements ActionListen
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-//			featureTable.setTableModelFromFeatureCollection(dataSet.getFeatures());
+			clustersTable.setTableModelFromBinnerAnnotationClusterCollection(
+					dataSet.getBinnerAnnotationClusters());
 			return null;
 		}
 	}
@@ -320,12 +320,12 @@ public class BinnerAnnotationsImportPanel extends JPanel implements ActionListen
 		MRC2ToolBoxCore.getTaskController().addTask(task);		
 	}
 
-	public Collection<MinimalMSOneFeature>getSelectedFeatures(){
-		return featureTable.getSelectedFeatures();
+	public Collection<BinnerAnnotationCluster>getSelectedClusters(){
+		return clustersTable.getSelectedClusters();
 	}
 	
-	public Collection<MinimalMSOneFeature>getAllFeatures(){
-		return featureTable.getAllFeatures();
+	public Collection<BinnerAnnotationCluster>getAllClusters(){
+		return clustersTable.getAllClusters();
 	}
 
 	public BinnerAnnotationLookupDataSet getDataSet() {
@@ -348,7 +348,7 @@ public class BinnerAnnotationsImportPanel extends JPanel implements ActionListen
 	}
 	
 	public void clearPanel() {
-		featureTable.clearTable();
+		clustersTable.clearTable();
 		dataSetNameTextField.setText("");
 		descriptionTextArea.setText("");
 		dataSet = null;
