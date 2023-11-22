@@ -24,13 +24,14 @@ package edu.umich.med.mrc2.datoolbox.project.store;
 public enum BinnerAnnotationFields {
 
 	BinnerAnnotation,
+	BaId,
 	FeatureName,
 	Annotation,
 	AdditionalGroupAnnotations,
 	FurtherAnnotations,
 	Derivations,
 	Isotopes,
-	AditionalIsotopes,
+	AdditionalIsotopes,
 	MassError,
 	Rmd,
 	MolIonNumber,

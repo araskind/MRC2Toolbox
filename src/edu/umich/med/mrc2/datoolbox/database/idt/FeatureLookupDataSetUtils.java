@@ -69,8 +69,10 @@ public class FeatureLookupDataSetUtils {
 			ps.setNull(3, java.sql.Types.NULL);
 		
 		ps.setString(4, dataSet.getCreatedBy().getId());
-		ps.setTimestamp(5, new java.sql.Timestamp(dataSet.getDateCreated().getTime()));
-		ps.setTimestamp(6, new java.sql.Timestamp(dataSet.getLastModified().getTime()));	
+		ps.setTimestamp(5, new java.sql.Timestamp(
+				dataSet.getDateCreated().getTime()));
+		ps.setTimestamp(6, new java.sql.Timestamp(
+				dataSet.getLastModified().getTime()));	
 		ps.executeUpdate();
 		
 		//	Add features

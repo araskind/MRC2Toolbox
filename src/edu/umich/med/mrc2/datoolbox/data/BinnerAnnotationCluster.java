@@ -43,6 +43,13 @@ public class BinnerAnnotationCluster {
 	private Set<BinnerAnnotation>annotations;
 	private BinnerAnnotation primaryFeatureAnnotation;
 		
+	public BinnerAnnotationCluster(String id, int molIonNumber) {
+		super();
+		this.id = id;
+		this.molIonNumber = molIonNumber;
+		annotations = new TreeSet<BinnerAnnotation>();
+	}
+
 	public BinnerAnnotationCluster(BinnerAnnotation firstAnnotation) {
 		super();
 		this.id = DataPrefix.BINNER_ANNOTATIONS_CLUSTER.getName() + 

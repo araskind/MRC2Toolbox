@@ -407,7 +407,7 @@ public class BinnerClustersImportTask extends AbstractTask {
 				r.getCell(columnMap.get(BinnerPostProcessorField.FURTHER_ANNOTATION)).getStringCellValue());
 		ba.setDerivations(r.getCell(columnMap.get(BinnerPostProcessorField.DERIVATIONS)).getStringCellValue());
 		ba.setIsotopes(r.getCell(columnMap.get(BinnerPostProcessorField.ISOTOPES)).getStringCellValue());
-		ba.setAditionalIsotopes(
+		ba.setAdditionalIsotopes(
 				r.getCell(columnMap.get(BinnerPostProcessorField.OTHER_ISOPTOES_IN_GROUP)).getStringCellValue());
 
 		Cell currentCell = r.getCell(columnMap.get(BinnerPostProcessorField.MASS_ERROR));

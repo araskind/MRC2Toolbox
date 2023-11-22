@@ -25,12 +25,15 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.Collection;
+import java.util.Date;
 import java.util.Map.Entry;
 import java.util.TreeSet;
 
 import edu.umich.med.mrc2.datoolbox.data.Adduct;
 import edu.umich.med.mrc2.datoolbox.data.AdductExchange;
 import edu.umich.med.mrc2.datoolbox.data.BinnerAdduct;
+import edu.umich.med.mrc2.datoolbox.data.BinnerAnnotation;
+import edu.umich.med.mrc2.datoolbox.data.BinnerAnnotationCluster;
 import edu.umich.med.mrc2.datoolbox.data.BinnerNeutralMassDifference;
 import edu.umich.med.mrc2.datoolbox.data.SimpleAdduct;
 import edu.umich.med.mrc2.datoolbox.data.enums.CompositeAdductComponentType;
@@ -321,23 +324,6 @@ public class BinnerUtils {
 		ConnectionManager.releaseConnection(conn);
 	}
 	
-//	public static String getNextBinnerNeutralMassDifferenceId(Connection conn) throws Exception{
-//		
-//		String nextId = null;
-//		String query  =
-//				"SELECT '" + DataPrefix.BINNER_MASS_DIFFERENCE.getName() + 
-//				"' || LPAD(BINNER_MASS_DIFFERENCE_SEQ.NEXTVAL, 3, '0') AS NEXT_ID FROM DUAL";
-//		
-//		PreparedStatement ps = conn.prepareStatement(query);
-//		ResultSet rs = ps.executeQuery();
-//		while(rs.next()) {
-//			nextId = rs.getString("NEXT_ID");
-//		}
-//		rs.close();
-//		ps.close();	
-//		return nextId;
-//	}
-	
 	public static void editBinnerNeutralMassDifference(
 			BinnerNeutralMassDifference toEdit) throws Exception {
 				
@@ -408,24 +394,123 @@ public class BinnerUtils {
 
 	public static void addBinnerAnnotationLookupDataSet(
 			BinnerAnnotationLookupDataSet newDataSet, Connection conn) throws Exception {
-		// TODO Auto-generated method stub
+
+		String newId = SQLUtils.getNextIdFromSequence(conn, 
+				"BINNER_ANNOTATION_DATA_SET_SEQ",
+				DataPrefix.BINNER_ANNOTATIONS_DATA_SET,
+				"0",
+				6);
+		newDataSet.setId(newId);
+
+		String query = 
+			"INSERT INTO BINNER_ANNOTATION_LOOKUP_DATA_SET " +
+			"(BALDS_ID, NAME, DESCRIPTION, CREATED_BY,  " +
+			"DATE_CREATED, LAST_MODIFIED) VALUES (?, ?, ?, ?, ?, ?)";
+		PreparedStatement ps = conn.prepareStatement(query);
 		
+		ps.setString(1, newDataSet.getId());
+		ps.setString(2, newDataSet.getName());
+		if(newDataSet.getDescription() != null)
+			ps.setString(3, newDataSet.getDescription());
+		else
+			ps.setNull(3, java.sql.Types.NULL);
+		
+		ps.setString(4, newDataSet.getCreatedBy().getId());
+		ps.setTimestamp(5, new java.sql.Timestamp(
+				newDataSet.getDateCreated().getTime()));
+		ps.setTimestamp(6, new java.sql.Timestamp(
+				newDataSet.getLastModified().getTime()));	
+		ps.executeUpdate();
+		
+		query = 
+			"INSERT INTO BINNER_ANNOTATION_CLUSTER "
+			+ "(BA_CLUSTER_ID, BALDS_ID, MOL_ION_NUMBER) "
+			+ "VALUES (?, ?, ?)";
+		ps = conn.prepareStatement(query);
+		ps.setString(2, newDataSet.getId());
+		
+		String bccQuery = 
+				"INSERT INTO BINNER_ANNOTATION_CLUSTER_COMPONENT " +
+				"(BCC_ID, BA_CLUSTER_ID, MOL_ION_NUMBER, FEATURE_NAME, BINNER_MZ,  " +
+				"BINNER_RT, ANNOTATION, IS_PRIMARY, ADDITIONAL_GROUP_ANNOTATIONS,  " +
+				"FURTHER_ANNOTATIONS, DERIVATIONS, ISOTOPES, ADDITIONAL_ISOTOPES,  " +
+				"CHARGE_CARRIER, ADDITIONAL_ADDUCTS, BIN_NUMBER, CORR_CLUSTER_NUMBER,  " +
+				"REBIN_SUBCLUSTER_NUMBER, RT_SUBCLUSTER_NUMBER, MASS_ERROR, RMD) "
+				+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+		PreparedStatement bccPs = conn.prepareStatement(bccQuery);
+		
+		int counter = 0;
+		for(BinnerAnnotationCluster bac : newDataSet.getBinnerAnnotationClusters()) {
+			
+			String cId = SQLUtils.getNextIdFromSequence(conn, 
+					"BINNER_ANNOTATION_CLUSTER_SEQ",
+					DataPrefix.BINNER_ANNOTATIONS_CLUSTER,
+					"0",
+					9);
+			bac.setId(cId);
+			ps.setString(1, cId);
+			ps.setInt(3, bac.getMolIonNumber());
+			
+			bccPs.setString(2, cId);
+			for(BinnerAnnotation ba : bac.getAnnotations()) {
+				
+				String bccId = SQLUtils.getNextIdFromSequence(conn, 
+						"BA_CLUSTER_COMPONENT_SEQ",
+						DataPrefix.BINNER_ANNOTATIONS_CLUSTER_COMPONENT,
+						"0",
+						11);
+				ba.setId(bccId);
+				bccPs.setString(1, bccId);
+				bccPs.setInt(3, ba.getMolIonNumber());	//MOL_ION_NUMBER
+				bccPs.setString(4, ba.getFeatureName());	//FEATURE_NAME
+				bccPs.setDouble(5, ba.getBinnerMz());	//BINNER_MZ
+				bccPs.setDouble(6, ba.getBinnerRt());	//BINNER_RT
+				bccPs.setString(7, ba.getAnnotation());	//ANNOTATION
+				if(ba.isPrimary())
+					bccPs.setString(8, "Y");	//IS_PRIMARY
+				else
+					bccPs.setNull(8, java.sql.Types.NULL);
+					
+				bccPs.setString(9, ba.getAdditionalGroupAnnotations()); //ADDITIONAL_GROUP_ANNOTATIONS
+				bccPs.setString(10, ba.getFurtherAnnotations()); //FURTHER_ANNOTATIONS
+				bccPs.setString(11, ba.getDerivations()); //DERIVATIONS
+				bccPs.setString(12, ba.getIsotopes()); //ISOTOPES
+				bccPs.setString(13, ba.getAdditionalIsotopes()); //ADDITIONAL_ISOTOPES
+				bccPs.setString(14, ba.getChargeCarrier());	//CHARGE_CARRIER
+				bccPs.setString(15, ba.getAdditionalAdducts());	//ADDITIONAL_ADDUCTS
+				bccPs.setInt(16, ba.getBinNumber()); //BIN_NUMBER
+				bccPs.setInt(17, ba.getCorrClusterNumber()); //CORR_CLUSTER_NUMBER
+				bccPs.setInt(18, ba.getRebinSubclusterNumber()); //REBIN_SUBCLUSTER_NUMBER
+				bccPs.setInt(19, ba.getRtSubclusterNumber()); //RT_SUBCLUSTER_NUMBER
+				bccPs.setDouble(20, ba.getMassError()); //MASS_ERROR
+				bccPs.setDouble(21, ba.getRmd()); //RMD
+			}
+			counter++;			
+			if(counter % 100 == 0) {
+				ps.executeBatch();
+				bccPs.executeBatch();
+			}
+		}
+		ps.executeBatch();
+		bccPs.executeBatch();
+		bccPs.close();
+		ps.close();
 	}
 	
 	public static void editBinnerAnnotationLookupDataSetMetadata(
 			BinnerAnnotationLookupDataSet dataSet) throws Exception {
 		
 		Connection conn = ConnectionManager.getConnection();
-//		String query = 
-//				"UPDATE FEATURE_LOOKUP_DATA_SET " +
-//				"SET NAME = ?, DESCRIPTION = ?, LAST_MODIFIED = ? "
-//				+ "WHERE FLDS_ID = ?";
-//		PreparedStatement ps = conn.prepareStatement(query);
-//		ps.setString(1, dataSet.getName());
-//		ps.setString(2, dataSet.getDescription());
-//		ps.setTimestamp(3, new java.sql.Timestamp(new Date().getTime()));
-//		ps.setString(4, dataSet.getId());	
-//		ps.executeUpdate();
+		String query = 
+				"UPDATE BINNER_ANNOTATION_LOOKUP_DATA_SET " +
+				"SET NAME = ?, DESCRIPTION = ?, LAST_MODIFIED = ? "
+				+ "WHERE BALDS_ID = ?";
+		PreparedStatement ps = conn.prepareStatement(query);
+		ps.setString(1, dataSet.getName());
+		ps.setString(2, dataSet.getDescription());
+		ps.setTimestamp(3, new java.sql.Timestamp(new Date().getTime()));
+		ps.setString(4, dataSet.getId());	
+		ps.executeUpdate();
 		ConnectionManager.releaseConnection(conn);	
 	}
 	
@@ -433,11 +518,12 @@ public class BinnerUtils {
 			BinnerAnnotationLookupDataSet dataSet) throws Exception {
 		
 		Connection conn = ConnectionManager.getConnection();
-//		String query = 
-//				"DELETE FROM FEATURE_LOOKUP_DATA_SET WHERE FLDS_ID = ?";
-//		PreparedStatement ps = conn.prepareStatement(query);
-//		ps.setString(1, dataSet.getId());	
-//		ps.executeUpdate();
+		String query = 
+				"DELETE FROM BINNER_ANNOTATION_LOOKUP_DATA_SET "
+				+ "WHERE BALDS_ID = ?";
+		PreparedStatement ps = conn.prepareStatement(query);
+		ps.setString(1, dataSet.getId());	
+		ps.executeUpdate();
 		ConnectionManager.releaseConnection(conn);	
 	}
 	
@@ -456,26 +542,25 @@ public class BinnerUtils {
 	
 		Collection<BinnerAnnotationLookupDataSet>dataSets = 
 				new TreeSet<BinnerAnnotationLookupDataSet>();
-//		String query = 
-//				"SELECT FLDS_ID, NAME, DESCRIPTION, CREATED_BY, "
-//				+ "DATE_CREATED, LAST_MODIFIED "
-//				+ "FROM FEATURE_LOOKUP_DATA_SET ORDER BY 1";
-//		PreparedStatement ps = conn.prepareStatement(query);		
-//		ResultSet rs = ps.executeQuery();
-//		while(rs.next()) {
-//			FeatureLookupDataSet ds = new FeatureLookupDataSet(
-//					rs.getString("FLDS_ID"), 
-//					rs.getString("NAME"), 
-//					rs.getString("DESCRIPTION"), 
-//					IDTDataCache.getUserById(rs.getString("CREATED_BY")), 
-//					new Date(rs.getTimestamp("DATE_CREATED").getTime()),
-//					new Date(rs.getTimestamp("LAST_MODIFIED").getTime()));
-//			
-////			getFeaturesForFeatureLookupDataSet(ds, conn);			
-//			dataSets.add(ds);
-//		}
-//		rs.close();
-//		ps.close();
+		String query = 
+				"SELECT FLDS_ID, NAME, DESCRIPTION, CREATED_BY, "
+				+ "DATE_CREATED, LAST_MODIFIED "
+				+ "FROM FEATURE_LOOKUP_DATA_SET ORDER BY 1";
+		PreparedStatement ps = conn.prepareStatement(query);		
+		ResultSet rs = ps.executeQuery();
+		while(rs.next()) {
+			BinnerAnnotationLookupDataSet ds = 
+					new BinnerAnnotationLookupDataSet(
+					rs.getString("FLDS_ID"), 
+					rs.getString("NAME"), 
+					rs.getString("DESCRIPTION"), 
+					IDTDataCache.getUserById(rs.getString("CREATED_BY")), 
+					new Date(rs.getTimestamp("DATE_CREATED").getTime()),
+					new Date(rs.getTimestamp("LAST_MODIFIED").getTime()));			
+			dataSets.add(ds);
+		}
+		rs.close();
+		ps.close();
 		return dataSets;
 	}
 	
@@ -490,31 +575,63 @@ public class BinnerUtils {
 	public static void getClustersForBinnerAnnotationLookupDataSet(
 			BinnerAnnotationLookupDataSet dataSet, Connection conn) throws Exception {
 		
-//		String query = 
-//				"SELECT COMPONENT_ID, NAME, MZ, RT, RANK, "
-//				+ "SMILES, INCHI_KEY, FOLD_CHANGE, P_VALUE "
-//				+ "FROM FEATURE_LOOKUP_DATA_SET_COMPONENT "
-//				+ "WHERE FLDS_ID = ?";
-//		PreparedStatement ps = conn.prepareStatement(query);	
-//		ps.setString(1, dataSet.getId());
-//		ResultSet rs = ps.executeQuery();
-//		while(rs.next()) {
-//			MinimalMSOneFeature feature = 
-//					new MinimalMSOneFeature(
-//							rs.getString("COMPONENT_ID"), 
-//							rs.getString("NAME"), 
-//							rs.getDouble("MZ"), 
-//							rs.getDouble("RT"), 
-//							rs.getDouble("RANK"),
-//							rs.getString("SMILES"),
-//							rs.getString("INCHI_KEY"));	
-//			
-//			feature.setFoldChange(rs.getDouble("FOLD_CHANGE"));
-//			feature.setpValue(rs.getDouble("P_VALUE"));
-//			dataSet.getFeatures().add(feature);
-//		}
-//		rs.close();
-//		ps.close();
+		String query = 
+				"SELECT BA_CLUSTER_ID, MOL_ION_NUMBER "
+				+ "FROM BINNER_ANNOTATION_CLUSTER WHERE BALDS_ID = ?";
+		PreparedStatement ps = conn.prepareStatement(query);
+		
+		String baQuery = 
+				"SELECT BCC_ID, MOL_ION_NUMBER, FEATURE_NAME, BINNER_MZ, " +
+				"BINNER_RT, ANNOTATION, IS_PRIMARY, ADDITIONAL_GROUP_ANNOTATIONS, " +
+				"FURTHER_ANNOTATIONS, DERIVATIONS, ISOTOPES, ADDITIONAL_ISOTOPES, " +
+				"CHARGE_CARRIER, ADDITIONAL_ADDUCTS, BIN_NUMBER, CORR_CLUSTER_NUMBER, " +
+				"REBIN_SUBCLUSTER_NUMBER, RT_SUBCLUSTER_NUMBER, MASS_ERROR, RMD " +
+				"FROM BINNER_ANNOTATION_CLUSTER_COMPONENT " +
+				"WHERE BA_CLUSTER_ID = ? ";
+		PreparedStatement baPs = conn.prepareStatement(baQuery);
+		ResultSet baRs;
+		
+		ps.setString(1, dataSet.getId());
+		ResultSet rs = ps.executeQuery();
+		while(rs.next()) {
+			
+			BinnerAnnotationCluster bac =
+					new BinnerAnnotationCluster(
+							rs.getString("BA_CLUSTER_ID"), 
+							rs.getInt("MOL_ION_NUMBER"));	
+			baRs = baPs.executeQuery();
+			while(baRs.next()) {
+				
+				BinnerAnnotation ba = new BinnerAnnotation(
+						rs.getString("BCC_ID"), 
+						rs.getString("FEATURE_NAME"), 
+						rs.getString("ANNOTATION"));
+				ba.setMolIonNumber(baRs.getInt("MOL_ION_NUMBER"));
+				ba.setBinnerMz(baRs.getDouble("BINNER_MZ"));
+				ba.setBinnerRt(baRs.getDouble("BINNER_RT"));
+				if(rs.getString("ANNOTATION") != null)
+					ba.setPrimary(true);
+				
+				ba.setAdditionalGroupAnnotations(rs.getString("ADDITIONAL_GROUP_ANNOTATIONS"));
+				ba.setFurtherAnnotations(rs.getString("FURTHER_ANNOTATIONS"));
+				ba.setDerivations(rs.getString("DERIVATIONS"));
+				ba.setIsotopes(rs.getString("ISOTOPES"));
+				ba.setAdditionalIsotopes(rs.getString("ADDITIONAL_ISOTOPES"));
+				ba.setChargeCarrier(rs.getString("CHARGE_CARRIER"));
+				ba.setAdditionalAdducts(rs.getString("ADDITIONAL_ADDUCTS"));
+				ba.setBinNumber(baRs.getInt("BIN_NUMBER"));
+				ba.setRebinSubclusterNumber(baRs.getInt("REBIN_SUBCLUSTER_NUMBER"));
+				ba.setRtSubclusterNumber(baRs.getInt("RT_SUBCLUSTER_NUMBER"));
+				ba.setMassError(baRs.getDouble("MASS_ERROR"));
+				ba.setRmd(baRs.getDouble("RMD"));
+				
+				bac.getAnnotations().add(ba);
+			}
+			baRs.close();			
+			dataSet.getBinnerAnnotationClusters().add(bac);
+		}
+		rs.close();
+		ps.close();
 	}
 }
 

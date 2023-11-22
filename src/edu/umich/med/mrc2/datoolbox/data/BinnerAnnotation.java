@@ -23,11 +23,12 @@ package edu.umich.med.mrc2.datoolbox.data;
 
 import java.io.Serializable;
 import java.util.Objects;
+import java.util.UUID;
 
 import org.jdom2.Element;
 
+import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.project.store.BinnerAnnotationFields;
-import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 
 public class BinnerAnnotation implements Serializable, Comparable<BinnerAnnotation>{
 
@@ -35,13 +36,15 @@ public class BinnerAnnotation implements Serializable, Comparable<BinnerAnnotati
 	 * 
 	 */
 	private static final long serialVersionUID = 8415317491808995172L;
+	
+	private String id;
 	private String featureName;
 	private String annotation;
 	private String additionalGroupAnnotations;
 	private String furtherAnnotations;
 	private String derivations;
 	private String isotopes;
-	private String aditionalIsotopes;
+	private String additionalIsotopes;
 	private double massError;
 	private double rmd;
 	private int molIonNumber;
@@ -54,9 +57,20 @@ public class BinnerAnnotation implements Serializable, Comparable<BinnerAnnotati
 	private boolean isPrimary;
 	private double binnerMz;
 	private double binnerRt;
+	
+	
+
+	public BinnerAnnotation(String id, String featureName, String annotation) {
+		super();
+		this.id = id;
+		this.featureName = featureName;
+		this.annotation = annotation;
+	}
 
 	public BinnerAnnotation(String featureName, String annotation) {
 		super();
+		this.id = DataPrefix.BINNER_ANNOTATIONS_CLUSTER_COMPONENT.getName() + 
+				UUID.randomUUID().toString().substring(0, 11);
 		this.featureName = featureName;
 		this.annotation = annotation;
 	}
@@ -202,16 +216,16 @@ public class BinnerAnnotation implements Serializable, Comparable<BinnerAnnotati
 		return replaceMolIonNumber(furtherAnnotations);
 	}
 
-	public String getAditionalIsotopes() {
-		return aditionalIsotopes;
+	public String getAdditionalIsotopes() {
+		return additionalIsotopes;
 	}
 
 	public void setFurtherAnnotations(String extraAnnotations) {
 		this.furtherAnnotations = extraAnnotations;
 	}
 
-	public void setAditionalIsotopes(String extraIsotopes) {
-		this.aditionalIsotopes = extraIsotopes;
+	public void setAdditionalIsotopes(String extraIsotopes) {
+		this.additionalIsotopes = extraIsotopes;
 	}
 
 	public String getAdditionalGroupAnnotations() {
@@ -266,7 +280,7 @@ public class BinnerAnnotation implements Serializable, Comparable<BinnerAnnotati
 
         final BinnerAnnotation other = (BinnerAnnotation) obj;
 
-        if(this.hashCode() != other.hashCode())
+        if(!this.id.equals(other.getId()))
         	return false;
 
         return true;
@@ -274,16 +288,7 @@ public class BinnerAnnotation implements Serializable, Comparable<BinnerAnnotati
 
     @Override
     public int hashCode() {
-
-        int hash = 3;
-        String mz = MsUtils.spectrumMzExportFormat.format(this.binnerMz);        
-        String rt = MsUtils.spectrumMzFormat.format(this.binnerRt);
-        hash = 53 * hash
-        		+ (this.featureName != null ? this.featureName.hashCode() : 0)
-        		+ (this.annotation != null ? this.annotation.hashCode() : 0)
-        		+ (mz != null ? mz.hashCode() : 0)
-        		+ (rt != null ? rt.hashCode() : 0);
-        return hash;
+        return id.hashCode();
     }
     
 	public Element getXmlElement() {
@@ -291,6 +296,8 @@ public class BinnerAnnotation implements Serializable, Comparable<BinnerAnnotati
 		Element binnerAnnotationElement = 
 				new Element(BinnerAnnotationFields.BinnerAnnotation.name());
 		
+		binnerAnnotationElement.setAttribute(
+				BinnerAnnotationFields.BaId.name(), id);
 		binnerAnnotationElement.setAttribute(
 				BinnerAnnotationFields.FeatureName.name(), Objects.toString(featureName, ""));	
 		binnerAnnotationElement.setAttribute(
@@ -304,7 +311,7 @@ public class BinnerAnnotation implements Serializable, Comparable<BinnerAnnotati
 		binnerAnnotationElement.setAttribute(
 				BinnerAnnotationFields.Isotopes.name(),  Objects.toString(isotopes, ""));
 		binnerAnnotationElement.setAttribute(
-				BinnerAnnotationFields.AditionalIsotopes.name(),  Objects.toString(aditionalIsotopes, ""));
+				BinnerAnnotationFields.AdditionalIsotopes.name(),  Objects.toString(additionalIsotopes, ""));
 		binnerAnnotationElement.setAttribute(
 				BinnerAnnotationFields.MassError.name(), Double.toString(massError));
 		binnerAnnotationElement.setAttribute(
@@ -334,7 +341,9 @@ public class BinnerAnnotation implements Serializable, Comparable<BinnerAnnotati
 	}
 	
 	public BinnerAnnotation(Element xmlElement) {
-				
+			
+		this.id = 
+				xmlElement.getAttributeValue(BinnerAnnotationFields.BaId.name());
 		this.featureName = 
 				xmlElement.getAttributeValue(BinnerAnnotationFields.FeatureName.name());
 		this.annotation = 
@@ -347,8 +356,8 @@ public class BinnerAnnotation implements Serializable, Comparable<BinnerAnnotati
 				xmlElement.getAttributeValue(BinnerAnnotationFields.Derivations.name());
 		this.isotopes = 
 				xmlElement.getAttributeValue(BinnerAnnotationFields.Isotopes.name());
-		this.aditionalIsotopes = 
-				xmlElement.getAttributeValue(BinnerAnnotationFields.AditionalIsotopes.name());
+		this.additionalIsotopes = 
+				xmlElement.getAttributeValue(BinnerAnnotationFields.AdditionalIsotopes.name());
 		this.massError = Double.parseDouble(
 				xmlElement.getAttributeValue(BinnerAnnotationFields.MassError.name()));
 		this.rmd = Double.parseDouble(
@@ -375,6 +384,14 @@ public class BinnerAnnotation implements Serializable, Comparable<BinnerAnnotati
 		this.binnerRt = Double.parseDouble(
 				xmlElement.getAttributeValue(BinnerAnnotationFields.BinnerRt.name()));
 		
+	}
+
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
 	}
 }
 
