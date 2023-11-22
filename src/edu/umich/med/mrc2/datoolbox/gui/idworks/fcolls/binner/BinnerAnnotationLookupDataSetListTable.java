@@ -19,7 +19,7 @@
  *
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.gui.idworks.search.binner;
+package edu.umich.med.mrc2.datoolbox.gui.idworks.fcolls.binner;
 
 import java.util.Arrays;
 import java.util.Collection;

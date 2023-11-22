@@ -206,6 +206,8 @@ public class DockableFeatureLookupDataSetManager extends DefaultSingleCDockable 
 		
 		FeatureLookupDataSet selected = 
 				featureLookupDataSetListTable.getSelectedDataSet();
+		if(selected == null)
+			return;
 		
 		showFeatureLookupDataSetEditorDialog(selected);
 	}

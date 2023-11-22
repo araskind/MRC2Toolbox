@@ -19,7 +19,7 @@
  *
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.gui.idworks.search.binner;
+package edu.umich.med.mrc2.datoolbox.gui.idworks.fcolls.binner;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -55,7 +55,7 @@ public class BinnerAnnotationLookupDataSetSelectorDialog extends JDialog {
 	private static final long serialVersionUID = -7638441884088309136L;
 	private static final Icon editCollectionIcon = GuiUtils.getIcon("editCollection", 32);
 	private BinnerAnnotationLookupDataSetListTable fllTable;
-	private JButton btnSave;
+	private JButton btnLoadDataSet;
 	
 	public BinnerAnnotationLookupDataSetSelectorDialog(ActionListener listener) {
 		super();
@@ -83,7 +83,7 @@ public class BinnerAnnotationLookupDataSetSelectorDialog extends JDialog {
 							if(selected == null)
 								return;
 							
-							btnSave.doClick(); 
+							btnLoadDataSet.doClick(); 
 						}
 					}
 				});
@@ -104,15 +104,16 @@ public class BinnerAnnotationLookupDataSetSelectorDialog extends JDialog {
 		};
 		btnCancel.addActionListener(al);
 
-		btnSave = new JButton(
+		btnLoadDataSet = new JButton(
 				MainActionCommands.LOAD_BINNER_ANNOTATIONS_FROM_DATABASE_COMMAND.getName());
-		btnSave.setActionCommand(
+		btnLoadDataSet.setActionCommand(
 				MainActionCommands.LOAD_BINNER_ANNOTATIONS_FROM_DATABASE_COMMAND.getName());
-		btnSave.addActionListener(listener);
-		panel.add(btnSave);
-		JRootPane rootPane = SwingUtilities.getRootPane(btnSave);
+		btnLoadDataSet.addActionListener(listener);
+		panel.add(btnLoadDataSet);
+		
+		JRootPane rootPane = SwingUtilities.getRootPane(btnLoadDataSet);
 		rootPane.registerKeyboardAction(al, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
-		rootPane.setDefaultButton(btnSave);
+		rootPane.setDefaultButton(btnLoadDataSet);
 		
 		pack();
 	}

@@ -49,9 +49,12 @@ import javax.swing.border.TitledBorder;
 import edu.umich.med.mrc2.datoolbox.data.BinnerAnnotationCluster;
 import edu.umich.med.mrc2.datoolbox.data.enums.ParameterSetStatus;
 import edu.umich.med.mrc2.datoolbox.data.msclust.BinnerAnnotationLookupDataSet;
+import edu.umich.med.mrc2.datoolbox.database.idt.BinnerUtils;
 import edu.umich.med.mrc2.datoolbox.gui.communication.FormChangeEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.FormChangeListener;
+import edu.umich.med.mrc2.datoolbox.gui.idworks.fcolls.binner.BinnerAnnotationLookupDataSetSelectorDialog;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
+import edu.umich.med.mrc2.datoolbox.gui.utils.IndeterminateProgressDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.LongUpdateTask;
 import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
@@ -74,7 +77,7 @@ public class BinnerAnnotationsImportPanel extends JPanel implements ActionListen
 	private JTextField dataSetNameTextField;
 	private JTextArea descriptionTextArea;
 	private BinnerAnnotationLookupDataSet dataSet;
-	private JButton btnNewButton, dbOpenButton;
+	private JButton fileOpenButton, dbOpenButton;
 	private BinnerAnnotationLookupDataSetSelectorDialog 
 				binnerAnnotationLookupDataSetSelectorDialog;
 	protected Set<FormChangeListener> changeListeners;
@@ -86,25 +89,6 @@ public class BinnerAnnotationsImportPanel extends JPanel implements ActionListen
 		
 		clustersTable = new BinnerAnnotationClusterTable();
 		add(new JScrollPane(clustersTable), BorderLayout.CENTER);
-		
-		JPanel fileImportPanel = new JPanel();
-		fileImportPanel.setBorder(null);
-	
-		btnNewButton = new JButton(
-				MainActionCommands.IMPORT_BINNER_ANNOTATIONS_FROM_FILE_COMMAND.getName());
-		btnNewButton.setActionCommand(
-				MainActionCommands.IMPORT_BINNER_ANNOTATIONS_FROM_FILE_COMMAND.getName());
-		btnNewButton.addActionListener(this);
-		fileImportPanel.setLayout(new FlowLayout(FlowLayout.RIGHT, 5, 5));
-		
-		dbOpenButton = new JButton(
-				MainActionCommands.SELECT_BINNER_ANNOTATIONS_FROM_DATABASE_COMMAND.getName());
-		dbOpenButton.setActionCommand(
-				MainActionCommands.SELECT_BINNER_ANNOTATIONS_FROM_DATABASE_COMMAND.getName());
-		dbOpenButton.addActionListener(this);
-		fileImportPanel.add(dbOpenButton);
-		fileImportPanel.add(btnNewButton);
-		add(fileImportPanel, BorderLayout.SOUTH);
 		
 		JPanel panel = new JPanel();
 		panel.setBorder(new CompoundBorder(new EmptyBorder(10, 10, 10, 10), 
@@ -158,6 +142,26 @@ public class BinnerAnnotationsImportPanel extends JPanel implements ActionListen
 		gbc_textArea.gridx = 0;
 		gbc_textArea.gridy = 2;
 		panel.add(descriptionTextArea, gbc_textArea);
+				
+		JPanel fileImportPanel = new JPanel();
+		fileImportPanel.setBorder(null);
+		fileImportPanel.setLayout(new FlowLayout(FlowLayout.RIGHT, 5, 5));
+		
+		fileOpenButton = new JButton(
+				MainActionCommands.IMPORT_BINNER_ANNOTATIONS_FROM_FILE_COMMAND.getName());
+		fileOpenButton.setActionCommand(
+				MainActionCommands.IMPORT_BINNER_ANNOTATIONS_FROM_FILE_COMMAND.getName());
+		fileOpenButton.addActionListener(this);
+		fileImportPanel.add(fileOpenButton);
+		
+		dbOpenButton = new JButton(
+				MainActionCommands.SELECT_BINNER_ANNOTATIONS_FROM_DATABASE_COMMAND.getName());
+		dbOpenButton.setActionCommand(
+				MainActionCommands.SELECT_BINNER_ANNOTATIONS_FROM_DATABASE_COMMAND.getName());
+		dbOpenButton.addActionListener(this);
+		fileImportPanel.add(dbOpenButton);
+		
+		add(fileImportPanel, BorderLayout.SOUTH);
 	}
 	
 	@Override
@@ -178,7 +182,7 @@ public class BinnerAnnotationsImportPanel extends JPanel implements ActionListen
 	}
 	
 	public void disableLoadingFeatures() {
-		btnNewButton.setEnabled(false);
+		fileOpenButton.setEnabled(false);
 		dbOpenButton.setEnabled(false);
 	}	
 	
@@ -218,10 +222,11 @@ public class BinnerAnnotationsImportPanel extends JPanel implements ActionListen
 		}		
 	}
 
-	private void finalizeBinnerImportTask(ExtractBinnerAnnotatiosForMSMSFeatureClusteringTask task) {
+	private void finalizeBinnerImportTask(
+			ExtractBinnerAnnotatiosForMSMSFeatureClusteringTask task) {
 
-		Collection<BinnerAnnotationCluster> bac = task.getBinnerAnnotationClusters();
-		
+		clustersTable.setTableModelFromBinnerAnnotationClusterCollection(
+				task.getBinnerAnnotationClusters());
 		fireFormChangeEvent(ParameterSetStatus.CHANGED);
 	}
 	
@@ -255,7 +260,8 @@ public class BinnerAnnotationsImportPanel extends JPanel implements ActionListen
 
 	private void selectBinnerAnnotationsSetFromDatabase() {
 
-		binnerAnnotationLookupDataSetSelectorDialog = new BinnerAnnotationLookupDataSetSelectorDialog(this);
+		binnerAnnotationLookupDataSetSelectorDialog = 
+				new BinnerAnnotationLookupDataSetSelectorDialog(this);
 		binnerAnnotationLookupDataSetSelectorDialog.setLocationRelativeTo(this);
 		binnerAnnotationLookupDataSetSelectorDialog.setVisible(true);
 	}
@@ -269,21 +275,21 @@ public class BinnerAnnotationsImportPanel extends JPanel implements ActionListen
 		setDataSetName(dataSet.getName());
 		setDataSetDescription(dataSet.getDescription());
 		
-//		if(dataSet.getFeatures().isEmpty()) 
-//			getClustersForBinnerAnnotationLookupDataSet(dataSet);		
-//		else
+		if(dataSet.getBinnerAnnotationClusters().isEmpty()) 
+			getClustersForBinnerAnnotationLookupDataSet(dataSet);		
+		else
 			clustersTable.setTableModelFromBinnerAnnotationClusterCollection(
 					dataSet.getBinnerAnnotationClusters());
 	}
 	
 	private void getClustersForBinnerAnnotationLookupDataSet(BinnerAnnotationLookupDataSet dataSet) {
 
-//		GetFeaturesForFeatureLookupDataSetTask task = 
-//				new GetFeaturesForFeatureLookupDataSetTask(dataSet);
-//		IndeterminateProgressDialog idp = new IndeterminateProgressDialog(
-//				"Getting features for lookup data set ...", this, task);
-//		idp.setLocationRelativeTo(this);
-//		idp.setVisible(true);
+		GetClustersForBinnerAnnotationLookupDataSetTask task = 
+				new GetClustersForBinnerAnnotationLookupDataSetTask(dataSet);
+		IndeterminateProgressDialog idp = new IndeterminateProgressDialog(
+				"Getting Binner annotation clusters for lookup data set ...", this, task);
+		idp.setLocationRelativeTo(this);
+		idp.setVisible(true);
 	}
 	
 	class GetClustersForBinnerAnnotationLookupDataSetTask extends LongUpdateTask {
@@ -301,14 +307,20 @@ public class BinnerAnnotationsImportPanel extends JPanel implements ActionListen
 		public Void doInBackground() {
 
 			try {
-//				FeatureLookupDataSetUtils.getFeaturesForFeatureLookupDataSet(dataSet);
+				BinnerUtils.getClustersForBinnerAnnotationLookupDataSet(dataSet);
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+			return null;
+		}
+		
+		@Override
+		public void done() {
+			
 			clustersTable.setTableModelFromBinnerAnnotationClusterCollection(
 					dataSet.getBinnerAnnotationClusters());
-			return null;
+			super.done();
 		}
 	}
 		

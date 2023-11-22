@@ -22,6 +22,7 @@
 package edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt;
 
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
+import edu.umich.med.mrc2.datoolbox.main.BinnerAnnotationDataSetManager;
 import edu.umich.med.mrc2.datoolbox.main.FeatureCollectionManager;
 import edu.umich.med.mrc2.datoolbox.main.FeatureLookupDataSetManager;
 import edu.umich.med.mrc2.datoolbox.main.MSMSClusterDataSetManager;
@@ -47,8 +48,8 @@ public class IDTrackerMetadataPullTask extends AbstractTask {
 
 		taskDescription = "Retrieving data from database ...";
 		setStatus(TaskStatus.PROCESSING);
-		total = 105;
-		processed = 1;
+		total = 120;
+		processed = 0;
 
 		try {
 			taskDescription = "Refreshing user list";
@@ -213,6 +214,10 @@ public class IDTrackerMetadataPullTask extends AbstractTask {
 			
 			taskDescription = "Refreshing MS/RT library list ";
 			IDTDataCache.refreshMsRtLibraryList();
+			processed = processed + 3;
+			
+			taskDescription = "Refreshing Binner annotation data set list ";
+			BinnerAnnotationDataSetManager.refreshBinnerAnnotationLookupDataSetList();
 			processed = processed + 3;
 			
 			setStatus(TaskStatus.FINISHED);

@@ -450,6 +450,7 @@ public class BinnerUtils {
 			bac.setId(cId);
 			ps.setString(1, cId);
 			ps.setInt(3, bac.getMolIonNumber());
+			ps.addBatch();
 			
 			bccPs.setString(2, cId);
 			for(BinnerAnnotation ba : bac.getAnnotations()) {
@@ -484,6 +485,8 @@ public class BinnerUtils {
 				bccPs.setInt(19, ba.getRtSubclusterNumber()); //RT_SUBCLUSTER_NUMBER
 				bccPs.setDouble(20, ba.getMassError()); //MASS_ERROR
 				bccPs.setDouble(21, ba.getRmd()); //RMD
+				
+				bccPs.addBatch();
 			}
 			counter++;			
 			if(counter % 100 == 0) {
@@ -543,15 +546,15 @@ public class BinnerUtils {
 		Collection<BinnerAnnotationLookupDataSet>dataSets = 
 				new TreeSet<BinnerAnnotationLookupDataSet>();
 		String query = 
-				"SELECT FLDS_ID, NAME, DESCRIPTION, CREATED_BY, "
+				"SELECT BALDS_ID, NAME, DESCRIPTION, CREATED_BY, "
 				+ "DATE_CREATED, LAST_MODIFIED "
-				+ "FROM FEATURE_LOOKUP_DATA_SET ORDER BY 1";
+				+ "FROM BINNER_ANNOTATION_LOOKUP_DATA_SET ORDER BY 1";
 		PreparedStatement ps = conn.prepareStatement(query);		
 		ResultSet rs = ps.executeQuery();
 		while(rs.next()) {
 			BinnerAnnotationLookupDataSet ds = 
 					new BinnerAnnotationLookupDataSet(
-					rs.getString("FLDS_ID"), 
+					rs.getString("BALDS_ID"), 
 					rs.getString("NAME"), 
 					rs.getString("DESCRIPTION"), 
 					IDTDataCache.getUserById(rs.getString("CREATED_BY")), 
@@ -598,27 +601,28 @@ public class BinnerUtils {
 			BinnerAnnotationCluster bac =
 					new BinnerAnnotationCluster(
 							rs.getString("BA_CLUSTER_ID"), 
-							rs.getInt("MOL_ION_NUMBER"));	
+							rs.getInt("MOL_ION_NUMBER"));
+			baPs.setString(1, bac.getId());
 			baRs = baPs.executeQuery();
 			while(baRs.next()) {
 				
 				BinnerAnnotation ba = new BinnerAnnotation(
-						rs.getString("BCC_ID"), 
-						rs.getString("FEATURE_NAME"), 
-						rs.getString("ANNOTATION"));
+						baRs.getString("BCC_ID"), 
+						baRs.getString("FEATURE_NAME"), 
+						baRs.getString("ANNOTATION"));
 				ba.setMolIonNumber(baRs.getInt("MOL_ION_NUMBER"));
 				ba.setBinnerMz(baRs.getDouble("BINNER_MZ"));
 				ba.setBinnerRt(baRs.getDouble("BINNER_RT"));
-				if(rs.getString("ANNOTATION") != null)
+				if(baRs.getString("IS_PRIMARY") != null)
 					ba.setPrimary(true);
 				
-				ba.setAdditionalGroupAnnotations(rs.getString("ADDITIONAL_GROUP_ANNOTATIONS"));
-				ba.setFurtherAnnotations(rs.getString("FURTHER_ANNOTATIONS"));
-				ba.setDerivations(rs.getString("DERIVATIONS"));
-				ba.setIsotopes(rs.getString("ISOTOPES"));
-				ba.setAdditionalIsotopes(rs.getString("ADDITIONAL_ISOTOPES"));
-				ba.setChargeCarrier(rs.getString("CHARGE_CARRIER"));
-				ba.setAdditionalAdducts(rs.getString("ADDITIONAL_ADDUCTS"));
+				ba.setAdditionalGroupAnnotations(baRs.getString("ADDITIONAL_GROUP_ANNOTATIONS"));
+				ba.setFurtherAnnotations(baRs.getString("FURTHER_ANNOTATIONS"));
+				ba.setDerivations(baRs.getString("DERIVATIONS"));
+				ba.setIsotopes(baRs.getString("ISOTOPES"));
+				ba.setAdditionalIsotopes(baRs.getString("ADDITIONAL_ISOTOPES"));
+				ba.setChargeCarrier(baRs.getString("CHARGE_CARRIER"));
+				ba.setAdditionalAdducts(baRs.getString("ADDITIONAL_ADDUCTS"));
 				ba.setBinNumber(baRs.getInt("BIN_NUMBER"));
 				ba.setRebinSubclusterNumber(baRs.getInt("REBIN_SUBCLUSTER_NUMBER"));
 				ba.setRtSubclusterNumber(baRs.getInt("RT_SUBCLUSTER_NUMBER"));

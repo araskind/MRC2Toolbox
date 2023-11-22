@@ -99,9 +99,10 @@
 									<root>true</root>
 									<content delegate="SplitDockStationFactory">
 										<fullscreen-action>false</fullscreen-action>
-										<leaf id="0" nodeId="1660329330265">
+										<leaf id="0" nodeId="1700671997188">
 											<placeholders>
 												<placeholder>dock.single.DockableFeatureLookupDataSetManager</placeholder>
+												<placeholder>dock.single.DockableBinnerAnnotationDataSetManager</placeholder>
 												<placeholder>dock.single.DockableFeatureCollectionsManager</placeholder>
 												<placeholder>dock.single.DockableFeatureClusterCollectionsManager</placeholder>
 											</placeholders>
@@ -129,6 +130,13 @@
 													<item key="convert" type="b">true</item>
 													<item key="convert-keys" type="a"/>
 												</entry>
+												<entry>
+													<key shared="false">
+														<placeholder>dock.single.DockableBinnerAnnotationDataSetManager</placeholder>
+													</key>
+													<item key="convert" type="b">true</item>
+													<item key="convert-keys" type="a"/>
+												</entry>
 											</placeholder-map>
 										</leaf>
 									</content>
@@ -142,7 +150,7 @@
 							<children ignore="false">
 								<child>
 									<layout factory="delegate_StackDockStationFactory">
-										<selected>1</selected>
+										<selected>3</selected>
 										<placeholders>
 											<version>0</version>
 											<format>dock.PlaceholderList</format>
@@ -188,6 +196,20 @@
 												<item key="dock.id" type="i">2</item>
 												<item key="dock.placeholder" type="s">dock.single.DockableFeatureLookupDataSetManager</item>
 											</entry>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.DockableBinnerAnnotationDataSetManager</placeholder>
+												</key>
+												<item key="convert" type="b">true</item>
+												<item key="convert-keys" type="a">
+													<item type="s">index</item>
+													<item type="s">id</item>
+													<item type="s">placeholder</item>
+												</item>
+												<item key="dock.index" type="i">3</item>
+												<item key="dock.id" type="i">3</item>
+												<item key="dock.placeholder" type="s">dock.single.DockableBinnerAnnotationDataSetManager</item>
+											</entry>
 										</placeholders>
 									</layout>
 									<children ignore="false">
@@ -216,6 +238,16 @@
 												<replacement id="dockablesingle DockableFeatureLookupDataSetManager"/>
 												<delegate id="delegate_ccontrol backup factory id">
 													<id>DockableFeatureLookupDataSetManager</id>
+													<area/>
+												</delegate>
+											</layout>
+											<children ignore="false"/>
+										</child>
+										<child>
+											<layout factory="predefined" placeholder="dock.single.DockableBinnerAnnotationDataSetManager">
+												<replacement id="dockablesingle DockableBinnerAnnotationDataSetManager"/>
+												<delegate id="delegate_ccontrol backup factory id">
+													<id>DockableBinnerAnnotationDataSetManager</id>
 													<area/>
 												</delegate>
 											</layout>
@@ -251,6 +283,30 @@
 				</base>
 				<modes>
 					<dockables>
+						<entry id="single DockableBinnerAnnotationDataSetManager" current="dock.mode.normal">
+							<history>
+								<mode>dock.mode.normal</mode>
+							</history>
+							<properties>
+								<property id="dock.mode.normal">
+									<mode>dock.mode.normal</mode>
+									<root>ccontrol center</root>
+									<applicationDefined>false</applicationDefined>
+									<location>
+										<property factory="SplitDockPlaceholderProperty">
+											<placeholder>dock.single.DockableBinnerAnnotationDataSetManager</placeholder>
+											<backup-path>
+												<leaf id="1700671997188"/>
+											</backup-path>
+										</property>
+										<property factory="StackDockPropertyFactory">
+											<index>3</index>
+											<placeholder>dock.single.DockableBinnerAnnotationDataSetManager</placeholder>
+										</property>
+									</location>
+								</property>
+							</properties>
+						</entry>
 						<entry id="single DockableFeatureCollectionsManager" current="dock.mode.normal">
 							<history>
 								<mode>dock.mode.normal</mode>
@@ -264,7 +320,7 @@
 										<property factory="SplitDockPlaceholderProperty">
 											<placeholder>dock.single.DockableFeatureCollectionsManager</placeholder>
 											<backup-path>
-												<leaf id="1660329330265"/>
+												<leaf id="1700671997188"/>
 											</backup-path>
 										</property>
 										<property factory="StackDockPropertyFactory">
@@ -288,7 +344,7 @@
 										<property factory="SplitDockPlaceholderProperty">
 											<placeholder>dock.single.DockableFeatureClusterCollectionsManager</placeholder>
 											<backup-path>
-												<leaf id="1660329330265"/>
+												<leaf id="1700671997188"/>
 											</backup-path>
 										</property>
 										<property factory="StackDockPropertyFactory">
@@ -312,7 +368,7 @@
 										<property factory="SplitDockPlaceholderProperty">
 											<placeholder>dock.single.DockableFeatureLookupDataSetManager</placeholder>
 											<backup-path>
-												<leaf id="1660329330265"/>
+												<leaf id="1700671997188"/>
 											</backup-path>
 										</property>
 										<property factory="StackDockPropertyFactory">

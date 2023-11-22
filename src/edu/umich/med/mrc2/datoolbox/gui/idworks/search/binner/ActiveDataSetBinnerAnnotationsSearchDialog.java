@@ -106,7 +106,8 @@ public class ActiveDataSetBinnerAnnotationsSearchDialog extends JDialog implemen
 
 		JButton searchButton = new JButton("Search ...");
 		searchButton.addActionListener(parent);
-		searchButton.setActionCommand(MainActionCommands.SEARCH_ACTIVE_DATA_SET_BY_BINNER_ANNOTATION_COMMAND.getName());
+		searchButton.setActionCommand(
+				MainActionCommands.SEARCH_ACTIVE_DATA_SET_BY_BINNER_ANNOTATION_COMMAND.getName());
 		panel_1.add(searchButton);
 		
 		JRootPane rootPane = SwingUtilities.getRootPane(searchButton);

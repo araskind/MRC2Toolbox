@@ -99,11 +99,11 @@ public class BinnerAnnotationClusterTable extends BasicTable {
 	
 	public Collection<BinnerAnnotationCluster>getAllClusters(){
 		
-		Collection<BinnerAnnotationCluster>selectedFeatures = new ArrayList<BinnerAnnotationCluster>();
+		Collection<BinnerAnnotationCluster>clusters = new ArrayList<BinnerAnnotationCluster>();
 		int featureCol = model.getColumnIndex(BinnerAnnotationClusterTableModel.CLUSTER_COLUMN);
 		for(int i=0; i<model.getRowCount(); i++)
-			selectedFeatures.add((BinnerAnnotationCluster)model.getValueAt(i, featureCol));
+			clusters.add((BinnerAnnotationCluster)model.getValueAt(i, featureCol));
 		
-		return selectedFeatures;
+		return clusters;
 	}
 }

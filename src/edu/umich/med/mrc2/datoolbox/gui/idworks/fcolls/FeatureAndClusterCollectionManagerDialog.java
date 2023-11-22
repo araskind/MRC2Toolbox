@@ -40,6 +40,7 @@ import bibliothek.gui.dock.common.intern.CDockable;
 import bibliothek.gui.dock.common.theme.ThemeMap;
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundleCollection;
+import edu.umich.med.mrc2.datoolbox.gui.idworks.fcolls.binner.DockableBinnerAnnotationDataSetManager;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.fcolls.clusters.DockableMSMSClusterDataSetsManager;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.fcolls.features.DockableFeatureCollectionsManager;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.fcolls.lookup.DockableFeatureLookupDataSetManager;
@@ -48,6 +49,7 @@ import edu.umich.med.mrc2.datoolbox.gui.main.PersistentLayout;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.IndeterminateProgressDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.LongUpdateTask;
+import edu.umich.med.mrc2.datoolbox.main.BinnerAnnotationDataSetManager;
 import edu.umich.med.mrc2.datoolbox.main.FeatureCollectionManager;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.MSMSClusterDataSetManager;
@@ -70,6 +72,7 @@ public class FeatureAndClusterCollectionManagerDialog extends JDialog
 	private DockableFeatureCollectionsManager featureCollectionsManager;
 	private DockableMSMSClusterDataSetsManager featureClusterCollectionsManager;
 	private DockableFeatureLookupDataSetManager featureLookupDataSetManager;
+	private DockableBinnerAnnotationDataSetManager binnerAnnotationDataSetManager;
 	private IndeterminateProgressDialog idp;
 	
 	public FeatureAndClusterCollectionManagerDialog() {
@@ -97,11 +100,14 @@ public class FeatureAndClusterCollectionManagerDialog extends JDialog
 				new DockableMSMSClusterDataSetsManager(this);
 		featureLookupDataSetManager = 
 				new DockableFeatureLookupDataSetManager(this);
+		binnerAnnotationDataSetManager = 
+				new DockableBinnerAnnotationDataSetManager(this);
 
 		grid.add(0, 0, 1, 1, 
 				featureCollectionsManager, 
 				featureClusterCollectionsManager,				
-				featureLookupDataSetManager);
+				featureLookupDataSetManager,
+				binnerAnnotationDataSetManager);
 		control.getContentArea().deploy(grid);
 				
 		loadLayout(layoutConfigFile);
@@ -109,12 +115,14 @@ public class FeatureAndClusterCollectionManagerDialog extends JDialog
 		if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() == null) {
 			featureCollectionsManager.loadDatabaseStoredCollections();
 			featureLookupDataSetManager.loadDatabaseStoredFeatureLookupDataSets();
-			featureClusterCollectionsManager.loadDatabaseStoredMSMSClusterDataSets();			
+			featureClusterCollectionsManager.loadDatabaseStoredMSMSClusterDataSets();
+			binnerAnnotationDataSetManager.loadDatabaseStoredBinnerAnnotationLookupDataSets();
 		}
 		else {
 			featureCollectionsManager.loadCollectionsForActiveProject();
 			featureLookupDataSetManager.loadFeatureLookupDataSetsForActiveProject();
-			featureClusterCollectionsManager.loadMSMSClusterDataSetsForActiveProject();			
+			featureClusterCollectionsManager.loadMSMSClusterDataSetsForActiveProject();	
+			binnerAnnotationDataSetManager.loadBinnerAnnotationLookupDataSetsForActiveProject();
 		}
 		pack();
 	}
@@ -133,6 +141,7 @@ public class FeatureAndClusterCollectionManagerDialog extends JDialog
 			featureCollectionsManager.loadCollectionsForActiveProject();
 			featureLookupDataSetManager.loadFeatureLookupDataSetsForActiveProject();
 			featureClusterCollectionsManager.loadMSMSClusterDataSetsForActiveProject();	
+			binnerAnnotationDataSetManager.loadBinnerAnnotationLookupDataSetsForActiveProject();
 		}
 		RefreshCollectionsTask task = 
 			new RefreshCollectionsTask();
@@ -154,8 +163,19 @@ public class FeatureAndClusterCollectionManagerDialog extends JDialog
 			
 			FeatureCollectionManager.refreshMsFeatureInfoBundleCollections();
 			MSMSClusterDataSetManager.refreshMSMSClusterDataSetList();
+			BinnerAnnotationDataSetManager.refreshBinnerAnnotationLookupDataSetList();
 			return null;
 		}
+		
+	    @Override
+	    public void done() {
+	    	
+			featureCollectionsManager.loadDatabaseStoredCollections();
+			featureLookupDataSetManager.loadDatabaseStoredFeatureLookupDataSets();
+			featureClusterCollectionsManager.loadDatabaseStoredMSMSClusterDataSets();
+			binnerAnnotationDataSetManager.loadDatabaseStoredBinnerAnnotationLookupDataSets();
+	    	super.done();
+	    }
 	}
 	
 	@Override

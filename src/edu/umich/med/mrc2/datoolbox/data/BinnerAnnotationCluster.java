@@ -82,6 +82,13 @@ public class BinnerAnnotationCluster {
 	}
 
 	public BinnerAnnotation getPrimaryFeatureAnnotation() {
+		
+		if(primaryFeatureAnnotation == null) {
+			primaryFeatureAnnotation = 
+				annotations.stream().
+				filter(a -> a.isPrimary()).
+				findFirst().orElse(null);
+		}
 		return primaryFeatureAnnotation;
 	}
 	
