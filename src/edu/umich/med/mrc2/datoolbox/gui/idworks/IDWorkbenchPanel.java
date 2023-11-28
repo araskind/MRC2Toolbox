@@ -63,6 +63,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import org.apache.commons.lang3.StringUtils;
 
 import bibliothek.gui.dock.action.actions.SimpleButtonAction;
+import edu.umich.med.mrc2.datoolbox.data.BinnerAnnotationCluster;
 import edu.umich.med.mrc2.datoolbox.data.CompoundIdentity;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.IDTrackerDataExportParameters;
@@ -96,6 +97,7 @@ import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSSamplePreparation;
+import edu.umich.med.mrc2.datoolbox.data.msclust.BinnerAnnotationLookupDataSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.FeatureLookupDataSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusterDataSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusteringParameterSet;
@@ -863,27 +865,6 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 				
 		if (command.equals(MainActionCommands.RUN_MZ_FREQUENCY_ANALYSIS_COMMAND.getName()))
 			runMSMSParentIonFrequencyAnalysis();		
-	}
-
-	private void showTrackerSearchByBinnerAnnotationsDialog() {
-
-		Collection<MSFeatureInfoBundle> allFeatures = 
-				msTwoFeatureTable.getBundles(TableRowSubset.ALL);
-		if(allFeatures.isEmpty())
-			return;
-		
-		activeDataSetBinnerAnnotationsSearchDialog = 
-				new ActiveDataSetBinnerAnnotationsSearchDialog(this);
-		activeDataSetBinnerAnnotationsSearchDialog.setLocationRelativeTo(this.getContentPane());
-		activeDataSetBinnerAnnotationsSearchDialog.setVisible(true);
-	}
-
-	private void searchActiveDataSetByBinnerAnnotations() {
-		// TODO Auto-generated method stub
-		
-		
-		
-		activeDataSetBinnerAnnotationsSearchDialog.dispose();
 	}
 
 	private void setUpMSMSParentIonFrequencyAnalysis() {
@@ -1742,6 +1723,55 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		task.addTaskListener(this);
 		MRC2ToolBoxCore.getTaskController().addTask(task);
 		activeDataSetMZRTDataSearchDialog.dispose();
+	}
+	
+	private void showTrackerSearchByBinnerAnnotationsDialog() {
+
+		Collection<MSFeatureInfoBundle> allFeatures = 
+				msTwoFeatureTable.getBundles(TableRowSubset.ALL);
+		if(allFeatures.isEmpty())
+			return;
+		
+		activeDataSetBinnerAnnotationsSearchDialog = 
+				new ActiveDataSetBinnerAnnotationsSearchDialog(this);
+		activeDataSetBinnerAnnotationsSearchDialog.setLocationRelativeTo(this.getContentPane());
+		activeDataSetBinnerAnnotationsSearchDialog.setVisible(true);
+	}
+
+	private void searchActiveDataSetByBinnerAnnotations() {
+
+		Collection<String>errors = 
+				activeDataSetBinnerAnnotationsSearchDialog.validateParameters();
+		if(!errors.isEmpty()) {
+			MessageDialog.showErrorMsg(
+					StringUtils.join(errors, "\n"), 
+					activeDataSetBinnerAnnotationsSearchDialog);
+			return;
+		}
+		Collection<MSFeatureInfoBundle> msmsFeatures = 
+				msTwoFeatureTable.getBundles(TableRowSubset.ALL);
+		
+		BinnerAnnotationLookupDataSet balds = 
+				activeDataSetBinnerAnnotationsSearchDialog.getDataSet();
+		if(balds == null) {
+			
+			Collection<BinnerAnnotationCluster> annotationClusters = 
+					activeDataSetBinnerAnnotationsSearchDialog.getAllClusters();
+
+			balds = new BinnerAnnotationLookupDataSet(
+					activeDataSetMZRTDataSearchDialog.getFeatureSetName(), 
+					activeDataSetMZRTDataSearchDialog.getFeatureSetDescription(), 
+					annotationClusters);
+		}
+		MSMSClusteringParameterSet params = 
+				activeDataSetMZRTDataSearchDialog.getParameters();
+
+//		MSMSFeatureClusteringTask task = 
+//				new MSMSFeatureClusteringTask(msmsFeatures, params, flds);
+//		task.addTaskListener(this);
+//		MRC2ToolBoxCore.getTaskController().addTask(task);
+		
+		activeDataSetBinnerAnnotationsSearchDialog.dispose();
 	}
 	
 	private void showPepSearchSetupDiaog(boolean runOffline) {

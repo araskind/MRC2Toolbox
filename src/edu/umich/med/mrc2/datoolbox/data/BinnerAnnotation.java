@@ -260,10 +260,7 @@ public class BinnerAnnotation implements Serializable, Comparable<BinnerAnnotati
 	
 	@Override
 	public int compareTo(BinnerAnnotation o) {
-
-		String thisQualifiedName = featureName + annotation;
-		String otherQualifiedName = o.getFeatureName() + o.getAnnotation();
-		return thisQualifiedName.compareTo(otherQualifiedName);
+		return getNameWithAnnotation().compareTo(o.getNameWithAnnotation());
 	}
 
     @Override

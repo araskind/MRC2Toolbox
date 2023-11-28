@@ -24,17 +24,19 @@ package edu.umich.med.mrc2.datoolbox.data.msclust;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang.StringUtils;
 import org.jdom2.Element;
 
+import edu.umich.med.mrc2.datoolbox.data.BinnerAnnotation;
+import edu.umich.med.mrc2.datoolbox.data.BinnerAnnotationCluster;
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
-import edu.umich.med.mrc2.datoolbox.data.MinimalMSOneFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
 import edu.umich.med.mrc2.datoolbox.data.MsPoint;
 import edu.umich.med.mrc2.datoolbox.data.TandemMassSpectrum;
@@ -47,105 +49,74 @@ import edu.umich.med.mrc2.datoolbox.data.enums.MSMSMatchType;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.clustree.MajorClusterFeatureDefiningProperty;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.msmsscore.MSMSScoreCalculator;
-import edu.umich.med.mrc2.datoolbox.project.store.MsFeatureIdentityFields;
-import edu.umich.med.mrc2.datoolbox.project.store.MsFeatureInfoBundleClusterFields;
-import edu.umich.med.mrc2.datoolbox.utils.ExperimentUtils;
 import edu.umich.med.mrc2.datoolbox.utils.MSMSClusteringUtils;
 import edu.umich.med.mrc2.datoolbox.utils.MsFeatureStatsUtils;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
 
-public class MsFeatureInfoBundleCluster {
+public class BinnerBasedMsFeatureInfoBundleCluster {
 
 	private String id;
-	private String name;
-	private Set<MSFeatureInfoBundle>components;
-	private double mz;
-	private double rt;
-	private double medianArea;
+	private String name;	
+	private BinnerAnnotationCluster binnerAnnotationCluster;
+	private Map<BinnerAnnotation,Set<MSFeatureInfoBundle>>componentMap;
+	private Map<BinnerAnnotation,Double>mzMap;
+	private Map<BinnerAnnotation,Double>rtMap;
+	private Map<BinnerAnnotation,Double>medianAreaMap;
 	private MsFeatureIdentity primaryIdentity;
 	private boolean locked;
 	private Collection<String>featureIds;
-	private MinimalMSOneFeature lookupFeature;
 	
-	public MsFeatureInfoBundleCluster() {
-		this(null, 0.0d, 0.0d, null);
-		this.id = DataPrefix.MSMS_CLUSTER.getName() + 
+	public BinnerBasedMsFeatureInfoBundleCluster(
+			BinnerAnnotationCluster binnerAnnotationCluster) {
+		
+		this.binnerAnnotationCluster = binnerAnnotationCluster;
+		this.id = DataPrefix.BINNER_MSMS_CLUSTER.getName() + 
 				UUID.randomUUID().toString().substring(0, 12);
+		this.name = binnerAnnotationCluster.toString();
+		componentMap = new TreeMap<BinnerAnnotation,Set<MSFeatureInfoBundle>>();
+		mzMap = new TreeMap<BinnerAnnotation,Double>();
+		rtMap = new TreeMap<BinnerAnnotation,Double>();
+		medianAreaMap = new TreeMap<BinnerAnnotation,Double>();
+		for(BinnerAnnotation ba : binnerAnnotationCluster.getAnnotations()) {
+			
+			componentMap.put(ba, new HashSet<MSFeatureInfoBundle>());
+			mzMap.put(ba, ba.getBinnerMz());
+			rtMap.put(ba, ba.getBinnerRt());
+			medianAreaMap.put(ba, 0.0d);
+		}
 	}
 	
-	public MsFeatureInfoBundleCluster(MinimalMSOneFeature parentFeature) {
-		this(null, parentFeature.getMz(), parentFeature.getRt(), null);
-		this.id = DataPrefix.MSMS_CLUSTER.getName() + 
-				UUID.randomUUID().toString().substring(0, 12);
+	public Collection<MSFeatureInfoBundle>getComponents(){
+		return componentMap.values().stream().
+				flatMap(v -> v.stream()).collect(Collectors.toList());
 	}
 	
-	public MsFeatureInfoBundleCluster(
-			String id, 
-			double mz, 
-			double rt, 
-			MsFeatureIdentity prinmaryIdentity) {
-		super();
-		this.id = id;
-		this.mz = mz;
-		this.rt = rt;
-		this.primaryIdentity = prinmaryIdentity;
-		components = new HashSet<MSFeatureInfoBundle>();
-		updateName();
+	public long getFeatureNumber() {		
+		return componentMap.values().stream().flatMap(v -> v.stream()).count();
 	}
 	
-	public MsFeatureInfoBundleCluster(MSFeatureInfoBundle b) {
-		this();
-		addComponent(b);
-	}
-
 	private void updateName() {
 		
-		String mzRtName = null;
-		if(mz > 0.0d && rt > 0.0d)
-			mzRtName = "MZ " + MRC2ToolBoxConfiguration.getMzFormat().format(mz) + 
-				" | RT " + MRC2ToolBoxConfiguration.getRtFormat().format(rt);
-		
-		MsFeatureIdentity newId = 
-				MSMSClusteringUtils.getTopMSMSLibraryHit(this.getComponents());
-		if(newId != null)
-			primaryIdentity = newId;
-		
-		if(primaryIdentity != null) {
-			name = primaryIdentity.getCompoundName();
-			if(mzRtName != null)
-				name += " | " + mzRtName;
-		}
-		else {
-			if(mzRtName != null)
-				name = mzRtName;
-			else
-				name = id;
-		}
-		if(components.size() > 1)
-			name += " [" + Integer.toString(components.size()) + "]";
+		primaryIdentity = 
+				MSMSClusteringUtils.getTopMSMSLibraryHit(getComponents());
+		updateNameFromPrimaryIdentity();
 	}
 	
 	public void updateNameFromPrimaryIdentity() {
 		
-		String mzRtName = null;
-		if(mz > 0.0d && rt > 0.0d)
-			mzRtName = "MZ " + MRC2ToolBoxConfiguration.getMzFormat().format(mz) + 
-				" | RT " + MRC2ToolBoxConfiguration.getRtFormat().format(rt);
+		BinnerAnnotation ba = binnerAnnotationCluster.getPrimaryFeatureAnnotation();
+		String mzRtName = "MZ " + MRC2ToolBoxConfiguration.getMzFormat().format(ba.getBinnerMz()) + 
+				" | RT " + MRC2ToolBoxConfiguration.getRtFormat().format(ba.getBinnerRt());
 		
-		if(primaryIdentity != null) {
-			name = primaryIdentity.getCompoundName();
-			if(mzRtName != null)
-				name += " | " + mzRtName;
-		}
-		else {
-			if(mzRtName != null)
-				name = mzRtName;
-			else
-				name = id;
-		}
-		if(components.size() > 1)
-			name += " [" + Integer.toString(components.size()) + "]";
+		if(primaryIdentity != null)
+			name = primaryIdentity.getCompoundName() + " | " + mzRtName;
+		else 
+			name = binnerAnnotationCluster.toString();
+		
+		long fNumber = getFeatureNumber();
+		if(fNumber > 1)
+			name += " [" + Long.toString(fNumber) + "]";
 	}
 	
 	public void replaceStoredPrimaryIdentityFromFeatures() {
@@ -155,53 +126,38 @@ public class MsFeatureInfoBundleCluster {
 			return;
 		}
 		String uniquePrimaryId = primaryIdentity.getUniqueId();		
-		primaryIdentity = components.stream().
+		primaryIdentity = getComponents().stream().
 				flatMap(c -> c.getMsFeature().getIdentifications().stream()).
 				filter(i -> i.getUniqueId().equals(uniquePrimaryId)).findFirst().orElse(null);
 		updateNameFromPrimaryIdentity();
 	}
 	
-	public void addComponent(MSFeatureInfoBundle newComponent) {
-		components.add(newComponent);		
-		updateStats();
+	public void addComponent(BinnerAnnotation ba, MSFeatureInfoBundle newComponent) {
+		componentMap.get(ba).add(newComponent);		
+		updateStats(ba);
 		updateName();
 	}
 
-	public void removeComponent(MSFeatureInfoBundle toRemove) {
-		components.remove(toRemove);
-		updateStats();
+	public void removeComponent(BinnerAnnotation ba, MSFeatureInfoBundle toRemove) {
+		componentMap.get(ba).remove(toRemove);
+		updateStats(ba);
 		updateName();
 	}
 	
-	private void updateStats() {
+	private void updateStats(BinnerAnnotation ba) {
 		
-		mz = MsFeatureStatsUtils.getMedianParentIonMzForFeatureCollection(components);
-		rt = MsFeatureStatsUtils.getMedianRtForFeatureCollection(components);
-		medianArea = MsFeatureStatsUtils.getMedianMSMSAreaForFeatureCollection(components);
+		double mz = MsFeatureStatsUtils.getMedianParentIonMzForFeatureCollection(componentMap.get(ba));
+		mzMap.put(ba, mz);
+		
+		double rt = MsFeatureStatsUtils.getMedianRtForFeatureCollection(componentMap.get(ba));
+		rtMap.put(ba, rt);
+		
+		double medianArea = MsFeatureStatsUtils.getMedianMSMSAreaForFeatureCollection(componentMap.get(ba));
+		medianAreaMap.put(ba, medianArea);
 	}
 	
 	public String getId() {
 		return id;
-	}
-
-	public void setId(String id) {
-		this.id = id;
-	}
-
-	public double getMz() {
-		return mz;
-	}
-
-	public void setMz(double mz) {
-		this.mz = mz;
-	}
-
-	public double getRt() {
-		return rt;
-	}
-
-	public void setRt(double rt) {
-		this.rt = rt;
 	}
 
 	public MsFeatureIdentity getPrimaryIdentity() {
@@ -213,10 +169,6 @@ public class MsFeatureInfoBundleCluster {
 		updateNameFromPrimaryIdentity();
 	}
 
-	public Set<MSFeatureInfoBundle> getComponents() {
-		return components;
-	}
-	
    @Override
     public boolean equals(Object obj) {
 
@@ -226,10 +178,10 @@ public class MsFeatureInfoBundleCluster {
         if (obj == null)
             return false;
 
-        if (!MsFeatureInfoBundleCluster.class.isAssignableFrom(obj.getClass()))
+        if (!BinnerBasedMsFeatureInfoBundleCluster.class.isAssignableFrom(obj.getClass()))
             return false;
 
-        final MsFeatureInfoBundleCluster other = (MsFeatureInfoBundleCluster) obj;
+        final BinnerBasedMsFeatureInfoBundleCluster other = (BinnerBasedMsFeatureInfoBundleCluster) obj;
 
         if ((this.id == null) ? (other.getId() != null) : !this.id.equals(other.getId()))
             return false;
@@ -249,10 +201,6 @@ public class MsFeatureInfoBundleCluster {
 		return name;
 	}
 
-//	public void setName(String name) {
-//		this.name = name;
-//	}
-	
 	@Override
 	public String toString() {
 		return name;
@@ -266,11 +214,8 @@ public class MsFeatureInfoBundleCluster {
 		this.locked = locked;
 	}
 
-	public double getMedianArea() {
-		return medianArea;
-	}
-
 	public boolean addNewBundle(
+			BinnerAnnotation ba,
 			MSFeatureInfoBundle b, 
 			MSMSClusteringParameterSet params) {
 		
@@ -279,23 +224,23 @@ public class MsFeatureInfoBundleCluster {
 		if(msms == null || msms.getParent() == null)
 			return false;
 		
-		if(components.isEmpty()) {
-			addComponent(b);
+		if(componentMap.get(ba).isEmpty()) {
+			addComponent(ba, b);
 			return true;
 		}
 		Range rtRange = new Range(
-				rt - params.getRtErrorValue(), 
-				rt + params.getRtErrorValue());
+				ba.getBinnerRt() - params.getRtErrorValue(), 
+				ba.getBinnerRt() + params.getRtErrorValue());
 		if(!rtRange.contains(b.getRetentionTime()))
 			return false;
 		
 		Range mzRange = MsUtils.createMassRange(
-				mz, params.getMzErrorValue(), params.getMassErrorType());
+				ba.getBinnerMz(), params.getMzErrorValue(), params.getMassErrorType());
 		if(!mzRange.contains(msms.getParent().getMz()))
 			return false;
 		
 		boolean spectrumMatches = false;
-		for(MSFeatureInfoBundle component : components) {
+		for(MSFeatureInfoBundle component : componentMap.get(ba)) {
 			
 			Collection<MsPoint>refMsMs = component.getMsFeature().getSpectrum().
 					getExperimentalTandemSpectrum().getSpectrum();		
@@ -303,7 +248,7 @@ public class MsFeatureInfoBundleCluster {
 					msms.getSpectrum(), refMsMs, params.getMzErrorValue(), params.getMassErrorType(), 
 					MSMSScoreCalculator.DEFAULT_MS_REL_INT_NOISE_CUTOFF);
 			if(score > params.getMsmsSimilarityCutoff()) {
-				addComponent(b);
+				addComponent(ba,b);
 				spectrumMatches = true;
 				break;
 			}
@@ -313,55 +258,60 @@ public class MsFeatureInfoBundleCluster {
 
 	public Element getXmlElement() {
 
-		Element msmsClusterElement = 
-				new Element(MsFeatureInfoBundleClusterFields.MsFeatureInfoBundleCluster.name());
-		msmsClusterElement.setAttribute(
-				MsFeatureInfoBundleClusterFields.Id.name(), id);	
+		//	TODO
+		
+//		Element msmsClusterElement = 
+//				new Element(MsFeatureInfoBundleClusterFields.MsFeatureInfoBundleCluster.name());
 //		msmsClusterElement.setAttribute(
-//				MsFeatureInfoBundleClusterFields.Name.name(), name);
-		msmsClusterElement.setAttribute(
-				MsFeatureInfoBundleClusterFields.MZ.name(), Double.toString(mz));
-		msmsClusterElement.setAttribute(
-				MsFeatureInfoBundleClusterFields.RT.name(), Double.toString(rt));
-		msmsClusterElement.setAttribute(
-				MsFeatureInfoBundleClusterFields.MedianArea.name(), Double.toString(medianArea));
-		msmsClusterElement.setAttribute(
-				MsFeatureInfoBundleClusterFields.IsLocked.name(), Boolean.toString(locked));
+//				MsFeatureInfoBundleClusterFields.Id.name(), id);	
+////		msmsClusterElement.setAttribute(
+////				MsFeatureInfoBundleClusterFields.Name.name(), name);
+//		msmsClusterElement.setAttribute(
+//				MsFeatureInfoBundleClusterFields.MZ.name(), Double.toString(mz));
+//		msmsClusterElement.setAttribute(
+//				MsFeatureInfoBundleClusterFields.RT.name(), Double.toString(rt));
+//		msmsClusterElement.setAttribute(
+//				MsFeatureInfoBundleClusterFields.MedianArea.name(), Double.toString(medianArea));
+//		msmsClusterElement.setAttribute(
+//				MsFeatureInfoBundleClusterFields.IsLocked.name(), Boolean.toString(locked));
+//		
+//		Collection<String>componentFeatureIds = components.stream().
+//				map(c -> c.getMSFeatureId()).collect(Collectors.toSet());
+//		msmsClusterElement.addContent(       		
+//        		new Element(MsFeatureInfoBundleClusterFields.FeatureIdList.name()).
+//        		setText(StringUtils.join(componentFeatureIds, ",")));
+//		
+//		if(primaryIdentity != null)
+//			msmsClusterElement.addContent(primaryIdentity.getXmlElement());
+//		
+//		return msmsClusterElement;
 		
-		Collection<String>componentFeatureIds = components.stream().
-				map(c -> c.getMSFeatureId()).collect(Collectors.toSet());
-		msmsClusterElement.addContent(       		
-        		new Element(MsFeatureInfoBundleClusterFields.FeatureIdList.name()).
-        		setText(StringUtils.join(componentFeatureIds, ",")));
-		
-		if(primaryIdentity != null)
-			msmsClusterElement.addContent(primaryIdentity.getXmlElement());
-		
-		return msmsClusterElement;
+		return null;
 	}
 	
-	public MsFeatureInfoBundleCluster(Element clusterElement) {
+	public BinnerBasedMsFeatureInfoBundleCluster(Element clusterElement) {
 		
-		id = clusterElement.getAttributeValue(MsFeatureInfoBundleClusterFields.Id.name());
-		//	name = clusterElement.getAttributeValue(MsFeatureInfoBundleClusterFields.Name.name());
-		mz = Double.parseDouble(
-				clusterElement.getAttributeValue(MsFeatureInfoBundleClusterFields.MZ.name()));
-		rt = Double.parseDouble(
-				clusterElement.getAttributeValue(MsFeatureInfoBundleClusterFields.RT.name()));
-		medianArea = Double.parseDouble(
-				clusterElement.getAttributeValue(MsFeatureInfoBundleClusterFields.MedianArea.name()));
-		locked = Boolean.parseBoolean(
-				clusterElement.getAttributeValue(MsFeatureInfoBundleClusterFields.IsLocked.name()));
-		
-		featureIds = new TreeSet<String>();
-		String compoundIdList = 
-				clusterElement.getChild(
-						MsFeatureInfoBundleClusterFields.FeatureIdList.name()).getText();
-		featureIds.addAll(ExperimentUtils.getIdList(compoundIdList));
-		Element primaryIdElement = 
-				clusterElement.getChild(MsFeatureIdentityFields.MSFID.name());
-		if(primaryIdElement != null)
-			primaryIdentity = new MsFeatureIdentity(primaryIdElement);
+		//	TODO 
+//		id = clusterElement.getAttributeValue(MsFeatureInfoBundleClusterFields.Id.name());
+//		//	name = clusterElement.getAttributeValue(MsFeatureInfoBundleClusterFields.Name.name());
+//		mz = Double.parseDouble(
+//				clusterElement.getAttributeValue(MsFeatureInfoBundleClusterFields.MZ.name()));
+//		rt = Double.parseDouble(
+//				clusterElement.getAttributeValue(MsFeatureInfoBundleClusterFields.RT.name()));
+//		medianArea = Double.parseDouble(
+//				clusterElement.getAttributeValue(MsFeatureInfoBundleClusterFields.MedianArea.name()));
+//		locked = Boolean.parseBoolean(
+//				clusterElement.getAttributeValue(MsFeatureInfoBundleClusterFields.IsLocked.name()));
+//		
+//		featureIds = new TreeSet<String>();
+//		String compoundIdList = 
+//				clusterElement.getChild(
+//						MsFeatureInfoBundleClusterFields.FeatureIdList.name()).getText();
+//		featureIds.addAll(ExperimentUtils.getIdList(compoundIdList));
+//		Element primaryIdElement = 
+//				clusterElement.getChild(MsFeatureIdentityFields.MSFID.name());
+//		if(primaryIdElement != null)
+//			primaryIdentity = new MsFeatureIdentity(primaryIdElement);
 	}
 
 	public Collection<String> getFeatureIds() {
@@ -372,29 +322,24 @@ public class MsFeatureInfoBundleCluster {
 		return featureIds;
 	}
 	
-	public void setFeatures(Collection<MSFeatureInfoBundle> featureBundles) {
-		components = new HashSet<MSFeatureInfoBundle>();
-		components.addAll(featureBundles);
-	}
-
-	public MinimalMSOneFeature getLookupFeature() {
-		return lookupFeature;
-	}
-
-	public void setLookupFeature(MinimalMSOneFeature lookupFeature) {
-		this.lookupFeature = lookupFeature;
-	}
+//	public void setFeatures(Collection<MSFeatureInfoBundle> featureBundles) {
+//		components = new HashSet<MSFeatureInfoBundle>();
+//		components.addAll(featureBundles);
+//	}
 
 	public boolean hasAnnotations() {
 
-		long saCount = components.stream().flatMap(b -> b.getStandadAnnotations().stream()).count();
-		long aCount = components.stream().flatMap(b -> b.getMsFeature().getAnnotations().stream()).count();
+		long saCount = getComponents().stream().
+				flatMap(b -> b.getStandadAnnotations().stream()).count();
+		long aCount =  getComponents().stream().
+				flatMap(b -> b.getMsFeature().getAnnotations().stream()).count();
 		return (saCount + aCount) > 0;
 	}
 
 	public boolean hasIdFollowupSteps() {
 
-		return components.stream().flatMap(b -> b.getIdFollowupSteps().stream()).count() > 0;
+		return  getComponents().stream().
+					flatMap(b -> b.getIdFollowupSteps().stream()).count() > 0;
 	}
 	
 	public MSFeatureInfoBundle getMSFeatureInfoBundleForPrimaryId() {
@@ -402,14 +347,14 @@ public class MsFeatureInfoBundleCluster {
 		if(primaryIdentity == null)
 			return null;
 		
-		return components.stream().
+		return  getComponents().stream().
 			filter(c -> c.getMsFeature().getIdentifications().contains(primaryIdentity)).
 			findFirst().orElse(null);
 	}
 	
 	public MSFeatureInfoBundle getMSFeatureInfoBundleWithLargestMSMSArea() {
 		
-		return components.stream().
+		return  getComponents().stream().
 				sorted(new MsFeatureInfoBundleComparator(SortProperty.msmsIntensity, SortDirection.DESC)).
 				findFirst().orElse(null);
 	}
@@ -417,7 +362,7 @@ public class MsFeatureInfoBundleCluster {
 	public MSFeatureInfoBundle getMSFeatureInfoBundleWithHihgestMSMSScore(boolean includeInSourceHits) {
 		
 		MsFeatureIdentity bestId = null;
-		List<MsFeatureIdentity> allIds = components.stream().
+		List<MsFeatureIdentity> allIds =  getComponents().stream().
 				flatMap(c -> c.getMsFeature().getIdentifications().stream()).
 				filter(id -> Objects.nonNull(id.getReferenceMsMsLibraryMatch())).
 				collect(Collectors.toList());
@@ -436,7 +381,7 @@ public class MsFeatureInfoBundleCluster {
 		if(bestId != null) {
 			
 			final MsFeatureIdentity lookupId = bestId;
-			return components.stream().
+			return  getComponents().stream().
 					filter(c -> c.getMsFeature().getIdentifications().contains(lookupId)).
 					findFirst().orElse(null);
 		}
@@ -444,15 +389,12 @@ public class MsFeatureInfoBundleCluster {
 			return null;
 	}
 	
-	public MSFeatureInfoBundle getMSFeatureInfoBundleWithSmallestParentIonMassError() {
+	public MSFeatureInfoBundle getMSFeatureInfoBundleWithSmallestParentIonMassError(BinnerAnnotation ba) {
 		
-		if(lookupFeature == null)
-			return null;
-		
-		double mz = lookupFeature.getMz();		
+		double mz = ba.getBinnerMz();		
 		double initError = 1000.0d;
 		MSFeatureInfoBundle bestHit = null;
-		for(MSFeatureInfoBundle b : components) {
+		for(MSFeatureInfoBundle b : componentMap.get(ba)) {
 			
 			TandemMassSpectrum msms = 
 					b.getMsFeature().getSpectrum().getExperimentalTandemSpectrum();
@@ -480,12 +422,17 @@ public class MsFeatureInfoBundleCluster {
 			return getMSFeatureInfoBundleWithHihgestMSMSScore(true);
 		
 		if(property.equals(MajorClusterFeatureDefiningProperty.SMALLEST_MASS_ERROR))
-			return getMSFeatureInfoBundleWithSmallestParentIonMassError();
+			return getMSFeatureInfoBundleWithSmallestParentIonMassError(
+					binnerAnnotationCluster.getPrimaryFeatureAnnotation());
 		
 		if(property.equals(MajorClusterFeatureDefiningProperty.CURRENT_PRIMARY_ID))
 				return getMSFeatureInfoBundleForPrimaryId();
 		
 		return null;
+	}
+
+	public BinnerAnnotationCluster getBinnerAnnotationCluster() {
+		return binnerAnnotationCluster;
 	}
 }
 

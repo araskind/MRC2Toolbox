@@ -29,12 +29,15 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import edu.umich.med.mrc2.datoolbox.data.BinnerAnnotation;
+import edu.umich.med.mrc2.datoolbox.data.BinnerAnnotationCluster;
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MinimalMSOneFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsPoint;
 import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
-import edu.umich.med.mrc2.datoolbox.data.msclust.FeatureLookupDataSet;
-import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusterDataSet;
+import edu.umich.med.mrc2.datoolbox.data.msclust.BinnerAnnotationLookupDataSet;
+import edu.umich.med.mrc2.datoolbox.data.msclust.BinnerBasedMSMSClusterDataSet;
+import edu.umich.med.mrc2.datoolbox.data.msclust.BinnerBasedMsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusteringParameterSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
@@ -46,40 +49,37 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
 
-public class MSMSFeatureClusteringTask extends AbstractTask {
+public class BinnerAnnotationLookupTask extends AbstractTask {
 	
 	private Collection<MSFeatureInfoBundle> msmsFeatures;
 	private MSMSClusteringParameterSet params;
-	private FeatureLookupDataSet featureLookupDataSet;
-	private Collection<MsFeatureInfoBundleCluster>featureClusters;
-	private MSMSClusterDataSet msmsClusterDataSet;
+	private BinnerAnnotationLookupDataSet binnerAnnotationsDataSet;
+	private Collection<BinnerBasedMsFeatureInfoBundleCluster>featureClusters;
+	private BinnerBasedMSMSClusterDataSet msmsClusterDataSet;
 	private double rtError;
 	private double mzError;
 	private MassErrorType mzErrorType;
 	private double minMsMsScore;
 	private static final double SPECTRUM_ENTROPY_NOISE_CUTOFF_DEFAULT = 0.01d;
 	
-	public MSMSFeatureClusteringTask(
+	public BinnerAnnotationLookupTask(
 			Collection<MSFeatureInfoBundle> msmsFeatures, 
 			MSMSClusteringParameterSet params,
-			FeatureLookupDataSet flds) {
+			BinnerAnnotationLookupDataSet balds) {
 		super();
 		this.msmsFeatures = msmsFeatures;
 		this.params = params;
-		this.featureLookupDataSet = flds;
-		String description  = "";
-		if(featureLookupDataSet.getFeatures() != null 
-				&& !featureLookupDataSet.getFeatures().isEmpty())
-			description = "Based on feature lookup data set \"" + 
-				featureLookupDataSet.getName() +"\"";
+		this.binnerAnnotationsDataSet = balds;
+		String description  = "Based on Binner annotations data set \"" + 
+				binnerAnnotationsDataSet.getName() +"\"";
 		 
-		msmsClusterDataSet = new MSMSClusterDataSet(
-				"MSMS clusters data set (" + 
+		msmsClusterDataSet = new BinnerBasedMSMSClusterDataSet(
+				"Binner based MSMS clusters data set (" + 
 						MRC2ToolBoxConfiguration.defaultTimeStampFormat.format(new Date()) +")", 
 				description, 
 				MRC2ToolBoxCore.getIdTrackerUser());
 		msmsClusterDataSet.setParameters(params);	
-		msmsClusterDataSet.setFeatureLookupDataSet(featureLookupDataSet);
+		msmsClusterDataSet.setBinnerAnnotationDataSet(binnerAnnotationsDataSet);
 		featureClusters = msmsClusterDataSet.getClusters();
 		rtError = params.getRtErrorValue();
 		mzError = params.getMzErrorValue();
@@ -91,59 +91,55 @@ public class MSMSFeatureClusteringTask extends AbstractTask {
 	public void run() {
 		taskDescription = "Clustering selected MSMS features";
 		setStatus(TaskStatus.PROCESSING);
-		if(featureLookupDataSet.getFeatures() != null 
-				&& !featureLookupDataSet.getFeatures().isEmpty()) {
-			try {
-				clusterFilteredFeatures();
-				msmsClusterDataSet.setFeatureLookupDataSet(featureLookupDataSet);
-			}
-			catch (Exception e) {
-				setStatus(TaskStatus.ERROR);
-				e.printStackTrace();
-			}
-			setStatus(TaskStatus.FINISHED);
+		try {
+			clusterFilteredFeatures();
 		}
-		else {
-			try {
-				clusterAllFeatures();
-			}
-			catch (Exception e) {
-				setStatus(TaskStatus.ERROR);
-				e.printStackTrace();
-			}
-			setStatus(TaskStatus.FINISHED);
+		catch (Exception e) {
+			setStatus(TaskStatus.ERROR);
+			e.printStackTrace();
 		}
+		setStatus(TaskStatus.FINISHED);		
 	}
 	
 	private void clusterFilteredFeatures() {
 
 		taskDescription = "Clustering MSMS features based on filter list ...";
-		Set<MinimalMSOneFeature> lookupFeatures = featureLookupDataSet.getFeatures();
-		total = lookupFeatures.size();
+		Set<BinnerAnnotationCluster> lookupClusters = 
+				binnerAnnotationsDataSet.getBinnerAnnotationClusters();
+		total = lookupClusters.size();
 		processed = 0;
 		
-		for(MinimalMSOneFeature lookupFeature : lookupFeatures) {
+		for(BinnerAnnotationCluster lookupCluster : lookupClusters) {
 			
-			Range rtRange = new Range(lookupFeature.getRt() - rtError, lookupFeature.getRt() + rtError);
-			Range mzRange = MsUtils.createMassRange(lookupFeature.getMz(), mzError, mzErrorType);
-			List<MSFeatureInfoBundle> clusterFeatures = msmsFeatures.stream().
-				filter(f -> Objects.nonNull(f.getMsFeature().
-						getSpectrum().getExperimentalTandemSpectrum())).
-				filter(f -> Objects.nonNull(f.getMsFeature().
-						getSpectrum().getExperimentalTandemSpectrum().getParent())).
-				filter(f -> rtRange.contains(f.getRetentionTime())).
-				filter(f -> mzRange.contains(f.getMsFeature().
-						getSpectrum().getExperimentalTandemSpectrum().getParent().getMz())).
-				collect(Collectors.toList());
-			if(clusterFeatures.isEmpty()) {
-				processed++;
-				continue;
-			}	
-			while(!clusterFeatures.isEmpty()) {
-				MsFeatureInfoBundleCluster newCluster = 
-						clusterBasedOnMSMSSimilarity(lookupFeature, clusterFeatures);
-				newCluster.setLookupFeature(lookupFeature);
-				featureClusters.add(newCluster);				
+			BinnerBasedMsFeatureInfoBundleCluster newCluster = 
+					new BinnerBasedMsFeatureInfoBundleCluster(lookupCluster);
+			
+			for(BinnerAnnotation binnerAnnotation : lookupCluster.getAnnotations()) {
+				
+				Range rtRange = new Range(
+						binnerAnnotation.getBinnerRt() - rtError, 
+						binnerAnnotation.getBinnerRt() + rtError);
+				Range mzRange = MsUtils.createMassRange(binnerAnnotation.getBinnerMz(), mzError, mzErrorType);
+				List<MSFeatureInfoBundle> clusterFeatures = msmsFeatures.stream().
+					filter(f -> Objects.nonNull(f.getMsFeature().
+							getSpectrum().getExperimentalTandemSpectrum())).
+					filter(f -> Objects.nonNull(f.getMsFeature().
+							getSpectrum().getExperimentalTandemSpectrum().getParent())).
+					filter(f -> rtRange.contains(f.getRetentionTime())).
+					filter(f -> mzRange.contains(f.getMsFeature().
+							getSpectrum().getExperimentalTandemSpectrum().getParent().getMz())).
+					collect(Collectors.toList());
+				if(clusterFeatures.isEmpty()) {
+					processed++;
+					continue;
+				}	
+				while(!clusterFeatures.isEmpty()) {
+					
+					MsFeatureInfoBundleCluster newCluster = 
+							clusterBasedOnMSMSSimilarity(lookupFeature, clusterFeatures);
+					newCluster.setLookupFeature(lookupFeature);
+					featureClusters.add(newCluster);				
+				}
 			}
 			processed++;
 		}
@@ -203,46 +199,20 @@ public class MSMSFeatureClusteringTask extends AbstractTask {
 		}		
 		return null;
 	}
-	
-	private void clusterAllFeatures() {
-		
-		taskDescription = "Clustering MSMS features ...";
-		total = msmsFeatures.size();
-		processed = 0;
-		params = msmsClusterDataSet.getParameters();
-		boolean added = false;
-		for(MSFeatureInfoBundle b : msmsFeatures) {
-			
-			added = false;
-			for(MsFeatureInfoBundleCluster cluster : featureClusters) {
-				
-				if(cluster.addNewBundle(b, params)) {
-					added = true;
-					break;
-				}
-			}	
-			if(!added) {
-				MsFeatureInfoBundleCluster newCluster = 
-						new MsFeatureInfoBundleCluster(b);
-				featureClusters.add(newCluster);
-			}
-			processed++;
-		}
-	}
 
 	@Override
 	public Task cloneTask() {
 		
-		return new MSMSFeatureClusteringTask(
-				msmsFeatures, params, featureLookupDataSet);
+		return new BinnerAnnotationLookupTask(
+				msmsFeatures, params, binnerAnnotationsDataSet);
 	}
 
-	public MSMSClusterDataSet getMsmsClusterDataSet() {
+	public BinnerBasedMSMSClusterDataSet getBinnerBasedMSMSClusterDataSet() {
 		return msmsClusterDataSet;
 	}
 
-	public FeatureLookupDataSet getFeatureLookupDataSet() {
-		return featureLookupDataSet;
+	public BinnerAnnotationLookupDataSet getBinnerAnnotationLookupDataSet() {
+		return binnerAnnotationsDataSet;
 	}
 }
 

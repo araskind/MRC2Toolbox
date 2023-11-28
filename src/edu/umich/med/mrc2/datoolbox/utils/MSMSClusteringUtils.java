@@ -36,13 +36,13 @@ import javax.xml.bind.DatatypeConverter;
 
 import org.apache.commons.lang3.StringUtils;
 
+import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
 import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureIdentityComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortDirection;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusteringParameterSet;
-import edu.umich.med.mrc2.datoolbox.data.msclust.MsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.nist.pepsearch.HiResSearchOption;
 
@@ -68,9 +68,10 @@ public class MSMSClusteringUtils {
 	    return null;
 	}
 	
-	public static MsFeatureIdentity getTopMSMSLibraryHit(MsFeatureInfoBundleCluster cluster) {
+	public static MsFeatureIdentity getTopMSMSLibraryHit(
+			Collection<MSFeatureInfoBundle>clusterComponents) {
 		
-		long numHits = cluster.getComponents().stream().
+		long numHits = clusterComponents.stream().
 			flatMap(f -> f.getMsFeature().getIdentifications().stream()).
 			filter(id -> Objects.nonNull(id.getReferenceMsMsLibraryMatch())).
 			count();
@@ -86,8 +87,8 @@ public class MSMSClusteringUtils {
 				IDTDataCache.getReferenceMsMsLibraryByName("Metlin_AMRT_PCDL").getUniqueId();
 			
 		Map<String,HiResSearchOption>searchTypeMap = 
-				NISTPepSearchUtils.getSearchTypeMap(cluster.getComponents());	
-		List<MsFeature> msFeatures = cluster.getComponents().stream().
+				NISTPepSearchUtils.getSearchTypeMap(clusterComponents);	
+		List<MsFeature> msFeatures = clusterComponents.stream().
 				map(b -> b.getMsFeature()).collect(Collectors.toList());
 		
 		for(MsFeature msf : msFeatures) {

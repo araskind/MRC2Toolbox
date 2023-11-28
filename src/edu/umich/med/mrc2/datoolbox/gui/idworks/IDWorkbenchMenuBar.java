@@ -84,8 +84,6 @@ public class IDWorkbenchMenuBar extends CommonMenuBar {
 	private static final Icon mzFrequencyIcon = GuiUtils.getIcon("mzFrequency", 24);
 	private static final Icon binnerLookupIcon = GuiUtils.getIcon("binnerLookupIcon", 24);
 	
-	//	binnerLookupIcon
-
 	// Menus
 	private JMenu
 		databaseSearchMenu,

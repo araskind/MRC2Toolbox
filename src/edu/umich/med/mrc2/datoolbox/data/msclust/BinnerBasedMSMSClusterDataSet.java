@@ -34,20 +34,20 @@ import java.util.stream.Collectors;
 
 import org.jdom2.Element;
 
+import edu.umich.med.mrc2.datoolbox.data.BinnerAnnotationCluster;
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
-import edu.umich.med.mrc2.datoolbox.data.MinimalMSOneFeature;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
-import edu.umich.med.mrc2.datoolbox.project.store.FeatureLookupDataSetFields;
+import edu.umich.med.mrc2.datoolbox.project.store.BinnerAnnotationLookupDataSetFields;
 import edu.umich.med.mrc2.datoolbox.project.store.MSMSClusterDataSetFields;
 import edu.umich.med.mrc2.datoolbox.project.store.MSMSClusteringParameterSetFields;
 import edu.umich.med.mrc2.datoolbox.project.store.MsFeatureInfoBundleClusterFields;
 import edu.umich.med.mrc2.datoolbox.utils.ExperimentUtils;
 
-public class MSMSClusterDataSet {
+public class BinnerBasedMSMSClusterDataSet {
 	
 	private String id;
 	private String name;
@@ -56,22 +56,22 @@ public class MSMSClusterDataSet {
 	private Date dateCreated;
 	private Date lastModified;
 	private MSMSClusteringParameterSet parameters;
-	private Set<MsFeatureInfoBundleCluster>clusters;
+	private Set<BinnerBasedMsFeatureInfoBundleCluster>clusters;
 	private Set<String>clusterIds;
-	private FeatureLookupDataSet featureLookupDataSet;
+	private BinnerAnnotationLookupDataSet binnerAnnotationDataSet;
 	
-	public MSMSClusterDataSet(
+	public BinnerBasedMSMSClusterDataSet(
 			String name, 
 			String description, 
 			LIMSUser createdBy) {
 		this(name, description, createdBy, new Date(), new Date());
 	}
 	
-	public MSMSClusterDataSet(String name) {
+	public BinnerBasedMSMSClusterDataSet(String name) {
 		this(name, name, MRC2ToolBoxCore.getIdTrackerUser(), new Date(), new Date());
 	}
 	
-	public MSMSClusterDataSet(
+	public BinnerBasedMSMSClusterDataSet(
 			String id, 
 			String name, 
 			String description, 
@@ -82,33 +82,33 @@ public class MSMSClusterDataSet {
 		this.id = id;
 	}
 
-	public MSMSClusterDataSet(
+	public BinnerBasedMSMSClusterDataSet(
 			String name, 
 			String description, 
 			LIMSUser createdBy, 
 			Date dateCreated,
 			Date lastModified) {
 		super();
-		this.id = DataPrefix.MSMS_CLUSTER_DATA_SET.getName() + 
+		this.id = DataPrefix.BINNER_MSMS_CLUSTER_DATA_SET.getName() + 
 				UUID.randomUUID().toString().substring(0, 12);
 		this.name = name;
 		this.description = description;
 		this.createdBy = createdBy;
 		this.dateCreated = dateCreated;
 		this.lastModified = lastModified;
-		clusters = new HashSet<MsFeatureInfoBundleCluster>();
+		clusters = new HashSet<BinnerBasedMsFeatureInfoBundleCluster>();
 		clusterIds = new TreeSet<String>();
 	}
 	
-	public Set<MsFeatureInfoBundleCluster> getClusters() {
+	public Set<BinnerBasedMsFeatureInfoBundleCluster> getClusters() {
 		return clusters;
 	}
 	
-	public void addCluster(MsFeatureInfoBundleCluster newCluster) {
+	public void addCluster(BinnerBasedMsFeatureInfoBundleCluster newCluster) {
 		clusters.add(newCluster);
 	}
 
-	public void removeCluster(MsFeatureInfoBundleCluster toRemove) {
+	public void removeCluster(BinnerBasedMsFeatureInfoBundleCluster toRemove) {
 		clusters.remove(toRemove);
 	}
 	
@@ -166,10 +166,10 @@ public class MSMSClusterDataSet {
         if (obj == null)
             return false;
 
-        if (!MSMSClusterDataSet.class.isAssignableFrom(obj.getClass()))
+        if (!BinnerBasedMSMSClusterDataSet.class.isAssignableFrom(obj.getClass()))
             return false;
 
-        final MSMSClusterDataSet other = (MSMSClusterDataSet) obj;
+        final BinnerBasedMSMSClusterDataSet other = (BinnerBasedMSMSClusterDataSet) obj;
 
         if ((this.id == null) ? (other.getId() != null) : !this.id.equals(other.getId()))
             return false;
@@ -259,18 +259,18 @@ public class MSMSClusterDataSet {
         		new Element(MSMSClusterDataSetFields.ClusterList.name());
         if(!clusters.isEmpty()) {
         	
-        	for(MsFeatureInfoBundleCluster fbc : clusters)
+        	for(BinnerBasedMsFeatureInfoBundleCluster fbc : clusters)
         		clusterListElement.addContent(fbc.getXmlElement());      	
         }       
         msmsClusterDataSetElement.addContent(clusterListElement);
         
-        if(featureLookupDataSet != null )
-        	msmsClusterDataSetElement.addContent(featureLookupDataSet.getXmlElement());
+        if(binnerAnnotationDataSet != null )
+        	msmsClusterDataSetElement.addContent(binnerAnnotationDataSet.getXmlElement());
         
 		return msmsClusterDataSetElement;
 	}
 	
-	public MSMSClusterDataSet(Element xmlElement) {
+	public BinnerBasedMSMSClusterDataSet(Element xmlElement) {
 		
 		this.id = xmlElement.getAttributeValue(MSMSClusterDataSetFields.Id.name());
 		if(id == null)
@@ -301,13 +301,13 @@ public class MSMSClusterDataSet {
 
 		parameters = new MSMSClusteringParameterSet(
 				xmlElement.getChild(MSMSClusteringParameterSetFields.MSMSClusteringParameterSet.name()));
-		
-		Element lookupListElement = 
-				xmlElement.getChild(FeatureLookupDataSetFields.FeatureLookupDataSet.name());
-        if(lookupListElement != null )
-        	featureLookupDataSet = new FeatureLookupDataSet(lookupListElement);     
         
-		clusters = new HashSet<MsFeatureInfoBundleCluster>();
+		Element binnerAnnotationsElement = 
+				xmlElement.getChild(BinnerAnnotationLookupDataSetFields.BinnerAnnotationLookupDataSet.name());
+        if(binnerAnnotationsElement != null )
+        	binnerAnnotationDataSet = new BinnerAnnotationLookupDataSet(binnerAnnotationsElement);
+        
+		clusters = new HashSet<BinnerBasedMsFeatureInfoBundleCluster>();
 		clusterIds = new TreeSet<String>();
 		
 		List<Element> clusterListElements = 
@@ -318,35 +318,34 @@ public class MSMSClusterDataSet {
 					clusterListElements.get(0).getChildren(MsFeatureInfoBundleClusterFields.MsFeatureInfoBundleCluster.name());
 			for(Element clusterElement : clusterList) {
 				
-				MsFeatureInfoBundleCluster newCluster = 
-						new MsFeatureInfoBundleCluster(clusterElement);
+				BinnerBasedMsFeatureInfoBundleCluster newCluster = 
+						new BinnerBasedMsFeatureInfoBundleCluster(clusterElement);
 				if(newCluster != null)
 					clusters.add(newCluster);
 			}
 		}
 	}
-
-	public FeatureLookupDataSet getFeatureLookupDataSet() {
-		return featureLookupDataSet;
-	}
 	
-	public Collection<MinimalMSOneFeature>getMatchedLookupFeatures(){
+	public Collection<BinnerAnnotationCluster>getMatchedBinnerAnnotationClusters(){
 		
 		return clusters.stream().
-				filter(c -> Objects.nonNull(c.getLookupFeature())).
-				map(c -> c.getLookupFeature()).
+				map(c -> c.getBinnerAnnotationCluster()).
 				collect(Collectors.toSet());
 	}
 
-	public void setFeatureLookupDataSet(FeatureLookupDataSet featureLookupDataSet) {
-		this.featureLookupDataSet = featureLookupDataSet;
-	}
-	
 	public Collection<MSFeatureInfoBundle> getAllFeatures(){ 
 	
 		return clusters.stream().
 				flatMap(c -> c.getComponents().stream()).distinct().
 				collect(Collectors.toList());
+	}
+
+	public BinnerAnnotationLookupDataSet getBinnerAnnotationDataSet() {
+		return binnerAnnotationDataSet;
+	}
+
+	public void setBinnerAnnotationDataSet(BinnerAnnotationLookupDataSet binnerAnnotationDataSet) {
+		this.binnerAnnotationDataSet = binnerAnnotationDataSet;
 	}
 }
 
