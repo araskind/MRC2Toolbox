@@ -33,6 +33,8 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang.StringUtils;
 import org.jdom2.Element;
 
+import edu.umich.med.mrc2.datoolbox.data.BinnerAnnotation;
+import edu.umich.med.mrc2.datoolbox.data.BinnerAnnotationCluster;
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MinimalMSOneFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
@@ -55,7 +57,7 @@ import edu.umich.med.mrc2.datoolbox.utils.MsFeatureStatsUtils;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
 
-public class MsFeatureInfoBundleCluster {
+public class MsFeatureInfoBundleCluster implements IMsFeatureInfoBundleCluster{
 
 	private String id;
 	private String name;
@@ -96,7 +98,7 @@ public class MsFeatureInfoBundleCluster {
 	
 	public MsFeatureInfoBundleCluster(MSFeatureInfoBundle b) {
 		this();
-		addComponent(b);
+		addComponent(null, b);
 	}
 
 	private void updateName() {
@@ -161,13 +163,15 @@ public class MsFeatureInfoBundleCluster {
 		updateNameFromPrimaryIdentity();
 	}
 	
-	public void addComponent(MSFeatureInfoBundle newComponent) {
+	@Override
+	public void addComponent(BinnerAnnotation ba, MSFeatureInfoBundle newComponent) {
 		components.add(newComponent);		
 		updateStats();
 		updateName();
 	}
 
-	public void removeComponent(MSFeatureInfoBundle toRemove) {
+	@Override
+	public void removeComponent(BinnerAnnotation ba, MSFeatureInfoBundle toRemove) {
 		components.remove(toRemove);
 		updateStats();
 		updateName();
@@ -270,7 +274,9 @@ public class MsFeatureInfoBundleCluster {
 		return medianArea;
 	}
 
+	@Override
 	public boolean addNewBundle(
+			BinnerAnnotation ba,
 			MSFeatureInfoBundle b, 
 			MSMSClusteringParameterSet params) {
 		
@@ -280,7 +286,7 @@ public class MsFeatureInfoBundleCluster {
 			return false;
 		
 		if(components.isEmpty()) {
-			addComponent(b);
+			addComponent(null, b);
 			return true;
 		}
 		Range rtRange = new Range(
@@ -303,7 +309,7 @@ public class MsFeatureInfoBundleCluster {
 					msms.getSpectrum(), refMsMs, params.getMzErrorValue(), params.getMassErrorType(), 
 					MSMSScoreCalculator.DEFAULT_MS_REL_INT_NOISE_CUTOFF);
 			if(score > params.getMsmsSimilarityCutoff()) {
-				addComponent(b);
+				addComponent(null, b);
 				spectrumMatches = true;
 				break;
 			}
@@ -444,7 +450,8 @@ public class MsFeatureInfoBundleCluster {
 			return null;
 	}
 	
-	public MSFeatureInfoBundle getMSFeatureInfoBundleWithSmallestParentIonMassError() {
+	public MSFeatureInfoBundle 
+		getMSFeatureInfoBundleWithSmallestParentIonMassError(BinnerAnnotation ba) {
 		
 		if(lookupFeature == null)
 			return null;
@@ -480,13 +487,32 @@ public class MsFeatureInfoBundleCluster {
 			return getMSFeatureInfoBundleWithHihgestMSMSScore(true);
 		
 		if(property.equals(MajorClusterFeatureDefiningProperty.SMALLEST_MASS_ERROR))
-			return getMSFeatureInfoBundleWithSmallestParentIonMassError();
+			return getMSFeatureInfoBundleWithSmallestParentIonMassError(null);
 		
 		if(property.equals(MajorClusterFeatureDefiningProperty.CURRENT_PRIMARY_ID))
 				return getMSFeatureInfoBundleForPrimaryId();
 		
 		return null;
 	}
+	
+	@Override
+	public long getFeatureNumber() {		
+		return components.size();
+	}
+
+	@Override
+	public double getRank() {
+		
+		if(lookupFeature == null)
+			return 0;
+		else
+			return lookupFeature.getRank();
+	}
+
+	@Override
+	public BinnerAnnotationCluster getBinnerAnnotationCluster() {
+		return null;
+	}	
 }
 
 

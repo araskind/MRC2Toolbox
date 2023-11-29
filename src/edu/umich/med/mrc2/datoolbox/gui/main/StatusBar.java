@@ -43,7 +43,7 @@ import javax.swing.border.EtchedBorder;
 
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundleCollection;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
-import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusterDataSet;
+import edu.umich.med.mrc2.datoolbox.data.msclust.IMSMSClusterDataSet;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
@@ -285,7 +285,7 @@ public class StatusBar extends JPanel implements
 			featureCollectionLabel.setText(newCollection.getName());
 	}
 
-	public static void setActiveMSMSClusterDataSet(MSMSClusterDataSet dataSet) {
+	public static void setActiveMSMSClusterDataSet(IMSMSClusterDataSet dataSet) {
 		
 		if(dataSet == null)
 			msmsClusterLabel.setText("");

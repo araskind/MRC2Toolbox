@@ -38,8 +38,9 @@ import javax.swing.JScrollPane;
 import org.apache.commons.lang3.StringUtils;
 
 import bibliothek.gui.dock.common.DefaultSingleCDockable;
+import edu.umich.med.mrc2.datoolbox.data.msclust.IMSMSClusterDataSet;
+import edu.umich.med.mrc2.datoolbox.data.msclust.IMsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusterDataSet;
-import edu.umich.med.mrc2.datoolbox.data.msclust.MsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.database.idt.MSMSClusteringDBUtils;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.IDWorkbenchPanel;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.fcolls.FeatureAndClusterCollectionManagerDialog;
@@ -66,7 +67,7 @@ public class DockableMSMSClusterDataSetsManager extends DefaultSingleCDockable i
 	private FeatureAndClusterCollectionManagerDialog parent;
 	
 	private MSMSClusterDataSetEditorDialog msmsClusterDataSetEditorDialog;
-	private Collection<MsFeatureInfoBundleCluster> clustersToAdd;
+	private Collection<IMsFeatureInfoBundleCluster> clustersToAdd;
 	
 	public DockableMSMSClusterDataSetsManager(FeatureAndClusterCollectionManagerDialog parent)  {
 
@@ -87,7 +88,7 @@ public class DockableMSMSClusterDataSetsManager extends DefaultSingleCDockable i
 
 						if (e.getClickCount() == 2) {
 							
-							MSMSClusterDataSet selected = 
+							IMSMSClusterDataSet selected = 
 									msmsClusterDataSetTable.getSelectedDataSet();
 							if(selected == null)
 								return;
@@ -130,7 +131,7 @@ public class DockableMSMSClusterDataSetsManager extends DefaultSingleCDockable i
 	
 	private void showLookupFeatureListForSelectedClusterDataSet() {
 
-		MSMSClusterDataSet selected = 
+		IMSMSClusterDataSet selected = 
 				msmsClusterDataSetTable.getSelectedDataSet();
 		if(selected == null)
 			return;
@@ -149,7 +150,7 @@ public class DockableMSMSClusterDataSetsManager extends DefaultSingleCDockable i
 
 	private void editSelectedMSMSClusterDataSet() {
 		
-		MSMSClusterDataSet selected = 
+		IMSMSClusterDataSet selected = 
 				msmsClusterDataSetTable.getSelectedDataSet();
 		if(selected == null)
 			return;
@@ -166,7 +167,7 @@ public class DockableMSMSClusterDataSetsManager extends DefaultSingleCDockable i
 		showMsMSMSDataSetEditorDialog(selected);
 	}
 	
-	public void showMsMSMSDataSetEditorDialog (MSMSClusterDataSet dataSet) {
+	public void showMsMSMSDataSetEditorDialog (IMSMSClusterDataSet dataSet) {
 		
 		msmsClusterDataSetEditorDialog = 
 				new MSMSClusterDataSetEditorDialog(dataSet, clustersToAdd, this);
@@ -184,7 +185,7 @@ public class DockableMSMSClusterDataSetsManager extends DefaultSingleCDockable i
 					msmsClusterDataSetEditorDialog);
 			return;
 		}
-		MSMSClusterDataSet edited = 
+		IMSMSClusterDataSet edited = 
 				msmsClusterDataSetEditorDialog.getMSMSClusterDataSet();
 
 		edited.setName(msmsClusterDataSetEditorDialog.getMSMSClusterDataSetName());
@@ -199,7 +200,7 @@ public class DockableMSMSClusterDataSetsManager extends DefaultSingleCDockable i
 		clustersToAdd = null;
 	}
 	
-	private void saveMSMSClusterDataSetChangesToProject(MSMSClusterDataSet edited) {
+	private void saveMSMSClusterDataSetChangesToProject(IMSMSClusterDataSet edited) {
 		
 		if(msmsClusterDataSetEditorDialog.getClustersToAdd() != null)
 			edited.getClusters().addAll(msmsClusterDataSetEditorDialog.getClustersToAdd());
@@ -216,7 +217,7 @@ public class DockableMSMSClusterDataSetsManager extends DefaultSingleCDockable i
 		}		
 	}
 	
-	private void saveMSMSClusterDataSetChangesToDatabase(MSMSClusterDataSet edited) { 
+	private void saveMSMSClusterDataSetChangesToDatabase(IMSMSClusterDataSet edited) { 
 		
 		try {
 			MSMSClusteringDBUtils.updateMSMSClusterDataSetMetadata(edited);
@@ -302,7 +303,7 @@ public class DockableMSMSClusterDataSetsManager extends DefaultSingleCDockable i
 
 	private void deleteMSMSClusterDataSet() {
 		
-		MSMSClusterDataSet selected = msmsClusterDataSetTable.getSelectedDataSet();
+		IMSMSClusterDataSet selected = msmsClusterDataSetTable.getSelectedDataSet();
 		if(selected == null)
 			return;
 		
@@ -325,9 +326,10 @@ public class DockableMSMSClusterDataSetsManager extends DefaultSingleCDockable i
 		}
 	}
 	
-	private void deleteMSMSClusterDataSetFromProject(MSMSClusterDataSet selected) {
+	private void deleteMSMSClusterDataSetFromProject(IMSMSClusterDataSet selected) {
 
-		RawDataAnalysisExperiment project = MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment();		
+		RawDataAnalysisExperiment project = 
+				MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment();		
 		int res = MessageDialog.showChoiceWithWarningMsg(
 				"Are you sure you want to delete data set \"" + selected.getName() + "\"?", 
 				this.getContentPane());
@@ -347,7 +349,7 @@ public class DockableMSMSClusterDataSetsManager extends DefaultSingleCDockable i
 		}
 	}
 
-	private void deleteMSMSClusterDataSetFromDatabase(MSMSClusterDataSet selected) {
+	private void deleteMSMSClusterDataSetFromDatabase(IMSMSClusterDataSet selected) {
 		
 		if(!MSMSClusterDataSetManager.getEditableMSMSClusterDataSets().contains(selected)) {
 			
@@ -382,17 +384,17 @@ public class DockableMSMSClusterDataSetsManager extends DefaultSingleCDockable i
 		}
 	}
 
-	public Collection<MsFeatureInfoBundleCluster> getClustersToAdd() {
+	public Collection<IMsFeatureInfoBundleCluster> getClustersToAdd() {
 		return clustersToAdd;
 	}
 	 
-	public void setClustersToAdd(Collection<MsFeatureInfoBundleCluster> clustersToAdd) {
+	public void setClustersToAdd(Collection<IMsFeatureInfoBundleCluster> clustersToAdd) {
 		this.clustersToAdd = clustersToAdd;
 	}
 	
 	private void loadMSMSClusterDataSet() {
 		
-		MSMSClusterDataSet selectedDataSet = 
+		IMSMSClusterDataSet selectedDataSet = 
 				msmsClusterDataSetTable.getSelectedDataSet();
 		if(selectedDataSet == null)
 			return;	
@@ -400,7 +402,7 @@ public class DockableMSMSClusterDataSetsManager extends DefaultSingleCDockable i
 		loadMSMSClusterDataSetIntoWorkBench(selectedDataSet);		
 	}
 	
-	public void loadMSMSClusterDataSetIntoWorkBench(MSMSClusterDataSet selectedDataSet) {
+	public void loadMSMSClusterDataSetIntoWorkBench(IMSMSClusterDataSet selectedDataSet) {
 		
 		IDWorkbenchPanel panel = 
 				(IDWorkbenchPanel)MRC2ToolBoxCore.getMainWindow().getPanel(PanelList.ID_WORKBENCH);		
@@ -428,15 +430,15 @@ public class DockableMSMSClusterDataSetsManager extends DefaultSingleCDockable i
 	}
 	
 	public void setTableModelFromMSMSClusterDataSetList(
-			Collection<MSMSClusterDataSet> dataSetList) {
+			Collection<IMSMSClusterDataSet> dataSetList) {
 		msmsClusterDataSetTable.setTableModelFromMSMSClusterDataSetList(dataSetList);
 	}
 	
-	public MSMSClusterDataSet getSelectedMSMSClusterDataSet() {	
+	public IMSMSClusterDataSet getSelectedMSMSClusterDataSet() {	
 		return msmsClusterDataSetTable.getSelectedDataSet();
 	}
 	
-	public void selectDataSet(MSMSClusterDataSet toSelect) {		
+	public void selectDataSet(IMSMSClusterDataSet toSelect) {		
 		msmsClusterDataSetTable.selectDataSet(toSelect);
 	}
 	
@@ -446,7 +448,7 @@ public class DockableMSMSClusterDataSetsManager extends DefaultSingleCDockable i
 
 	@Override
 	public void statusChanged(TaskEvent e) {
-		// TODO Auto-generated method stub
+
 		if (e.getStatus() == TaskStatus.FINISHED) {
 
 			((AbstractTask) e.getSource()).removeTaskListener(this);
@@ -459,7 +461,7 @@ public class DockableMSMSClusterDataSetsManager extends DefaultSingleCDockable i
 
 	private void finalizeMSMSClusterDataSetUploadTask(MSMSClusterDataSetUploadTask task) {
 
-		MSMSClusterDataSet newDataSet = task.getDataSet();
+		IMSMSClusterDataSet newDataSet = task.getDataSet();
 		if(msmsClusterDataSetEditorDialog.loadMSMSClusterDataSetIntoWorkBench()) {
 			loadMSMSClusterDataSetIntoWorkBench(newDataSet);
 			msmsClusterDataSetEditorDialog.dispose();

@@ -34,6 +34,7 @@ import java.util.stream.Collectors;
 
 import org.jdom2.Element;
 
+import edu.umich.med.mrc2.datoolbox.data.BinnerAnnotationCluster;
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MinimalMSOneFeature;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
@@ -47,18 +48,22 @@ import edu.umich.med.mrc2.datoolbox.project.store.MSMSClusteringParameterSetFiel
 import edu.umich.med.mrc2.datoolbox.project.store.MsFeatureInfoBundleClusterFields;
 import edu.umich.med.mrc2.datoolbox.utils.ExperimentUtils;
 
-public class MSMSClusterDataSet {
+public class MSMSClusterDataSet implements IMSMSClusterDataSet {
 	
 	private String id;
 	private String name;
+	private MSMSClusterDataSetType dataSetType;
 	private String description;
 	private LIMSUser createdBy;
 	private Date dateCreated;
 	private Date lastModified;
 	private MSMSClusteringParameterSet parameters;
-	private Set<MsFeatureInfoBundleCluster>clusters;
+	private Set<IMsFeatureInfoBundleCluster>clusters;
 	private Set<String>clusterIds;
 	private FeatureLookupDataSet featureLookupDataSet;
+	private BinnerAnnotationLookupDataSet binnerAnnotationDataSet;
+	
+	//	TODO specify data set type in constructor
 	
 	public MSMSClusterDataSet(
 			String name, 
@@ -96,11 +101,11 @@ public class MSMSClusterDataSet {
 		this.createdBy = createdBy;
 		this.dateCreated = dateCreated;
 		this.lastModified = lastModified;
-		clusters = new HashSet<MsFeatureInfoBundleCluster>();
+		clusters = new HashSet<IMsFeatureInfoBundleCluster>();
 		clusterIds = new TreeSet<String>();
 	}
 	
-	public Set<MsFeatureInfoBundleCluster> getClusters() {
+	public Set<IMsFeatureInfoBundleCluster> getClusters() {
 		return clusters;
 	}
 	
@@ -112,14 +117,17 @@ public class MSMSClusterDataSet {
 		clusters.remove(toRemove);
 	}
 	
+	@Override
 	public String getId() {
 		return id;
 	}
 
+	@Override
 	public void setId(String id) {
 		this.id = id;
 	}
 
+	@Override
 	public String getName() {
 		return name;
 	}
@@ -129,30 +137,37 @@ public class MSMSClusterDataSet {
 		return name;
 	}
 	
+	@Override
 	public void setName(String name) {
 		this.name = name;
 	}
 
+	@Override
 	public String getDescription() {
 		return description;
 	}
 
+	@Override
 	public void setDescription(String description) {
 		this.description = description;
 	}
 
+	@Override
 	public LIMSUser getCreatedBy() {
 		return createdBy;
 	}
 
+	@Override
 	public void setCreatedBy(LIMSUser createdBy) {
 		this.createdBy = createdBy;
 	}
 
+	@Override
 	public Date getDateCreated() {
 		return dateCreated;
 	}
 
+	@Override
 	public void setDateCreated(Date dateCreated) {
 		this.dateCreated = dateCreated;
 	}
@@ -185,14 +200,17 @@ public class MSMSClusterDataSet {
         return hash;
     }
 
+	@Override
 	public MSMSClusteringParameterSet getParameters() {
 		return parameters;
 	}
 
+	@Override
 	public void setParameters(MSMSClusteringParameterSet parameters) {
 		this.parameters = parameters;
 	}	
 	
+	@Override
 	public Collection<String>getInjectionIds(){
 		
 		return clusters.stream().flatMap(c -> c.getComponents().stream()).
@@ -201,6 +219,7 @@ public class MSMSClusterDataSet {
 				collect(Collectors.toSet());
 	}
 	
+	@Override
 	public Collection<DataExtractionMethod>getDataExtractionMethods(){
 		
 		return clusters.stream().flatMap(c -> c.getComponents().stream()).
@@ -209,10 +228,12 @@ public class MSMSClusterDataSet {
 				collect(Collectors.toSet());
 	}
 
+	@Override
 	public Date getLastModified() {
 		return lastModified;
 	}
 
+	@Override
 	public void setLastModified(Date lastModified) {
 		this.lastModified = lastModified;
 	}
@@ -230,6 +251,7 @@ public class MSMSClusterDataSet {
 					map(c -> c.getId()).collect(Collectors.toSet());
 	}
 
+	@Override
 	public Element getXmlElement() {
 
 		Element msmsClusterDataSetElement = 
@@ -241,6 +263,10 @@ public class MSMSClusterDataSet {
 		String descString = description;
 		if(descString == null)
 			descString = "";
+		
+		MSMSClusterDataSetType dsType = getDataSetType();
+		msmsClusterDataSetElement.setAttribute(
+				MSMSClusterDataSetFields.DsType.name(), dsType.name());
 		
 		msmsClusterDataSetElement.setAttribute(
 				MSMSClusterDataSetFields.Description.name(), descString);
@@ -259,7 +285,7 @@ public class MSMSClusterDataSet {
         		new Element(MSMSClusterDataSetFields.ClusterList.name());
         if(!clusters.isEmpty()) {
         	
-        	for(MsFeatureInfoBundleCluster fbc : clusters)
+        	for(IMsFeatureInfoBundleCluster fbc : clusters)
         		clusterListElement.addContent(fbc.getXmlElement());      	
         }       
         msmsClusterDataSetElement.addContent(clusterListElement);
@@ -307,7 +333,7 @@ public class MSMSClusterDataSet {
         if(lookupListElement != null )
         	featureLookupDataSet = new FeatureLookupDataSet(lookupListElement);     
         
-		clusters = new HashSet<MsFeatureInfoBundleCluster>();
+		clusters = new HashSet<IMsFeatureInfoBundleCluster>();
 		clusterIds = new TreeSet<String>();
 		
 		List<Element> clusterListElements = 
@@ -324,6 +350,12 @@ public class MSMSClusterDataSet {
 					clusters.add(newCluster);
 			}
 		}
+		String dsTypeString = 
+				xmlElement.getAttributeValue(MSMSClusterDataSetFields.DsType.name());
+		if(dsTypeString == null)
+			getDataSetType();
+		else
+			dataSetType = MSMSClusterDataSetType.valueOf(dsTypeString);
 	}
 
 	public FeatureLookupDataSet getFeatureLookupDataSet() {
@@ -333,8 +365,20 @@ public class MSMSClusterDataSet {
 	public Collection<MinimalMSOneFeature>getMatchedLookupFeatures(){
 		
 		return clusters.stream().
+				filter(MsFeatureInfoBundleCluster.class::isInstance).
+				map(MsFeatureInfoBundleCluster.class::cast).				
 				filter(c -> Objects.nonNull(c.getLookupFeature())).
 				map(c -> c.getLookupFeature()).
+				collect(Collectors.toSet());
+	}
+	
+	public Collection<BinnerAnnotationCluster>getMatchedBinnerAnnotationClusterss(){
+		
+		return clusters.stream().
+				filter(BinnerBasedMsFeatureInfoBundleCluster.class::isInstance).
+				map(BinnerBasedMsFeatureInfoBundleCluster.class::cast).				
+				filter(c -> Objects.nonNull(c.getBinnerAnnotationCluster())).
+				map(c -> c.getBinnerAnnotationCluster()).
 				collect(Collectors.toSet());
 	}
 
@@ -342,11 +386,37 @@ public class MSMSClusterDataSet {
 		this.featureLookupDataSet = featureLookupDataSet;
 	}
 	
+	@Override
 	public Collection<MSFeatureInfoBundle> getAllFeatures(){ 
 	
 		return clusters.stream().
 				flatMap(c -> c.getComponents().stream()).distinct().
 				collect(Collectors.toList());
+	}
+
+	@Override
+	public BinnerAnnotationLookupDataSet getBinnerAnnotationDataSet() {
+		return binnerAnnotationDataSet;
+	}
+
+	public void setBinnerAnnotationDataSet(BinnerAnnotationLookupDataSet binnerAnnotationDataSet) {
+		this.binnerAnnotationDataSet = binnerAnnotationDataSet;
+	}
+
+	public MSMSClusterDataSetType getDataSetType() {
+		
+		if(dataSetType == null) {
+			
+			if(binnerAnnotationDataSet != null)
+				dataSetType = MSMSClusterDataSetType.BINNER_ANNOTATION_BASED;
+			else
+				dataSetType = MSMSClusterDataSetType.FEATURE_BASED;
+		}
+		return dataSetType;
+	}
+
+	public void setDataSetType(MSMSClusterDataSetType dataSetType) {
+		this.dataSetType = dataSetType;
 	}
 }
 

@@ -41,9 +41,10 @@ import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
 import edu.umich.med.mrc2.datoolbox.data.msclust.FeatureLookupDataSet;
+import edu.umich.med.mrc2.datoolbox.data.msclust.IMSMSClusterDataSet;
+import edu.umich.med.mrc2.datoolbox.data.msclust.IMsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusterDataSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusteringParameterSet;
-import edu.umich.med.mrc2.datoolbox.data.msclust.MsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.main.FeatureLookupDataSetManager;
 import edu.umich.med.mrc2.datoolbox.main.MSMSClusterDataSetManager;
@@ -136,18 +137,18 @@ public class MSMSClusteringDBUtils {
 		ConnectionManager.releaseConnection(conn);
 	}
 	
-	public static Map<MSMSClusterDataSet, Set<String>> getMSMSClusterDataSets() throws Exception {
+	public static Map<IMSMSClusterDataSet, Set<String>> getMSMSClusterDataSets() throws Exception {
 		Connection conn = ConnectionManager.getConnection();
-		Map<MSMSClusterDataSet, Set<String>> dataSets = getMSMSClusterDataSets(conn);
+		Map<IMSMSClusterDataSet, Set<String>> dataSets = getMSMSClusterDataSets(conn);
 		ConnectionManager.releaseConnection(conn);
 		return dataSets;
 	}
 	
-	public static Map<MSMSClusterDataSet, Set<String>>getMSMSClusterDataSets(Connection conn) throws Exception {
+	public static Map<IMSMSClusterDataSet, Set<String>>getMSMSClusterDataSets(Connection conn) throws Exception {
 		
 		FeatureLookupDataSetManager.refreshFeatureLookupDataSetList();
-		Map<MSMSClusterDataSet, Set<String>> dataSets = 
-				new HashMap<MSMSClusterDataSet, Set<String>>();
+		Map<IMSMSClusterDataSet, Set<String>> dataSets = 
+				new HashMap<IMSMSClusterDataSet, Set<String>>();
 		String query = 
 			"SELECT CDS_ID, NAME, DESCRIPTION, CREATED_BY,  " +
 			"DATE_CREATED, LAST_MODIFIED, PAR_SET_ID, FLDS_ID " + 
@@ -163,7 +164,7 @@ public class MSMSClusteringDBUtils {
 		while(rs.next()) {
 			
 			LIMSUser createdBy = IDTDataCache.getUserById(rs.getString("CREATED_BY"));
-			MSMSClusterDataSet ds = new MSMSClusterDataSet(
+			IMSMSClusterDataSet ds = new MSMSClusterDataSet(
 					rs.getString("CDS_ID"), 
 					rs.getString("NAME"), 
 					rs.getString("DESCRIPTION"), 
@@ -197,14 +198,14 @@ public class MSMSClusteringDBUtils {
 	}
 	
 	public static void insertMSMSClusterDataSetWithClusters(
-			MSMSClusterDataSet newDataSet) throws Exception {
+			IMSMSClusterDataSet newDataSet) throws Exception {
 		Connection conn = ConnectionManager.getConnection();
 		insertMSMSClusterDataSet(newDataSet, conn);
 		ConnectionManager.releaseConnection(conn);
 	}
 	
 	public static void insertMSMSClusterDataSetWithClusters(
-			MSMSClusterDataSet newDataSet, Connection conn) throws Exception {
+			IMSMSClusterDataSet newDataSet, Connection conn) throws Exception {
 		
 		MSMSClusteringParameterSet parSet = 
 				MSMSClusterDataSetManager.getMsmsClusteringParameterSetById(newDataSet.getParameters().getId());
@@ -221,8 +222,8 @@ public class MSMSClusteringDBUtils {
 		String query = 
 			"INSERT INTO MSMS_CLUSTERED_DATA_SET " +
 			"(CDS_ID, NAME, DESCRIPTION, CREATED_BY,  " +
-			"DATE_CREATED, LAST_MODIFIED, PAR_SET_ID, FLDS_ID) "
-			+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+			"DATE_CREATED, LAST_MODIFIED, PAR_SET_ID, FLDS_ID, DATA_SET_TYPE) "
+			+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 		PreparedStatement ps = conn.prepareStatement(query);
 		
 		ps.setString(1, newDataSet.getId());
@@ -248,9 +249,11 @@ public class MSMSClusteringDBUtils {
 					newDataSet.getFeatureLookupDataSet());
 			ps.setString(8, newDataSet.getFeatureLookupDataSet().getId());
 		}
+		//	TODO Binner lookup set
 		else {
 			ps.setNull(8, java.sql.Types.NULL);	
 		}
+		ps.setString(9, newDataSet.getDataSetType().name());
 		
 		ps.executeUpdate();
 		
@@ -262,7 +265,7 @@ public class MSMSClusteringDBUtils {
 	}
 	
 	public static void insertDataAnalysisIdsForDataSet(
-			MSMSClusterDataSet newDataSet, 
+			IMSMSClusterDataSet newDataSet, 
 			Collection<String>daIds, 
 			Connection conn) throws Exception {
 		
@@ -278,8 +281,9 @@ public class MSMSClusteringDBUtils {
 		ps.close();
 	}
 	
+	//	TODO deal with Binner-based clusters
 	public static void insertClustersForDataSet(
-			MSMSClusterDataSet newDataSet, 
+			IMSMSClusterDataSet newDataSet, 
 			MSMSClusteringParameterSet parSet,
 			Connection conn) throws Exception {
 		
@@ -292,7 +296,7 @@ public class MSMSClusteringDBUtils {
 				+ "(CLUSTER_ID, MS_FEATURE_ID) VALUES (?, ?)";
 		PreparedStatement featurePs = conn.prepareStatement(featureQuery);
 		
-		for(MsFeatureInfoBundleCluster cluster : newDataSet.getClusters()) {
+		for(IMsFeatureInfoBundleCluster cluster : newDataSet.getClusters()) {
 			
 			String clusterId = SQLUtils.getNextIdFromSequence(conn, 
 					"MSMS_CLUSTER_SEQ",
@@ -335,6 +339,8 @@ public class MSMSClusteringDBUtils {
 			else
 				ps.setNull(8, java.sql.Types.NULL);
 			
+			//	TODO insert binner annotation cluster
+			
 			ps.executeUpdate();
 			
 			//	Add cluster features
@@ -350,7 +356,7 @@ public class MSMSClusteringDBUtils {
 	}
 	
 	public static Set<String>getAnalysisIdsForClusterCollection(
-			Collection<MsFeatureInfoBundleCluster>clusterCollection, Connection conn) throws Exception {
+			Collection<IMsFeatureInfoBundleCluster>clusterCollection, Connection conn) throws Exception {
 		
 		Set<String>analysisIds = new TreeSet<String>();
 		
@@ -386,13 +392,13 @@ public class MSMSClusteringDBUtils {
 		return analysisIds;
 	}
 	
-	public static void updateMSMSClusterDataSetMetadata(MSMSClusterDataSet edited) throws Exception {
+	public static void updateMSMSClusterDataSetMetadata(IMSMSClusterDataSet edited) throws Exception {
 		Connection conn = ConnectionManager.getConnection();
 		updateMSMSClusterDataSetMetadata(edited, conn);
 		ConnectionManager.releaseConnection(conn);		
 	}
 	
-	public static void updateMSMSClusterDataSetMetadata(MSMSClusterDataSet edited, Connection conn) throws Exception {
+	public static void updateMSMSClusterDataSetMetadata(IMSMSClusterDataSet edited, Connection conn) throws Exception {
 
 		String query = 
 				"UPDATE MSMS_CLUSTERED_DATA_SET SET NAME = ?, "
@@ -408,19 +414,19 @@ public class MSMSClusteringDBUtils {
 	}
 
 	public static void addClustersToDataSet(
-			MSMSClusterDataSet dataSet, 
-			Collection<MsFeatureInfoBundleCluster> newClusters) throws Exception {
+			IMSMSClusterDataSet dataSet, 
+			Collection<IMsFeatureInfoBundleCluster> newClusters) throws Exception {
 		Connection conn = ConnectionManager.getConnection();
 		addClustersToDataSet(dataSet, newClusters, conn);
 		ConnectionManager.releaseConnection(conn);		
 	}
 
 	public static void addClustersToDataSet(
-			MSMSClusterDataSet dataSet, 
-			Collection<MsFeatureInfoBundleCluster> newClusters, 
+			IMSMSClusterDataSet dataSet, 
+			Collection<IMsFeatureInfoBundleCluster> newClusters, 
 			Connection conn) throws Exception{
 		Set<String> existingIds = dataSet.getClusterIds();
-		List<MsFeatureInfoBundleCluster> clustersToAdd = newClusters.stream().
+		List<IMsFeatureInfoBundleCluster> clustersToAdd = newClusters.stream().
 				filter(c -> !existingIds.contains(c.getId())).
 				collect(Collectors.toList());
 		if(clustersToAdd.isEmpty())
@@ -442,7 +448,7 @@ public class MSMSClusteringDBUtils {
 	}
 	
 	public static Collection<String>getDataAnalysisIdsForMSMSClusterDataSet(
-			MSMSClusterDataSet dataSet, 
+			IMSMSClusterDataSet dataSet, 
 			Connection conn) throws Exception {
 		
 		Collection<String>daIds = new TreeSet<String>();
@@ -460,13 +466,13 @@ public class MSMSClusteringDBUtils {
 		return daIds;
 	}
 
-	public static void deleteMSMSClusterDataSet(MSMSClusterDataSet toDelete) throws Exception {
+	public static void deleteMSMSClusterDataSet(IMSMSClusterDataSet toDelete) throws Exception {
 		Connection conn = ConnectionManager.getConnection();
 		deleteMSMSClusterDataSet(toDelete, conn);
 		ConnectionManager.releaseConnection(conn);
 	}
 
-	public static void deleteMSMSClusterDataSet(MSMSClusterDataSet toDelete, Connection conn) throws Exception {
+	public static void deleteMSMSClusterDataSet(IMSMSClusterDataSet toDelete, Connection conn) throws Exception {
 
 		String query = "DELETE FROM MSMS_CLUSTER WHERE CLUSTER_ID = ?";
 		PreparedStatement ps = conn.prepareStatement(query);
@@ -488,14 +494,14 @@ public class MSMSClusteringDBUtils {
 	}
 	
 	public static void updateMSMSClusterPrimaryIdentity(
-			MsFeatureInfoBundleCluster edited) throws Exception {
+			IMsFeatureInfoBundleCluster edited) throws Exception {
 		Connection conn = ConnectionManager.getConnection();
 		updateMSMSClusterPrimaryIdentity(edited, conn);
 		ConnectionManager.releaseConnection(conn);		
 	}
 	
 	public static void updateMSMSClusterPrimaryIdentity(
-			MsFeatureInfoBundleCluster edited, 
+			IMsFeatureInfoBundleCluster edited, 
 			Connection conn) throws Exception {
 
 		String query = 

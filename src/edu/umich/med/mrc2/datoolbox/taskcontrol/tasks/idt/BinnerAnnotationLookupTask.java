@@ -21,10 +21,11 @@
 
 package edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -32,14 +33,14 @@ import java.util.stream.Collectors;
 import edu.umich.med.mrc2.datoolbox.data.BinnerAnnotation;
 import edu.umich.med.mrc2.datoolbox.data.BinnerAnnotationCluster;
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
-import edu.umich.med.mrc2.datoolbox.data.MinimalMSOneFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsPoint;
 import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
 import edu.umich.med.mrc2.datoolbox.data.msclust.BinnerAnnotationLookupDataSet;
-import edu.umich.med.mrc2.datoolbox.data.msclust.BinnerBasedMSMSClusterDataSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.BinnerBasedMsFeatureInfoBundleCluster;
+import edu.umich.med.mrc2.datoolbox.data.msclust.IMSMSClusterDataSet;
+import edu.umich.med.mrc2.datoolbox.data.msclust.IMsFeatureInfoBundleCluster;
+import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusterDataSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusteringParameterSet;
-import edu.umich.med.mrc2.datoolbox.data.msclust.MsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.msmsscore.MSMSScoreCalculator;
@@ -54,8 +55,8 @@ public class BinnerAnnotationLookupTask extends AbstractTask {
 	private Collection<MSFeatureInfoBundle> msmsFeatures;
 	private MSMSClusteringParameterSet params;
 	private BinnerAnnotationLookupDataSet binnerAnnotationsDataSet;
-	private Collection<BinnerBasedMsFeatureInfoBundleCluster>featureClusters;
-	private BinnerBasedMSMSClusterDataSet msmsClusterDataSet;
+	private Collection<IMsFeatureInfoBundleCluster>featureClusters;
+	private IMSMSClusterDataSet msmsClusterDataSet;
 	private double rtError;
 	private double mzError;
 	private MassErrorType mzErrorType;
@@ -73,7 +74,7 @@ public class BinnerAnnotationLookupTask extends AbstractTask {
 		String description  = "Based on Binner annotations data set \"" + 
 				binnerAnnotationsDataSet.getName() +"\"";
 		 
-		msmsClusterDataSet = new BinnerBasedMSMSClusterDataSet(
+		msmsClusterDataSet = new MSMSClusterDataSet(
 				"Binner based MSMS clusters data set (" + 
 						MRC2ToolBoxConfiguration.defaultTimeStampFormat.format(new Date()) +")", 
 				description, 
@@ -108,6 +109,8 @@ public class BinnerAnnotationLookupTask extends AbstractTask {
 				binnerAnnotationsDataSet.getBinnerAnnotationClusters();
 		total = lookupClusters.size();
 		processed = 0;
+		Map<MSFeatureInfoBundle,Double>featureScoreMap = 
+				new HashMap<MSFeatureInfoBundle,Double>();
 		
 		for(BinnerAnnotationCluster lookupCluster : lookupClusters) {
 			
@@ -116,6 +119,7 @@ public class BinnerAnnotationLookupTask extends AbstractTask {
 			
 			for(BinnerAnnotation binnerAnnotation : lookupCluster.getAnnotations()) {
 				
+				featureScoreMap.clear();
 				Range rtRange = new Range(
 						binnerAnnotation.getBinnerRt() - rtError, 
 						binnerAnnotation.getBinnerRt() + rtError);
@@ -129,75 +133,37 @@ public class BinnerAnnotationLookupTask extends AbstractTask {
 					filter(f -> mzRange.contains(f.getMsFeature().
 							getSpectrum().getExperimentalTandemSpectrum().getParent().getMz())).
 					collect(Collectors.toList());
-				if(clusterFeatures.isEmpty()) {
-					processed++;
+				if(clusterFeatures.isEmpty())
 					continue;
-				}	
-				while(!clusterFeatures.isEmpty()) {
 					
-					MsFeatureInfoBundleCluster newCluster = 
-							clusterBasedOnMSMSSimilarity(lookupFeature, clusterFeatures);
-					newCluster.setLookupFeature(lookupFeature);
-					featureClusters.add(newCluster);				
+				for(int i=0; i<clusterFeatures.size(); i++) {
+					
+					MSFeatureInfoBundle fOne = clusterFeatures.get(i);
+					featureScoreMap.put(fOne, 0.0d);
+					Collection<MsPoint>msmsOne = fOne.getMsFeature().getSpectrum().
+							getExperimentalTandemSpectrum().getSpectrum();
+					
+					for(int j=1; j<clusterFeatures.size(); j++) {
+						
+						Collection<MsPoint>msmsTwo = clusterFeatures.get(j).getMsFeature().getSpectrum().
+								getExperimentalTandemSpectrum().getSpectrum();
+						
+						double score = MSMSScoreCalculator.calculateEntropyBasedMatchScore(
+								msmsOne, msmsTwo, mzError, mzErrorType, SPECTRUM_ENTROPY_NOISE_CUTOFF_DEFAULT);
+						
+						if(score > featureScoreMap.get(fOne))
+							featureScoreMap.replace(fOne, score);
+					}
 				}
+				featureScoreMap.entrySet().stream().
+					filter(e -> (e.getValue() >= minMsMsScore)).
+					forEach(e -> newCluster.addComponent(binnerAnnotation, e.getKey()));
 			}
+			if(!newCluster.getComponents().isEmpty())
+				featureClusters.add(newCluster);
+			
 			processed++;
 		}
-	}
-	
-	private MsFeatureInfoBundleCluster clusterBasedOnMSMSSimilarity(
-			MinimalMSOneFeature b,
-			List<MSFeatureInfoBundle> featuresToCluster) {
-		
-		if(featuresToCluster.isEmpty())
-			return null;
-		
-		if(featuresToCluster.size() == 1) {		
-			MsFeatureInfoBundleCluster newCluster = new MsFeatureInfoBundleCluster(b);
-			newCluster.addComponent(featuresToCluster.get(0));
-			featuresToCluster.clear();
-			return newCluster;
-		}
-		if(featuresToCluster.size() > 1) {
-			
-			List<MSFeatureInfoBundle> featuresToRemove = 
-					new ArrayList<MSFeatureInfoBundle>();
-			MsFeatureInfoBundleCluster newCluster = new MsFeatureInfoBundleCluster(b);
-			MSFeatureInfoBundle maxInt = featuresToCluster.get(0);
-			double maxArea = maxInt.getMsFeature().getSpectrum().
-					getExperimentalTandemSpectrum().getTotalIntensity();
-			for(int i=1; i<featuresToCluster.size(); i++) {
-				double area = featuresToCluster.get(i).getMsFeature().getSpectrum().
-						getExperimentalTandemSpectrum().getTotalIntensity();
-				if(area > maxArea) {
-					maxArea = area;
-					maxInt = featuresToCluster.get(i);
-				}
-			}
-			newCluster.addComponent(maxInt);
-			Collection<MsPoint> refMsMs = maxInt.getMsFeature().getSpectrum().
-					getExperimentalTandemSpectrum().getSpectrum();
-			featuresToRemove.add(maxInt);
-			for(int i=0; i<featuresToCluster.size(); i++) {
-				
-				MSFeatureInfoBundle f = featuresToCluster.get(i);
-				if(f.equals(maxInt))
-					continue;
-				
-				Collection<MsPoint>msms = f.getMsFeature().getSpectrum().
-						getExperimentalTandemSpectrum().getSpectrum();
-				
-				double score = MSMSScoreCalculator.calculateEntropyBasedMatchScore(
-						msms, refMsMs, mzError, mzErrorType, SPECTRUM_ENTROPY_NOISE_CUTOFF_DEFAULT);
-				if(score >= minMsMsScore) {
-					newCluster.addComponent(f);
-					featuresToRemove.add(f);
-				}
-			}
-			featuresToCluster.removeAll(featuresToRemove);
-			return newCluster;
-		}		
-		return null;
 	}
 
 	@Override
@@ -207,7 +173,7 @@ public class BinnerAnnotationLookupTask extends AbstractTask {
 				msmsFeatures, params, binnerAnnotationsDataSet);
 	}
 
-	public BinnerBasedMSMSClusterDataSet getBinnerBasedMSMSClusterDataSet() {
+	public IMSMSClusterDataSet getMSMSClusterDataSet() {
 		return msmsClusterDataSet;
 	}
 

@@ -27,6 +27,7 @@ import java.util.Collection;
 import javax.swing.table.TableRowSorter;
 
 import edu.umich.med.mrc2.datoolbox.data.MinimalMSOneFeature;
+import edu.umich.med.mrc2.datoolbox.data.msclust.IMsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.AutoChoices;
@@ -66,7 +67,7 @@ public class FoundLookupFeaturesTable extends BasicTable {
 	}
 	
 	public void setTableModelFromMsFeatureInfoBundleClusterCollection(
-			Collection<MsFeatureInfoBundleCluster>clusters) {
+			Collection<IMsFeatureInfoBundleCluster>clusters) {
 		thf.setTable(null);
 		((FoundLookupFeaturesTableModel)model).setTableModelFromMsFeatureInfoBundleClusterCollection(clusters);
 		thf.setTable(this);

@@ -44,8 +44,8 @@ import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
-import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusterDataSet;
-import edu.umich.med.mrc2.datoolbox.data.msclust.MsFeatureInfoBundleCluster;
+import edu.umich.med.mrc2.datoolbox.data.msclust.IMSMSClusterDataSet;
+import edu.umich.med.mrc2.datoolbox.data.msclust.IMsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.IDWorkbenchPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
@@ -59,12 +59,12 @@ public class AddClustersToDataSetDialog extends JDialog implements ActionListene
 	private static final long serialVersionUID = -7638441884088309136L;
 	private static final Icon addFeatureCollectionIcon = GuiUtils.getIcon("newFeatureSubset", 32);
 	private MSMSClusterDataSetsTable dataSetsTable;
-	private Collection<MsFeatureInfoBundleCluster> clustersToAdd;
+	private Collection<IMsFeatureInfoBundleCluster> clustersToAdd;
 	private JCheckBox loadCollectionCheckBox;
 	private IDWorkbenchPanel parentPanel;
 	
 	public AddClustersToDataSetDialog(
-			Collection<MsFeatureInfoBundleCluster> clustersToAdd,
+			Collection<IMsFeatureInfoBundleCluster> clustersToAdd,
 			IDWorkbenchPanel parentPanel) {
 		super();
 		
@@ -143,11 +143,12 @@ public class AddClustersToDataSetDialog extends JDialog implements ActionListene
 	
 	private void addMSMSClustersToSelectedDataSet() {
 		
-		MSMSClusterDataSet selectedDataSet = dataSetsTable.getSelectedDataSet();	
+		IMSMSClusterDataSet selectedDataSet = dataSetsTable.getSelectedDataSet();	
 		if(selectedDataSet == null) {
 			MessageDialog.showErrorMsg("Please select data set to add clusters.", this);
 			return;
 		}
+		//	TODO
 //		if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() == null)
 //			FeatureCollectionManager.addFeaturesToCollection(selectedCollection, clustersToAdd);
 //		else

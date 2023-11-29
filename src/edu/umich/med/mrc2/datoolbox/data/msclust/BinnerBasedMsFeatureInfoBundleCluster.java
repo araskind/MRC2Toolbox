@@ -37,6 +37,7 @@ import org.jdom2.Element;
 import edu.umich.med.mrc2.datoolbox.data.BinnerAnnotation;
 import edu.umich.med.mrc2.datoolbox.data.BinnerAnnotationCluster;
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
+import edu.umich.med.mrc2.datoolbox.data.MinimalMSOneFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
 import edu.umich.med.mrc2.datoolbox.data.MsPoint;
 import edu.umich.med.mrc2.datoolbox.data.TandemMassSpectrum;
@@ -54,7 +55,7 @@ import edu.umich.med.mrc2.datoolbox.utils.MsFeatureStatsUtils;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
 
-public class BinnerBasedMsFeatureInfoBundleCluster {
+public class BinnerBasedMsFeatureInfoBundleCluster implements IMsFeatureInfoBundleCluster{
 
 	private String id;
 	private String name;	
@@ -433,6 +434,35 @@ public class BinnerBasedMsFeatureInfoBundleCluster {
 
 	public BinnerAnnotationCluster getBinnerAnnotationCluster() {
 		return binnerAnnotationCluster;
+	}
+	
+	@Override
+	public double getMz() {
+		return mzMap.get(binnerAnnotationCluster.getPrimaryFeatureAnnotation());
+	}
+
+	@Override
+	public double getRt() {
+		return rtMap.get(binnerAnnotationCluster.getPrimaryFeatureAnnotation());
+	}
+
+	@Override
+	public double getMedianArea() {
+		return medianAreaMap.get(binnerAnnotationCluster.getPrimaryFeatureAnnotation());
+	}
+
+	@Override
+	public double getRank() {
+		return 0;
+	}
+
+	public void setId(String id) {
+		this.id = id;
+	}
+
+	@Override
+	public MinimalMSOneFeature getLookupFeature() {
+		return null;
 	}
 }
 

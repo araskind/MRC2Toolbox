@@ -56,9 +56,9 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 
 import edu.umich.med.mrc2.datoolbox.data.msclust.FeatureLookupDataSet;
-import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusterDataSet;
+import edu.umich.med.mrc2.datoolbox.data.msclust.IMSMSClusterDataSet;
+import edu.umich.med.mrc2.datoolbox.data.msclust.IMsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusteringParameterSet;
-import edu.umich.med.mrc2.datoolbox.data.msclust.MsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
@@ -75,9 +75,9 @@ public class MSMSClusterDataSetEditorDialog extends JDialog {
 	private static final Icon addFeatureCollectionIcon = GuiUtils.getIcon("newFeatureSubset", 32);
 	private static final Icon editFeatureCollectionIcon = GuiUtils.getIcon("editCollection", 32);
 	
-	private MSMSClusterDataSet dataSet;
+	private IMSMSClusterDataSet dataSet;
 	private MSMSClusteringParameterSet msmsExtractionParameters;
-	private Collection<MsFeatureInfoBundleCluster> clustersToAdd;
+	private Collection<IMsFeatureInfoBundleCluster> clustersToAdd;
 	private FeatureLookupDataSet featureLookupDataSet;
 	
 	private JButton btnSave;
@@ -89,8 +89,8 @@ public class MSMSClusterDataSetEditorDialog extends JDialog {
 	private JCheckBox loadMSMSClusterDataSetCheckBox;
 	
 	public MSMSClusterDataSetEditorDialog(
-			MSMSClusterDataSet dataSet, 
-			Collection<MsFeatureInfoBundleCluster> clustersToAdd,
+			IMSMSClusterDataSet dataSet, 
+			Collection<IMsFeatureInfoBundleCluster> clustersToAdd,
 			ActionListener actionListener) {
 		super();
 		setPreferredSize(new Dimension(700, 300));
@@ -312,7 +312,7 @@ public class MSMSClusterDataSetEditorDialog extends JDialog {
 
 	private String validateNameAgainstDatabase(String newName) {
 		
-		MSMSClusterDataSet existing = null;
+		IMSMSClusterDataSet existing = null;
 		if(this.dataSet == null) {
 			existing = MSMSClusterDataSetManager.getMSMSClusterDataSetByName(newName);
 		}
@@ -331,9 +331,9 @@ public class MSMSClusterDataSetEditorDialog extends JDialog {
 
 	private String validateNameAgainstProject(String newName) {
 		
-		Collection<MSMSClusterDataSet> dataSets = 
+		Collection<IMSMSClusterDataSet> dataSets = 
 				MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment().getMsmsClusterDataSets();
-		MSMSClusterDataSet existing = null;
+		IMSMSClusterDataSet existing = null;
 
 		if(this.dataSet == null) {
 			existing = dataSets.stream().
@@ -353,7 +353,7 @@ public class MSMSClusterDataSetEditorDialog extends JDialog {
 			return null;
 	}
 
-	public MSMSClusterDataSet getMSMSClusterDataSet() {
+	public IMSMSClusterDataSet getMSMSClusterDataSet() {
 		return dataSet;
 	}
 
@@ -373,7 +373,7 @@ public class MSMSClusterDataSetEditorDialog extends JDialog {
 		descriptionTextArea.setText(description);
 	}	
 
-	public Collection<MsFeatureInfoBundleCluster>getClustersToAdd() {
+	public Collection<IMsFeatureInfoBundleCluster>getClustersToAdd() {
 		return clustersToAdd;
 	}
 	

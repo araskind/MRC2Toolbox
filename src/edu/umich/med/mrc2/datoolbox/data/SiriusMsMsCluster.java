@@ -32,7 +32,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
-import edu.umich.med.mrc2.datoolbox.data.msclust.MsFeatureInfoBundleCluster;
+import edu.umich.med.mrc2.datoolbox.data.msclust.IMsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.main.AdductManager;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
@@ -83,7 +83,7 @@ public class SiriusMsMsCluster implements Serializable {
 		//	TODO check for compatible acquisition methods
 	}
 	
-	public SiriusMsMsCluster(MsFeatureInfoBundleCluster cluster) {
+	public SiriusMsMsCluster(IMsFeatureInfoBundleCluster cluster) {
 
 		super();
 		msmsComponents = new HashSet<MSFeatureInfoBundle>();

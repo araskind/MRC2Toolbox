@@ -29,6 +29,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
+import edu.umich.med.mrc2.datoolbox.data.msclust.IMsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MsFeatureInfoBundleCluster;
 
 public class MSMSFeatureClusterTreeModel extends DefaultTreeModel {
@@ -61,12 +62,12 @@ public class MSMSFeatureClusterTreeModel extends DefaultTreeModel {
 		final DefaultMutableTreeNode newNode = new DefaultMutableTreeNode(object);
 		treeObjects.put(object, newNode);
 
-		if (object instanceof MsFeatureInfoBundleCluster) {
+		if (object instanceof IMsFeatureInfoBundleCluster) {
 
 			int childCount = getChildCount(clustersNode);
 			insertNodeInto(newNode, clustersNode, childCount);
 
-			for (MSFeatureInfoBundle cf : ((MsFeatureInfoBundleCluster) object).getComponents()) {
+			for (MSFeatureInfoBundle cf : ((IMsFeatureInfoBundleCluster) object).getComponents()) {
 
 				final DefaultMutableTreeNode newFeatureNode = new DefaultMutableTreeNode(cf);
 				treeObjects.put(cf, newFeatureNode);
@@ -91,18 +92,18 @@ public class MSMSFeatureClusterTreeModel extends DefaultTreeModel {
 
 	public synchronized void clearClusters() {
 
-		MsFeatureInfoBundleCluster[] clusters = getClusters();
+		IMsFeatureInfoBundleCluster[] clusters = getClusters();
 		if (clusters.length > 0) {
 
-			for (MsFeatureInfoBundleCluster cl : clusters)
+			for (IMsFeatureInfoBundleCluster cl : clusters)
 				removeObject(cl);
 		}
 	}
 
-	public synchronized MsFeatureInfoBundleCluster[] getClusters() {
+	public synchronized IMsFeatureInfoBundleCluster[] getClusters() {
 
 		int childrenCount = getChildCount(clustersNode);
-		MsFeatureInfoBundleCluster result[] = new MsFeatureInfoBundleCluster[childrenCount];
+		IMsFeatureInfoBundleCluster result[] = new IMsFeatureInfoBundleCluster[childrenCount];
 		for (int j = 0; j < childrenCount; j++) {
 
 			DefaultMutableTreeNode child = (DefaultMutableTreeNode) getChild(clustersNode, j);

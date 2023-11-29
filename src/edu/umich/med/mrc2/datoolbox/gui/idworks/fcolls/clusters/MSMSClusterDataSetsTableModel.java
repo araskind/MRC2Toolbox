@@ -27,7 +27,7 @@ import java.util.Date;
 import java.util.List;
 
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
-import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusterDataSet;
+import edu.umich.med.mrc2.datoolbox.data.msclust.IMSMSClusterDataSet;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTableModel;
 import edu.umich.med.mrc2.datoolbox.gui.tables.ColumnContext;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
@@ -52,7 +52,7 @@ public class MSMSClusterDataSetsTableModel extends BasicTableModel {
 		super();
 		columnArray = new ColumnContext[] {
 
-			new ColumnContext(CLUSTER_DATA_SET_COLUMN, "Cluster data set name", MSMSClusterDataSet.class, false),
+			new ColumnContext(CLUSTER_DATA_SET_COLUMN, "Cluster data set name", IMSMSClusterDataSet.class, false),
 			new ColumnContext(DESCRIPTION_COLUMN, DESCRIPTION_COLUMN, String.class, false),
 			new ColumnContext(NUM_CLUSTERS_COLUMN, "Number of clusters", Integer.class, true),
 			new ColumnContext(OWNER_COLUMN, OWNER_COLUMN, LIMSUser.class, false),
@@ -62,15 +62,15 @@ public class MSMSClusterDataSetsTableModel extends BasicTableModel {
 	}
 
 	public void setTableModelFromMSMSClusterDataSetList(
-			Collection<MSMSClusterDataSet> msmsClusterDataSetCollections) {
+			Collection<IMSMSClusterDataSet> IMSMSClusterDataSetCollections) {
 
 		setRowCount(0);
-		if(msmsClusterDataSetCollections == null 
-				|| msmsClusterDataSetCollections.isEmpty())
+		if(IMSMSClusterDataSetCollections == null 
+				|| IMSMSClusterDataSetCollections.isEmpty())
 			return;
 		
 		List<Object[]>rowData = new ArrayList<Object[]>();
-		for (MSMSClusterDataSet dataSet : msmsClusterDataSetCollections) {
+		for (IMSMSClusterDataSet dataSet : IMSMSClusterDataSetCollections) {
 
 			if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() == null) {
 				
@@ -98,7 +98,7 @@ public class MSMSClusterDataSetsTableModel extends BasicTableModel {
 			addRows(rowData);
 	}
 	
-	public int getMSMSClusterDataSetRow(MSMSClusterDataSet fCol) {
+	public int getMSMSClusterDataSetRow(IMSMSClusterDataSet fCol) {
 
 		int col = getColumnIndex(CLUSTER_DATA_SET_COLUMN);
 		for (int i = 0; i < getRowCount(); i++) {
@@ -109,7 +109,7 @@ public class MSMSClusterDataSetsTableModel extends BasicTableModel {
 		return -1;
 	}
 	
-	public void updateMSMSClusterDataSetData(MSMSClusterDataSet edited) {
+	public void updateMSMSClusterDataSetData(IMSMSClusterDataSet edited) {
 		
 		int row = getMSMSClusterDataSetRow(edited);
 		if(row == -1)
@@ -124,3 +124,7 @@ public class MSMSClusterDataSetsTableModel extends BasicTableModel {
 		setValueAt(edited.getLastModified(), row, getColumnIndex(LAST_MODIFIED_COLUMN));		
 	}
 }
+
+
+
+

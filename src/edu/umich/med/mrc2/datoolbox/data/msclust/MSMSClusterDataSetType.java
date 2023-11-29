@@ -19,18 +19,26 @@
  *
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.project.store;
+package edu.umich.med.mrc2.datoolbox.data.msclust;
 
-public enum MSMSClusterDataSetFields {
+public enum MSMSClusterDataSetType {
 
-	MSMSClusterDataSet,
-	Id,
-	Name,
-	DsType,
-	Description,
-	UserId,
-	DateCreated,
-	LastModified,
-	ClusterList
+	FEATURE_BASED("Feature based"),
+	BINNER_ANNOTATION_BASED("Binner annotation based"),
 	;
+	
+	private final String uiName;
+
+	MSMSClusterDataSetType(String uiName) {
+		this.uiName = uiName;
+	}
+
+	public String getName() {
+		return uiName;
+	}
+
+	@Override
+	public String toString() {
+		return uiName;
+	}
 }

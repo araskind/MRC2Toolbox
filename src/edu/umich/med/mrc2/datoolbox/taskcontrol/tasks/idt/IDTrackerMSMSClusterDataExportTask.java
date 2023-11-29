@@ -53,21 +53,21 @@ import edu.umich.med.mrc2.datoolbox.data.enums.IDTrackerMSMSClusterProperties;
 import edu.umich.med.mrc2.datoolbox.data.enums.IDTrackerMsFeatureProperties;
 import edu.umich.med.mrc2.datoolbox.data.enums.RefMetClassificationLevels;
 import edu.umich.med.mrc2.datoolbox.data.lims.Injection;
-import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusterDataSet;
-import edu.umich.med.mrc2.datoolbox.data.msclust.MsFeatureInfoBundleCluster;
+import edu.umich.med.mrc2.datoolbox.data.msclust.IMSMSClusterDataSet;
+import edu.umich.med.mrc2.datoolbox.data.msclust.IMsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.clustree.MajorClusterFeatureDefiningProperty;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 
 public class IDTrackerMSMSClusterDataExportTask extends IDTrackerFeatureExportTask {
 	
-	private MSMSClusterDataSet msmsClusterDataSet;
+	private IMSMSClusterDataSet msmsClusterDataSet;
 	private Collection<IDTrackerMSMSClusterProperties> msmsClusterPropertyList;	
 	private boolean exportIndividualFeatureData;
 	private MajorClusterFeatureDefiningProperty mcfdp;
 
 	public IDTrackerMSMSClusterDataExportTask(
-			MSMSClusterDataSet msmsClusterDataSet,
+			IMSMSClusterDataSet msmsClusterDataSet,
 			IDTrackerDataExportParameters params,
 			File outputFile) {
 		super();
@@ -150,7 +150,7 @@ public class IDTrackerMSMSClusterDataExportTask extends IDTrackerFeatureExportTa
 		}
 	}
 
-	private Collection<String>getAccessionsForClusters(Collection<MsFeatureInfoBundleCluster> msmsClusters){
+	private Collection<String>getAccessionsForClusters(Collection<IMsFeatureInfoBundleCluster> msmsClusters){
 		
 		Collection<String>accessions = new ArrayList<String>();
 		if(exportIndividualFeatureData) {
@@ -182,11 +182,11 @@ public class IDTrackerMSMSClusterDataExportTask extends IDTrackerFeatureExportTa
 		String header = createExportFileHeader();
 		dataToExport.add(header);
 		
-		List<MsFeatureInfoBundleCluster> toExport = msmsClusterDataSet.getClusters().stream().
+		List<IMsFeatureInfoBundleCluster> toExport = msmsClusterDataSet.getClusters().stream().
 				sorted(new MsFeatureInfoBundleClusterComparator(SortProperty.ID)).
 				collect(Collectors.toList());
 		
-		for(MsFeatureInfoBundleCluster msmsCluster : toExport) {
+		for(IMsFeatureInfoBundleCluster msmsCluster : toExport) {
 						
 			Map<MSFeatureInfoBundle, Collection<MsFeatureIdentity>>idMap =
 					filterClusterIdentifications(msmsCluster);
@@ -286,7 +286,7 @@ public class IDTrackerMSMSClusterDataExportTask extends IDTrackerFeatureExportTa
 	}
 	
 	private Map<MSFeatureInfoBundle, Collection<MsFeatureIdentity>>
-			filterClusterIdentifications(MsFeatureInfoBundleCluster cluster) {
+			filterClusterIdentifications(IMsFeatureInfoBundleCluster cluster) {
 		
 		Map<MSFeatureInfoBundle, Collection<MsFeatureIdentity>>idMap = 
 				new HashMap<MSFeatureInfoBundle, Collection<MsFeatureIdentity>>();
@@ -448,10 +448,12 @@ public class IDTrackerMSMSClusterDataExportTask extends IDTrackerFeatureExportTa
 //	}
 	
 	private String getClusterProperty(
-			MsFeatureInfoBundleCluster cluster, 
+			IMsFeatureInfoBundleCluster cluster, 
 			IDTrackerMSMSClusterProperties property) {
 		
 		MinimalMSOneFeature lookupFeature = cluster.getLookupFeature();
+		
+		//	TODO deal with binner identifications
 
 		if(property.equals(IDTrackerMSMSClusterProperties.CLUSTER_ID))
 			return cluster.getId();

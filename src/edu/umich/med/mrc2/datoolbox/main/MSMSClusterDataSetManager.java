@@ -31,6 +31,7 @@ import java.util.stream.Collectors;
 
 import edu.umich.med.mrc2.datoolbox.data.compare.MSMSClusterDataSetComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
+import edu.umich.med.mrc2.datoolbox.data.msclust.IMSMSClusterDataSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusterDataSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusteringParameterSet;
 import edu.umich.med.mrc2.datoolbox.database.idt.MSMSClusteringDBUtils;
@@ -42,12 +43,12 @@ public class MSMSClusterDataSetManager {
 			"Current MSMS cluster search";
 	public static final String CURRENT_MS1_CLUSTER_SEARCH_RESULT = 
 			"Current MS1 cluster search";	
-	public static final MSMSClusterDataSet msmsClusterSearchResults = 
+	public static final IMSMSClusterDataSet msmsClusterSearchResults = 
 			new MSMSClusterDataSet(CURRENT_MSMS_CLUSTER_SEARCH_RESULT);	
-	public static final MSMSClusterDataSet msOneClusterSearchResults = 
+	public static final IMSMSClusterDataSet msOneClusterSearchResults = 
 			new MSMSClusterDataSet(CURRENT_MS1_CLUSTER_SEARCH_RESULT);	
-	public static final Map<MSMSClusterDataSet, Set<String>>clusterDataSetsToClusterIdsMap = 
-			new TreeMap<MSMSClusterDataSet, Set<String>>(
+	public static final Map<IMSMSClusterDataSet, Set<String>>clusterDataSetsToClusterIdsMap = 
+			new TreeMap<IMSMSClusterDataSet, Set<String>>(
 					new MSMSClusterDataSetComparator(SortProperty.Name));
 	
 	public static Collection<MSMSClusteringParameterSet>msmsClusteringParameters = 
@@ -72,7 +73,7 @@ public class MSMSClusterDataSetManager {
 		}
 	}
 	
-	public static Collection<MSMSClusterDataSet>getMSMSClusterDataSets() {
+	public static Collection<IMSMSClusterDataSet>getMSMSClusterDataSets() {
 
 		if(clusterDataSetsToClusterIdsMap.isEmpty())
 			refreshMSMSClusterDataSetList();
@@ -80,7 +81,7 @@ public class MSMSClusterDataSetManager {
 		return clusterDataSetsToClusterIdsMap.keySet();
 	}
 	
-	public static Collection<MSMSClusterDataSet>getEditableMSMSClusterDataSets() {
+	public static Collection<IMSMSClusterDataSet>getEditableMSMSClusterDataSets() {
 		
 		return clusterDataSetsToClusterIdsMap.keySet().stream().
 			filter(c -> !c.equals(msmsClusterSearchResults)).
@@ -89,24 +90,24 @@ public class MSMSClusterDataSetManager {
 			collect(Collectors.toList());
 	}
 	
-	public static MSMSClusterDataSet getMSMSClusterDataSetById(String id) {
+	public static IMSMSClusterDataSet getMSMSClusterDataSetById(String id) {
 		
 		return clusterDataSetsToClusterIdsMap.keySet().stream().
 				filter(c -> c.getId().equals(id)).findFirst().orElse(null);
 	}
 	
-	public static MSMSClusterDataSet getMSMSClusterDataSetByName(String name) {
+	public static IMSMSClusterDataSet getMSMSClusterDataSetByName(String name) {
 		
 		return clusterDataSetsToClusterIdsMap.keySet().stream().
 				filter(c -> c.getName().equalsIgnoreCase(name)).findFirst().orElse(null);
 	}
 	
 	public static IDTMSMSClusterDataPullTask 
-							getMSMSClusterDataSetData(MSMSClusterDataSet dataSet) {
+							getMSMSClusterDataSetData(IMSMSClusterDataSet dataSet) {
 		return new IDTMSMSClusterDataPullTask(dataSet);
 	}	
 	
-	public static int getMSMSClusterDataSetSize(MSMSClusterDataSet cds) {
+	public static int getMSMSClusterDataSetSize(IMSMSClusterDataSet cds) {
 		
 		if(cds.getClusters() != null && !cds.getClusters().isEmpty())
 			return cds.getClusters().size();
@@ -118,7 +119,7 @@ public class MSMSClusterDataSetManager {
 		}			
 	}
 	
-	public static MSMSClusterDataSet getMsmsMSMSClusterDataSetById(String id) {		
+	public static IMSMSClusterDataSet getMsmsMSMSClusterDataSetById(String id) {		
 		return getMSMSClusterDataSets().stream().
 				filter(s -> s.getId().equals(id)).findFirst().orElse(null);
 	}

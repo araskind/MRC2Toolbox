@@ -75,7 +75,7 @@ import edu.umich.med.mrc2.datoolbox.data.enums.IDTrackerMsFeatureProperties;
 import edu.umich.med.mrc2.datoolbox.data.enums.MSMSMatchType;
 import edu.umich.med.mrc2.datoolbox.data.enums.MSMSScoringParameter;
 import edu.umich.med.mrc2.datoolbox.data.enums.MsDepth;
-import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusterDataSet;
+import edu.umich.med.mrc2.datoolbox.data.msclust.IMSMSClusterDataSet;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.clustree.MajorClusterFeatureDefiningProperty;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
@@ -157,14 +157,14 @@ public class IDTrackerMSMSClusterDataSetExportDialog extends JDialog
 	
 	private final String BROWSE_COMMAND = "BROWSE_FOR_OUTPUT";
 	
-	private MSMSClusterDataSet activeMSMSClusterDataSet;
+	private IMSMSClusterDataSet activeMSMSClusterDataSet;
 	private JCheckBox exportIndividualFeatureDataCheckBox;
 	private JComboBox mfpComboBox;
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public IDTrackerMSMSClusterDataSetExportDialog(
 			ActionListener listener, 
-			MSMSClusterDataSet activeMSMSClusterDataSet) {
+			IMSMSClusterDataSet activeMSMSClusterDataSet) {
 		super();
 		setTitle("Export data for the active MSMS cluster data set \"" + 
 				activeMSMSClusterDataSet.getName() +"\"");

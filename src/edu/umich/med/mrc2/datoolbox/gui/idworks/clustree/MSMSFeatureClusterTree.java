@@ -42,7 +42,7 @@ import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureInfoBundleClusterComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortDirection;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
-import edu.umich.med.mrc2.datoolbox.data.msclust.MsFeatureInfoBundleCluster;
+import edu.umich.med.mrc2.datoolbox.data.msclust.IMsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.gui.clustertree.SuppressMouseEditor;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 
@@ -139,7 +139,7 @@ public class MSMSFeatureClusterTree extends JTree implements ActionListener {
 			toggleClusterLock();
 	}
 
-	public void expandCluster(MsFeatureInfoBundleCluster cluster) {
+	public void expandCluster(IMsFeatureInfoBundleCluster cluster) {
 
 		int row = 0;
 		TreePath treePath;
@@ -269,13 +269,13 @@ public class MSMSFeatureClusterTree extends JTree implements ActionListener {
 		return treeModel;
 	}
 
-	public MsFeatureInfoBundleCluster[] getSelectedClusters() {
+	public IMsFeatureInfoBundleCluster[] getSelectedClusters() {
 
-		ArrayList<MsFeatureInfoBundleCluster> selectedObjects = new ArrayList<MsFeatureInfoBundleCluster>();
+		ArrayList<IMsFeatureInfoBundleCluster> selectedObjects = new ArrayList<IMsFeatureInfoBundleCluster>();
 		int selectedRows[] = getSelectionRows();
 
 		if ((selectedRows == null) || (selectedRows.length == 0))
-			return (MsFeatureInfoBundleCluster[]) Array.newInstance(MsFeatureInfoBundleCluster.class, 0);
+			return (IMsFeatureInfoBundleCluster[]) Array.newInstance(IMsFeatureInfoBundleCluster.class, 0);
 
 		Arrays.sort(selectedRows);
 
@@ -285,10 +285,10 @@ public class MSMSFeatureClusterTree extends JTree implements ActionListener {
 
 			Object selectedObject = selectedNode.getUserObject();
 
-			if (selectedObject instanceof MsFeatureInfoBundleCluster)
-				selectedObjects.add((MsFeatureInfoBundleCluster) selectedObject);
+			if (selectedObject instanceof IMsFeatureInfoBundleCluster)
+				selectedObjects.add((IMsFeatureInfoBundleCluster) selectedObject);
 		}
-		return selectedObjects.toArray(new MsFeatureInfoBundleCluster[selectedObjects.size()]);
+		return selectedObjects.toArray(new IMsFeatureInfoBundleCluster[selectedObjects.size()]);
 	}
 
 	public Collection<MSFeatureInfoBundle> getSelectedFeatures() {
@@ -321,7 +321,7 @@ public class MSMSFeatureClusterTree extends JTree implements ActionListener {
 		return sortDirection;
 	}
 
-	public void loadFeatureClusters(Collection<MsFeatureInfoBundleCluster> clusterList) {
+	public void loadFeatureClusters(Collection<IMsFeatureInfoBundleCluster> clusterList) {
 
 		Runnable swingCode = new Runnable() {
 
@@ -373,7 +373,7 @@ public class MSMSFeatureClusterTree extends JTree implements ActionListener {
 		}
 	}
 
-	public void removeFeatureCluster(MsFeatureInfoBundleCluster cluster) {
+	public void removeFeatureCluster(IMsFeatureInfoBundleCluster cluster) {
 
 		TreePath clusterPath = findPath(cluster);
 
@@ -412,19 +412,19 @@ public class MSMSFeatureClusterTree extends JTree implements ActionListener {
 
 	public void resortTree() {
 
-		MsFeatureInfoBundleCluster[] sortedClusters = treeModel.getClusters();
+		IMsFeatureInfoBundleCluster[] sortedClusters = treeModel.getClusters();
 
 		Arrays.sort(sortedClusters, new MsFeatureInfoBundleClusterComparator(sortByProperty, sortDirection));
 
 		treeModel.clearClusters();
 
-		for (MsFeatureInfoBundleCluster fc : sortedClusters)
+		for (IMsFeatureInfoBundleCluster fc : sortedClusters)
 			treeModel.addObject(fc);
 
 		expandClusterBranch();
 	}
 
-	public void selectFeatureCluster(MsFeatureInfoBundleCluster cluster) {
+	public void selectFeatureCluster(IMsFeatureInfoBundleCluster cluster) {
 
 		TreePath clusterPath = findPath(cluster);
 
@@ -448,13 +448,13 @@ public class MSMSFeatureClusterTree extends JTree implements ActionListener {
 		sortByProperty = property;
 		sortDirection = direction;
 
-		MsFeatureInfoBundleCluster[] sortedClusters = treeModel.getClusters();
+		IMsFeatureInfoBundleCluster[] sortedClusters = treeModel.getClusters();
 
 		Arrays.sort(sortedClusters, new MsFeatureInfoBundleClusterComparator(property, direction));
 
 		treeModel.clearClusters();
 
-		for (MsFeatureInfoBundleCluster fc : sortedClusters)
+		for (IMsFeatureInfoBundleCluster fc : sortedClusters)
 			treeModel.addObject(fc);
 
 		expandClusterBranch();
@@ -515,9 +515,9 @@ public class MSMSFeatureClusterTree extends JTree implements ActionListener {
 
 	private void toggleClusterLock() {
 
-		MsFeatureInfoBundleCluster[] selected = getSelectedClusters();
+		IMsFeatureInfoBundleCluster[] selected = getSelectedClusters();
 
-		for (MsFeatureInfoBundleCluster c : selected)
+		for (IMsFeatureInfoBundleCluster c : selected)
 			c.setLocked(!c.isLocked());
 	}
 
@@ -537,17 +537,17 @@ public class MSMSFeatureClusterTree extends JTree implements ActionListener {
 
 //	private void createXicMethodForAllClusters() {
 //
-//		for (MsFeatureInfoBundleCluster fc : treeModel.getClusters())
+//		for (IMsFeatureInfoBundleCluster fc : treeModel.getClusters())
 //			generateXicForCluster(fc);
 //	}
 //
 //	private void createXicMethodForSelectedClusters() {
 //
-//		for (MsFeatureInfoBundleCluster fc : this.getSelectedClusters())
+//		for (IMsFeatureInfoBundleCluster fc : this.getSelectedClusters())
 //			generateXicForCluster(fc);
 //	}
 //	
-//	private void generateXicForCluster(MsFeatureInfoBundleCluster fc) {
+//	private void generateXicForCluster(IMsFeatureInfoBundleCluster fc) {
 //
 //		XicMethodGenerator xmg = new XicMethodGenerator(fc, true);
 //		xmg.createXicMethod();

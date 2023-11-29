@@ -48,6 +48,8 @@ import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
 import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
+import edu.umich.med.mrc2.datoolbox.data.msclust.IMSMSClusterDataSet;
+import edu.umich.med.mrc2.datoolbox.data.msclust.IMsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusterDataSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusteringParameterSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MsFeatureInfoBundleCluster;
@@ -70,14 +72,14 @@ public class IDTMSMSFeatureDataPullWithFilteringTask extends IDTMSMSFeatureDataP
 	private Collection<DataPipeline> dataPipelines;
 	private Collection<MinimalMSOneFeature>lookupFeatures;
 	private MSMSClusteringParameterSet clusteringParams;
-	
-	private Collection<MSFeatureInfoBundle> filteredMsmsFeatures;
-	private Collection<MsFeatureInfoBundleCluster>featureClusters;
-	private MSMSClusterDataSet msmsClusterDataSet;
+
+	private Collection<IMsFeatureInfoBundleCluster>featureClusters;
+	private IMSMSClusterDataSet msmsClusterDataSet;
 	private double rtError;
 	private double mzError;
 	private MassErrorType mzErrorType;
 	private double minMsMsScore;
+	private HashSet<MSFeatureInfoBundle> filteredMsmsFeatures;
 	private static final double SPECTRUM_ENTROPY_NOISE_CUTOFF_DEFAULT = 0.01d;
 		
 	public IDTMSMSFeatureDataPullWithFilteringTask(
@@ -333,7 +335,7 @@ public class IDTMSMSFeatureDataPullWithFilteringTask extends IDTMSMSFeatureDataP
 				continue;
 			}	
 			while(!clusterFeatures.isEmpty()) {
-				MsFeatureInfoBundleCluster newCluster = 
+				IMsFeatureInfoBundleCluster newCluster = 
 						clusterBasedOnMSMSSimilarity(b, clusterFeatures);
 				featureClusters.add(newCluster);				
 			}
@@ -350,9 +352,9 @@ public class IDTMSMSFeatureDataPullWithFilteringTask extends IDTMSMSFeatureDataP
 		for(MSFeatureInfoBundle b : features) {
 			
 			added = false;
-			for(MsFeatureInfoBundleCluster cluster : featureClusters) {
+			for(IMsFeatureInfoBundleCluster cluster : featureClusters) {
 				
-				if(cluster.addNewBundle(b, clusteringParams)) {
+				if(cluster.addNewBundle(null, b, clusteringParams)) {
 					added = true;
 					break;
 				}
@@ -366,7 +368,7 @@ public class IDTMSMSFeatureDataPullWithFilteringTask extends IDTMSMSFeatureDataP
 		}
 	}
 	
-	private MsFeatureInfoBundleCluster clusterBasedOnMSMSSimilarity(
+	private IMsFeatureInfoBundleCluster clusterBasedOnMSMSSimilarity(
 			MinimalMSOneFeature b,
 			List<MSFeatureInfoBundle> featuresToCluster) {
 		
@@ -375,7 +377,7 @@ public class IDTMSMSFeatureDataPullWithFilteringTask extends IDTMSMSFeatureDataP
 		
 		if(featuresToCluster.size() == 1) {		
 			MsFeatureInfoBundleCluster newCluster = new MsFeatureInfoBundleCluster(b);
-			newCluster.addComponent(featuresToCluster.get(0));
+			newCluster.addComponent(null, featuresToCluster.get(0));
 			featuresToCluster.clear();
 			return newCluster;
 		}
@@ -383,7 +385,7 @@ public class IDTMSMSFeatureDataPullWithFilteringTask extends IDTMSMSFeatureDataP
 			
 			List<MSFeatureInfoBundle> featuresToRemove = 
 					new ArrayList<MSFeatureInfoBundle>();
-			MsFeatureInfoBundleCluster newCluster = new MsFeatureInfoBundleCluster(b);
+			IMsFeatureInfoBundleCluster newCluster = new MsFeatureInfoBundleCluster(b);
 			MSFeatureInfoBundle maxInt = featuresToCluster.get(0);
 			double maxArea = maxInt.getMsFeature().getSpectrum().
 					getExperimentalTandemSpectrum().getTotalIntensity();
@@ -395,7 +397,7 @@ public class IDTMSMSFeatureDataPullWithFilteringTask extends IDTMSMSFeatureDataP
 					maxInt = featuresToCluster.get(i);
 				}
 			}
-			newCluster.addComponent(maxInt);
+			newCluster.addComponent(null, maxInt);
 			Collection<MsPoint> refMsMs = maxInt.getMsFeature().getSpectrum().
 					getExperimentalTandemSpectrum().getSpectrum();
 			featuresToRemove.add(maxInt);
@@ -411,7 +413,7 @@ public class IDTMSMSFeatureDataPullWithFilteringTask extends IDTMSMSFeatureDataP
 				double score = MSMSScoreCalculator.calculateEntropyBasedMatchScore(
 						msms, refMsMs, mzError, mzErrorType, SPECTRUM_ENTROPY_NOISE_CUTOFF_DEFAULT);
 				if(score >= minMsMsScore) {
-					newCluster.addComponent(f);
+					newCluster.addComponent(null, f);
 					featuresToRemove.add(f);
 				}
 			}
@@ -425,7 +427,7 @@ public class IDTMSMSFeatureDataPullWithFilteringTask extends IDTMSMSFeatureDataP
 		return lookupFeatures;
 	}
 
-	public MSMSClusterDataSet getMsmsClusterDataSet() {
+	public IMSMSClusterDataSet getMsmsClusterDataSet() {
 		return msmsClusterDataSet;
 	}
 	

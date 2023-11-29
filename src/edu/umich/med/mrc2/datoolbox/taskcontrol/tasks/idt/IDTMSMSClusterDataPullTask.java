@@ -38,7 +38,8 @@ import java.util.stream.Collectors;
 import edu.umich.med.mrc2.datoolbox.data.MinimalMSOneFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
 import edu.umich.med.mrc2.datoolbox.data.msclust.FeatureLookupDataSet;
-import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusterDataSet;
+import edu.umich.med.mrc2.datoolbox.data.msclust.IMSMSClusterDataSet;
+import edu.umich.med.mrc2.datoolbox.data.msclust.IMsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.database.idt.FeatureLookupDataSetUtils;
@@ -48,12 +49,12 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 public class IDTMSMSClusterDataPullTask extends IDTMSMSFeatureDataPullTask {
 
 	private Map<String, Collection<String>>clusterFeatureIdMap;
-	private MSMSClusterDataSet dataSet;
-	private Set<MsFeatureInfoBundleCluster>clusters;
-	private Map<MsFeatureInfoBundleCluster,String>defaultClusterMSMSLibMatchesMap;
-	private Map<MsFeatureInfoBundleCluster,String>defaultClusterAltIdMap;
+	private IMSMSClusterDataSet dataSet;
+	private Set<IMsFeatureInfoBundleCluster>clusters;
+	private Map<IMsFeatureInfoBundleCluster,String>defaultClusterMSMSLibMatchesMap;
+	private Map<IMsFeatureInfoBundleCluster,String>defaultClusterAltIdMap;
 	
-	public IDTMSMSClusterDataPullTask(MSMSClusterDataSet dataSet) {
+	public IDTMSMSClusterDataPullTask(IMSMSClusterDataSet dataSet) {
 		super(null);
 		this.dataSet = dataSet;
 	}
@@ -117,12 +118,12 @@ public class IDTMSMSClusterDataPullTask extends IDTMSMSFeatureDataPullTask {
 		taskDescription = "Adding MSMS features to clusters ...";
 		total = clusters.size();
 		processed = 0;
-		for(MsFeatureInfoBundleCluster cluster : clusters) {
+		for(IMsFeatureInfoBundleCluster cluster : clusters) {
 			
 			Collection<String> fids = clusterFeatureIdMap.get(cluster.getId());
 			features.stream().
 				filter(f -> fids.contains(f.getMSFeatureId())).
-				forEach(f -> cluster.addComponent(f));
+				forEach(f -> cluster.addComponent(null, f));
 			processed++;
 		}
 	}
@@ -132,7 +133,7 @@ public class IDTMSMSClusterDataPullTask extends IDTMSMSFeatureDataPullTask {
 		taskDescription = "Adding MSMS primary IDs for clusters ...";
 		total = defaultClusterMSMSLibMatchesMap.size();
 		processed = 0;
-		for(Entry<MsFeatureInfoBundleCluster, String> entry : defaultClusterMSMSLibMatchesMap.entrySet()) {
+		for(Entry<IMsFeatureInfoBundleCluster, String> entry : defaultClusterMSMSLibMatchesMap.entrySet()) {
 
 			MsFeatureIdentity msmsMatch = entry.getKey().getComponents().
 				stream().flatMap(c -> c.getMsFeature().getIdentifications().stream()).
@@ -144,7 +145,7 @@ public class IDTMSMSClusterDataPullTask extends IDTMSMSFeatureDataPullTask {
 		taskDescription = "Adding manua; primary IDs for clusters ...";
 		total = defaultClusterAltIdMap.size();
 		processed = 0;
-		for(Entry<MsFeatureInfoBundleCluster, String> entry : defaultClusterAltIdMap.entrySet()) {
+		for(Entry<IMsFeatureInfoBundleCluster, String> entry : defaultClusterAltIdMap.entrySet()) {
 			
 			MsFeatureIdentity manualMatch = entry.getKey().getComponents().
 					stream().flatMap(c -> c.getMsFeature().getIdentifications().stream()).
@@ -157,9 +158,9 @@ public class IDTMSMSClusterDataPullTask extends IDTMSMSFeatureDataPullTask {
 	private void getMSMSClusters() throws Exception {
 
 		taskDescription = "Getting MSMS clusters ...";
-		clusters = new HashSet<MsFeatureInfoBundleCluster>();
-		defaultClusterMSMSLibMatchesMap = new HashMap<MsFeatureInfoBundleCluster,String>();
-		defaultClusterAltIdMap = new HashMap<MsFeatureInfoBundleCluster,String>();
+		clusters = new HashSet<IMsFeatureInfoBundleCluster>();
+		defaultClusterMSMSLibMatchesMap = new HashMap<IMsFeatureInfoBundleCluster,String>();
+		defaultClusterAltIdMap = new HashMap<IMsFeatureInfoBundleCluster,String>();
 		clusterFeatureIdMap = new TreeMap<String, Collection<String>>();
 		
 		Connection conn = ConnectionManager.getConnection();		
@@ -243,7 +244,7 @@ public class IDTMSMSClusterDataPullTask extends IDTMSMSFeatureDataPullTask {
 		return new IDTMSMSClusterDataPullTask(dataSet);
 	}
 
-	public MSMSClusterDataSet getDataSet() {
+	public IMSMSClusterDataSet getDataSet() {
 		return dataSet;
 	}
 }

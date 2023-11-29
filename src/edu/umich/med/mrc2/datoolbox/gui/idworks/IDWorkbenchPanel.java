@@ -99,6 +99,8 @@ import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSSamplePreparation;
 import edu.umich.med.mrc2.datoolbox.data.msclust.BinnerAnnotationLookupDataSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.FeatureLookupDataSet;
+import edu.umich.med.mrc2.datoolbox.data.msclust.IMSMSClusterDataSet;
+import edu.umich.med.mrc2.datoolbox.data.msclust.IMsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusterDataSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusteringParameterSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MsFeatureInfoBundleCluster;
@@ -200,6 +202,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.id.NISTMsPepSearchRoundTri
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.id.NISTMsSearchTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.id.NISTMspepSearchOfflineTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.id.PercolatorFDREstimationTask;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.BinnerAnnotationLookupTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.IDTMS1FeatureSearchTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.IDTMSMSClusterDataPullTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.IDTMSMSDuplicateMSMSFeatureCleanupTask;
@@ -289,8 +292,8 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 	private FeatureAndClusterCollectionManagerDialog featureCollectionManagerDialog;
 	private AddFeaturesToCollectionDialog addFeaturesToCollectionDialog;
 	private MsFeatureInfoBundleCollection activeFeatureCollection;
-	private MSMSClusterDataSet activeMSMSClusterDataSet;
-	private MsFeatureInfoBundleCluster activeCluster;
+	private IMSMSClusterDataSet activeMSMSClusterDataSet;
+	private IMsFeatureInfoBundleCluster activeCluster;
 	private FDREstimationSetupDialog fdrEstimationSetupDialog;
 	private ReassignDefaultMSMSLibraryHitDialog reassignDefaultMSMSLibraryHitDialog;
 	private IndeterminateProgressDialog idp;
@@ -833,7 +836,6 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			showAddNewMSMSClusterDataSetDialog();
 		
 		if (command.equals(MainActionCommands.ADD_MSMS_CLUSTER_DATASET_COMMAND.getName())) 
-//				|| command.equals(MainActionCommands.ADD_MSMS_CLUSTER_DATASET_WITH_CLUSTERS_COMMAND.getName()))
 			insertNewMSMSClusterDataSet();
 		
 		if (command.equals(MainActionCommands.CLEAR_IDTRACKER_WORKBENCH_PANEL.getName()))
@@ -923,7 +925,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		
 		Collection<MSFeatureInfoBundle>definingFeatures = new ArrayList<MSFeatureInfoBundle>();
 
-		for(MsFeatureInfoBundleCluster cluster : activeMSMSClusterDataSet.getClusters()) {
+		for(IMsFeatureInfoBundleCluster cluster : activeMSMSClusterDataSet.getClusters()) {
 			
 			MSFeatureInfoBundle b = cluster.getDefiningFeature(mcfp);
 			if(b != null)
@@ -1000,8 +1002,8 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			MessageDialog.showErrorMsg(StringUtils.join(errors, "\n"), msmsClusterFilterDialog);
 			return;
 		}
-		Collection<MsFeatureInfoBundleCluster> filteredClusters = 
-				new ArrayList<MsFeatureInfoBundleCluster>();
+		Collection<IMsFeatureInfoBundleCluster> filteredClusters = 
+				new ArrayList<IMsFeatureInfoBundleCluster>();
 		filteredClusters.addAll(activeMSMSClusterDataSet.getClusters());
 		Range mzRange = msmsClusterFilterDialog.getMzRange();
 		if(mzRange != null) {
@@ -1451,8 +1453,6 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 
 	private void showFeatureFilter(Collection<MSFeatureInfoBundle>featuresToFilter) {
 		
-//		Collection<MSFeatureInfoBundle> allFeatures = 
-//				msTwoFeatureTable.getBundles(TableRowSubset.ALL);
 		if(featuresToFilter == null || featuresToFilter.isEmpty())
 			return;
 		
@@ -1765,11 +1765,11 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		}
 		MSMSClusteringParameterSet params = 
 				activeDataSetMZRTDataSearchDialog.getParameters();
-
-//		MSMSFeatureClusteringTask task = 
-//				new MSMSFeatureClusteringTask(msmsFeatures, params, flds);
-//		task.addTaskListener(this);
-//		MRC2ToolBoxCore.getTaskController().addTask(task);
+		
+		BinnerAnnotationLookupTask task = 
+				new BinnerAnnotationLookupTask(msmsFeatures, params, balds);
+		task.addTaskListener(this);
+		MRC2ToolBoxCore.getTaskController().addTask(task);
 		
 		activeDataSetBinnerAnnotationsSearchDialog.dispose();
 	}
@@ -3390,14 +3390,17 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 				finalizeMSMSClusterDataSetUploadTask((MSMSClusterDataSetUploadTask)e.getSource());	
 			
 			if (e.getSource().getClass().equals(MzFrequencyAnalysisTask.class))
-				finalizeMzFrequencyAnalysisTask((MzFrequencyAnalysisTask)e.getSource());	
+				finalizeMzFrequencyAnalysisTask((MzFrequencyAnalysisTask)e.getSource());
+			
+			if (e.getSource().getClass().equals(BinnerAnnotationLookupTask.class))
+				finalizeBinnerAnnotationLookupTask((BinnerAnnotationLookupTask)e.getSource());
 		}
 		if (e.getStatus() == TaskStatus.CANCELED || e.getStatus() == TaskStatus.ERROR) {
 			MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
 			MainWindow.hideProgressDialog();
 		}
 	}
-	
+
 	private void finalizeMzFrequencyAnalysisTask(MzFrequencyAnalysisTask task) {
 
 		Collection<MzFrequencyObject>mzFrequencyObjects = task.getMzFrequencyObjects();
@@ -3451,6 +3454,11 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 	private void finalizeIDTMSMSClusterDataPullTask(IDTMSMSClusterDataPullTask source) {
 		loadMSMSClusterDataSetInGUI(source.getDataSet());
 	}
+	
+	
+	private void finalizeBinnerAnnotationLookupTask(BinnerAnnotationLookupTask source) {
+		loadMSMSClusterDataSetInGUI(source.getMSMSClusterDataSet());
+	}
 
 	private void finalizeMSMSFeatureClusteringTask(MSMSFeatureClusteringTask source) {
 		
@@ -3461,7 +3469,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		loadMSMSClusterDataSetInGUI(source.getMsmsClusterDataSet());
 	}
 	
-	private void loadMSMSClusterDataSetInGUI(MSMSClusterDataSet dataSet) {
+	private void loadMSMSClusterDataSetInGUI(IMSMSClusterDataSet dataSet) {
 		
 		clearMSMSFeatureData();
 		clearMSMSClusterData();
@@ -3469,7 +3477,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		
 		if(activeMSMSClusterDataSet != null) {
 			
-			Set<MsFeatureInfoBundleCluster> clusters = dataSet.getClusters();
+			Set<IMsFeatureInfoBundleCluster> clusters = dataSet.getClusters();
 			msmsFeatureClusterTreePanel.loadFeatureClusters(clusters);
 			lookupFeatureTable.loadDataSet(dataSet);
 			activeCluster = null;
@@ -3635,7 +3643,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		}
 	}
 	
-	public void loadMSMSClusterDataSet(MSMSClusterDataSet selectedDataSet) {
+	public void loadMSMSClusterDataSet(IMSMSClusterDataSet selectedDataSet) {
 		
 		if(selectedDataSet.equals(MSMSClusterDataSetManager.msmsClusterSearchResults)) {
 			reloadCompleteActiveMSMSClusterDataSet();
@@ -3969,7 +3977,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 				
 				MinimalMSOneFeature lookupFeature = 
 						lookupFeatureTable.getSelectedFeature();
-				MsFeatureInfoBundleCluster cluster = 
+				IMsFeatureInfoBundleCluster cluster = 
 						activeMSMSClusterDataSet.getClusters().stream().
 						filter(c -> Objects.nonNull(c.getLookupFeature())).
 						filter(c -> c.getLookupFeature().equals(lookupFeature)).
@@ -4391,10 +4399,6 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		
 	}
 
-	public MSMSClusterDataSet getActiveMSMSClusterDataSet() {
-		return activeMSMSClusterDataSet;
-	}
-	
 	@Override
 	public void switchDataPipeline(
 			DataAnalysisProject experiment, DataPipeline newDataPipeline) {
@@ -4418,6 +4422,10 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			msTwoFeatureTable.getTable().getSelectionModel().
 					removeListSelectionListener(this);
 		}
+	}
+
+	public IMSMSClusterDataSet getActiveMSMSClusterDataSet() {
+		return activeMSMSClusterDataSet;
 	}
 }
 

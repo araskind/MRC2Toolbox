@@ -21,10 +21,10 @@
 
 package edu.umich.med.mrc2.datoolbox.data.compare;
 
-import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusterDataSet;
+import edu.umich.med.mrc2.datoolbox.data.msclust.IMSMSClusterDataSet;
 
 public class MSMSClusterDataSetComparator extends 
-		ObjectCompatrator<MSMSClusterDataSet> {
+		ObjectCompatrator<IMSMSClusterDataSet> {
 
 	/**
 	 * 
@@ -43,8 +43,8 @@ public class MSMSClusterDataSetComparator extends
 
 	@Override
 	public int compare(
-			MSMSClusterDataSet p1, 
-			MSMSClusterDataSet p2) {
+			IMSMSClusterDataSet p1, 
+			IMSMSClusterDataSet p2) {
 
 		int result = 0;
 

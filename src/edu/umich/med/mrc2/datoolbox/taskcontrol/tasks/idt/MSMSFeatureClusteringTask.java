@@ -158,7 +158,7 @@ public class MSMSFeatureClusteringTask extends AbstractTask {
 		
 		if(featuresToCluster.size() == 1) {		
 			MsFeatureInfoBundleCluster newCluster = new MsFeatureInfoBundleCluster(b);
-			newCluster.addComponent(featuresToCluster.get(0));
+			newCluster.addComponent(null, featuresToCluster.get(0));
 			featuresToCluster.clear();
 			return newCluster;
 		}
@@ -178,7 +178,7 @@ public class MSMSFeatureClusteringTask extends AbstractTask {
 					maxInt = featuresToCluster.get(i);
 				}
 			}
-			newCluster.addComponent(maxInt);
+			newCluster.addComponent(null, maxInt);
 			Collection<MsPoint> refMsMs = maxInt.getMsFeature().getSpectrum().
 					getExperimentalTandemSpectrum().getSpectrum();
 			featuresToRemove.add(maxInt);
@@ -194,7 +194,7 @@ public class MSMSFeatureClusteringTask extends AbstractTask {
 				double score = MSMSScoreCalculator.calculateEntropyBasedMatchScore(
 						msms, refMsMs, mzError, mzErrorType, SPECTRUM_ENTROPY_NOISE_CUTOFF_DEFAULT);
 				if(score >= minMsMsScore) {
-					newCluster.addComponent(f);
+					newCluster.addComponent(null, f);
 					featuresToRemove.add(f);
 				}
 			}
@@ -216,7 +216,7 @@ public class MSMSFeatureClusteringTask extends AbstractTask {
 			added = false;
 			for(MsFeatureInfoBundleCluster cluster : featureClusters) {
 				
-				if(cluster.addNewBundle(b, params)) {
+				if(cluster.addNewBundle(null, b, params)) {
 					added = true;
 					break;
 				}

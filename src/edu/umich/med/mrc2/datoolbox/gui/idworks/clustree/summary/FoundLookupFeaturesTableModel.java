@@ -24,8 +24,10 @@ package edu.umich.med.mrc2.datoolbox.gui.idworks.clustree.summary;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import edu.umich.med.mrc2.datoolbox.data.MinimalMSOneFeature;
+import edu.umich.med.mrc2.datoolbox.data.msclust.IMsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTableModel;
 import edu.umich.med.mrc2.datoolbox.gui.tables.ColumnContext;
@@ -55,14 +57,19 @@ public class FoundLookupFeaturesTableModel extends BasicTableModel {
 	}
 
 	public void setTableModelFromMsFeatureInfoBundleClusterCollection(
-			Collection<MsFeatureInfoBundleCluster>clusters) {
+			Collection<IMsFeatureInfoBundleCluster>clusters) {
 
 		setRowCount(0);
 		if(clusters == null || clusters.isEmpty())
 			return;
-
+		Collection<MsFeatureInfoBundleCluster>msfCusters = 
+				clusters.stream().
+				filter(MsFeatureInfoBundleCluster.class::isInstance).
+				map(MsFeatureInfoBundleCluster.class::cast).
+				collect(Collectors.toList());
+		
 		List<Object[]>rowData = new ArrayList<Object[]>();
-		for (MsFeatureInfoBundleCluster cluster : clusters) {
+		for (MsFeatureInfoBundleCluster cluster : msfCusters) {
 
 			MinimalMSOneFeature feature = cluster.getLookupFeature();
 			if(feature == null)

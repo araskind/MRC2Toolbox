@@ -35,7 +35,7 @@ import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.format.LIMSUserFormat;
 import edu.umich.med.mrc2.datoolbox.data.format.MsFeatureInformationBundleCollectionFormat;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
-import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusterDataSet;
+import edu.umich.med.mrc2.datoolbox.data.msclust.IMSMSClusterDataSet;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.AutoChoices;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.TableFilterHeader;
@@ -87,27 +87,28 @@ public class MSMSClusterDataSetsTable extends BasicTable {
 	}
 
 	public void setTableModelFromMSMSClusterDataSetList(
-			Collection<MSMSClusterDataSet> msmsClusterDataSetCollections) {
+			Collection<IMSMSClusterDataSet> msmsClusterDataSetCollections) {
 		
 		thf.setTable(null);
-		((MSMSClusterDataSetsTableModel)model).setTableModelFromMSMSClusterDataSetList(msmsClusterDataSetCollections);
+		((MSMSClusterDataSetsTableModel)model).
+			setTableModelFromMSMSClusterDataSetList(msmsClusterDataSetCollections);
 		thf.setTable(this);	
 		adjustColumns();
 		
 	}
 	
-	public MSMSClusterDataSet getSelectedDataSet() {
+	public IMSMSClusterDataSet getSelectedDataSet() {
 		
 		int row = getSelectedRow();
 		if(row == -1)
 			return null;
 		
-		return (MSMSClusterDataSet)model.getValueAt(
+		return (IMSMSClusterDataSet)model.getValueAt(
 				convertRowIndexToModel(row), 
 				model.getColumnIndex(MSMSClusterDataSetsTableModel.CLUSTER_DATA_SET_COLUMN));
 	}
 	
-	public void selectDataSet(MSMSClusterDataSet toSelect) {
+	public void selectDataSet(IMSMSClusterDataSet toSelect) {
 		
 		int col = getColumnIndex(MSMSClusterDataSetsTableModel.CLUSTER_DATA_SET_COLUMN);
 		for(int i=0; i<getRowCount(); i++) {
@@ -120,7 +121,7 @@ public class MSMSClusterDataSetsTable extends BasicTable {
 		}
 	}
 	
-	public void updateMSMSClusterDataSetData(MSMSClusterDataSet edited) {
+	public void updateMSMSClusterDataSetData(IMSMSClusterDataSet edited) {
 		thf.setTable(null);
 		((MSMSClusterDataSetsTableModel)model).updateMSMSClusterDataSetData(edited);
 		thf.setTable(this);

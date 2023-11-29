@@ -26,17 +26,18 @@ import java.util.ArrayList;
 import java.util.Set;
 
 import edu.umich.med.mrc2.datoolbox.data.SiriusMsMsCluster;
-import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusterDataSet;
-import edu.umich.med.mrc2.datoolbox.data.msclust.MsFeatureInfoBundleCluster;
+import edu.umich.med.mrc2.datoolbox.data.msclust.IMSMSClusterDataSet;
+import edu.umich.med.mrc2.datoolbox.data.msclust.IMsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 
 public class IDTrackerSiriusMsClusterExportTask extends IDTrackerSiriusMsExportTask {
 
-	private MSMSClusterDataSet msmsClusterDataSet;
+	private IMSMSClusterDataSet msmsClusterDataSet;
 
 	public IDTrackerSiriusMsClusterExportTask(
-			MSMSClusterDataSet msmsClusterDataSet, File outputFile2) {
+			IMSMSClusterDataSet msmsClusterDataSet, 
+			File outputFile2) {
 		super(outputFile2);
 		this.msmsClusterDataSet = msmsClusterDataSet;
 	}
@@ -66,11 +67,11 @@ public class IDTrackerSiriusMsClusterExportTask extends IDTrackerSiriusMsExportT
 		
 		msmsclusters = new ArrayList<SiriusMsMsCluster>();
 		taskDescription = "Converting clusters for SIRIUS export";
-		Set<MsFeatureInfoBundleCluster> msmsClusters = msmsClusterDataSet.getClusters();
+		Set<IMsFeatureInfoBundleCluster> msmsClusters = msmsClusterDataSet.getClusters();
 		total = msmsClusters.size();
 		processed = 1;
 				
-		for(MsFeatureInfoBundleCluster cluster : msmsClusters) {
+		for(IMsFeatureInfoBundleCluster cluster : msmsClusters) {
 			
 			msmsclusters.add(new SiriusMsMsCluster(cluster)) ;
 			processed++;

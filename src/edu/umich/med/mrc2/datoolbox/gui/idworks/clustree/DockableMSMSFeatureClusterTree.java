@@ -37,7 +37,7 @@ import bibliothek.gui.dock.common.DefaultSingleCDockable;
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortDirection;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
-import edu.umich.med.mrc2.datoolbox.data.msclust.MsFeatureInfoBundleCluster;
+import edu.umich.med.mrc2.datoolbox.data.msclust.IMsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 
@@ -134,7 +134,7 @@ public class DockableMSMSFeatureClusterTree extends DefaultSingleCDockable imple
 		return clusterTree;
 	}
 
-	public void expandCluster(MsFeatureInfoBundleCluster cluster) {
+	public void expandCluster(IMsFeatureInfoBundleCluster cluster) {
 		clusterTree.expandCluster(cluster);
 	}
 
@@ -168,7 +168,7 @@ public class DockableMSMSFeatureClusterTree extends DefaultSingleCDockable imple
 		return clusterTree.getModel();
 	}
 
-	public MsFeatureInfoBundleCluster[] getSelectedClusters() {
+	public IMsFeatureInfoBundleCluster[] getSelectedClusters() {
 		return clusterTree.getSelectedClusters();
 	}
 
@@ -184,7 +184,7 @@ public class DockableMSMSFeatureClusterTree extends DefaultSingleCDockable imple
 		return clusterTree.getSortDirection();
 	}
 
-	public void loadFeatureClusters(Collection<MsFeatureInfoBundleCluster> clusterList) {
+	public void loadFeatureClusters(Collection<IMsFeatureInfoBundleCluster> clusterList) {
 		clusterTree.loadFeatureClusters(clusterList);
 	}
 
@@ -196,7 +196,7 @@ public class DockableMSMSFeatureClusterTree extends DefaultSingleCDockable imple
 		clusterTree.removeFeature(feature);
 	}
 
-	public void removeFeatureCluster(MsFeatureInfoBundleCluster cluster) {
+	public void removeFeatureCluster(IMsFeatureInfoBundleCluster cluster) {
 		clusterTree.removeFeatureCluster(cluster);
 	}
 
@@ -212,7 +212,7 @@ public class DockableMSMSFeatureClusterTree extends DefaultSingleCDockable imple
 		clusterTree.resortTree();
 	}
 
-	public void selectFeatureCluster(MsFeatureInfoBundleCluster cluster) {
+	public void selectFeatureCluster(IMsFeatureInfoBundleCluster cluster) {
 		clusterTree.selectFeatureCluster(cluster);
 	}
 

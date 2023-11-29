@@ -58,7 +58,7 @@ import edu.umich.med.mrc2.datoolbox.data.lims.LIMSInstrument;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSSamplePreparation;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSWorklistItem;
-import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusterDataSet;
+import edu.umich.med.mrc2.datoolbox.data.msclust.IMSMSClusterDataSet;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.main.FeatureCollectionManager;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
@@ -80,7 +80,7 @@ public class RawDataAnalysisExperiment extends Experiment {
 	protected Map<DataFile, Collection<MSFeatureInfoBundle>>msFeatureMap;	
 	protected Map<String, MsFeatureChromatogramBundle>chromatogramMap;
 	protected Set<MsFeatureInfoBundleCollection>featureCollections;
-	protected Collection<MSMSClusterDataSet> msmsClusterDataSets;
+	protected Collection<IMSMSClusterDataSet> msmsClusterDataSets;
 	protected MSMSExtractionParameterSet msmsExtractionParameterSet;
 //	protected Set<Injection>injections;
 	protected LIMSUser createdBy;
@@ -208,7 +208,7 @@ public class RawDataAnalysisExperiment extends Experiment {
 				new TreeSet<MsFeatureInfoBundleCollection>(
 						new MsFeatureInformationBundleCollectionComparator(SortProperty.Name));		
 		msmsClusterDataSets = 
-				new TreeSet<MSMSClusterDataSet>(
+				new TreeSet<IMSMSClusterDataSet>(
 						new MSMSClusterDataSetComparator(SortProperty.Name));
 		//	TODO
 	}
@@ -554,11 +554,10 @@ public class RawDataAnalysisExperiment extends Experiment {
 		}	
 	}
 	
-	public Collection<MSMSClusterDataSet> getMsmsClusterDataSets() {
+	public Collection<IMSMSClusterDataSet> getMsmsClusterDataSets() {
 		
 		if(msmsClusterDataSets == null)
-			msmsClusterDataSets = 
-			new TreeSet<MSMSClusterDataSet>(
+			msmsClusterDataSets = new TreeSet<IMSMSClusterDataSet>(
 					new MSMSClusterDataSetComparator(SortProperty.Name));
 		
 		return msmsClusterDataSets;

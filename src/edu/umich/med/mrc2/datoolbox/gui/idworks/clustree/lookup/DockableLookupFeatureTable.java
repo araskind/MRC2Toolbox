@@ -48,7 +48,7 @@ import javax.swing.event.ListSelectionListener;
 import bibliothek.gui.dock.common.DefaultSingleCDockable;
 import edu.umich.med.mrc2.datoolbox.data.MinimalMSOneFeature;
 import edu.umich.med.mrc2.datoolbox.data.msclust.FeatureLookupDataSet;
-import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusterDataSet;
+import edu.umich.med.mrc2.datoolbox.data.msclust.IMSMSClusterDataSet;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 
@@ -56,7 +56,7 @@ public class DockableLookupFeatureTable extends DefaultSingleCDockable implement
 	
 	private static final Icon componentIcon = GuiUtils.getIcon("editCollection", 16);
 	
-	private MSMSClusterDataSet activeMSMSClusterDataSet;
+	private IMSMSClusterDataSet activeMSMSClusterDataSet;
 	private LookupFeatureListTable featureTable;
 	private ListSelectionListener lsl;
 	private JTextField dataSetNameTextField;
@@ -198,7 +198,7 @@ public class DockableLookupFeatureTable extends DefaultSingleCDockable implement
 		return featureTable.getSelectedFeature();
 	}
 
-	public void loadDataSet(MSMSClusterDataSet activeMSMSClusterDataSet) {
+	public void loadDataSet(IMSMSClusterDataSet activeMSMSClusterDataSet) {
 		
 		this.activeMSMSClusterDataSet = activeMSMSClusterDataSet;
 		FeatureLookupDataSet dataSet = activeMSMSClusterDataSet.getFeatureLookupDataSet();

@@ -61,8 +61,8 @@ import edu.umich.med.mrc2.datoolbox.data.MinimalMSOneFeature;
 import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureInfoBundleClusterComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.msclust.FeatureLookupDataSet;
-import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusterDataSet;
-import edu.umich.med.mrc2.datoolbox.data.msclust.MsFeatureInfoBundleCluster;
+import edu.umich.med.mrc2.datoolbox.data.msclust.IMSMSClusterDataSet;
+import edu.umich.med.mrc2.datoolbox.data.msclust.IMsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.search.byexp.MinimalMSOneFeatureTable;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
@@ -79,7 +79,7 @@ public class MSMSCLusterDataSetSummaryDialog extends JDialog implements ActionLi
 	private static final Icon foundIcon = GuiUtils.getIcon("level", 24);
 	private static final Icon notFoundIcon = GuiUtils.getIcon("levelInactive", 24);
 	
-	private MSMSClusterDataSet dataSet;
+	private IMSMSClusterDataSet dataSet;
 	
 	private JTextField clusterSetNameTextField;
 	private JTextArea clusterSetDescriptionTextArea;
@@ -98,7 +98,8 @@ public class MSMSCLusterDataSetSummaryDialog extends JDialog implements ActionLi
 	private JLabel numFoundLookupFesturesLabel;
 	private JLabel numNotFoundLookupFesturesLabel;
 
-	public MSMSCLusterDataSetSummaryDialog(MSMSClusterDataSet dataSet) {
+	//	TODO different tables depending on data set type
+	public MSMSCLusterDataSetSummaryDialog(IMSMSClusterDataSet dataSet) {
 		super();
 		
 		this.dataSet = dataSet;
@@ -462,7 +463,7 @@ public class MSMSCLusterDataSetSummaryDialog extends JDialog implements ActionLi
 					map(c -> c.getLookupFeature()).
 					collect(Collectors.toSet());
 			
-			Collection<MsFeatureInfoBundleCluster>foundClusters = 
+			Collection<IMsFeatureInfoBundleCluster>foundClusters = 
 					dataSet.getClusters().stream().
 					filter(c -> c.getLookupFeature() != null).
 					sorted(new MsFeatureInfoBundleClusterComparator(SortProperty.Name)).

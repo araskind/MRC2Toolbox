@@ -21,9 +21,9 @@
 
 package edu.umich.med.mrc2.datoolbox.data.compare;
 
-import edu.umich.med.mrc2.datoolbox.data.msclust.MsFeatureInfoBundleCluster;
+import edu.umich.med.mrc2.datoolbox.data.msclust.IMsFeatureInfoBundleCluster;
 
-public class MsFeatureInfoBundleClusterComparator extends ObjectCompatrator<MsFeatureInfoBundleCluster> {
+public class MsFeatureInfoBundleClusterComparator extends ObjectCompatrator<IMsFeatureInfoBundleCluster> {
 
 	/**
 	 *
@@ -39,7 +39,7 @@ public class MsFeatureInfoBundleClusterComparator extends ObjectCompatrator<MsFe
 	}
 
 	@Override
-	public int compare(MsFeatureInfoBundleCluster c1, MsFeatureInfoBundleCluster c2) {
+	public int compare(IMsFeatureInfoBundleCluster c1, IMsFeatureInfoBundleCluster c2) {
 
 		int result;
 
@@ -62,7 +62,7 @@ public class MsFeatureInfoBundleClusterComparator extends ObjectCompatrator<MsFe
 				return -result;
 
 		case featureCount:
-			result = Integer.compare(c1.getComponents().size(), c2.getComponents().size());
+			result = Long.compare(c1.getFeatureNumber(), c2.getFeatureNumber());
 
 			if (direction == SortDirection.ASC)
 				return result;
@@ -101,16 +101,8 @@ public class MsFeatureInfoBundleClusterComparator extends ObjectCompatrator<MsFe
 			else
 				return -result;
 			
-		case Rank:			
-			double r1 = 0.0d;
-			double r2 = 0.0d;
-			if(c1.getLookupFeature() != null)
-				r1 = c1.getLookupFeature().getRank();
-			
-			if(c2.getLookupFeature() != null)
-				r2 = c2.getLookupFeature().getRank();
-			
-			result = Double.compare(r1, r2);
+		case Rank:	
+			result = Double.compare(c1.getRank(), c2.getRank());
 			if (direction == SortDirection.ASC)
 				return result;
 			else
