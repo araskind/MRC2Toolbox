@@ -273,4 +273,11 @@ public class BinnerAnnotationLookupDataSet implements Comparable<BinnerAnnotatio
 			}
 		}
 	}
+	
+	public BinnerAnnotationCluster getBinnerAnnotationClusterById(String bacId) {
+		
+		return annotationClusters.stream().
+			filter(c -> c.getId().equals(bacId)).
+			findFirst().orElse(null);
+	}
 }

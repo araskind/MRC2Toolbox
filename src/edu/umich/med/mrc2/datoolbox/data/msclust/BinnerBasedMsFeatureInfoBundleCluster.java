@@ -464,6 +464,22 @@ public class BinnerBasedMsFeatureInfoBundleCluster implements IMsFeatureInfoBund
 	public MinimalMSOneFeature getLookupFeature() {
 		return null;
 	}
+
+	@Override
+	public void setFeatures(Collection<MSFeatureInfoBundle> featureBundlesForIds) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public Map<BinnerAnnotation, Set<MSFeatureInfoBundle>> getComponentMap() {
+		return componentMap;
+	}
+
+	@Override
+	public void setLookupFeature(MinimalMSOneFeature lf) {
+		// TODO Auto-generated method stub
+		
+	}
 }
 
 

@@ -48,8 +48,9 @@ import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundleCollection;
 import edu.umich.med.mrc2.datoolbox.data.MsMsLibraryFeature;
 import edu.umich.med.mrc2.datoolbox.data.lims.Injection;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
+import edu.umich.med.mrc2.datoolbox.data.msclust.IMSMSClusterDataSet;
+import edu.umich.med.mrc2.datoolbox.data.msclust.IMsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusterDataSet;
-import edu.umich.med.mrc2.datoolbox.data.msclust.MsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.database.cpd.CompoundDatabaseUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
@@ -475,11 +476,11 @@ public class OpenStoredRawDataAnalysisExperimentTask extends AbstractTask implem
 			return;
 		
 		taskDescription = "Populating MSMS feature clusters ... ";
-		for(MSMSClusterDataSet ds : experiment.getMsmsClusterDataSets()) {	
+		for(IMSMSClusterDataSet ds : experiment.getMsmsClusterDataSets()) {	
 			
 			total = ds.getClusters().size();
 			processed = 0;
-			for(MsFeatureInfoBundleCluster cluster : ds.getClusters()) {
+			for(IMsFeatureInfoBundleCluster cluster : ds.getClusters()) {
 				
 				cluster.setFeatures(experiment.getFeatureBundlesForIds(cluster.getFeatureIds()));	
 				cluster.replaceStoredPrimaryIdentityFromFeatures();

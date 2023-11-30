@@ -276,4 +276,16 @@ public class FeatureLookupDataSet implements Comparable<FeatureLookupDataSet>{
 			}
 		}
 	}
+	
+	public MinimalMSOneFeature getMinimalMSOneFeatureById(String lfId) {
+		
+		return features.stream().			
+			filter(f -> f.getId().equals(lfId)).
+			findFirst().orElse(null);
+	}
 }
+
+
+
+
+

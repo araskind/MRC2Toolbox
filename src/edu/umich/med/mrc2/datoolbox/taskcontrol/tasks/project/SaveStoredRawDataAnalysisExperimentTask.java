@@ -44,7 +44,7 @@ import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundleCollection;
 import edu.umich.med.mrc2.datoolbox.data.lims.Injection;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
-import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusterDataSet;
+import edu.umich.med.mrc2.datoolbox.data.msclust.IMSMSClusterDataSet;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisExperiment;
@@ -234,7 +234,7 @@ public class SaveStoredRawDataAnalysisExperimentTask extends AbstractTask implem
         		new Element(ExperimentFields.MSMSClusterDataSetList.name());
         if(!experimentToSave.getMsmsClusterDataSets().isEmpty()) {
         	
-        	for(MSMSClusterDataSet fbc : experimentToSave.getMsmsClusterDataSets())
+        	for(IMSMSClusterDataSet fbc : experimentToSave.getMsmsClusterDataSets())
         		msmsClusterListElement.addContent(fbc.getXmlElement());       	
         }
         experimentRoot.addContent(msmsClusterListElement);

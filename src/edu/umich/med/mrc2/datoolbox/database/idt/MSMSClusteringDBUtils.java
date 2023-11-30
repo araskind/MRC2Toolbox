@@ -30,22 +30,28 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
+import edu.umich.med.mrc2.datoolbox.data.BinnerAnnotation;
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.enums.CompoundIdSource;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
+import edu.umich.med.mrc2.datoolbox.data.msclust.BinnerAnnotationLookupDataSet;
+import edu.umich.med.mrc2.datoolbox.data.msclust.BinnerBasedMsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.data.msclust.FeatureLookupDataSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.IMSMSClusterDataSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.IMsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusterDataSet;
+import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusterDataSetType;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusteringParameterSet;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
+import edu.umich.med.mrc2.datoolbox.main.BinnerAnnotationDataSetManager;
 import edu.umich.med.mrc2.datoolbox.main.FeatureLookupDataSetManager;
 import edu.umich.med.mrc2.datoolbox.main.MSMSClusterDataSetManager;
 import edu.umich.med.mrc2.datoolbox.utils.MSMSClusteringUtils;
@@ -53,16 +59,20 @@ import edu.umich.med.mrc2.datoolbox.utils.SQLUtils;
 
 public class MSMSClusteringDBUtils {
 	
-	public static Collection<MSMSClusteringParameterSet> getMSMSClusteringParameterSets() throws Exception {
+	public static Collection<MSMSClusteringParameterSet> 
+			getMSMSClusteringParameterSets() throws Exception {
 		Connection conn = ConnectionManager.getConnection();
-		Collection<MSMSClusteringParameterSet> paramSets = getMSMSClusteringParameterSets(conn);
+		Collection<MSMSClusteringParameterSet> paramSets = 
+				getMSMSClusteringParameterSets(conn);
 		ConnectionManager.releaseConnection(conn);
 		return paramSets;
 	}
 	
-	public static Collection<MSMSClusteringParameterSet>getMSMSClusteringParameterSets(Connection conn) throws Exception {
+	public static Collection<MSMSClusteringParameterSet>
+			getMSMSClusteringParameterSets(Connection conn) throws Exception {
 		
-		Collection<MSMSClusteringParameterSet> paramSets = new ArrayList<MSMSClusteringParameterSet>();
+		Collection<MSMSClusteringParameterSet> paramSets = 
+				new ArrayList<MSMSClusteringParameterSet>();
 		String query = 
 			"SELECT PAR_SET_ID, PAR_SET_NAME, MZ_ERROR_VALUE,  " +
 			"MZ_ERROR_TYPE, RT_ERROR_VALUE, MSMS_SIMILARITY_CUTOFF,  " +
@@ -137,23 +147,30 @@ public class MSMSClusteringDBUtils {
 		ConnectionManager.releaseConnection(conn);
 	}
 	
-	public static Map<IMSMSClusterDataSet, Set<String>> getMSMSClusterDataSets() throws Exception {
+	public static Map<IMSMSClusterDataSet, Set<String>> 
+			getMSMSClusterDataSets() throws Exception {
 		Connection conn = ConnectionManager.getConnection();
-		Map<IMSMSClusterDataSet, Set<String>> dataSets = getMSMSClusterDataSets(conn);
+		Map<IMSMSClusterDataSet, Set<String>> dataSets = 
+				getMSMSClusterDataSets(conn);
 		ConnectionManager.releaseConnection(conn);
 		return dataSets;
 	}
 	
-	public static Map<IMSMSClusterDataSet, Set<String>>getMSMSClusterDataSets(Connection conn) throws Exception {
+	public static Map<IMSMSClusterDataSet, Set<String>>
+			getMSMSClusterDataSets(Connection conn) throws Exception {
 		
 		FeatureLookupDataSetManager.refreshFeatureLookupDataSetList();
+		BinnerAnnotationDataSetManager.refreshBinnerAnnotationLookupDataSetList();
+		
 		Map<IMSMSClusterDataSet, Set<String>> dataSets = 
 				new HashMap<IMSMSClusterDataSet, Set<String>>();
 		String query = 
 			"SELECT CDS_ID, NAME, DESCRIPTION, CREATED_BY,  " +
-			"DATE_CREATED, LAST_MODIFIED, PAR_SET_ID, FLDS_ID " + 
+			"DATE_CREATED, LAST_MODIFIED, PAR_SET_ID, " + 
+			"FLDS_ID, BALDS_ID, DATA_SET_TYPE " + 
 			"FROM MSMS_CLUSTERED_DATA_SET " +
 			"ORDER BY NAME";
+		
 		PreparedStatement ps = conn.prepareStatement(query);
 		
 		String clusterIdQuery = 
@@ -173,7 +190,8 @@ public class MSMSClusteringDBUtils {
 					new Date(rs.getTimestamp("LAST_MODIFIED").getTime()));
 			
 			MSMSClusteringParameterSet parSet = 
-					MSMSClusterDataSetManager.getMsmsClusteringParameterSetById(rs.getString("PAR_SET_ID"));
+					MSMSClusterDataSetManager.getMsmsClusteringParameterSetById(
+							rs.getString("PAR_SET_ID"));
 			ds.setParameters(parSet);
 			
 			String fldsId = rs.getString("FLDS_ID");
@@ -181,7 +199,19 @@ public class MSMSClusteringDBUtils {
 				FeatureLookupDataSet flds = 
 						FeatureLookupDataSetManager.getFeatureLookupDataSetById(fldsId);
 				ds.setFeatureLookupDataSet(flds);
-			}		
+			}
+			String baldsId = rs.getString("BALDS_ID");
+			if(baldsId != null) {
+				BinnerAnnotationLookupDataSet balds = 
+						BinnerAnnotationDataSetManager.getBinnerAnnotationLookupDataSetById(baldsId);
+				ds.setBinnerAnnotationDataSet(balds);
+			}
+			String dstString = rs.getString("DATA_SET_TYPE");
+			if(dstString != null && !dstString.isEmpty()) {
+				MSMSClusterDataSetType dst = MSMSClusterDataSetType.valueOf(dstString);
+				ds.setDataSetType(dst);
+				ds.getDataSetType();
+			}
 			Set<String>clusterIds = new TreeSet<String>();
 			csidPs.setString(1, ds.getId());
 			ResultSet csidrs = csidPs.executeQuery();
@@ -196,74 +226,7 @@ public class MSMSClusteringDBUtils {
 		csidPs.close();
 		return dataSets;
 	}
-	
-	public static void insertMSMSClusterDataSetWithClusters(
-			IMSMSClusterDataSet newDataSet) throws Exception {
-		Connection conn = ConnectionManager.getConnection();
-		insertMSMSClusterDataSet(newDataSet, conn);
-		ConnectionManager.releaseConnection(conn);
-	}
-	
-	public static void insertMSMSClusterDataSetWithClusters(
-			IMSMSClusterDataSet newDataSet, Connection conn) throws Exception {
-		
-		MSMSClusteringParameterSet parSet = 
-				MSMSClusterDataSetManager.getMsmsClusteringParameterSetById(newDataSet.getParameters().getId());
-		if(parSet == null) {
-			addMSMSClusteringParameterSet(parSet, conn);
-			MSMSClusterDataSetManager.getMsmsClusteringParameters().add(parSet);
-		}
-		String newId = SQLUtils.getNextIdFromSequence(conn, 
-				"MSMS_CLUSTERS_DATA_SET_SEQ",
-				DataPrefix.MSMS_CLUSTER_DATA_SET,
-				"0",
-				5);
-		newDataSet.setId(newId);
-		String query = 
-			"INSERT INTO MSMS_CLUSTERED_DATA_SET " +
-			"(CDS_ID, NAME, DESCRIPTION, CREATED_BY,  " +
-			"DATE_CREATED, LAST_MODIFIED, PAR_SET_ID, FLDS_ID, DATA_SET_TYPE) "
-			+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-		PreparedStatement ps = conn.prepareStatement(query);
-		
-		ps.setString(1, newDataSet.getId());
-		ps.setString(2, newDataSet.getName());
-		if(newDataSet.getDescription() != null)
-			ps.setString(3, newDataSet.getDescription());
-		else
-			ps.setNull(3, java.sql.Types.NULL);
-		
-		ps.setString(4, newDataSet.getCreatedBy().getId());
-		ps.setTimestamp(5, new java.sql.Timestamp(newDataSet.getDateCreated().getTime()));
-		ps.setTimestamp(6, new java.sql.Timestamp(newDataSet.getLastModified().getTime()));	
-		ps.setString(7, newDataSet.getParameters().getId());
-		if(newDataSet.getFeatureLookupDataSet() != null) {
-			
-			FeatureLookupDataSet flds = FeatureLookupDataSetManager.getFeatureLookupDataSetById(
-					newDataSet.getFeatureLookupDataSet().getId());
-			if(flds == null)
-				FeatureLookupDataSetUtils.addFeatureLookupDataSet(
-						newDataSet.getFeatureLookupDataSet(), conn);
-			
-			FeatureLookupDataSetManager.getFeatureLookupDataSetList().add(
-					newDataSet.getFeatureLookupDataSet());
-			ps.setString(8, newDataSet.getFeatureLookupDataSet().getId());
-		}
-		//	TODO Binner lookup set
-		else {
-			ps.setNull(8, java.sql.Types.NULL);	
-		}
-		ps.setString(9, newDataSet.getDataSetType().name());
-		
-		ps.executeUpdate();
-		
-		//	Add assays		
-		Collection<String>daIds = 
-				getAnalysisIdsForClusterCollection(newDataSet.getClusters(), conn);
-		insertDataAnalysisIdsForDataSet(newDataSet, daIds, conn);
-		insertClustersForDataSet(newDataSet, parSet, conn);
-	}
-	
+
 	public static void insertDataAnalysisIdsForDataSet(
 			IMSMSClusterDataSet newDataSet, 
 			Collection<String>daIds, 
@@ -280,81 +243,7 @@ public class MSMSClusteringDBUtils {
 		ps.executeBatch();
 		ps.close();
 	}
-	
-	//	TODO deal with Binner-based clusters
-	public static void insertClustersForDataSet(
-			IMSMSClusterDataSet newDataSet, 
-			MSMSClusteringParameterSet parSet,
-			Connection conn) throws Exception {
-		
-		String query = "INSERT INTO MSMS_CLUSTER (CLUSTER_ID, PAR_SET_ID, "
-				+ "MZ, RT, MSMS_LIB_MATCH_ID, MSMS_ALT_ID, IS_LOCKED, LOOKUP_FEATURE_ID) "
-				+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-		PreparedStatement ps = conn.prepareStatement(query);
-		
-		String featureQuery = "INSERT INTO MSMS_CLUSTER_COMPONENT "
-				+ "(CLUSTER_ID, MS_FEATURE_ID) VALUES (?, ?)";
-		PreparedStatement featurePs = conn.prepareStatement(featureQuery);
-		
-		for(IMsFeatureInfoBundleCluster cluster : newDataSet.getClusters()) {
-			
-			String clusterId = SQLUtils.getNextIdFromSequence(conn, 
-					"MSMS_CLUSTER_SEQ",
-					DataPrefix.MSMS_CLUSTER,
-					"0",
-					12);
-			cluster.setId(clusterId);
-			String msmsLibMatchId = null;
-			String altId = null;
-			if(cluster.getPrimaryIdentity() != null) {
-				
-				if(cluster.getPrimaryIdentity().getReferenceMsMsLibraryMatch() != null)
-					msmsLibMatchId = cluster.getPrimaryIdentity().getUniqueId();
-				
-				if(cluster.getPrimaryIdentity().getIdSource().equals(CompoundIdSource.MANUAL))
-					altId = cluster.getPrimaryIdentity().getUniqueId();
-			}			
-			ps.setString(1, clusterId);
-			ps.setString(2, parSet.getId());
-			ps.setDouble(3, cluster.getMz());
-			ps.setDouble(4, cluster.getRt());
 
-			if(msmsLibMatchId != null)
-				ps.setString(5, msmsLibMatchId);
-			else
-				ps.setNull(5, java.sql.Types.NULL);
-			
-			if(altId != null)
-				ps.setString(6, altId);
-			else
-				ps.setNull(6, java.sql.Types.NULL);
-			
-			if(cluster.isLocked())
-				ps.setString(7, "Y");
-			else
-				ps.setNull(7, java.sql.Types.NULL);
-			
-			if(cluster.getLookupFeature() != null)
-				ps.setString(8, cluster.getLookupFeature().getId());
-			else
-				ps.setNull(8, java.sql.Types.NULL);
-			
-			//	TODO insert binner annotation cluster
-			
-			ps.executeUpdate();
-			
-			//	Add cluster features
-			featurePs.setString(1, clusterId);
-			for(MSFeatureInfoBundle feature : cluster.getComponents()) {				
-				featurePs.setString(2, feature.getMSFeatureId());
-				featurePs.addBatch();
-			}
-			featurePs.executeBatch();
-		}		
-		ps.close();
-		featurePs.close();
-	}
-	
 	public static Set<String>getAnalysisIdsForClusterCollection(
 			Collection<IMsFeatureInfoBundleCluster>clusterCollection, Connection conn) throws Exception {
 		
@@ -392,13 +281,15 @@ public class MSMSClusteringDBUtils {
 		return analysisIds;
 	}
 	
-	public static void updateMSMSClusterDataSetMetadata(IMSMSClusterDataSet edited) throws Exception {
+	public static void updateMSMSClusterDataSetMetadata(
+			IMSMSClusterDataSet edited) throws Exception {
 		Connection conn = ConnectionManager.getConnection();
 		updateMSMSClusterDataSetMetadata(edited, conn);
 		ConnectionManager.releaseConnection(conn);		
 	}
 	
-	public static void updateMSMSClusterDataSetMetadata(IMSMSClusterDataSet edited, Connection conn) throws Exception {
+	public static void updateMSMSClusterDataSetMetadata(
+			IMSMSClusterDataSet edited, Connection conn) throws Exception {
 
 		String query = 
 				"UPDATE MSMS_CLUSTERED_DATA_SET SET NAME = ?, "
@@ -432,7 +323,98 @@ public class MSMSClusteringDBUtils {
 		if(clustersToAdd.isEmpty())
 			return;		
 		 
-		insertClustersForDataSet(dataSet, dataSet.getParameters(), conn);
+		String query = 
+				"INSERT INTO MSMS_CLUSTER (CLUSTER_ID, PAR_SET_ID, "
+				+ "MZ, RT, MSMS_LIB_MATCH_ID, MSMS_ALT_ID, "
+				+ "IS_LOCKED, CDS_ID, LOOKUP_FEATURE_ID, BA_CLUSTER_ID) "
+				+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+		PreparedStatement ps = conn.prepareStatement(query);
+		
+		String featureQuery = "INSERT INTO MSMS_CLUSTER_COMPONENT "
+				+ "(CLUSTER_ID, MS_FEATURE_ID, BCC_ID) VALUES (?, ?, ?)";
+		PreparedStatement featurePs = conn.prepareStatement(featureQuery);	
+		
+		ps.setString(2, dataSet.getParameters().getId());
+		
+		for(IMsFeatureInfoBundleCluster cluster : newClusters) {
+			
+			//	Set correct database feature IDs 
+			cluster.getFeatureIds().clear();
+			cluster.getFeatureIds().addAll(
+					cluster.getComponents().stream().
+					map(c -> c.getMSFeatureId()).
+					collect(Collectors.toSet()));
+			
+			String clusterId = SQLUtils.getNextIdFromSequence(conn, 
+					"MSMS_CLUSTER_SEQ",
+					DataPrefix.MSMS_CLUSTER,
+					"0",
+					12);
+			cluster.setId(clusterId);
+			String msmsLibMatchId = null;
+			String altId = null;
+			
+			if(cluster.getPrimaryIdentity() != null) {
+				
+				if(cluster.getPrimaryIdentity().getReferenceMsMsLibraryMatch() != null)
+					msmsLibMatchId = cluster.getPrimaryIdentity().getUniqueId();
+								
+				if(cluster.getPrimaryIdentity().getIdSource().equals(CompoundIdSource.MANUAL))
+					altId = cluster.getPrimaryIdentity().getUniqueId();
+			}			
+			ps.setString(1, clusterId);			
+			ps.setDouble(3, cluster.getMz());
+			ps.setDouble(4, cluster.getRt());
+			ps.setString(5, msmsLibMatchId);
+			ps.setString(6, altId);
+			
+			if(cluster.isLocked())
+				ps.setString(7, "Y");
+			else
+				ps.setNull(7, java.sql.Types.NULL);
+			
+			ps.setString(8, dataSet.getId());
+			
+			if(cluster.getLookupFeature() != null)
+				ps.setString(9, cluster.getLookupFeature().getId());
+			else
+				ps.setNull(9, java.sql.Types.NULL);
+			
+			if(cluster.getBinnerAnnotationCluster() != null)
+				ps.setString(10, cluster.getBinnerAnnotationCluster().getId());
+			else
+				ps.setNull(10, java.sql.Types.NULL);
+			
+			ps.executeUpdate();
+			
+			//	Add cluster features
+			featurePs.setString(1, clusterId);
+			
+			if(dataSet.getDataSetType().equals(MSMSClusterDataSetType.FEATURE_BASED)) {
+				
+				for(MSFeatureInfoBundle feature : cluster.getComponents()) {				
+					featurePs.setString(2, feature.getMSFeatureId());
+					featurePs.setNull(3, java.sql.Types.NULL);
+					featurePs.addBatch();
+				}
+			}
+			if(dataSet.getDataSetType().equals(MSMSClusterDataSetType.BINNER_ANNOTATION_BASED)) {
+				
+				Map<BinnerAnnotation, Set<MSFeatureInfoBundle>> componentMap = 
+						((BinnerBasedMsFeatureInfoBundleCluster)cluster).getComponentMap();
+				for(Entry<BinnerAnnotation, Set<MSFeatureInfoBundle>>cme : componentMap.entrySet()) {
+					
+					featurePs.setString(3, cme.getKey().getId());
+					for(MSFeatureInfoBundle feature : cme.getValue()) {				
+						featurePs.setString(2, feature.getMSFeatureId());
+						featurePs.addBatch();
+					}
+				}
+			}
+			featurePs.executeBatch();
+		}		
+		ps.close();
+		featurePs.close();	
 		
 		Collection<String>daIds = 
 				getAnalysisIdsForClusterCollection(newClusters, conn);
@@ -546,8 +528,9 @@ public class MSMSClusteringDBUtils {
 	}
 	
 	public static MSMSClusteringParameterSet insertMSMSClusterDataSet(
-			MSMSClusterDataSet dataSet, Connection conn) throws Exception {
+			IMSMSClusterDataSet dataSet, Connection conn) throws Exception {
 				
+		MSMSClusterDataSetManager.refreshMsmsClusteringParameters();
 		MSMSClusteringParameterSet parSet = 
 				MSMSClusterDataSetManager.getMsmsClusteringParameterSetById(dataSet.getParameters().getId());
 		if(parSet == null) {
@@ -564,8 +547,9 @@ public class MSMSClusteringDBUtils {
 		String query = 
 			"INSERT INTO MSMS_CLUSTERED_DATA_SET " +
 			"(CDS_ID, NAME, DESCRIPTION, CREATED_BY,  " +
-			"DATE_CREATED, LAST_MODIFIED, PAR_SET_ID, FLDS_ID) "
-			+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+			"DATE_CREATED, LAST_MODIFIED, PAR_SET_ID, "
+			+ "FLDS_ID, BALDS_ID, DATA_SET_TYPE) "
+			+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 		PreparedStatement ps = conn.prepareStatement(query);
 		
 		ps.setString(1, dataSet.getId());
@@ -584,18 +568,34 @@ public class MSMSClusteringDBUtils {
 			FeatureLookupDataSetManager.refreshFeatureLookupDataSetList();
 			FeatureLookupDataSet flds = FeatureLookupDataSetManager.getFeatureLookupDataSetById(
 					dataSet.getFeatureLookupDataSet().getId());
-			if(flds == null)
-				FeatureLookupDataSetUtils.addFeatureLookupDataSet(
-						dataSet.getFeatureLookupDataSet(), conn);
-			
-			FeatureLookupDataSetManager.getFeatureLookupDataSetList().add(
-					dataSet.getFeatureLookupDataSet());
-			ps.setString(8, dataSet.getFeatureLookupDataSet().getId());
+			if(flds == null) {
+				flds = dataSet.getFeatureLookupDataSet();
+				FeatureLookupDataSetUtils.addFeatureLookupDataSet(flds, conn);			
+				FeatureLookupDataSetManager.getFeatureLookupDataSetList().add(flds);
+			}
+			ps.setString(8, flds.getId());
 		}
 		else {
 			ps.setNull(8, java.sql.Types.NULL);	
 		}
-		
+		if(dataSet.getBinnerAnnotationDataSet() != null) {
+			
+			BinnerAnnotationDataSetManager.refreshBinnerAnnotationLookupDataSetList();
+			BinnerAnnotationLookupDataSet balds = 
+					BinnerAnnotationDataSetManager.getBinnerAnnotationLookupDataSetById(
+							dataSet.getBinnerAnnotationDataSet().getId());
+			if(balds == null) {				
+				balds = dataSet.getBinnerAnnotationDataSet();
+				BinnerUtils.addBinnerAnnotationLookupDataSet(balds, conn);				
+				BinnerAnnotationDataSetManager.getBinnerAnnotationLookupDataSetList().add(balds);
+				ps.setString(9, balds.getId());
+			}
+		} 
+		else {
+			ps.setNull(9, java.sql.Types.NULL);	
+		}
+		ps.setString(10, dataSet.getDataSetType().name());
+	
 		ps.executeUpdate();
 		
 		//	Add assays		

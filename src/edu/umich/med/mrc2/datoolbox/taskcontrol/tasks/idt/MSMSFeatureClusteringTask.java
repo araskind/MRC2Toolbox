@@ -34,6 +34,8 @@ import edu.umich.med.mrc2.datoolbox.data.MinimalMSOneFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsPoint;
 import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
 import edu.umich.med.mrc2.datoolbox.data.msclust.FeatureLookupDataSet;
+import edu.umich.med.mrc2.datoolbox.data.msclust.IMSMSClusterDataSet;
+import edu.umich.med.mrc2.datoolbox.data.msclust.IMsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusterDataSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusteringParameterSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MsFeatureInfoBundleCluster;
@@ -51,8 +53,8 @@ public class MSMSFeatureClusteringTask extends AbstractTask {
 	private Collection<MSFeatureInfoBundle> msmsFeatures;
 	private MSMSClusteringParameterSet params;
 	private FeatureLookupDataSet featureLookupDataSet;
-	private Collection<MsFeatureInfoBundleCluster>featureClusters;
-	private MSMSClusterDataSet msmsClusterDataSet;
+	private Collection<IMsFeatureInfoBundleCluster>featureClusters;
+	private IMSMSClusterDataSet msmsClusterDataSet;
 	private double rtError;
 	private double mzError;
 	private MassErrorType mzErrorType;
@@ -214,7 +216,7 @@ public class MSMSFeatureClusteringTask extends AbstractTask {
 		for(MSFeatureInfoBundle b : msmsFeatures) {
 			
 			added = false;
-			for(MsFeatureInfoBundleCluster cluster : featureClusters) {
+			for(IMsFeatureInfoBundleCluster cluster : featureClusters) {
 				
 				if(cluster.addNewBundle(null, b, params)) {
 					added = true;
@@ -222,7 +224,7 @@ public class MSMSFeatureClusteringTask extends AbstractTask {
 				}
 			}	
 			if(!added) {
-				MsFeatureInfoBundleCluster newCluster = 
+				IMsFeatureInfoBundleCluster newCluster = 
 						new MsFeatureInfoBundleCluster(b);
 				featureClusters.add(newCluster);
 			}
@@ -237,7 +239,7 @@ public class MSMSFeatureClusteringTask extends AbstractTask {
 				msmsFeatures, params, featureLookupDataSet);
 	}
 
-	public MSMSClusterDataSet getMsmsClusterDataSet() {
+	public IMSMSClusterDataSet getMsmsClusterDataSet() {
 		return msmsClusterDataSet;
 	}
 

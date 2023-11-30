@@ -24,7 +24,6 @@ package edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -32,23 +31,27 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.TreeSet;
 import java.util.stream.Collectors;
 
-import edu.umich.med.mrc2.datoolbox.data.MinimalMSOneFeature;
+import edu.umich.med.mrc2.datoolbox.data.BinnerAnnotation;
+import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
+import edu.umich.med.mrc2.datoolbox.data.msclust.BinnerAnnotationLookupDataSet;
+import edu.umich.med.mrc2.datoolbox.data.msclust.BinnerBasedMsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.data.msclust.FeatureLookupDataSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.IMSMSClusterDataSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.IMsFeatureInfoBundleCluster;
+import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusterDataSetType;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
+import edu.umich.med.mrc2.datoolbox.database.idt.BinnerUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.FeatureLookupDataSetUtils;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 
 public class IDTMSMSClusterDataPullTask extends IDTMSMSFeatureDataPullTask {
 
-	private Map<String, Collection<String>>clusterFeatureIdMap;
+	private Map<String, Map<String,String>>clusterFeatureIdMap;
 	private IMSMSClusterDataSet dataSet;
 	private Set<IMsFeatureInfoBundleCluster>clusters;
 	private Map<IMsFeatureInfoBundleCluster,String>defaultClusterMSMSLibMatchesMap;
@@ -118,13 +121,40 @@ public class IDTMSMSClusterDataPullTask extends IDTMSMSFeatureDataPullTask {
 		taskDescription = "Adding MSMS features to clusters ...";
 		total = clusters.size();
 		processed = 0;
-		for(IMsFeatureInfoBundleCluster cluster : clusters) {
+		if(dataSet.getDataSetType().equals(MSMSClusterDataSetType.FEATURE_BASED)) {
 			
-			Collection<String> fids = clusterFeatureIdMap.get(cluster.getId());
-			features.stream().
-				filter(f -> fids.contains(f.getMSFeatureId())).
-				forEach(f -> cluster.addComponent(null, f));
-			processed++;
+			for(IMsFeatureInfoBundleCluster cluster : clusters) {
+				
+				Map<String,String> fids = clusterFeatureIdMap.get(cluster.getId());
+				features.stream().
+					filter(f -> fids.containsKey(f.getMSFeatureId())).
+					forEach(f -> cluster.addComponent(null, f));
+				processed++;
+			}
+			return;
+		}
+		if(dataSet.getDataSetType().equals(MSMSClusterDataSetType.BINNER_ANNOTATION_BASED)) {
+			
+			for(IMsFeatureInfoBundleCluster cluster : clusters) {
+				
+				Map<String,String> fids = clusterFeatureIdMap.get(cluster.getId());
+				for(Entry<String,String>pair : fids.entrySet()) {
+					
+					MSFeatureInfoBundle fb = features.stream().
+							filter(f -> f.getMSFeatureId().equals(pair.getKey())).
+							findFirst().orElse(null);
+
+					if(cluster.getBinnerAnnotationCluster() != null && pair.getValue() != null) {
+						
+						BinnerAnnotation ba = 
+								cluster.getBinnerAnnotationCluster().getBinnerAnnotationById(pair.getValue());					
+						if(ba != null)
+							cluster.addComponent(ba, fb);
+					}
+				}
+				processed++;
+			}
+			return;
 		}
 	}
 
@@ -161,7 +191,7 @@ public class IDTMSMSClusterDataPullTask extends IDTMSMSFeatureDataPullTask {
 		clusters = new HashSet<IMsFeatureInfoBundleCluster>();
 		defaultClusterMSMSLibMatchesMap = new HashMap<IMsFeatureInfoBundleCluster,String>();
 		defaultClusterAltIdMap = new HashMap<IMsFeatureInfoBundleCluster,String>();
-		clusterFeatureIdMap = new TreeMap<String, Collection<String>>();
+		clusterFeatureIdMap = new TreeMap<String, Map<String,String>>();
 		
 		Connection conn = ConnectionManager.getConnection();		
 		
@@ -173,17 +203,27 @@ public class IDTMSMSClusterDataPullTask extends IDTMSMSFeatureDataPullTask {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-		}		
+		}
+		BinnerAnnotationLookupDataSet balds = dataSet.getBinnerAnnotationDataSet();
+		if(balds != null && balds.getBinnerAnnotationClusters().isEmpty()) {			
+			try {
+				BinnerUtils.getClustersForBinnerAnnotationLookupDataSet(balds, conn);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 		String clusterQuery = 
 				"SELECT CLUSTER_ID, PAR_SET_ID, MZ, RT, IS_LOCKED,  " +
-				"MSMS_LIB_MATCH_ID, MSMS_ALT_ID, LOOKUP_FEATURE_ID " +
+				"MSMS_LIB_MATCH_ID, MSMS_ALT_ID, LOOKUP_FEATURE_ID, BA_CLUSTER_ID " +
 				"FROM MSMS_CLUSTER WHERE CDS_ID = ? ";
 		PreparedStatement ps = conn.prepareStatement(clusterQuery,
 		         ResultSet.TYPE_SCROLL_INSENSITIVE ,
 		         ResultSet.CONCUR_UPDATABLE);
 		
 		String featureQuery = 
-				"SELECT MS_FEATURE_ID FROM MSMS_CLUSTER_COMPONENT WHERE CLUSTER_ID = ?";
+				"SELECT MS_FEATURE_ID, BCC_ID "
+				+ "FROM MSMS_CLUSTER_COMPONENT WHERE CLUSTER_ID = ?";
 		PreparedStatement fps = conn.prepareStatement(featureQuery);
 
 		ps.setString(1, dataSet.getId());
@@ -194,41 +234,72 @@ public class IDTMSMSClusterDataPullTask extends IDTMSMSFeatureDataPullTask {
 			total = rs.getRow();
 		  rs.beforeFirst();
 		}
-		while(rs.next()) {
+		if(dataSet.getDataSetType().equals(MSMSClusterDataSetType.FEATURE_BASED)) {
 			
-			MsFeatureInfoBundleCluster cluster = 
-					new MsFeatureInfoBundleCluster(
-						rs.getString("CLUSTER_ID"), 
-						rs.getDouble("MZ"), 
-						rs.getDouble("RT"), 
-						null);
-			
-			if(rs.getString("MSMS_LIB_MATCH_ID") != null)
-				defaultClusterMSMSLibMatchesMap.put(
-						cluster, rs.getString("MSMS_LIB_MATCH_ID"));
-			
-			if(rs.getString("MSMS_ALT_ID") != null)
-				defaultClusterAltIdMap.put(
-						cluster, rs.getString("MSMS_ALT_ID"));
-			
-			String lfId = rs.getString("LOOKUP_FEATURE_ID");
-			if(lfId != null && flDataSet != null) {
+			while(rs.next()) {
 				
-				MinimalMSOneFeature lf = flDataSet.getFeatures().stream().
-						filter(f -> f.getId().equals(lfId)).
-						findFirst().orElse(null);
-				cluster.setLookupFeature(lf);
-			}		
-			Set<String>clusterFeatureIds = new TreeSet<String>();		
-			fps.setString(1, cluster.getId());
-			ResultSet frs = fps.executeQuery();
-			while(frs.next())
-				clusterFeatureIds.add(frs.getString(1));
-						
-			frs.close();
-			clusterFeatureIdMap.put(cluster.getId(), clusterFeatureIds);
-			clusters.add(cluster);
-			processed++;
+				IMsFeatureInfoBundleCluster cluster = 
+						new MsFeatureInfoBundleCluster(
+							rs.getString("CLUSTER_ID"), 
+							rs.getDouble("MZ"), 
+							rs.getDouble("RT"), 
+							null);
+				
+				if(rs.getString("MSMS_LIB_MATCH_ID") != null)
+					defaultClusterMSMSLibMatchesMap.put(
+							cluster, rs.getString("MSMS_LIB_MATCH_ID"));
+				
+				if(rs.getString("MSMS_ALT_ID") != null)
+					defaultClusterAltIdMap.put(
+							cluster, rs.getString("MSMS_ALT_ID"));
+				
+				String lfId = rs.getString("LOOKUP_FEATURE_ID");
+				if(lfId != null && flDataSet != null)
+					cluster.setLookupFeature(flDataSet.getMinimalMSOneFeatureById(lfId));
+				
+				Map<String,String>clusterFeatureIds = new TreeMap<String,String>();		
+				fps.setString(1, cluster.getId());
+				ResultSet frs = fps.executeQuery();
+				while(frs.next())
+					clusterFeatureIds.put(frs.getString(1), null);
+							
+				frs.close();
+				clusterFeatureIdMap.put(cluster.getId(), clusterFeatureIds);
+				clusters.add(cluster);
+				processed++;
+			}
+		}
+		if(dataSet.getDataSetType().equals(MSMSClusterDataSetType.FEATURE_BASED)) {
+			
+			while(rs.next()) {
+				
+				String bacId = rs.getString("BA_CLUSTER_ID");
+				if(bacId != null && balds != null) {
+
+					IMsFeatureInfoBundleCluster cluster = 
+							new BinnerBasedMsFeatureInfoBundleCluster(
+									balds.getBinnerAnnotationClusterById(bacId));
+					
+					if(rs.getString("MSMS_LIB_MATCH_ID") != null)
+						defaultClusterMSMSLibMatchesMap.put(
+								cluster, rs.getString("MSMS_LIB_MATCH_ID"));
+					
+					if(rs.getString("MSMS_ALT_ID") != null)
+						defaultClusterAltIdMap.put(
+								cluster, rs.getString("MSMS_ALT_ID"));
+										
+					Map<String,String>clusterFeatureIds = new TreeMap<String,String>();		
+					fps.setString(1, cluster.getId());
+					ResultSet frs = fps.executeQuery();
+					while(frs.next())
+						clusterFeatureIds.put(frs.getString(1), frs.getString(2));
+								
+					frs.close();
+					clusterFeatureIdMap.put(cluster.getId(), clusterFeatureIds);
+					clusters.add(cluster);
+					processed++;
+				}
+			}
 		}
 		rs.close();
 		ps.close();
@@ -236,7 +307,7 @@ public class IDTMSMSClusterDataPullTask extends IDTMSMSFeatureDataPullTask {
 		ConnectionManager.releaseConnection(conn);
 		
 		featureIds = clusterFeatureIdMap.values().stream().
-				flatMap(v -> v.stream()).collect(Collectors.toSet());
+				flatMap(v -> v.keySet().stream()).collect(Collectors.toSet());
 	}
 
 	@Override

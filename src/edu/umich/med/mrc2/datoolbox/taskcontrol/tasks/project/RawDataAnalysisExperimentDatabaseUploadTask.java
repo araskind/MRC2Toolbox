@@ -22,7 +22,6 @@
 package edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.project;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -33,27 +32,18 @@ import java.util.stream.Collectors;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentalSample;
 import edu.umich.med.mrc2.datoolbox.data.IDTExperimentalSample;
-import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureChromatogramBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundleCollection;
 import edu.umich.med.mrc2.datoolbox.data.Worklist;
-import edu.umich.med.mrc2.datoolbox.data.enums.CompoundIdSource;
-import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSSamplePreparation;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSWorklistItem;
-import edu.umich.med.mrc2.datoolbox.data.msclust.FeatureLookupDataSet;
-import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusterDataSet;
-import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusteringParameterSet;
-import edu.umich.med.mrc2.datoolbox.data.msclust.MsFeatureInfoBundleCluster;
+import edu.umich.med.mrc2.datoolbox.data.msclust.IMSMSClusterDataSet;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.database.idt.FeatureCollectionUtils;
-import edu.umich.med.mrc2.datoolbox.database.idt.FeatureLookupDataSetUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
-import edu.umich.med.mrc2.datoolbox.database.idt.MSMSClusteringDBUtils;
-import edu.umich.med.mrc2.datoolbox.main.FeatureLookupDataSetManager;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisExperiment;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
@@ -61,9 +51,9 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskListener;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
-import edu.umich.med.mrc2.datoolbox.utils.SQLUtils;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.MSMSClusterTask;
 
-public class RawDataAnalysisExperimentDatabaseUploadTask extends AbstractTask implements TaskListener {
+public class RawDataAnalysisExperimentDatabaseUploadTask extends MSMSClusterTask implements TaskListener {
 
 	private RawDataAnalysisExperiment experiment;
 	private double msOneMZWindow;
@@ -355,141 +345,19 @@ public class RawDataAnalysisExperimentDatabaseUploadTask extends AbstractTask im
 	private void uploadMSMSClusterCollections() throws Exception {
 		
 		taskDescription = "Uploading MSMS cluster data sets ...";
-		Connection conn = ConnectionManager.getConnection();
-		
-		for(MSMSClusterDataSet dataSet : experiment.getMsmsClusterDataSets()) {
+		Connection conn = ConnectionManager.getConnection();		
+		for(IMSMSClusterDataSet dataSet : experiment.getMsmsClusterDataSets()) {
 			
 			total = dataSet.getClusters().size();
 			processed = 0;	
-			
-			//	Insert data set
-			MSMSClusteringParameterSet parSet = null;
-			try {
-				parSet = MSMSClusteringDBUtils.insertMSMSClusterDataSet(dataSet, conn);
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				ConnectionManager.releaseConnection(conn);	
-				return;
-			}
-			if(dataSet.getFeatureLookupDataSet() != null) {
-					
-				FeatureLookupDataSet flds = FeatureLookupDataSetManager.getFeatureLookupDataSetById(
-						dataSet.getFeatureLookupDataSet().getId());
-				if(flds == null)
-					FeatureLookupDataSetUtils.addFeatureLookupDataSet(
-							dataSet.getFeatureLookupDataSet(), conn);
-				
-				FeatureLookupDataSetManager.getFeatureLookupDataSetList().add(
-						dataSet.getFeatureLookupDataSet());			
-			}
-			//	Insert cluster data
-			addClustersForDataSet(dataSet, conn);
+			insertNewMSMSClusterDataSet(dataSet, conn);
 		}
 		ConnectionManager.releaseConnection(conn);	
-	}
-	
-	private void addClustersForDataSet(
-			MSMSClusterDataSet dataSet,
-			Connection conn) throws Exception {
-		
-		taskDescription = "Uploading data for individual clusters ... ";
-		total = dataSet.getClusters().size();
-		processed = 0;
-		
-		String query = 
-				"INSERT INTO MSMS_CLUSTER (CLUSTER_ID, PAR_SET_ID, "
-				+ "MZ, RT, MSMS_LIB_MATCH_ID, MSMS_ALT_ID, "
-				+ "IS_LOCKED, CDS_ID, LOOKUP_FEATURE_ID) "
-				+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-		PreparedStatement ps = conn.prepareStatement(query);
-		
-		String featureQuery = "INSERT INTO MSMS_CLUSTER_COMPONENT "
-				+ "(CLUSTER_ID, MS_FEATURE_ID) VALUES (?, ?)";
-		PreparedStatement featurePs = conn.prepareStatement(featureQuery);			
-		ps.setString(2, dataSet.getParameters().getId());
-		
-		for(MsFeatureInfoBundleCluster cluster : dataSet.getClusters()) {
-			
-			//	Set correct database feature IDs 
-			cluster.getFeatureIds().clear();
-			cluster.getFeatureIds().addAll(
-					cluster.getComponents().stream().
-					map(c -> c.getMSFeatureId()).
-					collect(Collectors.toSet()));
-			
-			String clusterId = SQLUtils.getNextIdFromSequence(conn, 
-					"MSMS_CLUSTER_SEQ",
-					DataPrefix.MSMS_CLUSTER,
-					"0",
-					12);
-			cluster.setId(clusterId);
-			String msmsLibMatchId = null;
-			String altId = null;
-			
-			//	Debug only 
-//			Collection<String> matchIds = cluster.getComponents().stream().
-//					flatMap(c -> c.getMsFeature().getIdentifications().stream()).
-//					filter(i -> i.getReferenceMsMsLibraryMatch() != null).
-//					map(i -> i.getUniqueId()).collect(Collectors.toCollection(TreeSet::new));
-//			if(!matchIds.isEmpty())
-//				System.err.print(StringUtils.join(matchIds, "\n"));
-			
-			if(cluster.getPrimaryIdentity() != null) {
-				
-				if(cluster.getPrimaryIdentity().getReferenceMsMsLibraryMatch() != null) {
-					msmsLibMatchId = cluster.getPrimaryIdentity().getUniqueId();
-					//	Debug only 
-					//	System.err.println(msmsLibMatchId);
-				}
-				
-				if(cluster.getPrimaryIdentity().getIdSource().equals(CompoundIdSource.MANUAL))
-					altId = cluster.getPrimaryIdentity().getUniqueId();
-			}			
-			ps.setString(1, clusterId);			
-			ps.setDouble(3, cluster.getMz());
-			ps.setDouble(4, cluster.getRt());
-
-			if(msmsLibMatchId != null)
-				ps.setString(5, msmsLibMatchId);
-			else
-				ps.setNull(5, java.sql.Types.NULL);
-			
-			if(altId != null)
-				ps.setString(6, altId);
-			else
-				ps.setNull(6, java.sql.Types.NULL);
-			
-			if(cluster.isLocked())
-				ps.setString(7, "Y");
-			else
-				ps.setNull(7, java.sql.Types.NULL);
-			
-			ps.setString(8, dataSet.getId());
-			
-			if(cluster.getLookupFeature() != null)
-				ps.setString(9, cluster.getLookupFeature().getId());
-			else
-				ps.setNull(9, java.sql.Types.NULL);
-			
-			ps.executeUpdate();
-			
-			//	Add cluster features
-			featurePs.setString(1, clusterId);
-			for(MSFeatureInfoBundle feature : cluster.getComponents()) {				
-				featurePs.setString(2, feature.getMSFeatureId());
-				featurePs.addBatch();
-			}
-			featurePs.executeBatch();
-			processed++;
-		}		
-		ps.close();
-		featurePs.close();
 	}
 
 	private void uploadFeatureCollections() throws Exception {
 		
-		taskDescription = "Uploading MSMS cluster data sets ...";
+		taskDescription = "Uploading feature collections ...";
 		total = experiment.getEditableMsFeatureInfoBundleCollections().size();
 		processed = 0;
 		Connection conn = ConnectionManager.getConnection();

@@ -91,6 +91,10 @@ public interface IMsFeatureInfoBundleCluster {
 	MinimalMSOneFeature getLookupFeature();
 	
 	BinnerAnnotationCluster getBinnerAnnotationCluster();
+
+	void setFeatures(Collection<MSFeatureInfoBundle> featureBundlesForIds);
+
+	void setLookupFeature(MinimalMSOneFeature lf);
 }
 
 

@@ -208,6 +208,13 @@ public class BinnerAnnotationCluster {
 		
 		return StringUtils.join(allAnnotations, "; ");
 	}
+	
+	public BinnerAnnotation getBinnerAnnotationById(String bacId) {
+		
+		return annotations.stream().
+				filter(a -> a.getId().equals(bacId)).
+				findFirst().orElse(null);
+	}
 }
 
 
