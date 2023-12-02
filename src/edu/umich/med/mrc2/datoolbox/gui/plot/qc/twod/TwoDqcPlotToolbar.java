@@ -169,8 +169,6 @@ public class TwoDqcPlotToolbar extends PlotToolbar implements ActionListener, It
 				buttonDimension);
 		sidePanelButton.addActionListener(this);
 		add(sidePanelButton);
-		
-		toggleItemListeners(true);
 	}
 	
 	@Override

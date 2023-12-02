@@ -34,7 +34,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
-import edu.umich.med.mrc2.datoolbox.data.msclust.MsFeatureInfoBundleCluster;
+import edu.umich.med.mrc2.datoolbox.data.msclust.IMsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 
 public class MSMSFeatureClusterTreeRenderer extends DefaultTreeCellRenderer {
@@ -81,9 +81,9 @@ public class MSMSFeatureClusterTreeRenderer extends DefaultTreeCellRenderer {
 			label.setFont(smallerFont);
 			label.setText(((MSFeatureInfoBundle)embeddedObject).getMsFeature().getName());
 		}
-		if (embeddedObject instanceof MsFeatureInfoBundleCluster) {
+		if (embeddedObject instanceof IMsFeatureInfoBundleCluster) {
 
-			MsFeatureInfoBundleCluster cluster = (MsFeatureInfoBundleCluster) embeddedObject;
+			IMsFeatureInfoBundleCluster cluster = (IMsFeatureInfoBundleCluster) embeddedObject;
 
 			if (cluster.getComponents().size() > 1)
 				label.setIcon(multiNamedClusterIcon);

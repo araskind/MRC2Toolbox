@@ -103,7 +103,11 @@ public class TwoDimQCPlot extends MasterPlotPanel implements ItemListener, Contr
 	
 	private void loadBarChart() {
 		
+    	long startTime = System.currentTimeMillis();
 		QcBarChartDataSet ds = new QcBarChartDataSet(plotParameters);		
+    	long endTime = System.currentTimeMillis();
+    	System.out.println("Data set created in " + (endTime - startTime) + " milliseconds");
+
 		VariableCategorySizeBarRenderer renderer = new VariableCategorySizeBarRenderer();
 		
 		NumberFormat dataFormat = 
@@ -114,7 +118,11 @@ public class TwoDimQCPlot extends MasterPlotPanel implements ItemListener, Contr
 
 		((CategoryPlot)chart.getPlot()).setDomainAxis(new VariableCategorySizeCategoryAxis());
 		((CategoryPlot)chart.getPlot()).setRenderer(renderer);
+		
+		startTime = System.currentTimeMillis();
 		chart.getCategoryPlot().setDataset(ds);
+		endTime = System.currentTimeMillis();
+    	System.out.println("Plot rendered in " + (endTime - startTime) + " milliseconds");
 	}
 	
 	@Override

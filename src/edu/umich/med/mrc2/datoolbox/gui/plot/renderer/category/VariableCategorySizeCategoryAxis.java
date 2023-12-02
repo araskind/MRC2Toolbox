@@ -651,6 +651,9 @@ import org.jfree.data.category.CategoryDataset;
 	    
 	    public static int[]getCategoryItemCounts(CategoryDataset dataSet){
 	    	
+	    	if(dataSet == null)
+	    		return new int[0];
+	    	
 	    	int[]valueCounts = new int[dataSet.getColumnCount()];
 	    	int categoryCount = 0;
 	    	for(Object columnKey : dataSet.getColumnKeys()) {
@@ -979,6 +982,9 @@ import org.jfree.data.category.CategoryDataset;
 	        }
 	        CategoryPlot plot = (CategoryPlot) p;
 	        CategoryDataset dataSet = plot.getDataset();
+	        if(dataSet == null)
+	        	 return state;
+	        
 	        double categoryGapWidth = 
 	        		calculateCategoryGapSize(dataSet.getColumnCount(), dataArea, edge);
 	        

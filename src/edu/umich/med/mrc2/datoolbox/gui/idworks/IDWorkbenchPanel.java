@@ -103,7 +103,6 @@ import edu.umich.med.mrc2.datoolbox.data.msclust.IMSMSClusterDataSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.IMsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusterDataSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusteringParameterSet;
-import edu.umich.med.mrc2.datoolbox.data.msclust.MsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.database.idt.FeatureChromatogramUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
@@ -1759,12 +1758,12 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 					activeDataSetBinnerAnnotationsSearchDialog.getAllClusters();
 
 			balds = new BinnerAnnotationLookupDataSet(
-					activeDataSetMZRTDataSearchDialog.getFeatureSetName(), 
-					activeDataSetMZRTDataSearchDialog.getFeatureSetDescription(), 
+					activeDataSetBinnerAnnotationsSearchDialog.getFeatureSetName(), 
+					activeDataSetBinnerAnnotationsSearchDialog.getFeatureSetDescription(), 
 					annotationClusters);
 		}
 		MSMSClusteringParameterSet params = 
-				activeDataSetMZRTDataSearchDialog.getParameters();
+				activeDataSetBinnerAnnotationsSearchDialog.getParameters();
 		
 		BinnerAnnotationLookupTask task = 
 				new BinnerAnnotationLookupTask(msmsFeatures, params, balds);
@@ -4352,10 +4351,10 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 
 		MSMSFeatureClusterTree tree = (MSMSFeatureClusterTree)e.getSource();
 
-		if (tree.getClickedObject() instanceof MsFeatureInfoBundleCluster) {
+		if (tree.getClickedObject() instanceof IMsFeatureInfoBundleCluster) {
 			
-			MsFeatureInfoBundleCluster cluster = 
-					(MsFeatureInfoBundleCluster)tree.getClickedObject();
+			IMsFeatureInfoBundleCluster cluster = 
+					(IMsFeatureInfoBundleCluster)tree.getClickedObject();
 			activeCluster = cluster;
 			safelyLoadMSMSFeatures(cluster.getComponents());
 			showMultipleFeatureChromatograms(cluster.getComponents());
@@ -4369,8 +4368,8 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		}
 		if (tree.getClickedObject() instanceof MSFeatureInfoBundle) {
 			
-			MsFeatureInfoBundleCluster cluster = 
-					(MsFeatureInfoBundleCluster)tree.getClusterForSelectedFeature();
+			IMsFeatureInfoBundleCluster cluster = 
+					(IMsFeatureInfoBundleCluster)tree.getClusterForSelectedFeature();
 			if(cluster != null) {
 				
 				if(activeCluster != null && !activeCluster.equals(cluster)) {
