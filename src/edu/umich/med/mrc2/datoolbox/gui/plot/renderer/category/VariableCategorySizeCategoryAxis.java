@@ -67,6 +67,8 @@ import org.jfree.chart.util.SerialUtils;
 import org.jfree.chart.util.ShapeUtils;
 import org.jfree.data.category.CategoryDataset;
 
+import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.QcBarChartDataSet;
+
 	/**
 	 * An axis that displays categories.
 	 */
@@ -654,6 +656,9 @@ import org.jfree.data.category.CategoryDataset;
 	    	if(dataSet == null)
 	    		return new int[0];
 	    	
+	    	if(dataSet instanceof QcBarChartDataSet)
+	    		return ((QcBarChartDataSet)dataSet).getCategoryItemCounts();
+	    	
 	    	int[]valueCounts = new int[dataSet.getColumnCount()];
 	    	int categoryCount = 0;
 	    	for(Object columnKey : dataSet.getColumnKeys()) {
@@ -690,7 +695,8 @@ import org.jfree.data.category.CategoryDataset;
 	        Args.nullNotPermitted(categories, "categories");
 	        int categoryIndex = categories.indexOf(category);
 	        int categoryCount = categories.size();
-	        return getCategoryMiddle(categoryIndex, categoryCount, area, edge);
+	        return getCategoryStart(categoryIndex, categoryCount, area, edge)
+	                + calculateCategorySize(categoryCount, area, edge) / 2;
 	    }
 
 	    /**

@@ -65,7 +65,7 @@ import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.gui.plot.ControlledStatsPlot;
 import edu.umich.med.mrc2.datoolbox.gui.plot.MasterPlotPanel;
 import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.BoxAndWhiskerCategoryDatasetCa;
-import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.MsFeatureBarChartDataSet;
+import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.QcBarChartDataSet;
 import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.ScatterDataSet;
 import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.TimedScatterDataSet;
 import edu.umich.med.mrc2.datoolbox.gui.plot.renderer.category.VariableCategorySizeBarRenderer;
@@ -520,7 +520,8 @@ public class MultiPanelDataPlot extends MasterPlotPanel implements ActionListene
 				
 				CategoryPlot barChart = getNewBarchart();
 
-				MsFeatureBarChartDataSet ds = new MsFeatureBarChartDataSet(msf, plotParameters);
+				//	MsFeatureBarChartDataSet ds = new MsFeatureBarChartDataSet(msf, plotParameters);
+				QcBarChartDataSet ds = new QcBarChartDataSet(msf, plotParameters);
 				VariableCategorySizeBarRenderer renderer = new VariableCategorySizeBarRenderer();
 		        renderer.setDefaultToolTipGenerator(
 		        		new StatsPlotDataFileToolTipGenerator(NumberFormat.getNumberInstance(), null));

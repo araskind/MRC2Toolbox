@@ -23,19 +23,23 @@ package edu.umich.med.mrc2.datoolbox.gui.plot.dataset;
 
 import java.awt.Paint;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
-import org.jfree.data.category.DefaultCategoryDataset;
+import org.jfree.data.category.CategoryDataset;
+import org.jfree.data.general.AbstractDataset;
 
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.DataFileStatisticalSummary;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignFactor;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignLevel;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentalSample;
+import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.compare.ChartColorOption;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataSetQcField;
 import edu.umich.med.mrc2.datoolbox.data.enums.FileSortingOrder;
@@ -44,10 +48,11 @@ import edu.umich.med.mrc2.datoolbox.data.enums.StandardFactors;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.gui.plot.MasterPlotPanel;
 import edu.umich.med.mrc2.datoolbox.gui.plot.qc.twod.TwoDqcPlotParameterObject;
+import edu.umich.med.mrc2.datoolbox.gui.plot.stats.TwoDimFeatureDataPlotParameterObject;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 
-public class QcBarChartDataSet extends DefaultCategoryDataset {
+public class QcBarChartDataSet extends AbstractDataset implements CategoryDataset {
 
 	/**
 	 * 
@@ -55,6 +60,11 @@ public class QcBarChartDataSet extends DefaultCategoryDataset {
 	private static final long serialVersionUID = -7176808805153148751L;
 
 	private Map<Integer,Paint>seriesPaintMap;
+	private Map<Comparable,Integer>rowMap;
+	private Map<Comparable,Integer>columnMap;
+	private Double[][]data; 
+	private List rowKeys, columnKeys;
+	private int[]categoryItemCount;
 	
 	public QcBarChartDataSet(
 			Collection<DataFileStatisticalSummary> dataSetStats, 			
@@ -91,38 +101,175 @@ public class QcBarChartDataSet extends DefaultCategoryDataset {
 						groupingType, 
 						category, 
 						subCategory);
-		Map<String,Paint>seriesPaintNameMap = new TreeMap<String,Paint>();
-		seriesPaintMap = new TreeMap<Integer,Paint>();
+		calculateCategoryItemCount(seriesFileMap);
+		
+		Map<String,Paint>seriesPaintNameMap = new HashMap<String,Paint>();
+		seriesPaintMap = new HashMap<Integer,Paint>();
+		rowMap = new HashMap<Comparable,Integer>();
+		columnMap = new HashMap<Comparable,Integer>();
+		
 		int sCount = 0;
 		for(String sName : seriesFileMap.keySet()) {
 			seriesPaintNameMap.put(sName, MasterPlotPanel.getBrewerColor(sCount));
 			sCount++;
 		}
+		data = new Double[files.size()][seriesFileMap.size()];
 		Integer rowCount = 0;
+		Integer columnCount = 0;
 		for (Entry<String, DataFile[]> entry : seriesFileMap.entrySet()) {
 
+			columnMap.put(entry.getKey(), columnCount);
 			for(DataFile df : entry.getValue()) {
+				
 				
 				DataFileStatisticalSummary fileSummary = 
 						dataSetStats.stream().
 						filter(st -> st.getFile().equals(df)).
 						findFirst().orElse(null);
 				if(fileSummary != null) {
-					addValue(fileSummary.getProperty(statsField).doubleValue(), df.getName(), entry.getKey());
+					//	addValue(fileSummary.getProperty(statsField).doubleValue(), df.getName(), entry.getKey());
+					data[rowCount][columnCount] = fileSummary.getProperty(statsField).doubleValue();
+					rowMap.put(df.getName(), rowCount);
 					seriesPaintMap.put(rowCount, seriesPaintNameMap.get(entry.getKey()));
 					rowCount++;
 				}				
 			}
-		}		
+			columnCount++;
+		}
+		rowKeys = rowMap.keySet().stream().collect(Collectors.toList());
+		columnKeys = columnMap.keySet().stream().collect(Collectors.toList());		
 	}
 	
+	public QcBarChartDataSet(TwoDqcPlotParameterObject plotParameters) {
+		
+		if (plotParameters.getStatsField().equals(DataSetQcField.RAW_VALUES))
+			return;
+		
+		DataAnalysisProject experiment = 
+				MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
+		if(experiment == null)
+			return;
+		
+		DataPipeline pipeline = experiment.getActiveDataPipeline();
+		
+		Collection<ExperimentalSample> samples = 
+				experiment.getExperimentDesign().getSamples();
+		HashSet<DataFile> files = samples.stream().
+				flatMap(s -> s.getDataFilesForMethod(pipeline.getAcquisitionMethod()).stream()).
+				filter(s -> s.isEnabled()).collect(Collectors.toCollection(HashSet::new));
+
+		Map<String, DataFile[]> seriesFileMap = 
+				PlotDataSetUtils.createSeriesFileMap(
+						pipeline, 
+						files,
+						plotParameters.getSortingOrder(), 
+						experiment.getExperimentDesign().getCompleteDesignSubset(), 
+						plotParameters.getGroupingType(), 
+						plotParameters.getCategory(), 
+						plotParameters.getSubCategory());
+		calculateCategoryItemCount(seriesFileMap);
+		
+		Map<String,Paint>seriesPaintNameMap = 
+				createSeriesPaintMap(seriesFileMap, plotParameters.getGroupingType(), 
+						plotParameters.getChartColorOption());
+		
+		rowMap = new HashMap<Comparable,Integer>();
+		columnMap = new HashMap<Comparable,Integer>();
+		Integer rowCount = 0;
+		Integer columnCount = 0;
+		data = new Double[files.size()][seriesFileMap.size()];
+		
+		DataSetQcField sf = plotParameters.getStatsField();
+		for (Entry<String, DataFile[]> entry : seriesFileMap.entrySet()) {
+
+			columnMap.put(entry.getKey(), columnCount);
+			
+			for(DataFile df : entry.getValue()) {
+				
+				DataFileStatisticalSummary fileSummary = 
+						plotParameters.getDataSetStats().stream().
+						filter(st -> st.getFile().equals(df)).
+						findFirst().orElse(null);
+				if(fileSummary != null) {
+					//	addValue(fileSummary.getProperty(sf).doubleValue(), df, entry.getKey());
+					data[rowCount][columnCount] = fileSummary.getProperty(sf).doubleValue();
+					rowMap.put(df, rowCount);
+					seriesPaintMap.put(rowCount, seriesPaintNameMap.get(entry.getKey()));
+					rowCount++;
+				}				
+			}
+			columnCount++;
+		}
+		rowKeys = rowMap.keySet().stream().collect(Collectors.toList());
+		columnKeys = columnMap.keySet().stream().collect(Collectors.toList());
+	}
+	
+	public QcBarChartDataSet(
+			MsFeature feature, 
+			TwoDimFeatureDataPlotParameterObject plotParameters) {
+				
+		DataAnalysisProject experiment = 
+				MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
+		if(experiment == null)
+			return;
+		
+		DataPipeline pipeline = experiment.getActiveDataPipeline();
+		
+		Collection<ExperimentalSample> samples = 
+				experiment.getExperimentDesign().getSamples();
+		HashSet<DataFile> files = samples.stream().
+				flatMap(s -> s.getDataFilesForMethod(pipeline.getAcquisitionMethod()).stream()).
+				filter(s -> s.isEnabled()).collect(Collectors.toCollection(HashSet::new));
+
+		Map<String, DataFile[]> seriesFileMap = 
+				PlotDataSetUtils.createSeriesFileMap(
+						pipeline, 
+						files,
+						plotParameters.getSortingOrder(), 
+						experiment.getExperimentDesign().getCompleteDesignSubset(), 
+						plotParameters.getGroupingType(), 
+						plotParameters.getCategory(), 
+						plotParameters.getSubCategory());
+		calculateCategoryItemCount(seriesFileMap);
+		
+		Map<String,Paint>seriesPaintNameMap = 
+				createSeriesPaintMap(seriesFileMap, plotParameters.getGroupingType(), 
+						plotParameters.getChartColorOption());
+		
+		rowMap = new HashMap<Comparable,Integer>();
+		columnMap = new HashMap<Comparable,Integer>();
+		Integer rowCount = 0;
+		Integer columnCount = 0;
+		data = new Double[files.size()][seriesFileMap.size()];
+		
+		Map<DataFile, Double> dataMap = 
+				PlotDataSetUtils.getNormalizedDataForFeature(
+						experiment, feature, pipeline, files, plotParameters.getDataScale());
+
+		for (Entry<String, DataFile[]> entry : seriesFileMap.entrySet()) {
+
+			columnMap.put(entry.getKey(), columnCount);
+			
+			for(DataFile df : entry.getValue()) {
+
+				data[rowCount][columnCount] = dataMap.get(df);
+				rowMap.put(df, rowCount);
+				seriesPaintMap.put(rowCount, seriesPaintNameMap.get(entry.getKey()));
+				rowCount++;								
+			}
+			columnCount++;
+		}
+		rowKeys = rowMap.keySet().stream().collect(Collectors.toList());
+		columnKeys = columnMap.keySet().stream().collect(Collectors.toList());
+	}
+		
 	private Map<String,Paint> createSeriesPaintMap(
 			Map<String, DataFile[]> seriesFileMap, 
 			PlotDataGrouping groupingType,
 			ChartColorOption chartColorOption) {
 		
 		Map<String,Paint>seriesPaintNameMap = new TreeMap<String,Paint>();
-		seriesPaintMap = new TreeMap<Integer,Paint>();
+		seriesPaintMap = new HashMap<Integer,Paint>();
 		int sCount = 0;
 		if(groupingType.equals(PlotDataGrouping.IGNORE_DESIGN)
 				&& chartColorOption.equals(ChartColorOption.BY_SAMPLE_TYPE)) {
@@ -159,59 +306,83 @@ public class QcBarChartDataSet extends DefaultCategoryDataset {
 		return seriesPaintNameMap;
 	}
 	
-	public QcBarChartDataSet(TwoDqcPlotParameterObject plotParameters) {
-		
-		if (plotParameters.getStatsField().equals(DataSetQcField.RAW_VALUES))
-			return;
-		
-		DataAnalysisProject experiment = 
-				MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
-		if(experiment == null)
-			return;
-		
-		DataPipeline pipeline = experiment.getActiveDataPipeline();
-		
-		Collection<ExperimentalSample> samples = 
-				experiment.getExperimentDesign().getSamples();
-		HashSet<DataFile> files = samples.stream().
-				flatMap(s -> s.getDataFilesForMethod(pipeline.getAcquisitionMethod()).stream()).
-				filter(s -> s.isEnabled()).collect(Collectors.toCollection(HashSet::new));
+	private void calculateCategoryItemCount(Map<String, DataFile[]> seriesFileMap) {
 
-		Map<String, DataFile[]> seriesFileMap = 
-				PlotDataSetUtils.createSeriesFileMap(
-						pipeline, 
-						files,
-						plotParameters.getSortingOrder(), 
-						experiment.getExperimentDesign().getCompleteDesignSubset(), 
-						plotParameters.getGroupingType(), 
-						plotParameters.getCategory(), 
-						plotParameters.getSubCategory());
-		
-		Map<String,Paint>seriesPaintNameMap = 
-				createSeriesPaintMap(seriesFileMap, plotParameters.getGroupingType(), 
-						plotParameters.getChartColorOption());
-		Integer rowCount = 0;
-		
-		DataSetQcField sf = plotParameters.getStatsField();
-		for (Entry<String, DataFile[]> entry : seriesFileMap.entrySet()) {
-
-			for(DataFile df : entry.getValue()) {
-				
-				DataFileStatisticalSummary fileSummary = 
-						plotParameters.getDataSetStats().stream().
-						filter(st -> st.getFile().equals(df)).
-						findFirst().orElse(null);
-				if(fileSummary != null) {
-					addValue(fileSummary.getProperty(sf).doubleValue(), df, entry.getKey());
-					seriesPaintMap.put(rowCount, seriesPaintNameMap.get(entry.getKey()));
-					rowCount++;
-				}				
-			}
+		categoryItemCount = new int[seriesFileMap.size()];
+		int count = 0;
+		for(Entry<String, DataFile[]> e : seriesFileMap.entrySet()) {			
+			categoryItemCount[count] = e.getValue().length;
+			count++;
 		}
 	}
 
 	public Map<Integer, Paint> getSeriesPaintMap() {
 		return seriesPaintMap;
+	}
+	
+    @Override
+    public int getRowIndex(Comparable key) {
+        return this.rowMap.get(key);
+    }
+    
+    @Override
+    public int getColumnIndex(Comparable key) {
+        return this.columnMap.get(key);
+    }
+    
+    @Override
+    public Number getValue(Comparable rowKey, Comparable columnKey) {
+    	
+    	int row = rowMap.get(rowKey);
+    	int col = columnMap.get(columnKey);
+    	return data[row][col];
+    }
+
+	@Override
+	public Comparable getRowKey(int row) {
+		
+		return rowMap.entrySet().stream().
+				filter(e -> e.getValue().equals(row)).
+				map(e -> e.getKey()).
+				findFirst().orElse(null);
+	}
+
+	@Override
+	public List getRowKeys() {
+		return rowKeys;
+	}
+
+	@Override
+	public Comparable getColumnKey(int column) {
+	
+		return columnMap.entrySet().stream().
+				filter(e -> e.getValue().equals(column)).
+				map(e -> e.getKey()).
+				findFirst().orElse(null);
+	}
+
+	@Override
+	public List getColumnKeys() {
+		return columnKeys;
+	}
+
+	@Override
+	public int getRowCount() {
+		return rowKeys.size();
+	}
+
+	@Override
+	public int getColumnCount() {
+		return columnKeys.size();
+	}
+
+	@Override
+	public Number getValue(int row, int column) {
+		return data[row][column];
+	}
+
+	public int[] getCategoryItemCounts() {
+		return categoryItemCount;
 	}
 }
 

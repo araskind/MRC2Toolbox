@@ -157,8 +157,6 @@ public class MultiPanelDataPlotToolbar extends PlotToolbar implements ActionList
 				buttonDimension);
 		sidePanelButton.addActionListener(this);
 		add(sidePanelButton);
-		
-		toggleItemListeners(true);
 	}
 	
 	@Override

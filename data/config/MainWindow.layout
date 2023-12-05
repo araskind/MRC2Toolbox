@@ -233,12 +233,12 @@
 													</placeholders>
 												</leaf>
 												<node nodeId="1676064563113" orientation="HORIZONTAL" divider="0.28317601332593006">
-													<leaf id="-1" nodeId="1676064552084">
+													<leaf id="0" nodeId="1676064552084">
 														<placeholders>
 															<placeholder>dock.single.ExperimentSetupDraw</placeholder>
 														</placeholders>
 													</leaf>
-													<leaf id="0" nodeId="1672779039466">
+													<leaf id="1" nodeId="1672779039466">
 														<placeholders>
 															<placeholder>dock.single.CompoundDatabasePanel</placeholder>
 															<placeholder>dock.single.ExperimentDesignPanel</placeholder>
@@ -345,8 +345,18 @@
 							</adjacent>
 							<children ignore="false">
 								<child>
+									<layout factory="predefined" placeholder="dock.single.ExperimentSetupDraw">
+										<replacement id="dockablesingle ExperimentSetupDraw"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>ExperimentSetupDraw</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
+								</child>
+								<child>
 									<layout factory="delegate_StackDockStationFactory">
-										<selected>7</selected>
+										<selected>1</selected>
 										<placeholders>
 											<version>0</version>
 											<format>dock.PlaceholderList</format>
@@ -776,29 +786,6 @@
 								<children ignore="false"/>
 							</layout>
 						</child>
-						<child key="single ExperimentSetupDraw" root="ccontrol center" location="true">
-							<location>
-								<property factory="SplitDockPlaceholderProperty">
-									<placeholder>dock.single.ExperimentSetupDraw</placeholder>
-									<backup-path>
-										<node location="BOTTOM" size="0.5" id="1692380926531"/>
-										<node location="RIGHT" size="0.7217529039070749" id="1672779742083"/>
-										<node location="LEFT" size="0.28317601332593006" id="1676064563113"/>
-										<leaf id="1676064552084"/>
-									</backup-path>
-								</property>
-							</location>
-							<layout>
-								<layout factory="predefined" placeholder="dock.single.ExperimentSetupDraw">
-									<replacement id="dockablesingle ExperimentSetupDraw"/>
-									<delegate id="delegate_ccontrol backup factory id">
-										<id>ExperimentSetupDraw</id>
-										<area/>
-									</delegate>
-								</layout>
-								<children ignore="false"/>
-							</layout>
-						</child>
 						<child key="single DataIntegratorPanelClusterDisplayPanel" root="ccontrol center" location="true">
 							<location>
 								<property factory="SplitDockPlaceholderProperty">
@@ -1143,7 +1130,7 @@
 								</property>
 							</properties>
 						</entry>
-						<entry id="single ExperimentSetupDraw">
+						<entry id="single ExperimentSetupDraw" current="dock.mode.normal">
 							<history>
 								<mode>dock.mode.minimized</mode>
 								<mode>dock.mode.normal</mode>
