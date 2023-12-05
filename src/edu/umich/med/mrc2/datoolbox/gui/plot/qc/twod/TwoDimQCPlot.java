@@ -48,10 +48,10 @@ import edu.umich.med.mrc2.datoolbox.data.enums.FileSortingOrder;
 import edu.umich.med.mrc2.datoolbox.gui.plot.ControlledStatsPlot;
 import edu.umich.med.mrc2.datoolbox.gui.plot.MasterPlotPanel;
 import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.PlotDataSetUtils;
-import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.QcBarChartDataSet;
 import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.QcBoxPlotDataSet;
 import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.QcScatterDataSet;
 import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.QcTimedScatterSet;
+import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.VariableCategorySizeBarChartDataSet;
 import edu.umich.med.mrc2.datoolbox.gui.plot.renderer.category.VariableCategorySizeBarRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.plot.renderer.category.VariableCategorySizeCategoryAxis;
 import edu.umich.med.mrc2.datoolbox.gui.plot.stats.DataPlotControlsPanel;
@@ -104,7 +104,7 @@ public class TwoDimQCPlot extends MasterPlotPanel implements ItemListener, Contr
 	private void loadBarChart() {
 		
     	long startTime = System.currentTimeMillis();
-		QcBarChartDataSet ds = new QcBarChartDataSet(plotParameters);		
+		VariableCategorySizeBarChartDataSet ds = new VariableCategorySizeBarChartDataSet(plotParameters);		
     	long endTime = System.currentTimeMillis();
     	System.out.println("Data set created in " + (endTime - startTime) + " milliseconds");
 

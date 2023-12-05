@@ -67,7 +67,7 @@ import org.jfree.chart.util.SerialUtils;
 import org.jfree.chart.util.ShapeUtils;
 import org.jfree.data.category.CategoryDataset;
 
-import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.QcBarChartDataSet;
+import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.VariableCategorySizeBarChartDataSet;
 
 	/**
 	 * An axis that displays categories.
@@ -656,8 +656,8 @@ import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.QcBarChartDataSet;
 	    	if(dataSet == null)
 	    		return new int[0];
 	    	
-	    	if(dataSet instanceof QcBarChartDataSet)
-	    		return ((QcBarChartDataSet)dataSet).getCategoryItemCounts();
+	    	if(dataSet instanceof VariableCategorySizeBarChartDataSet)
+	    		return ((VariableCategorySizeBarChartDataSet)dataSet).getCategoryItemCounts();
 	    	
 	    	int[]valueCounts = new int[dataSet.getColumnCount()];
 	    	int categoryCount = 0;

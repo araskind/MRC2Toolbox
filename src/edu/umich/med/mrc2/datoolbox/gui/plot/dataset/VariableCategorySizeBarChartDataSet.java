@@ -52,7 +52,7 @@ import edu.umich.med.mrc2.datoolbox.gui.plot.stats.TwoDimFeatureDataPlotParamete
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 
-public class QcBarChartDataSet extends AbstractDataset implements CategoryDataset {
+public class VariableCategorySizeBarChartDataSet extends AbstractDataset implements CategoryDataset {
 
 	/**
 	 * 
@@ -66,7 +66,7 @@ public class QcBarChartDataSet extends AbstractDataset implements CategoryDatase
 	private List rowKeys, columnKeys;
 	private int[]categoryItemCount;
 	
-	public QcBarChartDataSet(
+	public VariableCategorySizeBarChartDataSet(
 			Collection<DataFileStatisticalSummary> dataSetStats, 			
 			DataSetQcField statsField,
 			FileSortingOrder sortingOrder, 
@@ -140,7 +140,7 @@ public class QcBarChartDataSet extends AbstractDataset implements CategoryDatase
 		columnKeys = columnMap.keySet().stream().collect(Collectors.toList());		
 	}
 	
-	public QcBarChartDataSet(TwoDqcPlotParameterObject plotParameters) {
+	public VariableCategorySizeBarChartDataSet(TwoDqcPlotParameterObject plotParameters) {
 		
 		if (plotParameters.getStatsField().equals(DataSetQcField.RAW_VALUES))
 			return;
@@ -168,6 +168,7 @@ public class QcBarChartDataSet extends AbstractDataset implements CategoryDatase
 						plotParameters.getCategory(), 
 						plotParameters.getSubCategory());
 		calculateCategoryItemCount(seriesFileMap);
+		categoryItemCount = new int[seriesFileMap.size()];
 		
 		Map<String,Paint>seriesPaintNameMap = 
 				createSeriesPaintMap(seriesFileMap, plotParameters.getGroupingType(), 
@@ -182,8 +183,7 @@ public class QcBarChartDataSet extends AbstractDataset implements CategoryDatase
 		DataSetQcField sf = plotParameters.getStatsField();
 		for (Entry<String, DataFile[]> entry : seriesFileMap.entrySet()) {
 
-			columnMap.put(entry.getKey(), columnCount);
-			
+			columnMap.put(entry.getKey(), columnCount);			
 			for(DataFile df : entry.getValue()) {
 				
 				DataFileStatisticalSummary fileSummary = 
@@ -204,7 +204,7 @@ public class QcBarChartDataSet extends AbstractDataset implements CategoryDatase
 		columnKeys = columnMap.keySet().stream().collect(Collectors.toList());
 	}
 	
-	public QcBarChartDataSet(
+	public VariableCategorySizeBarChartDataSet(
 			MsFeature feature, 
 			TwoDimFeatureDataPlotParameterObject plotParameters) {
 				
@@ -230,8 +230,9 @@ public class QcBarChartDataSet extends AbstractDataset implements CategoryDatase
 						plotParameters.getGroupingType(), 
 						plotParameters.getCategory(), 
 						plotParameters.getSubCategory());
-		calculateCategoryItemCount(seriesFileMap);
-		
+		//	calculateCategoryItemCount(seriesFileMap);
+		categoryItemCount = new int[seriesFileMap.size()];		
+
 		Map<String,Paint>seriesPaintNameMap = 
 				createSeriesPaintMap(seriesFileMap, plotParameters.getGroupingType(), 
 						plotParameters.getChartColorOption());
@@ -249,14 +250,20 @@ public class QcBarChartDataSet extends AbstractDataset implements CategoryDatase
 		for (Entry<String, DataFile[]> entry : seriesFileMap.entrySet()) {
 
 			columnMap.put(entry.getKey(), columnCount);
+			int itemCount = 0;
 			
 			for(DataFile df : entry.getValue()) {
 
-				data[rowCount][columnCount] = dataMap.get(df);
+				Double val = dataMap.get(df);
+				data[rowCount][columnCount] = val;
+				if(val != null)
+					itemCount++;
+				
 				rowMap.put(df, rowCount);
 				seriesPaintMap.put(rowCount, seriesPaintNameMap.get(entry.getKey()));
 				rowCount++;								
 			}
+			categoryItemCount[columnCount] = itemCount;
 			columnCount++;
 		}
 		rowKeys = rowMap.keySet().stream().collect(Collectors.toList());
