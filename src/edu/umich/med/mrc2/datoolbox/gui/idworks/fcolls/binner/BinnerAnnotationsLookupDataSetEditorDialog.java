@@ -369,6 +369,7 @@ public class BinnerAnnotationsLookupDataSetEditorDialog extends JDialog
 		preferences = Preferences.userRoot().node(PREFS_NODE);
 		preferences.put(BASE_DIRECTORY, 
 				binnerAnnotationsImportPanel.getBaseDirectory().getAbsolutePath());
+		binnerAnnotationsImportPanel.savePreferences();
 	}
 }
 

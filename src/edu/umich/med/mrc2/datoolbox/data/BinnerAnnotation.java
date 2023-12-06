@@ -40,25 +40,27 @@ public class BinnerAnnotation implements Serializable, Comparable<BinnerAnnotati
 	private String id;
 	private String featureName;
 	private String annotation;
+	
 	private String additionalGroupAnnotations;
 	private String furtherAnnotations;
 	private String derivations;
 	private String isotopes;
 	private String additionalIsotopes;
-	private double massError;
-	private double rmd;
-	private int molIonNumber;
 	private String chargeCarrier;
 	private String additionalAdducts;
+	
+	private int molIonNumber;
 	private int binNumber;
 	private int corrClusterNumber;
 	private int rebinSubclusterNumber;
 	private int rtSubclusterNumber;
+	
 	private boolean isPrimary;
+	
+	private double massError;
+	private double rmd;
 	private double binnerMz;
 	private double binnerRt;
-	
-	
 
 	public BinnerAnnotation(String id, String featureName, String annotation) {
 		super();
@@ -76,7 +78,7 @@ public class BinnerAnnotation implements Serializable, Comparable<BinnerAnnotati
 	}
 
 	public String toString() {
-		return annotation;
+		return getCleanAnnotation();
 	}
 
 	public String getAnnotation() {
@@ -84,7 +86,8 @@ public class BinnerAnnotation implements Serializable, Comparable<BinnerAnnotati
 	}
 	
 	public String getCleanAnnotation() {
-		return replaceMolIonNumber(annotation);
+		return replaceMolIonNumber(annotation).
+					replace("(duplicate)", "").trim();
 	}
 
 	public String getDerivations() {

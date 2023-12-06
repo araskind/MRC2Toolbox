@@ -63,6 +63,7 @@ import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSSampleType;
+import edu.umich.med.mrc2.datoolbox.data.msclust.IMsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTableModel;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.AutoChoices;
@@ -245,6 +246,14 @@ public class MSMSFeatureTable extends BasicTable {
 		idp = new TableUpdateProgressDialog(message, this, task);
 		idp.setLocationRelativeTo(this);
 		idp.setVisible(true);
+	}
+	
+	public void setTableModelFromFeatureCluster(IMsFeatureInfoBundleCluster featureCluster) {
+		
+		thf.setTable(null);
+		((MSMSFeatureTableModel)model).setTableModelFromFeatureCluster(featureCluster);
+		thf.setTable(this);
+		adjustColumns();
 	}
 	
 	class TableUpdateTask extends LongTableUpdateTask {

@@ -195,5 +195,6 @@ public class ActiveDataSetBinnerAnnotationsSearchDialog extends JDialog implemen
 		baseDirectory = binnerAnnotationsImportPanel.getBaseDirectory();
 		preferences.put(BASE_DIRECTORY, baseDirectory.getAbsolutePath());
 		msmsClusteringParametersPanel.savePreferences();
+		binnerAnnotationsImportPanel.savePreferences();
 	}
 }

@@ -4356,7 +4356,16 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			IMsFeatureInfoBundleCluster cluster = 
 					(IMsFeatureInfoBundleCluster)tree.getClickedObject();
 			activeCluster = cluster;
-			safelyLoadMSMSFeatures(cluster.getComponents());
+			//	safelyLoadMSMSFeatures(cluster.getComponents());
+			
+			clearFeatureData();
+			msTwoFeatureTable.getTable().
+				getSelectionModel().removeListSelectionListener(this);
+			msTwoFeatureTable.getTable().
+				setTableModelFromFeatureCluster(cluster);
+			msTwoFeatureTable.getTable().
+				getSelectionModel().addListSelectionListener(this);
+			
 			showMultipleFeatureChromatograms(cluster.getComponents());
 			
 			referenceMolStructurePanel.clearPanel();		

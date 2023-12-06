@@ -29,12 +29,17 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jdom2.Element;
 
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
+import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
 import edu.umich.med.mrc2.datoolbox.project.store.BinnerAnnotationClusterFields;
+import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
+import edu.umich.med.mrc2.datoolbox.utils.Range;
 
 public class BinnerAnnotationCluster {
 	
@@ -71,6 +76,129 @@ public class BinnerAnnotationCluster {
 			primaryFeatureAnnotation = newAnnotation;
 		
 		return true;
+	}
+	
+	public boolean addUniqueAnnotation(
+			BinnerAnnotation newAnnotation,
+			double mergeMzWindow,
+			MassErrorType masErrorType, 
+			double mergeRtWindow) {
+		
+		if(newAnnotation.getMolIonNumber() != molIonNumber)
+			return false;
+		
+		Range mzRange = MsUtils.createMassRange(
+				newAnnotation.getBinnerMz(), mergeMzWindow, masErrorType);
+		Range rtRange = new Range(
+				newAnnotation.getBinnerRt() - mergeRtWindow, 
+				newAnnotation.getBinnerRt() + mergeRtWindow);
+		List<BinnerAnnotation> matches = annotations.stream().
+			filter(a -> a.getCleanAnnotation().equals(newAnnotation.getCleanAnnotation())).
+			filter(a -> mzRange.contains(a.getBinnerMz())).
+			filter(a -> rtRange.contains(a.getBinnerRt())).
+			collect(Collectors.toList());
+		if(matches.isEmpty()) {
+			
+			annotations.add(newAnnotation);
+			if(newAnnotation.isPrimary())
+				primaryFeatureAnnotation = newAnnotation;
+			
+			return true;
+		}
+		else {
+			matches.add(newAnnotation);
+			BinnerAnnotation merged = mergeAnnotations(matches);
+			annotations.removeAll(matches);			
+			annotations.add(merged);
+			if(merged.isPrimary())
+				primaryFeatureAnnotation = merged;
+			
+			return true;
+		}
+	}
+	
+	private BinnerAnnotation mergeAnnotations(List<BinnerAnnotation> matches) {
+		
+		BinnerAnnotation first = matches.get(0);
+		
+		BinnerAnnotation merged = 
+				new BinnerAnnotation(first.getFeatureName(), first.getAnnotation());
+		merged.setMolIonNumber(first.getMolIonNumber());
+		merged.setBinNumber(first.getBinNumber());		
+		merged.setCorrClusterNumber(first.getCorrClusterNumber());
+		merged.setRebinSubclusterNumber(first.getRebinSubclusterNumber());
+		merged.setRtSubclusterNumber(first.getRtSubclusterNumber());
+		
+		double mzSum = 0.0d;
+		double rtSum = 0.0d;
+		double rmdSum = 0.0d;
+		double massErrSum = 0.0d;
+		
+		TreeSet<String>additionalGroupAnnotationsSet = new TreeSet<String>();
+		TreeSet<String>furtherAnnotationsSet = new TreeSet<String>();
+		TreeSet<String>derivationsSet = new TreeSet<String>();
+		TreeSet<String>isotopesSet = new TreeSet<String>();
+		TreeSet<String>additionalIsotopesSet = new TreeSet<String>();
+		TreeSet<String>chargeCarrierSet = new TreeSet<String>();
+		TreeSet<String>additionalAdductsSet = new TreeSet<String>();
+		
+		for(BinnerAnnotation ba : matches) {
+						
+			CollectionUtils.addIgnoreNull(
+					additionalGroupAnnotationsSet, ba.getAdditionalGroupAnnotations());			
+			CollectionUtils.addIgnoreNull(
+					furtherAnnotationsSet, ba.getFurtherAnnotations());			
+			CollectionUtils.addIgnoreNull(derivationsSet, ba.getDerivations());			
+			CollectionUtils.addIgnoreNull(isotopesSet, ba.getIsotopes());		
+			CollectionUtils.addIgnoreNull(
+					additionalIsotopesSet, ba.getAdditionalIsotopes());			
+			CollectionUtils.addIgnoreNull(chargeCarrierSet, ba.getChargeCarrier());
+			CollectionUtils.addIgnoreNull(
+					additionalAdductsSet, ba.getAdditionalAdducts());
+			
+			mzSum += ba.getBinnerMz();
+			rtSum += ba.getBinnerRt();
+			rmdSum += ba.getRmd();
+			massErrSum += ba.getMassError();
+			
+			if(ba.isPrimary())
+				merged.setPrimary(true);
+		}
+		double div = (double)matches.size();
+		merged.setBinnerMz(mzSum / div);
+		merged.setBinnerRt(rtSum / div);
+		merged.setRmd(rmdSum / div);
+		merged.setMassError(massErrSum / div);
+
+		if(!additionalGroupAnnotationsSet.isEmpty())
+			merged.setAdditionalGroupAnnotations(
+					StringUtils.join(additionalGroupAnnotationsSet, " "));
+		
+		if(!furtherAnnotationsSet.isEmpty())
+			merged.setFurtherAnnotations(
+					StringUtils.join(furtherAnnotationsSet, " "));
+		
+		if(!derivationsSet.isEmpty())
+			merged.setDerivations(
+					StringUtils.join(derivationsSet, " "));
+				
+		if(!isotopesSet.isEmpty())
+			merged.setIsotopes(
+					StringUtils.join(isotopesSet, " "));
+		
+		if(!additionalIsotopesSet.isEmpty())
+			merged.setAdditionalIsotopes(
+					StringUtils.join(additionalIsotopesSet, " "));
+		
+		if(!chargeCarrierSet.isEmpty())
+			merged.setChargeCarrier(
+					StringUtils.join(chargeCarrierSet, " "));
+				
+		if(!additionalAdductsSet.isEmpty())
+			merged.setAdditionalAdducts(
+					StringUtils.join(additionalAdductsSet, " "));
+				
+		return merged;
 	}
 
 	public int getMolIonNumber() {

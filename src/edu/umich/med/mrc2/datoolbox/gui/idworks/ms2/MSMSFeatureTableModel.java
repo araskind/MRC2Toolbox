@@ -26,6 +26,7 @@ import java.util.Collection;
 import java.util.List;
 
 import edu.umich.med.mrc2.datoolbox.data.Adduct;
+import edu.umich.med.mrc2.datoolbox.data.BinnerAnnotation;
 import edu.umich.med.mrc2.datoolbox.data.IDTExperimentalSample;
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureIdentificationLevel;
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
@@ -41,6 +42,8 @@ import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSSampleType;
+import edu.umich.med.mrc2.datoolbox.data.msclust.BinnerBasedMsFeatureInfoBundleCluster;
+import edu.umich.med.mrc2.datoolbox.data.msclust.IMsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTableModel;
 import edu.umich.med.mrc2.datoolbox.gui.tables.ColumnContext;
 import edu.umich.med.mrc2.datoolbox.main.AdductManager;
@@ -55,6 +58,7 @@ public class MSMSFeatureTableModel extends BasicTableModel {
 	public static final String COMPOUND_NAME_COLUMN = "Identification";
 	public static final String ID_LEVEL_COLUMN = "ID level";
 	public static final String ADDUCT_COLUMN = "Adduct";
+	public static final String BINNER_ANNOTATION_COLUMN = "BinAnnot";
 	public static final String POLARITY_COLUMN = "Polarity";
 	public static final String DATABASE_LINK_COLUMN = "DBID";
 	public static final String AMBIGUITY_COLUMN = "ID status";
@@ -63,10 +67,6 @@ public class MSMSFeatureTableModel extends BasicTableModel {
 	public static final String COLLISION_ENERGY_COLUMN = "CE, V";
 	public static final String ENTROPY_BASED_SCORE_COLUMN = "EScore";
 	public static final String MSMS_MATCH_TYPE_COLUMN = "MType";
-	
-//	public static final String LIB_SCORE_COLUMN = "Lib. score";
-//	public static final String MSMS_LIB_COLUMN = "MSMS library";
-	
 	public static final String EXPERIMENT_COLUMN = "Experiment";
 	public static final String SAMPLE_COLUMN = "Sample";
 	public static final String SAMPLE_TYPE_COLUMN = "Sample type";
@@ -80,8 +80,11 @@ public class MSMSFeatureTableModel extends BasicTableModel {
 	public static final String SPECTRUM_TOTAL_INTENSITY_COLUMN = "Area Sum";	
 	public static final String LIBRARY_PRECURSOR_DELTA_MZ_COLUMN = "Lib " + '\u0394' + " M/Z";
 	public static final String NEUTRAL_MASS_PRECURSOR_DELTA_MZ_COLUMN = "MW " + '\u0394' + " M/Z";
+	
+	private IMsFeatureInfoBundleCluster featureCluster;
 
 	public MSMSFeatureTableModel() {
+		
 		super();
 		columnArray = new ColumnContext[] {
 
@@ -93,6 +96,7 @@ public class MSMSFeatureTableModel extends BasicTableModel {
 					"Identification status (unknown, single / multiple IDs)", FeatureIdentificationState.class, false),
 			new ColumnContext(ID_LEVEL_COLUMN, "Identification level", MSFeatureIdentificationLevel.class, false),
 			new ColumnContext(ADDUCT_COLUMN, "Primary adduct", Adduct.class, false),
+			new ColumnContext(BINNER_ANNOTATION_COLUMN, "Binner annotation", BinnerAnnotation.class, false),
 			new ColumnContext(POLARITY_COLUMN, POLARITY_COLUMN, Polarity.class, false),
 			new ColumnContext(ANNOTATIONS_COLUMN, "Has annotations (standard or free form)", Boolean.class, false),
 			new ColumnContext(FOLLOWUP_COLUMN, "Identification followup steps assigned", Boolean.class, false),
@@ -105,9 +109,7 @@ public class MSMSFeatureTableModel extends BasicTableModel {
 					+ "and observed precursor ion M/Z", Double.class, false),			
 			new ColumnContext(COLLISION_ENERGY_COLUMN, "MSMS collision energy", Double.class, false),
 			new ColumnContext(ENTROPY_BASED_SCORE_COLUMN, "Entropy based MSMS match score", Double.class, false),
-			new ColumnContext(MSMS_MATCH_TYPE_COLUMN, "MSMS match type", ReferenceMsMsLibraryMatch.class, false),
-//			new ColumnContext(LIB_SCORE_COLUMN, Double.class, false),
-//			new ColumnContext(MSMS_LIB_COLUMN, ReferenceMsMsLibrary.class, false),			
+			new ColumnContext(MSMS_MATCH_TYPE_COLUMN, "MSMS match type", ReferenceMsMsLibraryMatch.class, false),		
 			new ColumnContext(SAMPLE_TYPE_COLUMN, SAMPLE_TYPE_COLUMN, LIMSSampleType.class, false),
 			new ColumnContext(SAMPLE_COLUMN, "Sample ID", IDTExperimentalSample.class, false),
 			new ColumnContext(EXPERIMENT_COLUMN, "Experiment ID", LIMSExperiment.class, false),
@@ -123,10 +125,25 @@ public class MSMSFeatureTableModel extends BasicTableModel {
 	public void setTableModelFromFeatureList(Collection<MSFeatureInfoBundle> featureList) {
 
 		setRowCount(0);
+		this.featureCluster = null;
 		if(featureList == null || featureList.isEmpty())
 			return;
 		
 		List<Object[]>rowData = createModelData(featureList);
+		if(!rowData.isEmpty())
+			addRows(rowData);
+	}
+	
+	public void setTableModelFromFeatureCluster(IMsFeatureInfoBundleCluster featureCluster) {
+
+		setRowCount(0);
+		if(featureCluster == null || featureCluster.getComponents() == null 
+				|| featureCluster.getComponents().isEmpty())
+			return;
+		
+		this.featureCluster = featureCluster;
+		
+		List<Object[]>rowData = createModelData(featureCluster.getComponents());
 		if(!rowData.isEmpty())
 			addRows(rowData);
 	}
@@ -157,6 +174,8 @@ public class MSMSFeatureTableModel extends BasicTableModel {
 			Double neutralMassDeltaMz = null;
 			MsFeatureIdentity primaryId = cf.getPrimaryIdentity();
 			Adduct adduct = null;
+			BinnerAnnotation ba = getBinnerAnnotation(bundle);
+			
 			Double entropyMsMsScore = null;
 			ReferenceMsMsLibraryMatch refMatch = null;
 			if(primaryId != null) {
@@ -197,6 +216,7 @@ public class MSMSFeatureTableModel extends BasicTableModel {
 				idState, //	AMBIGUITY_COLUMN, Boolean
 				idLevel,
 				adduct,
+				ba,
 				cf.getPolarity(),
 				hasAnnotations,	//	ANNOTATIONS_COLUMN, Boolean
 				hasFollowup,
@@ -226,6 +246,17 @@ public class MSMSFeatureTableModel extends BasicTableModel {
 		return modelData;
 	}
 
+	private BinnerAnnotation getBinnerAnnotation(MSFeatureInfoBundle bundle) {
+		
+		if(featureCluster != null 
+				&& featureCluster instanceof BinnerBasedMsFeatureInfoBundleCluster) {
+			
+			return ((BinnerBasedMsFeatureInfoBundleCluster)featureCluster).getAnnotationForFeature(bundle);		
+		}
+		else
+			return null;
+	}
+
 	public void updateFeatureData(MSFeatureInfoBundle bundle) {
 
 		int row = getFeatureInfoBundleRow(bundle);
@@ -248,6 +279,7 @@ public class MSMSFeatureTableModel extends BasicTableModel {
 		Double libraryPrecursorDeltaMz = null;
 		Double neutralMassDeltaMz = null;
 		Adduct adduct = null;
+		BinnerAnnotation ba = getBinnerAnnotation(bundle);
 		Double entropyMsMsScore = null;
 		ReferenceMsMsLibraryMatch refMatch = null;
 		MsFeatureIdentity primaryId = cf.getPrimaryIdentity();
@@ -291,6 +323,7 @@ public class MSMSFeatureTableModel extends BasicTableModel {
 		setValueAt(cf.getIdentificationState(), row, getColumnIndex(AMBIGUITY_COLUMN));
 		setValueAt(idLevel, row, getColumnIndex(ID_LEVEL_COLUMN));
 		setValueAt(adduct, row, getColumnIndex(ADDUCT_COLUMN));	
+		setValueAt(ba, row, getColumnIndex(BINNER_ANNOTATION_COLUMN));
 		setValueAt(cf.getPolarity(), row, getColumnIndex(POLARITY_COLUMN));	
 		setValueAt(hasAnnotations, row, getColumnIndex(ANNOTATIONS_COLUMN));
 		setValueAt(hasFollowup, row, getColumnIndex(FOLLOWUP_COLUMN));

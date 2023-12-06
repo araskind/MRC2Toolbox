@@ -123,7 +123,8 @@ public class BinnerAnnotationLookupTask extends AbstractTask {
 				Range rtRange = new Range(
 						binnerAnnotation.getBinnerRt() - rtError, 
 						binnerAnnotation.getBinnerRt() + rtError);
-				Range mzRange = MsUtils.createMassRange(binnerAnnotation.getBinnerMz(), mzError, mzErrorType);
+				Range mzRange = 
+						MsUtils.createMassRange(binnerAnnotation.getBinnerMz(), mzError, mzErrorType);
 				List<MSFeatureInfoBundle> clusterFeatures = msmsFeatures.stream().
 					filter(f -> Objects.nonNull(f.getMsFeature().
 							getSpectrum().getExperimentalTandemSpectrum())).

@@ -25,6 +25,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
@@ -479,6 +480,16 @@ public class BinnerBasedMsFeatureInfoBundleCluster implements IMsFeatureInfoBund
 	public void setLookupFeature(MinimalMSOneFeature lf) {
 		// TODO Auto-generated method stub
 		
+	}
+	
+	public BinnerAnnotation getAnnotationForFeature(MSFeatureInfoBundle bundle) {
+		
+		for(Entry<BinnerAnnotation, Set<MSFeatureInfoBundle>> e : componentMap.entrySet()) {
+			
+			if(e.getValue().contains(bundle))
+				return e.getKey();
+		}
+		return null;
 	}
 }
 

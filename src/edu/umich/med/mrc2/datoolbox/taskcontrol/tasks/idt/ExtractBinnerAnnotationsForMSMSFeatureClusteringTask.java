@@ -29,16 +29,27 @@ import java.util.TreeMap;
 
 import edu.umich.med.mrc2.datoolbox.data.BinnerAnnotation;
 import edu.umich.med.mrc2.datoolbox.data.BinnerAnnotationCluster;
+import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 
-public class ExtractBinnerAnnotatiosForMSMSFeatureClusteringTask extends BinnerReportParserTask {
+public class ExtractBinnerAnnotationsForMSMSFeatureClusteringTask extends BinnerReportParserTask {
 
 	private Collection<BinnerAnnotationCluster>binnerAnnotationClusters;
+	private double mergeMzWindow;
+	private MassErrorType masErrorType;
+	private double mergeRtWindow;
 
-	public ExtractBinnerAnnotatiosForMSMSFeatureClusteringTask(File binnerDataFile) {
+	public ExtractBinnerAnnotationsForMSMSFeatureClusteringTask(
+			File binnerDataFile, 
+			double mergeMzWindow,
+			MassErrorType masErrorType, 
+			double mergeRtWindow) {
 		super();
 		this.binnerDataFile = binnerDataFile;
+		this.mergeMzWindow = mergeMzWindow;
+		this.masErrorType = masErrorType;
+		this.mergeRtWindow = mergeRtWindow;
 	}
 
 	@Override
@@ -53,11 +64,11 @@ public class ExtractBinnerAnnotatiosForMSMSFeatureClusteringTask extends BinnerR
 				e.printStackTrace();
 			}			
 		}
-		ceateLookupClusters();
+		createLookupClusters();
 		setStatus(TaskStatus.FINISHED);
 	}
 	
-	private void ceateLookupClusters() {
+	private void createLookupClusters() {
 
 		Map<Integer,BinnerAnnotationCluster>featureGroupMap = 
 				new TreeMap<Integer,BinnerAnnotationCluster>();
@@ -70,7 +81,11 @@ public class ExtractBinnerAnnotatiosForMSMSFeatureClusteringTask extends BinnerR
 						annotation.getMolIonNumber(), new BinnerAnnotationCluster(annotation));
 			}
 			else {
-				featureGroupMap.get(annotation.getMolIonNumber()).addAnnotation(annotation);
+				featureGroupMap.get(annotation.getMolIonNumber()).
+					addUniqueAnnotation(annotation,
+										mergeMzWindow,
+										masErrorType, 
+										mergeRtWindow);
 			}
 		}		
 		binnerAnnotationClusters = featureGroupMap.values();
@@ -78,7 +93,8 @@ public class ExtractBinnerAnnotatiosForMSMSFeatureClusteringTask extends BinnerR
 
 	@Override
 	public Task cloneTask() {
-		return new ExtractBinnerAnnotatiosForMSMSFeatureClusteringTask(binnerDataFile);
+		return new ExtractBinnerAnnotationsForMSMSFeatureClusteringTask(
+				binnerDataFile, mergeMzWindow, masErrorType, mergeRtWindow);
 	}
 
 	public Collection<BinnerAnnotationCluster> getBinnerAnnotationClusters() {

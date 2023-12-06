@@ -260,7 +260,7 @@ public class MSMSClusteringParametersPanel extends JPanel implements BackedByPre
 			errors.add("M/Z error must be > 0");
 		
 		if(getMassErrorType() == null)
-			errors.add("M/Z error must be specified");
+			errors.add("M/Z error type must be specified");
 			
 		if(getRTError() == 0.0d)
 			errors.add("RT error must be > 0");
