@@ -168,7 +168,6 @@ public class VariableCategorySizeBarChartDataSet extends AbstractDataset impleme
 						plotParameters.getCategory(), 
 						plotParameters.getSubCategory());
 		calculateCategoryItemCount(seriesFileMap);
-		categoryItemCount = new int[seriesFileMap.size()];
 		
 		Map<String,Paint>seriesPaintNameMap = 
 				createSeriesPaintMap(seriesFileMap, plotParameters.getGroupingType(), 

@@ -44,6 +44,7 @@ import org.jfree.chart.ui.RectangleInsets;
 import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
 
 import edu.umich.med.mrc2.datoolbox.data.DataFileStatisticalSummary;
+import edu.umich.med.mrc2.datoolbox.data.enums.DataSetQcField;
 import edu.umich.med.mrc2.datoolbox.data.enums.FileSortingOrder;
 import edu.umich.med.mrc2.datoolbox.gui.plot.ControlledStatsPlot;
 import edu.umich.med.mrc2.datoolbox.gui.plot.MasterPlotPanel;
@@ -58,6 +59,7 @@ import edu.umich.med.mrc2.datoolbox.gui.plot.stats.DataPlotControlsPanel;
 import edu.umich.med.mrc2.datoolbox.gui.plot.stats.StatsPlotDataFileToolTipGenerator;
 import edu.umich.med.mrc2.datoolbox.gui.plot.stats.StatsPlotType;
 import edu.umich.med.mrc2.datoolbox.gui.plot.tooltip.FileStatsBoxAndWhiskerToolTipGenerator;
+import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 
 public class TwoDimQCPlot extends MasterPlotPanel implements ItemListener, ControlledStatsPlot {
 	
@@ -103,11 +105,12 @@ public class TwoDimQCPlot extends MasterPlotPanel implements ItemListener, Contr
 	
 	private void loadBarChart() {
 		
-    	long startTime = System.currentTimeMillis();
-		VariableCategorySizeBarChartDataSet ds = new VariableCategorySizeBarChartDataSet(plotParameters);		
-    	long endTime = System.currentTimeMillis();
-    	System.out.println("Data set created in " + (endTime - startTime) + " milliseconds");
-
+		//	Not supported for QC plot type
+		if(plotParameters.getStatsField().equals(DataSetQcField.RAW_VALUES)) {
+			MessageDialog.showWarningMsg("Option not supported for QC barchart plot", this);
+			return;
+		}
+ 		VariableCategorySizeBarChartDataSet ds = new VariableCategorySizeBarChartDataSet(plotParameters);		
 		VariableCategorySizeBarRenderer renderer = new VariableCategorySizeBarRenderer();
 		
 		NumberFormat dataFormat = 
@@ -119,10 +122,7 @@ public class TwoDimQCPlot extends MasterPlotPanel implements ItemListener, Contr
 		((CategoryPlot)chart.getPlot()).setDomainAxis(new VariableCategorySizeCategoryAxis());
 		((CategoryPlot)chart.getPlot()).setRenderer(renderer);
 		
-		startTime = System.currentTimeMillis();
 		chart.getCategoryPlot().setDataset(ds);
-		endTime = System.currentTimeMillis();
-    	System.out.println("Plot rendered in " + (endTime - startTime) + " milliseconds");
 	}
 	
 	@Override

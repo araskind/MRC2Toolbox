@@ -34,7 +34,9 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
+import edu.umich.med.mrc2.datoolbox.data.msclust.BinnerBasedMsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.data.msclust.IMsFeatureInfoBundleCluster;
+import edu.umich.med.mrc2.datoolbox.data.msclust.MsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 
 public class MSMSFeatureClusterTreeRenderer extends DefaultTreeCellRenderer {
@@ -44,17 +46,22 @@ public class MSMSFeatureClusterTreeRenderer extends DefaultTreeCellRenderer {
 	 */
 	private static final long serialVersionUID = -3568168754034663097L;
 
-	static final Icon featureIcon = GuiUtils.getIcon("feature", 24);
-	static final Icon clusterIcon = GuiUtils.getIcon("cluster", 24);
-	static final Icon namedClusterIcon = GuiUtils.getIcon("namedCluster", 24);
-	static final Icon multiNamedClusterIcon = GuiUtils.getIcon("multiNamedCluster", 24);
-
-	static final Font bigFont = new Font("SansSerif", Font.BOLD, 12);
-	static final Font smallerFont = new Font("SansSerif", Font.PLAIN, 11);
-	static final Font smallFont = new Font("SansSerif", Font.PLAIN, 10);
-
-	static final Color defaultColor = Color.BLACK;
-	static final Color lockedColor = Color.BLUE;
+	private static final Icon featureIcon = GuiUtils.getIcon("feature", 24);
+	private static final Icon clusterIcon = GuiUtils.getIcon("cluster", 24);
+	private static final Icon namedClusterIcon = GuiUtils.getIcon("namedCluster", 24);
+	private static final Icon multiNamedClusterIcon = GuiUtils.getIcon("multiNamedCluster", 24);
+	
+	private static final Icon binIdentifiedMultipleAnnotIcon = GuiUtils.getIcon("binIdentifiedMultipleAnnot", 24);
+	private static final Icon binIdentifiedSingleAnnotIcon = GuiUtils.getIcon("binIdentifiedSingleAnnot", 24);
+	private static final Icon binUnknownMultipleAnnotIcon = GuiUtils.getIcon("binUnknownMultipleAnnot", 24);
+	private static final Icon binUnknownSingleAnnotIcon = GuiUtils.getIcon("binUnknownSingleAnnot", 24);
+	
+	private static final Font bigFont = new Font("SansSerif", Font.BOLD, 12);
+	private static final Font smallerFont = new Font("SansSerif", Font.PLAIN, 11);
+	private static final Font smallFont = new Font("SansSerif", Font.PLAIN, 10);
+	
+	private static final Color defaultColor = Color.BLACK;
+	private static final Color lockedColor = Color.BLUE;
 	private static final String selectedColorString = "white";
 	private static final String lockedColorString = "blue";
 	private static final String lookupColorString = "green";
@@ -82,16 +89,41 @@ public class MSMSFeatureClusterTreeRenderer extends DefaultTreeCellRenderer {
 			label.setText(((MSFeatureInfoBundle)embeddedObject).getMsFeature().getName());
 		}
 		if (embeddedObject instanceof IMsFeatureInfoBundleCluster) {
-
-			IMsFeatureInfoBundleCluster cluster = (IMsFeatureInfoBundleCluster) embeddedObject;
-
-			if (cluster.getComponents().size() > 1)
-				label.setIcon(multiNamedClusterIcon);
-			else if (cluster.getComponents().size() == 1)
-				label.setIcon(namedClusterIcon);
-			else
-				label.setIcon(clusterIcon);
 			
+			IMsFeatureInfoBundleCluster c = (IMsFeatureInfoBundleCluster)embeddedObject;
+
+			if(embeddedObject instanceof MsFeatureInfoBundleCluster) {
+				
+				MsFeatureInfoBundleCluster cluster = (MsFeatureInfoBundleCluster) embeddedObject;
+				
+				if (cluster.getComponents().size() > 1)
+					label.setIcon(multiNamedClusterIcon);
+				else if (cluster.getComponents().size() == 1)
+					label.setIcon(namedClusterIcon);
+				else
+					label.setIcon(clusterIcon);
+			}
+			if(embeddedObject instanceof BinnerBasedMsFeatureInfoBundleCluster) {
+				
+				BinnerBasedMsFeatureInfoBundleCluster cluster = 
+						(BinnerBasedMsFeatureInfoBundleCluster) embeddedObject;
+				int annotCount = cluster.getDetectedAnnotationsCount();
+				boolean isIdentified = cluster.isIdentified();
+				if(annotCount == 1) {
+					
+					if(isIdentified)
+						label.setIcon(binIdentifiedSingleAnnotIcon);
+					else
+						label.setIcon(binUnknownSingleAnnotIcon);
+				}
+				if(annotCount > 1) {
+					
+					if(isIdentified)
+						label.setIcon(binIdentifiedMultipleAnnotIcon);
+					else
+						label.setIcon(binUnknownMultipleAnnotIcon);
+				}
+			}
 			String lockedClusterColorString = lockedColorString;
 			String luColorString = lookupColorString;
 			if(sel) {
@@ -99,18 +131,18 @@ public class MSMSFeatureClusterTreeRenderer extends DefaultTreeCellRenderer {
 				luColorString = selectedColorString;
 			}
 			String labelText = "<html>";
-			if (cluster.isLocked()) {
+			if (c.isLocked()) {
 				//	label.setForeground(lockedColor);
 				labelText+= "<font style=\"font-weight:bold; font-size: 1.2em; color:" 
-						+ lockedClusterColorString + "\">" + cluster.toString() + "</font>";
+						+ lockedClusterColorString + "\">" + c.toString() + "</font>";
 			}
 			else {
-				labelText+= "<font style=\"font-weight:bold; font-size: 1.2em\">" + cluster.toString() + "</font>";
+				labelText+= "<font style=\"font-weight:bold; font-size: 1.2em\">" + c.toString() + "</font>";
 			}
 			//label.setFont(bigFont);
-			if(cluster.getLookupFeature() != null)
+			if(c.getLookupFeature() != null)
 				labelText+= "<br><font style=\"color:" 
-						+ luColorString + "; font-size: 1.1em\">" + cluster.getLookupFeature().getName();
+						+ luColorString + "; font-size: 1.1em\">" + c.getLookupFeature().getName();
 				
 			label.setText(labelText);
 		}

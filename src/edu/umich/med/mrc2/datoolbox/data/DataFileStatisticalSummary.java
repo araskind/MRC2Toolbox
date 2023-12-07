@@ -174,4 +174,7 @@ public class DataFileStatisticalSummary implements Serializable {
 		return (double) properties.get(DataSetQcField.SD_TRIM);
 	}
 
+	public double getTotalArea() {
+		return (double) properties.get(DataSetQcField.TOTAL_AREA);
+	}
 }

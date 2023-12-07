@@ -111,7 +111,7 @@ public class BinnerBasedMsFeatureInfoBundleCluster implements IMsFeatureInfoBund
 		String mzRtName = "MZ " + MRC2ToolBoxConfiguration.getMzFormat().format(ba.getBinnerMz()) + 
 				" | RT " + MRC2ToolBoxConfiguration.getRtFormat().format(ba.getBinnerRt());
 		
-		if(primaryIdentity != null)
+		if(primaryIdentity != null && primaryIdentity.getCompoundIdentity() != null)
 			name = primaryIdentity.getCompoundName() + " | " + mzRtName;
 		else 
 			name = binnerAnnotationCluster.toString();
@@ -119,6 +119,14 @@ public class BinnerBasedMsFeatureInfoBundleCluster implements IMsFeatureInfoBund
 		long fNumber = getFeatureNumber();
 		if(fNumber > 1)
 			name += " [" + Long.toString(fNumber) + "]";
+	}
+	
+	public boolean isIdentified() {
+		
+		if(primaryIdentity != null && primaryIdentity.getCompoundIdentity() != null)
+			return true;
+		else
+			return false;
 	}
 	
 	public void replaceStoredPrimaryIdentityFromFeatures() {
@@ -490,6 +498,17 @@ public class BinnerBasedMsFeatureInfoBundleCluster implements IMsFeatureInfoBund
 				return e.getKey();
 		}
 		return null;
+	}
+	
+	public int getDetectedAnnotationsCount() {
+		
+		int count = 0;
+		for(Entry<BinnerAnnotation, Set<MSFeatureInfoBundle>>e : componentMap.entrySet()) {
+			
+			if(!e.getValue().isEmpty())
+				count++;
+		}
+		return count;
 	}
 }
 

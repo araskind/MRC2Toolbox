@@ -82,6 +82,8 @@ public class DataSetStatsTable extends BasicTable {
 		columnModel.getColumnById(DataSetQcField.RSD_TRIM.getName())
 				.setCellRenderer(percentRenderer);
 
+		addTablePopupMenu(new DataSetStatsTablePopupMenu(this, this));
+		
 		thf = new TableFilterHeader(this, AutoChoices.ENABLED);
 		finalizeLayout();
 	}
