@@ -98,6 +98,7 @@ import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSSamplePreparation;
 import edu.umich.med.mrc2.datoolbox.data.msclust.BinnerAnnotationLookupDataSet;
+import edu.umich.med.mrc2.datoolbox.data.msclust.BinnerBasedMsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.data.msclust.FeatureLookupDataSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.IMSMSClusterDataSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.IMsFeatureInfoBundleCluster;
@@ -122,6 +123,7 @@ import edu.umich.med.mrc2.datoolbox.gui.idtable.DockableUniversalIdentificationR
 import edu.umich.med.mrc2.datoolbox.gui.idtable.IDTrackerIdentificationTableModelListener;
 import edu.umich.med.mrc2.datoolbox.gui.idtable.UniversalIdentificationResultsTablePopupMenu;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.IDTrackerLimsManagerPanel;
+import edu.umich.med.mrc2.datoolbox.gui.idworks.binner.DockableBinnerAnnotationDetailsPanel;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.clustree.DockableMSMSFeatureClusterTree;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.clustree.MSMSFeatureClusterTree;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.clustree.MajorClusterFeatureDefiningProperty;
@@ -252,6 +254,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 	private DockableChromatogramPlot chromatogramPanel;
 	private DockableMSMSFeatureClusterTree msmsFeatureClusterTreePanel;	
 	private DockableLookupFeatureTable lookupFeatureTable;
+	private DockableBinnerAnnotationDetailsPanel binnerAnnotationDetailsPanel;
 	private IDSetupDialog idSetupDialog;
 	private JFileChooser chooser;
 	private File baseDirectory;
@@ -413,6 +416,8 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 				"IdTrackerDockableLookupFeatureTable",
 				"Lookup feature list",
 				this, this);
+		
+		binnerAnnotationDetailsPanel = new DockableBinnerAnnotationDetailsPanel();
 
 		grid.add(0, 0, 80, 30, msOneFeatureTable, msTwoFeatureTable, 
 				msmsFeatureClusterTreePanel, lookupFeatureTable);
@@ -426,7 +431,8 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 				msmsLibraryEntryPropertiesTable, 
 				pepSearchParameterListingPanel, 
 				featureAnnotationPanel, followupStepTable,
-				standardFeatureAnnotationTable);
+				standardFeatureAnnotationTable,
+				binnerAnnotationDetailsPanel);
 
 //		grid.select(0, 50, 50, 50, narrativeDataPanel);
 		grid.select(50, 50, 50, 50, msOnePlot);
@@ -3928,6 +3934,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		followupStepTable.clearTable();
 		standardFeatureAnnotationTable.clearTable();
 		chromatogramPanel.clearPanel();
+		binnerAnnotationDetailsPanel.clearPanel();
 	}
 	
 	private void clearIdentityData() {
@@ -4366,7 +4373,6 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			msTwoFeatureTable.getTable().
 				getSelectionModel().addListSelectionListener(this);
 			
-			showMultipleFeatureChromatograms(cluster.getComponents());
 			
 			referenceMolStructurePanel.clearPanel();		
 			if(cluster.getLookupFeature() != null && cluster.getLookupFeature().getSmiles() != null)
@@ -4374,6 +4380,12 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			
 			if(cluster.getComponents().size() > 0)
 				msTwoFeatureTable.getTable().setRowSelectionInterval(0, 0);
+			
+			if(cluster instanceof BinnerBasedMsFeatureInfoBundleCluster)
+				binnerAnnotationDetailsPanel.setTableModelFromBinnerAnnotationCluster(
+						(BinnerBasedMsFeatureInfoBundleCluster)cluster);
+			
+			showMultipleFeatureChromatograms(cluster.getComponents());
 		}
 		if (tree.getClickedObject() instanceof MSFeatureInfoBundle) {
 			

@@ -21,19 +21,15 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.idworks.binner;
 
-import java.util.Collection;
-
 import javax.swing.ListSelectionModel;
 import javax.swing.table.TableRowSorter;
 
-import edu.umich.med.mrc2.datoolbox.data.compare.ChromatographicColumnComparator;
-import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
-import edu.umich.med.mrc2.datoolbox.data.format.ChromatographicColumnFormat;
-import edu.umich.med.mrc2.datoolbox.data.lims.LIMSChromatographicColumn;
+import edu.umich.med.mrc2.datoolbox.data.BinnerAnnotation;
+import edu.umich.med.mrc2.datoolbox.data.msclust.BinnerBasedMsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.AutoChoices;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.TableFilterHeader;
-import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.ChromatographicColumnRenderer;
+import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.RadioButtonRenderer;
 
 public class BinnerAnnotationDetailsTable extends BasicTable {
 
@@ -49,38 +45,42 @@ public class BinnerAnnotationDetailsTable extends BasicTable {
 		setModel(model);
 		rowSorter = new TableRowSorter<BinnerAnnotationDetailsTableModel>(model);
 		setRowSorter(rowSorter);
-
 		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		setDefaultRenderer(LIMSChromatographicColumn.class, 
-				new ChromatographicColumnRenderer());
-
-		rowSorter.setComparator(
-				model.getColumnIndex(BinnerAnnotationDetailsTableModel.CHROM_COLUMN_COLUMN),
-				new ChromatographicColumnComparator(SortProperty.Name));
-
-		thf = new TableFilterHeader(this, AutoChoices.ENABLED);
-		thf.getParserModel().setFormat(LIMSChromatographicColumn.class,
-				new ChromatographicColumnFormat(SortProperty.Name));
-		thf.getParserModel().setComparator(LIMSChromatographicColumn.class,
-				new ChromatographicColumnComparator(SortProperty.Name));
 		
+		columnModel.getColumnById(BinnerAnnotationDetailsTableModel.PRIMARY_COLUMN)
+			.setCellRenderer(new RadioButtonRenderer());
+		columnModel.getColumnById(BinnerAnnotationDetailsTableModel.RT_COLUMN)
+			.setCellRenderer(rtRenderer);
+		columnModel.getColumnById(BinnerAnnotationDetailsTableModel.MZ_COLUMN)
+			.setCellRenderer(mzRenderer);
+		columnModel.getColumnById(BinnerAnnotationDetailsTableModel.MASS_ERROR_COLUMN)
+			.setCellRenderer(mzRenderer);
+		columnModel.getColumnById(BinnerAnnotationDetailsTableModel.RMD_COLUMN)
+			.setCellRenderer(ppmRenderer);
+		
+		setExactColumnWidth(BinnerAnnotationDetailsTableModel.PRIMARY_COLUMN, 50);
+		setExactColumnWidth(BinnerAnnotationDetailsTableModel.DETECTED_COLUMN, 50);
+		
+		thf = new TableFilterHeader(this, AutoChoices.ENABLED);
+		addTablePopupMenu(new BinnerAnnotationDetailsTablePopupMenu(this, this));
 		finalizeLayout();		
 	}
 
-	public void setTableModelFromColumns(Collection<LIMSChromatographicColumn>columns) {
+	public void setTableModelFromBinnerAnnotationCluster(
+			BinnerBasedMsFeatureInfoBundleCluster baCluster) {
 		thf.setTable(null);
-		model.setTableModelFromColumns(columns);
+		model.setTableModelFromBinnerAnnotationCluster(baCluster);
 		thf.setTable(this);
 		tca.adjustColumns();
 	}
 
-	public LIMSChromatographicColumn getSelectedChromatographicColumn() {
+	public BinnerAnnotation getSelectedBinnerAnnotation() {
 
 		int row = getSelectedRow();
 		if(row == -1)
 			return null;
 
-		return (LIMSChromatographicColumn)model.getValueAt(convertRowIndexToModel(row),
-				model.getColumnIndex(BinnerAnnotationDetailsTableModel.CHROM_COLUMN_COLUMN));
+		return (BinnerAnnotation)model.getValueAt(convertRowIndexToModel(row),
+				model.getColumnIndex(BinnerAnnotationDetailsTableModel.ANNOTATION_COLUMN));
 	}
 }

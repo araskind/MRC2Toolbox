@@ -27,6 +27,8 @@ import javax.swing.Icon;
 import javax.swing.JScrollPane;
 
 import bibliothek.gui.dock.common.DefaultSingleCDockable;
+import edu.umich.med.mrc2.datoolbox.data.BinnerAnnotation;
+import edu.umich.med.mrc2.datoolbox.data.msclust.BinnerBasedMsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 
 public class DockableBinnerAnnotationDetailsPanel extends DefaultSingleCDockable {
@@ -46,6 +48,19 @@ public class DockableBinnerAnnotationDetailsPanel extends DefaultSingleCDockable
 		binnerAnnotationDetailsTable = new BinnerAnnotationDetailsTable();
 		JScrollPane designScrollPane = new JScrollPane(binnerAnnotationDetailsTable);
 		getContentPane().add(designScrollPane, BorderLayout.CENTER);
+	}
+	
+	public void clearPanel() {
+		binnerAnnotationDetailsTable.clearTable();
+	}
+	
+	public void setTableModelFromBinnerAnnotationCluster(
+			BinnerBasedMsFeatureInfoBundleCluster baCluster) {
+		binnerAnnotationDetailsTable.setTableModelFromBinnerAnnotationCluster(baCluster);
+	}
+
+	public BinnerAnnotation getSelectedBinnerAnnotation() {
+		return binnerAnnotationDetailsTable.getSelectedBinnerAnnotation();
 	}
 }
 

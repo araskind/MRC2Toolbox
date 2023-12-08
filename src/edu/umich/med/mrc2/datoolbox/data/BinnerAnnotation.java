@@ -41,12 +41,12 @@ public class BinnerAnnotation implements Serializable, Comparable<BinnerAnnotati
 	private String featureName;
 	private String annotation;
 	
+	private String chargeCarrier;
 	private String additionalGroupAnnotations;
 	private String furtherAnnotations;
 	private String derivations;
 	private String isotopes;
-	private String additionalIsotopes;
-	private String chargeCarrier;
+	private String additionalIsotopes;	
 	private String additionalAdducts;
 	
 	private int molIonNumber;
@@ -100,6 +100,10 @@ public class BinnerAnnotation implements Serializable, Comparable<BinnerAnnotati
 
 	public String getIsotopes() {
 		return isotopes;
+	}
+	
+	public String getCleanIsotopes() {
+		return replaceMolIonNumber(isotopes);
 	}
 
 	public double getMassError() {
@@ -222,6 +226,10 @@ public class BinnerAnnotation implements Serializable, Comparable<BinnerAnnotati
 	public String getAdditionalIsotopes() {
 		return additionalIsotopes;
 	}
+	
+	public String getCleanAdditionalIsotopes() {
+		return replaceMolIonNumber(additionalIsotopes);
+	}
 
 	public void setFurtherAnnotations(String extraAnnotations) {
 		this.furtherAnnotations = extraAnnotations;
@@ -252,6 +260,9 @@ public class BinnerAnnotation implements Serializable, Comparable<BinnerAnnotati
 	}
 	
 	private String replaceMolIonNumber(String input) {
+		
+		if(input == null)
+			return null;
 		
 		String moinum = Integer.toString(molIonNumber);
 		return input.replaceAll(moinum, "");

@@ -22,12 +22,11 @@
 package edu.umich.med.mrc2.datoolbox.gui.idworks.binner;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
-import edu.umich.med.mrc2.datoolbox.data.lims.ChromatographicSeparationType;
-import edu.umich.med.mrc2.datoolbox.data.lims.LIMSChromatographicColumn;
-import edu.umich.med.mrc2.datoolbox.data.lims.Manufacturer;
+import edu.umich.med.mrc2.datoolbox.data.BinnerAnnotation;
+import edu.umich.med.mrc2.datoolbox.data.BinnerAnnotationCluster;
+import edu.umich.med.mrc2.datoolbox.data.msclust.BinnerBasedMsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTableModel;
 import edu.umich.med.mrc2.datoolbox.gui.tables.ColumnContext;
 
@@ -38,39 +37,68 @@ public class BinnerAnnotationDetailsTableModel extends BasicTableModel {
 	 */
 	private static final long serialVersionUID = 5386419982114129215L;
 
-	public static final String CHROM_COLUMN_ID_COLUMN = "Column ID";
-	public static final String CHROM_COLUMN_COLUMN = "Name";
-	public static final String SEPARATION_TYPE_COLUMN = "Separation type";
-	public static final String CHEMISTRY_COLUMN = "Chemistry";
-	public static final String MANUFACTURER_COLUMN = "Manufacturer";
-	public static final String CATALOG_NUMBER_COLUMN = "Catalog #";
-
+	public static final String PRIMARY_COLUMN = "Primary";
+	public static final String DETECTED_COLUMN = "Found";
+	public static final String ANNOTATION_COLUMN = "Annotation";
+	public static final String CHARGE_CARRIER_COLUMN = "Charge carrier";
+	public static final String MZ_COLUMN = "Binner M/Z";
+	public static final String RT_COLUMN = "Binner RT";
+	public static final String MASS_ERROR_COLUMN = "Mass error";
+	public static final String RMD_COLUMN = "RMD";
+	public static final String ADDITIONAL_GROUP_ANNOTATIONS_COLUMN = "Addl group annot";
+	public static final String FURTHER_ANNOTATIONS_COLUMN = "Further annotations";
+	public static final String DERIVATIONS_COLUMN = "Derivations";
+	public static final String ISOTOPES_COLUMN = "Isotopes";
+	public static final String ADDITIONAL_ISOTOPES_COLUMN = "Addl isotopes";
+	public static final String ADDITIONAL_ADDUCTS_COLUMN = "Addl adducts";
+	
 	public BinnerAnnotationDetailsTableModel() {
 
 		super();
 		columnArray = new ColumnContext[] {
-			new ColumnContext(CHROM_COLUMN_ID_COLUMN, CHROM_COLUMN_ID_COLUMN, String.class, false),
-			new ColumnContext(CHROM_COLUMN_COLUMN, "Column name", LIMSChromatographicColumn.class, false),
-			new ColumnContext(SEPARATION_TYPE_COLUMN, SEPARATION_TYPE_COLUMN, ChromatographicSeparationType.class, false),
-			new ColumnContext(CHEMISTRY_COLUMN, "Column chemistry", String.class, false),
-			new ColumnContext(MANUFACTURER_COLUMN, MANUFACTURER_COLUMN, Manufacturer.class, false),
-			new ColumnContext(CATALOG_NUMBER_COLUMN, CATALOG_NUMBER_COLUMN, String.class, false),
+			new ColumnContext(PRIMARY_COLUMN, PRIMARY_COLUMN, Boolean.class, false),
+			new ColumnContext(DETECTED_COLUMN, DETECTED_COLUMN, Boolean.class, false),
+			new ColumnContext(ANNOTATION_COLUMN, ANNOTATION_COLUMN, BinnerAnnotation.class, false),
+			new ColumnContext(CHARGE_CARRIER_COLUMN, CHARGE_CARRIER_COLUMN, String.class, false),
+			new ColumnContext(MZ_COLUMN, MZ_COLUMN, Double.class, false),
+			new ColumnContext(RT_COLUMN, RT_COLUMN, Double.class, false),
+			new ColumnContext(MASS_ERROR_COLUMN, MASS_ERROR_COLUMN, Double.class, false),
+			new ColumnContext(RMD_COLUMN, RMD_COLUMN, Double.class, false),			
+			new ColumnContext(ADDITIONAL_GROUP_ANNOTATIONS_COLUMN, "Additional group annotations", String.class, false),
+			new ColumnContext(FURTHER_ANNOTATIONS_COLUMN, FURTHER_ANNOTATIONS_COLUMN, String.class, false),
+			new ColumnContext(DERIVATIONS_COLUMN, DERIVATIONS_COLUMN, String.class, false),
+			new ColumnContext(ISOTOPES_COLUMN, ISOTOPES_COLUMN, String.class, false),
+			new ColumnContext(ADDITIONAL_ISOTOPES_COLUMN, "Additional isotopes", String.class, false),
+			new ColumnContext(ADDITIONAL_ADDUCTS_COLUMN, "Additional adducts", String.class, false),
 		};
 	}
 
-	public void setTableModelFromColumns(Collection<LIMSChromatographicColumn>columns) {
+	public void setTableModelFromBinnerAnnotationCluster(
+			BinnerBasedMsFeatureInfoBundleCluster baCluster) {
 
 		setRowCount(0);
+		BinnerAnnotationCluster bac = baCluster.getBinnerAnnotationCluster();
+		if(bac == null)
+			return;
+		
 		List<Object[]>rowData = new ArrayList<Object[]>();
-		for (LIMSChromatographicColumn column : columns) {
+		for (BinnerAnnotation ba : bac.getAnnotations()) {
 
 			Object[] obj = {
-				column.getColumnId(),
-				column,
-				column.getSeparationType(),
-				column.getChemistry(),
-				column.getManufacturer(),
-				column.getCatalogNumber(),
+					ba.equals(bac.getPrimaryFeatureAnnotation()),
+					baCluster.getComponentMap().get(ba).size() > 0,
+					ba,
+					ba.getChargeCarrier(),
+					ba.getBinnerMz(),
+					ba.getBinnerRt(),
+					ba.getMassError(),
+					ba.getRmd(),
+					ba.getCleanAdditionalGroupAnnotations(),
+					ba.getCleanFurtherAnnotations(),
+					ba.getCleanDerivations(),
+					ba.getCleanIsotopes(),
+					ba.getCleanAdditionalIsotopes(),
+					ba.getCleanAdditionalAdducts()
 			};
 			rowData.add(obj);
 		}
