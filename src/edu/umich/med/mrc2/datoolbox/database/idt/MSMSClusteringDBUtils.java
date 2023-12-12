@@ -188,7 +188,14 @@ public class MSMSClusteringDBUtils {
 					createdBy, 
 					new Date(rs.getTimestamp("DATE_CREATED").getTime()),
 					new Date(rs.getTimestamp("LAST_MODIFIED").getTime()));
-			
+
+			String dstString = rs.getString("DATA_SET_TYPE");
+			if(dstString != null && !dstString.isEmpty()) {
+				
+				MSMSClusterDataSetType dst = MSMSClusterDataSetType.valueOf(dstString);
+				ds.setDataSetType(dst);
+				ds.getDataSetType();
+			}			
 			MSMSClusteringParameterSet parSet = 
 					MSMSClusterDataSetManager.getMsmsClusteringParameterSetById(
 							rs.getString("PAR_SET_ID"));
@@ -205,13 +212,7 @@ public class MSMSClusteringDBUtils {
 				BinnerAnnotationLookupDataSet balds = 
 						BinnerAnnotationDataSetManager.getBinnerAnnotationLookupDataSetById(baldsId);
 				ds.setBinnerAnnotationDataSet(balds);
-			}
-			String dstString = rs.getString("DATA_SET_TYPE");
-			if(dstString != null && !dstString.isEmpty()) {
-				MSMSClusterDataSetType dst = MSMSClusterDataSetType.valueOf(dstString);
-				ds.setDataSetType(dst);
-				ds.getDataSetType();
-			}
+			}			
 			Set<String>clusterIds = new TreeSet<String>();
 			csidPs.setString(1, ds.getId());
 			ResultSet csidrs = csidPs.executeQuery();
@@ -588,6 +589,9 @@ public class MSMSClusteringDBUtils {
 				balds = dataSet.getBinnerAnnotationDataSet();
 				BinnerUtils.addBinnerAnnotationLookupDataSet(balds, conn);				
 				BinnerAnnotationDataSetManager.getBinnerAnnotationLookupDataSetList().add(balds);
+				ps.setString(9, balds.getId());
+			}
+			else {
 				ps.setString(9, balds.getId());
 			}
 		} 

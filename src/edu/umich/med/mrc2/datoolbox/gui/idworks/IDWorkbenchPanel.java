@@ -1127,18 +1127,22 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 					StringUtils.join(errors, "\n"), msmsClusterDataSetEditorDialog);
 			return;
 		}	
-		MSMSClusterDataSet dataSet = new MSMSClusterDataSet(
-			msmsClusterDataSetEditorDialog.getMSMSClusterDataSetName(), 
-			msmsClusterDataSetEditorDialog.getMSMSClusterDataSetDescription(), 
-			MRC2ToolBoxCore.getIdTrackerUser());
-		dataSet.setParameters(
-				msmsClusterDataSetEditorDialog.getMsmsExtractionParameters());
-		if(msmsClusterDataSetEditorDialog.getClustersToAdd() != null)
-			dataSet.getClusters().addAll(msmsClusterDataSetEditorDialog.getClustersToAdd());
-		
-		dataSet.setFeatureLookupDataSet(
-				msmsClusterDataSetEditorDialog.getFeatureLookupDataSet());
-		
+		IMSMSClusterDataSet dataSet = msmsClusterDataSetEditorDialog.getMSMSClusterDataSet();
+		if(dataSet == null) {
+			
+			dataSet = new MSMSClusterDataSet(
+					msmsClusterDataSetEditorDialog.getMSMSClusterDataSetName(), 
+					msmsClusterDataSetEditorDialog.getMSMSClusterDataSetDescription(), 
+					MRC2ToolBoxCore.getIdTrackerUser());
+			
+//			dataSet.setParameters(
+//					msmsClusterDataSetEditorDialog.getMsmsExtractionParameters());
+//			if(msmsClusterDataSetEditorDialog.getClustersToAdd() != null)
+//				dataSet.getClusters().addAll(msmsClusterDataSetEditorDialog.getClustersToAdd());
+//			
+//			dataSet.setFeatureLookupDataSet(
+//					msmsClusterDataSetEditorDialog.getFeatureLookupDataSet());
+		}
 		if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() == null) {
 			
 			MSMSClusterDataSetUploadTask task = 
@@ -1146,11 +1150,11 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			task.addTaskListener(this);
 			MRC2ToolBoxCore.getTaskController().addTask(task);
 		}
-//		else {
-//			MRC2ToolBoxCore.getActiveRawDataAnalysisProject().
-//				getMsmsClusterDataSets().add(dataSet);
-//			loadMSMSClusterDataSetInGUI(dataSet);
-//		}
+		else {
+			MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment().
+				getMsmsClusterDataSets().add(dataSet);
+			loadMSMSClusterDataSetInGUI(dataSet);
+		}
 		msmsClusterDataSetEditorDialog.dispose();		
 	}
 
@@ -1166,7 +1170,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 					this.getContentPane());
 			return;
 		}
-//		if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() == null) {
+		if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() == null) {
 			
 			if(MSMSClusterDataSetManager.getMSMSClusterDataSetById(activeMSMSClusterDataSet.getId()) != null){
 				
@@ -1175,37 +1179,40 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 						"\" is already uploaded to the database", this.getContentPane());
 				return;
 			}	
-//		}
-//		else {
-//			MSMSClusterDataSet existingSameNameSet = 
-//					MRC2ToolBoxCore.getActiveRawDataAnalysisProject().
-//							getMsmsClusterDataSets().stream().
-//							filter(s -> s.getName().equals(activeMSMSClusterDataSet.getName())).
-//							findFirst().orElse(null);
-//			if(existingSameNameSet != null) {
-//				
-//				if(activeMSMSClusterDataSet.equals(existingSameNameSet)) {
-//					
-//					MessageDialog.showWarningMsg(
-//							"Data set \"" + activeMSMSClusterDataSet.getName() + 
-//							"\" already exists in the experiment", this.getContentPane());
-//					return;
-//				}
-//				else {
-//					MessageDialog.showErrorMsg(
-//							"A different data set \"" + existingSameNameSet.getName() + 
-//							"\" already exists in the experiment", this.getContentPane());
-//					return;
-//				}				
-//			}
-//		}
+		}
+		else {
+			IMSMSClusterDataSet existingSameNameSet = 
+					MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment().
+							getMsmsClusterDataSets().stream().
+							filter(s -> s.getName().equals(activeMSMSClusterDataSet.getName())).
+							findFirst().orElse(null);
+			if(existingSameNameSet != null) {
+				
+				if(activeMSMSClusterDataSet.equals(existingSameNameSet)) {
+					
+					MessageDialog.showWarningMsg(
+							"Data set \"" + activeMSMSClusterDataSet.getName() + 
+							"\" already exists in the experiment", this.getContentPane());
+					return;
+				}
+				else {
+					MessageDialog.showErrorMsg(
+							"A different data set \"" + existingSameNameSet.getName() + 
+							"\" already exists in the experiment", this.getContentPane());
+					return;
+				}				
+			}
+		}
 		msmsClusterDataSetEditorDialog = 
 				new MSMSClusterDataSetEditorDialog(
-						null, activeMSMSClusterDataSet.getClusters(), this);
-		msmsClusterDataSetEditorDialog.setMSMSClusterDataSetName(activeMSMSClusterDataSet.getName());
-		msmsClusterDataSetEditorDialog.setMSMSClusterDataSetDescription(activeMSMSClusterDataSet.getDescription());
-		msmsClusterDataSetEditorDialog.setMsmsExtractionParameters(activeMSMSClusterDataSet.getParameters());
-		msmsClusterDataSetEditorDialog.setFeatureLookupDataSet(activeMSMSClusterDataSet.getFeatureLookupDataSet());
+						activeMSMSClusterDataSet, 
+						//	activeMSMSClusterDataSet.getClusters(), 
+						MainActionCommands.ADD_MSMS_CLUSTER_DATASET_COMMAND,
+						this);
+//		msmsClusterDataSetEditorDialog.setMSMSClusterDataSetName(activeMSMSClusterDataSet.getName());
+//		msmsClusterDataSetEditorDialog.setMSMSClusterDataSetDescription(activeMSMSClusterDataSet.getDescription());
+//		msmsClusterDataSetEditorDialog.setMsmsExtractionParameters(activeMSMSClusterDataSet.getParameters());
+//		msmsClusterDataSetEditorDialog.setFeatureLookupDataSet(activeMSMSClusterDataSet.getFeatureLookupDataSet());
 		msmsClusterDataSetEditorDialog.setLocationRelativeTo(this.getContentPane());
 		msmsClusterDataSetEditorDialog.setVisible(true);
 	}

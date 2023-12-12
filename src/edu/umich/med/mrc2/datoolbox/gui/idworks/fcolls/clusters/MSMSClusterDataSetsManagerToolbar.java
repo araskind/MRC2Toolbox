@@ -53,10 +53,10 @@ public class MSMSClusterDataSetsManagerToolbar extends CommonToolbar {
 	public MSMSClusterDataSetsManagerToolbar(ActionListener commandListener) {
 		super(commandListener);
 
-		addFeatureCollectionButton = GuiUtils.addButton(this, null, addFeatureCollectionIcon, commandListener,
-				MainActionCommands.ADD_MSMS_CLUSTER_DATASET_DIALOG_COMMAND.getName(),
-				MainActionCommands.ADD_MSMS_CLUSTER_DATASET_DIALOG_COMMAND.getName(),
-				buttonDimension);
+//		addFeatureCollectionButton = GuiUtils.addButton(this, null, addFeatureCollectionIcon, commandListener,
+//				MainActionCommands.ADD_MSMS_CLUSTER_DATASET_DIALOG_COMMAND.getName(),
+//				MainActionCommands.ADD_MSMS_CLUSTER_DATASET_DIALOG_COMMAND.getName(),
+//				buttonDimension);
 
 		editFeatureCollectionButton = GuiUtils.addButton(this, null, editFeatureCollectionIcon, commandListener,
 				MainActionCommands.EDIT_MSMS_CLUSTER_DATASET_DIALOG_COMMAND.getName(),

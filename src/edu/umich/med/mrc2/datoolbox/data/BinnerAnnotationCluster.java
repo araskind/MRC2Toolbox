@@ -325,7 +325,7 @@ public class BinnerAnnotationCluster {
 	}
 	
 	public String toString() {
-		return primaryFeatureAnnotation.getNameWithAnnotation();
+		return getPrimaryFeatureAnnotation().getNameWithAnnotation();
 	}
 	
 	public String getAllAnnotationsAsString() {

@@ -49,7 +49,7 @@ import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 
 public class DockableBinnerAnnotationDataSetManager extends DefaultSingleCDockable implements ActionListener {
 
-	private static final Icon componentIcon = GuiUtils.getIcon("editCollection", 16);
+	private static final Icon componentIcon = GuiUtils.getIcon("bin", 16);
 	
 	private BinnerAnnotationDataSetManagerToolbar toolbar;
 	private BinnerAnnotationLookupDataSetListTable binnerAnnotationLookupDataSetListTable;

@@ -42,12 +42,14 @@ public class MSMSClusterDataSetsTablePopupMenu extends JPopupMenu {
 	private static final Icon deleteFeatureCollectionIcon = GuiUtils.getIcon("deleteCollection", 24);
 	private static final Icon loadFeatureCollectionIcon = GuiUtils.getIcon("openCollection", 24);
 	private static final Icon showLookupFeatureListIcon = GuiUtils.getIcon("searchLibrary", 24);
+	private static final Icon showBinnerAnnotationsIcon = GuiUtils.getIcon("bin", 24);
 
 	private JMenuItem addFeatureCollectionMenuItem;
 	private JMenuItem editFeatureCollectionMenuItem;
 	private JMenuItem deleteFeatureCollectionMenuItem;
 	private JMenuItem loadFeatureCollectionMenuItem;
 	private JMenuItem showLookupFeaturesCollectionMenuItem;
+	private JMenuItem showBinnerAnnotationsMenuItem;
 
 	public MSMSClusterDataSetsTablePopupMenu(ActionListener listener) {
 
@@ -80,6 +82,12 @@ public class MSMSClusterDataSetsTablePopupMenu extends JPopupMenu {
 				MainActionCommands.SHOW_LOOKUP_FEATURE_LIST_FOR_CLUSTER_DATA_SET_COMMAND.getName(), listener,
 				MainActionCommands.SHOW_LOOKUP_FEATURE_LIST_FOR_CLUSTER_DATA_SET_COMMAND.getName());
 		showLookupFeaturesCollectionMenuItem.setIcon(showLookupFeatureListIcon);
+		
+		showBinnerAnnotationsMenuItem = GuiUtils.addMenuItem(this,
+				MainActionCommands.SHOW_BINNER_ANNOTATION_SET_FOR_CLUSTER_DATA_SET_COMMAND.getName(), listener,
+				MainActionCommands.SHOW_BINNER_ANNOTATION_SET_FOR_CLUSTER_DATA_SET_COMMAND.getName());
+		showBinnerAnnotationsMenuItem.setIcon(showBinnerAnnotationsIcon);
+		
 
 	}
 }

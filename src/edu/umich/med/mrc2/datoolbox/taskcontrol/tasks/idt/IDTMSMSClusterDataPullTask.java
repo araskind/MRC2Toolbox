@@ -269,7 +269,7 @@ public class IDTMSMSClusterDataPullTask extends IDTMSMSFeatureDataPullTask {
 				processed++;
 			}
 		}
-		if(dataSet.getDataSetType().equals(MSMSClusterDataSetType.FEATURE_BASED)) {
+		if(dataSet.getDataSetType().equals(MSMSClusterDataSetType.BINNER_ANNOTATION_BASED)) {
 			
 			while(rs.next()) {
 				
@@ -279,6 +279,7 @@ public class IDTMSMSClusterDataPullTask extends IDTMSMSFeatureDataPullTask {
 					IMsFeatureInfoBundleCluster cluster = 
 							new BinnerBasedMsFeatureInfoBundleCluster(
 									balds.getBinnerAnnotationClusterById(bacId));
+					cluster.setId(rs.getString("CLUSTER_ID"));
 					
 					if(rs.getString("MSMS_LIB_MATCH_ID") != null)
 						defaultClusterMSMSLibMatchesMap.put(

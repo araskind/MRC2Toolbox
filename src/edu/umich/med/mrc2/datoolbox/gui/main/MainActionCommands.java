@@ -1251,6 +1251,7 @@ public enum MainActionCommands {
 	LOAD_MSMS_CLUSTER_DATASET_COMMAND("Load selected MSMS cluster data set for analysis"),
 	REFRESH_FEATURE_AND_CLUSTER_COLLECTIONS_COMMAND("Refresh feature and MSMS cluster collection data"),
 	SHOW_LOOKUP_FEATURE_LIST_FOR_CLUSTER_DATA_SET_COMMAND("Show lookup feature list for MSMS cluster data set"),
+	SHOW_BINNER_ANNOTATION_SET_FOR_CLUSTER_DATA_SET_COMMAND("Show binner annotation set for MSMS cluster data set"),
 	
 	//	Chromatogram smoothing 
 	SMOOTH_CHROMATOGRAM_COMMAND("Smooth chromatogram"),

@@ -613,9 +613,9 @@ public class BinnerUtils {
 				ba.setMolIonNumber(baRs.getInt("MOL_ION_NUMBER"));
 				ba.setBinnerMz(baRs.getDouble("BINNER_MZ"));
 				ba.setBinnerRt(baRs.getDouble("BINNER_RT"));
-				if(baRs.getString("IS_PRIMARY") != null)
+				if(baRs.getString("IS_PRIMARY") != null) 
 					ba.setPrimary(true);
-				
+
 				ba.setAdditionalGroupAnnotations(baRs.getString("ADDITIONAL_GROUP_ANNOTATIONS"));
 				ba.setFurtherAnnotations(baRs.getString("FURTHER_ANNOTATIONS"));
 				ba.setDerivations(baRs.getString("DERIVATIONS"));

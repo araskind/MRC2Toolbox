@@ -57,7 +57,6 @@ import javax.swing.border.LineBorder;
 
 import edu.umich.med.mrc2.datoolbox.data.msclust.FeatureLookupDataSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.IMSMSClusterDataSet;
-import edu.umich.med.mrc2.datoolbox.data.msclust.IMsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusteringParameterSet;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
@@ -77,7 +76,7 @@ public class MSMSClusterDataSetEditorDialog extends JDialog {
 	
 	private IMSMSClusterDataSet dataSet;
 	private MSMSClusteringParameterSet msmsExtractionParameters;
-	private Collection<IMsFeatureInfoBundleCluster> clustersToAdd;
+//		private Collection<IMsFeatureInfoBundleCluster> clustersToAdd;
 	private FeatureLookupDataSet featureLookupDataSet;
 	
 	private JButton btnSave;
@@ -87,10 +86,12 @@ public class MSMSClusterDataSetEditorDialog extends JDialog {
 	private JLabel idValueLabel;
 	private JLabel ownerLabel;
 	private JCheckBox loadMSMSClusterDataSetCheckBox;
+	private MainActionCommands dataSetAction;
 	
 	public MSMSClusterDataSetEditorDialog(
 			IMSMSClusterDataSet dataSet, 
-			Collection<IMsFeatureInfoBundleCluster> clustersToAdd,
+//				Collection<IMsFeatureInfoBundleCluster> clustersToAdd,
+			MainActionCommands dataSetAction,
 			ActionListener actionListener) {
 		super();
 		setPreferredSize(new Dimension(700, 300));
@@ -99,7 +100,8 @@ public class MSMSClusterDataSetEditorDialog extends JDialog {
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		
 		this.dataSet = dataSet;
-		this.clustersToAdd = clustersToAdd;
+//		this.clustersToAdd = clustersToAdd;
+		this.dataSetAction = dataSetAction;
 		if(dataSet!= null)
 			this.msmsExtractionParameters = dataSet.getParameters();
 		
@@ -243,6 +245,7 @@ public class MSMSClusterDataSetEditorDialog extends JDialog {
 		btnCancel.addActionListener(al);
 
 		btnSave = new JButton("Save");
+		btnSave.setActionCommand(this.dataSetAction.getName());
 		btnSave.addActionListener(actionListener);
 		panel.add(btnSave);
 		JRootPane rootPane = SwingUtilities.getRootPane(btnSave);
@@ -254,40 +257,43 @@ public class MSMSClusterDataSetEditorDialog extends JDialog {
 
 	private void loadClusterDataSetParameters() {
 
-		if(dataSet == null) {
+		if(dataSet == null || dataSetAction.equals(MainActionCommands.ADD_MSMS_CLUSTER_DATASET_COMMAND)) {
 
 			setTitle("Save new MSMS cluster data set to database");
 			setIconImage(((ImageIcon) addFeatureCollectionIcon).getImage());
-			
-//			if(clustersToAdd == null) 
-				btnSave.setActionCommand(MainActionCommands.ADD_MSMS_CLUSTER_DATASET_COMMAND.getName());
-//			else 
-//				btnSave.setActionCommand(MainActionCommands.ADD_MSMS_CLUSTER_DATASET_WITH_CLUSTERS_COMMAND.getName());
-			
 			dateCreatedLabel.setText(MRC2ToolBoxConfiguration.getDateTimeFormat().format(new Date()));
 			lastModifiedLabel.setText(MRC2ToolBoxConfiguration.getDateTimeFormat().format(new Date()));			
 			ownerLabel.setText(MRC2ToolBoxCore.getIdTrackerUser().getInfo());
 		}
-		else {
+		if(dataSet != null && dataSetAction.equals(MainActionCommands.EDIT_MSMS_CLUSTER_DATASET_COMMAND)) {
+			
 			setTitle("Edit information for " + dataSet.getName());
 			setIconImage(((ImageIcon) editFeatureCollectionIcon).getImage());
-			btnSave.setActionCommand(MainActionCommands.EDIT_MSMS_CLUSTER_DATASET_COMMAND.getName());
+		}
+		if(dataSet != null) {
+			
 			idValueLabel.setText(dataSet.getId());
 
 			if (dataSet.getDateCreated() != null)
-				dateCreatedLabel.setText(MRC2ToolBoxConfiguration.getDateTimeFormat().format(
-						dataSet.getDateCreated()));
+				dateCreatedLabel.setText(MRC2ToolBoxConfiguration.getDateTimeFormat().format(dataSet.getDateCreated()));
+			else
+				dateCreatedLabel.setText(MRC2ToolBoxConfiguration.getDateTimeFormat().format(new Date()));
 
 			if (dataSet.getLastModified() != null)
-				lastModifiedLabel.setText(MRC2ToolBoxConfiguration.getDateTimeFormat().format(
-						dataSet.getLastModified()));
+				lastModifiedLabel.setText(MRC2ToolBoxConfiguration.getDateTimeFormat().format(dataSet.getLastModified()));
+			else
+				lastModifiedLabel.setText(MRC2ToolBoxConfiguration.getDateTimeFormat().format(new Date()));
 			
 			nameTextField.setText(dataSet.getName());
 			descriptionTextArea.setText(dataSet.getDescription());
 
 			if(dataSet.getCreatedBy() != null)
 				ownerLabel.setText(dataSet.getCreatedBy().getInfo());
+			else
+				ownerLabel.setText(MRC2ToolBoxCore.getIdTrackerUser().getInfo());
 		}
+
+		
 		pack();
 	}
 	
@@ -373,10 +379,10 @@ public class MSMSClusterDataSetEditorDialog extends JDialog {
 		descriptionTextArea.setText(description);
 	}	
 
-	public Collection<IMsFeatureInfoBundleCluster>getClustersToAdd() {
-		return clustersToAdd;
-	}
-	
+//	public Collection<IMsFeatureInfoBundleCluster>getClustersToAdd() {
+//		return clustersToAdd;
+//	}
+//	
 	public boolean loadMSMSClusterDataSetIntoWorkBench() {
 		return loadMSMSClusterDataSetCheckBox.isSelected();
 	}
