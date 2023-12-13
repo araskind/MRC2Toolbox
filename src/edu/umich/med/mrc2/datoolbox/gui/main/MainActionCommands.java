@@ -359,6 +359,8 @@ public enum MainActionCommands {
 	SHOW_FEATURE_FILTER_COMMAND("Show feature filter"),
 	SHOW_CLUSTERED_FEATURE_FILTER_COMMAND("Show clustered feature filter"),
 	FILTER_FEATURES_COMMAND("Filter features"),
+	SHOW_FEATURE_IDL_ANNOTATION_FILTER_COMMAND("Show feature ID level / annotation filter"),
+	FILTER_FEATURES_BY_IDL_ANNOTATION_COMMAND("Filter features by ID level / annotation"),
 	SHOW_FEATURE_SEARCH_BY_RT_ID_COMMAND("Search by RT/identity setup"),
 	SEARCH_FEATURES_BY_RT_ID_COMMAND("Search features by RT/identity"),
 	SHOW_MSMS_DATA_SET_STATISTICS_COMMAND("Show MSMS data set statistics"),

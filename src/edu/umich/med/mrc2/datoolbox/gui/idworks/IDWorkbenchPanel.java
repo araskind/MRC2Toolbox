@@ -150,6 +150,7 @@ import edu.umich.med.mrc2.datoolbox.gui.idworks.ms2.DockableMSMSFeatureTable;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.ms2.DockableMSMSLibraryEntryPropertiesTable;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.ms2.DockablePepSearchParameterListingPanel;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.ms2.MsMsFeaturePopupMenu;
+import edu.umich.med.mrc2.datoolbox.gui.idworks.ms2.filter.AnnotationFilterDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.ms2.filter.FilterTrackerMSMSFeaturesDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.ms2.filter.MSMSFilterParameters;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.ms2.rtid.MSMSFeatureRTIDSearchDialog;
@@ -311,6 +312,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 	private MajorClusterFeatureExtractionSetupDialog majorClusterFeatureExtractionSetupDialog;
 	private MzFrequencyAnalysisSetupDialog mzFrequencyAnalysisSetupDialog;
 	private ActiveDataSetBinnerAnnotationsSearchDialog activeDataSetBinnerAnnotationsSearchDialog;
+	private AnnotationFilterDialog annotationFilterDialog;
 	
 	private static final Icon searchIdTrackerIcon = GuiUtils.getIcon("searchDatabase", 24);
 	private static final Icon searchExperimentIcon = GuiUtils.getIcon("searchIdExperiment", 24);
@@ -802,6 +804,11 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			if(activeFeatureCollection != null && !activeFeatureCollection.getFeatures().isEmpty())
 				showFeatureFilter(activeFeatureCollection.getFeatures());
 		}
+		if (command.equals(MainActionCommands.SHOW_FEATURE_IDL_ANNOTATION_FILTER_COMMAND.getName())) {
+			
+			if(activeFeatureCollection != null && !activeFeatureCollection.getFeatures().isEmpty())
+				showIDLFeatureFilter(activeFeatureCollection.getFeatures());
+		}		
 		if (command.equals(MainActionCommands.SHOW_CLUSTERED_FEATURE_FILTER_COMMAND.getName())) {
 			
 			if(activeMSMSClusterDataSet != null && !activeMSMSClusterDataSet.getClusters().isEmpty())
@@ -809,6 +816,9 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		}	
 		if (command.equals(MainActionCommands.FILTER_FEATURES_COMMAND.getName()))
 			filterFeatureTable();
+		
+		if (command.equals(MainActionCommands.FILTER_FEATURES_BY_IDL_ANNOTATION_COMMAND.getName()))
+			filterFeatureTableByIDLAnnotations();
 		
 		if (command.equals(MainActionCommands.SHOW_FEATURE_SEARCH_BY_RT_ID_COMMAND.getName())) 
 			showFeatureRTIDSearchDialog();
@@ -1488,6 +1498,31 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 				"Filtering MSMS features ...", this.getContentPane(), task);
 		idp.setLocationRelativeTo(this.getContentPane());
 		idp.setVisible(true);
+	}
+		
+	private void showIDLFeatureFilter(Collection<MSFeatureInfoBundle>featuresToFilter) {
+		
+		if(featuresToFilter == null || featuresToFilter.isEmpty())
+			return;
+		
+		annotationFilterDialog = new AnnotationFilterDialog(this, featuresToFilter);
+		annotationFilterDialog.setLocationRelativeTo(this.getContentPane());
+		annotationFilterDialog.setVisible(true);
+	}
+	
+	private void filterFeatureTableByIDLAnnotations() {;
+	
+		Collection<String> errors = 
+				annotationFilterDialog.verifyParameters();
+		if(!errors.isEmpty()) {
+			MessageDialog.showErrorMsg(
+					StringUtils.join(errors, "\n"), annotationFilterDialog);
+			return;
+		}
+		
+		//	TODO
+		
+		annotationFilterDialog.dispose();
 	}
 	
 	class FilterMSMSFeaturesTask extends LongUpdateTask {

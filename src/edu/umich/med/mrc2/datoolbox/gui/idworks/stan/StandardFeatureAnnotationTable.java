@@ -89,7 +89,7 @@ public class StandardFeatureAnnotationTable extends BasicTable {
 		return selected;
 	}
 	
-	public void selectFollowupSteps(
+	public void selectStandardFeatureAnnotations(
 			Collection<StandardFeatureAnnotation>annotationList) {
 		
 		int col = model.getColumnIndex(StandardFeatureAnnotationTableModel.CODE_COLUMN);

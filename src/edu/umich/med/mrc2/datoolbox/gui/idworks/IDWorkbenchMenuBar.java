@@ -67,6 +67,7 @@ public class IDWorkbenchMenuBar extends CommonMenuBar {
 	private static final Icon fdrIcon = GuiUtils.getIcon("fdr", 24);	
 	private static final Icon reassignTopHitsIcon = GuiUtils.getIcon("recalculateScores", 24);
 	private static final Icon filterIcon = GuiUtils.getIcon("filter", 24);
+	private static final Icon filterIDLIcon = GuiUtils.getIcon("filterIdStatus", 24);
 	private static final Icon resetFilterIcon = GuiUtils.getIcon("resetFilter", 24);	
 	private static final Icon reloadIcon = GuiUtils.getIcon("rerun", 24);
 	private static final Icon reloadClusterSetFeaturesIcon = GuiUtils.getIcon("reloadClusterSetFeatures", 24);
@@ -100,6 +101,7 @@ public class IDWorkbenchMenuBar extends CommonMenuBar {
 		experimentSearchMenuItem,
 		findMSMSFeaturesMenuItem,
 		filterMSMSFeaturesMenuItem,
+		filterMSMSFeaturesByIDLMenuItem,
 		resetFeatureFiltersMenuItem,
 		reloadCompleteFeatureSetMenuItem,
 		clearWorkbenchMenuItem;
@@ -169,6 +171,10 @@ public class IDWorkbenchMenuBar extends CommonMenuBar {
 		filterMSMSFeaturesMenuItem = addItem(databaseSearchMenu, 
 				MainActionCommands.SHOW_FEATURE_FILTER_COMMAND, 
 				filterIcon);
+		
+		filterMSMSFeaturesByIDLMenuItem = addItem(databaseSearchMenu, 
+				MainActionCommands.SHOW_FEATURE_IDL_ANNOTATION_FILTER_COMMAND, 
+				filterIDLIcon);
 		
 //		findMSMSFeaturesMenuItem = addItem(databaseSearchMenu, 
 //				MainActionCommands.SHOW_FEATURE_SEARCH_BY_RT_ID_COMMAND, 

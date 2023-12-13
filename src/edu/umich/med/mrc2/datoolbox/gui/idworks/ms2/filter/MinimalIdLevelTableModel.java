@@ -19,7 +19,7 @@
  *
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.gui.idworks.idlevel;
+package edu.umich.med.mrc2.datoolbox.gui.idworks.ms2.filter;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -29,30 +29,24 @@ import edu.umich.med.mrc2.datoolbox.data.MSFeatureIdentificationLevel;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTableModel;
 import edu.umich.med.mrc2.datoolbox.gui.tables.ColumnContext;
 
-public class IdLevelTableModel extends BasicTableModel {
+public class MinimalIdLevelTableModel extends BasicTableModel {
 
 	/**
 	 *
 	 */
 	private static final long serialVersionUID = 3417856068405445036L;
 
-	public static final String LEVEL_ID_COLUMN = "ID";
-	public static final String LEVEL_COLUMN = "Name";
-	public static final String LEVEL_RANK_COLUMN = "Rank";
-	public static final String LEVEL_COLOR_CODE_COLUMN = "Color code";
-	public static final String SHORCUT_COLUMN = "Shortcut";
-	public static final String ALLOW_UPDATE_DEFAULT_ID_COLUMN = "Allow update default ID";
+	public static final String LEVEL_COLUMN = "Identification level";
+	public static final String LEVEL_COLOR_CODE_COLUMN = "Color";
 
-	public IdLevelTableModel() {
+	public MinimalIdLevelTableModel() {
 
 		super();
 		columnArray = new ColumnContext[] {
-			//	new ColumnContext(STATUS_ID_COLUMN, String.class, false),
-			new ColumnContext(LEVEL_COLUMN, "Identification level", MSFeatureIdentificationLevel.class, false),
-			new ColumnContext(LEVEL_RANK_COLUMN, LEVEL_RANK_COLUMN, Integer.class, false),
-			new ColumnContext(LEVEL_COLOR_CODE_COLUMN, LEVEL_COLOR_CODE_COLUMN, MSFeatureIdentificationLevel.class, false),
-			new ColumnContext(SHORCUT_COLUMN, SHORCUT_COLUMN, String.class, false),
-			new ColumnContext(ALLOW_UPDATE_DEFAULT_ID_COLUMN, ALLOW_UPDATE_DEFAULT_ID_COLUMN, Boolean.class, false),
+			new ColumnContext(LEVEL_COLOR_CODE_COLUMN, "Color code",
+					MSFeatureIdentificationLevel.class, false),
+			new ColumnContext(LEVEL_COLUMN, LEVEL_COLUMN, 
+					MSFeatureIdentificationLevel.class, false),			
 		};
 	}
 
@@ -67,12 +61,8 @@ public class IdLevelTableModel extends BasicTableModel {
 		for (MSFeatureIdentificationLevel level : levelList) {
 
 			Object[] obj = {
-
 				level,
-				level.getRank(),
 				level,
-				level.getShorcut(),
-				level.isAllowToReplaceAsDefault()
 			};
 			rowData.add(obj);
 		}

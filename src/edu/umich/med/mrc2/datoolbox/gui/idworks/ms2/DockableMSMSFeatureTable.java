@@ -44,11 +44,13 @@ public class DockableMSMSFeatureTable extends DefaultSingleCDockable {
 	private MSMSFeatureTable featureTable;
 	private static final Icon componentIcon = GuiUtils.getIcon("msTwo", 16);
 	private static final Icon filterIcon = GuiUtils.getIcon("filter", 16);
+	private static final Icon filterIDLIcon = GuiUtils.getIcon("filterIdStatus", 16);
 	private static final Icon filterClustersIcon = GuiUtils.getIcon("filterClusters", 16);	
 	private static final Icon reloadIcon = GuiUtils.getIcon("rerun", 16);
 	private static final Icon statsIcon = GuiUtils.getIcon("calcStats", 16);
 	private static final Icon clusteredStatsIcon = GuiUtils.getIcon("calcClusteredStats", 16);	
 	private static final Icon reloadClusterSetFeaturesIcon = GuiUtils.getIcon("reloadClusterSetFeatures", 16);
+	
 	
 	public DockableMSMSFeatureTable(DockableMRC2ToolboxPanel parentPanel) {
 
@@ -71,6 +73,12 @@ public class DockableMSMSFeatureTable extends DefaultSingleCDockable {
 				filterIcon, l);
 		actions.add(filterFeaturesButton);
 		
+		SimpleButtonAction filterFeaturesByIDLAnnotButton = GuiUtils.setupButtonAction(
+				MainActionCommands.SHOW_FEATURE_IDL_ANNOTATION_FILTER_COMMAND.getName(),
+				MainActionCommands.SHOW_FEATURE_IDL_ANNOTATION_FILTER_COMMAND.getName(), 
+				filterIDLIcon, l);
+		actions.add(filterFeaturesByIDLAnnotButton);
+				
 		SimpleButtonAction reloadFeaturesButton = GuiUtils.setupButtonAction(
 				MainActionCommands.RELOAD_ACTIVE_MSMS_FEATURES.getName(), 
 				MainActionCommands.RELOAD_ACTIVE_MSMS_FEATURES.getName(), 
