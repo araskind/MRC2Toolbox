@@ -1499,31 +1499,6 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		idp.setLocationRelativeTo(this.getContentPane());
 		idp.setVisible(true);
 	}
-		
-	private void showIDLFeatureFilter(Collection<MSFeatureInfoBundle>featuresToFilter) {
-		
-		if(featuresToFilter == null || featuresToFilter.isEmpty())
-			return;
-		
-		annotationFilterDialog = new AnnotationFilterDialog(this, featuresToFilter);
-		annotationFilterDialog.setLocationRelativeTo(this.getContentPane());
-		annotationFilterDialog.setVisible(true);
-	}
-	
-	private void filterFeatureTableByIDLAnnotations() {;
-	
-		Collection<String> errors = 
-				annotationFilterDialog.verifyParameters();
-		if(!errors.isEmpty()) {
-			MessageDialog.showErrorMsg(
-					StringUtils.join(errors, "\n"), annotationFilterDialog);
-			return;
-		}
-		
-		//	TODO
-		
-		annotationFilterDialog.dispose();
-	}
 	
 	class FilterMSMSFeaturesTask extends LongUpdateTask {
 
@@ -1545,6 +1520,56 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 							featuresToFilter, 
 							filterParameters);
 			safelyLoadMSMSFeatures(filtered);			
+			return null;
+		}
+	}
+		
+	private void showIDLFeatureFilter(Collection<MSFeatureInfoBundle>featuresToFilter) {
+		
+		if(featuresToFilter == null || featuresToFilter.isEmpty())
+			return;
+		
+		annotationFilterDialog = new AnnotationFilterDialog(this, featuresToFilter);
+		annotationFilterDialog.setLocationRelativeTo(this.getContentPane());
+		annotationFilterDialog.setVisible(true);
+	}
+	
+	private void filterFeatureTableByIDLAnnotations() {;
+	
+		Collection<String> errors = 
+				annotationFilterDialog.verifyParameters();
+		if(!errors.isEmpty()) {
+			MessageDialog.showErrorMsg(
+					StringUtils.join(errors, "\n"), annotationFilterDialog);
+			return;
+		}		
+		FilterByIDLAnnotationMSMSFeaturesTask task = 
+				new FilterByIDLAnnotationMSMSFeaturesTask(annotationFilterDialog.getFeaturesToFilter());
+		idp = new IndeterminateProgressDialog(
+				"Filtering MSMS features by ID levels / annotations...", this.getContentPane(), task);
+		idp.setLocationRelativeTo(this.getContentPane());
+		idp.setVisible(true);
+	}
+	
+	class FilterByIDLAnnotationMSMSFeaturesTask extends LongUpdateTask {
+
+		private Collection<MSFeatureInfoBundle>featuresToFilter;
+		
+		public FilterByIDLAnnotationMSMSFeaturesTask(Collection<MSFeatureInfoBundle>featuresToFilter) {
+			this.featuresToFilter = featuresToFilter;
+		}
+
+		@Override
+		public Void doInBackground() {
+
+			//	TODO
+			annotationFilterDialog.dispose();
+
+//			Collection<MSFeatureInfoBundle>filtered = 
+//					MsFeatureStatsUtils.filterMSMSFeatureTable(
+//							featuresToFilter, 
+//							filterParameters);
+//			safelyLoadMSMSFeatures(filtered);			
 			return null;
 		}
 	}

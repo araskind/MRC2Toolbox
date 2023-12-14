@@ -439,7 +439,11 @@ public class AnnotationFilterDialog extends JDialog implements BackedByPreferenc
 			errors.add("No values selected to filter the data.");
 		
 		return errors;
-	}	
+	}
+
+	public Collection<MSFeatureInfoBundle> getFeaturesToFilter() {
+		return featuresToFilter;
+	}
 }
 
 
