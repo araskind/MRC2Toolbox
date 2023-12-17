@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jdom2.Element;
 
@@ -391,4 +392,31 @@ public class MSFeatureInfoBundle implements Serializable {
 	public void setHasChromatogram(boolean hasChromatogram) {
 		this.hasChromatogram = hasChromatogram;
 	}
+	
+	public boolean hasAnyOfSpecifiedStandardAnnotations(
+			Collection<StandardFeatureAnnotation> lookupAnnotations) {
+		
+		if(standadAnnotations == null || standadAnnotations.isEmpty())
+			return false;
+		
+		return CollectionUtils.containsAny(lookupAnnotations, standadAnnotations);
+	}
+	
+	public boolean hasAnyOfSpecifiedFollowupSteps(
+			Collection<MSFeatureIdentificationFollowupStep> lookupFollowups) {
+		
+		if(idFollowupSteps == null || idFollowupSteps.isEmpty())
+			return false;
+		
+		return CollectionUtils.containsAny(lookupFollowups, idFollowupSteps);
+	}
 }
+
+
+
+
+
+
+
+
+

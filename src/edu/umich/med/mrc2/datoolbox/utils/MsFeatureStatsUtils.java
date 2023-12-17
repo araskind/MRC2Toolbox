@@ -29,14 +29,19 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
+import edu.umich.med.mrc2.datoolbox.data.MSFeatureIdentificationFollowupStep;
+import edu.umich.med.mrc2.datoolbox.data.MSFeatureIdentificationLevel;
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsPoint;
+import edu.umich.med.mrc2.datoolbox.data.StandardFeatureAnnotation;
 import edu.umich.med.mrc2.datoolbox.data.TandemMassSpectrum;
 import edu.umich.med.mrc2.datoolbox.data.enums.FeatureSubsetByIdentification;
 import edu.umich.med.mrc2.datoolbox.data.enums.IncludeSubset;
 import edu.umich.med.mrc2.datoolbox.data.enums.MSMSMatchType;
+import edu.umich.med.mrc2.datoolbox.gui.idworks.ms2.filter.IDLAnnotationFilterParameters;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.ms2.filter.MSMSFilterParameters;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.nist.pepsearch.HiResSearchOption;
 
@@ -445,6 +450,62 @@ public class MsFeatureStatsUtils {
 				filter(f -> Objects.nonNull(f.getMsFeature().
 						getPrimaryIdentity().getMsRtLibraryMatch())).
 				collect(Collectors.toList());
+	}
+
+	public static Collection<MSFeatureInfoBundle> filterMSMSFeaturesByIDLAnnotation(
+			Collection<MSFeatureInfoBundle> featuresToFilter, 
+			IDLAnnotationFilterParameters filterParameters) {
+		
+		Collection<MSFeatureInfoBundle>filtered = featuresToFilter;
+		if(!filterParameters.getIdLevels().isEmpty()) {
+			
+			Collection<MSFeatureIdentificationLevel> idLevels = filterParameters.getIdLevels();
+			if(filterParameters.isIncludeIdLevels()) {
+				filtered = filtered.stream().
+						filter(f -> Objects.nonNull(f.getMsFeature().getPrimaryIdentity())).
+						filter(f -> Objects.nonNull(f.getMsFeature().getPrimaryIdentity().getIdentificationLevel())).
+						filter(f -> idLevels.contains(f.getMsFeature().getPrimaryIdentity().getIdentificationLevel())).
+						collect(Collectors.toList());
+			}
+			else {
+				filtered = filtered.stream().
+						filter(f -> Objects.nonNull(f.getMsFeature().getPrimaryIdentity())).
+						filter(f -> Objects.nonNull(f.getMsFeature().getPrimaryIdentity().getIdentificationLevel())).
+						filter(f -> !idLevels.contains(f.getMsFeature().getPrimaryIdentity().getIdentificationLevel())).
+						collect(Collectors.toList());
+			}
+		}
+		if(!filterParameters.getStandardAnnotations().isEmpty()) {
+			
+			Collection<StandardFeatureAnnotation> stdAnnotations = 
+					filterParameters.getStandardAnnotations();
+			if(filterParameters.isIncludeStandardAnnotations()) {
+				filtered = filtered.stream().
+						filter(f -> f.hasAnyOfSpecifiedStandardAnnotations(stdAnnotations)).
+						collect(Collectors.toList());
+			}
+			else {
+				filtered = filtered.stream().
+						filter(f -> !f.hasAnyOfSpecifiedStandardAnnotations(stdAnnotations)).
+						collect(Collectors.toList());
+			}
+		}
+		if(!filterParameters.getFollowupSteps().isEmpty()) {
+			
+			Collection<MSFeatureIdentificationFollowupStep> followupSteps = 
+					filterParameters.getFollowupSteps();
+			if(filterParameters.isIncludeFollowupSteps()) {
+				filtered = filtered.stream().
+						filter(f -> f.hasAnyOfSpecifiedFollowupSteps(followupSteps)).
+						collect(Collectors.toList());
+			}
+			else {
+				filtered = filtered.stream().
+						filter(f -> !f.hasAnyOfSpecifiedFollowupSteps(followupSteps)).
+						collect(Collectors.toList());
+			}
+		}
+		return filtered;
 	}
 }
 

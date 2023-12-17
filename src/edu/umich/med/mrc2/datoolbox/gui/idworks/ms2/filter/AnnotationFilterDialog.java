@@ -444,6 +444,20 @@ public class AnnotationFilterDialog extends JDialog implements BackedByPreferenc
 	public Collection<MSFeatureInfoBundle> getFeaturesToFilter() {
 		return featuresToFilter;
 	}
+	
+	public IDLAnnotationFilterParameters getFilterParameters() {
+		
+		if(!verifyParameters().isEmpty())
+			return null;
+		else 
+			return new IDLAnnotationFilterParameters(
+				getSelectedIdLevels(),
+				getSelectedStandardFeatureAnnotations(),
+				getSelectedFollowupSteps(),
+				includeSelectedIdLevels(),
+				includeStandardFeatureAnnotations(),
+				includeFollowupSteps());
+	}
 }
 
 

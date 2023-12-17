@@ -152,6 +152,7 @@ import edu.umich.med.mrc2.datoolbox.gui.idworks.ms2.DockablePepSearchParameterLi
 import edu.umich.med.mrc2.datoolbox.gui.idworks.ms2.MsMsFeaturePopupMenu;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.ms2.filter.AnnotationFilterDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.ms2.filter.FilterTrackerMSMSFeaturesDialog;
+import edu.umich.med.mrc2.datoolbox.gui.idworks.ms2.filter.IDLAnnotationFilterParameters;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.ms2.filter.MSMSFilterParameters;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.ms2.rtid.MSMSFeatureRTIDSearchDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.nist.NISTReferenceLibraries;
@@ -1562,14 +1563,15 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		@Override
 		public Void doInBackground() {
 
-			//	TODO
+			IDLAnnotationFilterParameters filterParameters = 
+					annotationFilterDialog.getFilterParameters();
 			annotationFilterDialog.dispose();
 
-//			Collection<MSFeatureInfoBundle>filtered = 
-//					MsFeatureStatsUtils.filterMSMSFeatureTable(
-//							featuresToFilter, 
-//							filterParameters);
-//			safelyLoadMSMSFeatures(filtered);			
+			Collection<MSFeatureInfoBundle>filtered = 
+					MsFeatureStatsUtils.filterMSMSFeaturesByIDLAnnotation(
+							featuresToFilter, 
+							filterParameters);
+			safelyLoadMSMSFeatures(filtered);			
 			return null;
 		}
 	}
