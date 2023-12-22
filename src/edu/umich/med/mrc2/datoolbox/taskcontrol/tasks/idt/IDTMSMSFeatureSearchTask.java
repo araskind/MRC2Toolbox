@@ -156,6 +156,7 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 	protected Collection<String>msmsLibraryIds;
 	protected Map<String, CompoundIdentity>compoundMap;
 	protected Map<String, MsMsLibraryFeature>msmsLibraryFeatureMap;
+	protected Map<String,DataFile>injectionFileMap;
 	
 	public IDTMSMSFeatureSearchTask(
 			Polarity polarity, 
@@ -607,6 +608,36 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 		
 		//	Remove redundant
 		features = features.stream().distinct().collect(Collectors.toSet());
+		attachDataFiles();
+	}
+	
+	protected void attachDataFiles() {
+		
+		List<String> injectionIds = features.stream().
+				map(c -> c.getInjectionId()).distinct().
+				collect(Collectors.toList());
+		Collection<Injection> injections = new ArrayList<Injection>();
+		try {
+			injections = IDTUtils.getInjectionsByIds(injectionIds);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		if(injections.isEmpty())
+			return;		
+		
+		injectionFileMap = new TreeMap<String,DataFile>();
+		injections.stream().forEach(i -> injectionFileMap.put(i.getId(), new DataFile(i)));		
+		int fCount = 0;
+		for(DataFile df : injectionFileMap.values()) {			
+			df.setColor(ColorUtils.getColor(fCount));
+			fCount++;
+		}
+		for(MSFeatureInfoBundle fb : features) {
+			
+			if(fb.getInjectionId() != null)
+				fb.setDataFile(injectionFileMap.get(fb.getInjectionId()));
+		}
 	}
 
 	protected void updateCompoundIdFromLibraryId(Connection conn) throws Exception {
@@ -1341,20 +1372,20 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 			ConnectionManager.releaseConnection(conn);
 			return;
 		}
-		List<String> injectionIds = storedChroms.stream().
-				map(c -> c.getInjectionId()).distinct().
-				collect(Collectors.toList());
-		Collection<Injection>injections = 
-				 IDTUtils.getInjectionsByIds(injectionIds);
-		
-		Collection<DataFile>dataFiles = new TreeSet<DataFile>();
-		injections.stream().forEach(i -> dataFiles.add(new DataFile(i)));
-		
-		int fCount = 0;
-		for(DataFile df :dataFiles) {			
-			df.setColor(ColorUtils.getColor(fCount));
-			fCount++;
-		}		
+//		List<String> injectionIds = storedChroms.stream().
+//				map(c -> c.getInjectionId()).distinct().
+//				collect(Collectors.toList());
+//		Collection<Injection>injections = 
+//				 IDTUtils.getInjectionsByIds(injectionIds);
+//		
+//		Collection<DataFile>dataFiles = new TreeSet<DataFile>();
+//		injections.stream().forEach(i -> dataFiles.add(new DataFile(i)));
+//		
+//		int fCount = 0;
+//		for(DataFile df :dataFiles) {			
+//			df.setColor(ColorUtils.getColor(fCount));
+//			fCount++;
+//		}		
 		Map<String, List<StoredExtractedIonData>> featureChromMap = 
 				storedChroms.stream().collect(Collectors.groupingBy(StoredExtractedIonData::getFeatureId));
 		taskDescription = "Creating chromatogram bundles ...";
@@ -1368,11 +1399,8 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 			MsFeatureChromatogramBundle chromatogramBundle = 
 					new MsFeatureChromatogramBundle(chrEntry.getKey(), chromatogramDefinition);
 			for(StoredExtractedIonData scd : chrEntry.getValue()) {
-				
-				String injId = scd.getInjectionId();
-				DataFile df = dataFiles.stream().
-						filter(f -> f.getInjectionId().equals(injId)).
-						findFirst().orElse(null);
+
+				DataFile df =injectionFileMap.get(scd.getInjectionId());
 				if(df != null) {
 					if(chromatogramBundle.getChromatogramDefinition().getPolarity() == null)
 						chromatogramBundle.getChromatogramDefinition().setPolarity(df.getDataAcquisitionMethod().getPolarity());

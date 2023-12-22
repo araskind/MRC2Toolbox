@@ -210,7 +210,7 @@ public class IDTMSMSFeatureDataPullTask extends IDTMSMSFeatureSearchTask {
 									rs.getString("IDENTIFICATION_LEVEL_ID"));
 					if(f.getPrimaryIdentity() != null)
 						f.getPrimaryIdentity().setIdentificationLevel(level);
-				}				
+				}
 				MSFeatureInfoBundle bundle = new MSFeatureInfoBundle(f);
 				bundle.setAcquisitionMethod(
 					IDTDataCache.getAcquisitionMethodById(rs.getString("ACQUISITION_METHOD_ID")));
@@ -237,6 +237,7 @@ public class IDTMSMSFeatureDataPullTask extends IDTMSMSFeatureSearchTask {
 		
 		//	Remove redundant
 		features = features.stream().distinct().collect(Collectors.toSet());
+		attachDataFiles();
 	}
 		
 	@Override

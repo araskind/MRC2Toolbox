@@ -4294,7 +4294,9 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			if(msfCb == null) {
 				
 				try {
-					msfCb = FeatureChromatogramUtils.getMsFeatureChromatogramBundleForFeature(selectedBundle.getMSFeatureId());
+					msfCb = FeatureChromatogramUtils.getMsFeatureChromatogramBundleForFeature(
+							selectedBundle.getMSFeatureId(),
+							selectedBundle.getDataFile());
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();

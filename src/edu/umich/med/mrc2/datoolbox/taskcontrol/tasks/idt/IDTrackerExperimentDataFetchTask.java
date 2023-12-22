@@ -254,8 +254,8 @@ public class IDTrackerExperimentDataFetchTask extends IDTMSMSFeatureSearchTask {
 		
 		//	Remove redundant
 		features = features.stream().distinct().collect(Collectors.toSet());
+		attachDataFiles();
 	}
-
 
 	@Override
 	public Task cloneTask() {

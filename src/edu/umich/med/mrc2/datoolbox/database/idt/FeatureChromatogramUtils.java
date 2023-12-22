@@ -27,9 +27,12 @@ import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.Collections;
 
 import org.apache.commons.jcs3.access.exception.CacheException;
 
+import edu.umich.med.mrc2.datoolbox.data.ChromatogramDefinition;
+import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureChromatogramBundle;
 import edu.umich.med.mrc2.datoolbox.data.StoredExtractedIonData;
 import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
@@ -57,18 +60,19 @@ public class FeatureChromatogramUtils {
 	}
 	
 	public static MsFeatureChromatogramBundle getMsFeatureChromatogramBundleForFeature(
-			String featureId) throws Exception {
+			String featureId, DataFile dataFile) throws Exception {
 		
 		Connection conn = ConnectionManager.getConnection();
 		MsFeatureChromatogramBundle fcb = 
-				getMsFeatureChromatogramBundleForFeature(featureId, conn);
+				getMsFeatureChromatogramBundleForFeature(featureId, dataFile, conn);
 		ConnectionManager.releaseConnection(conn);
 		return fcb;
 	}
 	
 	public static MsFeatureChromatogramBundle getMsFeatureChromatogramBundleForFeature(
-			String featureId, Connection conn) throws Exception {
+			String featureId, DataFile dataFile, Connection conn) throws Exception {
 		
+		MsFeatureChromatogramBundle chromatogramBundle = null;
 		String query = 
 				"SELECT INJECTION_ID, MS_LEVEL, EXTRACTED_MASS,  " +
 				"MASS_ERROR_VALUE, MASS_ERROR_TYPE, START_RT, END_RT,  " +
@@ -109,13 +113,23 @@ public class FeatureChromatogramUtils {
 					MassErrorType.getTypeByName(rs.getString("MASS_ERROR_TYPE")), 
 					rs.getDouble("START_RT"),
 					rs.getDouble("END_RT"));
+
+			ChromatogramDefinition chromDef = new ChromatogramDefinition(
+						null, 
+						seid.getMsLevel(), 
+						Collections.singleton(seid.getExtractedMass()),
+						seid.getMassErrorValue(), 
+						seid.getMassErrorType(), 
+						seid.getRtRange());
+			chromatogramBundle = 
+					new MsFeatureChromatogramBundle(featureId, chromDef);
+			
+			chromatogramBundle.addChromatogramForDataFile(dataFile, seid);	
 		}
 		rs.close();
 		ps.close();
-		return null;
+		return chromatogramBundle;
 	}
-	
-	
 }
 
 

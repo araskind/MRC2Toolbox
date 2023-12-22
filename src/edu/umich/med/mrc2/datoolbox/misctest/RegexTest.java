@@ -147,7 +147,6 @@ import edu.umich.med.mrc2.datoolbox.database.cpd.CompoundDatabaseUtils;
 import edu.umich.med.mrc2.datoolbox.database.cpd.CompoundDbConnectionManager;
 import edu.umich.med.mrc2.datoolbox.database.idt.AcquisitionMethodUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.DocumentUtils;
-import edu.umich.med.mrc2.datoolbox.database.idt.FeatureChromatogramUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.MSMSLibraryUtils;
@@ -622,7 +621,7 @@ public class RegexTest {
 	}
 	
 	private static void testChrom() throws Exception {
-		FeatureChromatogramUtils.getMsFeatureChromatogramBundleForFeature("MSF_000003733493");
+		//`FeatureChromatogramUtils.getMsFeatureChromatogramBundleForFeature("MSF_000003733493");
 		
 	}
 	
