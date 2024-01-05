@@ -52,6 +52,7 @@ import org.apache.logging.log4j.core.LoggerContext;
 import org.renjin.script.RenjinScriptEngine;
 import org.renjin.script.RenjinScriptEngineFactory;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import edu.umich.med.mrc2.datoolbox.data.CompoundLibrary;
@@ -77,6 +78,7 @@ public final class MRC2ToolBoxCore {
 	public static String dataDir = "." + File.separator + "data" + File.separator;
 	public static final File lockFile = new File(dataDir + File.separator + "app.lock");
 	public static String configDir = dataDir + "config" + File.separator;
+	public static String logDir = dataDir + "logs" + File.separator;
 	public static String iconDir = dataDir + "icons" + File.separator;
 	public static String fleTypeIconDir = iconDir + "DF" + File.separator;
 	public static String referenceDir = dataDir + "reference" + File.separator;
@@ -122,24 +124,24 @@ public final class MRC2ToolBoxCore {
 		return taskController;
 	}	
 	
-	private static org.slf4j.Logger logger;
+	private static Logger logger;
 
 	public static void main(String[] args) {
 		
 		//	Prevent second copy running
 		FileLock lock = null;
-		try {
-		    FileChannel fc = FileChannel.open(lockFile.toPath(),
-		            StandardOpenOption.CREATE,
-		            StandardOpenOption.WRITE);
-		    lock = fc.tryLock();
-		} catch (IOException e) {
-		    throw new Error(e);
-		}
-	    if (lock == null) {
-	        System.out.println("Another instance of the software is already running");
-	        System.exit(1);
-	    }
+//		try {
+//		    FileChannel fc = FileChannel.open(lockFile.toPath(),
+//		            StandardOpenOption.CREATE,
+//		            StandardOpenOption.WRITE);
+//		    lock = fc.tryLock();
+//		} catch (IOException e) {
+//		    throw new Error(e);
+//		}
+//	    if (lock == null) {
+//	        System.out.println("Another instance of the software is already running");
+//	        System.exit(1);
+//	    }
 		
 		System.setProperty("java.util.prefs.PreferencesFactory", 
 				FilePreferencesFactory.class.getName());
@@ -147,8 +149,14 @@ public final class MRC2ToolBoxCore {
 				MRC2ToolBoxCore.configDir + "MRC2ToolBoxPrefs.txt");
 		
 		//	Configure logging
-		File file = new File(configDir + "log4j2.xml");
-		((LoggerContext) LogManager.getContext(false)).setConfigLocation(file.toURI());			
+//		File file = new File(configDir + "log4j2.xml");
+//		((LoggerContext) LogManager.getContext(false)).setConfigLocation(file.toURI());		
+		System.setProperty("logback.configurationFile", 
+				MRC2ToolBoxCore.configDir + "logback-config.xml");
+		System.setProperty("logback.statusListenerClass", 
+				"ch.qos.logback.core.status.OnConsoleStatusListener"); 
+		
+		
 		logger = LoggerFactory.getLogger(MRC2ToolBoxCore.class);
 		logger.info("Statring the program");
 		

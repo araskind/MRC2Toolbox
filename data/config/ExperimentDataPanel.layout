@@ -101,7 +101,7 @@
 										<fullscreen-action>false</fullscreen-action>
 										<node nodeId="1600213802276" orientation="HORIZONTAL" divider="0.7592223330009971">
 											<node nodeId="1600213802278" orientation="VERTICAL" divider="0.4891416752843847">
-												<leaf id="2" nodeId="1600213802280">
+												<leaf id="1" nodeId="1600213802280">
 													<placeholders>
 														<placeholder>dock.single.DockableExperimentListingTable</placeholder>
 													</placeholders>
@@ -112,7 +112,7 @@
 													</placeholders>
 												</leaf>
 											</node>
-											<leaf id="1" nodeId="1600213802284">
+											<leaf id="2" nodeId="1600213802284">
 												<placeholders>
 													<placeholder>dock.single.DockableExperimentSummaryPanel</placeholder>
 												</placeholders>
@@ -138,20 +138,20 @@
 									<children ignore="false"/>
 								</child>
 								<child>
-									<layout factory="predefined" placeholder="dock.single.DockableExperimentSummaryPanel">
-										<replacement id="dockablesingle DockableExperimentSummaryPanel"/>
+									<layout factory="predefined" placeholder="dock.single.DockableExperimentListingTable">
+										<replacement id="dockablesingle DockableExperimentListingTable"/>
 										<delegate id="delegate_ccontrol backup factory id">
-											<id>DockableExperimentSummaryPanel</id>
+											<id>DockableExperimentListingTable</id>
 											<area/>
 										</delegate>
 									</layout>
 									<children ignore="false"/>
 								</child>
 								<child>
-									<layout factory="predefined" placeholder="dock.single.DockableExperimentListingTable">
-										<replacement id="dockablesingle DockableExperimentListingTable"/>
+									<layout factory="predefined" placeholder="dock.single.DockableExperimentSummaryPanel">
+										<replacement id="dockablesingle DockableExperimentSummaryPanel"/>
 										<delegate id="delegate_ccontrol backup factory id">
-											<id>DockableExperimentListingTable</id>
+											<id>DockableExperimentSummaryPanel</id>
 											<area/>
 										</delegate>
 									</layout>
