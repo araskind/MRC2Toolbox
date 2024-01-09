@@ -2014,7 +2014,8 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 				return;
 		
 		identity.setIdentificationLevel(idLevel);
-		if(msOneFeatureTable.getSelectedBundle() != null) {
+		MSFeatureInfoBundle msOneBundle = msOneFeatureTable.getSelectedBundle();
+		if(msOneBundle != null) {
 			
 			if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() == null) {
 				
@@ -2025,15 +2026,17 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 					e.printStackTrace();
 				}
 			}
-			updateTableDisplayForMSFeatures(Collections.singleton(msOneFeatureTable.getSelectedBundle()));
+			//	updateTableDisplayForMSFeatures(Collections.singleton(msOneFeatureTable.getSelectedBundle()));
+			msOneFeatureTable.getTable().updateFeatureData(msOneBundle);
 			identificationsTable.refreshTable();
 			return;
 		}
-		if(msTwoFeatureTable.getSelectedBundle() != null) {
+		MSFeatureInfoBundle msTwoBundle = msTwoFeatureTable.getSelectedBundle();
+		if(msTwoBundle != null) {
 			
 			if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() == null) {
 				
-				String msmsId = msTwoFeatureTable.getSelectedBundle().getMsFeature().
+				String msmsId = msTwoBundle.getMsFeature().
 						getSpectrum().getExperimentalTandemSpectrum().getId();
 				try {
 					IdLevelUtils.setIdLevelForMSMSFeatureIdentification(identity, msmsId);
@@ -2042,7 +2045,8 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 					e.printStackTrace();
 				}
 			}
-			updateTableDisplayForMSMSFeatures(Collections.singleton(msTwoFeatureTable.getSelectedBundle()));
+			// updateTableDisplayForMSMSFeatures(Collections.singleton(msTwoFeatureTable.getSelectedBundle()));
+			msTwoFeatureTable.getTable().updateFeatureData(msTwoBundle);
 			identificationsTable.refreshTable();
 			return;
 		}
@@ -2128,6 +2132,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		public Void doInBackground() {
 						
 			String idLevelName = idLevelCommand;
+			identificationsTable.getTable().toggleIdentificationTableModelListener(false);
 			if(idLevelCommand.startsWith(MSFeatureIdentificationLevel.SET_PRIMARY))
 				idLevelName = idLevelCommand.replace(MSFeatureIdentificationLevel.SET_PRIMARY, "");
 			
@@ -2163,6 +2168,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 					getClientProperty(MRC2ToolBoxCore.COMPONENT_IDENTIFIER))) {
 				
 			}
+			identificationsTable.getTable().toggleIdentificationTableModelListener(true);
 			return null;
 		}
 	}
@@ -4063,8 +4069,8 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 
 	public void updateIdentificationsForMSMSFeatures(Collection<MSFeatureInfoBundle> selectedBundles) {
 		
-		identificationsTable.getTable().toggleIdentificationTableModelListener(false);
 		msTwoFeatureTable.getTable().getSelectionModel().removeListSelectionListener(this);
+		identificationsTable.getTable().toggleIdentificationTableModelListener(false);
 		for(MSFeatureInfoBundle bundle : selectedBundles) {
 			
 			MsFeatureIdentity primaryId = bundle.getMsFeature().getPrimaryIdentity();			
@@ -4084,6 +4090,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			}
 			msTwoFeatureTable.getTable().updateFeatureData(bundle);
 		}
+		identificationsTable.refreshTable();
 		identificationsTable.getTable().toggleIdentificationTableModelListener(true);
 		msTwoFeatureTable.getTable().getSelectionModel().addListSelectionListener(this);
 	}
@@ -4134,7 +4141,6 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 				for(MSFeatureInfoBundle bundle : featureBundles) 			
 					msOneFeatureTable.getTable().updateFeatureData(bundle);
 					
-
 				msOneFeatureTable.getTable().getSelectionModel().addListSelectionListener(IDWorkbenchPanel.this);
 				showMsFeatureInfoBundle(featureBundles.iterator().next());
 				msOneFeatureTable.getTable().scrollToSelected();			
@@ -4444,13 +4450,22 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			if(cluster.getLookupFeature() != null && cluster.getLookupFeature().getSmiles() != null)
 				referenceMolStructurePanel.showStructure(cluster.getLookupFeature().getSmiles());		
 			
-			if(cluster.getComponents().size() > 0)
-				msTwoFeatureTable.getTable().setRowSelectionInterval(0, 0);
-			
+			if(cluster.getComponents().size() > 0) {
+	
+				MSFeatureInfoBundle idBundle = cluster.getMSFeatureInfoBundleForPrimaryId();
+				
+				if(idBundle != null) {
+					
+					msTwoFeatureTable.selectBundle(idBundle);
+					identificationsTable.selectIdentity(cluster.getPrimaryIdentity());
+				}
+				else
+					msTwoFeatureTable.getTable().setRowSelectionInterval(0, 0);
+			}			
 			if(cluster instanceof BinnerBasedMsFeatureInfoBundleCluster)
 				binnerAnnotationDetailsPanel.setTableModelFromBinnerAnnotationCluster(
-						(BinnerBasedMsFeatureInfoBundleCluster)cluster);
-			
+						(BinnerBasedMsFeatureInfoBundleCluster)cluster);			
+						
 			showMultipleFeatureChromatograms(cluster.getComponents());
 		}
 		if (tree.getClickedObject() instanceof MSFeatureInfoBundle) {

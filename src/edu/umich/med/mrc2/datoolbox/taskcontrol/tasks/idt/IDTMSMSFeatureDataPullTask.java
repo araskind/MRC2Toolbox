@@ -88,6 +88,7 @@ public class IDTMSMSFeatureDataPullTask extends IDTMSMSFeatureSearchTask {
 				attachAnnotations();
 				attachFollowupSteps();
 				putDataInCache();
+				attachDataFiles();
 				attachChromatograms();
 			}
 			finalizeFeatureList();

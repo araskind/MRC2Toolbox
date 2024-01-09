@@ -253,6 +253,10 @@ public class DockableUniversalIdentificationResultsTable
 		preferences = Preferences.userRoot().node(PREFS_NODE);
 		preferences.putBoolean(SHOW_UNIQUE_IDENTITY_LIBRARY_HITS, showUniqueIdsOnly);  
 	}
+	
+	public void selectIdentity(MsFeatureIdentity id) {
+		idTable.selectIdentity(id);
+	}
 }
 
 

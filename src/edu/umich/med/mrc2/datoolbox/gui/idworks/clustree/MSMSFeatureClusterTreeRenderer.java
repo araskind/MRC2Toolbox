@@ -34,6 +34,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
+import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
 import edu.umich.med.mrc2.datoolbox.data.msclust.BinnerBasedMsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.data.msclust.IMsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MsFeatureInfoBundleCluster;
@@ -47,6 +48,7 @@ public class MSMSFeatureClusterTreeRenderer extends DefaultTreeCellRenderer {
 	private static final long serialVersionUID = -3568168754034663097L;
 
 	private static final Icon featureIcon = GuiUtils.getIcon("feature", 24);
+	private static final Icon primIdFeatureIcon = GuiUtils.getIcon("primIdFeature", 24);
 	private static final Icon clusterIcon = GuiUtils.getIcon("cluster", 24);
 	private static final Icon namedClusterIcon = GuiUtils.getIcon("namedCluster", 24);
 	private static final Icon multiNamedClusterIcon = GuiUtils.getIcon("multiNamedCluster", 24);
@@ -84,7 +86,11 @@ public class MSMSFeatureClusterTreeRenderer extends DefaultTreeCellRenderer {
 		Object embeddedObject = treeNode.getUserObject();
 		if (embeddedObject instanceof MSFeatureInfoBundle) {
 
-			label.setIcon(featureIcon);
+			if(isPrimaryIdFeatue(treeNode))
+				label.setIcon(primIdFeatureIcon);
+			else
+				label.setIcon(featureIcon);
+			
 			label.setFont(smallerFont);
 			label.setText(((MSFeatureInfoBundle)embeddedObject).getMsFeature().getName());
 		}
@@ -147,6 +153,31 @@ public class MSMSFeatureClusterTreeRenderer extends DefaultTreeCellRenderer {
 			label.setText(labelText);
 		}
 		return label;
+	}
+	
+	private boolean isPrimaryIdFeatue(DefaultMutableTreeNode treeNode) {
+
+		Object embeddedObject = treeNode.getUserObject();		
+		if (embeddedObject instanceof MSFeatureInfoBundle) {
+			
+//			MsFeatureIdentity pid = 
+//					((MSFeatureInfoBundle)embeddedObject).getMsFeature().getPrimaryIdentity();
+			Object parentObject = 
+					((DefaultMutableTreeNode)treeNode.getParent()).getUserObject();
+			if (parentObject instanceof IMsFeatureInfoBundleCluster) {
+				
+				MsFeatureIdentity cPid = ((IMsFeatureInfoBundleCluster)parentObject).getPrimaryIdentity();
+				if(cPid != null 
+						&& ((MSFeatureInfoBundle)embeddedObject).getMsFeature().getIdentifications().contains(cPid))
+					return true;
+				else
+					return false;
+			}
+			else
+				return false;
+		}
+		else
+			return false;
 	}
 }
 

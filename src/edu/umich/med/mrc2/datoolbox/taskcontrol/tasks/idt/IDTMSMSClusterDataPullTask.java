@@ -99,6 +99,7 @@ public class IDTMSMSClusterDataPullTask extends IDTMSMSFeatureDataPullTask {
 					attachAnnotations();
 					attachFollowupSteps();
 					putDataInCache();
+					attachDataFiles();
 					attachChromatograms();
 				}		
 			}

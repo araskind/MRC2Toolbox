@@ -1371,21 +1371,9 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 		if(storedChroms.isEmpty()) {
 			ConnectionManager.releaseConnection(conn);
 			return;
-		}
-//		List<String> injectionIds = storedChroms.stream().
-//				map(c -> c.getInjectionId()).distinct().
-//				collect(Collectors.toList());
-//		Collection<Injection>injections = 
-//				 IDTUtils.getInjectionsByIds(injectionIds);
-//		
-//		Collection<DataFile>dataFiles = new TreeSet<DataFile>();
-//		injections.stream().forEach(i -> dataFiles.add(new DataFile(i)));
-//		
-//		int fCount = 0;
-//		for(DataFile df :dataFiles) {			
-//			df.setColor(ColorUtils.getColor(fCount));
-//			fCount++;
-//		}		
+		}	
+		addMissingInjectionsForChromatograms(storedChroms);
+		
 		Map<String, List<StoredExtractedIonData>> featureChromMap = 
 				storedChroms.stream().collect(Collectors.groupingBy(StoredExtractedIonData::getFeatureId));
 		taskDescription = "Creating chromatogram bundles ...";
@@ -1410,6 +1398,41 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 			}			
 			FeatureChromatogramUtils.putFeatureChromatogramBundleInCache(chromatogramBundle);
 			processed++;
+		}
+	}
+	
+	//	Add missing data files to injection/file map to account for the cases
+	//	when chromatograms were extracted from MS1 files
+	protected void addMissingInjectionsForChromatograms(
+			Collection<StoredExtractedIonData>storedChroms) {
+
+		Set<String> missingInjectionIds = 
+				storedChroms.stream().map(c -> c.getInjectionId()).
+				filter(i -> !injectionFileMap.keySet().contains(i)).
+				collect(Collectors.toSet());
+		if(!missingInjectionIds.isEmpty()) {
+			
+			Collection<Injection> injections = new ArrayList<Injection>();
+			try {
+				injections = IDTUtils.getInjectionsByIds(missingInjectionIds);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			if(injections.isEmpty())
+				return;	
+			
+			int fCount = 0;
+			if(injectionFileMap == null)
+				injectionFileMap = new TreeMap<String,DataFile>();			
+			else
+				fCount = injectionFileMap.size();
+				
+			injections.stream().forEach(i -> injectionFileMap.put(i.getId(), new DataFile(i)));	
+			for(DataFile df : injectionFileMap.values()) {			
+				df.setColor(ColorUtils.getColor(fCount));
+				fCount++;
+			}
 		}
 	}
 	
