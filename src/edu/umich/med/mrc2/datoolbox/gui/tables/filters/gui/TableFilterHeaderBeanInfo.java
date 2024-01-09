@@ -28,6 +28,10 @@ package edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui;
 import java.beans.BeanDescriptor;
 import java.beans.SimpleBeanInfo;
 
+import javax.swing.ImageIcon;
+
+import edu.umich.med.mrc2.datoolbox.gui.tables.filters.IParser;
+
 
 public class TableFilterHeaderBeanInfo extends SimpleBeanInfo {
 
@@ -39,8 +43,13 @@ public class TableFilterHeaderBeanInfo extends SimpleBeanInfo {
     }
 
     @Override public java.awt.Image getIcon(int iconKind) {
-        return loadImage(
-                "resources/tableFilterHeader.png");
+    	
+    	ImageIcon tableFilterHeaderIcon = new ImageIcon(IParser.class
+                .getResource("tableFilterHeader.png"));
+    	
+    	return tableFilterHeaderIcon.getImage();
+//        return loadImage(
+//                "resources/tableFilterHeader.png");
     }
-
+ 
 }

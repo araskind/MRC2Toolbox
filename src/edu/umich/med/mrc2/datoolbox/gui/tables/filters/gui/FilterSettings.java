@@ -120,7 +120,7 @@ public class FilterSettings {
 
     /** The default icon used to represent null/empty values. */
     public static Icon matchEmptyFilterIcon = new ImageIcon(IParser.class
-                .getResource("resources/matchEmptyIcon.png"));
+                .getResource("matchEmptyIcon.png"));
 
     /**
      * The default string associated to a nop operation.

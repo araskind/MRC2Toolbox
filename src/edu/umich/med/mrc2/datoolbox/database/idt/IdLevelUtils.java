@@ -234,7 +234,7 @@ public class IdLevelUtils {
 			
 		}
 		
-		//	Modify manuallu assigned
+		//	Modify manually assigned
 		if(newIdentity.getIdSource().equals(CompoundIdSource.LIBRARY))
 			setIdLevelForReferenceMS1FeatureMSRTLibraryMatch(newIdentity, conn);
 		

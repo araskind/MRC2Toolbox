@@ -100,7 +100,7 @@
 									<content delegate="SplitDockStationFactory">
 										<fullscreen-action>false</fullscreen-action>
 										<node nodeId="1600213795362" orientation="HORIZONTAL" divider="0.2">
-											<leaf id="5" nodeId="1600213795364">
+											<leaf id="4" nodeId="1600213795364">
 												<placeholders>
 													<placeholder>dock.single.CorrelationResultsPanelDockableClusterTree</placeholder>
 												</placeholders>
@@ -138,7 +138,7 @@
 															</placeholders>
 														</leaf>
 													</node>
-													<leaf id="4" nodeId="1600213795375">
+													<leaf id="5" nodeId="1600213795375">
 														<placeholders>
 															<placeholder>dock.single.ClusterDisplayPanelDockableIdentificationResultsTable</placeholder>
 														</placeholders>
@@ -457,20 +457,20 @@
 									</children>
 								</child>
 								<child>
-									<layout factory="predefined" placeholder="dock.single.ClusterDisplayPanelDockableIdentificationResultsTable">
-										<replacement id="dockablesingle ClusterDisplayPanelDockableIdentificationResultsTable"/>
+									<layout factory="predefined" placeholder="dock.single.CorrelationResultsPanelDockableClusterTree">
+										<replacement id="dockablesingle CorrelationResultsPanelDockableClusterTree"/>
 										<delegate id="delegate_ccontrol backup factory id">
-											<id>ClusterDisplayPanelDockableIdentificationResultsTable</id>
+											<id>CorrelationResultsPanelDockableClusterTree</id>
 											<area/>
 										</delegate>
 									</layout>
 									<children ignore="false"/>
 								</child>
 								<child>
-									<layout factory="predefined" placeholder="dock.single.CorrelationResultsPanelDockableClusterTree">
-										<replacement id="dockablesingle CorrelationResultsPanelDockableClusterTree"/>
+									<layout factory="predefined" placeholder="dock.single.ClusterDisplayPanelDockableIdentificationResultsTable">
+										<replacement id="dockablesingle ClusterDisplayPanelDockableIdentificationResultsTable"/>
 										<delegate id="delegate_ccontrol backup factory id">
-											<id>CorrelationResultsPanelDockableClusterTree</id>
+											<id>ClusterDisplayPanelDockableIdentificationResultsTable</id>
 											<area/>
 										</delegate>
 									</layout>
