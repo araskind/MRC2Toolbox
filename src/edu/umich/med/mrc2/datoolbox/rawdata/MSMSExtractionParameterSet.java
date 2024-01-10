@@ -64,6 +64,7 @@ public class MSMSExtractionParameterSet implements Comparable<MSMSExtractionPara
 	private double precursorGroupingMassError;
 	private MassErrorType precursorGroupingMassErrorType;
 	private boolean flagMinorIsotopesPrecursors;
+	private double minorIsotopeDetectionMassError;
 	private int maxPrecursorCharge;
 	private int smoothingFilterWidth;
 	private double chromatogramExtractionWindow;
@@ -88,6 +89,7 @@ public class MSMSExtractionParameterSet implements Comparable<MSMSExtractionPara
 			double precursorGroupingMassError,
 			MassErrorType precursorGroupingMassErrorType, 
 			boolean flagMinorIsotopesPrecursors, 
+			double minorIsotopeDetectionMassError,
 			int maxPrecursorCharge,
 			int smoothingFilterWidth,
 			double chromatogramExtractionWindow,
@@ -112,6 +114,7 @@ public class MSMSExtractionParameterSet implements Comparable<MSMSExtractionPara
 		this.precursorGroupingMassError = precursorGroupingMassError;
 		this.precursorGroupingMassErrorType = precursorGroupingMassErrorType;
 		this.flagMinorIsotopesPrecursors = flagMinorIsotopesPrecursors;
+		this.minorIsotopeDetectionMassError = minorIsotopeDetectionMassError;
 		this.maxPrecursorCharge = maxPrecursorCharge;
 		this.smoothingFilterWidth = smoothingFilterWidth;
 		this.chromatogramExtractionWindow = chromatogramExtractionWindow;
@@ -621,6 +624,14 @@ public class MSMSExtractionParameterSet implements Comparable<MSMSExtractionPara
 
 	public void setMinPrecursorPurity(double minPrecursorPurity) {
 		this.minPrecursorPurity = minPrecursorPurity;
+	}
+
+	public double getMinorIsotopeDetectionMassError() {
+		return minorIsotopeDetectionMassError;
+	}
+
+	public void setMinorIsotopeDetectionMassError(double minorIsotopeDetectionMassError) {
+		this.minorIsotopeDetectionMassError = minorIsotopeDetectionMassError;
 	}
 }
 

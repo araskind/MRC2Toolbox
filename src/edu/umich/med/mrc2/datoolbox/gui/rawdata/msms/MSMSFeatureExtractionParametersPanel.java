@@ -73,28 +73,29 @@ public class MSMSFeatureExtractionParametersPanel extends JPanel {
 	
 //	private static final Polarity POLARITY_DEFAULT = Polarity.Positive;
 	
-	private static final double MIN_PRECURSOR_INTENSITY_DEFAULT = 0.0d;
-	private static final boolean USE_RT_RANGE_DEFAULT = false;
-	private static final double RT_BORDER_LEFT_DEFAULT = 0.0d;
-	private static final double RT_BORDER_RIGHT_DEFAULT = 0.0d;
-	private static final double ISOLATION_BORDER_MIN_DEFAULT = 0.65d;	
-	private static final double ISOLATION_BORDER_MAX_DEFAULT = 0.65d;	
-	private static final double PRECURSOR_GROUPING_RT_WINDOW_DEFAULT = 0.1d;
-	private static final double PRECURSOR_GROUPING_MASS_ERROR_DEFAULT = 15.0d;
-	private static final MassErrorType PRECURSOR_GROUPING_MASS_ERROR_TYPE_DEFAULT = MassErrorType.ppm;		
-	private static final boolean REMOVE_MASSES_ABOVE_PARENT_DEFAULT = true;
-	private static final boolean REMOVE_MASSES_BELOW_COUNT_DEFAULT = false;
-	private static final double MINIMAL_COUNTS_DEFAULT = 0.0d;
-	private static final double MINIMAL_PURITY_DEFAULT = 0.7d;
-	private static final boolean LEAVE_MAX_FRAGMENTS_DEFAULT = false;
-	private static final int MAX_FRAGMENTS_COUNT_DEFAULT = 30;	
-	private static final IntensityMeasure INTENSITY_MEASURE_DEFAULT = IntensityMeasure.ABSOLUTE;
-	private static final boolean MERGE_COLLISION_ENERGIES_DEFAULT = false;
-	private static final double SPECTRUM_SIMILARITY_CUTOFF_DEFAULT = 0.7d;	
-	private static final boolean FLAG_MINOR_ISOTOPES_PRECURSORS_DEFAULT = true;	
-	private static final int MAX_PRECURSOR_CHARGE_DEFAULT = 2;
-	private static final SavitzkyGolayWidth FILTER_WIDTH_DEFAULT = SavitzkyGolayWidth.NINE;
-	private static final double CHROMATOGRAM_WIDTH_DEFAULT = 0.3d;
+	public static final double MIN_PRECURSOR_INTENSITY_DEFAULT = 0.0d;
+	public static final boolean USE_RT_RANGE_DEFAULT = false;
+	public static final double RT_BORDER_LEFT_DEFAULT = 0.0d;
+	public static final double RT_BORDER_RIGHT_DEFAULT = 0.0d;
+	public static final double ISOLATION_BORDER_MIN_DEFAULT = 0.65d;
+	public static final double ISOLATION_BORDER_MAX_DEFAULT = 0.65d;
+	public static final double PRECURSOR_GROUPING_RT_WINDOW_DEFAULT = 0.1d;
+	public static final double PRECURSOR_GROUPING_MASS_ERROR_DEFAULT = 15.0d;
+	public static final MassErrorType PRECURSOR_GROUPING_MASS_ERROR_TYPE_DEFAULT = MassErrorType.ppm;
+	public static final boolean REMOVE_MASSES_ABOVE_PARENT_DEFAULT = true;
+	public static final boolean REMOVE_MASSES_BELOW_COUNT_DEFAULT = false;
+	public static final double MINIMAL_COUNTS_DEFAULT = 0.0d;
+	public static final double MINIMAL_PURITY_DEFAULT = 0.7d;
+	public static final boolean LEAVE_MAX_FRAGMENTS_DEFAULT = false;
+	public static final int MAX_FRAGMENTS_COUNT_DEFAULT = 30;
+	public static final IntensityMeasure INTENSITY_MEASURE_DEFAULT = IntensityMeasure.ABSOLUTE;
+	public static final boolean MERGE_COLLISION_ENERGIES_DEFAULT = false;
+	public static final double SPECTRUM_SIMILARITY_CUTOFF_DEFAULT = 0.7d;
+	public static final boolean FLAG_MINOR_ISOTOPES_PRECURSORS_DEFAULT = true;
+	public static final double MINOR_ISOTOPE_DETECTION_MASS_ERROR_DEFAULT = 10.0;
+	public static final int MAX_PRECURSOR_CHARGE_DEFAULT = 2;
+	public static final SavitzkyGolayWidth FILTER_WIDTH_DEFAULT = SavitzkyGolayWidth.NINE;
+	public static final double CHROMATOGRAM_WIDTH_DEFAULT = 0.3d;
 	
 	private JCheckBox chckbxLeaveOnly;
 	private JCheckBox chckbxRemoveAllMassesAboveParent;
@@ -102,7 +103,7 @@ public class MSMSFeatureExtractionParametersPanel extends JPanel {
 	private JCheckBox flagMinorIsotopesPrecursorsCheckBox;
 	private JCheckBox limitExtractionRtCheckBox;
 	private JCheckBox mergeCollisionsCheckBox;
-	private JComboBox filterWidthComboBox;
+//	private JComboBox filterWidthComboBox;
 	private JComboBox intensityMeasureComboBox;
 	
 //	private JComboBox polarityComboBox;
@@ -125,6 +126,7 @@ public class MSMSFeatureExtractionParametersPanel extends JPanel {
 	private JLabel methodIdLabel;
 	private JLabel lblNewLabel_11;
 	private JSpinner precursorPuritySpinner;
+	private JFormattedTextField minorIsotopeMassErrorTextField;
 	
 	public MSMSFeatureExtractionParametersPanel() {
 		super();
@@ -552,41 +554,73 @@ public class MSMSFeatureExtractionParametersPanel extends JPanel {
 		add(panel_4, gbc_panel_4);
 		
 		GridBagLayout gbl_panel_4 = new GridBagLayout();
-		gbl_panel_4.columnWidths = new int[]{0, 0, 0, 0, 0};
-		gbl_panel_4.rowHeights = new int[]{0, 0, 0, 0};
-		gbl_panel_4.columnWeights = new double[]{0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
-		gbl_panel_4.rowWeights = new double[]{0.0, 0.0, 0.0, Double.MIN_VALUE};
+		gbl_panel_4.columnWidths = new int[]{0, 0, 0, 0, 0, 0, 0, 0};
+		gbl_panel_4.rowHeights = new int[]{0, 0, 0, 0, 0};
+		gbl_panel_4.columnWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
+		gbl_panel_4.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
 		panel_4.setLayout(gbl_panel_4);
 		
 		flagMinorIsotopesPrecursorsCheckBox = 
 				new JCheckBox("Flag MSMS features where precursor is not monoisotopic peak");
 		GridBagConstraints gbc_flagMinorIsotopesPrecursorsCheckBox = new GridBagConstraints();
+		gbc_flagMinorIsotopesPrecursorsCheckBox.gridwidth = 4;
 		gbc_flagMinorIsotopesPrecursorsCheckBox.insets = new Insets(0, 0, 5, 5);
 		gbc_flagMinorIsotopesPrecursorsCheckBox.gridx = 0;
 		gbc_flagMinorIsotopesPrecursorsCheckBox.gridy = 0;
 		panel_4.add(flagMinorIsotopesPrecursorsCheckBox, gbc_flagMinorIsotopesPrecursorsCheckBox);
 		
-		JLabel lblNewLabel_7 = new JLabel("Max. charge");
+		JLabel lblNewLabel_8 = new JLabel("Minor isotope detection mass error");
+		GridBagConstraints gbc_lblNewLabel_8 = new GridBagConstraints();
+		gbc_lblNewLabel_8.anchor = GridBagConstraints.EAST;
+		gbc_lblNewLabel_8.insets = new Insets(0, 0, 5, 5);
+		gbc_lblNewLabel_8.gridx = 1;
+		gbc_lblNewLabel_8.gridy = 1;
+		panel_4.add(lblNewLabel_8, gbc_lblNewLabel_8);
+		
+		minorIsotopeMassErrorTextField = 
+				new JFormattedTextField(MRC2ToolBoxConfiguration.getPpmFormat());
+		minorIsotopeMassErrorTextField.setMinimumSize(new Dimension(50, 20));
+		minorIsotopeMassErrorTextField.setColumns(5);
+		GridBagConstraints gbc_formattedTextField = new GridBagConstraints();
+		gbc_formattedTextField.insets = new Insets(0, 0, 5, 5);
+		gbc_formattedTextField.fill = GridBagConstraints.HORIZONTAL;
+		gbc_formattedTextField.gridx = 2;
+		gbc_formattedTextField.gridy = 1;
+		panel_4.add(minorIsotopeMassErrorTextField, gbc_formattedTextField);
+		
+		JLabel  lblNewLabel_17 = new JLabel("ppm");
+		GridBagConstraints gbc_lblNewLabel_17 = new GridBagConstraints();
+		gbc_lblNewLabel_17.anchor = GridBagConstraints.WEST;
+		gbc_lblNewLabel_17.insets = new Insets(0, 0, 5, 5);
+		gbc_lblNewLabel_17.gridx = 3;
+		gbc_lblNewLabel_17.gridy = 1;
+		panel_4.add(lblNewLabel_17, gbc_lblNewLabel_17);
+		
+		JLabel lblNewLabel_7 = new JLabel("Max. absolute charge");		
+		lblNewLabel_7.setEnabled(false);
 		GridBagConstraints gbc_lblNewLabel_7 = new GridBagConstraints();
 		gbc_lblNewLabel_7.insets = new Insets(0, 0, 5, 5);
-		gbc_lblNewLabel_7.gridx = 2;
-		gbc_lblNewLabel_7.gridy = 0;
+		gbc_lblNewLabel_7.gridx = 5;
+		gbc_lblNewLabel_7.gridy = 1;
 		panel_4.add(lblNewLabel_7, gbc_lblNewLabel_7);
+		lblNewLabel_7.setVisible(false);
 		
-		maxChargeSpinner = new JSpinner();
+		maxChargeSpinner = new JSpinner();		
 		GridBagConstraints gbc_maxChargeSpinner = new GridBagConstraints();
 		gbc_maxChargeSpinner.insets = new Insets(0, 0, 5, 0);
-		gbc_maxChargeSpinner.gridx = 3;
-		gbc_maxChargeSpinner.gridy = 0;
+		gbc_maxChargeSpinner.gridx = 6;
+		gbc_maxChargeSpinner.gridy = 1;
 		panel_4.add(maxChargeSpinner, gbc_maxChargeSpinner);
 		maxChargeSpinner.setModel(new SpinnerNumberModel(2, 1, 3, 1));
+		maxChargeSpinner.setEnabled(false);
 		
 		JLabel lblNewLabel_9 = new JLabel("Chromatogram extraction window");
 		GridBagConstraints gbc_lblNewLabel_9 = new GridBagConstraints();
+		gbc_lblNewLabel_9.gridwidth = 2;
 		gbc_lblNewLabel_9.insets = new Insets(0, 0, 5, 5);
 		gbc_lblNewLabel_9.anchor = GridBagConstraints.EAST;
 		gbc_lblNewLabel_9.gridx = 0;
-		gbc_lblNewLabel_9.gridy = 1;
+		gbc_lblNewLabel_9.gridy = 2;
 		panel_4.add(lblNewLabel_9, gbc_lblNewLabel_9);
 		
 		xicWindowTextField = new JFormattedTextField(MRC2ToolBoxConfiguration.getRtFormat());
@@ -594,44 +628,42 @@ public class MSMSFeatureExtractionParametersPanel extends JPanel {
 		gbc_xicWindowTextField.fill = GridBagConstraints.HORIZONTAL;
 		gbc_xicWindowTextField.gridwidth = 2;
 		gbc_xicWindowTextField.insets = new Insets(0, 0, 5, 5);
-		gbc_xicWindowTextField.gridx = 1;
-		gbc_xicWindowTextField.gridy = 1;
+		gbc_xicWindowTextField.gridx = 2;
+		gbc_xicWindowTextField.gridy = 2;
 		panel_4.add(xicWindowTextField, gbc_xicWindowTextField);
 		
 		JLabel lblNewLabel_10 = new JLabel("min.");
 		GridBagConstraints gbc_lblNewLabel_10 = new GridBagConstraints();
 		gbc_lblNewLabel_10.anchor = GridBagConstraints.WEST;
-		gbc_lblNewLabel_10.insets = new Insets(0, 0, 5, 0);
-		gbc_lblNewLabel_10.gridx = 3;
-		gbc_lblNewLabel_10.gridy = 1;
+		gbc_lblNewLabel_10.insets = new Insets(0, 0, 5, 5);
+		gbc_lblNewLabel_10.gridx = 4;
+		gbc_lblNewLabel_10.gridy = 2;
 		panel_4.add(lblNewLabel_10, gbc_lblNewLabel_10);
+//		
+//		JLabel lblNewLabel_8 = new JLabel("Smoothing filter width");
+//		GridBagConstraints gbc_lblNewLabel_8 = new GridBagConstraints();
+//		gbc_lblNewLabel_8.anchor = GridBagConstraints.EAST;
+//		gbc_lblNewLabel_8.insets = new Insets(0, 0, 0, 5);
+//		gbc_lblNewLabel_8.gridx = 0;
+//		gbc_lblNewLabel_8.gridy = 2;
+//		panel_4.add(lblNewLabel_8, gbc_lblNewLabel_8);
+//		
+//		filterWidthComboBox = new JComboBox<SavitzkyGolayWidth>(
+//				new DefaultComboBoxModel<SavitzkyGolayWidth>(SavitzkyGolayWidth.values()));
+//		GridBagConstraints gbc_filterWidthComboBox = new GridBagConstraints();
+//		gbc_filterWidthComboBox.fill = GridBagConstraints.HORIZONTAL;
+//		gbc_filterWidthComboBox.gridwidth = 2;
+//		gbc_filterWidthComboBox.insets = new Insets(0, 0, 0, 5);
+//		gbc_filterWidthComboBox.gridx = 1;
+//		gbc_filterWidthComboBox.gridy = 2;
+//		panel_4.add(filterWidthComboBox, gbc_filterWidthComboBox);
 		
-		JLabel lblNewLabel_8 = new JLabel("Smoothing filter width");
-		GridBagConstraints gbc_lblNewLabel_8 = new GridBagConstraints();
-		gbc_lblNewLabel_8.anchor = GridBagConstraints.EAST;
-		gbc_lblNewLabel_8.insets = new Insets(0, 0, 0, 5);
-		gbc_lblNewLabel_8.gridx = 0;
-		gbc_lblNewLabel_8.gridy = 2;
-		panel_4.add(lblNewLabel_8, gbc_lblNewLabel_8);
-		
-		filterWidthComboBox = new JComboBox<SavitzkyGolayWidth>(
-				new DefaultComboBoxModel<SavitzkyGolayWidth>(SavitzkyGolayWidth.values()));
-		GridBagConstraints gbc_filterWidthComboBox = new GridBagConstraints();
-		gbc_filterWidthComboBox.fill = GridBagConstraints.HORIZONTAL;
-		gbc_filterWidthComboBox.gridwidth = 2;
-		gbc_filterWidthComboBox.insets = new Insets(0, 0, 0, 5);
-		gbc_filterWidthComboBox.gridx = 1;
-		gbc_filterWidthComboBox.gridy = 2;
-		panel_4.add(filterWidthComboBox, gbc_filterWidthComboBox);
-		
-		disableMS1parameters();
+//		disableMS1parameters();
 	}
 	
-	private void disableMS1parameters() {
-		
-		flagMinorIsotopesPrecursorsCheckBox.setEnabled(false);
-		maxChargeSpinner.setEnabled(false);	
-	}
+//	private void disableMS1parameters() {
+//		maxChargeSpinner.setEnabled(false);	
+//	}
 	
 	public String getParameterSetName() {
 		return nameTextField.getText().trim();
@@ -727,13 +759,17 @@ public class MSMSFeatureExtractionParametersPanel extends JPanel {
 		return flagMinorIsotopesPrecursorsCheckBox.isSelected();
 	}
 	
+	public double getMinorIsotopeDetectionMassError() {
+		return Double.parseDouble(minorIsotopeMassErrorTextField.getText());
+	}
+	
 	public int getMaxPrecursorCharge() {
 		return (int)maxChargeSpinner.getValue();
 	}
 
-	public int getSmoothingFilterWidth() {		
-		return ((SavitzkyGolayWidth)filterWidthComboBox.getSelectedItem()).getWidth();
-	}
+//	public int getSmoothingFilterWidth() {		
+//		return ((SavitzkyGolayWidth)filterWidthComboBox.getSelectedItem()).getWidth();
+//	}
 	
 	public double getChromatogramExtractionWindow() {
 		return Double.valueOf(xicWindowTextField.getText());
@@ -751,8 +787,7 @@ public class MSMSFeatureExtractionParametersPanel extends JPanel {
 				getPrecursorGroupingMassErrorType(),  
 				new Range(3.0d - getChromatogramExtractionWindow(), 
 						3.0d + getChromatogramExtractionWindow()),
-				null
-				//	new SavitzkyGolayFilter(getSmoothingFilterWidth())
+				null	//	new SavitzkyGolayFilter(getSmoothingFilterWidth())				
 				);
 		return ccd;
 	}
@@ -810,6 +845,12 @@ public class MSMSFeatureExtractionParametersPanel extends JPanel {
 		specSimCutoffTextField.setText(Double.toString(ps.getSpectrumSimilarityCutoffForMerging()));
 		
 		flagMinorIsotopesPrecursorsCheckBox.setSelected(ps.isFlagMinorIsotopesPrecursors());
+		
+		if(ps.getMinorIsotopeDetectionMassError() <= 0.0d)
+			ps.setMinorIsotopeDetectionMassError(MINOR_ISOTOPE_DETECTION_MASS_ERROR_DEFAULT);
+		
+		minorIsotopeMassErrorTextField.setText(Double.toString(ps.getMinorIsotopeDetectionMassError()));
+		
 		maxChargeSpinner.setValue(ps.getMaxPrecursorCharge());
 		xicWindowTextField.setText(Double.toString(ps.getChromatogramExtractionWindow()));
 		
@@ -820,9 +861,6 @@ public class MSMSFeatureExtractionParametersPanel extends JPanel {
 		
 		nameTextField.setText(DESCRIPTION_DEFAULT);
 		descriptionTextArea.setText(DESCRIPTION_DEFAULT);
-		
-//		polarityComboBox.setSelectedItem(POLARITY_DEFAULT);
-		
 		minPrecursorIntensityTextField.setText(
 				Double.toString(MIN_PRECURSOR_INTENSITY_DEFAULT));
 		
@@ -847,9 +885,10 @@ public class MSMSFeatureExtractionParametersPanel extends JPanel {
 		intensityMeasureComboBox.setSelectedItem(INTENSITY_MEASURE_DEFAULT);		
 		mergeCollisionsCheckBox.setSelected(MERGE_COLLISION_ENERGIES_DEFAULT);		
 		specSimCutoffTextField.setText(Double.toString(SPECTRUM_SIMILARITY_CUTOFF_DEFAULT));			
-		flagMinorIsotopesPrecursorsCheckBox.setSelected(FLAG_MINOR_ISOTOPES_PRECURSORS_DEFAULT);	
+		flagMinorIsotopesPrecursorsCheckBox.setSelected(FLAG_MINOR_ISOTOPES_PRECURSORS_DEFAULT);			
+		minorIsotopeMassErrorTextField.setText(Double.toString(MINOR_ISOTOPE_DETECTION_MASS_ERROR_DEFAULT));
 		maxChargeSpinner.setValue(MAX_PRECURSOR_CHARGE_DEFAULT);		
-		filterWidthComboBox.setSelectedItem(FILTER_WIDTH_DEFAULT);		
+		//	filterWidthComboBox.setSelectedItem(FILTER_WIDTH_DEFAULT);		
 		xicWindowTextField.setText(Double.toString(CHROMATOGRAM_WIDTH_DEFAULT));
 	}
 			
@@ -858,9 +897,6 @@ public class MSMSFeatureExtractionParametersPanel extends JPanel {
 		MSMSExtractionParameterSet ps = new MSMSExtractionParameterSet();
 		ps.setName(getParameterSetName());
 		ps.setDescription(getDescription());
-		
-//		ps.setPolarity(getPolarity());
-		
 		ps.setMinPrecursorIntensity(getMinimalPrecursorIntensity());
 		ps.setMinPrecursorPurity(getMinimalPrecursorPurity());
 		ps.setDataExtractionRtRange(getDataExtractionRtRange());
@@ -876,8 +912,9 @@ public class MSMSFeatureExtractionParametersPanel extends JPanel {
 		ps.setMergeCollisionEnergies(mergeCollisionEnergies());
 		ps.setSpectrumSimilarityCutoffForMerging(getSpectrumSimilarityCutoff());
 		ps.setFlagMinorIsotopesPrecursors(flagMinorIsotopesPrecursors());
+		ps.setMinorIsotopeDetectionMassError(getMinorIsotopeDetectionMassError());
 		ps.setMaxPrecursorCharge(getMaxPrecursorCharge());
-		ps.setSmoothingFilterWidth(getSmoothingFilterWidth());		
+		//	ps.setSmoothingFilterWidth(getSmoothingFilterWidth());		
 		ps.setChromatogramExtractionWindow(getChromatogramExtractionWindow());
 		ps.setCommonChromatogramDefinition(getCommonChromatogramDefinition());
 		ps.setXicTarget(MsFeatureChromatogramExtractionTarget.MSMSParentIon);
@@ -903,11 +940,14 @@ public class MSMSFeatureExtractionParametersPanel extends JPanel {
 			
 			double minCounts = getMsMsCountsCutoff();
 			if(minCounts > 100.0d || minCounts < 0.0d)
-				errors.add("Relative intensity cutoff should be between 0 and 100");
+				errors.add("Relative intensity cutoff must be between 0 and 100");
 		}
 		if(getChromatogramExtractionWindow() <= 0)
-			errors.add("Chromatogram extraction window should be > 0");
+			errors.add("Chromatogram extraction window must be > 0");
 		
+		if(flagMinorIsotopesPrecursors() && getMinorIsotopeDetectionMassError() <= 0.0d)
+			errors.add("Minor isotope detection mass error mus be > 0");
+				
 		return errors;
 	}
 	
@@ -917,13 +957,11 @@ public class MSMSFeatureExtractionParametersPanel extends JPanel {
 		chckbxRemoveAllMassesAboveParent.setEnabled(isEnabled);
 		chckbxRemoveAllMassesBelowCounts.setEnabled(isEnabled);
 		flagMinorIsotopesPrecursorsCheckBox.setEnabled(isEnabled);
+		minorIsotopeMassErrorTextField.setEnabled(isEnabled);
 		limitExtractionRtCheckBox.setEnabled(isEnabled);
 		mergeCollisionsCheckBox.setEnabled(isEnabled);
-		filterWidthComboBox.setEnabled(isEnabled);
+//		filterWidthComboBox.setEnabled(isEnabled);
 		intensityMeasureComboBox.setEnabled(isEnabled);
-		
-//		polarityComboBox.setEnabled(isEnabled);
-		
 		precursorGroupingMassErrorTypeComboBox.setEnabled(isEnabled);
 		isolationWindowLowerTextField.setEnabled(isEnabled);
 		isolationWindowUpperTextField.setEnabled(isEnabled);

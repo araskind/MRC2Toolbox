@@ -30,13 +30,13 @@ import edu.umich.med.mrc2.datoolbox.gui.tables.ColumnContext;
 import edu.umich.med.mrc2.datoolbox.rawdata.MSMSExtractionParameterSet;
 
 @SuppressWarnings("serial")
-public class MSMSFeatureExtractionParametersModel extends BasicTableModel {
+public class MSMSFeatureExtractionParametersTableModel extends BasicTableModel {
 
 	public static final String METHOD_ID_COLUMN = "ID";
 	public static final String METHOD_COLUMN = "Method";
 	public static final String POLARITY_COLUMN = "Polarity";
 	
-	public MSMSFeatureExtractionParametersModel() {
+	public MSMSFeatureExtractionParametersTableModel() {
 		super();
 		columnArray = new ColumnContext[] {
 			new ColumnContext(METHOD_ID_COLUMN, "Method ID", String.class, false),

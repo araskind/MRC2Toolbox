@@ -36,11 +36,14 @@ import java.util.stream.Collectors;
 import edu.umich.med.mrc2.datoolbox.data.Adduct;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.IDTExperimentalSample;
+import edu.umich.med.mrc2.datoolbox.data.MSFeatureIdentificationLevel;
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MassSpectrum;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureCluster;
+import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
 import edu.umich.med.mrc2.datoolbox.data.MsPoint;
+import edu.umich.med.mrc2.datoolbox.data.StandardFeatureAnnotation;
 import edu.umich.med.mrc2.datoolbox.data.TandemMassSpectrum;
 import edu.umich.med.mrc2.datoolbox.data.XicDataBundle;
 import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureComparator;
@@ -53,6 +56,8 @@ import edu.umich.med.mrc2.datoolbox.data.enums.SpectrumSource;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
+import edu.umich.med.mrc2.datoolbox.gui.rawdata.msms.MSMSFeatureExtractionParametersPanel;
 import edu.umich.med.mrc2.datoolbox.main.AdductManager;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.RawDataManager;
@@ -95,6 +100,7 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 	private boolean mergeCollisionEnergies;
 	private double spectrumSimilarityCutoff;
 	private boolean flagMinorIsotopesPrecursors;
+	private double minorIsotopeDetectionMassError;
 	private int maxPrecursorCharge;
 	private double chromatogramExtractionWindow;
 	private int smoothingFilterWidth;	
@@ -127,6 +133,11 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 		this.mergeCollisionEnergies = ps.isMergeCollisionEnergies();
 		this.spectrumSimilarityCutoff = ps.getSpectrumSimilarityCutoffForMerging();
 		this.flagMinorIsotopesPrecursors = ps.isFlagMinorIsotopesPrecursors();
+		this.minorIsotopeDetectionMassError = ps.getMinorIsotopeDetectionMassError();
+		if(flagMinorIsotopesPrecursors && minorIsotopeDetectionMassError <= 0.0d)
+			minorIsotopeDetectionMassError = 
+				MSMSFeatureExtractionParametersPanel.MINOR_ISOTOPE_DETECTION_MASS_ERROR_DEFAULT;
+		
 		this.maxPrecursorCharge = ps.getMaxPrecursorCharge();		
 		this.chromatogramExtractionWindow = ps.getChromatogramExtractionWindow();
 		smoothingFilter = new SavitzkyGolayFilter(ps.getSmoothingFilterWidth());
@@ -170,15 +181,6 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 			e1.printStackTrace();
 			setStatus(TaskStatus.ERROR);
 		}
-		if(flagMinorIsotopesPrecursors) {
-			try {
-//				flagFeaturesWithMinorIsotopesPrecursors();
-			}
-			catch (Exception e1) {
-				e1.printStackTrace();
-				setStatus(TaskStatus.ERROR);
-			}
-		}
 		try {
 			createFeatureInfoBundles();
 		}
@@ -186,12 +188,46 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 			e1.printStackTrace();
 			setStatus(TaskStatus.ERROR);
 		}
-		//	data.releaseMemory();
+		if(flagMinorIsotopesPrecursors) {
+			try {
+				flagFeaturesWithMinorIsotopesPrecursors();
+			}
+			catch (Exception e1) {
+				e1.printStackTrace();
+				setStatus(TaskStatus.ERROR);
+			}
+		}
 		RawDataManager.removeDataSource(rawDataFile);
 		setStatus(TaskStatus.FINISHED);
 	}
-
+	
 	private void flagFeaturesWithMinorIsotopesPrecursors() {
+		
+		taskDescription = "Flagging MSMS with minor isotope parent ions "
+				+ "and assigning adducts in " + rawDataFile.getName();
+		total = features.size();
+		processed = 0;	
+		
+		MSFeatureIdentificationLevel minorIsotopeIdLevel = 
+				IDTDataCache.getMSFeatureIdentificationLevelById(
+						MsUtils.minorIsotopeIdentificationLevelId);
+		StandardFeatureAnnotation minorIsotopeStdAnnotation = 
+				IDTDataCache.getStandardFeatureAnnotationById(
+						MsUtils.minorIsotopeStandardAnnotationId);
+				
+		for(MSFeatureInfoBundle bundle : featureBundles) {
+			
+			if(MsUtils.isParentIonMinorIsotope(
+					bundle.getMsFeature(), minorIsotopeDetectionMassError)) {
+				
+				bundle.addStandardFeatureAnnotation(minorIsotopeStdAnnotation);
+				for(MsFeatureIdentity id : bundle.getMsFeature().getIdentifications())
+					id.setIdentificationLevel(minorIsotopeIdLevel);
+			}
+		}
+	}
+
+	private void flagFeaturesWithMinorIsotopesPrecursorsOld() {
 		
 		taskDescription = "Flagging MSMS with minor isotope parent ions "
 				+ "and assigning adducts in " + rawDataFile.getName();

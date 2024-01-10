@@ -115,6 +115,10 @@ public class MsUtils {
 	
     //	Spectra normalization
     public static final double SPECTRUM_NORMALIZATION_BASE_INTENSITY = 999.0d;
+    
+    //	Minor isotope annotations
+    public static final String minorIsotopeIdentificationLevelId = "IDS007";
+    public static final String minorIsotopeStandardAnnotationId = "STAN0021";
 
 	public static final IChemObjectBuilder builder = SilentChemObjectBuilder.getInstance();
 	public static final SmilesParser smipar = new SmilesParser(builder);
@@ -1634,6 +1638,27 @@ public class MsUtils {
 	
 	public static MsPoint getBasePeak(Collection<MsPoint>inputSpectrum) {		
 		return inputSpectrum.stream().sorted(reverseIntensitySorter).findFirst().orElse(null);
+	}
+	
+	public static boolean isParentIonMinorIsotope(MsFeature feature, double massAccuracyPpm) {
+		
+		TandemMassSpectrum msms = feature.getSpectrum().getExperimentalTandemSpectrum();
+		if(msms == null)
+			return false;
+			
+		MsPoint precursor = msms.getParent();
+		if(precursor == null)
+			return false;
+		
+		Range lookupRange = createPpmMassRange(
+						precursor.getMz() - MsUtils.NEUTRON_MASS, massAccuracyPpm);
+		double precIntensity = precursor.getIntensity();
+		MsPoint lighterIsotope = feature.getSpectrum().getMsPoints().stream().
+				filter(p -> lookupRange.contains(p.getMz())).
+				filter(p -> (p.getIntensity() > precIntensity)).
+				findFirst().orElse(null);
+		
+		return (lighterIsotope) != null;
 	}
 }
 

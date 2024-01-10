@@ -68,6 +68,7 @@ public class MinorIsotopePrecursorFinder {
 				MRC2ToolBoxCore.configDir + "MRC2ToolBoxPrefs.txt");
 		MRC2ToolBoxConfiguration.initConfiguration();
 		try {
+		//	findMinorIsotopePrecursors();
 			markMinorIsotopePrecursors();
 		} catch (Exception e) {
 			e.printStackTrace();

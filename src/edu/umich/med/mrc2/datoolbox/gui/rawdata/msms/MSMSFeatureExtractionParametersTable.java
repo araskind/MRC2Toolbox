@@ -43,17 +43,17 @@ public class MSMSFeatureExtractionParametersTable extends BasicTable {
 
 		super();
 
-		model = new MSMSFeatureExtractionParametersModel();
+		model = new MSMSFeatureExtractionParametersTableModel();
 		setModel(model);
 		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		
-		rowSorter = new TableRowSorter<MSMSFeatureExtractionParametersModel>(
-				(MSMSFeatureExtractionParametersModel)model);
+		rowSorter = new TableRowSorter<MSMSFeatureExtractionParametersTableModel>(
+				(MSMSFeatureExtractionParametersTableModel)model);
 		setRowSorter(rowSorter);
 
-		columnModel.getColumnById(MSMSFeatureExtractionParametersModel.METHOD_COLUMN)
+		columnModel.getColumnById(MSMSFeatureExtractionParametersTableModel.METHOD_COLUMN)
 			.setCellRenderer(new WordWrapCellRenderer());		
-		setExactColumnWidth(MSMSFeatureExtractionParametersModel.METHOD_ID_COLUMN, 80);
+		setExactColumnWidth(MSMSFeatureExtractionParametersTableModel.METHOD_ID_COLUMN, 80);
 		thf = new TableFilterHeader(this, AutoChoices.ENABLED);		
 		finalizeLayout();
 	}
@@ -61,7 +61,7 @@ public class MSMSFeatureExtractionParametersTable extends BasicTable {
 	public void setModelFromParametersList(Collection<MSMSExtractionParameterSet>parameterList) {
 
 		thf.setTable(null);
-		((MSMSFeatureExtractionParametersModel)model).setModelFromParametersList(parameterList);
+		((MSMSFeatureExtractionParametersTableModel)model).setModelFromParametersList(parameterList);
 		thf.setTable(this);
 		adjustColumns();
 	}
@@ -73,7 +73,7 @@ public class MSMSFeatureExtractionParametersTable extends BasicTable {
 				
 		return (MSMSExtractionParameterSet)model.getValueAt(
 				convertRowIndexToModel(getSelectedRow()),
-				model.getColumnIndex(MSMSFeatureExtractionParametersModel.METHOD_COLUMN));
+				model.getColumnIndex(MSMSFeatureExtractionParametersTableModel.METHOD_COLUMN));
 	}
 }
 
