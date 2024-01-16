@@ -56,6 +56,8 @@ public class WorklistPanelMenuBar extends CommonMenuBar {
 	private static final Icon refreshIcon = GuiUtils.getIcon("rerun", 24);	
 	private static final Icon extractWorklistIcon = GuiUtils.getIcon("extractList", 24);
 	private static final Icon sampleWarningIcon = GuiUtils.getIcon("sampleWarning", 24);
+	private static final Icon generateManifestIcon = GuiUtils.getIcon("generateManifest", 24);
+	
 	
 	// Menus
 	private JMenu
@@ -75,7 +77,8 @@ public class WorklistPanelMenuBar extends CommonMenuBar {
 	private JMenuItem
 		saveWorklistMenuItem,
 		copyWorklistMenuItem,
-		saveManifestMenuItem;
+		saveManifestMenuItem,
+		generateManifestMenuItem;
 	
 	// Utils items
 	private JMenuItem
@@ -126,6 +129,12 @@ public class WorklistPanelMenuBar extends CommonMenuBar {
 		saveManifestMenuItem = addItem(exportMenu, 
 				MainActionCommands.SAVE_ASSAY_MANIFEST_COMMAND, 
 				manifestIcon);
+		
+		exportMenu.addSeparator();
+		
+		generateManifestMenuItem = addItem(exportMenu, 
+				MainActionCommands.CREATE_ASSAY_MANIFEST_COMMAND, 
+				generateManifestIcon);
 		
 		add(exportMenu);
 		

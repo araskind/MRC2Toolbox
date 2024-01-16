@@ -100,13 +100,13 @@
 									<content delegate="SplitDockStationFactory">
 										<fullscreen-action>false</fullscreen-action>
 										<node nodeId="1600213797152" orientation="HORIZONTAL" divider="0.25">
-											<leaf id="2" nodeId="1600213797154">
+											<leaf id="0" nodeId="1600213797154">
 												<placeholders>
 													<placeholder>dock.single.DockableMsMsInfoPanel</placeholder>
 												</placeholders>
 											</leaf>
 											<node nodeId="1600214012087" orientation="HORIZONTAL" divider="0.6348314606741573">
-												<leaf id="0" nodeId="1600213797158">
+												<leaf id="1" nodeId="1600213797158">
 													<placeholders>
 														<placeholder>dock.single.DockableMsMsPanelDockableMsMsTable</placeholder>
 														<placeholder>dock.single.DockableMsMsDataEditorPanelDockableSpectumPlot</placeholder>
@@ -130,7 +130,7 @@
 														</entry>
 													</placeholder-map>
 												</leaf>
-												<leaf id="1" nodeId="1600214012085">
+												<leaf id="2" nodeId="1600214012085">
 													<placeholders>
 														<placeholder>dock.single.MsMsPanelAnnotations</placeholder>
 													</placeholders>
@@ -146,6 +146,16 @@
 								</layout>
 							</adjacent>
 							<children ignore="false">
+								<child>
+									<layout factory="predefined" placeholder="dock.single.DockableMsMsInfoPanel">
+										<replacement id="dockablesingle DockableMsMsInfoPanel"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>DockableMsMsInfoPanel</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
+								</child>
 								<child>
 									<layout factory="delegate_StackDockStationFactory">
 										<selected>0</selected>
@@ -215,16 +225,6 @@
 										<replacement id="dockablesingle MsMsPanelAnnotations"/>
 										<delegate id="delegate_ccontrol backup factory id">
 											<id>MsMsPanelAnnotations</id>
-											<area/>
-										</delegate>
-									</layout>
-									<children ignore="false"/>
-								</child>
-								<child>
-									<layout factory="predefined" placeholder="dock.single.DockableMsMsInfoPanel">
-										<replacement id="dockablesingle DockableMsMsInfoPanel"/>
-										<delegate id="delegate_ccontrol backup factory id">
-											<id>DockableMsMsInfoPanel</id>
 											<area/>
 										</delegate>
 									</layout>

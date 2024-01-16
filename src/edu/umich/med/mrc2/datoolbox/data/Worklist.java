@@ -30,6 +30,7 @@ import java.util.HashSet;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
+import edu.umich.med.mrc2.datoolbox.data.enums.MoTrPACRawDataManifestFields;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSWorklistItem;
 
 public class Worklist implements Serializable {
@@ -117,6 +118,19 @@ public class Worklist implements Serializable {
 			tupd.setSample(nlwki.getSample());
 			tupd.setSamplePrep(nlwki.getSamplePrep());
 			tupd.setPrepItemId(nlwki.getPrepItemId());
+		}
+	}
+	
+	public void setRunOrder() {
+		
+		Collection<WorklistItem>sorted = getTimeSortedWorklistItems();
+		int injectionOrder = 1;
+		for(WorklistItem item : sorted) {
+			
+			item.setProperty(
+					MoTrPACRawDataManifestFields.MOTRPAC_SAMPLE_ORDER.getName(), 
+					Integer.toString(injectionOrder));
+			injectionOrder++;
 		}
 	}
 }

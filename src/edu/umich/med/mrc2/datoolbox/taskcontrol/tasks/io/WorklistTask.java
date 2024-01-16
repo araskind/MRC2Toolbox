@@ -166,21 +166,21 @@ public abstract class WorklistTask extends AbstractTask {
 			df.setInjectionTime(injectionTime);
 
 			for (Entry<String, Integer> entry : fieldMap.entrySet())
-				newItem.addProperty(entry.getKey(), worklistData[i][entry.getValue()]);
+				newItem.setProperty(entry.getKey(), worklistData[i][entry.getValue()]);
 
 			worklist.addItem(newItem);		
 			processed++;
 		}
 	}
 
-	protected void scanDirectoryForSampleInfo(Collection<File> dataDiles) throws Exception {
+	protected void scanDirectoryForSampleInfo(Collection<File> dataFiles) throws Exception {
 
 		DateFormat dFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		total = dataDiles.size();
+		total = dataFiles.size();
 		processed = 0;
 		worklist = new Worklist();
 
-		for (File df : dataDiles) {
+		for (File df : dataFiles) {
 		
 			String baseName = FilenameUtils.getBaseName(df.getName());
 			DataFile af = new DataFile(baseName);
@@ -220,7 +220,7 @@ public abstract class WorklistTask extends AbstractTask {
 					newItem.setTimeStamp(injectionTime);
 					af.setInjectionTime(injectionTime);
 					for (Entry<String, String> entry : sampleData.entrySet())
-						newItem.addProperty(entry.getKey(), entry.getValue());
+						newItem.setProperty(entry.getKey(), entry.getValue());
 
 					worklist.addItem(newItem);
 				}

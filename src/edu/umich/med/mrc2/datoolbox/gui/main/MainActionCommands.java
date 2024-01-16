@@ -166,11 +166,13 @@ public enum MainActionCommands {
 	LOAD_WORKLIST_COMMAND("Load assay worklist"),
 	ADD_WORKLIST_COMMAND("Add assay worklist data"),
 	SAVE_WORKLIST_COMMAND("Save assay worklist to file"),
-	SAVE_ASSAY_MANIFEST_COMMAND("Save assay manifest to file"),
 	COPY_WORKLIST_COMMAND("Copy assay worklist to clipboard as text"),
 	EXTRACT_WORKLIST_COMMAND("Extract assay worklist to text file from raw data folder"),
 	SCAN_DIR_SAMPLE_INFO_COMMAND("Scan directory for sample information"),
 	SCAN_DIR_ADD_SAMPLE_INFO_COMMAND("Add sample information from directory"),
+	CREATE_ASSAY_MANIFEST_COMMAND("Create assay manifest from design and worklist"),
+	SAVE_ASSAY_MANIFEST_COMMAND("Save assay manifest to file"),
+	COPY_ASSAY_MANIFEST_COMMAND("Copy assay manifest to clipboard as text"),
 	LOAD_MGF_COMMAND("Load MGF data file"),
 	SEND_WORKLIST_TO_DATABASE("Send worklist to database"),
 	REFRESH_WORKLIST("Refresh worklist"),
@@ -280,6 +282,7 @@ public enum MainActionCommands {
 	// Remove data
 	CLEAR_LIBRARY_COMMAND("Clear compound library"),
 	CLEAR_WORKLIST_COMMAND("Clear assay worklist"),
+	CLEAR_MANIFEST_COMMAND("Clear manifest data"),
 
 	// Export data
 	EXPORT_RESULTS_COMMAND("Export results"),

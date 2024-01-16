@@ -41,7 +41,7 @@ public class WorklistItem implements Comparable<WorklistItem>, Serializable {
 		properties = new TreeMap<String, String>();
 	}
 
-	public void addProperty(String propertyName, String propertyValue) {
+	public void setProperty(String propertyName, String propertyValue) {
 		properties.put(propertyName, propertyValue);
 	}
 

@@ -74,6 +74,7 @@ import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.TableClipboardKeyAdapter;
 import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
+import edu.umich.med.mrc2.datoolbox.gui.worklist.manifest.ManifestGenerationDialog;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
@@ -244,6 +245,9 @@ public class WorklistPanel extends DockableMRC2ToolboxPanel implements BackedByP
 
 		if (command.equals(MainActionCommands.SAVE_ASSAY_MANIFEST_COMMAND.getName()))
 			saveManifestToFile();
+		
+		if (command.equals(MainActionCommands.CREATE_ASSAY_MANIFEST_COMMAND.getName()))
+			showManifestGenerationDialog();
 
 		if (command.equals(MainActionCommands.CLEAR_WORKLIST_COMMAND.getName()))
 			clearWorklist();
@@ -376,7 +380,22 @@ public class WorklistPanel extends DockableMRC2ToolboxPanel implements BackedByP
 			}
 		}
 	}
-
+	
+	private void showManifestGenerationDialog(){
+		
+		if(currentExperiment == null || activeDataPipeline == null)
+			return;
+		
+		if(currentExperiment.getExperimentDesign() == null 
+				|| currentExperiment.getExperimentDesign().isEmpty())
+			return;
+		
+		ManifestGenerationDialog dialog = 
+				new ManifestGenerationDialog(currentExperiment.getExperimentDesign());
+		dialog.setLocationRelativeTo(this.getContentPane());
+		dialog.setVisible(true);
+	}
+	
 	private void copyWorklistToClipboard() {
 
 		String worklistString = worklistTable.getWorklistsAsString();

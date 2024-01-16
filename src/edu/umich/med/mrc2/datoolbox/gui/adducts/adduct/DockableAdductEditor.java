@@ -191,10 +191,13 @@ public class DockableAdductEditor extends DefaultSingleCDockable implements Acti
 		CompositeAdduct edited = compositeAdductEditor.getEditedCompositeAdduct();
 		
 		//	If no change
-		if(current != null && current.equals(edited)) {
-			compositeAdductEditor.dispose();
-			return;
-		}
+//		if(current != null && current.equals(edited) 
+//				&& ((current.getDescription() == null && edited.getDescription() == null)
+//						) || (current.getDescription() != null && edited.getDescription() != null)
+//				&& current.getDescription().equals(edited.getDescription())) {
+//			compositeAdductEditor.dispose();
+//			return;
+//		}
 		Collection<String> errors = compositeAdductEditor.validateModification();
 		if(!errors.isEmpty()) {
 			MessageDialog.showErrorMsg(StringUtils.join(errors, "\n"), compositeAdductEditor);
@@ -203,7 +206,6 @@ public class DockableAdductEditor extends DefaultSingleCDockable implements Acti
 		if(current == null)
 			AdductManager.addAdduct(edited);
 		else {
-
 			edited.setId(current.getId());
 			AdductManager.updateAdduct(edited);
 		}

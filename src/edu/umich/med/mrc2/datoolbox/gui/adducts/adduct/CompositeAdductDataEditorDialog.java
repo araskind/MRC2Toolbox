@@ -413,14 +413,17 @@ public class CompositeAdductDataEditorDialog extends JDialog
 		if(!errors.isEmpty())
 			return errors;
 		
-		CompositeAdduct tmp = new CompositeAdduct(chargeCarrier);
-		for(SimpleAdduct mod : compositAdductComponentsTable.getAllAdducts())
-			tmp.addModification(mod);
-		
+		CompositeAdduct tmp = getEditedCompositeAdduct();		
 		CompositeAdduct sameAdduct = AdductManager.getCompositeAdducts().
 				stream().filter(c -> c.equals(tmp)).findFirst().orElse(null);
 		
-		if(sameAdduct != null)
+		boolean sameDescription = false;
+		if(sameAdduct != null) {
+			
+			if(sameAdduct.getDescription() != null && tmp.getDescription() != null)
+				sameDescription = sameAdduct.getDescription().equals(tmp.getDescription());
+		}		
+		if(sameAdduct != null && sameDescription)
 			errors.add("Composite adduct with the same combination\n"
 					+ "of charge carrier/losses/additions already exists.");
 			
@@ -439,8 +442,9 @@ public class CompositeAdductDataEditorDialog extends JDialog
 		
 		String description = descriptionTextField.getText().trim();
 		if(description.isEmpty())
-			tmp.setDescription(tmp.getName());
+			description = tmp.getName();
 		
+		tmp.setDescription(description);	
 		return tmp;
 	}
 	
