@@ -218,6 +218,9 @@ public class WorklistPanel extends DockableMRC2ToolboxPanel implements BackedByP
 		
 		if (command.equals(MainActionCommands.EXTRACT_WORKLIST_COMMAND.getName()))
 			extractWorlkistFromRawDataFolderToFile();
+			
+		if (command.equals(MainActionCommands.CREATE_ASSAY_MANIFEST_COMMAND.getName()))
+			showManifestGenerationDialog();
 		
 		if(currentExperiment == null || activeDataPipeline == null)
 			return;
@@ -245,9 +248,6 @@ public class WorklistPanel extends DockableMRC2ToolboxPanel implements BackedByP
 
 		if (command.equals(MainActionCommands.SAVE_ASSAY_MANIFEST_COMMAND.getName()))
 			saveManifestToFile();
-		
-		if (command.equals(MainActionCommands.CREATE_ASSAY_MANIFEST_COMMAND.getName()))
-			showManifestGenerationDialog();
 
 		if (command.equals(MainActionCommands.CLEAR_WORKLIST_COMMAND.getName()))
 			clearWorklist();
@@ -383,10 +383,8 @@ public class WorklistPanel extends DockableMRC2ToolboxPanel implements BackedByP
 	
 	private void showManifestGenerationDialog(){
 		
-		if(currentExperiment == null || activeDataPipeline == null)
-			return;
-		
-		if(currentExperiment.getExperimentDesign() == null 
+		if(currentExperiment == null 
+				|| currentExperiment.getExperimentDesign() == null 
 				|| currentExperiment.getExperimentDesign().isEmpty())
 			return;
 		

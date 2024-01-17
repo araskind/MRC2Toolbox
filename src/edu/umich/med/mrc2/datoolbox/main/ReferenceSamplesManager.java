@@ -81,6 +81,16 @@ public class ReferenceSamplesManager {
 		ps.close();
 		ConnectionManager.releaseConnection(conn);
 	}
+	
+	public static void refreshReferenceSampleList() {
+		
+		try {
+			getReferenceSamplesFromDatabase();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 
 	//	TODO handle "Include in pool stats"
 	public static int addReferenceSample(ExperimentalSample newRefSample) throws Exception {

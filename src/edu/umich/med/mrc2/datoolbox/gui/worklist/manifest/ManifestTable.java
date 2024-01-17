@@ -21,14 +21,10 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.worklist.manifest;
 
-import java.awt.Component;
 import java.util.Date;
 
-import javax.swing.JLabel;
 import javax.swing.JTable;
-import javax.swing.JTextPane;
 import javax.swing.SwingUtilities;
-import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableRowSorter;
 
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
@@ -109,6 +105,7 @@ public class ManifestTable extends BasicTable {
 					model.fireTableDataChanged();
 					thf.setTable(table);
 					tca.adjustColumns();
+					finalizeLayout();
 				}
 			};
 			try {
@@ -124,40 +121,16 @@ public class ManifestTable extends BasicTable {
 			clearTable();
 	}
 	
-	public String getWorklistsAsString() {
-
-		StringBuffer worklistData = new StringBuffer();
-		int numCols = getColumnCount();
-
-		worklistData.append(getColumnName(0));
-
-		for(int i=1; i<numCols; i++)
-			worklistData.append("\t" + getColumnName(i));
-
-		worklistData.append("\n");
-
-		for(int i=0;  i<getRowCount(); i++){
-
-			for(int j=0; j<numCols; j++){
-
-                final TableCellRenderer renderer = getCellRenderer(i, j);
-                final Component comp = prepareRenderer(renderer, i, j);
-                String txt = null;
-
-                if (comp instanceof JLabel)
-                	txt = ((JLabel) comp).getText();
-
-                if (comp instanceof JTextPane)
-                	txt = ((JTextPane) comp).getText();
-
-            	worklistData.append(txt.trim());
-
-                if(j<numCols-1)
-                	worklistData.append("\t");
-                else
-                	worklistData.append("\n");
-			}
-		}
-		return worklistData.toString();
+	@Override
+	public void clearTable() {
+		
+		thf.setTable(null);
+		model = new ManifestTableModel();
+		setModel(model);
+		createDefaultColumnsFromModel();
+		rowSorter = new TableRowSorter<ManifestTableModel>(model);
+		setRowSorter(rowSorter);
+		thf = new TableFilterHeader(this, AutoChoices.ENABLED);
+		finalizeLayout();
 	}
 }

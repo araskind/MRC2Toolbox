@@ -25,12 +25,22 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,6 +60,7 @@ import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRootPane;
 import javax.swing.JScrollPane;
@@ -92,6 +103,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskListener;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io.WorklistImportTask;
 import edu.umich.med.mrc2.datoolbox.utils.DataImportUtils;
+import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
 
 public class ManifestGenerationDialog extends JDialog 
 		implements ActionListener, BackedByPreferences, TaskListener{
@@ -193,17 +205,78 @@ public class ManifestGenerationDialog extends JDialog
 		if(command.equals(MainActionCommands.SCAN_DIR_ADD_SAMPLE_INFO_COMMAND.getName()))
 			loadWorklistFromDirectoryScan(true);
 		
-		if(command.equals(MainActionCommands.COPY_ASSAY_MANIFEST_COMMAND.getName())){
-
-		}
-		if(command.equals(MainActionCommands.SAVE_ASSAY_MANIFEST_COMMAND.getName())){
-
-		}
-		if(command.equals(MainActionCommands.CLEAR_MANIFEST_COMMAND.getName())){
-
-		}
+		if(command.equals(MainActionCommands.COPY_ASSAY_MANIFEST_COMMAND.getName()))
+			copyManifestToClipboard();
+		
+		if(command.equals(MainActionCommands.SAVE_ASSAY_MANIFEST_COMMAND.getName()))
+			saveManifestToFile();
+		
+		if(command.equals(MainActionCommands.CLEAR_MANIFEST_COMMAND.getName()))
+			clearManifestData();		
 	}
 	
+	private void copyManifestToClipboard() {
+	
+		String manifestString = manifestTable.getTableDataAsString();
+		if(manifestString == null || manifestString.isEmpty())
+			return;
+
+		StringSelection stringSelection = new StringSelection(manifestString);
+		Clipboard clpbrd = Toolkit.getDefaultToolkit().getSystemClipboard();
+		clpbrd.setContents(stringSelection, null);		
+	}
+
+	private void saveManifestToFile() {
+		
+		String manifestString = manifestTable.getTableDataAsString();
+		if(manifestString == null || manifestString.isEmpty())
+			return;
+
+		DataAnalysisProject currentExperiment = 
+				MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
+		File saveDirectory = 
+				new File(MRC2ToolBoxConfiguration.getDefaultExperimentsDirectory()).getAbsoluteFile();
+		if (currentExperiment != null)
+			saveDirectory = MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExportsDirectory();
+
+		JnaFileChooser fc = new JnaFileChooser(saveDirectory);
+		fc.setMode(JnaFileChooser.Mode.Files);
+		fc.addFilter("Text files", "txt", "TXT");
+		fc.setTitle("Save namifest to file:");
+		fc.setMultiSelectionEnabled(false);
+		String defaultFileName = currentExperiment.getName() + "_" + getMsMode() + "_MANIFEST_"
+				+ MRC2ToolBoxConfiguration.getFileTimeStampFormat().format(new Date()) + ".txt";
+		fc.setDefaultFileName(defaultFileName);
+		
+		if (fc.showSaveDialog(SwingUtilities.getWindowAncestor(this.getContentPane()))) {
+			
+			File outputFile = fc.getSelectedFile();
+			outputFile = FIOUtils.changeExtension(outputFile, "txt") ;
+			Path outputPath = Paths.get(outputFile.getAbsolutePath());
+		    try {
+				Files.writeString(outputPath, 
+						manifestString, 
+						StandardCharsets.UTF_8,
+						StandardOpenOption.CREATE, 
+						StandardOpenOption.TRUNCATE_EXISTING);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	private void clearManifestData() {
+
+		if(manifestTable.getModel().getRowCount() == 0)
+			return;
+		
+		int selectedValue = MessageDialog.showChoiceWithWarningMsg(
+				"Do you want to clear the curent manifest data?", 
+				this.getContentPane());
+
+		if (selectedValue == JOptionPane.YES_OPTION)
+			manifestTable.clearTable();
+	}
+
 	private void loadWorklistFromDirectoryScan(boolean append) {
 
 		if(append && activeWorklist == null)
@@ -399,6 +472,14 @@ public class ManifestGenerationDialog extends JDialog
 		else {
 			activeWorklist = worklist;
 		}
+		List<WorklistItem> itemsToRemove = activeWorklist.getWorklistItems().stream().
+			filter(i -> i.getProperty(MoTrPACRawDataManifestFields.MOTRPAC_SAMPLE_ID.getName()) == null).
+			collect(Collectors.toList());
+		if(!itemsToRemove.isEmpty()) {
+			
+			for(WorklistItem item : itemsToRemove)
+				activeWorklist.getWorklistItems().remove(item);
+		}		
 		activeWorklist.setRunOrder();
 		manifestTable.setTableModelFromWorklist(activeWorklist);
 	}

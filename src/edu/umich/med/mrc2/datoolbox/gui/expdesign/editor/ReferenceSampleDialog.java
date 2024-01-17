@@ -31,9 +31,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import javax.swing.Icon;
@@ -42,12 +40,10 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
-import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JRootPane;
 import javax.swing.JScrollPane;
 import javax.swing.KeyStroke;
-import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
@@ -61,7 +57,6 @@ import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.ExperimentalSampleListCellRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.utils.CommonToolbar;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
-import edu.umich.med.mrc2.datoolbox.gui.utils.SortedListModel;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.ReferenceSamplesManager;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
@@ -77,8 +72,8 @@ public class ReferenceSampleDialog extends JDialog implements ActionListener{
 	private static final Icon deleteSampleIcon = GuiUtils.getIcon("deleteSample", 32);
 
 	private JButton addButton, removeButton;
-	private JList availableReferenceList;
-	private JList usedReferenceList;
+	private ReferenceSampleListingTable availableReferenceList;
+	private ReferenceSampleListingTable usedReferenceList;
 
 	private JButton btnSaveChanges;
 
@@ -96,6 +91,9 @@ public class ReferenceSampleDialog extends JDialog implements ActionListener{
 		pack();
 	}
 
+	/**
+	 * @wbp.parser.constructor
+	 */
 	public ReferenceSampleDialog(ActionListener parent, DataAnalysisProject project) {
 
 		super();
@@ -111,7 +109,7 @@ public class ReferenceSampleDialog extends JDialog implements ActionListener{
 		setTitle("Edit reference sample(s)");
 		setIconImage(((ImageIcon) rsEditIcon).getImage());
 		setModalityType(ModalityType.APPLICATION_MODAL);
-		setSize(new Dimension(600, 400));
+		setSize(new Dimension(600, 800));
 		setResizable(true);
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
@@ -144,9 +142,7 @@ public class ReferenceSampleDialog extends JDialog implements ActionListener{
 		panel.add(lblReferenceSamplesPresent, gbc_lblReferenceSamplesPresent);
 
 		ExperimentalSampleListCellRenderer slr = new ExperimentalSampleListCellRenderer();
-		availableReferenceList = new JList<ExperimentalSample>();
-		availableReferenceList.setCellRenderer(slr);
-		availableReferenceList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+		availableReferenceList = new ReferenceSampleListingTable();
 		JScrollPane scrollPane = new JScrollPane(availableReferenceList);
 		GridBagConstraints gbc_scrollPane = new GridBagConstraints();
 		gbc_scrollPane.fill = GridBagConstraints.BOTH;
@@ -156,9 +152,7 @@ public class ReferenceSampleDialog extends JDialog implements ActionListener{
 		gbc_scrollPane.gridy = 1;
 		panel.add(scrollPane, gbc_scrollPane);
 
-		usedReferenceList = new JList<ExperimentalSample>();
-		usedReferenceList.setCellRenderer(slr);
-		usedReferenceList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+		usedReferenceList = new ReferenceSampleListingTable();
 		JScrollPane scrollPane_1 = new JScrollPane(usedReferenceList);
 		GridBagConstraints gbc_scrollPane_1 = new GridBagConstraints();
 		gbc_scrollPane_1.fill = GridBagConstraints.BOTH;
@@ -223,11 +217,12 @@ public class ReferenceSampleDialog extends JDialog implements ActionListener{
 	@SuppressWarnings("unchecked")
 	private void populateSampleListsFromLimsExperiment(LIMSExperiment limsExperiment2) {
 
+		ReferenceSamplesManager.refreshReferenceSampleList();
 		if(ReferenceSamplesManager.getReferenceSamples() == null || limsExperiment2 == null)
 			return;
 
-		SortedListModel<ExperimentalSample> availableReferenceListModel = new SortedListModel<ExperimentalSample>();
-		SortedListModel<ExperimentalSample> usedReferenceListModel = new SortedListModel<ExperimentalSample>();
+//		SortedListModel<ExperimentalSample> availableReferenceListModel = new SortedListModel<ExperimentalSample>();
+//		SortedListModel<ExperimentalSample> usedReferenceListModel = new SortedListModel<ExperimentalSample>();
 		Collection<ExperimentalSample>available = new ArrayList<ExperimentalSample>();
 		Collection<ExperimentalSample>used = new ArrayList<ExperimentalSample>();
 		for(ExperimentalSample ref : ReferenceSamplesManager.getReferenceSamples()) {
@@ -237,20 +232,21 @@ public class ReferenceSampleDialog extends JDialog implements ActionListener{
 			else
 				available.add(ref);
 		}
-		usedReferenceListModel.addAll(used);
-		availableReferenceListModel.addAll(available);
-		availableReferenceList.setModel(availableReferenceListModel);
-		usedReferenceList.setModel(usedReferenceListModel);
+//		usedReferenceListModel.addAll(used);
+//		availableReferenceListModel.addAll(available);
+		availableReferenceList.setTableModelFromReferenceSamples(available);
+		usedReferenceList.setTableModelFromReferenceSamples(used);
 	}
 
 	@SuppressWarnings("unchecked")
 	private void populateSampleListsFromCefAnalyzerProject(DataAnalysisProject cefAnalyzerProject2) {
 
+		ReferenceSamplesManager.refreshReferenceSampleList();
 		if(ReferenceSamplesManager.getReferenceSamples() == null || cefAnalyzerProject2 == null)
 			return;
 
-		SortedListModel<ExperimentalSample> availableReferenceListModel = new SortedListModel<ExperimentalSample>();
-		SortedListModel<ExperimentalSample> usedReferenceListModel = new SortedListModel<ExperimentalSample>();
+//		SortedListModel<ExperimentalSample> availableReferenceListModel = new SortedListModel<ExperimentalSample>();
+//		SortedListModel<ExperimentalSample> usedReferenceListModel = new SortedListModel<ExperimentalSample>();
 		Collection<ExperimentalSample>available = new ArrayList<ExperimentalSample>();
 		Collection<ExperimentalSample>used = new ArrayList<ExperimentalSample>();
 		for(ExperimentalSample ref : ReferenceSamplesManager.getReferenceSamples()) {
@@ -260,10 +256,12 @@ public class ReferenceSampleDialog extends JDialog implements ActionListener{
 			else
 				available.add(ref);
 		}
-		usedReferenceListModel.addAll(used);
-		availableReferenceListModel.addAll(available);
-		availableReferenceList.setModel(availableReferenceListModel);
-		usedReferenceList.setModel(usedReferenceListModel);
+//		usedReferenceListModel.addAll(used);
+//		availableReferenceListModel.addAll(available);
+//		availableReferenceList.setModel(availableReferenceListModel);
+//		usedReferenceList.setModel(usedReferenceListModel);
+		availableReferenceList.setTableModelFromReferenceSamples(available);
+		usedReferenceList.setTableModelFromReferenceSamples(used);
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
@@ -272,44 +270,42 @@ public class ReferenceSampleDialog extends JDialog implements ActionListener{
 
 		if(e.getActionCommand().equals(MainActionCommands.ADD_REFERENCE_SAMPLES.getName())) {
 
-			List<ExperimentalSample>selected = availableReferenceList.getSelectedValuesList();
-			((SortedListModel)usedReferenceList.getModel()).addAll(selected);
-
-			for(ExperimentalSample ref : selected)
-				((SortedListModel)availableReferenceList.getModel()).removeElement(ref);
+			Collection<ExperimentalSample>selected = availableReferenceList.getSelectedSamples();
+			if(selected.isEmpty())
+				return;
+			
+			Collection<ExperimentalSample>assigned = usedReferenceList.getAllSamples();
+			assigned.addAll(selected);
+			
+			Collection<ExperimentalSample>newAvailable = availableReferenceList.getAllSamples();
+			newAvailable.removeAll(selected);
+			
+			availableReferenceList.setTableModelFromReferenceSamples(newAvailable);
+			usedReferenceList.setTableModelFromReferenceSamples(assigned);
 		}
 		if(e.getActionCommand().equals(MainActionCommands.REMOVE_REFERENCE_SAMPLES.getName())) {
 
-			List<ExperimentalSample>selected = usedReferenceList.getSelectedValuesList();
-			((SortedListModel)availableReferenceList.getModel()).addAll(selected);
-
-			for(ExperimentalSample ref : selected)
-				((SortedListModel)usedReferenceList.getModel()).removeElement(ref);
+			Collection<ExperimentalSample>selected = usedReferenceList.getSelectedSamples();
+			if(selected.isEmpty())
+				return;
+			
+			Collection<ExperimentalSample>available = availableReferenceList.getAllSamples();
+			available.addAll(selected);
+			
+			Collection<ExperimentalSample>newAssigned = usedReferenceList.getAllSamples();
+			newAssigned.removeAll(selected);
+			
+			availableReferenceList.setTableModelFromReferenceSamples(available);
+			usedReferenceList.setTableModelFromReferenceSamples(newAssigned);
 		}
 	}
 
 	public Collection<ExperimentalSample>getAvailableReferenceSamples(){
-
-		@SuppressWarnings("rawtypes")
-		SortedListModel model = ((SortedListModel)availableReferenceList.getModel());
-        TreeSet<ExperimentalSample> items = new TreeSet<ExperimentalSample>();
-		int size = model.getSize();
-		for (int i = 0; i < size; i++)
-			items.add((ExperimentalSample) model.getElementAt(i));
-
-		return items;
+		return availableReferenceList.getAllSamples();
 	}
 
 	public Collection<ExperimentalSample>getUsedReferenceSamples(){
-
-		@SuppressWarnings("rawtypes")
-		SortedListModel model = ((SortedListModel)usedReferenceList.getModel());
-        TreeSet<ExperimentalSample> items = new TreeSet<ExperimentalSample>();
-		int size = model.getSize();
-		for (int i = 0; i < size; i++)
-			items.add((ExperimentalSample) model.getElementAt(i));
-
-		return items;
+		return usedReferenceList.getAllSamples();
 	}
 	
 	public void editReferenceSamples() {
