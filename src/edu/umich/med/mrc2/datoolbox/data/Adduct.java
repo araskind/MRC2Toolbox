@@ -21,6 +21,7 @@
 
 package edu.umich.med.mrc2.datoolbox.data;
 
+import edu.umich.med.mrc2.datoolbox.data.enums.AdductNotationType;
 import edu.umich.med.mrc2.datoolbox.data.enums.ModificationType;
 import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
 
@@ -35,8 +36,6 @@ public interface Adduct {
 	double getAbsoluteMassCorrection();
 
 	String getAddedGroup();
-
-	String getCefNotation();
 
 	int getCharge();
 
@@ -60,8 +59,6 @@ public interface Adduct {
 
 	void setAddedGroup(String addedGroup);
 
-	void setCefNotation(String cefNotation);
-
 	void setCharge(int charge);
 
 	void setDescription(String description);
@@ -81,5 +78,8 @@ public interface Adduct {
 	String getSmiles();
 
 	void setSmiles(String smiles);
-
+	
+	void setNotationForType(AdductNotationType notationType, String notation);
+	
+	String getNotationForType(AdductNotationType notationType);
 }

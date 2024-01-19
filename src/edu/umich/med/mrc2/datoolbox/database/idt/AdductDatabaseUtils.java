@@ -34,6 +34,7 @@ import edu.umich.med.mrc2.datoolbox.data.Adduct;
 import edu.umich.med.mrc2.datoolbox.data.AdductExchange;
 import edu.umich.med.mrc2.datoolbox.data.CompositeAdduct;
 import edu.umich.med.mrc2.datoolbox.data.SimpleAdduct;
+import edu.umich.med.mrc2.datoolbox.data.enums.AdductNotationType;
 import edu.umich.med.mrc2.datoolbox.data.enums.CompositeAdductComponentType;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.enums.ModificationType;
@@ -52,8 +53,10 @@ public class AdductDatabaseUtils {
 		Collection<Adduct> adductList = new ArrayList<Adduct>();
 		Connection conn = ConnectionManager.getConnection();
 		String query = "SELECT ADDUCT_ID, ADDUCT_NAME, DESCRIPTION, CHARGE, "
-				+ "NMER, ADDED_GROUP, REMOVED_GROUP, CEF_NOTATION FROM ADDUCTS "
+				+ "NMER, ADDED_GROUP, REMOVED_GROUP, CEF_NOTATION, "
+				+ "BINNER_NOTATION, SIRIUS_NOTATION FROM ADDUCTS "
 				+ "ORDER BY ADDUCT_NAME";
+				
 		PreparedStatement ps = conn.prepareStatement(query);
 		ResultSet rs = ps.executeQuery();
 		while (rs.next()) {
@@ -64,15 +67,28 @@ public class AdductDatabaseUtils {
 					rs.getString("DESCRIPTION"), 
 					rs.getString("ADDED_GROUP"), 
 					rs.getString("REMOVED_GROUP"), 
-					rs.getString("CEF_NOTATION"), 
 					null, 
 					rs.getInt("CHARGE"), 
 					rs.getInt("NMER"), 
 					0.0d,
 					ModificationType.ADDUCT, 
 					true);
+			
 			newAdduct.setMassCorrection(
 					MsUtils.calculateMassCorrectionFromAddedRemovedGroups(newAdduct));
+			
+			String cefNotation = rs.getString("CEF_NOTATION");
+			if(cefNotation != null && !cefNotation.isEmpty())
+				newAdduct.setNotationForType(AdductNotationType.CEF, cefNotation);
+			
+			String binnerNotation = rs.getString("BINNER_NOTATION");
+			if(binnerNotation != null && !binnerNotation.isEmpty())
+				newAdduct.setNotationForType(AdductNotationType.BINNER, binnerNotation);
+			
+			String siriusNotation = rs.getString("SIRIUS_NOTATION");
+			if(siriusNotation != null && !siriusNotation.isEmpty())
+				newAdduct.setNotationForType(AdductNotationType.SIRIUS, siriusNotation);
+			
 			adductList.add(newAdduct);
 		}
 		rs.close();
@@ -92,8 +108,9 @@ public class AdductDatabaseUtils {
 		newAdduct.setId(id);
 		String query = 
 				"INSERT INTO ADDUCTS (ADDUCT_ID, ADDUCT_NAME, DESCRIPTION, "
-				+ "CHARGE, NMER, ADDED_GROUP, REMOVED_GROUP, CEF_NOTATION) "
-				+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?) " ;
+				+ "CHARGE, NMER, ADDED_GROUP, REMOVED_GROUP, "
+				+ "CEF_NOTATION, BINNER_NOTATION, SIRIUS_NOTATION) "
+				+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) " ;
 		PreparedStatement stmt = conn.prepareStatement(query);
 		stmt.setString(1, id);
 		stmt.setString(2, newAdduct.getName());
@@ -102,33 +119,21 @@ public class AdductDatabaseUtils {
 		stmt.setInt(5, newAdduct.getOligomericState());
 		stmt.setString(6, newAdduct.getAddedGroup());
 		stmt.setString(7, newAdduct.getRemovedGroup());
-		stmt.setString(8, newAdduct.getCefNotation());
+		stmt.setString(8, newAdduct.getNotationForType(AdductNotationType.CEF));
+		stmt.setString(9, newAdduct.getNotationForType(AdductNotationType.BINNER));
+		stmt.setString(10, newAdduct.getNotationForType(AdductNotationType.SIRIUS));
 		stmt.executeUpdate();
 		stmt.close();
 		ConnectionManager.releaseConnection(conn);
 	}
-	
-//	public static String getNextAdductId(Connection conn) throws Exception {
-//		
-//		String id = null;
-//		String query = "SELECT '" + DataPrefix.ADDUCT.getName() + 
-//				"' || LPAD(ADDUCT_SEQ.NEXTVAL, 4, '0') AS NEXT_ID FROM DUAL";
-//		PreparedStatement ps = conn.prepareStatement(query);
-//		ResultSet rs = ps.executeQuery();
-//		while (rs.next()) 
-//			id = rs.getString("NEXT_ID");			
-//		
-//		rs.close();
-//		ps.close();
-//		return id;
-//	}
 	
 	public static void updateAdduct(SimpleAdduct adduct) throws Exception {
 
 		Connection conn = ConnectionManager.getConnection();
 		String query = 
 				"UPDATE ADDUCTS SET ADDUCT_NAME = ?, DESCRIPTION = ?, CHARGE = ?, NMER = ?, "
-				+ "ADDED_GROUP = ?, REMOVED_GROUP = ?, CEF_NOTATION = ? WHERE ADDUCT_ID = ?";
+				+ "ADDED_GROUP = ?, REMOVED_GROUP = ?, CEF_NOTATION = ?, "
+				+ "BINNER_NOTATION = ?, SIRIUS_NOTATION = ? WHERE ADDUCT_ID = ?";
 		PreparedStatement stmt = conn.prepareStatement(query);
 		stmt.setString(1, adduct.getName());
 		stmt.setString(2, adduct.getDescription());
@@ -136,8 +141,10 @@ public class AdductDatabaseUtils {
 		stmt.setInt(4, adduct.getOligomericState());
 		stmt.setString(5, adduct.getAddedGroup());
 		stmt.setString(6, adduct.getRemovedGroup());
-		stmt.setString(7, adduct.getCefNotation());		
-		stmt.setString(8, adduct.getId());
+		stmt.setString(7, adduct.getNotationForType(AdductNotationType.CEF));
+		stmt.setString(8, adduct.getNotationForType(AdductNotationType.BINNER));
+		stmt.setString(9, adduct.getNotationForType(AdductNotationType.SIRIUS));		
+		stmt.setString(10, adduct.getId());
 		stmt.executeUpdate();
 		stmt.close();
 		ConnectionManager.releaseConnection(conn);
@@ -158,8 +165,10 @@ public class AdductDatabaseUtils {
 
 		SimpleAdduct newAdduct = null;
 		String query = "SELECT ADDUCT_NAME, DESCRIPTION, CHARGE, "
-				+ "NMER, ADDED_GROUP, REMOVED_GROUP, CEF_NOTATION FROM ADDUCTS "
+				+ "NMER, ADDED_GROUP, REMOVED_GROUP, CEF_NOTATION, "
+				+ "BINNER_NOTATION, SIRIUS_NOTATION FROM ADDUCTS "
 				+ "WHERE  ADDUCT_ID = ?";
+				
 		PreparedStatement ps = conn.prepareStatement(query);
 		ps.setString(1, id);
 		ResultSet rs = ps.executeQuery();
@@ -171,15 +180,27 @@ public class AdductDatabaseUtils {
 					rs.getString("DESCRIPTION"), 
 					rs.getString("ADDED_GROUP"), 
 					rs.getString("REMOVED_GROUP"), 
-					rs.getString("CEF_NOTATION"), 
 					null, 
 					rs.getInt("CHARGE"), 
 					rs.getInt("NMER"), 
 					0.0d,
 					ModificationType.ADDUCT, 
 					true);
+			
 			newAdduct.setMassCorrection(
 					MsUtils.calculateMassCorrectionFromAddedRemovedGroups(newAdduct));
+			
+			String cefNotation = rs.getString("CEF_NOTATION");
+			if(cefNotation != null && !cefNotation.isEmpty())
+				newAdduct.setNotationForType(AdductNotationType.CEF, cefNotation);
+			
+			String binnerNotation = rs.getString("BINNER_NOTATION");
+			if(binnerNotation != null && !binnerNotation.isEmpty())
+				newAdduct.setNotationForType(AdductNotationType.BINNER, binnerNotation);
+			
+			String siriusNotation = rs.getString("SIRIUS_NOTATION");
+			if(siriusNotation != null && !siriusNotation.isEmpty())
+				newAdduct.setNotationForType(AdductNotationType.SIRIUS, siriusNotation);
 		}
 		rs.close();
 		ps.close();
@@ -206,7 +227,6 @@ public class AdductDatabaseUtils {
 					rs.getString("DESCRIPTION"), 
 					rs.getString("ADDED_GROUP"), 
 					rs.getString("REMOVED_GROUP"), 
-					null, 
 					rs.getString("SMILES"), 
 					0, 
 					1, 
@@ -246,21 +266,6 @@ public class AdductDatabaseUtils {
 		stmt.close();
 		ConnectionManager.releaseConnection(conn);
 	}
-		
-//	public static String getNextNeutralLossId(Connection conn) throws Exception {
-//		
-//		String id = null;
-//		String query = "SELECT '" + DataPrefix.NEUTRAL_LOSS.getName() + 
-//				"' || LPAD(NEUTRAL_LOSS_SEQ.NEXTVAL, 4, '0') AS NEXT_ID FROM DUAL";
-//		PreparedStatement ps = conn.prepareStatement(query);
-//		ResultSet rs = ps.executeQuery();
-//		while (rs.next()) 
-//			id = rs.getString("NEXT_ID");			
-//		
-//		rs.close();
-//		ps.close();
-//		return id;
-//	}
 	
 	public static void updateNeutralLoss(SimpleAdduct loss) throws Exception {
 
@@ -308,8 +313,7 @@ public class AdductDatabaseUtils {
 					rs.getString("LOSS_NAME"), 
 					rs.getString("DESCRIPTION"), 
 					rs.getString("ADDED_GROUP"), 
-					rs.getString("REMOVED_GROUP"), 
-					null, 
+					rs.getString("REMOVED_GROUP"),
 					rs.getString("SMILES"), 
 					0, 
 					1, 
@@ -341,8 +345,7 @@ public class AdductDatabaseUtils {
 					rs.getString("ADDUCT_NAME"), 
 					rs.getString("DESCRIPTION"), 
 					rs.getString("ADDED_GROUP"), 
-					null, 
-					null, 
+					null,
 					rs.getString("SMILES"), 
 					0, 
 					1, 
@@ -379,22 +382,7 @@ public class AdductDatabaseUtils {
 		stmt.executeUpdate();
 		stmt.close();
 		ConnectionManager.releaseConnection(conn);
-	}	
-	
-//	public static String getNextNeutralAdductId(Connection conn) throws Exception {
-//		
-//		String id = null;
-//		String query = "SELECT '" + DataPrefix.REPEAT.getName() + 
-//				"' || LPAD(NEUTRAL_ADDUCT_SEQ.NEXTVAL, 4, '0') AS NEXT_ID FROM DUAL";
-//		PreparedStatement ps = conn.prepareStatement(query);
-//		ResultSet rs = ps.executeQuery();
-//		while (rs.next()) 
-//			id = rs.getString("NEXT_ID");			
-//		
-//		rs.close();
-//		ps.close();
-//		return id;
-//	}
+	}
 	
 	public static void updateNeutralAdduct(SimpleAdduct neutralAdduct) throws Exception {
 
@@ -441,7 +429,6 @@ public class AdductDatabaseUtils {
 					rs.getString("DESCRIPTION"), 
 					rs.getString("ADDED_GROUP"), 
 					null, 
-					null, 
 					rs.getString("SMILES"), 
 					0, 
 					1, 
@@ -462,7 +449,9 @@ public class AdductDatabaseUtils {
 		Collection<Adduct> adductList = new ArrayList<Adduct>();
 		Connection conn = ConnectionManager.getConnection();
 		
-		String query = "SELECT COMPOSITE_ADDUCT_ID, CHARGE_CARRIER, DESCRIPTION FROM COMPOSITE_ADDUCTS";
+		String query = "SELECT COMPOSITE_ADDUCT_ID, CHARGE_CARRIER, "
+				+ "DESCRIPTION, CEF_NOTATION, BINNER_NOTATION, "
+				+ "SIRIUS_NOTATION FROM COMPOSITE_ADDUCTS";		
 		PreparedStatement ps = conn.prepareStatement(query);
 		
 		String cmpQuery = "SELECT COMPONENT_ID, COMPONENT_TYPE, COMPONENT_COUNT "
@@ -504,6 +493,19 @@ public class AdductDatabaseUtils {
 				}
 			}	
 			cmpRs.close();
+			
+			String cefNotation = rs.getString("CEF_NOTATION");
+			if(cefNotation != null && !cefNotation.isEmpty())
+				newCompositeAdduct.setNotationForType(AdductNotationType.CEF, cefNotation);
+			
+			String binnerNotation = rs.getString("BINNER_NOTATION");
+			if(binnerNotation != null && !binnerNotation.isEmpty())
+				newCompositeAdduct.setNotationForType(AdductNotationType.BINNER, binnerNotation);
+			
+			String siriusNotation = rs.getString("SIRIUS_NOTATION");
+			if(siriusNotation != null && !siriusNotation.isEmpty())
+				newCompositeAdduct.setNotationForType(AdductNotationType.SIRIUS, siriusNotation);
+			
 			adductList.add(newCompositeAdduct);
 		}
 		rs.close();
@@ -526,12 +528,18 @@ public class AdductDatabaseUtils {
 		//	Adduct
 		String query = 
 				"INSERT INTO COMPOSITE_ADDUCTS ( " +
-				"COMPOSITE_ADDUCT_ID, DESCRIPTION, CHARGE_CARRIER)  " +
-				"VALUES (?, ?, ?) " ;
-		PreparedStatement stmt = conn.prepareStatement(query);				
+				"COMPOSITE_ADDUCT_ID, DESCRIPTION, CHARGE_CARRIER, "
+				+ "CEF_NOTATION, BINNER_NOTATION, SIRIUS_NOTATION)  " +
+				"VALUES (?, ?, ?, ?, ?, ?) " ;
+		PreparedStatement stmt = conn.prepareStatement(query);	
+		
 		stmt.setString(1, id);
 		stmt.setString(2, newAdduct.getDescription());
-		stmt.setString(3, newAdduct.getChargeCarrier().getId());
+		stmt.setString(3, newAdduct.getChargeCarrier().getId());		
+		stmt.setString(4, newAdduct.getNotationForType(AdductNotationType.CEF));
+		stmt.setString(5, newAdduct.getNotationForType(AdductNotationType.BINNER));
+		stmt.setString(6, newAdduct.getNotationForType(AdductNotationType.SIRIUS));
+		
 		stmt.executeUpdate();
 		stmt.close();
 		
@@ -569,30 +577,21 @@ public class AdductDatabaseUtils {
 		ConnectionManager.releaseConnection(conn);
 	}
 	
-//	public static String getNextCompositeAdductId(Connection conn) throws Exception {
-//		
-//		String id = null;
-//		String query = "SELECT '" + DataPrefix.COMPOSITE_ADDUCT.getName() + 
-//				"' || LPAD(COMPOSITE_ADDUCT_SEQ.NEXTVAL, 5, '0') AS NEXT_ID FROM DUAL";
-//		PreparedStatement ps = conn.prepareStatement(query);
-//		ResultSet rs = ps.executeQuery();
-//		while (rs.next()) 
-//			id = rs.getString("NEXT_ID");			
-//		
-//		rs.close();
-//		ps.close();
-//		return id;
-//	}
-	
 	public static void updateCompositeAdduct(CompositeAdduct adduct) throws Exception {
 
 		Connection conn = ConnectionManager.getConnection();
 		String query = 
-				"UPDATE COMPOSITE_ADDUCTS SET CHARGE_CARRIER = ?, DESCRIPTION = ? WHERE COMPOSITE_ADDUCT_ID =?" ;
+				"UPDATE COMPOSITE_ADDUCTS SET CHARGE_CARRIER = ?, DESCRIPTION = ?, "
+				+ "CEF_NOTATION = ?, BINNER_NOTATION = ?, SIRIUS_NOTATION = ? "
+				+ "WHERE COMPOSITE_ADDUCT_ID =?" ;
 		PreparedStatement stmt = conn.prepareStatement(query);				
 		stmt.setString(1, adduct.getChargeCarrier().getId());
-		stmt.setString(2, adduct.getDescription());
-		stmt.setString(3, adduct.getId());
+		stmt.setString(2, adduct.getDescription());		
+		stmt.setString(3, adduct.getNotationForType(AdductNotationType.CEF));
+		stmt.setString(4, adduct.getNotationForType(AdductNotationType.BINNER));
+		stmt.setString(5, adduct.getNotationForType(AdductNotationType.SIRIUS));
+		stmt.setString(6, adduct.getId());
+		
 		stmt.executeUpdate();
 		stmt.close();
 		
@@ -651,7 +650,8 @@ public class AdductDatabaseUtils {
 				
 		CompositeAdduct newCompositeAdduct = null;
 		
-		String query = "SELECT CHARGE_CARRIER, DESCRIPTION "
+		String query = "SELECT CHARGE_CARRIER, DESCRIPTION, "
+				+ "CEF_NOTATION, BINNER_NOTATION, SIRIUS_NOTATION "
 				+ "FROM COMPOSITE_ADDUCTS WHERE COMPOSITE_ADDUCT_ID = ?";
 		PreparedStatement ps = conn.prepareStatement(query);
 		ps.setString(1,  id); 
@@ -685,6 +685,17 @@ public class AdductDatabaseUtils {
 					for(int i=0; i<count; i++)
 						newCompositeAdduct.addNeutralAdduct((SimpleAdduct) repeat);
 				}
+				String cefNotation = rs.getString("CEF_NOTATION");
+				if(cefNotation != null && !cefNotation.isEmpty())
+					newCompositeAdduct.setNotationForType(AdductNotationType.CEF, cefNotation);
+				
+				String binnerNotation = rs.getString("BINNER_NOTATION");
+				if(binnerNotation != null && !binnerNotation.isEmpty())
+					newCompositeAdduct.setNotationForType(AdductNotationType.BINNER, binnerNotation);
+				
+				String siriusNotation = rs.getString("SIRIUS_NOTATION");
+				if(siriusNotation != null && !siriusNotation.isEmpty())
+					newCompositeAdduct.setNotationForType(AdductNotationType.SIRIUS, siriusNotation);
 			}	
 			cmpRs.close();
 		}
@@ -779,21 +790,6 @@ public class AdductDatabaseUtils {
 		stmt.close();
 		ConnectionManager.releaseConnection(conn);
 	}
-	
-//	public static String getNextAdductExchangeId(Connection conn) throws Exception {
-//		
-//		String id = null;
-//		String query = "SELECT '" + DataPrefix.ADDUCT_EXCHANGE.getName() + 
-//				"' || LPAD(ADDUCT_EXCHANGE_SEQ.NEXTVAL, 4, '0') AS NEXT_ID FROM DUAL";
-//		PreparedStatement ps = conn.prepareStatement(query);
-//		ResultSet rs = ps.executeQuery();
-//		while (rs.next()) 
-//			id = rs.getString("NEXT_ID");			
-//		
-//		rs.close();
-//		ps.close();
-//		return id;
-//	}
 	
 	public static void updateAdductExchange(AdductExchange originalExchange, AdductExchange modifiedExchange)
 			throws Exception {

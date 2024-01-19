@@ -50,6 +50,7 @@ import edu.umich.med.mrc2.datoolbox.data.MsPoint;
 import edu.umich.med.mrc2.datoolbox.data.TandemMassSpectrum;
 import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
+import edu.umich.med.mrc2.datoolbox.data.enums.AdductNotationType;
 import edu.umich.med.mrc2.datoolbox.data.enums.AgilentCefFields;
 import edu.umich.med.mrc2.datoolbox.data.enums.CompoundDatabaseEnum;
 import edu.umich.med.mrc2.datoolbox.data.enums.CompoundIdSource;
@@ -655,7 +656,7 @@ public abstract class CEFProcessingTask extends AbstractTask {
 				peak.setAttribute("y", Double.toString(adductMs[i].getIntensity()));
 				peak.setAttribute("z", charge);
 				
-				String aname = adduct.getCefNotation();
+				String aname = adduct.getNotationForType(AdductNotationType.CEF);
 				if(i>0)
 					aname = aname + "+" + i;
 
@@ -675,7 +676,7 @@ public abstract class CEFProcessingTask extends AbstractTask {
 					peak.setAttribute("x", MRC2ToolBoxConfiguration.getMzFormat().format(adductMs[i].getMz()));
 					peak.setAttribute("y", Double.toString(adductMs[i].getIntensity()));
 					peak.setAttribute("z", charge);
-					String aname = ad.getCefNotation();
+					String aname = ad.getNotationForType(AdductNotationType.CEF);
 
 					if(i>0)
 						aname = aname + "+" + i;

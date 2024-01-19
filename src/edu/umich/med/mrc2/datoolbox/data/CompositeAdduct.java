@@ -28,12 +28,14 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.TreeMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 
+import edu.umich.med.mrc2.datoolbox.data.enums.AdductNotationType;
 import edu.umich.med.mrc2.datoolbox.data.enums.ModificationType;
 import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
@@ -49,8 +51,8 @@ public class CompositeAdduct implements Adduct, Comparable<CompositeAdduct>, Ser
 	private Collection<SimpleAdduct>neutralLosses;
 	private Collection<SimpleAdduct>neutralAdducts;
 	private String description;
-	private String cefNotation;
 	private double massCorrection;
+	private Map<AdductNotationType,String>notations;
 	
 	public CompositeAdduct(String id, SimpleAdduct chargeCarrier, String description) {
 		super();
@@ -61,6 +63,7 @@ public class CompositeAdduct implements Adduct, Comparable<CompositeAdduct>, Ser
 		neutralAdducts = new ArrayList<SimpleAdduct>();
 		massCorrection = 
 				MsUtils.calculateMassCorrectionFromAddedRemovedGroups(this);
+		notations = new TreeMap<AdductNotationType,String>();
 	}
 
 	public CompositeAdduct(SimpleAdduct chargeCarrier2) {
@@ -235,11 +238,6 @@ public class CompositeAdduct implements Adduct, Comparable<CompositeAdduct>, Ser
 	}
 
 	@Override
-	public String getCefNotation() {
-		return cefNotation;
-	}
-
-	@Override
 	public String getDescription() {
 		return description;
 	}
@@ -319,12 +317,7 @@ public class CompositeAdduct implements Adduct, Comparable<CompositeAdduct>, Ser
 	public void setAddedGroup(String addedGroup) {
 		
 	}
-
-	@Override
-	public void setCefNotation(String cefNotation) {
-		this.cefNotation = cefNotation;
-	}
-
+	
 	@Override
 	public void setCharge(int charge) {
 
@@ -401,6 +394,16 @@ public class CompositeAdduct implements Adduct, Comparable<CompositeAdduct>, Ser
 	@Override
 	public String toString() {
 		return getName();
+	}
+
+	@Override
+	public void setNotationForType(AdductNotationType notationType, String notation) {
+		notations.put(notationType, notation);
+	}
+
+	@Override
+	public String getNotationForType(AdductNotationType notationType) {
+		return notations.get(notationType);
 	}	
 }
 

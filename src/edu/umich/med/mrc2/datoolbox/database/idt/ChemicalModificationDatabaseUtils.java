@@ -24,17 +24,12 @@ package edu.umich.med.mrc2.datoolbox.database.idt;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.TreeMap;
-import java.util.stream.Collectors;
 
 import edu.umich.med.mrc2.datoolbox.data.Adduct;
 import edu.umich.med.mrc2.datoolbox.data.AdductExchange;
-import edu.umich.med.mrc2.datoolbox.data.SimpleAdduct;
-import edu.umich.med.mrc2.datoolbox.data.enums.ModificationType;
 import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.main.ChemicalModificationsManager;
@@ -58,46 +53,6 @@ public class ChemicalModificationDatabaseUtils {
 //		ConnectionManager.releaseConnection(conn);
 	}
 
-	public static void addNewChemicalModification(Adduct newModification) throws Exception {
-
-		Connection conn = ConnectionManager.getConnection();
-
-		String query =
-			"INSERT INTO CHEM_MOD (MOD_NAME, MOD_DESCRIPTION, CHARGE, XM, ADDED_GROUP, " +
-			"REMOVED_GROUP, MOD_TYPE, MASS_CORRECTION, POLARITY, ENABLED, CEF_NOTATION, SMILES) " +
-			"VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-
-		PreparedStatement stmt = conn.prepareStatement(query);
-
-		stmt.setString(1, newModification.getName());
-		stmt.setString(2, newModification.getDescription());
-		stmt.setInt(3, newModification.getCharge());
-		stmt.setInt(4, newModification.getOligomericState());
-		stmt.setString(5, newModification.getAddedGroup());
-		stmt.setString(6, newModification.getRemovedGroup());
-		stmt.setString(7, newModification.getModificationType().name());
-		stmt.setDouble(8, newModification.getMassCorrection());
-
-		String polarity = "ALL";
-		if (newModification.getPolarity().equals(Polarity.Negative))
-			polarity = "NEG";
-
-		if (newModification.getPolarity().equals(Polarity.Positive))
-			polarity = "POS";
-
-		stmt.setString(9, polarity);
-
-		String enabled = "N";
-		if (newModification.isEnabled())
-			enabled = "Y";
-
-		stmt.setString(10, enabled);
-		stmt.setString(11, newModification.getCefNotation());
-		stmt.setString(12, newModification.getSmiles());
-		stmt.executeUpdate();
-		stmt.close();
-		ConnectionManager.releaseConnection(conn);
-	}
 
 	public static boolean adductExchangeExists(Adduct modOne, Adduct modTwo) throws Exception {
 
@@ -217,42 +172,6 @@ public class ChemicalModificationDatabaseUtils {
 		
 	}
 
-	public static Collection<Adduct> getChemicalModificationList() throws Exception {
-
-		Set<Adduct> adducts = new HashSet<Adduct>();
-		Connection conn = ConnectionManager.getConnection();
-		String query =
-			"SELECT MOD_NAME, CEF_NOTATION, MOD_DESCRIPTION, CHARGE, XM, ADDED_GROUP, " +
-			"REMOVED_GROUP, MOD_TYPE, MASS_CORRECTION, POLARITY, SMILES, ENABLED " +
-			"FROM CHEM_MOD ORDER BY MOD_TYPE, MOD_NAME";
-		PreparedStatement ps = conn.prepareStatement(query);
-		ResultSet rs = ps.executeQuery();
-		while (rs.next()) {
-
-			Adduct newAdduct = new SimpleAdduct(
-					null,
-					rs.getString("MOD_NAME"),
-					rs.getString("MOD_DESCRIPTION"),
-					rs.getInt("CHARGE"),
-					rs.getInt("XM"),
-					0.0,
-					ModificationType.getModificationTypeByName(rs.getString("MOD_TYPE")),
-					rs.getString("SMILES"));
-	
-			newAdduct.setAddedGroup(rs.getString("ADDED_GROUP"));
-			newAdduct.setRemovedGroup(rs.getString("REMOVED_GROUP"));
-			newAdduct.setMassCorrection(rs.getDouble("MASS_CORRECTION"));
-			newAdduct.setCefNotation(rs.getString("CEF_NOTATION"));
-			newAdduct.setEnabled(rs.getString("ENABLED").equals("Y"));
-			newAdduct.finalizeModification();
-			adducts.add(newAdduct);
-		}
-		rs.close();
-		ps.close();
-		ConnectionManager.releaseConnection(conn);
-		return adducts.stream().sorted().collect(Collectors.toList());
-	}
-
 	public static void updateAdductExchange(AdductExchange originalExchange, AdductExchange modifiedExchange)
 			throws Exception {
 
@@ -275,46 +194,5 @@ public class ChemicalModificationDatabaseUtils {
 //		stmt.executeUpdate();
 //		stmt.close();
 //		ConnectionManager.releaseConnection(conn);
-	}
-
-	public static void updateChemicalModification(String originalName, Adduct modified) throws Exception {
-
-		Connection conn = ConnectionManager.getConnection();
-		String query =
-			"UPDATE CHEM_MOD SET MOD_NAME = ?, MOD_DESCRIPTION = ?, CHARGE = ?, XM = ?, ADDED_GROUP = ?, " +
-			"REMOVED_GROUP = ?, MOD_TYPE = ?, MASS_CORRECTION = ?, POLARITY = ?, ENABLED = ?, CEF_NOTATION = ? " +
-			"SMILES = ? WHERE MOD_NAME = ?";
-
-		PreparedStatement stmt = conn.prepareStatement(query);
-		stmt.setString(1, modified.getName());
-		stmt.setString(2, modified.getDescription());
-		stmt.setInt(3, modified.getCharge());
-		stmt.setInt(4, modified.getOligomericState());
-		stmt.setString(5, modified.getAddedGroup());
-		stmt.setString(6, modified.getRemovedGroup());
-		stmt.setString(7, modified.getModificationType().name());
-		stmt.setDouble(8, modified.getMassCorrection());
-		String polarity = "ALL";
-		if (modified.getPolarity().equals(Polarity.Negative))
-			polarity = "NEG";
-
-		if (modified.getPolarity().equals(Polarity.Positive))
-			polarity = "POS";
-
-		stmt.setString(9, polarity);
-
-		String enabled = "N";
-		if (modified.isEnabled())
-			enabled = "Y";
-
-		stmt.setString(10, enabled);
-		stmt.setString(11, modified.getCefNotation());
-		stmt.setString(12, modified.getSmiles());
-		
-		stmt.setString(13, originalName);
-
-		stmt.executeUpdate();
-		stmt.close();
-		ConnectionManager.releaseConnection(conn);
 	}
 }

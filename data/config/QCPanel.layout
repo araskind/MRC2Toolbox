@@ -100,12 +100,12 @@
 									<content delegate="SplitDockStationFactory">
 										<fullscreen-action>false</fullscreen-action>
 										<node nodeId="1600213793228" orientation="VERTICAL" divider="0.5">
-											<leaf id="1" nodeId="1600213793230">
+											<leaf id="0" nodeId="1600213793230">
 												<placeholders>
 													<placeholder>dock.single.QCPanelDockableDataSetStatsTable</placeholder>
 												</placeholders>
 											</leaf>
-											<leaf id="0" nodeId="1600213793238">
+											<leaf id="1" nodeId="1600213793238">
 												<placeholders>
 													<placeholder>dock.single.QCPanelDockable2DQCPanel</placeholder>
 												</placeholders>
@@ -138,6 +138,16 @@
 								</layout>
 							</adjacent>
 							<children ignore="false">
+								<child>
+									<layout factory="predefined" placeholder="dock.single.QCPanelDockableDataSetStatsTable">
+										<replacement id="dockablesingle QCPanelDockableDataSetStatsTable"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>QCPanelDockableDataSetStatsTable</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
+								</child>
 								<child>
 									<layout factory="delegate_StackDockStationFactory">
 										<selected>0</selected>
@@ -196,16 +206,6 @@
 											<children ignore="false"/>
 										</child>
 									</children>
-								</child>
-								<child>
-									<layout factory="predefined" placeholder="dock.single.QCPanelDockableDataSetStatsTable">
-										<replacement id="dockablesingle QCPanelDockableDataSetStatsTable"/>
-										<delegate id="delegate_ccontrol backup factory id">
-											<id>QCPanelDockableDataSetStatsTable</id>
-											<area/>
-										</delegate>
-									</layout>
-									<children ignore="false"/>
 								</child>
 							</children>
 						</root>

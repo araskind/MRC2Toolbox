@@ -22,7 +22,10 @@
 package edu.umich.med.mrc2.datoolbox.data;
 
 import java.io.Serializable;
+import java.util.Map;
+import java.util.TreeMap;
 
+import edu.umich.med.mrc2.datoolbox.data.enums.AdductNotationType;
 import edu.umich.med.mrc2.datoolbox.data.enums.ModificationType;
 import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
 import edu.umich.med.mrc2.datoolbox.utils.MolFormulaUtils;
@@ -39,13 +42,13 @@ public class SimpleAdduct implements Adduct, Comparable<SimpleAdduct>, Serializa
 	private String description;
 	private String addedGroup;
 	private String removedGroup;
-	private String cefNotation;
 	private String smiles;
 	private int charge;
 	private int oligomericState;
 	private double massCorrection;
 	private ModificationType modificationType;
 	private boolean enabled;
+	private Map<AdductNotationType,String>notations;
 	
 	public SimpleAdduct(
 			String id,
@@ -80,7 +83,7 @@ public class SimpleAdduct implements Adduct, Comparable<SimpleAdduct>, Serializa
 			ModificationType massModType,
 			String smiles) {
 
-		this(id, adductName, description, null, null, null, null, 
+		this(id, adductName, description, null, null, null, 
 				charge, oligomericState, massCorrection, massModType, true);
 	}
 	
@@ -90,7 +93,6 @@ public class SimpleAdduct implements Adduct, Comparable<SimpleAdduct>, Serializa
 			String description, 
 			String addedGroup, 
 			String removedGroup,
-			String cefNotation, 
 			String smiles, 
 			int charge, 
 			int oligomericState, 
@@ -103,13 +105,13 @@ public class SimpleAdduct implements Adduct, Comparable<SimpleAdduct>, Serializa
 		this.description = description;
 		this.addedGroup = addedGroup;
 		this.removedGroup = removedGroup;
-		this.cefNotation = cefNotation;
 		this.smiles = smiles;
 		this.charge = charge;
 		this.oligomericState = oligomericState;
 		this.massCorrection = massCorrection;
 		this.modificationType = modificationType;
 		this.enabled = enabled;
+		notations = new TreeMap<AdductNotationType,String>();
 		
 		finalizeModification();
 	}
@@ -140,11 +142,6 @@ public class SimpleAdduct implements Adduct, Comparable<SimpleAdduct>, Serializa
 	@Override
 	public String getAddedGroup() {
 		return addedGroup;
-	}
-
-	@Override
-	public String getCefNotation() {
-		return cefNotation;
 	}
 
 	@Override
@@ -212,11 +209,6 @@ public class SimpleAdduct implements Adduct, Comparable<SimpleAdduct>, Serializa
 	@Override
 	public void setAddedGroup(String addedGroup) {
 		this.addedGroup = addedGroup;
-	}
-
-	@Override
-	public void setCefNotation(String cefNotation) {
-		this.cefNotation = cefNotation;
 	}
 
 	@Override
@@ -344,5 +336,15 @@ public class SimpleAdduct implements Adduct, Comparable<SimpleAdduct>, Serializa
 	@Override
 	public String getId() {
 		return id;
+	}	
+
+	@Override
+	public void setNotationForType(AdductNotationType notationType, String notation) {
+		notations.put(notationType, notation);
+	}
+
+	@Override
+	public String getNotationForType(AdductNotationType notationType) {
+		return notations.get(notationType);
 	}
 }

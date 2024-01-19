@@ -26,7 +26,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -58,13 +57,13 @@ public class ChemicalModificationsManager {
 
 	public static void addChemicalModification(Adduct modToAdd) {
 
-		getAllModifications().add(modToAdd);
-		adductNameMap.put(modToAdd.getName(), modToAdd);
-		try {
-			ChemicalModificationDatabaseUtils.addNewChemicalModification(modToAdd);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+//		getAllModifications().add(modToAdd);
+//		adductNameMap.put(modToAdd.getName(), modToAdd);
+//		try {
+//			ChemicalModificationDatabaseUtils.addNewChemicalModification(modToAdd);
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
 	}
 
 	public static void addAdductExchange(AdductExchange newExchange) {
@@ -311,10 +310,10 @@ public class ChemicalModificationsManager {
 					getAllModifications().stream().
 					collect(Collectors.toMap(Adduct::getName, Function.identity()));
 
-			adductNameMap.putAll(
-					getAllModifications().stream().
-						filter(mod -> Objects.nonNull(mod.getCefNotation())).
-						collect(Collectors.toMap(Adduct::getCefNotation, Function.identity())));
+//			adductNameMap.putAll(
+//					getAllModifications().stream().
+//						filter(mod -> Objects.nonNull(mod.getNotationForType(AdductNotationType.CEF))).
+//						collect(Collectors.toMap(Adduct::getNotationForType, Function.identity())));
 		}
 		return adductNameMap;
 	}
@@ -333,7 +332,7 @@ public class ChemicalModificationsManager {
 
 		if(chemicalModifications == null) {
 			try {
-				chemicalModifications = ChemicalModificationDatabaseUtils.getChemicalModificationList();
+//				chemicalModifications = ChemicalModificationDatabaseUtils.getChemicalModificationList();
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -444,10 +443,10 @@ public class ChemicalModificationsManager {
 				getAllModifications().stream().
 				collect(Collectors.toMap(Adduct::getName, Function.identity()));
 
-		adductNameMap.putAll(
-				getAllModifications().stream().
-					filter(mod -> Objects.nonNull(mod.getCefNotation())).
-					collect(Collectors.toMap(Adduct::getCefNotation, Function.identity())));
+//		adductNameMap.putAll(
+//				getAllModifications().stream().
+//					filter(mod -> Objects.nonNull(mod.getCefNotation())).
+//					collect(Collectors.toMap(Adduct::getCefNotation, Function.identity())));
 	}
 
 	public static void removeChemicalModification(Adduct modToRemove) {
@@ -465,7 +464,7 @@ public class ChemicalModificationsManager {
 	public static void updateChemicalModification(String originalName, Adduct activeModification) {
 
 		try {
-			ChemicalModificationDatabaseUtils.updateChemicalModification(originalName, activeModification);
+//			ChemicalModificationDatabaseUtils.updateChemicalModification(originalName, activeModification);
 			getAdductNameMap().remove(originalName);
 			getAdductNameMap().put(activeModification.getName(), activeModification);
 		}
@@ -512,19 +511,19 @@ public class ChemicalModificationsManager {
 
 	public static void populateDataLists() throws Exception {
 
-		chemicalModifications = 
-				ChemicalModificationDatabaseUtils.getChemicalModificationList();
+//		chemicalModifications = 
+//				ChemicalModificationDatabaseUtils.getChemicalModificationList();
+//
+//		adductNameMap =
+//				chemicalModifications.stream().
+//				collect(Collectors.toMap(Adduct::getName, Function.identity()));
 
-		adductNameMap =
-				chemicalModifications.stream().
-				collect(Collectors.toMap(Adduct::getName, Function.identity()));
+//		adductNameMap.putAll(chemicalModifications.stream().
+//			filter(mod -> Objects.nonNull(mod.getCefNotation())).
+//			filter(mod -> !mod.getCefNotation().trim().isEmpty()).
+//			collect(Collectors.toMap(Adduct::getCefNotation, Function.identity())));
 
-		adductNameMap.putAll(chemicalModifications.stream().
-			filter(mod -> Objects.nonNull(mod.getCefNotation())).
-			filter(mod -> !mod.getCefNotation().trim().isEmpty()).
-			collect(Collectors.toMap(Adduct::getCefNotation, Function.identity())));
-
-		adductExchangeList = ChemicalModificationDatabaseUtils.getAdductExchangeList();
+//		adductExchangeList = ChemicalModificationDatabaseUtils.getAdductExchangeList();
 	}
 
 	public static Adduct getDafaultAdductForPolarity(Polarity pol) {

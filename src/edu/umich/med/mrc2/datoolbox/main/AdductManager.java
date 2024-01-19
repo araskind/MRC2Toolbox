@@ -36,6 +36,7 @@ import edu.umich.med.mrc2.datoolbox.data.SimpleAdduct;
 import edu.umich.med.mrc2.datoolbox.data.compare.AdductComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.AdductExchangeComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
+import edu.umich.med.mrc2.datoolbox.data.enums.AdductNotationType;
 import edu.umich.med.mrc2.datoolbox.data.enums.ModificationType;
 import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
 import edu.umich.med.mrc2.datoolbox.database.idt.AdductDatabaseUtils;
@@ -291,8 +292,8 @@ public class AdductManager {
 	
 	public static Adduct getAdductByCefNotation(String cefNotation) {
 		return getAdductList().stream().
-				filter(f -> Objects.nonNull(f.getCefNotation())).
-				filter(a -> a.getCefNotation().equals(cefNotation)).
+				filter(f -> Objects.nonNull(f.getNotationForType(AdductNotationType.CEF))).
+				filter(a -> a.getNotationForType(AdductNotationType.CEF).equals(cefNotation)).
 				findFirst().orElse(null);
 	}
 	
