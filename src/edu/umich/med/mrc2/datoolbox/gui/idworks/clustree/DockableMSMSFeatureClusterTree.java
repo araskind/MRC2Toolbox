@@ -171,6 +171,10 @@ public class DockableMSMSFeatureClusterTree extends DefaultSingleCDockable imple
 	public IMsFeatureInfoBundleCluster[] getSelectedClusters() {
 		return clusterTree.getSelectedClusters();
 	}
+	
+	public Collection<IMsFeatureInfoBundleCluster> getSelectedClustersCollection() {
+		return clusterTree.getSelectedClustersCollection();
+	}
 
 	public Collection<MSFeatureInfoBundle> getSelectedFeatures() {
 		return clusterTree.getSelectedFeatures();

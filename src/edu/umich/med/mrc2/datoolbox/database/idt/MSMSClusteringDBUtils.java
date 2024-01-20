@@ -518,6 +518,27 @@ public class MSMSClusteringDBUtils {
 		ps.close();
 	}
 	
+	public static void deleteClusters(Collection<IMsFeatureInfoBundleCluster>toDelete) throws Exception {
+		
+		Connection conn = ConnectionManager.getConnection();
+		deleteClusters(toDelete, conn);
+		ConnectionManager.releaseConnection(conn);
+	}
+	
+	private static void deleteClusters(
+			Collection<IMsFeatureInfoBundleCluster> toDelete, Connection conn) throws Exception {
+
+		String query = "DELETE FROM MSMS_CLUSTER WHERE CLUSTER_ID = ?";
+		PreparedStatement ps = conn.prepareStatement(query);
+		for(IMsFeatureInfoBundleCluster cluster : toDelete) {
+			
+			ps.setString(1, cluster.getId());
+			ps.addBatch();
+		}
+		ps.executeBatch();
+		ps.close();
+	}
+
 	public static MSMSClusteringParameterSet insertMSMSClusterDataSet(
 			MSMSClusterDataSet dataSet) throws Exception {
 		

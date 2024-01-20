@@ -322,7 +322,9 @@ public enum MainActionCommands {
 	CREATE_XIC_METHOD_SET_COMMAND("Create Qual XIC methods for all clusters"),
 	SHOW_DATA_CLEANUP_DIALOG_COMMAND("Cleanup feature data"),
 	CLEANUP_FEATURE_DATA_COMMAND("Run feature data cleanup"),
-
+	COPY_CLUSTER_FEATURES_AS_MSP("Copy cluster features in NIST MSP format"),
+	COPY_CLUSTER_FEATURES_AS_SIRIUS_MS("Copy cluster features in SIRIUS MS format"),
+	
 	// Correlations
 	SHOW_CORRELATIONS_ANALYSIS_SETUP_COMMAND("Correlation analysis setup"),
 	FIND_FEATURE_CORRELATIONS_COMMAND("Find feature correlations"),

@@ -95,6 +95,7 @@ import edu.umich.med.mrc2.datoolbox.data.enums.TableRowSubset;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
+import edu.umich.med.mrc2.datoolbox.data.lims.Injection;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSSamplePreparation;
 import edu.umich.med.mrc2.datoolbox.data.msclust.BinnerAnnotationLookupDataSet;
@@ -225,6 +226,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.rawdata.RawDataLoadForInje
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.rawdata.RawDataRepositoryIndexingTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.stats.MzFrequencyAnalysisTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.stats.MzFrequencyType;
+import edu.umich.med.mrc2.datoolbox.utils.MSMSExportUtils;
 import edu.umich.med.mrc2.datoolbox.utils.MsFeatureStatsUtils;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 import edu.umich.med.mrc2.datoolbox.utils.NISTPepSearchUtils;
@@ -878,7 +880,114 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			setUpMSMSParentIonFrequencyAnalysis();
 				
 		if (command.equals(MainActionCommands.RUN_MZ_FREQUENCY_ANALYSIS_COMMAND.getName()))
-			runMSMSParentIonFrequencyAnalysis();		
+			runMSMSParentIonFrequencyAnalysis();	
+		
+		//	Feature cluster commands
+		if (command.equals(MainActionCommands.EDIT_CLUSTER_COMMAND.getName()))
+			editFeatureCluster();
+		
+		if (command.equals(MainActionCommands.DELETE_CLUSTER_COMMAND.getName()))
+			deleteFeatureClusters();
+		
+//		if (command.equals(MainActionCommands.ANNOTATE_CLUSTER_COMMAND.getName()))
+//			annotateFeatureCluster();	//	TODO
+		
+		if (command.equals(MainActionCommands.COPY_CLUSTER_FEATURES_AS_MSP.getName()))
+			copyFeatureClusterMSMS(MsLibraryFormat.MSP);
+		
+		if (command.equals(MainActionCommands.COPY_CLUSTER_FEATURES_AS_SIRIUS_MS.getName()))
+			copyFeatureClusterMSMS(MsLibraryFormat.SIRIUS_MS);
+	}
+
+	private void editFeatureCluster() {
+		// TODO Auto-generated method stub
+		IMsFeatureInfoBundleCluster[] clusters = 
+				msmsFeatureClusterTreePanel.getSelectedClusters();
+		if(clusters.length == 0)
+			return;
+		
+		IMsFeatureInfoBundleCluster selectedCluster = clusters[0];
+		
+		//	TODO
+		MessageDialog.showInfoMsg("Feature under development", this.getContentPane());
+	}
+
+	private void deleteFeatureClusters() {
+		
+		Collection<IMsFeatureInfoBundleCluster> clusters = 
+				msmsFeatureClusterTreePanel.getSelectedClustersCollection();
+		if(clusters.isEmpty() || activeMSMSClusterDataSet == null)
+			return;
+		
+		int res = MessageDialog.showChoiceWithWarningMsg(
+				"Do you want to delete selected feature clusters?", this.getContentPane());
+		if(res == JOptionPane.YES_OPTION) {
+			
+			activeMSMSClusterDataSet.getClusters().removeAll(clusters);
+			if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() == null) {
+				try {
+					MSMSClusteringDBUtils.deleteClusters(clusters);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			loadMSMSClusterDataSetInGUI(activeMSMSClusterDataSet);
+			if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() != null) {
+				MessageDialog.showWarningMsg(
+						"You must save the offline project at the end "
+						+ "of the session to preseve this change.", 
+						this.getContentPane());
+			}
+		}
+	}
+
+	private void copyFeatureClusterMSMS(MsLibraryFormat format) {
+		// TODO Auto-generated method stub
+		IMsFeatureInfoBundleCluster[] clusters = 
+				msmsFeatureClusterTreePanel.getSelectedClusters();
+		if(clusters.length == 0)
+			return;
+		
+		IMsFeatureInfoBundleCluster selectedCluster = clusters[0];
+		List<MSFeatureInfoBundle> msmsFeatures = 
+			selectedCluster.getComponents().stream().
+			filter(f -> Objects.nonNull(f.getMsFeature().getSpectrum())).
+			filter(f -> Objects.nonNull(f.getMsFeature().getSpectrum().getExperimentalTandemSpectrum())).
+			collect(Collectors.toList());
+		if(msmsFeatures.isEmpty()) {
+			MessageDialog.showWarningMsg(
+					"No features contatining MSMS spectra in the selected cluster", 
+					this.getContentPane());
+			return;
+		}
+		String copied = "";		
+		if(format.equals(MsLibraryFormat.MSP)) {
+
+			Map<String, Injection> injectionMap = 
+					MSMSExportUtils.createInjectionMap(msmsFeatures);
+			Collection<String> mspOutput = new ArrayList<String>();
+			for (MSFeatureInfoBundle bundle : msmsFeatures) {
+
+				Injection injection = null;
+				if (bundle.getInjectionId() != null)
+					injection = injectionMap.get(bundle.getInjectionId());
+
+				Collection<String> featureMSPBlock = 
+						MSMSExportUtils.createFeatureMSPBlock(bundle, injection);
+				mspOutput.addAll(featureMSPBlock);
+			}
+			copied = StringUtils.join(mspOutput, "\n");
+		}
+		if(format.equals(MsLibraryFormat.SIRIUS_MS)) {
+
+		}
+		if(copied == null || copied.isEmpty())
+			return;
+
+		StringSelection stringSelection = new StringSelection(copied);
+		Clipboard clpbrd = Toolkit.getDefaultToolkit().getSystemClipboard();
+		clpbrd.setContents(stringSelection, null);
 	}
 
 	private void setUpMSMSParentIonFrequencyAnalysis() {
@@ -1455,6 +1564,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		Clipboard clpbrd = Toolkit.getDefaultToolkit().getSystemClipboard();
 		clpbrd.setContents(stringSelection, null);
 	}
+
 
 	private void showFeatureRTIDSearchDialog() {
 		// TODO Auto-generated method stub
@@ -3146,7 +3256,8 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			File exportFile = fc.getSelectedFile();
 			if(exportFile != null) {
 
-				ExtendedMSPExportTask task = new ExtendedMSPExportTask(toExport, exportFile, true);
+				ExtendedMSPExportTask task = 
+						new ExtendedMSPExportTask(toExport, exportFile);
 				task.addTaskListener(this);
 				MRC2ToolBoxCore.getTaskController().addTask(task);
 			}

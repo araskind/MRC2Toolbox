@@ -104,10 +104,7 @@ public class MSMSFeatureClusterTree extends JTree implements ActionListener {
 	public void actionPerformed(ActionEvent event) {
 
 		String command = event.getActionCommand();
-
-		if (command.equals(MainActionCommands.EDIT_CLUSTER_COMMAND.getName()))
-			editCluster();
-
+		
 		if (command.equals(MainActionCommands.REMOVE_SELECTED_FROM_CLUSTER_COMMAND.getName()))
 			deleteFeature();
 
@@ -270,12 +267,19 @@ public class MSMSFeatureClusterTree extends JTree implements ActionListener {
 	}
 
 	public IMsFeatureInfoBundleCluster[] getSelectedClusters() {
+		Collection<IMsFeatureInfoBundleCluster>selected = 
+				getSelectedClustersCollection();
+		return selected.toArray(new IMsFeatureInfoBundleCluster[selected.size()]);
+	}
+	
+	public Collection<IMsFeatureInfoBundleCluster> getSelectedClustersCollection() {
 
-		ArrayList<IMsFeatureInfoBundleCluster> selectedObjects = new ArrayList<IMsFeatureInfoBundleCluster>();
+		ArrayList<IMsFeatureInfoBundleCluster> selectedObjects = 
+				new ArrayList<IMsFeatureInfoBundleCluster>();
 		int selectedRows[] = getSelectionRows();
 
 		if ((selectedRows == null) || (selectedRows.length == 0))
-			return (IMsFeatureInfoBundleCluster[]) Array.newInstance(IMsFeatureInfoBundleCluster.class, 0);
+			return selectedObjects;
 
 		Arrays.sort(selectedRows);
 
@@ -288,7 +292,7 @@ public class MSMSFeatureClusterTree extends JTree implements ActionListener {
 			if (selectedObject instanceof IMsFeatureInfoBundleCluster)
 				selectedObjects.add((IMsFeatureInfoBundleCluster) selectedObject);
 		}
-		return selectedObjects.toArray(new IMsFeatureInfoBundleCluster[selectedObjects.size()]);
+		return selectedObjects;
 	}
 
 	public Collection<MSFeatureInfoBundle> getSelectedFeatures() {
@@ -506,12 +510,6 @@ public class MSMSFeatureClusterTree extends JTree implements ActionListener {
 		// TODO Auto-generated method stub
 
 	}
-
-	private void editCluster() {
-		// TODO Auto-generated method stub
-
-	}
-
 
 	private void toggleClusterLock() {
 
