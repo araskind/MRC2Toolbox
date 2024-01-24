@@ -240,6 +240,7 @@ public class MSMSFeatureTable extends BasicTable {
 	
 	public void setTableModelFromFeatureList(Collection<MSFeatureInfoBundle> featureList) {
 
+		((MSMSFeatureTableModel)model).removeFeatureCluster();
 		TableUpdateTask task = new TableUpdateTask(featureList);
 		String message = "Loading data for " + 
 				Integer.toString(featureList.size()) + " features, please wait ...";

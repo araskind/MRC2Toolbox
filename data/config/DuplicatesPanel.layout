@@ -129,7 +129,7 @@
 									<content delegate="SplitDockStationFactory">
 										<fullscreen-action>false</fullscreen-action>
 										<node nodeId="1600213794189" orientation="HORIZONTAL" divider="0.2000966650555824">
-											<leaf id="2" nodeId="1600213794191">
+											<leaf id="1" nodeId="1600213794191">
 												<placeholders>
 													<placeholder>dock.single.DuplicatesPanelDockableClusterTree</placeholder>
 												</placeholders>
@@ -137,7 +137,7 @@
 											<node nodeId="1600213794193" orientation="VERTICAL" divider="0.46327212020033387">
 												<node nodeId="1600213794195" orientation="VERTICAL" divider="0.6">
 													<node nodeId="1600213794197" orientation="HORIZONTAL" divider="0.8">
-														<leaf id="1" nodeId="1600213794199">
+														<leaf id="2" nodeId="1600213794199">
 															<placeholders>
 																<placeholder>dock.single.DockableDuplicateSelectionTable</placeholder>
 															</placeholders>
@@ -307,20 +307,20 @@
 									</children>
 								</child>
 								<child>
-									<layout factory="predefined" placeholder="dock.single.DockableDuplicateSelectionTable">
-										<replacement id="dockablesingle DockableDuplicateSelectionTable"/>
+									<layout factory="predefined" placeholder="dock.single.DuplicatesPanelDockableClusterTree">
+										<replacement id="dockablesingle DuplicatesPanelDockableClusterTree"/>
 										<delegate id="delegate_ccontrol backup factory id">
-											<id>DockableDuplicateSelectionTable</id>
+											<id>DuplicatesPanelDockableClusterTree</id>
 											<area/>
 										</delegate>
 									</layout>
 									<children ignore="false"/>
 								</child>
 								<child>
-									<layout factory="predefined" placeholder="dock.single.DuplicatesPanelDockableClusterTree">
-										<replacement id="dockablesingle DuplicatesPanelDockableClusterTree"/>
+									<layout factory="predefined" placeholder="dock.single.DockableDuplicateSelectionTable">
+										<replacement id="dockablesingle DockableDuplicateSelectionTable"/>
 										<delegate id="delegate_ccontrol backup factory id">
-											<id>DuplicatesPanelDockableClusterTree</id>
+											<id>DockableDuplicateSelectionTable</id>
 											<area/>
 										</delegate>
 									</layout>

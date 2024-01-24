@@ -90,6 +90,7 @@ public class IDTMSMSFeatureDataPullTask extends IDTMSMSFeatureSearchTask {
 				putDataInCache();
 				attachDataFiles();
 				attachChromatograms();
+				fetchBinnerAnnotations();
 			}
 			finalizeFeatureList();
 			setStatus(TaskStatus.FINISHED);

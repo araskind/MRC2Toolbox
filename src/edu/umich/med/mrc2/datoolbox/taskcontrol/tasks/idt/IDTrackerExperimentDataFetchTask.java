@@ -87,6 +87,7 @@ public class IDTrackerExperimentDataFetchTask extends IDTMSMSFeatureSearchTask {
 				attachFollowupSteps();
 				putDataInCache();
 				attachChromatograms();
+				fetchBinnerAnnotations();
 			}
 		}
 		catch (Exception e) {

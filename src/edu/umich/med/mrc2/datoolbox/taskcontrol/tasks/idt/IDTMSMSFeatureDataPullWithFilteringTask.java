@@ -132,6 +132,7 @@ public class IDTMSMSFeatureDataPullWithFilteringTask extends IDTMSMSFeatureDataP
 				putDataInCache();
 				attachDataFiles();
 				attachChromatograms();
+				fetchBinnerAnnotations();
 			}
 		}
 		catch (Exception e) {

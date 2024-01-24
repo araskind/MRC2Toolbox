@@ -44,6 +44,7 @@ import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSSampleType;
 import edu.umich.med.mrc2.datoolbox.data.msclust.BinnerBasedMsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.data.msclust.IMsFeatureInfoBundleCluster;
+import edu.umich.med.mrc2.datoolbox.database.idt.BinnerAnnotationCache;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTableModel;
 import edu.umich.med.mrc2.datoolbox.gui.tables.ColumnContext;
 import edu.umich.med.mrc2.datoolbox.main.AdductManager;
@@ -253,8 +254,14 @@ public class MSMSFeatureTableModel extends BasicTableModel {
 			
 			return ((BinnerBasedMsFeatureInfoBundleCluster)featureCluster).getAnnotationForFeature(bundle);		
 		}
-		else
-			return null;
+		else {
+			Collection<BinnerAnnotation> cachedAnnotations = 
+					BinnerAnnotationCache.getAnnotationsForMSFeature(bundle.getMSFeatureId());
+			if(cachedAnnotations != null && !cachedAnnotations.isEmpty()) 
+				return cachedAnnotations.iterator().next();			
+			else
+				return null;
+		}
 	}
 
 	public void updateFeatureData(MSFeatureInfoBundle bundle) {
@@ -365,5 +372,9 @@ public class MSMSFeatureTableModel extends BasicTableModel {
 				return i;
 		}
 		return -1;
+	}
+
+	public void removeFeatureCluster() {
+		this.featureCluster = null;
 	}
 }

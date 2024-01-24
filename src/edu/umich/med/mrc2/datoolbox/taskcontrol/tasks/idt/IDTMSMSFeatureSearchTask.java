@@ -50,6 +50,7 @@ import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.interfaces.IChemModel;
 
 import edu.umich.med.mrc2.datoolbox.data.Adduct;
+import edu.umich.med.mrc2.datoolbox.data.BinnerAnnotation;
 import edu.umich.med.mrc2.datoolbox.data.ChromatogramDefinition;
 import edu.umich.med.mrc2.datoolbox.data.CompoundIdentity;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
@@ -98,6 +99,7 @@ import edu.umich.med.mrc2.datoolbox.data.lims.ObjectAnnotation;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.database.cpd.CompoundDatabaseUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.AnnotationUtils;
+import edu.umich.med.mrc2.datoolbox.database.idt.BinnerAnnotationCache;
 import edu.umich.med.mrc2.datoolbox.database.idt.FeatureChromatogramUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
@@ -247,6 +249,7 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 				attachFollowupSteps();
 				putDataInCache();
 				attachChromatograms();
+				fetchBinnerAnnotations();
 			}
 			finalizeFeatureList();
 			applyAdditionalFilters();
@@ -1486,7 +1489,7 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 		
 		for(MSFeatureInfoBundle fb : features) {
 			
-			stAnPs.setString(1, fb.getMsFeature().getId());
+			stAnPs.setString(1, fb.getMSFeatureId());
 			stAnRs = stAnPs.executeQuery();
 			while(stAnRs.next()) {
 				StandardFeatureAnnotation newAnnotation = 
@@ -1735,6 +1738,90 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 //				return false;
 //		}
 		return true;
+	}
+	
+	protected void fetchBinnerAnnotations() throws Exception {
+
+		Connection conn = ConnectionManager.getConnection();
+		taskDescription = "Adding Binner annotations ...";
+		total = 100;
+		processed = 20;
+		Map<String,Collection<String>>featureAnnotationMap = 
+				new TreeMap<String,Collection<String>>();
+		Collection<String>annotationIds = new TreeSet<String>();
+		
+		String query = "SELECT BCC_ID FROM MSMS_CLUSTER_COMPONENT "
+				+ "WHERE BCC_ID IS NOT NULL AND MS_FEATURE_ID = ?";
+		PreparedStatement ps = conn.prepareStatement(query);
+		ResultSet rs = null;
+		for(MSFeatureInfoBundle fb : features) {
+			
+			annotationIds.clear();
+			ps.setString(1, fb.getMSFeatureId());	
+			rs = ps.executeQuery();
+			while(rs.next())
+				annotationIds.add(rs.getString("BCC_ID"));			
+			
+			rs.close();
+			if(!annotationIds.isEmpty())
+				featureAnnotationMap.put(fb.getMSFeatureId(), new TreeSet<String>(annotationIds));
+		}
+		if(featureAnnotationMap.isEmpty()) {
+			
+			ps.close();
+			ConnectionManager.releaseConnection(conn);
+			return;
+		}
+		total = featureAnnotationMap.size();
+		processed = 0;
+		query = "SELECT MOL_ION_NUMBER, FEATURE_NAME, BINNER_MZ, " +
+			"BINNER_RT, ANNOTATION, IS_PRIMARY, ADDITIONAL_GROUP_ANNOTATIONS, " +
+			"FURTHER_ANNOTATIONS, DERIVATIONS, ISOTOPES, ADDITIONAL_ISOTOPES, " +
+			"CHARGE_CARRIER, ADDITIONAL_ADDUCTS, BIN_NUMBER, CORR_CLUSTER_NUMBER, " +
+			"REBIN_SUBCLUSTER_NUMBER, RT_SUBCLUSTER_NUMBER, MASS_ERROR, RMD " +
+			"FROM BINNER_ANNOTATION_CLUSTER_COMPONENT " +
+			"WHERE BCC_ID = ? ";
+		ps = conn.prepareStatement(query);
+		ResultSet baRs = null;
+		for(Entry<String, Collection<String>> me : featureAnnotationMap.entrySet()) {
+			
+			Collection<BinnerAnnotation>annotations = new ArrayList<BinnerAnnotation>();
+			for(String bccId : me.getValue()) {
+				
+				ps.setString(1, bccId);
+				baRs = ps.executeQuery();
+				while(baRs.next()) {
+					
+					BinnerAnnotation ba = new BinnerAnnotation(
+							bccId, 
+							baRs.getString("FEATURE_NAME"), 
+							baRs.getString("ANNOTATION"));
+					ba.setMolIonNumber(baRs.getInt("MOL_ION_NUMBER"));
+					ba.setBinnerMz(baRs.getDouble("BINNER_MZ"));
+					ba.setBinnerRt(baRs.getDouble("BINNER_RT"));
+					if(baRs.getString("IS_PRIMARY") != null) 
+						ba.setPrimary(true);
+
+					ba.setAdditionalGroupAnnotations(baRs.getString("ADDITIONAL_GROUP_ANNOTATIONS"));
+					ba.setFurtherAnnotations(baRs.getString("FURTHER_ANNOTATIONS"));
+					ba.setDerivations(baRs.getString("DERIVATIONS"));
+					ba.setIsotopes(baRs.getString("ISOTOPES"));
+					ba.setAdditionalIsotopes(baRs.getString("ADDITIONAL_ISOTOPES"));
+					ba.setChargeCarrier(baRs.getString("CHARGE_CARRIER"));
+					ba.setAdditionalAdducts(baRs.getString("ADDITIONAL_ADDUCTS"));
+					ba.setBinNumber(baRs.getInt("BIN_NUMBER"));
+					ba.setRebinSubclusterNumber(baRs.getInt("REBIN_SUBCLUSTER_NUMBER"));
+					ba.setRtSubclusterNumber(baRs.getInt("RT_SUBCLUSTER_NUMBER"));
+					ba.setMassError(baRs.getDouble("MASS_ERROR"));
+					ba.setRmd(baRs.getDouble("RMD"));
+					annotations.add(ba);
+				}
+				baRs.close();			
+			}
+			BinnerAnnotationCache.setAnnotationdForMsFeature(me.getKey(), annotations);
+		}		
+		ps.close();
+		ConnectionManager.releaseConnection(conn);
 	}
 	
 	@Override

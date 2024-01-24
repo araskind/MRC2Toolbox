@@ -101,6 +101,7 @@ public class IDTMSMSClusterDataPullTask extends IDTMSMSFeatureDataPullTask {
 					putDataInCache();
 					attachDataFiles();
 					attachChromatograms();
+					fetchBinnerAnnotations();
 				}		
 			}
 			catch (Exception e) {
