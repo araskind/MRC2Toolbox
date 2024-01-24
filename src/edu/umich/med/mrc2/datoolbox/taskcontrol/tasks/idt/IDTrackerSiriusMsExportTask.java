@@ -87,8 +87,12 @@ public abstract class IDTrackerSiriusMsExportTask extends AbstractTask {
 		final Writer writer = new BufferedWriter(new FileWriter(outputFile));
 		for(SiriusMsMsCluster cluster : msmsclusters) {
 			
-			writer.append(cluster.getSiriusMsBlock());
-			writer.append("\n");
+			String mspBlock = cluster.getSiriusMsBlock();
+			if(mspBlock != null) {
+				
+				writer.append(cluster.getSiriusMsBlock());
+				writer.append("\n");
+			}
 			processed++;
 		}
 		writer.flush();

@@ -28,7 +28,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
@@ -36,15 +38,21 @@ import javax.xml.bind.DatatypeConverter;
 
 import org.apache.commons.lang3.StringUtils;
 
+import edu.umich.med.mrc2.datoolbox.data.Adduct;
+import edu.umich.med.mrc2.datoolbox.data.BinnerAnnotation;
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
+import edu.umich.med.mrc2.datoolbox.data.SiriusMsMsCluster;
 import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureIdentityComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortDirection;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
+import edu.umich.med.mrc2.datoolbox.data.msclust.BinnerBasedMsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusteringParameterSet;
+import edu.umich.med.mrc2.datoolbox.data.msclust.MsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.nist.pepsearch.HiResSearchOption;
+import edu.umich.med.mrc2.datoolbox.main.AdductManager;
 
 public class MSMSClusteringUtils {
 	
@@ -114,4 +122,52 @@ public class MSMSClusteringUtils {
 		
 		return topHit;
 	}
+	
+	public static Collection<SiriusMsMsCluster>createMultipleSiriusMsClustersFromBinnerAnnotattedCluster(
+			BinnerBasedMsFeatureInfoBundleCluster bbc){
+		
+		Collection<SiriusMsMsCluster>siriusClusters = new ArrayList<SiriusMsMsCluster>();		
+		for(Entry<BinnerAnnotation, Set<MSFeatureInfoBundle>> e : bbc.getComponentMap().entrySet()) {
+			
+			if(e.getValue().size() == 0)
+				continue;
+			
+			MSFeatureInfoBundle[]bundles = 
+					e.getValue().toArray(new MSFeatureInfoBundle[e.getValue().size()]);
+			MsFeatureInfoBundleCluster c = new MsFeatureInfoBundleCluster(bundles[0]);
+			if(bundles.length > 1) {
+
+				for(int i=1; i<bundles.length; i++)
+					c.addComponent(null, bundles[i]);
+			}
+			SiriusMsMsCluster csc = new SiriusMsMsCluster(c);
+			Adduct siriusCompatible = 
+					AdductManager.getSiriusCompatibleAdductByBinnerAnnotation(e.getKey());
+			if(siriusCompatible != null) {
+				
+				csc.setAdduct(siriusCompatible);
+				siriusClusters.add(csc);
+			}
+		}
+		return siriusClusters;
+	}
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

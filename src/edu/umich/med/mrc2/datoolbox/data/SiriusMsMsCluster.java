@@ -31,6 +31,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
+import edu.umich.med.mrc2.datoolbox.data.enums.AdductNotationType;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.msclust.IMsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.main.AdductManager;
@@ -179,13 +180,19 @@ public class SiriusMsMsCluster implements Serializable {
 	
 	public String getSiriusMsBlock() {
 		
+		if(adduct == null 
+				|| adduct.getNotationForType(AdductNotationType.SIRIUS) == null)
+			return null;
+		
+		String adductName = adduct.getNotationForType(AdductNotationType.SIRIUS);
+		
 		Collection<String>msBlock = new ArrayList<String>();
 		if(msmsComponents.size() == 1) {
 			
 			MSFeatureInfoBundle bundle = msmsComponents.iterator().next();
 			msBlock.add(">compound " + bundle.getMSMSFeatureId());
 			msBlock.add(">parentmass " + MRC2ToolBoxConfiguration.getMzFormat().format(mzRange.getAverage()));
-			msBlock.add(">ionization " + adduct.getName());
+			msBlock.add(">ionization " + adductName);
 			msBlock.add(">comments " + getName());
 			msBlock.add("");
 			
@@ -207,7 +214,7 @@ public class SiriusMsMsCluster implements Serializable {
 		else {
 			msBlock.add(">compound " + getName());
 			msBlock.add(">parentmass " + MRC2ToolBoxConfiguration.getMzFormat().format(mzRange.getAverage()));
-			msBlock.add(">ionization " + adduct.getName());
+			msBlock.add(">ionization " + adductName);
 			msBlock.add(">comments " + getComment());
 			msBlock.add("");
 			
@@ -228,9 +235,16 @@ public class SiriusMsMsCluster implements Serializable {
 					MRC2ToolBoxConfiguration.getMzFormat().format(mzRange.getAverage()) + " " + 
 							intensityFormat.format(parentIon.getIntensity()));
 		}
-
 		msBlock.add("");
 		return StringUtils.join(msBlock, "\n");
+	}
+
+	public Adduct getAdduct() {
+		return adduct;
+	}
+
+	public void setAdduct(Adduct adduct) {
+		this.adduct = adduct;
 	}
 	
 }

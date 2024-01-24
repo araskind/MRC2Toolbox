@@ -23,13 +23,17 @@ package edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Set;
 
 import edu.umich.med.mrc2.datoolbox.data.SiriusMsMsCluster;
+import edu.umich.med.mrc2.datoolbox.data.msclust.BinnerBasedMsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.data.msclust.IMSMSClusterDataSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.IMsFeatureInfoBundleCluster;
+import edu.umich.med.mrc2.datoolbox.data.msclust.MsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
+import edu.umich.med.mrc2.datoolbox.utils.MSMSClusteringUtils;
 
 public class IDTrackerSiriusMsClusterExportTask extends IDTrackerSiriusMsExportTask {
 
@@ -73,7 +77,17 @@ public class IDTrackerSiriusMsClusterExportTask extends IDTrackerSiriusMsExportT
 				
 		for(IMsFeatureInfoBundleCluster cluster : msmsClusters) {
 			
-			msmsclusters.add(new SiriusMsMsCluster(cluster)) ;
+			if(cluster instanceof MsFeatureInfoBundleCluster)
+				msmsclusters.add(new SiriusMsMsCluster(cluster)) ;
+
+			if(cluster instanceof BinnerBasedMsFeatureInfoBundleCluster) {
+				
+				Collection<SiriusMsMsCluster>bsSiriusClusters = 
+						MSMSClusteringUtils.createMultipleSiriusMsClustersFromBinnerAnnotattedCluster(
+						(BinnerBasedMsFeatureInfoBundleCluster)cluster);
+				if(!bsSiriusClusters.isEmpty())
+					msmsclusters.addAll(bsSiriusClusters);
+			}
 			processed++;
 		}
 	}

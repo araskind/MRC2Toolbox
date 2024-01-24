@@ -30,6 +30,7 @@ import java.util.stream.Collectors;
 import edu.umich.med.mrc2.datoolbox.data.Adduct;
 import edu.umich.med.mrc2.datoolbox.data.AdductExchange;
 import edu.umich.med.mrc2.datoolbox.data.BinnerAdduct;
+import edu.umich.med.mrc2.datoolbox.data.BinnerAnnotation;
 import edu.umich.med.mrc2.datoolbox.data.BinnerNeutralMassDifference;
 import edu.umich.med.mrc2.datoolbox.data.CompositeAdduct;
 import edu.umich.med.mrc2.datoolbox.data.SimpleAdduct;
@@ -533,6 +534,24 @@ public class AdductManager {
 		return getBinnerAdductList().stream().
 				filter(a -> a.getId().equals(id)).
 				findFirst().orElse(null);
+	}
+	
+	public static Adduct getAdductByBinnerAnnotation(BinnerAnnotation ba) {
+		
+		String cleanAnnotation = ba.getCleanAnnotation();		
+		 return getAdductList().stream().
+				 filter(a -> Objects.nonNull(a.getNotationForType(AdductNotationType.BINNER))).
+				 filter(a -> a.getNotationForType(AdductNotationType.BINNER).equals(cleanAnnotation)).
+				 findFirst().orElse(null);						 
+	}
+	public static Adduct getSiriusCompatibleAdductByBinnerAnnotation(BinnerAnnotation ba) {
+		
+		String cleanAnnotation = ba.getCleanAnnotation();	
+		 return getAdductList().stream().
+				 filter(a -> Objects.nonNull(a.getNotationForType(AdductNotationType.BINNER))).
+				 filter(a -> Objects.nonNull(a.getNotationForType(AdductNotationType.SIRIUS))).
+				 filter(a -> a.getNotationForType(AdductNotationType.BINNER).equals(cleanAnnotation)).
+				 findFirst().orElse(null);						 
 	}
 }
 

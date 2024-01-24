@@ -81,6 +81,7 @@ import edu.umich.med.mrc2.datoolbox.data.MzFrequencyObject;
 import edu.umich.med.mrc2.datoolbox.data.NISTPepSearchParameterObject;
 import edu.umich.med.mrc2.datoolbox.data.ReferenceMsMsLibrary;
 import edu.umich.med.mrc2.datoolbox.data.ReferenceMsMsLibraryMatch;
+import edu.umich.med.mrc2.datoolbox.data.SiriusMsMsCluster;
 import edu.umich.med.mrc2.datoolbox.data.StandardFeatureAnnotation;
 import edu.umich.med.mrc2.datoolbox.data.TandemMassSpectrum;
 import edu.umich.med.mrc2.datoolbox.data.enums.FeatureSubsetByIdentification;
@@ -105,6 +106,7 @@ import edu.umich.med.mrc2.datoolbox.data.msclust.IMSMSClusterDataSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.IMsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusterDataSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusteringParameterSet;
+import edu.umich.med.mrc2.datoolbox.data.msclust.MsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.database.idt.FeatureChromatogramUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
@@ -226,6 +228,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.rawdata.RawDataLoadForInje
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.rawdata.RawDataRepositoryIndexingTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.stats.MzFrequencyAnalysisTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.stats.MzFrequencyType;
+import edu.umich.med.mrc2.datoolbox.utils.MSMSClusteringUtils;
 import edu.umich.med.mrc2.datoolbox.utils.MSMSExportUtils;
 import edu.umich.med.mrc2.datoolbox.utils.MsFeatureStatsUtils;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
@@ -962,11 +965,12 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			return;
 		}
 		String copied = "";		
+		Collection<String> mspOutput = new ArrayList<String>();
+		
 		if(format.equals(MsLibraryFormat.MSP)) {
 
 			Map<String, Injection> injectionMap = 
 					MSMSExportUtils.createInjectionMap(msmsFeatures);
-			Collection<String> mspOutput = new ArrayList<String>();
 			for (MSFeatureInfoBundle bundle : msmsFeatures) {
 
 				Injection injection = null;
@@ -976,12 +980,33 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 				Collection<String> featureMSPBlock = 
 						MSMSExportUtils.createFeatureMSPBlock(bundle, injection);
 				mspOutput.addAll(featureMSPBlock);
-			}
-			copied = StringUtils.join(mspOutput, "\n");
+			}			
 		}
 		if(format.equals(MsLibraryFormat.SIRIUS_MS)) {
-
+			
+			if(selectedCluster instanceof BinnerBasedMsFeatureInfoBundleCluster) {
+				
+				Collection<SiriusMsMsCluster>bsSiriusClusters = 
+						MSMSClusteringUtils.createMultipleSiriusMsClustersFromBinnerAnnotattedCluster(
+						(BinnerBasedMsFeatureInfoBundleCluster)selectedCluster);
+				for(SiriusMsMsCluster sc : bsSiriusClusters) {
+					
+					String siriusMsBlock = sc.getSiriusMsBlock();
+					if(siriusMsBlock != null)
+						mspOutput.add(siriusMsBlock);
+				}
+			}
+			if(selectedCluster instanceof MsFeatureInfoBundleCluster) {
+				
+				SiriusMsMsCluster bsSiriusCluster = 
+						new SiriusMsMsCluster((MsFeatureInfoBundleCluster)selectedCluster);
+					
+				String siriusMsBlock = bsSiriusCluster.getSiriusMsBlock();
+				if(siriusMsBlock != null)
+					mspOutput.add(siriusMsBlock);				
+			}
 		}
+		copied = StringUtils.join(mspOutput, "\n");
 		if(copied == null || copied.isEmpty())
 			return;
 
@@ -1504,63 +1529,82 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		if(selected.isEmpty())
 			return;
 		
-		ArrayList<String>contents = new ArrayList<String>();
-		for(MSFeatureInfoBundle bundle : selected) {
+		String copied = "";
+		Map<String, Injection> injectionMap = 
+				MSMSExportUtils.createInjectionMap(selected);
+		Collection<String> mspOutput = new ArrayList<String>();
+		for (MSFeatureInfoBundle bundle : selected) {
 
-			MsFeature msf = bundle.getMsFeature();
-			Collection<TandemMassSpectrum> tandemSpectra = msf.getSpectrum().getTandemSpectra().stream().
-					filter(t -> t.getSpectrumSource().equals(SpectrumSource.EXPERIMENTAL)).
-					collect(Collectors.toList());
+			Injection injection = null;
+			if (bundle.getInjectionId() != null)
+				injection = injectionMap.get(bundle.getInjectionId());
 
-			if(tandemSpectra.isEmpty())
-				continue;
-			
-			for(TandemMassSpectrum tandemMs : tandemSpectra) {
-
-				if(tandemMs.getSpectrum().isEmpty())
-					continue;
-
-				contents.add(MSPField.NAME.getName() + ": " + msf.getId());
-				contents.add("Feature name: " + msf.getName());
-				if(msf.isIdentified()) {
-					CompoundIdentity cid = msf.getPrimaryIdentity().getCompoundIdentity();
-					contents.add(MSPField.SYNONYM.getName() + ": " + cid.getName());
-					if(cid.getFormula() != null)
-						contents.add(MSPField.FORMULA.getName() + ": " + cid.getFormula());
-					if(cid.getInChiKey() != null)
-						contents.add(MSPField.INCHI_KEY.getName() + ": " + cid.getInChiKey());
-				}
-				String polarity = "P";
-				if(msf.getPolarity().equals(Polarity.Negative))
-					polarity = "N";
-				contents.add(MSPField.ION_MODE.getName() + ": " + polarity);
-
-				if(tandemMs.getCidLevel() >0)
-					contents.add(MSPField.COLLISION_ENERGY.getName() + ": " + Double.toString(tandemMs.getCidLevel()));
-
-				//	RT
-				contents.add(MSPField.RETENTION_INDEX.getName() + ": " +
-						MRC2ToolBoxConfiguration.getRtFormat().format(msf.getRetentionTime()) + " min. ");
-
-				contents.add(MSPField.PRECURSORMZ.getName() + ": " +
-					MRC2ToolBoxConfiguration.getMzFormat().format(tandemMs.getParent().getMz()));
-				contents.add(MSPField.NUM_PEAKS.getName() + ": " + Integer.toString(tandemMs.getSpectrum().size()));
-
-				MsPoint[] msms = MsUtils.normalizeAndSortMsPattern(tandemMs.getSpectrum());
-				for(MsPoint point : msms) {
-
-					contents.add(
-						MRC2ToolBoxConfiguration.getMzFormat().format(point.getMz())
-						+ " " + MsUtils.mspIntensityFormat.format(point.getIntensity()) + "; ") ;
-				}
-				contents.add("");
-			}
+			Collection<String> featureMSPBlock = 
+					MSMSExportUtils.createFeatureMSPBlock(bundle, injection);
+			mspOutput.addAll(featureMSPBlock);
 		}
-		String mspString = StringUtils.join(contents, "\n");
-		if(mspString == null || mspString.isEmpty())
+		copied = StringUtils.join(mspOutput, "\n");
+				
+//		ArrayList<String>contents = new ArrayList<String>();
+//		for(MSFeatureInfoBundle bundle : selected) {
+//
+//			MsFeature msf = bundle.getMsFeature();
+//			Collection<TandemMassSpectrum> tandemSpectra = msf.getSpectrum().getTandemSpectra().stream().
+//					filter(t -> t.getSpectrumSource().equals(SpectrumSource.EXPERIMENTAL)).
+//					collect(Collectors.toList());
+//
+//			if(tandemSpectra.isEmpty())
+//				continue;
+//			
+//			for(TandemMassSpectrum tandemMs : tandemSpectra) {
+//
+//				if(tandemMs.getSpectrum().isEmpty())
+//					continue;
+//
+//				contents.add(MSPField.NAME.getName() + ": " + msf.getId());
+//				contents.add("Feature name: " + msf.getName());
+//				if(msf.isIdentified()) {
+//					CompoundIdentity cid = msf.getPrimaryIdentity().getCompoundIdentity();
+//					contents.add(MSPField.SYNONYM.getName() + ": " + cid.getName());
+//					if(cid.getFormula() != null)
+//						contents.add(MSPField.FORMULA.getName() + ": " + cid.getFormula());
+//					if(cid.getInChiKey() != null)
+//						contents.add(MSPField.INCHI_KEY.getName() + ": " + cid.getInChiKey());
+//				}
+//				String polarity = "P";
+//				if(msf.getPolarity().equals(Polarity.Negative))
+//					polarity = "N";
+//				contents.add(MSPField.ION_MODE.getName() + ": " + polarity);
+//
+//				if(tandemMs.getCidLevel() >0)
+//					contents.add(MSPField.COLLISION_ENERGY.getName() + ": " + Double.toString(tandemMs.getCidLevel()));
+//
+//				//	RT
+//				contents.add(MSPField.RETENTION_INDEX.getName() + ": " +
+//						MRC2ToolBoxConfiguration.getRtFormat().format(msf.getRetentionTime()) + " min. ");
+//
+//				contents.add(MSPField.PRECURSORMZ.getName() + ": " +
+//					MRC2ToolBoxConfiguration.getMzFormat().format(tandemMs.getParent().getMz()));
+//				contents.add(MSPField.NUM_PEAKS.getName() + ": " + Integer.toString(tandemMs.getSpectrum().size()));
+//
+//				MsPoint[] msms = MsUtils.normalizeAndSortMsPattern(tandemMs.getSpectrum());
+//				for(MsPoint point : msms) {
+//
+//					contents.add(
+//						MRC2ToolBoxConfiguration.getMzFormat().format(point.getMz())
+//						+ " " + MsUtils.mspIntensityFormat.format(point.getIntensity()) + "; ") ;
+//				}
+//				contents.add("");
+//			}
+//		}
+//		String mspString = StringUtils.join(contents, "\n");
+//		if(mspString == null || mspString.isEmpty())
+//			return;
+		
+		if(copied == null || copied.isEmpty())
 			return;
 
-		StringSelection stringSelection = new StringSelection(mspString);
+		StringSelection stringSelection = new StringSelection(copied);
 		Clipboard clpbrd = Toolkit.getDefaultToolkit().getSystemClipboard();
 		clpbrd.setContents(stringSelection, null);
 	}

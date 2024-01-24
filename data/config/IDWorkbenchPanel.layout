@@ -175,7 +175,7 @@
 															</entry>
 														</placeholder-map>
 													</leaf>
-													<node nodeId="1666720209180" orientation="VERTICAL" divider="0.6090155369625883">
+													<node nodeId="1666720209180" orientation="VERTICAL" divider="0.53776859828918">
 														<leaf id="5" nodeId="1654996481318">
 															<placeholders>
 																<placeholder>dock.single.DockableMSMSFeatureTable</placeholder>
@@ -616,7 +616,7 @@
 								</child>
 								<child>
 									<layout factory="delegate_StackDockStationFactory">
-										<selected>0</selected>
+										<selected>1</selected>
 										<placeholders>
 											<version>0</version>
 											<format>dock.PlaceholderList</format>
@@ -715,7 +715,7 @@
 								</child>
 								<child>
 									<layout factory="delegate_StackDockStationFactory">
-										<selected>0</selected>
+										<selected>1</selected>
 										<placeholders>
 											<version>0</version>
 											<format>dock.PlaceholderList</format>

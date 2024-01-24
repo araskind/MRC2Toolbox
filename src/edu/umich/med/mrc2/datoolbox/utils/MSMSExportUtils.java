@@ -130,7 +130,7 @@ public class MSMSExportUtils {
 		return comment;
 	}
 	
-	public static Map<String,Injection> createInjectionMap(List<MSFeatureInfoBundle> msmsFeatures) {
+	public static Map<String,Injection> createInjectionMap(Collection<MSFeatureInfoBundle> msmsFeatures) {
 
 		Map<String,Injection>injectionMap = new TreeMap<String,Injection>();
 		List<String> injIds = msmsFeatures.stream().
