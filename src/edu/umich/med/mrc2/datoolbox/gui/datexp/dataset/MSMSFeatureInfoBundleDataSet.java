@@ -38,7 +38,7 @@ import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MassSpectrum;
 import edu.umich.med.mrc2.datoolbox.data.TandemMassSpectrum;
 import edu.umich.med.mrc2.datoolbox.data.enums.MSMSMatchType;
-import edu.umich.med.mrc2.datoolbox.gui.datexp.FeaturePlotColorOption;
+import edu.umich.med.mrc2.datoolbox.gui.datexp.FeatureIdentificationMeasure;
 
 public class MSMSFeatureInfoBundleDataSet extends AbstractXYDataset{
 
@@ -55,7 +55,7 @@ public class MSMSFeatureInfoBundleDataSet extends AbstractXYDataset{
 
 	public MSMSFeatureInfoBundleDataSet(
 			Collection<MSFeatureInfoBundle> featureBundles, 
-			FeaturePlotColorOption colorOption) {
+			FeatureIdentificationMeasure colorOption) {
 
 		super();
 		seriesMap = new LinkedHashMap<String, MSFeatureInfoBundle[]>();
@@ -64,18 +64,18 @@ public class MSMSFeatureInfoBundleDataSet extends AbstractXYDataset{
 	
 	private void populateSeries(
 			Collection<MSFeatureInfoBundle> featureBundles, 
-			FeaturePlotColorOption colorOption) {
+			FeatureIdentificationMeasure colorOption) {
 		
-		if(colorOption.equals(FeaturePlotColorOption.COLOR_BY_ID_LEVEL))			
+		if(colorOption.equals(FeatureIdentificationMeasure.COLOR_BY_ID_LEVEL))			
 			populateSeriesByIDLevel(featureBundles);
 		
-		if(colorOption.equals(FeaturePlotColorOption.COLOR_BY_MSMS_MATCH_TYPE))			
+		if(colorOption.equals(FeatureIdentificationMeasure.COLOR_BY_MSMS_MATCH_TYPE))			
 			populateSeriesByMSMSMatchType(featureBundles);
 		
-		if(colorOption.equals(FeaturePlotColorOption.COLOR_BY_NIST_SCORE)
-				|| colorOption.equals(FeaturePlotColorOption.COLOR_BY_ENTROPY_SCORE)
-				|| colorOption.equals(FeaturePlotColorOption.COLOR_BY_DOT_PRODUCT)
-				|| colorOption.equals(FeaturePlotColorOption.COLOR_BY_PROBABILITY)) {
+		if(colorOption.equals(FeatureIdentificationMeasure.COLOR_BY_NIST_SCORE)
+				|| colorOption.equals(FeatureIdentificationMeasure.COLOR_BY_ENTROPY_SCORE)
+				|| colorOption.equals(FeatureIdentificationMeasure.COLOR_BY_DOT_PRODUCT)
+				|| colorOption.equals(FeatureIdentificationMeasure.COLOR_BY_PROBABILITY)) {
 			populateSeriesForScoreColoring(featureBundles);
 		}		
 		keySet = seriesMap.keySet().toArray(new String[seriesMap.size()]);

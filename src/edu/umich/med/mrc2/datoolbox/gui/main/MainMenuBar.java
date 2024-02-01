@@ -150,12 +150,15 @@ public class MainMenuBar extends CommonMenuBar {
 			newXMLExperimentMenuItem = addItem(experimentMenu, 
 					MainActionCommands.NEW_METABOLOMICS_XML_EXPERIMENT_COMMAND, newXMLExperimentIcon);
 			newXMLExperimentMenuItem.setAccelerator(KeyStroke.getKeyStroke('M', MASK | InputEvent.SHIFT_DOWN_MASK));
+			newXMLExperimentMenuItem.setEnabled(false);
 			
 			openXMLExperimentMenuItem = addItem(experimentMenu, 
 					MainActionCommands.OPEN_METABOLOMICS_XML_EXPERIMENT_COMMAND, openXMLExperimentIcon);
+			openXMLExperimentMenuItem.setEnabled(false);
 			
 			saveAsXMLExperimentMenuItem = addItem(experimentMenu, 
 					MainActionCommands.SAVE_AS_XML_EXPERIMENT_COMMAND, saveXMLExperimentIcon);
+			saveAsXMLExperimentMenuItem.setEnabled(false);
 			
 			experimentMenu.addSeparator();
 		}

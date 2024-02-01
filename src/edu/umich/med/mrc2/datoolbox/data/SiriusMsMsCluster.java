@@ -45,6 +45,7 @@ public class SiriusMsMsCluster implements Serializable {
 	 * 
 	 */
 	private static final long serialVersionUID = -5308020706362132359L;
+	private String clusterId;
 	private MsPoint parentIon;
 	private Collection<MSFeatureInfoBundle>msmsComponents;
 	private Collection<MsPoint>msOneSpectrum;
@@ -87,6 +88,7 @@ public class SiriusMsMsCluster implements Serializable {
 	public SiriusMsMsCluster(IMsFeatureInfoBundleCluster cluster) {
 
 		super();
+		this.clusterId = cluster.getId();
 		msmsComponents = new HashSet<MSFeatureInfoBundle>();
 		MSFeatureInfoBundle[] features = cluster.getComponents().
 				toArray(new MSFeatureInfoBundle[cluster.getComponents().size()]);
@@ -175,7 +177,7 @@ public class SiriusMsMsCluster implements Serializable {
 			map(f -> f.getId()).
 			collect(Collectors.toList());
 		
-		return StringUtils.join(fids, ";");
+		return "Component features: " + StringUtils.join(fids, ";");
 	}
 	
 	public String getSiriusMsBlock() {
@@ -196,7 +198,8 @@ public class SiriusMsMsCluster implements Serializable {
 			msBlock.add(">comments " + getName());
 			msBlock.add("");
 			
-			TandemMassSpectrum msms =  bundle.getMsFeature().getSpectrum().getExperimentalTandemSpectrum();			
+			TandemMassSpectrum msms =  
+					bundle.getMsFeature().getSpectrum().getExperimentalTandemSpectrum();			
 			msBlock.add(">collision " + ceFormat.format(msms.getCidLevel()));
 			for(MsPoint p : msms.getMassSortedSpectrum()) {
 				
@@ -212,7 +215,11 @@ public class SiriusMsMsCluster implements Serializable {
 							intensityFormat.format(msms.getParent().getIntensity()));
 		}
 		else {
-			msBlock.add(">compound " + getName());
+			String clusterName = getName();
+			if(clusterId != null)
+				clusterName += " (Cluster ID " + clusterId + ")";
+				
+			msBlock.add(">compound " + clusterName);
 			msBlock.add(">parentmass " + MRC2ToolBoxConfiguration.getMzFormat().format(mzRange.getAverage()));
 			msBlock.add(">ionization " + adductName);
 			msBlock.add(">comments " + getComment());
@@ -231,6 +238,8 @@ public class SiriusMsMsCluster implements Serializable {
 				msBlock.add("");
 			}
 			msBlock.add(">ms1");
+			
+			//TODO add proper isotopic pattern
 			msBlock.add(
 					MRC2ToolBoxConfiguration.getMzFormat().format(mzRange.getAverage()) + " " + 
 							intensityFormat.format(parentIon.getIntensity()));

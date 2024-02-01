@@ -135,6 +135,7 @@ public class MSMSClusteringUtils {
 			MSFeatureInfoBundle[]bundles = 
 					e.getValue().toArray(new MSFeatureInfoBundle[e.getValue().size()]);
 			MsFeatureInfoBundleCluster c = new MsFeatureInfoBundleCluster(bundles[0]);
+			c.setId(bbc.getId());
 			if(bundles.length > 1) {
 
 				for(int i=1; i<bundles.length; i++)

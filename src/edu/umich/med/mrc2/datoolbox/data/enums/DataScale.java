@@ -46,13 +46,23 @@ public enum DataScale {
 		return uiName;
 	}
 	
-	public static DataScale getDataScaleByName(String name) {
+	public static DataScale getDataScaleByUIName(String name) {
 		
 		for(DataScale s : DataScale.values()) {
 			
 			if(s.getName().equals(name))
 				return s;
 		}		
+		return null;
+	}
+	
+	public static DataScale getOptionByName(String optionName) {
+
+		for(DataScale o : DataScale.values()) {
+
+			if(o.name().equals(optionName))
+				return o;
+		}
 		return null;
 	}
 }

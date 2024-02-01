@@ -1092,6 +1092,13 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 
 	private void openRawDataFiles() {
 		
+		if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() != null) {
+			MessageDialog.showWarningMsg(
+					"There is an opened raw data analysis experiment.\n"
+					+ "Please close it first if you want to work with unrelated raw data files.", 
+					this.getContentPane());
+			return;
+		}	
 		JnaFileChooser fc = new JnaFileChooser(MRC2ToolBoxConfiguration.getRawDataRepository());
 		fc.setMode(JnaFileChooser.Mode.Files);
 		fc.addFilter("Raw MS files", "mzml", "mzML", "mzXML", "mzxml");
@@ -1213,6 +1220,14 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 
 	private void showCloseRawDataFilesDialog() {
 		
+		if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() != null) {
+			MessageDialog.showWarningMsg(
+					"There is an opened raw data analysis experiment.\n"
+					+ "It is not possible to close individual data files.\n"
+					+ "You may only close the whole experiment.", 
+					this.getContentPane());
+			return;
+		}	
 		closeRawDataFilesDialog = new CloseRawDataFilesDialog(this);
 		closeRawDataFilesDialog.setLocationRelativeTo(this.getContentPane());
 		closeRawDataFilesDialog.setVisible(true);

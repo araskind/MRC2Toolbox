@@ -84,7 +84,7 @@ public class DockableMzRtMSMSPlotPanel extends DefaultSingleCDockable
 	private Collection<MSFeatureInfoBundle>msFeatureInfoBundles;
 	private TableRowSubset activeTableRowSubset;
 	private Range rtRange, mzRange;
-	private FeaturePlotColorOption plotColorOption;
+	private FeatureIdentificationMeasure plotColorOption;
 	private IndeterminateProgressDialog idp;
 	private static final Shape defaultShape = new Ellipse2D.Double(-3, -3, 6, 6);
 	private Preferences preferences;
@@ -196,7 +196,7 @@ public class DockableMzRtMSMSPlotPanel extends DefaultSingleCDockable
 					this.getContentPane());
 			return;
 		}
-		plotColorOption = mmzrtPlotSettingsPanel.getFeaturePlotColorOption();
+		plotColorOption = mmzrtPlotSettingsPanel.getFeatureIdentificationMeasure();
 		CreateMSMSFeatureInfoBundleDataSetTask task = 
 				new CreateMSMSFeatureInfoBundleDataSetTask(
 						mzrtFilteredMsFeatureInfoBundles, plotColorOption);
@@ -209,11 +209,11 @@ public class DockableMzRtMSMSPlotPanel extends DefaultSingleCDockable
 	class CreateMSMSFeatureInfoBundleDataSetTask extends LongUpdateTask {
 		
 		private Collection<MSFeatureInfoBundle>featurBundles;
-		private FeaturePlotColorOption colorOption;
+		private FeatureIdentificationMeasure colorOption;
 		
 		public CreateMSMSFeatureInfoBundleDataSetTask(
 				Collection<MSFeatureInfoBundle>featurBundles,
-				FeaturePlotColorOption colorOption) {
+				FeatureIdentificationMeasure colorOption) {
 			this.featurBundles = featurBundles;
 			this.colorOption = colorOption;
 		}
@@ -221,16 +221,16 @@ public class DockableMzRtMSMSPlotPanel extends DefaultSingleCDockable
 		@Override
 		public Void doInBackground() {
 
-			if(colorOption.equals(FeaturePlotColorOption.COLOR_BY_ID_LEVEL))
+			if(colorOption.equals(FeatureIdentificationMeasure.COLOR_BY_ID_LEVEL))
 				colorByIdLevel();
 			
-			if(colorOption.equals(FeaturePlotColorOption.COLOR_BY_MSMS_MATCH_TYPE))
+			if(colorOption.equals(FeatureIdentificationMeasure.COLOR_BY_MSMS_MATCH_TYPE))
 				colorByMatchType();
 				
-			if(colorOption.equals(FeaturePlotColorOption.COLOR_BY_NIST_SCORE)
-					|| colorOption.equals(FeaturePlotColorOption.COLOR_BY_ENTROPY_SCORE)
-					|| colorOption.equals(FeaturePlotColorOption.COLOR_BY_DOT_PRODUCT)
-					|| colorOption.equals(FeaturePlotColorOption.COLOR_BY_PROBABILITY)) {
+			if(colorOption.equals(FeatureIdentificationMeasure.COLOR_BY_NIST_SCORE)
+					|| colorOption.equals(FeatureIdentificationMeasure.COLOR_BY_ENTROPY_SCORE)
+					|| colorOption.equals(FeatureIdentificationMeasure.COLOR_BY_DOT_PRODUCT)
+					|| colorOption.equals(FeatureIdentificationMeasure.COLOR_BY_PROBABILITY)) {
 				colorByScore();
 			}
 			return null;
@@ -277,15 +277,15 @@ public class DockableMzRtMSMSPlotPanel extends DefaultSingleCDockable
 		}
 		
 		private MSMSScoringParameter lookupMSMSScoringParameter(
-				FeaturePlotColorOption plotColorOption) {
+				FeatureIdentificationMeasure plotColorOption) {
 			
-			if(plotColorOption.equals(FeaturePlotColorOption.COLOR_BY_NIST_SCORE))
+			if(plotColorOption.equals(FeatureIdentificationMeasure.COLOR_BY_NIST_SCORE))
 				return MSMSScoringParameter.NIST_SCORE;
-			else if(plotColorOption.equals(FeaturePlotColorOption.COLOR_BY_ENTROPY_SCORE))
+			else if(plotColorOption.equals(FeatureIdentificationMeasure.COLOR_BY_ENTROPY_SCORE))
 				return MSMSScoringParameter.ENTROPY_SCORE;
-			else if(plotColorOption.equals(FeaturePlotColorOption.COLOR_BY_DOT_PRODUCT))
+			else if(plotColorOption.equals(FeatureIdentificationMeasure.COLOR_BY_DOT_PRODUCT))
 				return MSMSScoringParameter.DOT_PRODUCT;
-			else if(plotColorOption.equals(FeaturePlotColorOption.COLOR_BY_PROBABILITY))
+			else if(plotColorOption.equals(FeatureIdentificationMeasure.COLOR_BY_PROBABILITY))
 				return MSMSScoringParameter.PROBABILITY;
 			else
 				return null;
@@ -295,7 +295,7 @@ public class DockableMzRtMSMSPlotPanel extends DefaultSingleCDockable
 			
 			MSMSFeatureInfoBundleDataSet dataSet = 
 					new MSMSFeatureInfoBundleDataSet(
-							featurBundles, FeaturePlotColorOption.COLOR_BY_MSMS_MATCH_TYPE);			
+							featurBundles, FeatureIdentificationMeasure.COLOR_BY_MSMS_MATCH_TYPE);			
 			
 			createDefaultRendrer();
 			for(int i=0; i<dataSet.getSeriesCount(); i++) {
@@ -328,7 +328,7 @@ public class DockableMzRtMSMSPlotPanel extends DefaultSingleCDockable
 			
 			MSMSFeatureInfoBundleDataSet dataSet = 
 					new MSMSFeatureInfoBundleDataSet(
-							featurBundles, FeaturePlotColorOption.COLOR_BY_ID_LEVEL);
+							featurBundles, FeatureIdentificationMeasure.COLOR_BY_ID_LEVEL);
 			
 			createDefaultRendrer();
 			for(int i=0; i<dataSet.getSeriesCount(); i++) {

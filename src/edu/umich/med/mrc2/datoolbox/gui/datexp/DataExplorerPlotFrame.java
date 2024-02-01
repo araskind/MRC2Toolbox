@@ -183,7 +183,7 @@ public class DataExplorerPlotFrame extends JFrame implements PersistentLayout, B
 	@Override
 	public void loadPreferences(Preferences prefs) {
 		preferences = prefs;
-		DataScale bubblePlotDataScale = DataScale.getDataScaleByName(
+		DataScale bubblePlotDataScale = DataScale.getDataScaleByUIName(
 				preferences.get(FEATURE_BUBBLE_PLOT_DATA_SCALE, DataScale.LN.name()));
 		if(bubblePlotDataScale != null)
 			mzRtBubblePlotPanel.setDataScale(bubblePlotDataScale);

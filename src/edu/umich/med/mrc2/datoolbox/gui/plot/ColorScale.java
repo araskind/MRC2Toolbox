@@ -36,19 +36,26 @@ public enum ColorScale {
 		this.value = value;
 	}
 
-	public double getValue() {
-		
+	public double getValue() {		
 		return value;
 	}
 	
-	public String getName() {
-		
+	public String getName() {	
 		return name;
 	}
 	
 	@Override
-	public String toString() {
-		
+	public String toString() {		
 		return name;
+	}
+	
+	public static ColorScale getOptionByName(String optionName) {
+
+		for(ColorScale o : ColorScale.values()) {
+
+			if(o.name().equals(optionName))
+				return o;
+		}
+		return null;
 	}
 }

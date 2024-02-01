@@ -58,24 +58,30 @@ public enum ColorGradient {
 		this.highValueColor = highValueColor;
 	}
 
-	public Color getLowValueColor() {
-		
+	public Color getLowValueColor() {		
 		return lowValueColor;
 	}
 	
-	public Color getHighValueColor() {
-		
+	public Color getHighValueColor() {		
 		return highValueColor;
 	}
 	
-	public String getName() {
-		
+	public String getName() {		
 		return name;
 	}
 	
 	@Override
-	public String toString() {
-		
+	public String toString() {		
 		return name;
+	}
+	
+	public static ColorGradient getOptionByName(String optionName) {
+
+		for(ColorGradient o : ColorGradient.values()) {
+
+			if(o.name().equals(optionName))
+				return o;
+		}
+		return null;
 	}
 }

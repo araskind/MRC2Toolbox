@@ -134,9 +134,11 @@ public class RawDataExaminerMenuBar extends CommonMenuBar {
 		msConvertSetupMenuItem = addItem(rawDataMenu, 
 				MainActionCommands.SETUP_RAW_DATA_CONVERSION_COMMAND, 
 				msConvertIcon);
-		indexRawDataRepositoryMenuItem = addItem(rawDataMenu, 
-				MainActionCommands.INDEX_RAW_DATA_REPOSITORY_COMMAND, 
-				indexRawFilesIcon);
+		
+//		indexRawDataRepositoryMenuItem = addItem(rawDataMenu, 
+//				MainActionCommands.INDEX_RAW_DATA_REPOSITORY_COMMAND, 
+//				indexRawFilesIcon);
+		
 		rawDataToolsMenuItem = addItem(rawDataMenu, 
 				MainActionCommands.SHOW_RAW_DATA_FILE_TOOLS_COMMAND, 
 				dataFileToolsIcon);

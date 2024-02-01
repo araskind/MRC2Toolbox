@@ -67,7 +67,7 @@ public class DockableMzRtBubblePlotPanel extends DefaultSingleCDockable
 	private static final Icon bubbleIcon = GuiUtils.getIcon("bubble", 16);
 	private DataExplorerPlotPanel plotPanel;
 	private MzRtPlotToolbar toolbar;
-	private MzRtPlotSettingsToolbar settingsToolbar;
+	private MZRTPlotSettingsPanel mzrtPlotSettingsPanel;
 	private MsFeatureTooltipGenerator msFeatureTooltipGenerator;
 	private DockableMRC2ToolboxPanel parentPanel;
 	private Collection<MsFeature>msFeatures;
@@ -85,8 +85,10 @@ public class DockableMzRtBubblePlotPanel extends DefaultSingleCDockable
 
 		toolbar = new MzRtPlotToolbar(plotPanel, this, this);
 		add(toolbar, BorderLayout.NORTH);
-		settingsToolbar = new MzRtPlotSettingsToolbar(plotPanel, this);
-		add(settingsToolbar, BorderLayout.SOUTH);
+		
+		mzrtPlotSettingsPanel = 
+				new MZRTPlotSettingsPanel(this,  this, false);
+		add(mzrtPlotSettingsPanel, BorderLayout.EAST);
 		
 		msFeatureTooltipGenerator 
 			= new MsFeatureTooltipGenerator();
@@ -241,11 +243,11 @@ public class DockableMzRtBubblePlotPanel extends DefaultSingleCDockable
 	}
 	
 	public void setDataScale(DataScale newScale) {
-		settingsToolbar.setDataScale(newScale);
+		mzrtPlotSettingsPanel.setDataScale(newScale);
 	}
 	
 	public DataScale getDataScale() {
-		return settingsToolbar.getDataScale();
+		return mzrtPlotSettingsPanel.getDataScale();
 	}
 
 	public void loadFeatureCollection(String title, Collection<MsFeature>features) {
@@ -253,7 +255,7 @@ public class DockableMzRtBubblePlotPanel extends DefaultSingleCDockable
 		this.msFeatures = features;
 		plotPanel.removeAllDataSets();
 		MsFeatureBubbleDataSet dataSet = 
-				new MsFeatureBubbleDataSet(title, features, settingsToolbar.getDataScale());
+				new MsFeatureBubbleDataSet(title, features, mzrtPlotSettingsPanel.getDataScale());
 		((XYPlot) plotPanel.getPlot()).setDataset(0, dataSet);
 		((XYPlot) plotPanel.getPlot()).getRenderer(0).
 				setDefaultToolTipGenerator(msFeatureTooltipGenerator);

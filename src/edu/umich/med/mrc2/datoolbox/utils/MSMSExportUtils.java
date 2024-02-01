@@ -31,6 +31,7 @@ import java.util.Objects;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
+import edu.umich.med.mrc2.datoolbox.data.Adduct;
 import edu.umich.med.mrc2.datoolbox.data.CompoundIdentity;
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
@@ -41,6 +42,7 @@ import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
 import edu.umich.med.mrc2.datoolbox.data.enums.SpectrumSource;
 import edu.umich.med.mrc2.datoolbox.data.lims.Injection;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
+import edu.umich.med.mrc2.datoolbox.main.AdductManager;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 
 public class MSMSExportUtils {
@@ -56,7 +58,11 @@ public class MSMSExportUtils {
 		 if(msf.getSpectrum() == null 
 				 || msf.getSpectrum().getExperimentalTandemSpectrum() == null)
 			 return featureMSPBlock;
-		 		
+		 
+		 Adduct adduct = msf.getSpectrum().getPrimaryAdduct();
+		if(adduct == null)
+			adduct = AdductManager.getDefaultAdductForPolarity(msf.getPolarity());
+		
 		 Collection<TandemMassSpectrum> tandemSpectra = 
 			 	msf.getSpectrum().getTandemSpectra().stream().
 				filter(t -> t.getSpectrumSource().equals(SpectrumSource.EXPERIMENTAL)).
@@ -80,6 +86,8 @@ public class MSMSExportUtils {
 				if(msf.getPolarity().equals(Polarity.Negative))
 					polarity = "N";
 				featureMSPBlock.add(MSPField.ION_MODE.getName() + ": " + polarity);
+				
+				featureMSPBlock.add(MSPField.PRECURSOR_TYPE.getName() + ": " + adduct.getName());
 
 				if(tandemMs.getCidLevel() >0)
 					featureMSPBlock.add(MSPField.COLLISION_ENERGY.getName() + ": " 
