@@ -40,4 +40,24 @@ public enum RetentionUnits {
 	public String toString() {
 		return uiName;
 	}
+		
+	public static RetentionUnits getOptionByName(String sName) {
+		
+		for(RetentionUnits t : RetentionUnits.values()) {
+			
+			if(t.name().equals(sName))
+				return t;
+		}		
+		return null;
+	}
+	
+	public static RetentionUnits getOptionByUIName(String sname) {
+		
+		for(RetentionUnits v : RetentionUnits.values()) {
+			
+			if(v.getName().equals(sname))
+				return v;
+		}		
+		return null;
+	}
 }

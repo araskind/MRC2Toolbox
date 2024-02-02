@@ -54,4 +54,13 @@ public enum InChiKeyCharge {
 		}
 		return 0;
 	}
+	
+	public static String getCodeByCharge(int charge) {
+		
+		for(InChiKeyCharge v : InChiKeyCharge.values()) {
+			if(v.getCharge() == charge)
+				return v.name();
+		}
+		return null;
+	}
 }

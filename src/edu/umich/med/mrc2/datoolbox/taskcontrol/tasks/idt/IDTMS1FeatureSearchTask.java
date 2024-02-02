@@ -510,7 +510,7 @@ public class IDTMS1FeatureSearchTask extends AbstractTask {
 				CompoundIdentificationConfidence confidenceLevel =
 						CompoundIdentificationConfidence.getLevelByNumber(rs.getInt("IDENTIFICATION_CONFIDENCE"));
 				MsFeatureIdentity id = new MsFeatureIdentity(compoundIdentity, confidenceLevel);
-				id.setIdSource(CompoundIdSource.getIdSourceByName(rs.getString("ID_SOURCE")));
+				id.setIdSource(CompoundIdSource.getOptionByName(rs.getString("ID_SOURCE")));
 //				MsRtLibraryMatch match = 
 //						new MsRtLibraryMatch(rs.getString("LIBRARY_ENTRY_ID"));
 //				match.setLibraryId(rs.getString("LIBRARY_ID"));
@@ -602,7 +602,7 @@ public class IDTMS1FeatureSearchTask extends AbstractTask {
 				CompoundIdentificationConfidence confidenceLevel =
 						CompoundIdentificationConfidence.getLevelById(rs.getString("ID_CONFIDENCE"));
 				MsFeatureIdentity id = new MsFeatureIdentity(compoundIdentity, confidenceLevel);
-				id.setIdSource(CompoundIdSource.getIdSourceByName(rs.getString("ID_SOURCE")));
+				id.setIdSource(CompoundIdSource.getOptionByName(rs.getString("ID_SOURCE")));
 				if(rs.getString("IS_PRIMARY") != null)
 					id.setPrimary(true);
 

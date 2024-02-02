@@ -40,12 +40,22 @@ public enum  FeatureSetProperties {
 		return uiName;
 	}
 	
-	public static FeatureSetProperties getFeatureSetPropertyByName(String name) {
+	public static FeatureSetProperties getOptionByName(String name) {
 		
 		for(FeatureSetProperties p : FeatureSetProperties.values()) {
 			
 			if(p.name().equals(name))
 				return p;
+		}		
+		return null;
+	}
+
+	public static FeatureSetProperties getOptionByUIName(String sname) {
+		
+		for(FeatureSetProperties v : FeatureSetProperties.values()) {
+			
+			if(v.getName().equals(sname))
+				return v;
 		}		
 		return null;
 	}

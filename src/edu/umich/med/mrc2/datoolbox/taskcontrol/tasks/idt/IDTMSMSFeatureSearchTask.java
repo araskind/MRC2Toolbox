@@ -858,7 +858,7 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 								Polarity.getPolarityByCode(
 										lfrs.getString(MSMSComponentTableFields.POLARITY.name())));
 						feature.setSpectrumSource(
-								SpectrumSource.getSpectrumSourceByName(
+								SpectrumSource.getOptionByName(
 										lfrs.getString(MSMSComponentTableFields.SPECTRUM_SOURCE.name())));
 						feature.setIonizationType(
 								IDTDataCache.getIonizationTypeById(
@@ -913,7 +913,7 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 					id.setIdSource(CompoundIdSource.LIBRARY_MS2);
 					id.setUniqueId(rs.getString("MATCH_ID"));
 					MSMSMatchType matchType = 
-							MSMSMatchType.getMSMSMatchTypeByName(rs.getString("MATCH_TYPE"));
+							MSMSMatchType.getOptionByName(rs.getString("MATCH_TYPE"));
 					
 					ReferenceMsMsLibraryMatch match = new ReferenceMsMsLibraryMatch(
 							feature,
@@ -1000,7 +1000,7 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 				id.setIdSource(CompoundIdSource.LIBRARY_MS2);
 				id.setUniqueId(rs.getString("MATCH_ID"));
 				MSMSMatchType matchType = 
-						MSMSMatchType.getMSMSMatchTypeByName(rs.getString("MATCH_TYPE"));
+						MSMSMatchType.getOptionByName(rs.getString("MATCH_TYPE"));
 				
 				ReferenceMsMsLibraryMatch match = new ReferenceMsMsLibraryMatch(
 						feature,
@@ -1171,7 +1171,7 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 						Polarity.getPolarityByCode(
 								lfrs.getString(MSMSComponentTableFields.POLARITY.name())));
 				feature.setSpectrumSource(
-						SpectrumSource.getSpectrumSourceByName(
+						SpectrumSource.getOptionByName(
 								lfrs.getString(MSMSComponentTableFields.SPECTRUM_SOURCE.name())));
 				feature.setIonizationType(
 						IDTDataCache.getIonizationTypeById(
@@ -1271,7 +1271,7 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 					CompoundIdentificationConfidence confidenceLevel =
 							CompoundIdentificationConfidence.getLevelById(rs.getString("ID_CONFIDENCE"));
 					MsFeatureIdentity id = new MsFeatureIdentity(compoundIdentity, confidenceLevel);
-					id.setIdSource(CompoundIdSource.getIdSourceByName(rs.getString("ID_SOURCE")));
+					id.setIdSource(CompoundIdSource.getOptionByName(rs.getString("ID_SOURCE")));
 					if(rs.getString("IS_PRIMARY") != null)
 						id.setPrimary(true);
 

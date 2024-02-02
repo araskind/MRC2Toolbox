@@ -558,7 +558,7 @@ public class IDTrackerDataExportDialog extends JDialog
 		msDepthComboBox.addItemListener(this);		
 		populateExportPropertyLists(depth);
 		
-		TableRowSubset subset = TableRowSubset.getSubsetByName(
+		TableRowSubset subset = TableRowSubset.getOptionByName(
 				preferences.get(TABLE_ROW_SUBSET, TableRowSubset.ALL.name()));
 		featureSubsetComboBox.setSelectedItem(subset);
 		
@@ -589,7 +589,7 @@ public class IDTrackerDataExportDialog extends JDialog
 			 for(String name : selectedMsOneFeaturePropertiesNames) {
 				 
 				IDTrackerMsFeatureProperties fProperty = 					
-						IDTrackerMsFeatureProperties.getPropertyByName(name);
+						IDTrackerMsFeatureProperties.getOptionByName(name);
 				if(fProperty != null)
 					storedFeatureProperties.add(fProperty);
 			 }
@@ -607,7 +607,7 @@ public class IDTrackerDataExportDialog extends JDialog
 			 for(String name : selectedMsOneIdentificationPropertiesNames) {
 				 
 				 IDTrackerFeatureIdentificationProperties idProperty = 
-						 IDTrackerFeatureIdentificationProperties.getPropertyByName(name);
+						 IDTrackerFeatureIdentificationProperties.getOptionByName(name);
 				if(idProperty != null)
 					storedIdentificationProperties.add(idProperty);
 			 }
@@ -627,7 +627,7 @@ public class IDTrackerDataExportDialog extends JDialog
 			 for(String name : selectedMsTwoFeaturePropertiesNames) {
 				 
 				IDTrackerMsFeatureProperties fProperty = 					
-						IDTrackerMsFeatureProperties.getPropertyByName(name);
+						IDTrackerMsFeatureProperties.getOptionByName(name);
 				if(fProperty != null)
 					storedFeatureProperties.add(fProperty);
 			 }
@@ -645,7 +645,7 @@ public class IDTrackerDataExportDialog extends JDialog
 			 for(String name : selectedMsTwoIdentificationPropertiesNames) {
 				 
 				 IDTrackerFeatureIdentificationProperties idProperty = 
-						 IDTrackerFeatureIdentificationProperties.getPropertyByName(name);
+						 IDTrackerFeatureIdentificationProperties.getOptionByName(name);
 				if(idProperty != null)
 					storedIdentificationProperties.add(idProperty);
 			 }

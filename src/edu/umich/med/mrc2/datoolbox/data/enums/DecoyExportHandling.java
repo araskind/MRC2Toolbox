@@ -43,11 +43,21 @@ public enum DecoyExportHandling {
 		return uiName;
 	}
 	
-	public static DecoyExportHandling getDecoyExportHandlingByName(String name) {
+	public static DecoyExportHandling getOptionByName(String name) {
 		
 		for(DecoyExportHandling s : DecoyExportHandling.values()) {
 			if(s.name().equals(name))
 				return s;
+		}
+		return null;
+	}
+
+	public static DecoyExportHandling getOptionByUIName(String dbName) {
+	
+		for(DecoyExportHandling field : DecoyExportHandling.values()) {
+	
+			if(field.getName().equals(dbName))
+				return field;
 		}
 		return null;
 	}

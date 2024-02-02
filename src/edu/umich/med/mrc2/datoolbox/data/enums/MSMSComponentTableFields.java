@@ -69,4 +69,24 @@ public enum MSMSComponentTableFields {
 	public MSPField getMSPField() {
 		return nistField;
 	}
+	
+	public static MSMSComponentTableFields getOptionByName(String name) {
+		
+		for(MSMSComponentTableFields type : MSMSComponentTableFields.values()) {
+			
+			if(type.name().equals(name))
+				return type;
+		}		
+		return null;
+	}
+	
+	public static MSMSComponentTableFields getOptionByUIName(String name) {
+		
+		for(MSMSComponentTableFields type : MSMSComponentTableFields.values()) {
+			
+			if(type.getName().equals(name))
+				return type;
+		}		
+		return null;
+	}
 }

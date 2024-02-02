@@ -746,7 +746,7 @@ public class IDTUtils {
 			
 			Manufacturer vendor = 
 					IDTDataCache.getManufacturerById(rs.getString("MANUFACTURER_ID"));
-			SoftwareType type = SoftwareType.getSoftwareTypeByName(rs.getString("SOFTWARE_TYPE"));
+			SoftwareType type = SoftwareType.getOptionByName(rs.getString("SOFTWARE_TYPE"));
 			
 			DataProcessingSoftware item = new DataProcessingSoftware(
 					rs.getString("SOFTWARE_ID"),

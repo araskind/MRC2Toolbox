@@ -46,12 +46,22 @@ public enum ModificationType {
 		return uiName;
 	}
 	
-	public static ModificationType getModificationTypeByName(String name) {
+	public static ModificationType getOptionByName(String name) {
 		
 		for(ModificationType type : ModificationType.values()) {
 			if(type.name().equals(name))
 				return type;
 		}	
+		return null;
+	}
+	
+	public static ModificationType getOptionByUIName(String sname) {
+		
+		for(ModificationType v : ModificationType.values()) {
+			
+			if(v.getName().equals(sname))
+				return v;
+		}		
 		return null;
 	}
 }

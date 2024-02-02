@@ -44,11 +44,21 @@ public enum FeatureIDSubset {
 		return uiName;
 	}
 	
-	public static FeatureIDSubset getFeatureIDSubsetByName(String name) {
+	public static FeatureIDSubset getOptionByName(String name) {
 		
 		for(FeatureIDSubset s : FeatureIDSubset.values()) {
 			if(s.name().equals(name))
 				return s;
+		}
+		return null;
+	}
+	
+	public static FeatureIDSubset getOptionByUIName(String dbName) {
+
+		for(FeatureIDSubset field : FeatureIDSubset.values()) {
+
+			if(field.getName().equals(dbName))
+				return field;
 		}
 		return null;
 	}

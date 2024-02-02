@@ -135,7 +135,7 @@ public class ReferenceMSMSLibraryExportTask extends AbstractTask {
 					Polarity.getPolarityByCode(
 							rs.getString(MSMSComponentTableFields.POLARITY.name())));
 			feature.setSpectrumSource(
-					SpectrumSource.getSpectrumSourceByName(
+					SpectrumSource.getOptionByName(
 							rs.getString(MSMSComponentTableFields.SPECTRUM_SOURCE.name())));
 			feature.setIonizationType(
 					IDTDataCache.getIonizationTypeById(

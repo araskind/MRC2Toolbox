@@ -48,7 +48,17 @@ public enum MoTrPACQCSampleType {
 		return uiName;
 	}
 	
-	public static MoTrPACQCSampleType getSampleTypeByUIName(String sname) {
+	public static MoTrPACQCSampleType getOptionByName(String name) {
+
+		for(MoTrPACQCSampleType source : MoTrPACQCSampleType.values()) {
+
+			if(source.name().equals(name))
+				return source;
+		}
+		return null;
+	}
+	
+	public static MoTrPACQCSampleType getOptionByUIName(String sname) {
 		
 		for(MoTrPACQCSampleType v : MoTrPACQCSampleType.values()) {
 			

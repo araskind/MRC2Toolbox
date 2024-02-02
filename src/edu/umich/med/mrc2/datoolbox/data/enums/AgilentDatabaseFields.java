@@ -56,7 +56,17 @@ public enum AgilentDatabaseFields {
 		return uiName;
 	}
 	
-	public static CompoundDatabaseEnum getDatabaseByName(String dbName) {
+	public static CompoundDatabaseEnum getOptionByName(String name) {
+
+		for(CompoundDatabaseEnum source : CompoundDatabaseEnum.values()) {
+
+			if(source.name().equals(name))
+				return source;
+		}
+		return null;
+	}
+	
+	public static CompoundDatabaseEnum getOptionByUIName(String dbName) {
 
 		for(AgilentDatabaseFields db : AgilentDatabaseFields.values()) {
 

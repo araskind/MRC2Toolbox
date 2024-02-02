@@ -53,4 +53,24 @@ public enum BinnerPageNames {
 	public String toString() {
 		return uiName;
 	}
+	
+	public static BinnerPageNames getOptionByName(String name) {
+
+		for(BinnerPageNames source : BinnerPageNames.values()) {
+
+			if(source.name().equals(name))
+				return source;
+		}
+		return null;
+	}
+	
+	public static BinnerPageNames getOptionByUIName(String uiname) {
+
+		for(BinnerPageNames source : BinnerPageNames.values()) {
+
+			if(source.getName().equals(uiname))
+				return source;
+		}
+		return null;
+	}
 }

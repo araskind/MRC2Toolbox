@@ -59,4 +59,23 @@ public enum DataSetQcField {
 	public String toString() {
 		return uiName;
 	}
+		
+	public static DataSetQcField getOptionByName(String name) {
+		
+		for(DataSetQcField s : DataSetQcField.values()) {
+			if(s.name().equals(name))
+				return s;
+		}
+		return null;
+	}
+
+	public static DataSetQcField getOptionByUIName(String dbName) {
+	
+		for(DataSetQcField field : DataSetQcField.values()) {
+	
+			if(field.getName().equals(dbName))
+				return field;
+		}
+		return null;
+	}
 }

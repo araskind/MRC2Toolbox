@@ -67,8 +67,7 @@ public class MsFeatureTooltipGenerator implements XYZToolTipGenerator {
 			chargeString += "<font style=\"font-weight:bold; color:blue\">" + Integer.toString(charge) + "</font>";
 		
 		tooltip +=  
-			"<b>M/Z:</b> " +  MRC2ToolBoxConfiguration.getMzFormat().format(f.getMonoisotopicMz()) 
-			+ chargeString
+			"<b>M/Z:</b> " +  MRC2ToolBoxConfiguration.getMzFormat().format(f.getMonoisotopicMz()) + chargeString
 			+ "<br><b>RT:</b> " +  MRC2ToolBoxConfiguration.getRtFormat().format(f.getRetentionTime()) 
 			+ "<br><b>Intensity:</b> " + MRC2ToolBoxConfiguration.getIntensityFormat().format(f.getStatsSummary().getTotalMedian());
 

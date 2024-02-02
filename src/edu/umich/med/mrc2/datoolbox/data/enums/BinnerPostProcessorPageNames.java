@@ -42,4 +42,24 @@ public enum BinnerPostProcessorPageNames {
 	public String toString() {
 		return uiName;
 	}
+	
+	public static BinnerPostProcessorPageNames getOptionByName(String name) {
+
+		for(BinnerPostProcessorPageNames source : BinnerPostProcessorPageNames.values()) {
+
+			if(source.name().equals(name))
+				return source;
+		}
+		return null;
+	}
+	
+	public static BinnerPostProcessorPageNames getOptionByUIName(String uiname) {
+
+		for(BinnerPostProcessorPageNames source : BinnerPostProcessorPageNames.values()) {
+
+			if(source.getName().equals(uiname))
+				return source;
+		}
+		return null;
+	}
 }

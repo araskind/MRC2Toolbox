@@ -46,7 +46,7 @@ public enum MSMSMatchType {
 		return colorCode;
 	}
 	
-	public static MSMSMatchType getMSMSMatchTypeByName(String name) {
+	public static MSMSMatchType getOptionByName(String name) {
 		
 		for(MSMSMatchType type : MSMSMatchType.values()) {
 			
@@ -56,7 +56,7 @@ public enum MSMSMatchType {
 		return null;
 	}
 	
-	public static MSMSMatchType getMSMSMatchTypeByUIName(String name) {
+	public static MSMSMatchType getOptionByUIName(String name) {
 		
 		for(MSMSMatchType type : MSMSMatchType.values()) {
 			

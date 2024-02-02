@@ -36,8 +36,14 @@ import javax.swing.Icon;
 import org.apache.commons.lang.StringUtils;
 import org.jfree.chart.ChartMouseEvent;
 import org.jfree.chart.ChartMouseListener;
+import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.entity.XYItemEntity;
+import org.jfree.chart.event.RendererChangeEvent;
 import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.title.PaintScaleLegend;
+import org.jfree.chart.title.Title;
+import org.jfree.chart.ui.RectangleEdge;
+import org.jfree.chart.ui.RectangleInsets;
 import org.jfree.data.xy.XYDataset;
 
 import bibliothek.gui.dock.common.DefaultSingleCDockable;
@@ -45,6 +51,7 @@ import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureSet;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataScale;
 import edu.umich.med.mrc2.datoolbox.data.enums.ParameterSetStatus;
+import edu.umich.med.mrc2.datoolbox.data.enums.TableRowSubset;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.gui.communication.FeatureSetListener;
 import edu.umich.med.mrc2.datoolbox.gui.datexp.dataset.MsFeatureBubbleDataSet;
@@ -55,6 +62,7 @@ import edu.umich.med.mrc2.datoolbox.gui.main.DockableMRC2ToolboxPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainWindow;
 import edu.umich.med.mrc2.datoolbox.gui.main.PanelList;
+import edu.umich.med.mrc2.datoolbox.gui.plot.renderer.MSFeatureStatsColorRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
@@ -88,6 +96,7 @@ public class DockableMzRtBubblePlotPanel extends DefaultSingleCDockable
 		
 		mzrtPlotSettingsPanel = 
 				new MZRTPlotSettingsPanel(this,  this, false);
+		
 		add(mzrtPlotSettingsPanel, BorderLayout.EAST);
 		
 		msFeatureTooltipGenerator 
@@ -224,11 +233,33 @@ public class DockableMzRtBubblePlotPanel extends DefaultSingleCDockable
 	
 	@Override
 	public void itemStateChanged(ItemEvent e) {
-
-		if (e.getItem() instanceof DataScale && e.getStateChange() == ItemEvent.SELECTED)
-			changeDataScale((DataScale)e.getItem());		
+		
+		if (e.getStateChange() == ItemEvent.SELECTED) {
+			
+			if (e.getItem() instanceof DataScale) {
+				changeDataScale((DataScale)e.getItem());
+			}
+			else if (e.getItem() instanceof TableRowSubset) {
+				//	TODO;
+			}
+			else {
+				redrawPlot();
+			}
+		}
 	}
 	
+	private void redrawPlot() {
+
+		MZRTPlotParameterObject parset = mzrtPlotSettingsPanel.getPlotParameters();
+		MSFeatureStatsColorRenderer renderer = 
+				(MSFeatureStatsColorRenderer)((XYPlot) plotPanel.getPlot()).getRenderer(0);
+		renderer.setStatsParameter(parset.getMsFeatureSetStatisticalParameter());
+		renderer.setColorGradient(parset.getColorGradient());
+		renderer.setColorScale(parset.getColorScale());	
+		renderer.notifyListeners(new RendererChangeEvent(renderer));
+		addColorScale(renderer);
+	}
+
 	private void changeDataScale(DataScale newScale) {
 
 		MsFeatureBubbleDataSet dataSet = null;
@@ -256,9 +287,38 @@ public class DockableMzRtBubblePlotPanel extends DefaultSingleCDockable
 		plotPanel.removeAllDataSets();
 		MsFeatureBubbleDataSet dataSet = 
 				new MsFeatureBubbleDataSet(title, features, mzrtPlotSettingsPanel.getDataScale());
+		MZRTPlotParameterObject params = mzrtPlotSettingsPanel.getPlotParameters();
+		MSFeatureStatsColorRenderer renderer = 
+				new MSFeatureStatsColorRenderer(
+						dataSet, 
+						params.getColorGradient(), 
+						params.getColorScale(), 
+						params.getMsFeatureSetStatisticalParameter());
+		renderer.setDefaultToolTipGenerator(msFeatureTooltipGenerator);
+				
 		((XYPlot) plotPanel.getPlot()).setDataset(0, dataSet);
-		((XYPlot) plotPanel.getPlot()).getRenderer(0).
-				setDefaultToolTipGenerator(msFeatureTooltipGenerator);
+		((XYPlot) plotPanel.getPlot()).setRenderer(0, renderer);	
+		addColorScale(renderer);
+	}
+	
+	private void addColorScale(MSFeatureStatsColorRenderer renderer) {
+		
+		NumberAxis scaleAxis = new NumberAxis();
+		scaleAxis.setRange(
+				renderer.getDataRange().getMin(), 
+				renderer.getDataRange().getMax());
+		PaintScaleLegend psl = new PaintScaleLegend(
+				renderer.getLookupPaintScale(), scaleAxis);
+		psl.setAxisOffset(5.0);
+		psl.setPosition(RectangleEdge.RIGHT);
+		psl.setMargin(new RectangleInsets(5, 5, 5, 5));
+		if(plotPanel.getChart().getSubtitleCount() > 0) {
+			
+			Title currentPsl = plotPanel.getChart().getSubtitle(0);
+			if(currentPsl != null)
+				plotPanel.getChart().removeSubtitle(currentPsl);
+		}
+		plotPanel.getChart().addSubtitle(psl);
 	}
 
 	@Override

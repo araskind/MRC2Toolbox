@@ -52,6 +52,16 @@ public enum IdentifierSearchOptions {
 		}
 		return null;
 	}
+	
+	public static IdentifierSearchOptions getOptionByUIName(String sname) {
+		
+		for(IdentifierSearchOptions v : IdentifierSearchOptions.values()) {
+			
+			if(v.getName().equals(sname))
+				return v;
+		}		
+		return null;
+	}
 }
 
 

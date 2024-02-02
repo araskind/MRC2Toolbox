@@ -42,4 +42,24 @@ public enum ThreeDChartType {
 	public String toString() {
 		return uiName;
 	}
+	
+	public static ThreeDChartType getOptionByName(String optionName) {
+
+		for(ThreeDChartType o : ThreeDChartType.values()) {
+
+			if(o.name().equals(optionName))
+				return o;
+		}
+		return null;
+	}
+	
+	public static ThreeDChartType getOptionByUIName(String name) {
+		
+		for(ThreeDChartType type : ThreeDChartType.values()) {
+			
+			if(type.getName().equals(name))
+				return type;
+		}		
+		return null;
+	}
 }

@@ -1361,7 +1361,7 @@ public class PepSearchSetupDialog extends JDialog implements ActionListener, Ite
 			new File(preferences.get(LIBRARY_DIR, MRC2ToolBoxConfiguration.getDefaultExperimentsDirectory())).
 			getAbsoluteFile();
 		
-		TableRowSubset subset = TableRowSubset.getSubsetByName(
+		TableRowSubset subset = TableRowSubset.getOptionByName(
 				preferences.get(TABLE_ROW_SUBSET, TableRowSubset.ALL.name()));
 		featureSubsetComboBox.setSelectedItem(subset);
 

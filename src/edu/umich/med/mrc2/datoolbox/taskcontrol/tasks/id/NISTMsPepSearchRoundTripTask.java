@@ -360,7 +360,7 @@ public class NISTMsPepSearchRoundTripTask extends NISTMsPepSearchTask {
 			id.setIdSource(CompoundIdSource.LIBRARY_MS2);
 			id.setUniqueId(msmsMatchId);		
 			MSMSMatchType matchType = 
-					MSMSMatchType.getMSMSMatchTypeByName(poo.getMatchType().name());		
+					MSMSMatchType.getOptionByName(poo.getMatchType().name());		
 			ReferenceMsMsLibraryMatch match = new ReferenceMsMsLibraryMatch(
 					msmsId,
 					poo.getScore(), 
@@ -655,7 +655,7 @@ public class NISTMsPepSearchRoundTripTask extends NISTMsPepSearchTask {
 				id.setUniqueId(rs.getString("MATCH_ID"));
 				
 				MSMSMatchType matchType = 
-						MSMSMatchType.getMSMSMatchTypeByName(rs.getString("MATCH_TYPE"));
+						MSMSMatchType.getOptionByName(rs.getString("MATCH_TYPE"));
 				
 				ReferenceMsMsLibraryMatch match = new ReferenceMsMsLibraryMatch(
 						msmsId,

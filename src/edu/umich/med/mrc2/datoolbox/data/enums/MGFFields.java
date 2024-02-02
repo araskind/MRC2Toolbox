@@ -58,4 +58,24 @@ public enum MGFFields {
 	public String toString() {
 		return field;
 	}
+	
+	public static MGFFields getOptionByName(String name) {
+		
+		for(MGFFields type : MGFFields.values()) {
+			
+			if(type.name().equals(name))
+				return type;
+		}	
+		return null;
+	}
+	
+	public static MGFFields getOptionByUIName(String sname) {
+		
+		for(MGFFields v : MGFFields.values()) {
+			
+			if(v.getName().equals(sname))
+				return v;
+		}		
+		return null;
+	}
 }

@@ -44,4 +44,24 @@ public enum GlobalDefaults {
 	public String toString() {
 		return uiName;
 	}
+	
+	public static GlobalDefaults getOptionByName(String optionName) {
+
+		for(GlobalDefaults o : GlobalDefaults.values()) {
+
+			if(o.name().equals(optionName))
+				return o;
+		}
+		return null;
+	}
+	
+	public static GlobalDefaults getOptionByUIName(String sname) {
+		
+		for(GlobalDefaults v : GlobalDefaults.values()) {
+			
+			if(v.getName().equals(sname))
+				return v;
+		}		
+		return null;
+	}
 }

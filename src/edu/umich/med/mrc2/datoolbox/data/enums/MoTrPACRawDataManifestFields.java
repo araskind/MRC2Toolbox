@@ -44,4 +44,24 @@ public enum MoTrPACRawDataManifestFields {
 	public String toString() {
 		return uiName;
 	}
+	
+	public static MoTrPACRawDataManifestFields getOptionByName(String optionName) {
+
+		for(MoTrPACRawDataManifestFields o : MoTrPACRawDataManifestFields.values()) {
+
+			if(o.name().equals(optionName))
+				return o;
+		}
+		return null;
+	}
+	
+	public static MoTrPACRawDataManifestFields getOptionByUIName(String name) {
+		
+		for(MoTrPACRawDataManifestFields type : MoTrPACRawDataManifestFields.values()) {
+			
+			if(type.getName().equals(name))
+				return type;
+		}		
+		return null;
+	}
 }

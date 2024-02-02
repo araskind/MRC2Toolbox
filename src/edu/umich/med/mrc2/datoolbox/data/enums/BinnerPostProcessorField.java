@@ -90,4 +90,24 @@ public enum BinnerPostProcessorField {
 	public String toString() {
 		return uiName;
 	}
+		
+	public static BinnerPostProcessorField getOptionByName(String name) {
+
+		for(BinnerPostProcessorField source : BinnerPostProcessorField.values()) {
+
+			if(source.name().equals(name))
+				return source;
+		}
+		return null;
+	}
+	
+	public static BinnerPostProcessorField getOptionByUIName(String uiname) {
+
+		for(BinnerPostProcessorField source : BinnerPostProcessorField.values()) {
+
+			if(source.getName().equals(uiname))
+				return source;
+		}
+		return null;
+	}
 }

@@ -278,7 +278,7 @@ public class CompoundDatabaseCuratorFrame extends JFrame
 		double maxMass = preferences.getDouble(MW_END, 0.0d);
 		massRange = new Range(minMass, maxMass);
 		maxRecords = preferences.getInt(MAX_RECORDS, 50);
-		inChiKeyPortionForMatching = InChiKeyPortion.getInChiKeyPortionByName(
+		inChiKeyPortionForMatching = InChiKeyPortion.getOptionByName(
 				preferences.get(INCHI_KEY_PORTION_FOR_MATCHING, InChiKeyPortion.COMPLETE.name()));
 	}
 

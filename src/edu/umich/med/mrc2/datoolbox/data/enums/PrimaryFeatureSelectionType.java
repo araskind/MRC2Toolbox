@@ -40,4 +40,24 @@ public enum PrimaryFeatureSelectionType {
 	public String toString() {
 		return uiName;
 	}
+	
+	public static PrimaryFeatureSelectionType getOptionByName(String optionName) {
+
+		for(PrimaryFeatureSelectionType o : PrimaryFeatureSelectionType.values()) {
+
+			if(o.name().equals(optionName))
+				return o;
+		}
+		return null;
+	}
+	
+	public static PrimaryFeatureSelectionType getOptionByUIName(String sname) {
+		
+		for(PrimaryFeatureSelectionType v : PrimaryFeatureSelectionType.values()) {
+			
+			if(v.getName().equals(sname))
+				return v;
+		}		
+		return null;
+	}
 }

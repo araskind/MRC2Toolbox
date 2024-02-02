@@ -684,7 +684,7 @@ public class TandemMassSpectrum implements AnnotatedObject, Serializable {
 		String sourceString = 
 				msmsElement.getAttributeValue(TandemMassSpectrumFields.Source.name());
 		if(sourceString != null)
-			spectrumSource = SpectrumSource.getSpectrumSourceByName(sourceString);
+			spectrumSource = SpectrumSource.getOptionByName(sourceString);
 		
 		detectionAlgorithm = 
 				msmsElement.getAttributeValue(TandemMassSpectrumFields.Algo.name());
@@ -736,7 +736,7 @@ public class TandemMassSpectrum implements AnnotatedObject, Serializable {
 		String aotString = 
 				msmsElement.getAttributeValue(TandemMassSpectrumFields.AOT.name());
 		if(aotString != null)
-			annotatedObjectType = AnnotatedObjectType.getObjectTypeByName(aotString);
+			annotatedObjectType = AnnotatedObjectType.getOptionByName(aotString);
 		
 		String parentPurityString = 
 				msmsElement.getAttributeValue(TandemMassSpectrumFields.ParentIonPurity.name());

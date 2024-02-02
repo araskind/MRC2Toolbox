@@ -240,7 +240,7 @@ public class PCDLTextLibraryImportTask extends AbstractTask {
 		//	;
 		for(int i=0; i<header.length; i++) {
 			
-			PCDLFields f = PCDLFields.getPCDLFieldByUIName(header[i]);
+			PCDLFields f = PCDLFields.getOptionByUIName(header[i]);
 			if(f != null)
 				dataFieldMap.put(f, i);
 		}

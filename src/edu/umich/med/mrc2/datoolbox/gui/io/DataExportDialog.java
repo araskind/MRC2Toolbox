@@ -608,11 +608,11 @@ public class DataExportDialog extends JDialog
 						preferences.get(EXPORT_TYPE, MainActionCommands.EXPORT_RESULTS_4BINNER_COMMAND.name())));
 		exportManifestCheckBox.setSelected(preferences.getBoolean(EXPORT_MANIFEST, true));
 		namingComboBox.setSelectedItem(
-				DataExportFields.getDataExportFieldByName(
+				DataExportFields.getOptionByName(
 						preferences.get(SAMPLE_NAMING_FIELD, DataExportFields.DATA_FILE_EXPORT.name())));
 		
 		missingTypeComboBox.setSelectedItem(
-				MissingExportType.getMissingExportTypeByName(
+				MissingExportType.getOptionByName(
 						preferences.get(EXPORT_MISSING_TYPE, MissingExportType.AS_MISSING.name())));
 		
 		replaceSpecCharsCheckBox.setSelected(preferences.getBoolean(REPLACE_SPEC_CHARS, false));

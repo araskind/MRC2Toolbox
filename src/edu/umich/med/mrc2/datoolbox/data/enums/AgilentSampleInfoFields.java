@@ -67,8 +67,18 @@ public enum AgilentSampleInfoFields {
 	public String toString() {
 		return uiName;
 	}
+		
+	public static AgilentSampleInfoFields getOptionByName(String name) {
+
+		for(AgilentSampleInfoFields source : AgilentSampleInfoFields.values()) {
+
+			if(source.name().equals(name))
+				return source;
+		}
+		return null;
+	}
 	
-	AgilentSampleInfoFields getAgilentSampleInfoFieldByFieldName(String fieldName) {
+	AgilentSampleInfoFields getOptionByUIName(String fieldName) {
 		
 		for(AgilentSampleInfoFields f : AgilentSampleInfoFields.values()) {
 			if(f.getName().equals(fieldName))

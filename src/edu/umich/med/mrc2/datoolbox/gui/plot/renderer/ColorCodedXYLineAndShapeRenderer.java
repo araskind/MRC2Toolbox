@@ -85,4 +85,46 @@ public abstract class ColorCodedXYLineAndShapeRenderer extends XYLineAndShapeRen
 	public Range getDataRange() {
 		return dataRange;
 	}
+
+	public void setColorGradient(ColorGradient newColorGradient) {
+		
+		if(!this.colorGradient.equals(newColorGradient)) {
+			
+			this.colorGradient = newColorGradient;					
+			if(dataRange != null)
+				lookupPaintScale = ColorCodingUtils.createLookupPaintScale(
+						dataRange, 
+						colorGradient, 
+						colorScale,
+						256);
+		}
+	}
+
+	public void setColorScale(ColorScale newColorScale) {
+		
+		if(!this.colorScale.equals(newColorScale)){
+			
+			this.colorScale = newColorScale;
+			if(dataRange != null)
+				lookupPaintScale = ColorCodingUtils.createLookupPaintScale(
+						dataRange, 
+						colorGradient, 
+						colorScale,
+						256);
+		}
+	}
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+

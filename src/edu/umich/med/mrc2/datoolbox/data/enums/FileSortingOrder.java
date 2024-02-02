@@ -42,4 +42,24 @@ public enum FileSortingOrder {
 	public String toString() {
 		return uiName;
 	}
+	
+	public static FileSortingOrder getOptionByName(String optionName) {
+
+		for(FileSortingOrder o : FileSortingOrder.values()) {
+
+			if(o.name().equals(optionName))
+				return o;
+		}
+		return null;
+	}
+	
+	public static FileSortingOrder getOptionByUIName(String sname) {
+		
+		for(FileSortingOrder v : FileSortingOrder.values()) {
+			
+			if(v.getName().equals(sname))
+				return v;
+		}		
+		return null;
+	}
 }

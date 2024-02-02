@@ -41,4 +41,24 @@ public enum MWtabReportStyle {
 	public String toString() {
 		return uiName;
 	}
+	
+	public static MWtabReportStyle getOptionByName(String optionName) {
+
+		for(MWtabReportStyle o : MWtabReportStyle.values()) {
+
+			if(o.name().equals(optionName))
+				return o;
+		}
+		return null;
+	}
+	
+	public static MWtabReportStyle getOptionByUIName(String uiName) {
+		
+		for(MWtabReportStyle f : MWtabReportStyle.values()) {
+			
+			if(f.getName().equals(uiName))
+				return f;
+		}		
+		return null;
+	}
 }

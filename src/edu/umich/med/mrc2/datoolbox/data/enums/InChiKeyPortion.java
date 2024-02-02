@@ -41,13 +41,23 @@ public enum InChiKeyPortion {
 		return uiName;
 	}
 	
-	public static InChiKeyPortion getInChiKeyPortionByName(String name) {
+	public static InChiKeyPortion getOptionByName(String name) {
 		
 		for(InChiKeyPortion v : InChiKeyPortion.values()) {
 			
 			if(v.name().equals(name))
 				return v;
 		}	
+		return null;
+	}
+	
+	public static InChiKeyPortion getOptionByUIName(String sname) {
+		
+		for(InChiKeyPortion v : InChiKeyPortion.values()) {
+			
+			if(v.getName().equals(sname))
+				return v;
+		}		
 		return null;
 	}
 }

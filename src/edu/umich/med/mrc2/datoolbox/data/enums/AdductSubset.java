@@ -41,5 +41,25 @@ public enum AdductSubset {
 	@Override
 	public String toString() {
 		return uiName;
+	}	
+	
+	public static AdductSubset getOptionByName(String name) {
+
+		for(AdductSubset field : AdductSubset.values()) {
+
+			if(field.name().equals(name))
+				return field;
+		}
+		return null;
+	}
+	
+	public static AdductSubset getOptionByUIName(String dbName) {
+
+		for(AdductSubset field : AdductSubset.values()) {
+
+			if(field.getName().equals(dbName))
+				return field;
+		}
+		return null;
 	}
 }

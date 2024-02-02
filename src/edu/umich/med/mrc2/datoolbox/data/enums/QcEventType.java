@@ -45,13 +45,23 @@ public enum QcEventType {
 		return uiName;
 	}
 
-	public static QcEventType getEventTypeByName(String name) {
+	public static QcEventType getOptionByName(String name) {
 
 		for(QcEventType source : QcEventType.values()) {
 
 			if(source.name().equals(name))
 				return source;
 		}
+		return null;
+	}
+	
+	public static QcEventType getOptionByUIName(String sname) {
+		
+		for(QcEventType v : QcEventType.values()) {
+			
+			if(v.getName().equals(sname))
+				return v;
+		}		
 		return null;
 	}
 }

@@ -409,7 +409,7 @@ public class MsFeatureIdentity implements Serializable {
 		String idSourceString = 
 				msfIdElement.getAttributeValue(MsFeatureIdentityFields.Source.name());	
 		if(idSourceString != null)
-			idSource = CompoundIdSource.getIdSourceByName(idSourceString);
+			idSource = CompoundIdSource.getOptionByName(idSourceString);
 			
 		String confString = 
 				msfIdElement.getAttributeValue(MsFeatureIdentityFields.Conf.name());

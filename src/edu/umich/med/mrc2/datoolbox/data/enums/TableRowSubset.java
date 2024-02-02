@@ -43,12 +43,21 @@ public enum TableRowSubset {
 		return uiName;
 	}
 	
-	public static TableRowSubset getSubsetByName(String name) {
+	public static TableRowSubset getOptionByName(String name) {
 
 		for(TableRowSubset d : TableRowSubset.values()) {
 
 			if(d.name().equals(name))
 				return d;
+		}
+		return null;
+	}
+	
+	TableRowSubset getOptionByUIName(String fieldName) {
+		
+		for(TableRowSubset f : TableRowSubset.values()) {
+			if(f.getName().equals(fieldName))
+				return f;
 		}
 		return null;
 	}

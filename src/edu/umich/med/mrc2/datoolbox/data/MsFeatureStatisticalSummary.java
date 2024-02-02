@@ -25,6 +25,7 @@ import java.io.Serializable;
 
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
+import edu.umich.med.mrc2.datoolbox.data.enums.MSFeatureSetStatisticalParameters;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
 
 public class MsFeatureStatisticalSummary implements Serializable {
@@ -239,6 +240,45 @@ public class MsFeatureStatisticalSummary implements Serializable {
 
 	public void setMzStatistics(DescriptiveStatistics mzStatistics) {
 		this.mzStatistics = mzStatistics;
+	}
+
+	public Double getValueOfType(MSFeatureSetStatisticalParameters statsParameter) {
+		
+		switch (statsParameter) {
+
+			case TOTAL_MEDIAN:
+					return totalMedian;
+	
+			case SAMPLE_MEDIAN:
+				return sampleMedian;
+
+			case POOLED_MEDIAN:
+				return pooledMedian;
+				
+			case PERCENT_MISSING_IN_SAMPLES:
+				return (1 - sampleFrequency) * 100.0d;
+				
+			case PERCENT_MISSING_IN_POOLS:
+				return (1 - pooledFrequency) * 100.0d;
+				
+			case AREA_RSD_SAMPLES:
+				return getSampleRsd() * 100.d;
+				
+			case AREA_RSD_POOLS:
+				return getPooledRsd() * 100.0d;
+				
+			case RT_RSD:
+				if(rtStatistics != null && rtStatistics.getMean() > 0)
+					return rtStatistics.getStandardDeviation() / rtStatistics.getMean() * 100.0d;
+						
+			case MZ_RSD:
+				if(mzStatistics != null&& mzStatistics.getMean() > 0)
+					return mzStatistics.getStandardDeviation() / mzStatistics.getMean() * 100.0d;
+				
+			default:
+				break;
+		}
+		return null;
 	}
 }
 

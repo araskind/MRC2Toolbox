@@ -23,8 +23,13 @@ package edu.umich.med.mrc2.datoolbox.data.enums;
 
 public enum MSFeatureSetStatisticalParameters {
 
-	PERCENT_MISSING("% missing"),
-	AREA_RSD("Area, %RDS"),
+	TOTAL_MEDIAN("Median area, all samples"), 
+	SAMPLE_MEDIAN("Median area, experimental samples only"),
+	POOLED_MEDIAN("Median area, pooled samples only"),
+	PERCENT_MISSING_IN_SAMPLES("% missing, experimental samples only"),
+	PERCENT_MISSING_IN_POOLS("% missing, pooled samples only"),
+	AREA_RSD_SAMPLES("Area %RDS, experimental samples only"),
+	AREA_RSD_POOLS("Area %RDS, pooled samples only"),
 	RT_RSD("RT, %RSD"),
 	MZ_RSD("M/Z, %RSD"),
 	;
@@ -51,6 +56,16 @@ public enum MSFeatureSetStatisticalParameters {
 			if(o.name().equals(optionName))
 				return o;
 		}
+		return null;
+	}
+	
+	public static MSFeatureSetStatisticalParameters getOptionByUIName(String name) {
+		
+		for(MSFeatureSetStatisticalParameters type : MSFeatureSetStatisticalParameters.values()) {
+			
+			if(type.getName().equals(name))
+				return type;
+		}		
 		return null;
 	}
 }

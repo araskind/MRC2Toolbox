@@ -44,4 +44,24 @@ public enum ClassyFireClassificationLevels {
 	public String toString() {
 		return uiName;
 	}
+	
+	public static ClassyFireClassificationLevels getOptionByName(String name) {
+
+		for(ClassyFireClassificationLevels source : ClassyFireClassificationLevels.values()) {
+
+			if(source.name().equals(name))
+				return source;
+		}
+		return null;
+	}
+	
+	public static ClassyFireClassificationLevels getOptionByUIName(String uiname) {
+
+		for(ClassyFireClassificationLevels source : ClassyFireClassificationLevels.values()) {
+
+			if(source.getName().equals(uiname))
+				return source;
+		}
+		return null;
+	}
 }

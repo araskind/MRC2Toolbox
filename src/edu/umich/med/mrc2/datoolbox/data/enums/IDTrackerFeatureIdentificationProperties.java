@@ -80,7 +80,7 @@ public enum IDTrackerFeatureIdentificationProperties {
 		return uiName;
 	}
 	
-	public static IDTrackerFeatureIdentificationProperties getPropertyByName(String optionName) {
+	public static IDTrackerFeatureIdentificationProperties getOptionByName(String optionName) {
 
 		for(IDTrackerFeatureIdentificationProperties o : IDTrackerFeatureIdentificationProperties.values()) {
 
@@ -89,4 +89,29 @@ public enum IDTrackerFeatureIdentificationProperties {
 		}
 		return null;
 	}
+	
+	public static IDTrackerFeatureIdentificationProperties getOptionByUIName(String sname) {
+		
+		for(IDTrackerFeatureIdentificationProperties v : IDTrackerFeatureIdentificationProperties.values()) {
+			
+			if(v.getName().equals(sname))
+				return v;
+		}		
+		return null;
+	}
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

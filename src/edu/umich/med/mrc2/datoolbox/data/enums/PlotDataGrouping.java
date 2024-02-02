@@ -42,4 +42,24 @@ public enum PlotDataGrouping {
 	public String toString() {
 		return uiName;
 	}
+	
+	public static PlotDataGrouping getOptionByName(String optionName) {
+
+		for(PlotDataGrouping o : PlotDataGrouping.values()) {
+
+			if(o.name().equals(optionName))
+				return o;
+		}
+		return null;
+	}
+	
+	public static PlotDataGrouping getOptionByUIName(String sname) {
+		
+		for(PlotDataGrouping v : PlotDataGrouping.values()) {
+			
+			if(v.getName().equals(sname))
+				return v;
+		}		
+		return null;
+	}
 }

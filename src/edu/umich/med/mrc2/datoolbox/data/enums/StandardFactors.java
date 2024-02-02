@@ -43,4 +43,23 @@ public enum StandardFactors {
 	public String toString() {
 		return uiName;
 	}
+	
+	public static StandardFactors getOptionByName(String name) {
+
+		for(StandardFactors d : StandardFactors.values()) {
+
+			if(d.name().equals(name))
+				return d;
+		}
+		return null;
+	}
+	
+	StandardFactors getOptionByUIName(String fieldName) {
+		
+		for(StandardFactors f : StandardFactors.values()) {
+			if(f.getName().equals(fieldName))
+				return f;
+		}
+		return null;
+	}
 }

@@ -69,4 +69,24 @@ public enum MSPField {
 	public String toString() {
 		return uiName;
 	}
+	
+	public static MSPField getOptionByName(String optionName) {
+
+		for(MSPField o : MSPField.values()) {
+
+			if(o.name().equals(optionName))
+				return o;
+		}
+		return null;
+	}
+	
+	public static MSPField getOptionByUIName(String uiName) {
+		
+		for(MSPField f : MSPField.values()) {
+			
+			if(f.getName().equals(uiName))
+				return f;
+		}		
+		return null;
+	}
 }

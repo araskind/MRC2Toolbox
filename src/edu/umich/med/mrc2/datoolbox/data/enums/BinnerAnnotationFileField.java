@@ -46,4 +46,14 @@ public enum BinnerAnnotationFileField {
 	public String toString() {
 		return uiName;
 	}
+	
+	public static BinnerAnnotationFileField getOptionByName(String name) {
+
+		for(BinnerAnnotationFileField source : BinnerAnnotationFileField.values()) {
+
+			if(source.name().equals(name))
+				return source;
+		}
+		return null;
+	}
 }

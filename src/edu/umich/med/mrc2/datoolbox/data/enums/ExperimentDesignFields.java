@@ -43,4 +43,23 @@ public enum ExperimentDesignFields {
 	public String toString() {
 		return uiName;
 	}
+	
+	public static ExperimentDesignFields getOptionByName(String name) {
+		
+		for(ExperimentDesignFields s : ExperimentDesignFields.values()) {
+			if(s.name().equals(name))
+				return s;
+		}
+		return null;
+	}
+	
+	public static ExperimentDesignFields getOptionByUIName(String dbName) {
+
+		for(ExperimentDesignFields field : ExperimentDesignFields.values()) {
+
+			if(field.getName().equals(dbName))
+				return field;
+		}
+		return null;
+	}
 }

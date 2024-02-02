@@ -178,7 +178,7 @@ public class MSMSLibraryUtils {
 					Polarity.getPolarityByCode(
 							rs.getString(MSMSComponentTableFields.POLARITY.name())));
 			feature.setSpectrumSource(
-					SpectrumSource.getSpectrumSourceByName(
+					SpectrumSource.getOptionByName(
 							rs.getString(MSMSComponentTableFields.SPECTRUM_SOURCE.name())));
 			feature.setIonizationType(
 					IDTDataCache.getIonizationTypeById(
@@ -324,7 +324,7 @@ public class MSMSLibraryUtils {
 					mrc2msmsId,
 					Polarity.getPolarityByCode(MSMSComponentTableFields.POLARITY.name()));
 			feature.setSpectrumSource(
-					SpectrumSource.getSpectrumSourceByName(
+					SpectrumSource.getOptionByName(
 							rs.getString(MSMSComponentTableFields.SPECTRUM_SOURCE.name())));
 			feature.setIonizationType(IDTDataCache.getIonizationTypeById(
 					rs.getString(MSMSComponentTableFields.IONIZATION_TYPE.name())));

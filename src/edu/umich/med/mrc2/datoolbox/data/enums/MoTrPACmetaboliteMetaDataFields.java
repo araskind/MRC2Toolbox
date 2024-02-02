@@ -48,7 +48,17 @@ public enum MoTrPACmetaboliteMetaDataFields {
 		return uiName;
 	}
 	
-	public static MoTrPACmetaboliteMetaDataFields getMoTrPACmetaboliteMetadataFieldByUIName(String sname) {
+	public static MoTrPACmetaboliteMetaDataFields getOptionByName(String sname) {
+		
+		for(MoTrPACmetaboliteMetaDataFields v : MoTrPACmetaboliteMetaDataFields.values()) {
+			
+			if(v.name().equals(sname))
+				return v;
+		}		
+		return null;
+	}
+	
+	public static MoTrPACmetaboliteMetaDataFields getOptionByUIName(String sname) {
 		
 		for(MoTrPACmetaboliteMetaDataFields v : MoTrPACmetaboliteMetaDataFields.values()) {
 			

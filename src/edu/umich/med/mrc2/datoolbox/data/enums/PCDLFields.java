@@ -77,7 +77,17 @@ public enum PCDLFields {
 		return pcdlName;
 	}
 	
-	public static PCDLFields getPCDLFieldByUIName(String uiName) {
+	public static PCDLFields getOptionByName(String optionName) {
+
+		for(PCDLFields o : PCDLFields.values()) {
+
+			if(o.name().equals(optionName))
+				return o;
+		}
+		return null;
+	}
+	
+	public static PCDLFields getOptionByUIName(String uiName) {
 		
 		for(PCDLFields f : PCDLFields.values()) {
 			
@@ -85,7 +95,7 @@ public enum PCDLFields {
 				return f;
 		}		
 		return null;
-	}
+	}	
 }
 
 

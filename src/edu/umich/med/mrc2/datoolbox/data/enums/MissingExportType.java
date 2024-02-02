@@ -41,13 +41,23 @@ public enum MissingExportType {
 		return uiName;
 	}
 	
-	public static MissingExportType getMissingExportTypeByName(String name) {
+	public static MissingExportType getOptionByName(String name) {
 		
 		for(MissingExportType type : MissingExportType.values()) {
 			
 			if(type.name().equals(name))
 				return type;
 		}	
+		return null;
+	}
+	
+	public static MissingExportType getOptionByUIName(String sname) {
+		
+		for(MissingExportType v : MissingExportType.values()) {
+			
+			if(v.getName().equals(sname))
+				return v;
+		}		
 		return null;
 	}
 }

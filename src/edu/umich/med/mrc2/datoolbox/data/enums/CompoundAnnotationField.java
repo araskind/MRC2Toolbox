@@ -85,6 +85,16 @@ public enum CompoundAnnotationField {
 	public String toString() {
 		return uiName;
 	}
+	
+	public static CompoundAnnotationField getOptionByName(String name) {
+
+		for(CompoundAnnotationField source : CompoundAnnotationField.values()) {
+
+			if(source.name().equals(name))
+				return source;
+		}
+		return null;
+	}
 }
 
 

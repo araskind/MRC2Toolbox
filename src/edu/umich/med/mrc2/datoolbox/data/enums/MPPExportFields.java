@@ -45,4 +45,24 @@ public enum MPPExportFields {
 	public String toString() {
 		return uiName;
 	}
+	
+	public static MPPExportFields getOptionByName(String optionName) {
+
+		for(MPPExportFields o : MPPExportFields.values()) {
+
+			if(o.name().equals(optionName))
+				return o;
+		}
+		return null;
+	}
+	
+	public static MPPExportFields getOptionByUIName(String name) {
+		
+		for(MPPExportFields type : MPPExportFields.values()) {
+			
+			if(type.getName().equals(name))
+				return type;
+		}		
+		return null;
+	}
 }

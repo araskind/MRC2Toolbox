@@ -256,7 +256,7 @@ public class IdentificationExportSettingsPanel extends JPanel implements ItemLis
 
 	public void loadPreferences(Preferences preferences) {
 		
-		FeatureIDSubset idsPerFeature = FeatureIDSubset.getFeatureIDSubsetByName(
+		FeatureIDSubset idsPerFeature = FeatureIDSubset.getOptionByName(
 				preferences.get(IDS_PER_FEATURE, FeatureIDSubset.PRIMARY_ONLY.name()));		
 		featureIdSubsetComboBox.setSelectedItem(idsPerFeature);
 		
@@ -271,7 +271,7 @@ public class IdentificationExportSettingsPanel extends JPanel implements ItemLis
 			minScoreTextField.setText(Double.toString(minScore));
 		
 		MSMSScoringParameter msmsScoringParameter = 
-				MSMSScoringParameter.getMSMSScoringParameterByName(
+				MSMSScoringParameter.getOptionByName(
 				preferences.get(SCORING_PARAMETER, MSMSScoringParameter.ENTROPY_SCORE.name()));
 		scoringParameterComboBox.setSelectedItem(msmsScoringParameter);
 		
@@ -279,7 +279,7 @@ public class IdentificationExportSettingsPanel extends JPanel implements ItemLis
 				preferences.getBoolean(EXCLUDE_IF_NO_IDS, false));
 		
 		DecoyExportHandling decoyExportHandling = 
-				DecoyExportHandling.getDecoyExportHandlingByName(
+				DecoyExportHandling.getOptionByName(
 						preferences.get(DECOY_EXPORT_HANDLING, DecoyExportHandling.NORMAL_ONLY.name()));		
 		decoyHitsHadlingComboBox.setSelectedItem(decoyExportHandling);
 	}

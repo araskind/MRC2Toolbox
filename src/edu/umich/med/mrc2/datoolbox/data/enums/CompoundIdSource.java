@@ -46,13 +46,23 @@ public enum CompoundIdSource {
 		return uiName;
 	}
 
-	public static CompoundIdSource getIdSourceByName(String name) {
+	public static CompoundIdSource getOptionByName(String name) {
 
 		for(CompoundIdSource source : CompoundIdSource.values()) {
 
 			if(source.name().equals(name))
 				return source;
 		}
+		return null;
+	}
+	
+	public static CompoundIdSource getOptionByUIName(String uiname) {
+		
+		for(CompoundIdSource cat :CompoundIdSource.values()) {
+			
+			if(cat.getName().equals(uiname))
+				return cat;
+		}		
 		return null;
 	}
 }

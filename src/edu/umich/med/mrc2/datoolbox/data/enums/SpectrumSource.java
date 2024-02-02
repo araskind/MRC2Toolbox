@@ -43,12 +43,21 @@ public enum SpectrumSource {
 		return uiName;
 	}
 
-	public static SpectrumSource getSpectrumSourceByName(String name) {
+	public static SpectrumSource getOptionByName(String name) {
 
 		for(SpectrumSource s : SpectrumSource.values()) {
 
 			if(s.name().equals(name))
 				return s;
+		}
+		return null;
+	}
+	
+	SpectrumSource getOptionByUIName(String fieldName) {
+		
+		for(SpectrumSource f : SpectrumSource.values()) {
+			if(f.getName().equals(fieldName))
+				return f;
 		}
 		return null;
 	}

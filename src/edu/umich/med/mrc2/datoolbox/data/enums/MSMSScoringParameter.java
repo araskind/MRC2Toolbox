@@ -44,12 +44,22 @@ public enum MSMSScoringParameter {
 		return uiName;
 	}
 	
-	public static MSMSScoringParameter getMSMSScoringParameterByName(String name) {
+	public static MSMSScoringParameter getOptionByName(String name) {
 		
 		for(MSMSScoringParameter s : MSMSScoringParameter.values()) {
 			if(s.name().equals(name))
 				return s;
 		}
+		return null;
+	}
+	
+	public static MSMSScoringParameter getOptionByUIName(String uiName) {
+		
+		for(MSMSScoringParameter f : MSMSScoringParameter.values()) {
+			
+			if(f.getName().equals(uiName))
+				return f;
+		}		
 		return null;
 	}
 }

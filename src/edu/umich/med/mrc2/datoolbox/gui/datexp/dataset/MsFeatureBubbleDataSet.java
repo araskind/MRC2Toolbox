@@ -21,6 +21,8 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.datexp.dataset;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.TreeMap;
 
@@ -160,7 +162,9 @@ public class MsFeatureBubbleDataSet extends AbstractXYZDataset{
 
 	public void setDataScale(DataScale newScale) {
 		
-		if(newScale.equals(DataScale.LN) || newScale.equals(DataScale.LOG10) ||  newScale.equals(DataScale.SQRT)) {
+		if(newScale.equals(DataScale.LN) 
+				|| newScale.equals(DataScale.LOG10) 
+				||  newScale.equals(DataScale.SQRT)) {
 			
 			boolean scaleChanged = false;
 			if(!dataScale.equals(newScale))
@@ -175,5 +179,15 @@ public class MsFeatureBubbleDataSet extends AbstractXYZDataset{
 		
 	public MsFeature getMsFeature(int series, int item) {
 		return (MsFeature) seriesMap.get(keySet[series])[item];
+	}
+	
+	public Collection<MsFeature>getAllFeatures(){
+		
+		Collection<MsFeature>allFeatures = new ArrayList<MsFeature>();
+		for(MsFeature[] v : seriesMap.values()) {
+			
+			allFeatures.addAll(Arrays.asList(v));
+		}
+		return allFeatures;
 	}
 }

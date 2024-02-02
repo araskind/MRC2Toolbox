@@ -44,4 +44,23 @@ public enum FeatureIdentificationState {
 	public String toString() {
 		return uiName;
 	}
+	
+	public static FeatureIdentificationState getOptionByName(String name) {
+		
+		for(FeatureIdentificationState s : FeatureIdentificationState.values()) {
+			if(s.name().equals(name))
+				return s;
+		}
+		return null;
+	}
+	
+	public static FeatureIdentificationState getOptionByUIName(String dbName) {
+
+		for(FeatureIdentificationState field : FeatureIdentificationState.values()) {
+
+			if(field.getName().equals(dbName))
+				return field;
+		}
+		return null;
+	}
 }

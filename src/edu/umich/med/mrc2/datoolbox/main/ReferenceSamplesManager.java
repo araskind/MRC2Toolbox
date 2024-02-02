@@ -70,7 +70,7 @@ public class ReferenceSamplesManager {
 			newSample.setIncloodeInPoolStats(rs.getString("INCLUDE_IN_POOL_STATS") != null);			
 			String mpType = rs.getString("MOTRPAC_REF_TYPE");
 			if(mpType != null)
-				newSample.setMoTrPACQCSampleType(MoTrPACQCSampleType.getSampleTypeByUIName(mpType));
+				newSample.setMoTrPACQCSampleType(MoTrPACQCSampleType.getOptionByUIName(mpType));
 
 			ExperimentDesignLevel typeLevel = new ExperimentDesignLevel(rs.getString("LIMS_NAME"));
 			scFactor.addLevel(typeLevel);

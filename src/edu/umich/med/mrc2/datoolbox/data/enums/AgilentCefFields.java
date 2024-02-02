@@ -46,4 +46,24 @@ public enum AgilentCefFields {
 	public String toString() {
 		return uiName;
 	}
+	
+	public static AgilentCefFields getOptionByName(String name) {
+
+		for(AgilentCefFields field : AgilentCefFields.values()) {
+
+			if(field.name().equals(name))
+				return field;
+		}
+		return null;
+	}
+	
+	public static AgilentCefFields getOptionByUIName(String dbName) {
+
+		for(AgilentCefFields field : AgilentCefFields.values()) {
+
+			if(field.getName().equals(dbName))
+				return field;
+		}
+		return null;
+	}
 }

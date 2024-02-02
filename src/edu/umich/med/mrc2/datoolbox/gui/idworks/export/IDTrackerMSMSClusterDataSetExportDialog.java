@@ -459,7 +459,7 @@ public class IDTrackerMSMSClusterDataSetExportDialog extends JDialog
 			 for(String name : selectedMsTwoFeaturePropertiesNames) {
 				 
 				 IDTrackerMSMSClusterProperties fProperty = 					
-						 IDTrackerMSMSClusterProperties.getPropertyByName(name);
+						 IDTrackerMSMSClusterProperties.getOptionByName(name);
 				if(fProperty != null)
 					storedClusterProperties.add(fProperty);
 			 }
@@ -477,7 +477,7 @@ public class IDTrackerMSMSClusterDataSetExportDialog extends JDialog
 			 for(String name : selectedMsTwoFeaturePropertiesNames) {
 				 
 				IDTrackerMsFeatureProperties fProperty = 					
-						IDTrackerMsFeatureProperties.getPropertyByName(name);
+						IDTrackerMsFeatureProperties.getOptionByName(name);
 				if(fProperty != null)
 					storedFeatureProperties.add(fProperty);
 			 }
@@ -495,7 +495,7 @@ public class IDTrackerMSMSClusterDataSetExportDialog extends JDialog
 			 for(String name : selectedMsTwoIdentificationPropertiesNames) {
 				 
 				 IDTrackerFeatureIdentificationProperties idProperty = 
-						 IDTrackerFeatureIdentificationProperties.getPropertyByName(name);
+						 IDTrackerFeatureIdentificationProperties.getOptionByName(name);
 				if(idProperty != null)
 					storedIdentificationProperties.add(idProperty);
 			 }

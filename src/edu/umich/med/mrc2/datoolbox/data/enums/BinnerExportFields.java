@@ -49,4 +49,14 @@ public enum BinnerExportFields {
 	public String toString() {
 		return uiName;
 	}
+	
+	public static BinnerExportFields getOptionByName(String name) {
+
+		for(BinnerExportFields source : BinnerExportFields.values()) {
+
+			if(source.name().equals(name))
+				return source;
+		}
+		return null;
+	}
 }

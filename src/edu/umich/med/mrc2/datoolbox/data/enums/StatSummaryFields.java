@@ -46,4 +46,23 @@ public enum StatSummaryFields {
 	public String toString() {
 		return uiName;
 	}
+	
+	public static StatSummaryFields getOptionByName(String name) {
+
+		for(StatSummaryFields d : StatSummaryFields.values()) {
+
+			if(d.name().equals(name))
+				return d;
+		}
+		return null;
+	}
+	
+	StatSummaryFields getOptionByUIName(String fieldName) {
+		
+		for(StatSummaryFields f : StatSummaryFields.values()) {
+			if(f.getName().equals(fieldName))
+				return f;
+		}
+		return null;
+	}
 }

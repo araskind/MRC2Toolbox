@@ -44,11 +44,21 @@ public enum CompoundNameCategory {
 		return uiName;
 	}
 	
-	public static CompoundNameCategory getCompoundNameCategoryByName(String name) {
+	public static CompoundNameCategory getOptionByName(String name) {
 		
 		for(CompoundNameCategory cat :CompoundNameCategory.values()) {
 			
 			if(cat.name().equals(name))
+				return cat;
+		}		
+		return null;
+	}
+	
+	public static CompoundNameCategory getOptionByUIName(String uiname) {
+		
+		for(CompoundNameCategory cat :CompoundNameCategory.values()) {
+			
+			if(cat.getName().equals(uiname))
 				return cat;
 		}		
 		return null;

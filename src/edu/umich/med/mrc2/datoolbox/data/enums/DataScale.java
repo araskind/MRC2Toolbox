@@ -46,7 +46,7 @@ public enum DataScale {
 		return uiName;
 	}
 	
-	public static DataScale getDataScaleByUIName(String name) {
+	public static DataScale getOptionByUIName(String name) {
 		
 		for(DataScale s : DataScale.values()) {
 			

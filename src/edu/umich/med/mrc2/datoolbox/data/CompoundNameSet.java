@@ -138,7 +138,7 @@ public class CompoundNameSet implements Serializable {
 			return;
 
 		CompoundNameCategory cat = 
-				CompoundNameCategory.getCompoundNameCategoryByName(type);
+				CompoundNameCategory.getOptionByName(type);
 		
 		if(cat == null)
 			throw new IllegalArgumentException("Invalid compound name category " + type);

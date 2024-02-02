@@ -183,12 +183,12 @@ public class DataExplorerPlotFrame extends JFrame implements PersistentLayout, B
 	@Override
 	public void loadPreferences(Preferences prefs) {
 		preferences = prefs;
-		DataScale bubblePlotDataScale = DataScale.getDataScaleByUIName(
+		DataScale bubblePlotDataScale = DataScale.getOptionByUIName(
 				preferences.get(FEATURE_BUBBLE_PLOT_DATA_SCALE, DataScale.LN.name()));
 		if(bubblePlotDataScale != null)
 			mzRtBubblePlotPanel.setDataScale(bubblePlotDataScale);
 		
-		KendrickUnits kendrickUnits = KendrickUnits.getKendrickUnitsByName(
+		KendrickUnits kendrickUnits = KendrickUnits.getOptionByName(
 				preferences.get(MASS_DEFECT_KENDRICK_UNITS, KendrickUnits.NONE.name()));
 		if(kendrickUnits != null)
 			mzMassDefectBubblePlotPanel.setKendrickUnits(kendrickUnits);

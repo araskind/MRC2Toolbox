@@ -66,4 +66,24 @@ public enum BinnerField {
 	public String toString() {
 		return uiName;
 	}
+	
+	public static BinnerField getOptionByName(String name) {
+
+		for(BinnerField source : BinnerField.values()) {
+
+			if(source.name().equals(name))
+				return source;
+		}
+		return null;
+	}
+	
+	public static BinnerField getOptionByUIName(String uiname) {
+
+		for(BinnerField source : BinnerField.values()) {
+
+			if(source.getName().equals(uiname))
+				return source;
+		}
+		return null;
+	}
 }

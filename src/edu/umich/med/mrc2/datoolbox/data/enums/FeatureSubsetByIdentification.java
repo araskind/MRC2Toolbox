@@ -52,4 +52,14 @@ public enum FeatureSubsetByIdentification {
 		}
 		return null;
 	}
+	
+	public static FeatureSubsetByIdentification getOptionByUIName(String sname) {
+		
+		for(FeatureSubsetByIdentification v : FeatureSubsetByIdentification.values()) {
+			
+			if(v.getName().equals(sname))
+				return v;
+		}		
+		return null;
+	}
 }

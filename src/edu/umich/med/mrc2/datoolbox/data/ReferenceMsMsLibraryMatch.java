@@ -476,7 +476,7 @@ public class ReferenceMsMsLibraryMatch implements Serializable {
 		String matchTypeId = 
 				msmsMatch.getAttributeValue(ReferenceMsMsLibraryMatchFields.MType.name());
 		if(matchTypeId != null)
-			matchType = MSMSMatchType.getMSMSMatchTypeByName(matchTypeId);
+			matchType = MSMSMatchType.getOptionByName(matchTypeId);
 		
 		searchParameterSetId = 
 				msmsMatch.getAttributeValue(ReferenceMsMsLibraryMatchFields.ParSet.name());

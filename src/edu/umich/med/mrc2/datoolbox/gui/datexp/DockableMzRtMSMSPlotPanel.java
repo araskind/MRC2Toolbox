@@ -306,7 +306,7 @@ public class DockableMzRtMSMSPlotPanel extends DefaultSingleCDockable
 					defaultRenderer.setSeriesShape(i, defaultShape);
 				}						
 				else {							
-					MSMSMatchType mt = MSMSMatchType.getMSMSMatchTypeByUIName(seriesName);
+					MSMSMatchType mt = MSMSMatchType.getOptionByUIName(seriesName);
 					if(mt != null)
 						defaultRenderer.setSeriesPaint(i, mt.getColorCode());
 				}					

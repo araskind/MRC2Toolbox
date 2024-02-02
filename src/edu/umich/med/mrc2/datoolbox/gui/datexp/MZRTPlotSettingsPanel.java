@@ -132,8 +132,7 @@ public class MZRTPlotSettingsPanel extends
 		gbc_featureSubsetComboBox.fill = GridBagConstraints.HORIZONTAL;
 		gbc_featureSubsetComboBox.gridx = 0;
 		gbc_featureSubsetComboBox.gridy = rowCount;
-		add(featureSubsetComboBox, gbc_featureSubsetComboBox);
-		featureSubsetComboBox.addItemListener(externalItemListener);
+		add(featureSubsetComboBox, gbc_featureSubsetComboBox);		
 		
 		rowCount++;
 		
@@ -261,7 +260,6 @@ public class MZRTPlotSettingsPanel extends
 			gbc_comboBox.gridx = 1;
 			gbc_comboBox.gridy = rowCount;
 			add(featureIDMeasureComboBox, gbc_comboBox);
-			featureIDMeasureComboBox.addItemListener(externalItemListener);
 			
 			rowCount++;
 		}
@@ -278,7 +276,6 @@ public class MZRTPlotSettingsPanel extends
 			dataScaleComboBox.setModel(new DefaultComboBoxModel<DataScale>(
 					new DataScale[] {DataScale.LN, DataScale.LOG10, DataScale.SQRT}));
 			dataScaleComboBox.setSelectedItem(DataScale.LN);
-			dataScaleComboBox.addItemListener(externalItemListener);
 			dataScaleComboBox.setMaximumSize(new Dimension(120, 26));
 			GridBagConstraints gbc_dataScaleComboBox = new GridBagConstraints();
 			gbc_dataScaleComboBox.anchor = GridBagConstraints.EAST;
@@ -307,7 +304,6 @@ public class MZRTPlotSettingsPanel extends
 			gbc_comboBox.gridx = 1;
 			gbc_comboBox.gridy = rowCount;
 			add(featureSetStatParamsComboBox, gbc_comboBox);
-			featureSetStatParamsComboBox.addItemListener(externalItemListener);
 			
 			rowCount++;
 			
@@ -323,8 +319,7 @@ public class MZRTPlotSettingsPanel extends
 					new SortedComboBoxModel<ColorGradient>(ColorGradient.values()));
 			colorSchemeComboBox.setSelectedItem(ColorGradient.GREEN_RED);
 			colorSchemeComboBox.setPreferredSize(new Dimension(100, 25));
-			colorSchemeComboBox.setSize(new Dimension(100, 25));
-			colorSchemeComboBox.addItemListener(externalItemListener);
+			colorSchemeComboBox.setSize(new Dimension(100, 25));			
 			GridBagConstraints gbc_colorSchemeComboBox = new GridBagConstraints();
 			gbc_colorSchemeComboBox.fill = GridBagConstraints.HORIZONTAL;
 			gbc_colorSchemeComboBox.gridwidth = 4;
@@ -348,7 +343,6 @@ public class MZRTPlotSettingsPanel extends
 			colorScaleComboBox.setSelectedItem(ColorScale.LINEAR);
 			colorScaleComboBox.setPreferredSize(new Dimension(100, 25));
 			colorScaleComboBox.setSize(new Dimension(100, 25));
-			colorScaleComboBox.addItemListener(externalItemListener);
 			GridBagConstraints gbc_colorScaleComboBox = new GridBagConstraints();
 			gbc_colorScaleComboBox.gridwidth = 4;
 			gbc_colorScaleComboBox.fill = GridBagConstraints.HORIZONTAL;
@@ -402,6 +396,24 @@ public class MZRTPlotSettingsPanel extends
 		gridBagLayout.rowWeights[rowCount + 1] = Double.MIN_VALUE;
 				
 		loadPreferences();
+		
+		featureSubsetComboBox.addItemListener(externalItemListener);
+		
+		if(featureIDMeasureComboBox != null)
+			featureIDMeasureComboBox.addItemListener(externalItemListener);
+		
+		if(dataScaleComboBox != null)
+			dataScaleComboBox.addItemListener(externalItemListener);
+		
+		if(featureSetStatParamsComboBox != null)
+			featureSetStatParamsComboBox.addItemListener(externalItemListener);
+		
+		if(colorSchemeComboBox != null)
+			colorSchemeComboBox.addItemListener(externalItemListener);
+		
+		if(colorScaleComboBox != null)
+			colorScaleComboBox.addItemListener(externalItemListener);
+		
 		useCompleteSetRadioButton.setSelected(true);
 	}
 	
@@ -560,7 +572,32 @@ public class MZRTPlotSettingsPanel extends
 			
 			featureIDMeasureComboBox.setSelectedItem(co);
 		}
-
+		if(dataScaleComboBox != null) {
+			
+			DataScale ds = DataScale.getOptionByName(
+							preferences.get(DATA_SCALE, DataScale.LN.name()));			
+			dataScaleComboBox.setSelectedItem(ds);
+		}
+		if(featureSetStatParamsComboBox != null) {
+			
+			MSFeatureSetStatisticalParameters ds = 
+					MSFeatureSetStatisticalParameters.getOptionByName(
+							preferences.get(FEATURE_SET_STAT_PARAM, 
+									MSFeatureSetStatisticalParameters.PERCENT_MISSING_IN_SAMPLES.name()));			
+			featureSetStatParamsComboBox.setSelectedItem(ds);
+		}
+		if(colorSchemeComboBox != null) {
+			
+			ColorGradient ds = ColorGradient.getOptionByName(
+							preferences.get(COLOR_SCHEME, ColorGradient.GREEN_RED.name()));			
+			colorSchemeComboBox.setSelectedItem(ds);
+		}
+		if(colorScaleComboBox != null) {
+			
+			ColorScale ds = ColorScale.getOptionByName(
+							preferences.get(COLOR_SCALE, ColorScale.LINEAR.name()));			
+			colorScaleComboBox.setSelectedItem(ds);
+		}	
 	}
 
 	@Override
@@ -587,6 +624,18 @@ public class MZRTPlotSettingsPanel extends
 		if(getFeatureIdentificationMeasure() != null)
 			preferences.put(FEATURE_PLOT_COLOR_OPTION, 
 					getFeatureIdentificationMeasure().name());		
+		
+		if(getDataScale() != null)
+			preferences.put(DATA_SCALE, getDataScale().name());	
+		
+		if(getMSFeatureSetStatisticalParameters() != null)
+			preferences.put(FEATURE_SET_STAT_PARAM, getMSFeatureSetStatisticalParameters().name());	
+		
+		if(getColorGradient() != null)
+			preferences.put(COLOR_SCHEME, getColorGradient().name());	
+		
+		if(getColorScale() != null)
+			preferences.put(COLOR_SCALE, getColorScale().name());	
 	}
 	
 	public MZRTPlotParameterObject getPlotParameters() {

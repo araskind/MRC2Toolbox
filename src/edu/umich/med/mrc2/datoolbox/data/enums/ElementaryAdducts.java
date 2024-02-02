@@ -63,4 +63,23 @@ public enum ElementaryAdducts {
 	public String toString() {
 		return uiName;
 	}
+		
+	public static ElementaryAdducts getOptionByName(String name) {
+		
+		for(ElementaryAdducts s : ElementaryAdducts.values()) {
+			if(s.name().equals(name))
+				return s;
+		}
+		return null;
+	}
+	
+	public static ElementaryAdducts getOptionByUIName(String dbName) {
+
+		for(ElementaryAdducts field : ElementaryAdducts.values()) {
+
+			if(field.getName().equals(dbName))
+				return field;
+		}
+		return null;
+	}
 }

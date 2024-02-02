@@ -317,7 +317,7 @@ public class QCAnnotationUtils {
 
 			QcEventType limsCategory = null;
 			if(rs.getString("EVENT_TYPE") != null)
-				limsCategory = QcEventType.getEventTypeByName(rs.getString("EVENT_TYPE"));
+				limsCategory = QcEventType.getOptionByName(rs.getString("EVENT_TYPE"));
 
 			AnalysisQcEventAnnotation annotation = new AnalysisQcEventAnnotation(
 					 uniqueId,

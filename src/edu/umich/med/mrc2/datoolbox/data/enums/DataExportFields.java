@@ -52,13 +52,24 @@ public enum DataExportFields {
 		return uiName;
 	}
 	
-	public static DataExportFields getDataExportFieldByName(String name) {
+	public static DataExportFields getOptionByName(String name) {
 		
 		for(DataExportFields field : DataExportFields.values()) {
 			
 			if(field.name().equals(name))
 				return field;
 		}	
+		return null;
+	}
+	
+	
+	public static DataExportFields getOptionByUIName(String name) {
+		
+		for(DataExportFields s : DataExportFields.values()) {
+			
+			if(s.getName().equals(name))
+				return s;
+		}		
 		return null;
 	}
 }

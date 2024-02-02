@@ -40,4 +40,23 @@ public enum IntensityFormat {
 	public String toString() {
 		return uiName;
 	}
+	
+	public static IntensityFormat getOptionByName(String type) {
+		
+		for(IntensityFormat m : IntensityFormat.values()) {
+			if(m.name().equals(type))
+				return m;
+		}		
+		return null;
+	}
+	
+	public static IntensityFormat getOptionByUIName(String sname) {
+		
+		for(IntensityFormat v : IntensityFormat.values()) {
+			
+			if(v.getName().equals(sname))
+				return v;
+		}		
+		return null;
+	}
 }

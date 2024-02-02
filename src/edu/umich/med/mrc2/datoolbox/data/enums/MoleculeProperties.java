@@ -41,4 +41,28 @@ public enum MoleculeProperties {
 	public String toString() {
 		return uiName;
 	}
+	
+	public String getName() {
+		return uiName;
+	}
+	
+	public static MoleculeProperties getOptionByName(String sname) {
+		
+		for(MoleculeProperties v : MoleculeProperties.values()) {
+			
+			if(v.name().equals(sname))
+				return v;
+		}		
+		return null;
+	}
+	
+	public static MoleculeProperties getOptionByUIName(String sname) {
+		
+		for(MoleculeProperties v : MoleculeProperties.values()) {
+			
+			if(v.getName().equals(sname))
+				return v;
+		}		
+		return null;
+	}
 }

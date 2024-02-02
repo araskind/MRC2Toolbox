@@ -42,12 +42,22 @@ public enum SoftwareType {
 		return uiName;
 	}
 	
-	public static SoftwareType getSoftwareTypeByName(String sName) {
+	public static SoftwareType getOptionByName(String sName) {
 		
 		for(SoftwareType t : SoftwareType.values()) {
 			
 			if(t.name().equals(sName))
 				return t;
+		}		
+		return null;
+	}
+	
+	public static SoftwareType getOptionByUIName(String sname) {
+		
+		for(SoftwareType v : SoftwareType.values()) {
+			
+			if(v.getName().equals(sname))
+				return v;
 		}		
 		return null;
 	}

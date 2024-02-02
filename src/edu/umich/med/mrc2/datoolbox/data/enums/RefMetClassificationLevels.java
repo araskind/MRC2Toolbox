@@ -42,4 +42,24 @@ public enum RefMetClassificationLevels {
 	public String toString() {
 		return uiName;
 	}
+	
+	public static RefMetClassificationLevels getOptionByName(String sName) {
+		
+		for(RefMetClassificationLevels t : RefMetClassificationLevels.values()) {
+			
+			if(t.name().equals(sName))
+				return t;
+		}		
+		return null;
+	}
+	
+	public static RefMetClassificationLevels getOptionByUIName(String sname) {
+		
+		for(RefMetClassificationLevels v : RefMetClassificationLevels.values()) {
+			
+			if(v.getName().equals(sname))
+				return v;
+		}		
+		return null;
+	}
 }

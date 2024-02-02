@@ -49,13 +49,23 @@ public enum IDTrackerMSMSClusterProperties {
 		return uiName;
 	}
 	
-	public static IDTrackerMSMSClusterProperties getPropertyByName(String optionName) {
+	public static IDTrackerMSMSClusterProperties getOptionByName(String optionName) {
 
 		for(IDTrackerMSMSClusterProperties o : IDTrackerMSMSClusterProperties.values()) {
 
 			if(o.name().equals(optionName))
 				return o;
 		}
+		return null;
+	}
+	
+	public static IDTrackerMSMSClusterProperties getOptionByUIName(String sname) {
+		
+		for(IDTrackerMSMSClusterProperties v : IDTrackerMSMSClusterProperties.values()) {
+			
+			if(v.getName().equals(sname))
+				return v;
+		}		
 		return null;
 	}
 }

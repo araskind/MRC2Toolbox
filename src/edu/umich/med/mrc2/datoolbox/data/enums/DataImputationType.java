@@ -52,5 +52,25 @@ public enum DataImputationType {
 	@Override
 	public String toString() {
 		return uiName;
+	}	
+	
+	public static DataImputationType getOptionByUIName(String name) {
+		
+		for(DataImputationType s : DataImputationType.values()) {
+			
+			if(s.getName().equals(name))
+				return s;
+		}		
+		return null;
+	}
+	
+	public static DataImputationType getOptionByName(String optionName) {
+
+		for(DataImputationType o : DataImputationType.values()) {
+
+			if(o.name().equals(optionName))
+				return o;
+		}
+		return null;
 	}
 }

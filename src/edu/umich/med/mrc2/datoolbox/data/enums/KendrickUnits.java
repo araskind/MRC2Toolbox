@@ -53,12 +53,22 @@ public enum KendrickUnits {
 		return multiplier;
 	}
 	
-	public static KendrickUnits getKendrickUnitsByName(String name) {
+	public static KendrickUnits getOptionByName(String name) {
 		
 		for(KendrickUnits u : KendrickUnits.values()) {
 			
 			if(u.name().equals(name))
 				return u;				
+		}		
+		return null;
+	}
+	
+	public static KendrickUnits getOptionByUIName(String sname) {
+		
+		for(KendrickUnits v : KendrickUnits.values()) {
+			
+			if(v.getName().equals(sname))
+				return v;
 		}		
 		return null;
 	}

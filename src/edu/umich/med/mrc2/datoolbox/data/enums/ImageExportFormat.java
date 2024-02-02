@@ -44,4 +44,24 @@ public enum ImageExportFormat {
 	public String getName() {
 		return uiName;
 	}
+		
+	public static ImageExportFormat getOptionByName(String name) {
+		
+		for(ImageExportFormat u : ImageExportFormat.values()) {
+			
+			if(u.name().equals(name))
+				return u;				
+		}		
+		return null;
+	}
+	
+	public static ImageExportFormat getOptionByUIName(String sname) {
+		
+		for(ImageExportFormat v : ImageExportFormat.values()) {
+			
+			if(v.getName().equals(sname))
+				return v;
+		}		
+		return null;
+	}
 }

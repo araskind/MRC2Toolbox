@@ -517,7 +517,7 @@ public class MSMSExtractionParameterSet implements Comparable<MSMSExtractionPara
 				parametersElement.getAttributeValue(
 						MSMSExtractionParameters.MaxFragmentsCutoff.name()));		
 		this.filterIntensityMeasure = 
-				IntensityMeasure.geIntensityMeasureByName(parametersElement.getAttributeValue(
+				IntensityMeasure.getOptionByName(parametersElement.getAttributeValue(
 				MSMSExtractionParameters.FilterIntensityMeasure.name()));		
 		this.msmsIsolationWindowLowerBorder = Double.parseDouble(
 				parametersElement.getAttributeValue(

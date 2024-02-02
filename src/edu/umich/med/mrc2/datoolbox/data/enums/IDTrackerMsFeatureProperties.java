@@ -62,13 +62,23 @@ public enum IDTrackerMsFeatureProperties {
 		return uiName;
 	}
 	
-	public static IDTrackerMsFeatureProperties getPropertyByName(String optionName) {
+	public static IDTrackerMsFeatureProperties getOptionByName(String optionName) {
 
 		for(IDTrackerMsFeatureProperties o : IDTrackerMsFeatureProperties.values()) {
 
 			if(o.name().equals(optionName))
 				return o;
 		}
+		return null;
+	}
+	
+	public static IDTrackerMsFeatureProperties getOptionByUIName(String sname) {
+		
+		for(IDTrackerMsFeatureProperties v : IDTrackerMsFeatureProperties.values()) {
+			
+			if(v.getName().equals(sname))
+				return v;
+		}		
 		return null;
 	}
 }

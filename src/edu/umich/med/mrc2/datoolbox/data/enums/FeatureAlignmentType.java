@@ -42,4 +42,23 @@ public enum FeatureAlignmentType {
 	public String toString() {
 		return uiName;
 	}
+	
+	public static FeatureAlignmentType getOptionByName(String name) {
+		
+		for(FeatureAlignmentType s : FeatureAlignmentType.values()) {
+			if(s.name().equals(name))
+				return s;
+		}
+		return null;
+	}
+	
+	public static FeatureAlignmentType getOptionByUIName(String dbName) {
+
+		for(FeatureAlignmentType field : FeatureAlignmentType.values()) {
+
+			if(field.getName().equals(dbName))
+				return field;
+		}
+		return null;
+	}
 }

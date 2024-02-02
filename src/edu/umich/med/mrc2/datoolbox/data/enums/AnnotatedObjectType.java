@@ -61,7 +61,7 @@ public enum AnnotatedObjectType {
 		return idPrefix;
 	}
 
-	public static AnnotatedObjectType getObjectTypeByName(String name) {
+	public static AnnotatedObjectType getOptionByName(String name) {
 
 		for(AnnotatedObjectType source : AnnotatedObjectType.values()) {
 

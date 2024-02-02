@@ -54,7 +54,17 @@ public enum ThermoInstrumentSequenceFields {
 		return uiName;
 	}
 	
-	ThermoInstrumentSequenceFields getThermoInstrumentSequenceFieldByFieldUIName(String fieldName) {
+	public static ThermoInstrumentSequenceFields getOptionByName(String optionName) {
+
+		for(ThermoInstrumentSequenceFields o : ThermoInstrumentSequenceFields.values()) {
+
+			if(o.name().equals(optionName))
+				return o;
+		}
+		return null;
+	}
+	
+	ThermoInstrumentSequenceFields getOptionByUIName(String fieldName) {
 		
 		for(ThermoInstrumentSequenceFields f : ThermoInstrumentSequenceFields.values()) {
 			if(f.getName().equals(fieldName))

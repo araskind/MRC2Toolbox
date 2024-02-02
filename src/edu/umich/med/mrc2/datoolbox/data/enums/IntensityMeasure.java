@@ -41,11 +41,21 @@ public enum IntensityMeasure {
 		return uiName;
 	}
 	
-	public static IntensityMeasure geIntensityMeasureByName(String type) {
+	public static IntensityMeasure getOptionByName(String type) {
 		
 		for(IntensityMeasure m : IntensityMeasure.values()) {
 			if(m.name().equals(type))
 				return m;
+		}		
+		return null;
+	}
+	
+	public static IntensityMeasure getOptionByUIName(String sname) {
+		
+		for(IntensityMeasure v : IntensityMeasure.values()) {
+			
+			if(v.getName().equals(sname))
+				return v;
 		}		
 		return null;
 	}
