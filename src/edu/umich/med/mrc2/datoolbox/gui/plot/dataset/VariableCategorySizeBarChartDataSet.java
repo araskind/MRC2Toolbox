@@ -25,6 +25,7 @@ import java.awt.Paint;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -105,8 +106,8 @@ public class VariableCategorySizeBarChartDataSet extends AbstractDataset impleme
 		
 		Map<String,Paint>seriesPaintNameMap = new HashMap<String,Paint>();
 		seriesPaintMap = new HashMap<Integer,Paint>();
-		rowMap = new HashMap<Comparable,Integer>();
-		columnMap = new HashMap<Comparable,Integer>();
+		rowMap = new LinkedHashMap<Comparable,Integer>();
+		columnMap = new LinkedHashMap<Comparable,Integer>();
 		
 		int sCount = 0;
 		for(String sName : seriesFileMap.keySet()) {
@@ -173,8 +174,8 @@ public class VariableCategorySizeBarChartDataSet extends AbstractDataset impleme
 				createSeriesPaintMap(seriesFileMap, plotParameters.getGroupingType(), 
 						plotParameters.getChartColorOption());
 		
-		rowMap = new HashMap<Comparable,Integer>();
-		columnMap = new HashMap<Comparable,Integer>();
+		rowMap = new LinkedHashMap<Comparable,Integer>();
+		columnMap = new LinkedHashMap<Comparable,Integer>();
 		Integer rowCount = 0;
 		Integer columnCount = 0;
 		data = new Double[files.size()][seriesFileMap.size()];
@@ -236,8 +237,8 @@ public class VariableCategorySizeBarChartDataSet extends AbstractDataset impleme
 				createSeriesPaintMap(seriesFileMap, plotParameters.getGroupingType(), 
 						plotParameters.getChartColorOption());
 		
-		rowMap = new HashMap<Comparable,Integer>();
-		columnMap = new HashMap<Comparable,Integer>();
+		rowMap = new LinkedHashMap<Comparable,Integer>();
+		columnMap = new LinkedHashMap<Comparable,Integer>();
 		Integer rowCount = 0;
 		Integer columnCount = 0;
 		data = new Double[files.size()][seriesFileMap.size()];

@@ -521,8 +521,10 @@ public class MultiPanelDataPlot extends MasterPlotPanel implements ActionListene
 				CategoryPlot barChart = getNewBarchart();
 
 				//	MsFeatureBarChartDataSet ds = new MsFeatureBarChartDataSet(msf, plotParameters);
-				VariableCategorySizeBarChartDataSet ds = new VariableCategorySizeBarChartDataSet(msf, plotParameters);
-				VariableCategorySizeBarRenderer renderer = new VariableCategorySizeBarRenderer();
+				VariableCategorySizeBarChartDataSet ds = 
+						new VariableCategorySizeBarChartDataSet(msf, plotParameters);
+				VariableCategorySizeBarRenderer renderer = 
+						new VariableCategorySizeBarRenderer();
 		        renderer.setDefaultToolTipGenerator(
 		        		new StatsPlotDataFileToolTipGenerator(NumberFormat.getNumberInstance(), null));
 				for(int i=0; i<ds.getRowCount(); i++)
@@ -531,11 +533,6 @@ public class MultiPanelDataPlot extends MasterPlotPanel implements ActionListene
 				barChart.setDomainAxis(new VariableCategorySizeCategoryAxis());
 				barChart.setRenderer(renderer);				
 				barChart.setDataset(ds);
-
-				//	TODO add slider to plot to allow adjustment
-				
-//				if(ds.getRowCount() == ds.getColumnCount())
-//					((BarRenderer)barChart.getRenderer()).setItemMargin(0.02);
 				
 				CategoryAxis axis = barChart.getDomainAxis();
 				axis.setLabel(msf.getName());
@@ -546,7 +543,7 @@ public class MultiPanelDataPlot extends MasterPlotPanel implements ActionListene
 				axis.setCategoryMargin(0.1);
 				
 				if(plotParameters.getGroupingType().equals(PlotDataGrouping.IGNORE_DESIGN))
-				axis.setTickLabelsVisible(false);
+					axis.setTickLabelsVisible(false);
 				
 				categoryPlot.add(barChart);
 			}
@@ -675,13 +672,13 @@ public class MultiPanelDataPlot extends MasterPlotPanel implements ActionListene
 				
 		plotParameters = 
 				new TwoDimFeatureDataPlotParameterObject(
-				plottedFeaturesMap,
-				((MultiPanelDataPlotToolbar)toolbar).getSortingOrder(), 
-				((MultiPanelDataPlotToolbar)toolbar).getDataScale(),
-				((MultiPanelDataPlotToolbar)toolbar).getChartColorOption(),
-				dataPlotControlsPanel.getDataGroupingType(), 
-				dataPlotControlsPanel.getCategory(), 
-				dataPlotControlsPanel.getSububCategory());		
+					plottedFeaturesMap,
+					((MultiPanelDataPlotToolbar)toolbar).getSortingOrder(), 
+					((MultiPanelDataPlotToolbar)toolbar).getDataScale(),
+					((MultiPanelDataPlotToolbar)toolbar).getChartColorOption(),
+					dataPlotControlsPanel.getDataGroupingType(), 
+					dataPlotControlsPanel.getCategory(), 
+					dataPlotControlsPanel.getSububCategory());		
 
 	}
 

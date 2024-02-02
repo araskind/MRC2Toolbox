@@ -78,13 +78,6 @@ public class DockableDataPlot extends DefaultSingleCDockable implements ActionLi
 		dataPlotControlsPanel.setVisible(b);
 	}
 
-//	public FileSortingOrder getFileOrder() {
-//		return plotToolbar.getFileOrder();
-//	}
-//
-//	public StatsPlotType getPlotType() {
-//		return plotToolbar.getPlotType();
-//	}
 
 	public void loadMultipleFeatureData(
 			Map<DataPipeline, Collection<MsFeature>> selectedFeaturesMap) {
@@ -93,31 +86,12 @@ public class DockableDataPlot extends DefaultSingleCDockable implements ActionLi
 			dataPlot.clearPlotPanel();
 			return;
 		}
-//			dataPlot.loadMultipleFeatureData(
-//					selectedFeaturesMap,
-//					plotToolbar.getDataGroupingType(),
-//					plotToolbar.getCategory(),
-//					plotToolbar.getSubCategory());
-			
 		dataPlot.loadMultipleFeatureData(selectedFeaturesMap);		
 	}
 
 	public void clearPlotPanel() {
-
 		dataPlot.clearPlotPanel();
-//		plotToolbar.setPlotType(StatsPlotType.BARCHART);
-//		plotToolbar.setFileOrder(FileSortingOrder.SAMPLE_NAME);
 	}
-
-//	public void setFileOrder(FileSortingOrder order) {
-//
-//		plotToolbar.setFileOrder(order);
-//	}
-//
-//	public void setPlotType(StatsPlotType type) {
-//
-//		plotToolbar.setPlotType(type);
-//	}
 
 	public void setActiveDesign(ExperimentDesignSubset activeSubset) {
 

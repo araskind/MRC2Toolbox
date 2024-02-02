@@ -999,6 +999,7 @@ import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.VariableCategorySizeBarChar
 	        int categoryIndex = 0;
 	        Iterator<Tick> iterator = ticks.iterator();
 	        while (iterator.hasNext()) {
+	        	
 	            CategoryTick tick = (CategoryTick) iterator.next();
 	            g2.setFont(getTickLabelFont(tick.getCategory()));
 	            g2.setPaint(getTickLabelPaint(tick.getCategory()));
