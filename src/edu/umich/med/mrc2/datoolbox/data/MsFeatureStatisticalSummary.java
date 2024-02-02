@@ -247,7 +247,7 @@ public class MsFeatureStatisticalSummary implements Serializable {
 		switch (statsParameter) {
 
 			case TOTAL_MEDIAN:
-					return totalMedian;
+				return totalMedian;
 	
 			case SAMPLE_MEDIAN:
 				return sampleMedian;

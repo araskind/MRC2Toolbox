@@ -64,6 +64,8 @@ import edu.umich.med.mrc2.datoolbox.gui.main.MainWindow;
 import edu.umich.med.mrc2.datoolbox.gui.main.PanelList;
 import edu.umich.med.mrc2.datoolbox.gui.plot.renderer.MSFeatureStatsColorRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
+import edu.umich.med.mrc2.datoolbox.gui.utils.IndeterminateProgressDialog;
+import edu.umich.med.mrc2.datoolbox.gui.utils.LongUpdateTask;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
@@ -236,15 +238,12 @@ public class DockableMzRtBubblePlotPanel extends DefaultSingleCDockable
 		
 		if (e.getStateChange() == ItemEvent.SELECTED) {
 			
-			if (e.getItem() instanceof DataScale) {
-				changeDataScale((DataScale)e.getItem());
-			}
-			else if (e.getItem() instanceof TableRowSubset) {
-				//	TODO;
-			}
-			else {
-				redrawPlot();
-			}
+			RedrawPlotTask task = new RedrawPlotTask(e.getItem());
+			IndeterminateProgressDialog idp = 
+					new IndeterminateProgressDialog(
+							"Updating plot ...", this.getContentPane(), task);
+			idp.setLocationRelativeTo(this.getContentPane());
+			idp.setVisible(true);
 		}
 	}
 	
@@ -258,6 +257,30 @@ public class DockableMzRtBubblePlotPanel extends DefaultSingleCDockable
 		renderer.setColorScale(parset.getColorScale());	
 		renderer.notifyListeners(new RendererChangeEvent(renderer));
 		addColorScale(renderer);
+	}
+	
+	class RedrawPlotTask extends LongUpdateTask {
+
+		Object redrawTrigger;
+		
+		public RedrawPlotTask(Object redrawTrigger) {
+			this.redrawTrigger = redrawTrigger;
+		}
+
+		@Override
+		public Void doInBackground() {
+
+			if (redrawTrigger instanceof DataScale) {
+				changeDataScale((DataScale)redrawTrigger);
+			}
+			else if (redrawTrigger instanceof TableRowSubset) {
+				//	TODO;
+			}
+			else {
+				redrawPlot();
+			}
+			return null;
+		}
 	}
 
 	private void changeDataScale(DataScale newScale) {

@@ -41,10 +41,12 @@ public class MsFeatureBubbleDataSet extends AbstractXYZDataset{
 	private TreeMap<String, MsFeature[]>seriesMap;
 	private String[] keySet;
 	private DataScale dataScale;
+	private Collection<MsFeature> allFeatures;
 
 	public MsFeatureBubbleDataSet() {
 		super();
 		seriesMap = new TreeMap<String, MsFeature[]>();
+		allFeatures = new ArrayList<MsFeature>();
 		dataScale = DataScale.LN;
 	}
 
@@ -56,19 +58,24 @@ public class MsFeatureBubbleDataSet extends AbstractXYZDataset{
 		seriesMap = new TreeMap<String, MsFeature[]>();
 		seriesMap.put(seriesName, features.toArray(new MsFeature[features.size()]));
 		keySet = seriesMap.keySet().toArray(new String[seriesMap.size()]);
+		allFeatures = new ArrayList<MsFeature>();
+		allFeatures.addAll(features);
 	}
 
 	public void addSeries(String seriesName, Collection<MsFeature> features) {
 
 		seriesMap.put(seriesName, features.toArray(new MsFeature[features.size()]));
 		keySet = seriesMap.keySet().toArray(new String[seriesMap.size()]);
+		allFeatures.addAll(features);
 		notifyListeners(new DatasetChangeEvent(this, this));
 	}
 
     public void removeSeries(String seriesName) {
+    	
+    	MsFeature[] removed = seriesMap.remove(seriesName);
+    	if(removed != null) {
 
-    	if(seriesMap.remove(seriesName) != null) {
-
+    		allFeatures.removeAll(Arrays.asList(removed));
     		keySet = seriesMap.keySet().toArray(new String[seriesMap.size()]);
     		notifyListeners(new DatasetChangeEvent(this, this));
     	}
@@ -182,12 +189,6 @@ public class MsFeatureBubbleDataSet extends AbstractXYZDataset{
 	}
 	
 	public Collection<MsFeature>getAllFeatures(){
-		
-		Collection<MsFeature>allFeatures = new ArrayList<MsFeature>();
-		for(MsFeature[] v : seriesMap.values()) {
-			
-			allFeatures.addAll(Arrays.asList(v));
-		}
 		return allFeatures;
 	}
 }
