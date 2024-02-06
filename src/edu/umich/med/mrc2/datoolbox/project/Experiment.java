@@ -27,9 +27,12 @@ import java.io.Serializable;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Date;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.UUID;
 
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesign;
+import edu.umich.med.mrc2.datoolbox.data.ExperimentalSample;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 
@@ -49,6 +52,7 @@ public abstract class Experiment implements Serializable{
 	protected File exportsDirectory;
 	protected Date dateCreated, lastModified;
 	protected ExperimentDesign experimentDesign;
+	protected TreeSet<ExperimentalSample> pooledSamples;
 	
 	public Experiment(ProjectType projectType,
 					String name, 
@@ -80,19 +84,6 @@ public abstract class Experiment implements Serializable{
 		
 		experimentDirectory = experimentFile.getParentFile();
 	}
-	
-//	public Experiment(Experiment other) {
-//		super();
-//		this.projectType = other.getProjectType();
-//		this.id = other.getId();
-//		this.name = other.getName();
-//		this.description = other.getDescription();
-//		this.experimentFile = other.getExperimentFile();
-//		this.dateCreated = other.getDateCreated();
-//		this.lastModified = other.getLastModified();		
-//		this.experimentDirectory = other.getExperimentDirectory();
-//		this.exportsDirectory = other.getExportsDirectory();
-//	}
 	
 	protected void createDirectoryStructureForNewExperiment(File parentDirectory) {
 		
@@ -201,6 +192,8 @@ public abstract class Experiment implements Serializable{
 	public void setExperimentDesign(ExperimentDesign experimentDesign) {
 		this.experimentDesign = experimentDesign;
 	}
+
+	public abstract Set<ExperimentalSample> getPooledSamples();
 }
 
 

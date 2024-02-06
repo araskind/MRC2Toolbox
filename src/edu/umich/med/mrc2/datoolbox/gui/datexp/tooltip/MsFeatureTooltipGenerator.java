@@ -91,16 +91,16 @@ public class MsFeatureTooltipGenerator implements XYZToolTipGenerator {
 					f.getStatsSummary().getValueOfType(MSFeatureSetStatisticalParameters.POOLED_MEDIAN)) + "</b>"
 			+ "<br>% Missing in experimental samples:<b> " + 
 				percentFormat.format(
-					f.getStatsSummary().getValueOfType(MSFeatureSetStatisticalParameters.PERCENT_MISSING_IN_SAMPLES) / 100.0d) + "</b>"
+					f.getStatsSummary().getValueOfType(MSFeatureSetStatisticalParameters.PERCENT_MISSING_IN_SAMPLES)/100.0d) + "</b>"
 			+ "<br>% Missing in pooled samples:<b> " + 
 				percentFormat.format(
-					f.getStatsSummary().getValueOfType(MSFeatureSetStatisticalParameters.PERCENT_MISSING_IN_POOLS) / 100.0d) + "</b>"
+					f.getStatsSummary().getValueOfType(MSFeatureSetStatisticalParameters.PERCENT_MISSING_IN_POOLS)/100.0d) + "</b>"
 			+ "<br>Area %RSD of experimental samples:<b> " + 
 				percentFormat.format( 
-					f.getStatsSummary().getValueOfType(MSFeatureSetStatisticalParameters.AREA_RSD_SAMPLES) / 100.0d) + "</b>"
+					f.getStatsSummary().getValueOfType(MSFeatureSetStatisticalParameters.AREA_RSD_SAMPLES)) + "</b>"
 			+ "<br>Area %RSD of pooled samples:<b> " + 
 				percentFormat.format(
-					f.getStatsSummary().getValueOfType(MSFeatureSetStatisticalParameters.AREA_RSD_POOLS) / 100.0d) + "</b>";
+					f.getStatsSummary().getValueOfType(MSFeatureSetStatisticalParameters.AREA_RSD_POOLS)) + "</b>";
 		
 		return tooltip;
 	}

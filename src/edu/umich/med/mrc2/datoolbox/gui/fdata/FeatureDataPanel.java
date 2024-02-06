@@ -42,6 +42,7 @@ import java.util.stream.Collectors;
 import javax.swing.DefaultListSelectionModel;
 import javax.swing.Icon;
 import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
@@ -51,6 +52,7 @@ import org.ujmp.core.Matrix;
 import edu.umich.med.mrc2.datoolbox.data.CompoundLibrary;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignSubset;
+import edu.umich.med.mrc2.datoolbox.data.ExperimentalSample;
 import edu.umich.med.mrc2.datoolbox.data.MSRTSearchParametersObject;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureCluster;
@@ -60,11 +62,13 @@ import edu.umich.med.mrc2.datoolbox.data.MzFrequencyObject;
 import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.enums.CompoundIdSource;
+import edu.umich.med.mrc2.datoolbox.data.enums.DataExportFields;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataImputationType;
 import edu.umich.med.mrc2.datoolbox.data.enums.FeatureFilter;
 import edu.umich.med.mrc2.datoolbox.data.enums.FeatureSetProperties;
 import edu.umich.med.mrc2.datoolbox.data.enums.GlobalDefaults;
 import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
+import edu.umich.med.mrc2.datoolbox.data.enums.MissingExportType;
 import edu.umich.med.mrc2.datoolbox.data.enums.ParameterSetStatus;
 import edu.umich.med.mrc2.datoolbox.data.enums.TableRowSubset;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
@@ -79,6 +83,7 @@ import edu.umich.med.mrc2.datoolbox.gui.communication.MsFeatureEvent;
 import edu.umich.med.mrc2.datoolbox.gui.cpddatabase.DatabaseSearchSetupDialog;
 import edu.umich.med.mrc2.datoolbox.gui.datexp.DataExplorerPlotFrame;
 import edu.umich.med.mrc2.datoolbox.gui.dereplication.duplicates.DuplicateMergeDialog;
+import edu.umich.med.mrc2.datoolbox.gui.expdesign.pools.ExperimentPooledSampleManagerDialog;
 import edu.umich.med.mrc2.datoolbox.gui.fdata.cleanup.FeatureCleanupParameters;
 import edu.umich.med.mrc2.datoolbox.gui.fdata.cleanup.FeatureDataCleanupDialog;
 import edu.umich.med.mrc2.datoolbox.gui.fdata.corr.DockableCorrelationDataPanel;
@@ -107,6 +112,7 @@ import edu.umich.med.mrc2.datoolbox.gui.utils.IndeterminateProgressDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.InformationDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.LongUpdateTask;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
+import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
@@ -115,6 +121,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.derepl.FindDuplicateNamesTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.derepl.MergeDuplicateFeaturesTask;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io.DataExportTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io.MultiCefDataAddTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io.MultiCefImportTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io.QuantMatrixImportTask;
@@ -127,6 +134,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.stats.MzFrequencyAnalysisT
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.stats.MzFrequencyType;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.stats.RemoveEmptyFeaturesTask;
 import edu.umich.med.mrc2.datoolbox.utils.ExperimentUtils;
+import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
 import edu.umich.med.mrc2.datoolbox.utils.MetabolomicsProjectUtils;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
@@ -168,6 +176,7 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 	
 	private boolean cleanEmtyFeatures;
 	private MzFrequencyAnalysisSetupDialog mzFrequencyAnalysisSetupDialog;
+	private ExperimentPooledSampleManagerDialog experimentPooledSampleManagerDialog;
 
 	private static final Icon componentIcon = GuiUtils.getIcon("barChart", 16);
 	private static final Icon loadLibraryIcon = GuiUtils.getIcon("loadLibrary", 24);
@@ -342,8 +351,8 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 		menuActions.addSeparator();
 		
 		menuActions.add(GuiUtils.setupButtonAction(
-				MainActionCommands.SHOW_FEATURE_MZ_RT_BUBBLE_PLOT.getName(),
-				MainActionCommands.SHOW_FEATURE_MZ_RT_BUBBLE_PLOT.getName(), 
+				MainActionCommands.SHOW_DATA_EXPLORER_FRAME.getName(),
+				MainActionCommands.SHOW_DATA_EXPLORER_FRAME.getName(), 
 				bubblePlotIcon, this));
 		
 		menuActions.addSeparator();
@@ -404,6 +413,9 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 			if (command.equals(MainActionCommands.CALC_FEATURES_STATS_COMMAND.getName()))
 				calculateDataStats();
 			
+			if (command.equals(MainActionCommands.RECALCULATE_STATISTICS_WITH_SELECTED_POOLS_COMMAND.getName()))
+				recalculateDataStatsWithSelectedPools();
+			
 			if (command.equals(MainActionCommands.CLEAN_EMPTY_FEATURES_COMMAND.getName()))
 				cleanEmptyFeatures();
 			
@@ -441,8 +453,8 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 			if (command.equals(MainActionCommands.IMPUTE_DATA_COMMAND.getName()))
 				imputeMissingData();
 
-			if (command.equals(MainActionCommands.SHOW_FEATURE_MZ_RT_BUBBLE_PLOT.getName()))
-				showBubblePlotDialog();
+			if (command.equals(MainActionCommands.SHOW_DATA_EXPLORER_FRAME.getName()))
+				showDataExplorerFrame();
 			
 			if (command.equals(MainActionCommands.MS_RT_LIBRARY_SEARCH_SETUP_FOR_SELECTED_COMMAND.getName()))
 				showLibrarySearchSetup(TableRowSubset.SELECTED);
@@ -501,6 +513,9 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 					
 			if (command.equals(MainActionCommands.RUN_MZ_FREQUENCY_ANALYSIS_COMMAND.getName()))
 				runMSMSParentIonFrequencyAnalysis();
+			
+			if (command.equals(MainActionCommands.EXPORT_FEATURE_STATISTICS_COMMAND.getName()))
+				exportStatisticsForActiveFeatureSet();
 		}	
 	}
 
@@ -799,20 +814,20 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 		excelImportWizard.setVisible(true);
 	}
 
-	private void showBubblePlotDialog() {
+	public void showDataExplorerFrame() {
 
 		if (currentExperiment == null || activeDataPipeline == null)
 			return;
-
+		
 		DataExplorerPlotFrame dataExplorerPlotDialog = MainWindow.getDataExplorerPlotDialog();
 		dataExplorerPlotDialog.setParentPanel(this);
 		
-		// Load data
-		MsFeatureSet featureSet = 
-				currentExperiment.getActiveFeatureSetForDataPipeline(activeDataPipeline);
-		dataExplorerPlotDialog.loadMzRtFromFeatureCollection(
-				featureSet.getName(), featureSet.getFeatures());
-		dataExplorerPlotDialog.setVisible(true);
+		if(dataExplorerPlotDialog.isVisible())			
+			dataExplorerPlotDialog.toFront();
+		else {
+			dataExplorerPlotDialog.setVisible(true);
+			dataExplorerPlotDialog.loadMzRtFromFeatureCollection(activeMsFeatureSet);
+		}
 	}
 
 	private void showMissingIdentifications() {
@@ -1086,6 +1101,23 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 		if(currentExperiment == null || activeDataPipeline == null)
 			return;
 
+		experimentPooledSampleManagerDialog = 
+				new ExperimentPooledSampleManagerDialog(this);
+		experimentPooledSampleManagerDialog.setLocationRelativeTo(this.getContentPane());
+		experimentPooledSampleManagerDialog.setVisible(true);
+	}
+	
+	private void recalculateDataStatsWithSelectedPools() {
+		
+		if(currentExperiment == null || activeDataPipeline == null)
+			return;
+
+		Collection<ExperimentalSample>selectedPools = 
+					experimentPooledSampleManagerDialog.getSelectedSamples();
+		currentExperiment.getPooledSamples().clear();
+		currentExperiment.getPooledSamples().addAll(selectedPools);
+		experimentPooledSampleManagerDialog.dispose();
+		
 		// Check if design assigned to data files and pooled/sample are specified
 		// TODO If no pooled present and required, calculate for the whole set as samples
 		if (ExperimentUtils.designValidForStats(currentExperiment, activeDataPipeline, false)) {
@@ -1096,7 +1128,7 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 			MRC2ToolBoxCore.getTaskController().addTask(cst);
 		} else {
 			MessageDialog.showWarningMsg(
-					"Experiment design not valid for calculating the statistics", 
+					"Experiment design not valid for calculating the statistics (no samples / pools defined	)", 
 					this.getContentPane());
 		}
 	}
@@ -1447,8 +1479,7 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 				MainWindow.getDataExplorerPlotDialog().clearPanels();
 			}
 			else {
-				MainWindow.getDataExplorerPlotDialog().loadMzRtFromFeatureCollection(
-						activeMsFeatureSet.getName(), activeMsFeatureSet.getFeatures());
+				MainWindow.getDataExplorerPlotDialog().loadMzRtFromFeatureCollection(activeMsFeatureSet);
 			}
 		}
 	}
@@ -1897,4 +1928,46 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 			return null;
 		}
 	}
+	
+	private void exportStatisticsForActiveFeatureSet() {
+		
+		if(activeMsFeatureSet == null || activeMsFeatureSet.getFeatures().isEmpty() 
+				|| activeDataPipeline == null)
+			return;
+		
+		currentExperiment.getExportsDirectory();
+		
+		File exportFile = null;
+		JnaFileChooser fc = new JnaFileChooser(currentExperiment.getExportsDirectory());
+		fc.setMode(JnaFileChooser.Mode.Files);
+		fc.addFilter("Text files", "txt", "TXT");
+		fc.setTitle("Export metabolomics experiment data to text file:");
+		fc.setMultiSelectionEnabled(false);
+		fc.setSaveButtonText("Export data");
+		String defaultFileName = FIOUtils.createFileNameForDataExportType(
+				MainActionCommands.EXPORT_FEATURE_STATISTICS_COMMAND);
+		fc.setDefaultFileName(defaultFileName);	
+		if (fc.showSaveDialog(SwingUtilities.getWindowAncestor(this.getContentPane()))) {
+						
+			exportFile = fc.getSelectedFile();
+		}	
+		if(exportFile == null)
+			return;
+			
+		DataExportTask det = new DataExportTask(
+				MRC2ToolBoxCore.getActiveMetabolomicsExperiment(),
+				MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getActiveDataPipeline(),
+				exportFile,
+				MainActionCommands.EXPORT_FEATURE_STATISTICS_COMMAND,
+				MissingExportType.AS_MISSING,
+				false,
+				1000.0d,
+				0.0d,
+				DataExportFields.DATA_FILE,
+				false,
+				false);
+		det.setMsFeatureSet4export(activeMsFeatureSet.getFeatures());
+		det.addTaskListener(this);
+		MRC2ToolBoxCore.getTaskController().addTask(det);		
+	}	
 }

@@ -83,8 +83,7 @@ public class MzRtPlotToolbar extends PlotToolbar implements ActionListener{
 			setSidePanelVisible(true);
 		
 		if(command.equals(MainActionCommands.HIDE_CHART_SIDE_PANEL_COMMAND.getName())) 
-			setSidePanelVisible(false);
-		
+			setSidePanelVisible(false);		
 	}
 		
 	private void setSidePanelVisible(boolean b){

@@ -23,6 +23,7 @@ package edu.umich.med.mrc2.datoolbox.gui.refsamples;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesign;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentalSample;
@@ -32,6 +33,7 @@ import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTableModel;
 import edu.umich.med.mrc2.datoolbox.gui.tables.ColumnContext;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.ReferenceSamplesManager;
+import edu.umich.med.mrc2.datoolbox.project.Experiment;
 
 public class ExperimentReferenceSampleTableModel extends BasicTableModel {
 
@@ -40,6 +42,7 @@ public class ExperimentReferenceSampleTableModel extends BasicTableModel {
 	 */
 	private static final long serialVersionUID = -237795112533015325L;
 
+	public static final String INCLUDE_IN_POOLS_COLUMN = "Pool";
 	public static final String SAMPLE_ID_COLUMN = "Sample ID";
 	public static final String SAMPLE_NAME_COLUMN = "Sample name";
 	public static final String SAMPLE_TYPE_COLUMN = "Sample type";
@@ -50,6 +53,7 @@ public class ExperimentReferenceSampleTableModel extends BasicTableModel {
 		super();
 		columnArray = new ColumnContext[] {
 
+			new ColumnContext(INCLUDE_IN_POOLS_COLUMN, "Include in pooled for statistics", Boolean.class, true),
 			new ColumnContext(SAMPLE_ID_COLUMN, SAMPLE_ID_COLUMN, ExperimentalSample.class, false),
 			new ColumnContext(SAMPLE_NAME_COLUMN, SAMPLE_NAME_COLUMN, String.class, false),
 			new ColumnContext(SAMPLE_TYPE_COLUMN, SAMPLE_TYPE_COLUMN, MoTrPACQCSampleType.class, false),
@@ -57,11 +61,15 @@ public class ExperimentReferenceSampleTableModel extends BasicTableModel {
 		};
 	}
 
-	public void loadReferenceSamples(ExperimentDesign design) {
+	public void loadReferenceSamples(Experiment experiment) {
 
 		setRowCount(0);
-		if(design == null || design.getSamples().isEmpty())
+		if(experiment.getExperimentDesign() == null 
+				|| experiment.getExperimentDesign().getSamples().isEmpty())
 			return;
+		
+		ExperimentDesign design = experiment.getExperimentDesign();
+		Set<ExperimentalSample>pools = experiment.getPooledSamples();
 		
 		DataAcquisitionMethod method = MRC2ToolBoxCore.getActiveMetabolomicsExperiment().
 				getActiveDataPipeline().getAcquisitionMethod();
@@ -72,6 +80,7 @@ public class ExperimentReferenceSampleTableModel extends BasicTableModel {
 			if(refSample != null) {
 				
 				Object[] obj = {
+						pools.contains(refSample),
 						refSample,
 						refSample.getName(),
 						refSample.getMoTrPACQCSampleType(),

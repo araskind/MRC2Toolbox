@@ -30,6 +30,7 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.TreeSet;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.entity.EntityCollection;
 import org.jfree.chart.plot.CrosshairState;
@@ -85,8 +86,10 @@ public class MSFeatureStatsColorRenderer extends ColorCodedXYLineAndShapeRendere
 		MsFeatureBubbleDataSet ds = 
 				(MsFeatureBubbleDataSet)datasetToRender;
 		Collection<MsFeature>allFeatures = ds.getAllFeatures();
-		allFeatures.stream().filter(f -> Objects.nonNull(f.getStatsSummary())).
-			forEach(f -> data.add(f.getStatsSummary().getValueOfType(statsParameter)));	
+		allFeatures.stream().
+			filter(f -> Objects.nonNull(f.getStatsSummary())).
+			forEach(f -> CollectionUtils.addIgnoreNull(
+					data, f.getStatsSummary().getValueOfTypeForPlot(statsParameter)));	
 		data.removeIf(v -> Double.isNaN(v));
 		
 		Range dataRange = new Range(data.first(), data.last());
@@ -99,10 +102,10 @@ public class MSFeatureStatsColorRenderer extends ColorCodedXYLineAndShapeRendere
 		MsFeature feature = 
 				((MsFeatureBubbleDataSet)datasetToRender).getMsFeature(row, column);
 		if(feature.getStatsSummary() == null 
-				|| feature.getStatsSummary().getValueOfType(statsParameter) == null)
+				|| feature.getStatsSummary().getValueOfTypeForPlot(statsParameter) == null)
 			return Color.LIGHT_GRAY;
 		
-		double value = feature.getStatsSummary().getValueOfType(statsParameter);
+		double value = feature.getStatsSummary().getValueOfTypeForPlot(statsParameter);
 		
 		return lookupPaintScale.getPaint(value);
 	}

@@ -27,13 +27,18 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.TreeMap;
@@ -65,6 +70,7 @@ import edu.umich.med.mrc2.datoolbox.data.enums.DataExportFields;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.enums.ExperimentDesignFields;
 import edu.umich.med.mrc2.datoolbox.data.enums.MPPExportFields;
+import edu.umich.med.mrc2.datoolbox.data.enums.MSFeatureSetStatisticalParameters;
 import edu.umich.med.mrc2.datoolbox.data.enums.MissingExportType;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
@@ -105,6 +111,7 @@ public class DataExportTask extends AbstractTask {
 	private static final NumberFormat rtFormat = MRC2ToolBoxConfiguration.getRtFormat();
 	private static final NumberFormat mzFormat = MRC2ToolBoxConfiguration.getMzFormat();
 	private static final NumberFormat peakAreaFormat = new DecimalFormat("###");
+	private static final NumberFormat percentFormat = NumberFormat.getPercentInstance();
 
 	public DataExportTask(
 			DataAnalysisProject experiment,
@@ -214,8 +221,17 @@ public class DataExportTask extends AbstractTask {
 				e.printStackTrace();
 			}
 		}
+		if (exportType.equals(MainActionCommands.EXPORT_FEATURE_STATISTICS_COMMAND)) {
+			try {
+				writeFeatureQCDataExportFile();
+				setStatus(TaskStatus.FINISHED);
+			} catch (Exception e) {
+				setStatus(TaskStatus.ERROR);
+				e.printStackTrace();
+			}
+		}
 	}
-	
+
 	private void writeMZRTDataExportFile() throws Exception {
 
 		taskDescription = "Reading feature data matrix ...";
@@ -687,6 +703,93 @@ public class DataExportTask extends AbstractTask {
 		}
 		writer.flush();
 		writer.close();
+	}
+	
+	private void writeFeatureQCDataExportFile() {
+		
+		taskDescription = "Writing data export file for Metabolomics Workbench ...";
+		List<MsFeature> featureList = msFeatureSet4export.stream().
+				sorted(new MsFeatureComparator(SortProperty.RT)).collect(Collectors.toList());
+		total = featureList.size();
+		processed = 0;
+				
+		Collection<String>dataToExport = new ArrayList<String>();
+		List<String>lineChunks = new ArrayList<String>();
+		//	lineChunks.add("FeatureID");
+		lineChunks.add("metabolite_name");
+		lineChunks.add("Name");
+		for(MSFeatureSetStatisticalParameters o : MSFeatureSetStatisticalParameters.values())
+			lineChunks.add(o.getName());
+		
+		dataToExport.add(StringUtils.join(lineChunks, columnSeparator));
+		
+		for(MsFeature feature :  featureList) {
+			
+			lineChunks.clear();
+			// lineChunks.add(feature.getId());
+			lineChunks.add(feature.getBicMetaboliteName());
+			lineChunks.add(feature.getName());
+			
+			for(MSFeatureSetStatisticalParameters o : MSFeatureSetStatisticalParameters.values()) {
+				
+				String valueString = 
+						formatQCValue(feature.getStatsSummary().getValueOfType(o), o);
+				lineChunks.add(valueString);
+			}
+			dataToExport.add(StringUtils.join(lineChunks, columnSeparator));
+			processed++;
+		}
+		try {
+			Files.write(exportFile.toPath(), 
+					dataToExport, 
+					StandardCharsets.UTF_8,
+					StandardOpenOption.CREATE, 
+					StandardOpenOption.TRUNCATE_EXISTING);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private String formatQCValue(Double value, MSFeatureSetStatisticalParameters field) {
+		
+		if(value == null || Double.isNaN(value))
+			return "";
+		
+		NumberFormat pcRSDFormat = new DecimalFormat("###.###");
+		
+		switch (field) {
+
+		case TOTAL_MEDIAN:
+			return peakAreaFormat.format(value);
+			
+		case SAMPLE_MEDIAN:
+			return peakAreaFormat.format(value);
+			
+		case POOLED_MEDIAN:
+			return peakAreaFormat.format(value);
+			
+		case PERCENT_MISSING_IN_SAMPLES:
+			return pcRSDFormat.format(value);
+			
+		case PERCENT_MISSING_IN_POOLS:
+			return pcRSDFormat.format(value);
+			
+		case AREA_RSD_SAMPLES:
+			return pcRSDFormat.format(value * 100.0);
+			
+		case AREA_RSD_POOLS:
+			return pcRSDFormat.format(value * 100.0);
+			
+		case RT_RSD:
+			return pcRSDFormat.format(value * 100.0);
+			
+		case MZ_RSD:
+			return pcRSDFormat.format(value * 100.0);
+
+		default:
+			break;
+		}
+		return "";
 	}
 	
 	private void writeMetabolomicsWorkbenchExportFile() throws Exception {

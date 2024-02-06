@@ -25,15 +25,16 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import javax.swing.ListSelectionModel;
+import javax.swing.event.TableModelEvent;
 import javax.swing.table.TableRowSorter;
 
-import edu.umich.med.mrc2.datoolbox.data.ExperimentDesign;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentalSample;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.AutoChoices;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.TableFilterHeader;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.ExperimentalSampleRenderer;
+import edu.umich.med.mrc2.datoolbox.project.Experiment;
 
 public class ExperimentReferenceSampleTable extends BasicTable {
 
@@ -59,37 +60,49 @@ public class ExperimentReferenceSampleTable extends BasicTable {
 		finalizeLayout();
 	}
 
-	public void loadReferenceSamples(ExperimentDesign design) {
+	public void loadReferenceSamples(Experiment experiment) {
+		
 		thf.setTable(null);
-		((ExperimentReferenceSampleTableModel)model).loadReferenceSamples(design);
+		((ExperimentReferenceSampleTableModel)model).loadReferenceSamples(experiment);
+		int selectedCol = model.getColumnIndex(ExperimentReferenceSampleTableModel.INCLUDE_IN_POOLS_COLUMN);
+		for(int row=0; row<getRowCount(); row++) {
+			
+			if((Boolean)model.getValueAt(row, selectedCol))
+				addRowSelectionInterval(row, row);	
+		}
 		thf.setTable(this);
 		adjustColumns();
 	}
 
 	public Collection<ExperimentalSample> getSelectedSamples() {
 
-		Collection<ExperimentalSample>selected = new ArrayList<ExperimentalSample>();
-		int[] rows = getSelectedRows();
-		if(rows.length == 0)
-			return selected;
+		Collection<ExperimentalSample>selected = new ArrayList<ExperimentalSample>();		
+		int selectedCol = model.getColumnIndex(ExperimentReferenceSampleTableModel.INCLUDE_IN_POOLS_COLUMN);
+		int idCol = model.getColumnIndex(ExperimentReferenceSampleTableModel.SAMPLE_ID_COLUMN);		
 		
-		int idCol = model.getColumnIndex(ReferenceSampleTableModel.SAMPLE_ID_COLUMN);
-		for(int row : rows) 
-			selected.add((ExperimentalSample) model.getValueAt(convertRowIndexToModel(row), idCol));	
-
+		for(int row=0; row<model.getRowCount(); row++) {
+			
+			if((Boolean)model.getValueAt(row, selectedCol))
+				selected.add((ExperimentalSample) model.getValueAt(row, idCol));	
+		}
 		return selected;
 	}
-
-	public void selectSampleRows(Collection<ExperimentalSample>toSelect) {
-
-		clearSelection();
-		int idColumn = getColumnIndex(ReferenceSampleTableModel.SAMPLE_ID_COLUMN);
-		for(int i=0; i<getRowCount(); i++) {
-
-			ExperimentalSample currentSample =
-					(ExperimentalSample)model.getValueAt(convertRowIndexToModel(i), idColumn);
-			if(toSelect.contains(currentSample))
-				addRowSelectionInterval(i, i);		
+	
+	@Override
+	public void tableChanged(TableModelEvent e) {
+		
+		super.tableChanged(e);
+		if(model == null)
+			return;
+		
+		if(e.getColumn() == model.getColumnIndex(ExperimentReferenceSampleTableModel.INCLUDE_IN_POOLS_COLUMN)) {
+			
+			clearSelection();
+			for(int row=0; row<getRowCount(); row++) {
+				
+				if((Boolean)model.getValueAt(convertRowIndexToModel(row), e.getColumn()))
+					addRowSelectionInterval(row, row);	
+			}
 		}
 	}
 }

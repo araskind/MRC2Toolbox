@@ -33,6 +33,7 @@ import org.ujmp.core.calculation.Calculation.Ret;
 
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignSubset;
+import edu.umich.med.mrc2.datoolbox.data.ExperimentalSample;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureSet;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureStatisticalSummary;
@@ -111,13 +112,12 @@ public class CalculateStatisticsTask extends AbstractTask {
 		HashMap<DataFile,Long>fileCoordinates = new HashMap<DataFile,Long>();
 		Matrix assayData = currentExperiment.getDataMatrixForDataPipeline(dataPipeline);
 		long[] dataCoordinates = new long[2];
+		
+		Set<ExperimentalSample> pooledSamples = currentExperiment.getPooledSamples();
 
 		for (DataFile df : dataFiles) {
-
-//			if(df.getParentSample().hasLevel(ReferenceSamplesManager.masterPoolLevel) && df.isEnabled())
-//				pooledFiles.add(df);
 			
-			if(df.getParentSample().isIncloodeInPoolStats() && df.isEnabled())
+			if(pooledSamples.contains(df.getParentSample()) && df.isEnabled())
 				pooledFiles.add(df);
 
 			if(df.getParentSample().hasLevel(ReferenceSamplesManager.sampleLevel) && df.isEnabled())

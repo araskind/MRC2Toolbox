@@ -256,13 +256,52 @@ public class MsFeatureStatisticalSummary implements Serializable {
 				return pooledMedian;
 				
 			case PERCENT_MISSING_IN_SAMPLES:
-				return (1 - sampleFrequency) * 100.0d;
+				return (1.0d - sampleFrequency) * 100.0d;
 				
 			case PERCENT_MISSING_IN_POOLS:
-				return (1 - pooledFrequency) * 100.0d;
+				return (1.0d - pooledFrequency) * 100.0d;
 				
 			case AREA_RSD_SAMPLES:
-				return getSampleRsd() * 100.d;
+				return getSampleRsd();
+				
+			case AREA_RSD_POOLS:
+				return getPooledRsd();
+				
+			case RT_RSD:
+				if(rtStatistics != null && rtStatistics.getMean() > 0)
+					return rtStatistics.getStandardDeviation() / rtStatistics.getMean();
+						
+			case MZ_RSD:
+				if(mzStatistics != null && mzStatistics.getMean() > 0)
+					return mzStatistics.getStandardDeviation() / mzStatistics.getMean();
+				
+			default:
+				break;
+		}
+		return null;
+	}
+	
+	public Double getValueOfTypeForPlot(MSFeatureSetStatisticalParameters statsParameter) {
+		
+		switch (statsParameter) {
+
+			case TOTAL_MEDIAN:
+				return totalMedian;
+	
+			case SAMPLE_MEDIAN:
+				return sampleMedian;
+
+			case POOLED_MEDIAN:
+				return pooledMedian;
+				
+			case PERCENT_MISSING_IN_SAMPLES:
+				return (1.0d - sampleFrequency) * 100.0d;
+				
+			case PERCENT_MISSING_IN_POOLS:
+				return (1.0d - pooledFrequency) * 100.0d;
+				
+			case AREA_RSD_SAMPLES:
+				return getSampleRsd() * 100.0d;
 				
 			case AREA_RSD_POOLS:
 				return getPooledRsd() * 100.0d;
@@ -272,7 +311,7 @@ public class MsFeatureStatisticalSummary implements Serializable {
 					return rtStatistics.getStandardDeviation() / rtStatistics.getMean() * 100.0d;
 						
 			case MZ_RSD:
-				if(mzStatistics != null&& mzStatistics.getMean() > 0)
+				if(mzStatistics != null && mzStatistics.getMean() > 0)
 					return mzStatistics.getStandardDeviation() / mzStatistics.getMean() * 100.0d;
 				
 			default:

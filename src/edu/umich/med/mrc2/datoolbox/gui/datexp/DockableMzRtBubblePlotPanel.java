@@ -101,14 +101,14 @@ public class DockableMzRtBubblePlotPanel extends DefaultSingleCDockable
 		
 		add(mzrtPlotSettingsPanel, BorderLayout.EAST);
 		
-		msFeatureTooltipGenerator 
-			= new MsFeatureTooltipGenerator();
+		msFeatureTooltipGenerator = new MsFeatureTooltipGenerator();
 	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		
 		String command = e.getActionCommand();
+		
 		if(command.equals(MainActionCommands.CREATE_NEW_MS_FEATURE_SUBSET_FROM_SELECTED.getName()))
 			showFeatureSetDialog(null);
 		
@@ -128,9 +128,26 @@ public class DockableMzRtBubblePlotPanel extends DefaultSingleCDockable
 			
 		}
 		if(command.equals(MainActionCommands.SAVE_CHANGES_TO_FEATURE_SUBSET_COMMAND.getName()))
-			finishSubsetEdit();		
+			finishSubsetEdit();	
+		
+		if(command.equals(MainActionCommands.SHOW_CHART_SIDE_PANEL_COMMAND.getName()))
+			mzrtPlotSettingsPanel.setVisible(true);
+				
+		if(command.equals(MainActionCommands.HIDE_CHART_SIDE_PANEL_COMMAND.getName())) 
+			mzrtPlotSettingsPanel.setVisible(false);	
 	}
 	
+	public void loadFeatureSet(MsFeatureSet subset) {
+		
+		msFeatures = subset.getFeatures();
+		RedrawPlotTask task = new RedrawPlotTask(subset);
+		IndeterminateProgressDialog idp = 
+				new IndeterminateProgressDialog(
+						"Loading feature set " + subset.getName(), this.getContentPane(), task);
+		idp.setLocationRelativeTo(this.getContentPane());
+		idp.setVisible(true);
+	}
+
 	private void showFeatureSetDialog(MsFeatureSet subset) {
 
 		if(getSelectedFeatures().isEmpty())
@@ -275,6 +292,11 @@ public class DockableMzRtBubblePlotPanel extends DefaultSingleCDockable
 			}
 			else if (redrawTrigger instanceof TableRowSubset) {
 				//	TODO;
+			}
+			else if(redrawTrigger instanceof MsFeatureSet) {
+				
+				MsFeatureSet featureSet = (MsFeatureSet)redrawTrigger;
+				loadFeatureCollection(featureSet.getName(), featureSet.getFeatures());
 			}
 			else {
 				redrawPlot();

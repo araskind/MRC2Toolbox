@@ -562,6 +562,12 @@ public class RawDataAnalysisExperiment extends Experiment {
 		
 		return msmsClusterDataSets;
 	}
+
+	@Override
+	public Set<ExperimentalSample> getPooledSamples() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }
 
 

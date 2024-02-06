@@ -892,6 +892,21 @@ public class DataAnalysisProject extends Experiment {
 		if(!dataIntegrationSets.contains(activeSet))
 			dataIntegrationSets.add(activeSet);
 	}
+
+	@Override
+	public Set<ExperimentalSample> getPooledSamples() {
+		
+		if(pooledSamples == null) {
+			
+			pooledSamples = new TreeSet<ExperimentalSample>();	
+			if(experimentDesign != null) {
+				
+				experimentDesign.getSamples().stream().
+					filter(s -> s.isIncloodeInPoolStats()).forEach(s -> pooledSamples.add(s));
+			}
+		}
+		return pooledSamples;
+	}
 }
 
 

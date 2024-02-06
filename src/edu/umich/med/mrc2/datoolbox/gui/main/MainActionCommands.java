@@ -294,7 +294,8 @@ public enum MainActionCommands {
 	EXPORT_RESULTS_TO_MWTAB_COMMAND("Export experiment report in MWTab format"),
 	EXPORT_MZRT_STATISTICS_COMMAND("Export M/Z & RT data for individual samples"),
 	SHOW_RAWA_DATA_UPLOAD_PREP_DIALOG("Prepare raw data for upload"),
-
+	EXPORT_FEATURE_STATISTICS_COMMAND("Export feature statistics for active feature set"),
+	
 	//
 	COPY_SELECTED_MS1_ROWS_COMMAND("Copy selected MS1 features (TAB separated)"),
 	COPY_SELECTED_MS1_ROWS_WITH_HEADER_COMMAND(	"Copy selected MS1 features (TAB separated) with header"),
@@ -416,7 +417,8 @@ public enum MainActionCommands {
 	HIDE_CHART_SIDE_PANEL_COMMAND("Hide chart side panel"),
 
 	// Feature statistics panel commands
-	CALC_FEATURES_STATS_COMMAND("Calculate features stats"),
+	CALC_FEATURES_STATS_COMMAND("Calculate feature statistics"),
+	RECALCULATE_STATISTICS_WITH_SELECTED_POOLS_COMMAND("Recalculate features statistics with selected pools"),
 	CLEAN_EMPTY_FEATURES_COMMAND("Remove features with no data"),
 	SHOW_KNOWN_FEATURES_COMMAND("Show known features only"),
 	SHOW_UNKNOWN_FEATURES_COMMAND("Show unknown features only"),
@@ -440,7 +442,8 @@ public enum MainActionCommands {
 	CLEAR_IDENTIFICATIONS_COMMAND("Clear feature identifications"),
 	IMPUTE_DATA_COMMAND("Impute missing data"),
 	FIND_REATURES_BY_ADDUCT_MASS("Find feaures with adduct masses"),
-	SHOW_FEATURE_MZ_RT_BUBBLE_PLOT("Show M/Z vs RT plot for features"),
+	SHOW_DATA_EXPLORER_FRAME("Show graphical data explorer window"),
+	SHOW_MZ_RT_PLOT_FOAR_ACTIVE_FEATURE_SET("Show M/Z - RT plot for active feature set"),
 
 	//	LIMS commands
 	REFRESH_LIMS_DATA_COMMAND("Load/refresh data from LIMS"),

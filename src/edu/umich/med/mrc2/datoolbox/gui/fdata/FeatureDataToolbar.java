@@ -195,8 +195,8 @@ public class FeatureDataToolbar extends CommonToolbar {
 		addSeparator(buttonDimension);
 		
 		bubblePlotButton = GuiUtils.addButton(this, null, bubblePlotIcon, commandListener,
-				MainActionCommands.SHOW_FEATURE_MZ_RT_BUBBLE_PLOT.getName(),
-				MainActionCommands.SHOW_FEATURE_MZ_RT_BUBBLE_PLOT.getName(), buttonDimension);
+				MainActionCommands.SHOW_DATA_EXPLORER_FRAME.getName(),
+				MainActionCommands.SHOW_DATA_EXPLORER_FRAME.getName(), buttonDimension);
 //
 //		imputeMissingDataButton = GuiUtils.addButton(this, null, imputeDataIcon, commandListener,
 //				MainActionCommands.SHOW_IMPUTE_DIALOG_COMMAND.getName(),

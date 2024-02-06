@@ -36,7 +36,13 @@ import java.util.stream.Stream;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FilenameUtils;
 
+import edu.umich.med.mrc2.datoolbox.data.MsFeatureSet;
+import edu.umich.med.mrc2.datoolbox.data.enums.GlobalDefaults;
+import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
+import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
+import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
+import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 
 public class FIOUtils {
 
@@ -161,6 +167,52 @@ public class FIOUtils {
 			throw new IllegalArgumentException(sourceDir.getAbsoluteFile() + "Permission Denied");
 		}
 	}	
+	
+	public static String createFileNameForDataExportType(MainActionCommands type) {
+
+		DataAnalysisProject currentProject = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
+
+		String typeString = "_DATA_";
+
+		if (type.equals(MainActionCommands.EXPORT_RESULTS_4R_COMMAND))
+			typeString = "_4R_";
+
+		if (type.equals(MainActionCommands.EXPORT_RESULTS_4MPP_COMMAND))
+			typeString = "_4MPP_";
+
+		if (type.equals(MainActionCommands.EXPORT_RESULTS_4BINNER_COMMAND))
+			typeString = "_4BINNER_";
+
+		if (type.equals(MainActionCommands.EXPORT_RESULTS_4METSCAPE_COMMAND))
+			typeString = "_4MetScape_";
+
+		if (type.equals(MainActionCommands.EXPORT_DUPLICATES_COMMAND))
+			typeString = "_DUPLICATES_";
+
+		if (type.equals(MainActionCommands.EXPORT_RESULTS_FOR_METABOLOMICS_WORKBENCH_COMMAND))
+			typeString = "_4MWB_";
+		
+		if (type.equals(MainActionCommands.EXPORT_MZRT_STATISTICS_COMMAND))
+			typeString = "_FEATURE_MZ_RT_STATS_";
+		
+		if (type.equals(MainActionCommands.EXPORT_FEATURE_STATISTICS_COMMAND))
+			typeString = "_FEATURE_MULTIPLE_QC_STATS_";
+				
+		String timestamp = MRC2ToolBoxConfiguration.getFileTimeStampFormat().format(new Date());
+		DataPipeline dataPipeline = currentProject.getActiveDataPipeline();
+		String fileName = currentProject.getName();
+		if(currentProject.getLimsExperiment() != null)
+			fileName = currentProject.getLimsExperiment().getId();
+		
+		fileName +=  "_" + dataPipeline.getName();		
+		MsFeatureSet fSet = currentProject.getActiveFeatureSetForDataPipeline(dataPipeline);
+		if(!fSet.getName().equals(GlobalDefaults.ALL_FEATURES.getName()))
+			fileName +=  "_" + currentProject.getActiveFeatureSetForDataPipeline(dataPipeline).getName();
+		
+		fileName +=  typeString + timestamp + ".txt";
+		
+		return fileName;
+	}
 }
 
 

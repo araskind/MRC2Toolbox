@@ -36,7 +36,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Date;
 import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
 
@@ -62,7 +61,6 @@ import org.apache.commons.lang.StringUtils;
 
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureSet;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataExportFields;
-import edu.umich.med.mrc2.datoolbox.data.enums.GlobalDefaults;
 import edu.umich.med.mrc2.datoolbox.data.enums.MissingExportType;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
@@ -72,13 +70,13 @@ import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
-import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskListener;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io.DataExportTask;
+import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
 
 public class DataExportDialog extends JDialog 
 	implements ActionListener, TaskListener, ItemListener, BackedByPreferences {
@@ -235,56 +233,6 @@ public class DataExportDialog extends JDialog
 		gbc_missingTypeComboBox.gridx = 1;
 		gbc_missingTypeComboBox.gridy = 2;
 		panel.add(missingTypeComboBox, gbc_missingTypeComboBox);
-
-//		enableFiltersCheckBox = new JCheckBox("Enable filters");
-//		GridBagConstraints gbc_enableFiltersCheckBox = new GridBagConstraints();
-//		gbc_enableFiltersCheckBox.anchor = GridBagConstraints.WEST;
-//		gbc_enableFiltersCheckBox.insets = new Insets(0, 0, 5, 5);
-//		gbc_enableFiltersCheckBox.gridx = 0;
-//		gbc_enableFiltersCheckBox.gridy = 3;
-//		panel.add(enableFiltersCheckBox, gbc_enableFiltersCheckBox);
-//
-//		JLabel lblMinFrequency = new JLabel("Min frequency, %");
-//		GridBagConstraints gbc_lblMinFrequency = new GridBagConstraints();
-//		gbc_lblMinFrequency.anchor = GridBagConstraints.EAST;
-//		gbc_lblMinFrequency.insets = new Insets(0, 0, 5, 5);
-//		gbc_lblMinFrequency.gridx = 1;
-//		gbc_lblMinFrequency.gridy = 3;
-//		panel.add(lblMinFrequency, gbc_lblMinFrequency);
-//
-//		minFrequencySpinner = new JSpinner();
-//		minFrequencySpinner.setSize(new Dimension(60, 20));
-//		minFrequencySpinner.setPreferredSize(new Dimension(60, 20));
-//		minFrequencySpinner.setModel(new SpinnerNumberModel(100, 0, 100, 1));
-//		GridBagConstraints gbc_minFrequencySpinner = new GridBagConstraints();
-//		gbc_minFrequencySpinner.anchor = GridBagConstraints.WEST;
-//		gbc_minFrequencySpinner.insets = new Insets(0, 0, 5, 5);
-//		gbc_minFrequencySpinner.gridx = 2;
-//		gbc_minFrequencySpinner.gridy = 3;
-//		panel.add(minFrequencySpinner, gbc_minFrequencySpinner);
-//
-//		JLabel lblMaxRsd = new JLabel("Max RSD, %");
-//		GridBagConstraints gbc_lblMaxRsd = new GridBagConstraints();
-//		gbc_lblMaxRsd.anchor = GridBagConstraints.EAST;
-//		gbc_lblMaxRsd.insets = new Insets(0, 0, 5, 5);
-//		gbc_lblMaxRsd.gridx = 3;
-//		gbc_lblMaxRsd.gridy = 3;
-//		panel.add(lblMaxRsd, gbc_lblMaxRsd);
-//
-//		NumberFormat integerFieldFormatter = NumberFormat.getIntegerInstance();
-//		integerFieldFormatter.setGroupingUsed(false);
-//		
-//		maxRsdTextField = new JFormattedTextField(integerFieldFormatter);
-//		maxRsdTextField.setHorizontalAlignment(SwingConstants.RIGHT);
-//		maxRsdTextField.setPreferredSize(new Dimension(60, 20));
-//		maxRsdTextField.setSize(new Dimension(60, 20));
-//		maxRsdTextField.setText("25");
-//		GridBagConstraints gbc_maxRsdTextField = new GridBagConstraints();
-//		gbc_maxRsdTextField.anchor = GridBagConstraints.WEST;
-//		gbc_maxRsdTextField.insets = new Insets(0, 0, 5, 5);
-//		gbc_maxRsdTextField.gridx = 4;
-//		gbc_maxRsdTextField.gridy = 3;
-//		panel.add(maxRsdTextField, gbc_maxRsdTextField);
 		
 		replaceSpecCharsCheckBox = 
 				new JCheckBox("Replace special characters in names with dash symbol");
@@ -294,34 +242,6 @@ public class DataExportDialog extends JDialog
 		gbc_chckbxNewCheckBox.gridx = 0;
 		gbc_chckbxNewCheckBox.gridy = 4;
 		panel.add(replaceSpecCharsCheckBox, gbc_chckbxNewCheckBox);
-		
-//		JLabel lblNewLabel = new JLabel("Export file:");
-//		GridBagConstraints gbc_lblNewLabel = new GridBagConstraints();
-//		gbc_lblNewLabel.anchor = GridBagConstraints.WEST;
-//		gbc_lblNewLabel.insets = new Insets(0, 0, 5, 5);
-//		gbc_lblNewLabel.gridx = 0;
-//		gbc_lblNewLabel.gridy = 5;
-//		panel.add(lblNewLabel, gbc_lblNewLabel);
-//		
-//		resultsFileTextField = new JTextField();
-//		GridBagConstraints gbc_textField = new GridBagConstraints();
-//		gbc_textField.gridwidth = 5;
-//		gbc_textField.insets = new Insets(0, 0, 0, 5);
-//		gbc_textField.fill = GridBagConstraints.HORIZONTAL;
-//		gbc_textField.gridx = 0;
-//		gbc_textField.gridy = 6;
-//		panel.add(resultsFileTextField, gbc_textField);
-//		resultsFileTextField.setColumns(10);
-//		
-//		JButton browseButton = new JButton("Browse");
-//		browseButton.setActionCommand(
-//				MainActionCommands.SELECT_DATA_EXPORT_FILE_COMMAND.getName());
-//		browseButton.addActionListener(this);
-//		GridBagConstraints gbc_browseButton = new GridBagConstraints();
-//		gbc_browseButton.fill = GridBagConstraints.HORIZONTAL;
-//		gbc_browseButton.gridx = 5;
-//		gbc_browseButton.gridy = 6;
-//		panel.add(browseButton, gbc_browseButton);
 
 		JPanel buttonPanel = new JPanel();
 		FlowLayout flowLayout = (FlowLayout) buttonPanel.getLayout();
@@ -378,7 +298,7 @@ public class DataExportDialog extends JDialog
 		fc.setTitle("Export IDTracker data to text file:");
 		fc.setMultiSelectionEnabled(false);
 		fc.setSaveButtonText("Write export file");
-		String defaultFileName = createExportFile(getExportType());
+		String defaultFileName = FIOUtils.createFileNameForDataExportType(getExportType());
 		fc.setDefaultFileName(defaultFileName);	
 		if (fc.showSaveDialog(SwingUtilities.getWindowAncestor(this.getContentPane()))) {
 						
@@ -413,7 +333,7 @@ public class DataExportDialog extends JDialog
 		fc.setTitle("Export metabolomics experiment data to text file:");
 		fc.setMultiSelectionEnabled(false);
 		fc.setSaveButtonText("Export data");
-		String defaultFileName = createExportFile(getExportType());
+		String defaultFileName = FIOUtils.createFileNameForDataExportType(getExportType());
 		fc.setDefaultFileName(defaultFileName);	
 		if (fc.showSaveDialog(SwingUtilities.getWindowAncestor(this.getContentPane()))) {
 						
@@ -454,71 +374,11 @@ public class DataExportDialog extends JDialog
 		
 		return errors;		
 	}
-	
-	private String createExportFile(MainActionCommands type) {
-
-		DataAnalysisProject currentProject = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
-
-		String typeString = "_DATA_";
-
-		if (type.equals(MainActionCommands.EXPORT_RESULTS_4R_COMMAND))
-			typeString = "_4R_";
-
-		if (type.equals(MainActionCommands.EXPORT_RESULTS_4MPP_COMMAND))
-			typeString = "_4MPP_";
-
-		if (type.equals(MainActionCommands.EXPORT_RESULTS_4BINNER_COMMAND))
-			typeString = "_4BINNER_";
-
-		if (type.equals(MainActionCommands.EXPORT_RESULTS_4METSCAPE_COMMAND))
-			typeString = "_4MetScape_";
-
-		if (type.equals(MainActionCommands.EXPORT_DUPLICATES_COMMAND))
-			typeString = "_DUPLICATES_";
-
-		if (type.equals(MainActionCommands.EXPORT_RESULTS_FOR_METABOLOMICS_WORKBENCH_COMMAND))
-			typeString = "_4MWB_";
-		
-		if (type.equals(MainActionCommands.EXPORT_MZRT_STATISTICS_COMMAND))
-			typeString = "_FEATURE_STATS_";
-		
-		
-		String timestamp = MRC2ToolBoxConfiguration.getFileTimeStampFormat().format(new Date());
-		DataPipeline dataPipeline = currentProject.getActiveDataPipeline();
-		String fileName = currentProject.getName();
-		if(currentProject.getLimsExperiment() != null)
-			fileName = currentProject.getLimsExperiment().getId();
-		
-		fileName +=  "_" + dataPipeline.getName();		
-		MsFeatureSet fSet = currentProject.getActiveFeatureSetForDataPipeline(dataPipeline);
-		if(!fSet.getName().equals(GlobalDefaults.ALL_FEATURES.getName()))
-			fileName +=  "_" + currentProject.getActiveFeatureSetForDataPipeline(dataPipeline).getName();
-		
-		fileName +=  typeString + timestamp + ".txt";
-		return fileName;
-	}
 
 	public MainActionCommands getExportType() {
 		return (MainActionCommands) exportTypeComboBox.getSelectedItem();
 	}
-
-//	public int getMaxPooledRsd() {
-//		return Integer.parseInt(maxRsdTextField.getText());
-//	}
-//
-//	public int getMinPooledFrequency() {
-//		return (int) minFrequencySpinner.getValue();
-//	}
-//	
-//	private File getResultsFile() {
-//		
-//		String filePath = resultsFileTextField.getText().trim();
-//		if(filePath == null || filePath.isEmpty())
-//			return null;
-//		else
-//			return new File(filePath);
-//	}
-
+	
 	@Override
 	public void itemStateChanged(ItemEvent event) {
 
@@ -533,14 +393,6 @@ public class DataExportDialog extends JDialog
 				namingComboBox.setSelectedItem(DataExportFields.DATA_FILE_EXPORT);
 				namingComboBox.setEnabled(true);
 			}
-//			File rf = getResultsFile();
-//			if(rf == null)
-//				return;
-//			
-//			String fileName = createExportFile(exportType);	
-//			String newFilePath = Paths.get(rf.getParentFile().getAbsolutePath(),fileName).
-//					toAbsolutePath().toString();
-//			resultsFileTextField.setText(newFilePath);
 		}
 	}
 
@@ -563,18 +415,6 @@ public class DataExportDialog extends JDialog
 	public boolean exportManifest() {
 		return exportManifestCheckBox.isSelected();
 	}
-	
-//	public boolean areFilteresEnabled() {
-//		return enableFiltersCheckBox.isSelected();
-//	}
-//	
-//	public double getMaxRsd() {
-//		return Double.parseDouble(maxRsdTextField.getText()) / 100.0d;
-//	}
-//	
-//	public double getMinFrequency() {
-//		return ((Integer) minFrequencySpinner.getValue()).doubleValue() / 100.0d;
-//	}
 	
 	@Override
 	public void statusChanged(TaskEvent e) {
@@ -616,10 +456,6 @@ public class DataExportDialog extends JDialog
 						preferences.get(EXPORT_MISSING_TYPE, MissingExportType.AS_MISSING.name())));
 		
 		replaceSpecCharsCheckBox.setSelected(preferences.getBoolean(REPLACE_SPEC_CHARS, false));
-		
-//		enableFiltersCheckBox.setSelected(preferences.getBoolean(ENABLE_FILTERS, false));
-//		maxRsdTextField.setText(Integer.toString(preferences.getInt(MAX_RSD, 25)));
-//		minFrequencySpinner.setValue(preferences.getInt(MIN_FREQUENCY, 70));
 	}
 
 	@Override

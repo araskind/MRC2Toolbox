@@ -61,8 +61,8 @@ import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.refsamples.ExperimentReferenceSampleTable;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
-import edu.umich.med.mrc2.datoolbox.main.ReferenceSamplesManager;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
+import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 
 public class FeatureDataCleanupDialog extends JDialog implements BackedByPreferences {
 
@@ -155,13 +155,12 @@ public class FeatureDataCleanupDialog extends JDialog implements BackedByPrefere
 		panel.add(lblNewLabel_2, gbc_lblNewLabel_2);
 		
 		referenceSampleTable = new ExperimentReferenceSampleTable();
-		if(MRC2ToolBoxCore.getActiveMetabolomicsExperiment() != null) {
+		DataAnalysisProject experiment = 
+				MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
+		if(experiment != null) {
 			
-			referenceSampleTable.loadReferenceSamples(
-					MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExperimentDesign());
-			
-			referenceSampleTable.selectSampleRows(
-					ReferenceSamplesManager.getReferencePoolSamples());
+			referenceSampleTable.loadReferenceSamples(experiment);			
+			//	referenceSampleTable.selectSampleRows(experiment.getPooledSamples());
 		}	
 		JScrollPane scrollPane = new JScrollPane(referenceSampleTable);
 		scrollPane.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
@@ -409,7 +408,7 @@ public class FeatureDataCleanupDialog extends JDialog implements BackedByPrefere
 		highMassBelowRTCheckBox.setSelected(parameterObject.isFilterHighMassBelowRT());
 		highMassRtCutoffTextField.setText(Double.toString(parameterObject.getHighMassFilterRTCutoff()));
 		highMassValueTextField.setText(Double.toString(parameterObject.getHighMassFilterMassValue()));		
-		referenceSampleTable.selectSampleRows(parameterObject.getSelectedPooledSamples());
+		//	referenceSampleTable.selectSampleRows(parameterObject.getSelectedPooledSamples());
 	}
 	
 	public void setEditable(boolean editable) {
