@@ -19,7 +19,7 @@
  *
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.gui.datexp;
+package edu.umich.med.mrc2.datoolbox.gui.datexp.msms;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -58,6 +58,11 @@ import edu.umich.med.mrc2.datoolbox.data.enums.MSMSMatchType;
 import edu.umich.med.mrc2.datoolbox.data.enums.MSMSScoringParameter;
 import edu.umich.med.mrc2.datoolbox.data.enums.TableRowSubset;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
+import edu.umich.med.mrc2.datoolbox.gui.datexp.DataExplorerPlotPanel;
+import edu.umich.med.mrc2.datoolbox.gui.datexp.DataExplorerPlotType;
+import edu.umich.med.mrc2.datoolbox.gui.datexp.FeatureIdentificationMeasure;
+import edu.umich.med.mrc2.datoolbox.gui.datexp.MZRTPlotSettingsPanel;
+import edu.umich.med.mrc2.datoolbox.gui.datexp.MzRtPlotToolbar;
 import edu.umich.med.mrc2.datoolbox.gui.datexp.dataset.MSMSFeatureInfoBundleDataSet;
 import edu.umich.med.mrc2.datoolbox.gui.datexp.tooltip.MSMSFeatureInfoBundleTooltipGenerator;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.IDWorkbenchPanel;

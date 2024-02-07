@@ -32,25 +32,48 @@ public class HistogramUtils {
 	public static SimpleHistogramDataset calcHistogram(
 			double[] data, String title, boolean adjustForBinSize) {
 
+		int BIN_COUNT = 0;
 		DescriptiveStatistics da = new DescriptiveStatistics(data);
-		double iqr = da.getPercentile(75) - da.getPercentile(25);
-		double bw = 2 * iqr / Math.pow((double)data.length, 1.0d/3.0d);
-		final int BIN_COUNT = (int)Math.ceil((da.getMax() - da.getMin()) / bw);
+		double iqr = da.getPercentile(75) - da.getPercentile(25);		
+		if(iqr > 0) {
+			double bw = 2 * iqr / Math.pow((double)data.length, 1.0d/3.0d);
+			BIN_COUNT = (int)Math.ceil((da.getMax() - da.getMin()) / bw);
+		}
+		if(BIN_COUNT == 0)
+			BIN_COUNT = (int) Math.round(Math.sqrt((double)da.getN()));
+		
+		if(BIN_COUNT > 100)
+			BIN_COUNT = 100;
 
 		if(BIN_COUNT > 0) {
 			EmpiricalDistribution distribution = new EmpiricalDistribution(BIN_COUNT);
 			distribution.load(data);
+			double halfWidth = (da.getMax() - da.getMin()) / (double)BIN_COUNT;
 			
 			SimpleHistogramDataset dataSet = new SimpleHistogramDataset(title);		
 			for(SummaryStatistics stats: distribution.getBinStats()) {
 				
-				if(stats.getSum() == 0.0d || stats.getMin() == stats.getMax())
+				if(stats.getSum() == 0.0d)
 					continue;
-
-				SimpleHistogramBin bin = 
-						new SimpleHistogramBin(stats.getMin(), stats.getMax(), true, false);
-				bin.setItemCount((int) stats.getN());
-			    dataSet.addBin(bin);
+				
+				else if(stats.getMin() == stats.getMax()) {
+					SimpleHistogramBin bin = 
+							new SimpleHistogramBin(
+									stats.getMean() - halfWidth, stats.getMean() + halfWidth, true, false);
+					bin.setItemCount((int) stats.getN());
+				    try {
+						dataSet.addBin(bin);
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+				else {
+					SimpleHistogramBin bin = 
+							new SimpleHistogramBin(stats.getMin(), stats.getMax(), true, false);
+					bin.setItemCount((int) stats.getN());
+				    dataSet.addBin(bin);
+				}
 			}			
 			dataSet.setAdjustForBinSize(adjustForBinSize);
 			return dataSet;

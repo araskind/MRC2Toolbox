@@ -23,7 +23,7 @@ package edu.umich.med.mrc2.datoolbox.gui.plot;
 
 public enum HeatMapDataRange {
 
-	FULL("Full range (-1:1)"),
+	CORRELATION("Correlation range (-1:1)"),
 	ACTUAL("Actual range");
 
 	private final String name;

@@ -19,7 +19,7 @@
  *
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.gui.datexp;
+package edu.umich.med.mrc2.datoolbox.gui.datexp.bp;
 
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
@@ -54,6 +54,11 @@ import edu.umich.med.mrc2.datoolbox.data.enums.ParameterSetStatus;
 import edu.umich.med.mrc2.datoolbox.data.enums.TableRowSubset;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.gui.communication.FeatureSetListener;
+import edu.umich.med.mrc2.datoolbox.gui.datexp.DataExplorerPlotPanel;
+import edu.umich.med.mrc2.datoolbox.gui.datexp.DataExplorerPlotType;
+import edu.umich.med.mrc2.datoolbox.gui.datexp.MZRTPlotParameterObject;
+import edu.umich.med.mrc2.datoolbox.gui.datexp.MZRTPlotSettingsPanel;
+import edu.umich.med.mrc2.datoolbox.gui.datexp.MzRtPlotToolbar;
 import edu.umich.med.mrc2.datoolbox.gui.datexp.dataset.MsFeatureBubbleDataSet;
 import edu.umich.med.mrc2.datoolbox.gui.datexp.tooltip.MsFeatureTooltipGenerator;
 import edu.umich.med.mrc2.datoolbox.gui.expsetup.featurelist.SimpleFeatureSubsetDialog;
@@ -97,8 +102,7 @@ public class DockableMzRtBubblePlotPanel extends DefaultSingleCDockable
 		add(toolbar, BorderLayout.NORTH);
 		
 		mzrtPlotSettingsPanel = 
-				new MZRTPlotSettingsPanel(this,  this, false);
-		
+				new MZRTPlotSettingsPanel(this,  this, false);		
 		add(mzrtPlotSettingsPanel, BorderLayout.EAST);
 		
 		msFeatureTooltipGenerator = new MsFeatureTooltipGenerator();

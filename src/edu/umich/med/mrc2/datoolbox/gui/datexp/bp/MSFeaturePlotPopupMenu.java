@@ -19,7 +19,7 @@
  *
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.gui.datexp;
+package edu.umich.med.mrc2.datoolbox.gui.datexp.bp;
 
 import java.awt.event.ActionListener;
 
@@ -30,7 +30,7 @@ import javax.swing.JPopupMenu;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 
-public class MSMSFeaturePlotPopupMenu extends JPopupMenu {
+public class MSFeaturePlotPopupMenu extends JPopupMenu {
 
 	/**
 	 * 
@@ -44,28 +44,25 @@ public class MSMSFeaturePlotPopupMenu extends JPopupMenu {
 	private JMenuItem createNewCollectionMenuItem;
 	private JMenuItem addToExistingCollectionMenuItem;	
 
-	public MSMSFeaturePlotPopupMenu(ActionListener listener) {
+	public MSFeaturePlotPopupMenu(ActionListener listener) {
 
 		super();
 		
 		filterSelectedFeaturesMenuItem = GuiUtils.addMenuItem(this,
-				MainActionCommands.FILTER_SELECTED_MSMS_FEATURES_IN_TABLE.getName(), listener,
-				MainActionCommands.FILTER_SELECTED_MSMS_FEATURES_IN_TABLE.getName());
+				MainActionCommands.FILTER_SELECTED_MS_FEATURES_IN_TABLE.getName(), listener,
+				MainActionCommands.FILTER_SELECTED_MS_FEATURES_IN_TABLE.getName());
 		filterSelectedFeaturesMenuItem.setIcon(filterSelectedFeaturesIcon);
 		
 		this.addSeparator();
 
 		createNewCollectionMenuItem = GuiUtils.addMenuItem(this,
-				MainActionCommands.CREATE_NEW_FEATURE_COLLECTION_FROM_SELECTED.getName(), listener,
-				MainActionCommands.CREATE_NEW_FEATURE_COLLECTION_FROM_SELECTED.getName());
+				MainActionCommands.CREATE_NEW_MS_FEATURE_SUBSET_FROM_SELECTED.getName(), listener,
+				MainActionCommands.CREATE_NEW_MS_FEATURE_SUBSET_FROM_SELECTED.getName());
 		createNewCollectionMenuItem.setIcon(createNewCollectionIcon);
-//		createNewCollectionMenuItem.setEnabled(false);
 
 		addToExistingCollectionMenuItem = GuiUtils.addMenuItem(this,
-				MainActionCommands.ADD_SELECTED_TO_EXISTING_FEATURE_COLLECTION.getName(), listener,
-				MainActionCommands.ADD_SELECTED_TO_EXISTING_FEATURE_COLLECTION.getName());
+				MainActionCommands.ADD_SELECCTED_TO_EXISTING_MS_FEATURE_SUBSET.getName(), listener,
+				MainActionCommands.ADD_SELECCTED_TO_EXISTING_MS_FEATURE_SUBSET.getName());
 		addToExistingCollectionMenuItem.setIcon(addToExistingCollectionIcon);
-//		addToExistingCollectionMenuItem.setEnabled(false);
 	}
 }
-

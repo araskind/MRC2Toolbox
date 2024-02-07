@@ -19,7 +19,7 @@
  *
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.gui.datexp;
+package edu.umich.med.mrc2.datoolbox.gui.datexp.msms;
 
 import java.awt.Dimension;
 import java.awt.event.ActionListener;

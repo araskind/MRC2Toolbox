@@ -35,11 +35,14 @@ import org.jfree.chart.title.PaintScaleLegend;
 import org.jfree.chart.ui.RectangleEdge;
 import org.jfree.chart.ui.RectangleInsets;
 
+import edu.umich.med.mrc2.datoolbox.gui.datexp.MZRTPlotParameterObject;
 import edu.umich.med.mrc2.datoolbox.gui.plot.ColorGradient;
 import edu.umich.med.mrc2.datoolbox.gui.plot.ColorScale;
 import edu.umich.med.mrc2.datoolbox.gui.plot.HeatMapDataRange;
 import edu.umich.med.mrc2.datoolbox.gui.plot.MasterPlotPanel;
 import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.CorrelationMapDataSet;
+import edu.umich.med.mrc2.datoolbox.gui.utils.ColorCodingUtils;
+import edu.umich.med.mrc2.datoolbox.utils.Range;
 
 public class JFHeatChart extends MasterPlotPanel implements ChartMouseListener {
 
@@ -51,110 +54,46 @@ public class JFHeatChart extends MasterPlotPanel implements ChartMouseListener {
 	private SymbolAxis xAxis;
 	private SymbolAxis yAxis;
 	private XYBlockRenderer renderer;
-	private Color lowValueColor;
-	private Color highValueColor;
 	private ColorScale colorScale;
+	private ColorGradient colorGradient;
+	private HeatMapDataRange heatMapDataRange;
 	private int colorValueDistance;
-	private double rangeMin, rangeMax;
+	private Range dataRange;
+	private HeatChartType chartType;
+	private LookupPaintScale lookupPaintScale;
 
 	private JFHeatChartTooltipGenerator toolTipGenerator;
 
-	public JFHeatChart() {
+	public JFHeatChart(HeatChartType chartType) {
 
 		super();
-
-		chart = ChartFactory.createScatterPlot("Correlation", "Features", "Features", null);
-		chart.setBackgroundPaint(Color.white);
-		setChart(chart);
-
-		lowValueColor = ColorGradient.GREEN_RED.getLowValueColor();
-		highValueColor = ColorGradient.GREEN_RED.getHighValueColor();
+		this.chartType = chartType;
+		colorGradient = ColorGradient.GREEN_RED;
 		colorScale = ColorScale.LINEAR;
 		
-		rangeMin = -1.0d;
-		rangeMax = 1.0d;
-		
-		updateColorDistance();
-
+		initChart();
 		initPlot();
 		setMouseWheelEnabled(true);
 	}
 
-	private int changeColorValue(int colourValue, int colourDistance) {
-		if (colourDistance < 0) {
-			return colourValue + 1;
-		} else if (colourDistance > 0) {
-			return colourValue - 1;
-		} else {
-			// This shouldn't actually happen here.
-			return colourValue;
-		}
-	}
-
 	@Override
-	public void chartMouseClicked(ChartMouseEvent event) {
+	protected void initChart() {
 		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void chartMouseMoved(ChartMouseEvent event) {
-		// TODO Auto-generated method stub
-
-	}
-
-	private LookupPaintScale createColorScale() {
-
-		LookupPaintScale paintScale = new LookupPaintScale(rangeMin, rangeMax, Color.black);
-		double step = (rangeMax - rangeMin) / 256.0;
-		double position = rangeMin;
-		for (int i = 0; i < 256; i++) {
-
-			paintScale.add(position, getCellColor(position, rangeMin, rangeMax));
-			position = position + step;
+		if(chartType.equals(HeatChartType.FeatureCorrelationMatrix)) {
+			chart = ChartFactory.createScatterPlot("Correlation", "Features", "Features", null);
+			chart.setBackgroundPaint(Color.white);
+			setChart(chart);
+			dataRange = new Range(-1.0d, 1.0d);
+			heatMapDataRange = HeatMapDataRange.CORRELATION;
 		}
-		return paintScale;
-	}
-
-	private Color getCellColor(double data, double min, double max) {
-
-		double range = max - min;
-		double position = data - min;
-		double percentPosition = position / range;
-		int colourPosition = getColorPosition(percentPosition);
-
-		int r = lowValueColor.getRed();
-		int g = lowValueColor.getGreen();
-		int b = lowValueColor.getBlue();
-
-		for (int i = 0; i < colourPosition; i++) {
-			int rDistance = r - highValueColor.getRed();
-			int gDistance = g - highValueColor.getGreen();
-			int bDistance = b - highValueColor.getBlue();
-
-			if ((Math.abs(rDistance) >= Math.abs(gDistance)) && (Math.abs(rDistance) >= Math.abs(bDistance))) {
-				// Red must be the largest.
-				r = changeColorValue(r, rDistance);
-			} else if (Math.abs(gDistance) >= Math.abs(bDistance)) {
-				// Green must be the largest.
-				g = changeColorValue(g, gDistance);
-			} else {
-				// Blue must be the largest.
-				b = changeColorValue(b, bDistance);
-			}
+		if(chartType.equals(HeatChartType.FeatureSetHeatmap)) {
+			//	TODO
+//			chart = ChartFactory.createScatterPlot("Correlation", "Features", "Features", null);
+//			chart.setBackgroundPaint(Color.white);
+//			setChart(chart);
 		}
-		return new Color(r, g, b);
 	}
-
-	/*
-	 * Returns how many colour shifts are required from the lowValueColour to
-	 * get to the correct colour position. The result will be different
-	 * depending on the colour scale used: LINEAR, LOGARITHMIC, EXPONENTIAL.
-	 */
-	private int getColorPosition(double percentPosition) {
-		return (int) Math.round(colorValueDistance * Math.pow(percentPosition, colorScale.getValue()));
-	}
-
+	
 	@Override
 	protected void initPlot() {
 
@@ -169,8 +108,9 @@ public class JFHeatChart extends MasterPlotPanel implements ChartMouseListener {
 		plot.setRangePannable(true);
 
 		renderer = new XYBlockRenderer();
-		LookupPaintScale paintScale = createColorScale();
-		renderer.setPaintScale(paintScale);
+		lookupPaintScale = ColorCodingUtils.createLookupPaintScale(
+				dataRange, colorGradient, colorScale, 256);
+		renderer.setPaintScale(lookupPaintScale);
 		toolTipGenerator = new JFHeatChartTooltipGenerator();
 		renderer.setDefaultToolTipGenerator(toolTipGenerator);
 
@@ -182,13 +122,19 @@ public class JFHeatChart extends MasterPlotPanel implements ChartMouseListener {
 		plot.setRangeAxis(yAxis);
 
 		NumberAxis scaleAxis = new NumberAxis();
-		scaleAxis.setRange(rangeMin, rangeMax);
-		PaintScaleLegend psl = new PaintScaleLegend(paintScale, scaleAxis);
+		scaleAxis.setRange(dataRange.getMin(), dataRange.getMax());
+		PaintScaleLegend psl = new PaintScaleLegend(lookupPaintScale, scaleAxis);
 		psl.setAxisOffset(5.0);
 		psl.setPosition(RectangleEdge.RIGHT);
 		psl.setMargin(new RectangleInsets(5, 5, 5, 5));
 		chart.removeSubtitle(chart.getSubtitle(0));
 		chart.addSubtitle(psl);
+	}
+
+	@Override
+	protected void initAxes() {
+		// TODO Auto-generated method stub
+		
 	}
 
 	public synchronized void removeAllDataSets() {
@@ -203,79 +149,123 @@ public class JFHeatChart extends MasterPlotPanel implements ChartMouseListener {
 		plot.clearAnnotations();
 		numberOfDataSets = 0;
 	}
-
-	public void setDataSet(CorrelationMapDataSet dataSet) {
+	
+	public void showFeatureCorrelationMatrix(
+			CorrelationMapDataSet dataSet, 
+			MZRTPlotParameterObject plotParams) {
 
 		removeAllDataSets();
 
 		xAxis = new SymbolAxis("Features", dataSet.getColumnLabels());
 		xAxis.setVerticalTickLabels(true);
 		plot.setDomainAxis(xAxis);
-
 		yAxis = new SymbolAxis("Features", dataSet.getRowLabels());
 		plot.setRangeAxis(yAxis);
-
+		
+		
+		colorGradient = plotParams.getColorGradient();
+		colorScale = plotParams.getColorScale();
+		heatMapDataRange = plotParams.getHeatMapDataRange();
+		
+		if(heatMapDataRange.equals(HeatMapDataRange.CORRELATION)) {			
+			dataRange = new Range(-1.0d, 1.0d);
+		}
+		else {
+			dataRange = new Range(
+					dataSet.getDataRange().getMin(),
+					dataSet.getDataRange().getMax());
+		}		
+		lookupPaintScale = ColorCodingUtils.createLookupPaintScale(
+				dataRange, colorGradient, colorScale, 256); 
+		renderer.setPaintScale(lookupPaintScale);
+		
 		plot.setDataset(dataSet);
 	}
 
-	private void updateColorDistance() {
-		
-		int r1 = lowValueColor.getRed();
-		int g1 = lowValueColor.getGreen();
-		int b1 = lowValueColor.getBlue();
-		int r2 = highValueColor.getRed();
-		int g2 = highValueColor.getGreen();
-		int b2 = highValueColor.getBlue();
-
-		colorValueDistance = Math.abs(r1 - r2);
-		colorValueDistance += Math.abs(g1 - g2);
-		colorValueDistance += Math.abs(b1 - b2);
-	}
-
-	public void setColorPalette(ColorGradient gradient) {
-		
-		lowValueColor = gradient.getLowValueColor();
-		highValueColor = gradient.getHighValueColor();
-		updateColorDistance();		
-		CorrelationMapDataSet dataSet = (CorrelationMapDataSet) plot.getDataset();
-		initPlot();
-		setDataSet(dataSet);
-	}
-	
-	public void setColorScale(ColorScale scale) {		
-
-		colorScale = scale;	
-		CorrelationMapDataSet dataSet = (CorrelationMapDataSet) plot.getDataset();
-		initPlot();
-		setDataSet(dataSet);
-	}
-	
-	public void setDataRange(HeatMapDataRange range) {		
-
-		CorrelationMapDataSet dataSet = (CorrelationMapDataSet) plot.getDataset();
-		
-		if(range.equals(HeatMapDataRange.FULL)) {
-			
-			rangeMax = 1.0d;
-			rangeMin = -1.0d;
-		}
-		else {
-			rangeMax = dataSet.getDataRange().getMax();
-			rangeMin = dataSet.getDataRange().getMin();
-		}
-		initPlot();
-		setDataSet(dataSet);
-	}
-	
 	@Override
-	protected void initAxes() {
+	public void chartMouseClicked(ChartMouseEvent event) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
-	protected void initChart() {
+	public void chartMouseMoved(ChartMouseEvent event) {
 		// TODO Auto-generated method stub
-		
+
 	}
+
+//	private Color getCellColor(double data, double min, double max) {
+//
+//		return null;
+//		double range = max - min;
+//		double position = data - min;
+//		double percentPosition = position / range;
+//		int colourPosition = getColorPosition(percentPosition);
+//
+//		int r = lowValueColor.getRed();
+//		int g = lowValueColor.getGreen();
+//		int b = lowValueColor.getBlue();
+//
+//		for (int i = 0; i < colourPosition; i++) {
+//			int rDistance = r - highValueColor.getRed();
+//			int gDistance = g - highValueColor.getGreen();
+//			int bDistance = b - highValueColor.getBlue();
+//
+//			if ((Math.abs(rDistance) >= Math.abs(gDistance)) && (Math.abs(rDistance) >= Math.abs(bDistance))) {
+//				// Red must be the largest.
+//				r = changeColorValue(r, rDistance);
+//			} else if (Math.abs(gDistance) >= Math.abs(bDistance)) {
+//				// Green must be the largest.
+//				g = changeColorValue(g, gDistance);
+//			} else {
+//				// Blue must be the largest.
+//				b = changeColorValue(b, bDistance);
+//			}
+//		}
+//		return new Color(r, g, b);
+//	}
+
+	/*
+	 * Returns how many colour shifts are required from the lowValueColour to
+	 * get to the correct colour position. The result will be different
+	 * depending on the colour scale used: LINEAR, LOGARITHMIC, EXPONENTIAL.
+	 */
+//	private int getColorPosition(double percentPosition) {
+//		return (int) Math.round(colorValueDistance * Math.pow(percentPosition, colorScale.getValue()));
+//	}
+
+//	private void updateColorDistance() {
+//		
+//		int r1 = lowValueColor.getRed();
+//		int g1 = lowValueColor.getGreen();
+//		int b1 = lowValueColor.getBlue();
+//		int r2 = highValueColor.getRed();
+//		int g2 = highValueColor.getGreen();
+//		int b2 = highValueColor.getBlue();
+//
+//		colorValueDistance = Math.abs(r1 - r2);
+//		colorValueDistance += Math.abs(g1 - g2);
+//		colorValueDistance += Math.abs(b1 - b2);
+//	}
+
+//	public void setColorPalette(ColorGradient gradient) {
+//		
+//		lowValueColor = gradient.getLowValueColor();
+//		highValueColor = gradient.getHighValueColor();
+//		updateColorDistance();		
+//		CorrelationMapDataSet dataSet = (CorrelationMapDataSet) plot.getDataset();
+//		initPlot();
+//		showFeatureCorrelationMatrix(dataSet);
+//	}
+	
+//	public void setColorScale(ColorScale scale) {		
+//
+//		colorScale = scale;	
+//		CorrelationMapDataSet dataSet = (CorrelationMapDataSet) plot.getDataset();
+//		initPlot();
+//		showFeatureCorrelationMatrix(dataSet);
+//	}
+	
+
+
 }

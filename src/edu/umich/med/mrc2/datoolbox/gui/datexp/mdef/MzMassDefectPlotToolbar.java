@@ -19,8 +19,9 @@
  *
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.gui.datexp;
+package edu.umich.med.mrc2.datoolbox.gui.datexp.mdef;
 
+import edu.umich.med.mrc2.datoolbox.gui.datexp.DataExplorerPlotPanel;
 import edu.umich.med.mrc2.datoolbox.gui.plot.PlotToolbar;
 
 public class MzMassDefectPlotToolbar extends PlotToolbar{

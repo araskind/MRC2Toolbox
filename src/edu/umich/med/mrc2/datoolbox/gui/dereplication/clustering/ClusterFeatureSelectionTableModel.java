@@ -109,6 +109,10 @@ public class ClusterFeatureSelectionTableModel extends BasicTableModel {
 				String compoundName = "";
 				if(cf.getPrimaryIdentity() != null)
 					compoundName = cf.getPrimaryIdentity().getCompoundName();
+				
+				String binAnnot = "";
+				if( cf.getBinnerAnnotation() != null)
+					binAnnot = cf.getBinnerAnnotation().getAnnotation();
 
 				Object[] obj = {
 					cf.equals(currentCluster.getPrimaryFeature()),
@@ -116,7 +120,7 @@ public class ClusterFeatureSelectionTableModel extends BasicTableModel {
 					cf.getQualityScore(),
 					cf,
 					compoundName,
-					cf.getBinnerAnnotation().getAnnotation(),
+					binAnnot,
 					cf.getDefaultChemicalModification(),
 					cf.getRetentionTime(),
 					cf.getNeutralMass(),

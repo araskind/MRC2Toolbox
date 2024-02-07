@@ -39,6 +39,10 @@ import bibliothek.gui.dock.common.theme.ThemeMap;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureSet;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataScale;
 import edu.umich.med.mrc2.datoolbox.data.enums.KendrickUnits;
+import edu.umich.med.mrc2.datoolbox.gui.datexp.bp.DockableMzRtBubblePlotPanel;
+import edu.umich.med.mrc2.datoolbox.gui.datexp.hm.DockableFeatureHeatMapPanel;
+import edu.umich.med.mrc2.datoolbox.gui.datexp.mdef.DockableMzMassDefectPlotPanel;
+import edu.umich.med.mrc2.datoolbox.gui.datexp.qchist.DockableQCHistogramPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.DockableMRC2ToolboxPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.PersistentLayout;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
@@ -65,6 +69,8 @@ public class DataExplorerPlotFrame extends JFrame implements PersistentLayout, B
 	private CControl control;
 	private CGrid grid;
 	private DockableMzRtBubblePlotPanel mzRtBubblePlotPanel;
+	private DockableQCHistogramPanel qcHistogramPanel;
+	private DockableFeatureHeatMapPanel featureHeatMapPanel;
 	private DockableMzMassDefectPlotPanel mzMassDefectBubblePlotPanel;
 	private IndeterminateProgressDialog idp;
 
@@ -87,9 +93,15 @@ public class DataExplorerPlotFrame extends JFrame implements PersistentLayout, B
 		grid = new CGrid(control);
 
 		mzRtBubblePlotPanel = new DockableMzRtBubblePlotPanel();
+		qcHistogramPanel = new DockableQCHistogramPanel();
+		featureHeatMapPanel = new DockableFeatureHeatMapPanel();
 		mzMassDefectBubblePlotPanel = new DockableMzMassDefectPlotPanel();
 		grid.add(0, 0, 1, 1,
-				mzRtBubblePlotPanel, mzMassDefectBubblePlotPanel);
+				mzRtBubblePlotPanel, 
+				qcHistogramPanel, 
+				featureHeatMapPanel,
+				mzMassDefectBubblePlotPanel
+				);
 		
 		control.getContentArea().deploy(grid);
 		add(control.getContentArea(), BorderLayout.CENTER);
@@ -106,20 +118,21 @@ public class DataExplorerPlotFrame extends JFrame implements PersistentLayout, B
 	}
 	
 	public void clearPanels() {
+		
 		mzRtBubblePlotPanel.clearPanel();
+		qcHistogramPanel.clearPanel();
 		mzMassDefectBubblePlotPanel.clearPanel();
+		featureHeatMapPanel.clearPanel();
 	}
 
 	public void loadMzRtFromFeatureCollection(MsFeatureSet subset) {
 
-		mzMassDefectBubblePlotPanel.setMsFeatures(subset.getFeatures());
-		mzMassDefectBubblePlotPanel.setFeatureSetTitle(subset.getName());
-//		CreateMzRtDataSetTask task = new CreateMzRtDataSetTask(title, features);
-//		idp = new IndeterminateProgressDialog("Creating MZ/RT data set ...", this, task);
-//		idp.setLocationRelativeTo(this.getContentPane());
-//		idp.setVisible(true);
-		
 		mzRtBubblePlotPanel.loadFeatureSet(subset);
+		qcHistogramPanel.createQCvalueHistogram(subset);
+		featureHeatMapPanel.createFeatureHeatMap(subset);
+		
+//		mzMassDefectBubblePlotPanel.setMsFeatures(subset.getFeatures());
+//		mzMassDefectBubblePlotPanel.setFeatureSetTitle(subset.getName());
 	}
 	
 	@Override
@@ -210,28 +223,4 @@ public class DataExplorerPlotFrame extends JFrame implements PersistentLayout, B
 		mzRtBubblePlotPanel.setParentPanel(parentPanel);
 		mzMassDefectBubblePlotPanel.setParentPanel(parentPanel);
 	}
-	
-//	class CreateMzRtDataSetTask extends LongUpdateTask {
-//
-//		private String title;
-//		private Collection<MsFeature>features;
-//		
-//		public CreateMzRtDataSetTask(String title, Collection<MsFeature>features) {
-//			this.title = title;
-//			this.features = features;
-//		}
-//
-//		@Override
-//		public Void doInBackground() {
-//
-//			try {
-//				mzRtBubblePlotPanel.loadFeatureCollection(title, features);
-//			}
-//			catch (Exception e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
-//			return null;
-//		}
-//	}
 }

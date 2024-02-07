@@ -45,16 +45,15 @@ import org.ujmp.core.Matrix;
 import edu.umich.med.mrc2.datoolbox.data.IndexedDoublePoint;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureCluster;
+import edu.umich.med.mrc2.datoolbox.gui.datexp.MZRTPlotParameterObject;
 import edu.umich.med.mrc2.datoolbox.gui.dereplication.clustering.CorrelationDisplay;
+import edu.umich.med.mrc2.datoolbox.gui.dereplication.vis.heatmap.HeatChartType;
 import edu.umich.med.mrc2.datoolbox.gui.dereplication.vis.heatmap.JFHeatChart;
 import edu.umich.med.mrc2.datoolbox.gui.dereplication.vis.htree.AverageLinkageStrategy;
 import edu.umich.med.mrc2.datoolbox.gui.dereplication.vis.htree.Cluster;
 import edu.umich.med.mrc2.datoolbox.gui.dereplication.vis.htree.DefaultClusteringAlgorithm;
 import edu.umich.med.mrc2.datoolbox.gui.dereplication.vis.htree.visualization.DendrogramPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
-import edu.umich.med.mrc2.datoolbox.gui.plot.ColorGradient;
-import edu.umich.med.mrc2.datoolbox.gui.plot.ColorScale;
-import edu.umich.med.mrc2.datoolbox.gui.plot.HeatMapDataRange;
 import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.CorrelationMapDataSet;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 
@@ -108,7 +107,7 @@ public class ClusterVisFrame extends JFrame implements ActionListener, ItemListe
 		label.setBackground(Color.WHITE);
 
 		// HeatChart
-		jfHeatChart = new JFHeatChart();
+		jfHeatChart = new JFHeatChart(HeatChartType.FeatureCorrelationMatrix);
 
 		// Dendrogramm
 		dendrogramm = new DendrogramPanel();
@@ -171,8 +170,9 @@ public class ClusterVisFrame extends JFrame implements ActionListener, ItemListe
 
 	private void createHeatmap() {
 
-		mapDataSet = new CorrelationMapDataSet(currentCluster);
-		jfHeatChart.setDataSet(mapDataSet);
+		mapDataSet = new CorrelationMapDataSet(currentCluster);		
+		MZRTPlotParameterObject plotParams = heatMapToolbar.getPlotParameters();
+		jfHeatChart.showFeatureCorrelationMatrix(mapDataSet, plotParams);
 		jfHeatChart.addChartMouseListener(chartMouseListener);
 	}
 
@@ -215,15 +215,21 @@ public class ClusterVisFrame extends JFrame implements ActionListener, ItemListe
 	public void itemStateChanged(ItemEvent event) {
 
 		if(event.getStateChange() == ItemEvent.SELECTED) {
+			
+			if(jfHeatChart.isVisible() && mapDataSet != null) {
+				
+				MZRTPlotParameterObject plotParams = heatMapToolbar.getPlotParameters();
+				jfHeatChart.showFeatureCorrelationMatrix(mapDataSet, plotParams);
+			}
 
-			if (event.getItem() instanceof ColorGradient)
-				jfHeatChart.setColorPalette((ColorGradient)event.getItem());
-
-			if (event.getItem() instanceof ColorScale)
-				jfHeatChart.setColorScale((ColorScale)event.getItem());
-
-			if (event.getItem() instanceof HeatMapDataRange)
-				jfHeatChart.setDataRange((HeatMapDataRange)event.getItem());
+//			if (event.getItem() instanceof ColorGradient)
+//				jfHeatChart.setColorPalette((ColorGradient)event.getItem());
+//
+//			if (event.getItem() instanceof ColorScale)
+//				jfHeatChart.setColorScale((ColorScale)event.getItem());
+//
+//			if (event.getItem() instanceof HeatMapDataRange)
+//				jfHeatChart.setDataRange((HeatMapDataRange)event.getItem());
 		}
 	}
 }

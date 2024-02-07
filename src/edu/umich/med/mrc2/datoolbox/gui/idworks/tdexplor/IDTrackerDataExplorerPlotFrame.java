@@ -36,7 +36,7 @@ import bibliothek.gui.dock.common.CControl;
 import bibliothek.gui.dock.common.CGrid;
 import bibliothek.gui.dock.common.intern.CDockable;
 import bibliothek.gui.dock.common.theme.ThemeMap;
-import edu.umich.med.mrc2.datoolbox.gui.datexp.DockableMzRtMSMSPlotPanel;
+import edu.umich.med.mrc2.datoolbox.gui.datexp.msms.DockableMzRtMSMSPlotPanel;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.IDWorkbenchPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.PersistentLayout;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;

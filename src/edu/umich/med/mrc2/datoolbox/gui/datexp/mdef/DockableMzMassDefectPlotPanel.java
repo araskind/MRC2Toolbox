@@ -19,7 +19,7 @@
  *
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.gui.datexp;
+package edu.umich.med.mrc2.datoolbox.gui.datexp.mdef;
 
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
@@ -40,6 +40,8 @@ import org.jfree.data.xy.XYDataset;
 import bibliothek.gui.dock.common.DefaultSingleCDockable;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.enums.KendrickUnits;
+import edu.umich.med.mrc2.datoolbox.gui.datexp.DataExplorerPlotPanel;
+import edu.umich.med.mrc2.datoolbox.gui.datexp.DataExplorerPlotType;
 import edu.umich.med.mrc2.datoolbox.gui.datexp.dataset.MsFeatureMassDefectDataSet;
 import edu.umich.med.mrc2.datoolbox.gui.datexp.tooltip.MsFeatureTooltipGenerator;
 import edu.umich.med.mrc2.datoolbox.gui.fdata.FeatureDataPanel;

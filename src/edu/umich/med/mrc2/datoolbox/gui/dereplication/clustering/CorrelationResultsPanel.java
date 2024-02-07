@@ -71,7 +71,6 @@ import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
-import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.derepl.AdductAssignmentTask;
@@ -409,31 +408,38 @@ public class CorrelationResultsPanel extends ClusterDisplayPanel implements Char
 
 	private void runCorrelationAnalysis() {
 
-		ArrayList<String> errors = validateClusteringSetupInput();
-
-		if (validateClusteringSetupInput().isEmpty()) {
-
-			clusteringParametersDialog.savePreferences();
-			clusteringParametersDialog.setVisible(false);
-			clearPanel();
-
-			Task createCorrClustersTask = new SlidingWindowClusteringTask(currentExperiment, activeDataPipeline,
-					clusteringParametersDialog.limitRtRange(), clusteringParametersDialog.getRetentionRange(),
-					clusteringParametersDialog.filterMissing(), clusteringParametersDialog.getMaxMissingPercent(),
-					clusteringParametersDialog.imputeMissing(), clusteringParametersDialog.getImputationMethod(),
-					clusteringParametersDialog.getKnnClusterNumber(),
-					clusteringParametersDialog.getCorrelationAlgoritmh(),
-					clusteringParametersDialog.getCorrelationCutoff(), clusteringParametersDialog.getMaxClusterWidth(),
-					clusteringParametersDialog.getWindowSlidingUnit(),
-					clusteringParametersDialog.getFeatureNumberWindow(),
-					clusteringParametersDialog.getFeatureTimeWindow());
-
-			createCorrClustersTask.addTaskListener(this);
-			MRC2ToolBoxCore.getTaskController().addTask(createCorrClustersTask);
-		} else {
-			MessageDialog.showErrorMsg(StringUtils.join(errors, "\n"), clusteringParametersDialog);
-			return;
-		}
+//		ArrayList<String> errors = validateClusteringSetupInput();
+//
+//		if (validateClusteringSetupInput().isEmpty()) {
+//
+//			clusteringParametersDialog.savePreferences();
+//			clusteringParametersDialog.setVisible(false);
+//			clearPanel();
+//
+//			Task createCorrClustersTask = new SlidingWindowClusteringTask(currentExperiment, activeDataPipeline,
+//					clusteringParametersDialog.limitRtRange(), clusteringParametersDialog.getRetentionRange(),
+//					clusteringParametersDialog.filterMissing(), clusteringParametersDialog.getMaxMissingPercent(),
+//					clusteringParametersDialog.imputeMissing(), clusteringParametersDialog.getImputationMethod(),
+//					clusteringParametersDialog.getKnnClusterNumber(),
+//					clusteringParametersDialog.getCorrelationAlgoritmh(),
+//					clusteringParametersDialog.getCorrelationCutoff(), clusteringParametersDialog.getMaxClusterWidth(),
+//					clusteringParametersDialog.getWindowSlidingUnit(),
+//					clusteringParametersDialog.getFeatureNumberWindow(),
+//					clusteringParametersDialog.getFeatureTimeWindow());
+//
+//			createCorrClustersTask.addTaskListener(this);
+//			MRC2ToolBoxCore.getTaskController().addTask(createCorrClustersTask);
+//		} else {
+//			MessageDialog.showErrorMsg(StringUtils.join(errors, "\n"), clusteringParametersDialog);
+//			return;
+//		}
+		
+		FeatureClusteringTask createCorrClustersTask = new FeatureClusteringTask(
+				currentExperiment,
+				activeDataPipeline, 
+				false);
+		createCorrClustersTask.addTaskListener(this);
+		MRC2ToolBoxCore.getTaskController().addTask(createCorrClustersTask);
 	}
 
 	private void addActiveFeaturesToSubset() {
@@ -837,6 +843,9 @@ public class CorrelationResultsPanel extends ClusterDisplayPanel implements Char
 
 	@Override
 	public void showClusterData(MsFeatureCluster selectedCluster) {
+		
+		if(selectedCluster == null)
+			return;	
 
 		super.showClusterData(selectedCluster);
 
@@ -900,6 +909,21 @@ public class CorrelationResultsPanel extends ClusterDisplayPanel implements Char
 					MessageDialog.showInfoMsg("No correlation clusters found using current settings", this.getContentPane());
 				}
 			}
+			if (e.getSource().getClass().equals(SlidingWindowClusteringTask.class)) {
+
+				SlidingWindowClusteringTask eTask = (SlidingWindowClusteringTask) e.getSource();
+
+				if (!eTask.getFeatureClusters().isEmpty()) {
+
+					clusteringMode = ClusteringMode.INTERNAL;
+					currentExperiment.setFeatureClustersForDataPipeline(activeDataPipeline, eTask.getFeatureClusters());
+					loadFeatureClusters(currentExperiment.getMsFeatureClustersForDataPipeline(activeDataPipeline));
+					MRC2ToolBoxCore.getMainWindow().showPanel(PanelList.CORRELATIONS);
+				} else {
+					MessageDialog.showInfoMsg("No correlation clusters found using current settings", this.getContentPane());
+				}
+			}
+			
 			// Binner data import
 			if (e.getSource().getClass().equals(BinnerClustersImportTask.class)) {
 

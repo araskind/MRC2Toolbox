@@ -26,6 +26,7 @@ import edu.umich.med.mrc2.datoolbox.data.enums.MSFeatureSetStatisticalParameters
 import edu.umich.med.mrc2.datoolbox.data.enums.TableRowSubset;
 import edu.umich.med.mrc2.datoolbox.gui.plot.ColorGradient;
 import edu.umich.med.mrc2.datoolbox.gui.plot.ColorScale;
+import edu.umich.med.mrc2.datoolbox.gui.plot.HeatMapDataRange;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
 
 public class MZRTPlotParameterObject {
@@ -38,6 +39,7 @@ public class MZRTPlotParameterObject {
 	private ColorGradient colorGradient;
 	private ColorScale colorScale;
 	private TableRowSubset featureTableRowSubset;
+	private HeatMapDataRange heatMapDataRange;
 	
 	public MZRTPlotParameterObject() {
 		super();
@@ -128,6 +130,14 @@ public class MZRTPlotParameterObject {
 
 	public void setFeatureTableRowSubset(TableRowSubset featureTableRowSubset) {
 		this.featureTableRowSubset = featureTableRowSubset;
+	}
+
+	public HeatMapDataRange getHeatMapDataRange() {
+		return heatMapDataRange;
+	}
+
+	public void setHeatMapDataRange(HeatMapDataRange heatMapDataRange) {
+		this.heatMapDataRange = heatMapDataRange;
 	}
 
 	

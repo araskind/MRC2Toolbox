@@ -32,6 +32,7 @@ import javax.swing.JLabel;
 import javax.swing.JSpinner;
 
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
+import edu.umich.med.mrc2.datoolbox.gui.datexp.MZRTPlotParameterObject;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.plot.ColorGradient;
 import edu.umich.med.mrc2.datoolbox.gui.plot.ColorScale;
@@ -58,6 +59,7 @@ public class ClusterVisToolbar extends CommonToolbar {
 	private JComboBox colorScaleComboBox;
 	private JComboBox dataRangeComboBox;
 
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public ClusterVisToolbar(ActionListener commandListener) {
 
 		super(commandListener);
@@ -72,7 +74,8 @@ public class ClusterVisToolbar extends CommonToolbar {
 		JLabel colorSchemeLabel = new JLabel("Palette ");
 		add(colorSchemeLabel);
 
-		SortedComboBoxModel<ColorGradient> colorSchemeModel = new SortedComboBoxModel<ColorGradient>(ColorGradient.values());
+		SortedComboBoxModel<ColorGradient> colorSchemeModel = 
+				new SortedComboBoxModel<ColorGradient>(ColorGradient.values());
 		colorSchemeComboBox = new JComboBox(colorSchemeModel);
 		colorSchemeComboBox.setSelectedItem(ColorGradient.GREEN_RED);
 		colorSchemeComboBox.setPreferredSize(new Dimension(100, 25));
@@ -83,7 +86,8 @@ public class ClusterVisToolbar extends CommonToolbar {
 		JLabel colorScaleLabel = new JLabel("Color scale ");
 		add(colorScaleLabel);
 
-		SortedComboBoxModel<ColorScale> colorSclaleModel = new SortedComboBoxModel<ColorScale>(ColorScale.values());
+		SortedComboBoxModel<ColorScale> colorSclaleModel = 
+				new SortedComboBoxModel<ColorScale>(ColorScale.values());
 		colorScaleComboBox = new JComboBox(colorSclaleModel);
 		colorScaleComboBox.setSelectedItem(ColorScale.LINEAR);
 		colorScaleComboBox.setPreferredSize(new Dimension(100, 25));
@@ -91,25 +95,29 @@ public class ClusterVisToolbar extends CommonToolbar {
 		colorScaleComboBox.addItemListener((ItemListener) commandListener);
 		add(colorScaleComboBox);
 
-		JLabel dataRangeLabel = new JLabel("Dara range ");
+		JLabel dataRangeLabel = new JLabel("Data range ");
 		add(dataRangeLabel);
 
-		SortedComboBoxModel<HeatMapDataRange> dataRangeModel = new SortedComboBoxModel<HeatMapDataRange>(HeatMapDataRange.values());
+		SortedComboBoxModel<HeatMapDataRange> dataRangeModel = 
+				new SortedComboBoxModel<HeatMapDataRange>(HeatMapDataRange.values());
 		dataRangeComboBox = new JComboBox(dataRangeModel);
-		dataRangeComboBox.setSelectedItem(HeatMapDataRange.FULL);
+		dataRangeComboBox.setSelectedItem(HeatMapDataRange.CORRELATION);
 		dataRangeComboBox.setPreferredSize(new Dimension(100, 25));
 		dataRangeComboBox.setSize(new Dimension(100, 25));
 		dataRangeComboBox.addItemListener((ItemListener) commandListener);
 		add(dataRangeComboBox);
-
-		// showTableButton =
-		// GuiUtils.addButton(this, null, tableIcon, commandListener,
-		// HeatMapFrame.SHOW_TABLE_COMMAND, "Show table", buttonDimension);
-
+	}
+	
+	public MZRTPlotParameterObject getPlotParameters() {
+		
+		MZRTPlotParameterObject params = new MZRTPlotParameterObject();
+		params.setColorGradient((ColorGradient) colorSchemeComboBox.getSelectedItem());
+		params.setColorScale((ColorScale) colorScaleComboBox.getSelectedItem());
+		params.setHeatMapDataRange((HeatMapDataRange) dataRangeComboBox.getSelectedItem());
+		return params;
 	}
 
 	public int getClusterNumber() {
-
 		return (int) spinner.getValue();
 	}
 

@@ -171,6 +171,9 @@ public class MsFeatureCluster implements Serializable {
 				map(f -> dataMatrix.getColumnForLabel(f)).
 				mapToLong(i -> i).
 				toArray();
+		
+		MsFeature[]sortedFeatureArray = sorted.toArray(new MsFeature[sorted.size()]);
+		
 
 		//	TODO	Select active samples - this is a temporary fix untill design subsets are implemented
 		ArrayList<Long>rowList = new ArrayList<Long>();
@@ -183,8 +186,8 @@ public class MsFeatureCluster implements Serializable {
 		long[] rowIndex = ArrayUtils.toPrimitive(rowList.toArray(new Long[rowList.size()]));
 		Matrix raw = dataMatrix.select(Ret.LINK, rowIndex, columnIndex).replace(Ret.NEW, 0.0d, Double.NaN);
 		corrMatrix = raw.corrcoef(Ret.LINK, true, false).replace(Ret.NEW, Double.NaN, 0.0d);
-		corrMatrix.setMetaDataDimensionMatrix(0, Matrix.Factory.linkToArray(sorted));
-		corrMatrix.setMetaDataDimensionMatrix(1, Matrix.Factory.linkToArray(sorted).transpose(Ret.NEW));
+		corrMatrix.setMetaDataDimensionMatrix(0, Matrix.Factory.linkToArray((Object[])sortedFeatureArray));
+		corrMatrix.setMetaDataDimensionMatrix(1, Matrix.Factory.linkToArray((Object[])sortedFeatureArray).transpose(Ret.NEW));
 		return corrMatrix;
 	}
 

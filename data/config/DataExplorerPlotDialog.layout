@@ -99,9 +99,11 @@
 									<root>true</root>
 									<content delegate="SplitDockStationFactory">
 										<fullscreen-action>false</fullscreen-action>
-										<leaf id="0" nodeId="1612984940221">
+										<leaf id="0" nodeId="1707255620569">
 											<placeholders>
+												<placeholder>dock.single.DockableQCHistogramPanel</placeholder>
 												<placeholder>dock.single.DockableMzRtBubblePlotPanel</placeholder>
+												<placeholder>dock.single.DockableFeatureHeatMapPanel</placeholder>
 												<placeholder>dock.single.DockableMzMassDefectBubblePlotPanel</placeholder>
 											</placeholders>
 											<placeholder-map>
@@ -110,6 +112,20 @@
 												<entry>
 													<key shared="false">
 														<placeholder>dock.single.DockableMzRtBubblePlotPanel</placeholder>
+													</key>
+													<item key="convert" type="b">true</item>
+													<item key="convert-keys" type="a"/>
+												</entry>
+												<entry>
+													<key shared="false">
+														<placeholder>dock.single.DockableQCHistogramPanel</placeholder>
+													</key>
+													<item key="convert" type="b">true</item>
+													<item key="convert-keys" type="a"/>
+												</entry>
+												<entry>
+													<key shared="false">
+														<placeholder>dock.single.DockableFeatureHeatMapPanel</placeholder>
 													</key>
 													<item key="convert" type="b">true</item>
 													<item key="convert-keys" type="a"/>
@@ -134,7 +150,7 @@
 							<children ignore="false">
 								<child>
 									<layout factory="delegate_StackDockStationFactory">
-										<selected>0</selected>
+										<selected>2</selected>
 										<placeholders>
 											<version>0</version>
 											<format>dock.PlaceholderList</format>
@@ -154,7 +170,7 @@
 											</entry>
 											<entry>
 												<key shared="false">
-													<placeholder>dock.single.DockableMzMassDefectBubblePlotPanel</placeholder>
+													<placeholder>dock.single.DockableQCHistogramPanel</placeholder>
 												</key>
 												<item key="convert" type="b">true</item>
 												<item key="convert-keys" type="a">
@@ -164,6 +180,34 @@
 												</item>
 												<item key="dock.index" type="i">1</item>
 												<item key="dock.id" type="i">1</item>
+												<item key="dock.placeholder" type="s">dock.single.DockableQCHistogramPanel</item>
+											</entry>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.DockableFeatureHeatMapPanel</placeholder>
+												</key>
+												<item key="convert" type="b">true</item>
+												<item key="convert-keys" type="a">
+													<item type="s">index</item>
+													<item type="s">id</item>
+													<item type="s">placeholder</item>
+												</item>
+												<item key="dock.index" type="i">2</item>
+												<item key="dock.id" type="i">2</item>
+												<item key="dock.placeholder" type="s">dock.single.DockableFeatureHeatMapPanel</item>
+											</entry>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.DockableMzMassDefectBubblePlotPanel</placeholder>
+												</key>
+												<item key="convert" type="b">true</item>
+												<item key="convert-keys" type="a">
+													<item type="s">index</item>
+													<item type="s">id</item>
+													<item type="s">placeholder</item>
+												</item>
+												<item key="dock.index" type="i">3</item>
+												<item key="dock.id" type="i">3</item>
 												<item key="dock.placeholder" type="s">dock.single.DockableMzMassDefectBubblePlotPanel</item>
 											</entry>
 										</placeholders>
@@ -174,6 +218,26 @@
 												<replacement id="dockablesingle DockableMzRtBubblePlotPanel"/>
 												<delegate id="delegate_ccontrol backup factory id">
 													<id>DockableMzRtBubblePlotPanel</id>
+													<area/>
+												</delegate>
+											</layout>
+											<children ignore="false"/>
+										</child>
+										<child>
+											<layout factory="predefined" placeholder="dock.single.DockableQCHistogramPanel">
+												<replacement id="dockablesingle DockableQCHistogramPanel"/>
+												<delegate id="delegate_ccontrol backup factory id">
+													<id>DockableQCHistogramPanel</id>
+													<area/>
+												</delegate>
+											</layout>
+											<children ignore="false"/>
+										</child>
+										<child>
+											<layout factory="predefined" placeholder="dock.single.DockableFeatureHeatMapPanel">
+												<replacement id="dockablesingle DockableFeatureHeatMapPanel"/>
+												<delegate id="delegate_ccontrol backup factory id">
+													<id>DockableFeatureHeatMapPanel</id>
 													<area/>
 												</delegate>
 											</layout>
@@ -219,6 +283,30 @@
 				</base>
 				<modes>
 					<dockables>
+						<entry id="single DockableQCHistogramPanel" current="dock.mode.normal">
+							<history>
+								<mode>dock.mode.normal</mode>
+							</history>
+							<properties>
+								<property id="dock.mode.normal">
+									<mode>dock.mode.normal</mode>
+									<root>ccontrol center</root>
+									<applicationDefined>false</applicationDefined>
+									<location>
+										<property factory="SplitDockPlaceholderProperty">
+											<placeholder>dock.single.DockableQCHistogramPanel</placeholder>
+											<backup-path>
+												<leaf id="1707255620569"/>
+											</backup-path>
+										</property>
+										<property factory="StackDockPropertyFactory">
+											<index>1</index>
+											<placeholder>dock.single.DockableQCHistogramPanel</placeholder>
+										</property>
+									</location>
+								</property>
+							</properties>
+						</entry>
 						<entry id="single DockableMzMassDefectBubblePlotPanel" current="dock.mode.normal">
 							<history>
 								<mode>dock.mode.normal</mode>
@@ -232,11 +320,11 @@
 										<property factory="SplitDockPlaceholderProperty">
 											<placeholder>dock.single.DockableMzMassDefectBubblePlotPanel</placeholder>
 											<backup-path>
-												<leaf id="1612984940221"/>
+												<leaf id="1707255620569"/>
 											</backup-path>
 										</property>
 										<property factory="StackDockPropertyFactory">
-											<index>1</index>
+											<index>3</index>
 											<placeholder>dock.single.DockableMzMassDefectBubblePlotPanel</placeholder>
 										</property>
 									</location>
@@ -256,12 +344,36 @@
 										<property factory="SplitDockPlaceholderProperty">
 											<placeholder>dock.single.DockableMzRtBubblePlotPanel</placeholder>
 											<backup-path>
-												<leaf id="1612984940221"/>
+												<leaf id="1707255620569"/>
 											</backup-path>
 										</property>
 										<property factory="StackDockPropertyFactory">
 											<index>0</index>
 											<placeholder>dock.single.DockableMzRtBubblePlotPanel</placeholder>
+										</property>
+									</location>
+								</property>
+							</properties>
+						</entry>
+						<entry id="single DockableFeatureHeatMapPanel" current="dock.mode.normal">
+							<history>
+								<mode>dock.mode.normal</mode>
+							</history>
+							<properties>
+								<property id="dock.mode.normal">
+									<mode>dock.mode.normal</mode>
+									<root>ccontrol center</root>
+									<applicationDefined>false</applicationDefined>
+									<location>
+										<property factory="SplitDockPlaceholderProperty">
+											<placeholder>dock.single.DockableFeatureHeatMapPanel</placeholder>
+											<backup-path>
+												<leaf id="1707255620569"/>
+											</backup-path>
+										</property>
+										<property factory="StackDockPropertyFactory">
+											<index>2</index>
+											<placeholder>dock.single.DockableFeatureHeatMapPanel</placeholder>
 										</property>
 									</location>
 								</property>
