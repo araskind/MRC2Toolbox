@@ -65,6 +65,7 @@ public class MZRTPlotSettingsPanel extends
 	
 	private static final Icon refreshDataIcon = GuiUtils.getIcon("rerun", 16);
 	
+	private String preferencesNodeName;
 	private Preferences preferences;
 	private static final String START_RT = "START_RT";
 	private static final String END_RT = "END_RT";
@@ -95,11 +96,13 @@ public class MZRTPlotSettingsPanel extends
 	public MZRTPlotSettingsPanel(
 			ActionListener actListener, 
 			ItemListener externalItemListener,
-			boolean isMSMSdata) {
+			boolean isMSMSdata,
+			String preferencesNodeName) {
 		
 		super();
 		this.actListener = actListener;
 		this.externalItemListener = externalItemListener;
+		this.preferencesNodeName = preferencesNodeName;
 		
 		setBorder(new EmptyBorder(10, 10, 10, 10));
 		GridBagLayout gridBagLayout = new GridBagLayout();
@@ -602,13 +605,13 @@ public class MZRTPlotSettingsPanel extends
 
 	@Override
 	public void loadPreferences() {
-		loadPreferences(Preferences.userNodeForPackage(this.getClass()));
+		loadPreferences(Preferences.userRoot().node(preferencesNodeName));
 	}
 
 	@Override
 	public void savePreferences() {
 		
-		preferences = Preferences.userNodeForPackage(this.getClass());
+		preferences = Preferences.userRoot().node(preferencesNodeName);
 		Range rtRange = getRtRange();
 		if(rtRange != null) {
 			

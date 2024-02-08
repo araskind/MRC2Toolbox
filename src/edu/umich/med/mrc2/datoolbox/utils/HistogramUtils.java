@@ -48,7 +48,7 @@ public class HistogramUtils {
 		if(BIN_COUNT > 0) {
 			EmpiricalDistribution distribution = new EmpiricalDistribution(BIN_COUNT);
 			distribution.load(data);
-			double halfWidth = (da.getMax() - da.getMin()) / (double)BIN_COUNT;
+			double halfWidth = (da.getMax() - da.getMin()) / (double)BIN_COUNT / 1.5d;
 			
 			SimpleHistogramDataset dataSet = new SimpleHistogramDataset(title);		
 			for(SummaryStatistics stats: distribution.getBinStats()) {

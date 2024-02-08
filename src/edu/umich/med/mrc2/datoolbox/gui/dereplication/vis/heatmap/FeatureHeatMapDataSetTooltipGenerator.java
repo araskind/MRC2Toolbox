@@ -21,55 +21,46 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.dereplication.vis.heatmap;
 
-import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
 import org.jfree.chart.labels.StandardXYZToolTipGenerator;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYZDataset;
 
-import edu.umich.med.mrc2.datoolbox.data.MsFeature;
-import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.CorrelationMapDataSet;
+import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.FeatureHeatMapDataSet;
+import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 
-public class JFHeatChartTooltipGenerator extends StandardXYZToolTipGenerator {
+public class FeatureHeatMapDataSetTooltipGenerator extends StandardXYZToolTipGenerator {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = -1947101878972605184L;
-	private static final NumberFormat corrFormat = new DecimalFormat("#.###");
+	private static final NumberFormat areaFormat = MRC2ToolBoxConfiguration.getIntensityFormat();
 
-	public JFHeatChartTooltipGenerator() {
+	public FeatureHeatMapDataSetTooltipGenerator() {
 		super();
-
 	}
 
 	@Override
-	public String generateLabelString(XYDataset dataset, int series, int item) {
-
-		String tooltip = "";
-
-		CorrelationMapDataSet ds = (CorrelationMapDataSet) dataset;
-
-		MsFeature[] labels = ds.getLabels()[item];
-
-		tooltip = "<HTML>" + corrFormat.format(ds.getZValue(series, item)) + "<BR>" + labels[0].getName() + "<BR>" + labels[1].getName();
-
+	public String generateLabelString(XYDataset dataset, int series, int item) {		
+		
+		FeatureHeatMapDataSet ds = (FeatureHeatMapDataSet) dataset;
+		String tooltip = 
+				"<HTML>Data file: <B>" + ds.getRowLabels()[(int)ds.getYValue(series, item)]
+				+ "</B><BR>Feature: <B>" + ds.getColumnLabels()[(int)ds.getXValue(series, item)] 
+				+ "</B><BR>Area: <B>" + areaFormat.format(ds.getRAWValue(series, item)) + "</B>" ;
 		return tooltip;
 	}
-
+	
 	@Override
 	public String generateToolTip(XYZDataset dataset, int series, int item) {
 
-		String tooltip = "";
-
-		CorrelationMapDataSet ds = (CorrelationMapDataSet) dataset;
-
-		MsFeature[] labels = ds.getLabels()[item];
-
-		tooltip = "<HTML>" + corrFormat.format(ds.getZValue(series, item)) + "<BR>" + labels[0].getName() + "<BR>" + labels[1].getName();
-
+		FeatureHeatMapDataSet ds = (FeatureHeatMapDataSet) dataset;
+		String tooltip = 
+				"<HTML>Data file: <B>" + ds.getRowLabels()[(int)ds.getYValue(series, item)]
+				+ "</B><BR>Feature: <B>" + ds.getColumnLabels()[(int)ds.getXValue(series, item)] 
+				+ "</B><BR>Area: <B>" + areaFormat.format(ds.getRAWValue(series, item)) + "</B>" ;
 		return tooltip;
 	}
-
 }

@@ -41,6 +41,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
+import edu.umich.med.mrc2.datoolbox.data.enums.DataScale;
 import edu.umich.med.mrc2.datoolbox.gui.datexp.MZRTPlotParameterObject;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.plot.ColorGradient;
@@ -79,6 +80,8 @@ public class FeatureHeatchartSettingsPanel extends
 	private JComboBox colorSchemeComboBox;
 	private JComboBox colorScaleComboBox;
 	private JComboBox dataRangeComboBox;
+
+	private JComboBox<DataScale> dataScaleComboBox;
 	
 	@SuppressWarnings("unchecked")
 	public FeatureHeatchartSettingsPanel(
@@ -254,6 +257,28 @@ public class FeatureHeatchartSettingsPanel extends
 		gbc_colorScaleComboBox.gridx = 1;
 		gbc_colorScaleComboBox.gridy = rowCount;
 		add(colorScaleComboBox, gbc_colorScaleComboBox);
+		
+		rowCount++;
+		
+		JLabel bubbleScaleLabel = new JLabel("Peak area scaling ");
+		GridBagConstraints gbc_bubbleScaleLabel = new GridBagConstraints();
+		gbc_bubbleScaleLabel.anchor = GridBagConstraints.EAST;
+		gbc_bubbleScaleLabel.insets = new Insets(0, 0, 5, 5);
+		gbc_bubbleScaleLabel.gridx = 0;
+		gbc_bubbleScaleLabel.gridy = rowCount;
+		add(bubbleScaleLabel, gbc_bubbleScaleLabel);
+		
+		dataScaleComboBox = new JComboBox<DataScale>();
+		dataScaleComboBox.setModel(new DefaultComboBoxModel<DataScale>(
+				new DataScale[] {DataScale.LN, DataScale.LOG10, DataScale.SQRT}));
+		dataScaleComboBox.setSelectedItem(DataScale.LN);
+		dataScaleComboBox.setMaximumSize(new Dimension(120, 26));
+		GridBagConstraints gbc_dataScaleComboBox = new GridBagConstraints();
+		gbc_dataScaleComboBox.anchor = GridBagConstraints.EAST;
+		gbc_dataScaleComboBox.insets = new Insets(0, 0, 5, 5);
+		gbc_dataScaleComboBox.gridx = 1;
+		gbc_dataScaleComboBox.gridy = rowCount;
+		add(dataScaleComboBox, gbc_dataScaleComboBox);
 		
 		rowCount++;
 			
@@ -452,6 +477,7 @@ public class FeatureHeatchartSettingsPanel extends
 		params.setRtRange(getRtRange());
 		params.setColorGradient(getColorGradient());
 		params.setColorScale(getColorScale());
+		params.setDataScale((DataScale) dataScaleComboBox.getSelectedItem());
 		return params;
 	}
 }

@@ -907,6 +907,54 @@ public class DataAnalysisProject extends Experiment {
 		}
 		return pooledSamples;
 	}
+	
+	public Matrix getDataMatrixForFeatureSetAndDesign(
+			MsFeatureSet featureSet,
+			ExperimentDesignSubset designSubset,
+			DataPipeline dataPipeline) {
+		
+		Matrix allData = getDataMatrixForDataPipeline(dataPipeline);
+		if(allData == null)
+			return null;
+		
+		if(featureSet == null 
+				|| featureSet.getFeatures().isEmpty()
+				|| designSubset == null)
+			return null;
+		
+		Set<DataFile>dataFiles = 
+				getActiveDataFilesForDesignAndAcquisitionMethod(
+				 designSubset, 
+				 dataPipeline.getAcquisitionMethod());
+		if(dataFiles.isEmpty())
+			return null;
+		
+		long[] featureCoordinates = new long[featureSet.getFeatures().size()];
+		long[] dataFileCoordinates = new long[dataFiles.size()];	
+	
+		int counter = 0;
+		for (MsFeature cf : featureSet.getFeatures()) {
+			featureCoordinates[counter] = allData.getColumnForLabel(cf);
+			counter++;
+		}
+		counter = 0;
+		for (DataFile df : dataFiles) {
+			dataFileCoordinates[counter] = allData.getRowForLabel(df);
+			counter++;
+		}
+		Matrix subsetMatrix = allData.select(
+				Ret.NEW, dataFileCoordinates, featureCoordinates);
+		
+		Matrix featureMetaData = allData.getMetaDataDimensionMatrix(0).selectColumns(
+				Ret.NEW, featureCoordinates);
+		Matrix fileMetaData = allData.getMetaDataDimensionMatrix(1).selectRows(
+				Ret.NEW, dataFileCoordinates);
+		
+		subsetMatrix.setMetaDataDimensionMatrix(0, featureMetaData);
+		subsetMatrix.setMetaDataDimensionMatrix(1, fileMetaData);
+		
+		return subsetMatrix;
+	}
 }
 
 

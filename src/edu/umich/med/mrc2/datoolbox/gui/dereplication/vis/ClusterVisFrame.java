@@ -221,15 +221,6 @@ public class ClusterVisFrame extends JFrame implements ActionListener, ItemListe
 				MZRTPlotParameterObject plotParams = heatMapToolbar.getPlotParameters();
 				jfHeatChart.showFeatureCorrelationMatrix(mapDataSet, plotParams);
 			}
-
-//			if (event.getItem() instanceof ColorGradient)
-//				jfHeatChart.setColorPalette((ColorGradient)event.getItem());
-//
-//			if (event.getItem() instanceof ColorScale)
-//				jfHeatChart.setColorScale((ColorScale)event.getItem());
-//
-//			if (event.getItem() instanceof HeatMapDataRange)
-//				jfHeatChart.setDataRange((HeatMapDataRange)event.getItem());
 		}
 	}
 }

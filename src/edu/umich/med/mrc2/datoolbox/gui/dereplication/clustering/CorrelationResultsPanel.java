@@ -433,6 +433,7 @@ public class CorrelationResultsPanel extends ClusterDisplayPanel implements Char
 //			MessageDialog.showErrorMsg(StringUtils.join(errors, "\n"), clusteringParametersDialog);
 //			return;
 //		}
+		clusteringParametersDialog.dispose();
 		
 		FeatureClusteringTask createCorrClustersTask = new FeatureClusteringTask(
 				currentExperiment,

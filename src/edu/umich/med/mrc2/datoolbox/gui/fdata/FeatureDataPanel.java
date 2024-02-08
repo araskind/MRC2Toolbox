@@ -516,7 +516,21 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 			
 			if (command.equals(MainActionCommands.EXPORT_FEATURE_STATISTICS_COMMAND.getName()))
 				exportStatisticsForActiveFeatureSet();
+			
+			if (command.equals(MainActionCommands.GET_DATA_MATRIX_FOR_FEATURE_SET_AND_DESIGN.getName()))
+				createDataMatrixForActiveFeatureSet();
 		}	
+	}
+
+	private void createDataMatrixForActiveFeatureSet() {
+
+		if(activeMsFeatureSet == null)
+			return;
+				
+		Matrix fm = currentExperiment.getDataMatrixForFeatureSetAndDesign(
+				activeMsFeatureSet, 
+				currentExperiment.getExperimentDesign().getActiveDesignSubset(), 
+				activeDataPipeline);
 	}
 
 	private void setUpMSMSParentIonFrequencyAnalysis() {

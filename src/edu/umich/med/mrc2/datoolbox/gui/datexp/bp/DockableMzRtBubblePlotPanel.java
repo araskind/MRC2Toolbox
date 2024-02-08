@@ -87,6 +87,8 @@ public class DockableMzRtBubblePlotPanel extends DefaultSingleCDockable
 	private DockableMRC2ToolboxPanel parentPanel;
 	private Collection<MsFeature>msFeatures;
 	private SimpleFeatureSubsetDialog featureSubsetDialog;
+	private static final String PLOT_SETTINGS_PANEL_PREFERENCES_NODE = 
+			"DockableMzRtBubblePlotPanelMZRTPlotSettingsPanel";
 	
 	public DockableMzRtBubblePlotPanel() {
 
@@ -102,7 +104,8 @@ public class DockableMzRtBubblePlotPanel extends DefaultSingleCDockable
 		add(toolbar, BorderLayout.NORTH);
 		
 		mzrtPlotSettingsPanel = 
-				new MZRTPlotSettingsPanel(this,  this, false);		
+				new MZRTPlotSettingsPanel(this,  this, false, 
+						PLOT_SETTINGS_PANEL_PREFERENCES_NODE);		
 		add(mzrtPlotSettingsPanel, BorderLayout.EAST);
 		
 		msFeatureTooltipGenerator = new MsFeatureTooltipGenerator();

@@ -116,7 +116,7 @@ public class ClusteringParametersDialog extends JDialog implements BackedByPrefe
 
 		setSize(new Dimension(450, 250));
 		setPreferredSize(new Dimension(450, 250));
-		setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
+		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		getContentPane().setLayout(new BorderLayout(0, 0));
 
 		tabbedPane = new JTabbedPane(JTabbedPane.TOP);

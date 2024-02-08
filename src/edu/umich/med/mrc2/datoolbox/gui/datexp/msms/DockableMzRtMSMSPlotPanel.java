@@ -94,6 +94,9 @@ public class DockableMzRtMSMSPlotPanel extends DefaultSingleCDockable
 	private static final Shape defaultShape = new Ellipse2D.Double(-3, -3, 6, 6);
 	private Preferences preferences;
 	private XYItemRenderer defaultRenderer;
+	
+	private static final String PLOT_SETTINGS_PANEL_PREFERENCES_NODE = 
+			"DockableMzRtMSMSPlotPanelMZRTPlotSettingsPanel";
 
 	public DockableMzRtMSMSPlotPanel() {
 
@@ -107,10 +110,9 @@ public class DockableMzRtMSMSPlotPanel extends DefaultSingleCDockable
 
 		toolbar = new MzRtPlotToolbar(plotPanel, this, this);
 		add(toolbar, BorderLayout.NORTH);
-//		settingsToolbar = new MSMSExplorerPlotSettingsToolbar(this, this);
-//		add(settingsToolbar, BorderLayout.SOUTH);
 		
-		mmzrtPlotSettingsPanel = new MZRTPlotSettingsPanel(this, this, true);
+		mmzrtPlotSettingsPanel = new MZRTPlotSettingsPanel(this, this, true,
+				PLOT_SETTINGS_PANEL_PREFERENCES_NODE);
 		add(mmzrtPlotSettingsPanel, BorderLayout.EAST);
 		
 		msmsFeatureInfoBundleTooltipGenerator 

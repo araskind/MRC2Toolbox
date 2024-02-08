@@ -1339,6 +1339,9 @@ public enum MainActionCommands {
 	SHOW_COMPLETE_LOOKUP_FEATURE_LIST_COMMAND("Show complete lookup feature list"),
 	SHOW_ONLY_MATCHED_LOOKUP_FEATURES_COMMAND("Show only matched lookup features"),
 	
+	
+	//	Debug 
+	GET_DATA_MATRIX_FOR_FEATURE_SET_AND_DESIGN("Get matrix for feature subset"),
 	;
 
 	private final String name;

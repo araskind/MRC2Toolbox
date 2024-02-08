@@ -99,7 +99,7 @@
 									<root>true</root>
 									<content delegate="SplitDockStationFactory">
 										<fullscreen-action>false</fullscreen-action>
-										<leaf id="0" nodeId="1707255620569">
+										<leaf id="0" nodeId="1707350015141">
 											<placeholders>
 												<placeholder>dock.single.DockableQCHistogramPanel</placeholder>
 												<placeholder>dock.single.DockableMzRtBubblePlotPanel</placeholder>
@@ -296,7 +296,7 @@
 										<property factory="SplitDockPlaceholderProperty">
 											<placeholder>dock.single.DockableQCHistogramPanel</placeholder>
 											<backup-path>
-												<leaf id="1707255620569"/>
+												<leaf id="1707350015141"/>
 											</backup-path>
 										</property>
 										<property factory="StackDockPropertyFactory">
@@ -320,7 +320,7 @@
 										<property factory="SplitDockPlaceholderProperty">
 											<placeholder>dock.single.DockableMzMassDefectBubblePlotPanel</placeholder>
 											<backup-path>
-												<leaf id="1707255620569"/>
+												<leaf id="1707350015141"/>
 											</backup-path>
 										</property>
 										<property factory="StackDockPropertyFactory">
@@ -344,7 +344,7 @@
 										<property factory="SplitDockPlaceholderProperty">
 											<placeholder>dock.single.DockableMzRtBubblePlotPanel</placeholder>
 											<backup-path>
-												<leaf id="1707255620569"/>
+												<leaf id="1707350015141"/>
 											</backup-path>
 										</property>
 										<property factory="StackDockPropertyFactory">
@@ -368,7 +368,7 @@
 										<property factory="SplitDockPlaceholderProperty">
 											<placeholder>dock.single.DockableFeatureHeatMapPanel</placeholder>
 											<backup-path>
-												<leaf id="1707255620569"/>
+												<leaf id="1707350015141"/>
 											</backup-path>
 										</property>
 										<property factory="StackDockPropertyFactory">

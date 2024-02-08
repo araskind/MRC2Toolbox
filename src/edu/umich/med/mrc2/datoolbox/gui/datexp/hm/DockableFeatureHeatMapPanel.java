@@ -29,12 +29,21 @@ import java.awt.event.ItemListener;
 
 import javax.swing.Icon;
 
+import org.ujmp.core.Matrix;
+
 import bibliothek.gui.dock.common.DefaultSingleCDockable;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureSet;
+import edu.umich.med.mrc2.datoolbox.data.enums.TableRowSubset;
+import edu.umich.med.mrc2.datoolbox.gui.datexp.MZRTPlotParameterObject;
 import edu.umich.med.mrc2.datoolbox.gui.dereplication.vis.heatmap.HeatChartType;
 import edu.umich.med.mrc2.datoolbox.gui.dereplication.vis.heatmap.JFHeatChart;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
+import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.FeatureHeatMapDataSet;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
+import edu.umich.med.mrc2.datoolbox.gui.utils.IndeterminateProgressDialog;
+import edu.umich.med.mrc2.datoolbox.gui.utils.LongUpdateTask;
+import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
+import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 
 public class DockableFeatureHeatMapPanel extends DefaultSingleCDockable implements ActionListener, ItemListener {
 
@@ -78,13 +87,70 @@ public class DockableFeatureHeatMapPanel extends DefaultSingleCDockable implemen
 
 	@Override
 	public void itemStateChanged(ItemEvent e) {
-		// TODO Auto-generated method stub
+
 		if (e.getStateChange() == ItemEvent.SELECTED) {
 			
+			RedrawPlotTask task = new RedrawPlotTask(e.getItem());
+			IndeterminateProgressDialog idp = 
+					new IndeterminateProgressDialog(
+							"Updating plot ...", this.getContentPane(), task);
+			idp.setLocationRelativeTo(this.getContentPane());
+			idp.setVisible(true);
 		}
 	}
 
 	public void createFeatureHeatMap(MsFeatureSet subset) {
+
+		RedrawPlotTask task = new RedrawPlotTask(subset);
+		IndeterminateProgressDialog idp = 
+				new IndeterminateProgressDialog(
+						"Loading feature set " + subset.getName(), this.getContentPane(), task);
+		idp.setLocationRelativeTo(this.getContentPane());
+		idp.setVisible(true);
+	}
+	
+	class RedrawPlotTask extends LongUpdateTask {
+
+		Object redrawTrigger;
+		
+		public RedrawPlotTask(Object redrawTrigger) {
+			this.redrawTrigger = redrawTrigger;
+		}
+
+		@Override
+		public Void doInBackground() {
+
+			if(redrawTrigger instanceof MsFeatureSet) {
+				loadFeatureCollection((MsFeatureSet)redrawTrigger);
+			}	
+			else if (redrawTrigger instanceof TableRowSubset) {
+				//	TODO;
+			}
+			else {
+				redrawPlot();
+			}
+			return null;
+		}
+	}
+	
+	private void loadFeatureCollection(MsFeatureSet featureSet) {
+
+		heatChart.removeAllDataSets();
+		DataAnalysisProject experiment = 
+				MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
+		Matrix featureSubsetMatrix = 
+				experiment.getDataMatrixForFeatureSetAndDesign(
+						featureSet, 
+						experiment.getExperimentDesign().getActiveDesignSubset(), 
+						experiment.getActiveDataPipeline());
+		FeatureHeatMapDataSet dataSet = 
+				new FeatureHeatMapDataSet(featureSubsetMatrix);
+		
+		MZRTPlotParameterObject plotParams = chartSettingsPanel.getPlotParameters();				
+		heatChart.showFeatureHeatMap(dataSet, plotParams);
+	}
+	
+	private void redrawPlot() {
 		// TODO Auto-generated method stub
 		
 	}

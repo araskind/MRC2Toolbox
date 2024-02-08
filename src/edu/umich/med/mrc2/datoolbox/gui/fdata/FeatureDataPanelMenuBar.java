@@ -278,6 +278,10 @@ public class FeatureDataPanelMenuBar extends CommonMenuBar {
 				MainActionCommands.EXPORT_RESULTS_TO_MWTAB_COMMAND, 
 				exportMwTabIcon);
 		
+		addItem(exportMenu, 
+				MainActionCommands.GET_DATA_MATRIX_FOR_FEATURE_SET_AND_DESIGN, 
+				null);
+		
 		add(exportMenu);
 		
 		// Utils items

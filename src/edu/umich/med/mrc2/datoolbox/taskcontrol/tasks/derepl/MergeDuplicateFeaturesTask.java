@@ -60,11 +60,8 @@ public class MergeDuplicateFeaturesTask extends AbstractTask {
 		this.activeDataPipeline = activeDataPipeline;
 		this.currentExperiment = experiment;
 		this.mergeOption = duplicatesCleanupOptions;
-
 		duplicateList = 
 				experiment.getDuplicateClustersForDataPipeline(activeDataPipeline);
-		total = duplicateList.size();
-		processed = 20;
 	}
 
 	public MergeDuplicateFeaturesTask(
@@ -83,8 +80,6 @@ public class MergeDuplicateFeaturesTask extends AbstractTask {
 
 		duplicateList = new HashSet<MsFeatureCluster>();
 		duplicateList.add(mergeCluster);
-		total = duplicateList.size();
-		processed = 20;
 	}
 
 	@Override
@@ -139,8 +134,9 @@ public class MergeDuplicateFeaturesTask extends AbstractTask {
 				
 		Matrix msFeatureMatrix = readFeatureMatrix();		
 		
-		taskDescription = "Removing duplicate features for active data pipeline";
-		processed = 50;
+		taskDescription = "Merging duplicate feature data for active data pipeline";
+		total = duplicateList.size();
+		processed = 0;
 		Matrix dataMatrix = 
 				currentExperiment.getDataMatrixForDataPipeline(activeDataPipeline);
 		Matrix featureMatrix = dataMatrix.getMetaDataDimensionMatrix(0);
@@ -230,7 +226,12 @@ public class MergeDuplicateFeaturesTask extends AbstractTask {
 					}
 				}
 			}
+			processed++;
 		}
+		taskDescription = "Removing duplicate features from data matrices";
+		total = 100;
+		processed = 20;
+		
 		ArrayList<Long> rem = new ArrayList<Long>();
 		for (MsFeature cf : featuresToRemove)
 			rem.add(dataMatrix.getColumnForLabel(cf));

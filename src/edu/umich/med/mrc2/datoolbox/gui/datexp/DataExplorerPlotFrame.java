@@ -76,7 +76,7 @@ public class DataExplorerPlotFrame extends JFrame implements PersistentLayout, B
 
 	private static final Icon bubbleIcon = GuiUtils.getIcon("bubble", 32);
 	private static final File layoutConfigFile = 
-			new File(MRC2ToolBoxCore.configDir + "DataExplorerPlotDialog.layout");
+			new File(MRC2ToolBoxCore.configDir + "DataExplorerPlotFrame.layout");
 	
 	public DataExplorerPlotFrame() {
 
