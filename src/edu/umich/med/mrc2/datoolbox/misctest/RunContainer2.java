@@ -44,6 +44,7 @@ import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator;
 
 import edu.umich.med.mrc2.datoolbox.data.MsPoint;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
+import edu.umich.med.mrc2.datoolbox.dbparse.load.nist.NISTParserUtils;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.FilePreferencesFactory;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
@@ -73,13 +74,25 @@ public class RunContainer2 {
 		MRC2ToolBoxConfiguration.initConfiguration();
 
 		try {
-			calculateDistinctIsotopicPatterns();
+			extractNISTFields();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 	
+	private static void extractNISTFields() {
+
+		File mspDir = 
+				new File("E:\\DataAnalysis\\Databases\\NIST\\NIST2023-export\\MSP");
+		File fieldList = 
+				new File("E:\\DataAnalysis\\Databases\\NIST\\NIST2023-export\\NIST23_MSP_FIELD_LIST.TXT");
+		File countsList = 
+				new File("E:\\DataAnalysis\\Databases\\NIST\\NIST2023-export\\NIST23_MSP_ENTRY_COUNTS.TXT");
+		
+		NISTParserUtils.countEntriesAndEnumerateNistDataFields(mspDir, fieldList, countsList);
+	}
+
 	private static void calculateDistinctIsotopicPatterns() throws Exception{
 		
 		Connection conn = ConnectionManager.getConnection();

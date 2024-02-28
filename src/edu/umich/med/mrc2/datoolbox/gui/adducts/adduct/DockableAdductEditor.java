@@ -73,6 +73,7 @@ public class DockableAdductEditor extends DefaultSingleCDockable implements Acti
 		add(toolBar, BorderLayout.NORTH);
 
 		adductTable = new AdductTable();
+		adductTable.addTablePopupMenu(new AdductTablePopupMenu(this, adductTable));
 		adductScrollPane = new JScrollPane(adductTable);
 		add(adductScrollPane, BorderLayout.CENTER);
 		activeAdduct = null;

@@ -69,6 +69,7 @@ import edu.umich.med.mrc2.datoolbox.data.enums.MSPField;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.nist.NISTReferenceLibraries;
 import edu.umich.med.mrc2.datoolbox.utils.MsImportUtils;
+import io.github.dan2097.jnainchi.InchiStatus;
 import net.sf.jniinchi.INCHI_RET;
 
 public class NISTDataUploader {
@@ -315,7 +316,8 @@ public class NISTDataUploader {
 		Map<List<String>,IAtomContainer>msmsMolMap = new HashMap<List<String>,IAtomContainer>();	
 		if(mspChunks.size() != molChunks.size()) {			
 			System.out.println(FilenameUtils.getBaseName(mspFile.getName()));
-			System.out.println("# of MSMS = " + Integer.toString(mspChunks.size()) + " | " + "# of MOL = " + Integer.toString(molChunks.size()));			
+			System.out.println("# of MSMS = " + Integer.toString(mspChunks.size()) + 
+					" | " + "# of MOL = " + Integer.toString(molChunks.size()));			
 		}
 		for(int i=0; i<mspChunks.size(); i++)
 				msmsMolMap.put(mspChunks.get(i), molChunks.get(i));
@@ -356,8 +358,8 @@ public class NISTDataUploader {
 					molecule.setProperty(CompoundIdentityField.SMILES.name(), smiles);
 				
 				inChIGenerator = igfactory.getInChIGenerator(molecule);
-				INCHI_RET ret = inChIGenerator.getReturnStatus();
-				if (ret == INCHI_RET.OKAY || ret == INCHI_RET.WARNING)
+				InchiStatus ret = inChIGenerator.getStatus();
+				if (ret == InchiStatus.SUCCESS || ret == InchiStatus.WARNING)
 					molecule.setProperty(CompoundIdentityField.INCHIKEY.name(), inChIGenerator.getInchiKey());
 				else
 					molErrorLog.add("Unable to generate InChi for " + molecule.getProperty(CDKConstants.TITLE));
@@ -378,10 +380,10 @@ public class NISTDataUploader {
 			
 			NISTTandemMassSpectrum msms = NISTMSPParser.parseNistMspDataSource(mspChunks.get(i));
 			IAtomContainer molecule = molChunks.get(i);
-			molecule.setProperty(NISTmspField.NAME.getName(), msms.getProperties().get(NISTmspField.NAME));			
+			molecule.setProperty(MSPField.NAME.getName(), msms.getProperties().get(MSPField.NAME));			
 			if(molChunks.get(i) != null) {
 				
-				String mspInChiKey = msms.getProperties().get(NISTmspField.INCHI_KEY);
+				String mspInChiKey = msms.getProperties().get(MSPField.INCHI_KEY);
 				String molInChiKey = molecule.getProperty(CompoundIdentityField.INCHIKEY.name());
 				if(molInChiKey != null && molInChiKey.equals(mspInChiKey))				
 					inchiKeyMolMap.put(mspInChiKey, molecule);

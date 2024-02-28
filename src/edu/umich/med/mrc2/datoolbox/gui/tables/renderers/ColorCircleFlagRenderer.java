@@ -59,6 +59,7 @@ public class ColorCircleFlagRenderer extends DefaultTableCellRenderer {
 		
 		if(value == null) {
 			setIcon(null);
+			setToolTipText(null);
 			return this;
 		}
 		if(value instanceof Boolean) {			
@@ -77,48 +78,11 @@ public class ColorCircleFlagRenderer extends DefaultTableCellRenderer {
 				setIcon(new SmallPie(size, 0.5d, Color.RED, 
 						match.getMatchType().getColorCode()));
 				setToolTipText(match.getMatchType().getName() + " / Decoy");
-				
-//				if(match.getMatchType().equals(MSMSMatchType.Regular)) {
-//					setIcon(new SmallPie(size, 0.5d, Color.RED, 
-//							match.getMatchType().getColorCode()));
-//					setToolTipText(match.getMatchType().getName() + " / Decoy");
-//				}
-//				else if(match.getMatchType().equals(MSMSMatchType.InSource)) {
-//					setIcon(new SmallPie(size, 0.5d, Color.RED,  
-//							match.getMatchType().getColorCode()));
-//					setToolTipText("In-source match / Decoy");
-//				}
-//				else if(match.getMatchType().equals(MSMSMatchType.Hybrid)) {
-//					setIcon(new SmallPie(size, 0.5d, Color.RED,  
-//							match.getMatchType().getColorCode()));
-//					setToolTipText("Hybrid match / Decoy");
-//				}
-//				else {
-//					setIcon(null);
-//					setToolTipText(null);
-//				}
 			}
 			else{
 				Color fill = match.getMatchType().getColorCode();
 				setIcon(new SmallPie(size, 1.0d, fill, fill));
 				setToolTipText(match.getMatchType().getName());
-				
-//				if(match.getMatchType().equals(MSMSMatchType.Regular)) {
-//					setIcon(new SmallPie(size, 1.0d, fill, fill));
-//					setToolTipText("Regular (precursor) match");
-//				}
-//				else if(match.getMatchType().equals(MSMSMatchType.InSource)) {
-//					setIcon(new SmallPie(size, 1.0d, fill, fill));
-//					setToolTipText("In-source match");
-//				}
-//				else if(match.getMatchType().equals(MSMSMatchType.Hybrid)) {
-//					setIcon(new SmallPie(size, 1.0d, fill, fill));
-//					setToolTipText("Hybrid match");
-//				}
-//				else {
-//					setIcon(null);
-//					setToolTipText(null);
-//				}
 			}
 		}		
 		return this;

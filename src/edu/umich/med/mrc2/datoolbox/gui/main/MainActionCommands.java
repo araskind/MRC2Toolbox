@@ -386,7 +386,9 @@ public enum MainActionCommands {
 	
 	//	MSMS clusters
 	SHOW_MSMS_CLUSTER_FILTER_COMMAND("Show MSMS cluster filter"),
-	FILTER_MSMS_CLUSTERS_COMMAND("Filter MSMS clusters"),
+	FILTER_MSMS_CLUSTERS_COMMAND("Filter MSMS clusters"),	
+	SHOW_MSMS_CLUSTER_MZ_RT_LIST_FILTER_COMMAND("Show MSMS cluster MZ/RT list filter"),
+	FILTER_MSMS_CLUSTERS_WITH_MZ_RT_LIST_COMMAND("Filter MSMS clusters using MZ/RT list"),	
 	RELOAD_ACTIVE_MSMS_CLUSTERS_SET_COMMAND("Reload active MSMS clusters data set"),
 	SHOW_MSMS_CLUSTERS_SUMMARY_COMMAND("Show MSMS clusters summary"),
 	COPY_LOOKUP_FEATURES_TO_CLIPBOARD_COMMAND("Copy lookup features toclipboard"),

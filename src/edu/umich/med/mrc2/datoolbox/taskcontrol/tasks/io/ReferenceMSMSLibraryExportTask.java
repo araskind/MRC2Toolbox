@@ -248,7 +248,7 @@ public class ReferenceMSMSLibraryExportTask extends AbstractTask {
 		Collection<MSPField>individual = new ArrayList<MSPField>();
 		individual.add(MSPField.NAME);
 		individual.add(MSPField.FORMULA);
-		individual.add(MSPField.EXACTMASS);
+		individual.add(MSPField.EXACT_MASS);
 		individual.add(MSPField.MW);
 		individual.add(MSPField.INCHI_KEY);
 		individual.add(MSPField.PRECURSORMZ);

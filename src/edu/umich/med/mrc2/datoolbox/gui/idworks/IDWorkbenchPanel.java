@@ -132,6 +132,7 @@ import edu.umich.med.mrc2.datoolbox.gui.idworks.clustree.MSMSFeatureClusterTree;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.clustree.MajorClusterFeatureDefiningProperty;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.clustree.MajorClusterFeatureExtractionSetupDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.clustree.filter.MSMSClusterFilterDialog;
+import edu.umich.med.mrc2.datoolbox.gui.idworks.clustree.filter.MSMSClusterMZRTListFilterDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.clustree.lookup.DockableLookupFeatureTable;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.clustree.summary.MSMSCLusterDataSetSummaryDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.export.IDTrackerDataExportDialog;
@@ -316,6 +317,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 	private MzFrequencyAnalysisSetupDialog mzFrequencyAnalysisSetupDialog;
 	private ActiveDataSetBinnerAnnotationsSearchDialog activeDataSetBinnerAnnotationsSearchDialog;
 	private AnnotationFilterDialog annotationFilterDialog;
+	private MSMSClusterMZRTListFilterDialog msmsClusterMZRTListFilterDialog;
 	
 	private static final Icon searchIdTrackerIcon = GuiUtils.getIcon("searchDatabase", 24);
 	private static final Icon searchExperimentIcon = GuiUtils.getIcon("searchIdExperiment", 24);
@@ -867,6 +869,12 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		if (command.equals(MainActionCommands.FILTER_MSMS_CLUSTERS_COMMAND.getName()))
 			filterMSMSClusters();
 		
+		if (command.equals(MainActionCommands.SHOW_MSMS_CLUSTER_MZ_RT_LIST_FILTER_COMMAND.getName()))
+			showMSMSClusterMZRTListFilter();
+		
+		if (command.equals(MainActionCommands.FILTER_MSMS_CLUSTERS_WITH_MZ_RT_LIST_COMMAND.getName()))
+			filterMSMSClustersByMZRTList();
+		
 		if (command.equals(MainActionCommands.RELOAD_ACTIVE_MSMS_CLUSTERS_SET_COMMAND.getName()))
 			reloadActiveMSMSClustersDataSet();
 		
@@ -1210,6 +1218,66 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			msmsClusterFilterDialog.dispose();
 		}		
 	}
+	
+	private void showMSMSClusterMZRTListFilter() {
+
+		if(activeMSMSClusterDataSet == null || activeMSMSClusterDataSet.getClusters().isEmpty())
+			return;
+
+		msmsClusterMZRTListFilterDialog = new MSMSClusterMZRTListFilterDialog(this);
+		msmsClusterMZRTListFilterDialog.setLocationRelativeTo(this.getContentPane());
+		msmsClusterMZRTListFilterDialog.setVisible(true);
+	}
+	
+	private void filterMSMSClustersByMZRTList() {
+		
+		Collection<String>errors = msmsClusterMZRTListFilterDialog.validateInput();
+		if(!errors.isEmpty()) {
+			MessageDialog.showErrorMsg(StringUtils.join(errors, "\n"), msmsClusterMZRTListFilterDialog);
+			return;
+		}
+		Collection<MinimalMSOneFeature> filterFeatures = 
+				msmsClusterMZRTListFilterDialog.getSelectedFeatures();
+		if(filterFeatures.isEmpty())
+			filterFeatures = msmsClusterMZRTListFilterDialog.getAllFeatures();
+		
+		double mzWindow = msmsClusterMZRTListFilterDialog.getMzError();
+		MassErrorType mzErrorType = msmsClusterMZRTListFilterDialog.getMassErrorType();
+		double rtWindow = msmsClusterMZRTListFilterDialog.getRTError();
+		
+		Set<IMsFeatureInfoBundleCluster> clusters = activeMSMSClusterDataSet.getClusters();
+		Collection<IMsFeatureInfoBundleCluster> filteredClusters = 
+				new ArrayList<IMsFeatureInfoBundleCluster>();
+		
+		for(MinimalMSOneFeature ff : filterFeatures) {
+			
+			final Range rtRange = new Range(ff.getRt() - rtWindow, ff.getRt() + rtWindow);
+			final Range mzRange = MsUtils.createMassRange(ff.getMz(), mzWindow, mzErrorType);
+			clusters.stream().
+				filter(c -> !c.containsFeaturesWithinRanges(rtRange, mzRange).isEmpty()).
+				forEach(c -> {
+						c.setLookupFeature(ff);
+						filteredClusters.add(c);
+					});				
+		}
+		if(filteredClusters.isEmpty()) {
+			
+			MessageDialog.showWarningMsg(
+					"No matching clusters found", 
+					msmsClusterMZRTListFilterDialog);
+			return;
+		}
+		else {
+			clearMSMSFeatureData();
+			msmsFeatureClusterTreePanel.loadFeatureClusters(filteredClusters);			
+			Collection<MinimalMSOneFeature>lookupFeatures = 
+					filteredClusters.stream().filter(c -> Objects.nonNull(c.getLookupFeature())).
+					map(c -> c.getLookupFeature()).collect(Collectors.toSet());
+			lookupFeatureTable.loadLookupFeatures(lookupFeatures);
+			activeCluster = null;
+			msmsClusterMZRTListFilterDialog.dispose();
+		}
+	}
 
 	private void reloadActiveMSMSClustersDataSet() {
 
@@ -1431,7 +1499,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		Collection<MSPField>individual = new ArrayList<MSPField>();
 		individual.add(MSPField.NAME);
 		individual.add(MSPField.FORMULA);
-		individual.add(MSPField.EXACTMASS);
+		individual.add(MSPField.EXACT_MASS);
 		individual.add(MSPField.MW);
 		individual.add(MSPField.INCHI_KEY);
 		individual.add(MSPField.PRECURSORMZ);
@@ -1442,7 +1510,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 
 		if (cid.getFormula() != null)
 			contents.add(MSPField.FORMULA.getName() + ": " + cid.getFormula());
-		contents.add(MSPField.EXACTMASS.getName() + ": "
+		contents.add(MSPField.EXACT_MASS.getName() + ": "
 				+ MRC2ToolBoxConfiguration.getMzFormat().format(cid.getExactMass()));
 		contents.add(MSPField.MW.getName() + ": " + 
 				Integer.toString((int) Math.round(cid.getExactMass())));

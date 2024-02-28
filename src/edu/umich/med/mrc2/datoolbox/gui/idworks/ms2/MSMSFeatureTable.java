@@ -226,18 +226,6 @@ public class MSMSFeatureTable extends BasicTable {
 		finalizeLayout();
 	}
 	
-//	private void adjustVariableColumns() {
-//		
-//		fixedWidthColumns.clear();
-//		fixedWidthColumns.add(getColumnIndex(MSMSFeatureTableModel.AMBIGUITY_COLUMN));
-//		fixedWidthColumns.add(getColumnIndex(MSMSFeatureTableModel.ID_LEVEL_COLUMN));
-//		fixedWidthColumns.add(getColumnIndex(MSMSFeatureTableModel.ANNOTATIONS_COLUMN));
-//		fixedWidthColumns.add(getColumnIndex(MSMSFeatureTableModel.FOLLOWUP_COLUMN));
-//				
-//		tca.adjustColumnsExcluding(fixedWidthColumns);
-//		columnModel.getColumnById(MSMSFeatureTableModel.COMPOUND_NAME_COLUMN).setMinWidth(200);
-//	}
-	
 	public void setTableModelFromFeatureList(Collection<MSFeatureInfoBundle> featureList) {
 
 		((MSMSFeatureTableModel)model).removeFeatureCluster();

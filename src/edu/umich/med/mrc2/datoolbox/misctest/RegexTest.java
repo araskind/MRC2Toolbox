@@ -3159,7 +3159,7 @@ public class RegexTest {
 		Collection<MSPField>individual = new ArrayList<MSPField>();
 		individual.add(MSPField.NAME);
 		individual.add(MSPField.FORMULA);
-		individual.add(MSPField.EXACTMASS);
+		individual.add(MSPField.EXACT_MASS);
 		individual.add(MSPField.MW);
 		individual.add(MSPField.INCHI_KEY);
 		individual.add(MSPField.PRECURSORMZ);
@@ -3179,7 +3179,7 @@ public class RegexTest {
 
 			if (cid.getFormula() != null)
 				entry.add(MSPField.FORMULA.getName() + ": " + cid.getFormula());
-			entry.add(MSPField.EXACTMASS.getName() + ": "
+			entry.add(MSPField.EXACT_MASS.getName() + ": "
 					+ MRC2ToolBoxConfiguration.getMzFormat().format(cid.getExactMass()));
 			entry.add(MSPField.MW.getName() + ": " + 
 					Integer.toString((int) Math.round(cid.getExactMass())));
@@ -3803,7 +3803,7 @@ public class RegexTest {
 		Collection<MSPField>individual = new ArrayList<MSPField>();
 		individual.add(MSPField.NAME);
 		individual.add(MSPField.FORMULA);
-		individual.add(MSPField.EXACTMASS);
+		individual.add(MSPField.EXACT_MASS);
 		individual.add(MSPField.MW);
 		individual.add(MSPField.INCHI_KEY);
 		individual.add(MSPField.PRECURSORMZ);
@@ -3817,7 +3817,7 @@ public class RegexTest {
 
 			if (cid.getFormula() != null)
 				writer.append(MSPField.FORMULA.getName() + ": " + cid.getFormula() + "\n");
-			writer.append(MSPField.EXACTMASS.getName() + ": "
+			writer.append(MSPField.EXACT_MASS.getName() + ": "
 					+ MRC2ToolBoxConfiguration.getMzFormat().format(cid.getExactMass()) + "\n");
 			writer.append(MSPField.MW.getName() + ": " + 
 					Integer.toString((int) Math.round(cid.getExactMass())) + "\n");
@@ -6290,7 +6290,7 @@ public class RegexTest {
 				msMode = "N";
 
 			writer.append(MSPField.ION_MODE.getName() + ": " + msMode + "\n");
-			writer.append(MSPField.EXACTMASS.getName() + ": "
+			writer.append(MSPField.EXACT_MASS.getName() + ": "
 					+ MRC2ToolBoxConfiguration.getMzFormat().format(rs.getDouble("EXACT_MASS")) + "\n");
 
 			writer.append(MSPField.COLLISION_ENERGY.getName() + ": " + rs.getString("FRAG_ENERGY") + "\n");
@@ -6359,7 +6359,7 @@ public class RegexTest {
 			writer.append(MSPField.SYNONYM.getName() + ": " + rs.getString("FULL_NAME") + "\n");
 			writer.append(MSPField.FORMULA.getName() + ": " + rs.getString("MOL_FORMULA") + "\n");
 			writer.append(MSPField.ION_MODE.getName() + ": " + rs.getString("MS_MODE") + "\n");
-			writer.append(MSPField.EXACTMASS.getName() + ": "
+			writer.append(MSPField.EXACT_MASS.getName() + ": "
 					+ MRC2ToolBoxConfiguration.getMzFormat().format(rs.getDouble("FORMULA_MASS")) + "\n");
 
 			if(rs.getString("ADDUCT") != null)

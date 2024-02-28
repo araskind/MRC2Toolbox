@@ -23,29 +23,36 @@ package edu.umich.med.mrc2.datoolbox.data.enums;
 
 public enum MSPField {
 
-	NAME("Name", true),
-	NUM_PEAKS("Num Peaks", true),
-	COMMENT("Comments", false),
-	FORMULA("Formula", false),
-	MW("MW", false),
-	SYNONYM("Synon", false),
 	CAS("CAS#", false),
-	PRECURSORMZ("PrecursorMZ", false),
-	DB_NUM("DB#", false),
-	NIST_NUM("NIST#", false),
-	INCHI_KEY("InChIKey", false),
-	RETENTION_INDEX("Retention_index", false),
-	ION_MODE("Ion_mode", false),	//	P or N
 	COLLISION_ENERGY("Collision_energy", false),	//	String
-	NOTES("Notes", false),
-	PRECURSOR_TYPE("Precursor_type", false), //	e.g. [M+H]+
-	SPECTRUM_TYPE("Spectrum_type", false),	//	MS2, MS3, MS4 etc
-	INSTRUMENT_TYPE("Instrument_type", false),	//	e.g. IT/ion trap
+	COLLISION_GAS("Collision_gas", false),
+	COMMENTS("Comments", false),
+	DB_NUM("DB#", false),
+	EXACT_MASS("ExactMass", false),
+	FORMULA("Formula", false),
+	INCHI_KEY("InChIKey", false),
 	INSTRUMENT("Instrument", false),	//	Model
-	SAMPLE_INLET("Sample_inlet", false),	//	e.g. HPLC
+	INSTRUMENT_TYPE("Instrument_type", false),	//	e.g. IT/ion trap
+	IN_SOURCE_VOLTAGE("In-source_voltage", false),
 	IONIZATION("Ionization", false),	//	e.g.ESI
+	ION_MODE("Ion_mode", false),	//	P or N
+	MSN_PATHWAY("msN_pathway", false),
+	MW("MW", false),
+	NAME("Name", true),
+	NIST_NUM("NIST#", false),
+	NOTES("Notes", false),
+	NUM_PEAKS("Num Peaks", true),
+	PEPTIDE_MODS("Peptide_mods", false),
+	PEPTIDE_SEQUENCE("Peptide_sequence", false),
+	PRECURSORMZ("PrecursorMZ", false),
+	PRECURSOR_TYPE("Precursor_type", false), //	e.g. [M+H]+
+	PRESSURE("Pressure", false),
+	RELATED_CAS("Related_CAS#", false),
+	RETENTION_INDEX("Retention_index", false),
+	SAMPLE_INLET("Sample_inlet", false),	//	e.g. HPLC
 	SPECIAL_FRAGMENTATION("Special_fragmentation", false),	// e.g. wideband
-	EXACTMASS("ExactMass", false),
+	SPECTRUM_TYPE("Spectrum_type", false),	//	MS2, MS3, MS4 etc
+	SYNONYM("Synon", false),
 	;
 
 	private final String uiName;

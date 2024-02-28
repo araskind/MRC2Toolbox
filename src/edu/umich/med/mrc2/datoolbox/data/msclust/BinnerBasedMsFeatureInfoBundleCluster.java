@@ -510,6 +510,16 @@ public class BinnerBasedMsFeatureInfoBundleCluster implements IMsFeatureInfoBund
 		}
 		return count;
 	}
+
+	@Override
+	public Collection<MSFeatureInfoBundle> containsFeaturesWithinRanges(
+			Range rtRange, Range mzRange) {
+
+		return getComponents().stream().
+				filter(f -> rtRange.contains(f.getRetentionTime())).
+				filter(f -> mzRange.contains(f.getPrecursorMz())).
+				collect(Collectors.toList());
+	}
 }
 
 

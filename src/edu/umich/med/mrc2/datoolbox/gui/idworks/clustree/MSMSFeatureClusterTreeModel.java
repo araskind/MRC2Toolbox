@@ -107,7 +107,7 @@ public class MSMSFeatureClusterTreeModel extends DefaultTreeModel {
 		for (int j = 0; j < childrenCount; j++) {
 
 			DefaultMutableTreeNode child = (DefaultMutableTreeNode) getChild(clustersNode, j);
-			result[j] = (MsFeatureInfoBundleCluster) child.getUserObject();
+			result[j] = (IMsFeatureInfoBundleCluster) child.getUserObject();
 		}
 		return result;
 	}

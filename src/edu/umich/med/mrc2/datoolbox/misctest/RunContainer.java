@@ -1876,7 +1876,7 @@ public class RunContainer {
 				writer.append(MSPField.PRECURSORMZ.getName() + ": " + rs.getString("PRECURSOR_MZ") + "\n");
 			
 			writer.append(MSPField.INCHI_KEY.getName() + ": " + rs.getString("INCHI_KEY") + "\n");
-			writer.append(MSPField.COMMENT.getName() + ": " + rs.getString("COMMENTS") + "\n");
+			writer.append(MSPField.COMMENTS.getName() + ": " + rs.getString("COMMENTS") + "\n");
 			
 			msps.setString(1, rs.getString("MRC2_LIB_ID"));
 			msrs = msps.executeQuery();

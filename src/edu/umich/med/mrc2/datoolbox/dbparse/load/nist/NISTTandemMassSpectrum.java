@@ -28,6 +28,7 @@ import java.util.TreeMap;
 
 import edu.umich.med.mrc2.datoolbox.data.MsPoint;
 import edu.umich.med.mrc2.datoolbox.data.TandemMassSpectrum;
+import edu.umich.med.mrc2.datoolbox.data.enums.MSPField;
 import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
 
 public class NISTTandemMassSpectrum extends TandemMassSpectrum {
@@ -40,7 +41,7 @@ public class NISTTandemMassSpectrum extends TandemMassSpectrum {
 	protected int dbnum;
 	protected int nistNum;
 	protected double exactMass;
-	protected Map<NISTmspField,String>properties;
+	protected Map<MSPField,String>properties;
 	protected Collection<MsPoint>precursors;
 	protected String peptideModifications;
 	protected String peptideSequence;
@@ -54,10 +55,10 @@ public class NISTTandemMassSpectrum extends TandemMassSpectrum {
 
 		super(polarity);
 		synonyms = new ArrayList<String>();
-		properties = new TreeMap<NISTmspField,String>();
+		properties = new TreeMap<MSPField,String>();
 		
 		if(initAllProperties) {
-			for(NISTmspField field : NISTmspField.values())
+			for(MSPField field : MSPField.values())
 				properties.put(field, "");
 		}
 		precursors = new ArrayList<MsPoint>();
@@ -103,11 +104,11 @@ public class NISTTandemMassSpectrum extends TandemMassSpectrum {
 	/**
 	 * @return the properties
 	 */
-	public Map<NISTmspField, String> getProperties() {
+	public Map<MSPField, String> getProperties() {
 		return properties;
 	}
 	
-	public String getProperty(NISTmspField property) {
+	public String getProperty(MSPField property) {
 		return properties.get(property);
 	}
 
@@ -142,7 +143,7 @@ public class NISTTandemMassSpectrum extends TandemMassSpectrum {
 	/**
 	 * @param properties the properties to set
 	 */
-	public void addProperty(NISTmspField field,  String value) {
+	public void addProperty(MSPField field,  String value) {
 		properties.put(field, value);
 	}
 
@@ -180,6 +181,11 @@ public class NISTTandemMassSpectrum extends TandemMassSpectrum {
 	public void setPeptideSequence(String peptideSequence) {
 		this.peptideSequence = peptideSequence;
 	}
+	
+    @Override
+    public int hashCode() {
+    	return uniqueId.hashCode();
+    }
 }
 
 

@@ -465,43 +465,6 @@ public class BasicTable extends JTable implements ActionListener{
 				
 				tableData.append(getCellStringValue(i,j));
 
-//                final TableCellRenderer renderer = getCellRenderer(i, j);
-//                final Component comp = prepareRenderer(renderer, i, j);
-//                String txt = null;
-//                if(comp == null) {
-//                	txt = "";
-//                }
-//                else {
-//                    if(JLabel.class.isAssignableFrom(comp.getClass()))             
-//                    	txt = ((JLabel) comp).getText();
-//
-//                    if (JTextPane.class.isAssignableFrom(comp.getClass()))
-//                    	txt = ((JTextPane) comp).getText();
-//                    
-//                    if (JTextField.class.isAssignableFrom(comp.getClass()))
-//                    	txt = ((JTextField) comp).getText();
-//                    
-//                    if (JTextArea.class.isAssignableFrom(comp.getClass()))
-//                    	txt = ((JTextArea) comp).getText();
-//                    
-//                    if(JCheckBox.class.isAssignableFrom(comp.getClass()))
-//                    	txt = Boolean.toString(((JCheckBox) comp).isSelected());
-//                    
-//                    if(JRadioButton.class.isAssignableFrom(comp.getClass()))
-//                    	txt = Boolean.toString(((JRadioButton) comp).isSelected());
-//                }
-//                if(txt != null) {
-//                	try {
-//                		//	Strip HTML code
-//    					tableData.append(txt.trim().replaceAll("<[^>]*>", "")); 
-//    				} catch (Exception e) {
-//    					// TODO Auto-generated catch block
-//    					e.printStackTrace();
-//    				}
-//                }
-//                else {
-//                	tableData.append("");
-//                }
                 if(j<numCols-1)
                 	tableData.append("\t");
                 else
@@ -520,9 +483,15 @@ public class BasicTable extends JTable implements ActionListener{
         	return "";
         }
         else {
-            if(JLabel.class.isAssignableFrom(comp.getClass()))             
+            if(JLabel.class.isAssignableFrom(comp.getClass())) {  
+            	
             	txt = ((JLabel) comp).getText();
-
+            	if(txt == null || txt.isEmpty())
+            		txt = ((JLabel) comp).getToolTipText();
+            	
+            	if(txt == null)
+            		txt = "";
+            }
             else if (JTextPane.class.isAssignableFrom(comp.getClass()))
             	txt = ((JTextPane) comp).getText();
             

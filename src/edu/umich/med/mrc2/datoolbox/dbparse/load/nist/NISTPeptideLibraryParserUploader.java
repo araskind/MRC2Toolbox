@@ -37,6 +37,7 @@ import org.apache.commons.io.LineIterator;
 
 import edu.umich.med.mrc2.datoolbox.data.MsPoint;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
+import edu.umich.med.mrc2.datoolbox.data.enums.MSPField;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.FilePreferencesFactory;
@@ -88,9 +89,9 @@ public class NISTPeptideLibraryParserUploader {
 				new ArrayList<NISTPeptideTandemMassSpectrum>();
 		List<String> chunk = new ArrayList<String>();
 		Pattern namePattern = 
-				Pattern.compile("(?i)^" + NISTmspField.NAME.getName() + ":");
+				Pattern.compile("(?i)^" + MSPField.NAME.getName() + ":");
 		Pattern pnumPattern =
-				Pattern.compile("(?i)^" + NISTmspField.NUM_PEAKS.getName() + ":?\\s+\\d+");
+				Pattern.compile("(?i)^" + MSPField.NUM_PEAKS.getName() + ":?\\s+\\d+");
 		Matcher regexMatcher;
 		int count = 0;
 		LineIterator it = null;

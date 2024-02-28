@@ -434,7 +434,7 @@ public class NISTMsPepSearchRoundTripTask extends NISTMsPepSearchTask {
 					MRC2ToolBoxConfiguration.getRtFormat().format(msf.getRetentionTime()) + " min.\n");
 
 			//	Comments
-			String comment = MSPField.COMMENT.getName() + ": ";
+			String comment = MSPField.COMMENTS.getName() + ": ";
 			if(bundle.getAcquisitionMethod() != null)
 				comment += "Acq. method: " + bundle.getAcquisitionMethod().getName() + "; ";
 			

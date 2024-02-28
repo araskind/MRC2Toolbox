@@ -79,7 +79,8 @@ public class IDWorkbenchMenuBar extends CommonMenuBar {
 	private static final Icon calcStatsIcon = GuiUtils.getIcon("calcStats", 24);
 	private static final Icon clusterIconSmall = GuiUtils.getIcon("cluster", 16);
 	private static final Icon clusterIcon = GuiUtils.getIcon("cluster", 24);
-	private static final Icon filterClustersIcon = GuiUtils.getIcon("filter", 24);
+	private static final Icon filterClustersIcon = GuiUtils.getIcon("filter", 24);	
+	private static final Icon filterClustersByMZRTIcon = GuiUtils.getIcon("filterClusterByMZRTList", 24);	
 	private static final Icon reloadClusterTreeIcon = GuiUtils.getIcon("rerun", 24);
 	private static final Icon clusteringSummaryIcon = GuiUtils.getIcon("summary", 24);
 	private static final Icon mzFrequencyIcon = GuiUtils.getIcon("mzFrequency", 24);
@@ -122,6 +123,7 @@ public class IDWorkbenchMenuBar extends CommonMenuBar {
 		reloadActiveClusterSetFeaturesMenuItem,
 		extractMajorClusterFeaturesMenuItem,
 		filterClustersMenuItem,
+		filterClustersMZRTListMenuItem,
 		reloadClusterTreeMenuItem,
 		clusteringSummaryMenuItem;
 
@@ -251,6 +253,10 @@ public class IDWorkbenchMenuBar extends CommonMenuBar {
 		filterClustersMenuItem = addItem(clusterMenu, 
 				MainActionCommands.SHOW_MSMS_CLUSTER_FILTER_COMMAND, 
 				filterClustersIcon);
+		
+		filterClustersMZRTListMenuItem = addItem(clusterMenu, 
+				MainActionCommands.SHOW_MSMS_CLUSTER_MZ_RT_LIST_FILTER_COMMAND, 
+				filterClustersByMZRTIcon);
 		
 		clusteringSummaryMenuItem = addItem(clusterMenu, 
 				MainActionCommands.SHOW_MSMS_CLUSTERS_SUMMARY_COMMAND, 

@@ -184,21 +184,22 @@ public class TextUtils {
 			    .replace("]", escapeChar + "]");
 	}
 
-	public static List<String> readFileInList(String fileName) {
+	public static List<String> readFileInList(String filePath) {
 
 		List<String> lines = Collections.emptyList();
 		try {
-			lines = Files.readAllLines(Paths.get(fileName), StandardCharsets.UTF_8);
+			lines = Files.readAllLines(Paths.get(filePath), StandardCharsets.UTF_8);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		return lines;
 	}
 
-	public static List<String>readTextFileToList(String fileName){
+	public static List<String>readTextFileToList(String filePath){
 
 		List<String> list = new ArrayList<>();
-		try (BufferedReader br = Files.newBufferedReader(Paths.get(fileName))) {
+		try (BufferedReader br = Files.newBufferedReader(
+				Paths.get(filePath), StandardCharsets.UTF_8)) {
 			list = br.lines().collect(Collectors.toList());
 		}
 		catch (IOException e) {

@@ -146,7 +146,7 @@ public class MSMSLibraryMSPExportTask extends AbstractTask {
 		Collection<MSPField>individual = new ArrayList<MSPField>();
 		individual.add(MSPField.NAME);
 		individual.add(MSPField.FORMULA);
-		individual.add(MSPField.EXACTMASS);
+		individual.add(MSPField.EXACT_MASS);
 		individual.add(MSPField.MW);
 		individual.add(MSPField.INCHI_KEY);
 		individual.add(MSPField.PRECURSORMZ);
@@ -160,7 +160,7 @@ public class MSMSLibraryMSPExportTask extends AbstractTask {
 
 			if (cid.getFormula() != null)
 				writer.append(MSPField.FORMULA.getName() + ": " + cid.getFormula() + "\n");
-			writer.append(MSPField.EXACTMASS.getName() + ": "
+			writer.append(MSPField.EXACT_MASS.getName() + ": "
 					+ MRC2ToolBoxConfiguration.getMzFormat().format(cid.getExactMass()) + "\n");
 			writer.append(MSPField.MW.getName() + ": " + 
 					Integer.toString((int) Math.round(cid.getExactMass())) + "\n");

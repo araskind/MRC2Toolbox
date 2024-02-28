@@ -1245,6 +1245,11 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 		files.stream().forEach(f -> RawDataManager.removeDataSource(f));
 		clearMsData(files);
 		
+		//TODO - remove only data for closed files
+		chromatogramListingPanel.clearPanel();
+		avgSpectraListingPanel.clearPanel();
+		
+		
 		xicSetupPanel.removeDataFiles(files);
 		msExtractorPanel.removeDataFiles(files);
 		

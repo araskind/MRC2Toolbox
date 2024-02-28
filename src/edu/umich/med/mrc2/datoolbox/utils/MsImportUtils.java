@@ -364,6 +364,9 @@ public class MsImportUtils {
 			if(!line.trim().isEmpty())
 				chunk.add(line.trim());
 		}
+		if(!chunk.isEmpty()) 
+			mspChunks.add(chunk);
+		
 		return mspChunks;
 	}
 }

@@ -45,6 +45,7 @@ import edu.umich.med.mrc2.datoolbox.data.compare.SortDirection;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.enums.CompoundIdentityField;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
+import edu.umich.med.mrc2.datoolbox.data.enums.MSPField;
 import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
 import edu.umich.med.mrc2.datoolbox.utils.SQLUtils;
 import edu.umich.med.mrc2.datoolbox.utils.TextUtils;
@@ -66,8 +67,8 @@ public class NISTMSPParser {
 		double precursorMz = -1.0;
 		String precursorString = "";
 		Matcher regexMatcher = null;
-		Map<NISTmspField,Pattern>patternMap = new TreeMap<NISTmspField,Pattern>();
-		for(NISTmspField field : NISTmspField.values())
+		Map<MSPField,Pattern>patternMap = new TreeMap<MSPField,Pattern>();
+		for(MSPField field : MSPField.values())
 			patternMap.put(field, Pattern.compile("(?i)^" + field.getName() + ":?\\s+(.+)"));
 
 		Matcher casNistMatcher = null;
@@ -76,7 +77,7 @@ public class NISTMSPParser {
 		spectrumStart = -1;
 
 		//	Find polarity
-		Pattern polarityPattern = Pattern.compile("(?i)^" + NISTmspField.ION_MODE.getName() + ":?\\s+([PN])");
+		Pattern polarityPattern = Pattern.compile("(?i)^" + MSPField.ION_MODE.getName() + ":?\\s+([PN])");
 		Polarity polarity = null;
 		for(int i=0; i<record.length; i++) {
 			regexMatcher = polarityPattern.matcher(record[i]);
@@ -91,7 +92,7 @@ public class NISTMSPParser {
 		//	Add all non-ms data
 		for(int i=0; i<record.length; i++) {
 
-			regexMatcher = patternMap.get(NISTmspField.NUM_PEAKS).matcher(record[i]);
+			regexMatcher = patternMap.get(MSPField.NUM_PEAKS).matcher(record[i]);
 			if (regexMatcher.find()) {
 
 				pnum = Integer.parseInt(regexMatcher.group(1));
@@ -99,52 +100,52 @@ public class NISTMSPParser {
 				break;
 			}
 			else {
-				for (Entry<NISTmspField, Pattern> entry : patternMap.entrySet()) {
+				for (Entry<MSPField, Pattern> entry : patternMap.entrySet()) {
 
 					regexMatcher = entry.getValue().matcher(record[i]);
 
 					if(regexMatcher.find()) {
 
-						if(entry.getKey().equals(NISTmspField.DB_NUM)) {
+						if(entry.getKey().equals(MSPField.DB_NUM)) {
 							msmsSet.setDbnum(Integer.parseInt(regexMatcher.group(1)));
 						}
-						else if(entry.getKey().equals(NISTmspField.EXACT_MASS)) {
+						else if(entry.getKey().equals(MSPField.EXACT_MASS)) {
 							msmsSet.setExactMass(Double.parseDouble(regexMatcher.group(1)));
 						}
-						else if(entry.getKey().equals(NISTmspField.NIST_NUMBER)) {
+						else if(entry.getKey().equals(MSPField.NIST_NUM)) {
 							msmsSet.setNistNum(Integer.parseInt(regexMatcher.group(1)));
 						}
 						//	When CAS is on one line with NIST #
-						else if(entry.getKey().equals(NISTmspField.CAS)) {
+						else if(entry.getKey().equals(MSPField.CAS)) {
 
 							casNistMatcher = casNistPattern.matcher(record[i]);
 							if(casNistMatcher.find()) {
-								msmsSet.addProperty(NISTmspField.CAS, casNistMatcher.group(1));
+								msmsSet.addProperty(MSPField.CAS, casNistMatcher.group(1));
 								msmsSet.setNistNum(Integer.parseInt(casNistMatcher.group(2)));
 							}
 							else {
-								msmsSet.addProperty(NISTmspField.CAS, regexMatcher.group(1));
+								msmsSet.addProperty(MSPField.CAS, regexMatcher.group(1));
 							}
 						}
-						else if(entry.getKey().equals(NISTmspField.SYNONYM)){
+						else if(entry.getKey().equals(MSPField.SYNONYM)){
 							msmsSet.addSynonym(regexMatcher.group(1));
 						}
-						else if(entry.getKey().equals(NISTmspField.COMMENTS)) {						
+						else if(entry.getKey().equals(MSPField.COMMENTS)) {						
 							msmsSet.getNotes().add(regexMatcher.group(1));
 						}
-						else if(entry.getKey().equals(NISTmspField.NOTES)) {
+						else if(entry.getKey().equals(MSPField.NOTES)) {
 							
 							String[] notes = regexMatcher.group(1).split(";");
 							for(String note : notes)
 								msmsSet.getNotes().add(note.trim());
 						}
-						else if(entry.getKey().equals(NISTmspField.PRECURSORMZ)) {
+						else if(entry.getKey().equals(MSPField.PRECURSORMZ)) {
 							precursorString = regexMatcher.group(1);
 						}
-						else if(entry.getKey().equals(NISTmspField.PEPTIDE_MODS)) {
+						else if(entry.getKey().equals(MSPField.PEPTIDE_MODS)) {
 							msmsSet.setPeptideModifications(regexMatcher.group(1));
 						}
-						else if(entry.getKey().equals(NISTmspField.PEPTIDE_SEQUENCE)) {
+						else if(entry.getKey().equals(MSPField.PEPTIDE_SEQUENCE)) {
 							msmsSet.setPeptideSequence(regexMatcher.group(1));
 						}
 						else {
@@ -181,8 +182,8 @@ public class NISTMSPParser {
 				for(String prec : precs) {
 
 					MsPoint precursor = new MsPoint(Double.parseDouble(prec), 1000.0d);
-					if(!msmsSet.getProperties().get(NISTmspField.PRECURSOR_TYPE).isEmpty())
-						precursor.setAdductType(msmsSet.getProperties().get(NISTmspField.PRECURSOR_TYPE));
+					if(!msmsSet.getProperties().get(MSPField.PRECURSOR_TYPE).isEmpty())
+						precursor.setAdductType(msmsSet.getProperties().get(MSPField.PRECURSOR_TYPE));
 
 					msmsSet.addPrecursor(precursor);
 				}
@@ -200,50 +201,49 @@ public class NISTMSPParser {
 			Connection conn) throws SQLException {
 
 		String dataQuery =
-				"INSERT INTO NIST_LIBRARY_COMPONENT " +
-				"(DB_NUM, NIST_ID, CAS_NUMBER, RELATED_CAS, NAME, ION_MODE, "
+				"INSERT INTO COMPOUNDDB.NIST_LIBRARY_COMPONENT " +
+				"(NIST_ID, CAS_NUMBER, RELATED_CAS, NAME, ION_MODE, "
 				+ "IONIZATION, EXACT_MASS, FORMULA, INCHI_KEY, " +
 				"COLLISION_ENERGY, COLLISION_GAS, INSTRUMENT, INSTRUMENT_TYPE, "
 				+ "IN_SOURCE_VOLTAGE, MSN_PATHWAY, PRESSURE, " +
 				"SAMPLE_INLET, SPECIAL_FRAGMENTATION, SPECTRUM_TYPE) " +
-				"VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+				"VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
 		int nistId = newRecord.getNistNum();
 
 		//	Component record
 		PreparedStatement ps = conn.prepareStatement(dataQuery);
 
-		ps.setInt(1, newRecord.getDbnum());
-		ps.setInt(2, nistId);
-		ps.setString(3, newRecord.getProperties().get(NISTmspField.CAS));
-		ps.setString(4, newRecord.getProperties().get(NISTmspField.RELATED_CAS));
-		ps.setString(5, newRecord.getProperties().get(NISTmspField.NAME));
-		ps.setString(6, newRecord.getProperties().get(NISTmspField.ION_MODE));
-		ps.setString(7, newRecord.getProperties().get(NISTmspField.IONIZATION));
-		ps.setDouble(8, newRecord.getExactMass());
-		ps.setString(9, newRecord.getProperties().get(NISTmspField.FORMULA));
-		ps.setString(10, newRecord.getProperties().get(NISTmspField.INCHI_KEY));
-		ps.setString(11, newRecord.getProperties().get(NISTmspField.COLLISION_ENERGY));
-		ps.setString(12, newRecord.getProperties().get(NISTmspField.COLLISION_GAS));
-		ps.setString(13, newRecord.getProperties().get(NISTmspField.INSTRUMENT));
-		ps.setString(14, newRecord.getProperties().get(NISTmspField.INSTRUMENT_TYPE));
-		ps.setString(15, newRecord.getProperties().get(NISTmspField.IN_SOURCE_VOLTAGE));
-		ps.setString(16, newRecord.getProperties().get(NISTmspField.MSN_PATHWAY));
-		ps.setString(17, newRecord.getProperties().get(NISTmspField.PRESSURE));
-		ps.setString(18, newRecord.getProperties().get(NISTmspField.SAMPLE_INLET));
-		ps.setString(19, newRecord.getProperties().get(NISTmspField.SPECIAL_FRAGMENTATION));
-		ps.setString(20, newRecord.getProperties().get(NISTmspField.SPECTRUM_TYPE));
+		ps.setInt(1, nistId);
+		ps.setString(2, newRecord.getProperties().get(MSPField.CAS));
+		ps.setString(3, newRecord.getProperties().get(MSPField.RELATED_CAS));
+		ps.setString(4, newRecord.getProperties().get(MSPField.NAME));
+		ps.setString(5, newRecord.getProperties().get(MSPField.ION_MODE));
+		ps.setString(6, newRecord.getProperties().get(MSPField.IONIZATION));
+		ps.setDouble(7, newRecord.getExactMass());
+		ps.setString(8, newRecord.getProperties().get(MSPField.FORMULA));
+		ps.setString(9, newRecord.getProperties().get(MSPField.INCHI_KEY));
+		ps.setString(10, newRecord.getProperties().get(MSPField.COLLISION_ENERGY));
+		ps.setString(11, newRecord.getProperties().get(MSPField.COLLISION_GAS));
+		ps.setString(12, newRecord.getProperties().get(MSPField.INSTRUMENT));
+		ps.setString(13, newRecord.getProperties().get(MSPField.INSTRUMENT_TYPE));
+		ps.setString(14, newRecord.getProperties().get(MSPField.IN_SOURCE_VOLTAGE));
+		ps.setString(15, newRecord.getProperties().get(MSPField.MSN_PATHWAY));
+		ps.setString(16, newRecord.getProperties().get(MSPField.PRESSURE));
+		ps.setString(17, newRecord.getProperties().get(MSPField.SAMPLE_INLET));
+		ps.setString(18, newRecord.getProperties().get(MSPField.SPECIAL_FRAGMENTATION));
+		ps.setString(19, newRecord.getProperties().get(MSPField.SPECTRUM_TYPE));
 
 		ps.executeUpdate();
 		ps.close();
 
 		//	Synonyms
 		dataQuery =
-			"INSERT INTO NIST_SYNONYM (NIST_ID, CPD_NAME, STYPE) VALUES(?, ?, ?)";
+			"INSERT INTO COMPOUNDDB.NIST_SYNONYM (NIST_ID, CPD_NAME, STYPE) VALUES(?, ?, ?)";
 
 		ps = conn.prepareStatement(dataQuery);
 		ps.setInt(1, nistId);
-		ps.setString(2, newRecord.getProperties().get(NISTmspField.NAME));
+		ps.setString(2, newRecord.getProperties().get(MSPField.NAME));
 		ps.setString(3, "PRI");
 		ps.executeUpdate();
 
@@ -256,7 +256,7 @@ public class NISTMSPParser {
 		ps.close();
 
 		//	Annotations
-		dataQuery = "INSERT INTO NIST_LIBRARY_ANNOTATION (NIST_ID, NOTE_TEXT) VALUES(?, ?)";
+		dataQuery = "INSERT INTO COMPOUNDDB.NIST_LIBRARY_ANNOTATION (NIST_ID, NOTE_TEXT) VALUES(?, ?)";
 		ps = conn.prepareStatement(dataQuery); 
 		ps.setInt(1, nistId);
 		for(String annot : newRecord.getNotes()) { 
@@ -268,7 +268,7 @@ public class NISTMSPParser {
 
 		//	MSMS spectrum
 		dataQuery =
-			"INSERT INTO NIST_LIBRARY_PEAK " +
+			"INSERT INTO COMPOUNDDB.NIST_LIBRARY_PEAK " +
 			"(NIST_ID, MZ, INTENSITY, ADDUCT, IS_PARENT) " +
 			"VALUES(?, ?, ?, ?, ?)";
 
@@ -299,17 +299,17 @@ public class NISTMSPParser {
 		
 		//	Compound data
 		dataQuery = 
-				"INSERT INTO NIST_COMPOUND_DATA  " +
+				"INSERT INTO COMPOUNDDB.NIST_COMPOUND_DATA  " +
 				"(NIST_ID, NAME, CAS_NUMBER, RELATED_CAS, " +
 				"FORMULA, INCHI_KEY, SMILES, MOL_TXT)  " +
 				"VALUES(?, ?, ?, ?, ?, ?, ?, ?) ";
 		ps = conn.prepareStatement(dataQuery);
 		ps.setInt(1, nistId);
-		ps.setString(2, newRecord.getProperties().get(NISTmspField.NAME));
-		ps.setString(3, newRecord.getProperties().get(NISTmspField.CAS));
-		ps.setString(4, newRecord.getProperties().get(NISTmspField.RELATED_CAS));
-		ps.setString(5, newRecord.getProperties().get(NISTmspField.FORMULA));
-		ps.setString(6, newRecord.getProperties().get(NISTmspField.INCHI_KEY));
+		ps.setString(2, newRecord.getProperties().get(MSPField.NAME));
+		ps.setString(3, newRecord.getProperties().get(MSPField.CAS));
+		ps.setString(4, newRecord.getProperties().get(MSPField.RELATED_CAS));
+		ps.setString(5, newRecord.getProperties().get(MSPField.FORMULA));
+		ps.setString(6, newRecord.getProperties().get(MSPField.INCHI_KEY));
 		
 		if(molecule != null) {
 			ps.setString(7, molecule.getProperty(CompoundIdentityField.SMILES.name()));
@@ -328,8 +328,8 @@ public class NISTMSPParser {
 		List<List<String>> mspChunks = new ArrayList<List<String>>();
 		List<String> allLines = TextUtils.readTextFileToList(inputFile.getAbsolutePath());
 		List<String> chunk = new ArrayList<String>();
-		Pattern namePattern = Pattern.compile("(?i)^" + NISTmspField.NAME.getName() + ":");
-		Pattern pnumPattern = Pattern.compile("(?i)^" + NISTmspField.NUM_PEAKS.getName() + ":?\\s+\\d+");
+		Pattern namePattern = Pattern.compile("(?i)^" + MSPField.NAME.getName() + ":");
+		Pattern pnumPattern = Pattern.compile("(?i)^" + MSPField.NUM_PEAKS.getName() + ":?\\s+\\d+");
 		Matcher regexMatcher;
 		int counter = 0;
 
@@ -486,9 +486,9 @@ public class NISTMSPParser {
 
 		PreparedStatement ps = conn.prepareStatement(query);
 		ps.setString(1, mrcId);
-		ps.setString(2, newRecord.getProperties().get(NISTmspField.ION_MODE));
-		ps.setString(3, newRecord.getProperties().get(NISTmspField.IONIZATION));
-		ps.setString(4, newRecord.getProperties().get(NISTmspField.COLLISION_ENERGY));
+		ps.setString(2, newRecord.getProperties().get(MSPField.ION_MODE));
+		ps.setString(3, newRecord.getProperties().get(MSPField.IONIZATION));
+		ps.setString(4, newRecord.getProperties().get(MSPField.COLLISION_ENERGY));
 
 		MsPoint precursor = newRecord.getPrecursors().iterator().next();
 		if(newRecord.getPrecursors().size() > 1)
@@ -497,19 +497,19 @@ public class NISTMSPParser {
 				findFirst().get();
 
 		ps.setDouble(5, precursor.getMz());
-		ps.setString(6, newRecord.getProperties().get(NISTmspField.PRECURSOR_TYPE));
-		ps.setString(7, newRecord.getProperties().get(NISTmspField.COLLISION_GAS));
-		ps.setString(8, newRecord.getProperties().get(NISTmspField.INSTRUMENT));
-		ps.setString(9, newRecord.getProperties().get(NISTmspField.INSTRUMENT_TYPE));
-		ps.setString(10, newRecord.getProperties().get(NISTmspField.IN_SOURCE_VOLTAGE));
-		ps.setString(11, newRecord.getProperties().get(NISTmspField.MSN_PATHWAY));
-		ps.setString(12, newRecord.getProperties().get(NISTmspField.PRESSURE));
-		ps.setString(13, newRecord.getProperties().get(NISTmspField.SAMPLE_INLET));
-		ps.setString(14, newRecord.getProperties().get(NISTmspField.SPECIAL_FRAGMENTATION));
+		ps.setString(6, newRecord.getProperties().get(MSPField.PRECURSOR_TYPE));
+		ps.setString(7, newRecord.getProperties().get(MSPField.COLLISION_GAS));
+		ps.setString(8, newRecord.getProperties().get(MSPField.INSTRUMENT));
+		ps.setString(9, newRecord.getProperties().get(MSPField.INSTRUMENT_TYPE));
+		ps.setString(10, newRecord.getProperties().get(MSPField.IN_SOURCE_VOLTAGE));
+		ps.setString(11, newRecord.getProperties().get(MSPField.MSN_PATHWAY));
+		ps.setString(12, newRecord.getProperties().get(MSPField.PRESSURE));
+		ps.setString(13, newRecord.getProperties().get(MSPField.SAMPLE_INLET));
+		ps.setString(14, newRecord.getProperties().get(MSPField.SPECIAL_FRAGMENTATION));
 		ps.setString(15, "MS2");
 		ps.setString(16, "HIGH");
 		ps.setString(17, "INSTRUMENT");
-		ps.setString(18, newRecord.getProperties().get(NISTmspField.IONIZATION));
+		ps.setString(18, newRecord.getProperties().get(MSPField.IONIZATION));
 		ps.setString(19, "nist_msms2");
 		ps.setString(20, Integer.toString(newRecord.getDbnum()));
 		ps.executeUpdate();
@@ -521,8 +521,8 @@ public class NISTMSPParser {
 
 		ps = conn.prepareStatement(query);
 		ps.setString(1, mrcId);
-		ps.setString(2, newRecord.getProperties().get(NISTmspField.NAME));
-		ps.setString(3, newRecord.getProperties().get(NISTmspField.FORMULA));
+		ps.setString(2, newRecord.getProperties().get(MSPField.NAME));
+		ps.setString(3, newRecord.getProperties().get(MSPField.FORMULA));
 		ps.setString(4, newRecord.getPeptideSequence());
 		ps.executeUpdate();
 		ps.close();
@@ -538,7 +538,7 @@ public class NISTMSPParser {
 		 * "Annotation"); for(ObjectAnnotation annot : newRecord.getAnnotations()) {
 		 * ps.setString(3, annot.getText()); ps.executeUpdate(); }
 		 * if(newRecord.getPeptideModifications() != null) { ps.setString(2,
-		 * NISTmspField.PEPTIDE_MODS.getName()); ps.setString(3,
+		 * MSPField.PEPTIDE_MODS.getName()); ps.setString(3,
 		 * newRecord.getPeptideModifications()); ps.executeUpdate(); } ps.close();
 		 */
 

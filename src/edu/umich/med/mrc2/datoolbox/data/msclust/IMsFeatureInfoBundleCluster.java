@@ -31,6 +31,7 @@ import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MinimalMSOneFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.clustree.MajorClusterFeatureDefiningProperty;
+import edu.umich.med.mrc2.datoolbox.utils.Range;
 
 public interface IMsFeatureInfoBundleCluster {
 
@@ -95,6 +96,8 @@ public interface IMsFeatureInfoBundleCluster {
 	void setFeatures(Collection<MSFeatureInfoBundle> featureBundlesForIds);
 
 	void setLookupFeature(MinimalMSOneFeature lf);
+	
+	Collection<MSFeatureInfoBundle> containsFeaturesWithinRanges(Range rtRange, Range mzRange);
 }
 
 

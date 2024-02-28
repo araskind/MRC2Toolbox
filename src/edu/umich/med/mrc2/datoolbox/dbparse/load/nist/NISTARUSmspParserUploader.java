@@ -41,6 +41,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import edu.umich.med.mrc2.datoolbox.data.MsPoint;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
+import edu.umich.med.mrc2.datoolbox.data.enums.MSPField;
 import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
@@ -64,16 +65,16 @@ public class NISTARUSmspParserUploader {
 	private static String sampleType = "urine";
 	
 	private static final Pattern namePattern = 
-			Pattern.compile("(?i)^" + NISTmspField.NAME.getName() + ":");
+			Pattern.compile("(?i)^" + MSPField.NAME.getName() + ":");
 	private static final Pattern pnumPattern =
-			Pattern.compile("(?i)^" + NISTmspField.NUM_PEAKS.getName() + ":?\\s+\\d+");
+			Pattern.compile("(?i)^" + MSPField.NUM_PEAKS.getName() + ":?\\s+\\d+");
 	private static final Pattern polarityPattern = 
-			Pattern.compile("(?i)^" + NISTmspField.ION_MODE.getName() + ":?\\s+([PN])");
+			Pattern.compile("(?i)^" + MSPField.ION_MODE.getName() + ":?\\s+([PN])");
 	private static final Pattern msmsPattern = 
 			Pattern.compile("^([0-9\\.]+)\\s?,?\\s?([0-9,\\.]+)\\s?(.+)?");
 	
 	private static Matcher regexMatcher;
-	private static Map<NISTmspField,Pattern>patternMap;
+	private static Map<MSPField,Pattern>patternMap;
 	private static Map<NISTARUSmspCommentField,Pattern>commentsPatternMap;
 	
 	public static void main(String[] args) {
@@ -84,8 +85,8 @@ public class NISTARUSmspParserUploader {
 				MRC2ToolBoxCore.configDir + "MRC2ToolBoxPrefs.txt");
 		MRC2ToolBoxConfiguration.initConfiguration();
 		
-		patternMap = new TreeMap<NISTmspField,Pattern>();
-		for(NISTmspField field : NISTmspField.values())
+		patternMap = new TreeMap<MSPField,Pattern>();
+		for(MSPField field : MSPField.values())
 			patternMap.put(field, Pattern.compile("(?i)^" + field.getName() + ":?\\s+(.+)"));
 
 		commentsPatternMap = 
@@ -368,9 +369,9 @@ public class NISTARUSmspParserUploader {
 			String specHash = MsUtils.calculateSpectrumHash(msms.getSpectrum());
 			ps.setString(11, specHash);	//	SPECTRUM_HASH
 			ps.setString(12, organism);	//	ORGANISM
-			ps.setString(13, msms.getProperty(NISTmspField.NAME));	//	NAME
+			ps.setString(13, msms.getProperty(MSPField.NAME));	//	NAME
 			ps.setString(14, msms.getPeptideSequence());	//	PEPTIDE_SEQUENCE
-			ps.setString(15, msms.getProperty(NISTmspField.COMMENTS));	//	COMMENTS
+			ps.setString(15, msms.getProperty(MSPField.COMMENTS));	//	COMMENTS
 			ps.setNull(16, java.sql.Types.NULL);
 			ps.setString(17, sampleType);	//	SAMPLE_TYPE
 			ps.executeUpdate();
@@ -401,7 +402,7 @@ public class NISTARUSmspParserUploader {
 			
 			//	Properties
 			propertiesPs.setString(1, libId);	//	MRC2_LIB_ID
-			for(Entry<NISTmspField, String> property : msms.getProperties().entrySet()) {
+			for(Entry<MSPField, String> property : msms.getProperties().entrySet()) {
 				
 				propertiesPs.setString(2, property.getKey().name());
 				propertiesPs.setString(3, property.getValue());
@@ -461,7 +462,7 @@ public class NISTARUSmspParserUploader {
 		//	Add all non-ms data
 		for(int i=0; i<record.length; i++) {
 
-			regexMatcher = patternMap.get(NISTmspField.NUM_PEAKS).matcher(record[i]);
+			regexMatcher = patternMap.get(MSPField.NUM_PEAKS).matcher(record[i]);
 			if (regexMatcher.find()) {
 
 				pnum = Integer.parseInt(regexMatcher.group(1));
@@ -469,24 +470,24 @@ public class NISTARUSmspParserUploader {
 				break;
 			}
 			else {
-				for (Entry<NISTmspField, Pattern> entry : patternMap.entrySet()) {
+				for (Entry<MSPField, Pattern> entry : patternMap.entrySet()) {
 
 					regexMatcher = entry.getValue().matcher(record[i]);
 
 					if(regexMatcher.find()) {
 
-						if(entry.getKey().equals(NISTmspField.EXACT_MASS)) {
+						if(entry.getKey().equals(MSPField.EXACT_MASS)) {
 							arusEntry.setExactMass(Double.parseDouble(regexMatcher.group(1)));
 						}
-						else if(entry.getKey().equals(NISTmspField.SYNONYM)){
+						else if(entry.getKey().equals(MSPField.SYNONYM)){
 							arusEntry.addSynonym(regexMatcher.group(1));
 						}
-						else if(entry.getKey().equals(NISTmspField.COMMENTS)) {	
+						else if(entry.getKey().equals(MSPField.COMMENTS)) {	
 							String comments = regexMatcher.group(1);
-							arusEntry.addProperty(NISTmspField.COMMENTS, comments);
+							arusEntry.addProperty(MSPField.COMMENTS, comments);
 							parseNISTARUSComments(arusEntry);
 						}
-						else if(entry.getKey().equals(NISTmspField.PRECURSORMZ)) {
+						else if(entry.getKey().equals(MSPField.PRECURSORMZ)) {
 							precursorString = regexMatcher.group(1);
 						}
 						else {
@@ -521,8 +522,8 @@ public class NISTARUSmspParserUploader {
 				for(String prec : precs) {
 
 					MsPoint precursor = new MsPoint(Double.parseDouble(prec), 1000.0d);
-					if(!arusEntry.getProperties().get(NISTmspField.PRECURSOR_TYPE).isEmpty())
-						precursor.setAdductType(arusEntry.getProperties().get(NISTmspField.PRECURSOR_TYPE));
+					if(!arusEntry.getProperties().get(MSPField.PRECURSOR_TYPE).isEmpty())
+						precursor.setAdductType(arusEntry.getProperties().get(MSPField.PRECURSOR_TYPE));
 
 					arusEntry.addPrecursor(precursor);
 				}
@@ -536,7 +537,7 @@ public class NISTARUSmspParserUploader {
 
 	private static void parseNISTARUSComments(NISTARUStandemMassSpectrum arusEntry) {
 
-		String comments = arusEntry.getProperty(NISTmspField.COMMENTS);
+		String comments = arusEntry.getProperty(MSPField.COMMENTS);
 		if(comments == null || comments.isEmpty())
 			return;
 		

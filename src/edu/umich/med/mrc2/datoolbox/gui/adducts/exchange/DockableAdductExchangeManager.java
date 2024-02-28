@@ -62,6 +62,8 @@ public class DockableAdductExchangeManager extends DefaultSingleCDockable implem
 		add(toolbar, BorderLayout.NORTH);
 
 		adductExchangeTable = new AdductExchangeTable();
+		adductExchangeTable.addTablePopupMenu(
+				new AdductExchangeTablePopupMenu(this,adductExchangeTable));	
 		scrollPane = new JScrollPane(adductExchangeTable);
 		add(scrollPane, BorderLayout.CENTER);
 

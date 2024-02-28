@@ -121,7 +121,7 @@ public class MSMSExportUtils {
 	
 	public static String createComment(MSFeatureInfoBundle bundle, Injection injection) {
 
-		String comment = MSPField.COMMENT.getName() + ": ";
+		String comment = MSPField.COMMENTS.getName() + ": ";
 		comment += "RT "+ MRC2ToolBoxConfiguration.getRtFormat().format(
 				bundle.getMsFeature().getRetentionTime()) + " min; ";
 

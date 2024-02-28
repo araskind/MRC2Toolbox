@@ -431,6 +431,16 @@ public class TandemMassSpectrum implements AnnotatedObject, Serializable {
 
         if (this.parent.getMz() != other.getParent().getMz())
         	return false;
+        
+        if (this.parent == null && other.getParent() != null)
+        	return false;
+        
+    	if(this.parent != null && other.getParent() == null)
+    		return false;
+    	
+    	if(this.parent != null && other.getParent() != null
+    			&& this.parent.getMz() != other.getParent().getMz())
+    		return false;
 
         if (this.cidLevel != other.getCidLevel())
         	return false;

@@ -93,6 +93,9 @@ public class DockableBinnerAnnotationsEditor
 		add(toolBar, BorderLayout.NORTH);
 
 		binnerAnnotationsTable = new BinnerAnnotationsTable();
+		binnerAnnotationsTable.addTablePopupMenu(
+				new BinnerAnnotationsTablePopupMenu(this,binnerAnnotationsTable));
+				
 		adductScrollPane = new JScrollPane(binnerAnnotationsTable);
 		add(adductScrollPane, BorderLayout.CENTER);
 		activeAdduct = null;
