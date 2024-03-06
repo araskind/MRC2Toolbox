@@ -21,16 +21,25 @@
 
 package edu.umich.med.mrc2.datoolbox.utils;
 
+import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.io.IOUtils;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.Namespace;
+import org.openscience.cdk.interfaces.IAtomContainer;
+import org.openscience.cdk.silent.SilentChemObjectBuilder;
 
 import edu.umich.med.mrc2.datoolbox.data.PubChemCompoundDescription;
 import edu.umich.med.mrc2.datoolbox.data.PubChemCompoundDescriptionBundle;
+import edu.umich.med.mrc2.datoolbox.misctest.IteratingSDFReaderFixed;
 
 public class PubChemUtils {
 	
@@ -113,5 +122,112 @@ public class PubChemUtils {
 		return bundle;
 	}
 	
+	public static IAtomContainer getMoleculeFromPubChemByInChiKey(String inchiKey) {
+		
+		String requestUrl = pubchemInchiKeyUrl + inchiKey + "/record/SDF";
+		InputStream pubchemDataStream = null;
+
+		try {
+			pubchemDataStream = WebUtils.getInputStreamFromURL(requestUrl);
+		} catch (Exception e) {
+			//	e.printStackTrace();
+		}		
+		if(pubchemDataStream == null)
+			return null;
+		
+		IteratingSDFReaderFixed reader = 
+				new IteratingSDFReaderFixed(
+						pubchemDataStream, SilentChemObjectBuilder.getInstance());
+		
+		IAtomContainer molecule = null;
+		while (reader.hasNext())
+			molecule = (IAtomContainer)reader.next();
+					
+		return molecule;
+	}
 	
+	public static boolean saveMoleculeFromPubChemByInChiKeyToSDFFile(String inchiKey, File sdfFile) {
+		
+		String requestUrl = pubchemInchiKeyUrl + inchiKey + "/record/SDF";
+		InputStream pubchemDataStream = null;
+		try {
+			pubchemDataStream = WebUtils.getInputStreamFromURL(requestUrl);
+		} catch (Exception e) {
+			//	e.printStackTrace();
+		}	
+		if(pubchemDataStream == null) {
+			
+			try {
+				Thread.sleep(300);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			requestUrl = pubchemInchiKeyUrl + inchiKey.split("-")[0] + "/record/SDF";
+			try {
+				pubchemDataStream = WebUtils.getInputStreamFromURL(requestUrl);
+			} catch (Exception e) {
+				//	e.printStackTrace();
+			}	
+		}			
+		if(pubchemDataStream != null) {
+			
+			try {
+				Files.copy(
+						pubchemDataStream,
+						sdfFile.toPath(),
+						  StandardCopyOption.REPLACE_EXISTING);
+				pubchemDataStream.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				return false;
+			}
+			return true;
+		}
+		else 
+			return false;
+	}
+	
+	public static String[]getPubChemSynonymsByCid(String cid){
+		
+		String[] synonyms = new String[0];
+		InputStream synonymStream = null;
+		try {
+			synonymStream = WebUtils.getInputStreamFromURL(pubchemCidUrl + cid + "/synonyms/TXT");
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+			//	e.printStackTrace();
+		}
+		if(synonymStream != null) {
+			try {
+				synonyms = IOUtils.toString(synonymStream, StandardCharsets.UTF_8).split("\\r?\\n");
+			}
+			catch (Exception e) {
+				System.out.println(e.getMessage());
+				//	e.printStackTrace();
+			}
+		}
+		return synonyms;
+	}
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

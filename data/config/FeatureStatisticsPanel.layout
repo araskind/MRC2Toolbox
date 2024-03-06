@@ -111,7 +111,7 @@
 														<placeholder>dock.single.FeatureDataPanelDockableFeatureDataTable</placeholder>
 													</placeholders>
 												</leaf>
-												<leaf id="2" nodeId="1697239277913">
+												<leaf id="0" nodeId="1697239277913">
 													<placeholders>
 														<placeholder>dock.single.FeatureDataPanelUniversalIdentificationResultsTable</placeholder>
 													</placeholders>
@@ -162,7 +162,7 @@
 														</placeholder-map>
 													</leaf>
 												</node>
-												<leaf id="0" nodeId="1600213792596">
+												<leaf id="2" nodeId="1600213792596">
 													<placeholders>
 														<placeholder>dock.single.FeatureDataPanelAnnotations</placeholder>
 													</placeholders>
@@ -203,6 +203,26 @@
 								</layout>
 							</adjacent>
 							<children ignore="false">
+								<child>
+									<layout factory="predefined" placeholder="dock.single.FeatureDataPanelUniversalIdentificationResultsTable">
+										<replacement id="dockablesingle FeatureDataPanelUniversalIdentificationResultsTable"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>FeatureDataPanelUniversalIdentificationResultsTable</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
+								</child>
+								<child>
+									<layout factory="predefined" placeholder="dock.single.FeatureDataPanelDockableFeatureDataTable">
+										<replacement id="dockablesingle FeatureDataPanelDockableFeatureDataTable"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>FeatureDataPanelDockableFeatureDataTable</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
+								</child>
 								<child>
 									<layout factory="delegate_StackDockStationFactory">
 										<selected>3</selected>
@@ -309,26 +329,6 @@
 											<children ignore="false"/>
 										</child>
 									</children>
-								</child>
-								<child>
-									<layout factory="predefined" placeholder="dock.single.FeatureDataPanelDockableFeatureDataTable">
-										<replacement id="dockablesingle FeatureDataPanelDockableFeatureDataTable"/>
-										<delegate id="delegate_ccontrol backup factory id">
-											<id>FeatureDataPanelDockableFeatureDataTable</id>
-											<area/>
-										</delegate>
-									</layout>
-									<children ignore="false"/>
-								</child>
-								<child>
-									<layout factory="predefined" placeholder="dock.single.FeatureDataPanelUniversalIdentificationResultsTable">
-										<replacement id="dockablesingle FeatureDataPanelUniversalIdentificationResultsTable"/>
-										<delegate id="delegate_ccontrol backup factory id">
-											<id>FeatureDataPanelUniversalIdentificationResultsTable</id>
-											<area/>
-										</delegate>
-									</layout>
-									<children ignore="false"/>
 								</child>
 								<child>
 									<layout factory="delegate_StackDockStationFactory">

@@ -66,6 +66,7 @@ import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.FilePreferencesFactory;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
+import edu.umich.med.mrc2.datoolbox.utils.ChemInfoUtils;
 import edu.umich.med.mrc2.datoolbox.utils.CompoundStructureUtils;
 import io.github.dan2097.jnainchi.InchiStatus;
 
@@ -96,7 +97,8 @@ public class CompoundDatabaseScripts {
 		logger.info("Statring the program");
 		MRC2ToolBoxConfiguration.initConfiguration();		
 		try {
-			generateTautomersAndZwitterIonsForCompoundDatabase("T3DB_COMPOUND_DATA", "T3DB");
+			createLipidMapsSMILESBasedData(true);
+			//	generateTautomersAndZwitterIonsForCompoundDatabase("T3DB_COMPOUND_DATA", "T3DB");
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -764,7 +766,7 @@ public class CompoundDatabaseScripts {
 		ConnectionManager.releaseConnection(conn);
 	}
 	
-	public static void createLipidMapsSMILESBasedData() throws Exception{
+	public static void createLipidMapsSMILESBasedData(boolean newOnly) throws Exception{
 		
 		igfactory = null;
 		try {
@@ -776,9 +778,12 @@ public class CompoundDatabaseScripts {
 		double toRound = 1000000.0d;
 		
 		Connection conn = ConnectionManager.getConnection();
-		String query = "SELECT LMID, SMILES, MOLECULAR_FORMULA"
+		String query = "SELECT LMID, SMILES, INCHI, MOLECULAR_FORMULA"
 				+ " FROM COMPOUNDDB.LIPIDMAPS_COMPOUND_DATA"
 				+ " WHERE SMILES IS NOT NULL";
+		if(newOnly)
+			query += " AND FORMULA_FROM_SMILES IS NULL";
+			
 		PreparedStatement ps = conn.prepareStatement(query);
 		
 		String updQuery = "UPDATE COMPOUNDDB.LIPIDMAPS_COMPOUND_DATA "
@@ -800,6 +805,10 @@ public class CompoundDatabaseScripts {
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
+			}
+			if(mol == null) {
+				String inchi = rs.getString("INCHI");
+				mol = ChemInfoUtils.generateMoleculeFromInchi(inchi);
 			}
 			if(mol != null) {
 				IMolecularFormula molFormula = 

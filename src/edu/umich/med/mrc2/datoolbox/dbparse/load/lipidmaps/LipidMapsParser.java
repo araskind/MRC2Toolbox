@@ -78,10 +78,8 @@ public class LipidMapsParser {
 		
 		//	Compound identity
 		record.getCompoundIdentity().setCommonName(commonName);
-		record.getCompoundIdentity().setSysName(record.getSysName());
-
-		record.getCompoundIdentity().setFormula(
-				lipidMapsDataMap.get(LipidMapsFields.FORMULA.name()));
+		record.getCompoundIdentity().setSysName(record.getSysName());			
+		record.getCompoundIdentity().setFormula(lipidMapsDataMap.get(LipidMapsFields.FORMULA.name()));		
 		record.getCompoundIdentity().setSmiles(
 				lipidMapsDataMap.get(LipidMapsFields.SMILES.name()));
 		record.getCompoundIdentity().setInChi(

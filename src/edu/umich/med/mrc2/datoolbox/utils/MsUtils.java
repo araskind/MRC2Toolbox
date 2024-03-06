@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -85,18 +86,6 @@ import edu.umich.med.mrc2.datoolbox.database.idt.MSRTLibraryUtils;
 import edu.umich.med.mrc2.datoolbox.main.AdductManager;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 
-/**
- * @author Sasha
- *
- */
-/**
- * @author Sasha
- *
- */
-/**
- * @author Sasha
- *
- */
 public class MsUtils {
 
 	public static final double NEUTRON_MASS = 1.003354838;
@@ -134,6 +123,8 @@ public class MsUtils {
 	
 	public static final MsDataPointComparator reverseIntensitySorter = 
 			new MsDataPointComparator(SortProperty.Intensity, SortDirection.DESC);
+	public static final MsDataPointComparator directIntensitySorter = 
+			new MsDataPointComparator(SortProperty.Intensity);
 	public static final MsDataPointComparator mzSorter = 
 			new MsDataPointComparator(SortProperty.MZ);
 	public static final MsDataPointComparator scanSorter = 
@@ -1373,6 +1364,20 @@ public class MsUtils {
 					spectrumIntensityFormat.format(p.getIntensity())).
 			collect(Collectors.toList());
 
+	    try {
+			MessageDigest md = MessageDigest.getInstance("MD5");
+			md.update(StringUtils.join(chunks).getBytes(Charset.forName("windows-1252")));
+			return DatatypeConverter.printHexBinary(md.digest()).toUpperCase();
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+		}
+	    return null;
+	}
+	
+	public static String calculateMzHash(TreeSet<Double>mzValues){
+
+		List<String> chunks = mzValues.stream().map(p -> spectrumMzFormat.format(p)).
+			collect(Collectors.toList());
 	    try {
 			MessageDigest md = MessageDigest.getInstance("MD5");
 			md.update(StringUtils.join(chunks).getBytes(Charset.forName("windows-1252")));

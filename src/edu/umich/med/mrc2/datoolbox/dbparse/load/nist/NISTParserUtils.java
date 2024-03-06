@@ -30,6 +30,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -57,8 +59,10 @@ import org.openscience.cdk.smiles.SmilesGenerator;
 
 import edu.umich.med.mrc2.datoolbox.data.enums.CompoundIdentityField;
 import edu.umich.med.mrc2.datoolbox.data.enums.MSPField;
+import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.misctest.IteratingSDFReaderFixed;
 import edu.umich.med.mrc2.datoolbox.utils.MsImportUtils;
+import edu.umich.med.mrc2.datoolbox.utils.PubChemUtils;
 import io.github.dan2097.jnainchi.InchiStatus;
 
 public class NISTParserUtils {
@@ -91,11 +95,20 @@ public class NISTParserUtils {
 		String output = inputName;
 		for(int i=0; i<24; i++) {
 			
-			if(output.contains(nistGreekInEnlish[i])) {
-				
-				//	output = output.replaceAll(nistGreekInEnlish[i], greek[i]);
-				output = output.replaceAll(nistGreekInEnlishEscaped[i], greek[i]);
-			}
+			if(output.contains(nistGreekInEnlish[i]))
+				output = output.replaceAll(nistGreekInEnlishEscaped[i], greek[i]);			
+		}
+		return output;
+	}
+	
+	public static String greekLettersToPhonetic(String inputName) {
+		
+		String output = inputName;
+		for(int i=0; i<24; i++) {
+			
+			if(output.contains(greek[i]))
+				output = output.replaceAll(greek[i], nistGreekInEnlishEscaped[i]);
+			
 		}
 		return output;
 	}
@@ -366,7 +379,8 @@ public class NISTParserUtils {
 				try {
 					smiles = smilesGenerator.create(molecule);
 				} catch (NullPointerException | CDKException e) {
-					System.out.println("Unable to generate SMILES for " + molecule.getProperty(CDKConstants.TITLE));
+					System.out.println("Unable to generate SMILES for " 
+							+ molecule.getProperty(CDKConstants.TITLE));
 				}
 				if(smiles != null)					
 					molecules.add(molecule);
@@ -468,7 +482,7 @@ public class NISTParserUtils {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		List<String>molErrorLog = new ArrayList<String>();
+		List<String>molErrorLog = new ArrayList<String>();		
 		for(int i=0; i<mspChunks.size(); i++) {
 			
 			IAtomContainer molecule = mols.get(i);		
@@ -528,6 +542,229 @@ public class NISTParserUtils {
 		System.out.println("MSMS upload completed");
 	}
 	
+	public static Map<NISTTandemMassSpectrum,IAtomContainer> createMsmsMolMapWithPubChemLookupOnly(
+			File mspFile, File logDir) throws Exception {
+		
+		List<String>molErrorLog = new ArrayList<String>();
+		TreeSet<String>missingInchiKeys = new TreeSet<String>();
+		Map<NISTTandemMassSpectrum,IAtomContainer>msmsMolMap = 
+				new HashMap<NISTTandemMassSpectrum,IAtomContainer>();	
+		List<NISTTandemMassSpectrum>msmsList = parseNISTmspFile(mspFile);
+		
+		for(NISTTandemMassSpectrum msms :msmsList) {
+					
+			String inchiKey = msms.getProperty(MSPField.INCHI_KEY);
+			if(inchiKey == null || inchiKey.isEmpty()) {
+				molErrorLog.add("No InChiKey for NIST ID " 			
+						+ msms.getProperty(MSPField.NIST_NUM) 
+						+ " " + msms.getProperty(MSPField.NAME));
+				msmsMolMap.put(msms, null);
+				continue;
+			}		
+			Thread.sleep(300);
+			IAtomContainer molecule = PubChemUtils.getMoleculeFromPubChemByInChiKey(inchiKey);
+			String smiles = null;
+			if(molecule != null) {
+				
+				molecule.setProperty(CompoundIdentityField.INCHIKEY.name(), inchiKey);
+				try {
+					smiles = smilesGenerator.create(molecule);
+				} catch (NullPointerException | CDKException e) {
+					molErrorLog.add("Unable to generate SMILES for " + molecule.getProperty(CDKConstants.TITLE));
+					molErrorLog.add(e.getMessage());
+					//	e.printStackTrace();
+				}
+				if(smiles != null) 	{	
+					
+					molecule.setProperty(CompoundIdentityField.SMILES.name(), smiles);
+					
+					StringWriter writer = new StringWriter();
+					SDFWriter sdfWriter = new SDFWriter(writer);
+			        sdfWriter.write(molecule);
+			        sdfWriter.close();
+			        molecule.setProperty(CompoundIdentityField.MOL_TEXT.name(), writer.toString());
+					
+			        msmsMolMap.put(msms, molecule);
+				}
+			}
+			else {
+				molErrorLog.add("No PubChem record for InChiKey " + inchiKey);
+				missingInchiKeys.add(inchiKey);
+				msmsMolMap.put(msms, null);
+			}
+		}
+		if(!molErrorLog.isEmpty() && logDir != null) {
+			
+			try {
+				Files.write(
+						Paths.get(logDir.getAbsolutePath(), 
+								FilenameUtils.getBaseName(mspFile.getName()) + ".log"), 
+						molErrorLog,
+						StandardCharsets.UTF_8,
+						StandardOpenOption.CREATE, 
+						StandardOpenOption.TRUNCATE_EXISTING);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		if(!missingInchiKeys.isEmpty() && logDir != null) {
+			
+			try {
+				Files.write(
+						Paths.get(logDir.getAbsolutePath(), 
+								FilenameUtils.getBaseName(mspFile.getName()) + "_missing_inchi_keys.txt"), 
+						missingInchiKeys,
+						StandardCharsets.UTF_8,
+						StandardOpenOption.CREATE, 
+						StandardOpenOption.APPEND);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		return msmsMolMap;
+	}
+	
+	public static Map<NISTTandemMassSpectrum,IAtomContainer> createMsmsMolMapWithPubChemLookup(
+			File mspFile, File sdfFile, File logDir) throws Exception {
+		
+		List<String>molErrorLog = new ArrayList<String>();
+		TreeSet<String>missingInchiKeys = new TreeSet<String>();
+		Map<NISTTandemMassSpectrum,IAtomContainer>msmsMolMap = 
+				new HashMap<NISTTandemMassSpectrum,IAtomContainer>();	
+		List<NISTTandemMassSpectrum>msmsList = parseNISTmspFile(mspFile);
+		
+		try {
+			igfactory = InChIGeneratorFactory.getInstance();
+		} catch (CDKException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		IteratingSDFReaderFixed reader = 
+				new IteratingSDFReaderFixed(new FileInputStream(sdfFile), 
+						DefaultChemObjectBuilder.getInstance());
+		
+		int molCount = 0;
+		while (reader.hasNext()) {
+
+			IAtomContainer molecule = new AtomContainer();
+			try {
+				molecule = (IAtomContainer)reader.next();
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			if(molecule != null){
+
+				String smiles = null;
+				try {
+					smiles = smilesGenerator.create(molecule);
+				} catch (NullPointerException | CDKException e) {
+					molErrorLog.add("Unable to generate SMILES for " + molecule.getProperty(CDKConstants.TITLE));
+					molErrorLog.add(e.getMessage());
+					//	e.printStackTrace();
+				}
+				if(smiles != null) {
+					
+					molecule.setProperty(CompoundIdentityField.SMILES.name(), smiles);
+					
+					inChIGenerator = igfactory.getInChIGenerator(molecule);
+					InchiStatus ret = inChIGenerator.getStatus();
+					if (ret == InchiStatus.SUCCESS || ret == InchiStatus.WARNING)
+						molecule.setProperty(CompoundIdentityField.INCHIKEY.name(), inChIGenerator.getInchiKey());
+					else
+						molErrorLog.add("Unable to generate InChi for " + molecule.getProperty(CDKConstants.TITLE));
+
+					StringWriter writer = new StringWriter();
+					SDFWriter sdfWriter = new SDFWriter(writer);
+			        sdfWriter.write(molecule);
+			        sdfWriter.close();
+			        molecule.setProperty(CompoundIdentityField.MOL_TEXT.name(), writer.toString());
+					
+			        msmsMolMap.put(msmsList.get(molCount), molecule);
+				}
+				else {					
+					Thread.sleep(300);
+					String inchiKey = msmsList.get(molCount).getProperty(MSPField.INCHI_KEY);
+					molecule = PubChemUtils.getMoleculeFromPubChemByInChiKey(inchiKey);
+					if(molecule != null) {
+						
+						molecule.setProperty(CompoundIdentityField.INCHIKEY.name(), inchiKey);
+						try {
+							smiles = smilesGenerator.create(molecule);
+						} catch (NullPointerException | CDKException e) {
+							molErrorLog.add("Unable to generate SMILES for " + molecule.getProperty(CDKConstants.TITLE));
+							molErrorLog.add(e.getMessage());
+							//	e.printStackTrace();
+						}
+						if(smiles != null) 	{	
+							
+							molecule.setProperty(CompoundIdentityField.SMILES.name(), smiles);
+							
+							StringWriter writer = new StringWriter();
+							SDFWriter sdfWriter = new SDFWriter(writer);
+					        sdfWriter.write(molecule);
+					        sdfWriter.close();
+					        molecule.setProperty(CompoundIdentityField.MOL_TEXT.name(), writer.toString());
+							
+					        msmsMolMap.put(msmsList.get(molCount), molecule);
+						}
+					}
+					else {
+						molErrorLog.add("No PubChem record for InChiKey " + inchiKey);
+						missingInchiKeys.add(inchiKey);
+						msmsMolMap.put(msmsList.get(molCount), null);
+					}
+				}
+			}
+			else {
+				msmsMolMap.put(msmsList.get(molCount), null);
+			}
+			molCount++;
+		}
+		if(!molErrorLog.isEmpty() && logDir != null) {
+			
+			try {
+				Files.write(
+						Paths.get(logDir.getAbsolutePath(), 
+								FilenameUtils.getBaseName(mspFile.getName()) + ".log"), 
+						molErrorLog,
+						StandardCharsets.UTF_8,
+						StandardOpenOption.CREATE, 
+						StandardOpenOption.TRUNCATE_EXISTING);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		if(!missingInchiKeys.isEmpty() && logDir != null) {
+			
+			try {
+				Files.write(
+						Paths.get(logDir.getAbsolutePath(), 
+								FilenameUtils.getBaseName(mspFile.getName()) + "_missing_inchi_keys.txt"), 
+						missingInchiKeys,
+						StandardCharsets.UTF_8,
+						StandardOpenOption.CREATE, 
+						StandardOpenOption.APPEND);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		return msmsMolMap;
+	}
+	
+	public static List<NISTTandemMassSpectrum>parseNISTmspFile(File mspFile){
+		
+		List<NISTTandemMassSpectrum>msmsList = new ArrayList<NISTTandemMassSpectrum>();
+		List<List<String>> mspChunks = NISTMSPParser.parseInputMspFile(mspFile);
+		for(int i=0; i<mspChunks.size(); i++) {
+			
+			NISTTandemMassSpectrum msms = 
+					NISTMSPParser.parseNistMspDataSource(mspChunks.get(i));
+			msmsList.add(msms);
+		}
+		return msmsList;
+	}
+	
 	public static Map<NISTTandemMassSpectrum,IAtomContainer> createMsmsMolMap(
 			File mspFile, File sdfFile, File logDir) throws Exception {
 		
@@ -562,22 +799,24 @@ public class NISTParserUtils {
 					molErrorLog.add(e.getMessage());
 					e.printStackTrace();
 				}
-				if(smiles != null)
+				if(smiles != null) {
 					molecule.setProperty(CompoundIdentityField.SMILES.name(), smiles);
-				
-				inChIGenerator = igfactory.getInChIGenerator(molecule);
-				InchiStatus ret = inChIGenerator.getStatus();
-				if (ret == InchiStatus.SUCCESS || ret == InchiStatus.WARNING)
-					molecule.setProperty(CompoundIdentityField.INCHIKEY.name(), inChIGenerator.getInchiKey());
-				else
-					molErrorLog.add("Unable to generate InChi for " + molecule.getProperty(CDKConstants.TITLE));
+					
+					inChIGenerator = igfactory.getInChIGenerator(molecule);
+					InchiStatus ret = inChIGenerator.getStatus();
+					if (ret == InchiStatus.SUCCESS || ret == InchiStatus.WARNING)
+						molecule.setProperty(CompoundIdentityField.INCHIKEY.name(), inChIGenerator.getInchiKey());
+					else
+						molErrorLog.add("Unable to generate InChi for " + molecule.getProperty(CDKConstants.TITLE));
+
+					StringWriter writer = new StringWriter();
+					SDFWriter sdfWriter = new SDFWriter(writer);
+			        sdfWriter.write(molecule);
+			        sdfWriter.close();
+			        molecule.setProperty(CompoundIdentityField.MOL_TEXT.name(), writer.toString());
+					molChunks.add(molecule);
+				}
 			}
-			StringWriter writer = new StringWriter();
-			SDFWriter sdfWriter = new SDFWriter(writer);
-	        sdfWriter.write(molecule);
-	        sdfWriter.close();
-	        molecule.setProperty(CompoundIdentityField.MOL_TEXT.name(), writer.toString());
-			molChunks.add(molecule);
 		}			
 		Map<NISTTandemMassSpectrum,IAtomContainer>msmsMolMap = 
 				new HashMap<NISTTandemMassSpectrum,IAtomContainer>();	
@@ -616,5 +855,50 @@ public class NISTParserUtils {
 				}
 		}
 		return msmsMolMap;
+	}
+	
+	public static void clearDataForNISTIDs(Collection<Integer> nistIds) throws Exception {
+		
+		Connection conn = ConnectionManager.getConnection();
+		
+		String query1 = "DELETE FROM COMPOUNDDB.NIST_LIBRARY_COMPONENT WHERE NIST_ID = ?";
+		PreparedStatement ps1 = conn.prepareStatement(query1);
+		
+		String query2 = "DELETE FROM COMPOUNDDB.NIST_COMPOUND_DATA WHERE NIST_ID = ?";
+		PreparedStatement ps2 = conn.prepareStatement(query2);
+		
+		String query3 = "DELETE FROM COMPOUNDDB.NIST_LIBRARY_ANNOTATION WHERE NIST_ID = ?";
+		PreparedStatement ps3 = conn.prepareStatement(query3);
+		
+		String query4 = "DELETE FROM COMPOUNDDB.NIST_LIBRARY_PEAK WHERE NIST_ID = ?";
+		PreparedStatement ps4 = conn.prepareStatement(query4);
+		
+		String query5 = "DELETE FROM COMPOUNDDB.NIST_SYNONYM WHERE NIST_ID = ?";
+		PreparedStatement ps5 = conn.prepareStatement(query5);
+		
+		for(Integer id : nistIds) {
+			
+			ps1.setInt(1, id);
+			ps1.executeQuery();
+			
+			ps2.setInt(1, id);
+			ps2.executeQuery();
+			
+			ps3.setInt(1, id);
+			ps3.executeQuery();
+			
+			ps4.setInt(1, id);
+			ps4.executeQuery();
+			
+			ps5.setInt(1, id);
+			ps5.executeQuery();
+		}		
+		ps1.close();
+		ps2.close();
+		ps3.close();
+		ps4.close();
+		ps5.close();
+		
+		ConnectionManager.releaseConnection(conn);
 	}
 }

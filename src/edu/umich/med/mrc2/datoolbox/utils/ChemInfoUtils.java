@@ -21,9 +21,35 @@
 
 package edu.umich.med.mrc2.datoolbox.utils;
 
+import org.openscience.cdk.CDKConstants;
+import org.openscience.cdk.DefaultChemObjectBuilder;
+import org.openscience.cdk.exception.CDKException;
+import org.openscience.cdk.inchi.InChIGenerator;
+import org.openscience.cdk.inchi.InChIGeneratorFactory;
+import org.openscience.cdk.inchi.InChIToStructure;
+import org.openscience.cdk.interfaces.IAtomContainer;
+import org.openscience.cdk.interfaces.IChemObjectBuilder;
+import org.openscience.cdk.interfaces.IMolecularFormula;
+import org.openscience.cdk.silent.SilentChemObjectBuilder;
+import org.openscience.cdk.smiles.SmiFlavor;
+import org.openscience.cdk.smiles.SmilesGenerator;
+import org.openscience.cdk.smiles.SmilesParser;
+import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator;
+
 import edu.umich.med.mrc2.datoolbox.data.enums.InChiKeyCharge;
+import io.github.dan2097.jnainchi.InchiStatus;
 
 public class ChemInfoUtils {
+	
+	private static final IChemObjectBuilder builder = 
+			SilentChemObjectBuilder.getInstance();
+	private static final SmilesGenerator smilesGenerator = 
+			new SmilesGenerator(SmiFlavor.Isomeric);	
+	private static final SmilesParser smilesParser = 
+			new SmilesParser(builder);
+	
+	private static InChIGeneratorFactory igfactory;
+	private static InChIGenerator inChIGenerator;
 
 	public static int getChargeFromInChiKey(String inChiKey) {
 		
@@ -33,4 +59,84 @@ public class ChemInfoUtils {
 		String lastChar = inChiKey.substring(inChiKey.length() - 1);				
 		return InChiKeyCharge.getChargeByCode(lastChar);
 	}
+	
+	public static IAtomContainer generateMoleculeFromInchi(String inchi) throws CDKException {
+		
+		igfactory = InChIGeneratorFactory.getInstance();
+		InChIToStructure intostruct = 
+				igfactory.getInChIToStructure(inchi, DefaultChemObjectBuilder.getInstance());
+
+		InchiStatus ret = intostruct.getStatus();
+		if (ret == InchiStatus.WARNING) {
+			// Structure generated, but with warning message
+			System.out.println("InChI warning: " + intostruct.getMessage());
+		} else if (ret != InchiStatus.SUCCESS) {
+			// Structure generation failed
+			System.out.println("Structure generation failed failed: " 
+					+ ret.toString() + " [" + intostruct.getMessage() + "]");
+			return null;
+		}
+		return intostruct.getAtomContainer();
+	}
+	
+	public static IAtomContainer generateMoleculeFromSMILES(String smiles) throws CDKException {
+		
+		IAtomContainer mol = null;
+		if (smiles == null || smiles.isEmpty() || smiles.equals("NoSmile")) 
+			return null;
+
+		try {
+			mol = smilesParser.parseSmiles(smiles);
+		} catch (Exception e1) {
+			e1.printStackTrace();
+		}
+		return mol;
+	}
+	
+	public static String generateFormulaStringFromSMILES(String smiles) throws CDKException {
+		
+		IAtomContainer mol = null;
+		if (smiles == null || smiles.isEmpty() || smiles.equals("NoSmile")) 
+			return null;
+
+		try {
+			mol = smilesParser.parseSmiles(smiles);
+		} catch (Exception e1) {
+			e1.printStackTrace();
+		}
+		if(mol != null) {
+			IMolecularFormula mf = MolecularFormulaManipulator.getMolecularFormula(mol);
+			if(mf != null)
+				return MolecularFormulaManipulator.getString(mf);
+		}
+		return null;
+	}
+	
+	public static String generateIsomericSmilesForMolecule(IAtomContainer molecule) {
+		
+		String smiles = null;
+		try {
+			smiles = smilesGenerator.create(molecule);
+		} catch (NullPointerException | CDKException e) {
+			System.out.println("Unable to generate SMILES for " + molecule.getProperty(CDKConstants.TITLE));
+			System.out.println(e.getMessage());
+			e.printStackTrace();
+			return null;
+		}
+		return smiles;
+	}
+	
+	public static String generateInchiForMolecule(IAtomContainer molecule) throws CDKException {
+		
+		igfactory = InChIGeneratorFactory.getInstance();
+		inChIGenerator = igfactory.getInChIGenerator(molecule);
+		InchiStatus ret = inChIGenerator.getStatus();
+		if (ret == InchiStatus.SUCCESS || ret == InchiStatus.WARNING)
+			return inChIGenerator.getInchi();
+		else
+			return null;
+	}
 }
+
+
+

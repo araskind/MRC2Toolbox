@@ -99,7 +99,7 @@ public class NISTDataUploader {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public void normalizeSdfData(File normSdfFolder) throws IOException {
 		
 		List<Path> pathList = Files.find(Paths.get(sdfDirectoryPath), 1,

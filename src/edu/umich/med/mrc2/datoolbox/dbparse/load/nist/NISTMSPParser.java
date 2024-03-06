@@ -206,9 +206,11 @@ public class NISTMSPParser {
 				+ "IONIZATION, EXACT_MASS, FORMULA, INCHI_KEY, " +
 				"COLLISION_ENERGY, COLLISION_GAS, INSTRUMENT, INSTRUMENT_TYPE, "
 				+ "IN_SOURCE_VOLTAGE, MSN_PATHWAY, PRESSURE, " +
-				"SAMPLE_INLET, SPECIAL_FRAGMENTATION, SPECTRUM_TYPE) " +
-				"VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-
+				"SAMPLE_INLET, SPECIAL_FRAGMENTATION, SPECTRUM_TYPE,"
+				+ "PEPTIDE_SEQUENCE, PEPTIDE_MODS) " +
+				"VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+		
+		
 		int nistId = newRecord.getNistNum();
 
 		//	Component record
@@ -233,6 +235,8 @@ public class NISTMSPParser {
 		ps.setString(17, newRecord.getProperties().get(MSPField.SAMPLE_INLET));
 		ps.setString(18, newRecord.getProperties().get(MSPField.SPECIAL_FRAGMENTATION));
 		ps.setString(19, newRecord.getProperties().get(MSPField.SPECTRUM_TYPE));
+		ps.setString(20, newRecord.getProperties().get(MSPField.PEPTIDE_SEQUENCE));
+		ps.setString(21, newRecord.getProperties().get(MSPField.PEPTIDE_MODS));
 
 		ps.executeUpdate();
 		ps.close();
@@ -291,7 +295,7 @@ public class NISTMSPParser {
 			ps.setDouble(2, p.getMz());
 			ps.setDouble(3, p.getIntensity());
 			ps.setString(4, p.getAdductType());
-			ps.setString(5, "N");
+			ps.setNull(5, java.sql.Types.NULL);
 			ps.addBatch();
 		}
 		ps.executeBatch();
@@ -313,7 +317,12 @@ public class NISTMSPParser {
 		
 		if(molecule != null) {
 			ps.setString(7, molecule.getProperty(CompoundIdentityField.SMILES.name()));
-			ps.setString(8, molecule.getProperty(CompoundIdentityField.MOL_TEXT.name()));
+			//32767
+			String molText = molecule.getProperty(CompoundIdentityField.MOL_TEXT.name());
+			if(molText.length() < 32767)
+				ps.setString(8, molText);
+			else
+				ps.setNull(8, java.sql.Types.NULL);
 		}
 		else {
 			ps.setString(7, null);
