@@ -24,8 +24,11 @@ package edu.umich.med.mrc2.datoolbox.utils;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
@@ -44,10 +47,15 @@ import edu.umich.med.mrc2.datoolbox.misctest.IteratingSDFReaderFixed;
 public class PubChemUtils {
 	
 	public static final String pubchemCidUrl = 
-			"https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/";
-	
+			"https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/";	
 	public static final String pubchemInchiKeyUrl =
 			"https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/inchikey/";
+	public static final String pubchemByNameUrl =
+			"https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/";
+	public static final String pubchemInchiUrl = 
+			"https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/inchi/";
+	
+	public static final String encoding = StandardCharsets.UTF_8.toString();
 
 	public static PubChemCompoundDescriptionBundle getCompoundDescriptionById(String cid) {
 		
@@ -69,6 +77,42 @@ public class PubChemUtils {
 		InputStream descStream = null;
 		try {
 			descStream = WebUtils.getInputStreamFromURL(pubchemInchiKeyUrl + inchiKey + "/description/XML");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		if(descStream == null)
+			return null;
+		
+		Document xmlDocument = XmlUtils.readXmlStream(descStream);
+		return parsePubChemDescription(xmlDocument);
+	}
+	
+	public static PubChemCompoundDescriptionBundle getCompoundDescriptionByName(
+			String compoundName) throws Exception {
+		
+		String requestUrl = 
+				pubchemByNameUrl + "description/XML?name=" + URLEncoder.encode(compoundName, encoding);
+		InputStream descStream = null;
+		try {
+			descStream = WebUtils.getInputStreamFromURL(requestUrl);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		if(descStream == null)
+			return null;
+		
+		Document xmlDocument = XmlUtils.readXmlStream(descStream);
+		return parsePubChemDescription(xmlDocument);
+	}
+	
+	public static PubChemCompoundDescriptionBundle getCompoundDescriptionByInchi(
+			String inchi) throws Exception {
+		
+		String requestUrl = 
+				pubchemInchiUrl + "description/XML?inchi=" + URLEncoder.encode(inchi, encoding);
+		InputStream descStream = null;
+		try {
+			descStream = WebUtils.getInputStreamFromURL(requestUrl);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -139,6 +183,30 @@ public class PubChemUtils {
 				new IteratingSDFReaderFixed(
 						pubchemDataStream, SilentChemObjectBuilder.getInstance());
 		
+		IAtomContainer molecule = null;
+		while (reader.hasNext())
+			molecule = (IAtomContainer)reader.next();
+					
+		return molecule;
+	}
+	
+	
+	public static IAtomContainer getMoleculeFromPubChemByName(String compoundName) throws Exception{
+
+		String requestUrl = 
+				pubchemByNameUrl + "record/SDF?name=" + URLEncoder.encode(compoundName, encoding);
+		InputStream pubchemDataStream = null;
+		try {
+			pubchemDataStream = WebUtils.getInputStreamFromURL(requestUrl);
+		} catch (Exception e) {
+			//	e.printStackTrace();
+		}		
+		if(pubchemDataStream == null)
+			return null;
+		
+		IteratingSDFReaderFixed reader = 
+				new IteratingSDFReaderFixed(
+						pubchemDataStream, SilentChemObjectBuilder.getInstance());	
 		IAtomContainer molecule = null;
 		while (reader.hasNext())
 			molecule = (IAtomContainer)reader.next();

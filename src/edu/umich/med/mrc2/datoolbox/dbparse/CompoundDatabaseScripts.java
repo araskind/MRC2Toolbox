@@ -25,10 +25,16 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -59,15 +65,20 @@ import org.openscience.cdk.smiles.SmilesParser;
 import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator;
 import org.slf4j.LoggerFactory;
 
+import com.Ostermiller.util.CSVParser;
+
 import ambit2.tautomers.TautomerManager;
 import ambit2.tautomers.ranking.EnergyRanking;
 import ambit2.tautomers.zwitterion.ZwitterionManager;
+import edu.umich.med.mrc2.datoolbox.data.PubChemCompoundDescriptionBundle;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.FilePreferencesFactory;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.utils.ChemInfoUtils;
 import edu.umich.med.mrc2.datoolbox.utils.CompoundStructureUtils;
+import edu.umich.med.mrc2.datoolbox.utils.PubChemUtils;
+import edu.umich.med.mrc2.datoolbox.utils.WebUtils;
 import io.github.dan2097.jnainchi.InchiStatus;
 
 public class CompoundDatabaseScripts {
@@ -83,6 +94,8 @@ public class CompoundDatabaseScripts {
 	public static InChIGeneratorFactory igfactory;
 	public static InChIGenerator inChIGenerator;
 	
+	public static final String encoding = StandardCharsets.UTF_8.toString();
+	
 	public static void main(String[] args) {
 
 		System.setProperty("java.util.prefs.PreferencesFactory", 
@@ -97,16 +110,150 @@ public class CompoundDatabaseScripts {
 		logger.info("Statring the program");
 		MRC2ToolBoxConfiguration.initConfiguration();		
 		try {
-			createLipidMapsSMILESBasedData(true);
-			//	generateTautomersAndZwitterIonsForCompoundDatabase("T3DB_COMPOUND_DATA", "T3DB");
+			//	standardizeNoConflictLipidMapsData();
+			//	createLipidMapsSMILESBasedData(true);
+			//	generateTautomersAndZwitterIonsForCompoundDatabase("LIPIDMAPS_COMPOUND_DATA", "LIPIDMAPS", true);
+			getPubChemIdsForLipidMapsEntriesByInchiOrName();
+
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 	
+	private static void retTest() {
+		
+		String inchi = "InChI=1S/C47H87O13P/c1-3-5-7-9-11-13-15-17-19-20-22-24-26-28-30-32-34-36-41"
+				+ "(49)59-39(38-58-61(55,56)60-47-45(53)43(51)42(50)44(52)46(47)54)37-57-40(48)35-33-"
+				+ "31-29-27-25-23-21-18-16-14-12-10-8-6-4-2/h11,13,17,19,39,42-47,50-54H,3-10,12,14-16,"
+				+ "18,20-38H2,1-2H3,(H,55,56)/b13-11-,19-17-/t39-,42?,43-,44?,45?,46?,47-/m1/s1";
+		PubChemCompoundDescriptionBundle pds = null;
+		try {
+			pds = PubChemUtils.getCompoundDescriptionByInchi(inchi);
+			System.out.println(pds.getCid());
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		String name = "PI(18:0/20:2(11Z,14Z))";
+		PubChemCompoundDescriptionBundle pdsn = null;
+		try {
+			pdsn = PubChemUtils.getCompoundDescriptionByName(name);
+			System.out.println(pdsn.getCid());
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	private static void testUrlEncode() {
+		
+		String input = "PC(22:0/22:6(4Z,7Z,10Z,13Z,16Z,19Z))";
+		String correct = "PC(22%3A0%2F22%3A6(4Z%2C7Z%2C10Z%2C13Z%2C16Z%2C19Z))";
+		String encoded = "";
+		try {
+			encoded  = URLEncoder.encode(input, encoding).
+				replaceAll("\\+", "%20").
+				replaceAll("%28", "(").
+				replaceAll("%29", ")");
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		if(!encoded.equals(correct)) {
+			System.out.println(encoded);
+		}		
+	}
+	
+	public static void standardizeNoConflictLipidMapsData() {
+		
+		String sourceTable = "LIPIDMAPS_COMPOUND_DATA";
+		String sourceDb = "LipidMaps";
+		File logFile = 
+				new File("E:\\DataAnalysi;s\\Databases\\_LATEST\\LipidMaps-2024-03-04\\LipidMapsNoConflictStandardizeLog_20240306.txt");
+		try {
+			standardizeNoConflictData(sourceTable, sourceDb, logFile);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	public static void standardizeNoConflictData(
+			String sourceTable, String sourceDb, File logFile) throws Exception {
+		
+		Collection<String>stdLog = new ArrayList<String>();
+		
+		Connection conn = ConnectionManager.getConnection();
+		String query = 
+				"SELECT ACCESSION, SMILES, INCHI FROM "
+				+ "COMPOUNDDB." + sourceTable + " WHERE CHARGE = 0 "
+				+ "AND FORMULA_CONFLICT IS NULL AND MS_READY_SMILES IS NULL "
+				+ "ORDER BY ACCESSION";
+		PreparedStatement ps = conn.prepareStatement(query);
+		
+		String updQuery = 
+				"UPDATE COMPOUNDDB." + sourceTable
+				+ " SET MS_READY_MOL_FORMULA = ?, MS_READY_EXACT_MASS = ?, "
+				+ "MS_READY_SMILES = ?, MS_READY_INCHI_KEY = ?, "
+				+ "MS_READY_INCHI_KEY2D = ?, MS_READY_CHARGE = ? "
+				+ "WHERE ACCESSION = ?";
+		PreparedStatement updPs = conn.prepareStatement(updQuery);
+		
+		int counter = 0;
+		ResultSet rs = ps.executeQuery();
+		while(rs.next()) {
+			
+			String accession = rs.getString(1);
+			String smiles = rs.getString(2);
+			String inchi = rs.getString(3);
+			StandardizedStructure stdMol = 
+					StructureStandardizationUtils.standardizeStructure(smiles, inchi);
+			
+			if(stdMol == null) {
+				stdLog.add("Could not process " + sourceDb + ": " + accession);
+				stdLog.add(smiles);
+				stdLog.add(inchi);
+				stdLog.add("\n************************\n");
+			}
+			else {
+				
+				updPs.setString(1, stdMol.getFormulaStringFromSmiles());
+				updPs.setDouble(2, stdMol.getSmilesMass());
+				updPs.setString(3, stdMol.getStdSmiles());
+				updPs.setString(4, stdMol.getStdInchiKey());
+				updPs.setString(5, stdMol.getStdInchiKey().split("-")[0]);
+				updPs.setInt(6, 0);
+				updPs.setString(7, accession);
+				updPs.executeUpdate();
+			}
+			counter++;
+			if(counter % 100 == 0)
+				System.out.print(".");
+			if(counter % 10000 == 0)
+				System.out.print(".\n");
+		}
+		rs.close();
+		ps.close();
+		updPs.close();
+		ConnectionManager.releaseConnection(conn);
+		
+		if(!stdLog.isEmpty()) {
+			
+			try {
+				Files.write(logFile.toPath(), 
+						stdLog, 
+						StandardCharsets.UTF_8,
+						StandardOpenOption.CREATE, 
+						StandardOpenOption.TRUNCATE_EXISTING);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
 	public static void generateTautomersAndZwitterIonsForCompoundDatabase(
-			String sourceTable, String sourceDb) throws Exception {
+			String sourceTable, String sourceDb, boolean newEntriesOnly) throws Exception {
 		
 		igfactory = null;
 		try {
@@ -121,13 +268,21 @@ public class CompoundDatabaseScripts {
 		String query = 
 				"SELECT ACCESSION, MS_READY_SMILES FROM "
 				+ "COMPOUNDDB." + sourceTable + " WHERE MS_READY_SMILES IS NOT NULL "
-				//	+ "AND ACCESSION > 'DB13742' "
 				+ "ORDER BY ACCESSION";
+		if(newEntriesOnly) {
+			
+			query = "SELECT D.ACCESSION, D.MS_READY_SMILES  " +
+					"FROM  COMPOUNDDB." + sourceTable + " D  " +
+					"WHERE  D.ACCESSION NOT IN( " +
+					"SELECT  T.ACCESSION  " +
+					"FROM COMPOUNDDB.COMPOUND_TAUTOMERS T  " +
+					"WHERE T.SOURCE_DB = '" + sourceDb + "') ";
+		}
 		PreparedStatement ps = conn.prepareStatement(query);
 		
 		String insertQuery = 
 				"INSERT INTO COMPOUNDDB.COMPOUND_TAUTOMERS "
-				+ "(ACCESSION, TAUTOMER_SMILES, TAUTOMER_INCHI_KEY, DB_SOURCE) VALUES (?, ?, ?, ?)";
+				+ "(ACCESSION, TAUTOMER_SMILES, TAUTOMER_INCHI_KEY, SOURCE_DB) VALUES (?, ?, ?, ?)";
 		PreparedStatement insertPs = conn.prepareStatement(insertQuery);
 		
 		ArrayList<String>errorLog = new ArrayList<String>();
@@ -1148,7 +1303,766 @@ public class CompoundDatabaseScripts {
 		ps.close();
 		ConnectionManager.releaseConnection(conn);
 	}
-	//
+		
+	private static void getPubChemIdsForDrugBankEntriesByInchiKey() throws Exception{
+		
+		Connection conn = ConnectionManager.getConnection();
+		
+		String query = "SELECT D.ACCESSION, D.INCHI_KEY "
+				+ "FROM COMPOUNDDB.DRUGBANK_COMPOUND_DATA D "
+				+ "WHERE D.PUBCHEM_ID IS NULL AND D.INCHI_KEY IS NOT NULL";
+		PreparedStatement ps = conn.prepareStatement(query);
+		
+		String query2 = "UPDATE COMPOUNDDB.DRUGBANK_COMPOUND_DATA D "
+				+ "SET D.PUBCHEM_ID = ? WHERE D.ACCESSION = ?";
+		PreparedStatement ps2 = conn.prepareStatement(query2);
+		
+		ArrayList<String>notFound = new ArrayList<String>();
+		ResultSet rs = ps.executeQuery();
+		int count = 0;
+		while(rs.next()) {
+			
+			Thread.sleep(300);
+			
+			String accession = rs.getString(1);
+			String inchiKey = rs.getString(2);			
+			
+			PubChemCompoundDescriptionBundle db = 
+					PubChemUtils.getCompoundDescriptionByInchiKey(inchiKey);
+			
+			if(db == null) {
+				notFound.add(accession + "\t" + inchiKey);
+			}
+			else {
+				ps2.setString(1, db.getCid());
+				ps2.setString(2, accession);
+				ps2.executeUpdate();
+			}
+			count++;
+			if(count % 50 == 0)
+				System.out.print(".");
+			
+			if(count % 5000 == 0)
+				System.out.println("\n" + count + " records processed");
+		}
+		rs.close();
+		ps.close();
+		ps2.close();
+
+		ConnectionManager.releaseConnection(conn);
+		
+		if(!notFound.isEmpty()) {
+			
+			File mismatchLog = new File("E:\\DataAnalysis\\Databases\\_LATEST\\DrugBank-5.1.10-2023-01-04\\NotFoundInPubChem.txt");
+			try {
+				Files.write(mismatchLog.toPath(), 
+						notFound, 
+						StandardCharsets.UTF_8,
+						StandardOpenOption.CREATE, 
+						StandardOpenOption.TRUNCATE_EXISTING);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	private static void getPubChemIdsForT3DBEntries() throws Exception{
+		
+		Connection conn = ConnectionManager.getConnection();
+		
+		String query = "SELECT D.ACCESSION, D.INCHIKEY "
+				+ "FROM COMPOUNDDB.T3DB_COMPOUND_DATA D "
+				+ "WHERE D.PUBCHEM_ID IS NULL AND D.INCHIKEY IS NOT NULL";
+		PreparedStatement ps = conn.prepareStatement(query);
+		
+		String query2 = "UPDATE COMPOUNDDB.T3DB_COMPOUND_DATA D "
+				+ "SET D.PUBCHEM_ID = ? WHERE D.ACCESSION = ?";
+		PreparedStatement ps2 = conn.prepareStatement(query2);
+		
+		ArrayList<String>notFound = new ArrayList<String>();
+		ResultSet rs = ps.executeQuery();
+		int count = 0;
+		while(rs.next()) {
+			
+			Thread.sleep(300);
+			
+			String accession = rs.getString(1);
+			String inchiKey = rs.getString(2);			
+			
+			PubChemCompoundDescriptionBundle db = 
+					PubChemUtils.getCompoundDescriptionByInchiKey(inchiKey);
+			
+			if(db == null) {
+				notFound.add(accession + "\t" + inchiKey);
+			}
+			else {
+				ps2.setString(1, db.getCid());
+				ps2.setString(2, accession);
+				ps2.executeUpdate();
+			}
+			count++;
+			if(count % 50 == 0)
+				System.out.print(".");
+			
+			if(count % 5000 == 0)
+				System.out.println("\n" + count + " records processed");
+		}
+		rs.close();
+		ps.close();
+		ps2.close();
+
+		ConnectionManager.releaseConnection(conn);
+		
+		if(!notFound.isEmpty()) {
+			
+			File mismatchLog = new File("E:\\DataAnalysis\\Databases\\_LATEST\\T3DB\\NotFoundInPubChem.txt");
+			try {
+				Files.write(mismatchLog.toPath(), 
+						notFound, 
+						StandardCharsets.UTF_8,
+						StandardOpenOption.CREATE, 
+						StandardOpenOption.TRUNCATE_EXISTING);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	private static void getPubChemIdsForFooDBEntries() throws Exception{
+		
+		Connection conn = ConnectionManager.getConnection();
+		
+		String query = 
+				"SELECT D.ACCESSION, D.INCHI_KEY_FROM_SMILES  " +
+				"FROM COMPOUNDDB.FOODB_COMPOUND_DATA D  " +
+				"WHERE D.PUBCHEM_ID IS NULL  " +
+				"AND D.INCHI_KEY_FROM_SMILES IS NOT NULL " +
+				"ORDER BY 1 ";
+		PreparedStatement ps = conn.prepareStatement(query);
+		
+		String query2 = "UPDATE COMPOUNDDB.FOODB_COMPOUND_DATA D "
+				+ "SET D.PUBCHEM_ID = ? WHERE D.ACCESSION = ?";
+		PreparedStatement ps2 = conn.prepareStatement(query2);
+		
+		ArrayList<String>notFound = new ArrayList<String>();
+		ResultSet rs = ps.executeQuery();
+		int count = 0;
+		while(rs.next()) {
+			
+			Thread.sleep(300);
+			
+			String accession = rs.getString(1);
+			String inchiKey = rs.getString(2);			
+			
+			PubChemCompoundDescriptionBundle db = 
+					PubChemUtils.getCompoundDescriptionByInchiKey(inchiKey);
+			
+			if(db == null) {
+				notFound.add(accession + "\t" + inchiKey);
+			}
+			else {
+				ps2.setString(1, db.getCid());
+				ps2.setString(2, accession);
+				ps2.executeUpdate();
+			}
+			count++;
+			if(count % 50 == 0)
+				System.out.print(".");
+			
+			if(count % 5000 == 0)
+				System.out.println("\n" + count + " records processed");
+		}
+		rs.close();
+		ps.close();
+		ps2.close();
+
+		ConnectionManager.releaseConnection(conn);
+		
+		if(!notFound.isEmpty()) {
+			
+			File mismatchLog = new File("E:\\DataAnalysis\\Databases\\_LATEST\\T3DB\\NotFoundInPubChem.txt");
+			try {
+				Files.write(mismatchLog.toPath(), 
+						notFound, 
+						StandardCharsets.UTF_8,
+						StandardOpenOption.CREATE, 
+						StandardOpenOption.TRUNCATE_EXISTING);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	private static void getPubChemIdsForFooDBEntriesByName() throws Exception{
+		
+		Connection conn = ConnectionManager.getConnection();
+		
+		String query = 
+				"SELECT D.ACCESSION, D.NAME " +
+				"FROM COMPOUNDDB.FOODB_COMPOUND_DATA D  " +
+				"WHERE D.PUBCHEM_ID IS NULL ORDER BY 1 ";
+		PreparedStatement ps = conn.prepareStatement(query);
+		
+		String query2 = "UPDATE COMPOUNDDB.FOODB_COMPOUND_DATA D "
+				+ "SET D.PUBCHEM_ID = ? WHERE D.ACCESSION = ?";
+		PreparedStatement ps2 = conn.prepareStatement(query2);
+		
+		ArrayList<String>notFound = new ArrayList<String>();
+		ResultSet rs = ps.executeQuery();
+		int count = 0;
+		while(rs.next()) {
+			
+			Thread.sleep(300);
+			
+			String accession = rs.getString(1);
+			String compoundName = rs.getString(2);			
+			
+			PubChemCompoundDescriptionBundle db = 
+					PubChemUtils.getCompoundDescriptionByName(compoundName);
+			
+			if(db == null) {
+				notFound.add(accession + "\t" + compoundName);
+			}
+			else {
+				ps2.setString(1, db.getCid());
+				ps2.setString(2, accession);
+				ps2.executeUpdate();
+			}
+			count++;
+			if(count % 50 == 0)
+				System.out.print(".");
+			
+			if(count % 5000 == 0)
+				System.out.println("\n" + count + " records processed");
+		}
+		rs.close();
+		ps.close();
+		ps2.close();
+
+		ConnectionManager.releaseConnection(conn);
+		
+		if(!notFound.isEmpty()) {
+			
+			File mismatchLog = new File("E:\\DataAnalysis\\Databases\\_LATEST\\T3DB\\NotFoundInPubChem_byName.txt");
+			try {
+				Files.write(mismatchLog.toPath(), 
+						notFound, 
+						StandardCharsets.UTF_8,
+						StandardOpenOption.CREATE, 
+						StandardOpenOption.TRUNCATE_EXISTING);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	private static void getPubChemIdsForLipidMapsEntries() throws Exception{
+		
+		Connection conn = ConnectionManager.getConnection();
+		
+//		String query = 
+//				"SELECT D.ACCESSION, D.INCHI_KEY " +
+//				"FROM COMPOUNDDB.LIPIDMAPS_COMPOUND_DATA D  " +
+//				"WHERE D.PUBCHEM_ID IS NULL  " +
+//				"AND D.INCHI_KEY IS NOT NULL " +
+
+		String query = 
+				"SELECT D.ACCESSION, D.MS_READY_INCHI_KEY " +
+				"FROM COMPOUNDDB.LIPIDMAPS_COMPOUND_DATA D  " +
+				"WHERE D.PUBCHEM_ID IS NULL  " +
+				"AND D.MS_READY_INCHI_KEY IS NOT NULL " + 
+				"AND D.MS_READY_INCHI_KEY != D.INCHI_KEY " +
+				"ORDER BY 1 ";		
+		PreparedStatement ps = conn.prepareStatement(query);		
+		
+		String query2 = "UPDATE COMPOUNDDB.LIPIDMAPS_COMPOUND_DATA D "
+				+ "SET D.PUBCHEM_ID = ? WHERE D.ACCESSION = ?";
+		PreparedStatement ps2 = conn.prepareStatement(query2);
+		
+		ArrayList<String>notFound = new ArrayList<String>();
+		ResultSet rs = ps.executeQuery();
+		int count = 0;
+		while(rs.next()) {
+			
+			Thread.sleep(300);
+			
+			String accession = rs.getString(1);
+			String inchiKey = rs.getString(2);			
+			
+			PubChemCompoundDescriptionBundle db = 
+					PubChemUtils.getCompoundDescriptionByInchiKey(inchiKey);
+			
+			if(db == null) {
+				notFound.add(accession + "\t" + inchiKey);
+			}
+			else {
+				ps2.setString(1, db.getCid());
+				ps2.setString(2, accession);
+				ps2.executeUpdate();
+			}
+			count++;
+			if(count % 50 == 0)
+				System.out.print(".");
+			
+			if(count % 5000 == 0)
+				System.out.println("\n" + count + " records processed");
+		}
+		rs.close();
+		ps.close();
+		ps2.close();
+
+		ConnectionManager.releaseConnection(conn);
+		
+		if(!notFound.isEmpty()) {
+			
+			File mismatchLog = new File("E:\\DataAnalysis\\Databases\\_LATEST\\T3DB\\LipidMapsNotFoundInPubChem.txt");
+			try {
+				Files.write(mismatchLog.toPath(), 
+						notFound, 
+						StandardCharsets.UTF_8,
+						StandardOpenOption.CREATE, 
+						StandardOpenOption.TRUNCATE_EXISTING);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	private static void getPubChemIdsForHMDBEntries() throws Exception{
+		
+		Connection conn = ConnectionManager.getConnection();
+		
+		String query = "SELECT D.ACCESSION, D.INCHI_KEY "
+				+ "FROM COMPOUNDDB.HMDB_COMPOUND_DATA D "
+				+ "WHERE D.PUBCHEM_ID IS NULL AND D.INCHI_KEY IS NOT NULL";
+		PreparedStatement ps = conn.prepareStatement(query);
+		
+		String query2 = "UPDATE COMPOUNDDB.HMDB_COMPOUND_DATA D "
+				+ "SET D.PUBCHEM_ID = ? WHERE D.ACCESSION = ?";
+		PreparedStatement ps2 = conn.prepareStatement(query2);
+		
+		ArrayList<String>notFound = new ArrayList<String>();
+		ResultSet rs = ps.executeQuery();
+		int count = 0;
+		while(rs.next()) {
+			
+			Thread.sleep(300);
+			
+			String accession = rs.getString(1);
+			String inchiKey = rs.getString(2);			
+			
+			PubChemCompoundDescriptionBundle db = 
+					PubChemUtils.getCompoundDescriptionByInchiKey(inchiKey);
+			
+			if(db == null) {
+				notFound.add(accession + "\t" + inchiKey);
+			}
+			else {
+				ps2.setString(1, db.getCid());
+				ps2.setString(2, accession);
+				ps2.executeUpdate();
+			}
+			count++;
+			if(count % 50 == 0)
+				System.out.print(".");
+			
+			if(count % 5000 == 0)
+				System.out.println("\n" + count + " records processed");
+		}
+		rs.close();
+		ps.close();
+		ps2.close();
+
+		ConnectionManager.releaseConnection(conn);
+		
+		if(!notFound.isEmpty()) {
+			
+			File mismatchLog = new File("E:\\DataAnalysis\\Databases\\_LATEST\\HMDB-5-2022-11-17\\HMDB_NotFoundByNameInPubChem.txt");
+			try {
+				Files.write(mismatchLog.toPath(), 
+						notFound, 
+						StandardCharsets.UTF_8,
+						StandardOpenOption.CREATE, 
+						StandardOpenOption.TRUNCATE_EXISTING);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	private static void getPubChemIdsForHMDBEntriesByInchi() throws Exception{
+		
+		Connection conn = ConnectionManager.getConnection();
+		
+		String query = 
+				"SELECT D.ACCESSION, D.INCHI " +
+				"FROM COMPOUNDDB.HMDB_COMPOUND_DATA D  " +
+				"WHERE D.PUBCHEM_ID IS NULL ORDER BY 1 ";
+		PreparedStatement ps = conn.prepareStatement(query);
+		
+		String query2 = "UPDATE COMPOUNDDB.HMDB_COMPOUND_DATA D "
+				+ "SET D.PUBCHEM_ID = ? WHERE D.ACCESSION = ?";
+		PreparedStatement ps2 = conn.prepareStatement(query2);
+		
+		ArrayList<String>notFound = new ArrayList<String>();
+		ResultSet rs = ps.executeQuery();
+		int count = 0;
+		while(rs.next()) {
+			
+			Thread.sleep(300);
+			
+			String accession = rs.getString(1);
+			String inchi = rs.getString(2);			
+			
+			PubChemCompoundDescriptionBundle db = 
+					PubChemUtils.getCompoundDescriptionByInchi(inchi);
+			
+			if(db == null) {
+				notFound.add(accession + "\t" + inchi);
+			}
+			else {
+				ps2.setString(1, db.getCid());
+				ps2.setString(2, accession);
+				ps2.executeUpdate();
+			}
+			count++;
+			if(count % 50 == 0)
+				System.out.print(".");
+			
+			if(count % 5000 == 0)
+				System.out.println("\n" + count + " records processed");
+		}
+		rs.close();
+		ps.close();
+		ps2.close();
+
+		ConnectionManager.releaseConnection(conn);
+		
+		if(!notFound.isEmpty()) {
+			
+			File mismatchLog = new File("E:\\DataAnalysis\\Databases\\_LATEST\\HMDB-5-2022-11-17\\HMDB_NotFoundByInchiInPubChem.txt");
+			try {
+				Files.write(mismatchLog.toPath(), 
+						notFound, 
+						StandardCharsets.UTF_8,
+						StandardOpenOption.CREATE, 
+						StandardOpenOption.TRUNCATE_EXISTING);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	private static void getPubChemIdsForHMDBEntriesByName() throws Exception{
+		
+		Connection conn = ConnectionManager.getConnection();
+		
+		String query = 
+				"SELECT D.ACCESSION, D.NAME " +
+				"FROM COMPOUNDDB.HMDB_COMPOUND_DATA D  " +
+				"WHERE D.PUBCHEM_ID IS NULL ORDER BY 1 ";
+		PreparedStatement ps = conn.prepareStatement(query);
+		
+		String query2 = "UPDATE COMPOUNDDB.HMDB_COMPOUND_DATA D "
+				+ "SET D.PUBCHEM_ID = ? WHERE D.ACCESSION = ?";
+		PreparedStatement ps2 = conn.prepareStatement(query2);
+		
+		ArrayList<String>notFound = new ArrayList<String>();
+		ResultSet rs = ps.executeQuery();
+		int count = 0;
+		while(rs.next()) {
+			
+			Thread.sleep(300);
+			
+			String accession = rs.getString(1);
+			String compoundName = rs.getString(2);			
+			
+			PubChemCompoundDescriptionBundle db = 
+					PubChemUtils.getCompoundDescriptionByName(compoundName);
+			
+			if(db == null) {
+				notFound.add(accession + "\t" + compoundName);
+			}
+			else {
+				ps2.setString(1, db.getCid());
+				ps2.setString(2, accession);
+				ps2.executeUpdate();
+			}
+			count++;
+			if(count % 50 == 0)
+				System.out.print(".");
+			
+			if(count % 5000 == 0)
+				System.out.println("\n" + count + " records processed");
+		}
+		rs.close();
+		ps.close();
+		ps2.close();
+
+		ConnectionManager.releaseConnection(conn);
+		
+		if(!notFound.isEmpty()) {
+			
+			File mismatchLog = new File("E:\\DataAnalysis\\Databases\\_LATEST\\HMDB-5-2022-11-17\\HMDB_NotFoundByNameInPubChem.txt");
+			try {
+				Files.write(mismatchLog.toPath(), 
+						notFound, 
+						StandardCharsets.UTF_8,
+						StandardOpenOption.CREATE, 
+						StandardOpenOption.TRUNCATE_EXISTING);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	private static void getPubChemIdsForMultipleDatabases() {
+		
+		 try {
+			getPubChemIdsForDrugBankEntriesByInchiOrName();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		try {
+			getPubChemIdsForFooDBEntriesByInchiOrName();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		try {
+			getPubChemIdsForLipidMapsEntriesByInchiOrName();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	private static void getPubChemIdsForDrugBankEntriesByInchiOrName() throws Exception{
+		
+		Connection conn = ConnectionManager.getConnection();
+		
+		String query = "SELECT D.ACCESSION, D.INCHI, D.COMMON_NAME "
+				+ "FROM COMPOUNDDB.DRUGBANK_COMPOUND_DATA D "
+				+ "WHERE D.PUBCHEM_ID IS NULL AND "
+				+ "(D.INCHI IS NOT NULL OR D.COMMON_NAME IS NOT NULL)";
+		PreparedStatement ps = conn.prepareStatement(query);
+		
+		String query2 = "UPDATE COMPOUNDDB.DRUGBANK_COMPOUND_DATA D "
+				+ "SET D.PUBCHEM_ID = ? WHERE D.ACCESSION = ?";
+		PreparedStatement ps2 = conn.prepareStatement(query2);
+		
+		ArrayList<String>notFound = new ArrayList<String>();
+		ResultSet rs = ps.executeQuery();
+		int count = 0;
+		while(rs.next()) {
+			
+			Thread.sleep(300);
+			
+			String accession = rs.getString(1);
+			String inchi = rs.getString(2);	
+			String name = rs.getString(3);	
+			PubChemCompoundDescriptionBundle db = null;
+			
+			if(inchi != null && !inchi.isEmpty())
+				db = PubChemUtils.getCompoundDescriptionByInchi(inchi);
+			
+			if(db == null) {
+				
+				Thread.sleep(300);
+				if(name != null && !name.isEmpty())
+					db = PubChemUtils.getCompoundDescriptionByName(name);
+			}		
+			if(db == null) {
+				notFound.add(accession + "\t" + name + "\t" + inchi );
+			}
+			else {
+				ps2.setString(1, db.getCid());
+				ps2.setString(2, accession);
+				ps2.executeUpdate();
+			}
+			count++;
+			if(count % 50 == 0)
+				System.out.print(".");
+			
+			if(count % 5000 == 0)
+				System.out.println("\n" + count + " records processed");
+		}
+		rs.close();
+		ps.close();
+		ps2.close();
+
+		ConnectionManager.releaseConnection(conn);
+		
+		if(!notFound.isEmpty()) {
+			
+			File mismatchLog = 
+					new File("E:\\DataAnalysis\\Databases\\_LATEST\\"
+							+ "DrugBank-5.1.10-2023-01-04\\NotFoundInPubChemByInchiOrName.txt");
+			try {
+				Files.write(mismatchLog.toPath(), 
+						notFound, 
+						StandardCharsets.UTF_8,
+						StandardOpenOption.CREATE, 
+						StandardOpenOption.TRUNCATE_EXISTING);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	private static void getPubChemIdsForFooDBEntriesByInchiOrName() throws Exception{
+		
+		Connection conn = ConnectionManager.getConnection();
+		
+		String query = "SELECT D.ACCESSION, D.MOLDB_INCHI, D.NAME "
+				+ "FROM COMPOUNDDB.FOODB_COMPOUND_DATA D "
+				+ "WHERE D.PUBCHEM_ID IS NULL AND "
+				+ "(D.INCHI IS NOT NULL OR D.COMMON_NAME IS NOT NULL)";
+		PreparedStatement ps = conn.prepareStatement(query);
+		
+		String query2 = "UPDATE COMPOUNDDB.FOODB_COMPOUND_DATA D "
+				+ "SET D.PUBCHEM_ID = ? WHERE D.ACCESSION = ?";
+		PreparedStatement ps2 = conn.prepareStatement(query2);
+		
+		ArrayList<String>notFound = new ArrayList<String>();
+		ResultSet rs = ps.executeQuery();
+		int count = 0;
+		while(rs.next()) {
+			
+			Thread.sleep(300);
+			
+			String accession = rs.getString(1);
+			String inchi = rs.getString(2);	
+			String name = rs.getString(3);	
+			PubChemCompoundDescriptionBundle db = null;
+			
+			if(inchi != null && !inchi.isEmpty())
+				db = PubChemUtils.getCompoundDescriptionByInchi(inchi);
+			
+			if(db == null) {
+				
+				Thread.sleep(300);
+				if(name != null && !name.isEmpty())
+					db = PubChemUtils.getCompoundDescriptionByName(name);
+			}		
+			if(db == null) {
+				notFound.add(accession + "\t" + name + "\t" + inchi );
+			}
+			else {
+				ps2.setString(1, db.getCid());
+				ps2.setString(2, accession);
+				ps2.executeUpdate();
+			}
+			count++;
+			if(count % 50 == 0)
+				System.out.print(".");
+			
+			if(count % 5000 == 0)
+				System.out.println("\n" + count + " records processed");
+		}
+		rs.close();
+		ps.close();
+		ps2.close();
+
+		ConnectionManager.releaseConnection(conn);
+		
+		if(!notFound.isEmpty()) {
+			
+			File mismatchLog = 
+					new File("E:\\DataAnalysis\\Databases\\_LATEST\\"
+							+ "FooDB-2020-04-07\\NotFoundInPubChemByInchiOrName.txt");
+			try {
+				Files.write(mismatchLog.toPath(), 
+						notFound, 
+						StandardCharsets.UTF_8,
+						StandardOpenOption.CREATE, 
+						StandardOpenOption.TRUNCATE_EXISTING);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	private static void getPubChemIdsForLipidMapsEntriesByInchiOrName() throws Exception{
+		
+		Connection conn = ConnectionManager.getConnection();
+		
+		String query = "SELECT D.ACCESSION, D.INCHI, D.COMMON_NAME, D.SYSTEMATIC_NAME "
+				+ "FROM COMPOUNDDB.LIPIDMAPS_COMPOUND_DATA D "
+				+ "WHERE D.PUBCHEM_ID IS NULL AND "
+				+ "(D.INCHI IS NOT NULL OR D.COMMON_NAME IS NOT NULL OR D.SYSTEMATIC_NAME IS NOT NULL)";
+		PreparedStatement ps = conn.prepareStatement(query);
+		
+		String query2 = "UPDATE COMPOUNDDB.LIPIDMAPS_COMPOUND_DATA D "
+				+ "SET D.PUBCHEM_ID = ? WHERE D.ACCESSION = ?";
+		PreparedStatement ps2 = conn.prepareStatement(query2);
+		
+		ArrayList<String>notFound = new ArrayList<String>();
+		ResultSet rs = ps.executeQuery();
+		int count = 0;
+		while(rs.next()) {
+			
+			Thread.sleep(300);
+			
+			String accession = rs.getString(1);
+			String inchi = rs.getString(2);	
+			String name = rs.getString(3);	
+			String sysName = rs.getString(4);	
+			PubChemCompoundDescriptionBundle db = null;
+			
+			if(inchi != null && !inchi.isEmpty())
+				db = PubChemUtils.getCompoundDescriptionByInchi(inchi);
+			
+			if(db == null) {
+				
+				Thread.sleep(300);
+				if(name != null && !name.isEmpty())
+					db = PubChemUtils.getCompoundDescriptionByName(name);
+			}	
+			if(db == null) {
+				
+				Thread.sleep(300);
+				if(sysName != null && !sysName.isEmpty())
+					db = PubChemUtils.getCompoundDescriptionByName(sysName);
+			}
+			if(db == null) {
+				notFound.add(accession + "\t" + name + "\t" + sysName + "\t"+ inchi );
+			}
+			else {
+				ps2.setString(1, db.getCid());
+				ps2.setString(2, accession);
+				ps2.executeUpdate();
+			}
+			count++;
+			if(count % 50 == 0)
+				System.out.print(".");
+			
+			if(count % 5000 == 0)
+				System.out.println("\n" + count + " records processed");
+		}
+		rs.close();
+		ps.close();
+		ps2.close();
+
+		ConnectionManager.releaseConnection(conn);
+		
+		if(!notFound.isEmpty()) {
+			
+			File mismatchLog = 
+					new File("E:\\DataAnalysis\\Databases\\_LATEST\\"
+							+ "LipidMaps-2024-03-04\\NotFoundInPubChemByInchiOrName.txt");
+			try {
+				Files.write(mismatchLog.toPath(), 
+						notFound, 
+						StandardCharsets.UTF_8,
+						StandardOpenOption.CREATE, 
+						StandardOpenOption.TRUNCATE_EXISTING);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
 }
 
 

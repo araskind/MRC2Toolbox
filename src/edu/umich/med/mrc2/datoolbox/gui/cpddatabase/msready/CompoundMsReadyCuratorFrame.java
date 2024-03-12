@@ -56,6 +56,7 @@ import org.openscience.cdk.aromaticity.Aromaticity;
 import org.openscience.cdk.aromaticity.ElectronDonation;
 import org.openscience.cdk.atomtype.CDKAtomTypeMatcher;
 import org.openscience.cdk.exception.CDKException;
+import org.openscience.cdk.exception.InvalidSmilesException;
 import org.openscience.cdk.graph.Cycles;
 import org.openscience.cdk.inchi.InChIGenerator;
 import org.openscience.cdk.inchi.InChIGeneratorFactory;
@@ -65,6 +66,7 @@ import org.openscience.cdk.interfaces.IMolecularFormula;
 import org.openscience.cdk.silent.SilentChemObjectBuilder;
 import org.openscience.cdk.smiles.SmiFlavor;
 import org.openscience.cdk.smiles.SmilesGenerator;
+import org.openscience.cdk.smiles.SmilesParser;
 import org.openscience.cdk.tools.CDKHydrogenAdder;
 import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator;
@@ -82,6 +84,8 @@ import edu.umich.med.mrc2.datoolbox.data.CompoundIdentity;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
 import edu.umich.med.mrc2.datoolbox.data.enums.CompoundDatabaseEnum;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
+import edu.umich.med.mrc2.datoolbox.dbparse.StandardizedStructure;
+import edu.umich.med.mrc2.datoolbox.dbparse.StructureStandardizationUtils;
 import edu.umich.med.mrc2.datoolbox.gui.cpddatabase.msready.cpd.CompoundCurationPopupMenu;
 import edu.umich.med.mrc2.datoolbox.gui.cpddatabase.msready.cpd.DockableCompoundCurationListingTable;
 import edu.umich.med.mrc2.datoolbox.gui.cpddatabase.msready.std.CompoundStandardizerSettingsDialog;
@@ -134,6 +138,7 @@ public class CompoundMsReadyCuratorFrame extends JFrame
 	private static final CDKAtomTypeMatcher matcher = CDKAtomTypeMatcher.getInstance(bldr);
 	private static final CDKHydrogenAdder adder = CDKHydrogenAdder.getInstance(bldr);
 	private static final SmilesGenerator smilesGenerator = new SmilesGenerator(SmiFlavor.Isomeric);
+	private static final SmilesParser smilesParser = new SmilesParser(bldr);
 	
 	private InChIGeneratorFactory igfactory;
 	private InChIGenerator inChIGenerator;
@@ -624,10 +629,10 @@ public class CompoundMsReadyCuratorFrame extends JFrame
 			if(compoundCollection != null && !compoundCollection.isEmpty()) {
 				
 				curatedCompounds.clear();
-
 				Collection<CompoundIdentity>cleanedCompounds = new ArrayList<CompoundIdentity>();
 				for(CompoundIdentity cid : compoundCollection) {
-					
+							
+					fixBadSmiles(cid);
 					curatedCompounds.put(cid, null);
 					CompoundIdentity pl = MSReadyUtils.neutralizePhosphoCholine(cid);
 					if(pl != null) {
@@ -671,12 +676,29 @@ public class CompoundMsReadyCuratorFrame extends JFrame
 		}
 	}
 	
+	private void fixBadSmiles(CompoundIdentity cid) {
+		
+		IAtomContainer atomContainer = null;
+		try {
+			atomContainer = smilesParser.parseSmiles(cid.getSmiles());
+		} catch (InvalidSmilesException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		if(atomContainer == null) {	//	Fix invalid SMILES
+			StandardizedStructure stdMol = 
+					StructureStandardizationUtils.standardizeStructure(cid.getSmiles(), cid.getInChi());
+			if(stdMol != null) 
+				cid.setSmiles(stdMol.getStdSmiles());						
+		}
+	}
+	
 	private Collection<CompoundIdentity> fetchHMDBDataForCuration() throws Exception{
 		
 		Collection<CompoundIdentity>idList = new ArrayList<CompoundIdentity>();
 		Connection conn = ConnectionManager.getConnection();
 		String query =
-			"SELECT ACCESSION, NAME, FORMULA_FROM_SMILES, EXACT_MASS, SMILES, INCHI_KEY, CHARGE " +
+			"SELECT ACCESSION, NAME, FORMULA_FROM_SMILES, EXACT_MASS, SMILES, INCHI, INCHI_KEY, CHARGE " +
 			"FROM COMPOUNDDB.HMDB_COMPOUND_DATA D WHERE MS_READY_INCHI_KEY IS NULL";
 
 		PreparedStatement ps = conn.prepareStatement(query);
@@ -692,6 +714,7 @@ public class CompoundMsReadyCuratorFrame extends JFrame
 					rs.getDouble("EXACT_MASS"), 
 					rs.getString("SMILES"));
 			identity.setInChiKey(rs.getString("INCHI_KEY"));
+			identity.setInChi(rs.getString("INCHI"));
 			identity.setCharge(rs.getInt("CHARGE"));
 			idList.add(identity);
 		}
@@ -706,7 +729,7 @@ public class CompoundMsReadyCuratorFrame extends JFrame
 		Collection<CompoundIdentity>idList = new ArrayList<CompoundIdentity>();
 		Connection conn = ConnectionManager.getConnection();
 		String query =
-			"SELECT ACCESSION, COMMON_NAME, FORMULA_FROM_SMILES, EXACT_MASS, SMILES, INCHI_KEY, CHARGE " +
+			"SELECT ACCESSION, COMMON_NAME, FORMULA_FROM_SMILES, EXACT_MASS, SMILES, INCHI, INCHI_KEY, CHARGE " +
 			"FROM COMPOUNDDB.DRUGBANK_COMPOUND_DATA D WHERE MS_READY_INCHI_KEY IS NULL AND SMILES IS NOT NULL";
 
 		PreparedStatement ps = conn.prepareStatement(query);
@@ -722,6 +745,7 @@ public class CompoundMsReadyCuratorFrame extends JFrame
 					rs.getDouble("EXACT_MASS"), 
 					rs.getString("SMILES"));
 			identity.setInChiKey(rs.getString("INCHI_KEY"));
+			identity.setInChi(rs.getString("INCHI"));
 			identity.setCharge(rs.getInt("CHARGE"));
 			idList.add(identity);
 		}
@@ -736,7 +760,7 @@ public class CompoundMsReadyCuratorFrame extends JFrame
 		Collection<CompoundIdentity>idList = new ArrayList<CompoundIdentity>();
 		Connection conn = ConnectionManager.getConnection();
 		String query =
-			"SELECT PUBLIC_ID, NAME, FORMULA_FROM_SMILES, MOLDB_MONO_MASS, MOLDB_SMILES, MOLDB_INCHIKEY, CHARGE " +
+			"SELECT PUBLIC_ID, NAME, FORMULA_FROM_SMILES, MOLDB_MONO_MASS, MOLDB_SMILES, MOLDB_INCHI, MOLDB_INCHIKEY, CHARGE " +
 			"FROM COMPOUNDDB.FOODB_COMPOUND_DATA D WHERE MS_READY_INCHI_KEY IS NULL AND MOLDB_SMILES IS NOT NULL";
 	
 		PreparedStatement ps = conn.prepareStatement(query);
@@ -752,6 +776,7 @@ public class CompoundMsReadyCuratorFrame extends JFrame
 					rs.getDouble("MOLDB_MONO_MASS"), 
 					rs.getString("MOLDB_SMILES"));
 			identity.setInChiKey(rs.getString("MOLDB_INCHIKEY"));
+			identity.setInChi(rs.getString("MOLDB_INCHI"));
 			identity.setCharge(rs.getInt("CHARGE"));
 			idList.add(identity);
 		}
@@ -766,7 +791,7 @@ public class CompoundMsReadyCuratorFrame extends JFrame
 		Collection<CompoundIdentity>idList = new ArrayList<CompoundIdentity>();
 		Connection conn = ConnectionManager.getConnection();
 		String query =
-			"SELECT ACCESSION, COMMON_NAME, FORMULA_FROM_SMILES, MASS_FROM_SMILES, SMILES, INCHIKEY, CHARGE " +
+			"SELECT ACCESSION, COMMON_NAME, FORMULA_FROM_SMILES, MASS_FROM_SMILES, SMILES, INCHI, INCHIKEY, CHARGE " +
 			"FROM COMPOUNDDB.T3DB_COMPOUND_DATA D WHERE MS_READY_INCHI_KEY IS NULL AND SMILES IS NOT NULL";
 	
 		PreparedStatement ps = conn.prepareStatement(query);
@@ -782,6 +807,7 @@ public class CompoundMsReadyCuratorFrame extends JFrame
 					rs.getDouble("MASS_FROM_SMILES"), 
 					rs.getString("SMILES"));
 			identity.setInChiKey(rs.getString("INCHIKEY"));
+			identity.setInChi(rs.getString("INCHI"));
 			identity.setCharge(rs.getInt("CHARGE"));
 			idList.add(identity);
 		}
@@ -796,7 +822,7 @@ public class CompoundMsReadyCuratorFrame extends JFrame
 		Collection<CompoundIdentity>idList = new ArrayList<CompoundIdentity>();
 		Connection conn = ConnectionManager.getConnection();
 		String query =
-			"SELECT LMID, COMMON_NAME, SYSTEMATIC_NAME, MOLECULAR_FORMULA, EXACT_MASS, SMILES, INCHI_KEY, CHARGE " +
+			"SELECT LMID, COMMON_NAME, SYSTEMATIC_NAME, MOLECULAR_FORMULA, EXACT_MASS, SMILES, INCHI, INCHI_KEY, CHARGE " +
 			"FROM COMPOUNDDB.LIPIDMAPS_COMPOUND_DATA D WHERE MS_READY_INCHI_KEY IS NULL AND SMILES IS NOT NULL";
 	
 		PreparedStatement ps = conn.prepareStatement(query);
@@ -812,6 +838,7 @@ public class CompoundMsReadyCuratorFrame extends JFrame
 					rs.getDouble("EXACT_MASS"), 
 					rs.getString("SMILES"));
 			identity.setInChiKey(rs.getString("INCHI_KEY"));
+			identity.setInChi(rs.getString("INCHI"));
 			identity.setCharge(rs.getInt("CHARGE"));
 			if(rs.getString("COMMON_NAME") == null)
 				identity.setCommonName(rs.getString("SYSTEMATIC_NAME"));
@@ -830,7 +857,7 @@ public class CompoundMsReadyCuratorFrame extends JFrame
 		Connection conn = ConnectionManager.getConnection();
 		String query =
 			"SELECT ACCESSION, NAME, CDK_FORMULA, CDK_MASS, "
-			+ "CDK_SMILES, CDK_INCHI_KEY, CHARGE " 
+			+ "CDK_SMILES, CDK_INCHI_KEY, INCHI, CHARGE " 
 			+ "FROM COMPOUNDDB.COCONUT_COMPOUND_DATA D "
 			+ "WHERE MS_READY_INCHI_KEY IS NULL "
 			+ "AND CDK_SMILES IS NOT NULL "
@@ -849,6 +876,7 @@ public class CompoundMsReadyCuratorFrame extends JFrame
 					rs.getDouble("CDK_MASS"), 
 					rs.getString("CDK_SMILES"));
 			identity.setInChiKey(rs.getString("CDK_INCHI_KEY"));
+			identity.setInChi(rs.getString("INCHI"));
 			identity.setCharge(rs.getInt("CHARGE"));
 			idList.add(identity);
 		}

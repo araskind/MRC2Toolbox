@@ -63,20 +63,30 @@ public class ChemInfoUtils {
 	public static IAtomContainer generateMoleculeFromInchi(String inchi) throws CDKException {
 		
 		igfactory = InChIGeneratorFactory.getInstance();
-		InChIToStructure intostruct = 
-				igfactory.getInChIToStructure(inchi, DefaultChemObjectBuilder.getInstance());
-
-		InchiStatus ret = intostruct.getStatus();
-		if (ret == InchiStatus.WARNING) {
-			// Structure generated, but with warning message
-			System.out.println("InChI warning: " + intostruct.getMessage());
-		} else if (ret != InchiStatus.SUCCESS) {
-			// Structure generation failed
-			System.out.println("Structure generation failed failed: " 
-					+ ret.toString() + " [" + intostruct.getMessage() + "]");
-			return null;
+		InChIToStructure intostruct = null;
+		try {
+			intostruct = igfactory.getInChIToStructure(
+					inchi, DefaultChemObjectBuilder.getInstance());
+		} catch (CDKException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
-		return intostruct.getAtomContainer();
+		if(intostruct != null) {
+			
+			InchiStatus ret = intostruct.getStatus();
+			if (ret == InchiStatus.WARNING) {
+				// Structure generated, but with warning message
+				System.out.println("InChI warning: " + intostruct.getMessage());
+			} else if (ret != InchiStatus.SUCCESS) {
+				// Structure generation failed
+				System.out.println("Structure generation failed failed: " 
+						+ ret.toString() + " [" + intostruct.getMessage() + "]");
+				return null;
+			}
+			return intostruct.getAtomContainer();
+		}
+		else
+			return null;
 	}
 	
 	public static IAtomContainer generateMoleculeFromSMILES(String smiles) throws CDKException {

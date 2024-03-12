@@ -62,13 +62,10 @@ public class CompoundDbIntegrationUtils {
 		MRC2ToolBoxConfiguration.initConfiguration();
 
 		try {
-			HMDBIntegration.copyHMDBdata2compounds();
+			HMDBIntegration.copyHMDBdata2compoundsNoDeprecationCheck();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
-	
-
-	
 }

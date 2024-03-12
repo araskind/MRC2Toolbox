@@ -32,6 +32,10 @@ import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.List;
 import java.util.prefs.Preferences;
 
 import javax.swing.DefaultComboBoxModel;
@@ -55,6 +59,8 @@ import javax.swing.border.EmptyBorder;
 import ambit2.tautomers.TautomerConst.GAT;
 import ambit2.tautomers.TautomerManager;
 import ambit2.tautomers.ranking.EnergyRanking;
+import ambit2.tautomers.rules.EnergyRule;
+import ambit2.tautomers.rules.JsonRuleParser;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
@@ -370,12 +376,15 @@ public class TautomerGeneratorSettingsDialog extends JDialog implements BackedBy
 		tautomerManager.getKnowledgeBase().use19ShiftRules(use19ruleCheckBox.isSelected());
 		tautomerManager.getKnowledgeBase().use13ShiftRulesOnly(use13ruleOnlyCheckBox.isSelected());
 			
-		try {
-			tautomerManager.setEnergyRanking(new EnergyRanking());
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		EnergyRanking er = loadEnergyRankings();
+		tautomerManager.setEnergyRanking(er);
+		
+//		try {
+//			tautomerManager.setEnergyRanking(new EnergyRanking());
+//		} catch (Exception e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 		
 //		tman.tautomerFilter.setFlagApplyWarningFilter(true);
 //		tman.tautomerFilter.setFlagApplyExcludeFilter(true);
@@ -399,6 +408,20 @@ public class TautomerGeneratorSettingsDialog extends JDialog implements BackedBy
 //		tman.FlagAddImplicitHAtomsOnTautomerProcess = false;
 		
 		return tautomerManager;
+	}
+	
+	private EnergyRanking loadEnergyRankings() {		
+		
+		URL resource =  
+				MRC2ToolBoxConfiguration.class.getClassLoader().getResource("ambit2/tautomers/energy-rules.json");
+		EnergyRanking er = null;
+		try {
+			er = new EnergyRanking(resource.getFile());
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return er;
 	}
 	
 	public GAT getAlgorithm() {

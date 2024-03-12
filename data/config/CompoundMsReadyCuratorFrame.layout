@@ -100,14 +100,14 @@
 									<content delegate="SplitDockStationFactory">
 										<fullscreen-action>false</fullscreen-action>
 										<node nodeId="1683143594703" orientation="VERTICAL" divider="0.42168674698795183">
-											<leaf id="1" nodeId="1683143594701">
+											<leaf id="2" nodeId="1683143594701">
 												<placeholders>
 													<placeholder>dock.single.DockableCompoundCurationListingTable</placeholder>
 												</placeholders>
 											</leaf>
 											<node nodeId="1683143600149" orientation="HORIZONTAL" divider="0.5121495327102804">
 												<node nodeId="1683143610498" orientation="VERTICAL" divider="0.28668318089155104">
-													<leaf id="2" nodeId="1683143590154">
+													<leaf id="0" nodeId="1683143590154">
 														<placeholders>
 															<placeholder>dock.single.OriginalStructuralDescriptorsPanel</placeholder>
 														</placeholders>
@@ -121,14 +121,14 @@
 															</entry>
 														</placeholder-map>
 													</leaf>
-													<leaf id="0" nodeId="1683143610496">
+													<leaf id="4" nodeId="1683143610496">
 														<placeholders>
 															<placeholder>dock.single.CompoundMsReadyCuratorPrimaryMolStructurePanel</placeholder>
 														</placeholders>
 													</leaf>
 												</node>
 												<node nodeId="1683815663268" orientation="VERTICAL" divider="0.28920373502267627">
-													<leaf id="4" nodeId="1683225988252">
+													<leaf id="1" nodeId="1683225988252">
 														<placeholders>
 															<placeholder>dock.single.MSReadyStructuralDescriptorsPanel</placeholder>
 														</placeholders>
@@ -160,10 +160,20 @@
 							</adjacent>
 							<children ignore="false">
 								<child>
-									<layout factory="predefined" placeholder="dock.single.CompoundMsReadyCuratorPrimaryMolStructurePanel">
-										<replacement id="dockablesingle CompoundMsReadyCuratorPrimaryMolStructurePanel"/>
+									<layout factory="predefined" placeholder="dock.single.OriginalStructuralDescriptorsPanel">
+										<replacement id="dockablesingle OriginalStructuralDescriptorsPanel"/>
 										<delegate id="delegate_ccontrol backup factory id">
-											<id>CompoundMsReadyCuratorPrimaryMolStructurePanel</id>
+											<id>OriginalStructuralDescriptorsPanel</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
+								</child>
+								<child>
+									<layout factory="predefined" placeholder="dock.single.MSReadyStructuralDescriptorsPanel">
+										<replacement id="dockablesingle MSReadyStructuralDescriptorsPanel"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>MSReadyStructuralDescriptorsPanel</id>
 											<area/>
 										</delegate>
 									</layout>
@@ -180,16 +190,6 @@
 									<children ignore="false"/>
 								</child>
 								<child>
-									<layout factory="predefined" placeholder="dock.single.OriginalStructuralDescriptorsPanel">
-										<replacement id="dockablesingle OriginalStructuralDescriptorsPanel"/>
-										<delegate id="delegate_ccontrol backup factory id">
-											<id>OriginalStructuralDescriptorsPanel</id>
-											<area/>
-										</delegate>
-									</layout>
-									<children ignore="false"/>
-								</child>
-								<child>
 									<layout factory="predefined" placeholder="dock.single.CompoundMsReadyCuratorMSReadyMolStructurePanel">
 										<replacement id="dockablesingle CompoundMsReadyCuratorMSReadyMolStructurePanel"/>
 										<delegate id="delegate_ccontrol backup factory id">
@@ -200,10 +200,10 @@
 									<children ignore="false"/>
 								</child>
 								<child>
-									<layout factory="predefined" placeholder="dock.single.MSReadyStructuralDescriptorsPanel">
-										<replacement id="dockablesingle MSReadyStructuralDescriptorsPanel"/>
+									<layout factory="predefined" placeholder="dock.single.CompoundMsReadyCuratorPrimaryMolStructurePanel">
+										<replacement id="dockablesingle CompoundMsReadyCuratorPrimaryMolStructurePanel"/>
 										<delegate id="delegate_ccontrol backup factory id">
-											<id>MSReadyStructuralDescriptorsPanel</id>
+											<id>CompoundMsReadyCuratorPrimaryMolStructurePanel</id>
 											<area/>
 										</delegate>
 									</layout>
