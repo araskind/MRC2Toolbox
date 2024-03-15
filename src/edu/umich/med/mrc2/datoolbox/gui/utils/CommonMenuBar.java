@@ -57,6 +57,34 @@ public class CommonMenuBar extends JMenuBar {
 		return item;
 	}
 	
+	protected JMenuItem addItem(JMenu menu, String title, MainActionCommands command, Icon defaultIcon) {
+
+		JMenuItem item = new JMenuItem(title);
+		item.setActionCommand(command.getName());
+		item.addActionListener(alistener);
+		item.setIcon(defaultIcon);
+		menu.add(item);
+		return item;
+	}
+	
+	protected JMenuItem addItem(JMenu menu, String title, String command, Icon defaultIcon) {
+
+		JMenuItem item = new JMenuItem(title);
+		item.setActionCommand(command);
+		item.addActionListener(alistener);
+		item.setIcon(defaultIcon);
+		menu.add(item);
+		return item;
+	}
+	
+	protected JMenuItem addExpandableItem(JMenu menu, String title, Icon defaultIcon) {
+
+		JMenuItem item = new JMenuItem(title);
+		item.setIcon(defaultIcon);
+		menu.add(item);
+		return item;
+	}
+	
 	public void updateMenuFromExperiment(
 			DataAnalysisProject experiment, DataPipeline activePipeline) {
 		// TODO Auto-generated method stub

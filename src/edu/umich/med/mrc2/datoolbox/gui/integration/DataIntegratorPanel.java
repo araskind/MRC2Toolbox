@@ -476,4 +476,10 @@ public class DataIntegratorPanel extends ClusterDisplayPanel {
 		// TODO Auto-generated method stub
 		
 	}
+
+	@Override
+	public void updateGuiWithRecentData() {
+		// TODO Auto-generated method stub
+		
+	}
 }

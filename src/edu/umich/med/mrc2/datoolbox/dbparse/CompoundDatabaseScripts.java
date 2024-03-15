@@ -25,16 +25,12 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -65,8 +61,6 @@ import org.openscience.cdk.smiles.SmilesParser;
 import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator;
 import org.slf4j.LoggerFactory;
 
-import com.Ostermiller.util.CSVParser;
-
 import ambit2.tautomers.TautomerManager;
 import ambit2.tautomers.ranking.EnergyRanking;
 import ambit2.tautomers.zwitterion.ZwitterionManager;
@@ -78,7 +72,6 @@ import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.utils.ChemInfoUtils;
 import edu.umich.med.mrc2.datoolbox.utils.CompoundStructureUtils;
 import edu.umich.med.mrc2.datoolbox.utils.PubChemUtils;
-import edu.umich.med.mrc2.datoolbox.utils.WebUtils;
 import io.github.dan2097.jnainchi.InchiStatus;
 
 public class CompoundDatabaseScripts {

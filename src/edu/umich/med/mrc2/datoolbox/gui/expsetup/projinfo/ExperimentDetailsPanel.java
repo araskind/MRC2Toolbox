@@ -566,6 +566,12 @@ public class ExperimentDetailsPanel extends DockableMRC2ToolboxPanel {
 		// TODO Auto-generated method stub
 		
 	}
+
+	@Override
+	public void updateGuiWithRecentData() {
+		// TODO Auto-generated method stub
+		
+	}
 }
 
 

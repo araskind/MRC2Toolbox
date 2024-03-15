@@ -104,6 +104,7 @@ import edu.umich.med.mrc2.datoolbox.gui.utils.fc.ImprovedFileChooser;
 import edu.umich.med.mrc2.datoolbox.main.BuildInformation;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.RawDataManager;
+import edu.umich.med.mrc2.datoolbox.main.RecentDataManager;
 import edu.umich.med.mrc2.datoolbox.main.StartupConfiguration;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
@@ -513,8 +514,18 @@ public class MainWindow extends JFrame
 			((IDTrackerLimsManagerPanel) MRC2ToolBoxCore.getMainWindow().
 					getPanel(PanelList.ID_TRACKER_LIMS)).refreshIdTrackerdata();
 			
+			RecentDataManager.readDataFromFile();
+			updateGuiWithRecentData();
 			idtLogin.dispose();
 		}
+	}
+
+	public void updateGuiWithRecentData() {
+
+		mainMenuBar.updateGuiWithRecentData();		
+		experimentSetupDraw.updateGuiWithRecentData();
+		for (Entry<PanelList, DockableMRC2ToolboxPanel> entry : panels.entrySet())
+			entry.getValue().updateGuiWithRecentData();
 	}
 
 	private void logoutIdTracker() {

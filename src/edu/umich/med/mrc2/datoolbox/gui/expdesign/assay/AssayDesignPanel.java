@@ -301,4 +301,10 @@ public class AssayDesignPanel extends DockableMRC2ToolboxPanel{
 		
 	}
 
+	@Override
+	public void updateGuiWithRecentData() {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

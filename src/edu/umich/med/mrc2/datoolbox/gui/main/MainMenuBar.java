@@ -24,6 +24,7 @@ package edu.umich.med.mrc2.datoolbox.gui.main;
 import java.awt.Toolkit;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
+import java.util.Collection;
 import java.util.HashMap;
 
 import javax.swing.Icon;
@@ -32,13 +33,16 @@ import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.KeyStroke;
 
+import edu.umich.med.mrc2.datoolbox.data.ExperimentPointer;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
 import edu.umich.med.mrc2.datoolbox.gui.utils.CommonMenuBar;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.main.BuildInformation;
+import edu.umich.med.mrc2.datoolbox.main.RecentDataManager;
 import edu.umich.med.mrc2.datoolbox.main.StartupConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
+import edu.umich.med.mrc2.datoolbox.project.ProjectType;
 
 public class MainMenuBar extends CommonMenuBar {
 
@@ -79,11 +83,15 @@ public class MainMenuBar extends CommonMenuBar {
 	private static final Icon helpIcon = GuiUtils.getIcon("help", 24);
 	private static final Icon webHelpIcon = GuiUtils.getIcon("webHelp", 24);
 	private static final Icon dataFileToolsIcon = GuiUtils.getIcon("dataFileTools", 24);
-	private static final Icon aboutIcon = GuiUtils.getIcon("infoGreen", 24);
+	private static final Icon aboutIcon = GuiUtils.getIcon("infoGreen", 24);	
+	private static final Icon featureCollectionsIcon = GuiUtils.getIcon("editCollection", 24);
+	private static final Icon clusterCollectionsIcon = GuiUtils.getIcon("clusterFeatureTable", 24);
+	private static final Icon experimentListIcon = GuiUtils.getIcon("idExperiment", 24);	
 	
 	// Menus
 	private JMenu
 		experimentMenu,
+		recentItemsMenu,
 		panelsMenu,
 		toolsMenu,
 		dbAccessMenu,
@@ -106,6 +114,12 @@ public class MainMenuBar extends CommonMenuBar {
 		closeExperimentMenuItem,
 		goToExperimentFolderMenuItem,
 		exitMenuItem;
+	
+	// Recent objects items
+	private JMenu
+		recentExperimentsMenu,
+		recentFeatureCollectionsMenu,
+		recentFeatureClusterDataSetsMenu;
 
 	// Tools menu items
 	private JMenuItem
@@ -206,6 +220,24 @@ public class MainMenuBar extends CommonMenuBar {
 		exitMenuItem.setAccelerator(KeyStroke.getKeyStroke('Q', MASK));
 		
 		add(experimentMenu);
+		
+		// Recent items
+		recentItemsMenu = new JMenu("Recent items");
+		
+		recentExperimentsMenu = new JMenu("Recent experiments");
+		recentExperimentsMenu.setIcon(experimentListIcon);
+		recentItemsMenu.add(recentExperimentsMenu);
+		
+		recentFeatureCollectionsMenu = new JMenu("Recent feature collections");
+		recentFeatureCollectionsMenu.setIcon(featureCollectionsIcon);
+		recentItemsMenu.add(recentFeatureCollectionsMenu);
+		
+		recentFeatureClusterDataSetsMenu = 
+				new JMenu("Recent feature cluster data sets");
+		recentFeatureClusterDataSetsMenu.setIcon(clusterCollectionsIcon);		
+		recentItemsMenu.add(recentFeatureClusterDataSetsMenu);
+		
+		add(recentItemsMenu);
 		
 		//	Tools
 		toolsMenu = new JMenu("Tools");
@@ -315,4 +347,80 @@ public class MainMenuBar extends CommonMenuBar {
 		// TODO Auto-generated method stub
 
 	}
+
+	public void updateGuiWithRecentData() {
+
+		//	openExperimentIcon
+		//	openRdaExperimentIcon
+
+		for(ProjectType type : ProjectType.values()) {
+			
+			Collection<ExperimentPointer> recentProjects = 
+					RecentDataManager.getRecentExperimentsOfType(type);
+						
+			if(recentProjects != null && !recentProjects.isEmpty()) {
+
+				for(ExperimentPointer ep : recentProjects)
+					recentExperimentsMenu.add(createMenuItemForRecentExperiment(ep));								
+			}
+		}
+//		recentFeatureCollectionsMenuItem,
+//		recentFeatureClusterDataSetsMenuItem;
+	}
+	
+	private JMenuItem createMenuItemForRecentExperiment(ExperimentPointer experiment) {
+
+		JMenuItem item = new JMenuItem(experiment.getName());
+		item.setActionCommand(getOpenCommandForRecentExperiment(experiment));	
+		item.setIcon(getIconForProjectType(experiment.getProjectType()));
+		item.addActionListener(alistener);
+		return item;
+	}
+	
+	private Icon getIconForProjectType(ProjectType type) {	
+				
+		if(type.equals(ProjectType.DATA_ANALYSIS))
+			return openExperimentIcon;
+		
+		else if(type.equals(ProjectType.ID_TRACKER_DATA_ANALYSIS))
+			return openRdaExperimentFromDbIcon;
+		
+		else if(type.equals(ProjectType.RAW_DATA_ANALYSIS))
+			return openRdaExperimentIcon;		
+		else
+			return null;
+	}
+	
+	private String getOpenCommandForRecentExperiment(ExperimentPointer ep) {
+		
+		ProjectType type = ep.getProjectType();
+		String command = null;
+		
+		if(type.equals(ProjectType.DATA_ANALYSIS))
+			command = MainActionCommands.OPEN_RECENT_METABOLOMICS_EXPERIMENT_COMMAND.name();
+		
+		else if(type.equals(ProjectType.ID_TRACKER_DATA_ANALYSIS))
+			command = MainActionCommands.OPEN_RECENT_IDTRACKER_EXPERIMENT_COMMAND.name();
+		
+		else if(type.equals(ProjectType.RAW_DATA_ANALYSIS))
+			command = MainActionCommands.OPEN_RECENT_OFFLINE_RAW_DATA_EXPERIMENT_COMMAND.name();
+		
+		if(command != null)
+			return command + "|" + ep.getId();
+		else
+			return null;
+	}
 }
+
+
+
+
+
+
+
+
+
+
+
+
+

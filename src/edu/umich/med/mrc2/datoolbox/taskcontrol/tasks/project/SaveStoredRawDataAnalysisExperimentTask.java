@@ -141,7 +141,7 @@ public class SaveStoredRawDataAnalysisExperimentTask extends AbstractTask implem
 			experimentRoot.setAttribute(ExperimentFields.Instrument.name(), 
 					experimentToSave.getInstrument().getInstrumentId());
 		
-		LIMSExperiment experiment = experimentToSave.getIdTrackerExperiment();
+		LIMSExperiment experiment = experimentToSave.getLimsExperiment();
 		if(experiment != null)
 			experimentRoot.addContent(experiment.getXmlElement());
 			

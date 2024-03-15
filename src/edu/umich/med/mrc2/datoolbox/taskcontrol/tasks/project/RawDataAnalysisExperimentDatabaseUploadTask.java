@@ -119,13 +119,13 @@ public class RawDataAnalysisExperimentDatabaseUploadTask extends MSMSClusterTask
 		total = 100;
 		processed = 20;
 		
-		String expId = experiment.getIdTrackerExperiment().getId();
+		String expId = experiment.getLimsExperiment().getId();
 		IDTDataCache.refreshExperimentList();
 		IDTDataCache.refreshExperimentSamplePrepMap();
 		if(IDTDataCache.getExperimentById(expId) != null) {
 			
 			try {
-				IDTUtils.deleteExperiment(experiment.getIdTrackerExperiment());
+				IDTUtils.deleteExperiment(experiment.getLimsExperiment());
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -159,7 +159,7 @@ public class RawDataAnalysisExperimentDatabaseUploadTask extends MSMSClusterTask
 
 		Worklist newWorklist =  experiment.getWorklist();
 		Map<String, String> prepItemMap = new TreeMap<String, String>();	
-		experiment.getIdTrackerExperiment().getSamplePreps().
+		experiment.getLimsExperiment().getSamplePreps().
 			forEach(p -> prepItemMap.putAll(p.getPrepItemMap()));
 		newWorklist.getWorklistItems().stream().
 			filter(LIMSWorklistItem.class::isInstance).
@@ -178,12 +178,12 @@ public class RawDataAnalysisExperimentDatabaseUploadTask extends MSMSClusterTask
 	private boolean insertSampleprep() {
 
 		Collection<IDTExperimentalSample>samples = 
-				experiment.getIdTrackerExperiment().getExperimentDesign().getSamples().stream().
+				experiment.getLimsExperiment().getExperimentDesign().getSamples().stream().
 				filter(IDTExperimentalSample.class::isInstance).
 				map(IDTExperimentalSample.class::cast).
 				collect(Collectors.toList());
 		
-		for(LIMSSamplePreparation prep : experiment.getIdTrackerExperiment().getSamplePreps()) {
+		for(LIMSSamplePreparation prep : experiment.getLimsExperiment().getSamplePreps()) {
 			
 			if(prep.getId() != null 
 					&& IDTDataCache.getSamplePrepById(prep.getId()) != null) {
@@ -192,11 +192,11 @@ public class RawDataAnalysisExperimentDatabaseUploadTask extends MSMSClusterTask
 			try {
 				IDTUtils.addNewSamplePrepWithSopsAndAnnotations(prep, samples);	
 				IDTDataCache.getSamplePreps().add(prep);
-				if(IDTDataCache.getExperimentSamplePrepMap().get(experiment.getIdTrackerExperiment()) == null)
+				if(IDTDataCache.getExperimentSamplePrepMap().get(experiment.getLimsExperiment()) == null)
 					IDTDataCache.getExperimentSamplePrepMap().
-						put(experiment.getIdTrackerExperiment(), new TreeSet<LIMSSamplePreparation>());
+						put(experiment.getLimsExperiment(), new TreeSet<LIMSSamplePreparation>());
 				
-				IDTDataCache.getExperimentSamplePrepMap().get(experiment.getIdTrackerExperiment()).add(prep);
+				IDTDataCache.getExperimentSamplePrepMap().get(experiment.getLimsExperiment()).add(prep);
 					
 			}
 			catch (Exception e) {
@@ -210,7 +210,7 @@ public class RawDataAnalysisExperimentDatabaseUploadTask extends MSMSClusterTask
 	private boolean insertSamples() {
 		
 		TreeSet<ExperimentalSample> samples = 
-				experiment.getIdTrackerExperiment().getExperimentDesign().getSamples();
+				experiment.getLimsExperiment().getExperimentDesign().getSamples();
 		for(ExperimentalSample sample : samples) {
 			
 			ExperimentalSample existingSample = null;
@@ -226,7 +226,7 @@ public class RawDataAnalysisExperimentDatabaseUploadTask extends MSMSClusterTask
 				
 				try {
 					String sampleId = IDTUtils.addNewIDTSample(
-							(IDTExperimentalSample) sample, experiment.getIdTrackerExperiment());
+							(IDTExperimentalSample) sample, experiment.getLimsExperiment());
 					sample.setId(sampleId);
 				}
 				catch (Exception e) {
@@ -240,7 +240,7 @@ public class RawDataAnalysisExperimentDatabaseUploadTask extends MSMSClusterTask
 	
 	private boolean insertNewExperiment() {
 		
-		LIMSExperiment newExperiment = experiment.getIdTrackerExperiment();
+		LIMSExperiment newExperiment = experiment.getLimsExperiment();
 		
 		//	If experiment already in the database
 		if(newExperiment.getId() != null) {

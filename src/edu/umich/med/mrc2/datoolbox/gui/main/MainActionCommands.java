@@ -1341,6 +1341,12 @@ public enum MainActionCommands {
 	SHOW_COMPLETE_LOOKUP_FEATURE_LIST_COMMAND("Show complete lookup feature list"),
 	SHOW_ONLY_MATCHED_LOOKUP_FEATURES_COMMAND("Show only matched lookup features"),
 	
+	//	Recent items
+	OPEN_RECENT_METABOLOMICS_EXPERIMENT_COMMAND("Open recent metabolomics experiment"),
+	OPEN_RECENT_IDTRACKER_EXPERIMENT_COMMAND("Open recent IDTracker experiment"),
+	OPEN_RECENT_OFFLINE_RAW_DATA_EXPERIMENT_COMMAND("Open recent offline RD experiment"),
+	OPEN_RECENT_FEATURE_COLLECTION_COMMAND("Open recent feature collection"),
+	OPEN_RECENT_FEATURE_CLUSTER_DATA_SET_COMMAND("Open recent feature cluster data set"),
 	
 	//	Debug 
 	GET_DATA_MATRIX_FOR_FEATURE_SET_AND_DESIGN("Get matrix for feature subset"),

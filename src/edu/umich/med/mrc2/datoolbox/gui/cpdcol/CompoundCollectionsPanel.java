@@ -521,4 +521,10 @@ public class CompoundCollectionsPanel extends DockableMRC2ToolboxPanel {
 	public File getLayoutFile() {
 		return layoutConfigFile;
 	}
+
+	@Override
+	public void updateGuiWithRecentData() {
+		// TODO Auto-generated method stub
+		
+	}
 }

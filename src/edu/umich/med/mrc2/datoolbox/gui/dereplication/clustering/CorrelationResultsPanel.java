@@ -1089,4 +1089,10 @@ public class CorrelationResultsPanel extends ClusterDisplayPanel implements Char
 		// TODO Auto-generated method stub
 		
 	}
+
+	@Override
+	public void updateGuiWithRecentData() {
+		// TODO Auto-generated method stub
+		
+	}
 }

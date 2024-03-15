@@ -270,6 +270,7 @@ public final class MRC2ToolBoxCore {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		RecentDataManager.saveDataToFile();
 		mainWindow.saveApplicationLayout();
 		mainWindow.savePreferences();
 		mainWindow.dispose();

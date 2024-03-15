@@ -218,7 +218,7 @@ public class RDEMetadataWizard extends JDialog
 		if(createdBy == null)
 			createdBy  = MRC2ToolBoxCore.getIdTrackerUser();
 		
-		if(experiment.getIdTrackerExperiment() == null) {
+		if(experiment.getLimsExperiment() == null) {
 			
 			newExperiment = new LIMSExperiment(
 							null, 
@@ -233,7 +233,7 @@ public class RDEMetadataWizard extends JDialog
 		}	
 		else {
 			newExperiment = 
-					new LIMSExperiment(experiment.getIdTrackerExperiment());
+					new LIMSExperiment(experiment.getLimsExperiment());
 			if(newExperiment.getCreator() == null)
 				newExperiment.setCreator(createdBy);
 		}
@@ -392,9 +392,9 @@ public class RDEMetadataWizard extends JDialog
 	
 	private void clearExperimentMetadata() {
 
-		if(experiment.getIdTrackerExperiment() != null) {
+		if(experiment.getLimsExperiment() != null) {
 			LIMSExperiment existingExperiment = 
-					IDTDataCache.getExperimentById(experiment.getIdTrackerExperiment().getId());
+					IDTDataCache.getExperimentById(experiment.getLimsExperiment().getId());
 			if(existingExperiment != null) {
 				MessageDialog.showWarningMsg(
 						"Experiment \"" + existingExperiment.getName() + "\"\n"
@@ -407,7 +407,7 @@ public class RDEMetadataWizard extends JDialog
 		if(res ==  JOptionPane.YES_OPTION) {
 			
 			newExperiment = null;
-			experiment.setIdTrackerExperiment(null);
+			experiment.setLimsExperiment(null);
 			experiment.setCreatedBy(null);			
 			populateWizardWithExperimentData();
 			silentlyVerifyExperimentMetadata();
@@ -765,7 +765,7 @@ public class RDEMetadataWizard extends JDialog
 			return;
 		}
 		//	Experiment
-		experiment.setIdTrackerExperiment(newExperiment);
+		experiment.setLimsExperiment(newExperiment);
 		RDPExperimentDefinitionPanel experimentPanel = 
 				(RDPExperimentDefinitionPanel)panels.get(RDPMetadataDefinitionStage.CREATE_EXPERIMENT);
 		experiment.setInstrument(experimentPanel.getInstrument());

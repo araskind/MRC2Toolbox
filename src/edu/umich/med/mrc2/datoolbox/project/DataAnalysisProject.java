@@ -65,13 +65,9 @@ public class DataAnalysisProject extends Experiment {
 	private static final long serialVersionUID = 618045235335401590L;
 
 	protected LIMSProject limsProject;
-	protected LIMSExperiment limsExperiment;
 	protected ProjectPreferences projectPreferences;
-	
-
 	protected TreeSet<DataPipeline> dataPipelines;
-	protected DataPipeline activeDataPipeline;
-	
+	protected DataPipeline activeDataPipeline;	
 	protected TreeMap<DataPipeline, CompoundLibrary> libraryMap;
 	protected TreeMap<DataPipeline, Set<MsFeature>> featureMap;
 	protected TreeMap<DataPipeline, Matrix> dataMatrixMap;
@@ -159,36 +155,6 @@ public class DataAnalysisProject extends Experiment {
 	public LIMSExperiment getLimsExperiment() {
 		return limsExperiment;
 	}
-
-	public void setLimsExperiment(LIMSExperiment limsExperiment) {
-		this.limsExperiment = limsExperiment;
-	}
-
-//	public File getExportsDirectory() {
-//
-//		exportsDirectory = Paths.get(experimentDirectory.getAbsolutePath(), 
-//				MRC2ToolBoxConfiguration.DATA_EXPORT_DIRECTORY).toFile();
-//
-//		if(!exportsDirectory.exists()) {
-//
-//			if (!createProjectDirectory(exportsDirectory)) {
-//				MessageDialog.showWarningMsg("Failed to create exports directory");
-//				return null;
-//			}
-//		}
-//		return exportsDirectory;
-//	}
-	
-//	protected boolean createProjectDirectory(File projDir) {		
-//		try {
-//			Files.createDirectories(Paths.get(projDir.getAbsolutePath()));
-//			return true;
-//		} catch (IOException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//			return false;
-//		}
-//	}
 
 	public void recreateMatrixMaps() {
 		dataMatrixMap = new TreeMap<DataPipeline, Matrix>();

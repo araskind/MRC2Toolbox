@@ -467,4 +467,10 @@ public class AutomatorPanel extends DockableMRC2ToolboxPanel implements TaskCont
 		// TODO Auto-generated method stub
 		
 	}
+
+	@Override
+	public void updateGuiWithRecentData() {
+		// TODO Auto-generated method stub
+		
+	}
 }

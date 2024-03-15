@@ -457,11 +457,11 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 			MessageDialog.showErrorMsg("No data to upload in the current experiment");
 			return;
 		}		
-		if(activeExperiment.getIdTrackerExperiment() != null 
-				&& activeExperiment.getIdTrackerExperiment().getId() != null) {
+		if(activeExperiment.getLimsExperiment() != null 
+				&& activeExperiment.getLimsExperiment().getId() != null) {
 			
 			LIMSExperiment existingExperiment = IDTDataCache.getExperimentById(
-					activeExperiment.getIdTrackerExperiment().getId());
+					activeExperiment.getLimsExperiment().getId());
 			if(existingExperiment != null) {
 				MessageDialog.showErrorMsg("Current experiment already uploaded to database as\n"
 						+ "experiment " + existingExperiment.toString());
@@ -575,11 +575,11 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 		if (experiment == null)
 			return;
 		
-		if(experiment.getIdTrackerExperiment() != null 
-				&& experiment.getIdTrackerExperiment().getId() != null) {
+		if(experiment.getLimsExperiment() != null 
+				&& experiment.getLimsExperiment().getId() != null) {
 			
 			LIMSExperiment existingExperiment = IDTDataCache.getExperimentById(
-					experiment.getIdTrackerExperiment().getId());
+					experiment.getLimsExperiment().getId());
 			if(existingExperiment != null) {
 				MessageDialog.showErrorMsg("Current project already uploaded to database as\n"
 						+ "experiment " + existingExperiment.toString());
@@ -602,7 +602,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 			return;
 		}		
 		LIMSExperiment idtExperiment = 
-				MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment().getIdTrackerExperiment();
+				MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment().getLimsExperiment();
 
 		if(idtExperiment != null && idtExperiment.getId() != null) {
 			
@@ -1876,6 +1876,12 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 	
 	public void removeSpectra(Collection<AverageMassSpectrum>spectra) {		
 		avgSpectraListingPanel.removeSpectra(spectra);		
+	}
+
+	@Override
+	public void updateGuiWithRecentData() {
+		// TODO Auto-generated method stub
+		
 	}
 }
 

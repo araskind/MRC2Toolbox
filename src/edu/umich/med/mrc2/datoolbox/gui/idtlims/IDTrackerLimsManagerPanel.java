@@ -1043,4 +1043,10 @@ public class IDTrackerLimsManagerPanel extends DockableMRC2ToolboxPanel implemen
 			deleteProject();
 		}		
 	}
+
+	@Override
+	public void updateGuiWithRecentData() {
+		// TODO Auto-generated method stub
+		
+	}
 }

@@ -712,6 +712,12 @@ public class WorklistPanel extends DockableMRC2ToolboxPanel implements BackedByP
 		// TODO Auto-generated method stub
 		
 	}
+
+	@Override
+	public void updateGuiWithRecentData() {
+		// TODO Auto-generated method stub
+		
+	}
 }
 
 

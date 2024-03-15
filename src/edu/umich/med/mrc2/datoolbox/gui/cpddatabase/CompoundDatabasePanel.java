@@ -1099,4 +1099,10 @@ public class CompoundDatabasePanel extends DockableMRC2ToolboxPanel implements L
 		// TODO Auto-generated method stub
 		
 	}
+
+	@Override
+	public void updateGuiWithRecentData() {
+		// TODO Auto-generated method stub
+		
+	}
 }

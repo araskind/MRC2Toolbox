@@ -33,6 +33,8 @@ import java.util.UUID;
 
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesign;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentalSample;
+import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
+import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 
@@ -53,6 +55,8 @@ public abstract class Experiment implements Serializable{
 	protected Date dateCreated, lastModified;
 	protected ExperimentDesign experimentDesign;
 	protected TreeSet<ExperimentalSample> pooledSamples;
+	protected LIMSUser createdBy;
+	protected LIMSExperiment limsExperiment;
 	
 	public Experiment(ProjectType projectType,
 					String name, 
@@ -194,6 +198,28 @@ public abstract class Experiment implements Serializable{
 	}
 
 	public abstract Set<ExperimentalSample> getPooledSamples();
+
+	public LIMSUser getCreatedBy() {
+		return createdBy;
+	}
+
+	public void setCreatedBy(LIMSUser createdBy) {
+		this.createdBy = createdBy;
+	}
+
+	public abstract LIMSExperiment getLimsExperiment();
+
+	public void setLimsExperiment(LIMSExperiment limsExperiment) {
+		this.limsExperiment = limsExperiment;
+	}
+	
+    @Override
+    public int hashCode() {
+
+        int hash = 3;
+        hash = 53 * hash + (this.id != null ? this.id.hashCode() : 0);
+        return hash;
+    } 
 }
 
 

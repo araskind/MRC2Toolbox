@@ -83,7 +83,7 @@ public class RawDataAnalysisMSFeatureDatabaseUploadTask extends AbstractTask {
 		this.dataFile = dataFile;
 		this.deMethod = deMethod;
 		this.msOneMZWindow = msOneMZWindow;
-		this.limsExperiment = experiment.getIdTrackerExperiment();
+		this.limsExperiment = experiment.getLimsExperiment();
 		featureIdMap = new HashMap<String,String>();
 		taskDescription = "Uploading results for " + dataFile.getName();
 	}

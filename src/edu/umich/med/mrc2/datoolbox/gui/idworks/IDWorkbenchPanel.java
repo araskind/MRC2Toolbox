@@ -4751,6 +4751,12 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 	public IMSMSClusterDataSet getActiveMSMSClusterDataSet() {
 		return activeMSMSClusterDataSet;
 	}
+
+	@Override
+	public void updateGuiWithRecentData() {
+		// TODO Auto-generated method stub
+		
+	}
 }
 
 

@@ -1983,5 +1983,11 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 		det.setMsFeatureSet4export(activeMsFeatureSet.getFeatures());
 		det.addTaskListener(this);
 		MRC2ToolBoxCore.getTaskController().addTask(det);		
+	}
+
+	@Override
+	public void updateGuiWithRecentData() {
+		// TODO Auto-generated method stub
+		
 	}	
 }

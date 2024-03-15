@@ -1343,4 +1343,10 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ItemList
 		// TODO Auto-generated method stub
 		
 	}
+
+	@Override
+	public void updateGuiWithRecentData() {
+		// TODO Auto-generated method stub
+		
+	}
 }

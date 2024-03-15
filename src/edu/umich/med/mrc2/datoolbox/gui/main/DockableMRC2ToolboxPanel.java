@@ -264,4 +264,6 @@ public abstract class DockableMRC2ToolboxPanel extends DefaultSingleCDockable
 		}
 		menuBar.add(panelsMenu);
 	}
+	
+	public abstract void updateGuiWithRecentData();
 }

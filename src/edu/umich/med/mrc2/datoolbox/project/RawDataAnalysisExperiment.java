@@ -82,9 +82,6 @@ public class RawDataAnalysisExperiment extends Experiment {
 	protected Set<MsFeatureInfoBundleCollection>featureCollections;
 	protected Collection<IMSMSClusterDataSet> msmsClusterDataSets;
 	protected MSMSExtractionParameterSet msmsExtractionParameterSet;
-//	protected Set<Injection>injections;
-	protected LIMSUser createdBy;
-	protected LIMSExperiment idTrackerExperiment;
 		
 	/**
 	 * This constructor is used when creating new experiment
@@ -191,14 +188,14 @@ public class RawDataAnalysisExperiment extends Experiment {
 
 	private void initFields() {
 		
-		idTrackerExperiment = new LIMSExperiment(
+		limsExperiment = new LIMSExperiment(
 				null, 
 				name, 
 				description, 
 				null, 
 				null, 
 				dateCreated);
-		idTrackerExperiment.setCreator(createdBy);		
+		limsExperiment.setCreator(createdBy);		
 		msmsDataFiles = ConcurrentHashMap.newKeySet();
 		msOneDataFiles = ConcurrentHashMap.newKeySet();
 		injections = new HashSet<Injection>();
@@ -442,10 +439,10 @@ public class RawDataAnalysisExperiment extends Experiment {
 
 	public ExperimentDesign getExperimentDesign() {
 		
-		if(idTrackerExperiment == null)
+		if(limsExperiment == null)
 			return null;
 		else
-			return idTrackerExperiment.getExperimentDesign();
+			return limsExperiment.getExperimentDesign();
 	}
 
 	public LIMSUser getCreatedBy() {
@@ -460,11 +457,12 @@ public class RawDataAnalysisExperiment extends Experiment {
 		this.createdBy = createdBy;
 	}
 
-	public LIMSExperiment getIdTrackerExperiment() {
+	@Override
+	public LIMSExperiment getLimsExperiment() {
 		
-		if(idTrackerExperiment == null) {
+		if(limsExperiment == null) {
 			
-			idTrackerExperiment = new LIMSExperiment(
+			limsExperiment = new LIMSExperiment(
 					null, 
 					name, 
 					description, 
@@ -475,35 +473,31 @@ public class RawDataAnalysisExperiment extends Experiment {
 			if(createdBy == null)
 				createdBy = MRC2ToolBoxCore.getIdTrackerUser();
 			
-			idTrackerExperiment.setCreator(createdBy);
-			idTrackerExperiment.setDesign(new ExperimentDesign());			
+			limsExperiment.setCreator(createdBy);
+			limsExperiment.setDesign(new ExperimentDesign());			
 		}
-		return idTrackerExperiment;
-	}
-
-	public void setIdTrackerExperiment(LIMSExperiment idTrackerExperiment) {
-		this.idTrackerExperiment = idTrackerExperiment;
+		return limsExperiment;
 	}
 	
 	public Worklist getWorklist() {
 		
 		LIMSSamplePreparation samplePrep = null;
-		if(idTrackerExperiment != null 
-				&& idTrackerExperiment.getSamplePreps() != null
-				&& !idTrackerExperiment.getSamplePreps().isEmpty()) {
+		if(limsExperiment != null 
+				&& limsExperiment.getSamplePreps() != null
+				&& !limsExperiment.getSamplePreps().isEmpty()) {
 			
 			//	TODO handle multiple preps?
-			samplePrep = idTrackerExperiment.getSamplePreps().iterator().next();
+			samplePrep = limsExperiment.getSamplePreps().iterator().next();
 		}
-		if(idTrackerExperiment.getExperimentDesign() == null)
-			idTrackerExperiment.setDesign(new ExperimentDesign());
+		if(limsExperiment.getExperimentDesign() == null)
+			limsExperiment.setDesign(new ExperimentDesign());
 			
 		Worklist worklist = new Worklist();
 		for(DataFile df : getDataFiles()) {
 			
 			ExperimentalSample parentSample = df.getParentSample();
 			if(parentSample == null)
-				parentSample = idTrackerExperiment.getExperimentDesign().getSampleByDataFile(df);
+				parentSample = limsExperiment.getExperimentDesign().getSampleByDataFile(df);
 						
 			LIMSWorklistItem wklItem = new LIMSWorklistItem(
 				df,
@@ -544,9 +538,9 @@ public class RawDataAnalysisExperiment extends Experiment {
 				df.setParentSample(item.getSample());
 				df.setPrepItemId(item.getPrepItemId());
 				
-				if(idTrackerExperiment != null && idTrackerExperiment.getExperimentDesign() != null) {
+				if(limsExperiment != null && limsExperiment.getExperimentDesign() != null) {
 					ExperimentalSample sample = 
-							idTrackerExperiment.getExperimentDesign().getSampleById(item.getSample().getId());
+							limsExperiment.getExperimentDesign().getSampleById(item.getSample().getId());
 					if(sample != null)
 						sample.addDataFile(df);
 				}

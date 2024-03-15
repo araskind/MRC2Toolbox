@@ -275,7 +275,7 @@ public class OpenStoredRawDataAnalysisExperimentTask extends AbstractTask implem
 				e.printStackTrace();
 			}
 			if(limsExperiment != null)
-				experiment.setIdTrackerExperiment(limsExperiment);
+				experiment.setLimsExperiment(limsExperiment);
 		}
 		if(experimentElement.getChild(ExperimentFields.Injections.name()) != null) {
 			
@@ -435,7 +435,7 @@ public class OpenStoredRawDataAnalysisExperimentTask extends AbstractTask implem
 				processedFiles++;
 				
 				OpenMsFeatureBundleFileTask task = (OpenMsFeatureBundleFileTask)e.getSource();
-				LIMSExperiment limsExperiment = experiment.getIdTrackerExperiment();
+				LIMSExperiment limsExperiment = experiment.getLimsExperiment();
 				if(limsExperiment != null)
 					task.getFeatures().stream().forEach(f -> f.setExperiment(limsExperiment));
 				
