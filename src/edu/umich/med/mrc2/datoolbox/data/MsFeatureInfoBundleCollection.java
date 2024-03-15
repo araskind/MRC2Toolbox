@@ -33,6 +33,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.text.WordUtils;
 import org.jdom2.Element;
 
 import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureInfoBundleComparator;
@@ -333,6 +334,21 @@ public class MsFeatureInfoBundleCollection implements Serializable {
 
 	public void setCollectionSize(int collectionSize) {
 		this.collectionSize = collectionSize;
+	}
+	
+	public String getFormattedMetadata() {
+				
+		String data = "<html><b>" + name + "</b><br>";
+		if(description != null && !description.isEmpty())
+			data += WordUtils.wrap(description, 80, "<br>", true) + "<br>";
+		
+		if(owner != null)
+			data += "<b>Created by: </b>" + owner.getFullName() + "<br>";
+		
+		data += "<b># of features: </b>" + Integer.toString(collectionSize) + "<br>";
+		data += "<b>Created on: </b>" + ExperimentUtils.dateTimeFormat.format(dateCreated) + "<br>";
+		data += "<b>Lat modified on: </b>" + ExperimentUtils.dateTimeFormat.format(lastModified);		
+		return data;
 	}
 }
 

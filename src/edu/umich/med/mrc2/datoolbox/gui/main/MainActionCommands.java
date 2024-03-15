@@ -1348,6 +1348,10 @@ public enum MainActionCommands {
 	OPEN_RECENT_FEATURE_COLLECTION_COMMAND("Open recent feature collection"),
 	OPEN_RECENT_FEATURE_CLUSTER_DATA_SET_COMMAND("Open recent feature cluster data set"),
 	
+	CLEAR_RECENT_EXPERIMENTS_COMMAND("Clear recent experiments"),
+	CLEAR_RECENT_FEATURE_COLLECTIONS_COMMAND("Clear recent feature collections"),
+	CLEAR_RECENT_FEATURE_CLUSTER_DATA_SETS_COMMAND("Clear recent feature cluster data sets"),
+	
 	//	Debug 
 	GET_DATA_MATRIX_FOR_FEATURE_SET_AND_DESIGN("Get matrix for feature subset"),
 	;

@@ -133,10 +133,8 @@ public class FeatureCollectionManager {
 			else
 				mbColl.addFeature(cachedFeature);
 		}
-		if(!missingIds.isEmpty()) {
-			IDTMSMSFeatureDataPullTask task = new IDTMSMSFeatureDataPullTask(missingIds);
-			return task;
-		}
+		if(!missingIds.isEmpty())
+			return new IDTMSMSFeatureDataPullTask(missingIds, mbColl);	
 		else	
 			return null;
 	}	

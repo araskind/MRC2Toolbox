@@ -197,6 +197,7 @@ import edu.umich.med.mrc2.datoolbox.main.FeatureCollectionManager;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.MSMSClusterDataSetManager;
 import edu.umich.med.mrc2.datoolbox.main.RawDataManager;
+import edu.umich.med.mrc2.datoolbox.main.RecentDataManager;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisExperiment;
@@ -3686,6 +3687,9 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 	private void finalizeIdTrackerExperimentLoad(IDTrackerExperimentDataFetchTask task) {
 
 		LIMSExperiment experiment = task.getIdTrackerExperiment();
+		RecentDataManager.addIDTrackerExperiment(experiment);
+		MRC2ToolBoxCore.getMainWindow().updateGuiWithRecentData();
+		
 		StatusBar.setExperimentName(experiment.toString());
 		
 		activeFeatureCollection = new MsFeatureInfoBundleCollection(
@@ -3788,7 +3792,11 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 
 	private void finalizeIDTMSMSFeatureDataPullTask(IDTMSMSFeatureDataPullTask task) {
 		
-		activeFeatureCollection = FeatureCollectionManager.msmsSearchResults;
+		if(task.getParentCollection() != null)
+			activeFeatureCollection = task.getParentCollection();
+		else	
+			activeFeatureCollection = FeatureCollectionManager.msmsSearchResults;
+		
 		activeFeatureCollection.clearCollection();
 		activeFeatureCollection.addFeatures(task.getSelectedFeatures());
 		safelyLoadMSMSFeatures(activeFeatureCollection.getFeatures());
@@ -3937,6 +3945,8 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		else {
 			 loadMSMSClusterDataSetInGUI(activeMSMSClusterDataSet);
 		}
+		RecentDataManager.addIMSMSClusterDataSet(selectedDataSet);	
+		MRC2ToolBoxCore.getMainWindow().updateGuiWithRecentData();
 	}	
 	
 	private void reloadActiveMSMSClusterDataSet() {
@@ -3982,6 +3992,8 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		else {
 			 reloadActiveMSMSFeatureCollection();
 		}
+		RecentDataManager.addFeatureCollection(selectedCollection);
+		MRC2ToolBoxCore.getMainWindow().updateGuiWithRecentData();
 	}
 	
 	private void reloadCompleteDataSet() {

@@ -26,6 +26,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Set;
 
 import javax.swing.Icon;
 import javax.swing.JCheckBoxMenuItem;
@@ -33,9 +34,13 @@ import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.KeyStroke;
 
+import org.apache.commons.text.WordUtils;
+
 import edu.umich.med.mrc2.datoolbox.data.ExperimentPointer;
+import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundleCollection;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
+import edu.umich.med.mrc2.datoolbox.data.msclust.IMSMSClusterDataSet;
 import edu.umich.med.mrc2.datoolbox.gui.utils.CommonMenuBar;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.main.BuildInformation;
@@ -85,8 +90,12 @@ public class MainMenuBar extends CommonMenuBar {
 	private static final Icon dataFileToolsIcon = GuiUtils.getIcon("dataFileTools", 24);
 	private static final Icon aboutIcon = GuiUtils.getIcon("infoGreen", 24);	
 	private static final Icon featureCollectionsIcon = GuiUtils.getIcon("editCollection", 24);
+	private static final Icon fcIcon = GuiUtils.getIcon("enableAll", 24);	
 	private static final Icon clusterCollectionsIcon = GuiUtils.getIcon("clusterFeatureTable", 24);
+	private static final Icon clusterIcon = GuiUtils.getIcon("cluster", 24);
 	private static final Icon experimentListIcon = GuiUtils.getIcon("idExperiment", 24);	
+	private static final Icon clearListIcon = GuiUtils.getIcon("clearWorklist", 24);	
+	
 	
 	// Menus
 	private JMenu
@@ -347,12 +356,20 @@ public class MainMenuBar extends CommonMenuBar {
 		// TODO Auto-generated method stub
 
 	}
+	
+	public void clearAllRecentItems() {
+		
+		recentExperimentsMenu.removeAll();
+		recentFeatureCollectionsMenu.removeAll();
+		recentFeatureClusterDataSetsMenu.removeAll();
+	}
 
 	public void updateGuiWithRecentData() {
 
-		//	openExperimentIcon
-		//	openRdaExperimentIcon
-
+		clearAllRecentItems();
+		
+		//	Experiments
+		int expCount = 0;
 		for(ProjectType type : ProjectType.values()) {
 			
 			Collection<ExperimentPointer> recentProjects = 
@@ -360,17 +377,57 @@ public class MainMenuBar extends CommonMenuBar {
 						
 			if(recentProjects != null && !recentProjects.isEmpty()) {
 
+				expCount = expCount + recentProjects.size();
 				for(ExperimentPointer ep : recentProjects)
-					recentExperimentsMenu.add(createMenuItemForRecentExperiment(ep));								
+					recentExperimentsMenu.add(createMenuItemForRecentExperiment(ep));	
+				
+				recentExperimentsMenu.addSeparator();
 			}
 		}
-//		recentFeatureCollectionsMenuItem,
-//		recentFeatureClusterDataSetsMenuItem;
+		if(expCount > 0) {			
+			addItem(recentExperimentsMenu, "Clear list",  
+					MainActionCommands.CLEAR_RECENT_EXPERIMENTS_COMMAND, clearListIcon);
+		}
+		
+		//	Feature collections
+		Set<MsFeatureInfoBundleCollection> fcList = 
+				RecentDataManager.getRecentFeatureCollections();
+		for(MsFeatureInfoBundleCollection fc : fcList) {
+			
+			String title = "<html>" + WordUtils.wrap(fc.getName(), 50, "<br />", true);
+			String command = MainActionCommands.OPEN_RECENT_FEATURE_COLLECTION_COMMAND.name() + "|" + fc.getId();
+			JMenuItem fcItem = addItem(recentFeatureCollectionsMenu, title, command, fcIcon);		
+			fcItem.setToolTipText(fc.getFormattedMetadata());
+		}
+		if(!fcList.isEmpty()) {
+			
+			recentFeatureCollectionsMenu.addSeparator();
+			addItem(recentFeatureCollectionsMenu, "Clear list",  
+					MainActionCommands.CLEAR_RECENT_FEATURE_COLLECTIONS_COMMAND, clearListIcon);
+		}
+		
+		//	Feature clusters
+		Set<IMSMSClusterDataSet> fcluctList = 
+				RecentDataManager.getRecentFeatureClusterDataSets();
+		for(IMSMSClusterDataSet fclust : fcluctList) {
+			
+			String title = "<html>" + WordUtils.wrap(fclust.getName(), 50, "<br />", true);
+			String command = MainActionCommands.OPEN_RECENT_FEATURE_COLLECTION_COMMAND.name() + "|" + fclust.getId();
+			JMenuItem fclustItem = addItem(recentFeatureClusterDataSetsMenu, title, command, clusterIcon);
+			fclustItem.setToolTipText(fclust.getFormattedMetadata());
+		}
+		if(!fcluctList.isEmpty()) {
+			
+			recentFeatureClusterDataSetsMenu.addSeparator();
+			addItem(recentFeatureClusterDataSetsMenu, "Clear list",  
+					MainActionCommands.CLEAR_RECENT_FEATURE_CLUSTER_DATA_SETS_COMMAND, clearListIcon);				
+		}
 	}
 	
 	private JMenuItem createMenuItemForRecentExperiment(ExperimentPointer experiment) {
 
-		JMenuItem item = new JMenuItem(experiment.getName());
+		String title = "<html>" + WordUtils.wrap(experiment.getName(), 50, "<br />", true);
+		JMenuItem item = new JMenuItem(title);
 		item.setActionCommand(getOpenCommandForRecentExperiment(experiment));	
 		item.setIcon(getIconForProjectType(experiment.getProjectType()));
 		item.addActionListener(alistener);

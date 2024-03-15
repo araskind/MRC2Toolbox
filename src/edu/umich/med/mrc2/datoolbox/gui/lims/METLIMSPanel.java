@@ -47,6 +47,7 @@ import edu.umich.med.mrc2.datoolbox.gui.main.PanelList;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
+import edu.umich.med.mrc2.datoolbox.main.RecentDataManager;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.ProjectType;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
@@ -267,7 +268,9 @@ public class METLIMSPanel extends DockableMRC2ToolboxPanel {
 			if (e.getSource().getClass().equals(LimsDataPullTask.class)) {
 
 				clearPanel();
-				experimentDataPanel.loadExperimentList(LIMSDataCache.getExperiments());
+				experimentDataPanel.loadExperimentList(LIMSDataCache.getExperiments());				
+				RecentDataManager.readDataFromFile();
+				MRC2ToolBoxCore.getMainWindow().updateGuiWithRecentData();
 			}
 //			if(e.getSource().getClass().equals(MetLimsToMrc2limsDataTransferTask.class)) {
 //				refreshLimsData();

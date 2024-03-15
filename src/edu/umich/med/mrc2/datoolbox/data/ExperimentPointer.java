@@ -70,6 +70,18 @@ public class ExperimentPointer {
 		this.limsExperiment = parent.getLimsExperiment();
 	}
 
+	public ExperimentPointer(LIMSExperiment limsExperiment) {
+		super();
+		this.limsExperiment = limsExperiment;
+		
+		this.id = limsExperiment.getId();
+		this.name = limsExperiment.getName();
+		this.description = limsExperiment.getDescription();
+		this.dateCreated = limsExperiment.getStartDate();
+		this.lastModified = limsExperiment.getStartDate();
+		this.createdBy = limsExperiment.getCreator();
+	}
+
 	public ProjectType getProjectType() {
 		return projectType;
 	}

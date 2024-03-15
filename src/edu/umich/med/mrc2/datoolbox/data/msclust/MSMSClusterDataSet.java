@@ -32,6 +32,7 @@ import java.util.TreeSet;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.apache.commons.text.WordUtils;
 import org.jdom2.Element;
 
 import edu.umich.med.mrc2.datoolbox.data.BinnerAnnotationCluster;
@@ -42,6 +43,7 @@ import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
+import edu.umich.med.mrc2.datoolbox.main.MSMSClusterDataSetManager;
 import edu.umich.med.mrc2.datoolbox.project.store.FeatureLookupDataSetFields;
 import edu.umich.med.mrc2.datoolbox.project.store.MSMSClusterDataSetFields;
 import edu.umich.med.mrc2.datoolbox.project.store.MSMSClusteringParameterSetFields;
@@ -417,6 +419,23 @@ public class MSMSClusterDataSet implements IMSMSClusterDataSet {
 
 	public void setDataSetType(MSMSClusterDataSetType dataSetType) {
 		this.dataSetType = dataSetType;
+	}
+
+	@Override
+	public String getFormattedMetadata() {
+
+		String data = "<html><b>" + name + "</b><br>";
+		if(description != null && !description.isEmpty())
+			data += WordUtils.wrap(description, 80, "<br>", true) + "<br>";
+		
+		if(createdBy != null)
+			data += "<b>Created by: </b>" + createdBy.getFullName() + "<br>";
+		
+		data += "<b># of clusters: </b>" + Integer.toString(
+				MSMSClusterDataSetManager.getMSMSClusterDataSetSize(this)) + "<br>";
+		data += "<b>Created on: </b>" + ExperimentUtils.dateTimeFormat.format(dateCreated) + "<br>";
+		data += "<b>Lat modified on: </b>" + ExperimentUtils.dateTimeFormat.format(lastModified);		
+		return data;
 	}
 }
 

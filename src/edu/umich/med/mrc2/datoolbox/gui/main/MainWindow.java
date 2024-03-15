@@ -68,12 +68,16 @@ import bibliothek.gui.dock.common.intern.CDockable;
 import bibliothek.gui.dock.common.intern.DefaultCDockable;
 import bibliothek.gui.dock.common.theme.ThemeMap;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
+import edu.umich.med.mrc2.datoolbox.data.ExperimentPointer;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentSwitchController;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentSwitchController.ExperimentState;
+import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundleCollection;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
+import edu.umich.med.mrc2.datoolbox.data.msclust.IMSMSClusterDataSet;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.database.idt.UserUtils;
 import edu.umich.med.mrc2.datoolbox.dbparse.DbParserFrame;
 import edu.umich.med.mrc2.datoolbox.gui.adducts.AdductManagerFrame;
@@ -83,6 +87,7 @@ import edu.umich.med.mrc2.datoolbox.gui.expsetup.ExperimentSetupDraw;
 import edu.umich.med.mrc2.datoolbox.gui.filetools.FileToolsDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.IDTrackerLimsManagerPanel;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.organization.OrganizationManagerDialog;
+import edu.umich.med.mrc2.datoolbox.gui.idworks.IDWorkbenchPanel;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.search.byexp.DatabaseExperimentSelectorDialog;
 import edu.umich.med.mrc2.datoolbox.gui.io.DataExportDialog;
 import edu.umich.med.mrc2.datoolbox.gui.io.NewMetabolomicsExperimentDialog;
@@ -102,7 +107,9 @@ import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.fc.ImprovedFileChooser;
 import edu.umich.med.mrc2.datoolbox.main.BuildInformation;
+import edu.umich.med.mrc2.datoolbox.main.FeatureCollectionManager;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
+import edu.umich.med.mrc2.datoolbox.main.MSMSClusterDataSetManager;
 import edu.umich.med.mrc2.datoolbox.main.RawDataManager;
 import edu.umich.med.mrc2.datoolbox.main.RecentDataManager;
 import edu.umich.med.mrc2.datoolbox.main.StartupConfiguration;
@@ -116,6 +123,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskListener;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.gui.TaskProgressPanel;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.IDTrackerExperimentDataFetchTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.project.LoadExperimentTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.project.OpenStoredRawDataAnalysisExperimentTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.project.SaveExperimentTask;
@@ -317,8 +325,149 @@ public class MainWindow extends JFrame
 		
 		if(command.equals(MainActionCommands.SHOW_WEB_HELP_COMMAND.getName()))
 			showOnlineHelp();
+		
+		if(command.equals(MainActionCommands.CLEAR_RECENT_EXPERIMENTS_COMMAND.getName())
+				|| command.equals(MainActionCommands.CLEAR_RECENT_FEATURE_COLLECTIONS_COMMAND.getName())
+				|| command.equals(MainActionCommands.CLEAR_RECENT_FEATURE_CLUSTER_DATA_SETS_COMMAND.getName())) {
+			clearRecentObjects(command);
+		}
+		if(command.startsWith(MainActionCommands.OPEN_RECENT_FEATURE_COLLECTION_COMMAND.name()))
+			loadRecentFeatureCollection(command);
+		
+		if(command.startsWith(MainActionCommands.OPEN_RECENT_FEATURE_CLUSTER_DATA_SET_COMMAND.name()))
+			loadRecentFeatureClusterDataSet(command);
+		
+		if(command.startsWith(MainActionCommands.OPEN_RECENT_METABOLOMICS_EXPERIMENT_COMMAND.name())
+				|| command.startsWith(MainActionCommands.OPEN_RECENT_IDTRACKER_EXPERIMENT_COMMAND.name())
+				|| command.startsWith(MainActionCommands.OPEN_RECENT_OFFLINE_RAW_DATA_EXPERIMENT_COMMAND.name())) {
+			openRecentExperiment(command);
+		}
 	}
 	
+	private void openRecentExperiment(String command) {
+
+		String[]parts = command.split("|");
+		String expId = parts[parts.length - 1];
+		ExperimentPointer ep = 
+				RecentDataManager.getRecentExperimentById(expId);
+		if(ep == null) {
+			MessageDialog.showErrorMsg(
+					"Requested experiment not found", this.getContentPane());
+			return;
+		}
+		if(MRC2ToolBoxCore.getActiveMetabolomicsExperiment() != null) {
+			
+			if(MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getId().equals(expId))
+				return;
+			else {
+				MessageDialog.showWarningMsg(
+						"Please close the active metabolomics experiment\n\"" +
+						MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getName() + 
+						"\"", this.getContentPane());
+				return;
+			}
+		}
+		if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() != null) {
+			
+			if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment().getId().equals(expId))
+				return;
+			else {
+				MessageDialog.showWarningMsg(
+						"Please close the active offline raw data analysis experiment\n\"" +
+						MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment().getName() + 
+						"\"", this.getContentPane());
+				return;
+			}
+		}
+		if(ep.getProjectType().equals(ProjectType.DATA_ANALYSIS)) {
+			
+			File experimentFile = ep.getExperimentFile();
+			if(!experimentFile.exists()) {
+				
+				MessageDialog.showErrorMsg(
+						"Project file for \"" + ep.getName() + "\" not found at\n"
+								+ experimentFile.getAbsolutePath(), this.getContentPane());
+				return;
+			}
+			LoadExperimentTask ltp = new LoadExperimentTask(experimentFile);
+			ltp.addTaskListener(this);
+			MRC2ToolBoxCore.getTaskController().addTask(ltp);	
+		}
+		if(ep.getProjectType().equals(ProjectType.RAW_DATA_ANALYSIS)) {
+			
+			File experimentFile = ep.getExperimentFile();
+			if(!experimentFile.exists()) {
+				
+				MessageDialog.showErrorMsg(
+						"Project file for \"" + ep.getName() + "\" not found at\n"
+								+ experimentFile.getAbsolutePath(), this.getContentPane());
+				return;
+			}
+			OpenStoredRawDataAnalysisExperimentTask ltp = 
+					new OpenStoredRawDataAnalysisExperimentTask(experimentFile, true);
+			ltp.addTaskListener(getPanel(PanelList.RAW_DATA_EXAMINER));
+			MRC2ToolBoxCore.getTaskController().addTask(ltp);
+		}
+		if(ep.getProjectType().equals(ProjectType.ID_TRACKER_DATA_ANALYSIS)) {
+			
+			LIMSExperiment idTrackerExperiment = IDTDataCache.getExperimentById(expId);
+			IDTrackerExperimentDataFetchTask task = 
+					new IDTrackerExperimentDataFetchTask(idTrackerExperiment);
+			
+			MRC2ToolBoxCore.getMainWindow().showPanel(PanelList.ID_WORKBENCH);
+			task.addTaskListener(MRC2ToolBoxCore.getMainWindow().getPanel(PanelList.ID_WORKBENCH));
+			MRC2ToolBoxCore.getTaskController().addTask(task);
+		}
+	}
+
+	private void loadRecentFeatureClusterDataSet(String command) {
+		
+		String cdsId = command.replace(
+				MainActionCommands.OPEN_RECENT_FEATURE_CLUSTER_DATA_SET_COMMAND.name() + "|", "");
+
+		IMSMSClusterDataSet cds = 
+				MSMSClusterDataSetManager.getMSMSClusterDataSetById(cdsId);
+		if(cds == null) {
+			MessageDialog.showErrorMsg(
+					"Requested feature cluster data set not found", this.getContentPane());
+			return;
+		}
+		IDWorkbenchPanel panel = 
+				(IDWorkbenchPanel)MRC2ToolBoxCore.getMainWindow().getPanel(PanelList.ID_WORKBENCH);		
+		panel.loadMSMSClusterDataSet(cds);
+	}
+
+	private void loadRecentFeatureCollection(String command) {
+
+		String fsId = command.replace(
+				MainActionCommands.OPEN_RECENT_FEATURE_COLLECTION_COMMAND.name() + "|", "");
+		MsFeatureInfoBundleCollection fColl = 
+				FeatureCollectionManager.getMsFeatureInfoBundleCollectionById(fsId);
+		if(fColl == null) {
+			MessageDialog.showErrorMsg(
+					"Requested feature collection not found", this.getContentPane());
+			return;
+		}
+		IDWorkbenchPanel panel = 
+				(IDWorkbenchPanel)MRC2ToolBoxCore.getMainWindow().getPanel(PanelList.ID_WORKBENCH);		
+		panel.loadMSMSFeatureInformationBundleCollection(fColl);
+	}
+
+	private void clearRecentObjects(String command) {
+
+		if(command.equals(MainActionCommands.CLEAR_RECENT_EXPERIMENTS_COMMAND.getName()))
+			RecentDataManager.clearRecentExperiments();
+		
+		if(command.equals(MainActionCommands.CLEAR_RECENT_FEATURE_COLLECTIONS_COMMAND.getName()))
+			RecentDataManager.clearRecentFeatureCollections();
+		
+		if(command.equals(MainActionCommands.CLEAR_RECENT_FEATURE_CLUSTER_DATA_SETS_COMMAND.getName()))
+			RecentDataManager.clearRecentFeatureClusterDataSets();
+		
+		RecentDataManager.saveDataToFile();
+		updateGuiWithRecentData();
+	}
+
 	private void saveMetabolomicsExperimentInNewFormat() {
 		// TODO Auto-generated method stub
 		
@@ -513,9 +662,7 @@ public class MainWindow extends JFrame
 			
 			((IDTrackerLimsManagerPanel) MRC2ToolBoxCore.getMainWindow().
 					getPanel(PanelList.ID_TRACKER_LIMS)).refreshIdTrackerdata();
-			
-			RecentDataManager.readDataFromFile();
-			updateGuiWithRecentData();
+		
 			idtLogin.dispose();
 		}
 	}
@@ -1351,10 +1498,12 @@ public class MainWindow extends JFrame
 
 	private void finalizeExperimentLoad(LoadExperimentTask eTask) {
 
-		MRC2ToolBoxCore.setActiveMetabolomicsExperiment(eTask.getNewExperiment());
+		MRC2ToolBoxCore.setActiveMetabolomicsExperiment(eTask.getNewExperiment());				
 		setGuiFromActiveExperiment();
 		MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
 		hideProgressDialog();
+		RecentDataManager.addExperiment(MRC2ToolBoxCore.getActiveMetabolomicsExperiment());
+		updateGuiWithRecentData();
 	}
 	
 	private void clearGuiAfterExperimentClosed() {

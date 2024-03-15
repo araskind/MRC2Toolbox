@@ -49,6 +49,7 @@ import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundleCollection;
 import edu.umich.med.mrc2.datoolbox.data.compare.MSMSClusterDataSetComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureInformationBundleCollectionComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
+import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.data.msclust.IMSMSClusterDataSet;
 import edu.umich.med.mrc2.datoolbox.project.Experiment;
 import edu.umich.med.mrc2.datoolbox.project.ProjectType;
@@ -56,7 +57,7 @@ import edu.umich.med.mrc2.datoolbox.utils.ExperimentUtils;
 
 public class RecentDataManager {
 	
-	private static int MAX_OBJECTS_COUNT = 10;
+	private static int MAX_OBJECTS_COUNT = 15;
 	
 	public static final String DOCUMENT_ROOT = "RecentObjects";
 	public static final String RECENT_EXPERIMENTS_ELEMENT = "RecentExperiments";
@@ -151,7 +152,7 @@ public class RecentDataManager {
         		new Element(RECENT_FEATURE_COLLECTION_ELEMENT).
         		setText(StringUtils.join(fcIdSet, ",")));
 		
-        Set<String> clustCollIdSet = featureCollections.stream().
+        Set<String> clustCollIdSet = featureClusterDataSets.stream().
         		filter(c -> Objects.nonNull(c.getId())).
         		map(c -> c.getId()).collect(Collectors.toSet());
         documentRoot.addContent(       		
@@ -202,11 +203,31 @@ public class RecentDataManager {
 		recentExperimentsMap.get(toAdd.getProjectType()).add(new ExperimentPointer(toAdd));
 	}
 	
+	public static void addIDTrackerExperiment(LIMSExperiment limsExperiment) {
+		
+		if(!recentExperimentsMap.containsKey(ProjectType.ID_TRACKER_DATA_ANALYSIS))
+			recentExperimentsMap.put(ProjectType.ID_TRACKER_DATA_ANALYSIS, new LinkedHashSet<ExperimentPointer>());
+		
+		Collection<ExperimentPointer> projectsOfType = 
+				recentExperimentsMap.get(ProjectType.ID_TRACKER_DATA_ANALYSIS);
+		
+		if(projectsOfType.size() == MAX_OBJECTS_COUNT)
+			projectsOfType.iterator().remove();
+		
+		recentExperimentsMap.get(ProjectType.ID_TRACKER_DATA_ANALYSIS).add(new ExperimentPointer(limsExperiment));
+	}
+
 	public static Set<MsFeatureInfoBundleCollection>getRecentFeatureCollections(){
 		return featureCollections;
 	}
 	
 	public static void addFeatureCollection(MsFeatureInfoBundleCollection toAdd) {
+		
+		if(toAdd == null)
+			return;
+		
+		if(featureCollections.contains(toAdd))
+			return;
 		
 		if(featureCollections.size() == MAX_OBJECTS_COUNT)
 			featureCollections.iterator().remove();
@@ -220,10 +241,36 @@ public class RecentDataManager {
 	
 	public static void addIMSMSClusterDataSet(IMSMSClusterDataSet toAdd) {
 		
+		if(toAdd == null)
+			return;
+		
+		if(featureClusterDataSets.contains(toAdd))
+			return;
+		
 		if(featureClusterDataSets.size() == MAX_OBJECTS_COUNT)
 			featureClusterDataSets.iterator().remove();
 		
 		featureClusterDataSets.add(toAdd);
+	}
+	
+	public static void clearRecentExperiments() { 
+		recentExperimentsMap.clear();
+	}
+	
+	public static void clearRecentFeatureCollections() { 
+		featureCollections.clear();
+	}
+	
+	public static void clearRecentFeatureClusterDataSets() { 
+		featureClusterDataSets.clear();
+	}
+	
+	public static ExperimentPointer getRecentExperimentById(String id) {
+		
+		return recentExperimentsMap.values().stream().
+				flatMap(e -> e.stream()).
+				filter(e -> e.getId().equals(id)).
+				findFirst().orElse(null);
 	}
 }
 

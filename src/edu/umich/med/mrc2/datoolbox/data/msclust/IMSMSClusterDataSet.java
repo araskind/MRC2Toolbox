@@ -89,4 +89,6 @@ public interface IMSMSClusterDataSet {
 	void clearDataSet();
 
 	Collection<MinimalMSOneFeature> getMatchedLookupFeatures();
+
+	String getFormattedMetadata();
 }

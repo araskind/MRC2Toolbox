@@ -38,6 +38,7 @@ import edu.umich.med.mrc2.datoolbox.data.MSFeatureIdentificationLevel;
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MassSpectrum;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
+import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundleCollection;
 import edu.umich.med.mrc2.datoolbox.data.MsPoint;
 import edu.umich.med.mrc2.datoolbox.data.StockSample;
 import edu.umich.med.mrc2.datoolbox.data.enums.AnnotatedObjectType;
@@ -55,10 +56,18 @@ import edu.umich.med.mrc2.datoolbox.utils.DiskCacheUtils;
 public class IDTMSMSFeatureDataPullTask extends IDTMSMSFeatureSearchTask {
 
 	protected Collection<String>featureIds;
+	protected MsFeatureInfoBundleCollection parentCollection;
 
 	public IDTMSMSFeatureDataPullTask(Collection<String> featureIds) {
 		super();
 		this.featureIds = featureIds;
+	}
+
+	public IDTMSMSFeatureDataPullTask(
+			Set<String> missingIds, 
+			MsFeatureInfoBundleCollection parentCollection) {
+		this.featureIds = missingIds;
+		this.parentCollection = parentCollection;
 	}
 
 	@Override
@@ -93,6 +102,10 @@ public class IDTMSMSFeatureDataPullTask extends IDTMSMSFeatureSearchTask {
 				fetchBinnerAnnotations();
 			}
 			finalizeFeatureList();
+			
+			if(parentCollection != null)
+				parentCollection.addFeatures(features);
+			
 			setStatus(TaskStatus.FINISHED);
 		}		
 		catch (Exception e) {
@@ -245,5 +258,9 @@ public class IDTMSMSFeatureDataPullTask extends IDTMSMSFeatureSearchTask {
 	@Override
 	public Task cloneTask() {
 		return new IDTMSMSFeatureDataPullTask(featureIds);
+	}
+
+	public MsFeatureInfoBundleCollection getParentCollection() {
+		return parentCollection;
 	}
 }

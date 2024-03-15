@@ -105,6 +105,7 @@ import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
 import edu.umich.med.mrc2.datoolbox.main.BuildInformation;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.RawDataManager;
+import edu.umich.med.mrc2.datoolbox.main.RecentDataManager;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisExperiment;
 import edu.umich.med.mrc2.datoolbox.rawdata.MSMSExtractionParameterSet;
@@ -1411,6 +1412,10 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 		MainWindow.hideProgressDialog();
 		StatusBar.clearExperimentData();
 		StatusBar.setExperimentName(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment().getName());
+		
+		RecentDataManager.addExperiment(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment());
+		MRC2ToolBoxCore.getMainWindow().updateGuiWithRecentData();
+		
 		idp = new IndeterminateProgressDialog("Loading raw data tree ...", this.getContentPane(), ordTask);
 		idp.setLocationRelativeTo(this.getContentPane());
 		idp.setVisible(true);		

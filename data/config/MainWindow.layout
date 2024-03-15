@@ -243,7 +243,7 @@
 													</placeholders>
 												</leaf>
 												<node nodeId="1676064563113" orientation="HORIZONTAL" divider="0.28317601332593006">
-													<leaf id="1" nodeId="1676064552084">
+													<leaf id="-1" nodeId="1676064552084">
 														<placeholders>
 															<placeholder>dock.single.ExperimentSetupDraw</placeholder>
 														</placeholders>
@@ -396,7 +396,7 @@
 							<children ignore="false">
 								<child>
 									<layout factory="delegate_StackDockStationFactory">
-										<selected>1</selected>
+										<selected>8</selected>
 										<placeholders>
 											<version>0</version>
 											<format>dock.PlaceholderList</format>
@@ -742,16 +742,6 @@
 										</child>
 									</children>
 								</child>
-								<child>
-									<layout factory="predefined" placeholder="dock.single.ExperimentSetupDraw">
-										<replacement id="dockablesingle ExperimentSetupDraw"/>
-										<delegate id="delegate_ccontrol backup factory id">
-											<id>ExperimentSetupDraw</id>
-											<area/>
-										</delegate>
-									</layout>
-									<children ignore="false"/>
-								</child>
 							</children>
 						</root>
 						<root name="ccontrol west">
@@ -849,6 +839,29 @@
 									<replacement id="dockablesingle MoTrPACDataTrackingPanel"/>
 									<delegate id="delegate_ccontrol backup factory id">
 										<id>MoTrPACDataTrackingPanel</id>
+										<area/>
+									</delegate>
+								</layout>
+								<children ignore="false"/>
+							</layout>
+						</child>
+						<child key="single ExperimentSetupDraw" root="ccontrol center" location="true">
+							<location>
+								<property factory="SplitDockPlaceholderProperty">
+									<placeholder>dock.single.ExperimentSetupDraw</placeholder>
+									<backup-path>
+										<node location="BOTTOM" size="0.5" id="1707276684834"/>
+										<node location="RIGHT" size="0.7217529039070749" id="1672779742083"/>
+										<node location="LEFT" size="0.28317601332593006" id="1676064563113"/>
+										<leaf id="1676064552084"/>
+									</backup-path>
+								</property>
+							</location>
+							<layout>
+								<layout factory="predefined" placeholder="dock.single.ExperimentSetupDraw">
+									<replacement id="dockablesingle ExperimentSetupDraw"/>
+									<delegate id="delegate_ccontrol backup factory id">
+										<id>ExperimentSetupDraw</id>
 										<area/>
 									</delegate>
 								</layout>
@@ -1240,7 +1253,7 @@
 								</property>
 							</properties>
 						</entry>
-						<entry id="single ExperimentSetupDraw" current="dock.mode.normal">
+						<entry id="single ExperimentSetupDraw">
 							<history>
 								<mode>dock.mode.minimized</mode>
 								<mode>dock.mode.normal</mode>
