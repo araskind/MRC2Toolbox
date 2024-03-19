@@ -1414,7 +1414,6 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 		StatusBar.setExperimentName(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment().getName());
 		
 		RecentDataManager.addExperiment(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment());
-		MRC2ToolBoxCore.getMainWindow().updateGuiWithRecentData();
 		
 		idp = new IndeterminateProgressDialog("Loading raw data tree ...", this.getContentPane(), ordTask);
 		idp.setLocationRelativeTo(this.getContentPane());

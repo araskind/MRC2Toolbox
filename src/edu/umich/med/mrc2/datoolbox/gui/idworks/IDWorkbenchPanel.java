@@ -786,6 +786,9 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		if(command.equals(MainActionCommands.CREATE_NEW_FEATURE_COLLECTION_FROM_SELECTED.getName()))
 			createNewMsmsFeatureCollectionFromSelectedFeatures(msTwoFeatureTable.getBundles(TableRowSubset.SELECTED));
 		
+		if(command.startsWith(MainActionCommands.ADD_FEATURES_TO_RECENT_FEATURE_COLLECTION_COMMAND.name()))
+			addSelectedFeaturesToRecentCollection(command);	
+		
 		if (command.equals(MainActionCommands.ADD_SELECTED_TO_EXISTING_FEATURE_COLLECTION.getName()))
 			addSelectedFeaturesToExistingMsMsFeatureCollection(msTwoFeatureTable.getBundles(TableRowSubset.SELECTED));
 		
@@ -2802,6 +2805,28 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		addFeaturesToCollectionDialog.setVisible(true);
 	}
 	
+	private void addSelectedFeaturesToRecentCollection(String command) {
+		
+		Collection<MSFeatureInfoBundle> selectedMSMSFeatures = 
+				msTwoFeatureTable.getBundles(TableRowSubset.SELECTED);
+		if(selectedMSMSFeatures == null || selectedMSMSFeatures.isEmpty())
+			return;
+		
+		String fsId = command.replace(
+				MainActionCommands.ADD_FEATURES_TO_RECENT_FEATURE_COLLECTION_COMMAND.name() + "|", "");
+		MsFeatureInfoBundleCollection fColl = 
+				FeatureCollectionManager.getMsFeatureInfoBundleCollectionById(fsId);
+		if(fColl == null) {
+			MessageDialog.showErrorMsg(
+					"Requested feature collection not found", this.getContentPane());
+			return;
+		}
+		if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() == null)
+			FeatureCollectionManager.addFeaturesToCollection(fColl, selectedMSMSFeatures);
+		else
+			fColl.addFeatures(selectedMSMSFeatures);
+	}
+	
 	public void removeFeaturesFromActiveMsMsFeatureCollection(
 			Collection<MSFeatureInfoBundle> featuresToRemove) {
 		
@@ -3687,9 +3712,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 	private void finalizeIdTrackerExperimentLoad(IDTrackerExperimentDataFetchTask task) {
 
 		LIMSExperiment experiment = task.getIdTrackerExperiment();
-		RecentDataManager.addIDTrackerExperiment(experiment);
-		MRC2ToolBoxCore.getMainWindow().updateGuiWithRecentData();
-		
+		RecentDataManager.addIDTrackerExperiment(experiment);		
 		StatusBar.setExperimentName(experiment.toString());
 		
 		activeFeatureCollection = new MsFeatureInfoBundleCollection(
@@ -3947,7 +3970,6 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			 loadMSMSClusterDataSetInGUI(activeMSMSClusterDataSet);
 		}
 		RecentDataManager.addIMSMSClusterDataSet(selectedDataSet);	
-		MRC2ToolBoxCore.getMainWindow().updateGuiWithRecentData();
 	}	
 	
 	private void reloadActiveMSMSClusterDataSet() {
@@ -3994,7 +4016,6 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			 reloadActiveMSMSFeatureCollection();
 		}
 		RecentDataManager.addFeatureCollection(selectedCollection);
-		MRC2ToolBoxCore.getMainWindow().updateGuiWithRecentData();
 	}
 	
 	private void reloadCompleteDataSet() {
@@ -4768,7 +4789,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 	@Override
 	public void updateGuiWithRecentData() {
 		// TODO Auto-generated method stub
-		
+		msmsFeaturePopupMenu.updateRecentFeatureCollectionList();
 	}
 }
 

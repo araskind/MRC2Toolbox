@@ -1223,10 +1223,10 @@ public enum MainActionCommands {
 	
 	//	MetIDTracker MSMS-feature plot
 	REFRESH_MSMS_FEATURE_PLOT("Refresh MSMS feature plot"),
-	CREATE_NEW_FEATURE_COLLECTION_FROM_SELECTED("Create new collection from selected features"),
-	ADD_SELECTED_TO_EXISTING_FEATURE_COLLECTION("Add selected features to existing collection"),
+	CREATE_NEW_FEATURE_COLLECTION_FROM_SELECTED("Create new collection from selected feature(s)"),
+	ADD_SELECTED_TO_EXISTING_FEATURE_COLLECTION("Add selected feature(s) to existing collection"),
 	FILTER_SELECTED_MSMS_FEATURES_IN_TABLE("Filter selected features in MSMS feature table"),
-	REMOVE_SELECTED_FROM_ACTIVE_MSMS_FEATURE_COLLECTION("Remove selected features from active feature collection"),
+	REMOVE_SELECTED_FROM_ACTIVE_MSMS_FEATURE_COLLECTION("Remove selected feature(s) from active feature collection"),
 	RESET_MZ_RT_LIMITS_COMMAND("Reset MZ / RT limits"),
 	
 	//	Compound database curator
@@ -1347,6 +1347,8 @@ public enum MainActionCommands {
 	OPEN_RECENT_OFFLINE_RAW_DATA_EXPERIMENT_COMMAND("Open recent offline RD experiment"),
 	OPEN_RECENT_FEATURE_COLLECTION_COMMAND("Open recent feature collection"),
 	OPEN_RECENT_FEATURE_CLUSTER_DATA_SET_COMMAND("Open recent feature cluster data set"),
+	
+	ADD_FEATURES_TO_RECENT_FEATURE_COLLECTION_COMMAND("Add features to recent feature collection"),
 	
 	CLEAR_RECENT_EXPERIMENTS_COMMAND("Clear recent experiments"),
 	CLEAR_RECENT_FEATURE_COLLECTIONS_COMMAND("Clear recent feature collections"),

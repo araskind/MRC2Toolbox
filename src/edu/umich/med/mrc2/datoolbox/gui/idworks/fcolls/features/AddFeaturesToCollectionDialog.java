@@ -52,6 +52,7 @@ import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.main.FeatureCollectionManager;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
+import edu.umich.med.mrc2.datoolbox.main.RecentDataManager;
 
 public class AddFeaturesToCollectionDialog extends JDialog implements ActionListener{
 	
@@ -155,6 +156,8 @@ public class AddFeaturesToCollectionDialog extends JDialog implements ActionList
 			FeatureCollectionManager.addFeaturesToCollection(selectedCollection, featuresToAdd);
 		else
 			selectedCollection.addFeatures(featuresToAdd);
+		
+		RecentDataManager.addFeatureCollection(selectedCollection);
 		
 		if(loadCollectionCheckBox.isSelected())
 			parentPanel.loadMSMSFeatureInformationBundleCollection(selectedCollection);

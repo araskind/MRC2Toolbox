@@ -24,13 +24,17 @@ package edu.umich.med.mrc2.datoolbox.gui.idworks.ms2;
 import java.awt.Toolkit;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
+import java.util.Set;
 
 import javax.swing.Icon;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.KeyStroke;
 
+import org.apache.commons.text.WordUtils;
+
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureIdentificationLevel;
+import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundleCollection;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.gui.communication.IdentificationLevelEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.IdentificationLevelEventListener;
@@ -40,6 +44,7 @@ import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTablePopupMenu;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
+import edu.umich.med.mrc2.datoolbox.main.RecentDataManager;
 
 public class MsMsFeaturePopupMenu extends BasicTablePopupMenu implements IdentificationLevelEventListener {
 
@@ -61,10 +66,12 @@ public class MsMsFeaturePopupMenu extends BasicTablePopupMenu implements Identif
 	private static final Icon xicIcon = GuiUtils.getIcon("xic", 24);
 	private static final Icon createNewCollectionIcon = GuiUtils.getIcon("newFeatureSubset", 24);
 	private static final Icon addToExistingCollectionIcon = GuiUtils.getIcon("addCollection", 24);
+	private static final Icon addToRecentCollectionIcon = GuiUtils.getIcon("addToRecentCollection", 24);
 	private static final Icon removeFromActiveCollectionIcon = GuiUtils.getIcon("deleteCollection", 24);
 	private static final Icon exportMSPIcon = GuiUtils.getIcon("exportToMSP", 24);
 	private static final Icon copyAsArrayIcon = GuiUtils.getIcon("copyAsArray", 24);
 	private static final Icon clearIcon = GuiUtils.getIcon("clear", 24);
+	private static final Icon fcIcon = GuiUtils.getIcon("enableAll", 24);
 	
 	private JMenuItem 
 			setupNISTPepSearchMenuItem,
@@ -82,6 +89,7 @@ public class MsMsFeaturePopupMenu extends BasicTablePopupMenu implements Identif
 			copyAsArrayMenuItem;
 	
 	private JMenu idLevelMenu;
+	private JMenu recentFeatureCollectionsMenu;
 
 	public MsMsFeaturePopupMenu(
 			ActionListener listener,
@@ -132,7 +140,12 @@ public class MsMsFeaturePopupMenu extends BasicTablePopupMenu implements Identif
 				MainActionCommands.CREATE_NEW_FEATURE_COLLECTION_FROM_SELECTED.getName(), listener,
 				MainActionCommands.CREATE_NEW_FEATURE_COLLECTION_FROM_SELECTED.getName());
 		createNewCollectionMenuItem.setIcon(createNewCollectionIcon);
-
+				
+		recentFeatureCollectionsMenu = new JMenu("Add Add selected feature(s) to recent collection");
+		recentFeatureCollectionsMenu.setIcon(addToRecentCollectionIcon);
+		updateRecentFeatureCollectionList();
+		add(recentFeatureCollectionsMenu);
+		
 		addToExistingCollectionMenuItem = GuiUtils.addMenuItem(this,
 				MainActionCommands.ADD_SELECTED_TO_EXISTING_FEATURE_COLLECTION.getName(), listener,
 				MainActionCommands.ADD_SELECTED_TO_EXISTING_FEATURE_COLLECTION.getName());
@@ -143,21 +156,7 @@ public class MsMsFeaturePopupMenu extends BasicTablePopupMenu implements Identif
 				MainActionCommands.REMOVE_SELECTED_FROM_ACTIVE_MSMS_FEATURE_COLLECTION.getName());
 		removeFromActiveCollectionMenuItem.setIcon(removeFromActiveCollectionIcon);
 		
-		addSeparator();
-
 		addCopyBlock();
-		
-//		copySelectedMenuItem = GuiUtils.addMenuItem(this,
-//				MainActionCommands.COPY_SELECTED_MS2_ROWS_COMMAND.getName(), listener,
-//				MainActionCommands.COPY_SELECTED_MS2_ROWS_COMMAND.getName());
-//		copySelectedMenuItem.setIcon(copySelectedIcon);
-//		copySelectedMenuItem.setEnabled(false);
-//
-//		copySelectedWithHeaderMenuItem = GuiUtils.addMenuItem(this,
-//				MainActionCommands.COPY_SELECTED_MS2_ROWS_WITH_HEADER_COMMAND.getName(), listener,
-//				MainActionCommands.COPY_SELECTED_MS2_ROWS_WITH_HEADER_COMMAND.getName());
-//		copySelectedWithHeaderMenuItem.setIcon(copySelectedWithHeaderIcon);
-//		copySelectedWithHeaderMenuItem.setEnabled(false);
 		
 		addSeparator();
 		
@@ -221,6 +220,20 @@ public class MsMsFeaturePopupMenu extends BasicTablePopupMenu implements Identif
 	@Override
 	public void identificationLevelDefinitionChanged(IdentificationLevelEvent e) {
 		refreshIdLevelMenu();
+	}
+	
+	public void updateRecentFeatureCollectionList() {
+		
+		recentFeatureCollectionsMenu.removeAll();
+		Set<MsFeatureInfoBundleCollection> fcList = 
+				RecentDataManager.getRecentFeatureCollections();
+		for(MsFeatureInfoBundleCollection fc : fcList) {
+			
+			String title = "<html>" + WordUtils.wrap(fc.getName(), 50, "<br />", true);
+			String command = MainActionCommands.ADD_FEATURES_TO_RECENT_FEATURE_COLLECTION_COMMAND.name() + "|" + fc.getId();
+			JMenuItem fcItem = addItem(recentFeatureCollectionsMenu, title, command, fcIcon);		
+			fcItem.setToolTipText(fc.getFormattedMetadata());
+		}
 	}
 }
 

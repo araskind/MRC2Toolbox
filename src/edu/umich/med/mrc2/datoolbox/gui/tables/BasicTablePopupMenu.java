@@ -24,6 +24,7 @@ package edu.umich.med.mrc2.datoolbox.gui.tables;
 import java.awt.event.ActionListener;
 
 import javax.swing.Icon;
+import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 
@@ -79,6 +80,17 @@ public class BasicTablePopupMenu extends JPopupMenu {
 				MainActionCommands.COPY_VISIBLE_TABLE_ROWS_COMMAND.getName(), copyListener,
 				MainActionCommands.COPY_VISIBLE_TABLE_ROWS_COMMAND.getName());
 		copyAllWithHeaderMenuItem.setIcon(copyAllIcon);		
+	}
+	
+	
+	protected JMenuItem addItem(JMenu menu, String title, String command, Icon defaultIcon) {
+
+		JMenuItem item = new JMenuItem(title);
+		item.setActionCommand(command);
+		item.addActionListener(mainActionListener);
+		item.setIcon(defaultIcon);
+		menu.add(item);
+		return item;
 	}
 }
 

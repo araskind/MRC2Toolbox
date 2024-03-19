@@ -201,6 +201,8 @@ public class RecentDataManager {
 			projectsOfType.iterator().remove();
 		
 		recentExperimentsMap.get(toAdd.getProjectType()).add(new ExperimentPointer(toAdd));
+		
+		MRC2ToolBoxCore.getMainWindow().updateGuiWithRecentData();
 	}
 	
 	public static void addIDTrackerExperiment(LIMSExperiment limsExperiment) {
@@ -215,6 +217,8 @@ public class RecentDataManager {
 			projectsOfType.iterator().remove();
 		
 		recentExperimentsMap.get(ProjectType.ID_TRACKER_DATA_ANALYSIS).add(new ExperimentPointer(limsExperiment));
+		
+		MRC2ToolBoxCore.getMainWindow().updateGuiWithRecentData();
 	}
 
 	public static Set<MsFeatureInfoBundleCollection>getRecentFeatureCollections(){
@@ -233,6 +237,8 @@ public class RecentDataManager {
 			featureCollections.iterator().remove();
 		
 		featureCollections.add(toAdd);
+		
+		MRC2ToolBoxCore.getMainWindow().updateGuiWithRecentData();
 	}
 	
 	public static Set<IMSMSClusterDataSet>getRecentFeatureClusterDataSets(){
@@ -251,18 +257,23 @@ public class RecentDataManager {
 			featureClusterDataSets.iterator().remove();
 		
 		featureClusterDataSets.add(toAdd);
+		
+		MRC2ToolBoxCore.getMainWindow().updateGuiWithRecentData();
 	}
 	
 	public static void clearRecentExperiments() { 
 		recentExperimentsMap.clear();
+		MRC2ToolBoxCore.getMainWindow().updateGuiWithRecentData();
 	}
 	
 	public static void clearRecentFeatureCollections() { 
 		featureCollections.clear();
+		MRC2ToolBoxCore.getMainWindow().updateGuiWithRecentData();
 	}
 	
 	public static void clearRecentFeatureClusterDataSets() { 
 		featureClusterDataSets.clear();
+		MRC2ToolBoxCore.getMainWindow().updateGuiWithRecentData();
 	}
 	
 	public static ExperimentPointer getRecentExperimentById(String id) {

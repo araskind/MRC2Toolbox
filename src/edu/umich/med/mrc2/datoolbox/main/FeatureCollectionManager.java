@@ -161,6 +161,19 @@ public class FeatureCollectionManager {
 		if(!featureCollectionsMSIDMap.containsKey(collection) || featuresToAdd.isEmpty())
 			return;
 		
+		if(featureCollectionsMSIDMap.get(collection).isEmpty()) {
+			
+			Set<String>dbIds = new TreeSet<String>();
+			try {
+				dbIds = 
+						FeatureCollectionUtils.getFeatureIdsForMsFeatureInfoBundleCollection(collection.getId());
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			if(!dbIds.isEmpty())
+				featureCollectionsMSIDMap.get(collection).addAll(dbIds);
+		}		
 		Set<String>existingIds = featureCollectionsMSIDMap.get(collection);
 		Set<String>featureIdsToAdd = featuresToAdd.stream().
 				map(f -> f.getMSFeatureId()).

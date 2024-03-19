@@ -49,6 +49,7 @@ import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.main.FeatureCollectionManager;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
+import edu.umich.med.mrc2.datoolbox.main.RecentDataManager;
 import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisExperiment;
 
 public class DockableFeatureCollectionsManager extends DefaultSingleCDockable implements ActionListener {
@@ -276,6 +277,7 @@ public class DockableFeatureCollectionsManager extends DefaultSingleCDockable im
 						FeatureCollectionManager.getMsFeatureInfoBundleCollections());	
 				featuresToAdd = null;
 			}
+			RecentDataManager.addFeatureCollection(newCollection);
 		}	
 		featuresToAdd = null;
 	}
