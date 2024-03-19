@@ -122,7 +122,7 @@ public class RecentDataManager {
 					MSMSClusterDataSetManager.getMSMSClusterDataSetById(ccid);
 			if(cds != null) 
 				featureClusterDataSets.add(cds);			
-		}	
+		}
 		List<Element> experimentElementList = 
 				rootElement.getChild(RECENT_EXPERIMENTS_ELEMENT).
 				getChildren(ExperimentPointer.ELEMENT_NAME);

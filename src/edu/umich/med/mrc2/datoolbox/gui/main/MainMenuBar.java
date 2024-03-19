@@ -412,7 +412,7 @@ public class MainMenuBar extends CommonMenuBar {
 		for(IMSMSClusterDataSet fclust : fcluctList) {
 			
 			String title = "<html>" + WordUtils.wrap(fclust.getName(), 50, "<br />", true);
-			String command = MainActionCommands.OPEN_RECENT_FEATURE_COLLECTION_COMMAND.name() + "|" + fclust.getId();
+			String command = MainActionCommands.OPEN_RECENT_FEATURE_CLUSTER_DATA_SET_COMMAND.name() + "|" + fclust.getId();
 			JMenuItem fclustItem = addItem(recentFeatureClusterDataSetsMenu, title, command, clusterIcon);
 			fclustItem.setToolTipText(fclust.getFormattedMetadata());
 		}

@@ -61,6 +61,7 @@ import edu.umich.med.mrc2.datoolbox.gui.main.PanelList;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.ReferenceSamplesManager;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
+import edu.umich.med.mrc2.datoolbox.project.ProjectType;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
@@ -236,7 +237,9 @@ public class LoadExperimentTask extends AbstractTask implements TaskListener{
 			br = new BufferedReader(new InputStreamReader(input, "UTF-8"));
 
 			newExperiment = (DataAnalysisProject) experimentImport.fromXML(br);
-
+			if(newExperiment.getProjectType() == null)	
+				newExperiment.setProjectType(ProjectType.DATA_ANALYSIS);
+					
 			br.close();
 			input.close();
 			zipFile.close();

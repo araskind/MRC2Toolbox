@@ -60,6 +60,7 @@ public class ExperimentPointer {
 	
 	public ExperimentPointer(Experiment parent) {
 		super();
+		this.projectType = parent.getProjectType();
 		this.id = parent.getId();
 		this.name = parent.getName();
 		this.description = parent.getDescription();
@@ -74,6 +75,7 @@ public class ExperimentPointer {
 		super();
 		this.limsExperiment = limsExperiment;
 		
+		this.projectType = ProjectType.ID_TRACKER_DATA_ANALYSIS;
 		this.id = limsExperiment.getId();
 		this.name = limsExperiment.getName();
 		this.description = limsExperiment.getDescription();
@@ -118,8 +120,11 @@ public class ExperimentPointer {
 		experimentPointerElement.setAttribute(EXPERIMENT_ID, id);	
 		experimentPointerElement.setAttribute(EXPERIMENT_NAME, name);
 		experimentPointerElement.setAttribute(EXPERIMENT_DESCRIPTION, description);
-		experimentPointerElement.setAttribute(
-				EXPERIMENT_FILE, experimentFile.getAbsolutePath());
+		
+		if(experimentFile != null)
+			experimentPointerElement.setAttribute(
+					EXPERIMENT_FILE, experimentFile.getAbsolutePath());
+		
 		experimentPointerElement.setAttribute(DATE_CREATED,
 				ExperimentUtils.dateTimeFormat.format(dateCreated));
 		experimentPointerElement.setAttribute(LAST_MODIFIED,
@@ -138,9 +143,14 @@ public class ExperimentPointer {
 		
 		super();
 		this.id = pointerElement.getAttributeValue(EXPERIMENT_ID);
+		this.projectType = ProjectType.valueOf(pointerElement.getAttributeValue(EXPERIMENT_TYPE));
 		this.name = pointerElement.getAttributeValue(EXPERIMENT_NAME);
 		this.description = pointerElement.getAttributeValue(EXPERIMENT_DESCRIPTION);
-		this.experimentFile = new File(pointerElement.getAttributeValue(EXPERIMENT_ID));
+		
+		String expFilePath = pointerElement.getAttributeValue(EXPERIMENT_FILE);
+		if(expFilePath != null && !expFilePath.isEmpty())
+			this.experimentFile = new File(expFilePath);
+		
 		try {
 			this.dateCreated = ExperimentUtils.dateTimeFormat.parse(
 					pointerElement.getAttributeValue(DATE_CREATED));
@@ -175,6 +185,39 @@ public class ExperimentPointer {
 		return limsExperiment;
 	}
 	
+    @Override
+    public boolean equals(Object obj) {
+
+		if (obj == this)
+			return true;
+
+        if (obj == null)
+            return false;
+
+        if (!ExperimentPointer.class.isAssignableFrom(obj.getClass()))
+            return false;
+
+        final ExperimentPointer other = (ExperimentPointer) obj;
+
+        if ((this.id == null) ? (other.getId() != null) : !this.id.equals(other.getId()))
+            return false;
+              
+		if ((this.projectType == null) ? (other.getProjectType() != null)
+				: !this.projectType.equals(other.getProjectType()))
+			return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+
+        int hash = 3;
+        hash = 53 * hash + (this.id != null ? this.id.hashCode() : 0) + 
+        		(this.projectType != null ? this.projectType.hashCode() : 0);
+
+        return hash;
+    }	
 }
 
 

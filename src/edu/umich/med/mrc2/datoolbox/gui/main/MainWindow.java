@@ -346,7 +346,7 @@ public class MainWindow extends JFrame
 	
 	private void openRecentExperiment(String command) {
 
-		String[]parts = command.split("|");
+		String[]parts = command.split("\\|");
 		String expId = parts[parts.length - 1];
 		ExperimentPointer ep = 
 				RecentDataManager.getRecentExperimentById(expId);
@@ -1270,6 +1270,22 @@ public class MainWindow extends JFrame
 	
 	private void openRawDataExperimentFromDatabase() {
 		
+		if(MRC2ToolBoxCore.getActiveMetabolomicsExperiment() != null) {
+			
+			MessageDialog.showWarningMsg(
+					"Please close the active metabolomics experiment\n\"" +
+					MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getName() + 
+					"\"", this.getContentPane());
+			return;			
+		}
+		if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() != null) {
+			
+			MessageDialog.showWarningMsg(
+					"Please close the active offline raw data analysis experiment\n\"" +
+					MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment().getName() + 
+					"\"", this.getContentPane());
+			return;		
+		}		
 		DatabaseExperimentSelectorDialog experimentSelectorDialog = 
 				new DatabaseExperimentSelectorDialog();
 		experimentSelectorDialog.setLocationRelativeTo(this.getContentPane());

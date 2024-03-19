@@ -3792,13 +3792,14 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 
 	private void finalizeIDTMSMSFeatureDataPullTask(IDTMSMSFeatureDataPullTask task) {
 		
-		if(task.getParentCollection() != null)
+		if(task.getParentCollection() != null) {
 			activeFeatureCollection = task.getParentCollection();
-		else	
+		}
+		else {	
 			activeFeatureCollection = FeatureCollectionManager.msmsSearchResults;
-		
-		activeFeatureCollection.clearCollection();
-		activeFeatureCollection.addFeatures(task.getSelectedFeatures());
+			activeFeatureCollection.clearCollection();
+			activeFeatureCollection.addFeatures(task.getSelectedFeatures());
+		}
 		safelyLoadMSMSFeatures(activeFeatureCollection.getFeatures());
 		StatusBar.setActiveFeatureCollection(activeFeatureCollection);
 		activeMSMSClusterDataSet = null;

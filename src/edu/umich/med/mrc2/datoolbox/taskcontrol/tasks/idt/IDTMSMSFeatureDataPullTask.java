@@ -74,17 +74,20 @@ public class IDTMSMSFeatureDataPullTask extends IDTMSMSFeatureSearchTask {
 	public void run() {
 		
 		setStatus(TaskStatus.PROCESSING);		
-		try {
-			getCachedFeatures();
-		}
-		catch (Exception e) {
-			setStatus(TaskStatus.ERROR);
-			e.printStackTrace();
-		}
-		if(featureIds.isEmpty()) {
-			features.addAll(cachedFeatures);
-			setStatus(TaskStatus.FINISHED);
-			return;
+		if(parentCollection == null) {
+			
+			try {
+				getCachedFeatures();
+			}
+			catch (Exception e) {
+				setStatus(TaskStatus.ERROR);
+				e.printStackTrace();
+			}
+			if(featureIds.isEmpty()) {
+				features.addAll(cachedFeatures);
+				setStatus(TaskStatus.FINISHED);
+				return;
+			}
 		}
 		try {
 			getMsMsFeatures();
