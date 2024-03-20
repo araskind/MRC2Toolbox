@@ -38,7 +38,7 @@ import org.apache.commons.lang.StringUtils;
 import bibliothek.gui.dock.common.DefaultSingleCDockable;
 import edu.umich.med.mrc2.datoolbox.data.msclust.BinnerAnnotationLookupDataSet;
 import edu.umich.med.mrc2.datoolbox.database.idt.BinnerUtils;
-import edu.umich.med.mrc2.datoolbox.gui.idworks.fcolls.FeatureAndClusterCollectionManagerDialog;
+import edu.umich.med.mrc2.datoolbox.gui.idworks.fcolls.DataCollectionsManagerDialog;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.IndeterminateProgressDialog;
@@ -53,12 +53,12 @@ public class DockableBinnerAnnotationDataSetManager extends DefaultSingleCDockab
 	
 	private BinnerAnnotationDataSetManagerToolbar toolbar;
 	private BinnerAnnotationLookupDataSetListTable binnerAnnotationLookupDataSetListTable;
-	private FeatureAndClusterCollectionManagerDialog parent;	
+	private DataCollectionsManagerDialog parent;	
 	private BinnerAnnotationsLookupDataSetEditorDialog binnerAnnotationLookupDataSetEditorDialog;
 
 	private IndeterminateProgressDialog idp;
 
-	public DockableBinnerAnnotationDataSetManager(FeatureAndClusterCollectionManagerDialog parent)  {
+	public DockableBinnerAnnotationDataSetManager(DataCollectionsManagerDialog parent)  {
 
 		super("DockableBinnerAnnotationDataSetManager", componentIcon, 
 				"Binner annotation data sets", null, Permissions.MIN_MAX_STACK);

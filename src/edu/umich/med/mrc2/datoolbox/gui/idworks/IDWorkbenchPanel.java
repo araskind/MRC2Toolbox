@@ -138,7 +138,7 @@ import edu.umich.med.mrc2.datoolbox.gui.idworks.clustree.summary.MSMSCLusterData
 import edu.umich.med.mrc2.datoolbox.gui.idworks.export.IDTrackerDataExportDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.export.IDTrackerMSMSClusterDataSetExportDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.export.SiriusDataExportDialog;
-import edu.umich.med.mrc2.datoolbox.gui.idworks.fcolls.FeatureAndClusterCollectionManagerDialog;
+import edu.umich.med.mrc2.datoolbox.gui.idworks.fcolls.DataCollectionsManagerDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.fcolls.clusters.MSMSClusterDataSetEditorDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.fcolls.features.AddFeaturesToCollectionDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.fdr.FDREstimationSetupDialog;
@@ -298,7 +298,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 	private IDTrackerDataSearchDialog idTrackerDataSearchDialog;
 	private PepserchResultsImportDialog pepSearchResultVerifierDialog;	
 	private IDTrackerDataExplorerPlotFrame idTrackerDataExplorerPlotDialog;	
-	private FeatureAndClusterCollectionManagerDialog featureCollectionManagerDialog;
+	private DataCollectionsManagerDialog dataCollectionManagerDialog;
 	private AddFeaturesToCollectionDialog addFeaturesToCollectionDialog;
 	private MsFeatureInfoBundleCollection activeFeatureCollection;
 	private IMSMSClusterDataSet activeMSMSClusterDataSet;
@@ -546,8 +546,8 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 				MainActionCommands.SHOW_IDTRACKER_DATA_EXPLORER_PLOT.getName(), 
 				bubblePlotIcon, this));
 		menuActions.add(GuiUtils.setupButtonAction(
-				MainActionCommands.SHOW_FEATURE_COLLECTION_MANAGER_DIALOG_COMMAND.getName(),
-				MainActionCommands.SHOW_FEATURE_COLLECTION_MANAGER_DIALOG_COMMAND.getName(), 
+				MainActionCommands.SHOW_DATA_COLLECTIONS_MANAGER_DIALOG_COMMAND.getName(),
+				MainActionCommands.SHOW_DATA_COLLECTIONS_MANAGER_DIALOG_COMMAND.getName(), 
 				editFeatureCollectionIcon, this));
 		
 		menuActions.addSeparator();
@@ -780,8 +780,8 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		if (command.equals(MainActionCommands.RELOAD_ACTIVE_MS_ONE_FEATURES.getName()))	
 			reloadCompleteActiveMSOneFeatureSet();
 		
-		if (command.equals(MainActionCommands.SHOW_FEATURE_COLLECTION_MANAGER_DIALOG_COMMAND.getName()))	
-			showFeatureCollectionManager();	
+		if (command.equals(MainActionCommands.SHOW_DATA_COLLECTIONS_MANAGER_DIALOG_COMMAND.getName()))	
+			showDataCollectionsManager();	
 		
 		if(command.equals(MainActionCommands.CREATE_NEW_FEATURE_COLLECTION_FROM_SELECTED.getName()))
 			createNewMsmsFeatureCollectionFromSelectedFeatures(msTwoFeatureTable.getBundles(TableRowSubset.SELECTED));
@@ -1886,11 +1886,11 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		fdrEstimationSetupDialog.dispose();
 	}
 	
-	private void showFeatureCollectionManager() { 
+	private void showDataCollectionsManager() { 
 
-		featureCollectionManagerDialog = new FeatureAndClusterCollectionManagerDialog();
-		featureCollectionManagerDialog.setLocationRelativeTo(IDWorkbenchPanel.this.getContentPane());
-		featureCollectionManagerDialog.setVisible(true);
+		dataCollectionManagerDialog = new DataCollectionsManagerDialog();
+		dataCollectionManagerDialog.setLocationRelativeTo(IDWorkbenchPanel.this.getContentPane());
+		dataCollectionManagerDialog.setVisible(true);
 		
 //		ShowFeatureAndClusterCollectionManagerTask task = 
 //			new ShowFeatureAndClusterCollectionManagerTask();
@@ -1913,9 +1913,9 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			FeatureCollectionManager.refreshMsFeatureInfoBundleCollections();
 			MSMSClusterDataSetManager.refreshMSMSClusterDataSetList();
 			
-			featureCollectionManagerDialog = new FeatureAndClusterCollectionManagerDialog();
-			featureCollectionManagerDialog.setLocationRelativeTo(IDWorkbenchPanel.this.getContentPane());
-			featureCollectionManagerDialog.setVisible(true);
+			dataCollectionManagerDialog = new DataCollectionsManagerDialog();
+			dataCollectionManagerDialog.setLocationRelativeTo(IDWorkbenchPanel.this.getContentPane());
+			dataCollectionManagerDialog.setVisible(true);
 			return null;
 		}
 	}
@@ -2773,10 +2773,10 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		if(featuresToAdd.isEmpty())
 			return;
 		
-		featureCollectionManagerDialog = new FeatureAndClusterCollectionManagerDialog();
-		featureCollectionManagerDialog.setFeaturesToAdd(featuresToAdd);
-		featureCollectionManagerDialog.setLocationRelativeTo(this.getContentPane());
-		featureCollectionManagerDialog.showMsFeatureCollectionEditorDialog(null);
+		dataCollectionManagerDialog = new DataCollectionsManagerDialog();
+		dataCollectionManagerDialog.setFeaturesToAdd(featuresToAdd);
+		dataCollectionManagerDialog.setLocationRelativeTo(this.getContentPane());
+		dataCollectionManagerDialog.showMsFeatureCollectionEditorDialog(null);
 	}
 	
 	public void addSelectedFeaturesToExistingMsMsFeatureCollection(

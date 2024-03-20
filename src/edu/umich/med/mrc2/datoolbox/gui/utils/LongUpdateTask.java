@@ -29,19 +29,19 @@ public abstract class LongUpdateTask extends SwingWorker<Void, Void> {
 	private JDialog progressDialog;
 
 	@Override
-    public Void doInBackground() {
+	public Void doInBackground() {
 		return null;
-    }
+	}
 
-    /*
-     * Executed in event dispatching thread
-     */
-    @Override
-    public void done() {
-    	progressDialog.dispose();
-    }
+	/*
+	 * Executed in event dispatching thread
+	 */
+	@Override
+	public void done() {
+		progressDialog.dispose();
+	}
 
-    public void setProgressDialog(JDialog progressDialog) {
-    	this.progressDialog = progressDialog;
-    }
-  }
+	public void setProgressDialog(JDialog progressDialog) {
+		this.progressDialog = progressDialog;
+	}
+}

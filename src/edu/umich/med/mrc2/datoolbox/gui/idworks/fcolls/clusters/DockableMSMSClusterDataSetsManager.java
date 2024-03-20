@@ -39,7 +39,7 @@ import bibliothek.gui.dock.common.DefaultSingleCDockable;
 import edu.umich.med.mrc2.datoolbox.data.msclust.IMSMSClusterDataSet;
 import edu.umich.med.mrc2.datoolbox.database.idt.MSMSClusteringDBUtils;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.IDWorkbenchPanel;
-import edu.umich.med.mrc2.datoolbox.gui.idworks.fcolls.FeatureAndClusterCollectionManagerDialog;
+import edu.umich.med.mrc2.datoolbox.gui.idworks.fcolls.DataCollectionsManagerDialog;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.main.PanelList;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
@@ -60,12 +60,12 @@ public class DockableMSMSClusterDataSetsManager extends DefaultSingleCDockable i
 	
 	private MSMSClusterDataSetsManagerToolbar toolbar;
 	private MSMSClusterDataSetsTable msmsClusterDataSetTable;
-	private FeatureAndClusterCollectionManagerDialog parent;
+	private DataCollectionsManagerDialog parent;
 	
 	private MSMSClusterDataSetEditorDialog msmsClusterDataSetEditorDialog;
 //		private Collection<IMsFeatureInfoBundleCluster> clustersToAdd;
 	
-	public DockableMSMSClusterDataSetsManager(FeatureAndClusterCollectionManagerDialog parent)  {
+	public DockableMSMSClusterDataSetsManager(DataCollectionsManagerDialog parent)  {
 
 		super("DockableFeatureClusterCollectionsManager", componentIcon, 
 				"MSMS feature cluster data sets", null, Permissions.MIN_MAX_STACK);

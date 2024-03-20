@@ -44,6 +44,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.prefs.Preferences;
+import java.util.stream.Collectors;
 
 import javax.swing.Box;
 import javax.swing.Icon;
@@ -104,11 +105,9 @@ public class FeatureCollectionEditorDialog extends JDialog
 	private JLabel methodAuthorLabel;
 	private Collection<MSFeatureInfoBundle> featuresToAdd;
 	private Set<String> msmsFeatureIdsToAdd;
-	private Set<String> msFeatureIdsToAdd;
+	private Set<String> msOneFeatureIdsToAdd;
 	private JTextField featureFileTextField;
 	private JCheckBox loadCollectionCheckBox;
-
-	private IndeterminateProgressDialog idp;
 
 	public FeatureCollectionEditorDialog(
 			MsFeatureInfoBundleCollection collection, 
@@ -429,49 +428,38 @@ public class FeatureCollectionEditorDialog extends JDialog
 			
 			File inputFile = fc.getSelectedFile();
 			if(inputFile.exists() && inputFile.canRead()) {
-				
-				List<String>lines = null;
-				try {
-					lines = Files.readAllLines(Paths.get(inputFile.getAbsolutePath()));
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				if(lines != null && !lines.isEmpty()) {
+//				
+//				List<String>lines = null;
+//				try {
+//					lines = Files.readAllLines(Paths.get(inputFile.getAbsolutePath()));
+//				} catch (IOException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
+//				if(lines != null && !lines.isEmpty()) {
+//					
+//					for(String line : lines) {
+//						
+//						String trimmed = line.trim();
+//						if(trimmed.startsWith(DataPrefix.MSMS_SPECTRUM.getName()) && trimmed.length() == 16)
+//							msmsFeatureIdsToAdd.add(trimmed);				
+//					}
+//				}
+//				if(!msmsFeatureIdsToAdd.isEmpty()) {
 					
-					for(String line : lines) {
-						
-						String trimmed = line.trim();
-						if(trimmed.startsWith(DataPrefix.MSMS_SPECTRUM.getName()) && trimmed.length() == 16)
-							msmsFeatureIdsToAdd.add(trimmed);				
-					}
-				}
-				if(!msmsFeatureIdsToAdd.isEmpty()) {
-					
-					ValidateMSMSIDlistTask task = new ValidateMSMSIDlistTask(msmsFeatureIdsToAdd);
-					idp = new IndeterminateProgressDialog("Validating MSMS feature IDs ...", this, task);
+					ValidateMSMSIDlistTask task = new ValidateMSMSIDlistTask(inputFile);
+					IndeterminateProgressDialog idp = 
+							new IndeterminateProgressDialog(
+									"Validating MSMS feature IDs ...", this, task);
 					idp.setLocationRelativeTo(this);
 					idp.setVisible(true);
-					
-					if(!msmsFeatureIdsToAdd.isEmpty()) {
-						featureFileTextField.setText(inputFile.getAbsolutePath());
-						btnSave.setText(MainActionCommands.ADD_FEATURE_COLLECTION_WITH_FEATURES_COMMAND.getName());
-						MessageDialog.showInfoMsg("Extracted " + Integer.toString(msmsFeatureIdsToAdd.size()) + 
-								" valid MSMS feature IDs", this);
-					}
-					else {
-						String message = "No valid MSMS feature IDs found in " + inputFile.getName() + "\n"
-								+ "Correct MSMS feature ID format is " + DataPrefix.MSMS_SPECTRUM.getName() + " followed by 12 digits.";
-						MessageDialog.showWarningMsg(message, this);
-						return;
-					}
-				}
-				else {
-					String message = "No valid MSMS feature IDs found in " + inputFile.getName() + "\n"
-							+ "Correct MSMS feature ID format is " + DataPrefix.MSMS_SPECTRUM.getName() + " followed by 12 digits.";
-					MessageDialog.showWarningMsg(message, this);
-					return;
-				}
+//				}
+//				else {
+//					String message = "No valid MSMS feature IDs found in " + inputFile.getName() + "\n"
+//							+ "Correct MSMS feature ID format is " + DataPrefix.MSMS_SPECTRUM.getName() + " followed by 12 digits.";
+//					MessageDialog.showWarningMsg(message, this);
+//					return;
+//				}
 			}
 			else {
 				MessageDialog.showErrorMsg("Can not read input file", this);
@@ -485,23 +473,86 @@ public class FeatureCollectionEditorDialog extends JDialog
 		/*
 		 * Main task. Executed in background thread.
 		 */
-		private Set<String>idsToValidate;
+		private File inputFile;
 
-		public ValidateMSMSIDlistTask(Set<String>idsToValidate) {
-			this.idsToValidate = idsToValidate;
+		public ValidateMSMSIDlistTask(File inputFile) {
+			this.inputFile = inputFile;
 		}
 
-		@SuppressWarnings("unchecked")
 		@Override
 		public Void doInBackground() {
+					
+			List<String>lines = null;
+			try {
+				lines = Files.readAllLines(Paths.get(inputFile.getAbsolutePath()));
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			if(lines != null && !lines.isEmpty()) {
+				
+				for(String line : lines) {
+					
+					String trimmed = line.trim();
+					if(trimmed.startsWith(DataPrefix.MSMS_SPECTRUM.getName()) && trimmed.length() == 16)
+						msmsFeatureIdsToAdd.add(trimmed);				
+				}
+			}
+			if(msmsFeatureIdsToAdd.isEmpty())
+				return null;
 
 			try {
-				msFeatureIdsToAdd = FeatureCollectionUtils.validateMSMSIDlist(idsToValidate);
+				msOneFeatureIdsToAdd = FeatureCollectionUtils.validateMSMSIDlist(msmsFeatureIdsToAdd);
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+			//	Check for existing IDs
+			if(featureCollection != null && msOneFeatureIdsToAdd != null && !msOneFeatureIdsToAdd.isEmpty()) {
+				
+				if(FeatureCollectionManager.getFeatureCollectionsMsIdMap().get(featureCollection) != null 
+						&& FeatureCollectionManager.getFeatureCollectionsMsIdMap().get(featureCollection).isEmpty()) {
+					
+					Set<String>dbIds = new TreeSet<String>();
+					try {
+						dbIds = 
+								FeatureCollectionUtils.getFeatureIdsForMsFeatureInfoBundleCollection(featureCollection.getId());
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					if(!dbIds.isEmpty())
+						FeatureCollectionManager.getFeatureCollectionsMsIdMap().get(featureCollection).addAll(dbIds);
+				}
+				Set<String> existingIds = 
+						FeatureCollectionManager.getFeatureCollectionsMsIdMap().get(featureCollection);
+				if(!existingIds.isEmpty()) {
+					
+					msOneFeatureIdsToAdd  = msOneFeatureIdsToAdd.stream().
+							filter(f -> !existingIds.contains(f)).
+							collect(Collectors.toSet());
+				}
+			}
 			return null;
+		}
+		
+		public void done() {
+			
+			super.done();
+			if(!msOneFeatureIdsToAdd.isEmpty()) {
+				featureFileTextField.setText(inputFile.getAbsolutePath());
+				btnSave.setText(MainActionCommands.ADD_FEATURE_COLLECTION_WITH_FEATURES_COMMAND.getName());
+				MessageDialog.showInfoMsg("Extracted " + Integer.toString(msOneFeatureIdsToAdd.size()) + 
+						" valid MSMS feature IDs", FeatureCollectionEditorDialog.this);
+			}
+			else {
+				String message = "Either all specified features are already in this collection\n"
+						+ "or no valid MSMS feature IDs found in " + inputFile.getName() + "\n"
+						+ "Correct MSMS feature ID format is " + DataPrefix.MSMS_SPECTRUM.getName() + " followed by 12 digits.";
+				MessageDialog.showWarningMsg(message, FeatureCollectionEditorDialog.this);
+				return;
+			}
+			
 		}
 	}
 
@@ -551,7 +602,7 @@ public class FeatureCollectionEditorDialog extends JDialog
 	}
 
 	public Set<String> getMsFeatureIdsToAdd() {
-		return msFeatureIdsToAdd;
+		return msOneFeatureIdsToAdd;
 	}
 	
 	public boolean loadCollectionIntoWorkBench() {

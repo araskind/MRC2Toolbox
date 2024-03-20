@@ -291,11 +291,11 @@ public class IDWorkbenchMenuBar extends CommonMenuBar {
 		add(annotationManagersMenu);
 		
 		//	Feature collections
-		featureCollectionsMenu = new JMenu("Feature collections");
+		featureCollectionsMenu = new JMenu("Data collections");
 		featureCollectionsMenu.setIcon(editFeatureCollectionIconSmall);
 
 		featureCollectionManagerMenuItem = addItem(featureCollectionsMenu, 
-				MainActionCommands.SHOW_FEATURE_COLLECTION_MANAGER_DIALOG_COMMAND, 
+				MainActionCommands.SHOW_DATA_COLLECTIONS_MANAGER_DIALOG_COMMAND, 
 				editFeatureCollectionIcon);
 		
 		featureCollectionsMenu.addSeparator();

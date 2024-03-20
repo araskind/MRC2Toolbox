@@ -1234,7 +1234,7 @@ public enum MainActionCommands {
 	PULL_REDUNDANT_COMPOUNDS_FROM_DATABASE("Pull redundant compounds from the database"),
 	
 	//	Feature collections
-	SHOW_FEATURE_COLLECTION_MANAGER_DIALOG_COMMAND("Show feature collection/MSMS cluster data set manager"),
+	SHOW_DATA_COLLECTIONS_MANAGER_DIALOG_COMMAND("Show data collections manager"),
 	ADD_FEATURE_COLLECTION_DIALOG_COMMAND("New feature collection"),
 	ADD_FEATURE_COLLECTION_COMMAND("Create new empty feature collection"),
 	ADD_FEATURE_COLLECTION_WITH_FEATURES_COMMAND("Create new feature collection with selected features"),

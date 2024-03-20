@@ -200,8 +200,8 @@ public class IDWorkbenchToolbar extends CommonToolbar{
 				MainActionCommands.SHOW_IDTRACKER_DATA_EXPLORER_PLOT.getName(), buttonDimension);
 		
 		editFeatureCollectionButton = GuiUtils.addButton(this, null, editFeatureCollectionIcon, commandListener,
-				MainActionCommands.SHOW_FEATURE_COLLECTION_MANAGER_DIALOG_COMMAND.getName(),
-				MainActionCommands.SHOW_FEATURE_COLLECTION_MANAGER_DIALOG_COMMAND.getName(), buttonDimension);
+				MainActionCommands.SHOW_DATA_COLLECTIONS_MANAGER_DIALOG_COMMAND.getName(),
+				MainActionCommands.SHOW_DATA_COLLECTIONS_MANAGER_DIALOG_COMMAND.getName(), buttonDimension);
 	
 		addSeparator(buttonDimension);
 		

@@ -40,7 +40,7 @@ import org.apache.commons.lang.StringUtils;
 import bibliothek.gui.dock.common.DefaultSingleCDockable;
 import edu.umich.med.mrc2.datoolbox.data.msclust.FeatureLookupDataSet;
 import edu.umich.med.mrc2.datoolbox.database.idt.FeatureLookupDataSetUtils;
-import edu.umich.med.mrc2.datoolbox.gui.idworks.fcolls.FeatureAndClusterCollectionManagerDialog;
+import edu.umich.med.mrc2.datoolbox.gui.idworks.fcolls.DataCollectionsManagerDialog;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.IndeterminateProgressDialog;
@@ -56,12 +56,12 @@ public class DockableFeatureLookupDataSetManager extends DefaultSingleCDockable 
 	
 	private FeatureLookupDataSetManagerToolbar toolbar;
 	private FeatureLookupDataSetListTable featureLookupDataSetListTable;
-	private FeatureAndClusterCollectionManagerDialog parent;	
+	private DataCollectionsManagerDialog parent;	
 	private FeatureLookupDataSetEditorDialog featureLookupDataSetEditorDialog;
 
 	private IndeterminateProgressDialog idp;
 
-	public DockableFeatureLookupDataSetManager(FeatureAndClusterCollectionManagerDialog parent)  {
+	public DockableFeatureLookupDataSetManager(DataCollectionsManagerDialog parent)  {
 
 		super("DockableFeatureLookupDataSetManager", componentIcon, "Lookup feature data sets", null, Permissions.MIN_MAX_STACK);
 		setCloseable(false);

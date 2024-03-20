@@ -61,9 +61,9 @@ public class FeatureCollectionsTable extends BasicTable {
 		
 		WordWrapCellRenderer ltr = new WordWrapCellRenderer();
 		columnModel.getColumnById(FeatureCollectionsTableModel.COLLECTION_COLUMN)
-			.setCellRenderer(ltr);
+			.setCellRenderer(new WordWrapCellRenderer());
 		columnModel.getColumnById(FeatureCollectionsTableModel.DESCRIPTION_COLUMN)
-			.setCellRenderer(ltr);
+			.setCellRenderer(new WordWrapCellRenderer());
 		
 		columnModel.getColumnById(FeatureCollectionsTableModel.COLLECTION_COLUMN)
 			.setMinWidth(120);

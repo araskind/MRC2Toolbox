@@ -42,10 +42,12 @@ import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundleCollection;
 import edu.umich.med.mrc2.datoolbox.database.idt.FeatureCollectionUtils;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.IDWorkbenchPanel;
-import edu.umich.med.mrc2.datoolbox.gui.idworks.fcolls.FeatureAndClusterCollectionManagerDialog;
+import edu.umich.med.mrc2.datoolbox.gui.idworks.fcolls.DataCollectionsManagerDialog;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.main.PanelList;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
+import edu.umich.med.mrc2.datoolbox.gui.utils.IndeterminateProgressDialog;
+import edu.umich.med.mrc2.datoolbox.gui.utils.LongUpdateTask;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.main.FeatureCollectionManager;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
@@ -58,12 +60,12 @@ public class DockableFeatureCollectionsManager extends DefaultSingleCDockable im
 	
 	private FeatureCollectionsManagerToolbar toolbar;
 	private FeatureCollectionsTable featureCollectionsTable;
-	private FeatureAndClusterCollectionManagerDialog parent;
+	private DataCollectionsManagerDialog parent;
 	
 	private FeatureCollectionEditorDialog msFeatureCollectionEditorDialog;
 	private Collection<MSFeatureInfoBundle> featuresToAdd;
 	
-	public DockableFeatureCollectionsManager(FeatureAndClusterCollectionManagerDialog parent)  {
+	public DockableFeatureCollectionsManager(DataCollectionsManagerDialog parent)  {
 
 		super("DockableFeatureCollectionsManager", componentIcon, "Feature collections", null, Permissions.MIN_MAX_STACK);
 		setCloseable(false);
@@ -141,8 +143,18 @@ public class DockableFeatureCollectionsManager extends DefaultSingleCDockable im
 		edited.setDescription(msFeatureCollectionEditorDialog.getFeatureCollectionDescription());
 		edited.setLastModified(new Date());
 		
-		if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() == null)
-			saveFeatureCollectionChangesToDatabase(edited);
+		if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() == null) {
+			
+			InsertOrUpdateDatabaseCollectionTask task = 
+					new InsertOrUpdateDatabaseCollectionTask(edited, false);
+			IndeterminateProgressDialog idp = 
+					new IndeterminateProgressDialog(
+							"Saving MSMS feature collection changes to database ...", 
+							this.getContentPane(), task);
+			idp.setLocationRelativeTo(this.getContentPane());
+			idp.setVisible(true);
+			//	saveFeatureCollectionChangesToDatabase(edited);
+		}
 		else
 			saveFeatureCollectionChangesToProject(edited);
 	}
@@ -175,6 +187,7 @@ public class DockableFeatureCollectionsManager extends DefaultSingleCDockable im
 		Set<String> featureIdsToAdd = 
 				msFeatureCollectionEditorDialog.getMsFeatureIdsToAdd();
 		if(featureIdsToAdd != null && !featureIdsToAdd.isEmpty()) {
+			
 			featureIds.addAll(featureIdsToAdd);				
 			try {
 				FeatureCollectionUtils.addFeaturesToCollection(edited.getId(), featureIdsToAdd);
@@ -183,6 +196,7 @@ public class DockableFeatureCollectionsManager extends DefaultSingleCDockable im
 				e.printStackTrace();
 			}
 			FeatureCollectionManager.getFeatureCollectionsMsIdMap().get(edited).addAll(featureIdsToAdd);
+			edited.setCollectionSize(FeatureCollectionManager.getFeatureCollectionsMsIdMap().get(edited).size());
 		}			
 		if(msFeatureCollectionEditorDialog.loadCollectionIntoWorkBench()) {
 			loadCollectionIntoWorkBench(edited);
@@ -194,6 +208,31 @@ public class DockableFeatureCollectionsManager extends DefaultSingleCDockable im
 			featureCollectionsTable.updateCollectionData(edited);
 			featureCollectionsTable.selectCollection(edited);
 		}		
+	}
+	
+	class InsertOrUpdateDatabaseCollectionTask extends LongUpdateTask {
+
+		MsFeatureInfoBundleCollection msfCollection;
+		boolean isNew;
+
+		public InsertOrUpdateDatabaseCollectionTask(
+				MsFeatureInfoBundleCollection msfCollection, 
+				boolean isNew) {
+			super();
+			this.msfCollection = msfCollection;
+			this.isNew = isNew;
+		}
+
+		@Override
+		public Void doInBackground() {
+			
+			if(isNew)
+				createNewFeatureCollectionInDatabase(msfCollection);
+			else
+				saveFeatureCollectionChangesToDatabase(msfCollection);
+
+			return null;
+		}
 	}
 
 	private void createNewFeatureCollection() {
@@ -215,8 +254,18 @@ public class DockableFeatureCollectionsManager extends DefaultSingleCDockable im
 		if(msFeatureCollectionEditorDialog.getFeaturesToAdd() != null)
 			newCollection.addFeatures(msFeatureCollectionEditorDialog.getFeaturesToAdd());
 		
-		if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() == null)
-			createNewFeatureCollectionInDatabase(newCollection);
+		if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() == null) {
+			
+			InsertOrUpdateDatabaseCollectionTask task = 
+					new InsertOrUpdateDatabaseCollectionTask(newCollection, true);
+			IndeterminateProgressDialog idp = 
+					new IndeterminateProgressDialog(
+							"Saving new MSMS feature collection to database ...", 
+							this.getContentPane(), task);
+			idp.setLocationRelativeTo(this.getContentPane());
+			idp.setVisible(true);
+			//	createNewFeatureCollectionInDatabase(newCollection);
+		}
 		else
 			createNewFeatureCollectionInProject(newCollection);
 	}
@@ -265,7 +314,8 @@ public class DockableFeatureCollectionsManager extends DefaultSingleCDockable im
 					e.printStackTrace();
 				}
 			}
-			FeatureCollectionManager.getFeatureCollectionsMsIdMap().put(newCollection, featureIds);					
+			FeatureCollectionManager.getFeatureCollectionsMsIdMap().put(newCollection, featureIds);	
+			newCollection.setCollectionSize(featureIds.size());
 			if(msFeatureCollectionEditorDialog.loadCollectionIntoWorkBench()) {
 				loadCollectionIntoWorkBench(newCollection);
 				msFeatureCollectionEditorDialog.dispose();

@@ -54,7 +54,7 @@ import edu.umich.med.mrc2.datoolbox.main.FeatureCollectionManager;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.MSMSClusterDataSetManager;
 
-public class FeatureAndClusterCollectionManagerDialog extends JDialog 
+public class DataCollectionsManagerDialog extends JDialog 
 		implements ActionListener, PersistentLayout {
 
 	/**
@@ -75,9 +75,9 @@ public class FeatureAndClusterCollectionManagerDialog extends JDialog
 	private DockableBinnerAnnotationDataSetManager binnerAnnotationDataSetManager;
 	private IndeterminateProgressDialog idp;
 	
-	public FeatureAndClusterCollectionManagerDialog() {
+	public DataCollectionsManagerDialog() {
 		super();
-		setTitle("Feature and feature cluster collection managers");
+		setTitle("Data collections managers");
 		setIconImage(((ImageIcon) stIcon).getImage());
 		setPreferredSize(new Dimension(1000, 500));
 		setSize(new Dimension(1000, 500));
