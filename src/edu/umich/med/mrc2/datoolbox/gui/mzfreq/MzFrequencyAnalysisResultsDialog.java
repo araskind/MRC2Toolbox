@@ -49,6 +49,7 @@ import edu.umich.med.mrc2.datoolbox.data.MSFeatureIdentificationFollowupStep;
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureIdentificationLevel;
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
+import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundleCollection;
 import edu.umich.med.mrc2.datoolbox.data.MzFrequencyObject;
 import edu.umich.med.mrc2.datoolbox.data.StandardFeatureAnnotation;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
@@ -63,6 +64,7 @@ import edu.umich.med.mrc2.datoolbox.gui.utils.IndeterminateProgressDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.LongUpdateTask;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
+import edu.umich.med.mrc2.datoolbox.main.FeatureCollectionManager;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 
@@ -88,6 +90,7 @@ public class MzFrequencyAnalysisResultsDialog extends JFrame implements BackedBy
 			standardFeatureAnnotationAssignmentDialog;
 
 	private MultipleFeaturesFollowupStepAssignmentDialog followupStepAssignmentDialog;
+	private MzFrequencyTablePopupMenu tablePopup;
 	
 	public MzFrequencyAnalysisResultsDialog(
 			ActionListener actionListener,
@@ -121,8 +124,8 @@ public class MzFrequencyAnalysisResultsDialog extends JFrame implements BackedBy
 		table = new MzFrequencyDataTable();
 		panel_1.add(new JScrollPane(table), BorderLayout.CENTER);
 		table.setTableModelFromMzFrequencyObjectCollection(mzFrequencyObjects);
-		table.addTablePopupMenu(
-				new MzFrequencyTablePopupMenu(this, table, enableTrackerCommands));
+		tablePopup = new MzFrequencyTablePopupMenu(this, table, enableTrackerCommands);
+		table.addTablePopupMenu(tablePopup);
 		
 		loadPreferences();
 		pack();
@@ -162,8 +165,37 @@ public class MzFrequencyAnalysisResultsDialog extends JFrame implements BackedBy
 				break;
 			}
 		}	
+		if(command.startsWith(MainActionCommands.ADD_FEATURES_TO_RECENT_FEATURE_COLLECTION_COMMAND.name()))
+			addSelectedFeaturesToRecentCollection(command);	
 	}
 
+	private void addSelectedFeaturesToRecentCollection(String command) {
+		
+		Collection<MsFeature> selected = table.getMsFeaturesForSelectedLines();
+		if(selected == null || selected.isEmpty())
+			return;
+		
+		Collection<MSFeatureInfoBundle>selectedMSMSFeatures = 
+				((IDWorkbenchPanel)parentPanel).getMsFeatureBundlesForFeatures(selected, 2);
+		
+		if(selectedMSMSFeatures == null || selectedMSMSFeatures.isEmpty())
+			return;
+		
+		String fsId = command.replace(
+				MainActionCommands.ADD_FEATURES_TO_RECENT_FEATURE_COLLECTION_COMMAND.name() + "|", "");
+		MsFeatureInfoBundleCollection fColl = 
+				FeatureCollectionManager.getMsFeatureInfoBundleCollectionById(fsId);
+		if(fColl == null) {
+			MessageDialog.showErrorMsg(
+					"Requested feature collection not found", this.getContentPane());
+			return;
+		}
+		if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() == null)
+			FeatureCollectionManager.addFeaturesToCollection(fColl, selectedMSMSFeatures);
+		else
+			fColl.addFeatures(selectedMSMSFeatures);
+	}
+	
 	private void saveMzFrequencyAnalysisResults() {
 
 		if(MRC2ToolBoxCore.getActiveMetabolomicsExperiment() != null)
@@ -232,6 +264,10 @@ public class MzFrequencyAnalysisResultsDialog extends JFrame implements BackedBy
 	}
 	
 	private void setPrimaryIdLevel(MSFeatureIdentificationLevel level) {
+		
+		Collection<MsFeature> selected = table.getMsFeaturesForSelectedLines();
+		if(selected == null || selected.isEmpty())
+			return;
 
 		if(parentPanel instanceof IDWorkbenchPanel) {
 			
@@ -291,7 +327,11 @@ public class MzFrequencyAnalysisResultsDialog extends JFrame implements BackedBy
 	}
 
 	private void addStandardFeatureAnnotation() {
-		// TODO Auto-generated method stub
+
+		Collection<MsFeature> selected = table.getMsFeaturesForSelectedLines();
+		if(selected == null || selected.isEmpty())
+			return;
+		
 		Collection<StandardFeatureAnnotation> annotations = 
 				standardFeatureAnnotationAssignmentDialog.getSelectedAnnotations();
 		if(annotations == null || annotations.isEmpty())
@@ -419,4 +459,7 @@ public class MzFrequencyAnalysisResultsDialog extends JFrame implements BackedBy
 		this.parentPanel = parentPanel;
 	}
 
+	public void updateRecentFeatureCollectionList() {
+		tablePopup.updateRecentFeatureCollectionList();
+	}
 }

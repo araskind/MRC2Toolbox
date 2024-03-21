@@ -194,6 +194,10 @@ public class IDTrackerDataExplorerPlotFrame extends JFrame implements Persistent
 //		}
 		mzRtMSMSPlotPanel.savePreferences();
 	}
+	
+	public void updateRecentFeatureCollectionList() {
+		mzRtMSMSPlotPanel.updateRecentFeatureCollectionList();
+	}
 }
 
 

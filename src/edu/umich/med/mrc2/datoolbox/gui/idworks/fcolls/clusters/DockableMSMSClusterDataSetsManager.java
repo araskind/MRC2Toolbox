@@ -47,6 +47,7 @@ import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.main.FeatureLookupDataSetManager;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.MSMSClusterDataSetManager;
+import edu.umich.med.mrc2.datoolbox.main.RecentDataManager;
 import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisExperiment;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
@@ -349,10 +350,12 @@ public class DockableMSMSClusterDataSetsManager extends DefaultSingleCDockable i
 				return;
 			}
 			deleteMSMSClusterDataSetFromDatabase(selected);
+			RecentDataManager.removeFeatureClusterDataSet(selected);
 			return;
 		}
 		else {
 			deleteMSMSClusterDataSetFromProject(selected);
+			RecentDataManager.removeFeatureClusterDataSet(selected);
 		}
 	}
 	

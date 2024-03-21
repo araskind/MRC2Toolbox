@@ -74,6 +74,8 @@ import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.IndeterminateProgressDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.LongUpdateTask;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
+import edu.umich.med.mrc2.datoolbox.main.FeatureCollectionManager;
+import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
 
 public class DockableMzRtMSMSPlotPanel extends DefaultSingleCDockable 
@@ -94,6 +96,7 @@ public class DockableMzRtMSMSPlotPanel extends DefaultSingleCDockable
 	private static final Shape defaultShape = new Ellipse2D.Double(-3, -3, 6, 6);
 	private Preferences preferences;
 	private XYItemRenderer defaultRenderer;
+	private MSMSFeaturePlotPopupMenu msmsFeaturePlotPopupMenu;
 	
 	private static final String PLOT_SETTINGS_PANEL_PREFERENCES_NODE = 
 			"DockableMzRtMSMSPlotPanelMZRTPlotSettingsPanel";
@@ -105,7 +108,10 @@ public class DockableMzRtMSMSPlotPanel extends DefaultSingleCDockable
 		setLayout(new BorderLayout(0, 0));
 		plotPanel = new DataExplorerPlotPanel(DataExplorerPlotType.MSMS_MZ_RT);
 		plotPanel.addChartMouseListener(this);
-		plotPanel.setFeaturePlotPopupMenu(new MSMSFeaturePlotPopupMenu(this));
+		
+		msmsFeaturePlotPopupMenu = new MSMSFeaturePlotPopupMenu(this);
+		plotPanel.setFeaturePlotPopupMenu(msmsFeaturePlotPopupMenu);
+		
 		add(plotPanel, BorderLayout.CENTER);
 
 		toolbar = new MzRtPlotToolbar(plotPanel, this, this);
@@ -147,6 +153,38 @@ public class DockableMzRtMSMSPlotPanel extends DefaultSingleCDockable
 		
 		if(command.equals(MainActionCommands.SHOW_CHART_SIDE_PANEL_COMMAND.getName()))
 			setSidePanelVisible(true);
+		
+		if(command.startsWith(MainActionCommands.ADD_FEATURES_TO_RECENT_FEATURE_COLLECTION_COMMAND.name()))
+			addSelectedFeaturesToRecentCollection(command);	
+	}
+	
+	private void addSelectedFeaturesToRecentCollection(String command) {
+		
+		if(parentPanel != null && parentPanel instanceof IDWorkbenchPanel) { 	
+			
+			Collection<MSFeatureInfoBundle>selected = getSelectedFeatures();
+			if(selected.isEmpty()) {
+				MessageDialog.showWarningMsg(
+						"No features in highlighted region.", this.getContentPane());
+				return;
+			}		
+			if(selected == null || selected.isEmpty())
+				return;
+			
+			String fsId = command.replace(
+					MainActionCommands.ADD_FEATURES_TO_RECENT_FEATURE_COLLECTION_COMMAND.name() + "|", "");
+			MsFeatureInfoBundleCollection fColl = 
+					FeatureCollectionManager.getMsFeatureInfoBundleCollectionById(fsId);
+			if(fColl == null) {
+				MessageDialog.showErrorMsg(
+						"Requested feature collection not found", this.getContentPane());
+				return;
+			}
+			if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() == null)
+				FeatureCollectionManager.addFeaturesToCollection(fColl, selected);
+			else
+				fColl.addFeatures(selected);
+		}
 	}
 	
 	public void setSidePanelVisible(boolean b) {
@@ -517,6 +555,10 @@ public class DockableMzRtMSMSPlotPanel extends DefaultSingleCDockable
 	public void savePreferences() {
 		preferences = Preferences.userNodeForPackage(this.getClass());
 		mmzrtPlotSettingsPanel.savePreferences();
+	}
+	
+	public void updateRecentFeatureCollectionList() {
+		msmsFeaturePlotPopupMenu.updateRecentFeatureCollectionList();
 	}
 }
 

@@ -60,7 +60,7 @@ public class MsFeatureInfoBundleCollection implements Serializable {
 	private Date lastModified;
 	private LIMSUser owner;
 	private Collection<MSFeatureInfoBundle>features;
-	private Collection<String>featureIds;
+	private Set<String>featureIds;
 	private TreeSet<ObjectAnnotation> annotations;
 	private int collectionSize;
 	
@@ -70,6 +70,7 @@ public class MsFeatureInfoBundleCollection implements Serializable {
 		this.id = DataPrefix.MSMS_FEATURE_COLLECTION.getName() + UUID.randomUUID().toString();
 		dateCreated = new Date();
 		lastModified = new Date();
+		featureIds = new TreeSet<String>();
 		features = new TreeSet<MSFeatureInfoBundle>(
 				new MsFeatureInfoBundleComparator(SortProperty.Name));
 		annotations = new TreeSet<ObjectAnnotation>();
@@ -93,6 +94,7 @@ public class MsFeatureInfoBundleCollection implements Serializable {
 		this.dateCreated = dateCreated;
 		this.lastModified = lastModified;
 		this.owner = owner;
+		featureIds = new TreeSet<String>();
 		features = new TreeSet<MSFeatureInfoBundle>(
 				new MsFeatureInfoBundleComparator(SortProperty.Name));
 		annotations = new TreeSet<ObjectAnnotation>();
@@ -102,14 +104,8 @@ public class MsFeatureInfoBundleCollection implements Serializable {
 		features.clear();		
 	}
 	
-	public int getCollectionSize() {
-		
-		if(!features.isEmpty())
-			return features.size();
-		else if(featureIds != null && !featureIds.isEmpty())
-			return featureIds.size();
-		else
-			return collectionSize;
+	public int getCollectionSize() {		
+		return collectionSize;
 	}
 	
 	public int getLoadedMSMSFeatureCount() {
@@ -171,26 +167,42 @@ public class MsFeatureInfoBundleCollection implements Serializable {
 				collect(Collectors.toList());
 	}
 	
-	public Collection<MSFeatureInfoBundle> getM1Features() {
+	public Collection<MSFeatureInfoBundle> getMSOneFeatures() {
 		return features.stream().
 				filter(f -> Objects.isNull(f.getMSMSFeatureId())).
 				collect(Collectors.toList());
 	}
 	
 	public void addFeature(MSFeatureInfoBundle featureToAdd) {
+		
+		featureIds.add(featureToAdd.getMSFeatureId());		
 		features.add(featureToAdd);
+		collectionSize = featureIds.size();
 	}
 	
 	public void removeFeature(MSFeatureInfoBundle toRemove) {
+		
+		featureIds.remove(toRemove.getMSFeatureId());
 		features.remove(toRemove);
+		collectionSize = featureIds.size();
 	}
 
 	public void addFeatures(Collection<MSFeatureInfoBundle> featuresToAdd) {
+		
+		Set<String> newIds = featuresToAdd.stream().
+				map(f -> f.getMSFeatureId()).collect(Collectors.toSet());
+		featureIds.addAll(newIds);
 		features.addAll(featuresToAdd);
+		collectionSize = featureIds.size();
 	}
 	
 	public void removeFeatures(Collection<MSFeatureInfoBundle> featuresToremove) {
+		
+		Set<String> idsToRemove = featuresToremove.stream().
+				map(f -> f.getMSFeatureId()).collect(Collectors.toSet());
+		featureIds.removeAll(idsToRemove);
 		features.removeAll(featuresToremove);
+		collectionSize = featureIds.size();
 	}
 
 	public AnnotatedObjectType getAnnotatedObjectType() {
@@ -259,7 +271,11 @@ public class MsFeatureInfoBundleCollection implements Serializable {
 				collect(Collectors.toSet());
 	}
 	
-	public Collection<String> getFeatureIds() {
+	public Set<String> getFeatureIds() {
+		
+		if(featureIds == null)
+			featureIds = new TreeSet<String>();
+		
 		return featureIds;
 	}
 	
@@ -281,6 +297,8 @@ public class MsFeatureInfoBundleCollection implements Serializable {
 				ExperimentUtils.dateTimeFormat.format(lastModified));	
 		msFeatureCollectionElement.setAttribute(
 				FeatureCollectionFields.UserId.name(), owner.getId());
+		
+		//	TODO update feature ID list from database if necessary
 		
 		Set<String>featureIds = features.stream().
 				map(f -> f.getMsFeature().getId()).
@@ -347,7 +365,7 @@ public class MsFeatureInfoBundleCollection implements Serializable {
 		
 		data += "<b># of features: </b>" + Integer.toString(collectionSize) + "<br>";
 		data += "<b>Created on: </b>" + ExperimentUtils.dateTimeFormat.format(dateCreated) + "<br>";
-		data += "<b>Lat modified on: </b>" + ExperimentUtils.dateTimeFormat.format(lastModified);		
+		data += "<b>Last modified on: </b>" + ExperimentUtils.dateTimeFormat.format(lastModified);		
 		return data;
 	}
 }

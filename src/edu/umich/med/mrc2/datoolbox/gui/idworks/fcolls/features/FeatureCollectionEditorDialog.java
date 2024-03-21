@@ -363,13 +363,13 @@ public class FeatureCollectionEditorDialog extends JDialog
 		FeatureCollectionManager.refreshMsFeatureInfoBundleCollections();
 		MsFeatureInfoBundleCollection existing = null;
 		if(this.featureCollection == null) {
-			existing = FeatureCollectionManager.getMsFeatureInfoBundleCollections().stream().
+			existing = FeatureCollectionManager.getEditableMsFeatureInfoBundleCollections().stream().
 				filter(f -> f.getName().equalsIgnoreCase(newName)).
 				findFirst().orElse(null);
 		}
 		else {
 			String id = featureCollection.getId();
-			existing = FeatureCollectionManager.getMsFeatureInfoBundleCollections().stream().
+			existing = FeatureCollectionManager.getEditableMsFeatureInfoBundleCollections().stream().
 					filter(f -> !f.getId().equals(id)).
 					filter(f -> f.getName().equalsIgnoreCase(newName)).
 					findFirst().orElse(null);
@@ -502,34 +502,33 @@ public class FeatureCollectionEditorDialog extends JDialog
 				return null;
 
 			try {
-				msOneFeatureIdsToAdd = FeatureCollectionUtils.validateMSMSIDlist(msmsFeatureIdsToAdd);
+				msOneFeatureIdsToAdd = 
+						FeatureCollectionUtils.validateMSMSIDlist(msmsFeatureIdsToAdd);
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			//	Check for existing IDs
-			if(featureCollection != null && msOneFeatureIdsToAdd != null && !msOneFeatureIdsToAdd.isEmpty()) {
+			if(featureCollection != null && msOneFeatureIdsToAdd != null 
+					&& !msOneFeatureIdsToAdd.isEmpty()) {
 				
-				if(FeatureCollectionManager.getFeatureCollectionsMsIdMap().get(featureCollection) != null 
-						&& FeatureCollectionManager.getFeatureCollectionsMsIdMap().get(featureCollection).isEmpty()) {
+				if(featureCollection.getFeatureIds().isEmpty()) {
 					
 					Set<String>dbIds = new TreeSet<String>();
 					try {
-						dbIds = 
-								FeatureCollectionUtils.getFeatureIdsForMsFeatureInfoBundleCollection(featureCollection.getId());
+						dbIds = FeatureCollectionUtils.
+								getFeatureIdsForMsFeatureInfoBundleCollection(featureCollection.getId());
 					} catch (Exception e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 					if(!dbIds.isEmpty())
-						FeatureCollectionManager.getFeatureCollectionsMsIdMap().get(featureCollection).addAll(dbIds);
+						featureCollection.getFeatureIds().addAll(dbIds);
 				}
-				Set<String> existingIds = 
-						FeatureCollectionManager.getFeatureCollectionsMsIdMap().get(featureCollection);
-				if(!existingIds.isEmpty()) {
+				if(!featureCollection.getFeatureIds().isEmpty()) {
 					
 					msOneFeatureIdsToAdd  = msOneFeatureIdsToAdd.stream().
-							filter(f -> !existingIds.contains(f)).
+							filter(f -> !featureCollection.getFeatureIds().contains(f)).
 							collect(Collectors.toSet());
 				}
 			}

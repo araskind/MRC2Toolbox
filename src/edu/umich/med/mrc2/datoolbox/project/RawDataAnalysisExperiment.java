@@ -48,8 +48,8 @@ import edu.umich.med.mrc2.datoolbox.data.MsFeatureChromatogramBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundleCollection;
 import edu.umich.med.mrc2.datoolbox.data.Worklist;
 import edu.umich.med.mrc2.datoolbox.data.compare.MSMSClusterDataSetComparator;
+import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureInfoBundleCollectionComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureInfoBundleComparator;
-import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureInformationBundleCollectionComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.Injection;
@@ -203,7 +203,7 @@ public class RawDataAnalysisExperiment extends Experiment {
 		chromatogramMap = new HashMap<String, MsFeatureChromatogramBundle>();
 		featureCollections = 
 				new TreeSet<MsFeatureInfoBundleCollection>(
-						new MsFeatureInformationBundleCollectionComparator(SortProperty.Name));		
+						new MsFeatureInfoBundleCollectionComparator(SortProperty.Name));		
 		msmsClusterDataSets = 
 				new TreeSet<IMSMSClusterDataSet>(
 						new MSMSClusterDataSetComparator(SortProperty.Name));
@@ -387,7 +387,7 @@ public class RawDataAnalysisExperiment extends Experiment {
 		if(featureCollections == null)
 			featureCollections = 
 					new TreeSet<MsFeatureInfoBundleCollection>(
-							new MsFeatureInformationBundleCollectionComparator(SortProperty.Name));
+							new MsFeatureInfoBundleCollectionComparator(SortProperty.Name));
 		
 		return featureCollections;
 	}
@@ -396,7 +396,7 @@ public class RawDataAnalysisExperiment extends Experiment {
 		
 		return getFeatureCollections().stream().
 				filter(c -> !c.equals(FeatureCollectionManager.activeExperimentFeatureSet)).
-				sorted(new MsFeatureInformationBundleCollectionComparator(SortProperty.Name)).
+				sorted(new MsFeatureInfoBundleCollectionComparator(SortProperty.Name)).
 				collect(Collectors.toList());
 	}
 	

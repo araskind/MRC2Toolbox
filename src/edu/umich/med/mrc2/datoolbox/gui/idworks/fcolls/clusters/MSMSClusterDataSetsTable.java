@@ -30,7 +30,7 @@ import javax.swing.table.TableRowSorter;
 
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundleCollection;
 import edu.umich.med.mrc2.datoolbox.data.compare.LIMSUserComparator;
-import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureInformationBundleCollectionComparator;
+import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureInfoBundleCollectionComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.format.LIMSUserFormat;
 import edu.umich.med.mrc2.datoolbox.data.format.MsFeatureInformationBundleCollectionFormat;
@@ -78,7 +78,7 @@ public class MSMSClusterDataSetsTable extends BasicTable {
 		thf.getParserModel().setFormat(MsFeatureInfoBundleCollection.class, 
 				new MsFeatureInformationBundleCollectionFormat(SortProperty.Name));
 		thf.getParserModel().setComparator(MsFeatureInfoBundleCollection.class, 
-				new MsFeatureInformationBundleCollectionComparator(SortProperty.Name));
+				new MsFeatureInfoBundleCollectionComparator(SortProperty.Name));
 		thf.getParserModel().setFormat(LIMSUser.class, new LIMSUserFormat());
 		thf.getParserModel().setComparator(LIMSUser.class, 
 				new LIMSUserComparator(SortProperty.Name));

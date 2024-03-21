@@ -26,13 +26,13 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundleCollection;
+import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureInfoBundleCollectionComparator;
+import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
@@ -41,21 +41,22 @@ import edu.umich.med.mrc2.datoolbox.utils.SQLUtils;
 
 public class FeatureCollectionUtils {
 
-	public static Map<MsFeatureInfoBundleCollection, Set<String>>
+	public static Set<MsFeatureInfoBundleCollection>
 			getMsFeatureInformationBundleCollections() throws Exception {
 
 		Connection conn = ConnectionManager.getConnection();
-		Map<MsFeatureInfoBundleCollection, Set<String>> featureCollectionsMap = 
+		Set<MsFeatureInfoBundleCollection> featureCollectionsSet = 
 				getMsFeatureInformationBundleCollections(conn);
 		ConnectionManager.releaseConnection(conn);
-		return featureCollectionsMap;
+		return featureCollectionsSet;
 	}
 	
-	private static Map<MsFeatureInfoBundleCollection, Set<String>> 
+	private static Set<MsFeatureInfoBundleCollection> 
 			getMsFeatureInformationBundleCollections(Connection conn) throws Exception {
 
-		Map<MsFeatureInfoBundleCollection, Set<String>>featureCollectionsMap = 
-				new HashMap<MsFeatureInfoBundleCollection, Set<String>>();
+		Set<MsFeatureInfoBundleCollection>featureCollectionsSet = 
+				new TreeSet<MsFeatureInfoBundleCollection>(
+						new MsFeatureInfoBundleCollectionComparator(SortProperty.Name));
 		String query =
 				"SELECT C.COLLECTION_ID, C.COLLECTION_NAME, C.DESCRIPTION, "
 				+ "C.OWNER, C.DATE_CREATED, C.DATE_MODIFIED, COUNT(O.MS_FEATURE_ID) AS COLLECTION_SIZE "
@@ -83,11 +84,11 @@ public class FeatureCollectionUtils {
 						owner);
 			newCollection.setCollectionSize(rs.getInt("COLLECTION_SIZE"));
 		
-			featureCollectionsMap.put(newCollection, new TreeSet<String>());
+			featureCollectionsSet.add(newCollection);
 		}
 		rs.close();
 		ps.close();
-		return featureCollectionsMap;
+		return featureCollectionsSet;
 	}
 	
 	public static Set<String>getFeatureIdsForMsFeatureInfoBundleCollection(

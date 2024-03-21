@@ -47,7 +47,7 @@ import org.jdom2.output.XMLOutputter;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentPointer;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundleCollection;
 import edu.umich.med.mrc2.datoolbox.data.compare.MSMSClusterDataSetComparator;
-import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureInformationBundleCollectionComparator;
+import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureInfoBundleCollectionComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.data.msclust.IMSMSClusterDataSet;
@@ -71,7 +71,7 @@ public class RecentDataManager {
 			new TreeMap<ProjectType,Collection<ExperimentPointer>>();	
 	private static Set<MsFeatureInfoBundleCollection>featureCollections = 
 			new TreeSet<MsFeatureInfoBundleCollection>(
-					new MsFeatureInformationBundleCollectionComparator(SortProperty.Name));
+					new MsFeatureInfoBundleCollectionComparator(SortProperty.Name));
 	private static Set<IMSMSClusterDataSet>featureClusterDataSets = 
 			new TreeSet<IMSMSClusterDataSet>(new MSMSClusterDataSetComparator(SortProperty.Name));
 
@@ -241,6 +241,13 @@ public class RecentDataManager {
 		MRC2ToolBoxCore.getMainWindow().updateGuiWithRecentData();
 	}
 	
+
+	public static void removeFeatureCollection(MsFeatureInfoBundleCollection toRemove) {
+
+		featureCollections.remove(toRemove);
+		MRC2ToolBoxCore.getMainWindow().updateGuiWithRecentData();
+	}
+	
 	public static Set<IMSMSClusterDataSet>getRecentFeatureClusterDataSets(){
 		return featureClusterDataSets;
 	}
@@ -258,6 +265,12 @@ public class RecentDataManager {
 		
 		featureClusterDataSets.add(toAdd);
 		
+		MRC2ToolBoxCore.getMainWindow().updateGuiWithRecentData();
+	}
+	
+	public static void removeFeatureClusterDataSet(IMSMSClusterDataSet toRemove) {
+
+		featureClusterDataSets.remove(toRemove);
 		MRC2ToolBoxCore.getMainWindow().updateGuiWithRecentData();
 	}
 	

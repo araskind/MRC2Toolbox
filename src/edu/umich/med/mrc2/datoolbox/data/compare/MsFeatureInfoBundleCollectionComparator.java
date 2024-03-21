@@ -23,7 +23,7 @@ package edu.umich.med.mrc2.datoolbox.data.compare;
 
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundleCollection;
 
-public class MsFeatureInformationBundleCollectionComparator extends 
+public class MsFeatureInfoBundleCollectionComparator extends 
 		ObjectCompatrator<MsFeatureInfoBundleCollection> {
 
 	/**
@@ -31,13 +31,13 @@ public class MsFeatureInformationBundleCollectionComparator extends
 	 */
 	private static final long serialVersionUID = 2075332847826777341L;
 
-	public MsFeatureInformationBundleCollectionComparator(
+	public MsFeatureInfoBundleCollectionComparator(
 			SortProperty property, 
 			SortDirection direction) {
 		super(property, direction);
 	}
 
-	public MsFeatureInformationBundleCollectionComparator(SortProperty property) {
+	public MsFeatureInfoBundleCollectionComparator(SortProperty property) {
 		super(property);
 	}
 

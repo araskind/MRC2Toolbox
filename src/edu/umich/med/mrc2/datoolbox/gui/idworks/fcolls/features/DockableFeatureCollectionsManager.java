@@ -30,6 +30,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import javax.swing.Icon;
 import javax.swing.JOptionPane;
@@ -77,7 +78,7 @@ public class DockableFeatureCollectionsManager extends DefaultSingleCDockable im
 		featureCollectionsTable = new FeatureCollectionsTable();
 		FeatureCollectionManager.refreshMsFeatureInfoBundleCollections();
 		featureCollectionsTable.setTableModelFromFeatureCollectionList(
-				FeatureCollectionManager.getMsFeatureInfoBundleCollections());
+				FeatureCollectionManager.getEditableMsFeatureInfoBundleCollections());
 		
 		featureCollectionsTable.addMouseListener(
 
@@ -182,21 +183,33 @@ public class DockableFeatureCollectionsManager extends DefaultSingleCDockable im
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}	
-		Set<String>featureIds = new TreeSet<String>();
-		featureIds.addAll(FeatureCollectionManager.getFeatureCollectionsMsIdMap().get(edited));
-		Set<String> featureIdsToAdd = 
-				msFeatureCollectionEditorDialog.getMsFeatureIdsToAdd();
-		if(featureIdsToAdd != null && !featureIdsToAdd.isEmpty()) {
+		if(edited.getFeatureIds().isEmpty()) {
 			
-			featureIds.addAll(featureIdsToAdd);				
+			Set<String>dbIds = new TreeSet<String>();
+			try {
+				dbIds = FeatureCollectionUtils.
+						getFeatureIdsForMsFeatureInfoBundleCollection(edited.getId());
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			if(!dbIds.isEmpty())
+				edited.getFeatureIds().addAll(dbIds);
+		}
+		Set<String> featureIdsToAdd = 
+				msFeatureCollectionEditorDialog.getMsFeatureIdsToAdd().
+				stream().filter(f -> !edited.getFeatureIds().contains(f)).collect(Collectors.toSet());
+				
+		if(!featureIdsToAdd.isEmpty()) {
+		
 			try {
 				FeatureCollectionUtils.addFeaturesToCollection(edited.getId(), featureIdsToAdd);
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			FeatureCollectionManager.getFeatureCollectionsMsIdMap().get(edited).addAll(featureIdsToAdd);
-			edited.setCollectionSize(FeatureCollectionManager.getFeatureCollectionsMsIdMap().get(edited).size());
+			edited.getFeatureIds().addAll(featureIdsToAdd);
+			edited.setCollectionSize(edited.getFeatureIds().size());
 		}			
 		if(msFeatureCollectionEditorDialog.loadCollectionIntoWorkBench()) {
 			loadCollectionIntoWorkBench(edited);
@@ -301,21 +314,22 @@ public class DockableFeatureCollectionsManager extends DefaultSingleCDockable im
 		if(newId != null) {
 			
 			newCollection.setId(newId);
-			Set<String>featureIds = new TreeSet<String>();
-			featureIds.addAll(newCollection.getMsFeatureIds());
 			Set<String> featureIdsToAdd = 
 					msFeatureCollectionEditorDialog.getMsFeatureIdsToAdd();
+			
 			if(featureIdsToAdd != null && !featureIdsToAdd.isEmpty()) {
-				featureIds.addAll(featureIdsToAdd);				
+		
 				try {
 					FeatureCollectionUtils.addFeaturesToCollection(newId, featureIdsToAdd);
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
+				newCollection.getFeatureIds().addAll(featureIdsToAdd);
+				newCollection.setCollectionSize(newCollection.getFeatureIds().size());
 			}
-			FeatureCollectionManager.getFeatureCollectionsMsIdMap().put(newCollection, featureIds);	
-			newCollection.setCollectionSize(featureIds.size());
+			FeatureCollectionManager.getfeatureCollectionsMSIDSet().add(newCollection);			
+			
 			if(msFeatureCollectionEditorDialog.loadCollectionIntoWorkBench()) {
 				loadCollectionIntoWorkBench(newCollection);
 				msFeatureCollectionEditorDialog.dispose();
@@ -324,7 +338,7 @@ public class DockableFeatureCollectionsManager extends DefaultSingleCDockable im
 			else {
 				msFeatureCollectionEditorDialog.dispose();
 				featureCollectionsTable.setTableModelFromFeatureCollectionList(
-						FeatureCollectionManager.getMsFeatureInfoBundleCollections());	
+						FeatureCollectionManager.getEditableMsFeatureInfoBundleCollections());	
 				featuresToAdd = null;
 			}
 			RecentDataManager.addFeatureCollection(newCollection);
@@ -354,20 +368,24 @@ public class DockableFeatureCollectionsManager extends DefaultSingleCDockable im
 		if(selected == null)
 			return;
 		
-		if(!selected.getOwner().equals(MRC2ToolBoxCore.getIdTrackerUser())
-				&& !MRC2ToolBoxCore.getIdTrackerUser().isSuperUser()) {
+		if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() == null) {
 			
-			MessageDialog.showErrorMsg(
-					"Data set \"" + selected.getName() + 
-					"\" was created by a different user, you can not delete it.", 
-					this.getContentPane());
-			return;
-		}
-		
-		if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() == null)
+			if(!selected.getOwner().equals(MRC2ToolBoxCore.getIdTrackerUser())
+					&& !MRC2ToolBoxCore.getIdTrackerUser().isSuperUser()) {
+				
+				MessageDialog.showErrorMsg(
+						"Data set \"" + selected.getName() + 
+						"\" was created by a different user, you can not delete it.", 
+						this.getContentPane());
+				return;
+			}
 			deleteFeatureCollectionFromDatabase(selected);
-		else
+			RecentDataManager.removeFeatureCollection(selected);
+		}
+		else {
 			deleteFeatureCollectionFromProject(selected);
+			RecentDataManager.removeFeatureCollection(selected);
+		}
 	}
 	
 	private void deleteFeatureCollectionFromProject(MsFeatureInfoBundleCollection selected) {
@@ -387,7 +405,8 @@ public class DockableFeatureCollectionsManager extends DefaultSingleCDockable im
 			featureCollectionsTable.setTableModelFromFeatureCollectionList(
 					project.getFeatureCollections());	
 			
-			IDWorkbenchPanel panel = (IDWorkbenchPanel)MRC2ToolBoxCore.getMainWindow().getPanel(PanelList.ID_WORKBENCH);
+			IDWorkbenchPanel panel = 
+					(IDWorkbenchPanel)MRC2ToolBoxCore.getMainWindow().getPanel(PanelList.ID_WORKBENCH);
 			if(panel.getActiveFeatureCollection() != null 
 					&& panel.getActiveFeatureCollection().equals(selected))
 				panel.clearMSMSFeatureData();
@@ -415,7 +434,7 @@ public class DockableFeatureCollectionsManager extends DefaultSingleCDockable im
 		}
 		FeatureCollectionManager.getMsFeatureInfoBundleCollections().remove(selected);
 		featureCollectionsTable.setTableModelFromFeatureCollectionList(
-				FeatureCollectionManager.getMsFeatureInfoBundleCollections());
+				FeatureCollectionManager.getEditableMsFeatureInfoBundleCollections());
 		
 		IDWorkbenchPanel panel = 
 				(IDWorkbenchPanel)MRC2ToolBoxCore.getMainWindow().getPanel(PanelList.ID_WORKBENCH);
@@ -453,7 +472,7 @@ public class DockableFeatureCollectionsManager extends DefaultSingleCDockable im
 	public void loadDatabaseStoredCollections() {
 
 		featureCollectionsTable.setTableModelFromFeatureCollectionList(
-				FeatureCollectionManager.getMsFeatureInfoBundleCollections());
+				FeatureCollectionManager.getEditableMsFeatureInfoBundleCollections());
 	}
 	
 	public void loadCollectionsForActiveProject() {

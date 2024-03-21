@@ -319,6 +319,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 	private ActiveDataSetBinnerAnnotationsSearchDialog activeDataSetBinnerAnnotationsSearchDialog;
 	private AnnotationFilterDialog annotationFilterDialog;
 	private MSMSClusterMZRTListFilterDialog msmsClusterMZRTListFilterDialog;
+	private MzFrequencyAnalysisResultsDialog mzFrequencyAnalysisResultsDialog;
 	
 	private static final Icon searchIdTrackerIcon = GuiUtils.getIcon("searchDatabase", 24);
 	private static final Icon searchExperimentIcon = GuiUtils.getIcon("searchIdExperiment", 24);
@@ -3702,11 +3703,10 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 				MRC2ToolBoxConfiguration.getPpmFormat().format(task.getMassWindowSize()) 
 				+ " " + task.getMassWindowType().name();
 		
-		MzFrequencyAnalysisResultsDialog resultsDialog = 
-				new MzFrequencyAnalysisResultsDialog(
-						this, mzFrequencyObjects, binningParameter);
-		resultsDialog.setLocationRelativeTo(this.getContentPane());
-		resultsDialog.setVisible(true);
+		mzFrequencyAnalysisResultsDialog = new MzFrequencyAnalysisResultsDialog(
+								this, mzFrequencyObjects, binningParameter);
+		mzFrequencyAnalysisResultsDialog.setLocationRelativeTo(this.getContentPane());
+		mzFrequencyAnalysisResultsDialog.setVisible(true);
 	}
 
 	private void finalizeIdTrackerExperimentLoad(IDTrackerExperimentDataFetchTask task) {
@@ -4788,8 +4788,16 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 
 	@Override
 	public void updateGuiWithRecentData() {
-		// TODO Auto-generated method stub
+
 		msmsFeaturePopupMenu.updateRecentFeatureCollectionList();
+		
+		if(mzFrequencyAnalysisResultsDialog != null 
+				&& mzFrequencyAnalysisResultsDialog.isVisible())
+			mzFrequencyAnalysisResultsDialog.updateRecentFeatureCollectionList();
+		
+		if(idTrackerDataExplorerPlotDialog != null 
+				&& idTrackerDataExplorerPlotDialog.isVisible())
+			idTrackerDataExplorerPlotDialog.updateRecentFeatureCollectionList();
 	}
 }
 

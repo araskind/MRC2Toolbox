@@ -434,7 +434,7 @@ public class MSMSClusterDataSet implements IMSMSClusterDataSet {
 		data += "<b># of clusters: </b>" + Integer.toString(
 				MSMSClusterDataSetManager.getMSMSClusterDataSetSize(this)) + "<br>";
 		data += "<b>Created on: </b>" + ExperimentUtils.dateTimeFormat.format(dateCreated) + "<br>";
-		data += "<b>Lat modified on: </b>" + ExperimentUtils.dateTimeFormat.format(lastModified);		
+		data += "<b>Last modified on: </b>" + ExperimentUtils.dateTimeFormat.format(lastModified);		
 		return data;
 	}
 }

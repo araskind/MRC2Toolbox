@@ -82,7 +82,6 @@ public class BasicTablePopupMenu extends JPopupMenu {
 		copyAllWithHeaderMenuItem.setIcon(copyAllIcon);		
 	}
 	
-	
 	protected JMenuItem addItem(JMenu menu, String title, String command, Icon defaultIcon) {
 
 		JMenuItem item = new JMenuItem(title);

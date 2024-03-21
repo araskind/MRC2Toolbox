@@ -72,8 +72,7 @@ public class FeatureCollectionsTableModel extends BasicTableModel {
 		for (MsFeatureInfoBundleCollection collection : featureCollections) {
 			
 			if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() == null
-					&& !FeatureCollectionManager.getEditableMsFeatureInfoBundleCollections().contains(collection)
-					&& FeatureCollectionManager.getMsFeatureInfoBundleCollectionSize(collection) == 0) {
+					&& !FeatureCollectionManager.getEditableMsFeatureInfoBundleCollections().contains(collection)) {
 				continue;
 			}
 			Object[] obj = {
@@ -108,10 +107,8 @@ public class FeatureCollectionsTableModel extends BasicTableModel {
 			return;
 		
 		setValueAt(edited, row, getColumnIndex(COLLECTION_COLUMN));
-		setValueAt(edited.getDescription(), 
-				row, getColumnIndex(DESCRIPTION_COLUMN));
-		setValueAt(FeatureCollectionManager.getMsFeatureInfoBundleCollectionSize(edited), 
-				row, getColumnIndex(NUM_FEATURES_COLUMN));
+		setValueAt(edited.getDescription(), row, getColumnIndex(DESCRIPTION_COLUMN));
+		setValueAt(edited.getCollectionSize(), row, getColumnIndex(NUM_FEATURES_COLUMN));
 		setValueAt(edited.getOwner(), row, getColumnIndex(OWNER_COLUMN));
 		setValueAt(edited.getDateCreated(), row, getColumnIndex(DATE_CREATED_COLUMN));
 		setValueAt(edited.getLastModified(), row, getColumnIndex(LAST_MODIFIED_COLUMN));		
