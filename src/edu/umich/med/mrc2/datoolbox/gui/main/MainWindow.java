@@ -115,6 +115,7 @@ import edu.umich.med.mrc2.datoolbox.main.RecentDataManager;
 import edu.umich.med.mrc2.datoolbox.main.StartupConfiguration;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
+import edu.umich.med.mrc2.datoolbox.project.Experiment;
 import edu.umich.med.mrc2.datoolbox.project.ProjectType;
 import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisExperiment;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
@@ -1458,11 +1459,12 @@ public class MainWindow extends JFrame
 				finalizeExperimentLoad((LoadExperimentTask) e.getSource());
 
 			//	Save metabolomics experiment
-			if (e.getSource().getClass().equals(SaveExperimentTask.class) || 
-					e.getSource().getClass().equals(SaveStoredRawDataAnalysisExperimentTask.class))
-				finalizeExperimentSave();
+			if (e.getSource().getClass().equals(SaveExperimentTask.class) )
+				finalizeExperimentSave(((SaveExperimentTask)e.getSource()).getExperimentToSave());
 			
-			
+			if(e.getSource().getClass().equals(SaveStoredRawDataAnalysisExperimentTask.class))
+				finalizeExperimentSave(((SaveStoredRawDataAnalysisExperimentTask)e.getSource()).getExperimentToSave());
+							
 			if(e.getSource().getClass().equals(ExperimentRawDataFileOpenTask.class))
 				finalizeExperimentRawDataLoad((ExperimentRawDataFileOpenTask)e.getSource());
 		}
@@ -1483,11 +1485,15 @@ public class MainWindow extends JFrame
 		rawDataPanel.finalizeExperimentRawDataLoad(task);
 	}
 	
-	private void finalizeExperimentSave() {
+	private void finalizeExperimentSave(Experiment experiment) {
 		
 		MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
 		MainWindow.hideProgressDialog();
 		
+		if(experiment != null) {
+			RecentDataManager.addExperiment(experiment);
+			updateGuiWithRecentData();
+		}
 		if(experimentSwitchController.isExitProgram()) {
 			MRC2ToolBoxCore.shutDown();
 			return;
@@ -1529,7 +1535,9 @@ public class MainWindow extends JFrame
 		MRC2ToolBoxCore.setActiveOfflineRawDataAnalysisExperiment(null);
 		MRC2ToolBoxCore.getMainWindow().getPanel(PanelList.RAW_DATA_EXAMINER).clearPanel();
 		MRC2ToolBoxCore.getMainWindow().getPanel(PanelList.ID_WORKBENCH).clearPanel();
-		RawDataManager.releaseAllDataSources();
+		RawDataManager.releaseAllDataSources();		
+		RecentDataManager.removeFeatureCollection(
+				FeatureCollectionManager.activeExperimentFeatureSet);
 		setTitle(BuildInformation.getProgramName());
 		System.gc();
 	}

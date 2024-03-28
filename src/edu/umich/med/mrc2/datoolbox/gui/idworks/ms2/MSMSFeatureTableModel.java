@@ -23,7 +23,11 @@ package edu.umich.med.mrc2.datoolbox.gui.idworks.ms2;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.TreeSet;
 
 import edu.umich.med.mrc2.datoolbox.data.Adduct;
 import edu.umich.med.mrc2.datoolbox.data.BinnerAnnotation;
@@ -83,10 +87,12 @@ public class MSMSFeatureTableModel extends BasicTableModel {
 	public static final String NEUTRAL_MASS_PRECURSOR_DELTA_MZ_COLUMN = "MW " + '\u0394' + " M/Z";
 	
 	private IMsFeatureInfoBundleCluster featureCluster;
+	private MSMSFeatureTable parentTable;
 
-	public MSMSFeatureTableModel() {
+	public MSMSFeatureTableModel(MSMSFeatureTable msmsFeatureTable) {
 		
 		super();
+		this.parentTable = msmsFeatureTable;
 		columnArray = new ColumnContext[] {
 
 			new ColumnContext(MS_FEATURE_COLUMN, MS_FEATURE_COLUMN, MSFeatureInfoBundle.class, false),
@@ -264,115 +270,150 @@ public class MSMSFeatureTableModel extends BasicTableModel {
 		}
 	}
 
-	public void updateFeatureData(MSFeatureInfoBundle bundle) {
-
-		int row = getFeatureInfoBundleRow(bundle);
-		if(row == -1)
-			return;
-
-		MsFeature cf = bundle.getMsFeature();
-		TandemMassSpectrum instrumentMsMs = cf.getSpectrum().getTandemSpectra().
-			stream().filter(s -> s.getSpectrumSource().equals(SpectrumSource.EXPERIMENTAL)).
-			findFirst().orElse(null);
-
-		if(instrumentMsMs == null)
-			return;
-
-		String compoundName = "";
-		boolean hasAnnotations = (!cf.getAnnotations().isEmpty() 
-				|| !bundle.getStandadAnnotations().isEmpty());
-		boolean hasFollowup = !bundle.getIdFollowupSteps().isEmpty();
-		MSFeatureIdentificationLevel idLevel = null;
-		Double libraryPrecursorDeltaMz = null;
-		Double neutralMassDeltaMz = null;
-		Adduct adduct = null;
-		BinnerAnnotation ba = getBinnerAnnotation(bundle);
-		Double entropyMsMsScore = null;
-		ReferenceMsMsLibraryMatch refMatch = null;
-		MsFeatureIdentity primaryId = cf.getPrimaryIdentity();
-	
-		if(primaryId != null) {
-
-			if(primaryId.getCompoundIdentity() == null) {
-				compoundName = primaryId.getIdentityName();
-			}
-			else {
-				compoundName = primaryId.getCompoundName();
-				double neutralMass = primaryId.getCompoundIdentity().getExactMass();
-				neutralMassDeltaMz = instrumentMsMs.getParent().getMz() - neutralMass;
-			}	
-			refMatch = primaryId.getReferenceMsMsLibraryMatch();
-			if(refMatch != null) {
-				
-				MsPoint libPrecursor = refMatch.getMatchedLibraryFeature().getParent();
-				if(libPrecursor != null) 
-					libraryPrecursorDeltaMz = instrumentMsMs.getParent().getMz() - libPrecursor.getMz();					
-			
-				entropyMsMsScore = refMatch.getEntropyBasedScore();
-			}
-			
-			idLevel = cf.getPrimaryIdentity().getIdentificationLevel();
-			adduct = primaryId.getPrimaryAdduct();
-		}
-		if(adduct == null) {
-			
-			if(cf.getSpectrum() != null) 	
-				adduct = cf.getSpectrum().getPrimaryAdduct();
-			else
-				adduct = AdductManager.getDefaultAdductForCharge(cf.getCharge());
-		}
-		LIMSSampleType sType = null;
-		if(bundle.getStockSample() != null)
-			sType = bundle.getStockSample().getLimsSampleType();
+	public void updateFeatureData(Collection<MSFeatureInfoBundle> bundlesToUpdate) {
 		
-		setValueAt(compoundName, row, getColumnIndex(COMPOUND_NAME_COLUMN));
-		setValueAt(cf.getPrimaryIdentity(), row, getColumnIndex(DATABASE_LINK_COLUMN));
-		setValueAt(cf.getIdentificationState(), row, getColumnIndex(AMBIGUITY_COLUMN));
-		setValueAt(idLevel, row, getColumnIndex(ID_LEVEL_COLUMN));
-		setValueAt(adduct, row, getColumnIndex(ADDUCT_COLUMN));	
-		setValueAt(ba, row, getColumnIndex(BINNER_ANNOTATION_COLUMN));
-		setValueAt(cf.getPolarity(), row, getColumnIndex(POLARITY_COLUMN));	
-		setValueAt(hasAnnotations, row, getColumnIndex(ANNOTATIONS_COLUMN));
-		setValueAt(hasFollowup, row, getColumnIndex(FOLLOWUP_COLUMN));
-		setValueAt(cf.getRetentionTime(), row, getColumnIndex(RETENTION_COLUMN));
-		setValueAt(instrumentMsMs.getParent().getMz(), row, getColumnIndex(PARENT_MZ_COLUMN));
-		setValueAt(neutralMassDeltaMz, row, getColumnIndex(NEUTRAL_MASS_PRECURSOR_DELTA_MZ_COLUMN));
-		setValueAt(libraryPrecursorDeltaMz, row, getColumnIndex(LIBRARY_PRECURSOR_DELTA_MZ_COLUMN));	
-		setValueAt(instrumentMsMs.getCidLevel(), row, getColumnIndex(COLLISION_ENERGY_COLUMN));		
-		setValueAt(entropyMsMsScore, row, getColumnIndex(ENTROPY_BASED_SCORE_COLUMN));
-		setValueAt(refMatch, row, getColumnIndex(MSMS_MATCH_TYPE_COLUMN));
-		setValueAt(sType, row, getColumnIndex(SAMPLE_TYPE_COLUMN));
-		setValueAt(bundle.getSample(), row, getColumnIndex(SAMPLE_COLUMN));
-		setValueAt(bundle.getExperiment(), row, getColumnIndex(EXPERIMENT_COLUMN));
-		setValueAt(bundle.getAcquisitionMethod(), row, getColumnIndex(ACQ_METHOD_ID_COLUMN));
-		setValueAt(bundle.getDataExtractionMethod(), row, getColumnIndex(DEX_METHOD_ID_COLUMN));		
-		setValueAt(instrumentMsMs.getParentIonPurity(), row, getColumnIndex(PARENT_ION_PURITY_COLUMN));		
-		setValueAt(instrumentMsMs.isParentIonMinorIsotope(), row, getColumnIndex(PARENT_ION_IS_MINOR_ISOTOPE_COLUMN));
-		setValueAt(instrumentMsMs.getEntropy(), row, getColumnIndex(SPECTRUM_ENTROPY_COLUMN));
-		setValueAt(instrumentMsMs.getTotalIntensity(), row, getColumnIndex(SPECTRUM_TOTAL_INTENSITY_COLUMN));
+		if(bundlesToUpdate == null || bundlesToUpdate.isEmpty())
+			return;
+		
+		removeTableModelListener(parentTable);
+		suppressEvents = true;
+		Map<MSFeatureInfoBundle,Integer>featureRowMap = 
+				getFeatureInfoBundleRowMap(bundlesToUpdate);
+		if(featureRowMap.isEmpty())
+			return;
+		
+		TreeSet<Integer>updatedRows = 
+				new TreeSet<Integer>(featureRowMap.values());
+		
+		for(Entry<MSFeatureInfoBundle,Integer>e : featureRowMap.entrySet()) {
+			
+			MSFeatureInfoBundle bundle = e.getKey();
+			int row = e.getValue();
+
+			MsFeature cf = bundle.getMsFeature();
+			TandemMassSpectrum instrumentMsMs = cf.getSpectrum().getTandemSpectra().
+				stream().filter(s -> s.getSpectrumSource().equals(SpectrumSource.EXPERIMENTAL)).
+				findFirst().orElse(null);
+
+			if(instrumentMsMs == null)
+				return;
+
+			String compoundName = "";
+			boolean hasAnnotations = (!cf.getAnnotations().isEmpty() 
+					|| !bundle.getStandadAnnotations().isEmpty());
+			boolean hasFollowup = !bundle.getIdFollowupSteps().isEmpty();
+			MSFeatureIdentificationLevel idLevel = null;
+			Double libraryPrecursorDeltaMz = null;
+			Double neutralMassDeltaMz = null;
+			Adduct adduct = null;
+			BinnerAnnotation ba = getBinnerAnnotation(bundle);
+			Double entropyMsMsScore = null;
+			ReferenceMsMsLibraryMatch refMatch = null;
+			MsFeatureIdentity primaryId = cf.getPrimaryIdentity();
+		
+			if(primaryId != null) {
+
+				if(primaryId.getCompoundIdentity() == null) {
+					compoundName = primaryId.getIdentityName();
+				}
+				else {
+					compoundName = primaryId.getCompoundName();
+					double neutralMass = primaryId.getCompoundIdentity().getExactMass();
+					neutralMassDeltaMz = instrumentMsMs.getParent().getMz() - neutralMass;
+				}	
+				refMatch = primaryId.getReferenceMsMsLibraryMatch();
+				if(refMatch != null) {
+					
+					MsPoint libPrecursor = refMatch.getMatchedLibraryFeature().getParent();
+					if(libPrecursor != null) 
+						libraryPrecursorDeltaMz = instrumentMsMs.getParent().getMz() - libPrecursor.getMz();					
+				
+					entropyMsMsScore = refMatch.getEntropyBasedScore();
+				}
+				
+				idLevel = cf.getPrimaryIdentity().getIdentificationLevel();
+				adduct = primaryId.getPrimaryAdduct();
+			}
+			if(adduct == null) {
+				
+				if(cf.getSpectrum() != null) 	
+					adduct = cf.getSpectrum().getPrimaryAdduct();
+				else
+					adduct = AdductManager.getDefaultAdductForCharge(cf.getCharge());
+			}
+			LIMSSampleType sType = null;
+			if(bundle.getStockSample() != null)
+				sType = bundle.getStockSample().getLimsSampleType();
+			
+			setValueAt(compoundName, row, getColumnIndex(COMPOUND_NAME_COLUMN));
+			setValueAt(cf.getPrimaryIdentity(), row, getColumnIndex(DATABASE_LINK_COLUMN));
+			setValueAt(cf.getIdentificationState(), row, getColumnIndex(AMBIGUITY_COLUMN));
+			setValueAt(idLevel, row, getColumnIndex(ID_LEVEL_COLUMN));
+			setValueAt(adduct, row, getColumnIndex(ADDUCT_COLUMN));	
+			setValueAt(ba, row, getColumnIndex(BINNER_ANNOTATION_COLUMN));
+			setValueAt(cf.getPolarity(), row, getColumnIndex(POLARITY_COLUMN));	
+			setValueAt(hasAnnotations, row, getColumnIndex(ANNOTATIONS_COLUMN));
+			setValueAt(hasFollowup, row, getColumnIndex(FOLLOWUP_COLUMN));
+			setValueAt(cf.getRetentionTime(), row, getColumnIndex(RETENTION_COLUMN));
+			setValueAt(instrumentMsMs.getParent().getMz(), row, getColumnIndex(PARENT_MZ_COLUMN));
+			setValueAt(neutralMassDeltaMz, row, getColumnIndex(NEUTRAL_MASS_PRECURSOR_DELTA_MZ_COLUMN));
+			setValueAt(libraryPrecursorDeltaMz, row, getColumnIndex(LIBRARY_PRECURSOR_DELTA_MZ_COLUMN));	
+			setValueAt(instrumentMsMs.getCidLevel(), row, getColumnIndex(COLLISION_ENERGY_COLUMN));		
+			setValueAt(entropyMsMsScore, row, getColumnIndex(ENTROPY_BASED_SCORE_COLUMN));
+			setValueAt(refMatch, row, getColumnIndex(MSMS_MATCH_TYPE_COLUMN));
+			setValueAt(sType, row, getColumnIndex(SAMPLE_TYPE_COLUMN));
+			setValueAt(bundle.getSample(), row, getColumnIndex(SAMPLE_COLUMN));
+			setValueAt(bundle.getExperiment(), row, getColumnIndex(EXPERIMENT_COLUMN));
+			setValueAt(bundle.getAcquisitionMethod(), row, getColumnIndex(ACQ_METHOD_ID_COLUMN));
+			setValueAt(bundle.getDataExtractionMethod(), row, getColumnIndex(DEX_METHOD_ID_COLUMN));		
+			setValueAt(instrumentMsMs.getParentIonPurity(), row, getColumnIndex(PARENT_ION_PURITY_COLUMN));		
+			setValueAt(instrumentMsMs.isParentIonMinorIsotope(), row, getColumnIndex(PARENT_ION_IS_MINOR_ISOTOPE_COLUMN));
+			setValueAt(instrumentMsMs.getEntropy(), row, getColumnIndex(SPECTRUM_ENTROPY_COLUMN));
+			setValueAt(instrumentMsMs.getTotalIntensity(), row, getColumnIndex(SPECTRUM_TOTAL_INTENSITY_COLUMN));
+			
+			updatedRows.add(row);
+		}
+		suppressEvents = false;
+		addTableModelListener(parentTable);
+		fireTableRowsUpdated(updatedRows.first(), updatedRows.last());
 	}
+	
+	public Map<MSFeatureInfoBundle,Integer> getFeatureInfoBundleRowMap(
+			Collection<MSFeatureInfoBundle> bundles) {
 
-	public int getFeatureInfoBundleRow(MSFeatureInfoBundle bundle) {
-
+		Map<MSFeatureInfoBundle,Integer>bundleRowMap = 
+				new HashMap<MSFeatureInfoBundle,Integer>();
 		int col = getColumnIndex(MS_FEATURE_COLUMN);
 		for (int i = 0; i < getRowCount(); i++) {
 
-			if (bundle.equals(getValueAt(i, col)))
-				return i;
+			MSFeatureInfoBundle b = (MSFeatureInfoBundle)getValueAt(i, col);
+			if (bundles.contains(b))
+				bundleRowMap.put(b, i);
 		}
-		return -1;
+		return bundleRowMap;
 	}
 
-	public int getFeatureRow(MsFeature feature) {
+//	public int getFeatureInfoBundleRow(MSFeatureInfoBundle bundle) {
+//
+//		int col = getColumnIndex(MS_FEATURE_COLUMN);
+//		for (int i = 0; i < getRowCount(); i++) {
+//
+//			if (bundle.equals(getValueAt(i, col)))
+//				return i;
+//		}
+//		return -1;
+//	}
 
-		int col = getColumnIndex(MS_FEATURE_COLUMN);
-		for (int i = 0; i < getRowCount(); i++) {
-
-			if (feature.equals(((MSFeatureInfoBundle)getValueAt(i, col)).getMsFeature()))
-				return i;
-		}
-		return -1;
-	}
+//	public int getFeatureRow(MsFeature feature) {
+//
+//		int col = getColumnIndex(MS_FEATURE_COLUMN);
+//		for (int i = 0; i < getRowCount(); i++) {
+//
+//			if (feature.equals(((MSFeatureInfoBundle)getValueAt(i, col)).getMsFeature()))
+//				return i;
+//		}
+//		return -1;
+//	}
 
 	public void removeFeatureCluster() {
 		this.featureCluster = null;

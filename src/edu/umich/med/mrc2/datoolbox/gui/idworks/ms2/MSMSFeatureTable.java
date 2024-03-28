@@ -102,7 +102,7 @@ public class MSMSFeatureTable extends BasicTable {
 		super();
 		this.putClientProperty(
 				MRC2ToolBoxCore.COMPONENT_IDENTIFIER, this.getClass().getSimpleName());
-		model = new MSMSFeatureTableModel();
+		model = new MSMSFeatureTableModel(this);
 		setModel(model);
 		setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 
@@ -349,11 +349,8 @@ public class MSMSFeatureTable extends BasicTable {
 		return bundles;
 	}
 
-	public void updateFeatureData(MSFeatureInfoBundle bundle) {
-//		thf.setTable(null);
-		((MSMSFeatureTableModel)model).updateFeatureData(bundle);
-//		thf.setTable(this);
-//		adjustVariableColumns();
+	public void updateFeatureData(Collection<MSFeatureInfoBundle> bundlesToUpdate) {
+		((MSMSFeatureTableModel)model).updateFeatureData(bundlesToUpdate);
 	}
 
 	public void selectBundle(MSFeatureInfoBundle toSelect) {

@@ -48,15 +48,18 @@ public class HistogramUtils {
 		if(BIN_COUNT > 0) {
 			EmpiricalDistribution distribution = new EmpiricalDistribution(BIN_COUNT);
 			distribution.load(data);
-			double halfWidth = (da.getMax() - da.getMin()) / (double)BIN_COUNT / 1.5d;
+			double halfWidth = (da.getMax() - da.getMin()) / (double)BIN_COUNT / 2.05d;
 			
-			SimpleHistogramDataset dataSet = new SimpleHistogramDataset(title);		
+			SimpleHistogramDataset dataSet = new SimpleHistogramDataset(title);				
+			
 			for(SummaryStatistics stats: distribution.getBinStats()) {
 				
 				if(stats.getSum() == 0.0d)
 					continue;
 				
 				else if(stats.getMin() == stats.getMax()) {
+					
+//					TODO adjust borders to prevent overlap iterate through list?;
 					SimpleHistogramBin bin = 
 							new SimpleHistogramBin(
 									stats.getMean() - halfWidth, stats.getMean() + halfWidth, true, false);

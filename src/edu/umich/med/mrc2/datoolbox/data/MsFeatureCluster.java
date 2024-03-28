@@ -23,6 +23,7 @@ package edu.umich.med.mrc2.datoolbox.data;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -35,6 +36,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.ujmp.core.Matrix;
 import org.ujmp.core.calculation.Calculation.Ret;
 
@@ -63,8 +65,9 @@ public class MsFeatureCluster implements Serializable {
 	
 	private String clusterId;
 	private Map<DataPipeline, Collection<MsFeature>>clusterFeatures;
+	private Map<DataPipeline, DescriptiveStatistics>featureRTStatistics;	
+	private Map<DataPipeline, DescriptiveStatistics>featureMZStatistics;
 	private Collection<MsFeature>disabledFeatures;
-	private Range rtRange;
 	private Matrix clusterCorrMatrix;
 	private Collection<ModificationBlock> chemicalModificationsMap;
 	private Map<MsFeature, Set<Adduct>> annotationMap;
@@ -77,8 +80,9 @@ public class MsFeatureCluster implements Serializable {
 		this.clusterId = 
 				DataPrefix.MS_FEATURE_CLUSTER.getName() + UUID.randomUUID().toString();
 		clusterFeatures = new TreeMap<DataPipeline, Collection<MsFeature>>();
+		featureRTStatistics = new TreeMap<DataPipeline, DescriptiveStatistics>();
+		featureMZStatistics = new TreeMap<DataPipeline, DescriptiveStatistics>();
 		chemicalModificationsMap = new HashSet<ModificationBlock>();
-		rtRange = null;
 		clusterCorrMatrix = null;
 		primaryFeature = null;
 		locked = false;
@@ -87,15 +91,21 @@ public class MsFeatureCluster implements Serializable {
 
 	public void addFeature(MsFeature cf, DataPipeline pipeline) {
 		
-		if(!clusterFeatures.containsKey(pipeline))
+		if(!clusterFeatures.containsKey(pipeline)) {
 			clusterFeatures.put(pipeline, new HashSet<MsFeature>());
-		
+			featureRTStatistics.put(pipeline, new DescriptiveStatistics());
+			featureMZStatistics.put(pipeline, new DescriptiveStatistics());
+		}		
 		clusterFeatures.get(pipeline).add(cf);
-		if (rtRange == null)
-			rtRange = new Range(cf.getRetentionTime());
-		else
-			rtRange.extendRange(cf.getRetentionTime());		
 		
+		if(cf.getStatsSummary() != null) {
+			featureRTStatistics.get(pipeline).addValue(cf.getStatsSummary().getMedianObservedRetention());
+			featureMZStatistics.get(pipeline).addValue(cf.getStatsSummary().getMedianObservedMz());
+		}
+		else {
+			featureRTStatistics.get(pipeline).addValue(cf.getRetentionTime());
+			featureMZStatistics.get(pipeline).addValue(cf.getMonoisotopicMz());
+		}
 		chargeMismatch = clusterFeatures.get(pipeline).stream().
 				map(f -> f.getCharge()).distinct().count() > 1;
 				
@@ -212,7 +222,6 @@ public class MsFeatureCluster implements Serializable {
 	}
 
 	public String getClusterId() {
-
 		return clusterId;
 	}
 
@@ -255,11 +264,12 @@ public class MsFeatureCluster implements Serializable {
 		return featureMods;
 	}
 
-	public String getNameForXicMethod() {
+	public String getNameForXicMethod(DataPipeline pipeline) {
 
 		String clusterName = "Cluster" + "_" + 
 				MRC2ToolBoxConfiguration.getMzFormat().format(getTopMass()) + "@"
-				+ MRC2ToolBoxConfiguration.getRtFormat().format(rtRange.getAverage());
+				+ MRC2ToolBoxConfiguration.getRtFormat().format(
+						featureRTStatistics.get(pipeline).getPercentile(50.0d));
 
 		return clusterName;
 	}
@@ -275,15 +285,18 @@ public class MsFeatureCluster implements Serializable {
 		return primaryFeature;
 	}
 
-	public Range getRtRange() {
-		return rtRange;
+	public Range getRtRange(DataPipeline pipeline) {
+		return new Range(featureRTStatistics.get(pipeline).getMin(), 
+				featureRTStatistics.get(pipeline).getMax());
 	}
 
 	public double getTopArea() {
-		return clusterFeatures.values().stream().
-				flatMap(c -> c.stream()).
-				sorted(new MsFeatureComparator(SortProperty.Area, SortDirection.DESC)).
-				findFirst().get().getAveragePeakArea();
+		
+		MsFeature mif = getMostIntensiveFeature();
+		if(mif != null)
+			return mif.getAveragePeakArea();
+		else 
+			return 0.0d;
 	}
 	
 	public MsFeature getMostIntensiveFeature() {
@@ -296,28 +309,61 @@ public class MsFeatureCluster implements Serializable {
 
 	public double getTopMass() {
 		
-		return clusterFeatures.values().stream().
-				flatMap(c -> c.stream()).
-				sorted(new MsFeatureComparator(SortProperty.Area, SortDirection.DESC)).
-				findFirst().get().getMonoisotopicMz();
+		MsFeature mif = getMostIntensiveFeature();
+		if(mif != null)
+			return mif.getMonoisotopicMz();
+		else 
+			return 0.0d;
 	}
 
 	public boolean isLocked() {
 		return locked;
 	}
-
+	
+	public boolean matches(
+			MsFeature cf, 
+			double massAccuracy, 
+			MassErrorType massErrorType,
+			double rtWindow) {
+		
+		for(Entry<DataPipeline, Collection<MsFeature>> plf : clusterFeatures.entrySet()) {
+			
+			if(plf.getValue().contains(cf))
+				return matches(cf, plf.getKey(), massAccuracy, massErrorType, rtWindow);
+		}
+		return false;
+	}
+	
 	public boolean matches(
 			MsFeature cf, 
 			DataPipeline pipeline,
 			double massAccuracy, 
+			MassErrorType massErrorType,
 			double rtWindow) {
-		
-		if(clusterFeatures.get(pipeline) == null)
-			return false;
 
-		return clusterFeatures.get(pipeline).stream().
-				filter(f -> MsUtils.matchesFeature(f, cf, massAccuracy, rtWindow, true)).
-				findFirst().isPresent();
+		if(clusterFeatures.get(pipeline) == null 
+				|| clusterFeatures.get(pipeline).isEmpty())
+			return false;
+		
+		double avgRt = featureRTStatistics.get(pipeline).getPercentile(50.0d);
+		Range refRtRange = new Range(avgRt - rtWindow, avgRt + rtWindow);
+		double frt = cf.getRetentionTime();
+		if(cf.getStatsSummary() != null)
+			frt = cf.getStatsSummary().getMedianObservedRetention();
+		
+		if(!refRtRange.contains(frt))
+			return false;
+		
+		double avgMz = featureMZStatistics.get(pipeline).getPercentile(50.0d);
+		Range refMZRange = MsUtils.createMassRange(avgMz, massAccuracy, massErrorType);
+		double fmz = cf.getMonoisotopicMz();
+		if(cf.getStatsSummary() != null)
+			fmz = cf.getStatsSummary().getMedianObservedMz();
+				
+		if(!refMZRange.contains(fmz))
+			return false;	
+		
+		return true;
 	}
 	
 	public boolean matchesPrimaryFeature(
@@ -436,18 +482,6 @@ public class MsFeatureCluster implements Serializable {
 				findFirst().isPresent();
 	}
 	
-	public boolean matches(
-			MsFeature cf, 
-			double massAccuracy, 
-			MassErrorType massErrorType,
-			double rtWindow) {
-
-		return clusterFeatures.values().stream().
-				flatMap(c -> c.stream()).
-				filter(f -> MsUtils.matchesFeature(f, cf, massAccuracy, massErrorType, rtWindow, true)).
-				findFirst().isPresent();
-	}
-	
 	public boolean matchesOnMSMSParentIon(
 			MsFeature cf, 
 			double massAccuracy, 
@@ -487,29 +521,39 @@ public class MsFeatureCluster implements Serializable {
 		return cidLevels.contains(cf.getSpectrum().getExperimentalTandemSpectrum().getCidLevel());		
 	}
 
-	private void recalculateClusterParameters() {
-
-		if (!clusterFeatures.isEmpty()) {
-
-			MsFeature topFeature = ClusterUtils.getMostIntensiveFeature(getFeatures());
-			rtRange = new Range(topFeature.getRetentionTime());
-			clusterFeatures.values().stream().flatMap(c -> c.stream()).
-				forEach(f -> rtRange.extendRange(f.getRetentionTime()));
-		}
-	}
-
 	public void removeFeature(MsFeature cf) {
-
-		clusterFeatures.values().stream().forEach(c -> c.remove(cf));
-		clusterCorrMatrix = createClusterCorrelationMatrix(false);
-		recalculateClusterParameters();
+		
+		for(Entry<DataPipeline, Collection<MsFeature>> dpf : clusterFeatures.entrySet()) {
+			
+			if(dpf.getValue().contains(cf)) {
+				
+				dpf.getValue().remove(cf);
+				updateStatisticsForDataPipeline(dpf.getKey());
+				
+				//	TODO - rewrite to handle pipelines
+				//	clusterCorrMatrix = createClusterCorrelationMatrix(false);				
+			}
+		}
 	}
 
 	public void removeFeatures(Collection<MsFeature> cfList) {
 
 		clusterFeatures.values().stream().forEach(c -> c.removeAll(cfList));
-		clusterCorrMatrix = createClusterCorrelationMatrix(false);
-		recalculateClusterParameters();
+		for(DataPipeline dp : clusterFeatures.keySet())
+			updateStatisticsForDataPipeline(dp);	
+		
+		//	TODO - rewrite to handle pipelines
+		//	clusterCorrMatrix = createClusterCorrelationMatrix(false);
+	}
+	
+	private void updateStatisticsForDataPipeline(DataPipeline pipeline) {
+		
+		featureRTStatistics.get(pipeline).clear();
+		featureMZStatistics.get(pipeline).clear();
+		clusterFeatures.get(pipeline).stream().forEach(f -> {
+			featureRTStatistics.get(pipeline).addValue(f.getRetentionTime());
+			featureMZStatistics.get(pipeline).addValue(f.getMonoisotopicMz());
+		});
 	}
 
 	public void setAnnotationMap(Map<MsFeature, Set<Adduct>> annotationMap) {
@@ -542,7 +586,7 @@ public class MsFeatureCluster implements Serializable {
 			clusterName = getPrimaryIdentity().getCompoundName() + " ";
 
 		clusterName += 
-				"RT " + MRC2ToolBoxConfiguration.getRtFormat().format(rtRange.getAverage()) + 
+				"RT " + MRC2ToolBoxConfiguration.getRtFormat().format(getRtRange().getAverage()) + 
 				" | group of " + getFeatures().size() + 
 				" | top M/Z " + MRC2ToolBoxConfiguration.getMzFormat().format(getTopMass());
 
@@ -693,6 +737,14 @@ public class MsFeatureCluster implements Serializable {
 
 	public boolean hasChargeMismatch() {
 		return chargeMismatch;
+	}
+
+	public Range getRtRange() {
+		
+		double[]allRts = featureRTStatistics.values().
+				stream().flatMapToDouble(s -> Arrays.stream(s.getValues())).
+				sorted().toArray();
+		return new Range(allRts[0], allRts[allRts.length - 1]);
 	}
 }
 

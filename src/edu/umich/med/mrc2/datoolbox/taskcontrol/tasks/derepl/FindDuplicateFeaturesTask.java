@@ -30,6 +30,7 @@ import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureCluster;
 import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
+import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
@@ -94,24 +95,51 @@ public class FindDuplicateFeaturesTask extends AbstractTask {
 		processed = 0;
 		taskDescription = "Finding duplicates";
 		duplicateList = new HashSet<MsFeatureCluster>();
-		HashSet<MsFeature>assigned = new HashSet<MsFeature>();
-		ArrayList<MsFeatureCluster> clusters = new ArrayList<MsFeatureCluster>();
+		Collection<MsFeature>assignedFeatures = new HashSet<MsFeature>();
+		ArrayList<MsFeatureCluster> clusters = new ArrayList<MsFeatureCluster>();				
+		analyzeDuplicates(assignedFeatures, clusters);
+		
+//		if(duplicateList.isEmpty())
+//			return duplicateList;
+//		
+//		taskDescription = "Finding duplicates, path 2";
+//		assignedFeatures = 
+//				duplicateList.stream().flatMap(c -> c.getFeatures().stream()).
+//				collect(Collectors.toSet());
+//		
+//		//	Second path
+//		analyzeDuplicates(assignedFeatures, duplicateList);
+		
+		return duplicateList;
+	}
+	
+	private void analyzeDuplicates(
+			Collection<MsFeature>assignedFeatures, 
+			Collection<MsFeatureCluster> clusters) {
+		
+		total = featureList.size();
+		processed = 0;
+		
 		for (MsFeature cf : featureList) {
+			
+			if(assignedFeatures.contains(cf))
+				continue;
 
 			for (MsFeatureCluster fClust : clusters) {
 
-				if (fClust.matchesPrimaryFeature(cf, dataPipeline, massAccuracy, rtWindow)) {
+				if (fClust.matches(
+						cf, dataPipeline, massAccuracy, MassErrorType.ppm, rtWindow)) {
 
 					fClust.addFeature(cf, dataPipeline);
-					assigned.add(cf);
+					assignedFeatures.add(cf);
 					break;
 				}
 			}
-			if (!assigned.contains(cf)) {
+			if (!assignedFeatures.contains(cf)) {
 
 				MsFeatureCluster newCluster = new MsFeatureCluster();
 				newCluster.addFeature(cf, dataPipeline);
-				assigned.add(cf);
+				assignedFeatures.add(cf);
 				clusters.add(newCluster);
 			}
 			processed++;
@@ -119,7 +147,6 @@ public class FindDuplicateFeaturesTask extends AbstractTask {
 		duplicateList = clusters.stream().
 				filter(c -> c.getFeatures().size() > 1).
 				collect(Collectors.toList());
-		return duplicateList;
 	}
 
 	private void calculateDuplicateScores() {

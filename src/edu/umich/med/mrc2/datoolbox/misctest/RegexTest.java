@@ -209,7 +209,7 @@ public class RegexTest {
 				MRC2ToolBoxCore.configDir + "MRC2ToolBoxPrefs.txt");
 		MRC2ToolBoxConfiguration.initConfiguration();
 		try {
-
+			batchDFileRename();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -241,7 +241,7 @@ public class RegexTest {
 	
 	private static void batchDFileRename() {
 		
-		File sourceDirectory = new File("E:\\_Downloads\\_2_rename\\EX01355-POS-B1");
+		File sourceDirectory = new File("E:\\_Downloads\\_2_rename\\BATCH01-V2");
 		IOFileFilter dotDfilter = 
 				FileFilterUtils.makeDirectoryOnly(new RegexFileFilter(".+\\.[dD]$"));
 		Collection<File> dotDfiles = FileUtils.listFilesAndDirs(
@@ -249,7 +249,7 @@ public class RegexTest {
 				DirectoryFileFilter.DIRECTORY,
 				dotDfilter);
 		File renameMapFile = new File(
-				"E:\\_Downloads\\_2_rename\\EX01355-POS-B1\\rename_map.txt");
+				"E:\\_Downloads\\_2_rename\\BATCH01-V2\\rename_map.txt");
 		String[][] renameMapping = DelimitedTextParser.parseTextFile(
 				renameMapFile, MRC2ToolBoxConfiguration.getTabDelimiter());
 		Map<String,String>fileNameMap = new TreeMap<String,String>();

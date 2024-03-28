@@ -1107,6 +1107,7 @@ public enum MainActionCommands {
 	
 	//	Summary
 	SHOW_ACTIVE_DATA_SET_SUMMARY_COMMAND("Show active data set summary"),
+	SHOW_FILTERED_DATA_SUMMARY_COMMAND("Show summary for features in the table"),
 	
 	//	MSMS search dialog
 	SHOW_SAVED_MSMS_QUERY_LIST_COMMAND("Show MSMS query list"),

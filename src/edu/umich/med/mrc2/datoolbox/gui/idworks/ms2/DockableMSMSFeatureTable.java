@@ -29,8 +29,10 @@ import javax.swing.Icon;
 import javax.swing.JScrollPane;
 
 import bibliothek.gui.dock.action.DefaultDockActionSource;
+import bibliothek.gui.dock.action.DockAction;
 import bibliothek.gui.dock.action.LocationHint;
 import bibliothek.gui.dock.action.actions.SimpleButtonAction;
+import bibliothek.gui.dock.action.actions.SimpleMenuAction;
 import bibliothek.gui.dock.common.DefaultSingleCDockable;
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
@@ -48,6 +50,8 @@ public class DockableMSMSFeatureTable extends DefaultSingleCDockable {
 	private static final Icon filterClustersIcon = GuiUtils.getIcon("filterClusters", 16);	
 	private static final Icon reloadIcon = GuiUtils.getIcon("rerun", 16);
 	private static final Icon statsIcon = GuiUtils.getIcon("calcStats", 16);
+	private static final Icon statsIconMedium = GuiUtils.getIcon("calcStats", 24);
+	private static final Icon statsFilteredIconMedium = GuiUtils.getIcon("calcFilteredStats", 24);	
 	private static final Icon clusteredStatsIcon = GuiUtils.getIcon("calcClusteredStats", 16);	
 	private static final Icon reloadClusterSetFeaturesIcon = GuiUtils.getIcon("reloadClusterSetFeatures", 16);
 	
@@ -85,11 +89,26 @@ public class DockableMSMSFeatureTable extends DefaultSingleCDockable {
 				reloadIcon, l);
 		actions.add(reloadFeaturesButton);
 		
+		DefaultDockActionSource summaryMenuActions = new DefaultDockActionSource();
+		SimpleMenuAction actionMenu = new SimpleMenuAction(summaryMenuActions);
+		actionMenu.setIcon(statsIcon);
+		actionMenu.setText("Data summary");   
+		
 		SimpleButtonAction showDataSetStatsButton = GuiUtils.setupButtonAction(
 				MainActionCommands.SHOW_ACTIVE_DATA_SET_SUMMARY_COMMAND.getName(),
 				MainActionCommands.SHOW_ACTIVE_DATA_SET_SUMMARY_COMMAND.getName(), 
-				statsIcon, l);
-		actions.add(showDataSetStatsButton);
+				statsIconMedium, l);
+		summaryMenuActions.add(showDataSetStatsButton);
+		
+		SimpleButtonAction showTableFeatureStatsButton = GuiUtils.setupButtonAction(
+				MainActionCommands.SHOW_FILTERED_DATA_SUMMARY_COMMAND.getName(),
+				MainActionCommands.SHOW_FILTERED_DATA_SUMMARY_COMMAND.getName(), 
+				statsFilteredIconMedium, l);
+		summaryMenuActions.add(showTableFeatureStatsButton);
+		
+		actions.add((DockAction)actionMenu);
+		
+		//actions.add(showDataSetStatsButton);
 				
 		actions.addSeparator();
 		

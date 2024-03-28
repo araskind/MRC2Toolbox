@@ -875,7 +875,7 @@ public class MsFeature implements AnnotatedObject, Serializable {
 	public double getMedianObservedRetention() {
 		
 		if(medianObservedRetentionTime == -1.0d)
-			medianObservedRetentionTime = statsSummary.getMeanObservedRetention();
+			medianObservedRetentionTime = statsSummary.getMedianObservedRetention();
 		
 		return medianObservedRetentionTime;
 	}

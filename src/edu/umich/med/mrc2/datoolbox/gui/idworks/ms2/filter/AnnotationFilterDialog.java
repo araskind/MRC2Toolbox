@@ -75,6 +75,12 @@ public class AnnotationFilterDialog extends JDialog implements BackedByPreferenc
 	private static final long serialVersionUID = 1L;
 	private static final Icon filterIDLIcon = GuiUtils.getIcon("filterIdStatus", 32);
 	private static final String RESET_COMMAND = "Reset";
+	private static final String CLEAR_ID_LEVELS_SELECTION_COMMAND = 
+			"CLEAR_ID_LEVELS_SELECTION_COMMAND";
+	private static final String CLEAR_STD_ANNOTATION_SELECTION_COMMAND = 
+			"CLEAR_STD_ANNOTATION_SELECTION_COMMAND";
+	private static final String CLEAR_FOLLOWUP_STEPS_SELECTION_COMMAND = 
+			"CLEAR_FOLLOWUP_STEPS_SELECTION_COMMAND";
 	
 	private Preferences preferences;
 	private static final String PROPERTIES_DELIMITER = "@";
@@ -114,9 +120,9 @@ public class AnnotationFilterDialog extends JDialog implements BackedByPreferenc
 		getContentPane().add(panel, BorderLayout.CENTER);
 
 		GridBagLayout gbl_panel = new GridBagLayout();
-		gbl_panel.columnWidths = new int[]{0, 0, 0, 0, 0, 0, 0};
+		gbl_panel.columnWidths = new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 		gbl_panel.rowHeights = new int[]{0, 0, 0};
-		gbl_panel.columnWeights = new double[]{1.0, 1.0, 1.0, 1.0, 1.0, 1.0, Double.MIN_VALUE};
+		gbl_panel.columnWeights = new double[]{1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, Double.MIN_VALUE};
 		gbl_panel.rowWeights = new double[]{1.0, 0.0, Double.MIN_VALUE};
 		panel.setLayout(gbl_panel);
 		
@@ -125,7 +131,7 @@ public class AnnotationFilterDialog extends JDialog implements BackedByPreferenc
 		scrollPane.setBorder(new TitledBorder(null, "ID levels", 
 				TitledBorder.LEADING, TitledBorder.TOP, null, null));
 		GridBagConstraints gbc_scrollPane = new GridBagConstraints();
-		gbc_scrollPane.gridwidth = 2;
+		gbc_scrollPane.gridwidth = 3;
 		gbc_scrollPane.insets = new Insets(0, 0, 5, 5);
 		gbc_scrollPane.fill = GridBagConstraints.BOTH;
 		gbc_scrollPane.gridx = 0;
@@ -139,10 +145,10 @@ public class AnnotationFilterDialog extends JDialog implements BackedByPreferenc
 		scrollPane_1.setBorder(new TitledBorder(null, "Standard annotations", 
 				TitledBorder.LEADING, TitledBorder.TOP, null, null));
 		GridBagConstraints gbc_scrollPane_1 = new GridBagConstraints();
-		gbc_scrollPane_1.gridwidth = 2;
+		gbc_scrollPane_1.gridwidth = 3;
 		gbc_scrollPane_1.insets = new Insets(0, 0, 5, 5);
 		gbc_scrollPane_1.fill = GridBagConstraints.BOTH;
-		gbc_scrollPane_1.gridx = 2;
+		gbc_scrollPane_1.gridx = 3;
 		gbc_scrollPane_1.gridy = 0;
 		panel.add(scrollPane_1, gbc_scrollPane_1);
 		
@@ -153,10 +159,10 @@ public class AnnotationFilterDialog extends JDialog implements BackedByPreferenc
 		scrollPane_2.setBorder(new TitledBorder(null, "Followup steps", 
 				TitledBorder.LEADING, TitledBorder.TOP, null, null));
 		GridBagConstraints gbc_scrollPane_2 = new GridBagConstraints();
-		gbc_scrollPane_2.gridwidth = 2;
+		gbc_scrollPane_2.gridwidth = 3;
 		gbc_scrollPane_2.insets = new Insets(0, 0, 5, 0);
 		gbc_scrollPane_2.fill = GridBagConstraints.BOTH;
-		gbc_scrollPane_2.gridx = 4;
+		gbc_scrollPane_2.gridx = 6;
 		gbc_scrollPane_2.gridy = 0;
 		panel.add(scrollPane_2, gbc_scrollPane_2);
 		
@@ -166,7 +172,7 @@ public class AnnotationFilterDialog extends JDialog implements BackedByPreferenc
 		includeIdLevelRadioButton.setForeground(new Color(0, 128, 0));
 		includeIdLevelRadioButton.setFont(new Font("Tahoma", Font.BOLD, 11));
 		GridBagConstraints gbc_includeIdLevelRadioButton = new GridBagConstraints();
-		gbc_includeIdLevelRadioButton.anchor = GridBagConstraints.EAST;
+		gbc_includeIdLevelRadioButton.anchor = GridBagConstraints.WEST;
 		gbc_includeIdLevelRadioButton.insets = new Insets(0, 0, 0, 5);
 		gbc_includeIdLevelRadioButton.gridx = 0;
 		gbc_includeIdLevelRadioButton.gridy = 1;
@@ -186,13 +192,23 @@ public class AnnotationFilterDialog extends JDialog implements BackedByPreferenc
 		
 		ButtonGroup stdAnnotationButtonGroup = new ButtonGroup();
 		
+		JButton clearIdLevelsButton = new JButton("Clear");
+		clearIdLevelsButton.setActionCommand(CLEAR_ID_LEVELS_SELECTION_COMMAND);
+		clearIdLevelsButton.addActionListener(this);
+		GridBagConstraints gbc_clearIdLevelsButton = new GridBagConstraints();
+		gbc_clearIdLevelsButton.anchor = GridBagConstraints.WEST;
+		gbc_clearIdLevelsButton.insets = new Insets(0, 0, 0, 5);
+		gbc_clearIdLevelsButton.gridx = 2;
+		gbc_clearIdLevelsButton.gridy = 1;
+		panel.add(clearIdLevelsButton, gbc_clearIdLevelsButton);
+		
 		includeStdAnnotationRadioButton = new JRadioButton("Include");
 		includeStdAnnotationRadioButton.setForeground(new Color(0, 128, 0));
 		includeStdAnnotationRadioButton.setFont(new Font("Tahoma", Font.BOLD, 11));		
 		GridBagConstraints gbc_includeStdAnnotationRadioButton = new GridBagConstraints();
-		gbc_includeStdAnnotationRadioButton.anchor = GridBagConstraints.EAST;
+		gbc_includeStdAnnotationRadioButton.anchor = GridBagConstraints.WEST;
 		gbc_includeStdAnnotationRadioButton.insets = new Insets(0, 0, 0, 5);
-		gbc_includeStdAnnotationRadioButton.gridx = 2;
+		gbc_includeStdAnnotationRadioButton.gridx = 3;
 		gbc_includeStdAnnotationRadioButton.gridy = 1;
 		panel.add(includeStdAnnotationRadioButton, gbc_includeStdAnnotationRadioButton);
 		stdAnnotationButtonGroup.add(includeStdAnnotationRadioButton);
@@ -203,20 +219,30 @@ public class AnnotationFilterDialog extends JDialog implements BackedByPreferenc
 		GridBagConstraints gbc_excludeStdAnnotationRadioButton = new GridBagConstraints();
 		gbc_excludeStdAnnotationRadioButton.anchor = GridBagConstraints.WEST;
 		gbc_excludeStdAnnotationRadioButton.insets = new Insets(0, 0, 0, 5);
-		gbc_excludeStdAnnotationRadioButton.gridx = 3;
+		gbc_excludeStdAnnotationRadioButton.gridx = 4;
 		gbc_excludeStdAnnotationRadioButton.gridy = 1;
 		panel.add(excludeStdAnnotationRadioButton, gbc_excludeStdAnnotationRadioButton);
 		stdAnnotationButtonGroup.add(excludeStdAnnotationRadioButton);
 		
 		ButtonGroup followupButtonGroup = new ButtonGroup();
 		
+		JButton clearStdAnnotButton = new JButton("Clear");
+		clearStdAnnotButton.setActionCommand(CLEAR_STD_ANNOTATION_SELECTION_COMMAND);
+		clearStdAnnotButton.addActionListener(this);
+		GridBagConstraints gbc_clearStdAnnotButton = new GridBagConstraints();
+		gbc_clearStdAnnotButton.anchor = GridBagConstraints.WEST;
+		gbc_clearStdAnnotButton.insets = new Insets(0, 0, 0, 5);
+		gbc_clearStdAnnotButton.gridx = 5;
+		gbc_clearStdAnnotButton.gridy = 1;
+		panel.add(clearStdAnnotButton, gbc_clearStdAnnotButton);
+		
 		includeFollowupRadioButton = new JRadioButton("Include");
 		includeFollowupRadioButton.setForeground(new Color(0, 128, 0));
 		includeFollowupRadioButton.setFont(new Font("Tahoma", Font.BOLD, 11));
 		GridBagConstraints gbc_includeFollowupRadioButton = new GridBagConstraints();
-		gbc_includeFollowupRadioButton.anchor = GridBagConstraints.EAST;
+		gbc_includeFollowupRadioButton.anchor = GridBagConstraints.WEST;
 		gbc_includeFollowupRadioButton.insets = new Insets(0, 0, 0, 5);
-		gbc_includeFollowupRadioButton.gridx = 4;
+		gbc_includeFollowupRadioButton.gridx = 6;
 		gbc_includeFollowupRadioButton.gridy = 1;
 		panel.add(includeFollowupRadioButton, gbc_includeFollowupRadioButton);
 		followupButtonGroup.add(includeFollowupRadioButton);
@@ -225,11 +251,21 @@ public class AnnotationFilterDialog extends JDialog implements BackedByPreferenc
 		excludeFollowupRadioButton.setForeground(new Color(255, 0, 0));
 		excludeFollowupRadioButton.setFont(new Font("Tahoma", Font.BOLD, 11));
 		GridBagConstraints gbc_excludeFollowupRadioButton = new GridBagConstraints();
+		gbc_excludeFollowupRadioButton.insets = new Insets(0, 0, 0, 5);
 		gbc_excludeFollowupRadioButton.anchor = GridBagConstraints.WEST;
-		gbc_excludeFollowupRadioButton.gridx = 5;
+		gbc_excludeFollowupRadioButton.gridx = 7;
 		gbc_excludeFollowupRadioButton.gridy = 1;
 		panel.add(excludeFollowupRadioButton, gbc_excludeFollowupRadioButton);
 		followupButtonGroup.add(excludeFollowupRadioButton);
+		
+		JButton clearFollowupsButton = new JButton("Clear");
+		clearFollowupsButton.setActionCommand(CLEAR_FOLLOWUP_STEPS_SELECTION_COMMAND);
+		clearFollowupsButton.addActionListener(this);
+		GridBagConstraints gbc_clearFollowupsButton = new GridBagConstraints();
+		gbc_clearFollowupsButton.anchor = GridBagConstraints.WEST;
+		gbc_clearFollowupsButton.gridx = 8;
+		gbc_clearFollowupsButton.gridy = 1;
+		panel.add(clearFollowupsButton, gbc_clearFollowupsButton);
 		
 		JPanel buttonPanel = new JPanel();
 		FlowLayout flowLayout = (FlowLayout) buttonPanel.getLayout();
@@ -286,10 +322,20 @@ public class AnnotationFilterDialog extends JDialog implements BackedByPreferenc
 	public void actionPerformed(ActionEvent event) {
 
 		String command = event.getActionCommand();
+		
 		if (command.equals(RESET_COMMAND))
-			resetFilters() ;		
+			resetFilters();
+		
+		if (command.equals(CLEAR_ID_LEVELS_SELECTION_COMMAND))
+			idLevelTable.clearSelection();
+		
+		if (command.equals(CLEAR_STD_ANNOTATION_SELECTION_COMMAND))
+			standardFeatureAnnotationTable.clearSelection();
+		
+		if (command.equals(CLEAR_FOLLOWUP_STEPS_SELECTION_COMMAND))
+			idFollowupStepTable.clearSelection();
 	}
-	
+
 	@Override
 	public void loadPreferences() {
 		loadPreferences(Preferences.userNodeForPackage(this.getClass()));

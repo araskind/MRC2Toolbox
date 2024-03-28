@@ -23,7 +23,11 @@ package edu.umich.med.mrc2.datoolbox.gui.idworks.ms1;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.TreeSet;
 
 import edu.umich.med.mrc2.datoolbox.data.Adduct;
 import edu.umich.med.mrc2.datoolbox.data.IDTExperimentalSample;
@@ -36,7 +40,6 @@ import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSSampleType;
-import edu.umich.med.mrc2.datoolbox.gui.fdata.FeatureDataTableModel;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTableModel;
 import edu.umich.med.mrc2.datoolbox.gui.tables.ColumnContext;
 import edu.umich.med.mrc2.datoolbox.main.AdductManager;
@@ -67,9 +70,14 @@ public class ReferenceMsOneFeatureTableModel extends BasicTableModel {
 	public static final String AMBIGUITY_COLUMN = "ID status";
 	public static final String FOLLOWUP_COLUMN = "Follow-up";
 	public static final String ID_LEVEL_COLUMN = "ID level";
+	
+	private ReferenceMsOneFeatureTable parentTable;
 
-	public ReferenceMsOneFeatureTableModel() {
+	public ReferenceMsOneFeatureTableModel(ReferenceMsOneFeatureTable referenceMsOneFeatureTable) {
+				
 		super();
+		this.parentTable = referenceMsOneFeatureTable;
+		
 		columnArray = new ColumnContext[] {
 
 			new ColumnContext(MS_FEATURE_COLUMN, MS_FEATURE_COLUMN, MSFeatureInfoBundle.class, false),
@@ -166,90 +174,137 @@ public class ReferenceMsOneFeatureTableModel extends BasicTableModel {
 			addRows(rowData);
 	}
 
-	public void updateFeatureData(MSFeatureInfoBundle bundle) {
+	public void updateFeatureData(Collection<MSFeatureInfoBundle> bundlesToUpdate) {
 		
-		int row = getFeatureInfoBundleRow(bundle);
-		if(row == -1)
+		if(bundlesToUpdate == null || bundlesToUpdate.isEmpty())
 			return;
 		
-		MsFeature cf = bundle.getMsFeature();
-		String compoundName = "";
-		boolean hasAnnotations = (!cf.getAnnotations().isEmpty() 
-				|| !bundle.getStandadAnnotations().isEmpty());
-		boolean hasFollowup = !bundle.getIdFollowupSteps().isEmpty();
-		Adduct adduct = null;
-		Double bp = null;
-		Integer charge = null;
-		if (cf.getSpectrum() != null) {
-			bp = cf.getMonoisotopicMz();
-			charge = cf.getCharge();
-		}
-		MSFeatureIdentificationLevel idLevel = null;
-		if(cf.getPrimaryIdentity() != null) {
-
-			if(cf.getPrimaryIdentity().getCompoundIdentity() == null) {
-				System.out.println(cf.getPrimaryIdentity().
-						getReferenceMsMsLibraryMatch().getMatchedLibraryFeature().getUniqueId() + " has no compound ID");
-			}
-			else {
-				compoundName = cf.getPrimaryIdentity().getCompoundName();
-			}
-			if(cf.getPrimaryIdentity().getMsRtLibraryMatch() != null) {
-				adduct = cf.getPrimaryIdentity().getMsRtLibraryMatch().
-						getTopAdductMatch().getLibraryMatch();
-			}
-			idLevel = cf.getPrimaryIdentity().getIdentificationLevel();
-			adduct = cf.getPrimaryIdentity().getPrimaryAdduct();
-		}	
-		if(adduct == null) {
+		suppressEvents = true;
+		removeTableModelListener(parentTable);
+		Map<MSFeatureInfoBundle,Integer>featureRowMap = 
+				getFeatureInfoBundleRowMap(bundlesToUpdate);
+		if(featureRowMap.isEmpty())
+			return;
+		
+		TreeSet<Integer>updatedRows = 
+				new TreeSet<Integer>(featureRowMap.values());
+		
+		for(Entry<MSFeatureInfoBundle,Integer>e : featureRowMap.entrySet()) {
 			
-			if(cf.getSpectrum() != null) 	
-				adduct = cf.getSpectrum().getPrimaryAdduct();
-			else
-				adduct = AdductManager.getDefaultAdductForCharge(cf.getCharge());
+			MSFeatureInfoBundle bundle = e.getKey();
+			int row = e.getValue();
+			MsFeature cf = bundle.getMsFeature();
+			String compoundName = "";
+			boolean hasAnnotations = (!cf.getAnnotations().isEmpty() 
+					|| !bundle.getStandadAnnotations().isEmpty());
+			boolean hasFollowup = !bundle.getIdFollowupSteps().isEmpty();
+			Adduct adduct = null;
+			Double bp = null;
+			Integer charge = null;
+			if (cf.getSpectrum() != null) {
+				bp = cf.getMonoisotopicMz();
+				charge = cf.getCharge();
+			}
+			MSFeatureIdentificationLevel idLevel = null;
+			if(cf.getPrimaryIdentity() != null) {
+
+				if(cf.getPrimaryIdentity().getCompoundIdentity() == null) {
+					System.out.println(cf.getPrimaryIdentity().
+							getReferenceMsMsLibraryMatch().getMatchedLibraryFeature().getUniqueId() + " has no compound ID");
+				}
+				else {
+					compoundName = cf.getPrimaryIdentity().getCompoundName();
+				}
+				if(cf.getPrimaryIdentity().getMsRtLibraryMatch() != null) {
+					adduct = cf.getPrimaryIdentity().getMsRtLibraryMatch().
+							getTopAdductMatch().getLibraryMatch();
+				}
+				idLevel = cf.getPrimaryIdentity().getIdentificationLevel();
+				adduct = cf.getPrimaryIdentity().getPrimaryAdduct();
+			}	
+			if(adduct == null) {
+				
+				if(cf.getSpectrum() != null) 	
+					adduct = cf.getSpectrum().getPrimaryAdduct();
+				else
+					adduct = AdductManager.getDefaultAdductForCharge(cf.getCharge());
+			}
+			setValueAt(bundle, row, getColumnIndex(MS_FEATURE_COLUMN));
+			setValueAt(compoundName, row, getColumnIndex(COMPOUND_NAME_COLUMN));
+			setValueAt(cf.getPrimaryIdentity(), row, getColumnIndex(DATABSE_LINK_COLUMN));
+			setValueAt(cf.getIdentificationState(), row, getColumnIndex(AMBIGUITY_COLUMN));		
+			setValueAt(idLevel, row, getColumnIndex(ID_LEVEL_COLUMN));		
+			setValueAt(hasAnnotations, row, getColumnIndex(ANNOTATIONS_COLUMN));
+			setValueAt(hasFollowup, row, getColumnIndex(FOLLOWUP_COLUMN));
+			setValueAt(adduct, row, getColumnIndex(CHEM_MOD_COLUMN));
+			setValueAt(charge, row, getColumnIndex(CHARGE_COLUMN));
+			setValueAt(cf.getRetentionTime(), row, getColumnIndex(RETENTION_COLUMN));
+			setValueAt(cf.getNeutralMass(), row, getColumnIndex(NEUTRAL_MASS_COLUMN));
+			setValueAt(bp, row, getColumnIndex(BASE_PEAK_COLUMN));
+			setValueAt(cf.getKmd(), row, getColumnIndex(KMD_COLUMN));
+			setValueAt(cf.getModifiedKmd(), row, getColumnIndex(KMD_MOD_COLUMN));		
+			setValueAt(bundle.getExperiment(), row, getColumnIndex(EXPERIMENT_COLUMN));
+			setValueAt(bundle.getSample(), row, getColumnIndex(SAMPLE_COLUMN));
+			setValueAt(bundle.getStockSample().getLimsSampleType(), row, getColumnIndex(SAMPLE_TYPE_COLUMN));
+			setValueAt(bundle.getAcquisitionMethod(), row, getColumnIndex(ACQ_METHOD_ID_COLUMN));
+			setValueAt(bundle.getDataExtractionMethod(), row, getColumnIndex(DEX_METHOD_ID_COLUMN));
+			
+			updatedRows.add(row);
 		}
-		setValueAt(bundle, row, getColumnIndex(MS_FEATURE_COLUMN));
-		setValueAt(compoundName, row, getColumnIndex(COMPOUND_NAME_COLUMN));
-		setValueAt(cf.getPrimaryIdentity(), row, getColumnIndex(DATABSE_LINK_COLUMN));
-		setValueAt(cf.getIdentificationState(), row, getColumnIndex(AMBIGUITY_COLUMN));		
-		setValueAt(idLevel, row, getColumnIndex(ID_LEVEL_COLUMN));		
-		setValueAt(hasAnnotations, row, getColumnIndex(ANNOTATIONS_COLUMN));
-		setValueAt(hasFollowup, row, getColumnIndex(FOLLOWUP_COLUMN));
-		setValueAt(adduct, row, getColumnIndex(CHEM_MOD_COLUMN));
-		setValueAt(charge, row, getColumnIndex(CHARGE_COLUMN));
-		setValueAt(cf.getRetentionTime(), row, getColumnIndex(RETENTION_COLUMN));
-		setValueAt(cf.getNeutralMass(), row, getColumnIndex(NEUTRAL_MASS_COLUMN));
-		setValueAt(bp, row, getColumnIndex(BASE_PEAK_COLUMN));
-		setValueAt(cf.getKmd(), row, getColumnIndex(KMD_COLUMN));
-		setValueAt(cf.getModifiedKmd(), row, getColumnIndex(KMD_MOD_COLUMN));		
-		setValueAt(bundle.getExperiment(), row, getColumnIndex(EXPERIMENT_COLUMN));
-		setValueAt(bundle.getSample(), row, getColumnIndex(SAMPLE_COLUMN));
-		setValueAt(bundle.getStockSample().getLimsSampleType(), row, getColumnIndex(SAMPLE_TYPE_COLUMN));
-		setValueAt(bundle.getAcquisitionMethod(), row, getColumnIndex(ACQ_METHOD_ID_COLUMN));
-		setValueAt(bundle.getDataExtractionMethod(), row, getColumnIndex(DEX_METHOD_ID_COLUMN));
+		suppressEvents = false;
+		addTableModelListener(parentTable);
+		fireTableRowsUpdated(updatedRows.first(), updatedRows.last());
 	}
 	
-	public int getFeatureInfoBundleRow(MSFeatureInfoBundle bundle) {
+	public Map<MSFeatureInfoBundle,Integer> getFeatureInfoBundleRowMap(
+			Collection<MSFeatureInfoBundle> bundles) {
 
+		Map<MSFeatureInfoBundle,Integer>bundleRowMap = 
+				new HashMap<MSFeatureInfoBundle,Integer>();
 		int col = getColumnIndex(MS_FEATURE_COLUMN);
 		for (int i = 0; i < getRowCount(); i++) {
 
-			if (bundle.equals(getValueAt(i, col)))
-				return i;
+			MSFeatureInfoBundle b = (MSFeatureInfoBundle)getValueAt(i, col);
+			if (bundles.contains(b))
+				bundleRowMap.put(b, i);
 		}
-		return -1;
+		return bundleRowMap;
 	}
+	
+//	public Map<MSFeatureInfoBundle,Integer> getFeatureRowMap(Collection<MsFeature> features) {
+//
+//		int row = -1;
+//		int col = getColumnIndex(FeatureDataTableModel.MS_FEATURE_COLUMN);
+//
+//		for (int i = 0; i < getRowCount(); i++) {
+//
+//			if (feature.equals(((MSFeatureInfoBundle)getValueAt(i, col)).getMsFeature()))
+//				return i;
+//		}
+//		return row;
+//	}
+	
+//	public int getFeatureInfoBundleRow(MSFeatureInfoBundle bundle) {
+//
+//		int col = getColumnIndex(MS_FEATURE_COLUMN);
+//		for (int i = 0; i < getRowCount(); i++) {
+//
+//			if (bundle.equals(getValueAt(i, col)))
+//				return i;
+//		}
+//		return -1;
+//	}
 
-	public int getFeatureRow(MsFeature feature) {
-
-		int row = -1;
-		int col = getColumnIndex(FeatureDataTableModel.MS_FEATURE_COLUMN);
-
-		for (int i = 0; i < getRowCount(); i++) {
-
-			if (feature.equals(((MSFeatureInfoBundle)getValueAt(i, col)).getMsFeature()))
-				return i;
-		}
-		return row;
-	}
+//	public int getFeatureRow(MsFeature feature) {
+//
+//		int row = -1;
+//		int col = getColumnIndex(FeatureDataTableModel.MS_FEATURE_COLUMN);
+//
+//		for (int i = 0; i < getRowCount(); i++) {
+//
+//			if (feature.equals(((MSFeatureInfoBundle)getValueAt(i, col)).getMsFeature()))
+//				return i;
+//		}
+//		return row;
+//	}
 }

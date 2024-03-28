@@ -270,4 +270,8 @@ public class SaveExperimentTask extends AbstractTask {
 	public Task cloneTask() {
 		return new SaveExperimentTask(experimentToSave);
 	}
+
+	public DataAnalysisProject getExperimentToSave() {
+		return experimentToSave;
+	}
 }

@@ -33,6 +33,7 @@ public class RadioButtonEditor extends DefaultCellEditor {
 	private static final long serialVersionUID = -5639973332738850529L;
 	public JRadioButton btn;
 
+	@SuppressWarnings("serial")
 	public RadioButtonEditor(JCheckBox checkBox) {
 
 		super(checkBox);

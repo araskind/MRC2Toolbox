@@ -406,18 +406,19 @@ public class MzFrequencyAnalysisResultsDialog extends JFrame implements BackedBy
 			if(fuSteps != null && !fuSteps.isEmpty()) {
 				
 				try {
+					Collection<MSFeatureInfoBundle> fBundles = 
+							((IDWorkbenchPanel)parentPanel).getMsFeatureBundlesForFeatures(features,2);
 					((IDWorkbenchPanel)parentPanel).setIDFollowUpStepsForMultipleFeatures(
 							fuSteps, 
 							2,
-							features,
+							fBundles,
 							false);
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}   				
-			((IDWorkbenchPanel)parentPanel).toggleTableListeners(true);
-			
+			((IDWorkbenchPanel)parentPanel).toggleTableListeners(true);			
 			return null;
 		}
 	}

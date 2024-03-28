@@ -82,7 +82,7 @@ public class ReferenceMsOneFeatureTable extends BasicTable {
 	
 	public ReferenceMsOneFeatureTable() {
 		super();
-		model = new ReferenceMsOneFeatureTableModel();
+		model = new ReferenceMsOneFeatureTableModel(this);
 		setModel(model);
 		rowSorter = new TableRowSorter<ReferenceMsOneFeatureTableModel>(
 				(ReferenceMsOneFeatureTableModel)model);
@@ -260,11 +260,8 @@ public class ReferenceMsOneFeatureTable extends BasicTable {
 		return bundles;
 	}
 
-	public void updateFeatureData(MSFeatureInfoBundle selectedBundle) {
-		thf.setTable(null);
-		((ReferenceMsOneFeatureTableModel)model).updateFeatureData(selectedBundle);
-		thf.setTable(this);
-		adjustColumns();
+	public void updateFeatureData(Collection<MSFeatureInfoBundle> selectedBundles) {
+		((ReferenceMsOneFeatureTableModel)model).updateFeatureData(selectedBundles);
 	}
 
 	public void selectBundle(MSFeatureInfoBundle toSelect) {

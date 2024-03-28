@@ -338,4 +338,8 @@ public class SaveStoredRawDataAnalysisExperimentTask extends AbstractTask implem
 	public Task cloneTask() {
 		return new SaveStoredRawDataAnalysisExperimentTask(experimentToSave);
 	}
+
+	public RawDataAnalysisExperiment getExperimentToSave() {
+		return experimentToSave;
+	}
 }
