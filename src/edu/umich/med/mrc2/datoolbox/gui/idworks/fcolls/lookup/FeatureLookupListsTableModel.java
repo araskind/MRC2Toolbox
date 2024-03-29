@@ -27,11 +27,11 @@ import java.util.Date;
 import java.util.List;
 
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
-import edu.umich.med.mrc2.datoolbox.data.msclust.FeatureLookupDataSet;
+import edu.umich.med.mrc2.datoolbox.data.msclust.FeatureLookupList;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTableModel;
 import edu.umich.med.mrc2.datoolbox.gui.tables.ColumnContext;
 
-public class FeatureLookupDataSetListTableModel extends BasicTableModel {
+public class FeatureLookupListsTableModel extends BasicTableModel {
 
 	/**
 	 * 
@@ -45,12 +45,12 @@ public class FeatureLookupDataSetListTableModel extends BasicTableModel {
 	public static final String DATE_CREATED_COLUMN = "Date created";
 	public static final String LAST_MODIFIED_COLUMN = "Last modified";
 
-	public FeatureLookupDataSetListTableModel() {
+	public FeatureLookupListsTableModel() {
 
 		super();
 		columnArray = new ColumnContext[] {
 
-			new ColumnContext(DATA_SET_COLUMN, DATA_SET_COLUMN, FeatureLookupDataSet.class, false),
+			new ColumnContext(DATA_SET_COLUMN, DATA_SET_COLUMN, FeatureLookupList.class, false),
 			new ColumnContext(DESCRIPTION_COLUMN, DESCRIPTION_COLUMN, String.class, false),
 //			new ColumnContext(NUM_FEATURES_COLUMN, Integer.class, true),
 			new ColumnContext(OWNER_COLUMN, OWNER_COLUMN, LIMSUser.class, false),
@@ -60,14 +60,14 @@ public class FeatureLookupDataSetListTableModel extends BasicTableModel {
 	}
 
 	public void setTableModelFromFeatureLookupDataSetList(
-			Collection<FeatureLookupDataSet>dataSetList) {
+			Collection<FeatureLookupList>dataSetList) {
 
 		setRowCount(0);
 		if(dataSetList == null || dataSetList .isEmpty())
 			return;
 		
 		List<Object[]>rowData = new ArrayList<Object[]>();
-		for (FeatureLookupDataSet dataSet : dataSetList) {
+		for (FeatureLookupList dataSet : dataSetList) {
 
 			Object[] obj = {
 				dataSet,
@@ -83,7 +83,7 @@ public class FeatureLookupDataSetListTableModel extends BasicTableModel {
 			addRows(rowData);
 	}
 	
-	public int getFeatureLookupDataSetRow(FeatureLookupDataSet dataSet) {
+	public int getFeatureLookupDataSetRow(FeatureLookupList dataSet) {
 
 		int col = getColumnIndex(DATA_SET_COLUMN);
 		for (int i = 0; i < getRowCount(); i++) {
@@ -94,7 +94,7 @@ public class FeatureLookupDataSetListTableModel extends BasicTableModel {
 		return -1;
 	}
 	
-	public void updateCollectionData(FeatureLookupDataSet edited) {
+	public void updateCollectionData(FeatureLookupList edited) {
 		
 		int row = getFeatureLookupDataSetRow(edited);
 		if(row == -1)

@@ -1246,11 +1246,11 @@ public enum MainActionCommands {
 	LOAD_FEATURE_COLLECTION_COMMAND("Load selected feature collection for analysis"),
 	
 	//	Feature lookup data sets
-	ADD_FEATURE_LOOKUP_DATA_SET_DIALOG_COMMAND("Create new feature lookup data set"),
-	ADD_FEATURE_LOOKUP_DATA_SET_COMMAND("Save new feature lookup data set"),
-	EDIT_FEATURE_LOOKUP_DATA_SET_DIALOG_COMMAND("Edit selected feature lookup data set"),
-	EDIT_FEATURE_LOOKUP_DATA_SET_COMMAND("Save edited feature lookup data set"),
-	DELETE_FEATURE_LOOKUP_DATA_SET_COMMAND("Delete selected feature lookup data set"),
+	ADD_FEATURE_LOOKUP_LIST_DIALOG_COMMAND("Create new feature lookup list"),
+	ADD_FEATURE_LOOKUP_LIST_COMMAND("Save new feature lookup list"),
+	EDIT_FEATURE_LOOKUP_LIST_DIALOG_COMMAND("Edit selected feature lookup list"),
+	EDIT_FEATURE_LOOKUP_LIST_COMMAND("Save edited feature lookup list"),
+	DELETE_FEATURE_LOOKUP_LIST_COMMAND("Delete selected feature lookup list"),
 	
 	//	MSMS cluster data sets
 	SHOW_MSMS_CLUSTER_DATASET_MANAGER_DIALOG_COMMAND("Show MSMS cluster data set manager"),
@@ -1273,9 +1273,9 @@ public enum MainActionCommands {
 	SAVE_SMOOTHING_PREFERENCES_COMMAND("Save smoothing preferences"),
 	
 	//	Feature filter
-	IMPORT_LOOKUP_FEATURE_LIST_FROM_FILE_COMMAND("Import lookup feature list from file"),
-	SELECT_LOOKUP_FEATURE_LIST_FROM_DATABASE_COMMAND("Select lookup features list from database"),
-	LOAD_LOOKUP_FEATURE_LIST_FROM_DATABASE_COMMAND("Load lookup features list from database"),
+	IMPORT_FEATURE_LOOKUP_LIST_FROM_FILE_COMMAND("Import feature lookup list from file"),
+	SELECT_FEATURE_LOOKUP_LIST_FROM_DATABASE_COMMAND("Select feature lookup list from database"),
+	LOAD_FEATURE_LOOKUP_LIST_FROM_DATABASE_COMMAND("Load feature lookup list from database"),
 	
 	//	Binner annotations lookup
 	IMPORT_BINNER_ANNOTATIONS_FROM_FILE_COMMAND("Import Binner annotations from file"),

@@ -43,14 +43,14 @@ import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
 import edu.umich.med.mrc2.datoolbox.data.MinimalMSOneFeature;
-import edu.umich.med.mrc2.datoolbox.data.msclust.FeatureLookupDataSet;
+import edu.umich.med.mrc2.datoolbox.data.msclust.FeatureLookupList;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusteringParameterSet;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.search.FeatureListImportPanel;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.search.MSMSClusteringParametersPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
-import edu.umich.med.mrc2.datoolbox.main.FeatureLookupDataSetManager;
+import edu.umich.med.mrc2.datoolbox.main.FeatureLookupListManager;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 
 public class ActiveDataSetMZRTDataSearchDialog extends JDialog implements ActionListener, BackedByPreferences {
@@ -130,7 +130,7 @@ public class ActiveDataSetMZRTDataSearchDialog extends JDialog implements Action
 
 	}
 	
-	public FeatureLookupDataSet getDataSet() {
+	public FeatureLookupList getDataSet() {
 		return featureListImportPanel.getDataSet();
 	}
 	
@@ -167,8 +167,8 @@ public class ActiveDataSetMZRTDataSearchDialog extends JDialog implements Action
 		else {
 			if(featureListImportPanel.getDataSet() == null) {
 				
-				FeatureLookupDataSetManager.refreshFeatureLookupDataSetList();
-				if(FeatureLookupDataSetManager.getFeatureLookupDataSetByName(newSetName) != null)
+				FeatureLookupListManager.refreshFeatureLookupListCollection();
+				if(FeatureLookupListManager.getFeatureLookupListByName(newSetName) != null)
 					errors.add("The lookup feature set \"" + newSetName + "\" already exists.");
 			}
 		}

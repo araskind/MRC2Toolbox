@@ -29,7 +29,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JDialog;
 import javax.swing.WindowConstants;
 
-import edu.umich.med.mrc2.datoolbox.data.msclust.FeatureLookupDataSet;
+import edu.umich.med.mrc2.datoolbox.data.msclust.FeatureLookupList;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.search.FeatureListImportPanel;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 
@@ -42,7 +42,7 @@ public class FeatureLookupListDisplayDialog extends JDialog {
 	
 	private static final Icon lookupFeatureListIcon = GuiUtils.getIcon("searchLibrary", 32);
 	
-	public FeatureLookupListDisplayDialog(FeatureLookupDataSet featureLookupDataSet) {
+	public FeatureLookupListDisplayDialog(FeatureLookupList featureLookupDataSet) {
 		super();
 		setPreferredSize(new Dimension(640, 480));
 		setModalityType(ModalityType.APPLICATION_MODAL);

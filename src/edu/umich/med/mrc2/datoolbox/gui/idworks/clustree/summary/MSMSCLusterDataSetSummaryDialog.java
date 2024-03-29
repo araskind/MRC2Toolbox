@@ -60,7 +60,7 @@ import javax.swing.border.TitledBorder;
 import edu.umich.med.mrc2.datoolbox.data.MinimalMSOneFeature;
 import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureInfoBundleClusterComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
-import edu.umich.med.mrc2.datoolbox.data.msclust.FeatureLookupDataSet;
+import edu.umich.med.mrc2.datoolbox.data.msclust.FeatureLookupList;
 import edu.umich.med.mrc2.datoolbox.data.msclust.IMSMSClusterDataSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.IMsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.search.byexp.MinimalMSOneFeatureTable;
@@ -446,7 +446,7 @@ public class MSMSCLusterDataSetSummaryDialog extends JDialog implements ActionLi
 				flatMap(c -> c.getComponents().stream()).count();
 		numFeaturesLabel.setText(Long.toString(numFeatures));
 		
-		FeatureLookupDataSet lookupSet = dataSet.getFeatureLookupDataSet();
+		FeatureLookupList lookupSet = dataSet.getFeatureLookupDataSet();
 		if(lookupSet != null) {
 			
 			flSetNameTextField.setText(lookupSet.getName());

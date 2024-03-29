@@ -24,7 +24,7 @@ package edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.main.BinnerAnnotationDataSetManager;
 import edu.umich.med.mrc2.datoolbox.main.FeatureCollectionManager;
-import edu.umich.med.mrc2.datoolbox.main.FeatureLookupDataSetManager;
+import edu.umich.med.mrc2.datoolbox.main.FeatureLookupListManager;
 import edu.umich.med.mrc2.datoolbox.main.MSMSClusterDataSetManager;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
@@ -205,7 +205,7 @@ public class IDTrackerMetadataPullTask extends AbstractTask {
 //			processed = processed + 3;
 			
 			taskDescription = "Refreshing featue lookup data sets ";
-			FeatureLookupDataSetManager.refreshFeatureLookupDataSetList();
+			FeatureLookupListManager.refreshFeatureLookupListCollection();
 			processed = processed + 3;
 						
 			taskDescription = "Refreshing the list of clustered MSMS sets ";

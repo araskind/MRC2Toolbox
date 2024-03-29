@@ -55,7 +55,7 @@ import javax.swing.border.EmptyBorder;
 
 import edu.umich.med.mrc2.datoolbox.data.BinnerAnnotationCluster;
 import edu.umich.med.mrc2.datoolbox.data.msclust.BinnerAnnotationLookupDataSet;
-import edu.umich.med.mrc2.datoolbox.data.msclust.FeatureLookupDataSet;
+import edu.umich.med.mrc2.datoolbox.data.msclust.FeatureLookupList;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.search.binner.BinnerAnnotationsImportPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
@@ -289,7 +289,7 @@ public class BinnerAnnotationsLookupDataSetEditorDialog extends JDialog
 	private String validateNameAgainstProject(String newName) {
 		
 		BinnerAnnotationDataSetManager existing = null;
-		Set<FeatureLookupDataSet> projectFeatureLookupDataSets = 
+		Set<FeatureLookupList> projectFeatureLookupDataSets = 
 				MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment().
 					getMsmsClusterDataSets().stream().
 					filter(d -> d.getFeatureLookupDataSet() != null).

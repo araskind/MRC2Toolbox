@@ -33,7 +33,7 @@ import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.format.LIMSUserFormat;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
 import edu.umich.med.mrc2.datoolbox.data.msclust.BinnerAnnotationLookupDataSet;
-import edu.umich.med.mrc2.datoolbox.data.msclust.FeatureLookupDataSet;
+import edu.umich.med.mrc2.datoolbox.data.msclust.FeatureLookupList;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.AutoChoices;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.TableFilterHeader;
@@ -115,7 +115,7 @@ public class BinnerAnnotationLookupDataSetListTable extends BasicTable {
 		}
 	}
 	
-	public void updateCollectionData(FeatureLookupDataSet edited) {
+	public void updateCollectionData(FeatureLookupList edited) {
 		thf.setTable(null);
 		((BinnerAnnotationLookupDataSetListTableModel)model).updateCollectionData(edited);
 		thf.setTable(this);

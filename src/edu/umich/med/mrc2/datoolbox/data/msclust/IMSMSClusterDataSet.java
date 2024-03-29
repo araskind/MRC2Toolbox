@@ -78,9 +78,9 @@ public interface IMSMSClusterDataSet {
 
 	Set<String> getClusterIds();
 	
-	void setFeatureLookupDataSet(FeatureLookupDataSet featureLookupDataSet);
+	void setFeatureLookupDataSet(FeatureLookupList featureLookupDataSet);
 	
-	FeatureLookupDataSet getFeatureLookupDataSet();
+	FeatureLookupList getFeatureLookupDataSet();
 	
 	void setBinnerAnnotationDataSet(BinnerAnnotationLookupDataSet binnerAnnotationDataSet);
 	

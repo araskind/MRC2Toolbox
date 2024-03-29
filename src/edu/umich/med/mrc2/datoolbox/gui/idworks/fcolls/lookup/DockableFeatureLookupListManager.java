@@ -38,42 +38,42 @@ import javax.swing.JScrollPane;
 import org.apache.commons.lang.StringUtils;
 
 import bibliothek.gui.dock.common.DefaultSingleCDockable;
-import edu.umich.med.mrc2.datoolbox.data.msclust.FeatureLookupDataSet;
-import edu.umich.med.mrc2.datoolbox.database.idt.FeatureLookupDataSetUtils;
+import edu.umich.med.mrc2.datoolbox.data.msclust.FeatureLookupList;
+import edu.umich.med.mrc2.datoolbox.database.idt.FeatureLookupListUtils;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.fcolls.DataCollectionsManagerDialog;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.IndeterminateProgressDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.LongUpdateTask;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
-import edu.umich.med.mrc2.datoolbox.main.FeatureLookupDataSetManager;
+import edu.umich.med.mrc2.datoolbox.main.FeatureLookupListManager;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisExperiment;
 
-public class DockableFeatureLookupDataSetManager extends DefaultSingleCDockable implements ActionListener {
+public class DockableFeatureLookupListManager extends DefaultSingleCDockable implements ActionListener {
 
 	private static final Icon componentIcon = GuiUtils.getIcon("editCollection", 16);
 	
-	private FeatureLookupDataSetManagerToolbar toolbar;
-	private FeatureLookupDataSetListTable featureLookupDataSetListTable;
+	private FeatureLookupListManagerToolbar toolbar;
+	private FeatureLookupListsTable featureLookupListsTable;
 	private DataCollectionsManagerDialog parent;	
-	private FeatureLookupDataSetEditorDialog featureLookupDataSetEditorDialog;
+	private FeatureLookupListEditorDialog featureLookupListDialog;
 
 	private IndeterminateProgressDialog idp;
 
-	public DockableFeatureLookupDataSetManager(DataCollectionsManagerDialog parent)  {
+	public DockableFeatureLookupListManager(DataCollectionsManagerDialog parent)  {
 
-		super("DockableFeatureLookupDataSetManager", componentIcon, "Lookup feature data sets", null, Permissions.MIN_MAX_STACK);
+		super("DockableFeatureLookupDataSetManager", componentIcon, "Feature lookup lists", null, Permissions.MIN_MAX_STACK);
 		setCloseable(false);
 		this.parent = parent;
 		
-		toolbar = new FeatureLookupDataSetManagerToolbar(this);
+		toolbar = new FeatureLookupListManagerToolbar(this);
 		getContentPane().add(toolbar, BorderLayout.NORTH);
 		
-		featureLookupDataSetListTable = new FeatureLookupDataSetListTable();
-		featureLookupDataSetListTable.setTableModelFromFeatureLookupDataSetList(
-				FeatureLookupDataSetManager.getFeatureLookupDataSetList());		
-		featureLookupDataSetListTable.addMouseListener(
+		featureLookupListsTable = new FeatureLookupListsTable();
+		featureLookupListsTable.setTableModelFromFeatureLookupListCollection(
+				FeatureLookupListManager.getFeatureLookupListCollection());		
+		featureLookupListsTable.addMouseListener(
 
 				new MouseAdapter() {
 
@@ -81,8 +81,8 @@ public class DockableFeatureLookupDataSetManager extends DefaultSingleCDockable 
 
 						if (e.getClickCount() == 2) {
 
-							FeatureLookupDataSet selected = 
-									featureLookupDataSetListTable.getSelectedDataSet();
+							FeatureLookupList selected = 
+									featureLookupListsTable.getSelectedDataSet();
 							if(selected == null)
 								return;
 							
@@ -90,61 +90,61 @@ public class DockableFeatureLookupDataSetManager extends DefaultSingleCDockable 
 						}
 					}
 				});
-		add(new JScrollPane(featureLookupDataSetListTable));
+		add(new JScrollPane(featureLookupListsTable));
 	}
 	
 	@Override
 	public void actionPerformed(ActionEvent e) {
 
 		String command = e.getActionCommand();
-		if(command.equals(MainActionCommands.ADD_FEATURE_LOOKUP_DATA_SET_DIALOG_COMMAND.getName()))
+		if(command.equals(MainActionCommands.ADD_FEATURE_LOOKUP_LIST_DIALOG_COMMAND.getName()))
 			showFeatureLookupDataSetEditorDialog(null); 
 		
-		if(command.equals(MainActionCommands.ADD_FEATURE_LOOKUP_DATA_SET_COMMAND.getName()))
+		if(command.equals(MainActionCommands.ADD_FEATURE_LOOKUP_LIST_COMMAND.getName()))
 			createNewFeatureLookupDataSet();
 		
-		if(command.equals(MainActionCommands.EDIT_FEATURE_LOOKUP_DATA_SET_DIALOG_COMMAND.getName()))
+		if(command.equals(MainActionCommands.EDIT_FEATURE_LOOKUP_LIST_DIALOG_COMMAND.getName()))
 			etitSelectedFeatureLookupDataSet();
 		
-		if(command.equals(MainActionCommands.EDIT_FEATURE_LOOKUP_DATA_SET_COMMAND.getName()))
+		if(command.equals(MainActionCommands.EDIT_FEATURE_LOOKUP_LIST_COMMAND.getName()))
 			saveEditedFeatureLookupDataSet();
 		
-		if(command.equals(MainActionCommands.DELETE_FEATURE_LOOKUP_DATA_SET_COMMAND.getName()))
+		if(command.equals(MainActionCommands.DELETE_FEATURE_LOOKUP_LIST_COMMAND.getName()))
 			 deleteFeatureLookupDataSet();
 	}
 	
-	public void showFeatureLookupDataSetEditorDialog (FeatureLookupDataSet datSet) {
+	public void showFeatureLookupDataSetEditorDialog (FeatureLookupList datSet) {
 		
-		featureLookupDataSetEditorDialog = new FeatureLookupDataSetEditorDialog(datSet, this);
-		featureLookupDataSetEditorDialog.setLocationRelativeTo(this.getContentPane());
-		featureLookupDataSetEditorDialog.setVisible(true);
+		featureLookupListDialog = new FeatureLookupListEditorDialog(datSet, this);
+		featureLookupListDialog.setLocationRelativeTo(this.getContentPane());
+		featureLookupListDialog.setVisible(true);
 	}
 
 	private void createNewFeatureLookupDataSet() {
 
 		Collection<String>errors = 
-				featureLookupDataSetEditorDialog.validateDataSet();
+				featureLookupListDialog.validateDataSet();
 		if(!errors.isEmpty()) {
 			MessageDialog.showErrorMsg(
 					StringUtils.join(errors, "\n"), 
-					featureLookupDataSetEditorDialog);
+					featureLookupListDialog);
 			return;
 		}
-		FeatureLookupDataSet dataSet = new FeatureLookupDataSet(
-				featureLookupDataSetEditorDialog.getDataSetName(), 
-				featureLookupDataSetEditorDialog.getDataSetDescription(), 
+		FeatureLookupList dataSet = new FeatureLookupList(
+				featureLookupListDialog.getDataSetName(), 
+				featureLookupListDialog.getDataSetDescription(), 
 				MRC2ToolBoxCore.getIdTrackerUser());
 		dataSet.getFeatures().addAll(
-				featureLookupDataSetEditorDialog.getAllFeatures());
+				featureLookupListDialog.getAllFeatures());
 			
-		featureLookupDataSetEditorDialog.dispose();
+		featureLookupListDialog.dispose();
 		if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() == null)
 			createNewFeatureLookupDataSetInDatabase(dataSet);
 		else
 			createNewFeatureLookupDataSetInProject(dataSet);
 	}
 		
-	private void createNewFeatureLookupDataSetInDatabase(FeatureLookupDataSet newDataSet) {
+	private void createNewFeatureLookupDataSetInDatabase(FeatureLookupList newDataSet) {
 
 		UploadNewFeatureLookupDataSetTask task = 
 				new UploadNewFeatureLookupDataSetTask(newDataSet);
@@ -158,9 +158,9 @@ public class DockableFeatureLookupDataSetManager extends DefaultSingleCDockable 
 		/*
 		 * Main task. Executed in background thread.
 		 */
-		private FeatureLookupDataSet newDataSet;
+		private FeatureLookupList newDataSet;
 
-		public UploadNewFeatureLookupDataSetTask(FeatureLookupDataSet newDataSet) {
+		public UploadNewFeatureLookupDataSetTask(FeatureLookupList newDataSet) {
 			this.newDataSet = newDataSet;
 		}
 
@@ -168,20 +168,20 @@ public class DockableFeatureLookupDataSetManager extends DefaultSingleCDockable 
 		public Void doInBackground() {
 
 			try {
-				FeatureLookupDataSetUtils.addFeatureLookupDataSet(newDataSet);
+				FeatureLookupListUtils.addFeatureLookupList(newDataSet);
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			FeatureLookupDataSetManager.refreshFeatureLookupDataSetList();
-			featureLookupDataSetListTable.setTableModelFromFeatureLookupDataSetList(
-					FeatureLookupDataSetManager.getFeatureLookupDataSetList());
-			featureLookupDataSetListTable.selectDataSet(newDataSet);
+			FeatureLookupListManager.refreshFeatureLookupListCollection();
+			featureLookupListsTable.setTableModelFromFeatureLookupListCollection(
+					FeatureLookupListManager.getFeatureLookupListCollection());
+			featureLookupListsTable.selectDataSet(newDataSet);
 			return null;
 		}
 	}
 		
-	private void createNewFeatureLookupDataSetInProject(FeatureLookupDataSet newDataSet) {
+	private void createNewFeatureLookupDataSetInProject(FeatureLookupList newDataSet) {
 		
 		MessageDialog.showWarningMsg(
 				"Feature under development", this.getContentPane());
@@ -204,8 +204,8 @@ public class DockableFeatureLookupDataSetManager extends DefaultSingleCDockable 
 
 	private void etitSelectedFeatureLookupDataSet() {
 		
-		FeatureLookupDataSet selected = 
-				featureLookupDataSetListTable.getSelectedDataSet();
+		FeatureLookupList selected = 
+				featureLookupListsTable.getSelectedDataSet();
 		if(selected == null)
 			return;
 		
@@ -215,20 +215,20 @@ public class DockableFeatureLookupDataSetManager extends DefaultSingleCDockable 
 	private void saveEditedFeatureLookupDataSet() {
 		
 		Collection<String>errors = 
-				featureLookupDataSetEditorDialog.validateDataSet();
+				featureLookupListDialog.validateDataSet();
 		if(!errors.isEmpty()) {
 			MessageDialog.showErrorMsg(
 					StringUtils.join(errors, "\n"), 
-					featureLookupDataSetEditorDialog);
+					featureLookupListDialog);
 			return;
 		}	
-		FeatureLookupDataSet edited = 
-				featureLookupDataSetEditorDialog.getFeatureLookupDataSet();
-		edited.setName(featureLookupDataSetEditorDialog.getDataSetName());
-		edited.setDescription(featureLookupDataSetEditorDialog.getDataSetDescription());
+		FeatureLookupList edited = 
+				featureLookupListDialog.getFeatureLookupDataSet();
+		edited.setName(featureLookupListDialog.getDataSetName());
+		edited.setDescription(featureLookupListDialog.getDataSetDescription());
 		edited.setLastModified(new Date());
 		
-		featureLookupDataSetEditorDialog.dispose();
+		featureLookupListDialog.dispose();
 		
 		if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() == null)
 			saveFeatureLookupDataSetChangesToDatabase(edited);
@@ -236,21 +236,21 @@ public class DockableFeatureLookupDataSetManager extends DefaultSingleCDockable 
 			saveFeatureLookupDataSetChangesToProject(edited);
 	}
 	
-	private void saveFeatureLookupDataSetChangesToDatabase(FeatureLookupDataSet edited) { 
+	private void saveFeatureLookupDataSetChangesToDatabase(FeatureLookupList edited) { 
 		
 		try {
-			FeatureLookupDataSetUtils.editFeatureLookupDataSetMetadata(edited);
+			FeatureLookupListUtils.editFeatureLookupListMetadata(edited);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		FeatureLookupDataSetManager.refreshFeatureLookupDataSetList();
-		featureLookupDataSetListTable.setTableModelFromFeatureLookupDataSetList(
-				FeatureLookupDataSetManager.getFeatureLookupDataSetList());		
-		featureLookupDataSetListTable.selectDataSet(edited);
+		FeatureLookupListManager.refreshFeatureLookupListCollection();
+		featureLookupListsTable.setTableModelFromFeatureLookupListCollection(
+				FeatureLookupListManager.getFeatureLookupListCollection());		
+		featureLookupListsTable.selectDataSet(edited);
 	}
 	
-	private void saveFeatureLookupDataSetChangesToProject(FeatureLookupDataSet edited) {
+	private void saveFeatureLookupDataSetChangesToProject(FeatureLookupList edited) {
 		
 		MessageDialog.showWarningMsg(
 				"Feature under development", this.getContentPane());
@@ -270,8 +270,8 @@ public class DockableFeatureLookupDataSetManager extends DefaultSingleCDockable 
 
 	private void deleteFeatureLookupDataSet() {
 		
-		FeatureLookupDataSet selected = 
-				featureLookupDataSetListTable.getSelectedDataSet();
+		FeatureLookupList selected = 
+				featureLookupListsTable.getSelectedDataSet();
 		if(selected == null)
 			return;
 		
@@ -291,7 +291,7 @@ public class DockableFeatureLookupDataSetManager extends DefaultSingleCDockable 
 			deleteFeatureLookupDataSetFromProject(selected);
 	}
 	
-	private void deleteFeatureLookupDataSetFromProject(FeatureLookupDataSet selected) {
+	private void deleteFeatureLookupDataSetFromProject(FeatureLookupList selected) {
 
 		MessageDialog.showWarningMsg(
 				"Feature under development", this.getContentPane());
@@ -318,7 +318,7 @@ public class DockableFeatureLookupDataSetManager extends DefaultSingleCDockable 
 //		}
 	}
 
-	private void deleteFeatureLookupDataSetFromDatabase(FeatureLookupDataSet selected) {
+	private void deleteFeatureLookupDataSetFromDatabase(FeatureLookupList selected) {
 			
 		int res = MessageDialog.showChoiceWithWarningMsg(
 				"Are you sure you want to delete feature lookup data set \"" + selected.getName() + "\"?", 
@@ -327,41 +327,41 @@ public class DockableFeatureLookupDataSetManager extends DefaultSingleCDockable 
 			return;
 		
 		try {
-			FeatureLookupDataSetUtils.deleteFeatureLookupDataSet(selected);
+			FeatureLookupListUtils.deleteFeatureLookupList(selected);
 		} catch (Exception e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-		FeatureLookupDataSetManager.getFeatureLookupDataSetList().remove(selected);
-		featureLookupDataSetListTable.setTableModelFromFeatureLookupDataSetList(
-				FeatureLookupDataSetManager.getFeatureLookupDataSetList());
+		FeatureLookupListManager.getFeatureLookupListCollection().remove(selected);
+		featureLookupListsTable.setTableModelFromFeatureLookupListCollection(
+				FeatureLookupListManager.getFeatureLookupListCollection());
 	}
 	
 	public void loadDatabaseStoredFeatureLookupDataSets() {
 		
-		featureLookupDataSetListTable.clearTable();
-		featureLookupDataSetListTable.setTableModelFromFeatureLookupDataSetList(
-				FeatureLookupDataSetManager.getFeatureLookupDataSetList());
+		featureLookupListsTable.clearTable();
+		featureLookupListsTable.setTableModelFromFeatureLookupListCollection(
+				FeatureLookupListManager.getFeatureLookupListCollection());
 	}
 	
 	public void loadFeatureLookupDataSetsForActiveProject() {
 		
-		featureLookupDataSetListTable.clearTable();		
+		featureLookupListsTable.clearTable();		
 		RawDataAnalysisExperiment project = 
 				MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment();
 		if(project == null)
 			return;
 		
-		List<FeatureLookupDataSet> flListCollection = 
+		List<FeatureLookupList> flListCollection = 
 				project.getMsmsClusterDataSets().stream().
 					filter(ds -> ds.getFeatureLookupDataSet() != null).
 					map(ds -> ds.getFeatureLookupDataSet()).distinct().
 					collect(Collectors.toList());
 
-		featureLookupDataSetListTable.setTableModelFromFeatureLookupDataSetList(flListCollection);
+		featureLookupListsTable.setTableModelFromFeatureLookupListCollection(flListCollection);
 	}
 
-	public FeatureLookupDataSetListTable getTable() {
-		return featureLookupDataSetListTable;
+	public FeatureLookupListsTable getTable() {
+		return featureLookupListsTable;
 	}
 }

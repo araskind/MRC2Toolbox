@@ -42,10 +42,10 @@ import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
-import edu.umich.med.mrc2.datoolbox.data.msclust.FeatureLookupDataSet;
+import edu.umich.med.mrc2.datoolbox.data.msclust.FeatureLookupList;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
-import edu.umich.med.mrc2.datoolbox.main.FeatureLookupDataSetManager;
+import edu.umich.med.mrc2.datoolbox.main.FeatureLookupListManager;
 
 public class FeatureLookupListSelectorDialog extends JDialog {
 	
@@ -54,7 +54,7 @@ public class FeatureLookupListSelectorDialog extends JDialog {
 	 */
 	private static final long serialVersionUID = -7638441884088309136L;
 	private static final Icon editCollectionIcon = GuiUtils.getIcon("editCollection", 32);
-	private FeatureLookupDataSetListTable fllTable;
+	private FeatureLookupListsTable fllTable;
 	private JButton btnSave;
 	
 	public FeatureLookupListSelectorDialog(ActionListener listener) {
@@ -67,9 +67,9 @@ public class FeatureLookupListSelectorDialog extends JDialog {
 		setResizable(true);
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		
-		fllTable = new FeatureLookupDataSetListTable();
-		fllTable.setTableModelFromFeatureLookupDataSetList(
-				FeatureLookupDataSetManager.getFeatureLookupDataSetList());
+		fllTable = new FeatureLookupListsTable();
+		fllTable.setTableModelFromFeatureLookupListCollection(
+				FeatureLookupListManager.getFeatureLookupListCollection());
 		fllTable.addMouseListener(
 
 				new MouseAdapter() {
@@ -78,7 +78,7 @@ public class FeatureLookupListSelectorDialog extends JDialog {
 
 						if (e.getClickCount() == 2) {
 
-							FeatureLookupDataSet selected = 
+							FeatureLookupList selected = 
 									fllTable.getSelectedDataSet();
 							if(selected == null)
 								return;
@@ -105,9 +105,9 @@ public class FeatureLookupListSelectorDialog extends JDialog {
 		btnCancel.addActionListener(al);
 
 		btnSave = new JButton(
-				MainActionCommands.LOAD_LOOKUP_FEATURE_LIST_FROM_DATABASE_COMMAND.getName());
+				MainActionCommands.LOAD_FEATURE_LOOKUP_LIST_FROM_DATABASE_COMMAND.getName());
 		btnSave.setActionCommand(
-				MainActionCommands.LOAD_LOOKUP_FEATURE_LIST_FROM_DATABASE_COMMAND.getName());
+				MainActionCommands.LOAD_FEATURE_LOOKUP_LIST_FROM_DATABASE_COMMAND.getName());
 		btnSave.addActionListener(listener);
 		panel.add(btnSave);
 		JRootPane rootPane = SwingUtilities.getRootPane(btnSave);
@@ -117,7 +117,7 @@ public class FeatureLookupListSelectorDialog extends JDialog {
 		pack();
 	}
 	
-	public FeatureLookupDataSet getSelectedDataSet() {
+	public FeatureLookupList getSelectedDataSet() {
 		return fllTable.getSelectedDataSet();
 	}
 }

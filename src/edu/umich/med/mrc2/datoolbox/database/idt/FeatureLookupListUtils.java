@@ -30,15 +30,15 @@ import java.util.TreeSet;
 
 import edu.umich.med.mrc2.datoolbox.data.MinimalMSOneFeature;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
-import edu.umich.med.mrc2.datoolbox.data.msclust.FeatureLookupDataSet;
+import edu.umich.med.mrc2.datoolbox.data.msclust.FeatureLookupList;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.utils.SQLUtils;
 
-public class FeatureLookupDataSetUtils {
+public class FeatureLookupListUtils {
 
 	
-	public static void addFeatureLookupDataSet(
-			FeatureLookupDataSet newDataSet) throws Exception {
+	public static void addFeatureLookupList(
+			FeatureLookupList newDataSet) throws Exception {
 		
 		Connection conn = ConnectionManager.getConnection();
 		addFeatureLookupDataSet(newDataSet, conn);
@@ -46,7 +46,7 @@ public class FeatureLookupDataSetUtils {
 	}
 	
 	public static void addFeatureLookupDataSet(
-			FeatureLookupDataSet dataSet, Connection conn) throws Exception {
+			FeatureLookupList dataSet, Connection conn) throws Exception {
 		
 		String newId = SQLUtils.getNextIdFromSequence(conn, 
 				"FEATURE_LOOKUP_DATA_SET_SEQ",
@@ -120,8 +120,8 @@ public class FeatureLookupDataSetUtils {
 		ps.close();		
 	}
 	
-	public static void editFeatureLookupDataSetMetadata(
-			FeatureLookupDataSet dataSet) throws Exception {
+	public static void editFeatureLookupListMetadata(
+			FeatureLookupList dataSet) throws Exception {
 		
 		Connection conn = ConnectionManager.getConnection();
 		String query = 
@@ -137,8 +137,8 @@ public class FeatureLookupDataSetUtils {
 		ConnectionManager.releaseConnection(conn);	
 	}
 	
-	public static void deleteFeatureLookupDataSet(
-			FeatureLookupDataSet dataSet) throws Exception {
+	public static void deleteFeatureLookupList(
+			FeatureLookupList dataSet) throws Exception {
 		
 		Connection conn = ConnectionManager.getConnection();
 		String query = 
@@ -149,8 +149,8 @@ public class FeatureLookupDataSetUtils {
 		ConnectionManager.releaseConnection(conn);	
 	}
 	
-	public static void addFeaturesToFeatureLookupDataSet(
-			FeatureLookupDataSet dataSet, Collection<MinimalMSOneFeature>featuresToAdd) throws Exception {
+	public static void addFeaturesToFeatureLookupList(
+			FeatureLookupList dataSet, Collection<MinimalMSOneFeature>featuresToAdd) throws Exception {
 		
 		Connection conn = ConnectionManager.getConnection();
 		String query = "INSERT INTO FEATURE_LOOKUP_DATA_SET_COMPONENT "
@@ -198,8 +198,9 @@ public class FeatureLookupDataSetUtils {
 		ConnectionManager.releaseConnection(conn);	
 	}
 	
-	public static void removeFeaturesFromFeatureLookupDataSet(
-			FeatureLookupDataSet dataSet, Collection<MinimalMSOneFeature>featuresToRemove) throws Exception {
+	public static void removeFeaturesFromFeatureLookupList(
+			FeatureLookupList dataSet, 
+			Collection<MinimalMSOneFeature>featuresToRemove) throws Exception {
 		
 		Connection conn = ConnectionManager.getConnection();
 		String query = 
@@ -221,17 +222,17 @@ public class FeatureLookupDataSetUtils {
 		ConnectionManager.releaseConnection(conn);	
 	}
 	
-	public static Collection<FeatureLookupDataSet>getFeatureLookupDataSetList() throws Exception {
+	public static Collection<FeatureLookupList>getFeatureLookupListCollection() throws Exception {
 		
 		Connection conn = ConnectionManager.getConnection();
-		Collection<FeatureLookupDataSet>dataSets = getFeatureLookupDataSetList(conn);
+		Collection<FeatureLookupList>dataSets = getFeatureLookupListCollection(conn);
 		ConnectionManager.releaseConnection(conn);	
 		return dataSets;
 	}
 	
-	public static Collection<FeatureLookupDataSet>getFeatureLookupDataSetList(Connection conn) throws Exception {
+	public static Collection<FeatureLookupList>getFeatureLookupListCollection(Connection conn) throws Exception {
 	
-		Collection<FeatureLookupDataSet>dataSets = new TreeSet<FeatureLookupDataSet>();
+		Collection<FeatureLookupList>dataSets = new TreeSet<FeatureLookupList>();
 		String query = 
 				"SELECT FLDS_ID, NAME, DESCRIPTION, CREATED_BY, "
 				+ "DATE_CREATED, LAST_MODIFIED "
@@ -239,7 +240,7 @@ public class FeatureLookupDataSetUtils {
 		PreparedStatement ps = conn.prepareStatement(query);		
 		ResultSet rs = ps.executeQuery();
 		while(rs.next()) {
-			FeatureLookupDataSet ds = new FeatureLookupDataSet(
+			FeatureLookupList ds = new FeatureLookupList(
 					rs.getString("FLDS_ID"), 
 					rs.getString("NAME"), 
 					rs.getString("DESCRIPTION"), 
@@ -255,17 +256,17 @@ public class FeatureLookupDataSetUtils {
 		return dataSets;
 	}
 	
-	public static void getFeaturesForFeatureLookupDataSet(
-			FeatureLookupDataSet dataSet) throws Exception {
+	public static void getFeaturesForFeatureLookupList(
+			FeatureLookupList dataSet) throws Exception {
 		
 		Connection conn = ConnectionManager.getConnection();
-		getFeaturesForFeatureLookupDataSet(dataSet, conn);
+		getFeaturesForFeatureLookupList(dataSet, conn);
 		ConnectionManager.releaseConnection(conn);	
 
 	}
 	
-	public static void getFeaturesForFeatureLookupDataSet(
-			FeatureLookupDataSet dataSet, Connection conn) throws Exception {
+	public static void getFeaturesForFeatureLookupList(
+			FeatureLookupList dataSet, Connection conn) throws Exception {
 		
 		String query = 
 				"SELECT COMPONENT_ID, NAME, MZ, RT, RANK, "

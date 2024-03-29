@@ -32,43 +32,43 @@ import edu.umich.med.mrc2.datoolbox.data.compare.LIMSUserComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.format.LIMSUserFormat;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
-import edu.umich.med.mrc2.datoolbox.data.msclust.FeatureLookupDataSet;
+import edu.umich.med.mrc2.datoolbox.data.msclust.FeatureLookupList;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.AutoChoices;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.TableFilterHeader;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.TimestampRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.WordWrapCellRenderer;
 
-public class FeatureLookupDataSetListTable extends BasicTable {
+public class FeatureLookupListsTable extends BasicTable {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = -6499296198033405250L;
 
-	public FeatureLookupDataSetListTable() {
+	public FeatureLookupListsTable() {
 		super();
-		model = new FeatureLookupDataSetListTableModel();
+		model = new FeatureLookupListsTableModel();
 		setModel(model);
 		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		rowSorter = new TableRowSorter<FeatureLookupDataSetListTableModel>(
-				(FeatureLookupDataSetListTableModel)model);
+		rowSorter = new TableRowSorter<FeatureLookupListsTableModel>(
+				(FeatureLookupListsTableModel)model);
 		setRowSorter(rowSorter);
-		rowSorter.setComparator(model.getColumnIndex(FeatureLookupDataSetListTableModel.OWNER_COLUMN),
+		rowSorter.setComparator(model.getColumnIndex(FeatureLookupListsTableModel.OWNER_COLUMN),
 				new LIMSUserComparator(SortProperty.Name));
 		
 		WordWrapCellRenderer ltr = new WordWrapCellRenderer();
-		columnModel.getColumnById(FeatureLookupDataSetListTableModel.DATA_SET_COLUMN)
+		columnModel.getColumnById(FeatureLookupListsTableModel.DATA_SET_COLUMN)
 			.setCellRenderer(ltr);
-		columnModel.getColumnById(FeatureLookupDataSetListTableModel.DESCRIPTION_COLUMN)
+		columnModel.getColumnById(FeatureLookupListsTableModel.DESCRIPTION_COLUMN)
 			.setCellRenderer(ltr);
 		
-		columnModel.getColumnById(FeatureLookupDataSetListTableModel.DATA_SET_COLUMN)
+		columnModel.getColumnById(FeatureLookupListsTableModel.DATA_SET_COLUMN)
 			.setMinWidth(120);
-		columnModel.getColumnById(FeatureLookupDataSetListTableModel.DESCRIPTION_COLUMN)
+		columnModel.getColumnById(FeatureLookupListsTableModel.DESCRIPTION_COLUMN)
 			.setMinWidth(120);
 		createInteractiveUserRenderer(Arrays.asList(
-				FeatureLookupDataSetListTableModel.OWNER_COLUMN));
+				FeatureLookupListsTableModel.OWNER_COLUMN));
 		
 		setDefaultRenderer(Date.class, new TimestampRenderer());
 		
@@ -80,29 +80,29 @@ public class FeatureLookupDataSetListTable extends BasicTable {
 		finalizeLayout();
 	}
 
-	public void setTableModelFromFeatureLookupDataSetList(
-			Collection<FeatureLookupDataSet>dataSetList) {
+	public void setTableModelFromFeatureLookupListCollection(
+			Collection<FeatureLookupList>dataSetList) {
 		
 		thf.setTable(null);
-		((FeatureLookupDataSetListTableModel)model).setTableModelFromFeatureLookupDataSetList(dataSetList);			
+		((FeatureLookupListsTableModel)model).setTableModelFromFeatureLookupDataSetList(dataSetList);			
 		thf.setTable(this);
 		adjustColumns();
 	}
 	
-	public FeatureLookupDataSet getSelectedDataSet() {
+	public FeatureLookupList getSelectedDataSet() {
 		
 		int row = getSelectedRow();
 		if(row == -1)
 			return null;
 		
-		return (FeatureLookupDataSet)model.getValueAt(
+		return (FeatureLookupList)model.getValueAt(
 				convertRowIndexToModel(row), 
-				model.getColumnIndex(FeatureLookupDataSetListTableModel.DATA_SET_COLUMN));
+				model.getColumnIndex(FeatureLookupListsTableModel.DATA_SET_COLUMN));
 	}
 	
-	public void selectDataSet(FeatureLookupDataSet toSelect) {
+	public void selectDataSet(FeatureLookupList toSelect) {
 		
-		int col = getColumnIndex(FeatureLookupDataSetListTableModel.DATA_SET_COLUMN);
+		int col = getColumnIndex(FeatureLookupListsTableModel.DATA_SET_COLUMN);
 		for(int i=0; i<getRowCount(); i++) {
 			
 			if(toSelect.equals(getValueAt(i, col))) {
@@ -113,9 +113,9 @@ public class FeatureLookupDataSetListTable extends BasicTable {
 		}
 	}
 	
-	public void updateCollectionData(FeatureLookupDataSet edited) {
+	public void updateCollectionData(FeatureLookupList edited) {
 		thf.setTable(null);
-		((FeatureLookupDataSetListTableModel)model).updateCollectionData(edited);
+		((FeatureLookupListsTableModel)model).updateCollectionData(edited);
 		thf.setTable(this);
 		adjustColumns();
 	}

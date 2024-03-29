@@ -401,6 +401,8 @@ public class MZRTPlotSettingsPanel extends
 		loadPreferences();
 		
 		featureSubsetComboBox.addItemListener(externalItemListener);
+		useFeaturesFromTableRadioButton.addItemListener(externalItemListener);
+		useCompleteSetRadioButton.addItemListener(externalItemListener);
 		
 		if(featureIDMeasureComboBox != null)
 			featureIDMeasureComboBox.addItemListener(externalItemListener);
@@ -526,6 +528,8 @@ public class MZRTPlotSettingsPanel extends
 		
 		if(useFeaturesFromTableRadioButton.isSelected()) {
 			featureSubsetComboBox.setEnabled(true);
+			if(featureSubsetComboBox.getSelectedIndex() == -1)
+				featureSubsetComboBox.setSelectedItem(TableRowSubset.FILTERED);
 		}
 		if(useCompleteSetRadioButton.isSelected()) {
 			

@@ -44,7 +44,7 @@ import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.main.PanelList;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
-import edu.umich.med.mrc2.datoolbox.main.FeatureLookupDataSetManager;
+import edu.umich.med.mrc2.datoolbox.main.FeatureLookupListManager;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.MSMSClusterDataSetManager;
 import edu.umich.med.mrc2.datoolbox.main.RecentDataManager;
@@ -445,7 +445,7 @@ public class DockableMSMSClusterDataSetsManager extends DefaultSingleCDockable i
 	
 	public void loadDatabaseStoredMSMSClusterDataSets() {
 		
-		FeatureLookupDataSetManager.refreshFeatureLookupDataSetList();
+		FeatureLookupListManager.refreshFeatureLookupListCollection();
 		MSMSClusterDataSetManager.refreshMSMSClusterDataSetList();		
 		msmsClusterDataSetTable.setTableModelFromMSMSClusterDataSetList(
 				MSMSClusterDataSetManager.getMSMSClusterDataSets());

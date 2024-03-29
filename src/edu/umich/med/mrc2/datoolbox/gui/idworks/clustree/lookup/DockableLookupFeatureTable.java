@@ -47,7 +47,7 @@ import javax.swing.event.ListSelectionListener;
 
 import bibliothek.gui.dock.common.DefaultSingleCDockable;
 import edu.umich.med.mrc2.datoolbox.data.MinimalMSOneFeature;
-import edu.umich.med.mrc2.datoolbox.data.msclust.FeatureLookupDataSet;
+import edu.umich.med.mrc2.datoolbox.data.msclust.FeatureLookupList;
 import edu.umich.med.mrc2.datoolbox.data.msclust.IMSMSClusterDataSet;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
@@ -84,7 +84,7 @@ public class DockableLookupFeatureTable extends DefaultSingleCDockable implement
 		panel.setBorder(new CompoundBorder(new EmptyBorder(10, 10, 10, 10), 
 				new CompoundBorder(new TitledBorder(
 						new EtchedBorder(EtchedBorder.LOWERED, new Color(255, 255, 255), new Color(160, 160, 160)), 
-						"Feature set properties", TitledBorder.LEADING, 
+						"Feature list properties", TitledBorder.LEADING, 
 						TitledBorder.TOP, null, new Color(0, 0, 0)), 
 						new EmptyBorder(10, 10, 10, 10))));
 		add(panel, BorderLayout.NORTH);
@@ -201,7 +201,7 @@ public class DockableLookupFeatureTable extends DefaultSingleCDockable implement
 	public void loadDataSet(IMSMSClusterDataSet activeMSMSClusterDataSet) {
 		
 		this.activeMSMSClusterDataSet = activeMSMSClusterDataSet;
-		FeatureLookupDataSet dataSet = activeMSMSClusterDataSet.getFeatureLookupDataSet();
+		FeatureLookupList dataSet = activeMSMSClusterDataSet.getFeatureLookupDataSet();
 		if(dataSet == null) {
 			clearPanel();
 			return;

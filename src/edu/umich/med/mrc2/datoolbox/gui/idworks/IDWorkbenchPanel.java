@@ -101,7 +101,7 @@ import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSSamplePreparation;
 import edu.umich.med.mrc2.datoolbox.data.msclust.BinnerAnnotationLookupDataSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.BinnerBasedMsFeatureInfoBundleCluster;
-import edu.umich.med.mrc2.datoolbox.data.msclust.FeatureLookupDataSet;
+import edu.umich.med.mrc2.datoolbox.data.msclust.FeatureLookupList;
 import edu.umich.med.mrc2.datoolbox.data.msclust.IMSMSClusterDataSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.IMsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusterDataSet;
@@ -2014,7 +2014,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		Collection<MSFeatureInfoBundle> msmsFeatures = 
 				msTwoFeatureTable.getBundles(TableRowSubset.ALL);
 		
-		FeatureLookupDataSet flds = 
+		FeatureLookupList flds = 
 				activeDataSetMZRTDataSearchDialog.getDataSet();
 		if(flds == null) {
 			
@@ -2027,7 +2027,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 				if(res != JOptionPane.YES_OPTION)
 					return;
 			}
-			flds = new FeatureLookupDataSet(
+			flds = new FeatureLookupList(
 					activeDataSetMZRTDataSearchDialog.getFeatureSetName(), 
 					activeDataSetMZRTDataSearchDialog.getFeatureSetDescription(), 
 					lookupFeatures);

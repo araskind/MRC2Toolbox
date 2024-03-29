@@ -24,42 +24,42 @@ package edu.umich.med.mrc2.datoolbox.main;
 import java.util.Collection;
 import java.util.TreeSet;
 
-import edu.umich.med.mrc2.datoolbox.data.msclust.FeatureLookupDataSet;
-import edu.umich.med.mrc2.datoolbox.database.idt.FeatureLookupDataSetUtils;
+import edu.umich.med.mrc2.datoolbox.data.msclust.FeatureLookupList;
+import edu.umich.med.mrc2.datoolbox.database.idt.FeatureLookupListUtils;
 
-public class FeatureLookupDataSetManager {
+public class FeatureLookupListManager {
 
-	private static final Collection<FeatureLookupDataSet> featureLookupDataSets = 
-			new TreeSet<FeatureLookupDataSet>();
+	private static final Collection<FeatureLookupList> featureLookupLists = 
+			new TreeSet<FeatureLookupList>();
 	
-	public static void refreshFeatureLookupDataSetList() {
+	public static void refreshFeatureLookupListCollection() {
 		
-		featureLookupDataSets.clear();		
+		featureLookupLists.clear();		
 		try {
-			featureLookupDataSets.addAll(
-					FeatureLookupDataSetUtils.getFeatureLookupDataSetList());
+			featureLookupLists.addAll(
+					FeatureLookupListUtils.getFeatureLookupListCollection());
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 	
-	public static Collection<FeatureLookupDataSet>getFeatureLookupDataSetList(){
+	public static Collection<FeatureLookupList>getFeatureLookupListCollection(){
 		
-		if(featureLookupDataSets.isEmpty())
-			refreshFeatureLookupDataSetList();
+		if(featureLookupLists.isEmpty())
+			refreshFeatureLookupListCollection();
 		
-		return featureLookupDataSets;
+		return featureLookupLists;
 	}
 	
-	public static FeatureLookupDataSet getFeatureLookupDataSetById(String id) {
-		return getFeatureLookupDataSetList().stream().
+	public static FeatureLookupList getFeatureLookupListById(String id) {
+		return getFeatureLookupListCollection().stream().
 				filter(d -> d.getId().equals(id)).
 				findFirst().orElse(null);
 	}
 	
-	public static FeatureLookupDataSet getFeatureLookupDataSetByName(String name) {
-		return getFeatureLookupDataSetList().stream().
+	public static FeatureLookupList getFeatureLookupListByName(String name) {
+		return getFeatureLookupListCollection().stream().
 				filter(d -> d.getName().equals(name)).
 				findFirst().orElse(null);
 	}

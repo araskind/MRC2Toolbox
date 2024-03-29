@@ -44,7 +44,7 @@ import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
 import edu.umich.med.mrc2.datoolbox.data.msclust.BinnerAnnotationLookupDataSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.BinnerBasedMsFeatureInfoBundleCluster;
-import edu.umich.med.mrc2.datoolbox.data.msclust.FeatureLookupDataSet;
+import edu.umich.med.mrc2.datoolbox.data.msclust.FeatureLookupList;
 import edu.umich.med.mrc2.datoolbox.data.msclust.IMSMSClusterDataSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.IMsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusterDataSet;
@@ -52,7 +52,7 @@ import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusterDataSetType;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusteringParameterSet;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.main.BinnerAnnotationDataSetManager;
-import edu.umich.med.mrc2.datoolbox.main.FeatureLookupDataSetManager;
+import edu.umich.med.mrc2.datoolbox.main.FeatureLookupListManager;
 import edu.umich.med.mrc2.datoolbox.main.MSMSClusterDataSetManager;
 import edu.umich.med.mrc2.datoolbox.utils.MSMSClusteringUtils;
 import edu.umich.med.mrc2.datoolbox.utils.SQLUtils;
@@ -159,7 +159,7 @@ public class MSMSClusteringDBUtils {
 	public static Map<IMSMSClusterDataSet, Set<String>>
 			getMSMSClusterDataSets(Connection conn) throws Exception {
 		
-		FeatureLookupDataSetManager.refreshFeatureLookupDataSetList();
+		FeatureLookupListManager.refreshFeatureLookupListCollection();
 		BinnerAnnotationDataSetManager.refreshBinnerAnnotationLookupDataSetList();
 		
 		Map<IMSMSClusterDataSet, Set<String>> dataSets = 
@@ -203,8 +203,8 @@ public class MSMSClusteringDBUtils {
 			
 			String fldsId = rs.getString("FLDS_ID");
 			if(fldsId != null) {
-				FeatureLookupDataSet flds = 
-						FeatureLookupDataSetManager.getFeatureLookupDataSetById(fldsId);
+				FeatureLookupList flds = 
+						FeatureLookupListManager.getFeatureLookupListById(fldsId);
 				ds.setFeatureLookupDataSet(flds);
 			}
 			String baldsId = rs.getString("BALDS_ID");
@@ -587,13 +587,13 @@ public class MSMSClusteringDBUtils {
 		ps.setString(7, dataSet.getParameters().getId());
 		if(dataSet.getFeatureLookupDataSet() != null) {
 			
-			FeatureLookupDataSetManager.refreshFeatureLookupDataSetList();
-			FeatureLookupDataSet flds = FeatureLookupDataSetManager.getFeatureLookupDataSetById(
+			FeatureLookupListManager.refreshFeatureLookupListCollection();
+			FeatureLookupList flds = FeatureLookupListManager.getFeatureLookupListById(
 					dataSet.getFeatureLookupDataSet().getId());
 			if(flds == null) {
 				flds = dataSet.getFeatureLookupDataSet();
-				FeatureLookupDataSetUtils.addFeatureLookupDataSet(flds, conn);			
-				FeatureLookupDataSetManager.getFeatureLookupDataSetList().add(flds);
+				FeatureLookupListUtils.addFeatureLookupDataSet(flds, conn);			
+				FeatureLookupListManager.getFeatureLookupListCollection().add(flds);
 			}
 			ps.setString(8, flds.getId());
 		}

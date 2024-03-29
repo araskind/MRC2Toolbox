@@ -28,7 +28,7 @@ import java.util.List;
 
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
 import edu.umich.med.mrc2.datoolbox.data.msclust.BinnerAnnotationLookupDataSet;
-import edu.umich.med.mrc2.datoolbox.data.msclust.FeatureLookupDataSet;
+import edu.umich.med.mrc2.datoolbox.data.msclust.FeatureLookupList;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTableModel;
 import edu.umich.med.mrc2.datoolbox.gui.tables.ColumnContext;
 
@@ -82,7 +82,7 @@ public class BinnerAnnotationLookupDataSetListTableModel extends BasicTableModel
 			addRows(rowData);
 	}
 	
-	public int getFeatureLookupDataSetRow(FeatureLookupDataSet dataSet) {
+	public int getFeatureLookupDataSetRow(FeatureLookupList dataSet) {
 
 		int col = getColumnIndex(DATA_SET_COLUMN);
 		for (int i = 0; i < getRowCount(); i++) {
@@ -93,7 +93,7 @@ public class BinnerAnnotationLookupDataSetListTableModel extends BasicTableModel
 		return -1;
 	}
 	
-	public void updateCollectionData(FeatureLookupDataSet edited) {
+	public void updateCollectionData(FeatureLookupList edited) {
 		
 		int row = getFeatureLookupDataSetRow(edited);
 		if(row == -1)

@@ -46,38 +46,46 @@ public class HistogramUtils {
 			BIN_COUNT = 100;
 
 		if(BIN_COUNT > 0) {
+			
 			EmpiricalDistribution distribution = new EmpiricalDistribution(BIN_COUNT);
 			distribution.load(data);
 			double halfWidth = (da.getMax() - da.getMin()) / (double)BIN_COUNT / 2.05d;
 			
-			SimpleHistogramDataset dataSet = new SimpleHistogramDataset(title);				
+			SimpleHistogramDataset dataSet = new SimpleHistogramDataset(title);			
+			double upperBorder = 0.0d;
 			
-			for(SummaryStatistics stats: distribution.getBinStats()) {
+			for(int i=0; i<distribution.getBinStats().size(); i++) {
 				
+				SummaryStatistics stats = distribution.getBinStats().get(i);
 				if(stats.getSum() == 0.0d)
 					continue;
 				
-				else if(stats.getMin() == stats.getMax()) {
+				if(stats.getMin() < stats.getMax()) {
 					
-//					TODO adjust borders to prevent overlap iterate through list?;
+					double binMin = stats.getMin();
+					if(binMin < upperBorder)
+						binMin = upperBorder + 0.001d;
+					
 					SimpleHistogramBin bin = 
-							new SimpleHistogramBin(
-									stats.getMean() - halfWidth, stats.getMean() + halfWidth, true, false);
-					bin.setItemCount((int) stats.getN());
-				    try {
-						dataSet.addBin(bin);
-					} catch (Exception e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				}
-				else {
-					SimpleHistogramBin bin = 
-							new SimpleHistogramBin(stats.getMin(), stats.getMax(), true, false);
+							new SimpleHistogramBin(binMin, stats.getMax(), true, false);
 					bin.setItemCount((int) stats.getN());
 				    dataSet.addBin(bin);
+				    upperBorder = stats.getMax();
 				}
-			}			
+				if(stats.getMin() == stats.getMax()) {
+					
+					double binMin = stats.getMean() - halfWidth;
+					if(binMin < upperBorder)
+						binMin = upperBorder + 0.001d;
+					
+					SimpleHistogramBin bin = 
+							new SimpleHistogramBin(
+									binMin, stats.getMean() + halfWidth, true, false);
+					bin.setItemCount((int) stats.getN());
+				    dataSet.addBin(bin);
+				    upperBorder = stats.getMean() + halfWidth;
+				}
+			}	
 			dataSet.setAdjustForBinSize(adjustForBinSize);
 			return dataSet;
 		}

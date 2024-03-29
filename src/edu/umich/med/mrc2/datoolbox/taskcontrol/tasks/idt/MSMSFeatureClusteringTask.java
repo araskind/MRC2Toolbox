@@ -33,7 +33,7 @@ import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MinimalMSOneFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsPoint;
 import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
-import edu.umich.med.mrc2.datoolbox.data.msclust.FeatureLookupDataSet;
+import edu.umich.med.mrc2.datoolbox.data.msclust.FeatureLookupList;
 import edu.umich.med.mrc2.datoolbox.data.msclust.IMSMSClusterDataSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.IMsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusterDataSet;
@@ -52,7 +52,7 @@ public class MSMSFeatureClusteringTask extends AbstractTask {
 	
 	private Collection<MSFeatureInfoBundle> msmsFeatures;
 	private MSMSClusteringParameterSet params;
-	private FeatureLookupDataSet featureLookupDataSet;
+	private FeatureLookupList featureLookupDataSet;
 	private Collection<IMsFeatureInfoBundleCluster>featureClusters;
 	private IMSMSClusterDataSet msmsClusterDataSet;
 	private double rtError;
@@ -64,7 +64,7 @@ public class MSMSFeatureClusteringTask extends AbstractTask {
 	public MSMSFeatureClusteringTask(
 			Collection<MSFeatureInfoBundle> msmsFeatures, 
 			MSMSClusteringParameterSet params,
-			FeatureLookupDataSet flds) {
+			FeatureLookupList flds) {
 		super();
 		this.msmsFeatures = msmsFeatures;
 		this.params = params;
@@ -243,7 +243,7 @@ public class MSMSFeatureClusteringTask extends AbstractTask {
 		return msmsClusterDataSet;
 	}
 
-	public FeatureLookupDataSet getFeatureLookupDataSet() {
+	public FeatureLookupList getFeatureLookupDataSet() {
 		return featureLookupDataSet;
 	}
 }

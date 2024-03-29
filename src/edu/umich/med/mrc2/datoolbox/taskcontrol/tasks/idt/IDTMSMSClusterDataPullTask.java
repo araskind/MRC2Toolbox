@@ -38,14 +38,14 @@ import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
 import edu.umich.med.mrc2.datoolbox.data.msclust.BinnerAnnotationLookupDataSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.BinnerBasedMsFeatureInfoBundleCluster;
-import edu.umich.med.mrc2.datoolbox.data.msclust.FeatureLookupDataSet;
+import edu.umich.med.mrc2.datoolbox.data.msclust.FeatureLookupList;
 import edu.umich.med.mrc2.datoolbox.data.msclust.IMSMSClusterDataSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.IMsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusterDataSetType;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.database.idt.BinnerUtils;
-import edu.umich.med.mrc2.datoolbox.database.idt.FeatureLookupDataSetUtils;
+import edu.umich.med.mrc2.datoolbox.database.idt.FeatureLookupListUtils;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 
@@ -197,10 +197,10 @@ public class IDTMSMSClusterDataPullTask extends IDTMSMSFeatureDataPullTask {
 		
 		Connection conn = ConnectionManager.getConnection();		
 		
-		FeatureLookupDataSet flDataSet = dataSet.getFeatureLookupDataSet();
+		FeatureLookupList flDataSet = dataSet.getFeatureLookupDataSet();
 		if(flDataSet != null && flDataSet.getFeatures().isEmpty()) {
 			try {
-				FeatureLookupDataSetUtils.getFeaturesForFeatureLookupDataSet(flDataSet, conn);
+				FeatureLookupListUtils.getFeaturesForFeatureLookupList(flDataSet, conn);
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

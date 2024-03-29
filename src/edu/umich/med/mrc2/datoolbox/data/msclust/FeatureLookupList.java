@@ -40,7 +40,7 @@ import edu.umich.med.mrc2.datoolbox.project.store.FeatureLookupDataSetFields;
 import edu.umich.med.mrc2.datoolbox.project.store.MinimalMSOneFeatureFields;
 import edu.umich.med.mrc2.datoolbox.utils.ExperimentUtils;
 
-public class FeatureLookupDataSet implements Comparable<FeatureLookupDataSet>{
+public class FeatureLookupList implements Comparable<FeatureLookupList>{
 
 	private String id;
 	private String name;
@@ -50,7 +50,7 @@ public class FeatureLookupDataSet implements Comparable<FeatureLookupDataSet>{
 	private Date lastModified;
 	private Set<MinimalMSOneFeature>features;
 	
-	public FeatureLookupDataSet(
+	public FeatureLookupList(
 			String name, 
 			String description, 
 			LIMSUser createdBy) {
@@ -58,12 +58,12 @@ public class FeatureLookupDataSet implements Comparable<FeatureLookupDataSet>{
 				new Date(), new Date());
 	}
 	
-	public FeatureLookupDataSet(String name) {
+	public FeatureLookupList(String name) {
 		this(name, name, MRC2ToolBoxCore.getIdTrackerUser(), 
 				new Date(), new Date());
 	}
 	
-	public FeatureLookupDataSet(
+	public FeatureLookupList(
 			String id, 
 			String name, 
 			String description, 
@@ -74,7 +74,7 @@ public class FeatureLookupDataSet implements Comparable<FeatureLookupDataSet>{
 		this.id = id;
 	}
 
-	public FeatureLookupDataSet(
+	public FeatureLookupList(
 			String name, 
 			String description, 
 			LIMSUser createdBy, 
@@ -91,7 +91,7 @@ public class FeatureLookupDataSet implements Comparable<FeatureLookupDataSet>{
 		features = new HashSet<MinimalMSOneFeature>();
 	}
 	
-	public FeatureLookupDataSet(
+	public FeatureLookupList(
 			String name, 
 			String description, 
 			Collection<MinimalMSOneFeature> features2) {
@@ -110,10 +110,10 @@ public class FeatureLookupDataSet implements Comparable<FeatureLookupDataSet>{
 		if (obj == null)
 			return false;
 
-		if (!FeatureLookupDataSet.class.isAssignableFrom(obj.getClass()))
+		if (!FeatureLookupList.class.isAssignableFrom(obj.getClass()))
 			return false;
 
-		final FeatureLookupDataSet other = (FeatureLookupDataSet) obj;
+		final FeatureLookupList other = (FeatureLookupList) obj;
 
 		if ((this.id == null) ? (other.getId() != null) : !this.id.equals(other.getId()))
 			return false;
@@ -130,7 +130,7 @@ public class FeatureLookupDataSet implements Comparable<FeatureLookupDataSet>{
 	}
 
 	@Override
-	public int compareTo(FeatureLookupDataSet o) {
+	public int compareTo(FeatureLookupList o) {
 		return name.compareTo(o.getName());
 	}
 
@@ -230,7 +230,7 @@ public class FeatureLookupDataSet implements Comparable<FeatureLookupDataSet>{
 		return featureLookupDataSetElement;
 	}
 	
-	public FeatureLookupDataSet(Element xmlElement) {
+	public FeatureLookupList(Element xmlElement) {
 				
 		this.id = xmlElement.getAttributeValue(FeatureLookupDataSetFields.Id.name());
 		if(id == null)

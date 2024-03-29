@@ -54,16 +54,16 @@ import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
 
 import edu.umich.med.mrc2.datoolbox.data.MinimalMSOneFeature;
-import edu.umich.med.mrc2.datoolbox.data.msclust.FeatureLookupDataSet;
+import edu.umich.med.mrc2.datoolbox.data.msclust.FeatureLookupList;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.search.FeatureListImportPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
-import edu.umich.med.mrc2.datoolbox.main.FeatureLookupDataSetManager;
+import edu.umich.med.mrc2.datoolbox.main.FeatureLookupListManager;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 
-public class FeatureLookupDataSetEditorDialog extends JDialog 
+public class FeatureLookupListEditorDialog extends JDialog 
 		implements ActionListener, BackedByPreferences{
 
 	/**
@@ -78,7 +78,7 @@ public class FeatureLookupDataSetEditorDialog extends JDialog
 	private static final Icon addFeatureCollectionIcon = GuiUtils.getIcon("newFeatureSubset", 32);
 	private static final Icon editFeatureCollectionIcon = GuiUtils.getIcon("editCollection", 32);
 	
-	private FeatureLookupDataSet dataSet;
+	private FeatureLookupList dataSet;
 	private JButton btnSave;
 	private JLabel dateCreatedLabel, lastModifiedLabel;
 	private File baseDirectory;
@@ -87,8 +87,8 @@ public class FeatureLookupDataSetEditorDialog extends JDialog
 
 	private FeatureListImportPanel featureListImportPanel;
 	
-	public FeatureLookupDataSetEditorDialog(
-			FeatureLookupDataSet datSet,
+	public FeatureLookupListEditorDialog(
+			FeatureLookupList datSet,
 			ActionListener actionListener) {
 		super();
 		setPreferredSize(new Dimension(700, 500));
@@ -212,7 +212,7 @@ public class FeatureLookupDataSetEditorDialog extends JDialog
 
 			setTitle("Create new feature lookup data set");
 			setIconImage(((ImageIcon) addFeatureCollectionIcon).getImage());
-			btnSave.setText(MainActionCommands.ADD_FEATURE_LOOKUP_DATA_SET_COMMAND.getName());			
+			btnSave.setText(MainActionCommands.ADD_FEATURE_LOOKUP_LIST_COMMAND.getName());			
 			dateCreatedLabel.setText(MRC2ToolBoxConfiguration.getDateTimeFormat().format(new Date()));
 			lastModifiedLabel.setText(MRC2ToolBoxConfiguration.getDateTimeFormat().format(new Date()));			
 			methodAuthorLabel.setText(MRC2ToolBoxCore.getIdTrackerUser().getInfo());
@@ -221,7 +221,7 @@ public class FeatureLookupDataSetEditorDialog extends JDialog
 		else {
 			setTitle("Edit information for " + dataSet.getName());
 			setIconImage(((ImageIcon) editFeatureCollectionIcon).getImage());
-			btnSave.setActionCommand(MainActionCommands.EDIT_FEATURE_LOOKUP_DATA_SET_COMMAND.getName());
+			btnSave.setActionCommand(MainActionCommands.EDIT_FEATURE_LOOKUP_LIST_COMMAND.getName());
 			idValueLabel.setText(dataSet.getId());
 
 			if (dataSet.getDateCreated() != null)
@@ -266,14 +266,14 @@ public class FeatureLookupDataSetEditorDialog extends JDialog
 	
 	private String validateNameAgainstDatabase(String newName) {
 		
-		FeatureLookupDataSetManager.refreshFeatureLookupDataSetList();
-		FeatureLookupDataSet existing = null;
+		FeatureLookupListManager.refreshFeatureLookupListCollection();
+		FeatureLookupList existing = null;
 		if(this.dataSet == null) {
-			existing = FeatureLookupDataSetManager.getFeatureLookupDataSetByName(newName);
+			existing = FeatureLookupListManager.getFeatureLookupListByName(newName);
 		}
 		else {
 			String id = dataSet.getId();
-			existing = FeatureLookupDataSetManager.getFeatureLookupDataSetList().stream().
+			existing = FeatureLookupListManager.getFeatureLookupListCollection().stream().
 					filter(f -> !f.getId().equals(id)).
 					filter(f -> f.getName().equalsIgnoreCase(newName)).
 					findFirst().orElse(null);
@@ -286,8 +286,8 @@ public class FeatureLookupDataSetEditorDialog extends JDialog
 	
 	private String validateNameAgainstProject(String newName) {
 		
-		FeatureLookupDataSet existing = null;
-		Set<FeatureLookupDataSet> projectFeatureLookupDataSets = 
+		FeatureLookupList existing = null;
+		Set<FeatureLookupList> projectFeatureLookupDataSets = 
 				MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment().
 					getMsmsClusterDataSets().stream().
 					filter(d -> d.getFeatureLookupDataSet() != null).
@@ -327,7 +327,7 @@ public class FeatureLookupDataSetEditorDialog extends JDialog
 
 	}
 	
-	public FeatureLookupDataSet getFeatureLookupDataSet() {
+	public FeatureLookupList getFeatureLookupDataSet() {
 		return dataSet;
 	}
 	

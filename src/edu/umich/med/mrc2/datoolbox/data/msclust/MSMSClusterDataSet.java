@@ -62,7 +62,7 @@ public class MSMSClusterDataSet implements IMSMSClusterDataSet {
 	private MSMSClusteringParameterSet parameters;
 	private Set<IMsFeatureInfoBundleCluster>clusters;
 	private Set<String>clusterIds;
-	private FeatureLookupDataSet featureLookupDataSet;
+	private FeatureLookupList featureLookupDataSet;
 	private BinnerAnnotationLookupDataSet binnerAnnotationDataSet;
 	
 	//	TODO specify data set type in constructor
@@ -333,7 +333,7 @@ public class MSMSClusterDataSet implements IMSMSClusterDataSet {
 		Element lookupListElement = 
 				xmlElement.getChild(FeatureLookupDataSetFields.FeatureLookupDataSet.name());
         if(lookupListElement != null )
-        	featureLookupDataSet = new FeatureLookupDataSet(lookupListElement);     
+        	featureLookupDataSet = new FeatureLookupList(lookupListElement);     
         
 		clusters = new HashSet<IMsFeatureInfoBundleCluster>();
 		clusterIds = new TreeSet<String>();
@@ -360,7 +360,7 @@ public class MSMSClusterDataSet implements IMSMSClusterDataSet {
 			dataSetType = MSMSClusterDataSetType.valueOf(dsTypeString);
 	}
 
-	public FeatureLookupDataSet getFeatureLookupDataSet() {
+	public FeatureLookupList getFeatureLookupDataSet() {
 		return featureLookupDataSet;
 	}
 	
@@ -384,7 +384,7 @@ public class MSMSClusterDataSet implements IMSMSClusterDataSet {
 				collect(Collectors.toSet());
 	}
 
-	public void setFeatureLookupDataSet(FeatureLookupDataSet featureLookupDataSet) {
+	public void setFeatureLookupDataSet(FeatureLookupList featureLookupDataSet) {
 		this.featureLookupDataSet = featureLookupDataSet;
 	}
 	

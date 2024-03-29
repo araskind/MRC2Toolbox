@@ -32,7 +32,7 @@ import edu.umich.med.mrc2.datoolbox.gui.utils.CommonToolbar;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 
-public class FeatureLookupDataSetManagerToolbar extends CommonToolbar {
+public class FeatureLookupListManagerToolbar extends CommonToolbar {
 
 	/**
 	 * 
@@ -44,26 +44,26 @@ public class FeatureLookupDataSetManagerToolbar extends CommonToolbar {
 	
 	@SuppressWarnings("unused")
 	private JButton
-		addFeatureCollectionButton,
-		editFeatureCollectionButton,
-		deleteFeatureCollectionButton;
+		addFeatureLookupListButton,
+		editFeatureLookupListButton,
+		deleteFeatureLookupListButton;
 
-	public FeatureLookupDataSetManagerToolbar(ActionListener commandListener) {
+	public FeatureLookupListManagerToolbar(ActionListener commandListener) {
 		super(commandListener);
 
-		addFeatureCollectionButton = GuiUtils.addButton(this, null, addFeatureCollectionIcon, commandListener,
-				MainActionCommands.ADD_FEATURE_LOOKUP_DATA_SET_DIALOG_COMMAND.getName(),
-				MainActionCommands.ADD_FEATURE_LOOKUP_DATA_SET_DIALOG_COMMAND.getName(),
+		addFeatureLookupListButton = GuiUtils.addButton(this, null, addFeatureCollectionIcon, commandListener,
+				MainActionCommands.ADD_FEATURE_LOOKUP_LIST_DIALOG_COMMAND.getName(),
+				MainActionCommands.ADD_FEATURE_LOOKUP_LIST_DIALOG_COMMAND.getName(),
 				buttonDimension);
 
-		editFeatureCollectionButton = GuiUtils.addButton(this, null, editFeatureCollectionIcon, commandListener,
-				MainActionCommands.EDIT_FEATURE_LOOKUP_DATA_SET_DIALOG_COMMAND.getName(),
-				MainActionCommands.EDIT_FEATURE_LOOKUP_DATA_SET_DIALOG_COMMAND.getName(),
+		editFeatureLookupListButton = GuiUtils.addButton(this, null, editFeatureCollectionIcon, commandListener,
+				MainActionCommands.EDIT_FEATURE_LOOKUP_LIST_DIALOG_COMMAND.getName(),
+				MainActionCommands.EDIT_FEATURE_LOOKUP_LIST_DIALOG_COMMAND.getName(),
 				buttonDimension);
 
-		deleteFeatureCollectionButton = GuiUtils.addButton(this, null, deleteFeatureCollectionIcon, commandListener,
-				MainActionCommands.DELETE_FEATURE_LOOKUP_DATA_SET_COMMAND.getName(),
-				MainActionCommands.DELETE_FEATURE_LOOKUP_DATA_SET_COMMAND.getName(),
+		deleteFeatureLookupListButton = GuiUtils.addButton(this, null, deleteFeatureCollectionIcon, commandListener,
+				MainActionCommands.DELETE_FEATURE_LOOKUP_LIST_COMMAND.getName(),
+				MainActionCommands.DELETE_FEATURE_LOOKUP_LIST_COMMAND.getName(),
 				buttonDimension);
 	}
 

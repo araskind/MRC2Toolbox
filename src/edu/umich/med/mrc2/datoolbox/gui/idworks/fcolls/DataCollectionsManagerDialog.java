@@ -43,7 +43,7 @@ import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundleCollection;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.fcolls.binner.DockableBinnerAnnotationDataSetManager;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.fcolls.clusters.DockableMSMSClusterDataSetsManager;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.fcolls.features.DockableFeatureCollectionsManager;
-import edu.umich.med.mrc2.datoolbox.gui.idworks.fcolls.lookup.DockableFeatureLookupDataSetManager;
+import edu.umich.med.mrc2.datoolbox.gui.idworks.fcolls.lookup.DockableFeatureLookupListManager;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.main.PersistentLayout;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
@@ -71,7 +71,7 @@ public class DataCollectionsManagerDialog extends JDialog
 	private CollectionManagerToolbar toolbar;
 	private DockableFeatureCollectionsManager featureCollectionsManager;
 	private DockableMSMSClusterDataSetsManager featureClusterCollectionsManager;
-	private DockableFeatureLookupDataSetManager featureLookupDataSetManager;
+	private DockableFeatureLookupListManager featureLookupDataSetManager;
 	private DockableBinnerAnnotationDataSetManager binnerAnnotationDataSetManager;
 	private IndeterminateProgressDialog idp;
 	
@@ -99,7 +99,7 @@ public class DataCollectionsManagerDialog extends JDialog
 		featureClusterCollectionsManager = 
 				new DockableMSMSClusterDataSetsManager(this);
 		featureLookupDataSetManager = 
-				new DockableFeatureLookupDataSetManager(this);
+				new DockableFeatureLookupListManager(this);
 		binnerAnnotationDataSetManager = 
 				new DockableBinnerAnnotationDataSetManager(this);
 

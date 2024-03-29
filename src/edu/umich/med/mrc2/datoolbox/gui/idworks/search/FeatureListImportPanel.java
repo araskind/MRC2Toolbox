@@ -58,9 +58,9 @@ import org.apache.commons.io.FilenameUtils;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.MinimalMSOneFeature;
 import edu.umich.med.mrc2.datoolbox.data.enums.ParameterSetStatus;
-import edu.umich.med.mrc2.datoolbox.data.msclust.FeatureLookupDataSet;
+import edu.umich.med.mrc2.datoolbox.data.msclust.FeatureLookupList;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
-import edu.umich.med.mrc2.datoolbox.database.idt.FeatureLookupDataSetUtils;
+import edu.umich.med.mrc2.datoolbox.database.idt.FeatureLookupListUtils;
 import edu.umich.med.mrc2.datoolbox.gui.communication.FormChangeEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.FormChangeListener;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.fcolls.lookup.FeatureLookupListSelectorDialog;
@@ -91,7 +91,7 @@ public class FeatureListImportPanel extends JPanel implements ActionListener, Ta
 	private File baseDirectory;
 	private JTextField dataSetNameTextField;
 	private JTextArea descriptionTextArea;
-	private FeatureLookupDataSet dataSet;
+	private FeatureLookupList dataSet;
 	private JButton btnNewButton, dbOpenButton;
 	private FeatureLookupListSelectorDialog featureLookupListSelectorDialog;
 	private Set<FormChangeListener> changeListeners;
@@ -108,14 +108,14 @@ public class FeatureListImportPanel extends JPanel implements ActionListener, Ta
 		fileImportPanel.setBorder(null);
 		
 		btnNewButton = new JButton(
-				MainActionCommands.IMPORT_LOOKUP_FEATURE_LIST_FROM_FILE_COMMAND.getName());
-		btnNewButton.setActionCommand(MainActionCommands.IMPORT_LOOKUP_FEATURE_LIST_FROM_FILE_COMMAND.getName());
+				MainActionCommands.IMPORT_FEATURE_LOOKUP_LIST_FROM_FILE_COMMAND.getName());
+		btnNewButton.setActionCommand(MainActionCommands.IMPORT_FEATURE_LOOKUP_LIST_FROM_FILE_COMMAND.getName());
 		btnNewButton.addActionListener(this);
 		fileImportPanel.setLayout(new FlowLayout(FlowLayout.RIGHT, 5, 5));
 		
 		dbOpenButton = 
-				new JButton(MainActionCommands.SELECT_LOOKUP_FEATURE_LIST_FROM_DATABASE_COMMAND.getName());
-		dbOpenButton.setActionCommand(MainActionCommands.SELECT_LOOKUP_FEATURE_LIST_FROM_DATABASE_COMMAND.getName());
+				new JButton(MainActionCommands.SELECT_FEATURE_LOOKUP_LIST_FROM_DATABASE_COMMAND.getName());
+		dbOpenButton.setActionCommand(MainActionCommands.SELECT_FEATURE_LOOKUP_LIST_FROM_DATABASE_COMMAND.getName());
 		dbOpenButton.addActionListener(this);
 		fileImportPanel.add(dbOpenButton);
 		fileImportPanel.add(btnNewButton);
@@ -125,7 +125,7 @@ public class FeatureListImportPanel extends JPanel implements ActionListener, Ta
 		panel.setBorder(new CompoundBorder(new EmptyBorder(10, 10, 10, 10), 
 				new CompoundBorder(new TitledBorder(
 						new EtchedBorder(EtchedBorder.LOWERED, new Color(255, 255, 255), new Color(160, 160, 160)), 
-						"Feature set properties", TitledBorder.LEADING, 
+						"Feature list properties", TitledBorder.LEADING, 
 						TitledBorder.TOP, null, new Color(0, 0, 0)), 
 						new EmptyBorder(10, 10, 10, 10))));
 		add(panel, BorderLayout.NORTH);
@@ -232,13 +232,13 @@ public class FeatureListImportPanel extends JPanel implements ActionListener, Ta
 	@Override
 	public void actionPerformed(ActionEvent e) {
 
-		if(e.getActionCommand().equals(MainActionCommands.IMPORT_LOOKUP_FEATURE_LIST_FROM_FILE_COMMAND.getName()))
+		if(e.getActionCommand().equals(MainActionCommands.IMPORT_FEATURE_LOOKUP_LIST_FROM_FILE_COMMAND.getName()))
 			importLookupFeatureListFromFile();
 
-		if(e.getActionCommand().equals(MainActionCommands.SELECT_LOOKUP_FEATURE_LIST_FROM_DATABASE_COMMAND.getName()))
+		if(e.getActionCommand().equals(MainActionCommands.SELECT_FEATURE_LOOKUP_LIST_FROM_DATABASE_COMMAND.getName()))
 			selectLookupFeatureListFromDatabase();
 		
-		if(e.getActionCommand().equals(MainActionCommands.LOAD_LOOKUP_FEATURE_LIST_FROM_DATABASE_COMMAND.getName()))
+		if(e.getActionCommand().equals(MainActionCommands.LOAD_FEATURE_LOOKUP_LIST_FROM_DATABASE_COMMAND.getName()))
 			loadLookupFeatureListFromDatabase();
 	}
 	
@@ -262,7 +262,7 @@ public class FeatureListImportPanel extends JPanel implements ActionListener, Ta
 
 	private void loadLookupFeatureListFromDatabase() {
 		
-		FeatureLookupDataSet dataSet = 
+		FeatureLookupList dataSet = 
 				featureLookupListSelectorDialog.getSelectedDataSet();
 		if(dataSet == null)
 			return;		
@@ -279,7 +279,7 @@ public class FeatureListImportPanel extends JPanel implements ActionListener, Ta
 		featureLookupListSelectorDialog.setVisible(true);
 	}
 	
-	public void loadDataSet(FeatureLookupDataSet dataSet) {
+	public void loadDataSet(FeatureLookupList dataSet) {
 		
 		if(dataSet == null)
 			return;
@@ -294,7 +294,7 @@ public class FeatureListImportPanel extends JPanel implements ActionListener, Ta
 			featureTable.setTableModelFromFeatureCollection(dataSet.getFeatures());
 	}
 	
-	private void getFeaturesForFeatureLookupDataSet(FeatureLookupDataSet dataSet) {
+	private void getFeaturesForFeatureLookupDataSet(FeatureLookupList dataSet) {
 
 		GetFeaturesForFeatureLookupDataSetTask task = 
 				new GetFeaturesForFeatureLookupDataSetTask(dataSet);
@@ -308,9 +308,9 @@ public class FeatureListImportPanel extends JPanel implements ActionListener, Ta
 		/*
 		 * Main task. Executed in background thread.
 		 */
-		private FeatureLookupDataSet dataSet;
+		private FeatureLookupList dataSet;
 
-		public GetFeaturesForFeatureLookupDataSetTask(FeatureLookupDataSet dataSet) {
+		public GetFeaturesForFeatureLookupDataSetTask(FeatureLookupList dataSet) {
 			this.dataSet = dataSet;
 		}
 
@@ -318,7 +318,7 @@ public class FeatureListImportPanel extends JPanel implements ActionListener, Ta
 		public Void doInBackground() {
 
 			try {
-				FeatureLookupDataSetUtils.getFeaturesForFeatureLookupDataSet(dataSet);
+				FeatureLookupListUtils.getFeaturesForFeatureLookupList(dataSet);
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -558,7 +558,7 @@ public class FeatureListImportPanel extends JPanel implements ActionListener, Ta
 		return featureTable.getAllFeatures();
 	}
 
-	public FeatureLookupDataSet getDataSet() {
+	public FeatureLookupList getDataSet() {
 		return dataSet;
 	}
 	
