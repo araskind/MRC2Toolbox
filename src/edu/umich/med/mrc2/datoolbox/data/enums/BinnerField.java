@@ -23,43 +23,42 @@ package edu.umich.med.mrc2.datoolbox.data.enums;
 
 public enum BinnerField {
 
-		INDEX("Index"),
-		FEATURE("Feature"),
-		MZ("m/z"),
-		RT("RT"),
-		INTENSITY("Median Intensity"),
-		MASS_ERROR("Mass Error"),
-		RMD("RMD"),
-		ANNOTATION("Annotations"),
-		OTHER_ANNOTATION_IN_GROUP("Other Annotations In Group"),
-		DERIVATIONS("Derivations"),
-		FEATURE_GROUP_NUMBER("Feature Group Number"),
-		CHARGE_CARRIER("Charge Carrier"),
-		ADDITIONAL_ADDUCTS("Adduct/NL"),
-		ISOTOPES("Isotopes"),
-		OTHER_ISOTOPES_IN_GROUP("Other Isotopes In Group"),
-		DERIVED_MW("Derived Molecular Mass"),
-		BIN("Bin"),
-		CLUSTER("Corr Cluster"),
-		REBIN_SUBCLUSTER("Rebin Subcluster"),
-		RT_SUBCLUSTER("RT Subcluster"),
-//		KMD("KMD"),
-//		METABOLITE_NAME("Metabolite_name"),
-//		BINNER_NAME("Binner name"),
-//		NEUTRAL_MASS("Neutral mass"),
-//		RT_EXPECTED("RT expected"),
-//		MONOISOTOPIC_MZ("Monoisotopic M/Z"),
-//		CHARGE("Charge"),
+		INDEX("Index", true),
+		FEATURE("Feature", true),
+		MZ("m/z", true),
+		RT("RT", true),
+		INTENSITY("Median Intensity", true),
+		MASS_ERROR("Mass Error", true),
+		RMD("RMD", false),
+		ANNOTATION("Annotations", true),
+		OTHER_ANNOTATION_IN_GROUP("Other Annotations In Group", false),
+		DERIVATIONS("Derivations", true),
+		FEATURE_GROUP_NUMBER("Feature Group Number", true),
+		CHARGE_CARRIER("Charge Carrier", true),
+		ADDITIONAL_ADDUCTS("Adduct/NL", true),
+		ISOTOPES("Isotopes", true),
+		OTHER_ISOTOPES_IN_GROUP("Other Isotopes In Group", false),
+		DERIVED_MW("Derived Molecular Mass", true),
+		BIN("Bin", true),
+		CLUSTER("Corr Cluster", true),
+		REBIN_SUBCLUSTER("Rebin Subcluster", true),
+		RT_SUBCLUSTER("RT Subcluster", true),
 	;
 
 	private final String uiName;
+	private final boolean obligatory;
 
-	BinnerField(String uiName) {
+	BinnerField(String uiName, boolean obligatory) {
 		this.uiName = uiName;
+		this.obligatory = obligatory;
 	}
 
 	public String getName() {
 		return uiName;
+	}
+	
+	public boolean isObligatory() {
+		return obligatory;
 	}
 	
 	@Override

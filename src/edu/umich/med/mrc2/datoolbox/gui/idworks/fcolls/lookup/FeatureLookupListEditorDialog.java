@@ -72,7 +72,8 @@ public class FeatureLookupListEditorDialog extends JDialog
 	private static final long serialVersionUID = 7684989595475342241L;
 
 	private Preferences preferences;
-	public static final String PREFS_NODE = "edu.umich.med.mrc2.cefanalyzer.gui.FeatureLookupDataSetEditorDialog";
+	public static final String PREFS_NODE = 
+			"edu.umich.med.mrc2.cefanalyzer.gui.FeatureLookupDataSetEditorDialog";
 	public static final String BASE_DIRECTORY = "BASE_DIRECTORY";
 	
 	private static final Icon addFeatureCollectionIcon = GuiUtils.getIcon("newFeatureSubset", 32);
@@ -210,7 +211,7 @@ public class FeatureLookupListEditorDialog extends JDialog
 
 		if(dataSet == null) {
 
-			setTitle("Create new feature lookup data set");
+			setTitle("Create new feature lookup list");
 			setIconImage(((ImageIcon) addFeatureCollectionIcon).getImage());
 			btnSave.setText(MainActionCommands.ADD_FEATURE_LOOKUP_LIST_COMMAND.getName());			
 			dateCreatedLabel.setText(MRC2ToolBoxConfiguration.getDateTimeFormat().format(new Date()));

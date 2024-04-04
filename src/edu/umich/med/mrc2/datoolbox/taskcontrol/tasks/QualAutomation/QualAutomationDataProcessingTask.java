@@ -42,6 +42,7 @@ public class QualAutomationDataProcessingTask extends AbstractTask {
 	private File methodFile;
 	private File qualBinary;
 	private AutomatorPanel automatorPanel;
+	private String colorCode;
 	
 	public QualAutomationDataProcessingTask(
 			File dataFile, 
@@ -55,7 +56,15 @@ public class QualAutomationDataProcessingTask extends AbstractTask {
 
 		total = 100;
 		processed = 20;
-		taskDescription = "Data file " + dataFile.getName() + " [ waiting ]";
+		colorCode = "black";
+		if(dataFile.getName().matches("(?i).+\\-N\\.d$"))
+			colorCode = "blue";
+		
+		if(dataFile.getName().matches("(?i).+\\-P\\.d$"))
+			colorCode = "red";
+		
+		taskDescription = "<HTML><font color = \"" + colorCode + "\">Data file " 
+				+ dataFile.getName() + "</font> [ waiting ]";
 		automatorPanel = (AutomatorPanel) MRC2ToolBoxCore.getMainWindow().getPanel(PanelList.AUTOMATOR);		
 	}
 	
@@ -75,8 +84,8 @@ public class QualAutomationDataProcessingTask extends AbstractTask {
 	
 	protected void runQualAutomation() throws InterruptedException {
 
-		taskDescription = "Processing " + dataFile.getName() + 
-				" data file using " + methodFile.getName() + " method";
+		taskDescription = "<HTML><font color = \"" + colorCode + "\">Processing " + dataFile.getName() + 
+				"</font> data file using " + methodFile.getName() + " method";
 		ProcessBuilder pb = new ProcessBuilder(
 				qualBinary.getAbsolutePath(), 
 				dataFile.getAbsolutePath(),

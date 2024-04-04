@@ -60,7 +60,7 @@ public class BinnerAnnotationLookupDataSetSelectorDialog extends JDialog {
 	public BinnerAnnotationLookupDataSetSelectorDialog(ActionListener listener) {
 		super();
 		
-		setTitle("Select Binner annotation lookup data set");
+		setTitle("Select Binner annotation data set");
 		setIconImage(((ImageIcon) editCollectionIcon).getImage());
 		setPreferredSize(new Dimension(640, 480));
 		setModalityType(ModalityType.APPLICATION_MODAL);

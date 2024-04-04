@@ -265,8 +265,14 @@ public class BinnerAnnotationsImportPanel extends JPanel
 	}
 	
 	public void disableLoadingFeatures() {
+		
 		fileOpenButton.setEnabled(false);
-		dbOpenButton.setEnabled(false);
+		dbOpenButton.setEnabled(false);		
+		massErrorTextField.setEnabled(false);
+		massErrorTextField.setEditable(false);
+		massErrorTypeComboBox.setEnabled(false);
+		rtErrorTextField.setEnabled(false);
+		rtErrorTextField.setEditable(false);
 	}	
 	
 	public String getDataSetName() {

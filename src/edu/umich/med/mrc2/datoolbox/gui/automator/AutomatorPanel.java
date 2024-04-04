@@ -33,7 +33,9 @@ import java.util.regex.Pattern;
 import javax.swing.Icon;
 import javax.swing.event.ListSelectionEvent;
 
+import org.apache.commons.io.filefilter.FileFilterUtils;
 import org.apache.commons.io.filefilter.RegexFileFilter;
+import org.apache.commons.lang3.StringUtils;
 
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignEvent;
@@ -71,6 +73,7 @@ public class AutomatorPanel extends DockableMRC2ToolboxPanel implements TaskCont
 	private PrintStream ps;
 	private TextAreaOutputStream taos;
 	private FileFilter dotDfilter;
+	private FileFilter cefFilter;
 	private ArrayList<Task> tasksToRerurn;
 	private int processNumber;
 	private File[] posDataFileList;
@@ -116,7 +119,10 @@ public class AutomatorPanel extends DockableMRC2ToolboxPanel implements TaskCont
 		loadLayout(layoutConfigFile);
 		populatePanelsMenu();
 		
-		dotDfilter = new RegexFileFilter(".+\\.[dD]$");
+//		dotDfilter = new RegexFileFilter(".+\\.[dD]$");
+		
+		dotDfilter = FileFilterUtils.makeDirectoryOnly(new RegexFileFilter(".+\\.[dD]$"));
+		cefFilter = FileFilterUtils.makeFileOnly(new RegexFileFilter("(?i).+\\.cef$"));
 		tasksToRerurn = new ArrayList<Task>();
 	}
 
@@ -221,63 +227,60 @@ public class AutomatorPanel extends DockableMRC2ToolboxPanel implements TaskCont
 
 	private boolean checkInputs() {
 
-		boolean inputValid = true;
+		ArrayList<String>errors = new ArrayList<String>();
+		
 
 		processNumber = MRC2ToolBoxConfiguration.getMaxThreadNumber();
-
 		if (processNumber == 0)
-			processNumber = 12;
+			processNumber = 8;
 
 		// Executable
 		qualAutomationBinary = new File(MRC2ToolBoxConfiguration.getQualAutomationExecutableFile());
-
 		if (qualAutomationBinary == null || !qualAutomationBinary.exists()
 				|| !qualAutomationBinary.getName().equals("QualAutomation.exe")) {
 
-			MessageDialog.showErrorMsg("AgtQual binary not found!");
-			return false;
+			errors.add("AgtQual binary not found!");
 		}
-
 		// Input data and methods
+		posDataFileList = new File[0];
+		File[]posCefList = new File[0];
 		positiveModeDataFilesFolder = dataFilesPanel.getPositiveDataFolder();
-
-		if (positiveModeDataFilesFolder.exists())
-			posDataFileList = positiveModeDataFilesFolder.listFiles(dotDfilter);
-
-		negativeModeDataFilesFolder = dataFilesPanel.getNegativeDataFolder();
-
-		if (negativeModeDataFilesFolder.exists())
-			negDataFileList = negativeModeDataFilesFolder.listFiles(dotDfilter);
-
-		positiveModeMethod = parametersPanel.getPositiveMethodFile();
-
 		if (positiveModeDataFilesFolder.exists()) {
+			posDataFileList = positiveModeDataFilesFolder.listFiles(dotDfilter);
+			posCefList = positiveModeDataFilesFolder.listFiles(cefFilter);
+		}
+		positiveModeMethod = parametersPanel.getPositiveMethodFile();
+		if (posDataFileList.length > 0) {
 
-			if (posDataFileList.length > 0) {
-
-				if (!positiveModeMethod.exists() || !Pattern.matches(".+[mM]$", positiveModeMethod.getName())) {
-
-					MessageDialog.showErrorMsg("Positive mode method file missing or wrong type!");
-					return false;
-				} else
-					inputValid = true;
-			}
+			if (!positiveModeMethod.exists() || !Pattern.matches(".+[mM]$", positiveModeMethod.getName()))
+				errors.add("Positive mode method file missing or wrong type!");
+				
+			if(posCefList.length > 0)
+				errors.add("Positive mode directory already contains results!");
+		}
+		
+		negDataFileList = new File[0];
+		File[]negCefList = new File[0];
+		negativeModeDataFilesFolder = dataFilesPanel.getNegativeDataFolder();
+		if (negativeModeDataFilesFolder.exists()) {
+			negDataFileList = negativeModeDataFilesFolder.listFiles(dotDfilter);
+			negCefList = negativeModeDataFilesFolder.listFiles(cefFilter);
 		}
 		negativeModeMethod = parametersPanel.getNegativeMethodFile();
+		if (negDataFileList.length > 0) {
 
-		if (negativeModeDataFilesFolder.exists()) {
+			if (!negativeModeMethod.exists() || !Pattern.matches(".+[mM]$", negativeModeMethod.getName()))
+				errors.add("Negative mode method file missing or wrong type!");
 
-			if (negDataFileList.length > 0) {
-
-				if (!negativeModeMethod.exists() || !Pattern.matches(".+[mM]$", negativeModeMethod.getName())) {
-
-					MessageDialog.showErrorMsg("Negative mode method file missing or wrong type!");
-					return false;
-				}
-			} else
-				inputValid = true;
-		}
-		return inputValid;
+			if(negCefList.length > 0)
+				errors.add("Negative mode directory already contains results!");
+		} 	
+		if(errors.isEmpty())
+			return true;
+		else {
+			MessageDialog.showErrorMsg(StringUtils.join(errors, "\n"));
+			return false;
+		}		
 	}
 
 	@Override

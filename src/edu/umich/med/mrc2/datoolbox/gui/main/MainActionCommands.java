@@ -971,6 +971,8 @@ public enum MainActionCommands {
 	SELECT_RECENT_NEGATIVE_MODE_RAW_DATA_FOLDER("Select recent NEG mode raw data folder"),
 	SET_POSITIVE_MODE_RAW_DATA_FOLDER("Set POS mode raw data folder"),
 	SET_NEGATIVE_MODE_RAW_DATA_FOLDER("Set NEG mode raw data folder"),
+	OPEN_POSITIVE_MODE_RAW_DATA_FOLDER("Open POS mode raw data folder"),
+	OPEN_NEGATIVE_MODE_RAW_DATA_FOLDER("Open NEG mode raw data folder"),
 	
 	//	LIMS
 	SAVE_EXPERIMENT_SUMMARY_COMMAND("Save LIMS experiment summary"),
@@ -1281,11 +1283,11 @@ public enum MainActionCommands {
 	IMPORT_BINNER_ANNOTATIONS_FROM_FILE_COMMAND("Import Binner annotations from file"),
 	SELECT_BINNER_ANNOTATIONS_FROM_DATABASE_COMMAND("Select Binner annotations set from database"),
 	LOAD_BINNER_ANNOTATIONS_FROM_DATABASE_COMMAND("Load Binner annotations set from database"),	
-	ADD_BINNER_ANNOTATIONS_DATA_SET_DIALOG_COMMAND("Create new Binner annotations lookup data set"),
-	ADD_BINNER_ANNOTATIONS_DATA_SET_COMMAND("Save new Binner annotations lookup data set"),
-	EDIT_BINNER_ANNOTATIONS_DATA_SET_DIALOG_COMMAND("Edit selected Binner annotations lookup data set"),
-	EDIT_BINNER_ANNOTATIONS_DATA_SET_COMMAND("Save edited Binner annotations lookup data set"),
-	DELETE_BINNER_ANNOTATIONS_DATA_SET_COMMAND("Delete selected Binner annotations lookup data set"),
+	ADD_BINNER_ANNOTATIONS_DATA_SET_DIALOG_COMMAND("Create new Binner annotations data set"),
+	ADD_BINNER_ANNOTATIONS_DATA_SET_COMMAND("Save new Binner annotations data set"),
+	EDIT_BINNER_ANNOTATIONS_DATA_SET_DIALOG_COMMAND("Edit selected Binner annotations data set"),
+	EDIT_BINNER_ANNOTATIONS_DATA_SET_COMMAND("Save edited Binner annotations data set"),
+	DELETE_BINNER_ANNOTATIONS_DATA_SET_COMMAND("Delete selected Binner annotations data set"),
 	
 	//	Manual peak integration
 	SHOW_MANUAL_INTEGRATOR_SETTINGS("Show manual integrator settings"),

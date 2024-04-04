@@ -196,12 +196,12 @@ public class StatusBar extends JPanel implements
 		add(memoryPanel);
 
 		//	Task block
-		JPanel taskPanel = new JPanel();	
+		JPanel taskPanel = new JPanel();
 		taskPanel.setBorder(new EmptyBorder(5, 30, 5, 30));
 		GridBagLayout gridBagLayout = new GridBagLayout();
 		gridBagLayout.columnWidths = new int[]{0, 0, 0, 0, 0, 0, 0};
 		gridBagLayout.rowHeights = new int[]{0, 0};
-		gridBagLayout.columnWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
+		gridBagLayout.columnWeights = new double[]{0.0, 0.0, 0.0, 1.0, 0.0, 1.0, Double.MIN_VALUE};
 		gridBagLayout.rowWeights = new double[]{0.0, Double.MIN_VALUE};
 		taskPanel.setLayout(gridBagLayout);
 		
@@ -215,8 +215,8 @@ public class StatusBar extends JPanel implements
 		
 		maxTasksLabel = new JLabel(" ");
 		maxTasksLabel.setPreferredSize(new Dimension(20, 14));
-		maxTasksLabel.setMinimumSize(new Dimension(20, 14));
-		maxTasksLabel.setMaximumSize(new Dimension(30, 14));
+		maxTasksLabel.setMinimumSize(new Dimension(60, 14));
+		maxTasksLabel.setMaximumSize(new Dimension(80, 14));
 		maxTasksLabel.setFont(new Font("Tahoma", Font.BOLD, 12));
 		GridBagConstraints gbc_maxTasksLabel = new GridBagConstraints();
 		gbc_maxTasksLabel.fill = GridBagConstraints.HORIZONTAL;
@@ -235,8 +235,8 @@ public class StatusBar extends JPanel implements
 		
 		runningTasksLabel = new JLabel(" ");
 		runningTasksLabel.setPreferredSize(new Dimension(20, 14));
-		runningTasksLabel.setMinimumSize(new Dimension(20, 14));
-		runningTasksLabel.setMaximumSize(new Dimension(30, 14));
+		runningTasksLabel.setMinimumSize(new Dimension(50, 14));
+		runningTasksLabel.setMaximumSize(new Dimension(80, 14));
 		runningTasksLabel.setBackground(Color.GREEN);
 		runningTasksLabel.setForeground(Color.BLACK);
 		runningTasksLabel.setOpaque(true);
@@ -258,8 +258,8 @@ public class StatusBar extends JPanel implements
 		
 		waitingTasksLabel = new JLabel(" ");
 		waitingTasksLabel.setPreferredSize(new Dimension(20, 14));
-		waitingTasksLabel.setMinimumSize(new Dimension(20, 14));
-		waitingTasksLabel.setMaximumSize(new Dimension(30, 14));
+		waitingTasksLabel.setMinimumSize(new Dimension(60, 14));
+		waitingTasksLabel.setMaximumSize(new Dimension(80, 14));
 		waitingTasksLabel.setBackground(Color.YELLOW);
 		waitingTasksLabel.setForeground(Color.BLACK);
 		waitingTasksLabel.setOpaque(true);

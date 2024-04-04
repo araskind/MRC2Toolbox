@@ -29,11 +29,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
@@ -156,9 +159,23 @@ public abstract class BinnerReportParserTask extends AbstractTask {
 		Cell currentCell;
 
 		Map<BinnerField, Integer> columnMap = getBinnerColumnMap(sheet.iterator().next());
-		if(!CollectionUtils.containsAll(columnMap.keySet(), Arrays.asList(BinnerField.values()))){
+		
+		List<BinnerField> obligatoryFields = 
+				Arrays.asList(BinnerField.values()).stream().
+				filter(v -> v.isObligatory()).collect(Collectors.toList());
+		if(!CollectionUtils.containsAll(columnMap.keySet(), obligatoryFields)){
+			
+			Collection<BinnerField> missingColumns = 
+					CollectionUtils.subtract(obligatoryFields, columnMap.keySet());
+			
+			List<String> missingColumnNames = 
+					missingColumns.stream().map(c -> c.getName()).
+					collect(Collectors.toList());
 
-			MessageDialog.showErrorMsg("Binner column naming mismatch!", MRC2ToolBoxCore.getMainWindow());
+			MessageDialog.showErrorMsg(
+					"Missing obligatory columns in Binner output:\n\n" +
+			StringUtils.join(missingColumnNames, "\n"), 
+					MRC2ToolBoxCore.getMainWindow());
 			setStatus(TaskStatus.FINISHED);
 			return null;
 		}
@@ -167,56 +184,84 @@ public abstract class BinnerReportParserTask extends AbstractTask {
 			if(r.getRowNum() > 0 && !r.getCell(0).getStringCellValue().trim().isEmpty()
 					&& !r.getCell(columnMap.get(BinnerField.ANNOTATION)).getStringCellValue().trim().isEmpty()) {
 
-				String featureName = r.getCell(columnMap.get(BinnerField.FEATURE)).getStringCellValue();
-				short fcol = r.getCell(columnMap.get(BinnerField.ANNOTATION)).getCellStyle().getFillForegroundColor();
+				String featureName = 
+						r.getCell(columnMap.get(BinnerField.FEATURE)).getStringCellValue();
+				short fcol = r.getCell(
+						columnMap.get(BinnerField.ANNOTATION)).getCellStyle().getFillForegroundColor();
 				BinnerAnnotation ba =
 						new BinnerAnnotation(featureName,
 								r.getCell(columnMap.get(BinnerField.ANNOTATION)).getStringCellValue());
 				if(fcol == 42)
 					ba.setPrimary(true);
 
-				ba.setDerivations(r.getCell(columnMap.get(BinnerField.DERIVATIONS)).getStringCellValue());
-				ba.setIsotopes(r.getCell(columnMap.get(BinnerField.ISOTOPES)).getStringCellValue());
-
-				currentCell = r.getCell(columnMap.get(BinnerField.MASS_ERROR));
-				if(currentCell.getCellType().equals(CellType.NUMERIC))
-					ba.setMassError(currentCell.getNumericCellValue());
-				
-				currentCell = r.getCell(columnMap.get(BinnerField.RMD));
-				if(currentCell.getCellType().equals(CellType.NUMERIC))
-					ba.setRmd(currentCell.getNumericCellValue());
-
-				currentCell = r.getCell(columnMap.get(BinnerField.FEATURE_GROUP_NUMBER));
-				if(currentCell.getCellType().equals(CellType.NUMERIC))
-					ba.setMolIonNumber((int) currentCell.getNumericCellValue());
-
-				ba.setChargeCarrier(r.getCell(columnMap.get(BinnerField.CHARGE_CARRIER)).getStringCellValue());
-				ba.setAdditionalAdducts(r.getCell(columnMap.get(BinnerField.ADDITIONAL_ADDUCTS)).getStringCellValue());
-
-				currentCell = r.getCell(columnMap.get(BinnerField.BIN));
-				if(currentCell.getCellType().equals(CellType.NUMERIC))
-					ba.setBinNumber((int) currentCell.getNumericCellValue());
-
-				currentCell = r.getCell(columnMap.get(BinnerField.CLUSTER));
-				if(currentCell.getCellType().equals(CellType.NUMERIC))
-					ba.setCorrClusterNumber((int) currentCell.getNumericCellValue());
-
-				currentCell = r.getCell(columnMap.get(BinnerField.REBIN_SUBCLUSTER));
-				if(currentCell.getCellType().equals(CellType.NUMERIC))
-					ba.setRebinSubclusterNumber((int) currentCell.getNumericCellValue());
-
-				currentCell = r.getCell(columnMap.get(BinnerField.RT_SUBCLUSTER));
-				if(currentCell.getCellType().equals(CellType.NUMERIC))
-					ba.setRtSubclusterNumber((int) currentCell.getNumericCellValue());
-
-				currentCell = r.getCell(columnMap.get(BinnerField.MZ));
-				if(currentCell.getCellType().equals(CellType.NUMERIC))
-					ba.setBinnerMz(currentCell.getNumericCellValue());
-
-				currentCell = r.getCell(columnMap.get(BinnerField.RT));
-				if(currentCell.getCellType().equals(CellType.NUMERIC))
-					ba.setBinnerRt(currentCell.getNumericCellValue());
-
+				if(columnMap.get(BinnerField.DERIVATIONS) != null) {
+					
+					ba.setDerivations(r.getCell(
+							columnMap.get(BinnerField.DERIVATIONS)).getStringCellValue());
+					ba.setIsotopes(
+							r.getCell(columnMap.get(BinnerField.ISOTOPES)).getStringCellValue());
+				}
+				if(columnMap.get(BinnerField.MASS_ERROR) != null) {
+					
+					currentCell = r.getCell(columnMap.get(BinnerField.MASS_ERROR));
+					if(currentCell.getCellType().equals(CellType.NUMERIC))
+						ba.setMassError(currentCell.getNumericCellValue());
+				}
+				if(columnMap.get(BinnerField.RMD) != null) {
+					
+					currentCell = r.getCell(columnMap.get(BinnerField.RMD));
+					if(currentCell.getCellType().equals(CellType.NUMERIC))
+						ba.setRmd(currentCell.getNumericCellValue());
+				}
+				if(columnMap.get(BinnerField.FEATURE_GROUP_NUMBER) != null) {
+					
+					currentCell = r.getCell(columnMap.get(BinnerField.FEATURE_GROUP_NUMBER));
+					if(currentCell.getCellType().equals(CellType.NUMERIC))
+						ba.setMolIonNumber((int) currentCell.getNumericCellValue());
+				}		
+				if(columnMap.get(BinnerField.CHARGE_CARRIER) != null) {
+					
+					ba.setChargeCarrier(r.getCell(
+							columnMap.get(BinnerField.CHARGE_CARRIER)).getStringCellValue());
+					ba.setAdditionalAdducts(
+							r.getCell(columnMap.get(BinnerField.ADDITIONAL_ADDUCTS)).getStringCellValue());
+				}
+				if(columnMap.get(BinnerField.BIN) != null) {
+					
+					currentCell = r.getCell(columnMap.get(BinnerField.BIN));
+					if(currentCell.getCellType().equals(CellType.NUMERIC))
+						ba.setBinNumber((int) currentCell.getNumericCellValue());
+				}
+				if(columnMap.get(BinnerField.CLUSTER) != null) {
+					
+					currentCell = r.getCell(columnMap.get(BinnerField.CLUSTER));
+					if(currentCell.getCellType().equals(CellType.NUMERIC))
+						ba.setCorrClusterNumber((int) currentCell.getNumericCellValue());
+				}
+				if(columnMap.get(BinnerField.REBIN_SUBCLUSTER) != null) {
+					
+					currentCell = r.getCell(columnMap.get(BinnerField.REBIN_SUBCLUSTER));
+					if(currentCell.getCellType().equals(CellType.NUMERIC))
+						ba.setRebinSubclusterNumber((int) currentCell.getNumericCellValue());
+				}
+				if(columnMap.get(BinnerField.RT_SUBCLUSTER) != null) {
+					
+					currentCell = r.getCell(columnMap.get(BinnerField.RT_SUBCLUSTER));
+					if(currentCell.getCellType().equals(CellType.NUMERIC))
+						ba.setRtSubclusterNumber((int) currentCell.getNumericCellValue());
+				}
+				if(columnMap.get(BinnerField.MZ) != null) {
+					
+					currentCell = r.getCell(columnMap.get(BinnerField.MZ));
+					if(currentCell.getCellType().equals(CellType.NUMERIC))
+						ba.setBinnerMz(currentCell.getNumericCellValue());
+				}
+				if(columnMap.get(BinnerField.RT) != null) {
+					
+					currentCell = r.getCell(columnMap.get(BinnerField.RT));
+					if(currentCell.getCellType().equals(CellType.NUMERIC))
+						ba.setBinnerRt(currentCell.getNumericCellValue());
+				}
 				annotations.add(ba);
 			}
 		}

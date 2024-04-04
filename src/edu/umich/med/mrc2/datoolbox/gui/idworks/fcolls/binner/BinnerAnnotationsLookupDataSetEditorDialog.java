@@ -212,7 +212,7 @@ public class BinnerAnnotationsLookupDataSetEditorDialog extends JDialog
 
 		if(dataSet == null) {
 
-			setTitle("Create new Binner annotations lookup data set");
+			setTitle("Create new Binner annotations data set");
 			setIconImage(((ImageIcon) addFeatureCollectionIcon).getImage());
 			btnSave.setText(MainActionCommands.ADD_BINNER_ANNOTATIONS_DATA_SET_COMMAND.getName());			
 			dateCreatedLabel.setText(MRC2ToolBoxConfiguration.getDateTimeFormat().format(new Date()));
@@ -235,10 +235,10 @@ public class BinnerAnnotationsLookupDataSetEditorDialog extends JDialog
 						dataSet.getLastModified()));
 			
 			if(dataSet.getCreatedBy() != null)
-				methodAuthorLabel.setText(dataSet.getCreatedBy().getInfo());
+				methodAuthorLabel.setText(dataSet.getCreatedBy().getInfo());			
 			
-			binnerAnnotationsImportPanel.disableLoadingFeatures();
 			binnerAnnotationsImportPanel.loadDataSet(dataSet);
+			binnerAnnotationsImportPanel.disableLoadingFeatures();
 		}
 		loadPreferences();
 		pack();

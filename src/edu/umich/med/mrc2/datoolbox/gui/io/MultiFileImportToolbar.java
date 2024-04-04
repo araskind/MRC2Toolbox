@@ -21,15 +21,25 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.io;
 
+import java.awt.Dimension;
 import java.awt.event.ActionListener;
 
 import javax.swing.Icon;
 import javax.swing.JButton;
+import javax.swing.JComponent;
+import javax.swing.JFormattedTextField;
+import javax.swing.JLabel;
+import javax.swing.JSpinner;
+import javax.swing.SpinnerNumberModel;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import javax.swing.text.DefaultFormatter;
 
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.CommonToolbar;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
+import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 
 public class MultiFileImportToolbar extends CommonToolbar {
@@ -59,6 +69,8 @@ public class MultiFileImportToolbar extends CommonToolbar {
 		loadDesignButton,
 		addAcqMethodButton,
 		addDextrMethodButton;
+
+	private JSpinner taskNumberSpinner;
 
 	public MultiFileImportToolbar(ActionListener commandListener) {
 		
@@ -110,6 +122,30 @@ public class MultiFileImportToolbar extends CommonToolbar {
 				MainActionCommands.LOAD_DATA_FILE_SAMPLE_MAP_COMMAND.getName(),
 				MainActionCommands.LOAD_DATA_FILE_SAMPLE_MAP_COMMAND.getName(),
 				buttonDimension);
+		
+		addSeparator(buttonDimension);
+		
+		add(new JLabel("# of tasks: "));
+		
+		taskNumberSpinner = new JSpinner();
+		taskNumberSpinner.setModel(new SpinnerNumberModel(
+				MRC2ToolBoxConfiguration.getMaxThreadNumber(), 1, null, 1));
+		taskNumberSpinner.setPreferredSize(new Dimension(30, 22));
+		taskNumberSpinner.setMinimumSize(new Dimension(30, 22));
+		taskNumberSpinner.setMaximumSize(new Dimension(80, 22));
+		
+		JComponent comp = taskNumberSpinner.getEditor();
+	    JFormattedTextField field = (JFormattedTextField) comp.getComponent(0);
+	    DefaultFormatter formatter = (DefaultFormatter) field.getFormatter();
+	    formatter.setCommitsOnValidEdit(true);
+	    taskNumberSpinner.addChangeListener(new ChangeListener() {
+
+	        @Override
+	        public void stateChanged(ChangeEvent e) {
+	        	MRC2ToolBoxConfiguration.setMaxThreadNumber((int) taskNumberSpinner.getValue());
+	        }
+	    });	    
+		add(taskNumberSpinner);
 	}
 
 	@Override

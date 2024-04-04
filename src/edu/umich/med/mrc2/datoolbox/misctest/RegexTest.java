@@ -24,6 +24,7 @@ package edu.umich.med.mrc2.datoolbox.misctest;
 import java.io.BufferedInputStream;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
@@ -209,10 +210,19 @@ public class RegexTest {
 				MRC2ToolBoxCore.configDir + "MRC2ToolBoxPrefs.txt");
 		MRC2ToolBoxConfiguration.initConfiguration();
 		try {
-			batchDFileRename();
+			testCefFilter();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+	
+	private static void testCefFilter() {
+		
+		File testDir = new File("Y:\\_QUALTMP\\EX01392\\POS\\BATCH02");
+		FileFilter cefFilter = null;				
+		cefFilter = FileFilterUtils.makeFileOnly(new RegexFileFilter("(?i).+\\.cef$"));
+		File[]cefList = testDir.listFiles(cefFilter);
+		System.out.println(cefList.length + " files");
 	}
 	
 	private static void newPass(String pw) {
