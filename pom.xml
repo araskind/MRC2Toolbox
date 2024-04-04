@@ -13,7 +13,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>edu.umich.mrc2</groupId>
 	<artifactId>MRC2ToolBox</artifactId>
-	<version>1.2.73</version>
+	<version>1.2.74</version>
 	<name>MRC2ToolBox</name>
 	<description>Metabolomics data analysis</description>
 	<properties>

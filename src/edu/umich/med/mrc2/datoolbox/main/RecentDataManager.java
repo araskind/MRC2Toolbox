@@ -33,7 +33,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
@@ -46,9 +45,6 @@ import org.jdom2.output.XMLOutputter;
 
 import edu.umich.med.mrc2.datoolbox.data.ExperimentPointer;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundleCollection;
-import edu.umich.med.mrc2.datoolbox.data.compare.MSMSClusterDataSetComparator;
-import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureInfoBundleCollectionComparator;
-import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.data.msclust.IMSMSClusterDataSet;
 import edu.umich.med.mrc2.datoolbox.project.Experiment;
@@ -70,10 +66,9 @@ public class RecentDataManager {
 	private static Map<ProjectType,Collection<ExperimentPointer>>recentExperimentsMap = 
 			new TreeMap<ProjectType,Collection<ExperimentPointer>>();	
 	private static Set<MsFeatureInfoBundleCollection>featureCollections = 
-			new TreeSet<MsFeatureInfoBundleCollection>(
-					new MsFeatureInfoBundleCollectionComparator(SortProperty.Name));
+			new LinkedHashSet<MsFeatureInfoBundleCollection>();
 	private static Set<IMSMSClusterDataSet>featureClusterDataSets = 
-			new TreeSet<IMSMSClusterDataSet>(new MSMSClusterDataSetComparator(SortProperty.Name));
+			new LinkedHashSet<IMSMSClusterDataSet>();
 
 	public RecentDataManager() {
 		super();

@@ -24,7 +24,8 @@ package edu.umich.med.mrc2.datoolbox.gui.mzfreq;
 import java.awt.Toolkit;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
-import java.util.Set;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.swing.Icon;
 import javax.swing.JMenu;
@@ -35,6 +36,8 @@ import org.apache.commons.text.WordUtils;
 
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureIdentificationLevel;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundleCollection;
+import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureInfoBundleCollectionComparator;
+import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.idlevel.IdLevelIcon;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
@@ -91,7 +94,7 @@ public class MzFrequencyTablePopupMenu extends BasicTablePopupMenu {
 					MainActionCommands.CREATE_NEW_FEATURE_COLLECTION_FROM_SELECTED.getName());
 			createNewCollectionMenuItem.setIcon(createNewCollectionIcon);
 					
-			recentFeatureCollectionsMenu = new JMenu("Add Add selected feature(s) to recent collection");
+			recentFeatureCollectionsMenu = new JMenu("Add selected feature(s) to recent collection");
 			recentFeatureCollectionsMenu.setIcon(addToRecentCollectionIcon);
 			updateRecentFeatureCollectionList();
 			add(recentFeatureCollectionsMenu);
@@ -133,8 +136,10 @@ public class MzFrequencyTablePopupMenu extends BasicTablePopupMenu {
 			return;
 		
 		recentFeatureCollectionsMenu.removeAll();
-		Set<MsFeatureInfoBundleCollection> fcList = 
-				RecentDataManager.getRecentFeatureCollections();
+		List<MsFeatureInfoBundleCollection> fcList = 
+				RecentDataManager.getRecentFeatureCollections().
+				stream().sorted(new MsFeatureInfoBundleCollectionComparator(SortProperty.Name)).
+				collect(Collectors.toList());
 		for(MsFeatureInfoBundleCollection fc : fcList) {
 			
 			String title = "<html>" + WordUtils.wrap(fc.getName(), 50, "<br />", true);

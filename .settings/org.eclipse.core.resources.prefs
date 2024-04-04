@@ -1,4 +1,5 @@
 eclipse.preferences.version=1
 encoding//src/edu/umich/med/mrc2/datoolbox/dbparse/load/nist/NISTParserUtils.java=UTF-8
-encoding/<project>=UTF-8
+encoding//src/main/resources=cp1252
+encoding/<project>=cp1252
 encoding/src=cp1252

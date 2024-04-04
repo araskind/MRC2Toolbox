@@ -26,7 +26,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Set;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.swing.Icon;
 import javax.swing.JCheckBoxMenuItem;
@@ -38,6 +39,9 @@ import org.apache.commons.text.WordUtils;
 
 import edu.umich.med.mrc2.datoolbox.data.ExperimentPointer;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundleCollection;
+import edu.umich.med.mrc2.datoolbox.data.compare.MSMSClusterDataSetComparator;
+import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureInfoBundleCollectionComparator;
+import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
 import edu.umich.med.mrc2.datoolbox.data.msclust.IMSMSClusterDataSet;
@@ -390,8 +394,10 @@ public class MainMenuBar extends CommonMenuBar {
 		}
 		
 		//	Feature collections
-		Set<MsFeatureInfoBundleCollection> fcList = 
-				RecentDataManager.getRecentFeatureCollections();
+		List<MsFeatureInfoBundleCollection> fcList = 
+				RecentDataManager.getRecentFeatureCollections().
+				stream().sorted(new MsFeatureInfoBundleCollectionComparator(SortProperty.Name)).
+				collect(Collectors.toList());
 		for(MsFeatureInfoBundleCollection fc : fcList) {
 			
 			String title = "<html>" + WordUtils.wrap(fc.getName(), 50, "<br />", true);
@@ -407,8 +413,10 @@ public class MainMenuBar extends CommonMenuBar {
 		}
 		
 		//	Feature clusters
-		Set<IMSMSClusterDataSet> fcluctList = 
-				RecentDataManager.getRecentFeatureClusterDataSets();
+		List<IMSMSClusterDataSet> fcluctList = 
+				RecentDataManager.getRecentFeatureClusterDataSets().
+				stream().sorted(new MSMSClusterDataSetComparator(SortProperty.Name)).
+				collect(Collectors.toList());
 		for(IMSMSClusterDataSet fclust : fcluctList) {
 			
 			String title = "<html>" + WordUtils.wrap(fclust.getName(), 50, "<br />", true);
