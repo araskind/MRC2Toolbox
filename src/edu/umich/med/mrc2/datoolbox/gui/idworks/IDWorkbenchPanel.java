@@ -1028,6 +1028,11 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 
 	private void setUpMSMSParentIonFrequencyAnalysis() {
 		
+		if(mzFrequencyAnalysisResultsDialog != null 
+				&& mzFrequencyAnalysisResultsDialog.isVisible()) {
+			mzFrequencyAnalysisResultsDialog.toFront();
+			return;
+		}
 		if(msTwoFeatureTable.getTable().getModel().getRowCount() == 0)
 			return;
 
@@ -2411,7 +2416,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			if(componentId.equals(msOneFeatureTable.getTable().
 					getClientProperty(MRC2ToolBoxCore.COMPONENT_IDENTIFIER))) {
 				
-			}
+			}			
 			identificationsTable.getTable().toggleIdentificationTableModelListener(true);
 			return null;
 		}
@@ -3666,9 +3671,9 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			if (e.getSource().getClass().equals(IDTMS1FeatureSearchTask.class))
 				loadMsOneSearchData(((IDTMS1FeatureSearchTask)e.getSource()).getSelectedFeatures());
 			
-			if (e.getSource().getClass().equals(IDTMSMSFeatureSearchTask.class))
-				loadMsMsSearchData(((IDTMSMSFeatureSearchTask)e.getSource()).getSelectedFeatures());			
-
+			if (e.getSource().getClass().equals(IDTMSMSFeatureSearchTask.class)) 
+				finalizeMSMSFeatureSearch((IDTMSMSFeatureSearchTask)e.getSource());
+			
 			if (e.getSource().getClass().equals(NISTMspepSearchOfflineTask.class))
 				finalizeNISTMspepSearchOfflineTask((NISTMspepSearchOfflineTask)e.getSource());
 
@@ -3744,6 +3749,11 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		LIMSExperiment experiment = task.getIdTrackerExperiment();
 		RecentDataManager.addIDTrackerExperiment(experiment);		
 		StatusBar.setExperimentName(experiment.toString());
+		
+		FeatureCollectionManager.msmsSearchResults.clearCollection();
+		FeatureCollectionManager.msmsSearchResults.addFeatures(task.getSelectedFeatures());
+		
+//		activeFeatureCollection = FeatureCollectionManager.msmsSearchResults;
 		
 		activeFeatureCollection = new MsFeatureInfoBundleCollection(
 				"Features for experiment " + experiment.toString());		
@@ -3849,7 +3859,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			activeFeatureCollection = task.getParentCollection();
 		}
 		else {	
-			activeFeatureCollection = FeatureCollectionManager.msmsSearchResults;
+			//	activeFeatureCollection = FeatureCollectionManager.msmsSearchResults;
 			activeFeatureCollection.clearCollection();
 			activeFeatureCollection.addFeatures(task.getSelectedFeatures());
 		}
@@ -3865,9 +3875,12 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		if(task.getMsmsClusterDataSet() != null)
 			loadMSMSClusterDataSetInGUI(task.getMsmsClusterDataSet());
 		else {
-			activeFeatureCollection = FeatureCollectionManager.msmsSearchResults;
 			activeFeatureCollection.clearCollection();
+			activeFeatureCollection.setName("feature clustering results");			
 			activeFeatureCollection.addFeatures(task.getSelectedFeatures());
+//			FeatureCollectionManager.msmsSearchResults.clearCollection();
+//			FeatureCollectionManager.msmsSearchResults.addFeatures(task.getSelectedFeatures());
+//			activeFeatureCollection = FeatureCollectionManager.msmsSearchResults;
 			safelyLoadMSMSFeatures(activeFeatureCollection.getFeatures());
 			StatusBar.setActiveFeatureCollection(activeFeatureCollection);
 			activeMSMSClusterDataSet = null;
@@ -4049,10 +4062,14 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 	}
 	
 	private void reloadCompleteDataSet() {
+
+		clearMSMSClusterData();
 		
 		if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() != null) {
 			
-			activeFeatureCollection = FeatureCollectionManager.activeExperimentFeatureSet;
+			activeFeatureCollection.clearCollection();
+			activeFeatureCollection.setName(FeatureCollectionManager.activeExperimentFeatureSet.getName());
+			activeFeatureCollection.addFeatures(FeatureCollectionManager.activeExperimentFeatureSet.getFeatures());			
 			safelyLoadMSMSFeatures(activeFeatureCollection.getFeatures());
 			
 			Collection<MSFeatureInfoBundle> msOneData = 
@@ -4064,24 +4081,34 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		}
 		else {
 			//	MSMS search data 
-			if(FeatureCollectionManager.msmsSearchResults != null 
-					&& !FeatureCollectionManager.msmsSearchResults.isEmpty()) {
-				
-				loadMsMsSearchData(FeatureCollectionManager.msmsSearchResults.getFeatures());
+			if(FeatureCollectionManager.msmsSearchResults == null 
+					|| FeatureCollectionManager.msmsSearchResults.isEmpty()) {
+				clearMSMSFeatureData();
+				return;
+			}
+			else {
+				activeFeatureCollection.clearCollection();	
+				activeFeatureCollection.setName(FeatureCollectionManager.msmsSearchResults.getName());			
+				activeFeatureCollection.addFeatures(FeatureCollectionManager.msmsSearchResults.getFeatures());
+				StatusBar.setActiveFeatureCollection(activeFeatureCollection);
+				safelyLoadMSMSFeatures(activeFeatureCollection.getFeatures());
+				activeMSMSClusterDataSet = null;
+				activeCluster = null;
 			}			
 			//	TODO MS1 search data?
 		}
 	}
-
-	private void loadMsMsSearchData(Collection<MSFeatureInfoBundle> features) {
+	
+	private void finalizeMSMSFeatureSearch(IDTMSMSFeatureSearchTask task) {
 		
 		FeatureCollectionManager.msmsSearchResults.clearCollection();
-		FeatureCollectionManager.msmsSearchResults.addFeatures(features);
-		clearMSMSFeatureData();
-		clearMSMSClusterData();
-		activeFeatureCollection = FeatureCollectionManager.msmsSearchResults;
+		FeatureCollectionManager.msmsSearchResults.addFeatures(task.getSelectedFeatures());
+		clearMSMSFeatureData();		
+		activeFeatureCollection.clearCollection();	
+		activeFeatureCollection.setName(FeatureCollectionManager.msmsSearchResults.getName());			
+		activeFeatureCollection.addFeatures(FeatureCollectionManager.msmsSearchResults.getFeatures());
 		StatusBar.setActiveFeatureCollection(activeFeatureCollection);
-		safelyLoadMSMSFeatures(FeatureCollectionManager.msmsSearchResults.getFeatures());
+		safelyLoadMSMSFeatures(activeFeatureCollection.getFeatures());
 		activeMSMSClusterDataSet = null;
 		activeCluster = null;
 	}
@@ -4100,13 +4127,23 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 
 	public void reloadCompleteActiveMSMSFeatureSet() {
 		
+		if(activeFeatureCollection == null)
+			activeFeatureCollection = 
+				new MsFeatureInfoBundleCollection(
+						FeatureCollectionManager.msmsSearchResults.getName());
+		
 		if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() == null) {
-			activeFeatureCollection = FeatureCollectionManager.msmsSearchResults;
+				
+			activeFeatureCollection.clearCollection();	
+			activeFeatureCollection.setName(FeatureCollectionManager.msmsSearchResults.getName());			
+			activeFeatureCollection.addFeatures(FeatureCollectionManager.msmsSearchResults.getFeatures());
 			StatusBar.setActiveFeatureCollection(activeFeatureCollection);
 			safelyLoadMSMSFeatures(activeFeatureCollection.getFeatures());
 		}
 		else {
-			activeFeatureCollection = FeatureCollectionManager.activeExperimentFeatureSet;
+			activeFeatureCollection.clearCollection();	
+			activeFeatureCollection.setName(FeatureCollectionManager.activeExperimentFeatureSet.getName());			
+			activeFeatureCollection.addFeatures(FeatureCollectionManager.activeExperimentFeatureSet.getFeatures());
 			StatusBar.setActiveFeatureCollection(activeFeatureCollection);
 			safelyLoadMSMSFeatures(activeFeatureCollection.getFeatures());
 		}

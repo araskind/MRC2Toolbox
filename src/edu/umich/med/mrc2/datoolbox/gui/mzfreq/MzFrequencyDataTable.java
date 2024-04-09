@@ -54,6 +54,7 @@ public class MzFrequencyDataTable extends BasicTable {
 	public MzFrequencyDataTable() {
 
 		super();
+				
 		model = new MzFrequencyDataTableModel();
 		setModel(model);
 		

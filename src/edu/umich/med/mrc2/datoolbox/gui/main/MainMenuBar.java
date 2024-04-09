@@ -27,6 +27,8 @@ import java.awt.event.InputEvent;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import javax.swing.Icon;
@@ -391,21 +393,20 @@ public class MainMenuBar extends CommonMenuBar {
 		if(expCount > 0) {			
 			addItem(recentExperimentsMenu, "Clear list",  
 					MainActionCommands.CLEAR_RECENT_EXPERIMENTS_COMMAND, clearListIcon);
-		}
-		
-		//	Feature collections
-		List<MsFeatureInfoBundleCollection> fcList = 
+		}		
+		Set<MsFeatureInfoBundleCollection>fcSet = 
 				RecentDataManager.getRecentFeatureCollections().
-				stream().sorted(new MsFeatureInfoBundleCollectionComparator(SortProperty.Name)).
-				collect(Collectors.toList());
-		for(MsFeatureInfoBundleCollection fc : fcList) {
+					stream().collect(Collectors.toCollection(() -> 
+					new TreeSet<>(new MsFeatureInfoBundleCollectionComparator(SortProperty.Name))));
+				
+		for(MsFeatureInfoBundleCollection fc : fcSet) {
 			
 			String title = "<html>" + WordUtils.wrap(fc.getName(), 50, "<br />", true);
 			String command = MainActionCommands.OPEN_RECENT_FEATURE_COLLECTION_COMMAND.name() + "|" + fc.getId();
 			JMenuItem fcItem = addItem(recentFeatureCollectionsMenu, title, command, fcIcon);		
 			fcItem.setToolTipText(fc.getFormattedMetadata());
 		}
-		if(!fcList.isEmpty()) {
+		if(!fcSet.isEmpty()) {
 			
 			recentFeatureCollectionsMenu.addSeparator();
 			addItem(recentFeatureCollectionsMenu, "Clear list",  

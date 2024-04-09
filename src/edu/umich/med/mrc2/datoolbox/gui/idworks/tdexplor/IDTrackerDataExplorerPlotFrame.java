@@ -75,7 +75,7 @@ public class IDTrackerDataExplorerPlotFrame extends JFrame implements Persistent
 		setPreferredSize(new Dimension(1200, 600));
 		setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
 		getContentPane().setLayout(new BorderLayout(0, 0));
-		setAlwaysOnTop(true);
+		//	setAlwaysOnTop(true);
 
 		control = new CControl(MRC2ToolBoxCore.getMainWindow());
 		control.setTheme(ThemeMap.KEY_ECLIPSE_THEME);

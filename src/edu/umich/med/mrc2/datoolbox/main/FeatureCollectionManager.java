@@ -42,11 +42,17 @@ public class FeatureCollectionManager {
 	public static final String ACTIVE_EXPERIMENT_FEATURE_SET = "Active experiment complete feature set";
 	
 	public static final MsFeatureInfoBundleCollection msmsSearchResults = 
-			new MsFeatureInfoBundleCollection(CURRENT_MSMS_FEATURE_SEARCH_RESULT);	
+			new MsFeatureInfoBundleCollection(
+					CURRENT_MSMS_FEATURE_SEARCH_RESULT, 
+					CURRENT_MSMS_FEATURE_SEARCH_RESULT);	
 	public static final MsFeatureInfoBundleCollection msOneSearchResults = 
-			new MsFeatureInfoBundleCollection(CURRENT_MS1_FEATURE_SEARCH_RESULT);
+			new MsFeatureInfoBundleCollection(
+					CURRENT_MS1_FEATURE_SEARCH_RESULT, 
+					CURRENT_MS1_FEATURE_SEARCH_RESULT);
 	public static final MsFeatureInfoBundleCollection activeExperimentFeatureSet = 
-			new MsFeatureInfoBundleCollection(ACTIVE_EXPERIMENT_FEATURE_SET);
+			new MsFeatureInfoBundleCollection(
+					ACTIVE_EXPERIMENT_FEATURE_SET,
+					ACTIVE_EXPERIMENT_FEATURE_SET);
 	
 	public static final Set<MsFeatureInfoBundleCollection>featureCollectionsMSIDSet = 
 			new TreeSet<MsFeatureInfoBundleCollection>(

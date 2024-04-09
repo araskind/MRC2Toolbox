@@ -21,42 +21,19 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.idworks.ms2;
 
-import java.awt.Toolkit;
 import java.awt.event.ActionListener;
-import java.awt.event.InputEvent;
-import java.util.List;
-import java.util.stream.Collectors;
 
 import javax.swing.Icon;
-import javax.swing.JMenu;
 import javax.swing.JMenuItem;
-import javax.swing.KeyStroke;
 
-import org.apache.commons.text.WordUtils;
-
-import edu.umich.med.mrc2.datoolbox.data.MSFeatureIdentificationLevel;
-import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundleCollection;
-import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureInfoBundleCollectionComparator;
-import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
-import edu.umich.med.mrc2.datoolbox.gui.communication.IdentificationLevelEvent;
-import edu.umich.med.mrc2.datoolbox.gui.communication.IdentificationLevelEventListener;
-import edu.umich.med.mrc2.datoolbox.gui.idworks.idlevel.IdLevelIcon;
+import edu.umich.med.mrc2.datoolbox.gui.idworks.FeatureListPopupMenu;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
-import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTablePopupMenu;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
-import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
-import edu.umich.med.mrc2.datoolbox.main.RecentDataManager;
 
-public class MsMsFeaturePopupMenu extends BasicTablePopupMenu implements IdentificationLevelEventListener {
+public class MsMsFeaturePopupMenu extends FeatureListPopupMenu {
 
-	/**
-	 *
-	 */
 	private static final long serialVersionUID = -6064748415801630180L;
-	private static final int MASK =
-		    Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx();	
 	
 	private static final Icon nistPepMsIcon = GuiUtils.getIcon("NISTMS-pep", 24);
 	private static final Icon manualIdentificationIcon = GuiUtils.getIcon("manualIdentification", 24);
@@ -64,17 +41,11 @@ public class MsMsFeaturePopupMenu extends BasicTablePopupMenu implements Identif
 	private static final Icon clearIdentificationsIcon = GuiUtils.getIcon("clearIdentifications", 24);
 	private static final Icon fusEditIcon = GuiUtils.getIcon("editIdFollowupStep", 24);
 	private static final Icon editStandardFeatureAnnotationIcon = GuiUtils.getIcon("editCollection", 24);
-	private static final Icon setIdLevelIcon = GuiUtils.getIcon("editIdStatus", 24);
 	private static final Icon goToDatabaseIcon = GuiUtils.getIcon("goToDatabase", 24);
 	private static final Icon xicIcon = GuiUtils.getIcon("xic", 24);
-	private static final Icon createNewCollectionIcon = GuiUtils.getIcon("newFeatureSubset", 24);
-	private static final Icon addToExistingCollectionIcon = GuiUtils.getIcon("addCollection", 24);
-	private static final Icon addToRecentCollectionIcon = GuiUtils.getIcon("addToRecentCollection", 24);
-	private static final Icon removeFromActiveCollectionIcon = GuiUtils.getIcon("deleteCollection", 24);
 	private static final Icon exportMSPIcon = GuiUtils.getIcon("exportToMSP", 24);
 	private static final Icon copyAsArrayIcon = GuiUtils.getIcon("copyAsArray", 24);
-	private static final Icon clearIcon = GuiUtils.getIcon("clear", 24);
-	private static final Icon fcIcon = GuiUtils.getIcon("enableAll", 24);
+
 	
 	private JMenuItem 
 			setupNISTPepSearchMenuItem,
@@ -85,20 +56,14 @@ public class MsMsFeaturePopupMenu extends BasicTablePopupMenu implements Identif
 			editIdStandardFeatureAnnotationMenuItem,
 			goToCompoundDatabaseMenuItem,
 			xicMenuItem,
-			createNewCollectionMenuItem,
-			addToExistingCollectionMenuItem,
-			removeFromActiveCollectionMenuItem,
 			copySpectrumAsMSPMenuItem, 
 			copyAsArrayMenuItem;
-	
-	private JMenu idLevelMenu;
-	private JMenu recentFeatureCollectionsMenu;
 
 	public MsMsFeaturePopupMenu(
 			ActionListener listener,
 			BasicTable copyListener) {
 
-		super(listener, copyListener);
+		super(listener, copyListener, true);
 
 		setupNISTPepSearchMenuItem = GuiUtils.addMenuItem(this,
 				MainActionCommands.NIST_MS_PEPSEARCH_SETUP_COMMAND.getName(), listener,
@@ -132,32 +97,11 @@ public class MsMsFeaturePopupMenu extends BasicTablePopupMenu implements Identif
 				MainActionCommands.ASSIGN_STANDARD_FEATURE_ANNOTATIONS_TO_FEATURE_DIALOG_COMMAND.getName());
 		editIdStandardFeatureAnnotationMenuItem.setIcon(editStandardFeatureAnnotationIcon);
 		
-		idLevelMenu = new JMenu("Set ID confidence level");
-		idLevelMenu.setIcon(setIdLevelIcon);
-		populateIdLevelMenu();
-		add(idLevelMenu);
+		addIdLevelMenu();
 		
-		this.addSeparator();
+		addSeparator();
 
-		createNewCollectionMenuItem = GuiUtils.addMenuItem(this,
-				MainActionCommands.CREATE_NEW_FEATURE_COLLECTION_FROM_SELECTED.getName(), listener,
-				MainActionCommands.CREATE_NEW_FEATURE_COLLECTION_FROM_SELECTED.getName());
-		createNewCollectionMenuItem.setIcon(createNewCollectionIcon);
-				
-		recentFeatureCollectionsMenu = new JMenu("Add selected feature(s) to recent collection");
-		recentFeatureCollectionsMenu.setIcon(addToRecentCollectionIcon);
-		updateRecentFeatureCollectionList();
-		add(recentFeatureCollectionsMenu);
-		
-		addToExistingCollectionMenuItem = GuiUtils.addMenuItem(this,
-				MainActionCommands.ADD_SELECTED_TO_EXISTING_FEATURE_COLLECTION.getName(), listener,
-				MainActionCommands.ADD_SELECTED_TO_EXISTING_FEATURE_COLLECTION.getName());
-		addToExistingCollectionMenuItem.setIcon(addToExistingCollectionIcon);
-		
-		removeFromActiveCollectionMenuItem = GuiUtils.addMenuItem(this,
-				MainActionCommands.REMOVE_SELECTED_FROM_ACTIVE_MSMS_FEATURE_COLLECTION.getName(), listener,
-				MainActionCommands.REMOVE_SELECTED_FROM_ACTIVE_MSMS_FEATURE_COLLECTION.getName());
-		removeFromActiveCollectionMenuItem.setIcon(removeFromActiveCollectionIcon);
+		addFeatureCollectionMenu(true);
 		
 		addCopyBlock();
 		
@@ -186,59 +130,6 @@ public class MsMsFeaturePopupMenu extends BasicTablePopupMenu implements Identif
 				MainActionCommands.GO_TO_PRIMARY_COMPOUND_IN_DATABASE_COMMAND.getName(), listener,
 				MainActionCommands.GO_TO_PRIMARY_COMPOUND_IN_DATABASE_COMMAND.getName());
 		goToCompoundDatabaseMenuItem.setIcon(goToDatabaseIcon);
-	}
-	
-	private void populateIdLevelMenu() {
-		
-		for(MSFeatureIdentificationLevel level : IDTDataCache.getMsFeatureIdentificationLevelList()) {
-			
-			Icon levelIcon = new IdLevelIcon(24, level.getColorCode());
-			JMenuItem levelItem = GuiUtils.addMenuItem(
-					idLevelMenu, level.getName(), mainActionListener, 
-					MSFeatureIdentificationLevel.SET_PRIMARY + level.getName(), levelIcon);
-			levelItem.putClientProperty(
-					MRC2ToolBoxCore.COMPONENT_IDENTIFIER, copyListener.getClass().getSimpleName());
-			if(level.getShorcut() != null)
-				levelItem.setAccelerator(
-						KeyStroke.getKeyStroke(level.getShorcut().charAt(0), 
-								MASK | InputEvent.SHIFT_DOWN_MASK));
-		}
-		JMenuItem clearIdLevelMenuItem = GuiUtils.addMenuItem(idLevelMenu,
-				MainActionCommands.CLEAR_ID_LEVEL_COMMAND.getName(), mainActionListener,
-				MainActionCommands.CLEAR_ID_LEVEL_COMMAND.getName());
-		clearIdLevelMenuItem.putClientProperty(
-				MRC2ToolBoxCore.COMPONENT_IDENTIFIER, this.getClass().getSimpleName());
-		clearIdLevelMenuItem.setIcon(clearIcon);
-		clearIdLevelMenuItem.putClientProperty(
-				MRC2ToolBoxCore.COMPONENT_IDENTIFIER, copyListener.getClass().getSimpleName());
-	}
-	
-	public void refreshIdLevelMenu() {
-				
-		idLevelMenu.removeAll();
-		IDTDataCache.refreshMsFeatureIdentificationLevelList();
-		populateIdLevelMenu();
-	}
-
-	@Override
-	public void identificationLevelDefinitionChanged(IdentificationLevelEvent e) {
-		refreshIdLevelMenu();
-	}
-	
-	public void updateRecentFeatureCollectionList() {
-		
-		recentFeatureCollectionsMenu.removeAll();
-		List<MsFeatureInfoBundleCollection> fcList = 
-				RecentDataManager.getRecentFeatureCollections().
-				stream().sorted(new MsFeatureInfoBundleCollectionComparator(SortProperty.Name)).
-				collect(Collectors.toList());
-		for(MsFeatureInfoBundleCollection fc : fcList) {
-			
-			String title = "<html>" + WordUtils.wrap(fc.getName(), 50, "<br />", true);
-			String command = MainActionCommands.ADD_FEATURES_TO_RECENT_FEATURE_COLLECTION_COMMAND.name() + "|" + fc.getId();
-			JMenuItem fcItem = addItem(recentFeatureCollectionsMenu, title, command, fcIcon);		
-			fcItem.setToolTipText(fc.getFormattedMetadata());
-		}
 	}
 }
 

@@ -76,6 +76,20 @@ public class MsFeatureInfoBundleCollection implements Serializable {
 		annotations = new TreeSet<ObjectAnnotation>();
 		owner = MRC2ToolBoxCore.getIdTrackerUser();
 	}
+	
+	public MsFeatureInfoBundleCollection(
+			String id, 
+			String name) {
+		this.id = id;
+		this.name = name;
+		dateCreated = new Date();
+		lastModified = new Date();
+		featureIds = new TreeSet<String>();
+		features = new TreeSet<MSFeatureInfoBundle>(
+				new MsFeatureInfoBundleComparator(SortProperty.Name));
+		annotations = new TreeSet<ObjectAnnotation>();
+		owner = MRC2ToolBoxCore.getIdTrackerUser();
+	}			
 
 	public MsFeatureInfoBundleCollection(
 			String id, 

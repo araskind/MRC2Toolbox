@@ -72,7 +72,7 @@ public class RecentDataManager {
 
 	public RecentDataManager() {
 		super();
-		readDataFromFile();
+		readDataFromFile();		
 	}
 
 	public static void readDataFromFile() {
@@ -132,6 +132,7 @@ public class RecentDataManager {
 				recentExperimentsMap.get(ep.getProjectType()).add(ep);
 			}
 		}	
+		addFeatureCollection(FeatureCollectionManager.msmsSearchResults);
 	}
 	
 	public static void saveDataToFile() {
@@ -276,6 +277,7 @@ public class RecentDataManager {
 	
 	public static void clearRecentFeatureCollections() { 
 		featureCollections.clear();
+		addFeatureCollection(FeatureCollectionManager.msmsSearchResults);
 		MRC2ToolBoxCore.getMainWindow().updateGuiWithRecentData();
 	}
 	
