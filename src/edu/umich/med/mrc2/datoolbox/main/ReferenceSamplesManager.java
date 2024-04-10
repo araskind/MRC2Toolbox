@@ -217,6 +217,10 @@ public class ReferenceSamplesManager {
 		else
 			return null;
 	}
+	
+	public static ExperimentalSample getGenericRegularSample() {
+		return new ExperimentalSample(REGULAR_SAMPLE, REGULAR_SAMPLE);
+	}
 }	
 
 

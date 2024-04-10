@@ -44,6 +44,7 @@ import edu.umich.med.mrc2.datoolbox.gui.utils.IndeterminateProgressDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.LongUpdateTask;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
+import edu.umich.med.mrc2.datoolbox.project.Experiment;
 
 public class DockableFeatureHeatMapPanel extends DefaultSingleCDockable implements ActionListener, ItemListener {
 
@@ -52,6 +53,7 @@ public class DockableFeatureHeatMapPanel extends DefaultSingleCDockable implemen
 	private JFHeatChart heatChart;
 	private FeatureHeatchartToolbar toolbar;
 	private FeatureHeatchartSettingsPanel chartSettingsPanel;
+	private FeatureHeatMapDataSet heatMapDataSet;
 	
 	public DockableFeatureHeatMapPanel() {
 
@@ -67,6 +69,10 @@ public class DockableFeatureHeatMapPanel extends DefaultSingleCDockable implemen
 		
 		chartSettingsPanel = new FeatureHeatchartSettingsPanel(this, this);
 		add(chartSettingsPanel, BorderLayout.EAST);
+	}
+	
+	public void loadSampleTypes(Experiment experiment) {
+		chartSettingsPanel.loadSampleTypes(experiment);
 	}
 
 	@Override
@@ -138,21 +144,22 @@ public class DockableFeatureHeatMapPanel extends DefaultSingleCDockable implemen
 		heatChart.removeAllDataSets();
 		DataAnalysisProject experiment = 
 				MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
+		chartSettingsPanel.loadSampleTypes(experiment);
 		Matrix featureSubsetMatrix = 
 				experiment.getDataMatrixForFeatureSetAndDesign(
 						featureSet, 
 						experiment.getExperimentDesign().getActiveDesignSubset(), 
 						experiment.getActiveDataPipeline());
-		FeatureHeatMapDataSet dataSet = 
-				new FeatureHeatMapDataSet(featureSubsetMatrix);
+		heatMapDataSet = new FeatureHeatMapDataSet(featureSubsetMatrix);
 		
 		MZRTPlotParameterObject plotParams = chartSettingsPanel.getPlotParameters();				
-		heatChart.showFeatureHeatMap(dataSet, plotParams);
+		heatChart.showFeatureHeatMap(heatMapDataSet, plotParams);
 	}
 	
 	private void redrawPlot() {
 		// TODO Auto-generated method stub
-		
+		heatChart.showFeatureHeatMap(heatMapDataSet, 
+				chartSettingsPanel.getPlotParameters());
 	}
 }
 

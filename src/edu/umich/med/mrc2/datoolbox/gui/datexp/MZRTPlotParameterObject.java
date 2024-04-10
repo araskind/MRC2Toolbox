@@ -21,6 +21,10 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.datexp;
 
+import java.util.Collection;
+
+import edu.umich.med.mrc2.datoolbox.data.ExperimentalSample;
+import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataScale;
 import edu.umich.med.mrc2.datoolbox.data.enums.MSFeatureSetStatisticalParameters;
 import edu.umich.med.mrc2.datoolbox.data.enums.TableRowSubset;
@@ -40,10 +44,12 @@ public class MZRTPlotParameterObject {
 	private ColorScale colorScale;
 	private TableRowSubset featureTableRowSubset;
 	private HeatMapDataRange heatMapDataRange;
+	private SortProperty fileSortingOrder;
+	private SortProperty featureSortingOrder;
+	private Collection<ExperimentalSample>activeSamples;
 	
 	public MZRTPlotParameterObject() {
 		super();
-		// TODO Auto-generated constructor stub
 	}
 
 	public MZRTPlotParameterObject(
@@ -66,6 +72,32 @@ public class MZRTPlotParameterObject {
 		this.featureTableRowSubset = featureTableRowSubset;
 	}
 
+	public MZRTPlotParameterObject(
+			Range mzRange, 
+			Range rtRange, 
+			DataScale dataScale,
+			MSFeatureSetStatisticalParameters msFeatureSetStatisticalParameter,
+			FeatureIdentificationMeasure featureIdentificationMeasure, 
+			ColorGradient colorGradient,
+			ColorScale colorScale, 
+			TableRowSubset featureTableRowSubset,
+			SortProperty fileSortingOrder,
+			SortProperty featureSortingOrder,
+			Collection<ExperimentalSample>activeSamples) {
+		super();
+		this.mzRange = mzRange;
+		this.rtRange = rtRange;
+		this.dataScale = dataScale;
+		this.msFeatureSetStatisticalParameter = msFeatureSetStatisticalParameter;
+		this.featureIdentificationMeasure = featureIdentificationMeasure;
+		this.colorGradient = colorGradient;
+		this.colorScale = colorScale;
+		this.featureTableRowSubset = featureTableRowSubset;
+		this.fileSortingOrder = fileSortingOrder;
+		this.featureSortingOrder = featureSortingOrder;
+		this.activeSamples = activeSamples;
+	}
+	
 	public Range getMzRange() {
 		return mzRange;
 	}
@@ -138,6 +170,30 @@ public class MZRTPlotParameterObject {
 
 	public void setHeatMapDataRange(HeatMapDataRange heatMapDataRange) {
 		this.heatMapDataRange = heatMapDataRange;
+	}
+
+	public SortProperty getFileSortingOrder() {
+		return fileSortingOrder;
+	}
+
+	public void setFileSortingOrder(SortProperty fileSortingOrder) {
+		this.fileSortingOrder = fileSortingOrder;
+	}
+
+	public SortProperty getFeatureSortingOrder() {
+		return featureSortingOrder;
+	}
+
+	public void setFeatureSortingOrder(SortProperty featureSortingOrder) {
+		this.featureSortingOrder = featureSortingOrder;
+	}
+
+	public Collection<ExperimentalSample> getActiveSamples() {
+		return activeSamples;
+	}
+
+	public void setActiveSamples(Collection<ExperimentalSample> activeSamples) {
+		this.activeSamples = activeSamples;
 	}
 
 	

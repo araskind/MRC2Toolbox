@@ -49,6 +49,7 @@ import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.IndeterminateProgressDialog;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
+import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
 
 public class DataExplorerPlotFrame extends JFrame implements PersistentLayout, BackedByPreferences  {
@@ -129,6 +130,10 @@ public class DataExplorerPlotFrame extends JFrame implements PersistentLayout, B
 
 		mzRtBubblePlotPanel.loadFeatureSet(subset);
 		qcHistogramPanel.createQCvalueHistogram(subset);
+		
+		DataAnalysisProject experiment = 
+				MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
+		featureHeatMapPanel.loadSampleTypes(experiment);
 		featureHeatMapPanel.createFeatureHeatMap(subset);
 		
 //		mzMassDefectBubblePlotPanel.setMsFeatures(subset.getFeatures());

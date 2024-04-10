@@ -39,8 +39,10 @@ import javax.swing.JComboBox;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.border.EmptyBorder;
 
+import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataScale;
 import edu.umich.med.mrc2.datoolbox.gui.datexp.MZRTPlotParameterObject;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
@@ -51,6 +53,7 @@ import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.SortedComboBoxModel;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
+import edu.umich.med.mrc2.datoolbox.project.Experiment;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
 
 public class FeatureHeatchartSettingsPanel extends 
@@ -70,18 +73,20 @@ public class FeatureHeatchartSettingsPanel extends
 	private static final String END_MZ = "END_MZ";
 	private static final String COLOR_SCHEME = "COLOR_SCHEME";
 	private static final String COLOR_SCALE = "COLOR_SCALE";
+	private static final String FILE_SORTING_ORDER = "FILE_SORTING_ORDER";
+	private static final String FEATURE_SORTING_ORDER = "FEATURE_SORTING_ORDER";
 	
 	private ActionListener actListener;
 	private ItemListener externalItemListener;	
 	private JFormattedTextField startRTTextField, endRTTextField; 
 	private JFormattedTextField startMZTextField, endMZTextField; 
-	private JButton resetLimitsButton;
-	private JButton refreshPlotButton;
 	private JComboBox colorSchemeComboBox;
 	private JComboBox colorScaleComboBox;
 	private JComboBox dataRangeComboBox;
-
 	private JComboBox<DataScale> dataScaleComboBox;
+	private JComboBox<SortProperty> fileSortingOrderComboBox;
+	private JComboBox<SortProperty> featureSortingOrderComboBox;
+	private SampleGroupTable sampleGroupTable;
 	
 	@SuppressWarnings("unchecked")
 	public FeatureHeatchartSettingsPanel(
@@ -110,6 +115,8 @@ public class FeatureHeatchartSettingsPanel extends
 		
 		startRTTextField = new JFormattedTextField(
 				MRC2ToolBoxConfiguration.getRtFormat());
+		startRTTextField.setPreferredSize(new Dimension(80, 20));
+		startRTTextField.setMinimumSize(new Dimension(60, 20));
 		startRTTextField.setColumns(6);
 		GridBagConstraints gbc_formattedTextField = new GridBagConstraints();
 		gbc_formattedTextField.insets = new Insets(0, 0, 5, 5);
@@ -127,6 +134,8 @@ public class FeatureHeatchartSettingsPanel extends
 		
 		endRTTextField = new JFormattedTextField(
 				MRC2ToolBoxConfiguration.getRtFormat());
+		endRTTextField.setPreferredSize(new Dimension(80, 20));
+		endRTTextField.setMinimumSize(new Dimension(60, 20));
 		endRTTextField.setColumns(6);
 		GridBagConstraints gbc_startRTTextField_1 = new GridBagConstraints();
 		gbc_startRTTextField_1.insets = new Insets(0, 0, 5, 5);
@@ -155,6 +164,8 @@ public class FeatureHeatchartSettingsPanel extends
 		
 		startMZTextField = new JFormattedTextField(
 				MRC2ToolBoxConfiguration.getMzFormat());
+		startMZTextField.setPreferredSize(new Dimension(80, 20));
+		startMZTextField.setMinimumSize(new Dimension(60, 20));
 		startMZTextField.setColumns(8);
 		GridBagConstraints gbc_startMZTextField = new GridBagConstraints();
 		gbc_startMZTextField.insets = new Insets(0, 0, 5, 5);
@@ -172,6 +183,8 @@ public class FeatureHeatchartSettingsPanel extends
 		
 		endMZTextField = new JFormattedTextField(
 				MRC2ToolBoxConfiguration.getMzFormat());
+		endMZTextField.setPreferredSize(new Dimension(80, 20));
+		endMZTextField.setMinimumSize(new Dimension(60, 20));
 		endMZTextField.setColumns(8);
 		GridBagConstraints gbc_endMZTextField = new GridBagConstraints();
 		gbc_endMZTextField.insets = new Insets(0, 0, 5, 5);
@@ -187,6 +200,21 @@ public class FeatureHeatchartSettingsPanel extends
 		gbc_lblNewLabel_5.gridx = 4;
 		gbc_lblNewLabel_5.gridy = rowCount;
 		add(lblNewLabel_5, gbc_lblNewLabel_5);
+		
+		rowCount++;
+		
+		JButton resetLimitsButton = new JButton(
+				MainActionCommands.RESET_MZ_RT_LIMITS_COMMAND.getName());
+		resetLimitsButton.setActionCommand(
+				MainActionCommands.RESET_MZ_RT_LIMITS_COMMAND.getName());
+		resetLimitsButton.addActionListener(this);
+		GridBagConstraints gbc_resetLimitsButton = new GridBagConstraints();
+		gbc_resetLimitsButton.fill = GridBagConstraints.HORIZONTAL;
+		gbc_resetLimitsButton.gridwidth = 3;
+		gbc_resetLimitsButton.insets = new Insets(0, 0, 5, 0);
+		gbc_resetLimitsButton.gridx = 2;
+		gbc_resetLimitsButton.gridy = rowCount;
+		add(resetLimitsButton, gbc_resetLimitsButton);
 		
 		rowCount++;
 		
@@ -274,14 +302,86 @@ public class FeatureHeatchartSettingsPanel extends
 		dataScaleComboBox.setSelectedItem(DataScale.LN);
 		dataScaleComboBox.setMaximumSize(new Dimension(120, 26));
 		GridBagConstraints gbc_dataScaleComboBox = new GridBagConstraints();
-		gbc_dataScaleComboBox.anchor = GridBagConstraints.EAST;
+		gbc_dataScaleComboBox.gridwidth = 2;
+		gbc_dataScaleComboBox.fill = GridBagConstraints.HORIZONTAL;
 		gbc_dataScaleComboBox.insets = new Insets(0, 0, 5, 5);
 		gbc_dataScaleComboBox.gridx = 1;
 		gbc_dataScaleComboBox.gridy = rowCount;
 		add(dataScaleComboBox, gbc_dataScaleComboBox);
 		
 		rowCount++;
-			
+		
+		gridBagLayout.rowHeights = new int[rowCount + 2];
+		Arrays.fill(gridBagLayout.rowHeights, 0);
+		
+		gridBagLayout.rowWeights = new double[rowCount + 2];
+		Arrays.fill(gridBagLayout.rowWeights, 0.0d);
+		
+		JLabel lblNewLabel_7 = new JLabel("File sorting order");
+		GridBagConstraints gbc_lblNewLabel_7 = new GridBagConstraints();
+		gbc_lblNewLabel_7.anchor = GridBagConstraints.EAST;
+		gbc_lblNewLabel_7.insets = new Insets(0, 0, 5, 5);
+		gbc_lblNewLabel_7.gridx = 0;
+		gbc_lblNewLabel_7.gridy = rowCount;
+		add(lblNewLabel_7, gbc_lblNewLabel_7);
+		
+		fileSortingOrderComboBox = new JComboBox<SortProperty>(
+				new DefaultComboBoxModel<SortProperty>(
+						new SortProperty[] {SortProperty.Name, SortProperty.injectionTime}));
+		GridBagConstraints gbc_fileSortingOrderComboBox = new GridBagConstraints();
+		gbc_fileSortingOrderComboBox.gridwidth = 2;
+		gbc_fileSortingOrderComboBox.insets = new Insets(0, 0, 5, 0);
+		gbc_fileSortingOrderComboBox.fill = GridBagConstraints.HORIZONTAL;
+		gbc_fileSortingOrderComboBox.gridx = 1;
+		gbc_fileSortingOrderComboBox.gridy = rowCount;
+		add(fileSortingOrderComboBox, gbc_fileSortingOrderComboBox);
+		
+		rowCount++;
+		
+		JLabel lblNewLabel_10 = new JLabel("Feature sorting order");
+		GridBagConstraints gbc_lblNewLabel_10 = new GridBagConstraints();
+		gbc_lblNewLabel_10.anchor = GridBagConstraints.EAST;
+		gbc_lblNewLabel_10.insets = new Insets(0, 0, 5, 5);
+		gbc_lblNewLabel_10.gridx = 0;
+		gbc_lblNewLabel_10.gridy = rowCount;
+		add(lblNewLabel_10, gbc_lblNewLabel_10);
+		
+		featureSortingOrderComboBox = new JComboBox<SortProperty>(
+				new DefaultComboBoxModel<SortProperty>(
+						new SortProperty[] {SortProperty.RT, SortProperty.MZ}));
+		GridBagConstraints gbc_featureSortingOrderComboBox = new GridBagConstraints();
+		gbc_featureSortingOrderComboBox.gridwidth = 2;
+		gbc_featureSortingOrderComboBox.insets = new Insets(0, 0, 5, 0);
+		gbc_featureSortingOrderComboBox.fill = GridBagConstraints.HORIZONTAL;
+		gbc_featureSortingOrderComboBox.gridx = 1;
+		gbc_featureSortingOrderComboBox.gridy = rowCount;
+		add(featureSortingOrderComboBox, gbc_featureSortingOrderComboBox);
+		
+		rowCount++;
+		
+		JLabel lblNewLabel_8 = new JLabel("Include sample groups:");
+		GridBagConstraints gbc_lblNewLabel_8 = new GridBagConstraints();
+		gbc_lblNewLabel_8.anchor = GridBagConstraints.WEST;
+		gbc_lblNewLabel_8.gridwidth = 2;
+		gbc_lblNewLabel_8.insets = new Insets(0, 0, 5, 5);
+		gbc_lblNewLabel_8.gridx = 0;
+		gbc_lblNewLabel_8.gridy = rowCount;
+		add(lblNewLabel_8, gbc_lblNewLabel_8);
+		
+		rowCount++;
+		
+		sampleGroupTable = new SampleGroupTable();
+		GridBagConstraints gbc_comboBox = new GridBagConstraints();
+		gbc_comboBox.gridheight = 2;
+		gbc_comboBox.gridwidth = 5;
+		gbc_comboBox.insets = new Insets(0, 0, 5, 0);
+		gbc_comboBox.fill = GridBagConstraints.BOTH;
+		gbc_comboBox.gridx = 0;
+		gbc_comboBox.gridy = rowCount;
+		add(new JScrollPane(sampleGroupTable), gbc_comboBox);
+		
+		rowCount++;
+		
 		JLabel lblNewLabel_6 = new JLabel("  ");
 		GridBagConstraints gbc_lblNewLabel_6 = new GridBagConstraints();
 		gbc_lblNewLabel_6.insets = new Insets(0, 0, 5, 5);
@@ -291,33 +391,16 @@ public class FeatureHeatchartSettingsPanel extends
 		
 		rowCount++;
 		
-		resetLimitsButton = new JButton(
-				MainActionCommands.RESET_MZ_RT_LIMITS_COMMAND.getName());
-		resetLimitsButton.setActionCommand(
-				MainActionCommands.RESET_MZ_RT_LIMITS_COMMAND.getName());
-		resetLimitsButton.addActionListener(this);
-		GridBagConstraints gbc_resetLimitsButton = new GridBagConstraints();
-		gbc_resetLimitsButton.fill = GridBagConstraints.HORIZONTAL;
-		gbc_resetLimitsButton.gridwidth = 2;
-		gbc_resetLimitsButton.insets = new Insets(0, 0, 5, 5);
-		gbc_resetLimitsButton.gridx = 0;
-		gbc_resetLimitsButton.gridy = rowCount;
-		add(resetLimitsButton, gbc_resetLimitsButton);
-		
-		refreshPlotButton = new JButton("Refresh plot", refreshDataIcon);
+		JButton refreshPlotButton = new JButton("Refresh plot", refreshDataIcon);
 		refreshPlotButton.setActionCommand(
 				MainActionCommands.REFRESH_MSMS_FEATURE_PLOT.getName());
 		refreshPlotButton.addActionListener(actListener);
 		GridBagConstraints gbc_refreshPlotButton = new GridBagConstraints();
-		gbc_refreshPlotButton.insets = new Insets(0, 0, 5, 0);
 		gbc_refreshPlotButton.gridwidth = 2;
 		gbc_refreshPlotButton.fill = GridBagConstraints.HORIZONTAL;
 		gbc_refreshPlotButton.gridx = 3;
 		gbc_refreshPlotButton.gridy = rowCount;
 		add(refreshPlotButton, gbc_refreshPlotButton);
-        
-		gridBagLayout.rowHeights = new int[rowCount + 2];
-		Arrays.fill(gridBagLayout.rowHeights, 0);
 		
 		gridBagLayout.rowWeights = new double[rowCount + 2];
 		Arrays.fill(gridBagLayout.rowWeights, 0.0d);
@@ -328,6 +411,8 @@ public class FeatureHeatchartSettingsPanel extends
 		colorSchemeComboBox.addItemListener(externalItemListener);
 		colorScaleComboBox.addItemListener(externalItemListener);
 		colorSchemeComboBox.addItemListener(externalItemListener);
+		fileSortingOrderComboBox.addItemListener(externalItemListener);
+		featureSortingOrderComboBox.addItemListener(externalItemListener);
 	}
 	
 	@Override
@@ -335,6 +420,10 @@ public class FeatureHeatchartSettingsPanel extends
 
 		if(e.getActionCommand().equals(MainActionCommands.RESET_MZ_RT_LIMITS_COMMAND.getName()))
 			resetMZRTlimits();		
+	}
+	
+	public void loadSampleTypes(Experiment experiment) {
+		sampleGroupTable.loadSampleTypes(experiment);
 	}
 	
 	private void resetMZRTlimits() {
@@ -406,6 +495,14 @@ public class FeatureHeatchartSettingsPanel extends
 			return (ColorScale)colorScaleComboBox.getSelectedItem();
 	}
 	
+	public SortProperty getFileSortingOrder() {
+		return (SortProperty)fileSortingOrderComboBox.getSelectedItem();
+	}
+	
+	public SortProperty getFeatureSortingOrder() {
+		return (SortProperty)featureSortingOrderComboBox.getSelectedItem();
+	}
+	
 	@Override
 	public void itemStateChanged(ItemEvent e) {
 			
@@ -427,18 +524,21 @@ public class FeatureHeatchartSettingsPanel extends
 		double endMz = preferences.getDouble(END_MZ, 0.0d);
 		endMZTextField.setText(Double.toString(endMz));
 
-		if(colorSchemeComboBox != null) {
-			
-			ColorGradient ds = ColorGradient.getOptionByName(
-							preferences.get(COLOR_SCHEME, ColorGradient.GREEN_RED.name()));			
-			colorSchemeComboBox.setSelectedItem(ds);
-		}
-		if(colorScaleComboBox != null) {
-			
-			ColorScale ds = ColorScale.getOptionByName(
-							preferences.get(COLOR_SCALE, ColorScale.LINEAR.name()));			
-			colorScaleComboBox.setSelectedItem(ds);
-		}	
+		ColorGradient cg = ColorGradient.getOptionByName(
+						preferences.get(COLOR_SCHEME, ColorGradient.GREEN_RED.name()));			
+		colorSchemeComboBox.setSelectedItem(cg);
+		
+		ColorScale cs = ColorScale.getOptionByName(
+						preferences.get(COLOR_SCALE, ColorScale.LINEAR.name()));			
+		colorScaleComboBox.setSelectedItem(cs);		
+		
+		SortProperty fileSortingOrder = SortProperty.getOptionByName(
+				preferences.get(FILE_SORTING_ORDER, SortProperty.injectionTime.name()));
+		fileSortingOrderComboBox.setSelectedItem(fileSortingOrder);
+		
+		SortProperty featureSortingOrder = SortProperty.getOptionByName(
+				preferences.get(FEATURE_SORTING_ORDER, SortProperty.RT.name()));
+		featureSortingOrderComboBox.setSelectedItem(featureSortingOrder);
 	}
 
 	@Override
@@ -461,13 +561,18 @@ public class FeatureHeatchartSettingsPanel extends
 			
 			preferences.putDouble(START_MZ, mzRange.getMin());
 			preferences.putDouble(END_MZ, mzRange.getMax());
-		}
-		
+		}		
 		if(getColorGradient() != null)
 			preferences.put(COLOR_SCHEME, getColorGradient().name());	
 		
 		if(getColorScale() != null)
 			preferences.put(COLOR_SCALE, getColorScale().name());	
+		
+		if(getFileSortingOrder() != null)
+			preferences.put(FILE_SORTING_ORDER, getFileSortingOrder().name());
+		
+		if(getFeatureSortingOrder() != null)
+			preferences.put(FEATURE_SORTING_ORDER, getFeatureSortingOrder().name());	
 	}
 	
 	public MZRTPlotParameterObject getPlotParameters() {
@@ -478,6 +583,9 @@ public class FeatureHeatchartSettingsPanel extends
 		params.setColorGradient(getColorGradient());
 		params.setColorScale(getColorScale());
 		params.setDataScale((DataScale) dataScaleComboBox.getSelectedItem());
+		params.setFileSortingOrder(getFileSortingOrder());
+		params.setFeatureSortingOrder(getFeatureSortingOrder());
+		params.setActiveSamples(sampleGroupTable.getSelectedSamples());
 		return params;
 	}
 }

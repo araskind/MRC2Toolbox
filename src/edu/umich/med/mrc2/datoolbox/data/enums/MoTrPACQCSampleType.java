@@ -31,6 +31,7 @@ public enum MoTrPACQCSampleType {
 	QC_POOLED("QC-Pooled"),
 	QC_PRERUN("QC-PreRun"),
 	QC_REFERENCE("QC-Reference"),	
+	REGULAR_SAMPLE("Sample"),
 	;
 	
 	private final String uiName;

@@ -652,6 +652,14 @@ public class ExperimentDesign implements ExperimentDesignFactorListener, Seriali
 				collect(Collectors.toList());
 	}
 	
+	public Collection<ExperimentalSample> getRegularSamples() {
+		
+		ExperimentDesignFactor refFactor = ReferenceSamplesManager.getSampleControlTypeFactor();
+		return sampleSet.stream().
+				filter(s -> s.getLevel(refFactor).equals(ReferenceSamplesManager.sampleLevel)).
+				collect(Collectors.toList());
+	}
+	
 	public Element getXmlElement() {
 		
 		Element experimentDesignElement = 
