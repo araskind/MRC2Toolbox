@@ -21,6 +21,8 @@
 
 package edu.umich.med.mrc2.datoolbox.utils;
 
+import java.util.Arrays;
+
 import org.apache.commons.math3.linear.MatrixUtils;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
@@ -30,7 +32,10 @@ public class NormalizationUtils {
 	
     public static double[] paretoScale(final double[] sample) {
     	
-        DescriptiveStatistics stats = new DescriptiveStatistics(sample);
+    	double[]sampleCopy = new double[sample.length];
+    	System.arraycopy( sample, 0, sampleCopy, 0, sample.length );
+    	Arrays.setAll(sampleCopy, i -> Double.isNaN(sampleCopy[i]) ? 0 : sampleCopy[i]);
+        DescriptiveStatistics stats = new DescriptiveStatistics(sampleCopy);
 
         // Compute mean and standard deviation
         double mean = stats.getMean();
@@ -47,7 +52,10 @@ public class NormalizationUtils {
     
     public static double[] zScore(final double[] sample) {
     	
-        DescriptiveStatistics stats = new DescriptiveStatistics(sample);
+    	double[]sampleCopy = new double[sample.length];
+    	System.arraycopy( sample, 0, sampleCopy, 0, sample.length );
+    	Arrays.setAll(sampleCopy, i -> Double.isNaN(sampleCopy[i]) ? 0 : sampleCopy[i]);
+        DescriptiveStatistics stats = new DescriptiveStatistics(sampleCopy);
 
         // Compute mean and standard deviation
         double mean = stats.getMean();
@@ -64,7 +72,11 @@ public class NormalizationUtils {
     
     public static double[] rangeScale(final double[] sample, Range scaleRange) {
     	
-        DescriptiveStatistics stats = new DescriptiveStatistics(sample);
+    	double[]sampleCopy = new double[sample.length];
+    	System.arraycopy( sample, 0, sampleCopy, 0, sample.length );
+    	Arrays.setAll(sampleCopy, i -> Double.isNaN(sampleCopy[i]) ? 0 : sampleCopy[i]);
+        DescriptiveStatistics stats = new DescriptiveStatistics(sampleCopy);
+        
         if(scaleRange == null)
         	scaleRange = new Range(0.0d, 100.0d);
 

@@ -82,8 +82,10 @@ public class SampleGroupTableModel extends BasicTableModel {
 		}
 		ExperimentalSample regularSample = ReferenceSamplesManager.getGenericRegularSample();
 		regularSample.setMoTrPACQCSampleType(MoTrPACQCSampleType.REGULAR_SAMPLE);
-		Object[] obj = createSampleRow(regularSample, 
-				regularSample.getDataFilesForMethod(method).size());
+		
+		long regSampleCount = design.getRegularSamples().stream().
+				flatMap(s -> s.getDataFilesForMethod(method).stream()).count();
+		Object[] obj = createSampleRow(regularSample, (int)regSampleCount);
 		rowData.add(obj);
 		
 		if(!rowData.isEmpty())
@@ -96,7 +98,6 @@ public class SampleGroupTableModel extends BasicTableModel {
 				true,
 				sample,
 				sample.getName(),
-				sample.getMoTrPACQCSampleType(),
 				count,
 			};
 		return obj;

@@ -46,10 +46,8 @@ import edu.umich.med.mrc2.datoolbox.utils.Range;
 
 public class FeatureHeatMapDataSet extends DefaultXYZDataset implements RangeInfo, DomainInfo, IHeatMapDataSet{
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = -2535216261141143315L;
+	
 	private Matrix featureSubsetMatrix;
 	private double[][] data;
 	private String[]rowLabels;
@@ -70,55 +68,24 @@ public class FeatureHeatMapDataSet extends DefaultXYZDataset implements RangeInf
 		dataScale = params.getDataScale();
 		createDataSet();
 	}
-
-	private void createDataSetOld() {		
-
-		if (featureSubsetMatrix == null)
-			return;
-		
-		Matrix featureMatrix = featureSubsetMatrix.getMetaDataDimensionMatrix(0);
-		Matrix fileMatrix = featureSubsetMatrix.getMetaDataDimensionMatrix(1);	
-		features = new ArrayList<MsFeature>();
-		dataFiles = new ArrayList<DataFile>();
-		long[] coordinates = new long[2];
-		coordinates[0] = 0;
-		
-		data = featureSubsetMatrix.toDoubleArray();
-		//	System.out.println(Integer.toString(data[0].length) + " X " + Integer.toString(data[1].length));
-		rowLabels = new String[(int) featureSubsetMatrix.getRowCount()];
-		columnLabels = new String[(int) featureSubsetMatrix.getColumnCount()];	
-		
-        double[] xvalues = new double[1];
-        double[] yvalues = new double[1];
-        double[] zvalues = new double[1];
-        double[][]placeholder = new double[][] {xvalues, yvalues, zvalues};
-
-		for (long i = 0; i < featureSubsetMatrix.getRowCount(); i++) {
-			
-			String rowLabel = featureSubsetMatrix.getRowLabel(i);
-			rowLabels[(int)i] = rowLabel;
-			super.addSeries(rowLabel, placeholder);
-			
-			coordinates[1] = i;
-			dataFiles.add((DataFile) fileMatrix.getAsObject(coordinates));
-		}
-		for (long j = 0; j < featureSubsetMatrix.getColumnCount(); j++) {
-			
-			columnLabels[(int)j] = featureSubsetMatrix.getColumnLabel(j);
-			
-			coordinates[1] = j;
-			features.add((MsFeature) featureMatrix.getAsObject(coordinates));
-		}	
-		calculateDataRange();
-	}
 	
 	private void createDataSet() {	
 		
 		if (featureSubsetMatrix == null)
 			return;
 		
-		createFileAndFeatureLists();
-		updateDataSetWithParameters(params, false);
+		try {
+			createFileAndFeatureLists();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		try {
+			updateDataSetWithParameters(params, false);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	private void createFileAndFeatureLists() {
@@ -171,7 +138,7 @@ public class FeatureHeatMapDataSet extends DefaultXYZDataset implements RangeInf
 				map(f -> featureSubsetMatrix.getRowForLabel(f)).
 				collect(Collectors.toList());
 		Matrix fileMetadataMatrix = featureSubsetMatrix.getMetaDataDimensionMatrix(1);
-		Matrix newFileMetadataMatrix = fileMetadataMatrix.selectColumns(Ret.NEW, dataFileCoordinates);
+		Matrix newFileMetadataMatrix = fileMetadataMatrix.selectRows(Ret.NEW, dataFileCoordinates);
 		
 		long[] featureCoordinatesArray = featureCoordinates.stream().mapToLong(d -> d).toArray();
 		long[] fileCoordinatesArray = dataFileCoordinates.stream().mapToLong(d -> d).toArray();
@@ -367,6 +334,47 @@ public class FeatureHeatMapDataSet extends DefaultXYZDataset implements RangeInf
 	@Override
 	public org.jfree.data.Range getDomainBounds(boolean includeInterval) {
 		return new org.jfree.data.Range(0, columnLabels.length);
+	}
+	
+	private void createDataSetOld() {		
+
+		if (featureSubsetMatrix == null)
+			return;
+		
+		Matrix featureMatrix = featureSubsetMatrix.getMetaDataDimensionMatrix(0);
+		Matrix fileMatrix = featureSubsetMatrix.getMetaDataDimensionMatrix(1);	
+		features = new ArrayList<MsFeature>();
+		dataFiles = new ArrayList<DataFile>();
+		long[] coordinates = new long[2];
+		coordinates[0] = 0;
+		
+		data = featureSubsetMatrix.toDoubleArray();
+		//	System.out.println(Integer.toString(data[0].length) + " X " + Integer.toString(data[1].length));
+		rowLabels = new String[(int) featureSubsetMatrix.getRowCount()];
+		columnLabels = new String[(int) featureSubsetMatrix.getColumnCount()];	
+		
+        double[] xvalues = new double[1];
+        double[] yvalues = new double[1];
+        double[] zvalues = new double[1];
+        double[][]placeholder = new double[][] {xvalues, yvalues, zvalues};
+
+		for (long i = 0; i < featureSubsetMatrix.getRowCount(); i++) {
+			
+			String rowLabel = featureSubsetMatrix.getRowLabel(i);
+			rowLabels[(int)i] = rowLabel;
+			super.addSeries(rowLabel, placeholder);
+			
+			coordinates[1] = i;
+			dataFiles.add((DataFile) fileMatrix.getAsObject(coordinates));
+		}
+		for (long j = 0; j < featureSubsetMatrix.getColumnCount(); j++) {
+			
+			columnLabels[(int)j] = featureSubsetMatrix.getColumnLabel(j);
+			
+			coordinates[1] = j;
+			features.add((MsFeature) featureMatrix.getAsObject(coordinates));
+		}	
+		calculateDataRange();
 	}
 }
 

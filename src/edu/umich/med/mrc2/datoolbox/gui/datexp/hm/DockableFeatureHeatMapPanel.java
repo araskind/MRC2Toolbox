@@ -33,6 +33,7 @@ import java.util.stream.Collectors;
 
 import javax.swing.Icon;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.ujmp.core.Matrix;
 
@@ -63,6 +64,7 @@ public class DockableFeatureHeatMapPanel extends DefaultSingleCDockable implemen
 	private FeatureHeatchartSettingsPanel chartSettingsPanel;
 	private FeatureHeatMapDataSet heatMapDataSet;
 	private MZRTPlotParameterObject lastUsedParameters;
+	private Matrix featureSubsetMatrix;
 	
 	public DockableFeatureHeatMapPanel() {
 
@@ -158,7 +160,12 @@ public class DockableFeatureHeatMapPanel extends DefaultSingleCDockable implemen
 				return null;
 			}
 			else {
-				redrawPlot();
+				try {
+					redrawPlot();
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 			return null;
 		}
@@ -177,8 +184,9 @@ public class DockableFeatureHeatMapPanel extends DefaultSingleCDockable implemen
 			return true;
 		
 		if(!currentParameters.getDataScale().equals(lastUsedParameters.getDataScale())
-				&& Boolean.compare(currentParameters.getDataScale().isDirectCalculation(), 
-						lastUsedParameters.getDataScale().isDirectCalculation()) != 0){
+//				&& Boolean.compare(currentParameters.getDataScale().isDirectCalculation(), 
+//						lastUsedParameters.getDataScale().isDirectCalculation()) != 0
+						){
 			return true;
 		}	
 		if(!currentParameters.getFileSortingOrder().equals(lastUsedParameters.getFileSortingOrder()))
@@ -187,12 +195,17 @@ public class DockableFeatureHeatMapPanel extends DefaultSingleCDockable implemen
 		if(!currentParameters.getFeatureSortingOrder().equals(lastUsedParameters.getFeatureSortingOrder()))
 			return true;
 		
+		if(!CollectionUtils.isEqualCollection(
+				currentParameters.getActiveSamples(), lastUsedParameters.getActiveSamples()))
+			return true;
+		
 		return false;
 	}
 	
 	private boolean recalculateColorScale() {
 		
 		MZRTPlotParameterObject currentParameters = chartSettingsPanel.getPlotParameters();
+		
 		if(!currentParameters.getDataScale().equals(lastUsedParameters.getDataScale()))
 			return true;
 		
@@ -244,7 +257,7 @@ public class DockableFeatureHeatMapPanel extends DefaultSingleCDockable implemen
 		DataAnalysisProject experiment = 
 				MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
 		chartSettingsPanel.loadSampleTypes(experiment);
-		Matrix featureSubsetMatrix = 
+		featureSubsetMatrix = 
 				experiment.getDataMatrixForFeatureSetAndDesign(
 						this.featureSet, 
 						experiment.getExperimentDesign().getActiveDesignSubset(), 
@@ -264,8 +277,10 @@ public class DockableFeatureHeatMapPanel extends DefaultSingleCDockable implemen
 		if(recalculateDataSet()) {
 			
 			lastUsedParameters = currentParameters;
-			heatMapDataSet.updateDataSetWithParameters(lastUsedParameters, true);			
-			//	heatChart.showFeatureHeatMap(heatMapDataSet, lastUsedParameters);
+			//heatMapDataSet.updateDataSetWithParameters(lastUsedParameters, true);			
+			heatMapDataSet = new FeatureHeatMapDataSet(
+					featureSubsetMatrix, lastUsedParameters);
+			heatChart.showFeatureHeatMap(heatMapDataSet, lastUsedParameters);
 		}
 		else {
 			if(recalculateColorScale()) {

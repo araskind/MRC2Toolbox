@@ -221,30 +221,6 @@ public class FeatureHeatchartSettingsPanel extends
 		add(resetLimitsButton, gbc_resetLimitsButton);
 		
 		rowCount++;
-		
-//		JLabel dataRangeLabel = new JLabel("Data range ");
-//		GridBagConstraints gbc_dataRangeLabel = new GridBagConstraints();
-//		gbc_dataRangeLabel.anchor = GridBagConstraints.EAST;
-//		gbc_dataRangeLabel.insets = new Insets(0, 0, 5, 5);
-//		gbc_dataRangeLabel.gridx = 0;
-//		gbc_dataRangeLabel.gridy = rowCount;
-//		add(dataRangeLabel, gbc_dataRangeLabel);
-//
-//		dataRangeComboBox = new JComboBox<HeatMapDataRange>(
-//				new DefaultComboBoxModel<HeatMapDataRange>(HeatMapDataRange.values()));
-//		dataRangeComboBox.setSelectedItem(HeatMapDataRange.CORRELATION);
-//		dataRangeComboBox.setSelectedItem(ColorGradient.GREEN_RED);
-//		dataRangeComboBox.setPreferredSize(new Dimension(100, 25));
-//		dataRangeComboBox.setSize(new Dimension(100, 25));			
-//		GridBagConstraints gbc_dataRangeComboBox = new GridBagConstraints();
-//		gbc_dataRangeComboBox.fill = GridBagConstraints.HORIZONTAL;
-//		gbc_dataRangeComboBox.gridwidth = 4;
-//		gbc_dataRangeComboBox.insets = new Insets(0, 0, 5, 0);
-//		gbc_dataRangeComboBox.gridx = 1;
-//		gbc_dataRangeComboBox.gridy = rowCount;
-//		add(dataRangeComboBox, gbc_dataRangeComboBox);
-//		
-//		rowCount++;
 			
 		JLabel colorSchemeLabel = new JLabel("Palette ");
 		GridBagConstraints gbc_colorSchemeLabel = new GridBagConstraints();
