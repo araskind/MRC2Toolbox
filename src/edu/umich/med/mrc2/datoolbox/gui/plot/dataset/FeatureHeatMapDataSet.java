@@ -21,13 +21,27 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.plot.dataset;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.jfree.data.DomainInfo;
 import org.jfree.data.RangeInfo;
 import org.jfree.data.general.DatasetChangeEvent;
 import org.jfree.data.xy.DefaultXYZDataset;
 import org.ujmp.core.Matrix;
+import org.ujmp.core.calculation.Calculation.Ret;
 
+import edu.umich.med.mrc2.datoolbox.data.DataFile;
+import edu.umich.med.mrc2.datoolbox.data.MsFeature;
+import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureComparator;
+import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataScale;
+import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
+import edu.umich.med.mrc2.datoolbox.gui.datexp.MZRTPlotParameterObject;
+import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
+import edu.umich.med.mrc2.datoolbox.utils.DataSetUtils;
+import edu.umich.med.mrc2.datoolbox.utils.NormalizationUtils;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
 
 public class FeatureHeatMapDataSet extends DefaultXYZDataset implements RangeInfo, DomainInfo, IHeatMapDataSet{
@@ -42,22 +56,35 @@ public class FeatureHeatMapDataSet extends DefaultXYZDataset implements RangeInf
 	private String[]columnLabels;
 	private DataScale dataScale;
 	private Range dataRange;
+	private List<MsFeature>features;
+	private List<DataFile>dataFiles;
+	private MZRTPlotParameterObject params;
 
-	public FeatureHeatMapDataSet(Matrix featureSubsetMatrix) {
+	public FeatureHeatMapDataSet(
+			Matrix featureSubsetMatrix,
+			MZRTPlotParameterObject params) {
 
 		super();
 		this.featureSubsetMatrix = featureSubsetMatrix;
-		dataScale = DataScale.LN;
+		this.params = params;
+		dataScale = params.getDataScale();
 		createDataSet();
 	}
 
-	private void createDataSet() {		
+	private void createDataSetOld() {		
 
 		if (featureSubsetMatrix == null)
-			throw new IllegalArgumentException("The 'data' is null.");
+			return;
+		
+		Matrix featureMatrix = featureSubsetMatrix.getMetaDataDimensionMatrix(0);
+		Matrix fileMatrix = featureSubsetMatrix.getMetaDataDimensionMatrix(1);	
+		features = new ArrayList<MsFeature>();
+		dataFiles = new ArrayList<DataFile>();
+		long[] coordinates = new long[2];
+		coordinates[0] = 0;
 		
 		data = featureSubsetMatrix.toDoubleArray();
-		System.out.println(Integer.toString(data[0].length) + " X " + Integer.toString(data[01].length));
+		//	System.out.println(Integer.toString(data[0].length) + " X " + Integer.toString(data[1].length));
 		rowLabels = new String[(int) featureSubsetMatrix.getRowCount()];
 		columnLabels = new String[(int) featureSubsetMatrix.getColumnCount()];	
 		
@@ -71,11 +98,142 @@ public class FeatureHeatMapDataSet extends DefaultXYZDataset implements RangeInf
 			String rowLabel = featureSubsetMatrix.getRowLabel(i);
 			rowLabels[(int)i] = rowLabel;
 			super.addSeries(rowLabel, placeholder);
+			
+			coordinates[1] = i;
+			dataFiles.add((DataFile) fileMatrix.getAsObject(coordinates));
 		}
-		for (long j = 0; j < featureSubsetMatrix.getColumnCount(); j++)
+		for (long j = 0; j < featureSubsetMatrix.getColumnCount(); j++) {
+			
 			columnLabels[(int)j] = featureSubsetMatrix.getColumnLabel(j);
+			
+			coordinates[1] = j;
+			features.add((MsFeature) featureMatrix.getAsObject(coordinates));
+		}	
+		calculateDataRange();
+	}
+	
+	private void createDataSet() {	
 		
-		dataRange = calculateDataRange();
+		if (featureSubsetMatrix == null)
+			return;
+		
+		createFileAndFeatureLists();
+		updateDataSetWithParameters(params, false);
+	}
+	
+	private void createFileAndFeatureLists() {
+		
+		Matrix featureMatrix = featureSubsetMatrix.getMetaDataDimensionMatrix(0);
+		Matrix fileMatrix = featureSubsetMatrix.getMetaDataDimensionMatrix(1);	
+		features = new ArrayList<MsFeature>();
+		dataFiles = new ArrayList<DataFile>();
+		long[] coordinates = new long[2];
+		coordinates[0] = 0;
+		for (long i = 0; i < featureSubsetMatrix.getRowCount(); i++) {
+			
+			coordinates[1] = i;
+			dataFiles.add((DataFile) fileMatrix.getAsObject(coordinates));
+		}
+		for (long j = 0; j < featureSubsetMatrix.getColumnCount(); j++) {
+			
+			coordinates[1] = j;
+			features.add((MsFeature) featureMatrix.getAsObject(coordinates));
+		}
+	}
+	
+	public void updateDataSetWithParameters(MZRTPlotParameterObject newParams, boolean notify) {	
+
+		if (featureSubsetMatrix == null)
+			return;	
+		
+		if(MRC2ToolBoxCore.getActiveMetabolomicsExperiment() == null
+				|| MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getActiveDataPipeline() == null)
+			return;
+
+		params = newParams;
+		List<MsFeature>filteredFeatures = filterAndSortFeatures(			
+				params.getMzRange(), params.getRtRange(), params.getFeatureSortingOrder());
+		List<Long>featureCoordinates = 
+				filteredFeatures.stream().
+				map(f -> featureSubsetMatrix.getColumnForLabel(f)).
+				collect(Collectors.toList());
+		Matrix featureMetadataMatrix = featureSubsetMatrix.getMetaDataDimensionMatrix(0);
+		Matrix newFeatureMetadataMatrix = featureMetadataMatrix.selectColumns(Ret.NEW, featureCoordinates);
+		
+		DataPipeline dataPipeline = MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getActiveDataPipeline();
+		List<DataFile>filteredDataFiles = DataSetUtils.getDataFilesForSamples(
+				params.getActiveSamples(), 
+				dataPipeline, 
+				params.getFileSortingOrder());
+				
+		List<Long>dataFileCoordinates = 
+				filteredDataFiles.stream().
+				map(f -> featureSubsetMatrix.getRowForLabel(f)).
+				collect(Collectors.toList());
+		Matrix fileMetadataMatrix = featureSubsetMatrix.getMetaDataDimensionMatrix(1);
+		Matrix newFileMetadataMatrix = fileMetadataMatrix.selectColumns(Ret.NEW, dataFileCoordinates);
+		
+		long[] featureCoordinatesArray = featureCoordinates.stream().mapToLong(d -> d).toArray();
+		long[] fileCoordinatesArray = dataFileCoordinates.stream().mapToLong(d -> d).toArray();
+
+		Matrix filteredDataMatrix = featureSubsetMatrix.select(
+						Ret.NEW, fileCoordinatesArray, featureCoordinatesArray);
+		filteredDataMatrix.setMetaDataDimensionMatrix(0, newFeatureMetadataMatrix);
+		filteredDataMatrix.setMetaDataDimensionMatrix(1, newFileMetadataMatrix);
+		
+		data = filteredDataMatrix.toDoubleArray();
+		dataScale = params.getDataScale();
+		if(!dataScale.isDirectCalculation())
+			data = NormalizationUtils.scaleData(data, dataScale, true);
+				
+		rowLabels = new String[(int) filteredDataMatrix.getRowCount()];
+		columnLabels = new String[(int) filteredDataMatrix.getColumnCount()];	
+		
+        double[] xvalues = new double[1];
+        double[] yvalues = new double[1];
+        double[] zvalues = new double[1];
+        double[][]placeholder = new double[][] {xvalues, yvalues, zvalues};
+
+		for (long i = 0; i < filteredDataMatrix.getRowCount(); i++) {
+			
+			String rowLabel = filteredDataMatrix.getRowLabel(i);
+			rowLabels[(int)i] = rowLabel;
+			super.addSeries(rowLabel, placeholder);
+		}
+		for (long j = 0; j < filteredDataMatrix.getColumnCount(); j++)			
+			columnLabels[(int)j] = filteredDataMatrix.getColumnLabel(j);
+
+		calculateDataRange();
+		
+		if(notify)
+			notifyListeners(new DatasetChangeEvent(this, this));
+	}
+	
+	private List<MsFeature>filterAndSortFeatures(			
+			Range mzRange,
+			Range rtRange,
+			SortProperty featureSortingOrder){
+		
+		List<MsFeature>filteredFeatures = new ArrayList<MsFeature>();
+		if(features == null || features.isEmpty())
+			return filteredFeatures;
+		
+		filteredFeatures.addAll(features);
+		if(mzRange != null && mzRange.getSize() > 0) {
+			
+			filteredFeatures = filteredFeatures.stream().
+				filter(f -> mzRange.contains(f.getMonoisotopicMz())).
+				collect(Collectors.toList());
+		}
+		if(rtRange != null && rtRange.getSize() > 0) {
+			
+			filteredFeatures = filteredFeatures.stream().
+				filter(f -> rtRange.contains(f.getRetentionTime())).
+				collect(Collectors.toList());
+		}
+		return filteredFeatures.stream().
+				sorted(new MsFeatureComparator(featureSortingOrder)).
+				collect(Collectors.toList());
 	}
 	
 	@Override
@@ -145,43 +303,39 @@ public class FeatureHeatMapDataSet extends DefaultXYZDataset implements RangeInf
 		return dataRange;
 	}
 
-	public Range calculateDataRange() {
+	private void calculateDataRange() {
 		
-		double min = featureSubsetMatrix.getMinValue();
-		double max = featureSubsetMatrix.getMaxValue();
-		
+		dataRange = NormalizationUtils.getDataRangeFrom2Darray(data);
 		if(dataScale.equals(DataScale.LN)) {
-			min = Math.log1p(min);
-			max = Math.log1p(max);
+			
+			dataRange = new Range(
+					Math.log1p(dataRange.getMin()),  
+					Math.log1p(dataRange.getMax()));
+			return;
 		}
 		else if(dataScale.equals(DataScale.LOG10)) {
-			min = Math.log10(min);
-			max = Math.log10(max);
+
+			dataRange = new Range(
+					Math.log10(dataRange.getMin()),  
+					Math.log10(dataRange.getMax()));
+			return;
 		}
 		else if(dataScale.equals(DataScale.SQRT)) {
-			min = Math.sqrt(min);
-			max = Math.sqrt(max);
-		}
-		return new Range(min, max);
+			
+			dataRange = new Range(
+					Math.sqrt(dataRange.getMin()),  
+					Math.sqrt(dataRange.getMax()));
+			return;
+		}		
 	}
 
 	public void setDataScale(DataScale newScale) {
 		
-		if(newScale.equals(DataScale.RAW) 
-				|| newScale.equals(DataScale.LN)
-				|| newScale.equals(DataScale.LOG10) 
-				||  newScale.equals(DataScale.SQRT)) {
-			boolean scaleChanged = false;
-			
-			if(!dataScale.equals(newScale))
-				scaleChanged = true;
-			
-			this.dataScale = newScale;
-			if(scaleChanged) {
+		if(newScale.isDirectCalculation() && !dataScale.equals(newScale)) {
 				
-				dataRange = calculateDataRange();
-				notifyListeners(new DatasetChangeEvent(this, this));
-			}
+			this.dataScale = newScale;
+			calculateDataRange();
+			notifyListeners(new DatasetChangeEvent(this, this));		
 		}
 	}
 

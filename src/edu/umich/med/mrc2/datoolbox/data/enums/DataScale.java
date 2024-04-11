@@ -23,24 +23,30 @@ package edu.umich.med.mrc2.datoolbox.data.enums;
 
 public enum DataScale {
 
-	RAW("Raw"), 
-	LN("ln"),
-	LOG10("log10"),
-	SQRT("Square root"),
-	RANGE("Range (0-100)"), 
-	ZSCORE("Z-score"),
-	PARETO("Pareto");
+	RAW("Raw", true), 
+	LN("ln", true),
+	LOG10("log10", true),
+	SQRT("Square root", true),
+	RANGE("Range (0-100)", false), 
+	ZSCORE("Z-score", false),
+	PARETO("Pareto", false);
 
 	private final String uiName;
+	private final boolean directCalculation;
 
-	DataScale(String uiName) {
+	DataScale(String uiName, boolean directCalculation) {
 		this.uiName = uiName;
+		this.directCalculation = directCalculation;
 	}
 
 	public String getName() {
 		return uiName;
 	}
 
+	public boolean isDirectCalculation() {
+		return directCalculation;
+	}
+	
 	@Override
 	public String toString() {
 		return uiName;

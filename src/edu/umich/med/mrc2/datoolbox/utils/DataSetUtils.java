@@ -24,6 +24,8 @@ package edu.umich.med.mrc2.datoolbox.utils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import org.ujmp.core.Matrix;
@@ -34,11 +36,13 @@ import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignSubset;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentalSample;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureSet;
+import edu.umich.med.mrc2.datoolbox.data.compare.DataFileComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.DataFileTimeStampComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.ExperimentalSampleComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.enums.FileSortingOrder;
 import edu.umich.med.mrc2.datoolbox.data.enums.GlobalDefaults;
+import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.ReferenceSamplesManager;
@@ -149,6 +153,38 @@ public class DataSetUtils {
 
 		ArrayList<DataFile>sortedFiles = new ArrayList<DataFile>();
 		return sortedFiles.toArray(new DataFile[sortedFiles.size()]) ;
+	}
+	
+	public static List<DataFile> getDataFilesForSamples(
+			Collection<ExperimentalSample>samples, 
+			DataPipeline dataPipeline, 
+			SortProperty fileSortingOrder) {
+		
+		List<DataFile>dataFiles = new ArrayList<DataFile>();
+		if (MRC2ToolBoxCore.getActiveMetabolomicsExperiment() == null
+				|| MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExperimentDesign() == null 
+				|| MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExperimentDesign().getSamples().isEmpty())
+			return dataFiles;
+		
+		DataAcquisitionMethod acqMethod = dataPipeline.getAcquisitionMethod();
+		for(ExperimentalSample s : samples) {
+			
+			if(s.equals(ReferenceSamplesManager.getGenericRegularSample())) {
+				
+				for(ExperimentalSample regSample : MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExperimentDesign().getRegularSamples()) {
+					
+					TreeSet<DataFile> sampleFiles = regSample.getDataFilesForMethod(acqMethod);
+					if(sampleFiles != null && !sampleFiles.isEmpty())
+						dataFiles.addAll(sampleFiles);
+				}
+			}
+			else {
+				TreeSet<DataFile> sampleFiles = s.getDataFilesForMethod(acqMethod);
+				if(sampleFiles != null && !sampleFiles.isEmpty())
+					dataFiles.addAll(sampleFiles);
+			}
+		}
+		return dataFiles.stream().sorted(new DataFileComparator(fileSortingOrder)).collect(Collectors.toList());
 	}
 
 }

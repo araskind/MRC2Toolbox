@@ -30,6 +30,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.prefs.Preferences;
 
 import javax.swing.DefaultComboBoxModel;
@@ -41,14 +42,16 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 
+import edu.umich.med.mrc2.datoolbox.data.ExperimentalSample;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataScale;
 import edu.umich.med.mrc2.datoolbox.gui.datexp.MZRTPlotParameterObject;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.plot.ColorGradient;
 import edu.umich.med.mrc2.datoolbox.gui.plot.ColorScale;
-import edu.umich.med.mrc2.datoolbox.gui.plot.HeatMapDataRange;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.SortedComboBoxModel;
@@ -57,7 +60,7 @@ import edu.umich.med.mrc2.datoolbox.project.Experiment;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
 
 public class FeatureHeatchartSettingsPanel extends 
-		JPanel implements ItemListener, ActionListener, BackedByPreferences {
+		JPanel implements ItemListener, ActionListener, BackedByPreferences, TableModelListener {
 
 	/**
 	 * 
@@ -82,11 +85,12 @@ public class FeatureHeatchartSettingsPanel extends
 	private JFormattedTextField startMZTextField, endMZTextField; 
 	private JComboBox colorSchemeComboBox;
 	private JComboBox colorScaleComboBox;
-	private JComboBox dataRangeComboBox;
+//	private JComboBox dataRangeComboBox;
 	private JComboBox<DataScale> dataScaleComboBox;
 	private JComboBox<SortProperty> fileSortingOrderComboBox;
 	private JComboBox<SortProperty> featureSortingOrderComboBox;
 	private SampleGroupTable sampleGroupTable;
+	private JButton refreshPlotButton;
 	
 	@SuppressWarnings("unchecked")
 	public FeatureHeatchartSettingsPanel(
@@ -218,29 +222,29 @@ public class FeatureHeatchartSettingsPanel extends
 		
 		rowCount++;
 		
-		JLabel dataRangeLabel = new JLabel("Data range ");
-		GridBagConstraints gbc_dataRangeLabel = new GridBagConstraints();
-		gbc_dataRangeLabel.anchor = GridBagConstraints.EAST;
-		gbc_dataRangeLabel.insets = new Insets(0, 0, 5, 5);
-		gbc_dataRangeLabel.gridx = 0;
-		gbc_dataRangeLabel.gridy = rowCount;
-		add(dataRangeLabel, gbc_dataRangeLabel);
-
-		dataRangeComboBox = new JComboBox<HeatMapDataRange>(
-				new DefaultComboBoxModel<HeatMapDataRange>(HeatMapDataRange.values()));
-		dataRangeComboBox.setSelectedItem(HeatMapDataRange.CORRELATION);
-		dataRangeComboBox.setSelectedItem(ColorGradient.GREEN_RED);
-		dataRangeComboBox.setPreferredSize(new Dimension(100, 25));
-		dataRangeComboBox.setSize(new Dimension(100, 25));			
-		GridBagConstraints gbc_dataRangeComboBox = new GridBagConstraints();
-		gbc_dataRangeComboBox.fill = GridBagConstraints.HORIZONTAL;
-		gbc_dataRangeComboBox.gridwidth = 4;
-		gbc_dataRangeComboBox.insets = new Insets(0, 0, 5, 0);
-		gbc_dataRangeComboBox.gridx = 1;
-		gbc_dataRangeComboBox.gridy = rowCount;
-		add(dataRangeComboBox, gbc_dataRangeComboBox);
-		
-		rowCount++;
+//		JLabel dataRangeLabel = new JLabel("Data range ");
+//		GridBagConstraints gbc_dataRangeLabel = new GridBagConstraints();
+//		gbc_dataRangeLabel.anchor = GridBagConstraints.EAST;
+//		gbc_dataRangeLabel.insets = new Insets(0, 0, 5, 5);
+//		gbc_dataRangeLabel.gridx = 0;
+//		gbc_dataRangeLabel.gridy = rowCount;
+//		add(dataRangeLabel, gbc_dataRangeLabel);
+//
+//		dataRangeComboBox = new JComboBox<HeatMapDataRange>(
+//				new DefaultComboBoxModel<HeatMapDataRange>(HeatMapDataRange.values()));
+//		dataRangeComboBox.setSelectedItem(HeatMapDataRange.CORRELATION);
+//		dataRangeComboBox.setSelectedItem(ColorGradient.GREEN_RED);
+//		dataRangeComboBox.setPreferredSize(new Dimension(100, 25));
+//		dataRangeComboBox.setSize(new Dimension(100, 25));			
+//		GridBagConstraints gbc_dataRangeComboBox = new GridBagConstraints();
+//		gbc_dataRangeComboBox.fill = GridBagConstraints.HORIZONTAL;
+//		gbc_dataRangeComboBox.gridwidth = 4;
+//		gbc_dataRangeComboBox.insets = new Insets(0, 0, 5, 0);
+//		gbc_dataRangeComboBox.gridx = 1;
+//		gbc_dataRangeComboBox.gridy = rowCount;
+//		add(dataRangeComboBox, gbc_dataRangeComboBox);
+//		
+//		rowCount++;
 			
 		JLabel colorSchemeLabel = new JLabel("Palette ");
 		GridBagConstraints gbc_colorSchemeLabel = new GridBagConstraints();
@@ -297,8 +301,9 @@ public class FeatureHeatchartSettingsPanel extends
 		add(bubbleScaleLabel, gbc_bubbleScaleLabel);
 		
 		dataScaleComboBox = new JComboBox<DataScale>();
-		dataScaleComboBox.setModel(new DefaultComboBoxModel<DataScale>(
-				new DataScale[] {DataScale.LN, DataScale.LOG10, DataScale.SQRT}));
+//		dataScaleComboBox.setModel(new DefaultComboBoxModel<DataScale>(
+//				new DataScale[] {DataScale.LN, DataScale.LOG10, DataScale.SQRT}));
+		dataScaleComboBox.setModel(new DefaultComboBoxModel<DataScale>(DataScale.values()));
 		dataScaleComboBox.setSelectedItem(DataScale.LN);
 		dataScaleComboBox.setMaximumSize(new Dimension(120, 26));
 		GridBagConstraints gbc_dataScaleComboBox = new GridBagConstraints();
@@ -391,9 +396,9 @@ public class FeatureHeatchartSettingsPanel extends
 		
 		rowCount++;
 		
-		JButton refreshPlotButton = new JButton("Refresh plot", refreshDataIcon);
+		refreshPlotButton = new JButton("Refresh plot", refreshDataIcon);
 		refreshPlotButton.setActionCommand(
-				MainActionCommands.REFRESH_MSMS_FEATURE_PLOT.getName());
+				MainActionCommands.REDRAW_HEAT_MAP_COMMAND.getName());
 		refreshPlotButton.addActionListener(actListener);
 		GridBagConstraints gbc_refreshPlotButton = new GridBagConstraints();
 		gbc_refreshPlotButton.gridwidth = 2;
@@ -411,8 +416,10 @@ public class FeatureHeatchartSettingsPanel extends
 		colorSchemeComboBox.addItemListener(externalItemListener);
 		colorScaleComboBox.addItemListener(externalItemListener);
 		colorSchemeComboBox.addItemListener(externalItemListener);
+		dataScaleComboBox.addItemListener(externalItemListener);
 		fileSortingOrderComboBox.addItemListener(externalItemListener);
 		featureSortingOrderComboBox.addItemListener(externalItemListener);
+		sampleGroupTable.getModel().addTableModelListener(this);
 	}
 	
 	@Override
@@ -423,7 +430,10 @@ public class FeatureHeatchartSettingsPanel extends
 	}
 	
 	public void loadSampleTypes(Experiment experiment) {
+		
+		sampleGroupTable.getModel().removeTableModelListener(this);
 		sampleGroupTable.loadSampleTypes(experiment);
+		sampleGroupTable.getModel().addTableModelListener(this);
 	}
 	
 	private void resetMZRTlimits() {
@@ -433,6 +443,7 @@ public class FeatureHeatchartSettingsPanel extends
 		endRTTextField.setText(Double.toString(limit));
 		startMZTextField.setText(Double.toString(limit));
 		endMZTextField.setText(Double.toString(limit));
+		refreshPlotButton.doClick();
 	}
 
 	public void setRtRange(Range rtRange) {
@@ -451,10 +462,10 @@ public class FeatureHeatchartSettingsPanel extends
 		if(!endRTTextField.getText().trim().isEmpty())
 			endRt = Double.parseDouble(endRTTextField.getText().trim());
 		
-		if(startRt <= endRt)
+		if(startRt < endRt)
 			return new Range(startRt, endRt);
-		
-		return null;
+		else
+			return null;
 	}	
 	
 	public void setMZRange(Range mzRange) {
@@ -473,10 +484,10 @@ public class FeatureHeatchartSettingsPanel extends
 		if(!endMZTextField.getText().trim().isEmpty())
 			endMZ = Double.parseDouble(endMZTextField.getText().trim());
 		
-		if(startMZ <= endMZ)
+		if(startMZ < endMZ)
 			return new Range(startMZ, endMZ);
-		
-		return null;
+		else
+			return null;
 	}
 	
 	public ColorGradient getColorGradient() {
@@ -501,6 +512,10 @@ public class FeatureHeatchartSettingsPanel extends
 	
 	public SortProperty getFeatureSortingOrder() {
 		return (SortProperty)featureSortingOrderComboBox.getSelectedItem();
+	}
+	
+	public Collection<ExperimentalSample> getSelectedSamples() {
+		return sampleGroupTable.getSelectedSamples();
 	}
 	
 	@Override
@@ -587,6 +602,23 @@ public class FeatureHeatchartSettingsPanel extends
 		params.setFeatureSortingOrder(getFeatureSortingOrder());
 		params.setActiveSamples(sampleGroupTable.getSelectedSamples());
 		return params;
+	}
+
+	@Override
+	public void tableChanged(TableModelEvent e) {
+
+		SampleGroupTableModel tModel = (SampleGroupTableModel)e.getSource();
+		if(e.getColumn() == tModel.getColumnIndex(SampleGroupTableModel.INCLUDE_COLUMN)
+				&& e.getType() == TableModelEvent.UPDATE) {
+			refreshPlotButton.doClick();
+		}
+	}
+	
+	public void clearSampleGroups() {
+		
+		sampleGroupTable.getModel().removeTableModelListener(this);
+		sampleGroupTable.clearTable();
+		sampleGroupTable.getModel().addTableModelListener(this);		
 	}
 }
 

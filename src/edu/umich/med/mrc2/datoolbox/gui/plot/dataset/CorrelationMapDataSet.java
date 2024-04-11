@@ -26,6 +26,7 @@ import org.ujmp.core.Matrix;
 
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureCluster;
+import edu.umich.med.mrc2.datoolbox.data.enums.DataScale;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
 
 public class CorrelationMapDataSet extends DefaultXYZDataset implements IHeatMapDataSet{
@@ -110,6 +111,12 @@ public class CorrelationMapDataSet extends DefaultXYZDataset implements IHeatMap
 	
 	public Range getDataRange() {
 		return new Range(corrMatrix.getMinValue(), corrMatrix.getMaxValue());
+	}
+
+	@Override
+	public void setDataScale(DataScale newScale) {
+		// TODO Auto-generated method stub
+		
 	}
 }
 

@@ -214,6 +214,7 @@ public class JFHeatChart extends MasterPlotPanel implements ChartMouseListener {
 		colorGradient = plotParams.getColorGradient();
 		colorScale = plotParams.getColorScale();
 
+		dataSet.setDataScale(plotParams.getDataScale());
 		dataRange = new Range(
 				dataSet.getDataRange().getMin(),
 				dataSet.getDataRange().getMax());

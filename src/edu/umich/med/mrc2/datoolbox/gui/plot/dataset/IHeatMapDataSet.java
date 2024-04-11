@@ -21,6 +21,7 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.plot.dataset;
 
+import edu.umich.med.mrc2.datoolbox.data.enums.DataScale;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
 
 public interface IHeatMapDataSet {
@@ -30,4 +31,6 @@ public interface IHeatMapDataSet {
 	String[] getColumnLabels();
 
 	Range getDataRange();
+	
+	public void setDataScale(DataScale newScale);
 }

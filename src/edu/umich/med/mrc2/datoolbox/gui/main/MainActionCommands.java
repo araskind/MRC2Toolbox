@@ -417,6 +417,8 @@ public enum MainActionCommands {
 	//	Chart side panel
 	SHOW_CHART_SIDE_PANEL_COMMAND("Show chart side panel"),
 	HIDE_CHART_SIDE_PANEL_COMMAND("Hide chart side panel"),
+	
+	REDRAW_HEAT_MAP_COMMAND("Redraw heat map"),
 
 	// Feature statistics panel commands
 	CALC_FEATURES_STATS_COMMAND("Calculate feature statistics"),
