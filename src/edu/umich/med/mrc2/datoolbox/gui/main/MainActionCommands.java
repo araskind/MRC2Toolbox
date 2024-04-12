@@ -1064,6 +1064,8 @@ public enum MainActionCommands {
 	COPY_PEPSEARCH_CLI_COMMAND("Copy PepSearch CLI command to clipboard"),
 	NIST_MS_SEARCH_SETUP_COMMAND("Set up NIST MS search"),
 	NIST_MS_SEARCH_RUN_COMMAND("Search NIST MSMS libraries"),
+	FEATURE_VS_FEATURE_MSMS_SEARCH_SETUP_COMMAND("Set up MSMS search against feature library"),
+	FEATURE_VS_FEATURE_MSMS_SEARCH_RUN_COMMAND("Run MSMS search against feature library"),
 	
 	//	PepSearch data verifier
 	SELECT_PEPSEARCH_OUTPUT_FILE_COMMAND("Select NIST pepsearch output file"),

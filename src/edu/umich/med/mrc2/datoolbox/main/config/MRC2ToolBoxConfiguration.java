@@ -212,10 +212,10 @@ public class MRC2ToolBoxConfiguration {
       
     //	Spectrum entropy
     public static final String SPECTRUM_ENTROPY_MASS_ERROR = "SPECTRUM_ENTROPY_MASS_ERROR";
-    public static final double SPECTRUM_ENTROPY_MASS_ERROR_DEFAULT = 0.05d;
+    public static final double SPECTRUM_ENTROPY_MASS_ERROR_DEFAULT = 50.0d;
     
     public static final String SPECTRUM_ENTROPY_MASS_ERROR_TYPE = "SPECTRUM_ENTROPY_MASS_ERROR_TYPE";
-    public static final MassErrorType SPECTRUM_ENTROPY_MASS_ERROR_TYPE_DEFAULT = MassErrorType.Da;
+    public static final MassErrorType SPECTRUM_ENTROPY_MASS_ERROR_TYPE_DEFAULT = MassErrorType.mDa;
     
     public static final String SPECTRUM_ENTROPY_NOISE_CUTOFF = "SPECTRUM_ENTROPY_NOISE_CUTOFF";
     public static final double SPECTRUM_ENTROPY_NOISE_CUTOFF_DEFAULT = 0.01d;

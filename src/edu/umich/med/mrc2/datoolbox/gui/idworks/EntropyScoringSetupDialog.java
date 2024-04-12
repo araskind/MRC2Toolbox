@@ -201,6 +201,9 @@ public class EntropyScoringSetupDialog extends JDialog implements BackedByPrefer
 		if(getMassErrorType() == null)
 			errors.add("Mass error type must be specified");
 		
+		if(getNoizeCutoff() < 0 || getNoizeCutoff() > 1)
+			errors.add("Noise cutoff value must be between 0 and 100");
+		
 		return errors;
 	}
 

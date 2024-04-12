@@ -383,6 +383,10 @@ public class FeatureHeatchartSettingsPanel extends
 		gbc_refreshPlotButton.gridy = rowCount;
 		add(refreshPlotButton, gbc_refreshPlotButton);
 		
+		gridBagLayout.rowHeights = new int[rowCount + 2];
+		Arrays.fill(gridBagLayout.rowHeights, 0);
+		gridBagLayout.rowHeights[rowCount + 1] = Integer.MIN_VALUE;
+		    
 		gridBagLayout.rowWeights = new double[rowCount + 2];
 		Arrays.fill(gridBagLayout.rowWeights, 0.0d);
 		gridBagLayout.rowWeights[rowCount + 1] = Double.MIN_VALUE;

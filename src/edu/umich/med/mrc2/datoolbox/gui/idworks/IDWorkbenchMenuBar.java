@@ -50,6 +50,7 @@ public class IDWorkbenchMenuBar extends CommonMenuBar {
 	private static final Icon nistPepMsIconSmall = GuiUtils.getIcon("NISTMS-pep", 16);
 	private static final Icon nistPepMsOfflineIcon = GuiUtils.getIcon("NISTMS-pep-offline", 24);
 	private static final Icon nistPepMsOfflineUploadIcon = GuiUtils.getIcon("NISTMS-pep-upload", 24);
+	private static final Icon featureVsFeatureMSMSSearchIcon = GuiUtils.getIcon("msmsSearch", 24);
 	private static final Icon exportMSPIcon = GuiUtils.getIcon("exportToMSP", 24);
 	private static final Icon exportMSPIconSmall = GuiUtils.getIcon("exportToMSP", 16);
 	private static final Icon siriusIcon = GuiUtils.getIcon("sirius", 24);
@@ -112,6 +113,7 @@ public class IDWorkbenchMenuBar extends CommonMenuBar {
 	private JMenuItem
 		pepSearchSetupMenuItem,
 		pepSearchOfflineSetupMenuItem,
+		featureVsFeatureMSMSSearchSetupMenuItem,
 		pepsearchResultsValidateMenuItem,
 		defaultMatchReassignMenuItem,
 		entropyMenuItem,
@@ -210,7 +212,7 @@ public class IDWorkbenchMenuBar extends CommonMenuBar {
 		pepSearchOfflineSetupMenuItem = addItem(librarySearchMenu, 
 				MainActionCommands.NIST_MS_OFFLINE_PEPSEARCH_SETUP_COMMAND, 
 				nistPepMsOfflineIcon);
-
+		
 		librarySearchMenu.addSeparator();
 
 		pepsearchResultsValidateMenuItem = addItem(librarySearchMenu, 
@@ -219,6 +221,12 @@ public class IDWorkbenchMenuBar extends CommonMenuBar {
 		defaultMatchReassignMenuItem = addItem(librarySearchMenu, 
 				MainActionCommands.SETUP_DEFAULT_MSMS_LIBRARY_MATCH_REASSIGNMENT, 
 				reassignTopHitsIcon);
+		
+		librarySearchMenu.addSeparator();
+		
+		featureVsFeatureMSMSSearchSetupMenuItem = addItem(librarySearchMenu, 
+				MainActionCommands.FEATURE_VS_FEATURE_MSMS_SEARCH_SETUP_COMMAND, 
+				featureVsFeatureMSMSSearchIcon);
 		
 		librarySearchMenu.addSeparator();
 		

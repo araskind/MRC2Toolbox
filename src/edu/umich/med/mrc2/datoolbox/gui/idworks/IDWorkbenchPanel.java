@@ -166,6 +166,7 @@ import edu.umich.med.mrc2.datoolbox.gui.idworks.search.ads.ActiveDataSetMZRTData
 import edu.umich.med.mrc2.datoolbox.gui.idworks.search.binner.ActiveDataSetBinnerAnnotationsSearchDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.search.byexp.ExperimentMZRTDataSearchDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.search.dbwide.IDTrackerDataSearchDialog;
+import edu.umich.med.mrc2.datoolbox.gui.idworks.search.msms.FeatureVsFeatureMSMSSearchSetupDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.stan.DockableStandardFeatureAnnotationTable;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.stan.StandardFeatureAnnotationAssignmentDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.stan.StandardFeatureAnnotationManagerDialog;
@@ -320,6 +321,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 	private AnnotationFilterDialog annotationFilterDialog;
 	private MSMSClusterMZRTListFilterDialog msmsClusterMZRTListFilterDialog;
 	private MzFrequencyAnalysisResultsDialog mzFrequencyAnalysisResultsDialog;
+	private FeatureVsFeatureMSMSSearchSetupDialog featureVsFeatureMSMSSearchSetupDialog;
 	
 	private static final Icon searchIdTrackerIcon = GuiUtils.getIcon("searchDatabase", 24);
 	private static final Icon searchExperimentIcon = GuiUtils.getIcon("searchIdExperiment", 24);
@@ -802,6 +804,12 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		
 		if (command.equals(MainActionCommands.REASSIGN_DEFAULT_MSMS_LIBRARY_MATCHES.getName()))
 			reassignTopMSMSHits();
+		
+		if (command.equals(MainActionCommands.FEATURE_VS_FEATURE_MSMS_SEARCH_SETUP_COMMAND.getName()))
+			setupFeatureVsFeatureMSMSSearch();
+		
+		if (command.equals(MainActionCommands.FEATURE_VS_FEATURE_MSMS_SEARCH_RUN_COMMAND.getName()))
+			runFeatureVsFeatureMSMSSearch();		
 		
 		if (command.equals(MainActionCommands.SHOW_FEATURE_FILTER_COMMAND.getName())) {
 			
@@ -1858,6 +1866,24 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		MRC2ToolBoxCore.getTaskController().addTask(task);
 		reassignDefaultMSMSLibraryHitDialog.dispose();
 	}
+	
+	private void setupFeatureVsFeatureMSMSSearch(){
+		//	TODO
+		
+		if(activeFeatureCollection == null || activeFeatureCollection.isEmpty())
+			return;
+		
+		featureVsFeatureMSMSSearchSetupDialog = new FeatureVsFeatureMSMSSearchSetupDialog(this);
+		featureVsFeatureMSMSSearchSetupDialog.setLocationRelativeTo(this.getContentPane());	
+		featureVsFeatureMSMSSearchSetupDialog.setVisible(true);	
+	}
+
+	private void runFeatureVsFeatureMSMSSearch(){
+		//	TODO
+		
+		
+		featureVsFeatureMSMSSearchSetupDialog.dispose();
+	}
 
 	private void setupFDRforMSMSlibraryIdentifications() {
 		
@@ -2049,9 +2075,12 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 	
 	private void showTrackerSearchByBinnerAnnotationsDialog() {
 
-		Collection<MSFeatureInfoBundle> allFeatures = 
-				msTwoFeatureTable.getBundles(TableRowSubset.ALL);
-		if(allFeatures.isEmpty())
+//		Collection<MSFeatureInfoBundle> allFeatures = 
+//				msTwoFeatureTable.getBundles(TableRowSubset.ALL);
+//		if(allFeatures.isEmpty())
+//			return;
+		
+		if(activeFeatureCollection == null || activeFeatureCollection.isEmpty())
 			return;
 		
 		activeDataSetBinnerAnnotationsSearchDialog = 
