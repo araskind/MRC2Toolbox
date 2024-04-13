@@ -30,27 +30,29 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.prefs.Preferences;
 
+import javax.swing.ButtonGroup;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 
 import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
-import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusteringParameterSet;
-import edu.umich.med.mrc2.datoolbox.database.idt.MSMSClusteringDBUtils;
+import edu.umich.med.mrc2.datoolbox.data.enums.TableRowSubset;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
-import edu.umich.med.mrc2.datoolbox.main.MSMSClusterDataSetManager;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
-import edu.umich.med.mrc2.datoolbox.utils.MSMSClusteringUtils;
+import edu.umich.med.mrc2.datoolbox.msmsscore.MSMSSearchParameterSet;
+import edu.umich.med.mrc2.datoolbox.utils.MSMSSearchUtils;
 
 public class MSMSSearchParametersPanel extends JPanel implements ItemListener, BackedByPreferences {
 
@@ -65,12 +67,14 @@ public class MSMSSearchParametersPanel extends JPanel implements ItemListener, B
 	private static final String MZ_ERROR_VALUE = "MZ_ERROR_VALUE";
 	private static final String MZ_ERROR_TYPE = "MZ_ERROR_TYPE";
 	private static final String RT_ERROR_VALUE = "RT_ERROR_VALUE";
+	private static final String IGNORE_RT = "IGNORE_RT";
 	private static final String MSMS_SIMILARITY_CUTOFF = "MSMS_SIMILARITY_CUTOFF";
 	private static final String ENTROPY_SCORE_MASS_ERROR_VALUE = "ENTROPY_SCORE_MASS_ERROR_VALUE";
 	private static final String ENTROPY_SCORE_MASS_ERROR_TYPE = "ENTROPY_SCORE_MASS_ERROR_TYPE";
 	private static final String ENTROPY_SCORE_NOISE_CUTOFF = "ENTROPY_SCORE_NOISE_CUTOFF";
+	private static final String USE_TABLE_ROW_SUBSET_SET = "USE_TABLE_ROW_SUBSET_SET";	
 	
-	private MSMSClusteringParameterSet parameters;
+	private MSMSSearchParameterSet parameters;
 	
 	private JFormattedTextField mzErrorValueTextField;
 	private JComboBox massErrorTypeComboBox;
@@ -80,6 +84,9 @@ public class MSMSSearchParametersPanel extends JPanel implements ItemListener, B
 	private JFormattedTextField esMassErrorTextField;
 	private JComboBox esMassErrorTypeComboBox;
 	private JFormattedTextField esNoiseCutoffTextField;
+	private JRadioButton useFeaturesFromTableRadioButton;
+	private JComboBox<TableRowSubset> featureSubsetComboBox;
+	private JRadioButton useCompleteSetRadioButton;
 			
 	public MSMSSearchParametersPanel() {
 		
@@ -92,8 +99,8 @@ public class MSMSSearchParametersPanel extends JPanel implements ItemListener, B
 					TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)), 
 				new EmptyBorder(10, 10, 10, 10))));
 		GridBagLayout gridBagLayout = new GridBagLayout();
-		gridBagLayout.columnWidths = new int[]{0, 0, 0, 0, 0};
-		gridBagLayout.columnWeights = new double[]{0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
+		gridBagLayout.columnWidths = new int[]{0, 0, 0, 0, 0, 0};
+		gridBagLayout.columnWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
 		setLayout(gridBagLayout);
 		
 		int rowCount = 0;
@@ -157,7 +164,7 @@ public class MSMSSearchParametersPanel extends JPanel implements ItemListener, B
 		
 		ignoreRtCheckBox = new JCheckBox("Ignore retention time");
 		GridBagConstraints gbc_ignoreRtCheckBox = new GridBagConstraints();
-		gbc_ignoreRtCheckBox.insets = new Insets(0, 0, 5, 0);
+		gbc_ignoreRtCheckBox.insets = new Insets(0, 0, 5, 5);
 		gbc_ignoreRtCheckBox.gridx = 3;
 		gbc_ignoreRtCheckBox.gridy = rowCount;
 		add(ignoreRtCheckBox, gbc_ignoreRtCheckBox);
@@ -195,21 +202,34 @@ public class MSMSSearchParametersPanel extends JPanel implements ItemListener, B
 		
 		JPanel entropyScoreParamsPanel = createEntropyScoreParametersBlock();
 		GridBagConstraints gbc_entropyScoreParamsPanel = new GridBagConstraints();
-		gbc_entropyScoreParamsPanel.gridwidth = 4;
+		gbc_entropyScoreParamsPanel.anchor = GridBagConstraints.NORTH;
+		gbc_entropyScoreParamsPanel.insets = new Insets(0, 0, 5, 5);
+		gbc_entropyScoreParamsPanel.gridwidth = 3;
 		gbc_entropyScoreParamsPanel.fill = GridBagConstraints.HORIZONTAL;
 		gbc_entropyScoreParamsPanel.gridx = 0;
 		gbc_entropyScoreParamsPanel.gridy = rowCount;
 		add(entropyScoreParamsPanel, gbc_entropyScoreParamsPanel);
+		
+		//`rowCount++;
+			
+		JPanel featureSubsetPanel = createFeatureSubsetBlock(); 
+		GridBagConstraints gbc_featureSubsetPanel = new GridBagConstraints();
+		gbc_featureSubsetPanel.anchor = GridBagConstraints.NORTH;
+		gbc_featureSubsetPanel.insets = new Insets(0, 0, 0, 5);
+		gbc_featureSubsetPanel.gridwidth = 2;
+		gbc_featureSubsetPanel.fill = GridBagConstraints.HORIZONTAL;
+		gbc_featureSubsetPanel.gridx = 3;
+		gbc_featureSubsetPanel.gridy = rowCount;
+		add(featureSubsetPanel, gbc_featureSubsetPanel);
 
-//		gridBagLayout.rowHeights = new int[rowCount + 2];
-//		Arrays.fill(gridBagLayout.rowHeights, 0);
-//		gridBagLayout.rowHeights[rowCount + 1] = Integer.MIN_VALUE;
-//
-//		gridBagLayout.rowWeights = new double[rowCount + 2];
-//		Arrays.fill(gridBagLayout.rowWeights, 0.0d);
-//		gridBagLayout.rowWeights[rowCount + 1] = Double.MIN_VALUE;
+		gridBagLayout.rowWeights = new double[rowCount + 2];
+		Arrays.fill(gridBagLayout.rowWeights, 0.0d);
+		gridBagLayout.rowWeights[rowCount + 1] = Double.MIN_VALUE;
 			
 		loadPreferences();
+		
+		useCompleteSetRadioButton.addItemListener(this);
+		useFeaturesFromTableRadioButton.addItemListener(this);
 	}
 	
 	private JPanel createEntropyScoreParametersBlock() {
@@ -283,6 +303,68 @@ public class MSMSSearchParametersPanel extends JPanel implements ItemListener, B
 		
 		return entropyScoreParamsPanel;
 	}
+	
+	private JPanel createFeatureSubsetBlock() {
+		
+		JPanel featureSubsetPanel = new JPanel();
+		featureSubsetPanel.setBorder(new CompoundBorder(new EmptyBorder(5, 5, 5, 5), 
+				new CompoundBorder(
+						new TitledBorder(
+							new EtchedBorder(EtchedBorder.LOWERED, new Color(255, 255, 255), 
+									new Color(160, 160, 160)), "Input MSMS features", 
+							TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)), 
+						new EmptyBorder(10, 10, 10, 10))));
+		GridBagLayout gridBagLayout = new GridBagLayout();
+		gridBagLayout.columnWidths = new int[]{0, 0};		
+		gridBagLayout.columnWeights = new double[]{0.0, Double.MIN_VALUE};
+		featureSubsetPanel.setLayout(gridBagLayout);
+		
+		int rowCount = 0;
+		
+		ButtonGroup bg = new ButtonGroup();
+		
+		useCompleteSetRadioButton = 
+				new JRadioButton("Use complete active feature set");
+		useCompleteSetRadioButton.addItemListener(this);
+		bg.add(useCompleteSetRadioButton);
+		GridBagConstraints gbc_useCompleteSetRadioButton = new GridBagConstraints();
+		gbc_useCompleteSetRadioButton.anchor = GridBagConstraints.WEST;
+		gbc_useCompleteSetRadioButton.gridx = 0;
+		gbc_useCompleteSetRadioButton.gridy = rowCount;
+		featureSubsetPanel.add(useCompleteSetRadioButton, gbc_useCompleteSetRadioButton);
+		//	useCompleteSetRadioButton.addItemListener(this);
+		
+		rowCount++;
+		
+		useFeaturesFromTableRadioButton = 
+				new JRadioButton("Use features from the table");
+		//	useFeaturesFromTableRadioButton.addItemListener(this);
+		bg.add(useFeaturesFromTableRadioButton);
+		GridBagConstraints gbc_useFeaturesFromTableRadioButton = new GridBagConstraints();
+		gbc_useFeaturesFromTableRadioButton.anchor = GridBagConstraints.WEST;
+		gbc_useFeaturesFromTableRadioButton.insets = new Insets(0, 0, 5, 0);
+		gbc_useFeaturesFromTableRadioButton.gridx = 0;
+		gbc_useFeaturesFromTableRadioButton.gridy = rowCount;
+		featureSubsetPanel.add(useFeaturesFromTableRadioButton, gbc_useFeaturesFromTableRadioButton);
+		useFeaturesFromTableRadioButton.addItemListener(this);
+		
+		rowCount++;
+		
+		featureSubsetComboBox = new JComboBox<TableRowSubset>(
+				new DefaultComboBoxModel<TableRowSubset>(TableRowSubset.values()));
+		GridBagConstraints gbc_featureSubsetComboBox = new GridBagConstraints();
+		gbc_featureSubsetComboBox.insets = new Insets(0, 0, 5, 0);
+		gbc_featureSubsetComboBox.fill = GridBagConstraints.HORIZONTAL;
+		gbc_featureSubsetComboBox.gridx = 0;
+		gbc_featureSubsetComboBox.gridy = rowCount;
+		featureSubsetPanel.add(featureSubsetComboBox, gbc_featureSubsetComboBox);		
+		
+		gridBagLayout.rowWeights = new double[rowCount + 2];
+		Arrays.fill(gridBagLayout.rowWeights, 0.0d);
+		gridBagLayout.rowWeights[rowCount + 1] = Double.MIN_VALUE;
+		
+		return featureSubsetPanel;
+	}
 
 	@Override
 	public void loadPreferences(Preferences prefs) {
@@ -295,6 +377,7 @@ public class MSMSSearchParametersPanel extends JPanel implements ItemListener, B
 				MassErrorType.getTypeByName(preferences.get(MZ_ERROR_TYPE, MassErrorType.ppm.name())));
 		rtWindowTextField.setText(
 				Double.toString(preferences.getDouble(RT_ERROR_VALUE, 0.1d)));
+		ignoreRtCheckBox.setSelected(preferences.getBoolean(IGNORE_RT, true));
 		msmsSimilarityCutoffTextField.setText(
 				Double.toString(preferences.getDouble(MSMS_SIMILARITY_CUTOFF, 0.5d)));
 		
@@ -306,10 +389,25 @@ public class MSMSSearchParametersPanel extends JPanel implements ItemListener, B
 				MassErrorType.getTypeByName(preferences.get(
 						ENTROPY_SCORE_MASS_ERROR_TYPE, 
 						MRC2ToolBoxConfiguration.SPECTRUM_ENTROPY_MASS_ERROR_TYPE_DEFAULT.name())));
-		esNoiseCutoffTextField.setText(
-				Double.toString(preferences.getDouble(
-						ENTROPY_SCORE_NOISE_CUTOFF, 
-						MRC2ToolBoxConfiguration.SPECTRUM_ENTROPY_NOISE_CUTOFF_DEFAULT)));
+		double esNoiseCutoff = preferences.getDouble(
+				ENTROPY_SCORE_NOISE_CUTOFF, 
+				MRC2ToolBoxConfiguration.SPECTRUM_ENTROPY_NOISE_CUTOFF_DEFAULT);
+		esNoiseCutoffTextField.setText(Double.toString(esNoiseCutoff * 100.0d));
+
+		TableRowSubset trs = TableRowSubset.getOptionByName(
+				preferences.get(USE_TABLE_ROW_SUBSET_SET, ""));
+		if(trs == null) {			
+			useCompleteSetRadioButton.setSelected(true);
+			useFeaturesFromTableRadioButton.setSelected(false);
+			featureSubsetComboBox.setSelectedIndex(-1);
+			featureSubsetComboBox.setEnabled(false);
+		}
+		else {
+			useFeaturesFromTableRadioButton.setSelected(true);
+			useCompleteSetRadioButton.setSelected(false);			
+			featureSubsetComboBox.setEnabled(true);
+			featureSubsetComboBox.setSelectedItem(trs);
+		}
 	}
 
 	@Override
@@ -329,6 +427,7 @@ public class MSMSSearchParametersPanel extends JPanel implements ItemListener, B
 			preferences.put(MZ_ERROR_TYPE, getMassErrorType().name());
 		
 		preferences.putDouble(RT_ERROR_VALUE, getRTError());
+		preferences.putBoolean(IGNORE_RT, ignoreRt());
 		preferences.putDouble(MSMS_SIMILARITY_CUTOFF, getMsmsSimilarityCutoff());
 		
 		if(getEntropyScoreMassErrorType() != null)
@@ -336,9 +435,16 @@ public class MSMSSearchParametersPanel extends JPanel implements ItemListener, B
 		
 		preferences.putDouble(ENTROPY_SCORE_MASS_ERROR_VALUE, getEntropyScoreMassError());
 		preferences.putDouble(ENTROPY_SCORE_NOISE_CUTOFF, getEntropyScoreNoizeCutoff());
+		
+		String trsName = "";
+		TableRowSubset trs = getFeaturesTableRowSubset();
+		if(trs != null)
+			trsName = trs.name();
+			
+		preferences.put(USE_TABLE_ROW_SUBSET_SET, trsName);		
 	}
 
-	public MSMSClusteringParameterSet getParameters() {
+	public MSMSSearchParameterSet getMSMSSearchParameters() {
 		
 		if(!validateParameters().isEmpty())
 			return null;
@@ -348,34 +454,41 @@ public class MSMSSearchParametersPanel extends JPanel implements ItemListener, B
 					" " + getMassErrorType().name() + 
 					" | RT " + MRC2ToolBoxConfiguration.getRtFormat().format(getRTError()) +
 					" | SCORE " + MRC2ToolBoxConfiguration.getPpmFormat().format(getMsmsSimilarityCutoff());
-			MSMSClusteringParameterSet newParams = 
-					new MSMSClusteringParameterSet(
-							name, 
-							getMzError(), 
-							getMassErrorType(),
-							getRTError(), 
-							getMsmsSimilarityCutoff());
-			String md5 = MSMSClusteringUtils.calculateCLusteringParametersMd5(newParams);
-			MSMSClusteringParameterSet existing = 
-					MSMSClusterDataSetManager.getMsmsClusteringParameterSetByMd5(md5);
-			if(existing == null) {
-				try {
-					MSMSClusteringDBUtils.addMSMSClusteringParameterSet(newParams);
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				MSMSClusterDataSetManager.getMsmsClusteringParameters().add(newParams);
-				parameters = newParams;
-			}
-			else {
-				parameters = existing;
-			}
-		}
-		return parameters;
+			MSMSSearchParameterSet newParams = new MSMSSearchParameterSet();
+			newParams.setName(name);
+			newParams.setMzErrorValue(getMzError());
+			newParams.setMassErrorType(getMassErrorType());
+			newParams.setRtErrorValue(getRTError());
+			newParams.setIgnoreRt(ignoreRt());
+			newParams.setMsmsSimilarityCutoff(getMsmsSimilarityCutoff());
+			newParams.setEntropyScoreMassError(getEntropyScoreMassError());
+			newParams.setEntropyScoreMassErrorType(getEntropyScoreMassErrorType());
+			newParams.setEntropyScoreNoiseCutoff(getEntropyScoreNoizeCutoff());
+			String md5 = MSMSSearchUtils.calculateMSMSSearchParametersMd5(newParams);
+			newParams.setMd5(md5);
+			
+			//	TODO database storage of MSMS search parameters;
+			
+//			MSMSClusteringParameterSet existing = 
+//					MSMSClusterDataSetManager.getMsmsClusteringParameterSetByMd5(md5);
+//			if(existing == null) {
+//				try {
+//					MSMSClusteringDBUtils.calculateMSMSSearchParametersMd5(newParams);
+//				} catch (Exception e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
+//				MSMSClusterDataSetManager.getMsmsClusteringParameters().add(newParams);
+//				parameters = newParams;
+//			}
+//			else {
+//				parameters = existing;
+//			}
+			return parameters;
+		}		
 	}
 
-	public void setParameters(MSMSClusteringParameterSet parameters) {
+	public void setParameters(MSMSSearchParameterSet parameters) {
 		
 		this.parameters = parameters;
 		if(parameters == null)
@@ -384,7 +497,11 @@ public class MSMSSearchParametersPanel extends JPanel implements ItemListener, B
 		mzErrorValueTextField.setText(Double.toString(parameters.getMzErrorValue()));
 		esMassErrorTypeComboBox.setSelectedItem(parameters.getMassErrorType());
 		rtWindowTextField.setText(Double.toString(parameters.getRtErrorValue()));
-		msmsSimilarityCutoffTextField.setText(Double.toString(parameters.getMsmsSimilarityCutoff()));
+		ignoreRtCheckBox.setSelected(parameters.isIgnoreRt());	
+		msmsSimilarityCutoffTextField.setText(Double.toString(parameters.getMsmsSimilarityCutoff()));		
+		esMassErrorTextField.setText(Double.toString(parameters.getEntropyScoreMassError()));
+		esMassErrorTypeComboBox.setSelectedItem(parameters.getEntropyScoreMassErrorType());
+		esNoiseCutoffTextField.setText(Double.toString(parameters.getEntropyScoreNoiseCutoff()));
 	}
 	
 	public double getMzError() {	
@@ -397,6 +514,10 @@ public class MSMSSearchParametersPanel extends JPanel implements ItemListener, B
 	
 	public double getRTError() {	
 		return Double.parseDouble(rtWindowTextField.getText().trim());
+	}
+	
+	public boolean ignoreRt() {
+		return ignoreRtCheckBox.isSelected();
 	}
 	
 	public double getMsmsSimilarityCutoff() {	
@@ -427,6 +548,10 @@ public class MSMSSearchParametersPanel extends JPanel implements ItemListener, B
 		return noiseCutoff / 100.0d;
 	}
 	
+	public TableRowSubset getFeaturesTableRowSubset() {
+		return (TableRowSubset)featureSubsetComboBox.getSelectedItem();
+	}
+	
 	public Collection<String>validateParameters(){
 		
 		Collection<String>errors = new ArrayList<String>();
@@ -437,7 +562,7 @@ public class MSMSSearchParametersPanel extends JPanel implements ItemListener, B
 		if(getMassErrorType() == null)
 			errors.add("M/Z error type must be specified");
 			
-		if(getRTError() == 0.0d)
+		if(getRTError() == 0.0d && !ignoreRt())
 			errors.add("RT error must be > 0");
 		
 		if(getMsmsSimilarityCutoff() < 0.0d || getMsmsSimilarityCutoff() > 1.0d)
@@ -458,8 +583,26 @@ public class MSMSSearchParametersPanel extends JPanel implements ItemListener, B
 	@Override
 	public void itemStateChanged(ItemEvent e) {
 
-		rtWindowTextField.setEditable(!ignoreRtCheckBox.isSelected());
-		rtWindowTextField.setEnabled(!ignoreRtCheckBox.isSelected());
+		if(e.getSource().equals(ignoreRtCheckBox)) {
+			
+			rtWindowTextField.setEditable(!ignoreRtCheckBox.isSelected());
+			rtWindowTextField.setEnabled(!ignoreRtCheckBox.isSelected());
+		}
+		if(e.getSource().equals(useFeaturesFromTableRadioButton) 
+				|| e.getSource().equals(useCompleteSetRadioButton) ) {
+			
+			if(useFeaturesFromTableRadioButton.isSelected()) {
+				
+				featureSubsetComboBox.setEnabled(true);
+				if(featureSubsetComboBox.getSelectedIndex() == -1)
+					featureSubsetComboBox.setSelectedItem(TableRowSubset.FILTERED);
+			}
+			if(useCompleteSetRadioButton.isSelected()) {
+				
+				featureSubsetComboBox.setSelectedIndex(-1);			
+				featureSubsetComboBox.setEnabled(false);
+			}	
+		}
 	}
 }
 

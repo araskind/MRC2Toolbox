@@ -200,6 +200,7 @@ import edu.umich.med.mrc2.datoolbox.main.MSMSClusterDataSetManager;
 import edu.umich.med.mrc2.datoolbox.main.RawDataManager;
 import edu.umich.med.mrc2.datoolbox.main.RecentDataManager;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
+import edu.umich.med.mrc2.datoolbox.msmsscore.MSMSSearchParameterSet;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisExperiment;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
@@ -1879,10 +1880,25 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 	}
 
 	private void runFeatureVsFeatureMSMSSearch(){
-		//	TODO
 		
-		
+		Collection<String>errors = 
+				featureVsFeatureMSMSSearchSetupDialog.validateSearchSetup();
+		if(!errors.isEmpty()){
+			MessageDialog.showErrorMsg(
+					StringUtils.join(errors, "\n"), 
+					featureVsFeatureMSMSSearchSetupDialog);
+			return;
+		}
+		MsFeatureInfoBundleCollection featureLib = 
+				featureVsFeatureMSMSSearchSetupDialog.getSelectedFeatureCollection();
+		MSMSSearchParameterSet searchParameters =  
+				featureVsFeatureMSMSSearchSetupDialog.getMSMSSearchParameters();
+		TableRowSubset trs = 
+				featureVsFeatureMSMSSearchSetupDialog.getFeaturesTableRowSubset();
+
 		featureVsFeatureMSMSSearchSetupDialog.dispose();
+		
+		//		TODO
 	}
 
 	private void setupFDRforMSMSlibraryIdentifications() {

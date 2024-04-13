@@ -114,7 +114,7 @@ public class MSMSClusteringDBUtils {
 				"0",
 				5);
 		params.setId(newId);
-		String md5 = MSMSClusteringUtils.calculateCLusteringParametersMd5(params);
+		String md5 = MSMSClusteringUtils.calculateClusteringParametersMd5(params);
 		params.setMd5(md5);
 		
 		String query = 

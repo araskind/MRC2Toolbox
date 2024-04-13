@@ -48,17 +48,24 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 
+import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundleCollection;
+import edu.umich.med.mrc2.datoolbox.data.enums.TableRowSubset;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.fcolls.features.FeatureCollectionsTable;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.main.FeatureCollectionManager;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
+import edu.umich.med.mrc2.datoolbox.msmsscore.MSMSSearchParameterSet;
 
 public class FeatureVsFeatureMSMSSearchSetupDialog extends JDialog 
 		implements ActionListener, BackedByPreferences{
 	
 	private static final long serialVersionUID = -7638441884088309136L;
+	
+	private static final String PREFS_NODE = 
+			"edu.umich.med.mrc2.datoolbox.gui.FeatureVsFeatureMSMSSearchSetupDialog";
+	private static final String ACTIVE_FEATURE_COLLECTION_ID = "ACTIVE_FEATURE_COLLECTION_ID";
 	
 	private static final Icon featureVsFeatureMSMSSearchIcon = 
 			GuiUtils.getIcon("msmsSearch", 32);
@@ -76,12 +83,13 @@ public class FeatureVsFeatureMSMSSearchSetupDialog extends JDialog
 		setModalityType(ModalityType.APPLICATION_MODAL);
 		setResizable(true);
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-		setLayout(new BorderLayout());
+		getContentPane().setLayout(new BorderLayout());
 		
 		msmsSearchParametersPanel = new MSMSSearchParametersPanel();
-		add(msmsSearchParametersPanel, BorderLayout.NORTH);
+		getContentPane().add(msmsSearchParametersPanel, BorderLayout.NORTH);
 				
 		featureCollectionsTable = new FeatureCollectionsTable();
+		featureCollectionsTable.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
 		populateCollectiosTable();
 		
 		JScrollPane tableScroll= new JScrollPane(featureCollectionsTable);
@@ -93,12 +101,12 @@ public class FeatureVsFeatureMSMSSearchSetupDialog extends JDialog
 						TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)), 
 					new EmptyBorder(10, 10, 10, 10))));
 		
-		add(tableScroll, BorderLayout.CENTER);
+		getContentPane().add(tableScroll, BorderLayout.CENTER);
 
 		JPanel panel = new JPanel();
 		FlowLayout flowLayout = (FlowLayout) panel.getLayout();
 		flowLayout.setAlignment(FlowLayout.RIGHT);
-		add(panel, BorderLayout.SOUTH);
+		getContentPane().add(panel, BorderLayout.SOUTH);
 		
 		JButton btnCancel = new JButton("Cancel");
 		panel.add(btnCancel);
@@ -123,6 +131,13 @@ public class FeatureVsFeatureMSMSSearchSetupDialog extends JDialog
 		pack();
 	}
 	
+	@Override
+	public void dispose() {
+		
+		savePreferences();
+		super.dispose();
+	}
+	
 	private void populateCollectiosTable() {
 		
 		if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() == null) {
@@ -142,7 +157,9 @@ public class FeatureVsFeatureMSMSSearchSetupDialog extends JDialog
 	public Collection<String>validateSearchSetup(){
 		
 		Collection<String>errors = new ArrayList<String>();
-		
+		errors.addAll(msmsSearchParametersPanel.validateParameters());
+		if(getSelectedFeatureCollection() == null)
+			errors.add("No feature collection selected.");
 	
 		return errors;
 	}
@@ -154,20 +171,40 @@ public class FeatureVsFeatureMSMSSearchSetupDialog extends JDialog
 
 	@Override
 	public void loadPreferences(Preferences preferences) {
-		// TODO Auto-generated method stub
-		
+
+		String activeCollectionId = preferences.get(ACTIVE_FEATURE_COLLECTION_ID, "");
+		featureCollectionsTable.selectCollectionByID(activeCollectionId);
 	}
 
 	@Override
 	public void loadPreferences() {
-		// TODO Auto-generated method stub
 		
+		msmsSearchParametersPanel.loadPreferences();
+		loadPreferences(Preferences.userRoot().node(PREFS_NODE));
 	}
 
 	@Override
 	public void savePreferences() {
-		// TODO Auto-generated method stub
 		
+		Preferences preferences = Preferences.userRoot().node(PREFS_NODE);
+		MsFeatureInfoBundleCollection selectedCollection =  
+				getSelectedFeatureCollection();
+		if(selectedCollection != null)
+			preferences.put(ACTIVE_FEATURE_COLLECTION_ID, selectedCollection.getId());
+		
+		msmsSearchParametersPanel.savePreferences();
+	}
+	
+	public MSMSSearchParameterSet getMSMSSearchParameters() {
+		return msmsSearchParametersPanel.getMSMSSearchParameters();
+	}
+	
+	public MsFeatureInfoBundleCollection getSelectedFeatureCollection() {
+		return featureCollectionsTable.getSelectedCollection();
+	}
+	
+	public TableRowSubset getFeaturesTableRowSubset() {
+		return msmsSearchParametersPanel.getFeaturesTableRowSubset();
 	}
 }
 

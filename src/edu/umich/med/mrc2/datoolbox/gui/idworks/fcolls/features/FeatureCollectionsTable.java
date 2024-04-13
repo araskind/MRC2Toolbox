@@ -119,6 +119,22 @@ public class FeatureCollectionsTable extends BasicTable {
 		}
 	}
 	
+	public void selectCollectionByID(String collectionId) {
+		
+		if(collectionId == null || collectionId.isEmpty())
+			return;
+		
+		int col = getColumnIndex(FeatureCollectionsTableModel.COLLECTION_COLUMN);
+		for(int i=0; i<getRowCount(); i++) {
+			
+			if(collectionId.equals(((MsFeatureInfoBundleCollection)getValueAt(i, col)).getId())) {
+				setRowSelectionInterval(i, i);
+//				scrollToSelected();
+				return;
+			}
+		}
+	}
+	
 	public void updateCollectionData(MsFeatureInfoBundleCollection edited) {
 		thf.setTable(null);
 		((FeatureCollectionsTableModel)model).updateCollectionData(edited);

@@ -221,7 +221,7 @@ public class MSMSClusteringParametersPanel extends JPanel implements BackedByPre
 							getMassErrorType(),
 							getRTError(), 
 							getMsmsSimilarityCutoff());
-			String md5 = MSMSClusteringUtils.calculateCLusteringParametersMd5(newParams);
+			String md5 = MSMSClusteringUtils.calculateClusteringParametersMd5(newParams);
 			MSMSClusteringParameterSet existing = 
 					MSMSClusterDataSetManager.getMsmsClusteringParameterSetByMd5(md5);
 			if(existing == null) {

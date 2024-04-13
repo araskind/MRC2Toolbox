@@ -59,7 +59,7 @@ public class MSMSClusteringUtils {
 	public static final MsFeatureIdentityComparator entropyScoreComparator = 
 			new MsFeatureIdentityComparator(SortProperty.msmsEntropyScore, SortDirection.DESC);
 
-	public static String calculateCLusteringParametersMd5(MSMSClusteringParameterSet params){
+	public static String calculateClusteringParametersMd5(MSMSClusteringParameterSet params){
 
 		List<String> chunks = new ArrayList<String>();
 		chunks.add(MsUtils.spectrumMzExportFormat.format(params.getMzErrorValue()));

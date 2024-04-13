@@ -194,7 +194,7 @@ public class MSMSClusteringParameterSet {
 		msmsSimilarityCutoff = Double.parseDouble(
 				xmlElement.getAttributeValue(MSMSClusteringParameterSetFields.MSMSSimilarityCutoff.name()));
 
-		md5 = MSMSClusteringUtils.calculateCLusteringParametersMd5(this);
+		md5 = MSMSClusteringUtils.calculateClusteringParametersMd5(this);
 	}
 }
 
