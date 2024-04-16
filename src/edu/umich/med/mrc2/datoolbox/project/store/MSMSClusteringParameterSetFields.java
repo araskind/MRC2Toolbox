@@ -28,7 +28,12 @@ public enum MSMSClusteringParameterSetFields {
 	Name,
 	MZErrorValue,
 	MassErrorType,
+	IgnoreParent,
 	RTErrorValue,
+	IgnoreRetention,
 	MSMSSimilarityCutoff,
+	EntropyScoreMassError,
+	EntropyScoreMassErrorType,
+	EntropyScoreNoiseCutoff,
 	;
 }

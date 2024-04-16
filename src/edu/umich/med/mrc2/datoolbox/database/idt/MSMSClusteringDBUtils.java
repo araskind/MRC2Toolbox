@@ -21,6 +21,7 @@
 
 package edu.umich.med.mrc2.datoolbox.database.idt;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -35,6 +36,14 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
+
+import org.jdom2.Document;
+import org.jdom2.Element;
+import org.jdom2.JDOMException;
+import org.jdom2.input.SAXBuilder;
+import org.jdom2.output.Format;
+import org.jdom2.output.XMLOutputter;
+import org.junit.Assert;
 
 import edu.umich.med.mrc2.datoolbox.data.BinnerAnnotation;
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
@@ -54,6 +63,8 @@ import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.main.BinnerAnnotationDataSetManager;
 import edu.umich.med.mrc2.datoolbox.main.FeatureLookupListManager;
 import edu.umich.med.mrc2.datoolbox.main.MSMSClusterDataSetManager;
+import edu.umich.med.mrc2.datoolbox.msmsscore.MSMSSearchParameterSet;
+import edu.umich.med.mrc2.datoolbox.project.store.MSMSClusteringParameterSetFields;
 import edu.umich.med.mrc2.datoolbox.utils.MSMSClusteringUtils;
 import edu.umich.med.mrc2.datoolbox.utils.SQLUtils;
 
@@ -68,8 +79,36 @@ public class MSMSClusteringDBUtils {
 		return paramSets;
 	}
 	
+	public static Collection<MSMSClusteringParameterSet> getMSMSClusteringParameterSets(Connection conn)
+			throws Exception {
+
+		Collection<MSMSClusteringParameterSet> paramSets = new ArrayList<MSMSClusteringParameterSet>();
+		String query = 
+				"SELECT PAR_SET_ID, PAR_SET_XML,  "
+				+ "PAR_SET_MD5 FROM MSMS_CLUSTERING_PARAMETERS_XML  " 
+				+ "ORDER BY PAR_SET_NAME ";
+		PreparedStatement ps = conn.prepareStatement(query);
+		ResultSet rs = ps.executeQuery();
+		while (rs.next()) {
+
+			MSMSClusteringParameterSet parSet = null;
+			String xmlString = rs.getString("PAR_SET_NAME");
+			if(xmlString != null && !xmlString.isEmpty())
+				parSet = createMSMSClusteringParameterSetFromXML(xmlString);
+			 
+			if(parSet != null)
+				paramSets.add(parSet);
+			else
+				System.err.println("Could not recreate MSMSClusteringParameterSet "
+						+ "for ID " + rs.getString("PAR_SET_ID"));
+		}
+		rs.close();
+		ps.close();
+		return paramSets;
+	}
+	
 	public static Collection<MSMSClusteringParameterSet>
-			getMSMSClusteringParameterSets(Connection conn) throws Exception {
+			getMSMSClusteringParameterSetsOld(Connection conn) throws Exception {
 		
 		Collection<MSMSClusteringParameterSet> paramSets = 
 				new ArrayList<MSMSClusteringParameterSet>();
@@ -114,6 +153,38 @@ public class MSMSClusteringDBUtils {
 				"0",
 				5);
 		params.setId(newId);
+		
+		if(params.getMd5() == null) {
+			String md5 = MSMSClusteringUtils.calculateClusteringParametersMd5(params);
+			params.setMd5(md5);
+		}
+		String paramsXml = getXMLStringForMSMSClusteringParameterSet(params);
+		Assert.assertNotNull(paramsXml);
+		
+		String query = 
+				"INSERT INTO MSMS_CLUSTERING_PARAMETERS_XML ( " +
+				"PAR_SET_ID, PAR_SET_NAME, PAR_SET_XML, PAR_SET_MD5)  " +
+				"VALUES(?, ?, ?, ?)";
+		PreparedStatement ps = conn.prepareStatement(query);
+		
+		ps.setString(1, params.getId());
+		ps.setString(2,params.getName());		
+		ps.setString(3, paramsXml);
+		ps.setString(4, params.getMd5());
+		ps.executeUpdate();
+		ps.close();
+	}
+	
+	public static void addMSMSClusteringParameterSetOld(
+			MSMSClusteringParameterSet params,
+			Connection conn) throws Exception {
+		
+		String newId = SQLUtils.getNextIdFromSequence(conn, 
+				"MSMS_CLUST_PARAMS_SEQ",
+				DataPrefix.MSMS_CLUSTERING_PARAM_SET,
+				"0",
+				5);
+		params.setId(newId);
 		String md5 = MSMSClusteringUtils.calculateClusteringParametersMd5(params);
 		params.setMd5(md5);
 		
@@ -135,6 +206,19 @@ public class MSMSClusteringDBUtils {
 	}
 	
 	public static void deleteMSMSClusteringParameterSet(
+			MSMSClusteringParameterSet params) throws Exception {
+		
+		Connection conn = ConnectionManager.getConnection();
+		String query = 
+				"DELETE FROM MSMS_CLUSTERING_PARAMETERS_XML WHERE PAR_SET_ID = ?";
+		PreparedStatement ps = conn.prepareStatement(query);
+		ps.setString(1, params.getId());
+		ps.executeUpdate();
+		ps.close();
+		ConnectionManager.releaseConnection(conn);
+	}
+	
+	public static void deleteMSMSClusteringParameterSetOld(
 			MSMSClusteringParameterSet params) throws Exception {
 		
 		Connection conn = ConnectionManager.getConnection();
@@ -637,6 +721,66 @@ public class MSMSClusteringDBUtils {
 		ps.executeBatch();
 		ps.close();
 		return parSet;		
+	}
+	
+	public static String getXMLStringForMSMSClusteringParameterSet(MSMSClusteringParameterSet params) {
+		
+		String output = null;
+        Document document = new Document();
+        Element documentRoot = new Element("MCP");
+        documentRoot.setAttribute("version", "1.0.0.0");     
+        documentRoot.addContent(params.getXmlElement());
+        document.setContent(documentRoot);       
+        try {
+            XMLOutputter outputter = new XMLOutputter();
+            outputter.setFormat(Format.getCompactFormat());
+            output = outputter.outputString(document);
+         } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return output;
+	}
+	
+	public static MSMSClusteringParameterSet createMSMSClusteringParameterSetFromXML(String xmlString) {
+		
+		MSMSClusteringParameterSet params = null;
+		
+		SAXBuilder sax = new SAXBuilder();
+		Document doc = null;
+		try {
+			doc = sax.build(xmlString);
+		} catch (JDOMException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+			return null;						
+		}
+		Element rootElement = doc.getRootElement();
+		Element paramsElement = rootElement.getChild(
+				MSMSClusteringParameterSetFields.MSMSClusteringParameterSet.name());
+		if(paramsElement == null)
+			return null;
+		String emet = paramsElement.getAttributeValue(
+				MSMSClusteringParameterSetFields.EntropyScoreMassErrorType.name());
+		if(emet == null) {
+			try {
+				params = new MSMSClusteringParameterSet(paramsElement);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		else {
+			try {
+				params = new MSMSSearchParameterSet(paramsElement);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}		
+		return params;
 	}
 }
 

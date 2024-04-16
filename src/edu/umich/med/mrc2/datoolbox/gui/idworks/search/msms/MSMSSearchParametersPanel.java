@@ -49,10 +49,13 @@ import javax.swing.border.TitledBorder;
 
 import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
 import edu.umich.med.mrc2.datoolbox.data.enums.TableRowSubset;
+import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusteringParameterSet;
+import edu.umich.med.mrc2.datoolbox.database.idt.MSMSClusteringDBUtils;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
+import edu.umich.med.mrc2.datoolbox.main.MSMSClusterDataSetManager;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.msmsscore.MSMSSearchParameterSet;
-import edu.umich.med.mrc2.datoolbox.utils.MSMSSearchUtils;
+import edu.umich.med.mrc2.datoolbox.utils.MSMSClusteringUtils;
 
 public class MSMSSearchParametersPanel extends JPanel implements ItemListener, BackedByPreferences {
 
@@ -73,6 +76,7 @@ public class MSMSSearchParametersPanel extends JPanel implements ItemListener, B
 	private static final String ENTROPY_SCORE_MASS_ERROR_TYPE = "ENTROPY_SCORE_MASS_ERROR_TYPE";
 	private static final String ENTROPY_SCORE_NOISE_CUTOFF = "ENTROPY_SCORE_NOISE_CUTOFF";
 	private static final String USE_TABLE_ROW_SUBSET_SET = "USE_TABLE_ROW_SUBSET_SET";	
+	private static final String IGNORE_PARENT_ION = "IGNORE_PARENT_ION";
 	
 	private MSMSSearchParameterSet parameters;
 	
@@ -87,6 +91,7 @@ public class MSMSSearchParametersPanel extends JPanel implements ItemListener, B
 	private JRadioButton useFeaturesFromTableRadioButton;
 	private JComboBox<TableRowSubset> featureSubsetComboBox;
 	private JRadioButton useCompleteSetRadioButton;
+	private JCheckBox ignoreParentIonCheckBox;
 			
 	public MSMSSearchParametersPanel() {
 		
@@ -133,6 +138,14 @@ public class MSMSSearchParametersPanel extends JPanel implements ItemListener, B
 		gbc_comboBox.gridx = 2;
 		gbc_comboBox.gridy = rowCount;
 		add(massErrorTypeComboBox, gbc_comboBox);
+		
+		ignoreParentIonCheckBox = new JCheckBox("Ignore parent ion");
+		GridBagConstraints gbc_ignoreParentIonCheckBox = new GridBagConstraints();
+		gbc_ignoreParentIonCheckBox.anchor = GridBagConstraints.WEST;
+		gbc_ignoreParentIonCheckBox.insets = new Insets(0, 0, 5, 5);
+		gbc_ignoreParentIonCheckBox.gridx = 3;
+		gbc_ignoreParentIonCheckBox.gridy = rowCount;
+		add(ignoreParentIonCheckBox, gbc_ignoreParentIonCheckBox);
 		
 		rowCount++;
 		
@@ -203,7 +216,7 @@ public class MSMSSearchParametersPanel extends JPanel implements ItemListener, B
 		JPanel entropyScoreParamsPanel = createEntropyScoreParametersBlock();
 		GridBagConstraints gbc_entropyScoreParamsPanel = new GridBagConstraints();
 		gbc_entropyScoreParamsPanel.anchor = GridBagConstraints.NORTH;
-		gbc_entropyScoreParamsPanel.insets = new Insets(0, 0, 5, 5);
+		gbc_entropyScoreParamsPanel.insets = new Insets(0, 0, 0, 5);
 		gbc_entropyScoreParamsPanel.gridwidth = 3;
 		gbc_entropyScoreParamsPanel.fill = GridBagConstraints.HORIZONTAL;
 		gbc_entropyScoreParamsPanel.gridx = 0;
@@ -215,7 +228,6 @@ public class MSMSSearchParametersPanel extends JPanel implements ItemListener, B
 		JPanel featureSubsetPanel = createFeatureSubsetBlock(); 
 		GridBagConstraints gbc_featureSubsetPanel = new GridBagConstraints();
 		gbc_featureSubsetPanel.anchor = GridBagConstraints.NORTH;
-		gbc_featureSubsetPanel.insets = new Insets(0, 0, 0, 5);
 		gbc_featureSubsetPanel.gridwidth = 2;
 		gbc_featureSubsetPanel.fill = GridBagConstraints.HORIZONTAL;
 		gbc_featureSubsetPanel.gridx = 3;
@@ -374,7 +386,11 @@ public class MSMSSearchParametersPanel extends JPanel implements ItemListener, B
 		mzErrorValueTextField.setText(
 				Double.toString(preferences.getDouble(MZ_ERROR_VALUE, 20.0d)));
 		esMassErrorTypeComboBox.setSelectedItem(
-				MassErrorType.getTypeByName(preferences.get(MZ_ERROR_TYPE, MassErrorType.ppm.name())));
+				MassErrorType.getTypeByName(
+						preferences.get(MZ_ERROR_TYPE, MassErrorType.ppm.name())));
+		ignoreParentIonCheckBox.setSelected(
+				preferences.getBoolean(IGNORE_PARENT_ION, false));
+		
 		rtWindowTextField.setText(
 				Double.toString(preferences.getDouble(RT_ERROR_VALUE, 0.1d)));
 		ignoreRtCheckBox.setSelected(preferences.getBoolean(IGNORE_RT, true));
@@ -426,6 +442,8 @@ public class MSMSSearchParametersPanel extends JPanel implements ItemListener, B
 		if(getMassErrorType() != null)
 			preferences.put(MZ_ERROR_TYPE, getMassErrorType().name());
 		
+		preferences.putBoolean(IGNORE_PARENT_ION, ignoreParentIon());
+		
 		preferences.putDouble(RT_ERROR_VALUE, getRTError());
 		preferences.putBoolean(IGNORE_RT, ignoreRt());
 		preferences.putDouble(MSMS_SIMILARITY_CUTOFF, getMsmsSimilarityCutoff());
@@ -450,13 +468,25 @@ public class MSMSSearchParametersPanel extends JPanel implements ItemListener, B
 			return null;
 		else {
 			String name = 
-					"MZ " + MRC2ToolBoxConfiguration.getMzFormat().format(getMzError()) + 
-					" " + getMassErrorType().name() + 
-					" | RT " + MRC2ToolBoxConfiguration.getRtFormat().format(getRTError()) +
-					" | SCORE " + MRC2ToolBoxConfiguration.getPpmFormat().format(getMsmsSimilarityCutoff());
+					"MZ " + MRC2ToolBoxConfiguration.getMzFormat().format(getMzError()) 
+					+ getMassErrorType().name();
+			if(ignoreParentIon())
+				name += " | IgnorePrent";
+			
+			if(ignoreRt())
+				name += " | Ignore RT";
+			else
+				name += " | RT " + MRC2ToolBoxConfiguration.getRtFormat().format(getRTError());
+			
+			name += " | SCORE " + MRC2ToolBoxConfiguration.getPpmFormat().format(getMsmsSimilarityCutoff());			
+			name += " EMZ " + MRC2ToolBoxConfiguration.getMzFormat().format(getEntropyScoreMassError()) 
+					+ getEntropyScoreMassErrorType().name();
+			name += " | ENC " + MRC2ToolBoxConfiguration.getPpmFormat().format(getEntropyScoreNoizeCutoff());
+			
 			MSMSSearchParameterSet newParams = new MSMSSearchParameterSet();
 			newParams.setName(name);
 			newParams.setMzErrorValue(getMzError());
+			newParams.setIgnoreParentIon(ignoreParentIon());
 			newParams.setMassErrorType(getMassErrorType());
 			newParams.setRtErrorValue(getRTError());
 			newParams.setIgnoreRt(ignoreRt());
@@ -464,26 +494,24 @@ public class MSMSSearchParametersPanel extends JPanel implements ItemListener, B
 			newParams.setEntropyScoreMassError(getEntropyScoreMassError());
 			newParams.setEntropyScoreMassErrorType(getEntropyScoreMassErrorType());
 			newParams.setEntropyScoreNoiseCutoff(getEntropyScoreNoizeCutoff());
-			String md5 = MSMSSearchUtils.calculateMSMSSearchParametersMd5(newParams);
+			String md5 = MSMSClusteringUtils.calculateMSMSSearchParametersMd5(newParams);
 			newParams.setMd5(md5);
 			
-			//	TODO database storage of MSMS search parameters;
-			
-//			MSMSClusteringParameterSet existing = 
-//					MSMSClusterDataSetManager.getMsmsClusteringParameterSetByMd5(md5);
-//			if(existing == null) {
-//				try {
-//					MSMSClusteringDBUtils.calculateMSMSSearchParametersMd5(newParams);
-//				} catch (Exception e) {
-//					// TODO Auto-generated catch block
-//					e.printStackTrace();
-//				}
-//				MSMSClusterDataSetManager.getMsmsClusteringParameters().add(newParams);
-//				parameters = newParams;
-//			}
-//			else {
-//				parameters = existing;
-//			}
+			MSMSClusteringParameterSet existing = 
+					MSMSClusterDataSetManager.getMsmsClusteringParameterSetByMd5(md5);
+			if(existing == null) {
+				try {
+					MSMSClusteringDBUtils.addMSMSClusteringParameterSet(newParams);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				MSMSClusterDataSetManager.getMsmsClusteringParameters().add(newParams);
+				parameters = newParams;
+			}
+			else {
+				parameters = (MSMSSearchParameterSet) existing;
+			}
 			return parameters;
 		}		
 	}
@@ -497,7 +525,7 @@ public class MSMSSearchParametersPanel extends JPanel implements ItemListener, B
 		mzErrorValueTextField.setText(Double.toString(parameters.getMzErrorValue()));
 		esMassErrorTypeComboBox.setSelectedItem(parameters.getMassErrorType());
 		rtWindowTextField.setText(Double.toString(parameters.getRtErrorValue()));
-		ignoreRtCheckBox.setSelected(parameters.isIgnoreRt());	
+		ignoreRtCheckBox.setSelected(parameters.ignoreRt());	
 		msmsSimilarityCutoffTextField.setText(Double.toString(parameters.getMsmsSimilarityCutoff()));		
 		esMassErrorTextField.setText(Double.toString(parameters.getEntropyScoreMassError()));
 		esMassErrorTypeComboBox.setSelectedItem(parameters.getEntropyScoreMassErrorType());
@@ -510,6 +538,10 @@ public class MSMSSearchParametersPanel extends JPanel implements ItemListener, B
 	
 	public MassErrorType getMassErrorType() {
 		return (MassErrorType)esMassErrorTypeComboBox.getSelectedItem();
+	}	
+	
+	public boolean ignoreParentIon() {
+		return ignoreParentIonCheckBox.isSelected();
 	}
 	
 	public double getRTError() {	

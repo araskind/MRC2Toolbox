@@ -32,14 +32,20 @@ import edu.umich.med.mrc2.datoolbox.utils.MSMSClusteringUtils;
 
 public class MSMSClusteringParameterSet {
 
-	private String id;
-	private String name;
-	private double mzErrorValue;
-	private MassErrorType massErrorType;
-	private double rtErrorValue;
-	private double msmsSimilarityCutoff;
-	private String md5;
+	protected String id;
+	protected String name;
+	protected double mzErrorValue;
+	protected MassErrorType massErrorType;
+	protected double rtErrorValue;
+	protected double msmsSimilarityCutoff;
+	protected String md5;
 	
+	public MSMSClusteringParameterSet() {
+		super();
+		this.id = DataPrefix.MSMS_CLUSTERING_PARAM_SET.getName() + 
+				UUID.randomUUID().toString().substring(0, 12);
+	}
+				
 	public MSMSClusteringParameterSet(
 			String id, 
 			String name, 
@@ -167,13 +173,17 @@ public class MSMSClusteringParameterSet {
 		msmsClusteringParameterSetElement.setAttribute(
 				MSMSClusteringParameterSetFields.Name.name(), nameString);		
 		msmsClusteringParameterSetElement.setAttribute(
-				MSMSClusteringParameterSetFields.MZErrorValue.name(), Double.toString(mzErrorValue));	
+				MSMSClusteringParameterSetFields.MZErrorValue.name(), 
+				Double.toString(mzErrorValue));	
 		msmsClusteringParameterSetElement.setAttribute(
-				MSMSClusteringParameterSetFields.MassErrorType.name(), massErrorType.name());
+				MSMSClusteringParameterSetFields.MassErrorType.name(), 
+				massErrorType.name());
 		msmsClusteringParameterSetElement.setAttribute(
-				MSMSClusteringParameterSetFields.RTErrorValue.name(), Double.toString(rtErrorValue));	
+				MSMSClusteringParameterSetFields.RTErrorValue.name(), 
+				Double.toString(rtErrorValue));	
 		msmsClusteringParameterSetElement.setAttribute(
-				MSMSClusteringParameterSetFields.MSMSSimilarityCutoff.name(), Double.toString(msmsSimilarityCutoff));
+				MSMSClusteringParameterSetFields.MSMSSimilarityCutoff.name(), 
+				Double.toString(msmsSimilarityCutoff));
 		
 		return msmsClusteringParameterSetElement;
 	}
@@ -186,13 +196,17 @@ public class MSMSClusteringParameterSet {
 			name = null;
 		
 		mzErrorValue = Double.parseDouble(
-				xmlElement.getAttributeValue(MSMSClusteringParameterSetFields.MZErrorValue.name()));
+				xmlElement.getAttributeValue(
+						MSMSClusteringParameterSetFields.MZErrorValue.name()));
 		massErrorType = MassErrorType.getTypeByName(
-				xmlElement.getAttributeValue(MSMSClusteringParameterSetFields.MassErrorType.name()));
+				xmlElement.getAttributeValue(
+						MSMSClusteringParameterSetFields.MassErrorType.name()));
 		rtErrorValue = Double.parseDouble(
-				xmlElement.getAttributeValue(MSMSClusteringParameterSetFields.RTErrorValue.name()));
+				xmlElement.getAttributeValue(
+						MSMSClusteringParameterSetFields.RTErrorValue.name()));
 		msmsSimilarityCutoff = Double.parseDouble(
-				xmlElement.getAttributeValue(MSMSClusteringParameterSetFields.MSMSSimilarityCutoff.name()));
+				xmlElement.getAttributeValue(
+						MSMSClusteringParameterSetFields.MSMSSimilarityCutoff.name()));
 
 		md5 = MSMSClusteringUtils.calculateClusteringParametersMd5(this);
 	}

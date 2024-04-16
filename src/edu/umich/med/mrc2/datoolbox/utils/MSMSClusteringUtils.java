@@ -53,6 +53,7 @@ import edu.umich.med.mrc2.datoolbox.data.msclust.MsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.nist.pepsearch.HiResSearchOption;
 import edu.umich.med.mrc2.datoolbox.main.AdductManager;
+import edu.umich.med.mrc2.datoolbox.msmsscore.MSMSSearchParameterSet;
 
 public class MSMSClusteringUtils {
 	
@@ -66,6 +67,29 @@ public class MSMSClusteringUtils {
 		chunks.add(params.getMassErrorType().name());
 		chunks.add(MsUtils.spectrumMzExportFormat.format(params.getRtErrorValue()));
 		chunks.add(MsUtils.spectrumMzExportFormat.format(params.getMsmsSimilarityCutoff()));
+	    try {
+			MessageDigest md = MessageDigest.getInstance("MD5");
+			md.update(StringUtils.join(chunks).getBytes(Charset.forName("windows-1252")));
+			return DatatypeConverter.printHexBinary(md.digest()).toUpperCase();
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+		}
+	    return null;
+	}
+	
+	public static String calculateMSMSSearchParametersMd5(MSMSSearchParameterSet params){
+
+		List<String> chunks = new ArrayList<String>();
+		chunks.add(MsUtils.spectrumMzExportFormat.format(params.getMzErrorValue()));
+		chunks.add(params.getMassErrorType().name());
+		chunks.add(Boolean.toString(params.ignoreParentIon()));
+		chunks.add(MsUtils.spectrumMzExportFormat.format(params.getRtErrorValue()));
+		chunks.add(Boolean.toString(params.ignoreRt()));
+		chunks.add(MsUtils.spectrumMzExportFormat.format(params.getMsmsSimilarityCutoff()));		
+		chunks.add(MsUtils.spectrumMzExportFormat.format(params.getEntropyScoreMassError()));
+		chunks.add(params.getEntropyScoreMassErrorType().name());
+		chunks.add(MsUtils.spectrumMzExportFormat.format(params.getEntropyScoreNoiseCutoff()));
+		
 	    try {
 			MessageDigest md = MessageDigest.getInstance("MD5");
 			md.update(StringUtils.join(chunks).getBytes(Charset.forName("windows-1252")));

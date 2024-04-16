@@ -212,6 +212,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.id.NISTMsSearchTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.id.NISTMspepSearchOfflineTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.id.PercolatorFDREstimationTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.BinnerAnnotationLookupTask;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.FeatureVsFeatureMSMSSearchTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.IDTMS1FeatureSearchTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.IDTMSMSClusterDataPullTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.IDTMSMSDuplicateMSMSFeatureCleanupTask;
@@ -1883,6 +1884,19 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		
 		Collection<String>errors = 
 				featureVsFeatureMSMSSearchSetupDialog.validateSearchSetup();
+		
+		TableRowSubset trs = 
+				featureVsFeatureMSMSSearchSetupDialog.getFeaturesTableRowSubset();
+		
+		Collection<MSFeatureInfoBundle>inputFeatures = null;
+		if(trs == null)
+			inputFeatures = activeFeatureCollection.getFeatures();
+		else
+			inputFeatures = msTwoFeatureTable.getBundles(trs);
+		
+		if(inputFeatures == null || inputFeatures.isEmpty()) 
+			errors.add("No input features selected for the search.")		;
+		
 		if(!errors.isEmpty()){
 			MessageDialog.showErrorMsg(
 					StringUtils.join(errors, "\n"), 
@@ -1893,12 +1907,13 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 				featureVsFeatureMSMSSearchSetupDialog.getSelectedFeatureCollection();
 		MSMSSearchParameterSet searchParameters =  
 				featureVsFeatureMSMSSearchSetupDialog.getMSMSSearchParameters();
-		TableRowSubset trs = 
-				featureVsFeatureMSMSSearchSetupDialog.getFeaturesTableRowSubset();
-
 		featureVsFeatureMSMSSearchSetupDialog.dispose();
 		
-		//		TODO
+		FeatureVsFeatureMSMSSearchTask task = 
+				new FeatureVsFeatureMSMSSearchTask(
+						inputFeatures, featureLib, searchParameters);
+		task.addTaskListener(this);			
+		MRC2ToolBoxCore.getTaskController().addTask(task);		
 	}
 
 	private void setupFDRforMSMSlibraryIdentifications() {
@@ -3769,10 +3784,23 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			
 			if (e.getSource().getClass().equals(BinnerAnnotationLookupTask.class))
 				finalizeBinnerAnnotationLookupTask((BinnerAnnotationLookupTask)e.getSource());
+			
+			if (e.getSource().getClass().equals(FeatureVsFeatureMSMSSearchTask.class))
+				finalizeFeatureVsFeatureMSMSSearchTask((FeatureVsFeatureMSMSSearchTask)e.getSource());		
 		}
 		if (e.getStatus() == TaskStatus.CANCELED || e.getStatus() == TaskStatus.ERROR) {
 			MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
 			MainWindow.hideProgressDialog();
+		}
+	}
+
+	private void finalizeFeatureVsFeatureMSMSSearchTask(FeatureVsFeatureMSMSSearchTask task) {
+
+		Collection<IMsFeatureInfoBundleCluster>featureVsFeatureSearchResults = task.getSearchResults();
+		if(featureVsFeatureSearchResults.isEmpty()) {
+			
+			MessageDialog.showWarningMsg("No matches found.", this.getContentPane());
+			return;
 		}
 	}
 
