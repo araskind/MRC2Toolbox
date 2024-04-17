@@ -37,6 +37,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
+import org.apache.commons.io.IOUtils;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
@@ -92,7 +93,7 @@ public class MSMSClusteringDBUtils {
 		while (rs.next()) {
 
 			MSMSClusteringParameterSet parSet = null;
-			String xmlString = rs.getString("PAR_SET_NAME");
+			String xmlString = rs.getString("PAR_SET_XML");
 			if(xmlString != null && !xmlString.isEmpty())
 				parSet = createMSMSClusteringParameterSetFromXML(xmlString);
 			 
@@ -116,7 +117,7 @@ public class MSMSClusteringDBUtils {
 			"SELECT PAR_SET_ID, PAR_SET_NAME, MZ_ERROR_VALUE,  " +
 			"MZ_ERROR_TYPE, RT_ERROR_VALUE, MSMS_SIMILARITY_CUTOFF,  " +
 			"PAR_SET_MD5 FROM MSMS_CLUSTERING_PARAMETERS  " +
-			"ORDER BY PAR_SET_NAME ";
+			"ORDER BY PAR_SET_ID ";
 		PreparedStatement ps = conn.prepareStatement(query);
 		ResultSet rs = ps.executeQuery();
 		while(rs.next()) {
@@ -748,7 +749,7 @@ public class MSMSClusteringDBUtils {
 		SAXBuilder sax = new SAXBuilder();
 		Document doc = null;
 		try {
-			doc = sax.build(xmlString);
+			doc = sax.build(IOUtils.toInputStream(xmlString));
 		} catch (JDOMException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();

@@ -258,6 +258,11 @@ public class StockSample implements Serializable, Comparable<StockSample>{
 	public void setLimsExperiment(LIMSExperiment limsExperiment) {
 		this.limsExperiment = limsExperiment;
 	}
+	
+	@Override
+	public String toString() {
+		return sampleName;
+	}
 }
 
 

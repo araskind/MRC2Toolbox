@@ -29,6 +29,7 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import org.junit.Assert;
 import org.openscience.cdk.aromaticity.Aromaticity;
 import org.openscience.cdk.inchi.InChIGenerator;
 import org.openscience.cdk.inchi.InChIGeneratorFactory;
@@ -43,11 +44,14 @@ import org.openscience.cdk.tautomers.InChITautomerGenerator;
 import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator;
 
 import edu.umich.med.mrc2.datoolbox.data.MsPoint;
+import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusteringParameterSet;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
+import edu.umich.med.mrc2.datoolbox.database.idt.MSMSClusteringDBUtils;
 import edu.umich.med.mrc2.datoolbox.dbparse.load.nist.NISTParserUtils;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.FilePreferencesFactory;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
+import edu.umich.med.mrc2.datoolbox.utils.MSMSClusteringUtils;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 
 public class RunContainer2 {
@@ -74,11 +78,53 @@ public class RunContainer2 {
 		MRC2ToolBoxConfiguration.initConfiguration();
 
 		try {
-			extractNISTFields();
+			getMSMSClusteringParameterSets();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+	
+	private static void getMSMSClusteringParameterSets() throws Exception{
+		
+		Collection<MSMSClusteringParameterSet>existingSets = 
+				MSMSClusteringDBUtils.getMSMSClusteringParameterSets();
+		
+		for(MSMSClusteringParameterSet params : existingSets) {
+			System.out.println(params.getName());
+		}
+	}
+	
+	private static void copyClusteringParamsToXMLTable() throws Exception{
+		
+		Connection conn = ConnectionManager.getConnection();
+		
+		Collection<MSMSClusteringParameterSet>existingSets = 
+				MSMSClusteringDBUtils.getMSMSClusteringParameterSetsOld(conn);
+		
+		String query = 
+				"INSERT INTO MSMS_CLUSTERING_PARAMETERS_XML ( " +
+				"PAR_SET_ID, PAR_SET_NAME, PAR_SET_XML, PAR_SET_MD5)  " +
+				"VALUES(?, ?, ?, ?)";
+		PreparedStatement ps = conn.prepareStatement(query);
+		
+		for(MSMSClusteringParameterSet params : existingSets) {
+		
+			if(params.getMd5() == null) {
+				String md5 = MSMSClusteringUtils.calculateClusteringParametersMd5(params);
+				params.setMd5(md5);
+			}
+			String paramsXml = MSMSClusteringDBUtils.getXMLStringForMSMSClusteringParameterSet(params);
+			Assert.assertNotNull(paramsXml);
+			
+			ps.setString(1, params.getId());
+			ps.setString(2,params.getName());		
+			ps.setString(3, paramsXml);
+			ps.setString(4, params.getMd5());
+			ps.executeUpdate();			
+		}
+		ps.close();
+		ConnectionManager.releaseConnection(conn);
 	}
 	
 	private static void extractNISTFields() {

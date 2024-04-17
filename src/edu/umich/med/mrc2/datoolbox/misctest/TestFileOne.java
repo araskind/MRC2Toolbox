@@ -49,20 +49,6 @@ public class TestFileOne {
 
 	public static String dataDir = "." + File.separator + "data" + File.separator;
 	private static String dbHome = dataDir + "database" + File.separator + "CefAnalyzerDB";
-	private static String dbUser = "CefAnalyzer";
-	private static String dbPassword = "CefAnalyzer";
-
-//	public static final String pubchemCidUrl = "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/";
-//	private static final IChemObjectBuilder builder = SilentChemObjectBuilder.getInstance();
-//	private static final SmilesParser smipar = new SmilesParser(builder);
-//	private static final SmilesGenerator smilesGenerator = new SmilesGenerator(SmiFlavor.Isomeric);
-//	private static final InChITautomerGenerator tautgen = new InChITautomerGenerator(InChITautomerGenerator.KETO_ENOL);
-//	private static final MDLV2000Reader mdlReader = new MDLV2000Reader();
-//	private static InChIGeneratorFactory igfactory;
-//	private static InChIGenerator inChIGenerator;
-//	private static Aromaticity aromaticity;
-//	private static final DecimalFormat intensityFormat = new DecimalFormat("###");
-	
 	public static void main(String[] args) {
 
 		System.setProperty("java.util.prefs.PreferencesFactory", 

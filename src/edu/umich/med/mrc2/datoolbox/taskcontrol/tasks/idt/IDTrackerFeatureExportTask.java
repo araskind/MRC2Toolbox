@@ -464,8 +464,14 @@ public abstract class IDTrackerFeatureExportTask extends AbstractTask {
 				return "";
 		}
 		if(property.equals(IDTrackerMsFeatureProperties.SAMPLE_TYPE)) {
-			if(bundle.getStockSample() != null)
-				return bundle.getStockSample().getLimsSampleType().getName();
+			if(bundle.getStockSample() != null) {
+				
+				if(bundle.getStockSample().getLimsSampleType() != null)
+					return bundle.getStockSample().getLimsSampleType().getName();
+				else {
+					System.out.println(bundle.getStockSample().toString());
+				}
+			}
 			else
 				return "";
 		}

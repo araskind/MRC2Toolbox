@@ -3796,6 +3796,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 
 	private void finalizeFeatureVsFeatureMSMSSearchTask(FeatureVsFeatureMSMSSearchTask task) {
 
+		MainWindow.hideProgressDialog();
 		Collection<IMsFeatureInfoBundleCluster>featureVsFeatureSearchResults = task.getSearchResults();
 		if(featureVsFeatureSearchResults.isEmpty()) {
 			

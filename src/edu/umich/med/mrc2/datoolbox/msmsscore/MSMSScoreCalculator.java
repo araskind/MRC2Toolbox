@@ -325,6 +325,19 @@ public class MSMSScoreCalculator {
 		return Arrays.asList(unitNormPattern);
 	}
 	
+	public static MsPoint[] cleanAndNormalizeSpectrum(			
+			Collection<MsPoint> spectrum, 
+			double mzWindowValue, 
+			MassErrorType massErrorType,
+			double noiseCutoff) {
+		
+		Collection<MsPoint>avgSpectrum = 
+				MsUtils.averageAndDenoiseMassSpectrum(
+						spectrum, mzWindowValue, massErrorType, noiseCutoff);
+
+		return normalizeToUnitSum(avgSpectrum);
+	}
+	
 	public static double calculateEntropyBasedMatchScore(			
 			Collection<MsPoint> unknownSpectrum, 
 			Collection<MsPoint> librarySpectrum,
@@ -332,15 +345,12 @@ public class MSMSScoreCalculator {
 			MassErrorType massErrorType,
 			double noiseCutoff) {
 		
-		Collection<MsPoint>unkAvgSpectrum = 
-				MsUtils.averageAndDenoiseMassSpectrum(
+		MsPoint[]unknownSpectrumUnorm = 
+				cleanAndNormalizeSpectrum(
 						unknownSpectrum, mzWindowValue, massErrorType, noiseCutoff);
-		Collection<MsPoint>libAvgSpectrum = 
-				MsUtils.averageAndDenoiseMassSpectrum(
-						librarySpectrum, mzWindowValue, massErrorType, noiseCutoff);;
-
-		MsPoint[]unknownSpectrumUnorm = normalizeToUnitSum(unkAvgSpectrum);
-		MsPoint[]librarySpectrumUnorm = normalizeToUnitSum(libAvgSpectrum);
+		MsPoint[]librarySpectrumUnorm = 
+				cleanAndNormalizeSpectrum(
+						librarySpectrum, mzWindowValue, massErrorType, noiseCutoff);
 		
 		Collection<MsPoint>allPoints = new TreeSet<MsPoint>(MsUtils.mzSorter);
 		allPoints.addAll(Arrays.asList(unknownSpectrumUnorm));
@@ -348,6 +358,62 @@ public class MSMSScoreCalculator {
 		MsPoint[] points = allPoints.stream().
 				sorted(mzSorter).
 				toArray(size -> new MsPoint[size]);
+		ArrayList<MsPointBucket> msBins = new ArrayList<MsPointBucket>();
+		MsPointBucket first = new MsPointBucket(points[0], mzWindowValue, massErrorType);
+		msBins.add(first);
+		for(int i=1; i<points.length; i++) {
+			
+			MsPointBucket current = msBins.get(msBins.size()-1);
+			if(current.pointBelongs(points[i]))
+				current.addPoint(points[i]);
+			else
+				msBins.add(new MsPointBucket(points[i], mzWindowValue, massErrorType));
+		}
+		double[][]matchedIntensities = new double[3][msBins.size()];
+		for(int i=0; i<msBins.size(); i++) {
+			
+			MsPointBucket bin = msBins.get(i);
+			for(int j=0; j<unknownSpectrumUnorm.length; j++) {
+				if(bin.pointBelongs(unknownSpectrumUnorm[j]))
+					matchedIntensities[0][i] = unknownSpectrumUnorm[j].getIntensity();
+			}
+			for(int j=0; j<librarySpectrumUnorm.length; j++) {
+				if(bin.pointBelongs(librarySpectrumUnorm[j]))
+					matchedIntensities[1][i] = librarySpectrumUnorm[j].getIntensity();
+			}
+		}	
+		double[]unknownSpectrumWeighted = createEntropyWeigtedPattern(matchedIntensities[0]);
+		double[]librarySpectrumWeighted = createEntropyWeigtedPattern(matchedIntensities[1]);
+		for(int i=0; i<msBins.size(); i++)
+			matchedIntensities[2][i] = unknownSpectrumWeighted[i] + librarySpectrumWeighted[i]; 
+		
+		double score = 
+				1 - ((2.0d * calculateEntropyNatLog(matchedIntensities[2]) 
+						- calculateEntropyNatLog(unknownSpectrumWeighted) 
+						- calculateEntropyNatLog(librarySpectrumWeighted)) / Math.log(4.0d));
+		return score;
+	}
+	
+	public static double calculateEntropyBasedMatchScoreForPreparedSpectra(			
+			MsPoint[]unknownSpectrumUnorm, 
+			MsPoint[]librarySpectrumUnorm,
+			double mzWindowValue, 
+			MassErrorType massErrorType,
+			double noiseCutoff) {
+		
+		MsPoint[] points = Arrays.copyOf(
+				unknownSpectrumUnorm, 
+				unknownSpectrumUnorm.length + librarySpectrumUnorm.length);
+	    System.arraycopy(librarySpectrumUnorm, 0, points, 
+	    		unknownSpectrumUnorm.length, librarySpectrumUnorm.length);
+	    Arrays.sort(points, mzSorter);
+		
+//		Collection<MsPoint>allPoints = new TreeSet<MsPoint>(MsUtils.mzSorter);
+//		allPoints.addAll(Arrays.asList(unknownSpectrumUnorm));
+//		allPoints.addAll(Arrays.asList(librarySpectrumUnorm));		
+//		MsPoint[] points = allPoints.stream().
+//				sorted(mzSorter).
+//				toArray(size -> new MsPoint[size]);
 		ArrayList<MsPointBucket> msBins = new ArrayList<MsPointBucket>();
 		MsPointBucket first = new MsPointBucket(points[0], mzWindowValue, massErrorType);
 		msBins.add(first);
