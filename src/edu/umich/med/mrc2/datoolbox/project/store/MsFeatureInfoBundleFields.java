@@ -31,5 +31,6 @@ public enum MsFeatureInfoBundleFields {
 	Inj,
 	FUS,
 	StAn,
+	IsLibRef,
 	;
 }

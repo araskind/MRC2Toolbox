@@ -52,6 +52,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 public class IDTMSMSClusterDataPullTask extends IDTMSMSFeatureDataPullTask {
 
 	private Map<String, Map<String,String>>clusterFeatureIdMap;
+	private Map<String, String>clusterRefLibFeatureIdMap;
 	private IMSMSClusterDataSet dataSet;
 	private Set<IMsFeatureInfoBundleCluster>clusters;
 	private Map<IMsFeatureInfoBundleCluster,String>defaultClusterMSMSLibMatchesMap;
@@ -131,6 +132,31 @@ public class IDTMSMSClusterDataPullTask extends IDTMSMSFeatureDataPullTask {
 				features.stream().
 					filter(f -> fids.containsKey(f.getMSFeatureId())).
 					forEach(f -> cluster.addComponent(null, f));
+
+				processed++;
+			}
+			return;
+		}
+		if(dataSet.getDataSetType().equals(MSMSClusterDataSetType.MSMS_SEARCH_BASED)) {
+			
+			for(IMsFeatureInfoBundleCluster cluster : clusters) {
+				
+				Map<String,String> fids = clusterFeatureIdMap.get(cluster.getId());
+				features.stream().
+					filter(f -> fids.containsKey(f.getMSFeatureId())).
+					forEach(f -> cluster.addComponent(null, f));
+				
+				String refLibId = clusterRefLibFeatureIdMap.get(cluster.getId());
+				if(refLibId != null) {
+					
+					for(MSFeatureInfoBundle b : cluster.getComponents()) {
+						
+						if(b.getMSFeatureId().equals(refLibId)) {
+							b.setUsedAsLibraryReference(true);
+							break;
+						}
+					}
+				}
 				processed++;
 			}
 			return;
@@ -194,6 +220,7 @@ public class IDTMSMSClusterDataPullTask extends IDTMSMSFeatureDataPullTask {
 		defaultClusterMSMSLibMatchesMap = new HashMap<IMsFeatureInfoBundleCluster,String>();
 		defaultClusterAltIdMap = new HashMap<IMsFeatureInfoBundleCluster,String>();
 		clusterFeatureIdMap = new TreeMap<String, Map<String,String>>();
+		clusterRefLibFeatureIdMap = new TreeMap<String, String>();
 		
 		Connection conn = ConnectionManager.getConnection();		
 		
@@ -224,7 +251,7 @@ public class IDTMSMSClusterDataPullTask extends IDTMSMSFeatureDataPullTask {
 		         ResultSet.CONCUR_UPDATABLE);
 		
 		String featureQuery = 
-				"SELECT MS_FEATURE_ID, BCC_ID "
+				"SELECT MS_FEATURE_ID, BCC_ID, IS_LIB_REF "
 				+ "FROM MSMS_CLUSTER_COMPONENT WHERE CLUSTER_ID = ?";
 		PreparedStatement fps = conn.prepareStatement(featureQuery);
 
@@ -236,7 +263,8 @@ public class IDTMSMSClusterDataPullTask extends IDTMSMSFeatureDataPullTask {
 			total = rs.getRow();
 		  rs.beforeFirst();
 		}
-		if(dataSet.getDataSetType().equals(MSMSClusterDataSetType.FEATURE_BASED)) {
+		if(dataSet.getDataSetType().equals(MSMSClusterDataSetType.FEATURE_BASED)
+				|| dataSet.getDataSetType().equals(MSMSClusterDataSetType.MSMS_SEARCH_BASED)) {
 			
 			while(rs.next()) {
 				
@@ -262,9 +290,11 @@ public class IDTMSMSClusterDataPullTask extends IDTMSMSFeatureDataPullTask {
 				Map<String,String>clusterFeatureIds = new TreeMap<String,String>();		
 				fps.setString(1, cluster.getId());
 				ResultSet frs = fps.executeQuery();
-				while(frs.next())
+				while(frs.next()) {
 					clusterFeatureIds.put(frs.getString(1), null);
-							
+					if(frs.getString(3) != null)
+						clusterRefLibFeatureIdMap.put(cluster.getId(), frs.getString(3));
+				}			
 				frs.close();
 				clusterFeatureIdMap.put(cluster.getId(), clusterFeatureIds);
 				clusters.add(cluster);

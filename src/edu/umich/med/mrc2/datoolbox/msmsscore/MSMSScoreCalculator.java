@@ -398,8 +398,7 @@ public class MSMSScoreCalculator {
 			MsPoint[]unknownSpectrumUnorm, 
 			MsPoint[]librarySpectrumUnorm,
 			double mzWindowValue, 
-			MassErrorType massErrorType,
-			double noiseCutoff) {
+			MassErrorType massErrorType) {
 		
 		MsPoint[] points = Arrays.copyOf(
 				unknownSpectrumUnorm, 

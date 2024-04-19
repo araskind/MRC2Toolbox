@@ -57,6 +57,7 @@ public class MSFeatureInfoBundle implements Serializable {
 	private Collection<MSFeatureIdentificationFollowupStep>idFollowupSteps;
 	private Collection<StandardFeatureAnnotation>standadAnnotations;
 	private boolean hasChromatogram;
+	private boolean usedAsLibraryReference;
 	
 	private DataFile dataFile;
 
@@ -324,6 +325,10 @@ public class MSFeatureInfoBundle implements Serializable {
 					MsFeatureInfoBundleFields.StAn.name(), 
 					StringUtils.join(stanList, "@"));
 		}	
+		msFeatureInfoBundleElement.setAttribute(
+				MsFeatureInfoBundleFields.IsLibRef.name(), 
+				Boolean.toString(usedAsLibraryReference));
+		
 		return msFeatureInfoBundleElement;
 	}
 	
@@ -383,6 +388,10 @@ public class MSFeatureInfoBundle implements Serializable {
 					standadAnnotations.add(stan);
 			}		
 		}
+		String useAsLibRef = 
+				featureElement.getAttributeValue(MsFeatureInfoBundleFields.IsLibRef.name());
+		if(useAsLibRef != null)
+			usedAsLibraryReference = Boolean.valueOf(useAsLibRef);
 	}
 
 	public boolean getHasChromatogram() {
@@ -409,6 +418,14 @@ public class MSFeatureInfoBundle implements Serializable {
 			return false;
 		
 		return CollectionUtils.containsAny(lookupFollowups, idFollowupSteps);
+	}
+
+	public boolean isUsedAsLibraryReference() {
+		return usedAsLibraryReference;
+	}
+
+	public void setUsedAsLibraryReference(boolean usedAsLibraryReference) {
+		this.usedAsLibraryReference = usedAsLibraryReference;
 	}
 }
 

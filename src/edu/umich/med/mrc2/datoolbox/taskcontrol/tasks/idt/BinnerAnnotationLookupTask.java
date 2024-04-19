@@ -72,11 +72,11 @@ public class BinnerAnnotationLookupTask extends AbstractTask {
 		this.params = params;
 		this.binnerAnnotationsDataSet = balds;
 		String description  = "Based on Binner annotations data set \"" + 
-				binnerAnnotationsDataSet.getName() +"\"";
+				binnerAnnotationsDataSet.getName() + 
+				" (Created " + MRC2ToolBoxConfiguration.defaultTimeStampFormat.format(new Date()) + ")";
 		 
 		msmsClusterDataSet = new MSMSClusterDataSet(
-				"Binner based MSMS clusters data set (" + 
-						MRC2ToolBoxConfiguration.defaultTimeStampFormat.format(new Date()) +")", 
+				"Binner based MSMS clusters data set", 
 				description, 
 				MRC2ToolBoxCore.getIdTrackerUser());
 		msmsClusterDataSet.setParameters(params);	

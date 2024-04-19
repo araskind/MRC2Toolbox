@@ -3796,13 +3796,17 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 
 	private void finalizeFeatureVsFeatureMSMSSearchTask(FeatureVsFeatureMSMSSearchTask task) {
 
-		MainWindow.hideProgressDialog();
-		Collection<IMsFeatureInfoBundleCluster>featureVsFeatureSearchResults = task.getSearchResults();
-		if(featureVsFeatureSearchResults.isEmpty()) {
+		MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
+		MainWindow.hideProgressDialog();		
+		IMSMSClusterDataSet featureVsFeatureSearchResults = task.getSearchResults();
+		
+		if(featureVsFeatureSearchResults == null 
+				|| featureVsFeatureSearchResults.getClusters().isEmpty()) {
 			
 			MessageDialog.showWarningMsg("No matches found.", this.getContentPane());
 			return;
 		}
+		loadMSMSClusterDataSetInGUI(featureVsFeatureSearchResults);
 	}
 
 	private void finalizeMzFrequencyAnalysisTask(MzFrequencyAnalysisTask task) {

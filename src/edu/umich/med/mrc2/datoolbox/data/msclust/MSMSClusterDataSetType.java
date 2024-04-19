@@ -25,6 +25,7 @@ public enum MSMSClusterDataSetType {
 
 	FEATURE_BASED("Feature based"),
 	BINNER_ANNOTATION_BASED("Binner annotation based"),
+	MSMS_SEARCH_BASED("MSMS search based"),
 	;
 	
 	private final String uiName;

@@ -417,7 +417,8 @@ public class MSMSClusteringDBUtils {
 		PreparedStatement ps = conn.prepareStatement(query);
 		
 		String featureQuery = "INSERT INTO MSMS_CLUSTER_COMPONENT "
-				+ "(CLUSTER_ID, MS_FEATURE_ID, BCC_ID) VALUES (?, ?, ?)";
+				+ "(CLUSTER_ID, MS_FEATURE_ID, BCC_ID, IS_LIB_REF) "
+				+ "VALUES (?, ?, ?, ?)";
 		PreparedStatement featurePs = conn.prepareStatement(featureQuery);	
 		
 		ps.setString(2, dataSet.getParameters().getId());
@@ -481,6 +482,7 @@ public class MSMSClusteringDBUtils {
 				for(MSFeatureInfoBundle feature : cluster.getComponents()) {				
 					featurePs.setString(2, feature.getMSFeatureId());
 					featurePs.setNull(3, java.sql.Types.NULL);
+					featurePs.setNull(4, java.sql.Types.NULL);
 					featurePs.addBatch();
 				}
 			}
@@ -491,10 +493,24 @@ public class MSMSClusteringDBUtils {
 				for(Entry<BinnerAnnotation, Set<MSFeatureInfoBundle>>cme : componentMap.entrySet()) {
 					
 					featurePs.setString(3, cme.getKey().getId());
+					featurePs.setNull(4, java.sql.Types.NULL);
 					for(MSFeatureInfoBundle feature : cme.getValue()) {				
 						featurePs.setString(2, feature.getMSFeatureId());
 						featurePs.addBatch();
 					}
+				}
+			}
+			if(dataSet.getDataSetType().equals(MSMSClusterDataSetType.MSMS_SEARCH_BASED)) {
+				
+				for(MSFeatureInfoBundle feature : cluster.getComponents()) {				
+					featurePs.setString(2, feature.getMSFeatureId());
+					featurePs.setNull(3, java.sql.Types.NULL);
+					if(feature.isUsedAsLibraryReference())
+						featurePs.setString(4, "Y");
+					else
+						featurePs.setNull(4, java.sql.Types.NULL);
+					
+					featurePs.addBatch();
 				}
 			}
 			featurePs.executeBatch();

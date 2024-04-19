@@ -70,7 +70,8 @@ public abstract class MSMSClusterTask extends AbstractTask {
 		PreparedStatement ps = conn.prepareStatement(query);
 		
 		String featureQuery = "INSERT INTO MSMS_CLUSTER_COMPONENT "
-				+ "(CLUSTER_ID, MS_FEATURE_ID, BCC_ID) VALUES (?, ?, ?)";
+				+ "(CLUSTER_ID, MS_FEATURE_ID, BCC_ID, IS_LIB_REF) "
+				+ "VALUES (?, ?, ?, ?)";
 		PreparedStatement featurePs = conn.prepareStatement(featureQuery);	
 		
 		ps.setString(2, dataSet.getParameters().getId());
@@ -91,24 +92,12 @@ public abstract class MSMSClusterTask extends AbstractTask {
 					12);
 			cluster.setId(clusterId);
 			String msmsLibMatchId = null;
-			String altId = null;
-			
-			//	Debug only 
-//			Collection<String> matchIds = cluster.getComponents().stream().
-//					flatMap(c -> c.getMsFeature().getIdentifications().stream()).
-//					filter(i -> i.getReferenceMsMsLibraryMatch() != null).
-//					map(i -> i.getUniqueId()).collect(Collectors.toCollection(TreeSet::new));
-//			if(!matchIds.isEmpty())
-//				System.err.print(StringUtils.join(matchIds, "\n"));
-			
+			String altId = null;		
 			if(cluster.getPrimaryIdentity() != null) {
 				
 				if(cluster.getPrimaryIdentity().getReferenceMsMsLibraryMatch() != null) {
 					msmsLibMatchId = cluster.getPrimaryIdentity().getUniqueId();
-					//	Debug only 
-					//	System.err.println(msmsLibMatchId);
-				}
-				
+				}				
 				if(cluster.getPrimaryIdentity().getIdSource().equals(CompoundIdSource.MANUAL))
 					altId = cluster.getPrimaryIdentity().getUniqueId();
 			}			
@@ -145,6 +134,7 @@ public abstract class MSMSClusterTask extends AbstractTask {
 				for(MSFeatureInfoBundle feature : cluster.getComponents()) {				
 					featurePs.setString(2, feature.getMSFeatureId());
 					featurePs.setNull(3, java.sql.Types.NULL);
+					featurePs.setNull(4, java.sql.Types.NULL);
 					featurePs.addBatch();
 				}
 			}
@@ -155,10 +145,24 @@ public abstract class MSMSClusterTask extends AbstractTask {
 				for(Entry<BinnerAnnotation, Set<MSFeatureInfoBundle>>cme : componentMap.entrySet()) {
 					
 					featurePs.setString(3, cme.getKey().getId());
+					featurePs.setNull(4, java.sql.Types.NULL);
 					for(MSFeatureInfoBundle feature : cme.getValue()) {				
 						featurePs.setString(2, feature.getMSFeatureId());
 						featurePs.addBatch();
 					}
+				}
+			}
+			if(dataSet.getDataSetType().equals(MSMSClusterDataSetType.MSMS_SEARCH_BASED)) {
+				
+				for(MSFeatureInfoBundle feature : cluster.getComponents()) {				
+					featurePs.setString(2, feature.getMSFeatureId());
+					featurePs.setNull(3, java.sql.Types.NULL);
+					if(feature.isUsedAsLibraryReference())
+						featurePs.setString(4, "Y");
+					else
+						featurePs.setNull(4, java.sql.Types.NULL);
+					
+					featurePs.addBatch();
 				}
 			}
 			featurePs.executeBatch();
@@ -167,5 +171,4 @@ public abstract class MSMSClusterTask extends AbstractTask {
 		ps.close();
 		featurePs.close();
 	}
-
 }

@@ -73,11 +73,11 @@ public class MSMSFeatureClusteringTask extends AbstractTask {
 		if(featureLookupDataSet.getFeatures() != null 
 				&& !featureLookupDataSet.getFeatures().isEmpty())
 			description = "Based on feature lookup data set \"" + 
-				featureLookupDataSet.getName() +"\"";
+				featureLookupDataSet.getName() + 
+				"\" (Created " + MRC2ToolBoxConfiguration.defaultTimeStampFormat.format(new Date()) + ")";
 		 
 		msmsClusterDataSet = new MSMSClusterDataSet(
-				"MSMS clusters data set (" + 
-						MRC2ToolBoxConfiguration.defaultTimeStampFormat.format(new Date()) +")", 
+				"MSMS clusters data set", 
 				description, 
 				MRC2ToolBoxCore.getIdTrackerUser());
 		msmsClusterDataSet.setParameters(params);	
