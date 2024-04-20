@@ -47,6 +47,7 @@ import edu.umich.med.mrc2.datoolbox.data.SiriusMsMsCluster;
 import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureIdentityComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortDirection;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
+import edu.umich.med.mrc2.datoolbox.data.enums.MSMSSearchDirection;
 import edu.umich.med.mrc2.datoolbox.data.msclust.BinnerBasedMsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusteringParameterSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MsFeatureInfoBundleCluster;
@@ -90,6 +91,10 @@ public class MSMSClusteringUtils {
 		chunks.add(params.getEntropyScoreMassErrorType().name());
 		chunks.add(MsUtils.spectrumMzExportFormat.format(params.getEntropyScoreNoiseCutoff()));
 		
+		if(params.getMsmsSearchDirection() == null)
+			params.setMsmsSearchDirection(MSMSSearchDirection.DIRECT);
+		
+		chunks.add(params.getMsmsSearchDirection().name());		
 	    try {
 			MessageDigest md = MessageDigest.getInstance("MD5");
 			md.update(StringUtils.join(chunks).getBytes(Charset.forName("windows-1252")));

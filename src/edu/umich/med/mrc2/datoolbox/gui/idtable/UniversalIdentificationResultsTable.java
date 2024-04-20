@@ -220,8 +220,6 @@ public class UniversalIdentificationResultsTable extends BasicTable {
 		thf.getParserModel().setFormat(ReferenceMsMsLibraryMatch.class, new ReferenceMsMsLibraryMatchTypeFormat());
 		thf.getParserModel().setComparator(ReferenceMsMsLibraryMatch.class, new ReferenceMsMsLibraryMatchTypeComparator());
 		
-
-		
 		finalizeLayout();
 		
 		createIdLevelActions();

@@ -50,6 +50,7 @@ public class MSMSFeatureClusterTreeRenderer extends DefaultTreeCellRenderer {
 	private static final Icon featureIcon = GuiUtils.getIcon("feature", 24);
 	private static final Icon primIdFeatureIcon = GuiUtils.getIcon("primIdFeature", 24);
 	private static final Icon clusterIcon = GuiUtils.getIcon("cluster", 24);
+	private static final Icon msmsClusterIcon = GuiUtils.getIcon("msmsCluster", 24);
 	private static final Icon namedClusterIcon = GuiUtils.getIcon("namedCluster", 24);
 	private static final Icon multiNamedClusterIcon = GuiUtils.getIcon("multiNamedCluster", 24);
 	

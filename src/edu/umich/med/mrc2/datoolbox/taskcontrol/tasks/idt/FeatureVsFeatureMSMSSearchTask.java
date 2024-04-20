@@ -32,12 +32,15 @@ import java.util.stream.Collectors;
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundleCollection;
 import edu.umich.med.mrc2.datoolbox.data.MsPoint;
+import edu.umich.med.mrc2.datoolbox.data.enums.MSMSSearchDirection;
 import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
 import edu.umich.med.mrc2.datoolbox.data.msclust.IMSMSClusterDataSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusterDataSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusterDataSetType;
+import edu.umich.med.mrc2.datoolbox.data.msclust.MsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.main.FeatureCollectionManager;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
+import edu.umich.med.mrc2.datoolbox.main.RecentDataManager;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.msmsscore.MSMSScoreCalculator;
 import edu.umich.med.mrc2.datoolbox.msmsscore.MSMSSearchParameterSet;
@@ -57,6 +60,8 @@ public class FeatureVsFeatureMSMSSearchTask extends AbstractTask implements Task
 	private IMSMSClusterDataSet searchResultsDataSet;
 	private Map<String,MsPoint[]>normalizedLibrarySpectra;
 	private Map<String,MsPoint[]>normalizedUnknownSpectra;	
+	private Collection<MSFeatureInfoBundle>inputLibEntries;
+	private Collection<MSFeatureInfoBundle>inputUnknowns;
 	private Collection<MSFeatureInfoBundle>validLibEntries;
 	private Collection<MSFeatureInfoBundle>validUnknowns;
 	
@@ -70,6 +75,15 @@ public class FeatureVsFeatureMSMSSearchTask extends AbstractTask implements Task
 		this.searchParameters = searchParameters;
 		normalizedLibrarySpectra = new TreeMap<String,MsPoint[]>();
 		normalizedUnknownSpectra = new TreeMap<String,MsPoint[]>();
+		if(searchParameters.getMsmsSearchDirection().equals(MSMSSearchDirection.DIRECT)) {
+			inputLibEntries = featureLib.getFeatures();
+			inputUnknowns = inputFeatures;
+		}
+		else {
+			inputLibEntries = inputFeatures; 
+			inputUnknowns = featureLib.getFeatures();
+		}
+		RecentDataManager.addFeatureCollection(featureLib);
 	}
 
 	@Override
@@ -102,9 +116,11 @@ public class FeatureVsFeatureMSMSSearchTask extends AbstractTask implements Task
 		searchResultsDataSet = new MSMSClusterDataSet(
 					"MSMS search against " + featureLib.getName(), 
 					"MSMS search against " + featureLib.getName() +" (Created " + 
-							MRC2ToolBoxConfiguration.defaultTimeStampFormat.format(new Date()) + ")", 
+							MRC2ToolBoxConfiguration.defaultTimeStampFormat.format(new Date()) + ")\n"
+							+ "Search direction: " + searchParameters.getMsmsSearchDirection().getName(), 
 					MRC2ToolBoxCore.getIdTrackerUser());
 		searchResultsDataSet.setDataSetType(MSMSClusterDataSetType.MSMS_SEARCH_BASED);
+		searchResultsDataSet.setParameters(searchParameters);
 		
 		double mzErrorValue = searchParameters.getMzErrorValue();
 		MassErrorType massErrorType = searchParameters.getMassErrorType();
@@ -119,6 +135,7 @@ public class FeatureVsFeatureMSMSSearchTask extends AbstractTask implements Task
 		for(MSFeatureInfoBundle f : validUnknowns) {
 			
 			activeLibrarySubset = validLibEntries;
+
 			if(!ignoreRt) {
 				
 				final Range rtRange = new Range(
@@ -154,26 +171,25 @@ public class FeatureVsFeatureMSMSSearchTask extends AbstractTask implements Task
 			Collection<MSFeatureInfoBundle>matches = new ArrayList<MSFeatureInfoBundle>();
 			for(MSFeatureInfoBundle l : activeLibrarySubset) {
 				
+				if(!l.getMsFeature().getPolarity().equals(f.getMsFeature().getPolarity()))
+					continue;
+				
 				MsPoint[] libNorm = normalizedLibrarySpectra.get(l.getMSFeatureId());
 				double eScore = MSMSScoreCalculator.calculateEntropyBasedMatchScoreForPreparedSpectra(
 									unkNorm, 
 									libNorm,
 									mzErrorValue, 
 									massErrorType);		
-				if(eScore > msmsSimilarityCutoff 
-						&& !l.getMSFeatureId().equals(f.getMSFeatureId()))
+				if(eScore > msmsSimilarityCutoff)
 					matches.add(l);							
 			}
 			if(!matches.isEmpty()) {
 				
-				//	MsFeatureInfoBundleCluster newCluster = MsFeatureInfoBundleCluster(MSFeatureInfoBundle b)
+				MsFeatureInfoBundleCluster newCluster = new MsFeatureInfoBundleCluster(f);
+				for(MSFeatureInfoBundle match : matches) 
+					newCluster.addComponent(null, match);
 				
-				System.out.println(f.getMsFeature().toString());
-				System.out.println("***  Matches to ***");
-				for(MSFeatureInfoBundle m : matches)
-					System.out.println(m.getMsFeature().toString());
-				
-				System.out.println(">--------------\n");
+				searchResultsDataSet.getClusters().add(newCluster);
 			}
 			processed++;
 		}
@@ -185,30 +201,8 @@ public class FeatureVsFeatureMSMSSearchTask extends AbstractTask implements Task
 		double mzWindowValue = searchParameters.getEntropyScoreMassError();
 		MassErrorType massErrorType = searchParameters.getEntropyScoreMassErrorType();
 		double noiseCutoff = searchParameters.getEntropyScoreNoiseCutoff();
-		
-		validLibEntries = featureLib.getFeatures().stream().
-			filter(f -> Objects.nonNull(f.getMsFeature().getSpectrum())).
-			filter(f -> Objects.nonNull(f.getMsFeature().getSpectrum().getExperimentalTandemSpectrum())).
-			collect(Collectors.toList());
-		
-		taskDescription = "Preparing library spectra";
-		total = validLibEntries.size();
-		processed = 0;
-		
-		for(MSFeatureInfoBundle f : validLibEntries) {
-			
-			f.setUsedAsLibraryReference(true);
-			MsPoint[] msmsNorm = 
-					MSMSScoreCalculator.cleanAndNormalizeSpectrum(
-								f.getMsFeature().getSpectrum().getExperimentalTandemSpectrum().getSpectrum(), 
-								mzWindowValue, 
-								massErrorType,
-								noiseCutoff);
-			
-			normalizedLibrarySpectra.put(f.getMSFeatureId(), msmsNorm);			
-			processed++;
-		}
-		validUnknowns = inputFeatures.stream().
+	
+		validUnknowns = inputUnknowns.stream().
 				filter(f -> Objects.nonNull(f.getMsFeature().getSpectrum())).
 				filter(f -> Objects.nonNull(f.getMsFeature().getSpectrum().getExperimentalTandemSpectrum())).
 				collect(Collectors.toList());
@@ -218,6 +212,7 @@ public class FeatureVsFeatureMSMSSearchTask extends AbstractTask implements Task
 		processed = 0;
 		for(MSFeatureInfoBundle l : validUnknowns) {
 			
+			l.setAsMatchingTarget(true);
 			MsPoint[] msmsNorm = 
 					MSMSScoreCalculator.cleanAndNormalizeSpectrum(
 								l.getMsFeature().getSpectrum().getExperimentalTandemSpectrum().getSpectrum(), 
@@ -225,6 +220,29 @@ public class FeatureVsFeatureMSMSSearchTask extends AbstractTask implements Task
 								massErrorType,
 								noiseCutoff);
 			normalizedUnknownSpectra.put(l.getMSFeatureId(), msmsNorm);
+			processed++;
+		}		
+		validLibEntries = inputLibEntries.stream().
+			filter(f -> Objects.nonNull(f.getMsFeature().getSpectrum())).
+			filter(f -> Objects.nonNull(f.getMsFeature().getSpectrum().getExperimentalTandemSpectrum())).
+			filter(f -> !validUnknowns.contains(f)).
+			collect(Collectors.toList());
+		
+		taskDescription = "Preparing library spectra";
+		total = validLibEntries.size();
+		processed = 0;
+		
+		for(MSFeatureInfoBundle f : validLibEntries) {
+				
+			f.setAsMatchingTarget(false);
+			MsPoint[] msmsNorm = 
+					MSMSScoreCalculator.cleanAndNormalizeSpectrum(
+								f.getMsFeature().getSpectrum().getExperimentalTandemSpectrum().getSpectrum(), 
+								mzWindowValue, 
+								massErrorType,
+								noiseCutoff);
+			
+			normalizedLibrarySpectra.put(f.getMSFeatureId(), msmsNorm);			
 			processed++;
 		}
 	}
@@ -258,7 +276,8 @@ public class FeatureVsFeatureMSMSSearchTask extends AbstractTask implements Task
 			((AbstractTask) e.getSource()).removeTaskListener(this);
 
 			if (e.getSource().getClass().equals(IDTMSMSFeatureDataPullTask.class))
-				searchFeaturesAgainstLibrary();			
+				searchFeaturesAgainstLibrary();		
+			
 		}
 	}
 	

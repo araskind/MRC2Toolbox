@@ -152,7 +152,7 @@ public class IDTMSMSClusterDataPullTask extends IDTMSMSFeatureDataPullTask {
 					for(MSFeatureInfoBundle b : cluster.getComponents()) {
 						
 						if(b.getMSFeatureId().equals(refLibId)) {
-							b.setUsedAsLibraryReference(true);
+							b.setAsMatchingTarget(true);
 							break;
 						}
 					}
@@ -251,7 +251,7 @@ public class IDTMSMSClusterDataPullTask extends IDTMSMSFeatureDataPullTask {
 		         ResultSet.CONCUR_UPDATABLE);
 		
 		String featureQuery = 
-				"SELECT MS_FEATURE_ID, BCC_ID, IS_LIB_REF "
+				"SELECT MS_FEATURE_ID, BCC_ID, IS_MATCHING_TARGET "
 				+ "FROM MSMS_CLUSTER_COMPONENT WHERE CLUSTER_ID = ?";
 		PreparedStatement fps = conn.prepareStatement(featureQuery);
 

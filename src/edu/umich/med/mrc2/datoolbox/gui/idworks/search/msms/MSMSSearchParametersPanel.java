@@ -47,6 +47,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 
+import edu.umich.med.mrc2.datoolbox.data.enums.MSMSSearchDirection;
 import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
 import edu.umich.med.mrc2.datoolbox.data.enums.TableRowSubset;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusteringParameterSet;
@@ -77,6 +78,7 @@ public class MSMSSearchParametersPanel extends JPanel implements ItemListener, B
 	private static final String ENTROPY_SCORE_NOISE_CUTOFF = "ENTROPY_SCORE_NOISE_CUTOFF";
 	private static final String USE_TABLE_ROW_SUBSET_SET = "USE_TABLE_ROW_SUBSET_SET";	
 	private static final String IGNORE_PARENT_ION = "IGNORE_PARENT_ION";
+	private static final String MSMS_SEARCH_DIRECTION = "MSMS_SEARCH_DIRECTION";
 	
 	private MSMSSearchParameterSet parameters;
 	
@@ -92,6 +94,7 @@ public class MSMSSearchParametersPanel extends JPanel implements ItemListener, B
 	private JComboBox<TableRowSubset> featureSubsetComboBox;
 	private JRadioButton useCompleteSetRadioButton;
 	private JCheckBox ignoreParentIonCheckBox;
+	private JComboBox searchDirectionComboBox;
 			
 	public MSMSSearchParametersPanel() {
 		
@@ -212,6 +215,38 @@ public class MSMSSearchParametersPanel extends JPanel implements ItemListener, B
 		add(lblNewLabel_4, gbc_lblNewLabel_4);
 		
 		rowCount++;
+		
+		JLabel lblNewLabel_5 = new JLabel("Search direction ");
+		GridBagConstraints gbc_lblNewLabel_5 = new GridBagConstraints();
+		gbc_lblNewLabel_5.anchor = GridBagConstraints.EAST;
+		gbc_lblNewLabel_5.insets = new Insets(0, 0, 5, 5);
+		gbc_lblNewLabel_5.gridx = 0;
+		gbc_lblNewLabel_5.gridy = rowCount;
+		add(lblNewLabel_5, gbc_lblNewLabel_5);
+		
+		searchDirectionComboBox = new JComboBox<MSMSSearchDirection>(
+				new DefaultComboBoxModel<MSMSSearchDirection>(
+						MSMSSearchDirection.values()));
+		GridBagConstraints gbc_searchDirectionComboBox = new GridBagConstraints();
+		gbc_searchDirectionComboBox.gridwidth = 3;
+		gbc_searchDirectionComboBox.insets = new Insets(0, 0, 5, 5);
+		gbc_searchDirectionComboBox.fill = GridBagConstraints.HORIZONTAL;
+		gbc_searchDirectionComboBox.gridx = 1;
+		gbc_searchDirectionComboBox.gridy = rowCount;
+		add(searchDirectionComboBox, gbc_searchDirectionComboBox);
+		
+		rowCount++;
+		
+//		JLabel lblNewLabel_6 = new JLabel("... ");
+//		GridBagConstraints gbc_lblNewLabel_6 = new GridBagConstraints();
+//		gbc_lblNewLabel_6.gridwidth = 4;
+//		gbc_lblNewLabel_6.anchor = GridBagConstraints.WEST;
+//		gbc_lblNewLabel_6.insets = new Insets(0, 0, 5, 5);
+//		gbc_lblNewLabel_6.gridx = 0;
+//		gbc_lblNewLabel_6.gridy = rowCount;
+//		add(lblNewLabel_6, gbc_lblNewLabel_6);
+//		
+//		rowCount++;
 		
 		JPanel entropyScoreParamsPanel = createEntropyScoreParametersBlock();
 		GridBagConstraints gbc_entropyScoreParamsPanel = new GridBagConstraints();
@@ -382,7 +417,11 @@ public class MSMSSearchParametersPanel extends JPanel implements ItemListener, B
 	public void loadPreferences(Preferences prefs) {
 		
 		preferences = prefs;
-		
+				
+		searchDirectionComboBox.setSelectedItem(
+				MSMSSearchDirection.getOptionByName(
+						preferences.get(MSMS_SEARCH_DIRECTION, MSMSSearchDirection.DIRECT.name())));
+	
 		mzErrorValueTextField.setText(
 				Double.toString(preferences.getDouble(MZ_ERROR_VALUE, 20.0d)));
 		esMassErrorTypeComboBox.setSelectedItem(
@@ -438,6 +477,10 @@ public class MSMSSearchParametersPanel extends JPanel implements ItemListener, B
 			return;
 	
 		preferences = Preferences.userRoot().node(PREFS_NODE);
+		
+		if(getMSMSSearchDirection() != null)
+			preferences.put(MSMS_SEARCH_DIRECTION, getMSMSSearchDirection().name());
+		
 		preferences.putDouble(MZ_ERROR_VALUE, getMzError());
 		if(getMassErrorType() != null)
 			preferences.put(MZ_ERROR_TYPE, getMassErrorType().name());
@@ -484,6 +527,7 @@ public class MSMSSearchParametersPanel extends JPanel implements ItemListener, B
 			name += " | ENC " + MRC2ToolBoxConfiguration.getPpmFormat().format(getEntropyScoreNoizeCutoff());
 			
 			MSMSSearchParameterSet newParams = new MSMSSearchParameterSet();
+			newParams.setMsmsSearchDirection(getMSMSSearchDirection());
 			newParams.setName(name);
 			newParams.setMzErrorValue(getMzError());
 			newParams.setIgnoreParentIon(ignoreParentIon());
@@ -530,7 +574,12 @@ public class MSMSSearchParametersPanel extends JPanel implements ItemListener, B
 		esMassErrorTextField.setText(Double.toString(parameters.getEntropyScoreMassError()));
 		esMassErrorTypeComboBox.setSelectedItem(parameters.getEntropyScoreMassErrorType());
 		esNoiseCutoffTextField.setText(Double.toString(parameters.getEntropyScoreNoiseCutoff()));
+		searchDirectionComboBox.setSelectedItem(parameters.getMsmsSearchDirection());
 	}
+	
+	public MSMSSearchDirection getMSMSSearchDirection() {
+		return (MSMSSearchDirection)searchDirectionComboBox.getSelectedItem();
+	}	
 	
 	public double getMzError() {	
 		return Double.parseDouble(mzErrorValueTextField.getText().trim());

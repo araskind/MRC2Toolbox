@@ -70,7 +70,7 @@ public abstract class MSMSClusterTask extends AbstractTask {
 		PreparedStatement ps = conn.prepareStatement(query);
 		
 		String featureQuery = "INSERT INTO MSMS_CLUSTER_COMPONENT "
-				+ "(CLUSTER_ID, MS_FEATURE_ID, BCC_ID, IS_LIB_REF) "
+				+ "(CLUSTER_ID, MS_FEATURE_ID, BCC_ID, IS_MATCHING_TARGET) "
 				+ "VALUES (?, ?, ?, ?)";
 		PreparedStatement featurePs = conn.prepareStatement(featureQuery);	
 		
@@ -157,7 +157,7 @@ public abstract class MSMSClusterTask extends AbstractTask {
 				for(MSFeatureInfoBundle feature : cluster.getComponents()) {				
 					featurePs.setString(2, feature.getMSFeatureId());
 					featurePs.setNull(3, java.sql.Types.NULL);
-					if(feature.isUsedAsLibraryReference())
+					if(feature.isUsedAsMatchingTarget())
 						featurePs.setString(4, "Y");
 					else
 						featurePs.setNull(4, java.sql.Types.NULL);

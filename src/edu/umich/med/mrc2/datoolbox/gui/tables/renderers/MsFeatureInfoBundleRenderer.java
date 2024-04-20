@@ -26,6 +26,8 @@ import java.awt.Component;
 import java.awt.Font;
 
 import javax.swing.JTable;
+import javax.swing.border.Border;
+import javax.swing.border.LineBorder;
 import javax.swing.table.DefaultTableCellRenderer;
 
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
@@ -39,6 +41,7 @@ public class MsFeatureInfoBundleRenderer extends DefaultTableCellRenderer {
 	 */
 	private static final long serialVersionUID = 3136340273175023112L;
 	private SortProperty idField;
+	private static final Border highlightBorder = new LineBorder(new Color(255, 0, 0), 2, true);
 
 	public MsFeatureInfoBundleRenderer(SortProperty idField) {
 
@@ -58,6 +61,7 @@ public class MsFeatureInfoBundleRenderer extends DefaultTableCellRenderer {
 
 		if(value == null){
 			setText("");
+			setBorder(null);
 			return this;
 		}
 		if (value instanceof MSFeatureInfoBundle) {
@@ -76,6 +80,11 @@ public class MsFeatureInfoBundleRenderer extends DefaultTableCellRenderer {
 				setText(msf.getPrimaryIdentity().getCompoundName());
 			else
 				setText(msf.getName());
+			
+			if(((MSFeatureInfoBundle) value).isUsedAsMatchingTarget())
+				setBorder(highlightBorder);
+			else
+				setBorder(null);
 		}
 		return this;
 	}

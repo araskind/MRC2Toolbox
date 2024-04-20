@@ -166,7 +166,7 @@ public class BasicTable extends JTable implements ActionListener{
 	
 	public void adjustColumns() {
 
-		if(fixedWidthColumns.isEmpty()) {
+		if(!fixedWidthColumns.isEmpty()) {
 			
 			try {
 				tca.adjustColumnsExcluding(fixedWidthColumns);

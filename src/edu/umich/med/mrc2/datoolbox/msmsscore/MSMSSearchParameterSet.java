@@ -23,6 +23,7 @@ package edu.umich.med.mrc2.datoolbox.msmsscore;
 
 import org.jdom2.Element;
 
+import edu.umich.med.mrc2.datoolbox.data.enums.MSMSSearchDirection;
 import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusteringParameterSet;
 import edu.umich.med.mrc2.datoolbox.project.store.MSMSClusteringParameterSetFields;
@@ -35,6 +36,7 @@ public class MSMSSearchParameterSet extends MSMSClusteringParameterSet{
 	private double entropyScoreMassError;
 	private MassErrorType entropyScoreMassErrorType;
 	private double entropyScoreNoiseCutoff;	
+	private MSMSSearchDirection msmsSearchDirection;
 		
 	public MSMSSearchParameterSet() {
 		super();
@@ -51,7 +53,8 @@ public class MSMSSearchParameterSet extends MSMSClusteringParameterSet{
 			double entropyScoreMassError,
 			MassErrorType entropyScoreMassErrorType, 
 			double entropyScoreNoiseCutoff,
-			boolean ignoreParentIon) {
+			boolean ignoreParentIon,
+			MSMSSearchDirection msmsSearchDirection) {
 		super(name, mzErrorValue, massErrorType, rtErrorValue, msmsSimilarityCutoff);
 		this.id = id;
 		this.ignoreRt = ignoreRt;
@@ -59,6 +62,7 @@ public class MSMSSearchParameterSet extends MSMSClusteringParameterSet{
 		this.entropyScoreMassErrorType = entropyScoreMassErrorType;
 		this.entropyScoreNoiseCutoff = entropyScoreNoiseCutoff;
 		this.ignoreParentIon = ignoreParentIon;
+		this.msmsSearchDirection = msmsSearchDirection;
 		this.md5 = MSMSClusteringUtils.calculateMSMSSearchParametersMd5(this);
 	}
 
@@ -149,7 +153,13 @@ public class MSMSSearchParameterSet extends MSMSClusteringParameterSet{
 				entropyScoreMassErrorType.name());
 		msmsSearchParameterSetElement.setAttribute(
 				MSMSClusteringParameterSetFields.EntropyScoreNoiseCutoff.name(), 
-				Double.toString(entropyScoreNoiseCutoff));	
+				Double.toString(entropyScoreNoiseCutoff));
+		
+		if(msmsSearchDirection == null)
+			msmsSearchDirection = MSMSSearchDirection.DIRECT;
+		msmsSearchParameterSetElement.setAttribute(
+				MSMSClusteringParameterSetFields.MSMSSearchDirection.name(), 
+				msmsSearchDirection.name());
 		
 		return msmsSearchParameterSetElement;
 	}
@@ -173,8 +183,20 @@ public class MSMSSearchParameterSet extends MSMSClusteringParameterSet{
 		entropyScoreNoiseCutoff = Double.parseDouble(
 				xmlElement.getAttributeValue(
 						MSMSClusteringParameterSetFields.EntropyScoreNoiseCutoff.name()));
+		
+		msmsSearchDirection = MSMSSearchDirection.getOptionByName(
+				xmlElement.getAttributeValue(
+						MSMSClusteringParameterSetFields.MSMSSearchDirection.name()));
 
 		md5 = MSMSClusteringUtils.calculateMSMSSearchParametersMd5(this);
+	}
+
+	public MSMSSearchDirection getMsmsSearchDirection() {
+		return msmsSearchDirection;
+	}
+
+	public void setMsmsSearchDirection(MSMSSearchDirection msmsSearchDirection) {
+		this.msmsSearchDirection = msmsSearchDirection;
 	}
 }
 

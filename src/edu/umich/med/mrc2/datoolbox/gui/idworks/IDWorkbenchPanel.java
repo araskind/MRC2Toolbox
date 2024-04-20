@@ -1907,6 +1907,11 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 				featureVsFeatureMSMSSearchSetupDialog.getSelectedFeatureCollection();
 		MSMSSearchParameterSet searchParameters =  
 				featureVsFeatureMSMSSearchSetupDialog.getMSMSSearchParameters();
+		MSMSClusteringParameterSet existingParamSet = 
+				MSMSClusterDataSetManager.getMsmsClusteringParameterSetByMd5(searchParameters.getMd5());
+		if(existingParamSet != null)
+			searchParameters = (MSMSSearchParameterSet)existingParamSet;
+		
 		featureVsFeatureMSMSSearchSetupDialog.dispose();
 		
 		FeatureVsFeatureMSMSSearchTask task = 
