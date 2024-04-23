@@ -36,5 +36,6 @@ public enum MSMSClusteringParameterSetFields {
 	EntropyScoreMassErrorType,
 	EntropyScoreNoiseCutoff,
 	MSMSSearchDirection,
+	MD5,
 	;
 }

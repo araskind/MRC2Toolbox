@@ -86,19 +86,20 @@ public class MSMSClusteringDBUtils {
 		Collection<MSMSClusteringParameterSet> paramSets = new ArrayList<MSMSClusteringParameterSet>();
 		String query = 
 				"SELECT PAR_SET_ID, PAR_SET_XML,  "
-				+ "PAR_SET_MD5 FROM MSMS_CLUSTERING_PARAMETERS_XML  " 
+				+ "PAR_SET_MD5 FROM MSMS_CLUSTERING_PARAMETERS_XML " 
 				+ "ORDER BY PAR_SET_NAME ";
 		PreparedStatement ps = conn.prepareStatement(query);
 		ResultSet rs = ps.executeQuery();
 		while (rs.next()) {
 
 			MSMSClusteringParameterSet parSet = null;
-			String xmlString = rs.getString("PAR_SET_XML");
-			if(xmlString != null && !xmlString.isEmpty())
-				parSet = createMSMSClusteringParameterSetFromXML(xmlString);
-			 
-			if(parSet != null)
-				paramSets.add(parSet);
+			String xmlString = rs.getString("PAR_SET_XML");				
+			parSet = createMSMSClusteringParameterSetFromXML(xmlString);
+			if(parSet != null) {
+				
+				parSet.setMd5(rs.getString("PAR_SET_MD5"));
+				paramSets.add(parSet);			
+			}
 			else
 				System.err.println("Could not recreate MSMSClusteringParameterSet "
 						+ "for ID " + rs.getString("PAR_SET_ID"));
@@ -655,10 +656,18 @@ public class MSMSClusteringDBUtils {
 				
 		MSMSClusterDataSetManager.refreshMsmsClusteringParameters();
 		MSMSClusteringParameterSet parSet = 
-				MSMSClusterDataSetManager.getMsmsClusteringParameterSetById(dataSet.getParameters().getId());
+				MSMSClusterDataSetManager.getMsmsClusteringParameterSetById(
+						dataSet.getParameters().getId());
+		if(parSet == null)
+			parSet = MSMSClusterDataSetManager.getMsmsClusteringParameterSetByMd5(
+					dataSet.getParameters().getMd5());
+			
 		if(parSet == null) {
 			addMSMSClusteringParameterSet(parSet, conn);
 			MSMSClusterDataSetManager.getMsmsClusteringParameters().add(parSet);
+			dataSet.setParameters(parSet);
+		}
+		else {
 			dataSet.setParameters(parSet);
 		}
 		String newId = SQLUtils.getNextIdFromSequence(conn, 
@@ -779,6 +788,7 @@ public class MSMSClusteringDBUtils {
 				MSMSClusteringParameterSetFields.MSMSClusteringParameterSet.name());
 		if(paramsElement == null)
 			return null;
+		
 		String emet = paramsElement.getAttributeValue(
 				MSMSClusteringParameterSetFields.EntropyScoreMassErrorType.name());
 		if(emet == null) {

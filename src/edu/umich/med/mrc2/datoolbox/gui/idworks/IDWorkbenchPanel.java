@@ -1907,11 +1907,6 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 				featureVsFeatureMSMSSearchSetupDialog.getSelectedFeatureCollection();
 		MSMSSearchParameterSet searchParameters =  
 				featureVsFeatureMSMSSearchSetupDialog.getMSMSSearchParameters();
-		MSMSClusteringParameterSet existingParamSet = 
-				MSMSClusterDataSetManager.getMsmsClusteringParameterSetByMd5(searchParameters.getMd5());
-		if(existingParamSet != null)
-			searchParameters = (MSMSSearchParameterSet)existingParamSet;
-		
 		featureVsFeatureMSMSSearchSetupDialog.dispose();
 		
 		FeatureVsFeatureMSMSSearchTask task = 
@@ -3794,6 +3789,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 				finalizeFeatureVsFeatureMSMSSearchTask((FeatureVsFeatureMSMSSearchTask)e.getSource());		
 		}
 		if (e.getStatus() == TaskStatus.CANCELED || e.getStatus() == TaskStatus.ERROR) {
+			((AbstractTask) e.getSource()).removeTaskListener(this);
 			MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
 			MainWindow.hideProgressDialog();
 		}
@@ -3801,19 +3797,25 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 
 	private void finalizeFeatureVsFeatureMSMSSearchTask(FeatureVsFeatureMSMSSearchTask task) {
 
-		MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
-		MainWindow.hideProgressDialog();		
+		MainWindow.hideProgressDialog();
 		IMSMSClusterDataSet featureVsFeatureSearchResults = task.getSearchResults();
-		
 		if(featureVsFeatureSearchResults == null 
 				|| featureVsFeatureSearchResults.getClusters().isEmpty()) {
 			
 			MessageDialog.showWarningMsg("No matches found.", this.getContentPane());
 			return;
-		}
-		loadMSMSClusterDataSetInGUI(featureVsFeatureSearchResults);
+		}	
+		MRC2ToolBoxCore.getTaskController().getTaskQueue().removeTask(task);
+		
+		LoadMSMSClusterDataSetInGUITask ldt = 
+				new LoadMSMSClusterDataSetInGUITask(featureVsFeatureSearchResults);
+    	IndeterminateProgressDialog idp = new IndeterminateProgressDialog(
+    			"Loading results ...", 
+    			IDWorkbenchPanel.this.getContentPane(), ldt);
+    	idp.setLocationRelativeTo(IDWorkbenchPanel.this.getContentPane());
+    	idp.setVisible(true);
 	}
-
+	
 	private void finalizeMzFrequencyAnalysisTask(MzFrequencyAnalysisTask task) {
 
 		Collection<MzFrequencyObject>mzFrequencyObjects = task.getMzFrequencyObjects();
@@ -3885,6 +3887,28 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 					getMsmsClusterDataSets().add(source.getMsmsClusterDataSet());
 		
 		loadMSMSClusterDataSetInGUI(source.getMsmsClusterDataSet());
+	}
+		
+	class LoadMSMSClusterDataSetInGUITask extends LongUpdateTask {
+
+		private IMSMSClusterDataSet dataSet;
+		
+		public LoadMSMSClusterDataSetInGUITask(IMSMSClusterDataSet dataSet) {
+			this.dataSet = dataSet;
+		}
+
+		@Override
+		public Void doInBackground() {
+			
+			loadMSMSClusterDataSetInGUI(dataSet);			
+			return null;
+		}
+		
+//		@Override
+//		public void done() {
+//			
+//			super.done();
+//		}
 	}
 	
 	private void loadMSMSClusterDataSetInGUI(IMSMSClusterDataSet dataSet) {

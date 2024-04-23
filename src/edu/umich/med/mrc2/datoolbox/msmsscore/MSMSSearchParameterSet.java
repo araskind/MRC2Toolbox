@@ -168,10 +168,10 @@ public class MSMSSearchParameterSet extends MSMSClusteringParameterSet{
 		
 		super(xmlElement);
 			
-		ignoreParentIon = Boolean.getBoolean(
+		ignoreParentIon = Boolean.parseBoolean(
 				xmlElement.getAttributeValue(
 						MSMSClusteringParameterSetFields.IgnoreParent.name()));
-		ignoreRt = Boolean.getBoolean(
+		ignoreRt = Boolean.parseBoolean(
 				xmlElement.getAttributeValue(
 						MSMSClusteringParameterSetFields.IgnoreRetention.name()));
 		entropyScoreMassError = Double.parseDouble(
@@ -188,7 +188,9 @@ public class MSMSSearchParameterSet extends MSMSClusteringParameterSet{
 				xmlElement.getAttributeValue(
 						MSMSClusteringParameterSetFields.MSMSSearchDirection.name()));
 
-		md5 = MSMSClusteringUtils.calculateMSMSSearchParametersMd5(this);
+		md5 = xmlElement.getAttributeValue(MSMSClusteringParameterSetFields.MD5.name());
+		if(md5 == null || md5.isEmpty())			
+			md5 = MSMSClusteringUtils.calculateClusteringParametersMd5(this);
 	}
 
 	public MSMSSearchDirection getMsmsSearchDirection() {

@@ -106,12 +106,12 @@
 										<fullscreen-action>false</fullscreen-action>
 										<node nodeId="1697239277915" orientation="VERTICAL" divider="0.6246741963509991">
 											<node nodeId="1697239315478" orientation="VERTICAL" divider="0.7447698744769876">
-												<leaf id="3" nodeId="1600213792571">
+												<leaf id="0" nodeId="1600213792571">
 													<placeholders>
 														<placeholder>dock.single.FeatureDataPanelDockableFeatureDataTable</placeholder>
 													</placeholders>
 												</leaf>
-												<leaf id="0" nodeId="1697239277913">
+												<leaf id="3" nodeId="1697239277913">
 													<placeholders>
 														<placeholder>dock.single.FeatureDataPanelUniversalIdentificationResultsTable</placeholder>
 													</placeholders>
@@ -204,10 +204,10 @@
 							</adjacent>
 							<children ignore="false">
 								<child>
-									<layout factory="predefined" placeholder="dock.single.FeatureDataPanelUniversalIdentificationResultsTable">
-										<replacement id="dockablesingle FeatureDataPanelUniversalIdentificationResultsTable"/>
+									<layout factory="predefined" placeholder="dock.single.FeatureDataPanelDockableFeatureDataTable">
+										<replacement id="dockablesingle FeatureDataPanelDockableFeatureDataTable"/>
 										<delegate id="delegate_ccontrol backup factory id">
-											<id>FeatureDataPanelUniversalIdentificationResultsTable</id>
+											<id>FeatureDataPanelDockableFeatureDataTable</id>
 											<area/>
 										</delegate>
 									</layout>
@@ -409,10 +409,10 @@
 									</children>
 								</child>
 								<child>
-									<layout factory="predefined" placeholder="dock.single.FeatureDataPanelDockableFeatureDataTable">
-										<replacement id="dockablesingle FeatureDataPanelDockableFeatureDataTable"/>
+									<layout factory="predefined" placeholder="dock.single.FeatureDataPanelUniversalIdentificationResultsTable">
+										<replacement id="dockablesingle FeatureDataPanelUniversalIdentificationResultsTable"/>
 										<delegate id="delegate_ccontrol backup factory id">
-											<id>FeatureDataPanelDockableFeatureDataTable</id>
+											<id>FeatureDataPanelUniversalIdentificationResultsTable</id>
 											<area/>
 										</delegate>
 									</layout>

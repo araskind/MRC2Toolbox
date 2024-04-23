@@ -24,7 +24,8 @@ package edu.umich.med.mrc2.datoolbox.taskcontrol;
 public interface Task extends Runnable {
 
 	public void addTaskListener(TaskListener t);
-
+	public void removeTaskListener(TaskListener t);
+	
 	/**
 	 * Cancel a running task by user request.
 	 */

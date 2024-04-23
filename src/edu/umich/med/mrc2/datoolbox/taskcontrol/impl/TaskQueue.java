@@ -27,6 +27,7 @@ import java.util.Hashtable;
 import javax.swing.table.AbstractTableModel;
 
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskListener;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskPriority;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.gui.LabeledProgressBar;
@@ -93,9 +94,24 @@ public class TaskQueue extends AbstractTableModel {
 	}
 
 	public synchronized void clear() {
+
+		//	removeAllTaskListeners();
 		size = 0;
 		queue = new WrappedTask[DEFAULT_CAPACITY];
 		fireTableDataChanged();
+	}
+	
+	public synchronized void removeAllTaskListeners(){
+		
+		for (WrappedTask wrappedTask :getQueueSnapshot()) {
+
+			if(wrappedTask != null) {
+				
+				Task task = wrappedTask.getActualTask();				
+				for(TaskListener l : task.getTaskListeners())
+					task.removeTaskListener(l);
+			}
+		}
 	}
 
 	public synchronized void clearFinished() {

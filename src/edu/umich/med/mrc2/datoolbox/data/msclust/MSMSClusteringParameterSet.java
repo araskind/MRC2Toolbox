@@ -184,6 +184,8 @@ public class MSMSClusteringParameterSet {
 		msmsClusteringParameterSetElement.setAttribute(
 				MSMSClusteringParameterSetFields.MSMSSimilarityCutoff.name(), 
 				Double.toString(msmsSimilarityCutoff));
+		msmsClusteringParameterSetElement.setAttribute(
+				MSMSClusteringParameterSetFields.MD5.name(), md5);
 		
 		return msmsClusteringParameterSetElement;
 	}
@@ -192,7 +194,7 @@ public class MSMSClusteringParameterSet {
 				
 		id = xmlElement.getAttributeValue(MSMSClusteringParameterSetFields.Id.name());
 		name = xmlElement.getAttributeValue(MSMSClusteringParameterSetFields.Name.name());
-		if(name.isEmpty())
+		if(name == null || name.isEmpty())
 			name = null;
 		
 		mzErrorValue = Double.parseDouble(
@@ -208,7 +210,9 @@ public class MSMSClusteringParameterSet {
 				xmlElement.getAttributeValue(
 						MSMSClusteringParameterSetFields.MSMSSimilarityCutoff.name()));
 
-		md5 = MSMSClusteringUtils.calculateClusteringParametersMd5(this);
+		md5 = xmlElement.getAttributeValue(MSMSClusteringParameterSetFields.MD5.name());
+		if(md5 == null || md5.isEmpty())			
+			md5 = MSMSClusteringUtils.calculateClusteringParametersMd5(this);
 	}
 }
 

@@ -172,7 +172,7 @@ public class TaskControllerImpl implements TaskController, Runnable {
 		int previousQueueSize = -1;
 
 		while (true) {
-
+			
 			int currentQueueSize = taskQueue.getNumOfRunningAndWaitingTasks();
 			if (currentQueueSize != previousQueueSize) {
 				previousQueueSize = currentQueueSize;
