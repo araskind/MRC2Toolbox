@@ -59,7 +59,7 @@ import edu.umich.med.mrc2.datoolbox.gui.main.DockableMRC2ToolboxPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainWindow;
 import edu.umich.med.mrc2.datoolbox.gui.main.PanelList;
-import edu.umich.med.mrc2.datoolbox.gui.plot.spectrum.DockableSpectumPlot;
+import edu.umich.med.mrc2.datoolbox.gui.plot.lcms.spectrum.DockableSpectumPlot;
 import edu.umich.med.mrc2.datoolbox.gui.plot.stats.DockableDataPlot;
 import edu.umich.med.mrc2.datoolbox.gui.structure.DockableMolStructurePanel;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicFeatureTable;

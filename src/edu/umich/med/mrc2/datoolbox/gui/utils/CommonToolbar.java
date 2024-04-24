@@ -25,7 +25,10 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ActionListener;
+import java.util.HashSet;
+import java.util.Set;
 
+import javax.swing.AbstractButton;
 import javax.swing.BoxLayout;
 import javax.swing.JToolBar;
 
@@ -40,6 +43,7 @@ public abstract class CommonToolbar extends JToolBar {
 	private static final long serialVersionUID = -2082413025910340358L;
 	public static final Dimension buttonDimension = new Dimension(35, 35);
 	protected ActionListener commandListener;
+	protected Set<AbstractButton>buttonSet;
 
 	public CommonToolbar(ActionListener commandListener) {
 
@@ -51,6 +55,19 @@ public abstract class CommonToolbar extends JToolBar {
 		setFloatable(false);
 		setBackground(Color.LIGHT_GRAY);
 		setAlignmentX(Component.LEFT_ALIGNMENT);
+		buttonSet = new HashSet<AbstractButton>();
+	}
+	
+	public void addNewActionListener(ActionListener newActionListener) {
+		
+		for(AbstractButton b : buttonSet)
+			b.addActionListener(newActionListener);
+	}
+	
+	public void removeExistingActionListener(ActionListener existingActionListener) {
+		
+		for(AbstractButton b : buttonSet)
+			b.removeActionListener(existingActionListener);
 	}
 
 	public abstract void updateGuiFromExperimentAndDataPipeline(

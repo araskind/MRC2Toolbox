@@ -69,11 +69,12 @@ public class MultiPanelDataPlotToolbar extends PlotToolbar implements ActionList
 	private JButton colorOptionButton;
 	private JButton sidePanelButton;
 	
-	public MultiPanelDataPlotToolbar(MultiPanelDataPlot plot, ActionListener secondaryListener) {
+	public MultiPanelDataPlotToolbar(
+			MultiPanelDataPlot plot, 
+			ActionListener secondaryListener) {
 
 		super(plot);
 		this.plot = plot;
-		this.plot.setToolbar(this);
 		xAxisUnits = "design";
 
 		createLegendToggle();

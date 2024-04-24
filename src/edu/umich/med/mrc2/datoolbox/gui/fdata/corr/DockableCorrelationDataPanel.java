@@ -147,7 +147,6 @@ public class DockableCorrelationDataPanel extends DefaultSingleCDockable {
 
 		corrPlot = new CorrelationPlotPanel();
 		corrPlotToolbar = new CorrelationPlotToolbar(corrPlot);
-		corrPlot.setToolbar(corrPlotToolbar);
 		wrapper.add(corrPlot);
 
 		add(corrPlotToolbar, BorderLayout.NORTH);

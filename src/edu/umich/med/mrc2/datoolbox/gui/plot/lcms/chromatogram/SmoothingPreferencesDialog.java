@@ -19,7 +19,7 @@
  *
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.gui.plot.chromatogram;
+package edu.umich.med.mrc2.datoolbox.gui.plot.lcms.chromatogram;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;

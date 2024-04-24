@@ -19,7 +19,7 @@
  *
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.gui.plot;
+package edu.umich.med.mrc2.datoolbox.gui.plot.lcms;
 
 import java.awt.Color;
 import java.awt.Graphics;
@@ -68,7 +68,11 @@ import edu.umich.med.mrc2.datoolbox.data.ExtractedIonData;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureChromatogramBundle;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortDirection;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
-import edu.umich.med.mrc2.datoolbox.gui.plot.chromatogram.SmoothingPreferencesDialog;
+import edu.umich.med.mrc2.datoolbox.gui.plot.MasterPlotPanel;
+import edu.umich.med.mrc2.datoolbox.gui.plot.PlotType;
+import edu.umich.med.mrc2.datoolbox.gui.plot.lcms.chromatogram.ChromatogramRenderingType;
+import edu.umich.med.mrc2.datoolbox.gui.plot.lcms.chromatogram.SmoothingPreferencesDialog;
+import edu.umich.med.mrc2.datoolbox.gui.plot.lcms.spectrum.MSReferenceDisplayType;
 import edu.umich.med.mrc2.datoolbox.gui.plot.renderer.ContinuousCromatogramRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.plot.renderer.DefaultSplineRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.plot.renderer.FilledChromatogramRenderer;
@@ -88,7 +92,7 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = -752801915848372103L;
+	protected static final long serialVersionUID = -752801915848372103L;
 
 	protected PlotType plotType = null;
 	protected ValueMarker retentionMarker;
@@ -219,7 +223,7 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 	}
 	
 	
-	private void smoothChromatograms() {
+	protected void smoothChromatograms() {
 
 		if(plotType.equals(PlotType.SPECTRUM))
 			return;
@@ -230,20 +234,20 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 		}
 		smoothChromatogram = true;	
 		redrawChromatograms(chromatogramRenderingType);
-		toolbar.toggleSmoothingIcon(smoothChromatogram);
+		//	toolbar.toggleSmoothingIcon(smoothChromatogram);
 	}
 
-	private void showRawChromatograms() {
+	protected void showRawChromatograms() {
 
 		if(plotType.equals(PlotType.SPECTRUM))
 			return;
 		
 		smoothChromatogram = false;
 		redrawChromatograms(chromatogramRenderingType);		
-		toolbar.toggleSmoothingIcon(smoothChromatogram);
+		//	toolbar.toggleSmoothingIcon(smoothChromatogram);
 	}
 
-	private void showChromatogramSmoothingPreferences() {
+	protected void showChromatogramSmoothingPreferences() {
 		// TODO Auto-generated method stub
 		if(plotType.equals(PlotType.SPECTRUM))
 			return;
@@ -253,7 +257,7 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 		smoothingPreferencesDialog.setVisible(true);
 	}
 
-	private void saveChromatogramSmoothingPreferences() {
+	protected void saveChromatogramSmoothingPreferences() {
 
 		if(plotType.equals(PlotType.SPECTRUM))
 			return;
@@ -280,7 +284,7 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 		numberOfDataSets++;
 	}
 
-	private void drawMarkerRectangle(Graphics2D g2, boolean xor) {
+	protected void drawMarkerRectangle(Graphics2D g2, boolean xor) {
 
 		if (this.markerRectangle != null) {
 			
@@ -336,7 +340,7 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 		return domainMarker.getStartValue();
 	}
 
-	private Point2D getMarkerStartPoint(int x, int y, Rectangle2D area) {
+	protected Point2D getMarkerStartPoint(int x, int y, Rectangle2D area) {
 		double xx = Math.max(area.getMinX(), Math.min(x, area.getMaxX()));
 		double yy = Math.max(area.getMinY(), Math.min(y, area.getMaxY()));
 		return new Point2D.Double(xx, yy);
@@ -351,7 +355,7 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 		return plotType;
 	}
 
-	private Double getPosition(MouseEvent e) {
+	protected Double getPosition(MouseEvent e) {
 		Point2D p = translateScreenToJava2D(e.getPoint());
 		Rectangle2D plotArea = getScreenDataArea();
 		XYPlot plot = (XYPlot) chart.getPlot();
@@ -436,7 +440,7 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 		plot.addDomainMarker(domainMarker, Layer.BACKGROUND);
 	}
 
-	private void initRendererForPlotType() {
+	protected void initRendererForPlotType() {
 
 		if (plotType.equals(PlotType.SPECTRUM)) {			
 			defaultMsRenderer = createMassSpectrumRenderer();
@@ -445,6 +449,10 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 			
 			filledChromatogramRenderer = new FilledChromatogramRenderer();
 			filledChromatogramRenderer.setPlotShapes(dataPointsVisible);
+			filledChromatogramRenderer.setDefaultShape(
+					FilledChromatogramRenderer.dataPointsShape);
+			filledChromatogramRenderer.setDefaultLegendShape(
+					FilledChromatogramRenderer.dataPointsShape);
 			
 			linesChromatogramRenderer = new FilledChromatogramRenderer(
 					FilledChromatogramRenderer.SHAPES_AND_LINES);
@@ -456,6 +464,8 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 			
 			splineRenderer = new DefaultSplineRenderer();
 			((XYSplineRenderer)splineRenderer).setDefaultShapesVisible(dataPointsVisible);
+			splineRenderer.setDefaultShape(
+					DefaultSplineRenderer.dataPointsShape);
 		}
 	}
 	
@@ -525,7 +535,7 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 		}
 	}
 	
-	private void setInvizibleMarkers() {
+	protected void setInvizibleMarkers() {
 		
 		if(markerRectangle == null) {
 			zeroMarkers();
@@ -546,7 +556,7 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 		domainMarker.setEndValue(Math.max(startPoint.getX(), endPoint.getX()));
 	}
 	
-	private void zeroMarkers() {
+	protected void zeroMarkers() {
 		
 		domainMarker.setStartValue(0.0d);
 		domainMarker.setEndValue(0.0d);
@@ -639,7 +649,7 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 		adjustRange();
 	}
 	
-	private void adjustRange() {
+	protected void adjustRange() {
 		
         org.jfree.data.Range r = 
         		((ValueAxisPlot) plot).getDataRange(plot.getRangeAxis()); 
@@ -701,11 +711,11 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 		this.markerStart = markerStart;
 	}
 
-	@Override
-	public void setToolbar(PlotToolbar toolbar) {
-
-		this.toolbar = toolbar;
-	}
+//	@Override
+//	public void setToolbar(PlotToolbar toolbar) {
+//
+//		this.toolbar = toolbar;
+//	}
 
 	public void toggleDataPoints() {
 		
@@ -724,7 +734,7 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 				renderer.setPlotShapes(dataPointsVisible);
 			}
 		}
-		toolbar.toggleDataPointsIcon(dataPointsVisible);
+//		toolbar.toggleDataPointsIcon(dataPointsVisible);
 	}
 	
 	@Override

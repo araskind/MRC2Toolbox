@@ -36,7 +36,7 @@ import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.ExtractedChromatogram;
 import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
 import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
-import edu.umich.med.mrc2.datoolbox.gui.plot.chromatogram.ChromatogramPlotMode;
+import edu.umich.med.mrc2.datoolbox.gui.plot.lcms.chromatogram.ChromatogramPlotMode;
 import edu.umich.med.mrc2.datoolbox.gui.rawdata.xic.ChromatogramExtractionType;
 import edu.umich.med.mrc2.datoolbox.gui.utils.ColorUtils;
 import edu.umich.med.mrc2.datoolbox.main.RawDataManager;

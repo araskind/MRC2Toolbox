@@ -73,6 +73,7 @@ public class TwoDimQCPlot extends MasterPlotPanel implements ItemListener, Contr
 	private Collection<DataFileStatisticalSummary> dataSetStats;
 	private Plot activePlot;
 	private DataPlotControlsPanel dataPlotControlsPanel;
+	private TwoDqcPlotToolbar toolbar;
 
 	public TwoDimQCPlot() {
 		super();
@@ -217,8 +218,6 @@ public class TwoDimQCPlot extends MasterPlotPanel implements ItemListener, Contr
 
 		if (activePlot instanceof XYPlot)
 			((XYPlot) activePlot).getRenderer().setDefaultItemLabelsVisible(annotationsVisible);
-				
-		toolbar.toggleAnnotationsIcon(annotationsVisible);
 	}
 
 	@SuppressWarnings("unused")
@@ -227,9 +226,7 @@ public class TwoDimQCPlot extends MasterPlotPanel implements ItemListener, Contr
 		dataPointsVisible = !dataPointsVisible;
 
 		if (activePlot instanceof XYPlot) 			
-			((XYLineAndShapeRenderer)((XYPlot) activePlot).getRenderer()).setDefaultShapesVisible(dataPointsVisible);		
-		
-		toolbar.toggleDataPointsIcon(dataPointsVisible);
+			((XYLineAndShapeRenderer)((XYPlot) activePlot).getRenderer()).setDefaultShapesVisible(dataPointsVisible);				
 	}
 	
 	@Override
@@ -384,10 +381,13 @@ public class TwoDimQCPlot extends MasterPlotPanel implements ItemListener, Contr
 			chart.addLegend(legend);
 			legendVisible = true;
 		}
-		toolbar.toggleLegendIcon(legendVisible);
 	}	
 
 	public void setDataPlotControlsPanel(DataPlotControlsPanel dataPlotControlsPanel) {
 		this.dataPlotControlsPanel = dataPlotControlsPanel;
+	}
+
+	public void setToolbar(TwoDqcPlotToolbar toolbar) {
+		this.toolbar = toolbar;
 	}
 }

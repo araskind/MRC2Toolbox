@@ -74,7 +74,5 @@ public class ManualIntegrationToolbar extends PlotToolbar {
 		toggleLegendIcon(parentPlot.isLegendVisible());
 		toggleAnnotationsIcon(parentPlot.areAnnotationsVisible());
 		toggleDataPointsIcon(parentPlot.areDataPointsVisible());
-		
-		parentPlot.setToolbar(this);
 	}
 }

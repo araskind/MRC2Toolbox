@@ -19,13 +19,37 @@
  *
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.gui.plot.spectrum;
+package edu.umich.med.mrc2.datoolbox.gui.plot.lcms.spectrum;
 
-public enum MsPlotType {
+public enum MSReferenceDisplayType {
 
-	Raw,
-	Normalized,
-	HeadToTale,
-	Difference,
+	HEAD_TO_HEAD("Overlay"),
+	HEAD_TO_TAIL("head-to-tail"),
+	DIFFERENCE("Difference"),
 	;
+	
+	private final String uiName;
+
+	MSReferenceDisplayType(String uiName) {
+		this.uiName = uiName;
+	}
+
+	public String getName() {	
+		return uiName;
+	}
+	
+	@Override
+	public String toString() {		
+		return uiName;
+	}
+	
+	public static MSReferenceDisplayType getOptionByName(String optionName) {
+
+		for(MSReferenceDisplayType o : MSReferenceDisplayType.values()) {
+
+			if(o.name().equals(optionName))
+				return o;
+		}
+		return null;
+	}
 }

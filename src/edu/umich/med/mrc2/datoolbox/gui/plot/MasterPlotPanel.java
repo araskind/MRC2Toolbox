@@ -54,6 +54,8 @@ import org.jfree.chart.ui.Layer;
 import org.jfree.chart.ui.RectangleEdge;
 import org.jfree.chart.ui.RectangleInsets;
 
+import edu.umich.med.mrc2.datoolbox.gui.plot.lcms.LCMSPlotPanel;
+
 public abstract class MasterPlotPanel extends ChartPanel{
 
 	/**
@@ -105,7 +107,7 @@ public abstract class MasterPlotPanel extends ChartPanel{
 	protected boolean legendVisible;
 	protected int numberOfDataSets = 0;
 	protected LegendTitle legend;
-	protected PlotToolbar toolbar;
+	//	protected PlotToolbar toolbar;
 	protected Paint[] paintArray;
 	protected Shape[] shapeArray;
 
@@ -288,9 +290,9 @@ public abstract class MasterPlotPanel extends ChartPanel{
 	 * @param toolbar
 	 *            the toolbar to set
 	 */
-	public void setToolbar(PlotToolbar toolbar) {
-		this.toolbar = toolbar;
-	}
+//	public void setToolbar(PlotToolbar toolbar) {
+//		this.toolbar = toolbar;
+//	}
 
 	public void toggleLegend() {
 
@@ -302,7 +304,7 @@ public abstract class MasterPlotPanel extends ChartPanel{
 			chart.addLegend(legend);
 			legendVisible = true;
 		}
-		toolbar.toggleLegendIcon(legendVisible);
+		//	toolbar.toggleLegendIcon(legendVisible);
 	}
 
 	public Paint getSeriesPaint(int series) {
@@ -323,7 +325,7 @@ public abstract class MasterPlotPanel extends ChartPanel{
 		for (int i = 0; i < plot.getDatasetCount(); i++)
 			plot.getRenderer(i).setDefaultItemLabelsVisible(annotationsVisible);
 
-		toolbar.toggleAnnotationsIcon(annotationsVisible);
+		//	toolbar.toggleAnnotationsIcon(annotationsVisible);
 	}
 
 	public static Color getColor(int seriesNumber) {

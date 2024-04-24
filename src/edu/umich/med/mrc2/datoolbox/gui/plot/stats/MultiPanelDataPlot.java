@@ -92,6 +92,7 @@ public class MultiPanelDataPlot extends MasterPlotPanel implements ActionListene
 
 	protected DataPlotControlsPanel dataPlotControlsPanel;
 	protected TwoDimFeatureDataPlotParameterObject plotParameters;
+	private MultiPanelDataPlotToolbar toolbar;
 
 	public MultiPanelDataPlot() {
 
@@ -601,7 +602,6 @@ public class MultiPanelDataPlot extends MasterPlotPanel implements ActionListene
 					subPlot.getRenderer(i).setDefaultItemLabelsVisible(annotationsVisible);
 			}
 		}
-		toolbar.toggleAnnotationsIcon(annotationsVisible);
 	}
 
 	@SuppressWarnings({ "unchecked" })
@@ -622,7 +622,6 @@ public class MultiPanelDataPlot extends MasterPlotPanel implements ActionListene
 					 ((XYLineAndShapeRenderer)subPlot.getRenderer(i)).setDefaultShapesVisible(dataPointsVisible);
 			}
 		}
-		toolbar.toggleDataPointsIcon(dataPointsVisible);
 	}
 
 	@Override
@@ -649,7 +648,6 @@ public class MultiPanelDataPlot extends MasterPlotPanel implements ActionListene
 			chart.addLegend(legend);
 			legendVisible = true;
 		}
-		toolbar.toggleLegendIcon(legendVisible);
 	}
 	
 	public void updatePlotType() {
@@ -684,5 +682,9 @@ public class MultiPanelDataPlot extends MasterPlotPanel implements ActionListene
 
 	public void setDataPlotControlsPanel(DataPlotControlsPanel dataPlotControlsPanel) {
 		this.dataPlotControlsPanel = dataPlotControlsPanel;
+	}
+
+	public void setToolbar(MultiPanelDataPlotToolbar toolbar) {
+		this.toolbar = toolbar;
 	}
 }

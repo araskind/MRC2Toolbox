@@ -76,7 +76,7 @@ public class TwoDqcPlotToolbar extends PlotToolbar implements ActionListener, It
 
 		super(plot);
 		this.plot = plot;
-		this.plot.setToolbar(this);
+		//this.plot.setToolbar(this);
 		xAxisUnits = "design";
 
 		createLegendToggle();

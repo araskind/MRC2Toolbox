@@ -25,23 +25,26 @@ import java.util.Arrays;
 
 import edu.umich.med.mrc2.datoolbox.data.MassSpectrum;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
+import edu.umich.med.mrc2.datoolbox.data.MsFeaturePair;
 import edu.umich.med.mrc2.datoolbox.data.MsMsLibraryFeature;
 import edu.umich.med.mrc2.datoolbox.data.TandemMassSpectrum;
+import edu.umich.med.mrc2.datoolbox.data.enums.MsDepth;
+import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
 
-public class HeadToTaleMsDataSet  extends MsDataSet {
+public class HeadToTailMsDataSet  extends MsDataSet {
 
 	/**
 	 *
 	 */
 	private static final long serialVersionUID = 6793905715141166824L;
 	
-	public HeadToTaleMsDataSet() {
+	public HeadToTailMsDataSet() {
 		super();
 		isNormalized = true;
 	}
 
-	public HeadToTaleMsDataSet(
+	public HeadToTailMsDataSet(
 			MsFeature feature, 
 			MsFeature reference) {
 
@@ -60,7 +63,7 @@ public class HeadToTaleMsDataSet  extends MsDataSet {
 	}
 
 	//TandemMassSpectrum
-	public HeadToTaleMsDataSet(
+	public HeadToTailMsDataSet(
 			TandemMassSpectrum unk, 
 			TandemMassSpectrum reference) {
 
@@ -75,7 +78,7 @@ public class HeadToTaleMsDataSet  extends MsDataSet {
 		}
 	}
 
-	public HeadToTaleMsDataSet(
+	public HeadToTailMsDataSet(
 			TandemMassSpectrum instrumentSpectrum, 
 			MsMsLibraryFeature reference) {
 
@@ -88,6 +91,41 @@ public class HeadToTaleMsDataSet  extends MsDataSet {
 			labels.put(1, reference.getUserFriendlyId());
 			finalizeDataSet();
 		}
+	}
+	
+	public HeadToTailMsDataSet(
+			MsFeaturePair featurePair, 
+			MsDepth msLevel) {
+		this();		
+		//	TODO deal in a more elegant way to support MSn?
+		if(msLevel.equals(MsDepth.All) || msLevel.equals(MsDepth.MSn))
+			return;
+		
+		MassSpectrum featureSpectrum = featurePair.getUnknownFeature().getSpectrum();
+		MassSpectrum referenceSpectrum = featurePair.getReferenceFeature().getSpectrum();
+		
+		if(featureSpectrum == null || referenceSpectrum == null)
+			return;			
+			
+		labels.put(0, featurePair.getUnknownFeature().getName());
+		labels.put(1, featurePair.getReferenceFeature().getName());
+		
+		if(msLevel.equals(MsDepth.MS1)){
+
+			msSeriesScaled.put(0, featureSpectrum.getCompleteNormalizedPattern());				
+			msSeriesScaled.put(1, referenceSpectrum.getCompleteNormalizedPattern());			
+		}
+		if(msLevel.equals(MsDepth.MS2)){
+
+			TandemMassSpectrum unkMsms = featureSpectrum.getExperimentalTandemSpectrum();
+			TandemMassSpectrum refMsms = referenceSpectrum.getExperimentalTandemSpectrum();
+			if(unkMsms == null || refMsms == null)
+				return;		
+			
+			msSeriesScaled.put(0, MsUtils.normalizeAndSortMsPattern(unkMsms.getSpectrum()));				
+			msSeriesScaled.put(1, MsUtils.normalizeAndSortMsPattern(refMsms.getSpectrum()));			
+		}
+		finalizeDataSet();
 	}
 	
 	private void finalizeDataSet() {

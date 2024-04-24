@@ -19,10 +19,11 @@
  *
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.gui.plot;
+package edu.umich.med.mrc2.datoolbox.gui.plot.lcms.chromatogram;
 
-public enum MSReferenceDisplayType {
-
-	HEAD_TO_HEAD,
-	HEAD_TO_TAIL;
+public enum ChromatogramRenderingType {
+	Spline,
+	Lines,
+	Filled,
+	;
 }

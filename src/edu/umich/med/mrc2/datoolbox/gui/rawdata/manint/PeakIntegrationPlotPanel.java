@@ -222,7 +222,6 @@ public class PeakIntegrationPlotPanel extends MasterPlotPanel {
 					((FilledChromatogramRenderer)fRenderer).setPlotShapes(dataPointsVisible);
 			}
 		}
-		toolbar.toggleDataPointsIcon(dataPointsVisible);
 	}
 	
 	@Override

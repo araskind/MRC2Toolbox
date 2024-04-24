@@ -19,7 +19,7 @@
  *
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.gui.plot.spectrum;
+package edu.umich.med.mrc2.datoolbox.gui.plot.lcms.spectrum;
 
 import java.util.ArrayList;
 import java.util.Collection;

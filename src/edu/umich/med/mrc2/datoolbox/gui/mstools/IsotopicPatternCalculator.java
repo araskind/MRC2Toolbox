@@ -50,7 +50,7 @@ import bibliothek.gui.dock.common.CGrid;
 import bibliothek.gui.dock.common.theme.ThemeMap;
 import edu.umich.med.mrc2.datoolbox.data.MsPoint;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
-import edu.umich.med.mrc2.datoolbox.gui.plot.spectrum.DockableSpectumPlot;
+import edu.umich.med.mrc2.datoolbox.gui.plot.lcms.spectrum.DockableSpectumPlot;
 import edu.umich.med.mrc2.datoolbox.gui.utils.ChemicalModificationSelector;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.UppercaseDocumentFilter;

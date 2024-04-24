@@ -19,7 +19,7 @@
  *
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.gui.plot.spectrum;
+package edu.umich.med.mrc2.datoolbox.gui.plot.lcms.spectrum;
 
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
@@ -60,12 +60,12 @@ import edu.umich.med.mrc2.datoolbox.data.MsPoint;
 import edu.umich.med.mrc2.datoolbox.data.SimpleMsMs;
 import edu.umich.med.mrc2.datoolbox.data.TandemMassSpectrum;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
-import edu.umich.med.mrc2.datoolbox.gui.plot.LCMSPlotPanel;
-import edu.umich.med.mrc2.datoolbox.gui.plot.LCMSPlotToolbar;
 import edu.umich.med.mrc2.datoolbox.gui.plot.MasterPlotPanel;
 import edu.umich.med.mrc2.datoolbox.gui.plot.PlotType;
-import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.HeadToTaleMsDataSet;
+import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.HeadToTailMsDataSet;
 import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.MsDataSet;
+import edu.umich.med.mrc2.datoolbox.gui.plot.lcms.LCMSPlotPanel;
+import edu.umich.med.mrc2.datoolbox.gui.plot.lcms.LCMSPlotToolbar;
 import edu.umich.med.mrc2.datoolbox.gui.plot.renderer.MassSpectrumRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.rawdata.RawDataExaminerPanel;
@@ -95,7 +95,7 @@ public class DockableSpectumPlot extends DefaultSingleCDockable implements Actio
 	private boolean zoomToMSMSPrecursor;
 	private boolean normalizeSpectra;
 	private MsDataSet activeMsDataSet;
-	private MsPlotType msPlotType;
+	private MSReferenceDisplayType msPlotType;
 	private static final double markerSize = 16.0;
 	private static final Shape precursorTopMarker = new Ellipse2D.Double(
 			-markerSize/4.0, -markerSize/4.0, markerSize/2.0, markerSize/2.0);	
@@ -286,7 +286,7 @@ public class DockableSpectumPlot extends DefaultSingleCDockable implements Actio
 		}
 		XYPlot plot = ((XYPlot) spectrumPlot.getPlot());
 		double border  = plot.getDataRange(plot.getRangeAxis()).getUpperBound() * 1.15;
-		if(msDataSet instanceof HeadToTaleMsDataSet) {
+		if(msDataSet instanceof HeadToTailMsDataSet) {
 			
 			((XYPlot) spectrumPlot.getPlot()).getRangeAxis().
 			setRange(new Range(-border, border));
@@ -468,9 +468,9 @@ public class DockableSpectumPlot extends DefaultSingleCDockable implements Actio
 
 		removeAllDataSets();
 		activeMsDataSet = 
-				new HeadToTaleMsDataSet(msms, reference);
+				new HeadToTailMsDataSet(msms, reference);
 		finalizeTandemMsWithReferencePlotSetup(
-				(HeadToTaleMsDataSet) activeMsDataSet, 
+				(HeadToTailMsDataSet) activeMsDataSet, 
 				msms.getNormalisedParentIon(), 
 				reference.getNormalisedParentIon());
 	}
@@ -480,15 +480,15 @@ public class DockableSpectumPlot extends DefaultSingleCDockable implements Actio
 			MsMsLibraryFeature libFeature) {
 
 		activeMsDataSet = 
-				new HeadToTaleMsDataSet(instrumentSpectrum, libFeature);	
+				new HeadToTailMsDataSet(instrumentSpectrum, libFeature);	
 		finalizeTandemMsWithReferencePlotSetup(
-				(HeadToTaleMsDataSet) activeMsDataSet, 
+				(HeadToTailMsDataSet) activeMsDataSet, 
 				instrumentSpectrum.getNormalisedParentIon(), 
 				libFeature.getNormalisedParentIon());
 	}
 	
 	private void finalizeTandemMsWithReferencePlotSetup(
-			HeadToTaleMsDataSet dataSet,
+			HeadToTailMsDataSet dataSet,
 			MsPoint featureParentIon,
 			MsPoint referenceParentIon) {
 		
@@ -536,12 +536,7 @@ public class DockableSpectumPlot extends DefaultSingleCDockable implements Actio
 		ValueMarker marker = new ValueMarker(0.0d);
 		marker.setPaint(Color.GRAY);
 		plot.addRangeMarker(marker);
-//		spectrumPlot.restoreAutoBounds();
-//
-//		((XYPlot) spectrumPlot.getPlot()).getRangeAxis().
-//			setRange(new Range(
-//					dataSet.getIntensityRange().getMin() * 1.15, 
-//					dataSet.getIntensityRange().getMax() * 1.15));
+		
 		setPlotMargins(dataSet);
 	}
 		

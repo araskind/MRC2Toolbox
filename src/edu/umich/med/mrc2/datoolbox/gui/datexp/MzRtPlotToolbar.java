@@ -33,7 +33,7 @@ import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.plot.PlotToolbar;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 
-public class MzRtPlotToolbar extends PlotToolbar implements ActionListener{
+public class MzRtPlotToolbar extends PlotToolbar{
 
 	/**
 	 *
@@ -68,10 +68,6 @@ public class MzRtPlotToolbar extends PlotToolbar implements ActionListener{
 				buttonDimension);
 		sidePanelButton.addActionListener(this);
 		add(sidePanelButton);
-		
-		parentPlot.setToolbar(this);
-		
-		
 	}
 
 	@Override
@@ -83,7 +79,9 @@ public class MzRtPlotToolbar extends PlotToolbar implements ActionListener{
 			setSidePanelVisible(true);
 		
 		if(command.equals(MainActionCommands.HIDE_CHART_SIDE_PANEL_COMMAND.getName())) 
-			setSidePanelVisible(false);		
+			setSidePanelVisible(false);	
+		
+		super.actionPerformed(e);
 	}
 		
 	private void setSidePanelVisible(boolean b){

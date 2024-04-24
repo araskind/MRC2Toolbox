@@ -1344,6 +1344,8 @@ public enum MainActionCommands {
 	RUN_MZ_FREQUENCY_ANALYSIS_COMMAND("Run M/Z frequency analysis"),
 	SAVE_MZ_FREQUENCY_ANALYSIS_RESULTS_COMMAND("Save M/Z frequency analysis results"),
 	
+	SHOW_MULTISPECTRA_DISPLAY_COMMAND("Show multispectra display dialog"),
+	
 	//	Lookup feature list panel commands
 	SHOW_COMPLETE_LOOKUP_FEATURE_LIST_COMMAND("Show complete lookup feature list"),
 	SHOW_ONLY_MATCHED_LOOKUP_FEATURES_COMMAND("Show only matched lookup features"),

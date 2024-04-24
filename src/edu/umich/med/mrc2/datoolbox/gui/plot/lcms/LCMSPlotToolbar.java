@@ -19,19 +19,24 @@
  *
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.gui.plot;
+package edu.umich.med.mrc2.datoolbox.gui.plot.lcms;
 
 import java.awt.Dimension;
+import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 
 import javax.swing.DefaultComboBoxModel;
-import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 
+import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
+import edu.umich.med.mrc2.datoolbox.gui.plot.PlotToolbar;
+import edu.umich.med.mrc2.datoolbox.gui.plot.PlotType;
+import edu.umich.med.mrc2.datoolbox.gui.plot.lcms.chromatogram.ChromatogramRenderingType;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
+import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 
 /**
  * @author Sasha
@@ -39,50 +44,67 @@ import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
  */
 public class LCMSPlotToolbar extends PlotToolbar implements ItemListener {
 
-	/**
-	 *
-	 */
-	private static final long serialVersionUID = 3326538358094303867L;
-	private PlotType plotType;
-
-	protected static final Icon msHead2tailIcon = GuiUtils.getIcon("msHead2tail", 24);
-	protected static final Icon msHead2headIcon = GuiUtils.getIcon("msHead2head", 24);
+	protected static final long serialVersionUID = 3326538358094303867L;
 	
+	protected PlotType plotType;	
 	protected JButton toggleTailHeadButton;
 	protected JComboBox chromatogramTypeComboBox;
 	protected LCMSPlotPanel parentPlot;
+	protected ActionListener plotTypeSwitchListener;
+		
+	public LCMSPlotToolbar(ActionListener plotTypeSwitchListener) {
+		
+		super(null);
+		this.plotTypeSwitchListener = plotTypeSwitchListener;
+	}
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public LCMSPlotToolbar(LCMSPlotPanel parentPlot, ActionListener plotTypeSwitchListener) {
 
 		super(parentPlot);
 		this.parentPlot = parentPlot;
+		this.plotTypeSwitchListener = plotTypeSwitchListener;
+		
+		initToolbar(parentPlot.getPlotType());
 
-		plotType = parentPlot.getPlotType();
+		toggleLegendIcon(parentPlot.isLegendVisible());
+		toggleAnnotationsIcon(parentPlot.areAnnotationsVisible());
+		toggleDataPointsIcon(parentPlot.areDataPointsVisible());
+	}
+	
+	protected void createToggleTailHeadBlock() {
+		
+		toggleTailHeadButton = GuiUtils.addButton(this, null, msHead2headIcon, plotTypeSwitchListener,
+				LCMSPlotPanel.TOGGLE_MS_HEAD_TO_TAIL_COMMAND, "Reference display type", buttonDimension);
+		toggleTailHeadButton.addActionListener(this);
+		buttonSet.add(toggleTailHeadButton);
+	}
+	
+	protected void initToolbar(PlotType pt) {
+		
+		plotType = pt;
 
-		toggleLabelsButton = GuiUtils.addButton(this, null, labelInactiveIcon, commandListener,
-				LCMSPlotPanel.TOGGLE_ANNOTATIONS_COMMAND, "Hide labels", buttonDimension);
+		createLabelsToggle();
 
 		if (plotType.equals(PlotType.CHROMATOGRAM)) {
 			
+			xAxisUnits = "time";
+			
 			//	Show Chromatogram type selector
 			chromatogramTypeComboBox = new JComboBox<ChromatogramRenderingType>(
-					new DefaultComboBoxModel(ChromatogramRenderingType.values()));			
+					new DefaultComboBoxModel<ChromatogramRenderingType>(
+							ChromatogramRenderingType.values()));			
 			chromatogramTypeComboBox.setMaximumSize(new Dimension(120, 26));			
 			chromatogramTypeComboBox.setSelectedItem(ChromatogramRenderingType.Lines);
 			chromatogramTypeComboBox.addItemListener(this);
 			add(chromatogramTypeComboBox);
 
-			toggleDataPointsButton = GuiUtils.addButton(this, null, dataPointsOffIcon, commandListener,
-					LCMSPlotPanel.TOGGLE_DATA_POINTS_COMMAND, "Show data points", buttonDimension);
-			xAxisUnits = "time";
+			createDataPointsToggle();			
 			createSmoothingBlock();
 		}
 		if (plotType.equals(PlotType.SPECTRUM)) {
 
 			xAxisUnits = "m/z";
-			toggleTailHeadButton = GuiUtils.addButton(this, null, msHead2headIcon, plotTypeSwitchListener,
-					LCMSPlotPanel.TOGGLE_MS_HEAD_TO_TAIL_COMMAND, "Reference display type", buttonDimension);
+			createToggleTailHeadBlock();
 		}
 
 		addSeparator(buttonDimension);
@@ -96,12 +118,45 @@ public class LCMSPlotToolbar extends PlotToolbar implements ItemListener {
 		addSeparator(buttonDimension);
 
 		createServiceBlock();
+	}
+	
+	protected void toggleTailHeadIcon(boolean isHeadToTail) {
 
-		toggleLegendIcon(parentPlot.isLegendVisible());
-		toggleAnnotationsIcon(parentPlot.areAnnotationsVisible());
-		toggleDataPointsIcon(parentPlot.areDataPointsVisible());
+		if(toggleTailHeadButton == null)
+			return;
+		
+		if (toggleTailHeadButton != null) {
 
-		parentPlot.setToolbar(this);
+			if (isHeadToTail) {
+
+				toggleTailHeadButton.setIcon(msHead2tailIcon);
+				toggleTailHeadButton.setToolTipText("Show overlay");
+			} else {
+				toggleTailHeadButton.setIcon(msHead2headIcon);
+				toggleTailHeadButton.setToolTipText("Had-to-tail");
+			}
+		}
+	}
+
+	@Override
+	public void updateGuiFromExperimentAndDataPipeline(
+			DataAnalysisProject experiment, DataPipeline newDataPipeline) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		
+		String command = e.getActionCommand();
+		
+		if(command.equals(LCMSPlotPanel.TOGGLE_MS_HEAD_TO_TAIL_COMMAND) && toggleTailHeadButton != null) {
+			
+			boolean isHeadToTail = 
+					toggleTailHeadButton.getIcon().equals(msHead2tailIcon);
+			toggleTailHeadIcon(isHeadToTail);
+		}
+		super.actionPerformed(e);
 	}
 	
 	public ChromatogramRenderingType getChromatogramRenderingType() {

@@ -34,20 +34,12 @@ public class MzMassDefectPlotToolbar extends PlotToolbar{
 	public MzMassDefectPlotToolbar(DataExplorerPlotPanel parentPlot) {
 
 		super(parentPlot);
-
-//		toggleLabelsButton = GuiUtils.addButton(this, null, labelInactiveIcon, commandListener,
-//				LCMSPlotPanel.TOGGLE_ANNOTATIONS_COMMAND, "Hide labels", buttonDimension);
-//
-//		addSeparator(buttonDimension);
 		
 		createZoomBlock();
 		addSeparator(buttonDimension);
 		createLegendToggle();
 		addSeparator(buttonDimension);
 		createServiceBlock();
-//		toggleLegendIcon(parentPlot.isLegendVisible());
-//		toggleAnnotationsIcon(parentPlot.areAnnotationsVisible());
-		parentPlot.setToolbar(this);
 	}
 }
 

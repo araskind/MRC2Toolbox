@@ -51,13 +51,13 @@ public class Dockable2DQCPanel extends DefaultSingleCDockable implements ActionL
 		super(id, componentIcon, title, null, Permissions.MIN_MAX_STACK);
 		setCloseable(false);
 		setLayout(new BorderLayout(0, 0));
-
+		
 		plotPanel = new TwoDimQCPlot();
 		add(plotPanel, BorderLayout.CENTER);
 		
 		toolbar = new TwoDqcPlotToolbar(plotPanel, this);
-		add(toolbar, BorderLayout.NORTH);
 		plotPanel.setToolbar(toolbar);
+		add(toolbar, BorderLayout.NORTH);
 		
 		dataPlotControlsPanel = new DataPlotControlsPanel(plotPanel);
 		add(dataPlotControlsPanel, BorderLayout.EAST);

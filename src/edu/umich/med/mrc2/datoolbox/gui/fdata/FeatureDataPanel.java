@@ -103,7 +103,7 @@ import edu.umich.med.mrc2.datoolbox.gui.main.MainWindow;
 import edu.umich.med.mrc2.datoolbox.gui.main.PanelList;
 import edu.umich.med.mrc2.datoolbox.gui.mzfreq.MzFrequencyAnalysisResultsDialog;
 import edu.umich.med.mrc2.datoolbox.gui.mzfreq.MzFrequencyAnalysisSetupDialog;
-import edu.umich.med.mrc2.datoolbox.gui.plot.spectrum.DockableSpectumPlot;
+import edu.umich.med.mrc2.datoolbox.gui.plot.lcms.spectrum.DockableSpectumPlot;
 import edu.umich.med.mrc2.datoolbox.gui.plot.stats.DockableDataPlot;
 import edu.umich.med.mrc2.datoolbox.gui.structure.DockableMolStructurePanel;
 import edu.umich.med.mrc2.datoolbox.gui.tables.ms.DockableMsTable;

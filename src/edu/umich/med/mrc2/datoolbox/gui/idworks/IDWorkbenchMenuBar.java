@@ -86,7 +86,8 @@ public class IDWorkbenchMenuBar extends CommonMenuBar {
 	private static final Icon clusteringSummaryIcon = GuiUtils.getIcon("summary", 24);
 	private static final Icon mzFrequencyIcon = GuiUtils.getIcon("mzFrequency", 24);
 	private static final Icon binnerLookupIcon = GuiUtils.getIcon("binnerLookupIcon", 24);
-	private static final Icon statsFilteredIcon = GuiUtils.getIcon("calcFilteredStats", 24);	
+	private static final Icon statsFilteredIcon = GuiUtils.getIcon("calcFilteredStats", 24);
+	private static final Icon msmsMultiIcon = GuiUtils.getIcon("msmsMulti", 24);
 	
 	// Menus
 	private JMenu
@@ -146,7 +147,8 @@ public class IDWorkbenchMenuBar extends CommonMenuBar {
 		bubblePlotMenuItem,
 		dataSetSummaryMenuItem,
 		filteredDataSetSummaryMenuItem,
-		mzFrequencyMenuItem;
+		mzFrequencyMenuItem,
+		multispectraDialogMenuItem;
 	
 	//	Export
 	private JMenuItem
@@ -335,6 +337,12 @@ public class IDWorkbenchMenuBar extends CommonMenuBar {
 		mzFrequencyMenuItem = addItem(explorationMenu, 
 				MainActionCommands.SET_UP_MZ_FREQUENCY_ANALYSIS_COMMAND, 
 				mzFrequencyIcon);
+		
+		explorationMenu.addSeparator();
+		
+		multispectraDialogMenuItem = addItem(explorationMenu, 
+				MainActionCommands.SHOW_MULTISPECTRA_DISPLAY_COMMAND, 
+				msmsMultiIcon);
 
 		add(explorationMenu);
 		

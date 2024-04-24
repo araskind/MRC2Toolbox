@@ -33,7 +33,7 @@ import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.plot.PlotToolbar;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 
-public class FeatureHeatchartToolbar extends PlotToolbar implements ActionListener{
+public class FeatureHeatchartToolbar extends PlotToolbar{
 
 	/**
 	 *
@@ -64,8 +64,6 @@ public class FeatureHeatchartToolbar extends PlotToolbar implements ActionListen
 				buttonDimension);
 		sidePanelButton.addActionListener(this);
 		add(sidePanelButton);
-		
-		parentPlot.setToolbar(this);
 	}
 
 	@Override
@@ -78,6 +76,8 @@ public class FeatureHeatchartToolbar extends PlotToolbar implements ActionListen
 		
 		if(command.equals(MainActionCommands.HIDE_CHART_SIDE_PANEL_COMMAND.getName())) 
 			setSidePanelVisible(false);		
+		
+		super.actionPerformed(e);	
 	}
 		
 	private void setSidePanelVisible(boolean b){

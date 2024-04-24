@@ -22,6 +22,7 @@
 package edu.umich.med.mrc2.datoolbox.gui.plot;
 
 import java.awt.Dimension;
+import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -35,11 +36,12 @@ import org.jfree.chart.ChartPanel;
 
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
+import edu.umich.med.mrc2.datoolbox.gui.plot.lcms.LCMSPlotPanel;
 import edu.umich.med.mrc2.datoolbox.gui.utils.CommonToolbar;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 
-public class PlotToolbar extends CommonToolbar {
+public class PlotToolbar extends CommonToolbar implements ActionListener{
 
 	/**
 	 *
@@ -62,15 +64,15 @@ public class PlotToolbar extends CommonToolbar {
 	protected static final Icon savePngIcon = GuiUtils.getIcon("savePng", 24);
 	protected static final Icon savePdfIcon = GuiUtils.getIcon("savePdf", 24);
 	protected static final Icon saveSvgIcon = GuiUtils.getIcon("saveSvg", 24);
-
 	protected static final Icon labelActiveIcon = GuiUtils.getIcon("plotLabelActive", 24);
 	protected static final Icon labelInactiveIcon = GuiUtils.getIcon("plotLabelInactive", 24);
 	protected static final Icon dataPointsOnIcon = GuiUtils.getIcon("chromatogram_dotted", 24);
-	protected static final Icon dataPointsOffIcon = GuiUtils.getIcon("chromatogram", 24);
-	
+	protected static final Icon dataPointsOffIcon = GuiUtils.getIcon("chromatogram", 24);	
 	protected static final Icon smoothingOnIcon = GuiUtils.getIcon("smoothChromatogram", 24);
 	protected static final Icon smoothingOffIcon = GuiUtils.getIcon("rawChromatogram", 24);
-	protected static final Icon smoothingPreferencesIcon = GuiUtils.getIcon("smoothingPreferences", 24);
+	protected static final Icon smoothingPreferencesIcon = GuiUtils.getIcon("smoothingPreferences", 24);	
+	protected static final Icon msHead2tailIcon = GuiUtils.getIcon("msHead2tail", 24);
+	protected static final Icon msHead2headIcon = GuiUtils.getIcon("msHead2head", 24);
 	
 	protected Dimension buttonDimension = new Dimension(28, 28);
 
@@ -98,16 +100,31 @@ public class PlotToolbar extends CommonToolbar {
 
 		toggleLegendButton = GuiUtils.addButton(this, null, hideLegendIcon, commandListener,
 				LCMSPlotPanel.TOGGLE_LEGEND_COMMAND, "Hide legend", buttonDimension);
+		toggleLegendButton.addActionListener(this);
+		buttonSet.add(toggleLegendButton);
 	}
-
+	
+	protected void createLabelsToggle() {
+		
+		toggleLabelsButton = GuiUtils.addButton(this, null, labelInactiveIcon, commandListener,
+				LCMSPlotPanel.TOGGLE_ANNOTATIONS_COMMAND, "Hide labels", buttonDimension);
+		toggleLabelsButton.addActionListener(this);
+		buttonSet.add(toggleLabelsButton);
+	}
+	
+	protected void createDataPointsToggle() {
+		
+		toggleDataPointsButton = GuiUtils.addButton(this, null, dataPointsOffIcon, commandListener,
+				LCMSPlotPanel.TOGGLE_DATA_POINTS_COMMAND, "Show data points", buttonDimension);
+		toggleDataPointsButton.addActionListener(this);
+		buttonSet.add(toggleDataPointsButton);
+	}
+	
 	protected void createServiceBlock() {
 
 		GuiUtils.addButton(this, null, copyIcon, commandListener, ChartPanel.COPY_COMMAND, "Copy graph",
 				buttonDimension);
-
-//		GuiUtils.addButton(this, null, saveIcon, commandListener, ChartPanel.SAVE_COMMAND, "Save graph",
-//				buttonDimension);
-
+		
 		saveAs = new JPopupMenu("Save as");
 
 		saveAsPngMenuItem = GuiUtils.addMenuItem(saveAs,
@@ -168,6 +185,7 @@ public class PlotToolbar extends CommonToolbar {
 		toggleSmoothingButton = GuiUtils.addButton(this, null, smoothingOffIcon, commandListener,
 				MainActionCommands.SMOOTH_CHROMATOGRAM_COMMAND.getName(), 
 				MainActionCommands.SMOOTH_CHROMATOGRAM_COMMAND.getName(), buttonDimension);
+		toggleSmoothingButton.addActionListener(this);
 		
 		smoothingPreferencesButton = GuiUtils.addButton(this, null, smoothingPreferencesIcon, commandListener,
 				MainActionCommands.SHOW_SMOOTHING_PREFERENCES_COMMAND.getName(), 
@@ -191,7 +209,7 @@ public class PlotToolbar extends CommonToolbar {
 		}
 	}
 
-	public void toggleAnnotationsIcon(boolean isAnnotationVisible) {
+	protected void toggleAnnotationsIcon(boolean isAnnotationVisible) {
 
 		if(toggleLabelsButton == null)
 			return;
@@ -206,7 +224,7 @@ public class PlotToolbar extends CommonToolbar {
 		}
 	}
 
-	public void toggleDataPointsIcon(boolean dataPointsVisibleVisible) {
+	protected void toggleDataPointsIcon(boolean dataPointsVisibleVisible) {
 
 		if(toggleDataPointsButton == null)
 			return;
@@ -224,7 +242,7 @@ public class PlotToolbar extends CommonToolbar {
 		}
 	}
 
-	public void toggleLegendIcon(boolean isLegendVisible) {
+	protected void toggleLegendIcon(boolean isLegendVisible) {
 
 		if(toggleLegendButton == null)
 			return;
@@ -248,4 +266,45 @@ public class PlotToolbar extends CommonToolbar {
 		// TODO Auto-generated method stub
 
 	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		
+		String command = e.getActionCommand();
+		
+		if(command.equals(LCMSPlotPanel.TOGGLE_LEGEND_COMMAND) && toggleLegendButton != null) {
+			
+			boolean isLegendVisible = 
+					toggleLegendButton.getIcon().equals(showLegendIcon);
+			toggleLegendIcon(isLegendVisible);
+		}
+		if(command.equals(LCMSPlotPanel.TOGGLE_ANNOTATIONS_COMMAND) && toggleLabelsButton != null) {
+			
+			boolean isAnnotationVisible = 
+					toggleLabelsButton.getIcon().equals(labelActiveIcon);
+			toggleLegendIcon(isAnnotationVisible);
+		}
+		if(command.equals(LCMSPlotPanel.TOGGLE_DATA_POINTS_COMMAND) && toggleLabelsButton != null) {
+		
+			
+			boolean dataPointsVisibleVisible = 
+					toggleDataPointsButton.getIcon().equals(dataPointsOnIcon);
+			toggleDataPointsIcon(dataPointsVisibleVisible);
+		}
+		if(command.equals(MainActionCommands.SHOW_RAW_CHROMATOGRAM_COMMAND.getName())) 
+			toggleSmoothingIcon(false);
+		 
+		if(command.equals(MainActionCommands.SMOOTH_CHROMATOGRAM_COMMAND.getName())) 
+			toggleSmoothingIcon(true);
+		
+		
+	}
 }
+
+
+
+
+
+
+
+

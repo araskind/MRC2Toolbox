@@ -26,7 +26,7 @@ import org.jfree.chart.labels.XYItemLabelGenerator;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.xy.XYDataset;
 
-import edu.umich.med.mrc2.datoolbox.gui.plot.LCMSPlotPanel;
+import edu.umich.med.mrc2.datoolbox.gui.plot.lcms.LCMSPlotPanel;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 
 public class MsLabelGenerator implements XYItemLabelGenerator {

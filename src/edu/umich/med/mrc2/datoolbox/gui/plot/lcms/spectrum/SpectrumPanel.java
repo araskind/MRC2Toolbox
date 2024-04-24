@@ -19,7 +19,7 @@
  *
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.gui.plot.spectrum;
+package edu.umich.med.mrc2.datoolbox.gui.plot.lcms.spectrum;
 
 import java.awt.BorderLayout;
 import java.awt.Graphics;
@@ -33,9 +33,9 @@ import javax.swing.JSplitPane;
 
 import edu.umich.med.mrc2.datoolbox.data.LibraryMsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
-import edu.umich.med.mrc2.datoolbox.gui.plot.LCMSPlotPanel;
-import edu.umich.med.mrc2.datoolbox.gui.plot.LCMSPlotToolbar;
 import edu.umich.med.mrc2.datoolbox.gui.plot.PlotType;
+import edu.umich.med.mrc2.datoolbox.gui.plot.lcms.LCMSPlotPanel;
+import edu.umich.med.mrc2.datoolbox.gui.plot.lcms.LCMSPlotToolbar;
 
 public class SpectrumPanel extends JPanel implements ActionListener {
 

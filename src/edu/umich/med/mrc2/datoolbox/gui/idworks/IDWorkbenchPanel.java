@@ -182,8 +182,9 @@ import edu.umich.med.mrc2.datoolbox.gui.main.PanelList;
 import edu.umich.med.mrc2.datoolbox.gui.main.StatusBar;
 import edu.umich.med.mrc2.datoolbox.gui.mzfreq.MzFrequencyAnalysisResultsDialog;
 import edu.umich.med.mrc2.datoolbox.gui.mzfreq.MzFrequencyAnalysisSetupDialog;
-import edu.umich.med.mrc2.datoolbox.gui.plot.chromatogram.DockableChromatogramPlot;
-import edu.umich.med.mrc2.datoolbox.gui.plot.spectrum.DockableSpectumPlot;
+import edu.umich.med.mrc2.datoolbox.gui.plot.lcms.chromatogram.DockableChromatogramPlot;
+import edu.umich.med.mrc2.datoolbox.gui.plot.lcms.multi.MultipleSpectraDisplayDialog;
+import edu.umich.med.mrc2.datoolbox.gui.plot.lcms.spectrum.DockableSpectumPlot;
 import edu.umich.med.mrc2.datoolbox.gui.rawdata.RawDataExaminerPanel;
 import edu.umich.med.mrc2.datoolbox.gui.rawdata.xic.XICSetupDialog;
 import edu.umich.med.mrc2.datoolbox.gui.structure.DockableMolStructurePanel;
@@ -324,6 +325,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 	private MSMSClusterMZRTListFilterDialog msmsClusterMZRTListFilterDialog;
 	private MzFrequencyAnalysisResultsDialog mzFrequencyAnalysisResultsDialog;
 	private FeatureVsFeatureMSMSSearchSetupDialog featureVsFeatureMSMSSearchSetupDialog;
+	private MultipleSpectraDisplayDialog multipleSpectraDisplayDialog;
 	
 	private static final Icon searchIdTrackerIcon = GuiUtils.getIcon("searchDatabase", 24);
 	private static final Icon searchExperimentIcon = GuiUtils.getIcon("searchIdExperiment", 24);
@@ -921,6 +923,9 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		
 		if (command.equals(MainActionCommands.COPY_CLUSTER_FEATURES_AS_SIRIUS_MS.getName()))
 			copyFeatureClusterMSMS(MsLibraryFormat.SIRIUS_MS);
+		
+		if (command.equals(MainActionCommands.SHOW_MULTISPECTRA_DISPLAY_COMMAND.getName()))
+			showMultipleSpectraDisplayDialog();
 	}
 
 	private void editFeatureCluster() {
@@ -4978,6 +4983,20 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		if(idTrackerDataExplorerPlotDialog != null 
 				&& idTrackerDataExplorerPlotDialog.isVisible())
 			idTrackerDataExplorerPlotDialog.updateRecentFeatureCollectionList();
+	}
+	
+	private void showMultipleSpectraDisplayDialog() {
+	
+		if(multipleSpectraDisplayDialog != null 
+				&& multipleSpectraDisplayDialog.isVisible()) {
+			multipleSpectraDisplayDialog.toFront();
+			return;
+		}
+		else {
+			multipleSpectraDisplayDialog = new MultipleSpectraDisplayDialog();
+			multipleSpectraDisplayDialog.setLocationRelativeTo(this.getContentPane());
+			multipleSpectraDisplayDialog.setVisible(true);
+		}
 	}
 }
 
