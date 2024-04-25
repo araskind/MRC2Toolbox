@@ -36,7 +36,6 @@ import org.jfree.chart.ChartPanel;
 
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
-import edu.umich.med.mrc2.datoolbox.gui.plot.lcms.LCMSPlotPanel;
 import edu.umich.med.mrc2.datoolbox.gui.utils.CommonToolbar;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
@@ -74,11 +73,12 @@ public class PlotToolbar extends CommonToolbar implements ActionListener{
 	protected static final Icon msHead2tailIcon = GuiUtils.getIcon("msHead2tail", 24);
 	protected static final Icon msHead2headIcon = GuiUtils.getIcon("msHead2head", 24);
 	
+	private MasterPlotPanel parentPlot;
 	protected Dimension buttonDimension = new Dimension(28, 28);
 
 	protected JButton
 		toggleLegendButton,
-		toggleLabelsButton,
+		toggleAnnotationsButton,
 		toggleDataPointsButton,
 		saveButton,
 		toggleSmoothingButton,
@@ -91,31 +91,39 @@ public class PlotToolbar extends CommonToolbar implements ActionListener{
 	protected JMenuItem saveAsPdfMenuItem;
 	protected JMenuItem saveAsSvgMenuItem;
 
-	public PlotToolbar(ActionListener listener) {
+	public PlotToolbar(MasterPlotPanel parentPlot) {
 
-		super(listener);
+		super(parentPlot);
+		this.parentPlot = parentPlot;
 	}
 
 	protected void createLegendToggle() {
 
 		toggleLegendButton = GuiUtils.addButton(this, null, hideLegendIcon, commandListener,
-				LCMSPlotPanel.TOGGLE_LEGEND_COMMAND, "Hide legend", buttonDimension);
+				MainActionCommands.SHOW_PLOT_LEGEND_COMMAND.getName(), 
+				MainActionCommands.SHOW_PLOT_LEGEND_COMMAND.getName(), buttonDimension);
+
+		toggleLegendIcon(parentPlot.isLegendVisible());
 		toggleLegendButton.addActionListener(this);
 		buttonSet.add(toggleLegendButton);
 	}
 	
-	protected void createLabelsToggle() {
+	protected void createAnnotationsToggle() {
 		
-		toggleLabelsButton = GuiUtils.addButton(this, null, labelInactiveIcon, commandListener,
-				LCMSPlotPanel.TOGGLE_ANNOTATIONS_COMMAND, "Hide labels", buttonDimension);
-		toggleLabelsButton.addActionListener(this);
-		buttonSet.add(toggleLabelsButton);
+		toggleAnnotationsButton = GuiUtils.addButton(this, null, labelInactiveIcon, commandListener,
+				MainActionCommands.SHOW_PLOT_LABELS_COMMAND.getName(), 
+				MainActionCommands.SHOW_PLOT_LABELS_COMMAND.getName(), buttonDimension);
+		toggleAnnotationsIcon(parentPlot.areAnnotationsVisible());
+		toggleAnnotationsButton.addActionListener(this);
+		buttonSet.add(toggleAnnotationsButton);
 	}
 	
 	protected void createDataPointsToggle() {
 		
 		toggleDataPointsButton = GuiUtils.addButton(this, null, dataPointsOffIcon, commandListener,
-				LCMSPlotPanel.TOGGLE_DATA_POINTS_COMMAND, "Show data points", buttonDimension);
+				MainActionCommands.SHOW_PLOT_DATA_POINTS_COMMAND.getName(), 
+				MainActionCommands.SHOW_PLOT_DATA_POINTS_COMMAND.getName(), buttonDimension);
+		toggleDataPointsIcon(parentPlot.areDataPointsVisible());
 		toggleDataPointsButton.addActionListener(this);
 		buttonSet.add(toggleDataPointsButton);
 	}
@@ -200,27 +208,37 @@ public class PlotToolbar extends CommonToolbar implements ActionListener{
 		if (smoothChromatogram) {
 
 			toggleSmoothingButton.setIcon(smoothingOnIcon);
-			toggleSmoothingButton.setActionCommand(MainActionCommands.SHOW_RAW_CHROMATOGRAM_COMMAND.getName());
-			toggleSmoothingButton.setToolTipText(MainActionCommands.SHOW_RAW_CHROMATOGRAM_COMMAND.getName());
+			toggleSmoothingButton.setActionCommand(
+					MainActionCommands.SHOW_RAW_CHROMATOGRAM_COMMAND.getName());
+			toggleSmoothingButton.setToolTipText(
+					MainActionCommands.SHOW_RAW_CHROMATOGRAM_COMMAND.getName());
 		} else {
 			toggleSmoothingButton.setIcon(smoothingOffIcon);
-			toggleSmoothingButton.setActionCommand(MainActionCommands.SMOOTH_CHROMATOGRAM_COMMAND.getName());
-			toggleSmoothingButton.setToolTipText(MainActionCommands.SMOOTH_CHROMATOGRAM_COMMAND.getName());
+			toggleSmoothingButton.setActionCommand(
+					MainActionCommands.SMOOTH_CHROMATOGRAM_COMMAND.getName());
+			toggleSmoothingButton.setToolTipText(
+					MainActionCommands.SMOOTH_CHROMATOGRAM_COMMAND.getName());
 		}
 	}
 
 	protected void toggleAnnotationsIcon(boolean isAnnotationVisible) {
 
-		if(toggleLabelsButton == null)
+		if(toggleAnnotationsButton == null)
 			return;
 		
 		if (isAnnotationVisible) {
 
-			toggleLabelsButton.setIcon(labelActiveIcon);
-			toggleLabelsButton.setToolTipText("Hide labels");
+			toggleAnnotationsButton.setIcon(labelActiveIcon);
+			toggleAnnotationsButton.setActionCommand(
+					MainActionCommands.HIDE_PLOT_LABELS_COMMAND.getName());
+			toggleAnnotationsButton.setToolTipText(
+					MainActionCommands.HIDE_PLOT_LABELS_COMMAND.getName());
 		} else {
-			toggleLabelsButton.setIcon(labelInactiveIcon);
-			toggleLabelsButton.setToolTipText("Show labels");
+			toggleAnnotationsButton.setIcon(labelInactiveIcon);
+			toggleAnnotationsButton.setActionCommand(
+					MainActionCommands.SHOW_PLOT_LABELS_COMMAND.getName());
+			toggleAnnotationsButton.setToolTipText(
+					MainActionCommands.SHOW_PLOT_LABELS_COMMAND.getName());
 		}
 	}
 
@@ -228,18 +246,21 @@ public class PlotToolbar extends CommonToolbar implements ActionListener{
 
 		if(toggleDataPointsButton == null)
 			return;
-		
-		if (toggleDataPointsButton != null) {
 
-			if (dataPointsVisibleVisible) {
+		if (dataPointsVisibleVisible) {
 
-				toggleDataPointsButton.setIcon(dataPointsOnIcon);
-				toggleDataPointsButton.setToolTipText("Hide data points");
-			} else {
-				toggleDataPointsButton.setIcon(dataPointsOffIcon);
-				toggleDataPointsButton.setToolTipText("Show data points");
-			}
-		}
+			toggleDataPointsButton.setIcon(dataPointsOnIcon);
+			toggleDataPointsButton.setActionCommand(
+					MainActionCommands.HIDE_PLOT_DATA_POINTS_COMMAND.getName());
+			toggleDataPointsButton.setToolTipText(
+					MainActionCommands.HIDE_PLOT_DATA_POINTS_COMMAND.getName());
+		} else {
+			toggleDataPointsButton.setIcon(dataPointsOffIcon);
+			toggleDataPointsButton.setActionCommand(
+					MainActionCommands.SHOW_PLOT_DATA_POINTS_COMMAND.getName());
+			toggleDataPointsButton.setToolTipText(
+					MainActionCommands.SHOW_PLOT_DATA_POINTS_COMMAND.getName());
+		}		
 	}
 
 	protected void toggleLegendIcon(boolean isLegendVisible) {
@@ -247,17 +268,21 @@ public class PlotToolbar extends CommonToolbar implements ActionListener{
 		if(toggleLegendButton == null)
 			return;
 		
-		if (toggleLegendButton != null) {
+		if (isLegendVisible) {
 
-			if (isLegendVisible) {
-
-				toggleLegendButton.setIcon(showLegendIcon);
-				toggleLegendButton.setToolTipText("Hide legend");
-			} else {
-				toggleLegendButton.setIcon(hideLegendIcon);
-				toggleLegendButton.setToolTipText("Show legend");
-			}
-		}
+			toggleLegendButton.setIcon(showLegendIcon);
+			toggleLegendButton.setActionCommand(
+					MainActionCommands.HIDE_PLOT_LEGEND_COMMAND.getName());
+			toggleLegendButton.setToolTipText(
+					MainActionCommands.HIDE_PLOT_LEGEND_COMMAND.getName());
+		} 
+		else {			
+			toggleLegendButton.setIcon(hideLegendIcon);
+			toggleLegendButton.setActionCommand(
+					MainActionCommands.SHOW_PLOT_LEGEND_COMMAND.getName());
+			toggleLegendButton.setToolTipText(
+					MainActionCommands.SHOW_PLOT_LEGEND_COMMAND.getName());
+		}		
 	}
 
 	@Override
@@ -272,32 +297,29 @@ public class PlotToolbar extends CommonToolbar implements ActionListener{
 		
 		String command = e.getActionCommand();
 		
-		if(command.equals(LCMSPlotPanel.TOGGLE_LEGEND_COMMAND) && toggleLegendButton != null) {
-			
-			boolean isLegendVisible = 
-					toggleLegendButton.getIcon().equals(showLegendIcon);
-			toggleLegendIcon(isLegendVisible);
-		}
-		if(command.equals(LCMSPlotPanel.TOGGLE_ANNOTATIONS_COMMAND) && toggleLabelsButton != null) {
-			
-			boolean isAnnotationVisible = 
-					toggleLabelsButton.getIcon().equals(labelActiveIcon);
-			toggleLegendIcon(isAnnotationVisible);
-		}
-		if(command.equals(LCMSPlotPanel.TOGGLE_DATA_POINTS_COMMAND) && toggleLabelsButton != null) {
+		if(command.equals(MainActionCommands.SHOW_PLOT_LEGEND_COMMAND.getName()))
+			toggleLegendIcon(true);
 		
-			
-			boolean dataPointsVisibleVisible = 
-					toggleDataPointsButton.getIcon().equals(dataPointsOnIcon);
-			toggleDataPointsIcon(dataPointsVisibleVisible);
-		}
-		if(command.equals(MainActionCommands.SHOW_RAW_CHROMATOGRAM_COMMAND.getName())) 
-			toggleSmoothingIcon(false);
+		if(command.equals(MainActionCommands.HIDE_PLOT_LEGEND_COMMAND.getName()))
+			toggleLegendIcon(false);
+		
+		if(command.equals(MainActionCommands.SHOW_PLOT_LABELS_COMMAND.getName()))
+			toggleAnnotationsIcon(true);
+		
+		if(command.equals(MainActionCommands.HIDE_PLOT_LABELS_COMMAND.getName()))
+			toggleAnnotationsIcon(false);
+		
+		if(command.equals(MainActionCommands.SHOW_PLOT_DATA_POINTS_COMMAND.getName()))
+			toggleDataPointsIcon(true);
+		
+		if(command.equals(MainActionCommands.HIDE_PLOT_DATA_POINTS_COMMAND.getName()))
+			toggleDataPointsIcon(false);
 		 
 		if(command.equals(MainActionCommands.SMOOTH_CHROMATOGRAM_COMMAND.getName())) 
 			toggleSmoothingIcon(true);
 		
-		
+		if(command.equals(MainActionCommands.SHOW_RAW_CHROMATOGRAM_COMMAND.getName())) 
+			toggleSmoothingIcon(false);
 	}
 }
 

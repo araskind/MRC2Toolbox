@@ -412,6 +412,13 @@ public class MsFeatureInfoBundleCluster implements IMsFeatureInfoBundleCluster{
 			filter(c -> c.getMsFeature().getIdentifications().contains(primaryIdentity)).
 			findFirst().orElse(null);
 	}
+		
+	private MSFeatureInfoBundle getReferenceMSFeatureInfoBundle() {
+		
+		return components.stream().
+			filter(b -> b.isUsedAsMatchingTarget()).
+			findFirst().orElse(null);
+	}
 	
 	public MSFeatureInfoBundle getMSFeatureInfoBundleWithLargestMSMSArea() {
 		
@@ -492,9 +499,12 @@ public class MsFeatureInfoBundleCluster implements IMsFeatureInfoBundleCluster{
 		if(property.equals(MajorClusterFeatureDefiningProperty.CURRENT_PRIMARY_ID))
 				return getMSFeatureInfoBundleForPrimaryId();
 		
+		if(property.equals(MajorClusterFeatureDefiningProperty.REFERENCE_FEATURE))
+			return getReferenceMSFeatureInfoBundle();
+		
 		return null;
 	}
-	
+
 	@Override
 	public long getFeatureNumber() {		
 		return components.size();

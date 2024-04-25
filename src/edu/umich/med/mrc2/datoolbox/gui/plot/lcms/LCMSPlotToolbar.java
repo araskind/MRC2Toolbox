@@ -32,10 +32,10 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
+import edu.umich.med.mrc2.datoolbox.gui.plot.MasterPlotPanel;
 import edu.umich.med.mrc2.datoolbox.gui.plot.PlotToolbar;
 import edu.umich.med.mrc2.datoolbox.gui.plot.PlotType;
 import edu.umich.med.mrc2.datoolbox.gui.plot.lcms.chromatogram.ChromatogramRenderingType;
-import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 
 /**
@@ -52,38 +52,37 @@ public class LCMSPlotToolbar extends PlotToolbar implements ItemListener {
 	protected LCMSPlotPanel parentPlot;
 	protected ActionListener plotTypeSwitchListener;
 		
-	public LCMSPlotToolbar(ActionListener plotTypeSwitchListener) {
-		
-		super(null);
-		this.plotTypeSwitchListener = plotTypeSwitchListener;
-	}
+//	public LCMSPlotToolbar(ActionListener plotTypeSwitchListener) {
+//		
+//		super(null);
+//		this.plotTypeSwitchListener = plotTypeSwitchListener;
+//	}
 
-	public LCMSPlotToolbar(LCMSPlotPanel parentPlot, ActionListener plotTypeSwitchListener) {
+	public LCMSPlotToolbar(
+			MasterPlotPanel parentPlot, 
+			PlotType plotType, 
+			ActionListener plotTypeSwitchListener) {
 
 		super(parentPlot);
-		this.parentPlot = parentPlot;
 		this.plotTypeSwitchListener = plotTypeSwitchListener;
+		this.plotType = plotType;
 		
-		initToolbar(parentPlot.getPlotType());
-
-		toggleLegendIcon(parentPlot.isLegendVisible());
-		toggleAnnotationsIcon(parentPlot.areAnnotationsVisible());
-		toggleDataPointsIcon(parentPlot.areDataPointsVisible());
+		initToolbar(plotType);
 	}
 	
 	protected void createToggleTailHeadBlock() {
 		
-		toggleTailHeadButton = GuiUtils.addButton(this, null, msHead2headIcon, plotTypeSwitchListener,
-				LCMSPlotPanel.TOGGLE_MS_HEAD_TO_TAIL_COMMAND, "Reference display type", buttonDimension);
-		toggleTailHeadButton.addActionListener(this);
-		buttonSet.add(toggleTailHeadButton);
+//		toggleTailHeadButton = GuiUtils.addButton(this, null, msHead2headIcon, plotTypeSwitchListener,
+//				LCMSPlotPanel.TOGGLE_MS_HEAD_TO_TAIL_COMMAND, "Reference display type", buttonDimension);
+//		toggleTailHeadButton.addActionListener(this);
+//		buttonSet.add(toggleTailHeadButton);
 	}
 	
 	protected void initToolbar(PlotType pt) {
 		
 		plotType = pt;
 
-		createLabelsToggle();
+		createAnnotationsToggle();
 
 		if (plotType.equals(PlotType.CHROMATOGRAM)) {
 			
@@ -98,7 +97,8 @@ public class LCMSPlotToolbar extends PlotToolbar implements ItemListener {
 			chromatogramTypeComboBox.addItemListener(this);
 			add(chromatogramTypeComboBox);
 
-			createDataPointsToggle();			
+			createDataPointsToggle();
+			
 			createSmoothingBlock();
 		}
 		if (plotType.equals(PlotType.SPECTRUM)) {
@@ -124,18 +124,15 @@ public class LCMSPlotToolbar extends PlotToolbar implements ItemListener {
 
 		if(toggleTailHeadButton == null)
 			return;
-		
-		if (toggleTailHeadButton != null) {
 
-			if (isHeadToTail) {
+		if (isHeadToTail) {
 
-				toggleTailHeadButton.setIcon(msHead2tailIcon);
-				toggleTailHeadButton.setToolTipText("Show overlay");
-			} else {
-				toggleTailHeadButton.setIcon(msHead2headIcon);
-				toggleTailHeadButton.setToolTipText("Had-to-tail");
-			}
-		}
+			toggleTailHeadButton.setIcon(msHead2tailIcon);
+			toggleTailHeadButton.setToolTipText("Show overlay");
+		} else {
+			toggleTailHeadButton.setIcon(msHead2headIcon);
+			toggleTailHeadButton.setToolTipText("Had-to-tail");
+		}		
 	}
 
 	@Override
@@ -150,7 +147,7 @@ public class LCMSPlotToolbar extends PlotToolbar implements ItemListener {
 		
 		String command = e.getActionCommand();
 		
-		if(command.equals(LCMSPlotPanel.TOGGLE_MS_HEAD_TO_TAIL_COMMAND) && toggleTailHeadButton != null) {
+		if(command.equals(LCMSPlotPanel.TOGGLE_MS_HEAD_TO_TAIL_COMMAND)) {
 			
 			boolean isHeadToTail = 
 					toggleTailHeadButton.getIcon().equals(msHead2tailIcon);
@@ -173,7 +170,8 @@ public class LCMSPlotToolbar extends PlotToolbar implements ItemListener {
 		if (e.getSource().equals(chromatogramTypeComboBox) &&
 				e.getStateChange() == ItemEvent.SELECTED) {
 
-			parentPlot.redrawChromatograms((ChromatogramRenderingType)chromatogramTypeComboBox.getSelectedItem());
+			parentPlot.redrawChromatograms(
+					(ChromatogramRenderingType)chromatogramTypeComboBox.getSelectedItem());
 		}
 	}
 }

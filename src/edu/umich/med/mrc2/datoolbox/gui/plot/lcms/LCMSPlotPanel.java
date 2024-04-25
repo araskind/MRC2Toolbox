@@ -25,10 +25,12 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Paint;
+import java.awt.Shape;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseEvent;
+import java.awt.geom.Ellipse2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.Collection;
@@ -110,12 +112,18 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 	public static final Color markerColor = new Color(255, 0, 0, 70);
 	public static final Color markerOutlineColor = Color.RED;
 	protected static final Color invizibleMarkerColor = new Color(255, 255, 255, 0);	
+	
+	private static final double markerSize = 16.0;
+	private static final Shape precursorTopMarker = new Ellipse2D.Double(
+			-markerSize/4.0, -markerSize/4.0, markerSize/2.0, markerSize/2.0);	
+	
 	protected IntervalMarker domainMarker;
 	
 	protected NumberAxis xAxis, yAxis;
 	protected MassSpectrumRenderer defaultMsRenderer;
 	protected MsLabelGenerator defaultMsLabelGenerator;
 	protected MSReferenceDisplayType msReferenceDisplayType;
+	protected XYItemRenderer defaultParentIonRenderer;
 	
 	protected FilledChromatogramRenderer filledChromatogramRenderer;
 	protected FilledChromatogramRenderer linesChromatogramRenderer;
@@ -199,8 +207,12 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 			adjustRange();
 			return;
 		}		
-		if (command.equals(MasterPlotPanel.TOGGLE_DATA_POINTS_COMMAND)) {
-			toggleDataPoints();
+		if (command.equals(MainActionCommands.SHOW_PLOT_DATA_POINTS_COMMAND.getName())) {
+			toggleDataPoints(true);
+			return;
+		}
+		if (command.equals(MainActionCommands.HIDE_PLOT_DATA_POINTS_COMMAND.getName())) {
+			toggleDataPoints(false);
 			return;
 		}
 		if (command.equals(MainActionCommands.SMOOTH_CHROMATOGRAM_COMMAND.getName())) { 
@@ -442,8 +454,11 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 
 	protected void initRendererForPlotType() {
 
-		if (plotType.equals(PlotType.SPECTRUM)) {			
-			defaultMsRenderer = createMassSpectrumRenderer();
+		if (plotType.equals(PlotType.SPECTRUM)) {		
+			
+			defaultMsRenderer = createMassSpectrumRenderer();		
+			defaultParentIonRenderer = createParentIonRenderer();
+
 		}
 		if (plotType.equals(PlotType.CHROMATOGRAM)) {
 			
@@ -469,6 +484,16 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 		}
 	}
 	
+	public XYItemRenderer createParentIonRenderer() {
+		
+		XYLineAndShapeRenderer parentIonRenderer = new XYLineAndShapeRenderer(false, true);
+		parentIonRenderer.setSeriesPaint(0, Color.BLACK);
+		parentIonRenderer.setSeriesPaint(1, Color.RED);
+		parentIonRenderer.setSeriesShape(0, precursorTopMarker);
+		parentIonRenderer.setSeriesShape(1, precursorTopMarker);		
+		return parentIonRenderer;
+	}
+
 	public MassSpectrumRenderer createMassSpectrumRenderer () {
 		
 		MassSpectrumRenderer msRenderer =  
@@ -485,6 +510,10 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 				ItemLabelAnchor.OUTSIDE6, 
 				TextAnchor.TOP_LEFT);
 		msRenderer.setDefaultNegativeItemLabelPosition(negIlp);
+		
+		// ?is it necessary
+		msRenderer.setSeriesPaint(0, Color.BLACK);
+		msRenderer.setSeriesPaint(1, Color.RED);
 		
 		return msRenderer;
 	}
@@ -710,16 +739,10 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 	public void setMarkerStart(Double markerStart) {
 		this.markerStart = markerStart;
 	}
-
-//	@Override
-//	public void setToolbar(PlotToolbar toolbar) {
-//
-//		this.toolbar = toolbar;
-//	}
-
-	public void toggleDataPoints() {
+	
+	public void toggleDataPoints(boolean show) {
 		
-		dataPointsVisible = !dataPointsVisible;
+		dataPointsVisible = show;
 		final int count = plot.getDatasetCount();	
 		for (int i = 0; i < count; i++) {
 			
@@ -734,7 +757,6 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 				renderer.setPlotShapes(dataPointsVisible);
 			}
 		}
-//		toolbar.toggleDataPointsIcon(dataPointsVisible);
 	}
 	
 	@Override
@@ -982,8 +1004,10 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 	public RawDataExaminerPanel getRawDataExaminerPanel() {
 		return rawDataExaminerPanel;
 	}
-	
 
+	public XYItemRenderer getDefaultParentIonRenderer() {
+		return defaultParentIonRenderer;
+	}
 }
 
 

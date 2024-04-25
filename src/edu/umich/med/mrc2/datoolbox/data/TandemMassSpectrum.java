@@ -201,14 +201,7 @@ public class TandemMassSpectrum implements AnnotatedObject, Serializable {
 	}
 
 	public MsPoint[] getNormalizedMassSortedSpectrum() {
-
-//		double maxIntensity = spectrum.stream().
-//			sorted(MsUtils.reverseIntensitySorter).
-//			findFirst().get().getIntensity();
-//
-//		return spectrum.stream().sorted(MsUtils.mzSorter).
-//				map(p -> new MsPoint(p.getMz(), p.getIntensity()/maxIntensity * 100.0d)).
-//				toArray(size -> new MsPoint[size]);
+		
 		return MsUtils.normalizeAndSortMsPattern(spectrum);
 	}
 	

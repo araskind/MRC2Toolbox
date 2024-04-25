@@ -23,6 +23,7 @@ package edu.umich.med.mrc2.datoolbox.gui.plot.lcms.multi;
 
 import java.awt.event.ActionListener;
 
+import edu.umich.med.mrc2.datoolbox.gui.plot.MasterPlotPanel;
 import edu.umich.med.mrc2.datoolbox.gui.plot.PlotType;
 import edu.umich.med.mrc2.datoolbox.gui.plot.lcms.LCMSPlotToolbar;
 
@@ -34,9 +35,11 @@ public class LCMSMultiPlotToolbar extends LCMSPlotToolbar {
 
 	private static final long serialVersionUID = 1L;
 
-	public LCMSMultiPlotToolbar(PlotType plotType, ActionListener plotTypeSwitchListener) {
+	public LCMSMultiPlotToolbar(
+			MasterPlotPanel parentPlot, 
+			PlotType plotType, 
+			ActionListener plotTypeSwitchListener) {
 
-		super(plotTypeSwitchListener);
-		initToolbar(plotType);
+		super(parentPlot, plotType, plotTypeSwitchListener);
 	}
 }

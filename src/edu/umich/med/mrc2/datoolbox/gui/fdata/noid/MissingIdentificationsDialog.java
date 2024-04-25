@@ -175,7 +175,8 @@ public class MissingIdentificationsDialog extends JDialog implements ActionListe
 		JPanel plotPanel = new JPanel(new BorderLayout(0, 0));
 		msPlot = new LCMSPlotPanel(PlotType.SPECTRUM);
 		plotPanel.add(msPlot, BorderLayout.CENTER);
-		msPlotToolbar = new LCMSPlotToolbar(msPlot, this);
+		msPlotToolbar = 
+				new LCMSPlotToolbar(msPlot, PlotType.SPECTRUM, this);
 		plotPanel.add(msPlotToolbar, BorderLayout.NORTH);
 		splitPane_1.setRightComponent(plotPanel);
 

@@ -1272,6 +1272,14 @@ public enum MainActionCommands {
 	SHOW_LOOKUP_FEATURE_LIST_FOR_CLUSTER_DATA_SET_COMMAND("Show lookup feature list for MSMS cluster data set"),
 	SHOW_BINNER_ANNOTATION_SET_FOR_CLUSTER_DATA_SET_COMMAND("Show binner annotation set for MSMS cluster data set"),
 	
+	//	Plot commands
+	SHOW_PLOT_LEGEND_COMMAND("Show legend"),
+	HIDE_PLOT_LEGEND_COMMAND("Hide legend"),
+	SHOW_PLOT_LABELS_COMMAND("Show labels"),
+	HIDE_PLOT_LABELS_COMMAND("Hide labels"),
+	SHOW_PLOT_DATA_POINTS_COMMAND("Show data points"),
+	HIDE_PLOT_DATA_POINTS_COMMAND("Hide data points"),
+	
 	//	Chromatogram smoothing 
 	SMOOTH_CHROMATOGRAM_COMMAND("Smooth chromatogram"),
 	SHOW_RAW_CHROMATOGRAM_COMMAND("Show raw chromatogram"),

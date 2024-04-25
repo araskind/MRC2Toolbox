@@ -54,6 +54,7 @@ import org.jfree.chart.ui.Layer;
 import org.jfree.chart.ui.RectangleEdge;
 import org.jfree.chart.ui.RectangleInsets;
 
+import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.plot.lcms.LCMSPlotPanel;
 
 public abstract class MasterPlotPanel extends ChartPanel{
@@ -175,9 +176,24 @@ public abstract class MasterPlotPanel extends ChartPanel{
 		}
 		else if (command.equals(MasterPlotPanel.TOGGLE_LEGEND_COMMAND))
 			toggleLegend();
-
+		else if (command.equals(MainActionCommands.SHOW_PLOT_LEGEND_COMMAND.getName())) {
+			legendVisible = false;
+			toggleLegend();
+		}
+		else if (command.equals(MainActionCommands.HIDE_PLOT_LEGEND_COMMAND.getName())) {
+			legendVisible = true;
+			toggleLegend();
+		}
 		else if (command.equals(MasterPlotPanel.TOGGLE_ANNOTATIONS_COMMAND))
 			toggleAnnotations();
+		else if (command.equals(MainActionCommands.SHOW_PLOT_LABELS_COMMAND.getName())) {
+			annotationsVisible = false;
+			toggleAnnotations();
+		}
+		else if (command.equals(MainActionCommands.HIDE_PLOT_LABELS_COMMAND.getName())) {
+			annotationsVisible = true;
+			toggleAnnotations();
+		}
 		else
 			super.actionPerformed(event);
 	}

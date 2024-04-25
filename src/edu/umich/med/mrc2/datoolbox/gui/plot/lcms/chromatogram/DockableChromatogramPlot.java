@@ -59,7 +59,8 @@ public class DockableChromatogramPlot extends DefaultSingleCDockable implements 
 		chromatogramPlot.setSmoothingFilter(SmoothingFilterManager.getFilter(id));
 		add(chromatogramPlot, BorderLayout.CENTER);
 
-		chromatogramToolbar = new LCMSPlotToolbar(chromatogramPlot, this);
+		chromatogramToolbar = 
+				new LCMSPlotToolbar(chromatogramPlot, PlotType.CHROMATOGRAM, this);
 		add(chromatogramToolbar, BorderLayout.NORTH);
 	}
 	

@@ -40,7 +40,11 @@ import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
+import edu.umich.med.mrc2.datoolbox.data.enums.MsDepth;
+import edu.umich.med.mrc2.datoolbox.data.msclust.IMsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.gui.plot.PlotType;
+import edu.umich.med.mrc2.datoolbox.gui.plot.lcms.spectrum.MSReferenceDisplayType;
+import edu.umich.med.mrc2.datoolbox.gui.plot.lcms.spectrum.MsReferenceType;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 
@@ -57,17 +61,17 @@ public class MultipleSpectraDisplayDialog extends JDialog
 		super();
 		setPreferredSize(new Dimension(640, 800));
 		setSize(new Dimension(640, 800));
-		setTitle("Multiple spactra display");
+		setTitle("Multiple spectra display");
 		setIconImage(((ImageIcon) componentIcon).getImage());
 		setModalityType(ModalityType.MODELESS);
 		setResizable(true);
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		
-		toolbar = new LCMSMultiPlotToolbar(PlotType.SPECTRUM, this);
-		getContentPane().add(toolbar, BorderLayout.NORTH);
-			
 		plotPanel = new LCMSMultiPlotPanel(PlotType.SPECTRUM);
 		getContentPane().add(new JScrollPane(plotPanel), BorderLayout.CENTER);
+		
+		toolbar = new LCMSMultiPlotToolbar(plotPanel, PlotType.SPECTRUM, this);
+		getContentPane().add(toolbar, BorderLayout.NORTH);
 				
 		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
 		ActionListener al = new ActionListener() {
@@ -84,6 +88,15 @@ public class MultipleSpectraDisplayDialog extends JDialog
 		
 		savePreferences();
 		super.dispose();
+	}
+	
+	public void showMSFeatureCluster(
+			IMsFeatureInfoBundleCluster cluster, 
+			MsDepth msLevel, 
+			MsReferenceType refType,
+			MSReferenceDisplayType displayType) {
+		plotPanel.showMSFeatureCluster(
+				cluster, msLevel, refType, displayType);
 	}
 	
 	@Override
@@ -116,4 +129,14 @@ public class MultipleSpectraDisplayDialog extends JDialog
 
 	}
 
+	public void clearPanel() {
+		plotPanel.removeAllDataSets();
+	}
 }
+
+
+
+
+
+
+

@@ -110,7 +110,8 @@ public class DockableSpectumPlot extends DefaultSingleCDockable implements Actio
 		spectrumPlot = new LCMSPlotPanel(PlotType.SPECTRUM);
 		add(spectrumPlot, BorderLayout.CENTER);
 
-		msPlotToolbar = new LCMSPlotToolbar(spectrumPlot, this);
+		msPlotToolbar = 
+				new LCMSPlotToolbar(spectrumPlot, PlotType.SPECTRUM, this);
 		add(msPlotToolbar, BorderLayout.NORTH);
 		
 		PREFERENCES_NODE = "mrc2.datoolbox." + id;
@@ -479,6 +480,7 @@ public class DockableSpectumPlot extends DefaultSingleCDockable implements Actio
 			TandemMassSpectrum instrumentSpectrum, 
 			MsMsLibraryFeature libFeature) {
 
+		removeAllDataSets();
 		activeMsDataSet = 
 				new HeadToTailMsDataSet(instrumentSpectrum, libFeature);	
 		finalizeTandemMsWithReferencePlotSetup(
@@ -491,47 +493,19 @@ public class DockableSpectumPlot extends DefaultSingleCDockable implements Actio
 			HeadToTailMsDataSet dataSet,
 			MsPoint featureParentIon,
 			MsPoint referenceParentIon) {
-		
-		XYPlot plot = (XYPlot) spectrumPlot.getPlot();
-
-		//	Add MSMS points
-		MassSpectrumRenderer msRenderer = spectrumPlot.getDefaultMsRenderer();
-		msRenderer.setSeriesPaint(0, Color.BLACK);
-		msRenderer.setSeriesPaint(1, Color.RED);
-		plot.setRenderer(1, msRenderer);
-		plot.setDataset(1, dataSet);
-		
-		//	Add feature and reference parent ions
-		XYSeriesCollection parentSet = new XYSeriesCollection();
-
-		if(featureParentIon != null) {
-			dataSet.getMassRange().extendRange(featureParentIon.getMz());
-			XYSeries parentSeries = new XYSeries("Feature parent ion");
-			parentSeries.add(featureParentIon.getMz(), featureParentIon.getIntensity());			
-			parentSet.addSeries(parentSeries);
-		}	
-		if(referenceParentIon != null) {
-			dataSet.getMassRange().extendRange(referenceParentIon.getMz());
-			XYSeries refParentSeries = new XYSeries("Reference parent ion");
-			refParentSeries.add(referenceParentIon.getMz(), -referenceParentIon.getIntensity());			
-			parentSet.addSeries(refParentSeries);
+				
+		XYPlot plot = (XYPlot) spectrumPlot.getPlot();		
+		XYSeriesCollection parentIonDataSet = dataSet.getParentIonDataSet();
+		if(parentIonDataSet != null) {
+			
+			plot.setDataset(0, parentIonDataSet);
+			plot.setRenderer(0, spectrumPlot.getDefaultParentIonRenderer());	
+			plot.setDataset(1, dataSet);
+			plot.setRenderer(1, spectrumPlot.getDefaultMsRenderer());
 		}
-		if(parentSet.getSeriesCount() > 0) {
-			
-			XYItemRenderer parentRenderer = new XYLineAndShapeRenderer(false, true);
-			
-			int featureIndex = parentSet.getSeriesIndex("Feature parent ion");
-			if(featureIndex >= 0) {
-				parentRenderer.setSeriesPaint(featureIndex, Color.RED);
-				parentRenderer.setSeriesShape(featureIndex, precursorTopMarker);
-			}
-			int refIndex = parentSet.getSeriesIndex("Reference parent ion");
-			if(refIndex >= 0) {
-				parentRenderer.setSeriesPaint(refIndex, Color.BLACK);
-				parentRenderer.setSeriesShape(refIndex, precursorTopMarker);
-			}
-			plot.setRenderer(0, parentRenderer);
-			plot.setDataset(0, parentSet);
+		else {
+			plot.setDataset(0, dataSet);
+			plot.setRenderer(0, spectrumPlot.getDefaultMsRenderer());
 		}
 		ValueMarker marker = new ValueMarker(0.0d);
 		marker.setPaint(Color.GRAY);

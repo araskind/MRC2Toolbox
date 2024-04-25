@@ -68,7 +68,8 @@ public class SpectrumPanel extends JPanel implements ActionListener {
 
 		msPlot = new LCMSPlotPanel(PlotType.SPECTRUM);
 
-		msPlotToolbar = new LCMSPlotToolbar(msPlot, this);
+		msPlotToolbar = 
+				new LCMSPlotToolbar(msPlot, PlotType.SPECTRUM, this);
 		add(msPlotToolbar, BorderLayout.NORTH);
 
 		splitPane = new JSplitPane();

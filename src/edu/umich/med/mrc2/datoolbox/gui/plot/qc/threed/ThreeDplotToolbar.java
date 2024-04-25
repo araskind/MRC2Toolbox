@@ -79,7 +79,8 @@ public class ThreeDplotToolbar extends PlotToolbar implements ItemListener{
 	@SuppressWarnings("unchecked")
 	public ThreeDplotToolbar(Dockable3DChartPanel parentPlotPanel) {
 
-		super(parentPlotPanel);
+		// TODO 
+		super(null);
 		this.parentPlotPanel = parentPlotPanel;
 
 		GuiUtils.addButton(this, null, copyIcon, commandListener, MainActionCommands.COPY_AS_IMAGE.getName(),

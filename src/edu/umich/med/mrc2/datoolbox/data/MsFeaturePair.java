@@ -51,6 +51,24 @@ public class MsFeaturePair implements Comparable<MsFeaturePair> {
 		return "REF: " + referenceFeature.getName() + 
 				" | UNK: " + unknownFeature.getName();
 	}
+	
+	public MsPoint getUnknownFeatureParentIon() {
+		
+		if(unknownFeature.getSpectrum() == null 
+				|| unknownFeature.getSpectrum().getExperimentalTandemSpectrum() == null)
+			return null;
+		
+		return unknownFeature.getSpectrum().getExperimentalTandemSpectrum().getParent();
+	}
+	
+	public MsPoint getReferenceFeatureParentIon() {
+		
+		if(referenceFeature.getSpectrum() == null 
+				|| referenceFeature.getSpectrum().getExperimentalTandemSpectrum() == null)
+			return null;
+		
+		return referenceFeature.getSpectrum().getExperimentalTandemSpectrum().getParent();
+	}
 
 	@Override
 	public boolean equals(Object obj) {

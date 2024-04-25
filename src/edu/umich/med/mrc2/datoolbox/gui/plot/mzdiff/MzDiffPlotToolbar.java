@@ -21,8 +21,7 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.plot.mzdiff;
 
-import java.awt.event.ActionListener;
-
+import edu.umich.med.mrc2.datoolbox.gui.plot.MasterPlotPanel;
 import edu.umich.med.mrc2.datoolbox.gui.plot.PlotToolbar;
 
 public class MzDiffPlotToolbar extends PlotToolbar{
@@ -32,7 +31,7 @@ public class MzDiffPlotToolbar extends PlotToolbar{
 	 */
 	private static final long serialVersionUID = -8756954637925601169L;
 
-	public MzDiffPlotToolbar(ActionListener parentPlot) {
+	public MzDiffPlotToolbar(MasterPlotPanel parentPlot) {
 
 		super(parentPlot);
 		createZoomBlock();

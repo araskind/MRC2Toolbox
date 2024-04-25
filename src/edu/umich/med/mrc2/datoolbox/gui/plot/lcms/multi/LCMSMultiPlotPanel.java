@@ -27,13 +27,11 @@ import org.jfree.chart.plot.Plot;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.ValueMarker;
 import org.jfree.chart.plot.XYPlot;
-import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.chart.ui.Layer;
 import org.jfree.chart.ui.RectangleEdge;
 import org.jfree.chart.ui.RectangleInsets;
 import org.jfree.data.Range;
-import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
@@ -42,15 +40,15 @@ import edu.umich.med.mrc2.datoolbox.data.MsFeaturePair;
 import edu.umich.med.mrc2.datoolbox.data.MsPoint;
 import edu.umich.med.mrc2.datoolbox.data.enums.MsDepth;
 import edu.umich.med.mrc2.datoolbox.data.msclust.IMsFeatureInfoBundleCluster;
-import edu.umich.med.mrc2.datoolbox.gui.plot.MasterPlotPanel;
+import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.plot.PlotType;
 import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.HeadToTailMsDataSet;
+import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.MsDataSet;
 import edu.umich.med.mrc2.datoolbox.gui.plot.lcms.LCMSPlotPanel;
 import edu.umich.med.mrc2.datoolbox.gui.plot.lcms.spectrum.MSReferenceDisplayType;
 import edu.umich.med.mrc2.datoolbox.gui.plot.lcms.spectrum.MsReferenceType;
 import edu.umich.med.mrc2.datoolbox.gui.plot.renderer.DefaultSplineRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.plot.renderer.FilledChromatogramRenderer;
-import edu.umich.med.mrc2.datoolbox.gui.plot.renderer.MassSpectrumRenderer;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 
 public class LCMSMultiPlotPanel extends LCMSPlotPanel {
@@ -125,8 +123,12 @@ public class LCMSMultiPlotPanel extends LCMSPlotPanel {
 			resetRange();
 			return;
 		}
-		if (command.equals(MasterPlotPanel.TOGGLE_DATA_POINTS_COMMAND)) {
-			toggleDataPoints();
+		if (command.equals(MainActionCommands.SHOW_PLOT_DATA_POINTS_COMMAND.getName())) {
+			toggleDataPoints(true);
+			return;
+		}
+		if (command.equals(MainActionCommands.HIDE_PLOT_DATA_POINTS_COMMAND.getName())) {
+			toggleDataPoints(false);
 			return;
 		}
 		super.actionPerformed(event);
@@ -204,9 +206,9 @@ public class LCMSMultiPlotPanel extends LCMSPlotPanel {
 	}
 	
 	@Override
-	public void toggleDataPoints() {
+	public void toggleDataPoints(boolean show) {
 
-		dataPointsVisible = !dataPointsVisible;
+		dataPointsVisible = show;
 		for(XYPlot fPlot : objectPlotMap.values()) {
 			
 			final int count = fPlot.getDatasetCount();
@@ -285,11 +287,12 @@ public class LCMSMultiPlotPanel extends LCMSPlotPanel {
 			((CombinedDomainXYPlot)plot).remove((XYPlot) spl);
 		
 		objectPlotMap.clear();
+		clearMarkers();
 	}
 	
 	protected XYPlot getNewXYPlot() {
 
-		XYPlot newPlot = (XYPlot) ChartFactory.createScatterPlot(
+		XYPlot newPlot = (XYPlot) ChartFactory.createXYLineChart(
 				"", // title
 				"", // x-axis label
 				"Intensity", // y-axis label
@@ -345,7 +348,7 @@ public class LCMSMultiPlotPanel extends LCMSPlotPanel {
 				MsFeaturePair featurePair = 
 						new MsFeaturePair(refBundle.getMsFeature(), b.getMsFeature());
 				
-				XYDataset dataSet = null;
+				MsDataSet dataSet = null;
 				if(displayType.equals(MSReferenceDisplayType.HEAD_TO_TAIL))
 					dataSet = new HeadToTailMsDataSet(featurePair, msLevel);
 					
@@ -354,11 +357,29 @@ public class LCMSMultiPlotPanel extends LCMSPlotPanel {
 				}
 				if(displayType.equals(MSReferenceDisplayType.HEAD_TO_HEAD)) {
 					
-				}
+				}				
 				if(dataSet != null) {
 					
 					XYPlot newPlot = getNewXYPlot();
-					
+					if(msLevel.equals(MsDepth.MS1)) {
+						
+						newPlot.setDataset(0, dataSet);
+						newPlot.setRenderer(0, defaultMsRenderer);
+					}
+					if(msLevel.equals(MsDepth.MS2)) {
+						
+						newPlot.setDataset(1, dataSet);
+						newPlot.setRenderer(1, defaultMsRenderer);
+						
+//						addParentIonDataSeries(
+//								dataSet,
+//								newPlot,
+//								featurePair.getUnknownFeatureParentIon(),
+//								featurePair.getReferenceFeatureParentIon());
+					}	
+					ValueMarker marker = new ValueMarker(0.0d);
+					marker.setPaint(Color.GRAY);
+					newPlot.addRangeMarker(marker);
 					try {
 						((CombinedDomainXYPlot)plot).add(newPlot);
 					} catch (Exception e) {
@@ -374,66 +395,19 @@ public class LCMSMultiPlotPanel extends LCMSPlotPanel {
 		}
 		setPreferredSize(new Dimension(
 				getPreferredSize().width, subPlotHeight * plotCount));
-		
 
-		
-//		for(MsFeature f : features) {
-//			
-//			if(featureRtRange == null)
-//				featureRtRange = f.getRtRange();
-//			else
-//				featureRtRange.extendRange(f.getRtRange());
-//			
-//			XYPlot fPlot = getNewXicPlot();
-//			setBasicPlotGui(fPlot);
-//			fileFeatureMap.put(f.getDataFile(), f);
-//			filePlotMap.put(f.getDataFile(), fPlot);
-//			
-//			//	TODO add data set and set renderer
-//			addFeatureXics(fPlot, f);
-//			addAnnotationForFeature(fPlot, f);
-//			try {
-//				xicPlot.add(fPlot);
-//			} catch (Exception e) {
-//				// TODO Auto-generated catch block
-//				//e.printStackTrace();
-//			}
-//		}
-//		double newMin = featureRtRange.getMin() - rtWindowExtensionWidth;
-//		if(newMin < 0.0d)
-//			newMin = 0.0d;
-//		
-//		double newMax = featureRtRange.getMax() + rtWindowExtensionWidth;	
-//		defaultRtRange = new Range(newMin, newMax);
-//		xicPlot.getDomainAxis().setRange(defaultRtRange);	
-//		chart.fireChartChanged();
+		chart.fireChartChanged();
 		revalidate();
 		repaint();
 	}
 	
-	//	TODO rewrite to create head-to-tail plot
-	private void finalizeTandemMsWithReferencePlotSetup(
+	private void addParentIonDataSeries(
+			MsDataSet dataSet,
 			XYPlot plot,
-			HeadToTailMsDataSet dataSet,
 			MsPoint featureParentIon,
 			MsPoint referenceParentIon) {
 		
-		//	Add MSMS points
-		MassSpectrumRenderer msRenderer = null;
-		try {
-			msRenderer = (MassSpectrumRenderer) defaultMsRenderer.clone();
-		} catch (CloneNotSupportedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		msRenderer.setSeriesPaint(0, Color.BLACK);
-		msRenderer.setSeriesPaint(1, Color.RED);
-		plot.setRenderer(1, msRenderer);
-		plot.setDataset(1, dataSet);
-		
-		//	Add feature and reference parent ions
 		XYSeriesCollection parentSet = new XYSeriesCollection();
-
 		if(featureParentIon != null) {
 			dataSet.getMassRange().extendRange(featureParentIon.getMz());
 			XYSeries parentSeries = new XYSeries("Feature parent ion");
@@ -446,28 +420,8 @@ public class LCMSMultiPlotPanel extends LCMSPlotPanel {
 			refParentSeries.add(referenceParentIon.getMz(), -referenceParentIon.getIntensity());			
 			parentSet.addSeries(refParentSeries);
 		}
-		if(parentSet.getSeriesCount() > 0) {
-			
-			XYItemRenderer parentRenderer = new XYLineAndShapeRenderer(false, true);
-			
-			int featureIndex = parentSet.getSeriesIndex("Feature parent ion");
-			if(featureIndex >= 0) {
-				parentRenderer.setSeriesPaint(featureIndex, Color.RED);
-//				parentRenderer.setSeriesShape(featureIndex, precursorTopMarker);
-			}
-			int refIndex = parentSet.getSeriesIndex("Reference parent ion");
-			if(refIndex >= 0) {
-				parentRenderer.setSeriesPaint(refIndex, Color.BLACK);
-//				parentRenderer.setSeriesShape(refIndex, precursorTopMarker);
-			}
-			plot.setRenderer(0, parentRenderer);
-			plot.setDataset(0, parentSet);
-		}
-		ValueMarker marker = new ValueMarker(0.0d);
-		marker.setPaint(Color.GRAY);
-		plot.addRangeMarker(marker);
-		
-//		setPlotMargins(dataSet);
+		plot.setRenderer(0, defaultParentIonRenderer);
+		plot.setDataset(0, parentSet);
 	}
 	
 	public double getRtWindowExtensionWidth() {

@@ -22,11 +22,16 @@
 package edu.umich.med.mrc2.datoolbox.gui.plot.dataset;
 
 import java.util.Arrays;
+import java.util.TreeSet;
+
+import org.jfree.data.xy.XYSeries;
+import org.jfree.data.xy.XYSeriesCollection;
 
 import edu.umich.med.mrc2.datoolbox.data.MassSpectrum;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeaturePair;
 import edu.umich.med.mrc2.datoolbox.data.MsMsLibraryFeature;
+import edu.umich.med.mrc2.datoolbox.data.MsPoint;
 import edu.umich.med.mrc2.datoolbox.data.TandemMassSpectrum;
 import edu.umich.med.mrc2.datoolbox.data.enums.MsDepth;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
@@ -38,6 +43,8 @@ public class HeadToTailMsDataSet  extends MsDataSet {
 	 *
 	 */
 	private static final long serialVersionUID = 6793905715141166824L;
+
+	private XYSeriesCollection parentIonDataSet;
 	
 	public HeadToTailMsDataSet() {
 		super();
@@ -69,11 +76,42 @@ public class HeadToTailMsDataSet  extends MsDataSet {
 
 		this();
 		if(unk != null && reference != null) {
+			
+			TreeSet<MsPoint>spec = new TreeSet<MsPoint>(MsUtils.mzSorter);
+			parentIonDataSet = new XYSeriesCollection();
+			
+			//	Unknown			
+			spec.addAll(unk.getSpectrum());
+			if(unk.getParent() != null)
+				spec.add(unk.getParent());
 
-			msSeriesScaled.put(0, unk.getNormalizedMassSortedSpectrum());
-			labels.put(0, unk.getUserFriendlyId());
-			msSeriesScaled.put(1, reference.getNormalizedMassSortedSpectrum());
+			MsPoint[]normSpec = MsUtils.normalizeAndSortMsPattern(spec);
+			msSeriesScaled.put(0, normSpec);
+			labels.put(0, unk.getUserFriendlyId());			
+			if(unk.getParent() != null) {
+				
+				MsPoint normParent = findNormalizedParent(normSpec, unk.getParent().getMz());			
+				XYSeries parentSeries = new XYSeries("Feature parent ion");
+				parentSeries.add(normParent.getMz(), normParent.getIntensity());			
+				parentIonDataSet.addSeries(parentSeries);			
+			}			
+			//	Reference
+			spec.clear();
+			spec.addAll(reference.getSpectrum());
+			if(reference.getParent() != null)
+				spec.add(reference.getParent());
+			
+			MsPoint[]normRefSpec = MsUtils.normalizeAndSortMsPattern(spec);			
+			msSeriesScaled.put(1,normRefSpec);
 			labels.put(1, reference.getUserFriendlyId());
+			if(reference.getParent() != null) {
+				
+				MsPoint normRefParent = 
+						findNormalizedParent(normRefSpec, reference.getParent().getMz());
+				XYSeries refParentSeries = new XYSeries("Reference parent ion");
+				refParentSeries.add(normRefParent.getMz(), -normRefParent.getIntensity());			
+				parentIonDataSet.addSeries(refParentSeries);			
+			}
 			finalizeDataSet();
 		}
 	}
@@ -85,12 +123,65 @@ public class HeadToTailMsDataSet  extends MsDataSet {
 		this();
 		if(instrumentSpectrum != null && reference != null) {
 
-			msSeriesScaled.put(0, instrumentSpectrum.getNormalizedMassSortedSpectrum());
-			labels.put(0, instrumentSpectrum.getUserFriendlyId());
-			msSeriesScaled.put(1, reference.getNormalizedMassSortedSpectrum());
+			TreeSet<MsPoint>spec = new TreeSet<MsPoint>(MsUtils.mzSorter);
+			parentIonDataSet = new XYSeriesCollection();
+			
+			//	Instrument
+			spec.addAll(instrumentSpectrum.getSpectrum());
+			if(instrumentSpectrum.getParent() != null)
+				spec.add(instrumentSpectrum.getParent());
+
+			MsPoint[]normSpec = MsUtils.normalizeAndSortMsPattern(spec);
+			msSeriesScaled.put(0, normSpec);
+			labels.put(0, instrumentSpectrum.getUserFriendlyId());			
+			if(instrumentSpectrum.getParent() != null) {
+				
+				MsPoint normParent = 
+						findNormalizedParent(normSpec, instrumentSpectrum.getParent().getMz());
+				XYSeries parentSeries = new XYSeries("Feature parent ion");
+				parentSeries.add(normParent.getMz(), normParent.getIntensity());			
+				parentIonDataSet.addSeries(parentSeries);		
+				
+//				msSeriesScaled.put(3, new MsPoint[] {normParent});
+//				labels.put(3, "Feature parent ion");			
+			}				
+//			msSeriesScaled.put(0, instrumentSpectrum.getNormalizedMassSortedSpectrum());
+//			labels.put(0, instrumentSpectrum.getUserFriendlyId());
+			
+			//	Library 
+			spec.clear();
+			spec.addAll(reference.getSpectrum());
+			if(reference.getParent() != null)
+				spec.add(reference.getParent());
+			
+			MsPoint[]normRefSpec = MsUtils.normalizeAndSortMsPattern(spec);			
+			msSeriesScaled.put(1,normRefSpec);
 			labels.put(1, reference.getUserFriendlyId());
+			if(reference.getParent() != null) {
+				
+				MsPoint normRefParent = 
+						findNormalizedParent(normRefSpec, reference.getParent().getMz());
+				XYSeries refParentSeries = new XYSeries("Reference parent ion");
+				refParentSeries.add(normRefParent.getMz(), -normRefParent.getIntensity());			
+				parentIonDataSet.addSeries(refParentSeries);
+				
+//				msSeriesScaled.put(4, new MsPoint[] {normRefParent});
+//				labels.put(4, "Reference parent ion");			
+			}		
+//			msSeriesScaled.put(1, reference.getNormalizedMassSortedSpectrum());
+//			labels.put(1, reference.getUserFriendlyId());
 			finalizeDataSet();
 		}
+	}
+	
+	private MsPoint findNormalizedParent(MsPoint[]normSpec, double parentMz) {
+		
+		Range mzRange = MsUtils.createPpmMassRange(parentMz, 10.0d);
+		for(MsPoint p : normSpec) {
+			if(mzRange.contains(p.getMz()))
+				return p;
+		}
+		return null;
 	}
 	
 	public HeadToTailMsDataSet(
@@ -184,5 +275,9 @@ public class HeadToTailMsDataSet  extends MsDataSet {
 	@Override
 	public void setNormalized(boolean isNormalized) {
 		//	This data set is always normalized
+	}
+
+	public XYSeriesCollection getParentIonDataSet() {
+		return parentIonDataSet;
 	}
 }

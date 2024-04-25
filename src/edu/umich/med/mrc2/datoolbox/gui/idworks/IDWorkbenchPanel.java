@@ -185,6 +185,8 @@ import edu.umich.med.mrc2.datoolbox.gui.mzfreq.MzFrequencyAnalysisSetupDialog;
 import edu.umich.med.mrc2.datoolbox.gui.plot.lcms.chromatogram.DockableChromatogramPlot;
 import edu.umich.med.mrc2.datoolbox.gui.plot.lcms.multi.MultipleSpectraDisplayDialog;
 import edu.umich.med.mrc2.datoolbox.gui.plot.lcms.spectrum.DockableSpectumPlot;
+import edu.umich.med.mrc2.datoolbox.gui.plot.lcms.spectrum.MSReferenceDisplayType;
+import edu.umich.med.mrc2.datoolbox.gui.plot.lcms.spectrum.MsReferenceType;
 import edu.umich.med.mrc2.datoolbox.gui.rawdata.RawDataExaminerPanel;
 import edu.umich.med.mrc2.datoolbox.gui.rawdata.xic.XICSetupDialog;
 import edu.umich.med.mrc2.datoolbox.gui.structure.DockableMolStructurePanel;
@@ -4384,6 +4386,10 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		
 		if(idTrackerDataExplorerPlotDialog != null)
 			idTrackerDataExplorerPlotDialog.clearPanels();
+		
+		if(multipleSpectraDisplayDialog != null 
+				&& multipleSpectraDisplayDialog.isVisible())
+			multipleSpectraDisplayDialog.clearPanel();
 	}
 	
 	public void clearMSMSFeatureData() {
@@ -4909,6 +4915,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 						(BinnerBasedMsFeatureInfoBundleCluster)cluster);			
 						
 			showMultipleFeatureChromatograms(cluster.getComponents());
+			showAllClusterSpectra(cluster);
 		}
 		if (tree.getClickedObject() instanceof MSFeatureInfoBundle) {
 			
@@ -4927,6 +4934,29 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 				msTwoFeatureTable.selectBundle((MSFeatureInfoBundle)tree.getClickedObject());
 			}
 		}
+	}
+	
+	private void showAllClusterSpectra(IMsFeatureInfoBundleCluster cluster) {		
+		
+		if(multipleSpectraDisplayDialog == null 
+				|| !multipleSpectraDisplayDialog.isVisible())
+			return;
+		
+		MsReferenceType refType = MsReferenceType.LIBRARY_MATCH;
+		if(cluster.getDefiningFeature(MajorClusterFeatureDefiningProperty.REFERENCE_FEATURE) != null)
+			refType = MsReferenceType.REFERENCE_FEATURE;
+		
+		MsDepth msLevel = MsDepth.MS2;
+		List<MSFeatureInfoBundle> msmsList = cluster.getComponents().stream().
+				filter(c -> Objects.nonNull(c.getMsFeature().getSpectrum())).
+				filter(c -> Objects.nonNull(c.getMsFeature().getSpectrum().getExperimentalTandemSpectrum())).
+				collect(Collectors.toList());
+		if(msmsList.isEmpty())
+			msLevel = MsDepth.MS1;
+		
+		MSReferenceDisplayType displayType = MSReferenceDisplayType.HEAD_TO_TAIL;
+		
+		multipleSpectraDisplayDialog.showMSFeatureCluster(cluster, msLevel, refType, displayType);
 	}
 	
 	public void clearMSMSClusterData() {

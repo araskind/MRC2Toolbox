@@ -28,6 +28,7 @@ public enum MajorClusterFeatureDefiningProperty {
 	HIGHEST_MSMS_SCORE_WITH_IN_SOURCE("Highest MSMS score (regular and in-source matches)"),
 	SMALLEST_MASS_ERROR("Smallest mass error for parent ion"),
 	CURRENT_PRIMARY_ID("Current primary identity for the cluster"),
+	REFERENCE_FEATURE("Reference feature"),
 	;
 
 	private final String name;

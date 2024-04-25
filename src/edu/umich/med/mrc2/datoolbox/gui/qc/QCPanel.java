@@ -37,7 +37,6 @@ import edu.umich.med.mrc2.datoolbox.gui.main.DockableMRC2ToolboxPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainWindow;
 import edu.umich.med.mrc2.datoolbox.gui.main.PanelList;
-import edu.umich.med.mrc2.datoolbox.gui.plot.qc.threed.Dockable3DChartPanel;
 import edu.umich.med.mrc2.datoolbox.gui.plot.qc.twod.Dockable2DQCPanel;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
@@ -53,7 +52,7 @@ public class QCPanel extends DockableMRC2ToolboxPanel {
 
 	private DockableDataSetStatsTable dataSetStatsTable;
 	private Dockable2DQCPanel twoDQCpanel;
-	private Dockable3DChartPanel threeDpanel;
+	//private Dockable3DChartPanel threeDpanel;
 
 	private static final Icon componentIcon = GuiUtils.getIcon("qc", 16);
 	static final Icon calcStatsIcon = GuiUtils.getIcon("stats", 24);
@@ -70,11 +69,13 @@ public class QCPanel extends DockableMRC2ToolboxPanel {
 				"QCPanelDockableDataSetStatsTable", "Global data set statistics");
 		twoDQCpanel = new Dockable2DQCPanel(
 				"QCPanelDockable2DQCPanel", "2D QC plots");
-		threeDpanel = new Dockable3DChartPanel(
-				"QCPanelDockable3DChartPanel", "3D QC plots");
+//		threeDpanel = new Dockable3DChartPanel(
+//				"QCPanelDockable3DChartPanel", "3D QC plots");
 
 		grid.add(0, 0, 100, 50, dataSetStatsTable);
-		grid.add(0, 50, 100, 50, twoDQCpanel, threeDpanel);
+		grid.add(0, 50, 100, 50, twoDQCpanel
+				//	, threeDpanel
+				);
 		grid.select(0, 50, 100, 50, twoDQCpanel);
 		control.getContentArea().deploy(grid);
 		add(control.getContentArea(), BorderLayout.CENTER);
@@ -131,7 +132,7 @@ public class QCPanel extends DockableMRC2ToolboxPanel {
 	public synchronized void clearPanel() {
 
 		twoDQCpanel.clearPanel();
-		threeDpanel.clearPlotPanel();
+//		threeDpanel.clearPlotPanel();
 		dataSetStatsTable.getTable().clearTable();
 	}
 
@@ -172,10 +173,10 @@ public class QCPanel extends DockableMRC2ToolboxPanel {
 
 	private void showPCAResults(PCATask dssTask) {
 
-		threeDpanel.showPca(
-				dssTask.getProjection(), 
-				dssTask.getAciveDataPipeline(), 
-				dssTask.getActiveDesign());
+//		threeDpanel.showPca(
+//				dssTask.getProjection(), 
+//				dssTask.getAciveDataPipeline(), 
+//				dssTask.getActiveDesign());
 	}
 
 	@Override
@@ -190,7 +191,7 @@ public class QCPanel extends DockableMRC2ToolboxPanel {
 		super.switchDataPipeline(experiment, newDataPipeline);
 		menuBar.updateMenuFromExperiment(currentExperiment, activeDataPipeline);
 		twoDQCpanel.updateGuiFromExperimentAndDataPipeline(currentExperiment, activeDataPipeline);
-		threeDpanel.updateGuiFromExperimentAndDataPipeline(currentExperiment, activeDataPipeline);
+//		threeDpanel.updateGuiFromExperimentAndDataPipeline(currentExperiment, activeDataPipeline);
 		if(currentExperiment != null && activeDataPipeline != null) {
 			//TODO show data if available
 
