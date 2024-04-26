@@ -49,7 +49,6 @@ public class LCMSPlotToolbar extends PlotToolbar implements ItemListener {
 	protected PlotType plotType;	
 	protected JButton toggleTailHeadButton;
 	protected JComboBox chromatogramTypeComboBox;
-	protected LCMSPlotPanel parentPlot;
 	protected ActionListener plotTypeSwitchListener;
 		
 //	public LCMSPlotToolbar(ActionListener plotTypeSwitchListener) {
@@ -170,8 +169,9 @@ public class LCMSPlotToolbar extends PlotToolbar implements ItemListener {
 		if (e.getSource().equals(chromatogramTypeComboBox) &&
 				e.getStateChange() == ItemEvent.SELECTED) {
 
-			parentPlot.redrawChromatograms(
-					(ChromatogramRenderingType)chromatogramTypeComboBox.getSelectedItem());
+			if(parentPlot instanceof LCMSPlotPanel)
+				((LCMSPlotPanel)parentPlot).redrawChromatograms(
+						(ChromatogramRenderingType)chromatogramTypeComboBox.getSelectedItem());
 		}
 	}
 }

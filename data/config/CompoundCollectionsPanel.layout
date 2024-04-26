@@ -106,7 +106,7 @@
 														<placeholder>dock.single.DockableCompoundMultiplexListingTable</placeholder>
 													</placeholders>
 												</leaf>
-												<leaf id="1" nodeId="1680113462823">
+												<leaf id="3" nodeId="1680113462823">
 													<placeholders>
 														<placeholder>dock.single.DockableCompoundMultiplexComponentsListingTable</placeholder>
 													</placeholders>
@@ -129,13 +129,13 @@
 																<placeholder>dock.single.DockableCompoundCollectionComponentPropertiesTable</placeholder>
 															</placeholders>
 														</leaf>
-														<leaf id="3" nodeId="1680796480777">
+														<leaf id="4" nodeId="1680796480777">
 															<placeholders>
 																<placeholder>dock.single.CpdCollectionsPanelMSReadyMolStructurePanel</placeholder>
 															</placeholders>
 														</leaf>
 													</node>
-													<leaf id="0" nodeId="1680113462826">
+													<leaf id="1" nodeId="1680113462826">
 														<placeholders>
 															<placeholder>dock.single.CpdCollectionsPanelPrimaryMolStructurePanel</placeholder>
 														</placeholders>
@@ -150,7 +150,7 @@
 														</placeholder-map>
 													</leaf>
 												</node>
-												<leaf id="4" nodeId="1680114870523">
+												<leaf id="0" nodeId="1680114870523">
 													<placeholders>
 														<placeholder>dock.single.CpdCollectionsPanelSourceMolStructurePanel</placeholder>
 													</placeholders>
@@ -167,20 +167,20 @@
 							</adjacent>
 							<children ignore="false">
 								<child>
-									<layout factory="predefined" placeholder="dock.single.CpdCollectionsPanelPrimaryMolStructurePanel">
-										<replacement id="dockablesingle CpdCollectionsPanelPrimaryMolStructurePanel"/>
+									<layout factory="predefined" placeholder="dock.single.CpdCollectionsPanelSourceMolStructurePanel">
+										<replacement id="dockablesingle CpdCollectionsPanelSourceMolStructurePanel"/>
 										<delegate id="delegate_ccontrol backup factory id">
-											<id>CpdCollectionsPanelPrimaryMolStructurePanel</id>
+											<id>CpdCollectionsPanelSourceMolStructurePanel</id>
 											<area/>
 										</delegate>
 									</layout>
 									<children ignore="false"/>
 								</child>
 								<child>
-									<layout factory="predefined" placeholder="dock.single.DockableCompoundMultiplexComponentsListingTable">
-										<replacement id="dockablesingle DockableCompoundMultiplexComponentsListingTable"/>
+									<layout factory="predefined" placeholder="dock.single.CpdCollectionsPanelPrimaryMolStructurePanel">
+										<replacement id="dockablesingle CpdCollectionsPanelPrimaryMolStructurePanel"/>
 										<delegate id="delegate_ccontrol backup factory id">
-											<id>DockableCompoundMultiplexComponentsListingTable</id>
+											<id>CpdCollectionsPanelPrimaryMolStructurePanel</id>
 											<area/>
 										</delegate>
 									</layout>
@@ -197,20 +197,20 @@
 									<children ignore="false"/>
 								</child>
 								<child>
-									<layout factory="predefined" placeholder="dock.single.CpdCollectionsPanelMSReadyMolStructurePanel">
-										<replacement id="dockablesingle CpdCollectionsPanelMSReadyMolStructurePanel"/>
+									<layout factory="predefined" placeholder="dock.single.DockableCompoundMultiplexComponentsListingTable">
+										<replacement id="dockablesingle DockableCompoundMultiplexComponentsListingTable"/>
 										<delegate id="delegate_ccontrol backup factory id">
-											<id>CpdCollectionsPanelMSReadyMolStructurePanel</id>
+											<id>DockableCompoundMultiplexComponentsListingTable</id>
 											<area/>
 										</delegate>
 									</layout>
 									<children ignore="false"/>
 								</child>
 								<child>
-									<layout factory="predefined" placeholder="dock.single.CpdCollectionsPanelSourceMolStructurePanel">
-										<replacement id="dockablesingle CpdCollectionsPanelSourceMolStructurePanel"/>
+									<layout factory="predefined" placeholder="dock.single.CpdCollectionsPanelMSReadyMolStructurePanel">
+										<replacement id="dockablesingle CpdCollectionsPanelMSReadyMolStructurePanel"/>
 										<delegate id="delegate_ccontrol backup factory id">
-											<id>CpdCollectionsPanelSourceMolStructurePanel</id>
+											<id>CpdCollectionsPanelMSReadyMolStructurePanel</id>
 											<area/>
 										</delegate>
 									</layout>

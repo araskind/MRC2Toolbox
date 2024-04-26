@@ -73,7 +73,7 @@ public class PlotToolbar extends CommonToolbar implements ActionListener{
 	protected static final Icon msHead2tailIcon = GuiUtils.getIcon("msHead2tail", 24);
 	protected static final Icon msHead2headIcon = GuiUtils.getIcon("msHead2head", 24);
 	
-	private MasterPlotPanel parentPlot;
+	protected MasterPlotPanel parentPlot;
 	protected Dimension buttonDimension = new Dimension(28, 28);
 
 	protected JButton
