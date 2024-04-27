@@ -71,6 +71,8 @@ public class MSMSDecoyLibraryImportTask extends AbstractTask {
 
 			e.printStackTrace();
 			setStatus(TaskStatus.ERROR);
+return;
+
 		}
 //		setStatus(TaskStatus.FINISHED);
 		
@@ -83,6 +85,8 @@ public class MSMSDecoyLibraryImportTask extends AbstractTask {
 				
 				e1.printStackTrace();
 				setStatus(TaskStatus.ERROR);
+return;
+
 			} 
 		}
 		else {
@@ -94,6 +98,8 @@ public class MSMSDecoyLibraryImportTask extends AbstractTask {
 
 			e.printStackTrace();
 			setStatus(TaskStatus.ERROR);
+return;
+
 		}				
 		setStatus(TaskStatus.FINISHED);
 	}

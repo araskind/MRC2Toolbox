@@ -61,6 +61,8 @@ public class LoadCompoundMultiplexesTask extends AbstractTask {
 			e.printStackTrace();
 			errorMessage = e.getMessage();
 			setStatus(TaskStatus.ERROR);
+return;
+
 		}
 		try {
 			solvents  = CompoundMultiplexUtils.getSolventList();
@@ -68,6 +70,8 @@ public class LoadCompoundMultiplexesTask extends AbstractTask {
 			e.printStackTrace();
 			errorMessage = e.getMessage();
 			setStatus(TaskStatus.ERROR);
+return;
+
 		}		
 		try {
 			multiplexes = CompoundMultiplexUtils.getCompoundMultiplexMixtureList();
@@ -75,6 +79,8 @@ public class LoadCompoundMultiplexesTask extends AbstractTask {
 			e.printStackTrace();
 			errorMessage = e.getMessage();
 			setStatus(TaskStatus.ERROR);
+return;
+
 		}
 		try {
 			getMultiplexComponents();
@@ -82,6 +88,8 @@ public class LoadCompoundMultiplexesTask extends AbstractTask {
 			e.printStackTrace();
 			errorMessage = e.getMessage();
 			setStatus(TaskStatus.ERROR);
+return;
+
 		}
 		try {
 			getCompoundComponents();
@@ -89,6 +97,8 @@ public class LoadCompoundMultiplexesTask extends AbstractTask {
 			e.printStackTrace();
 			errorMessage = e.getMessage();
 			setStatus(TaskStatus.ERROR);
+return;
+
 		}
 		setStatus(TaskStatus.FINISHED);
 	}

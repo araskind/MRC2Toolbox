@@ -105,6 +105,8 @@ public class NISTMsPepSearchDataUploadTask extends NISTMsPepSearchTask {
 		} catch (Exception e) {
 			e.printStackTrace();
 			setStatus(TaskStatus.ERROR);
+return;
+
 		}
 		if(writeResultsFileWithSpectra) {
 			
@@ -140,6 +142,8 @@ public class NISTMsPepSearchDataUploadTask extends NISTMsPepSearchTask {
 		} catch (Exception e) {
 			e.printStackTrace();
 			setStatus(TaskStatus.ERROR);
+return;
+
 		}
 		if(validateOnly) {
 			setStatus(TaskStatus.FINISHED);
@@ -152,6 +156,8 @@ public class NISTMsPepSearchDataUploadTask extends NISTMsPepSearchTask {
 			} catch (Exception e) {
 				e.printStackTrace();
 				setStatus(TaskStatus.ERROR);
+return;
+
 			}
 		}
 		if(!pooListForUpdateOnly.isEmpty() && addMissingParameters) {
@@ -161,6 +167,8 @@ public class NISTMsPepSearchDataUploadTask extends NISTMsPepSearchTask {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 				setStatus(TaskStatus.ERROR);
+return;
+
 			}
 		}
 		setStatus(TaskStatus.FINISHED);

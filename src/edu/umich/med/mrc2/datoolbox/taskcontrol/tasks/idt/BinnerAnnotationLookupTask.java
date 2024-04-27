@@ -96,8 +96,9 @@ public class BinnerAnnotationLookupTask extends AbstractTask {
 			clusterFilteredFeatures();
 		}
 		catch (Exception e) {
-			setStatus(TaskStatus.ERROR);
 			e.printStackTrace();
+			setStatus(TaskStatus.ERROR);
+			return;
 		}
 		setStatus(TaskStatus.FINISHED);		
 	}

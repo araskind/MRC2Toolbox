@@ -43,9 +43,10 @@ public class RawDataRepositoryIndexingTask extends AbstractTask {
 			RawDataManager.indexRepository();
 			setStatus(TaskStatus.FINISHED);
 		} catch (Exception e) {
-			setStatus(TaskStatus.ERROR);
 			e.printStackTrace();
-		}	
+			setStatus(TaskStatus.ERROR);
+			return;
+		}
 		setStatus(TaskStatus.FINISHED);
 	}
 

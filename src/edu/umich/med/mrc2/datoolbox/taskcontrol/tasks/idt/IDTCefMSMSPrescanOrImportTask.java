@@ -122,6 +122,7 @@ public class IDTCefMSMSPrescanOrImportTask extends CEFProcessingTask {
 		catch (Exception e) {
 			e.printStackTrace();
 			setStatus(TaskStatus.ERROR);
+			return;
 		}
 		if(inputFeatureList == null || inputFeatureList.isEmpty()) {
 			errorMessage = "No features found in input file";
@@ -135,12 +136,14 @@ public class IDTCefMSMSPrescanOrImportTask extends CEFProcessingTask {
 		} catch (Exception e1) {
 			e1.printStackTrace();
 			setStatus(TaskStatus.ERROR);
+			return;
 		}
 		try {
 			mapMSMSLibraryMatchesToDatabase();
 		} catch (Exception e1) {
 			e1.printStackTrace();
 			setStatus(TaskStatus.ERROR);
+			return;
 		}
 		if(uploadData) {
 			
@@ -161,6 +164,7 @@ public class IDTCefMSMSPrescanOrImportTask extends CEFProcessingTask {
 			catch (Exception e) {
 				e.printStackTrace();
 				setStatus(TaskStatus.ERROR);
+				return;
 			}
 		}		
 		setStatus(TaskStatus.FINISHED);

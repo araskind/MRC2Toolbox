@@ -43,6 +43,8 @@ public class NISTParseAndUploadTask extends AbstractTask {
 			e.printStackTrace();
 			errorMessage = e.getMessage();
 			setStatus(TaskStatus.ERROR);
+return;
+
 		}
 		try {
 			uploadRecordsToDatabase();
@@ -50,6 +52,8 @@ public class NISTParseAndUploadTask extends AbstractTask {
 			e.printStackTrace();
 			errorMessage = e.getMessage();
 			setStatus(TaskStatus.ERROR);
+return;
+
 		}
 		setStatus(TaskStatus.FINISHED);	
 	}

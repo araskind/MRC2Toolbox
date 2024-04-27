@@ -50,6 +50,8 @@ public class MSMSClusterDataSetUploadTask extends MSMSClusterTask {
 			errorMessage = e.getMessage();
 			e.printStackTrace();
 			setStatus(TaskStatus.ERROR);
+return;
+
 		}
 		try {
 			insertNewMSMSClusterDataSet(dataSet, conn);
@@ -57,6 +59,8 @@ public class MSMSClusterDataSetUploadTask extends MSMSClusterTask {
 			errorMessage = e1.getMessage();
 			e1.printStackTrace();
 			setStatus(TaskStatus.ERROR);
+return;
+
 		}	
 		if(conn != null) {
 			try {

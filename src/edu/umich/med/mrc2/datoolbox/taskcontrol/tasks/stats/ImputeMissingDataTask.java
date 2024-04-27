@@ -74,6 +74,8 @@ public class ImputeMissingDataTask  extends AbstractTask {
 
 			e.printStackTrace();
 			setStatus(TaskStatus.ERROR);
+return;
+
 		}			
 	}
 }

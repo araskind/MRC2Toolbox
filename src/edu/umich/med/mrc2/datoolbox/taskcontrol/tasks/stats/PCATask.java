@@ -112,6 +112,8 @@ public class PCATask extends AbstractTask {
 
 			e.printStackTrace();
 			setStatus(TaskStatus.ERROR);
+return;
+
 		}
 		setStatus(TaskStatus.FINISHED);
 	}

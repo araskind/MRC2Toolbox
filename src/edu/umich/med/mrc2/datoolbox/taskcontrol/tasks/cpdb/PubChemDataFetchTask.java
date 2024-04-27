@@ -85,12 +85,16 @@ public class PubChemDataFetchTask extends AbstractTask {
 		} catch (Exception e1) {
 			e1.printStackTrace();
 			setStatus(TaskStatus.ERROR);
+return;
+
 		}
 		try {
 			fetchPubChemData();
 		} catch (Exception e1) {
 			e1.printStackTrace();
 			setStatus(TaskStatus.ERROR);
+return;
+
 		}
 		try {
 			ConnectionManager.releaseConnection(conn);

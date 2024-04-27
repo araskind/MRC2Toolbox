@@ -86,6 +86,8 @@ public class MSMSImportTask extends AbstractTask {
 
 				e1.printStackTrace();
 				setStatus(TaskStatus.ERROR);
+return;
+
 			}
 		}
 		if(FilenameUtils.getExtension(msmsDataFile.getName()).equalsIgnoreCase("XML")){
@@ -96,6 +98,8 @@ public class MSMSImportTask extends AbstractTask {
 
 				e1.printStackTrace();
 				setStatus(TaskStatus.ERROR);
+return;
+
 			}
 		}
 		if(activeMsMs != null) {

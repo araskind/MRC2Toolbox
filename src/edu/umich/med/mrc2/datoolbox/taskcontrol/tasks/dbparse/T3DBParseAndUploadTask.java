@@ -98,24 +98,34 @@ public class T3DBParseAndUploadTask extends HMDBParseAndUploadTask {
 			e.printStackTrace();
 			errorMessage = e.getMessage();
 			setStatus(TaskStatus.ERROR);
+			return;
 		}
 		try {
 			getHMDBMetadata();
 		} catch (Exception e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
+			errorMessage = e1.getMessage();
+			setStatus(TaskStatus.ERROR);
+			return;
 		}
 		try {
 			extractRedundantData();
 		} catch (Exception e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
+			errorMessage = e1.getMessage();
+			setStatus(TaskStatus.ERROR);
+			return;
 		}
 		try {
 			insertRedundantData();
 		} catch (Exception e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
+			errorMessage = e1.getMessage();
+			setStatus(TaskStatus.ERROR);
+			return;
 		}
 		try {
 			uploadRecordsToDatabase();
@@ -123,6 +133,7 @@ public class T3DBParseAndUploadTask extends HMDBParseAndUploadTask {
 			e.printStackTrace();
 			errorMessage = e.getMessage();
 			setStatus(TaskStatus.ERROR);
+			return;
 		}
 		setStatus(TaskStatus.FINISHED);		
 	}

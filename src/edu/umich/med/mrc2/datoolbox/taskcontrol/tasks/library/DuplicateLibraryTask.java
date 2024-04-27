@@ -78,6 +78,8 @@ public class DuplicateLibraryTask extends AbstractTask {
 
 			e.printStackTrace();
 			setStatus(TaskStatus.ERROR);
+return;
+
 		}
 		setStatus(TaskStatus.FINISHED);
 	}

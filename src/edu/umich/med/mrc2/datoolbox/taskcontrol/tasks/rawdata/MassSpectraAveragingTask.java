@@ -32,7 +32,6 @@ import edu.umich.med.mrc2.datoolbox.data.AverageMassSpectrum;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.MsPoint;
 import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
-import edu.umich.med.mrc2.datoolbox.gui.utils.InformationDialog;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
@@ -85,9 +84,9 @@ public class MassSpectraAveragingTask extends AbstractTask {
 			}
 		} 
 		catch (Throwable e) {
+			e.printStackTrace();
 			setStatus(TaskStatus.ERROR);
-			InformationDialog errorDilalog = 
-					new InformationDialog("Spectrum extraction failed!", e, null);
+			return;
 		}
 		this.setStatus(TaskStatus.FINISHED);
 	}

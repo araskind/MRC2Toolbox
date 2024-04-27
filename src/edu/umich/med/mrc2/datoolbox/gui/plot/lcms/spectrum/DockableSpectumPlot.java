@@ -464,19 +464,6 @@ public class DockableSpectumPlot extends DefaultSingleCDockable implements Actio
 	}
 
 	public void showTandemMsWithReference(
-			TandemMassSpectrum msms, 
-			TandemMassSpectrum reference) {
-
-		removeAllDataSets();
-		activeMsDataSet = 
-				new HeadToTailMsDataSet(msms, reference);
-		finalizeTandemMsWithReferencePlotSetup(
-				(HeadToTailMsDataSet) activeMsDataSet, 
-				msms.getNormalisedParentIon(), 
-				reference.getNormalisedParentIon());
-	}
-
-	public void showTandemMsWithReference(
 			TandemMassSpectrum instrumentSpectrum, 
 			MsMsLibraryFeature libFeature) {
 

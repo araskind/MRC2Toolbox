@@ -110,8 +110,9 @@ public class LibraryExportTask extends CEFProcessingTask {
 			try {
 				writeCefLibrary(libraryFeatureListForExport, combineAdducts);
 			} catch (Exception e) {
-				setStatus(TaskStatus.ERROR);
 				e.printStackTrace();
+				setStatus(TaskStatus.ERROR);
+				return;				
 			}
 		}
 		if(libraryFormat.equals(MsLibraryFormat.MSP))
@@ -123,6 +124,8 @@ public class LibraryExportTask extends CEFProcessingTask {
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
+				setStatus(TaskStatus.ERROR);
+				return;	
 			}
 		}
 		setStatus(TaskStatus.FINISHED);

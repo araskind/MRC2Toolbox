@@ -70,8 +70,9 @@ public class MultiplexDataExportTask extends AbstractTask {
 			setStatus(TaskStatus.FINISHED);
 		}
 		catch (Exception e1) {
-			setStatus(TaskStatus.ERROR);
 			e1.printStackTrace();
+			setStatus(TaskStatus.ERROR);
+			return;
 		}
 	}
 	

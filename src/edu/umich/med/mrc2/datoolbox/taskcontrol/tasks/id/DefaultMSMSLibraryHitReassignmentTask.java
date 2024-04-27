@@ -86,8 +86,9 @@ public class DefaultMSMSLibraryHitReassignmentTask extends AbstractTask {
 				NISTPepSearchUtils.removeLockedFeatures(featuresToUpdate);
 		}
 		catch (Exception e1) {
-			setStatus(TaskStatus.ERROR);
 			e1.printStackTrace();
+			setStatus(TaskStatus.ERROR);
+			return;
 		}
 		if(featuresToUpdate.isEmpty()) {
 			setStatus(TaskStatus.FINISHED);
@@ -98,8 +99,9 @@ public class DefaultMSMSLibraryHitReassignmentTask extends AbstractTask {
 			setStatus(TaskStatus.FINISHED);
 		}
 		catch (Exception e1) {
-			setStatus(TaskStatus.ERROR);
 			e1.printStackTrace();
+			setStatus(TaskStatus.ERROR);
+			return;
 		}
 		if(commitChangesToDatabase) {
 			
@@ -108,6 +110,8 @@ public class DefaultMSMSLibraryHitReassignmentTask extends AbstractTask {
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
+				setStatus(TaskStatus.ERROR);
+				return;
 			}
 		}
 	}

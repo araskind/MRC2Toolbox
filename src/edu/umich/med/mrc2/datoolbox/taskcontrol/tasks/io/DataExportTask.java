@@ -172,8 +172,9 @@ public class DataExportTask extends AbstractTask {
 				writeRexportFile();
 				setStatus(TaskStatus.FINISHED);
 			} catch (Exception e) {
-				setStatus(TaskStatus.ERROR);
 				e.printStackTrace();
+				setStatus(TaskStatus.ERROR);
+				return;
 			}
 		}
 		if (exportType.equals(MainActionCommands.EXPORT_RESULTS_4MPP_COMMAND)) {
@@ -181,8 +182,9 @@ public class DataExportTask extends AbstractTask {
 				writeMPPexportFile();
 				setStatus(TaskStatus.FINISHED);
 			} catch (Exception e) {
-				setStatus(TaskStatus.ERROR);
 				e.printStackTrace();
+				setStatus(TaskStatus.ERROR);
+				return;
 			}
 		}
 		if (exportType.equals(MainActionCommands.EXPORT_RESULTS_4BINNER_COMMAND)) {
@@ -190,8 +192,9 @@ public class DataExportTask extends AbstractTask {
 				writeBinnerExportFile();
 				setStatus(TaskStatus.FINISHED);
 			} catch (Exception e) {
-				setStatus(TaskStatus.ERROR);
 				e.printStackTrace();
+				setStatus(TaskStatus.ERROR);
+				return;
 			}
 		}
 		if (exportType.equals(MainActionCommands.EXPORT_DUPLICATES_COMMAND)) {
@@ -199,8 +202,9 @@ public class DataExportTask extends AbstractTask {
 				writeDuplicatesExportFile();
 				setStatus(TaskStatus.FINISHED);
 			} catch (Exception e) {
-				setStatus(TaskStatus.ERROR);
 				e.printStackTrace();
+				setStatus(TaskStatus.ERROR);
+				return;
 			}
 		}
 		if (exportType.equals(MainActionCommands.EXPORT_RESULTS_FOR_METABOLOMICS_WORKBENCH_COMMAND)) {
@@ -208,8 +212,9 @@ public class DataExportTask extends AbstractTask {
 				writeMetabolomicsWorkbenchExportFile();
 				setStatus(TaskStatus.FINISHED);
 			} catch (Exception e) {
-				setStatus(TaskStatus.ERROR);
 				e.printStackTrace();
+				setStatus(TaskStatus.ERROR);
+				return;
 			}
 		}
 		if (exportType.equals(MainActionCommands.EXPORT_MZRT_STATISTICS_COMMAND)) {
@@ -217,8 +222,9 @@ public class DataExportTask extends AbstractTask {
 				writeMZRTDataExportFile();
 				setStatus(TaskStatus.FINISHED);
 			} catch (Exception e) {
-				setStatus(TaskStatus.ERROR);
 				e.printStackTrace();
+				setStatus(TaskStatus.ERROR);
+				return;
 			}
 		}
 		if (exportType.equals(MainActionCommands.EXPORT_FEATURE_STATISTICS_COMMAND)) {
@@ -226,8 +232,9 @@ public class DataExportTask extends AbstractTask {
 				writeFeatureQCDataExportFile();
 				setStatus(TaskStatus.FINISHED);
 			} catch (Exception e) {
-				setStatus(TaskStatus.ERROR);
 				e.printStackTrace();
+				setStatus(TaskStatus.ERROR);
+				return;
 			}
 		}
 	}
@@ -382,8 +389,9 @@ public class DataExportTask extends AbstractTask {
 			try {
 				featureMatrix = Matrix.Factory.load(featureMatrixFile);
 			} catch (ClassNotFoundException | IOException e) {
-				setStatus(TaskStatus.ERROR);
 				e.printStackTrace();
+				setStatus(TaskStatus.ERROR);
+				return null;
 			}
 			if (featureMatrix != null) {
 

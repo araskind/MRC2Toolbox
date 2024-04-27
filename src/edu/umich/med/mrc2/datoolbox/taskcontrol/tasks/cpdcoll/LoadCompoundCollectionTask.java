@@ -57,6 +57,8 @@ public class LoadCompoundCollectionTask extends AbstractTask {
 			e.printStackTrace();
 			errorMessage = e.getMessage();
 			setStatus(TaskStatus.ERROR);
+return;
+
 		}
 		try {
 			getTemporaryComponents();
@@ -64,6 +66,8 @@ public class LoadCompoundCollectionTask extends AbstractTask {
 			e.printStackTrace();
 			errorMessage = e.getMessage();
 			setStatus(TaskStatus.ERROR);
+return;
+
 		}
 		setStatus(TaskStatus.FINISHED);
 	}

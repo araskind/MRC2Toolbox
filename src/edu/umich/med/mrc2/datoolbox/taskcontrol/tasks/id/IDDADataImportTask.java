@@ -86,6 +86,8 @@ public class IDDADataImportTask extends AbstractTask implements TaskListener{
 		catch (Exception e1) {
 			e1.printStackTrace();
 			setStatus(TaskStatus.ERROR);
+return;
+
 		}
 	}
 

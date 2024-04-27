@@ -92,8 +92,9 @@ public class MSMSLibraryMSPExportTask extends AbstractTask {
 			setStatus(TaskStatus.FINISHED);
 		}
 		catch (Exception e1) {
-			setStatus(TaskStatus.ERROR);
 			e1.printStackTrace();
+			setStatus(TaskStatus.ERROR);
+			return;
 		}		
 		try {
 			//	Filter features that have MSMS
@@ -101,8 +102,9 @@ public class MSMSLibraryMSPExportTask extends AbstractTask {
 			setStatus(TaskStatus.FINISHED);
 		}
 		catch (Exception e1) {
-			setStatus(TaskStatus.ERROR);
 			e1.printStackTrace();
+			setStatus(TaskStatus.ERROR);
+			return;
 		}
 	}
 

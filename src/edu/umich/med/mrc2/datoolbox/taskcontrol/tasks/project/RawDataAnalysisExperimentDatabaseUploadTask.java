@@ -96,11 +96,13 @@ public class RawDataAnalysisExperimentDatabaseUploadTask extends MSMSClusterTask
 		} catch (Exception ex) {
 			ex.printStackTrace();
 			setStatus(TaskStatus.ERROR);
+			return;
 		}
 		if(!metadataUploaded) {
 			clearUploadedMetadata();
 			errorMessage = "Experiment upload failed due to database error.";
 			setStatus(TaskStatus.ERROR);
+
 			return;
 		}
 		taskDescription = "Uploading MSMS analysis results ...";
@@ -110,6 +112,7 @@ public class RawDataAnalysisExperimentDatabaseUploadTask extends MSMSClusterTask
 		} catch (Exception ex) {
 			ex.printStackTrace();
 			setStatus(TaskStatus.ERROR);
+			return;
 		}
 	}
 	

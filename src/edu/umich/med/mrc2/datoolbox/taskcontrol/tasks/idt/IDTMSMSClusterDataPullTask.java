@@ -74,13 +74,15 @@ public class IDTMSMSClusterDataPullTask extends IDTMSMSFeatureDataPullTask {
 			errorMessage = e1.getMessage();
 			e1.printStackTrace();
 			setStatus(TaskStatus.ERROR);
+			return;
 		}
 		try {
 			getCachedFeatures();
 		}
-		catch (Exception e) {
-			setStatus(TaskStatus.ERROR);
+		catch (Exception e) {			
 			e.printStackTrace();
+			setStatus(TaskStatus.ERROR);
+			return;
 		}
 		if(featureIds != null && !featureIds.isEmpty()) {
 			try {
@@ -89,6 +91,7 @@ public class IDTMSMSClusterDataPullTask extends IDTMSMSFeatureDataPullTask {
 				errorMessage = e1.getMessage();
 				e1.printStackTrace();
 				setStatus(TaskStatus.ERROR);
+				return;
 			}		
 			try {			
 				if(!features.isEmpty()) {
@@ -108,7 +111,8 @@ public class IDTMSMSClusterDataPullTask extends IDTMSMSFeatureDataPullTask {
 			catch (Exception e) {
 				errorMessage = e.getMessage();
 				e.printStackTrace();
-				setStatus(TaskStatus.ERROR);			
+				setStatus(TaskStatus.ERROR);
+				return;
 			}
 		}
 		finalizeFeatureList();

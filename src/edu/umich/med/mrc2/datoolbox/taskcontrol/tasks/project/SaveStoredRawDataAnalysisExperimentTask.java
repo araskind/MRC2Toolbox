@@ -92,6 +92,8 @@ public class SaveStoredRawDataAnalysisExperimentTask extends AbstractTask implem
 		} catch (Exception ex) {
 			ex.printStackTrace();
 			setStatus(TaskStatus.ERROR);
+return;
+
 		}
 		if(fileFeatureCount == 0) {
 			//compressAndCleanup();

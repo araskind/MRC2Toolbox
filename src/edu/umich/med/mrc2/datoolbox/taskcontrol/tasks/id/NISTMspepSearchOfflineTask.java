@@ -58,6 +58,8 @@ public class NISTMspepSearchOfflineTask extends NISTMsPepSearchRoundTripTask {
 				e.printStackTrace();
 				errorMessage = "Failed to create MSP input file.";
 				setStatus(TaskStatus.ERROR);
+return;
+
 			}
 		}
 		try {
@@ -66,6 +68,8 @@ public class NISTMspepSearchOfflineTask extends NISTMsPepSearchRoundTripTask {
 			e1.printStackTrace();
 			errorMessage = "Failed to run PepSearch.";
 			setStatus(TaskStatus.ERROR);
+return;
+
 		}
 		setStatus(TaskStatus.FINISHED);
 	}

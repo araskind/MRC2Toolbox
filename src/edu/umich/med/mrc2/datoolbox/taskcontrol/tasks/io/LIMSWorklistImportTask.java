@@ -74,6 +74,8 @@ public class LIMSWorklistImportTask extends WorklistTask {
 			} catch (Exception e) {
 				e.printStackTrace();
 				setStatus(TaskStatus.ERROR);
+return;
+
 			}
 		}
 		if(importType.equals(WorklistImportType.RAW_DATA_DIRECTORY_SCAN)) {
@@ -88,6 +90,8 @@ public class LIMSWorklistImportTask extends WorklistTask {
 
 					e.printStackTrace();
 					setStatus(TaskStatus.ERROR);
+return;
+
 				}
 			}
 		}

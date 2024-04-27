@@ -155,7 +155,7 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 		setMouseWheelEnabled(true);
 
 		if (plotType.equals(PlotType.SPECTRUM))
-			msReferenceDisplayType = MSReferenceDisplayType.HEAD_TO_HEAD;
+			msReferenceDisplayType = MSReferenceDisplayType.OVERLAY;
 
 		dataPointsVisible = false;
 		annotationsVisible = true;

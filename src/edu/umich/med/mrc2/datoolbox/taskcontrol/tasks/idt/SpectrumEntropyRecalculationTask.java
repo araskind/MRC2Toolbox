@@ -87,6 +87,8 @@ public class SpectrumEntropyRecalculationTask extends AbstractTask {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			setStatus(TaskStatus.ERROR);
+return;
+
 		}
 		setStatus(TaskStatus.FINISHED);
 	}

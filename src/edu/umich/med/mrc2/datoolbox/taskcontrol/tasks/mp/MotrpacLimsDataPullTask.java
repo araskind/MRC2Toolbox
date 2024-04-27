@@ -53,6 +53,8 @@ public class MotrpacLimsDataPullTask extends AbstractTask {
 			} catch (Exception e) {
 				e.printStackTrace();
 				setStatus(TaskStatus.ERROR);
+return;
+
 			}
 			try {
 				taskDescription = "Getting organization data ...";
@@ -61,6 +63,8 @@ public class MotrpacLimsDataPullTask extends AbstractTask {
 			} catch (Exception e) {
 				e.printStackTrace();
 				setStatus(TaskStatus.ERROR);
+return;
+
 			}
 			try {
 				taskDescription = "Getting project data ...";
@@ -69,6 +73,8 @@ public class MotrpacLimsDataPullTask extends AbstractTask {
 			} catch (Exception e) {
 				e.printStackTrace();
 				setStatus(TaskStatus.ERROR);
+return;
+
 			}
 			try {
 				taskDescription = "Getting experiment data ...";
@@ -77,6 +83,8 @@ public class MotrpacLimsDataPullTask extends AbstractTask {
 			} catch (Exception e) {
 				e.printStackTrace();
 				setStatus(TaskStatus.ERROR);
+return;
+
 			}
 			try {
 				taskDescription = "Refreshing MoTrPAC subject type list";
@@ -85,6 +93,8 @@ public class MotrpacLimsDataPullTask extends AbstractTask {
 			} catch (Exception e) {
 				e.printStackTrace();
 				setStatus(TaskStatus.ERROR);
+return;
+
 			}
 			try {
 				taskDescription = "Refreshing MoTrPAC study list";
@@ -93,6 +103,8 @@ public class MotrpacLimsDataPullTask extends AbstractTask {
 			} catch (Exception e) {
 				e.printStackTrace();
 				setStatus(TaskStatus.ERROR);
+return;
+
 			}
 			try {
 				taskDescription = "Refreshing MoTrPAC assay list";
@@ -101,6 +113,8 @@ public class MotrpacLimsDataPullTask extends AbstractTask {
 			} catch (Exception e) {
 				e.printStackTrace();
 				setStatus(TaskStatus.ERROR);
+return;
+
 			}
 			try {
 				taskDescription = "Refreshing MoTrPAC sample type list";
@@ -109,6 +123,8 @@ public class MotrpacLimsDataPullTask extends AbstractTask {
 			} catch (Exception e) {
 				e.printStackTrace();
 				setStatus(TaskStatus.ERROR);
+return;
+
 			}
 			try {
 				taskDescription = "Refreshing MoTrPAC tissue code list";
@@ -117,6 +133,8 @@ public class MotrpacLimsDataPullTask extends AbstractTask {
 			} catch (Exception e) {
 				e.printStackTrace();
 				setStatus(TaskStatus.ERROR);
+return;
+
 			}
 			try {
 				taskDescription = "Refreshing MoTrPAC report list";
@@ -125,6 +143,8 @@ public class MotrpacLimsDataPullTask extends AbstractTask {
 			} catch (Exception e) {
 				e.printStackTrace();
 				setStatus(TaskStatus.ERROR);
+return;
+
 			}
 			setStatus(TaskStatus.FINISHED);
 		}
@@ -132,6 +152,8 @@ public class MotrpacLimsDataPullTask extends AbstractTask {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			setStatus(TaskStatus.ERROR);
+return;
+
 		}
 		setStatus(TaskStatus.FINISHED);
 	}

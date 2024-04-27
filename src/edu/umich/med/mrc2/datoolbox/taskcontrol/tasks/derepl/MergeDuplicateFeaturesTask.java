@@ -93,6 +93,8 @@ public class MergeDuplicateFeaturesTask extends AbstractTask {
 
 			e.printStackTrace();
 			setStatus(TaskStatus.ERROR);
+return;
+
 		}
 		setStatus(TaskStatus.FINISHED);
 	}
@@ -113,8 +115,9 @@ public class MergeDuplicateFeaturesTask extends AbstractTask {
 			try {
 				featureMatrix = Matrix.Factory.load(featureMatrixFile);
 			} catch (ClassNotFoundException | IOException e) {
-				setStatus(TaskStatus.ERROR);
 				e.printStackTrace();
+				setStatus(TaskStatus.ERROR);
+				return null;				
 			}
 			if (featureMatrix != null) {
 
@@ -289,6 +292,8 @@ public class MergeDuplicateFeaturesTask extends AbstractTask {
 			} catch (IOException e) {
 				e.printStackTrace();
 //					setStatus(TaskStatus.ERROR);
+return;
+
 			}
 			msFeatureMatrix = null;
 			System.gc();

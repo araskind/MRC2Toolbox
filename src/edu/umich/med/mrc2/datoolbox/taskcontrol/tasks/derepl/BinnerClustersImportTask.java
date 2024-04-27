@@ -125,8 +125,9 @@ public class BinnerClustersImportTask extends AbstractTask {
 			try {
 				parsePostProcessorIdData();
 			} catch (Exception e) {
-				setStatus(TaskStatus.ERROR);
 				e.printStackTrace();
+				setStatus(TaskStatus.ERROR);
+				return;
 			}
 		}
 	}
@@ -142,8 +143,9 @@ public class BinnerClustersImportTask extends AbstractTask {
 			try {
 				parseClusteringData();
 			} catch (Exception e) {
-				setStatus(TaskStatus.ERROR);
 				e.printStackTrace();
+				setStatus(TaskStatus.ERROR);
+				return;
 			}
 		}
 	}

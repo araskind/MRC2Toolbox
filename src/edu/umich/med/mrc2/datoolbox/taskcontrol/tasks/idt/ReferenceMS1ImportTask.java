@@ -110,6 +110,7 @@ public class ReferenceMS1ImportTask extends CEFProcessingTask {
 		catch (Exception e) {
 			e.printStackTrace();
 			setStatus(TaskStatus.ERROR);
+			return;
 		}
 		setStatus(TaskStatus.FINISHED);
 	}

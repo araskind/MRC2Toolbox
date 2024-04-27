@@ -96,8 +96,9 @@ public class FeatureVsFeatureMSMSSearchTask extends AbstractTask implements Task
 				searchFeaturesAgainstLibrary();				
 			}
 			catch (Exception e) {
-				setStatus(TaskStatus.ERROR);
 				e.printStackTrace();
+				setStatus(TaskStatus.ERROR);
+				return;
 			}
 		}
 	}

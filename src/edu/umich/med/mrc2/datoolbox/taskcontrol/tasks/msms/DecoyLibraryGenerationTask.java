@@ -158,12 +158,16 @@ public class DecoyLibraryGenerationTask extends AbstractTask implements TaskList
 		} catch (Exception e) {
 			e.printStackTrace();
 			setStatus(TaskStatus.ERROR);
+return;
+
 		}
 		try {
 			runDecoyGeneration();
 		} catch (Exception e) {
 			e.printStackTrace();
 			setStatus(TaskStatus.ERROR);
+return;
+
 		}
 	}
 	
@@ -230,6 +234,8 @@ public class DecoyLibraryGenerationTask extends AbstractTask implements TaskList
 		} catch (IOException e) {
 			e.printStackTrace();
 			setStatus(TaskStatus.ERROR);
+return;
+
 		}
 	}
 	
@@ -242,6 +248,8 @@ public class DecoyLibraryGenerationTask extends AbstractTask implements TaskList
 		} catch (IOException e) {
 			e.printStackTrace();
 			setStatus(TaskStatus.ERROR);
+return;
+
 		}
 	}
 
@@ -306,14 +314,20 @@ public class DecoyLibraryGenerationTask extends AbstractTask implements TaskList
         		addLogLine(errorMessage);
         		addLogLine("Failed to create decoy for " + feature.getUniqueId());
 				setStatus(TaskStatus.ERROR);
+return;
+
 			}
 		}
 		catch (IOException e1) {
 			e1.printStackTrace();
 			setStatus(TaskStatus.ERROR);
+return;
+
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 			setStatus(TaskStatus.ERROR);
+return;
+
 		}
 	}
 	

@@ -23,8 +23,8 @@ package edu.umich.med.mrc2.datoolbox.gui.plot.lcms.spectrum;
 
 public enum MSReferenceDisplayType {
 
-	HEAD_TO_HEAD("Overlay"),
-	HEAD_TO_TAIL("head-to-tail"),
+	OVERLAY("Overlay"),
+	HEAD_TO_TAIL("Head-to-tail"),
 	DIFFERENCE("Difference"),
 	;
 	

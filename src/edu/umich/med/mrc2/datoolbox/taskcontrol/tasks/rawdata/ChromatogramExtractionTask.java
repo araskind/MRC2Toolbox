@@ -210,7 +210,9 @@ public class ChromatogramExtractionTask extends AbstractTask {
 		} 
 		catch (Exception e) {
 			e.printStackTrace();
-			setStatus(TaskStatus.ERROR);		
+			setStatus(TaskStatus.ERROR);
+return;
+		
 		}
 	}
 	

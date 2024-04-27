@@ -99,7 +99,9 @@ public class RawDataLoadForInjectionsTask extends AbstractTask implements TaskLi
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			setStatus(TaskStatus.ERROR);		
+			setStatus(TaskStatus.ERROR);
+return;
+		
 		}
 	}
 	

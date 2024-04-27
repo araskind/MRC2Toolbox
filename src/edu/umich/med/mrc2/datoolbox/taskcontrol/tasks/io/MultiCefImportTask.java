@@ -225,6 +225,7 @@ public class MultiCefImportTask extends AbstractTask implements TaskListener{
 			} catch (Exception e1) {
 				e1.printStackTrace();
 				setStatus(TaskStatus.ERROR);
+				return;
 			}
 		}
 	}
@@ -274,6 +275,8 @@ public class MultiCefImportTask extends AbstractTask implements TaskListener{
 			} catch (IOException e) {
 				e.printStackTrace();
 //					setStatus(TaskStatus.ERROR);
+return;
+
 			}
 			String featureMatrixFileName = experimentToSave.getFeatureMatrixFileNameForDataPipeline(dataPipeline);
 			if(featureMatrixFileName != null) {
@@ -292,6 +295,8 @@ public class MultiCefImportTask extends AbstractTask implements TaskListener{
 				} catch (IOException e) {
 					e.printStackTrace();
 //					setStatus(TaskStatus.ERROR);
+return;
+
 				}
 				experimentToSave.setFeatureMatrixForDataPipeline(dataPipeline, null);
 				featureMatrix = null;

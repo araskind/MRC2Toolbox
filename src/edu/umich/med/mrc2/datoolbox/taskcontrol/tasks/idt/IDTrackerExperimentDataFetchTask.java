@@ -91,8 +91,9 @@ public class IDTrackerExperimentDataFetchTask extends IDTMSMSFeatureSearchTask {
 			}
 		}
 		catch (Exception e) {
-			setStatus(TaskStatus.ERROR);
 			e.printStackTrace();
+			setStatus(TaskStatus.ERROR);
+			return;
 		}
 		finalizeFeatureList();
 		setStatus(TaskStatus.FINISHED);

@@ -65,6 +65,8 @@ public class SaveFileMsFeaturesTask extends AbstractTask {
 
 			ex.printStackTrace();
 			setStatus(TaskStatus.ERROR);
+return;
+
 		}
 		setStatus(TaskStatus.FINISHED);
 	}

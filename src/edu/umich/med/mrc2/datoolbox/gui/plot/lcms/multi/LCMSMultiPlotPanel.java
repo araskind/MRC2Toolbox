@@ -32,18 +32,16 @@ import org.jfree.chart.ui.Layer;
 import org.jfree.chart.ui.RectangleEdge;
 import org.jfree.chart.ui.RectangleInsets;
 import org.jfree.data.Range;
-import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
-import edu.umich.med.mrc2.datoolbox.data.MsFeaturePair;
+import edu.umich.med.mrc2.datoolbox.data.MsPlotDataObject;
 import edu.umich.med.mrc2.datoolbox.data.MsPoint;
 import edu.umich.med.mrc2.datoolbox.data.enums.MsDepth;
 import edu.umich.med.mrc2.datoolbox.data.msclust.IMsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.plot.PlotType;
 import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.HeadToTailMsDataSet;
-import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.MsDataSet;
 import edu.umich.med.mrc2.datoolbox.gui.plot.lcms.LCMSPlotPanel;
 import edu.umich.med.mrc2.datoolbox.gui.plot.lcms.spectrum.MSReferenceDisplayType;
 import edu.umich.med.mrc2.datoolbox.gui.plot.lcms.spectrum.MsReferenceType;
@@ -55,14 +53,15 @@ public class LCMSMultiPlotPanel extends LCMSPlotPanel {
 
 	
 	private static final long serialVersionUID = 1L;
-	protected int subPlotHeight;
-		
+	
+	protected int minimumSubPlotHeight = 100;		
 	protected FilledChromatogramRenderer filledChromatogramRenderer;
 	protected FilledChromatogramRenderer linesChromatogramRenderer;
 	protected DefaultSplineRenderer splineRenderer;
 	protected Map<Comparable, XYPlot>objectPlotMap;	
 	protected Range defaultRtRange;
 	protected double rtWindowExtensionWidth;
+	protected int plotCount;
 
 	public LCMSMultiPlotPanel(PlotType plotType) {
 		
@@ -327,101 +326,199 @@ public class LCMSMultiPlotPanel extends LCMSPlotPanel {
 			MSReferenceDisplayType displayType) {
 		
 		removeAllDataSets();
-		MSFeatureInfoBundle refBundle = null;
-		int plotCount = cluster.getComponents().size();
-		if(refType.equals(MsReferenceType.REFERENCE_FEATURE)) {
-			
-			plotCount = plotCount -1;
-			refBundle = cluster.getComponents().stream().
-					filter(b -> b.isUsedAsMatchingTarget()).
-					findFirst().orElse(null);
-			if(refBundle == null)
-				return;
-			
-			List<MSFeatureInfoBundle> unkBundles = 
-					cluster.getComponents().stream().
-					filter(b -> !b.isUsedAsMatchingTarget()).
-					collect(Collectors.toList());
-			
-			for(MSFeatureInfoBundle b : unkBundles) {
-				
-				MsFeaturePair featurePair = 
-						new MsFeaturePair(refBundle.getMsFeature(), b.getMsFeature());
-				
-				MsDataSet dataSet = null;
-				if(displayType.equals(MSReferenceDisplayType.HEAD_TO_TAIL))
-					dataSet = new HeadToTailMsDataSet(featurePair, msLevel);
-					
-				if(displayType.equals(MSReferenceDisplayType.DIFFERENCE)) {
-					
-				}
-				if(displayType.equals(MSReferenceDisplayType.HEAD_TO_HEAD)) {
-					
-				}				
-				if(dataSet != null) {
-					
-					XYPlot newPlot = getNewXYPlot();
-					if(msLevel.equals(MsDepth.MS1)) {
-						
-						newPlot.setDataset(0, dataSet);
-						newPlot.setRenderer(0, defaultMsRenderer);
-					}
-					if(msLevel.equals(MsDepth.MS2)) {
-						
-						newPlot.setDataset(1, dataSet);
-						newPlot.setRenderer(1, defaultMsRenderer);
-						
-//						addParentIonDataSeries(
-//								dataSet,
-//								newPlot,
-//								featurePair.getUnknownFeatureParentIon(),
-//								featurePair.getReferenceFeatureParentIon());
-					}	
-					ValueMarker marker = new ValueMarker(0.0d);
-					marker.setPaint(Color.GRAY);
-					newPlot.addRangeMarker(marker);
-					try {
-						((CombinedDomainXYPlot)plot).add(newPlot);
-					} catch (Exception e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-					objectPlotMap.put(featurePair, newPlot);
-				}
-			}
-		}
-		if(refType.equals(MsReferenceType.LIBRARY_MATCH)) {
-			
-		}
-		setPreferredSize(new Dimension(
-				getPreferredSize().width, subPlotHeight * plotCount));
 
+		if(refType.equals(MsReferenceType.REFERENCE_FEATURE))
+			createFeatureToReferenceFeaturePlotForCluster(cluster, msLevel, displayType);
+		
+		if(refType.equals(MsReferenceType.LIBRARY_MATCH))
+			createFeatureToLibraryMatchPlotForCluster(cluster, displayType);
+		
+		
+		adjustSize(plotCount);
 		chart.fireChartChanged();
 		revalidate();
 		repaint();
 	}
 	
-	private void addParentIonDataSeries(
-			MsDataSet dataSet,
-			XYPlot plot,
-			MsPoint featureParentIon,
-			MsPoint referenceParentIon) {
+	protected void createFeatureToReferenceFeaturePlotForCluster(
+			IMsFeatureInfoBundleCluster cluster, 
+			MsDepth msLevel, 
+			MSReferenceDisplayType displayType) {
+
+		MSFeatureInfoBundle refBundle = 
+				cluster.getComponents().stream().
+				filter(b -> b.isUsedAsMatchingTarget()).
+				findFirst().orElse(null);
+		if(refBundle == null)
+			return;
 		
-		XYSeriesCollection parentSet = new XYSeriesCollection();
-		if(featureParentIon != null) {
-			dataSet.getMassRange().extendRange(featureParentIon.getMz());
-			XYSeries parentSeries = new XYSeries("Feature parent ion");
-			parentSeries.add(featureParentIon.getMz(), featureParentIon.getIntensity());			
-			parentSet.addSeries(parentSeries);
-		}	
-		if(referenceParentIon != null) {
-			dataSet.getMassRange().extendRange(referenceParentIon.getMz());
-			XYSeries refParentSeries = new XYSeries("Reference parent ion");
-			refParentSeries.add(referenceParentIon.getMz(), -referenceParentIon.getIntensity());			
-			parentSet.addSeries(refParentSeries);
+		List<MSFeatureInfoBundle> unkBundles = 
+				cluster.getComponents().stream().
+				filter(b -> !b.isUsedAsMatchingTarget()).
+				collect(Collectors.toList());
+		
+		plotCount = 0;
+		for(MSFeatureInfoBundle b : unkBundles) {
+			
+			XYPlot newPlot = null;
+			
+			if(displayType.equals(MSReferenceDisplayType.HEAD_TO_TAIL)) {
+				
+				MsPlotDataObject unkData = createMsPlotDataObject(
+						b, msLevel, MsReferenceType.REFERENCE_FEATURE);
+				MsPlotDataObject refData = createMsPlotDataObject(
+						refBundle, msLevel, MsReferenceType.REFERENCE_FEATURE);
+				newPlot = createheadToTailPlot(unkData, refData, msLevel);
+			}
+			if(displayType.equals(MSReferenceDisplayType.DIFFERENCE)) {
+				
+			}
+			if(displayType.equals(MSReferenceDisplayType.OVERLAY)) {
+				
+			}
+			if(newPlot != null) {
+				try {
+					((CombinedDomainXYPlot)plot).add(newPlot);
+					plotCount++;
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}				
+			}
 		}
-		plot.setRenderer(0, defaultParentIonRenderer);
-		plot.setDataset(0, parentSet);
+	}
+	
+	protected MsPlotDataObject createMsPlotDataObject(
+			MSFeatureInfoBundle msf, 
+			MsDepth msLevel,
+			MsReferenceType refType) {
+		
+		Collection<MsPoint>spectrum = null;
+		MsPoint parent = null;
+		String label = null;
+		if(msLevel.equals(MsDepth.MS1)) {
+			
+			if(msf.getMsFeature().getSpectrum() != null)
+				spectrum = msf.getMsFeature().getSpectrum().getMsPoints();
+		}
+		if(msLevel.equals(MsDepth.MS2)) {
+			
+			if(msf.getMsFeature().getSpectrum() != null
+					&& msf.getMsFeature().getSpectrum().getExperimentalTandemSpectrum() != null) {
+				
+				spectrum = msf.getMsFeature().getSpectrum().getExperimentalTandemSpectrum().getSpectrum();
+				parent = msf.getMsFeature().getSpectrum().getExperimentalTandemSpectrum().getParent();
+			}
+		}
+		if(refType.equals(MsReferenceType.REFERENCE_FEATURE))
+			label = msf.getMsFeature().getName();
+		
+		if(refType.equals(MsReferenceType.LIBRARY_MATCH)) {
+			
+		}
+		return new MsPlotDataObject(spectrum, parent, label);
+	}
+	
+	protected void createFeatureToLibraryMatchPlotForCluster(
+			IMsFeatureInfoBundleCluster cluster, 
+			MSReferenceDisplayType displayType) {
+		
+		plotCount = 0;
+		for(MSFeatureInfoBundle b : cluster.getComponents()) {
+			
+			if(displayType.equals(MSReferenceDisplayType.HEAD_TO_TAIL)) {
+				
+			}
+			if(displayType.equals(MSReferenceDisplayType.DIFFERENCE)) {
+				
+			}
+			if(displayType.equals(MSReferenceDisplayType.OVERLAY)) {
+				
+			}
+		}
+	}
+	
+	protected void adjustSize(int subPlotCount) {
+		
+		if(getPreferredSize().height < minimumSubPlotHeight * subPlotCount)
+			setPreferredSize(new Dimension(
+					getPreferredSize().width, minimumSubPlotHeight * subPlotCount));
+	}
+	
+//	protected XYPlot createReferenceFeaturePlot(
+//			MsFeaturePair featurePair,
+//			MsDepth msLevel, 
+//			MSReferenceDisplayType displayType) {
+//			
+//		if(featurePair.getUnknownFeature().getSpectrum() == null 
+//				|| featurePair.getReferenceFeature().getSpectrum() == null)
+//			return null;
+//		
+//		XYPlot newPlot = null;
+//		Collection<MsPoint>unkSpectrum = null;
+//		MsPoint unkParent = null;
+//		Collection<MsPoint>refSpectrum = null;
+//		MsPoint refParent = null;
+//		if(msLevel.equals(MsDepth.MS1)) {
+//			
+//			unkSpectrum = featurePair.getUnknownFeature().getSpectrum().getMsPoints();
+//			refSpectrum = featurePair.getReferenceFeature().getSpectrum().getMsPoints();			
+//		}
+//		if(msLevel.equals(MsDepth.MS2)) {
+//			
+//			if(featurePair.getUnknownFeature().getSpectrum().getExperimentalTandemSpectrum() != null) {
+//				unkSpectrum = featurePair.getUnknownFeature().getSpectrum().getExperimentalTandemSpectrum().getSpectrum();
+//				unkParent = featurePair.getUnknownFeature().getMSMSParentIon();
+//			}
+//			if(featurePair.getReferenceFeature().getSpectrum().getExperimentalTandemSpectrum() != null) {
+//				refSpectrum = featurePair.getReferenceFeature().getSpectrum().getExperimentalTandemSpectrum().getSpectrum();
+//				refParent = featurePair.getReferenceFeature().getMSMSParentIon();
+//			}
+//		}
+//		if(displayType.equals(MSReferenceDisplayType.HEAD_TO_TAIL))			
+////			newPlot = createheadToTailPlot(
+////					unkSpectrum, 
+////					unkParent, 
+////					featurePair.getUnknownFeature().getName()
+////					refSpectrum, 
+////					refParent);
+//		
+//		return newPlot;
+//	}
+	
+	protected XYPlot createheadToTailPlot(
+				MsPlotDataObject unkData,
+				MsPlotDataObject refData,
+				MsDepth msLevel) {
+		
+		XYPlot newPlot = getNewXYPlot();
+		HeadToTailMsDataSet dataSet = 
+				new HeadToTailMsDataSet(unkData, refData);
+		
+		if(msLevel.equals(MsDepth.MS1)) {
+			
+			newPlot.setDataset(0, dataSet);
+			newPlot.setRenderer(0, defaultMsRenderer);
+		}
+		if(msLevel.equals(MsDepth.MS2)) {
+			
+			XYSeriesCollection parentIonDataSet = dataSet.getParentIonDataSet();
+			if(parentIonDataSet != null) {
+				
+				newPlot.setDataset(0, parentIonDataSet);
+				newPlot.setRenderer(0, defaultParentIonRenderer);	
+				newPlot.setDataset(1, dataSet);
+				newPlot.setRenderer(1, defaultMsRenderer);
+			}
+			else {
+				newPlot.setDataset(0, dataSet);
+				newPlot.setRenderer(0, defaultMsRenderer);
+			}
+		}	
+		ValueMarker marker = new ValueMarker(0.0d);
+		marker.setPaint(Color.GRAY);
+		newPlot.addRangeMarker(marker);
+		return newPlot;
 	}
 	
 	public double getRtWindowExtensionWidth() {
@@ -528,13 +625,13 @@ public class LCMSMultiPlotPanel extends LCMSPlotPanel {
 	}
 
 	public int getSubPlotHeight() {
-		return subPlotHeight;
+		return minimumSubPlotHeight;
 	}
 
 	public void setSubPlotHeight(int newSubPlotHeight) {
 		
-		boolean update = subPlotHeight != newSubPlotHeight;
-		this.subPlotHeight = newSubPlotHeight;
+		boolean update = minimumSubPlotHeight != newSubPlotHeight;
+		this.minimumSubPlotHeight = newSubPlotHeight;
 //		if(update && !fileFeatureMap.isEmpty()) {
 		
 //		}

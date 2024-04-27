@@ -1120,6 +1120,14 @@ public class MsFeature implements AnnotatedObject, Serializable {
 		
 		return spectrum.getPrimaryAdductBasePeakMz() % 1;
 	}
+	
+	public MsPoint getMSMSParentIon() {
+		
+		if(spectrum == null || spectrum.getExperimentalTandemSpectrum() == null)
+			return null;
+		
+		return spectrum.getExperimentalTandemSpectrum().getParent();
+	}
 }
 
 

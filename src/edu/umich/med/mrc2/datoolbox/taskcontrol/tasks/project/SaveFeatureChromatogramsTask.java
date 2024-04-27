@@ -57,6 +57,8 @@ public class SaveFeatureChromatogramsTask extends AbstractTask {
 		} catch (Exception ex) {
 			ex.printStackTrace();
 			setStatus(TaskStatus.ERROR);
+return;
+
 		}
 		
 	}
@@ -94,6 +96,8 @@ public class SaveFeatureChromatogramsTask extends AbstractTask {
         } catch (Exception e) {
             e.printStackTrace();
             setStatus(TaskStatus.ERROR);
+return;
+
         }
         setStatus(TaskStatus.FINISHED);
 	}

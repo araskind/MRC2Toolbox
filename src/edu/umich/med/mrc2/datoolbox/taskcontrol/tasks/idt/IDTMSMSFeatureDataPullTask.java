@@ -80,8 +80,9 @@ public class IDTMSMSFeatureDataPullTask extends IDTMSMSFeatureSearchTask {
 				getCachedFeatures();
 			}
 			catch (Exception e) {
-				setStatus(TaskStatus.ERROR);
 				e.printStackTrace();
+				setStatus(TaskStatus.ERROR);
+				return;
 			}
 			if(featureIds.isEmpty()) {
 				features.addAll(cachedFeatures);
@@ -112,9 +113,11 @@ public class IDTMSMSFeatureDataPullTask extends IDTMSMSFeatureSearchTask {
 			setStatus(TaskStatus.FINISHED);
 		}		
 		catch (Exception e) {
-			setStatus(TaskStatus.ERROR);
 			e.printStackTrace();
+			setStatus(TaskStatus.ERROR);
+			return;
 		}
+		setStatus(TaskStatus.FINISHED);
 	}
 	
 	protected void getCachedFeatures() {

@@ -77,13 +77,19 @@ public class RawDataConversionTask extends AbstractTask {
 				System.out.println(errorMessage);
 				System.out.println(command);
 				setStatus(TaskStatus.ERROR);
+return;
+
 			}
 		} catch (IOException e1) {
 			e1.printStackTrace();
 			setStatus(TaskStatus.ERROR);
+return;
+
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 			setStatus(TaskStatus.ERROR);
+return;
+
 		}
 		setStatus(TaskStatus.FINISHED);
 	}

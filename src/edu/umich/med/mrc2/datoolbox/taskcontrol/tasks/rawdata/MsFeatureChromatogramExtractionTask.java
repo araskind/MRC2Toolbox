@@ -77,6 +77,8 @@ public class MsFeatureChromatogramExtractionTask extends AbstractTask {
 		catch (Exception e1) {
 			e1.printStackTrace();
 			setStatus(TaskStatus.ERROR);
+return;
+
 		}
 		try {
 			extractCromatograms();
@@ -84,6 +86,8 @@ public class MsFeatureChromatogramExtractionTask extends AbstractTask {
 		catch (Exception e1) {
 			e1.printStackTrace();
 			setStatus(TaskStatus.ERROR);
+return;
+
 		}
 		RawDataManager.removeDataSource(rawDataFile);
 		setStatus(TaskStatus.FINISHED);

@@ -128,6 +128,8 @@ public class QualAutomationDataProcessingTask extends AbstractTask {
 			} else {
 				automatorPanel.addTaskToRerunQueue(this.cloneTask());
 				setStatus(TaskStatus.ERROR);
+return;
+
 			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block

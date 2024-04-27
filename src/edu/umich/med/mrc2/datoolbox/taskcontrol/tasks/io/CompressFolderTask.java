@@ -66,6 +66,8 @@ public class CompressFolderTask extends AbstractTask {
 		catch (Exception e1) {
 			e1.printStackTrace();
 			setStatus(TaskStatus.ERROR);
+return;
+
 		}
 	}
 

@@ -109,6 +109,8 @@ public class HMDBParseAndUploadTask extends AbstractTask {
 			e.printStackTrace();
 			errorMessage = e.getMessage();
 			setStatus(TaskStatus.ERROR);
+return;
+
 		}
 		try {
 			extractRedundantData();
@@ -128,6 +130,8 @@ public class HMDBParseAndUploadTask extends AbstractTask {
 			e.printStackTrace();
 			errorMessage = e.getMessage();
 			setStatus(TaskStatus.ERROR);
+return;
+
 		}
 		setStatus(TaskStatus.FINISHED);		
 	}

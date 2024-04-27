@@ -68,6 +68,8 @@ public class RetrieveCompoundsForCurationTask extends AbstractTask {
 		} catch (Exception e) {
 			e.printStackTrace();
 			setStatus(TaskStatus.ERROR);
+return;
+
 		}
 		Collection<String>inchiList = null;
 		try {
@@ -75,6 +77,8 @@ public class RetrieveCompoundsForCurationTask extends AbstractTask {
 		} catch (Exception e1) {
 			e1.printStackTrace();
 			setStatus(TaskStatus.ERROR);
+return;
+
 		}
 		if(inchiList.isEmpty()) {
 			finishTask();
@@ -85,18 +89,24 @@ public class RetrieveCompoundsForCurationTask extends AbstractTask {
 		} catch (Exception e) {
 			e.printStackTrace();
 			setStatus(TaskStatus.ERROR);
+return;
+
 		}
 		try {
 			attachSynonyms(conn);
 		} catch (Exception e) {
 			e.printStackTrace();
 			setStatus(TaskStatus.ERROR);
+return;
+
 		}
 		try {
 			attachDbCrossref(conn);
 		} catch (Exception e) {
 			e.printStackTrace();
 			setStatus(TaskStatus.ERROR);
+return;
+
 		}
 		finishTask();
 	}

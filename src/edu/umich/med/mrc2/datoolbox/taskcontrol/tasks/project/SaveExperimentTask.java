@@ -134,6 +134,8 @@ public class SaveExperimentTask extends AbstractTask {
 
 			ex.printStackTrace();
 			setStatus(TaskStatus.ERROR);
+return;
+
 		}
 		restoreListeners();
 		saveDataMatrixes();
@@ -160,6 +162,8 @@ public class SaveExperimentTask extends AbstractTask {
 				} catch (IOException e) {
 					e.printStackTrace();
 					setStatus(TaskStatus.ERROR);
+return;
+
 				}
 				if(experimentToSave.getFeatureMatrixFileNameForDataPipeline(dp) != null
 						&& experimentToSave.getFeatureMatrixForDataPipeline(dp) != null) {
@@ -177,6 +181,8 @@ public class SaveExperimentTask extends AbstractTask {
 					} catch (IOException e) {
 						e.printStackTrace();
 						setStatus(TaskStatus.ERROR);
+return;
+
 					}
 				}
 			}

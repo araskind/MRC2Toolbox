@@ -210,6 +210,8 @@ public class PercolatorFDREstimationTask extends NISTMsPepSearchTask implements 
 		} catch (Exception e) {
 			e.printStackTrace();
 			setStatus(TaskStatus.ERROR);
+return;
+
 		}
 		if(getStatus().equals(TaskStatus.PROCESSING)) {
 			try {
@@ -217,6 +219,8 @@ public class PercolatorFDREstimationTask extends NISTMsPepSearchTask implements 
 			} catch (Exception e) {
 				e.printStackTrace();
 				setStatus(TaskStatus.ERROR);
+return;
+
 			}
 		}
 		if(getStatus().equals(TaskStatus.PROCESSING)) {
@@ -225,6 +229,8 @@ public class PercolatorFDREstimationTask extends NISTMsPepSearchTask implements 
 			} catch (Exception e) {
 				e.printStackTrace();
 				setStatus(TaskStatus.ERROR);
+return;
+
 			}
 		}
 		setStatus(TaskStatus.FINISHED);
@@ -270,11 +276,12 @@ public class PercolatorFDREstimationTask extends NISTMsPepSearchTask implements 
 				FilenameUtils.getBaseName(decoySearchResultFile.getName()) + "_merged.txt").toFile();
 		try {
 			NISTPepSearchResultManipulator.writeMergedDataToFile(mergedData, mergedFile);
-		} catch (Exception e) {			
-			errorMessage = "Failed to create Percolator input file";
-			messageLog.add(errorMessage);
-			setStatus(TaskStatus.ERROR);
+		} catch (Exception e) {	
 			e.printStackTrace();
+			errorMessage = "Failed to create Percolator input file";
+			messageLog.add(errorMessage);			
+			setStatus(TaskStatus.ERROR);
+			return;
 		}
 		percolatorInputFile = Paths.get(decoySearchResultFile.getParentFile().getAbsolutePath(), 
 				FilenameUtils.getBaseName(decoySearchResultFile.getName()) + ".pin").toFile();
@@ -389,19 +396,22 @@ public class PercolatorFDREstimationTask extends NISTMsPepSearchTask implements 
 							messageLog.add(errorMessage);
 							addPercollatorLogToErrors();
 							setStatus(TaskStatus.ERROR);
+							return;
 						}
 					} else {
 						errorMessage = "Percolator run failed.";
 						messageLog.add(errorMessage);
 						addPercollatorLogToErrors();
 						setStatus(TaskStatus.ERROR);
+						return;
 					}
 				} catch (IOException e) {
+					e.printStackTrace();
 					errorMessage = "Percolator run failed.";
 					messageLog.add(errorMessage);
 					addPercollatorLogToErrors();
 					setStatus(TaskStatus.ERROR);
-					e.printStackTrace();
+					return;
 				}
 			 processed = 100;		 
 		}
@@ -441,6 +451,8 @@ public class PercolatorFDREstimationTask extends NISTMsPepSearchTask implements 
 			errorMessage = "Failed to parse Percolator result files.";
 			messageLog.add(errorMessage);
 			setStatus(TaskStatus.ERROR);
+return;
+
 		}
 		Collection<MSFeatureInfoBundle> featuresToUpdate = 
 				MsFeatureStatsUtils.getFeaturesWithMSMSLibMatch(featureList);		

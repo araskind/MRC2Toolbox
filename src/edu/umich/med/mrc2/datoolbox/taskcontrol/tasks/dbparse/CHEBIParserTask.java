@@ -58,6 +58,8 @@ public class CHEBIParserTask extends AbstractTask {
 			e.printStackTrace();
 			errorMessage = e.getMessage();
 			setStatus(TaskStatus.ERROR);
+return;
+
 		}
 		try {
 			uploadData();
@@ -65,6 +67,8 @@ public class CHEBIParserTask extends AbstractTask {
 			e.printStackTrace();
 			errorMessage = e.getMessage();
 			setStatus(TaskStatus.ERROR);
+return;
+
 		}
 		setStatus(TaskStatus.FINISHED);	
 	}

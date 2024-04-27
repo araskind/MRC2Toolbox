@@ -121,6 +121,8 @@ public class QuantMatrixImportTask extends AbstractTask {
 
 			e.printStackTrace();
 			setStatus(TaskStatus.ERROR);
+return;
+
 		}
 		setStatus(TaskStatus.FINISHED);
 	}
@@ -356,6 +358,8 @@ public class QuantMatrixImportTask extends AbstractTask {
 			}
 		} else {
 			setStatus(TaskStatus.ERROR);
+return;
+
 		}
 	}
 

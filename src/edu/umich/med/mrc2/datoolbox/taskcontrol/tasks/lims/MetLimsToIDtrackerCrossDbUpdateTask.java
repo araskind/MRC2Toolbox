@@ -169,6 +169,8 @@ public class MetLimsToIDtrackerCrossDbUpdateTask extends AbstractTask {
 		catch (Exception e) {
 			e.printStackTrace();
 			setStatus(TaskStatus.ERROR);
+return;
+
 		}
 	}	
 

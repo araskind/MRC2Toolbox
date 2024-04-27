@@ -62,6 +62,8 @@ public class OpenChromatogramFileTask extends AbstractTask {
 		} catch (Exception ex) {
 			ex.printStackTrace();
 			setStatus(TaskStatus.ERROR);
+return;
+
 		}
 		setStatus(TaskStatus.FINISHED);
 	}

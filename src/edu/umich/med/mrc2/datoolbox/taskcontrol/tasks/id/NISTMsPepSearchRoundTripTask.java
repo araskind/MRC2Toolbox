@@ -130,6 +130,8 @@ public class NISTMsPepSearchRoundTripTask extends NISTMsPepSearchTask {
 		catch (Exception e) {
 			e.printStackTrace();
 			setStatus(TaskStatus.ERROR);
+return;
+
 		}
         try {
 			Thread.sleep(1000);
@@ -142,18 +144,24 @@ public class NISTMsPepSearchRoundTripTask extends NISTMsPepSearchTask {
 		} catch (Exception e1) {
 			e1.printStackTrace();
 			setStatus(TaskStatus.ERROR);
+return;
+
 		}
 		try {
 			parseSearchResults();
 		} catch (Exception e) {
 			e.printStackTrace();
 			setStatus(TaskStatus.ERROR);
+return;
+
 		}
 		try {
 			filterSearchResults(skipResultsUpload);
 		} catch (Exception e) {
 			e.printStackTrace();
 			setStatus(TaskStatus.ERROR);
+return;
+
 		}
 		if(pooList.size() > 0) {
 			
@@ -173,6 +181,8 @@ public class NISTMsPepSearchRoundTripTask extends NISTMsPepSearchTask {
 				} catch (Exception e) {
 					e.printStackTrace();
 					setStatus(TaskStatus.ERROR);
+return;
+
 				}
 				try {
 					updateFeatureIdentifications();
@@ -491,14 +501,20 @@ public class NISTMsPepSearchRoundTripTask extends NISTMsPepSearchTask {
 					addLogLine(getOutput());
 	        		addLogLine(errorMessage);
 					setStatus(TaskStatus.ERROR);
+return;
+
 				}
 			}
 			catch (IOException e1) {
 				e1.printStackTrace();
 				setStatus(TaskStatus.ERROR);
+return;
+
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 				setStatus(TaskStatus.ERROR);
+return;
+
 			}
 		}
 		if(commandParts != null) {
@@ -525,7 +541,9 @@ public class NISTMsPepSearchRoundTripTask extends NISTMsPepSearchTask {
 				if (exitCode == 0)
 					p.destroy();
 				else 
-					setStatus(TaskStatus.ERROR);				
+					setStatus(TaskStatus.ERROR);
+return;
+				
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

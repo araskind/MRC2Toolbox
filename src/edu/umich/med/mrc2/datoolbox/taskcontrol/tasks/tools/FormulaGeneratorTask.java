@@ -71,8 +71,9 @@ public class FormulaGeneratorTask extends AbstractTask {
 				setStatus(TaskStatus.FINISHED);
 
 			} catch (Exception e) {
-				setStatus(TaskStatus.ERROR);
 				e.printStackTrace();
+				setStatus(TaskStatus.ERROR);
+				return;
 			}
 		}
 	}

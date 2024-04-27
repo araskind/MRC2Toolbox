@@ -287,6 +287,8 @@ public class LibEditorImportTask  extends AbstractTask {
 
 					e.printStackTrace();
 					setStatus(TaskStatus.ERROR);
+return;
+
 				}
 			}
 		}

@@ -214,15 +214,21 @@ public class PassatuttoDecoyGeneratorTask extends AbstractTask {
 	        		addLogLine(errorMessage);
 	        		addLogLine("Failed to create decoy for " + feature.getUniqueId());
 					setStatus(TaskStatus.ERROR);
+return;
+
 				}
 			}
 		}
 		catch (IOException e1) {
 			e1.printStackTrace();
 			setStatus(TaskStatus.ERROR);
+return;
+
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 			setStatus(TaskStatus.ERROR);
+return;
+
 		}
 	}
 	

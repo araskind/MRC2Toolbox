@@ -24,16 +24,14 @@ package edu.umich.med.mrc2.datoolbox.gui.plot.dataset;
 import java.util.Arrays;
 import java.util.TreeSet;
 
+import org.apache.commons.jcs3.access.exception.InvalidArgumentException;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
-import edu.umich.med.mrc2.datoolbox.data.MassSpectrum;
-import edu.umich.med.mrc2.datoolbox.data.MsFeature;
-import edu.umich.med.mrc2.datoolbox.data.MsFeaturePair;
 import edu.umich.med.mrc2.datoolbox.data.MsMsLibraryFeature;
+import edu.umich.med.mrc2.datoolbox.data.MsPlotDataObject;
 import edu.umich.med.mrc2.datoolbox.data.MsPoint;
 import edu.umich.med.mrc2.datoolbox.data.TandemMassSpectrum;
-import edu.umich.med.mrc2.datoolbox.data.enums.MsDepth;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
 
@@ -50,70 +48,17 @@ public class HeadToTailMsDataSet  extends MsDataSet {
 		super();
 		isNormalized = true;
 	}
-
+	
 	public HeadToTailMsDataSet(
-			MsFeature feature, 
-			MsFeature reference) {
-
+			MsPlotDataObject unkData, 
+			MsPlotDataObject refData) {
+		
 		this();
-		MassSpectrum featureSpectrum = feature.getSpectrum();
-		MassSpectrum referenceSpectrum = reference.getSpectrum();
-
-		if(featureSpectrum != null && referenceSpectrum != null) {
-
-			msSeriesScaled.put(0, featureSpectrum.getCompleteNormalizedPattern());
-			labels.put(0, feature.getName());
-			msSeriesScaled.put(1, referenceSpectrum.getCompleteNormalizedPattern());
-			labels.put(1, reference.getName());
-			finalizeDataSet();
-		}
-	}
-
-	//TandemMassSpectrum
-	public HeadToTailMsDataSet(
-			TandemMassSpectrum unk, 
-			TandemMassSpectrum reference) {
-
-		this();
-		if(unk != null && reference != null) {
-			
-			TreeSet<MsPoint>spec = new TreeSet<MsPoint>(MsUtils.mzSorter);
-			parentIonDataSet = new XYSeriesCollection();
-			
-			//	Unknown			
-			spec.addAll(unk.getSpectrum());
-			if(unk.getParent() != null)
-				spec.add(unk.getParent());
-
-			MsPoint[]normSpec = MsUtils.normalizeAndSortMsPattern(spec);
-			msSeriesScaled.put(0, normSpec);
-			labels.put(0, unk.getUserFriendlyId());			
-			if(unk.getParent() != null) {
-				
-				MsPoint normParent = findNormalizedParent(normSpec, unk.getParent().getMz());			
-				XYSeries parentSeries = new XYSeries("Feature parent ion");
-				parentSeries.add(normParent.getMz(), normParent.getIntensity());			
-				parentIonDataSet.addSeries(parentSeries);			
-			}			
-			//	Reference
-			spec.clear();
-			spec.addAll(reference.getSpectrum());
-			if(reference.getParent() != null)
-				spec.add(reference.getParent());
-			
-			MsPoint[]normRefSpec = MsUtils.normalizeAndSortMsPattern(spec);			
-			msSeriesScaled.put(1,normRefSpec);
-			labels.put(1, reference.getUserFriendlyId());
-			if(reference.getParent() != null) {
-				
-				MsPoint normRefParent = 
-						findNormalizedParent(normRefSpec, reference.getParent().getMz());
-				XYSeries refParentSeries = new XYSeries("Reference parent ion");
-				refParentSeries.add(normRefParent.getMz(), -normRefParent.getIntensity());			
-				parentIonDataSet.addSeries(refParentSeries);			
-			}
-			finalizeDataSet();
-		}
+		if(unkData == null || refData == null)
+			throw new InvalidArgumentException(
+					"Unknown and reference must not be NULL!");
+		
+		createDataSet(unkData, refData);
 	}
 
 	public HeadToTailMsDataSet(
@@ -121,57 +66,62 @@ public class HeadToTailMsDataSet  extends MsDataSet {
 			MsMsLibraryFeature reference) {
 
 		this();
-		if(instrumentSpectrum != null && reference != null) {
+		if(instrumentSpectrum == null || reference == null)
+			throw new InvalidArgumentException(
+					"Instrument MSMS and library reference must not be NULL!");
+		
+		MsPlotDataObject unkData = new  MsPlotDataObject(
+				instrumentSpectrum.getSpectrum(),
+				instrumentSpectrum.getParent(),
+				instrumentSpectrum.getUserFriendlyId());
+		MsPlotDataObject refData = new  MsPlotDataObject(
+				reference.getSpectrum(),
+				reference.getParent(),
+				reference.getUserFriendlyId());
 
-			TreeSet<MsPoint>spec = new TreeSet<MsPoint>(MsUtils.mzSorter);
-			parentIonDataSet = new XYSeriesCollection();
-			
-			//	Instrument
-			spec.addAll(instrumentSpectrum.getSpectrum());
-			if(instrumentSpectrum.getParent() != null)
-				spec.add(instrumentSpectrum.getParent());
+		createDataSet(unkData, refData);
+	}
+	
+	private void createDataSet(
+			MsPlotDataObject unkData, 
+			MsPlotDataObject refData) {
+		
+		TreeSet<MsPoint>spec = new TreeSet<MsPoint>(MsUtils.mzSorter);
+		parentIonDataSet = new XYSeriesCollection();
+		
+		//	Unknown			
+		spec.addAll(unkData.getSpectrum());
+		if(unkData.getParent() != null)
+			spec.add(unkData.getParent());
 
-			MsPoint[]normSpec = MsUtils.normalizeAndSortMsPattern(spec);
-			msSeriesScaled.put(0, normSpec);
-			labels.put(0, instrumentSpectrum.getUserFriendlyId());			
-			if(instrumentSpectrum.getParent() != null) {
-				
-				MsPoint normParent = 
-						findNormalizedParent(normSpec, instrumentSpectrum.getParent().getMz());
-				XYSeries parentSeries = new XYSeries("Feature parent ion");
-				parentSeries.add(normParent.getMz(), normParent.getIntensity());			
-				parentIonDataSet.addSeries(parentSeries);		
-				
-//				msSeriesScaled.put(3, new MsPoint[] {normParent});
-//				labels.put(3, "Feature parent ion");			
-			}				
-//			msSeriesScaled.put(0, instrumentSpectrum.getNormalizedMassSortedSpectrum());
-//			labels.put(0, instrumentSpectrum.getUserFriendlyId());
+		MsPoint[]normSpec = MsUtils.normalizeAndSortMsPattern(spec);
+		msSeriesScaled.put(0, normSpec);
+		labels.put(0, unkData.getLabel());			
+		if(unkData.getParent() != null) {
 			
-			//	Library 
-			spec.clear();
-			spec.addAll(reference.getSpectrum());
-			if(reference.getParent() != null)
-				spec.add(reference.getParent());
+			MsPoint normParent = findNormalizedParent(normSpec, unkData.getParent().getMz());			
+			XYSeries parentSeries = new XYSeries(unkData.getLabel() + " parent");
+			parentSeries.add(normParent.getMz(), normParent.getIntensity());			
+			parentIonDataSet.addSeries(parentSeries);			
+		}			
+		//	Reference
+		spec.clear();
+		spec.addAll(refData.getSpectrum());
+		if(refData.getParent() != null)
+			spec.add(refData.getParent());
+		
+		MsPoint[]normRefSpec = MsUtils.normalizeAndSortMsPattern(spec);			
+		msSeriesScaled.put(1,normRefSpec);
+		labels.put(1, refData.getLabel());
+		if(refData.getParent() != null) {
 			
-			MsPoint[]normRefSpec = MsUtils.normalizeAndSortMsPattern(spec);			
-			msSeriesScaled.put(1,normRefSpec);
-			labels.put(1, reference.getUserFriendlyId());
-			if(reference.getParent() != null) {
-				
-				MsPoint normRefParent = 
-						findNormalizedParent(normRefSpec, reference.getParent().getMz());
-				XYSeries refParentSeries = new XYSeries("Reference parent ion");
-				refParentSeries.add(normRefParent.getMz(), -normRefParent.getIntensity());			
-				parentIonDataSet.addSeries(refParentSeries);
-				
-//				msSeriesScaled.put(4, new MsPoint[] {normRefParent});
-//				labels.put(4, "Reference parent ion");			
-			}		
-//			msSeriesScaled.put(1, reference.getNormalizedMassSortedSpectrum());
-//			labels.put(1, reference.getUserFriendlyId());
-			finalizeDataSet();
+			MsPoint normRefParent = 
+					findNormalizedParent(normRefSpec, refData.getParent().getMz());
+			XYSeries refParentSeries = new XYSeries(refData.getLabel() + " parent");
+			refParentSeries.add(normRefParent.getMz(), -normRefParent.getIntensity());			
+			parentIonDataSet.addSeries(refParentSeries);			
 		}
+		finalizeDataSet();
 	}
 	
 	private MsPoint findNormalizedParent(MsPoint[]normSpec, double parentMz) {
@@ -183,42 +133,7 @@ public class HeadToTailMsDataSet  extends MsDataSet {
 		}
 		return null;
 	}
-	
-	public HeadToTailMsDataSet(
-			MsFeaturePair featurePair, 
-			MsDepth msLevel) {
-		this();		
-		//	TODO deal in a more elegant way to support MSn?
-		if(msLevel.equals(MsDepth.All) || msLevel.equals(MsDepth.MSn))
-			return;
-		
-		MassSpectrum featureSpectrum = featurePair.getUnknownFeature().getSpectrum();
-		MassSpectrum referenceSpectrum = featurePair.getReferenceFeature().getSpectrum();
-		
-		if(featureSpectrum == null || referenceSpectrum == null)
-			return;			
-			
-		labels.put(0, featurePair.getUnknownFeature().getName());
-		labels.put(1, featurePair.getReferenceFeature().getName());
-		
-		if(msLevel.equals(MsDepth.MS1)){
 
-			msSeriesScaled.put(0, featureSpectrum.getCompleteNormalizedPattern());				
-			msSeriesScaled.put(1, referenceSpectrum.getCompleteNormalizedPattern());			
-		}
-		if(msLevel.equals(MsDepth.MS2)){
-
-			TandemMassSpectrum unkMsms = featureSpectrum.getExperimentalTandemSpectrum();
-			TandemMassSpectrum refMsms = referenceSpectrum.getExperimentalTandemSpectrum();
-			if(unkMsms == null || refMsms == null)
-				return;		
-			
-			msSeriesScaled.put(0, MsUtils.normalizeAndSortMsPattern(unkMsms.getSpectrum()));				
-			msSeriesScaled.put(1, MsUtils.normalizeAndSortMsPattern(refMsms.getSpectrum()));			
-		}
-		finalizeDataSet();
-	}
-	
 	private void finalizeDataSet() {
 		
 		allPointsScaled.addAll(Arrays.asList(msSeriesScaled.get(0)));
@@ -280,4 +195,39 @@ public class HeadToTailMsDataSet  extends MsDataSet {
 	public XYSeriesCollection getParentIonDataSet() {
 		return parentIonDataSet;
 	}
+		
+//	public HeadToTailMsDataSet(
+//			MsFeaturePair featurePair, 
+//			MsDepth msLevel) {
+//		this();		
+//		//	TODO deal in a more elegant way to support MSn?
+//		if(msLevel.equals(MsDepth.All) || msLevel.equals(MsDepth.MSn))
+//			return;
+//		
+//		MassSpectrum featureSpectrum = featurePair.getUnknownFeature().getSpectrum();
+//		MassSpectrum referenceSpectrum = featurePair.getReferenceFeature().getSpectrum();
+//		
+//		if(featureSpectrum == null || referenceSpectrum == null)
+//			return;			
+//			
+//		labels.put(0, featurePair.getUnknownFeature().getName());
+//		labels.put(1, featurePair.getReferenceFeature().getName());
+//		
+//		if(msLevel.equals(MsDepth.MS1)){
+//
+//			msSeriesScaled.put(0, featureSpectrum.getCompleteNormalizedPattern());				
+//			msSeriesScaled.put(1, referenceSpectrum.getCompleteNormalizedPattern());			
+//		}
+//		if(msLevel.equals(MsDepth.MS2)){
+//
+//			TandemMassSpectrum unkMsms = featureSpectrum.getExperimentalTandemSpectrum();
+//			TandemMassSpectrum refMsms = referenceSpectrum.getExperimentalTandemSpectrum();
+//			if(unkMsms == null || refMsms == null)
+//				return;		
+//			
+//			msSeriesScaled.put(0, MsUtils.normalizeAndSortMsPattern(unkMsms.getSpectrum()));				
+//			msSeriesScaled.put(1, MsUtils.normalizeAndSortMsPattern(refMsms.getSpectrum()));			
+//		}
+//		finalizeDataSet();
+//	}
 }

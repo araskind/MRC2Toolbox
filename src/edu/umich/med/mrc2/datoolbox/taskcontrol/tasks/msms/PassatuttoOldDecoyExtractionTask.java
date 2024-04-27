@@ -72,6 +72,8 @@ public class PassatuttoOldDecoyExtractionTask extends AbstractTask {
 
 			e.printStackTrace();
 			setStatus(TaskStatus.ERROR);
+return;
+
 		}
 	}
 	

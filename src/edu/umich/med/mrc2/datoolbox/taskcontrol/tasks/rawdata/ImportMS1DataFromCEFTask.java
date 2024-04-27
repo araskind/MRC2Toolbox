@@ -70,6 +70,8 @@ public class ImportMS1DataFromCEFTask extends CEFProcessingTask implements TaskL
 			errorMessage = e.getMessage();
 			e.printStackTrace();
 			setStatus(TaskStatus.ERROR);
+return;
+
 		}
 		featureBundles = new ArrayList<MSFeatureInfoBundle>();
 		for(MsFeature msFeature : inputFeatureList) {

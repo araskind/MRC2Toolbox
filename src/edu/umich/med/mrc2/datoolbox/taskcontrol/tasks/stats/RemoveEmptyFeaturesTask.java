@@ -63,6 +63,8 @@ public class RemoveEmptyFeaturesTask extends AbstractTask {
 
 			e.printStackTrace();
 			setStatus(TaskStatus.ERROR);
+return;
+
 		}
 		setStatus(TaskStatus.FINISHED);
 	}
@@ -138,6 +140,8 @@ public class RemoveEmptyFeaturesTask extends AbstractTask {
 			} catch (IOException e) {
 				e.printStackTrace();
 //					setStatus(TaskStatus.ERROR);
+return;
+
 			}
 			msFeatureMatrix = null;
 			System.gc();

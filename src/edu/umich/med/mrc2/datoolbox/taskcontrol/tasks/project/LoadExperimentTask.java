@@ -96,9 +96,9 @@ public class LoadExperimentTask extends AbstractTask implements TaskListener{
 		try {
 			loadExperimentFile();
 		} catch (Throwable e) {
-
-			setStatus(TaskStatus.ERROR);
 			e.printStackTrace();
+			setStatus(TaskStatus.ERROR);
+			return;
 		}
 		if (newExperiment != null) {
 
@@ -119,8 +119,9 @@ public class LoadExperimentTask extends AbstractTask implements TaskListener{
 					try {
 						dataMatrix = Matrix.Factory.load(dataMatrixFile);
 					} catch (ClassNotFoundException | IOException e) {
-						setStatus(TaskStatus.ERROR);
 						e.printStackTrace();
+						setStatus(TaskStatus.ERROR);
+						return;
 					}
 					if (dataMatrix != null) {
 

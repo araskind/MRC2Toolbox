@@ -61,6 +61,8 @@ public class IDTExperimentDesignPullTask  extends AbstractTask {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			setStatus(TaskStatus.ERROR);
+return;
+
 		}
 	}
 

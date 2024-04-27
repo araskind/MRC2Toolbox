@@ -100,8 +100,9 @@ public class MSMSFeatureClusteringTask extends AbstractTask {
 				msmsClusterDataSet.setFeatureLookupDataSet(featureLookupDataSet);
 			}
 			catch (Exception e) {
-				setStatus(TaskStatus.ERROR);
 				e.printStackTrace();
+				setStatus(TaskStatus.ERROR);
+				return;
 			}
 			setStatus(TaskStatus.FINISHED);
 		}
@@ -110,8 +111,9 @@ public class MSMSFeatureClusteringTask extends AbstractTask {
 				clusterAllFeatures();
 			}
 			catch (Exception e) {
-				setStatus(TaskStatus.ERROR);
 				e.printStackTrace();
+				setStatus(TaskStatus.ERROR);
+				return;
 			}
 			setStatus(TaskStatus.FINISHED);
 		}

@@ -54,6 +54,8 @@ public class LimsDataPullTask extends AbstractTask {
 			} catch (Exception e) {
 				e.printStackTrace();
 				setStatus(TaskStatus.ERROR);
+return;
+
 			}
 			try {
 				taskDescription = "Getting organization data ...";
@@ -62,6 +64,8 @@ public class LimsDataPullTask extends AbstractTask {
 			} catch (Exception e) {
 				e.printStackTrace();
 				setStatus(TaskStatus.ERROR);
+return;
+
 			}
 			try {
 				taskDescription = "Getting project data ...";
@@ -70,6 +74,8 @@ public class LimsDataPullTask extends AbstractTask {
 			} catch (Exception e) {
 				e.printStackTrace();
 				setStatus(TaskStatus.ERROR);
+return;
+
 			}
 			try {
 				taskDescription = "Getting experiment data ...";
@@ -78,6 +84,8 @@ public class LimsDataPullTask extends AbstractTask {
 			} catch (Exception e) {
 				e.printStackTrace();
 				setStatus(TaskStatus.ERROR);
+return;
+
 			}
 			setStatus(TaskStatus.FINISHED);
 		}
@@ -85,6 +93,8 @@ public class LimsDataPullTask extends AbstractTask {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			setStatus(TaskStatus.ERROR);
+return;
+
 		}
 		setStatus(TaskStatus.FINISHED);
 	}

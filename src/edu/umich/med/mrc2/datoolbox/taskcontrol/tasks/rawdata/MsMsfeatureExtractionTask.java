@@ -157,6 +157,8 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 		catch (Exception e1) {
 			e1.printStackTrace();
 			setStatus(TaskStatus.ERROR);
+return;
+
 		}
 		try {
 			extractMSMSFeatures();
@@ -164,6 +166,8 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 		catch (Exception e1) {
 			e1.printStackTrace();
 			setStatus(TaskStatus.ERROR);
+return;
+
 		}
 		System.gc();
 		try {
@@ -172,6 +176,8 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 		catch (Exception e1) {
 			e1.printStackTrace();
 			setStatus(TaskStatus.ERROR);
+return;
+
 		}
 		System.gc();
 		try {
@@ -180,6 +186,8 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 		catch (Exception e1) {
 			e1.printStackTrace();
 			setStatus(TaskStatus.ERROR);
+return;
+
 		}
 		try {
 			createFeatureInfoBundles();
@@ -187,6 +195,8 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 		catch (Exception e1) {
 			e1.printStackTrace();
 			setStatus(TaskStatus.ERROR);
+return;
+
 		}
 		if(flagMinorIsotopesPrecursors) {
 			try {
@@ -195,6 +205,8 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 			catch (Exception e1) {
 				e1.printStackTrace();
 				setStatus(TaskStatus.ERROR);
+return;
+
 			}
 		}
 		RawDataManager.removeDataSource(rawDataFile);

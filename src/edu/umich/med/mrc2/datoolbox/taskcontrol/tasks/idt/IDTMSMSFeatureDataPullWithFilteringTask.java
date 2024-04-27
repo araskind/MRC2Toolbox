@@ -136,8 +136,9 @@ public class IDTMSMSFeatureDataPullWithFilteringTask extends IDTMSMSFeatureDataP
 			}
 		}
 		catch (Exception e) {
-			setStatus(TaskStatus.ERROR);
 			e.printStackTrace();
+			setStatus(TaskStatus.ERROR);
+			return;
 		}
 		finalizeFeatureList();
 		if(clusteringParams != null) {
@@ -148,8 +149,9 @@ public class IDTMSMSFeatureDataPullWithFilteringTask extends IDTMSMSFeatureDataP
 					clusterFilteredFeatures();
 				}
 				catch (Exception e) {
-					setStatus(TaskStatus.ERROR);
 					e.printStackTrace();
+					setStatus(TaskStatus.ERROR);
+					return;
 				}
 			}
 			else {

@@ -98,9 +98,9 @@ public class ExperimentRawDataFileOpenTask extends AbstractTask implements TaskL
 			try {
 				Files.copy(source, destination);
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				setStatus(TaskStatus.ERROR);
 				e.printStackTrace();
+				setStatus(TaskStatus.ERROR);
+				return;
 			}
 			df.setFullPath(destination.getAbsolutePath());
 			processed++;

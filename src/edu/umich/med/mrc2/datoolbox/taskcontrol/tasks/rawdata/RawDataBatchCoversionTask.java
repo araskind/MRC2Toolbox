@@ -64,7 +64,9 @@ public class RawDataBatchCoversionTask extends AbstractTask implements TaskListe
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			setStatus(TaskStatus.ERROR);		
+			setStatus(TaskStatus.ERROR);
+return;
+		
 		}
 	}
 	

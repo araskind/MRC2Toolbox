@@ -73,7 +73,9 @@ public class RawDataFileOpenTask extends AbstractTask implements TaskListener{
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			setStatus(TaskStatus.ERROR);		
+			setStatus(TaskStatus.ERROR);
+return;
+		
 		}
 	}
 	

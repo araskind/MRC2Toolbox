@@ -96,6 +96,8 @@ public class RawDataUploadPrepTask extends AbstractTask implements TaskListener{
 		catch (Exception e1) {
 			e1.printStackTrace();
 			setStatus(TaskStatus.ERROR);
+return;
+
 		}
 		if(compressFiles) {
 			try {
@@ -104,6 +106,8 @@ public class RawDataUploadPrepTask extends AbstractTask implements TaskListener{
 			catch (Exception e1) {
 				e1.printStackTrace();
 				setStatus(TaskStatus.ERROR);
+return;
+
 			}
 		}
 		else {

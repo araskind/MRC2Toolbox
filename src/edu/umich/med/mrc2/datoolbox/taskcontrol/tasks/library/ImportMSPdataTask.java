@@ -84,6 +84,8 @@ public class ImportMSPdataTask extends AbstractTask {
 
 					e.printStackTrace();
 					setStatus(TaskStatus.ERROR);
+return;
+
 				}
 			}
 		}

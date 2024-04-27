@@ -119,6 +119,8 @@ public class PCDLTextLibraryImportTask extends AbstractTask {
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
+				setStatus(TaskStatus.ERROR);
+				return;
 			}
 		}
 		setStatus(TaskStatus.FINISHED);
