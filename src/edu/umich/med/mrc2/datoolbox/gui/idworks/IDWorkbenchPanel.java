@@ -3804,7 +3804,6 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 
 	private void finalizeFeatureVsFeatureMSMSSearchTask(FeatureVsFeatureMSMSSearchTask task) {
 
-		MainWindow.hideProgressDialog();
 		IMSMSClusterDataSet featureVsFeatureSearchResults = task.getSearchResults();
 		if(featureVsFeatureSearchResults == null 
 				|| featureVsFeatureSearchResults.getClusters().isEmpty()) {
@@ -3812,7 +3811,9 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			MessageDialog.showWarningMsg("No matches found.", this.getContentPane());
 			return;
 		}	
-		MRC2ToolBoxCore.getTaskController().getTaskQueue().removeTask(task);
+		MainWindow.hideProgressDialog();
+		//	MRC2ToolBoxCore.getTaskController().getTaskQueue().removeTask(task);
+		MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
 		
 		LoadMSMSClusterDataSetInGUITask ldt = 
 				new LoadMSMSClusterDataSetInGUITask(featureVsFeatureSearchResults);

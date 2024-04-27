@@ -276,8 +276,10 @@ public class FeatureVsFeatureMSMSSearchTask extends AbstractTask implements Task
 
 			((AbstractTask) e.getSource()).removeTaskListener(this);
 
-			if (e.getSource().getClass().equals(IDTMSMSFeatureDataPullTask.class))
-				searchFeaturesAgainstLibrary();					
+			if (e.getSource().getClass().equals(IDTMSMSFeatureDataPullTask.class)) {
+				MRC2ToolBoxCore.getTaskController().getTaskQueue().removeTask(((AbstractTask) e.getSource()));
+				searchFeaturesAgainstLibrary();		
+			}
 		}
 	}
 	
