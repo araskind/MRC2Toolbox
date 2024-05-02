@@ -13,11 +13,11 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>edu.umich.mrc2</groupId>
 	<artifactId>MRC2ToolBox</artifactId>
-	<version>1.2.76</version>
+	<version>1.2.77</version>
 	<name>MRC2ToolBox</name>
 	<description>Metabolomics data analysis</description>
 	<properties>
-		<project.build.sourceEncoding>cp1252</project.build.sourceEncoding>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<native.maven.plugin.version>0.9.28</native.maven.plugin.version>
 		<mainClass>edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore</mainClass>
 		<project.build.directory>./target</project.build.directory>

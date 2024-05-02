@@ -23,7 +23,6 @@ package edu.umich.med.mrc2.datoolbox.gui.plot.stats;
 
 import java.awt.Color;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -45,13 +44,10 @@ import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.plot.CombinedRangeCategoryPlot;
 import org.jfree.chart.plot.CombinedRangeXYPlot;
-import org.jfree.chart.plot.DatasetRenderingOrder;
-import org.jfree.chart.plot.Plot;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.chart.ui.RectangleEdge;
-import org.jfree.chart.ui.RectangleInsets;
 import org.jfree.data.Range;
 import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
 
@@ -62,18 +58,18 @@ import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.enums.FileSortingOrder;
 import edu.umich.med.mrc2.datoolbox.data.enums.PlotDataGrouping;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
-import edu.umich.med.mrc2.datoolbox.gui.plot.ControlledStatsPlot;
 import edu.umich.med.mrc2.datoolbox.gui.plot.MasterPlotPanel;
 import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.BoxAndWhiskerCategoryDatasetCa;
 import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.ScatterDataSet;
 import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.TimedScatterDataSet;
 import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.VariableCategorySizeBarChartDataSet;
+import edu.umich.med.mrc2.datoolbox.gui.plot.qc.twod.TwoDimQCPlot;
 import edu.umich.med.mrc2.datoolbox.gui.plot.renderer.category.VariableCategorySizeBarRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.plot.renderer.category.VariableCategorySizeCategoryAxis;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 
-public class MultiPanelDataPlot extends MasterPlotPanel implements ActionListener, ControlledStatsPlot {
+public class MultiPanelDataPlot extends TwoDimQCPlot{
 
 	/**
 	 * 
@@ -85,22 +81,18 @@ public class MultiPanelDataPlot extends MasterPlotPanel implements ActionListene
 	protected CategoryAxis categoryAxis;
 	protected NumberAxis yAxis;
 	protected Axis xAxis;
-	
-	protected StatsPlotType plotType;	
+
 	protected ExperimentDesignSubset activeDesign;
 	protected Map<DataPipeline, Collection<MsFeature>> plottedFeaturesMap;
-
-	protected DataPlotControlsPanel dataPlotControlsPanel;
 	protected TwoDimFeatureDataPlotParameterObject plotParameters;
-	private MultiPanelDataPlotToolbar toolbar;
 
 	public MultiPanelDataPlot() {
 
 		super();
-		plotType = StatsPlotType.BOXPLOT_BY_FEATURE;
+		plotType = StatsPlotType.BARCHART;
 		initChart();
 		initTitles();
-		initLegend(RectangleEdge.RIGHT, legendVisible);
+		initLegend(RectangleEdge.BOTTOM, legendVisible);
 		plottedFeaturesMap = 
 				new TreeMap<DataPipeline, Collection<MsFeature>>();
 	}
@@ -214,35 +206,6 @@ public class MultiPanelDataPlot extends MasterPlotPanel implements ActionListene
 		return newPlot;
 	}
 
-	private void setBasicPlotGui(Plot newPlot) {
-
-		newPlot.setBackgroundPaint(Color.white);
-		if(newPlot instanceof XYPlot) {
-
-			XYPlot xyPlot = (XYPlot)newPlot;
-
-			xyPlot.setAxisOffset(new RectangleInsets(5.0, 5.0, 5.0, 5.0));
-			xyPlot.setDatasetRenderingOrder(DatasetRenderingOrder.FORWARD);
-			xyPlot.setDomainGridlinePaint(GRID_COLOR);
-			xyPlot.setRangeGridlinePaint(GRID_COLOR);
-			xyPlot.setDomainCrosshairVisible(false);
-			xyPlot.setRangeCrosshairVisible(false);
-			xyPlot.setDomainPannable(true);
-			xyPlot.setRangePannable(true);
-		}
-		if(newPlot instanceof CategoryPlot) {
-
-			CategoryPlot catPlot = (CategoryPlot)newPlot;
-			catPlot.setAxisOffset(new RectangleInsets(5.0, 5.0, 5.0, 5.0));
-			catPlot.setDatasetRenderingOrder(DatasetRenderingOrder.FORWARD);
-			catPlot.setDomainGridlinePaint(GRID_COLOR);
-			catPlot.setRangeGridlinePaint(GRID_COLOR);
-			catPlot.setDomainCrosshairVisible(false);
-			catPlot.setRangeCrosshairVisible(false);
-			catPlot.setRangePannable(false);
-		}
-	}
-
 	@Override
 	public void actionPerformed(ActionEvent event) {
 
@@ -260,6 +223,7 @@ public class MultiPanelDataPlot extends MasterPlotPanel implements ActionListene
 				plot.getRangeAxis().resizeRange(1 / ZOOM_FACTOR);
 				plot.getRangeAxis().setLowerBound(0d);
 			}
+			return;
 		}
 		else if (command.equals(ChartPanel.ZOOM_OUT_RANGE_COMMAND)) {
 
@@ -273,6 +237,7 @@ public class MultiPanelDataPlot extends MasterPlotPanel implements ActionListene
 				plot.getRangeAxis().resizeRange(ZOOM_FACTOR);
 				plot.getRangeAxis().setLowerBound(0d);
 			}
+			return;
 		}
 		else if (command.equals(ChartPanel.ZOOM_RESET_RANGE_COMMAND)) {
 
@@ -281,15 +246,21 @@ public class MultiPanelDataPlot extends MasterPlotPanel implements ActionListene
 
 			if (plot != null)
 				plot.getRangeAxis().setAutoRange(true);
+			
+			return;
 		}
-		else if (command.equals(ChartPanel.ZOOM_RESET_BOTH_COMMAND))
+		else if (command.equals(ChartPanel.ZOOM_RESET_BOTH_COMMAND)) {
 			this.restoreAutoBounds();
-
-		else if (command.equals(MasterPlotPanel.TOGGLE_ANNOTATIONS_COMMAND))
+			return;
+		}
+		else if (command.equals(MasterPlotPanel.TOGGLE_ANNOTATIONS_COMMAND)) {
 			toggleAnnotations();
-
-		else if (command.equals(MasterPlotPanel.TOGGLE_DATA_POINTS_COMMAND))
+			return;
+		}
+		else if (command.equals(MasterPlotPanel.TOGGLE_DATA_POINTS_COMMAND)) {
 			toggleDataPoints();
+			return;
+		}
 		else
 			super.actionPerformed(event);
 	}
@@ -298,7 +269,6 @@ public class MultiPanelDataPlot extends MasterPlotPanel implements ActionListene
 
 		clearPlotMatrix();
 		plottedFeaturesMap.clear();		
-		plotType = ((MultiPanelDataPlotToolbar)toolbar).getStatsPlotType();
 		activeDesign = null;
 		plotParameters = null;
 	}
@@ -628,63 +598,42 @@ public class MultiPanelDataPlot extends MasterPlotPanel implements ActionListene
 	public void removeAllDataSets() {
 		clearPlotMatrix();
 	}
-
-	public StatsPlotType getPlotType() {
-		return plotType;
-	}
-
-	public void setPlotType(StatsPlotType plotType) {
-		this.plotType = plotType;
-	}
-
-	@Override
-	public void toggleLegend() {
-
-		if (legendVisible) {
-
-			chart.removeLegend();
-			legendVisible = false;
-		} else {
-			chart.addLegend(legend);
-			legendVisible = true;
-		}
-	}
 	
-	public void updatePlotType() {
-		
-		if(chart == null 
-				|| !((MultiPanelDataPlotToolbar)toolbar).getStatsPlotType().equals(plotType)) {
-			
-			plotType = ((MultiPanelDataPlotToolbar)toolbar).getStatsPlotType();
-			initChart();
-			initTitles();
-			initAxes();
-			initLegend(RectangleEdge.RIGHT, legendVisible);
-		}
-		dataPlotControlsPanel.updatePlotGroupingOptions(
-				((MultiPanelDataPlotToolbar)toolbar).getStatsPlotType());
-	}
+//	public void updatePlotType(StatsPlotType newPlotType) {
+//		
+//		if(chart == null || !newPlotType.equals(plotType)) {
+//			
+//			this.plotType = newPlotType;
+//			initChart();
+//			initTitles();
+//			initAxes();
+//			initLegend(RectangleEdge.RIGHT, legendVisible);
+//		}
+//		dataPlotControlsPanel.updatePlotGroupingOptions(plotType);
+//	}
 
 	@Override
 	public void updateParametersFromControls() {
+		
+		if(chart == null || !toolbar.getStatsPlotType().equals(plotType)) {
+			
+			plotType = toolbar.getStatsPlotType();
+			initChart();
+			initTitles();
+			initAxes();
+			initLegend(RectangleEdge.BOTTOM, legendVisible);
+			dataPlotControlsPanel.updatePlotGroupingOptions(plotType);
+			dataPlotControlsPanel.updatePlotGroupingOptions(plotType);
+		}
 				
 		plotParameters = 
 				new TwoDimFeatureDataPlotParameterObject(
 					plottedFeaturesMap,
-					((MultiPanelDataPlotToolbar)toolbar).getSortingOrder(), 
-					((MultiPanelDataPlotToolbar)toolbar).getDataScale(),
-					((MultiPanelDataPlotToolbar)toolbar).getChartColorOption(),
+					toolbar.getSortingOrder(), 
+					toolbar.getDataScale(),
+					toolbar.getChartColorOption(),
 					dataPlotControlsPanel.getDataGroupingType(), 
 					dataPlotControlsPanel.getCategory(), 
 					dataPlotControlsPanel.getSububCategory());		
-
-	}
-
-	public void setDataPlotControlsPanel(DataPlotControlsPanel dataPlotControlsPanel) {
-		this.dataPlotControlsPanel = dataPlotControlsPanel;
-	}
-
-	public void setToolbar(MultiPanelDataPlotToolbar toolbar) {
-		this.toolbar = toolbar;
 	}
 }

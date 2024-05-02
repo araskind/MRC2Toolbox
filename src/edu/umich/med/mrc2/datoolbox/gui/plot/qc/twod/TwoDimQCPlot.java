@@ -24,7 +24,6 @@ package edu.umich.med.mrc2.datoolbox.gui.plot.qc.twod;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.text.NumberFormat;
 import java.util.Collection;
 
@@ -46,7 +45,7 @@ import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
 import edu.umich.med.mrc2.datoolbox.data.DataFileStatisticalSummary;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataSetQcField;
 import edu.umich.med.mrc2.datoolbox.data.enums.FileSortingOrder;
-import edu.umich.med.mrc2.datoolbox.gui.plot.ControlledStatsPlot;
+import edu.umich.med.mrc2.datoolbox.gui.plot.AbstractControlledDataPlot;
 import edu.umich.med.mrc2.datoolbox.gui.plot.MasterPlotPanel;
 import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.PlotDataSetUtils;
 import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.QcBoxPlotDataSet;
@@ -61,19 +60,19 @@ import edu.umich.med.mrc2.datoolbox.gui.plot.stats.StatsPlotType;
 import edu.umich.med.mrc2.datoolbox.gui.plot.tooltip.FileStatsBoxAndWhiskerToolTipGenerator;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 
-public class TwoDimQCPlot extends MasterPlotPanel implements ItemListener, ControlledStatsPlot {
+public class TwoDimQCPlot extends AbstractControlledDataPlot {
 	
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 8509961200306648220L;
 	
-	private StatsPlotType plotType;
-	private TwoDqcPlotParameterObject plotParameters;
-	private Collection<DataFileStatisticalSummary> dataSetStats;
-	private Plot activePlot;
-	private DataPlotControlsPanel dataPlotControlsPanel;
-	private TwoDqcPlotToolbar toolbar;
+	protected StatsPlotType plotType;
+	protected TwoDqcPlotParameterObject plotParameters;
+	protected Collection<DataFileStatisticalSummary> dataSetStats;
+	protected Plot activePlot;
+	protected DataPlotControlsPanel dataPlotControlsPanel;
+	protected TwoDqcPlotToolbar toolbar;
 
 	public TwoDimQCPlot() {
 		super();
@@ -104,7 +103,7 @@ public class TwoDimQCPlot extends MasterPlotPanel implements ItemListener, Contr
 			chart.getCategoryPlot().setDataset(new QcBoxPlotDataSet(plotParameters));
 	}
 	
-	private void loadBarChart() {
+	protected void loadBarChart() {
 		
 		//	Not supported for QC plot type
 		if(plotParameters.getStatsField().equals(DataSetQcField.RAW_VALUES)) {
@@ -137,22 +136,22 @@ public class TwoDimQCPlot extends MasterPlotPanel implements ItemListener, Contr
 	@Override
 	public void updateParametersFromControls() {
 		
-		if(chart == null 
-				|| !((TwoDqcPlotToolbar)toolbar).getStatsPlotType().equals(plotType)) {
+		if(chart == null || !toolbar.getStatsPlotType().equals(plotType)) {
 			
-			plotType = ((TwoDqcPlotToolbar)toolbar).getStatsPlotType();
+			plotType = toolbar.getStatsPlotType();
 			initChart();
 			initTitles();
 			initAxes();
-			initLegend(RectangleEdge.RIGHT, legendVisible);
+			initLegend(RectangleEdge.BOTTOM, legendVisible);
+			dataPlotControlsPanel.updatePlotGroupingOptions(plotType);
 		}
 		plotParameters = 
 				new TwoDqcPlotParameterObject(
 				dataSetStats,
-				((TwoDqcPlotToolbar)toolbar).getStatParameter(),
-				((TwoDqcPlotToolbar)toolbar).getSortingOrder(), 
-				((TwoDqcPlotToolbar)toolbar).getDataScale(),
-				((TwoDqcPlotToolbar)toolbar).getChartColorOption(),
+				toolbar.getStatParameter(),
+				toolbar.getSortingOrder(), 
+				toolbar.getDataScale(),
+				toolbar.getChartColorOption(),
 				dataPlotControlsPanel.getDataGroupingType(), 
 				dataPlotControlsPanel.getCategory(), 
 				dataPlotControlsPanel.getSububCategory());		
@@ -208,7 +207,6 @@ public class TwoDimQCPlot extends MasterPlotPanel implements ItemListener, Contr
 			super.actionPerformed(event);
 	}
 	
-	@SuppressWarnings("unchecked")
 	public void toggleAnnotations() {
 
 		annotationsVisible = !annotationsVisible;
@@ -220,7 +218,6 @@ public class TwoDimQCPlot extends MasterPlotPanel implements ItemListener, Contr
 			((XYPlot) activePlot).getRenderer().setDefaultItemLabelsVisible(annotationsVisible);
 	}
 
-	@SuppressWarnings("unused")
 	public void toggleDataPoints() {
 
 		dataPointsVisible = !dataPointsVisible;
@@ -308,7 +305,7 @@ public class TwoDimQCPlot extends MasterPlotPanel implements ItemListener, Contr
 		setChart(chart);
 	}
 	
-	private void setBasicPlotGui(Plot newPlot) {
+	protected void setBasicPlotGui(Plot newPlot) {
 		
 		newPlot.setBackgroundPaint(Color.white);
 		
@@ -370,18 +367,6 @@ public class TwoDimQCPlot extends MasterPlotPanel implements ItemListener, Contr
 		}
 		numberOfDataSets = 0;		
 	}
-
-	public void toggleLegend() {
-
-		if (legendVisible) {
-
-			chart.removeLegend();
-			legendVisible = false;
-		} else {
-			chart.addLegend(legend);
-			legendVisible = true;
-		}
-	}	
 
 	public void setDataPlotControlsPanel(DataPlotControlsPanel dataPlotControlsPanel) {
 		this.dataPlotControlsPanel = dataPlotControlsPanel;

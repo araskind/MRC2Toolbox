@@ -55,7 +55,7 @@ public class Dockable2DQCPanel extends DefaultSingleCDockable implements ActionL
 		plotPanel = new TwoDimQCPlot();
 		add(plotPanel, BorderLayout.CENTER);
 		
-		toolbar = new TwoDqcPlotToolbar(plotPanel, this);
+		toolbar = new TwoDqcPlotToolbar(plotPanel, this, true);
 		plotPanel.setToolbar(toolbar);
 		add(toolbar, BorderLayout.NORTH);
 		

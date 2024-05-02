@@ -24,7 +24,6 @@ package edu.umich.med.mrc2.datoolbox.gui.plot.stats;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.HashMap;
 import java.util.Map;
@@ -46,7 +45,7 @@ import edu.umich.med.mrc2.datoolbox.gui.plot.PlotToolbar;
 import edu.umich.med.mrc2.datoolbox.gui.utils.ComboBoxRendererWithIcons;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 
-public class MultiPanelDataPlotToolbar extends PlotToolbar implements ActionListener, ItemListener{
+public class MultiPanelDataPlotToolbar extends PlotToolbar implements ActionListener{
 
 	/**
 	 * 
@@ -71,7 +70,8 @@ public class MultiPanelDataPlotToolbar extends PlotToolbar implements ActionList
 	
 	public MultiPanelDataPlotToolbar(
 			MultiPanelDataPlot plot, 
-			ActionListener secondaryListener) {
+			ActionListener secondaryListener,
+			ItemListener itemListener) {
 
 		super(plot);
 		this.plot = plot;
@@ -103,7 +103,7 @@ public class MultiPanelDataPlotToolbar extends PlotToolbar implements ActionList
 //						StatsPlotType.BOXPLOT_BY_GROUP,						
 						}));	//	TODO fix boxplot
 		plotTypeComboBox.setSelectedItem(StatsPlotType.BARCHART);
-		plotTypeComboBox.addItemListener(this);
+		plotTypeComboBox.addItemListener(itemListener);
 		plotTypeComboBox.setMaximumSize(new Dimension(120, 26));
 		
 		Map<Object,Icon> imageMap = new HashMap<Object,Icon>();
@@ -124,7 +124,7 @@ public class MultiPanelDataPlotToolbar extends PlotToolbar implements ActionList
 		dataScaleComboBox.setModel(
 				new DefaultComboBoxModel<DataScale>(DataScale.values()));
 		dataScaleComboBox.setSelectedItem(DataScale.RAW);
-		dataScaleComboBox.addItemListener(this);
+		dataScaleComboBox.addItemListener(itemListener);
 		dataScaleComboBox.setMaximumSize(new Dimension(120, 26));
 		add(dataScaleComboBox);
 		
@@ -233,34 +233,34 @@ public class MultiPanelDataPlotToolbar extends PlotToolbar implements ActionList
 		}
 	}
 
-	private void toggleItemListeners(boolean enabled) {
-		
-		if(enabled) {			
-			plotTypeComboBox.addItemListener(this);
-			dataScaleComboBox.addItemListener(this);
-		}
-		else {
-			plotTypeComboBox.removeItemListener(this);
-			dataScaleComboBox.removeItemListener(this);
-		}
-	}
+//	private void toggleItemListeners(boolean enabled) {
+//		
+//		if(enabled) {			
+//			plotTypeComboBox.addItemListener(this);
+//			dataScaleComboBox.addItemListener(this);
+//		}
+//		else {
+//			plotTypeComboBox.removeItemListener(this);
+//			dataScaleComboBox.removeItemListener(this);
+//		}
+//	}
 
-	@Override
-	public void itemStateChanged(ItemEvent e) {
-		
-		if(e.getStateChange() == ItemEvent.SELECTED) {
-			
-			toggleItemListeners(false);
-			updatePlotType();
-			toggleItemListeners(true);			
-		}		
-	}
+//	@Override
+//	public void itemStateChanged(ItemEvent e) {
+//		
+//		if(e.getStateChange() == ItemEvent.SELECTED) {
+//			
+//			toggleItemListeners(false);
+//			updatePlotType();
+//			toggleItemListeners(true);			
+//		}		
+//	}
 	
-	private void updatePlotType() {
-		
-		plot.updatePlotType();
-		plot.redrawPlot();
-	}
+//	private void updatePlotType() {
+//		
+//		plot.updatePlotType();
+//		plot.redrawPlot();
+//	}
 	
 	private void updatePlot() {
 		

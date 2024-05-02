@@ -34,6 +34,7 @@ import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignSubset;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
+import edu.umich.med.mrc2.datoolbox.gui.plot.qc.twod.TwoDqcPlotToolbar;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 
 public class DockableDataPlot extends DefaultSingleCDockable implements ActionListener{
@@ -41,7 +42,7 @@ public class DockableDataPlot extends DefaultSingleCDockable implements ActionLi
 	private static final Icon componentIcon = GuiUtils.getIcon("boxplot", 16);
 
 	private MultiPanelDataPlot dataPlot;
-	private MultiPanelDataPlotToolbar plotToolbar;
+	private TwoDqcPlotToolbar plotToolbar;
 	private DataPlotControlsPanel dataPlotControlsPanel;
 
 	public DockableDataPlot(String id, String title) {
@@ -53,13 +54,15 @@ public class DockableDataPlot extends DefaultSingleCDockable implements ActionLi
 		dataPlot = new MultiPanelDataPlot();
 		add(dataPlot, BorderLayout.CENTER);
 		
+		plotToolbar = new TwoDqcPlotToolbar(dataPlot, this, false);
+		dataPlot.setToolbar(plotToolbar);
+		add(plotToolbar, BorderLayout.NORTH);
+		
 		dataPlotControlsPanel = new DataPlotControlsPanel(dataPlot);
 		add(dataPlotControlsPanel, BorderLayout.EAST);
 		dataPlot.setDataPlotControlsPanel(dataPlotControlsPanel);
 		
-		plotToolbar = new MultiPanelDataPlotToolbar(dataPlot, this);
-		dataPlot.setToolbar(plotToolbar);
-		add(plotToolbar, BorderLayout.NORTH);
+		dataPlot.updateParametersFromControls();
 	}	
 	
 	@Override

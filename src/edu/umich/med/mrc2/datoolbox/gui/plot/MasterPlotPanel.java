@@ -108,7 +108,6 @@ public abstract class MasterPlotPanel extends ChartPanel{
 	protected boolean legendVisible;
 	protected int numberOfDataSets = 0;
 	protected LegendTitle legend;
-	//	protected PlotToolbar toolbar;
 	protected Paint[] paintArray;
 	protected Shape[] shapeArray;
 
@@ -174,26 +173,18 @@ public abstract class MasterPlotPanel extends ChartPanel{
 			AxesSetupDialog dialog = new AxesSetupDialog(plot);
 			dialog.setVisible(true);
 		}
-		else if (command.equals(MasterPlotPanel.TOGGLE_LEGEND_COMMAND))
-			toggleLegend();
-		else if (command.equals(MainActionCommands.SHOW_PLOT_LEGEND_COMMAND.getName())) {
-			legendVisible = false;
-			toggleLegend();
-		}
-		else if (command.equals(MainActionCommands.HIDE_PLOT_LEGEND_COMMAND.getName())) {
-			legendVisible = true;
-			toggleLegend();
-		}
-		else if (command.equals(MasterPlotPanel.TOGGLE_ANNOTATIONS_COMMAND))
-			toggleAnnotations();
-		else if (command.equals(MainActionCommands.SHOW_PLOT_LABELS_COMMAND.getName())) {
-			annotationsVisible = false;
-			toggleAnnotations();
-		}
-		else if (command.equals(MainActionCommands.HIDE_PLOT_LABELS_COMMAND.getName())) {
-			annotationsVisible = true;
-			toggleAnnotations();
-		}
+		else if (command.equals(MainActionCommands.SHOW_PLOT_LEGEND_COMMAND.getName())) 
+			showLegend();
+		
+		else if (command.equals(MainActionCommands.HIDE_PLOT_LEGEND_COMMAND.getName())) 
+			hideLegend();
+		
+		else if (command.equals(MainActionCommands.SHOW_PLOT_LABELS_COMMAND.getName())) 
+			showAnnotations();
+		
+		else if (command.equals(MainActionCommands.HIDE_PLOT_LABELS_COMMAND.getName())) 
+			hideAnnotations();
+		
 		else
 			super.actionPerformed(event);
 	}
@@ -302,27 +293,26 @@ public abstract class MasterPlotPanel extends ChartPanel{
 		chartSubTitle.setText(subTitle);
 	}
 
-	/**
-	 * @param toolbar
-	 *            the toolbar to set
-	 */
-//	public void setToolbar(PlotToolbar toolbar) {
-//		this.toolbar = toolbar;
-//	}
+	public void showLegend() {
 
-	public void toggleLegend() {
-
-		if (legendVisible) {
-
-			chart.removeLegend();
-			legendVisible = false;
-		} else {
+		if (legendVisible)
+			return;
+		else {
 			chart.addLegend(legend);
 			legendVisible = true;
 		}
-		//	toolbar.toggleLegendIcon(legendVisible);
 	}
 
+	public void hideLegend() {
+
+		if (!legendVisible)
+			return;
+		else {
+			chart.removeLegend();
+			legendVisible = false;
+		}
+	}
+	
 	public Paint getSeriesPaint(int series) {
 
 		return paintArray[series % paintArray.length];
@@ -333,17 +323,30 @@ public abstract class MasterPlotPanel extends ChartPanel{
 		return shapeArray[series % shapeArray.length];
 	}
 
-
-	public void toggleAnnotations() {
-
-		annotationsVisible = !annotationsVisible;
-
-		for (int i = 0; i < plot.getDatasetCount(); i++)
-			plot.getRenderer(i).setDefaultItemLabelsVisible(annotationsVisible);
-
-		//	toolbar.toggleAnnotationsIcon(annotationsVisible);
+	public void showAnnotations() {
+		
+		if(annotationsVisible)
+			return;
+		else {
+			for (int i = 0; i < plot.getDatasetCount(); i++)
+				plot.getRenderer(i).setDefaultItemLabelsVisible(true);
+			
+			annotationsVisible = true;
+		}
 	}
 
+	public void hideAnnotations() {
+		
+		if(!annotationsVisible)
+			return;
+		else {
+			for (int i = 0; i < plot.getDatasetCount(); i++)
+				plot.getRenderer(i).setDefaultItemLabelsVisible(false);
+			
+			annotationsVisible = false;
+		}
+	}
+	
 	public static Color getColor(int seriesNumber) {
 
 		int j = 0;

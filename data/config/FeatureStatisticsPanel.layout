@@ -106,7 +106,7 @@
 										<fullscreen-action>false</fullscreen-action>
 										<node nodeId="1697239277915" orientation="VERTICAL" divider="0.6246741963509991">
 											<node nodeId="1697239315478" orientation="VERTICAL" divider="0.7447698744769876">
-												<leaf id="0" nodeId="1600213792571">
+												<leaf id="1" nodeId="1600213792571">
 													<placeholders>
 														<placeholder>dock.single.FeatureDataPanelDockableFeatureDataTable</placeholder>
 													</placeholders>
@@ -162,7 +162,7 @@
 														</placeholder-map>
 													</leaf>
 												</node>
-												<leaf id="1" nodeId="1600213792596">
+												<leaf id="0" nodeId="1600213792596">
 													<placeholders>
 														<placeholder>dock.single.FeatureDataPanelAnnotations</placeholder>
 													</placeholders>
@@ -203,16 +203,6 @@
 								</layout>
 							</adjacent>
 							<children ignore="false">
-								<child>
-									<layout factory="predefined" placeholder="dock.single.FeatureDataPanelDockableFeatureDataTable">
-										<replacement id="dockablesingle FeatureDataPanelDockableFeatureDataTable"/>
-										<delegate id="delegate_ccontrol backup factory id">
-											<id>FeatureDataPanelDockableFeatureDataTable</id>
-											<area/>
-										</delegate>
-									</layout>
-									<children ignore="false"/>
-								</child>
 								<child>
 									<layout factory="delegate_StackDockStationFactory">
 										<selected>1</selected>
@@ -321,6 +311,16 @@
 									</children>
 								</child>
 								<child>
+									<layout factory="predefined" placeholder="dock.single.FeatureDataPanelDockableFeatureDataTable">
+										<replacement id="dockablesingle FeatureDataPanelDockableFeatureDataTable"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>FeatureDataPanelDockableFeatureDataTable</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
+								</child>
+								<child>
 									<layout factory="predefined" placeholder="dock.single.FeatureDataPanelUniversalIdentificationResultsTable">
 										<replacement id="dockablesingle FeatureDataPanelUniversalIdentificationResultsTable"/>
 										<delegate id="delegate_ccontrol backup factory id">
@@ -332,7 +332,7 @@
 								</child>
 								<child>
 									<layout factory="delegate_StackDockStationFactory">
-										<selected>1</selected>
+										<selected>0</selected>
 										<placeholders>
 											<version>0</version>
 											<format>dock.PlaceholderList</format>

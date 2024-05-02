@@ -38,13 +38,13 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.jcs3.access.exception.InvalidArgumentException;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
 import org.jdom2.input.SAXBuilder;
 import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
-import org.junit.Assert;
 
 import edu.umich.med.mrc2.datoolbox.data.BinnerAnnotation;
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
@@ -161,8 +161,10 @@ public class MSMSClusteringDBUtils {
 			params.setMd5(md5);
 		}
 		String paramsXml = getXMLStringForMSMSClusteringParameterSet(params);
-		Assert.assertNotNull(paramsXml);
-		
+		if(paramsXml == null) {
+			throw new InvalidArgumentException(
+					"Unable to create XML string for MSMS clustering parameters object");
+		}		
 		String query = 
 				"INSERT INTO MSMS_CLUSTERING_PARAMETERS_XML ( " +
 				"PAR_SET_ID, PAR_SET_NAME, PAR_SET_XML, PAR_SET_MD5)  " +

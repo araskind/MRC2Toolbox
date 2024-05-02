@@ -43,6 +43,7 @@ import edu.umich.med.mrc2.datoolbox.data.enums.DataScale;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataSetQcField;
 import edu.umich.med.mrc2.datoolbox.data.enums.FileSortingOrder;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
+import edu.umich.med.mrc2.datoolbox.gui.plot.AbstractControlledDataPlot;
 import edu.umich.med.mrc2.datoolbox.gui.plot.PlotToolbar;
 import edu.umich.med.mrc2.datoolbox.gui.plot.stats.StatsPlotType;
 import edu.umich.med.mrc2.datoolbox.gui.utils.ComboBoxRendererWithIcons;
@@ -63,7 +64,7 @@ public class TwoDqcPlotToolbar extends PlotToolbar implements ActionListener, It
 	protected static final Icon sidePanelHideIcon = GuiUtils.getIcon("sidePanelHide", 24);		
 
 	private JComboBox<DataSetQcField> statParameterComboBox;
-	private TwoDimQCPlot plot;
+	private AbstractControlledDataPlot plot;
 	private JComboBox<StatsPlotType> plotTypeComboBox;
 	private JComboBox<DataScale> dataScaleComboBox;
 	private FileSortingOrder fileSortingOrder;
@@ -72,7 +73,10 @@ public class TwoDqcPlotToolbar extends PlotToolbar implements ActionListener, It
 	private JButton colorOptionButton;
 	private JButton sidePanelButton;
 	
-	public TwoDqcPlotToolbar(TwoDimQCPlot plot, ActionListener secondaryListener) {
+	public TwoDqcPlotToolbar(
+			AbstractControlledDataPlot plot, 
+			ActionListener secondaryListener,
+			boolean includeQcFieldSelector) {
 
 		super(plot);
 		this.plot = plot;
@@ -90,9 +94,6 @@ public class TwoDqcPlotToolbar extends PlotToolbar implements ActionListener, It
 		
 		createServiceBlock();
 
-		toggleLegendIcon(plot.isLegendVisible());
-
-		// Add plot type options
 		addSeparator(buttonDimension);
 		//	add(new JLabel("Plot type: "));
 		plotTypeComboBox = new JComboBox<StatsPlotType>();
@@ -150,15 +151,18 @@ public class TwoDqcPlotToolbar extends PlotToolbar implements ActionListener, It
 		
 		addSeparator(buttonDimension);
 		
-		//	QC fields
-		add(new JLabel("  Parameter: "));
-		statParameterComboBox = new JComboBox<DataSetQcField>();
-		statParameterComboBox.setModel(
-				new DefaultComboBoxModel<DataSetQcField>(DataSetQcField.values()));	
-		statParameterComboBox.setSelectedItem(DataSetQcField.OBSERVATIONS);
-		statParameterComboBox.addItemListener(this);
-		statParameterComboBox.setMaximumSize(new Dimension(120, 26));
-		add(statParameterComboBox);
+		if(includeQcFieldSelector) {
+			
+			//	QC fields
+			add(new JLabel("  Parameter: "));
+			statParameterComboBox = new JComboBox<DataSetQcField>();
+			statParameterComboBox.setModel(
+					new DefaultComboBoxModel<DataSetQcField>(DataSetQcField.values()));	
+			statParameterComboBox.setSelectedItem(DataSetQcField.OBSERVATIONS);
+			statParameterComboBox.addItemListener(this);
+			statParameterComboBox.setMaximumSize(new Dimension(120, 26));
+			add(statParameterComboBox);
+		}
 		
 		add(Box.createHorizontalGlue());
 		
@@ -192,6 +196,8 @@ public class TwoDqcPlotToolbar extends PlotToolbar implements ActionListener, It
 		
 		if(command.equals(MainActionCommands.HIDE_CHART_SIDE_PANEL_COMMAND.getName())) 
 			setSidePanelVisible(false);
+		
+		super.actionPerformed(e);
 	}
 	
 	private void sortDataByFileName(){
@@ -249,12 +255,16 @@ public class TwoDqcPlotToolbar extends PlotToolbar implements ActionListener, It
 		if(enabled) {			
 			plotTypeComboBox.addItemListener(this);
 			dataScaleComboBox.addItemListener(this);
-			statParameterComboBox.addItemListener(this);	
+			
+			if(statParameterComboBox != null)
+				statParameterComboBox.addItemListener(this);	
 		}
 		else {
 			plotTypeComboBox.removeItemListener(this);
 			dataScaleComboBox.removeItemListener(this);
-			statParameterComboBox.removeItemListener(this);	
+			
+			if(statParameterComboBox != null)
+				statParameterComboBox.removeItemListener(this);	
 		}
 	}
 
@@ -271,15 +281,20 @@ public class TwoDqcPlotToolbar extends PlotToolbar implements ActionListener, It
 
 				if(getStatsPlotType().equals(StatsPlotType.BOXPLOT)) {
 					
-					statParameterComboBox.setModel(
-							new DefaultComboBoxModel<DataSetQcField>(
-									new DataSetQcField[] {DataSetQcField.RAW_VALUES}));
+					if(statParameterComboBox != null)
+						statParameterComboBox.setModel(
+								new DefaultComboBoxModel<DataSetQcField>(
+										new DataSetQcField[] {DataSetQcField.RAW_VALUES}));
+					
 					dataScaleComboBox.setSelectedItem(DataScale.RAW);
 				}
 				else {
-					statParameterComboBox.setModel(
-							new DefaultComboBoxModel<DataSetQcField>(DataSetQcField.values()));
-					statParameterComboBox.removeItem(DataSetQcField.RAW_VALUES);
+					if(statParameterComboBox != null) {
+						
+						statParameterComboBox.setModel(
+								new DefaultComboBoxModel<DataSetQcField>(DataSetQcField.values()));
+						statParameterComboBox.removeItem(DataSetQcField.RAW_VALUES);
+					}
 					dataScaleComboBox.setSelectedItem(scale);
 				}
 			}	
@@ -335,11 +350,17 @@ public class TwoDqcPlotToolbar extends PlotToolbar implements ActionListener, It
 	}
 	
 	public DataSetQcField getStatParameter() {
-		return (DataSetQcField) statParameterComboBox.getSelectedItem();
+		
+		if(statParameterComboBox != null)
+			return (DataSetQcField) statParameterComboBox.getSelectedItem();
+		else
+			return null;
 	}
 	
 	public void setStatParameter(DataSetQcField field) {
-		statParameterComboBox.setSelectedItem(field);
+		
+		if(statParameterComboBox != null)
+			statParameterComboBox.setSelectedItem(field);
 	}
 
 	public ChartColorOption getChartColorOption() {

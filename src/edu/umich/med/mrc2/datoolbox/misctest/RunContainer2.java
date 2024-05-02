@@ -29,7 +29,7 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import org.junit.Assert;
+import org.apache.commons.jcs3.access.exception.InvalidArgumentException;
 import org.openscience.cdk.aromaticity.Aromaticity;
 import org.openscience.cdk.inchi.InChIGenerator;
 import org.openscience.cdk.inchi.InChIGeneratorFactory;
@@ -115,8 +115,10 @@ public class RunContainer2 {
 				params.setMd5(md5);
 			}
 			String paramsXml = MSMSClusteringDBUtils.getXMLStringForMSMSClusteringParameterSet(params);
-			Assert.assertNotNull(paramsXml);
-			
+			if(paramsXml == null) {
+				throw new InvalidArgumentException(
+						"Unable to create XML string for MSMS clustering parameters object");
+			}				
 			ps.setString(1, params.getId());
 			ps.setString(2,params.getName());		
 			ps.setString(3, paramsXml);
