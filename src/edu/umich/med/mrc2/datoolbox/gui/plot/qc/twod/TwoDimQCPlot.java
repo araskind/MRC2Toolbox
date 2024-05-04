@@ -37,7 +37,6 @@ import org.jfree.chart.plot.Plot;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.category.BoxAndWhiskerRenderer;
-import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.chart.ui.RectangleEdge;
 import org.jfree.chart.ui.RectangleInsets;
 import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
@@ -46,7 +45,6 @@ import edu.umich.med.mrc2.datoolbox.data.DataFileStatisticalSummary;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataSetQcField;
 import edu.umich.med.mrc2.datoolbox.data.enums.FileSortingOrder;
 import edu.umich.med.mrc2.datoolbox.gui.plot.AbstractControlledDataPlot;
-import edu.umich.med.mrc2.datoolbox.gui.plot.MasterPlotPanel;
 import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.PlotDataSetUtils;
 import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.QcBoxPlotDataSet;
 import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.QcScatterDataSet;
@@ -154,7 +152,7 @@ public class TwoDimQCPlot extends AbstractControlledDataPlot {
 				toolbar.getChartColorOption(),
 				dataPlotControlsPanel.getDataGroupingType(), 
 				dataPlotControlsPanel.getCategory(), 
-				dataPlotControlsPanel.getSububCategory());		
+				dataPlotControlsPanel.getSububCategory());	
 	}
 	
 	@Override
@@ -198,33 +196,33 @@ public class TwoDimQCPlot extends AbstractControlledDataPlot {
 		else if (command.equals(ChartPanel.ZOOM_RESET_BOTH_COMMAND))
 			this.restoreAutoBounds();
 
-		else if (command.equals(MasterPlotPanel.TOGGLE_ANNOTATIONS_COMMAND))
-			toggleAnnotations();
-
-		else if (command.equals(MasterPlotPanel.TOGGLE_DATA_POINTS_COMMAND))
-			toggleDataPoints();
+//		else if (command.equals(MasterPlotPanel.TOGGLE_ANNOTATIONS_COMMAND))
+//			toggleAnnotations();
+//
+//		else if (command.equals(MasterPlotPanel.TOGGLE_DATA_POINTS_COMMAND))
+//			toggleDataPoints();
 		else
 			super.actionPerformed(event);
 	}
 	
-	public void toggleAnnotations() {
-
-		annotationsVisible = !annotationsVisible;
-
-		if (activePlot instanceof CategoryPlot)
-			((CategoryPlot) activePlot).getRenderer().setDefaultItemLabelsVisible(annotationsVisible);
-
-		if (activePlot instanceof XYPlot)
-			((XYPlot) activePlot).getRenderer().setDefaultItemLabelsVisible(annotationsVisible);
-	}
-
-	public void toggleDataPoints() {
-
-		dataPointsVisible = !dataPointsVisible;
-
-		if (activePlot instanceof XYPlot) 			
-			((XYLineAndShapeRenderer)((XYPlot) activePlot).getRenderer()).setDefaultShapesVisible(dataPointsVisible);				
-	}
+//	public void toggleAnnotations() {
+//
+//		annotationsVisible = !annotationsVisible;
+//
+//		if (activePlot instanceof CategoryPlot)
+//			((CategoryPlot) activePlot).getRenderer().setDefaultItemLabelsVisible(annotationsVisible);
+//
+//		if (activePlot instanceof XYPlot)
+//			((XYPlot) activePlot).getRenderer().setDefaultItemLabelsVisible(annotationsVisible);
+//	}
+//
+//	public void toggleDataPoints() {
+//
+//		dataPointsVisible = !dataPointsVisible;
+//
+//		if (activePlot instanceof XYPlot) 			
+//			((XYLineAndShapeRenderer)((XYPlot) activePlot).getRenderer()).setDefaultShapesVisible(dataPointsVisible);				
+//	}
 	
 	@Override
 	public void itemStateChanged(ItemEvent e) {
