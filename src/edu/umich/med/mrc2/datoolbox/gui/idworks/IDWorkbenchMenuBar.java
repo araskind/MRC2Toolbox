@@ -65,6 +65,7 @@ public class IDWorkbenchMenuBar extends CommonMenuBar {
 	private static final Icon bubblePlotIconSmall = GuiUtils.getIcon("bubble", 16);
 	private static final Icon editFeatureCollectionIcon = GuiUtils.getIcon("clusterFeatureTable", 24);
 	private static final Icon editFeatureCollectionIconSmall = GuiUtils.getIcon("clusterFeatureTable", 16);
+	private static final Icon combSubFeatureCollectionIcon = GuiUtils.getIcon("combSubCollection", 24);
 	private static final Icon fdrIcon = GuiUtils.getIcon("fdr", 24);	
 	private static final Icon reassignTopHitsIcon = GuiUtils.getIcon("recalculateScores", 24);
 	private static final Icon filterIcon = GuiUtils.getIcon("filter", 24);
@@ -140,6 +141,7 @@ public class IDWorkbenchMenuBar extends CommonMenuBar {
 	//	Feature collections
 	private JMenuItem
 		featureCollectionManagerMenuItem,
+		featureCollectionOperationsMenuItem,
 		saveClusterDataSetMenuItem;
 	
 	//	Explore
@@ -309,6 +311,10 @@ public class IDWorkbenchMenuBar extends CommonMenuBar {
 		featureCollectionManagerMenuItem = addItem(featureCollectionsMenu, 
 				MainActionCommands.SHOW_DATA_COLLECTIONS_MANAGER_DIALOG_COMMAND, 
 				editFeatureCollectionIcon);
+		
+		featureCollectionOperationsMenuItem = addItem(featureCollectionsMenu, 
+				MainActionCommands.SHOW_FEATURE_COLLECTION_COMBSUB_DIALOG_COMMAND, 
+				combSubFeatureCollectionIcon);
 		
 		featureCollectionsMenu.addSeparator();
 		

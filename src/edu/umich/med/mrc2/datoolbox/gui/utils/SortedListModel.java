@@ -23,6 +23,7 @@ package edu.umich.med.mrc2.datoolbox.gui.utils;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.TreeSet;
 
 import javax.swing.DefaultListModel;
@@ -30,27 +31,44 @@ import javax.swing.DefaultListModel;
 public class SortedListModel<E> extends DefaultListModel<E> {
 
 	private static final long serialVersionUID = 1L;
+	
+	@SuppressWarnings("rawtypes")
+	private Comparator comp;
 
-	public SortedListModel() {
+	@SuppressWarnings("rawtypes")
+	public SortedListModel(Comparator comp) {
 		super();
+		this.comp = comp;
 	}
-
-	public SortedListModel(E[] items) {
-		Arrays.sort(items);
+	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public SortedListModel(E[] items, Comparator comp) {
+		this(comp);
+		Arrays.sort(items, comp);
 		addAll(Arrays.asList(items));
 	}
 
-	public SortedListModel(Collection<? extends E> items) {
-		this.addAll(items);
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public SortedListModel(Collection<? extends Comparable> items) {
+
+		TreeSet itemSet = new TreeSet();
+		itemSet.addAll(items);
+		this.addAll(itemSet);		
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void addElement(E element) {
 
         TreeSet<E> items = new TreeSet<E>();
+        if(comp != null)
+        	items = new TreeSet<E>(comp);
+        
 		int size = getSize();
 		for (int i = 0; i < size; i++)
 			items.add(getElementAt(i));
+		
+		items.add(element);
 
 		addAll(items);
 	}
@@ -61,6 +79,9 @@ public class SortedListModel<E> extends DefaultListModel<E> {
             return;
 
         TreeSet<E> items = new TreeSet<E>();
+        if(comp != null)
+        	items = new TreeSet<E>(comp);
+        
 		int size = getSize();
 		for (int i = 0; i < size; i++)
 			items.add(getElementAt(i));
@@ -71,6 +92,7 @@ public class SortedListModel<E> extends DefaultListModel<E> {
 			super.addElement(item);
     }
 
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
 	public void insertElementAt(E element, int index) {
 		int size = getSize();
@@ -84,9 +106,13 @@ public class SortedListModel<E> extends DefaultListModel<E> {
 		super.insertElementAt(element, index);
 	}
 
+	@SuppressWarnings("unchecked")
 	public Collection<? extends E>getElementCollection(){
 
         TreeSet<E> items = new TreeSet<E>();
+        if(comp != null)
+        	items = new TreeSet<E>(comp);
+        
 		int size = getSize();
 		for (int i = 0; i < size; i++)
 			items.add(getElementAt(i));

@@ -141,6 +141,7 @@ import edu.umich.med.mrc2.datoolbox.gui.idworks.export.SiriusDataExportDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.fcolls.DataCollectionsManagerDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.fcolls.clusters.MSMSClusterDataSetEditorDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.fcolls.features.AddFeaturesToCollectionDialog;
+import edu.umich.med.mrc2.datoolbox.gui.idworks.fcolls.features.oper.FeatureCollectionsOperationDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.fdr.FDREstimationSetupDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.idfus.DockableFollowupStepTable;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.idfus.FollowupStepAssignmentDialog;
@@ -786,6 +787,9 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		
 		if (command.equals(MainActionCommands.SHOW_DATA_COLLECTIONS_MANAGER_DIALOG_COMMAND.getName()))	
 			showDataCollectionsManager();	
+		
+		if (command.equals(MainActionCommands.SHOW_FEATURE_COLLECTION_COMBSUB_DIALOG_COMMAND.getName()))	
+			showFeatureCollectionCombSubDialog();
 		
 		if(command.equals(MainActionCommands.CREATE_NEW_FEATURE_COLLECTION_FROM_SELECTED.getName()))
 			createNewMsmsFeatureCollectionFromSelectedFeatures(msTwoFeatureTable.getBundles(TableRowSubset.SELECTED));
@@ -1979,14 +1983,21 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		dataCollectionManagerDialog = new DataCollectionsManagerDialog();
 		dataCollectionManagerDialog.setLocationRelativeTo(IDWorkbenchPanel.this.getContentPane());
 		dataCollectionManagerDialog.setVisible(true);
+	}
+	
+	private void showFeatureCollectionCombSubDialog(){
 		
-//		ShowFeatureAndClusterCollectionManagerTask task = 
-//			new ShowFeatureAndClusterCollectionManagerTask();
-//		idp = new IndeterminateProgressDialog(
-//				"Refreshing data for feature and cluster collections  ...", 
-//				this.getContentPane(), task);
-//		idp.setLocationRelativeTo(this.getContentPane());
-//		idp.setVisible(true);
+		if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() != null) {
+			MessageDialog.showWarningMsg(
+					"This option is only available for database-stored data.\n"
+					+ "Please close active offline raw data analysis experiment first.", 
+					this.getContentPane());
+			return;
+		}	
+		FeatureCollectionsOperationDialog featureCollectionsOperationDialog = 
+				new FeatureCollectionsOperationDialog();
+		featureCollectionsOperationDialog.setLocationRelativeTo(this.getContentPane());
+		featureCollectionsOperationDialog.setVisible(true);	
 	}
 	
 	class ShowFeatureAndClusterCollectionManagerTask extends LongUpdateTask {

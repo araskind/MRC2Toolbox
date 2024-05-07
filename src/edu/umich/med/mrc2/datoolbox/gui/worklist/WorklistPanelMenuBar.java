@@ -58,7 +58,6 @@ public class WorklistPanelMenuBar extends CommonMenuBar {
 	private static final Icon sampleWarningIcon = GuiUtils.getIcon("sampleWarning", 24);
 	private static final Icon generateManifestIcon = GuiUtils.getIcon("generateManifest", 24);
 	
-	
 	// Menus
 	private JMenu
 		loadMenu,
@@ -114,7 +113,7 @@ public class WorklistPanelMenuBar extends CommonMenuBar {
 		clearWorklistMenuItem = addItem(loadMenu, 
 				MainActionCommands.CLEAR_WORKLIST_COMMAND, 
 				clearWorklistIcon);
-		
+				
 		add(loadMenu);
 
 		exportMenu = new JMenu("Export");

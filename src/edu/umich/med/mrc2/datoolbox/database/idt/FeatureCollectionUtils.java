@@ -211,10 +211,19 @@ public class FeatureCollectionUtils {
 			String collectionId, 
 			Set<String>featureIdsToAdd) throws Exception {
 
+		Connection conn = ConnectionManager.getConnection();
+		addFeaturesToCollection(collectionId, featureIdsToAdd, conn);
+		ConnectionManager.releaseConnection(conn);
+	}
+	
+	public static void addFeaturesToCollection(
+			String collectionId, 
+			Set<String>featureIdsToAdd,
+			Connection conn) throws Exception {
+
 		if(collectionId == null || featureIdsToAdd.isEmpty())
 			return;
 		
-		Connection conn = ConnectionManager.getConnection();
 		String 	query = 
 				"INSERT INTO MSMS_FEATURE_COLLECTION_COMPONENT "
 				+ "(COLLECTION_ID, MS_FEATURE_ID) VALUES (?,?)";		
@@ -234,7 +243,6 @@ public class FeatureCollectionUtils {
 		ps.setString(2, collectionId);	
 		ps.executeUpdate();
 		ps.close();		
-		ConnectionManager.releaseConnection(conn);
 	}
 	
 	public static void removeFeaturesFromCollection(

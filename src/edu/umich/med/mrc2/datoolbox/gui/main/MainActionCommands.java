@@ -1242,6 +1242,7 @@ public enum MainActionCommands {
 	
 	//	Feature collections
 	SHOW_DATA_COLLECTIONS_MANAGER_DIALOG_COMMAND("Show data collections manager"),
+	SHOW_FEATURE_COLLECTION_COMBSUB_DIALOG_COMMAND("Show feature collections combine/subtract dialog"),
 	ADD_FEATURE_COLLECTION_DIALOG_COMMAND("New feature collection"),
 	ADD_FEATURE_COLLECTION_COMMAND("Create new empty feature collection"),
 	ADD_FEATURE_COLLECTION_WITH_FEATURES_COMMAND("Create new feature collection with selected features"),
@@ -1250,6 +1251,10 @@ public enum MainActionCommands {
 	EDIT_FEATURE_COLLECTION_COMMAND("Save edited feature collection"),
 	DELETE_FEATURE_COLLECTION_COMMAND("Delete selected feature collection"),
 	LOAD_FEATURE_COLLECTION_COMMAND("Load selected feature collection for analysis"),
+	COMBINE_SUBTRACT_SELECTED_FEATURE_COLLECTIONS("Create new collection from selected (combine/subtract)"),
+	ADD_FEATURE_COLLECTION_TO_COMBINE_LIST_COMMAND("Add collection to \"Combine\" list"),
+	ADD_FEATURE_COLLECTION_TO_SUBTRACT_LIST_COMMAND("Add collection to \"Subtract\" list"),
+	REMOVE_FEATURE_COLLECTION_FROM_LIST_COMMAND("Remove collection from the list"),	
 	
 	//	Feature lookup data sets
 	ADD_FEATURE_LOOKUP_LIST_DIALOG_COMMAND("Create new feature lookup list"),
