@@ -3,6 +3,7 @@ package edu.umich.med.mrc2.datoolbox.gui.plot.lcms.multi;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Point2D;
@@ -29,17 +30,28 @@ import org.jfree.chart.plot.ValueMarker;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.chart.ui.Layer;
+import org.jfree.chart.ui.RectangleAnchor;
 import org.jfree.chart.ui.RectangleEdge;
 import org.jfree.chart.ui.RectangleInsets;
+import org.jfree.chart.ui.TextAnchor;
 import org.jfree.data.Range;
 import org.jfree.data.xy.XYSeriesCollection;
+import org.openscience.cdk.depict.Depiction;
+import org.openscience.cdk.depict.DepictionGenerator;
+import org.openscience.cdk.exception.CDKException;
+import org.openscience.cdk.interfaces.IAtomContainer;
+import org.openscience.cdk.silent.SilentChemObjectBuilder;
+import org.openscience.cdk.smiles.SmilesParser;
 
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
+import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
 import edu.umich.med.mrc2.datoolbox.data.MsPlotDataObject;
 import edu.umich.med.mrc2.datoolbox.data.MsPoint;
 import edu.umich.med.mrc2.datoolbox.data.enums.MsDepth;
 import edu.umich.med.mrc2.datoolbox.data.msclust.IMsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
+import edu.umich.med.mrc2.datoolbox.gui.plot.LockedXYImageAnnotation;
+import edu.umich.med.mrc2.datoolbox.gui.plot.LockedXYTextAnnotation;
 import edu.umich.med.mrc2.datoolbox.gui.plot.PlotType;
 import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.HeadToTailMsDataSet;
 import edu.umich.med.mrc2.datoolbox.gui.plot.lcms.LCMSPlotPanel;
@@ -54,7 +66,8 @@ public class LCMSMultiPlotPanel extends LCMSPlotPanel {
 	
 	private static final long serialVersionUID = 1L;
 	
-	protected int minimumSubPlotHeight = 100;		
+	protected int minimumSubPlotHeight = 200;
+	protected int maximumSubPlotHeight = 400;
 	protected FilledChromatogramRenderer filledChromatogramRenderer;
 	protected FilledChromatogramRenderer linesChromatogramRenderer;
 	protected DefaultSplineRenderer splineRenderer;
@@ -63,12 +76,19 @@ public class LCMSMultiPlotPanel extends LCMSPlotPanel {
 	protected double rtWindowExtensionWidth;
 	protected int plotCount;
 
+	private static final SmilesParser smipar = 
+			new SmilesParser(SilentChemObjectBuilder.getInstance());
+	private static final DepictionGenerator dptgen = 
+			new DepictionGenerator().withAtomColors().
+					withBackgroundColor(new Color(255,255,255,0));
+
 	public LCMSMultiPlotPanel(PlotType plotType) {
 		
 		super(plotType);
 		
 		dataPointsVisible = false;
 		annotationsVisible = true;
+		legendVisible = false;
 		
 		initChart();
 		initAxes();
@@ -368,7 +388,7 @@ public class LCMSMultiPlotPanel extends LCMSPlotPanel {
 						b, msLevel, MsReferenceType.REFERENCE_FEATURE);
 				MsPlotDataObject refData = createMsPlotDataObject(
 						refBundle, msLevel, MsReferenceType.REFERENCE_FEATURE);
-				newPlot = createheadToTailPlot(unkData, refData, msLevel);
+				newPlot = createHeadToTailPlot(unkData, refData, msLevel);
 			}
 			if(displayType.equals(MSReferenceDisplayType.DIFFERENCE)) {
 				
@@ -396,6 +416,7 @@ public class LCMSMultiPlotPanel extends LCMSPlotPanel {
 		Collection<MsPoint>spectrum = null;
 		MsPoint parent = null;
 		String label = null;
+		Image compoundImage = null;
 		if(msLevel.equals(MsDepth.MS1)) {
 			
 			if(msf.getMsFeature().getSpectrum() != null)
@@ -410,13 +431,46 @@ public class LCMSMultiPlotPanel extends LCMSPlotPanel {
 				parent = msf.getMsFeature().getSpectrum().getExperimentalTandemSpectrum().getParent();
 			}
 		}
-		if(refType.equals(MsReferenceType.REFERENCE_FEATURE))
+		if(refType.equals(MsReferenceType.REFERENCE_FEATURE)) {
 			label = msf.getMsFeature().getName();
-		
+			compoundImage = getCompoundImage(msf.getMsFeature().getPrimaryIdentity());
+		}
 		if(refType.equals(MsReferenceType.LIBRARY_MATCH)) {
 			
 		}
-		return new MsPlotDataObject(spectrum, parent, label);
+		MsPlotDataObject pda = new MsPlotDataObject(spectrum, parent, label);
+		pda.setImage(compoundImage);
+		return pda;
+	}
+	
+	private Image getCompoundImage(MsFeatureIdentity id) {
+		
+		if(id == null || id.getCompoundIdentity() == null 
+				|| id.getCompoundIdentity().getSmiles() == null)
+		return null;
+		
+		Depiction dpic = null;
+		String smiles = id.getCompoundIdentity().getSmiles();
+		if (smiles.isEmpty() || smiles.equals("NoSmile")) 
+			return null;
+		
+		IAtomContainer mol = null;
+		try {
+			mol = smipar.parseSmiles(smiles);
+		} catch (Exception e1) {
+			e1.printStackTrace();
+		}
+		if (mol != null) {
+			try {
+				dpic = dptgen.depict(mol);
+			} catch (CDKException e) {
+				// e.printStackTrace();
+			}
+		}
+		if(dpic != null)
+			return dpic.toImg();
+		else
+			return null;
 	}
 	
 	protected void createFeatureToLibraryMatchPlotForCluster(
@@ -443,6 +497,10 @@ public class LCMSMultiPlotPanel extends LCMSPlotPanel {
 		if(getPreferredSize().height < minimumSubPlotHeight * subPlotCount)
 			setPreferredSize(new Dimension(
 					getPreferredSize().width, minimumSubPlotHeight * subPlotCount));
+		
+		if(getPreferredSize().height > maximumSubPlotHeight * subPlotCount)
+			setPreferredSize(new Dimension(
+					getPreferredSize().width, maximumSubPlotHeight * subPlotCount));
 	}
 	
 //	protected XYPlot createReferenceFeaturePlot(
@@ -486,7 +544,7 @@ public class LCMSMultiPlotPanel extends LCMSPlotPanel {
 //		return newPlot;
 //	}
 	
-	protected XYPlot createheadToTailPlot(
+	protected XYPlot createHeadToTailPlot(
 				MsPlotDataObject unkData,
 				MsPlotDataObject refData,
 				MsDepth msLevel) {
@@ -518,7 +576,42 @@ public class LCMSMultiPlotPanel extends LCMSPlotPanel {
 		ValueMarker marker = new ValueMarker(0.0d);
 		marker.setPaint(Color.GRAY);
 		newPlot.addRangeMarker(marker);
+		newPlot.addAnnotation(
+				createLockedAnnotation(
+						unkData.getLabel(), TextAnchor.TOP_LEFT));
+		newPlot.addAnnotation(
+				createLockedAnnotation(
+						refData.getLabel(), TextAnchor.BOTTOM_LEFT));
+		
+		newPlot.getRenderer().removeAnnotations();
+		if(unkData.getImage() != null) {
+			
+			LockedXYImageAnnotation unkImage = 
+					new LockedXYImageAnnotation(
+							unkData.getImage(), RectangleAnchor.TOP_RIGHT, 0.03d, 1.0f);
+			newPlot.getRenderer().addAnnotation(unkImage, Layer.BACKGROUND);
+		}
+		if(refData.getImage() != null) {
+			
+			LockedXYImageAnnotation unkImage = 
+					new LockedXYImageAnnotation(
+							refData.getImage(), RectangleAnchor.BOTTOM_RIGHT, 0.03d, 1.0f);
+			newPlot.getRenderer().addAnnotation(unkImage, Layer.BACKGROUND);
+		}
 		return newPlot;
+	}
+	
+	private LockedXYTextAnnotation createLockedAnnotation(
+			String text, TextAnchor textAnchor) {
+		
+        LockedXYTextAnnotation a = 
+        		new LockedXYTextAnnotation(text, 0.03d);
+		a.setTextAnchor(textAnchor);
+		a.setPaint(Color.BLACK);
+		//	a.setOutlinePaint(Color.BLACK);
+		a.setOutlineVisible(false);
+		a.setFont(new java.awt.Font("SansSerif", java.awt.Font.PLAIN, 14));
+        return a;
 	}
 	
 	public double getRtWindowExtensionWidth() {

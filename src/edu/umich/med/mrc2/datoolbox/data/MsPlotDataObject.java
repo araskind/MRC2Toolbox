@@ -21,6 +21,7 @@
 
 package edu.umich.med.mrc2.datoolbox.data;
 
+import java.awt.Image;
 import java.util.Collection;
 
 public class MsPlotDataObject {
@@ -28,6 +29,7 @@ public class MsPlotDataObject {
 	private Collection<MsPoint>spectrum;
 	private MsPoint parent;
 	private String label;
+	private Image image;
 	
 	public MsPlotDataObject(
 			Collection<MsPoint> spectrum, 
@@ -49,5 +51,13 @@ public class MsPlotDataObject {
 
 	public String getLabel() {
 		return label;
+	}
+
+	public Image getImage() {
+		return image;
+	}
+
+	public void setImage(Image image) {
+		this.image = image;
 	}
 }
