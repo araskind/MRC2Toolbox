@@ -29,5 +29,7 @@ public enum MsRtLibraryMatchFields {
 	TGSpectrum,
 	Score,
 	AdScores,
+	RTExpected,
+	RTObserved,
 	;
 }

@@ -53,8 +53,8 @@ import edu.umich.med.mrc2.datoolbox.data.enums.CompoundIdentificationConfidence;
 import edu.umich.med.mrc2.datoolbox.data.enums.MSMSMatchType;
 import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
+import edu.umich.med.mrc2.datoolbox.database.idt.DatabaseIdentificationUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
-import edu.umich.med.mrc2.datoolbox.database.idt.IdentificationUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.MSMSLibraryUtils;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.nist.pepsearch.HiResSearchOption;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
@@ -558,7 +558,7 @@ return;
 	
 		if(searchParameters != null) {
 			try {
-				IdentificationUtils.addNewPepSearchParameterSet(searchParameters);
+				DatabaseIdentificationUtils.addNewPepSearchParameterSet(searchParameters);
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

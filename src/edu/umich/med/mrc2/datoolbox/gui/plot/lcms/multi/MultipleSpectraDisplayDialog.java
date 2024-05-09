@@ -28,6 +28,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
+import java.util.Collection;
 import java.util.prefs.Preferences;
 
 import javax.swing.Icon;
@@ -40,6 +41,8 @@ import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
+import edu.umich.med.mrc2.datoolbox.data.MsFeature;
+import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
 import edu.umich.med.mrc2.datoolbox.data.enums.MsDepth;
 import edu.umich.med.mrc2.datoolbox.data.msclust.IMsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.gui.plot.PlotType;
@@ -59,8 +62,8 @@ public class MultipleSpectraDisplayDialog extends JDialog
 
 	public MultipleSpectraDisplayDialog() {
 		super();
-		setPreferredSize(new Dimension(640, 800));
-		setSize(new Dimension(640, 800));
+		setPreferredSize(new Dimension(800, 800));
+		setSize(new Dimension(800, 800));
 		setTitle("Multiple spectra display");
 		setIconImage(((ImageIcon) componentIcon).getImage());
 		setModalityType(ModalityType.MODELESS);
@@ -131,6 +134,12 @@ public class MultipleSpectraDisplayDialog extends JDialog
 
 	public void clearPanel() {
 		plotPanel.removeAllDataSets();
+	}
+
+	public void showMSMSLibraryMatches(
+			MsFeature feature, Collection<MsFeatureIdentity> idList) {
+		plotPanel.showMSMSLibraryMatches(
+				feature, idList, MSReferenceDisplayType.HEAD_TO_TAIL);		
 	}
 }
 

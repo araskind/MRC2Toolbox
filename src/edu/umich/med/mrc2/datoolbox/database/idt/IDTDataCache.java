@@ -1210,7 +1210,7 @@ public class IDTDataCache {
 
 		if(pepSearchParameters.isEmpty()) {
 			try {
-				pepSearchParameters.addAll(IdentificationUtils.getNISTPepSearchParameterObjects());
+				pepSearchParameters.addAll(DatabaseIdentificationUtils.getNISTPepSearchParameterObjects());
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

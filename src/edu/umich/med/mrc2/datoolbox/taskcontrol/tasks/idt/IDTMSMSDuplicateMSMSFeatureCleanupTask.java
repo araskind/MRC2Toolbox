@@ -53,12 +53,12 @@ import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.data.lims.ObjectAnnotation;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.database.idt.AnnotationUtils;
+import edu.umich.med.mrc2.datoolbox.database.idt.DatabaseIdentificationUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTMsDataUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTRawDataUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.IdFollowupUtils;
-import edu.umich.med.mrc2.datoolbox.database.idt.IdentificationUtils;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
@@ -126,7 +126,7 @@ public class IDTMSMSDuplicateMSMSFeatureCleanupTask extends AbstractTask {
 		}
 		while(rs.next()) {
 			String featureId = rs.getString("MSMS_FEATURE_ID");
-			Collection<MsFeatureIdentity>dupIds = IdentificationUtils.getMSMSFeatureLibraryMatches(
+			Collection<MsFeatureIdentity>dupIds = DatabaseIdentificationUtils.getMSMSFeatureLibraryMatches(
 					featureId, conn);
 			
 			dupIds = dupIds.stream().filter(i -> i.isPrimary()).collect(Collectors.toList());
@@ -151,7 +151,7 @@ public class IDTMSMSDuplicateMSMSFeatureCleanupTask extends AbstractTask {
 			MsFeatureIdentity primary = dupIds.stream().
 					sorted(new MsFeatureIdentityComparator(
 							SortProperty.Quality)).findFirst().orElse(null);
-			IdentificationUtils.setMSMSFeaturePrimaryIdentity(featureId, primary, conn);
+			DatabaseIdentificationUtils.setMSMSFeaturePrimaryIdentity(featureId, primary, conn);
 		}
 		else {
 			System.out.println("Curated data for " + featureId);
@@ -181,7 +181,7 @@ public class IDTMSMSDuplicateMSMSFeatureCleanupTask extends AbstractTask {
 		}
 		while(rs.next()) {
 			
-			Collection<MsFeatureIdentity>dupIds = IdentificationUtils.getMSMSFeatureLibraryMatchesForLibraryId(
+			Collection<MsFeatureIdentity>dupIds = DatabaseIdentificationUtils.getMSMSFeatureLibraryMatchesForLibraryId(
 					rs.getString("MSMS_FEATURE_ID"), rs.getString("MRC2_LIB_ID"),  conn);
 
 			if(removeCompleteDuplicates(dupIds, conn))
@@ -239,7 +239,7 @@ public class IDTMSMSDuplicateMSMSFeatureCleanupTask extends AbstractTask {
 						if(!id.getUniqueId().equals(primId.getUniqueId())) {
 							try {
 								//	System.out.println("Deleting " + id.getUniqueId());
-								IdentificationUtils.removeMSMSFeatureLibraryMatch(id, conn);
+								DatabaseIdentificationUtils.removeMSMSFeatureLibraryMatch(id, conn);
 							} catch (Exception e) {
 								// TODO Auto-generated catch block
 								e.printStackTrace();
@@ -254,7 +254,7 @@ public class IDTMSMSDuplicateMSMSFeatureCleanupTask extends AbstractTask {
 					if(!curatedIds.contains(id.getUniqueId())) {
 						try {
 							//	System.out.println("Deleting " + id.getUniqueId());
-							IdentificationUtils.removeMSMSFeatureLibraryMatch(id, conn);
+							DatabaseIdentificationUtils.removeMSMSFeatureLibraryMatch(id, conn);
 						} catch (Exception e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
@@ -598,7 +598,7 @@ public class IDTMSMSDuplicateMSMSFeatureCleanupTask extends AbstractTask {
 					ps.addBatch();
 				}
 				ps.executeBatch();
-				IdentificationUtils.setMSMSFeaturePrimaryIdentity(
+				DatabaseIdentificationUtils.setMSMSFeaturePrimaryIdentity(
 						feature.getMsFeature().getId(), feature.getMsFeature().getPrimaryIdentity(), conn);
 				processed++;
 			}

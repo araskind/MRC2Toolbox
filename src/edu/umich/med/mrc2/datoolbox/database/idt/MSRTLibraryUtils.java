@@ -50,6 +50,7 @@ import edu.umich.med.mrc2.datoolbox.data.compare.AdductComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.enums.AnnotatedObjectType;
 import edu.umich.med.mrc2.datoolbox.data.enums.CompoundDatabaseEnum;
+import edu.umich.med.mrc2.datoolbox.data.enums.CompoundIdSource;
 import edu.umich.med.mrc2.datoolbox.data.enums.CompoundIdentificationConfidence;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
@@ -876,7 +877,7 @@ public class MSRTLibraryUtils {
 	}
 
 	public static Map<String, MsFeatureIdentity>
-		getCompoundIdentitiesByTargetIds(Collection<String> libraryTargetIdList, String libraryId) throws Exception{
+		getCompoundIdentitiesByTargetIds(Collection<String> libraryTargetIdList) throws Exception{
 
 		TreeMap<String, MsFeatureIdentity> identityMap = new TreeMap<String, MsFeatureIdentity>();
 
@@ -911,12 +912,7 @@ public class MSRTLibraryUtils {
 
 				MsFeatureIdentity msId = new MsFeatureIdentity(
 						identity, CompoundIdentificationConfidence.ACCURATE_MASS_RT);
-
-//				MsRtLibraryMatch libMatch = new MsRtLibraryMatch(libraryTargetId);
-//				libMatch.setLibraryId(rs.getString("LIBRARY_ID"));
-//				libMatch.setExpectedRetention(rs.getDouble("RETENTION_TIME"));
-//				libMatch.setScore(100.0d);
-				
+				msId.setIdSource(CompoundIdSource.LIBRARY);
 				MsRtLibraryMatch libMatch = new MsRtLibraryMatch(
 						rs.getString("LIBRARY_ID"), 			
 						libraryTargetId, 

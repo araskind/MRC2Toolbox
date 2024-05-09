@@ -101,7 +101,7 @@ import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.database.cpd.CompoundDatabaseUtils;
 import edu.umich.med.mrc2.datoolbox.database.cpd.CompoundDbConnectionManager;
-import edu.umich.med.mrc2.datoolbox.database.idt.IdentificationUtils;
+import edu.umich.med.mrc2.datoolbox.database.idt.DatabaseIdentificationUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.MSRTLibraryUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.UserUtils;
 import edu.umich.med.mrc2.datoolbox.dbparse.load.isdb.ISDBMGFParser;
@@ -206,9 +206,9 @@ public class TestClass {
 		Connection conn = ConnectionManager.getConnection();
 				
 		NISTPepSearchParameterObject parOne = 
-				IdentificationUtils.getNISTPepSearchParameterObjectById(parOneId, conn);
+				DatabaseIdentificationUtils.getNISTPepSearchParameterObjectById(parOneId, conn);
 		NISTPepSearchParameterObject parTwo = 
-				IdentificationUtils.getNISTPepSearchParameterObjectById(parTwoId, conn);
+				DatabaseIdentificationUtils.getNISTPepSearchParameterObjectById(parTwoId, conn);
 		
 //		System.out.print("Search parameters\n-------------------------\n");
 //		System.out.println(parOneId + "\t" + parTwoId);
@@ -237,7 +237,7 @@ public class TestClass {
 		Connection conn = ConnectionManager.getConnection();		
 		for(String id : idList) {
 			if(id.startsWith("MSN_"))
-				IdentificationUtils.disableMSMSFeaturePrimaryIdentity(id, conn);
+				DatabaseIdentificationUtils.disableMSMSFeaturePrimaryIdentity(id, conn);
 		}
 		ConnectionManager.releaseConnection(conn);
 	}

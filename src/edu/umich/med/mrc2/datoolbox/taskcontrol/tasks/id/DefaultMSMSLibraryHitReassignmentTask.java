@@ -36,8 +36,8 @@ import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureIdentityComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortDirection;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
+import edu.umich.med.mrc2.datoolbox.database.idt.DatabaseIdentificationUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
-import edu.umich.med.mrc2.datoolbox.database.idt.IdentificationUtils;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.nist.pepsearch.HiResSearchOption;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.tophit.TopHitReassignmentOption;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
@@ -282,7 +282,7 @@ public class DefaultMSMSLibraryHitReassignmentTask extends AbstractTask {
 		for(MSFeatureInfoBundle bundle : featuresToUpdate) {
 			
 			try {
-				IdentificationUtils.setMSMSFeaturePrimaryIdentity(
+				DatabaseIdentificationUtils.setMSMSFeaturePrimaryIdentity(
 						bundle.getMSMSFeatureId(), 
 						bundle.getMsFeature().getPrimaryIdentity(), 
 						conn);

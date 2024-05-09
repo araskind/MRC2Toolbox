@@ -45,6 +45,7 @@ public class MsRtLibraryMatch implements Serializable {
 	private double score;
 	private Set<AdductMatch>adductScoreMap;
 	private double expectedRetention = 0.0d;
+	private double observedRetention = 0.0d;
 	private MassSpectrum librarySpectrum;
 
 	public MsRtLibraryMatch(
@@ -185,6 +186,7 @@ public class MsRtLibraryMatch implements Serializable {
 		this.libraryTargetName = libraryTargetName;
 	}
 	
+	
 	public Element getXmlElement() {
 		
 		Element refMsRtElement = 
@@ -201,6 +203,13 @@ public class MsRtLibraryMatch implements Serializable {
 		if(libraryTargetName != null)
 			refMsRtElement.setAttribute(
 					MsRtLibraryMatchFields.TGName.name(), libraryTargetName);
+		
+		refMsRtElement.setAttribute(
+				MsRtLibraryMatchFields.Score.name(), Double.toString(score));		
+		refMsRtElement.setAttribute(
+				MsRtLibraryMatchFields.RTExpected.name(), Double.toString(expectedRetention));
+		refMsRtElement.setAttribute(
+				MsRtLibraryMatchFields.RTObserved.name(), Double.toString(observedRetention));
 		
 		if(adductScoreMap != null && !adductScoreMap.isEmpty()) {
 			
@@ -234,6 +243,16 @@ public class MsRtLibraryMatch implements Serializable {
 				msRtMatchElement.getAttributeValue(MsRtLibraryMatchFields.Score.name());
 		if(scoreString != null)
 			score = Double.parseDouble(scoreString);
+		
+		String expectedRTString = 
+				msRtMatchElement.getAttributeValue(MsRtLibraryMatchFields.RTExpected.name());
+		if(expectedRTString != null)
+			expectedRetention = Double.parseDouble(expectedRTString);
+		
+		String observedRTString = 
+				msRtMatchElement.getAttributeValue(MsRtLibraryMatchFields.RTObserved.name());
+		if(observedRTString != null)
+			observedRetention = Double.parseDouble(observedRTString);
 
 		String adductScoreMapString = 
 				msRtMatchElement.getAttributeValue(MsRtLibraryMatchFields.AdScores.name());
@@ -262,6 +281,22 @@ public class MsRtLibraryMatch implements Serializable {
 				MsRtLibraryMatchFields.TGSpectrum.name());
 		if(spectrumElement != null)
 			librarySpectrum = new MassSpectrum(spectrumElement);
+	}
+
+	public double getObservedRetention() {
+		return observedRetention;
+	}
+
+	public void setObservedRetention(double observedRetention) {
+		this.observedRetention = observedRetention;
+	}
+	
+	public Double getRtError() {
+		
+		if(observedRetention > 0.0d && expectedRetention > 0.0)
+			return observedRetention - expectedRetention;
+		else
+			return null;
 	}
 }
 

@@ -100,10 +100,10 @@ import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.database.cpd.CompoundDatabaseUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.AnnotationUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.BinnerAnnotationCache;
+import edu.umich.med.mrc2.datoolbox.database.idt.DatabaseIdentificationUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.FeatureChromatogramUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
-import edu.umich.med.mrc2.datoolbox.database.idt.IdentificationUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.ColorUtils;
 import edu.umich.med.mrc2.datoolbox.main.AdductManager;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
@@ -1697,7 +1697,7 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 						feature.getSpectrum().getTandemSpectrum(SpectrumSource.EXPERIMENTAL);
 				if(msmsFeature != null) {
 					try {
-						IdentificationUtils.setMSMSFeaturePrimaryIdentity(msmsFeature.getId(), bestId);
+						DatabaseIdentificationUtils.setMSMSFeaturePrimaryIdentity(msmsFeature.getId(), bestId);
 					} catch (Exception e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();

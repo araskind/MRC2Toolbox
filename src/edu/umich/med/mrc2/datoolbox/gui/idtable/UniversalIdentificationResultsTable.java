@@ -27,6 +27,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
@@ -269,17 +270,6 @@ public class UniversalIdentificationResultsTable extends BasicTable {
 		addModelListeners();
 	}
 	
-//	private void adjustVarWidthColumns() {
-//		
-//		fixedWidthColumns.clear();
-//		fixedWidthColumns.add(getColumnIndex(UniversalIdentificationResultsTableModel.DEFAULT_ID_COLUMN));
-//		fixedWidthColumns.add(getColumnIndex(UniversalIdentificationResultsTableModel.ID_LEVEL_COLUMN));
-//		fixedWidthColumns.add(getColumnIndex(UniversalIdentificationResultsTableModel.MSMS_MATCH_TYPE_COLUMN));
-//		fixedWidthColumns.add(getColumnIndex(UniversalIdentificationResultsTableModel.ID_CONFIDENCE_COLUMN));
-//		tca.adjustColumnsExcluding(fixedWidthColumns);
-//		columnModel.getColumnById(UniversalIdentificationResultsTableModel.IDENTIFICATION_COLUMN).setMinWidth(200);
-//	}
-	
 	public void setModelFromMsFeature(
 			MsFeature feature, 
 			Collection<CompoundIdSource> sorcesToExclude, 
@@ -332,6 +322,16 @@ public class UniversalIdentificationResultsTable extends BasicTable {
 
 		return (MsFeatureIdentity) model.getValueAt(convertRowIndexToModel(row), 
 				model.getColumnIndex(UniversalIdentificationResultsTableModel.IDENTIFICATION_COLUMN));
+	}
+	
+	public Collection<MsFeatureIdentity>getAllIdentities(){
+		
+		Collection<MsFeatureIdentity>idList = new ArrayList<MsFeatureIdentity>();
+		int col = model.getColumnIndex(UniversalIdentificationResultsTableModel.IDENTIFICATION_COLUMN);
+		for(int i=0; i<model.getRowCount(); i++)
+			idList.add((MsFeatureIdentity)model.getValueAt(i, col));
+		
+		return idList;
 	}
 
 	/**

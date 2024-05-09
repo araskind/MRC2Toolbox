@@ -108,11 +108,11 @@ import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusterDataSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusteringParameterSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
+import edu.umich.med.mrc2.datoolbox.database.idt.DatabaseIdentificationUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.FeatureChromatogramUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.database.idt.IdFollowupUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.IdLevelUtils;
-import edu.umich.med.mrc2.datoolbox.database.idt.IdentificationUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.MSMSClusteringDBUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.StandardAnnotationUtils;
 import edu.umich.med.mrc2.datoolbox.gui.annotation.DockableObjectAnnotationPanel;
@@ -3078,7 +3078,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 				
 				if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() == null) {
 					try {
-						IdentificationUtils.clearAllReferenceMS1FeatureIdentifications(msOneFeature.getId(), conn);
+						DatabaseIdentificationUtils.clearAllReferenceMS1FeatureIdentifications(msOneFeature.getId(), conn);
 					} catch (Exception e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -3116,7 +3116,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 				if(msms != null) {
 					if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() == null) {
 						try {					
-							IdentificationUtils.clearAllMSMSFeatureIdentifications(msms.getId(), conn);
+							DatabaseIdentificationUtils.clearAllMSMSFeatureIdentifications(msms.getId(), conn);
 						} catch (Exception e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
@@ -3177,7 +3177,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			msOneFeature.disablePrimaryIdentity();
 			if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() != null) {
 				try {
-					IdentificationUtils.disableReferenceMS1FeaturePrimaryIdentity(msOneFeature.getId(), conn);
+					DatabaseIdentificationUtils.disableReferenceMS1FeaturePrimaryIdentity(msOneFeature.getId(), conn);
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -3201,7 +3201,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() != null) {
 				try {
 					String msmsId = msTwoFeature.getSpectrum().getTandemSpectrum(SpectrumSource.EXPERIMENTAL).getId();
-					IdentificationUtils.disableMSMSFeaturePrimaryIdentity(msmsId, conn);
+					DatabaseIdentificationUtils.disableMSMSFeaturePrimaryIdentity(msmsId, conn);
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -3311,14 +3311,14 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 				
 				if(id.getMsRtLibraryMatch() != null) {
 					try {
-						IdentificationUtils.removeReferenceMS1FeatureLibraryMatch(id);
+						DatabaseIdentificationUtils.removeReferenceMS1FeatureLibraryMatch(id);
 					} catch (Exception e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 				} else {
 					try {
-						IdentificationUtils.removeReferenceMS1FeatureManualId(id);
+						DatabaseIdentificationUtils.removeReferenceMS1FeatureManualId(id);
 					} catch (Exception e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -3356,14 +3356,14 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 				
 				if(id.getReferenceMsMsLibraryMatch() != null) {
 					try {					
-						IdentificationUtils.removeMSMSFeatureLibraryMatch(id);
+						DatabaseIdentificationUtils.removeMSMSFeatureLibraryMatch(id);
 					} catch (Exception e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 				} else {
 					try {
-						IdentificationUtils.removeMSMSFeatureManualIdentification(id);
+						DatabaseIdentificationUtils.removeMSMSFeatureManualIdentification(id);
 					} catch (Exception e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -3430,7 +3430,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		feature.setPrimaryIdentity(manualId);
 		if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() == null) {
 			try {
-				IdentificationUtils.addReferenceMS1FeatureManualId(feature.getId(), manualId);
+				DatabaseIdentificationUtils.addReferenceMS1FeatureManualId(feature.getId(), manualId);
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -3448,7 +3448,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 				feature.getSpectrum().getTandemSpectrum(SpectrumSource.EXPERIMENTAL);
 		if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() == null) {
 			try {
-				IdentificationUtils.addMSMSFeatureManualId(msms.getId(), manualId);
+				DatabaseIdentificationUtils.addMSMSFeatureManualId(msms.getId(), manualId);
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -3608,7 +3608,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 					pepSearchSetupDialog.getResultFile());			
 			task.setPepSearchParameterObject(pepSearchSetupDialog.getPepSearchParameterObject());
 			try {
-				IdentificationUtils.addNewPepSearchParameterSet(task.getPepSearchParameterObject());
+				DatabaseIdentificationUtils.addNewPepSearchParameterSet(task.getPepSearchParameterObject());
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -4105,7 +4105,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		}	
 		try {
 			String searchParametersId = 
-					IdentificationUtils.addNewPepSearchParameterSet(
+					DatabaseIdentificationUtils.addNewPepSearchParameterSet(
 							task.getPepSearchParameterObject());
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -4510,7 +4510,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			MsFeatureIdentity primaryId = bundle.getMsFeature().getPrimaryIdentity();
 			if(primaryId != null && MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() == null) {
 				try {
-					IdentificationUtils.setReferenceMS1FeaturePrimaryIdentity(
+					DatabaseIdentificationUtils.setReferenceMS1FeaturePrimaryIdentity(
 							bundle.getMsFeature().getId(),
 							primaryId);
 				} catch (Exception e) {
@@ -4541,7 +4541,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 						bundle.getMsFeature().getSpectrum().getExperimentalTandemSpectrum();
 
 				try {
-					IdentificationUtils.setMSMSFeaturePrimaryIdentity(
+					DatabaseIdentificationUtils.setMSMSFeaturePrimaryIdentity(
 							msmsFeature.getId(),
 							primaryId);
 				} catch (Exception e) {

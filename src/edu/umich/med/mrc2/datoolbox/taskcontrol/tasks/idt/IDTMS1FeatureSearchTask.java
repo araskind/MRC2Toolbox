@@ -512,11 +512,6 @@ public class IDTMS1FeatureSearchTask extends AbstractTask {
 						CompoundIdentificationConfidence.getLevelByNumber(rs.getInt("IDENTIFICATION_CONFIDENCE"));
 				MsFeatureIdentity id = new MsFeatureIdentity(compoundIdentity, confidenceLevel);
 				id.setIdSource(CompoundIdSource.getOptionByName(rs.getString("ID_SOURCE")));
-//				MsRtLibraryMatch match = 
-//						new MsRtLibraryMatch(rs.getString("LIBRARY_ENTRY_ID"));
-//				match.setLibraryId(rs.getString("LIBRARY_ID"));
-//				match.setExpectedRetention(rs.getDouble("RETENTION_TIME"));
-//				match.setScore(rs.getDouble("MATCH_SCORE"));
 				
 				MsRtLibraryMatch match = new MsRtLibraryMatch(
 						rs.getString("LIBRARY_ID"), 			
@@ -526,6 +521,7 @@ public class IDTMS1FeatureSearchTask extends AbstractTask {
 						rs.getDouble("RETENTION_TIME"), 
 						null,
 						null);
+				match.setObservedRetention(fb.getRetentionTime());
 				
 				String adductName = rs.getString("ADDUCT_NAME");
 				if(adductName != null) {

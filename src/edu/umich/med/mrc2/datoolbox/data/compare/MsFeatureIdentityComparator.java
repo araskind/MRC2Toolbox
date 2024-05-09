@@ -21,7 +21,12 @@
 
 package edu.umich.med.mrc2.datoolbox.data.compare;
 
+import java.util.Collection;
+import java.util.Map.Entry;
+
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
+import edu.umich.med.mrc2.datoolbox.data.enums.CompoundDatabaseEnum;
+import edu.umich.med.mrc2.datoolbox.data.enums.CompoundIdSource;
 
 public class MsFeatureIdentityComparator extends ObjectCompatrator<MsFeatureIdentity>{
 
@@ -30,6 +35,11 @@ public class MsFeatureIdentityComparator extends ObjectCompatrator<MsFeatureIden
 	 */
 	private static final long serialVersionUID = 3208234498036550811L;
 
+	private static final Collection<CompoundIdSource>libraryIdSources = 
+			CompoundIdSource.getLibraryIdSources();
+	private static final AdductRankComparator adductComparator = 
+			new AdductRankComparator();
+	
 	public MsFeatureIdentityComparator(SortProperty property, SortDirection direction) {
 		super(property,direction);
 	}
@@ -100,16 +110,52 @@ public class MsFeatureIdentityComparator extends ObjectCompatrator<MsFeatureIden
 			else
 				return -result;
 
-		case Quality:	//	Default descending
-			result = 0;			
-			if(o1.getConfidenceLevel() != null && o2.getConfidenceLevel() != null) {
-				result = Integer.compare(
-						o1.getConfidenceLevel().getLevel(), 
-						o2.getConfidenceLevel().getLevel());
+		case Quality:
+			
+			result = Integer.compare(
+					o1.getConfidenceLevel().getLevel(), o2.getConfidenceLevel().getLevel());
+			
+			if(result == 0 && o1.getIdSource() != null && o2.getIdSource() != null)						
+				result = Integer.compare(o1.getIdSource().getRank(), o2.getIdSource().getRank());	
+			
+			//	Rank RT matches by close RT
+			if(result == 0 && o1.getMsRtLibraryMatch() != null 
+					&& o2.getMsRtLibraryMatch() != null) {
+				
+				Double rtError1 = o1.getMsRtLibraryMatch().getRtError();
+				Double rtError2 = o2.getMsRtLibraryMatch().getRtError();
+				if(rtError1 != null && rtError2 != null)
+					result = Double.compare(Math.abs(rtError1), Math.abs(rtError2));
+				
+				// Select more likely adduct
+				if(result == 0) {									
+					result = adductComparator.compare(
+							o1.getMsRtLibraryMatch().getTopAdductMatch().getLibraryMatch(), 
+							o2.getMsRtLibraryMatch().getTopAdductMatch().getLibraryMatch());
+				}
 			}
-			if(result == 0)
-				result = Double.compare(o1.getScore(), o2.getScore());
-
+			if(result == 0) 				
+				result = Double.compare(o2.getEntropyBasedScore(), o1.getEntropyBasedScore());	//	Higher score - better match
+			
+			if(result == 0) {
+						
+				Entry<CompoundDatabaseEnum, String>hr1 = 
+						o1.getCompoundIdentity().getTopRankingDatabaseId();
+				Entry<CompoundDatabaseEnum, String>hr2 = 
+						o2.getCompoundIdentity().getTopRankingDatabaseId();
+				
+				if(hr1 != null && hr2 == null)	// Ranked database before unranked in ASC sort
+					result = -1;
+				
+				if(hr1 == null && hr2 != null)	// Unranked database after ranked in ASC sort
+					result = 1;
+				
+				if(hr1 != null && hr2 != null) {
+					result = Integer.compare(hr1.getKey().getRank(), hr2.getKey().getRank());
+					if(result == 0)
+						result = hr1.getValue().compareToIgnoreCase(hr2.getValue());
+				}
+			}
 			if (direction == SortDirection.ASC)
 				return result;
 			else

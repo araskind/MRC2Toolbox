@@ -21,48 +21,59 @@
 
 package edu.umich.med.mrc2.datoolbox.data.enums;
 
+import java.util.Collection;
+import java.util.TreeSet;
+
 public enum CompoundIdSource {
 
-	LIBRARY("Library (MS1/RT)"),
-	LIBRARY_MS2_RT("Library (MS1/MS2/RT)"),
-	LIBRARY_MS2("MSMS Library"),
-	DATABASE("Database"),
-	MANUAL("Manual assignment"),
-	FORMULA_GENERATOR("Mol. formula generator"),
-	UNKNOWN("Unknown");
+	MANUAL("Manual assignment", 1),
+	LIBRARY_MS2_RT("Library (MS1/MS2/RT)", 2), 
+	LIBRARY("Library (MS1/RT)", 3),
+	LIBRARY_MS2("Library (MS1/MS2", 4),
+	LIBRARY_MS_ONLY("Library (MS1, NO RT)", 5), 	
+	DATABASE("Database", 7),
+	FORMULA_GENERATOR("Mol. formula generator", 8),
+	UNKNOWN("Unknown", 9);
 
 	private final String uiName;
+	private final int rank;
 
-	CompoundIdSource(String uiName) {
+	CompoundIdSource(String uiName, int rank) {
 		this.uiName = uiName;
+		this.rank = rank;
 	}
 
 	public String getName() {
 		return uiName;
 	}
-
-	@Override
+	
+	public int getRank() {
+		return rank;
+	}
+	
 	public String toString() {
 		return uiName;
 	}
-
+	
 	public static CompoundIdSource getOptionByName(String name) {
-
+		
+		if(name == null)
+			return null;
+		
 		for(CompoundIdSource source : CompoundIdSource.values()) {
-
+			
 			if(source.name().equals(name))
 				return source;
-		}
+		}		
 		return null;
 	}
 	
-	public static CompoundIdSource getOptionByUIName(String uiname) {
+	public static Collection<CompoundIdSource>getLibraryIdSources(){
 		
-		for(CompoundIdSource cat :CompoundIdSource.values()) {
-			
-			if(cat.getName().equals(uiname))
-				return cat;
-		}		
-		return null;
+		 Collection<CompoundIdSource>libSources = new TreeSet<CompoundIdSource>();
+		 libSources.add(LIBRARY_MS2);
+		 libSources.add(LIBRARY);
+		 libSources.add(LIBRARY_MS_ONLY);		 
+		 return libSources;
 	}
 }

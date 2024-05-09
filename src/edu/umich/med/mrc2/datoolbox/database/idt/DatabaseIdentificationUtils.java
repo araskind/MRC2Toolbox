@@ -66,7 +66,7 @@ import edu.umich.med.mrc2.datoolbox.gui.idworks.nist.NISTReferenceLibraries;
 import edu.umich.med.mrc2.datoolbox.main.AdductManager;
 import edu.umich.med.mrc2.datoolbox.utils.SQLUtils;
 
-public class IdentificationUtils {
+public class DatabaseIdentificationUtils {
 	
 	/*
 	 * MS1 features library matches

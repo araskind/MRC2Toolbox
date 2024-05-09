@@ -24,7 +24,9 @@ package edu.umich.med.mrc2.datoolbox.main;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import edu.umich.med.mrc2.datoolbox.data.Adduct;
@@ -552,6 +554,24 @@ public class AdductManager {
 				 filter(a -> Objects.nonNull(a.getNotationForType(AdductNotationType.SIRIUS))).
 				 filter(a -> a.getNotationForType(AdductNotationType.BINNER).equals(cleanAnnotation)).
 				 findFirst().orElse(null);						 
+	}
+	
+	public static Map<Adduct,Integer>getRankedPrimaryModificationsForPolarity(Polarity polarity){
+		
+		Map<Adduct,Integer>rankedModsMap = new TreeMap<Adduct,Integer>();
+		if(polarity.equals(Polarity.Positive)) {
+			
+			rankedModsMap.put(getAdductByName("[M+H]+"), 1);
+			rankedModsMap.put(getAdductByName("[M+Na]+"), 2);
+			rankedModsMap.put(getAdductByName("[M+2H]2+"), 3);
+		}
+		if(polarity.equals(Polarity.Negative)) {
+			
+			rankedModsMap.put(getAdductByName("[M-H]-"), 1);
+			rankedModsMap.put(getAdductByName("[M+Cl]-"), 2);
+			rankedModsMap.put(getAdductByName("[M-2H]2-"), 3);
+		}		
+		return rankedModsMap;
 	}
 }
 

@@ -49,9 +49,9 @@ import edu.umich.med.mrc2.datoolbox.data.enums.MSMSMatchType;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
+import edu.umich.med.mrc2.datoolbox.database.idt.DatabaseIdentificationUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.IdFollowupUtils;
-import edu.umich.med.mrc2.datoolbox.database.idt.IdentificationUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.StandardAnnotationUtils;
 import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisExperiment;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
@@ -431,7 +431,7 @@ return;
 		if(!manualIds.isEmpty()) {
 			
 			for(Entry<String, MsFeatureIdentity> entry : manualIds.entrySet())
-				IdentificationUtils.addMSMSFeatureManualId(entry.getKey(), entry.getValue(), conn);
+				DatabaseIdentificationUtils.addMSMSFeatureManualId(entry.getKey(), entry.getValue(), conn);
 			
 			manualIds.clear();
 		}

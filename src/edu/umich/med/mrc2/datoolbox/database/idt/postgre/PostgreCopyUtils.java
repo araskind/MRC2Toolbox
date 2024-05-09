@@ -46,8 +46,8 @@ import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
+import edu.umich.med.mrc2.datoolbox.database.idt.DatabaseIdentificationUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
-import edu.umich.med.mrc2.datoolbox.database.idt.IdentificationUtils;
 import edu.umich.med.mrc2.datoolbox.database.lims.LIMSDataCache;
 
 public class PostgreCopyUtils {
@@ -791,7 +791,7 @@ public class PostgreCopyUtils {
 		
 		Connection mrcConnection = ConnectionManager.getConnection();
 		Collection<NISTPepSearchParameterObject>npsObjects = 
-				IdentificationUtils.getNISTPepSearchParameterObjects(mrcConnection);			
+				DatabaseIdentificationUtils.getNISTPepSearchParameterObjects(mrcConnection);			
 		Connection pgConnection =  getPostGreConnection();
 		String query =
 				"INSERT INTO NIST_PEPSEARCH_PARAMETERS (PARAMETER_SET_ID, PARAMETER_SET_OBJECT, "

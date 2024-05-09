@@ -288,7 +288,7 @@ public class IDTMsDataUtils {
 			return;
 		
 		Collection<MsFeatureIdentity> msmsIds =
-				IdentificationUtils.getMSMSFeatureLibraryMatches(msms.getId(), conn);
+				DatabaseIdentificationUtils.getMSMSFeatureLibraryMatches(msms.getId(), conn);
 
 		for(MsFeatureIdentity cid : msmsIds) {
 			
@@ -308,7 +308,7 @@ public class IDTMsDataUtils {
 			return;
 
 		Collection<MsFeatureIdentity>altIds = 
-				IdentificationUtils.getMSMSFeatureManualIds(msms.getId(), conn);
+				DatabaseIdentificationUtils.getMSMSFeatureManualIds(msms.getId(), conn);
 		
 		for(MsFeatureIdentity cid : altIds) {
 			
@@ -435,7 +435,7 @@ public class IDTMsDataUtils {
 			Connection conn) throws Exception {
 		
 		Collection<MsFeatureIdentity> msmsIds =
-				IdentificationUtils.getReferenceMS1FeatureLibraryMatches(
+				DatabaseIdentificationUtils.getReferenceMS1FeatureLibraryMatches(
 						newTarget.getId(), conn);
 
 		for(MsFeatureIdentity cid : msmsIds) {
@@ -452,7 +452,7 @@ public class IDTMsDataUtils {
 			Connection conn) throws Exception {
 
 		Collection<MsFeatureIdentity>altIds = 
-				IdentificationUtils.getReferenceMS1FeatureManualIds(
+				DatabaseIdentificationUtils.getReferenceMS1FeatureManualIds(
 						newTarget.getId(), conn);
 		
 		for(MsFeatureIdentity cid : altIds) {

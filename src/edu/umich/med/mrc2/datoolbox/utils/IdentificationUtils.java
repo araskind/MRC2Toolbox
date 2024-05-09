@@ -24,19 +24,21 @@ package edu.umich.med.mrc2.datoolbox.utils;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import edu.umich.med.mrc2.datoolbox.data.CompoundIdentity;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
+import edu.umich.med.mrc2.datoolbox.data.compare.CompoundDatabaseCompatrator;
 import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureIdentityComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortDirection;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
+import edu.umich.med.mrc2.datoolbox.data.enums.CompoundDatabaseEnum;
 import edu.umich.med.mrc2.datoolbox.data.enums.DecoyExportHandling;
 import edu.umich.med.mrc2.datoolbox.data.enums.MSMSMatchType;
 import edu.umich.med.mrc2.datoolbox.data.enums.MSMSScoringParameter;
@@ -46,28 +48,31 @@ public class IdentificationUtils {
 	
 	private static final MsFeatureIdentityComparator idQualitySorter = 
 			new MsFeatureIdentityComparator(SortProperty.Quality);
+	public static final CompoundDatabaseCompatrator compoundDatabaseRankSorter = 
+			new CompoundDatabaseCompatrator(SortProperty.Rank);
 
 	public static Collection<MsFeatureIdentity>getBestMatchIds(MsFeature feature){
 		
-		Collection<MsFeatureIdentity> idList = feature.getIdentifications();			
 		Map<CompoundIdentity, List<MsFeatureIdentity>> idsByCompound = 
-				idList.stream().filter(i -> Objects.nonNull(i.getCompoundIdentity())).
+				feature.getIdentifications().stream().
+				filter(i -> Objects.nonNull(i.getCompoundIdentity())).
 				collect(Collectors.groupingBy(MsFeatureIdentity::getCompoundIdentity));
 		
-		Collection<MsFeatureIdentity> bestMatchList = new HashSet<MsFeatureIdentity>();
+		Map<CompoundIdentity,MsFeatureIdentity> bestMatchList = 
+				new HashMap<CompoundIdentity,MsFeatureIdentity>();
 		for(Entry<CompoundIdentity, List<MsFeatureIdentity>> matchList : idsByCompound.entrySet()) {
 			
 			MsFeatureIdentity bestMatch = matchList.getValue().
 					stream().filter(id -> !isDecoyHit(id)).
 					sorted(idQualitySorter).findFirst().orElse(null);
 			if(bestMatch != null)
-				bestMatchList.add(bestMatch);
+				bestMatchList.put(matchList.getKey(), bestMatch);
 		}
 		if(feature.getPrimaryIdentity() != null && !isDecoyHit(feature.getPrimaryIdentity())
-				&& !bestMatchList.contains(feature.getPrimaryIdentity()))
-			bestMatchList.add(feature.getPrimaryIdentity());
+				&& !bestMatchList.values().contains(feature.getPrimaryIdentity()))
+			bestMatchList.put(feature.getPrimaryIdentity().getCompoundIdentity(), feature.getPrimaryIdentity());
 		
-		return bestMatchList;
+		return bestMatchList.values();
 	}
 	
 	public static boolean isDecoyHit(MsFeatureIdentity msfId) {
@@ -143,5 +148,16 @@ public class IdentificationUtils {
 				filter(i -> Objects.nonNull(i.getReferenceMsMsLibraryMatch())).
 				filter(i -> i.getReferenceMsMsLibraryMatch().getScoreOfType(msmsScoringParameter) > minScore).
 				collect(Collectors.toSet());
+	}
+	
+	public static Entry<CompoundDatabaseEnum, String>getTopRankingDatabaseId(CompoundIdentity cid){
+		
+		if(cid.getDbIdMap().isEmpty())
+			return null;
+		
+		TreeMap<CompoundDatabaseEnum, String> rankedIdMap = 
+				new TreeMap<CompoundDatabaseEnum, String>(compoundDatabaseRankSorter);
+		rankedIdMap.putAll(cid.getDbIdMap());
+		return rankedIdMap.firstEntry();
 	}
 }

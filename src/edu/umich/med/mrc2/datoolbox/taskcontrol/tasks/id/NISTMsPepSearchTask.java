@@ -57,7 +57,7 @@ import edu.umich.med.mrc2.datoolbox.data.ReferenceMsMsLibrary;
 import edu.umich.med.mrc2.datoolbox.data.SQLParameter;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
-import edu.umich.med.mrc2.datoolbox.database.idt.IdentificationUtils;
+import edu.umich.med.mrc2.datoolbox.database.idt.DatabaseIdentificationUtils;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.nist.NISTReferenceLibraries;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.nist.pepsearch.PepSearchHitParameters;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
@@ -474,7 +474,7 @@ public abstract class NISTMsPepSearchTask extends AbstractTask {
 		Connection conn = ConnectionManager.getConnection();		
 		String searchParametersId = null;
 		if(pepSearchParameterObject != null)		
-			searchParametersId = IdentificationUtils.addNewPepSearchParameterSet(pepSearchParameterObject, conn);
+			searchParametersId = DatabaseIdentificationUtils.addNewPepSearchParameterSet(pepSearchParameterObject, conn);
 		
 		String msmsMatchId = null;
 //		String midQuery = "SELECT '" + DataPrefix.MSMS_LIBRARY_MATCH.getName() +
@@ -573,7 +573,7 @@ public abstract class NISTMsPepSearchTask extends AbstractTask {
 		ps.close();
 		
 		ConnectionManager.releaseConnection(conn);
-		IdentificationUtils.markNewDefaultLibraryIdsAsTentative();
+		DatabaseIdentificationUtils.markNewDefaultLibraryIdsAsTentative();
 	}
 	
 	protected void updateExistingHits() throws Exception {
@@ -588,7 +588,7 @@ public abstract class NISTMsPepSearchTask extends AbstractTask {
 		}
 		Connection conn = ConnectionManager.getConnection();		
 		Collection<String> searchParametersIds = 
-				IdentificationUtils.getPepSearchParameterSetWithSameSearchSettings(
+				DatabaseIdentificationUtils.getPepSearchParameterSetWithSameSearchSettings(
 						pepSearchParameterObject,conn);
 		
 		if(searchParametersIds.isEmpty()) {

@@ -13,6 +13,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
@@ -28,6 +29,7 @@ import org.jfree.chart.plot.Plot;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.ValueMarker;
 import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.chart.ui.Layer;
 import org.jfree.chart.ui.RectangleAnchor;
@@ -43,10 +45,15 @@ import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.silent.SilentChemObjectBuilder;
 import org.openscience.cdk.smiles.SmilesParser;
 
+import edu.umich.med.mrc2.datoolbox.data.CompoundIdentity;
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
+import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
+import edu.umich.med.mrc2.datoolbox.data.MsMsLibraryFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsPlotDataObject;
 import edu.umich.med.mrc2.datoolbox.data.MsPoint;
+import edu.umich.med.mrc2.datoolbox.data.ReferenceMsMsLibraryMatch;
+import edu.umich.med.mrc2.datoolbox.data.TandemMassSpectrum;
 import edu.umich.med.mrc2.datoolbox.data.enums.MsDepth;
 import edu.umich.med.mrc2.datoolbox.data.msclust.IMsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
@@ -305,6 +312,7 @@ public class LCMSMultiPlotPanel extends LCMSPlotPanel {
 		for(Object spl : subplots)
 			((CombinedDomainXYPlot)plot).remove((XYPlot) spl);
 		
+		plotCount = 0;
 		objectPlotMap.clear();
 		clearMarkers();
 	}
@@ -351,8 +359,7 @@ public class LCMSMultiPlotPanel extends LCMSPlotPanel {
 			createFeatureToReferenceFeaturePlotForCluster(cluster, msLevel, displayType);
 		
 		if(refType.equals(MsReferenceType.LIBRARY_MATCH))
-			createFeatureToLibraryMatchPlotForCluster(cluster, displayType);
-		
+			createFeatureToLibraryMatchPlotForCluster(cluster, displayType);		
 		
 		adjustSize(plotCount);
 		chart.fireChartChanged();
@@ -433,7 +440,8 @@ public class LCMSMultiPlotPanel extends LCMSPlotPanel {
 		}
 		if(refType.equals(MsReferenceType.REFERENCE_FEATURE)) {
 			label = msf.getMsFeature().getName();
-			compoundImage = getCompoundImage(msf.getMsFeature().getPrimaryIdentity());
+			if(msf.getMsFeature().getPrimaryIdentity() != null)
+				compoundImage = getCompoundImage(msf.getMsFeature().getPrimaryIdentity().getCompoundIdentity());
 		}
 		if(refType.equals(MsReferenceType.LIBRARY_MATCH)) {
 			
@@ -443,14 +451,13 @@ public class LCMSMultiPlotPanel extends LCMSPlotPanel {
 		return pda;
 	}
 	
-	private Image getCompoundImage(MsFeatureIdentity id) {
+	private Image getCompoundImage(CompoundIdentity id) {
 		
-		if(id == null || id.getCompoundIdentity() == null 
-				|| id.getCompoundIdentity().getSmiles() == null)
+		if(id == null || id.getSmiles() == null)
 		return null;
 		
 		Depiction dpic = null;
-		String smiles = id.getCompoundIdentity().getSmiles();
+		String smiles = id.getSmiles();
 		if (smiles.isEmpty() || smiles.equals("NoSmile")) 
 			return null;
 		
@@ -584,19 +591,28 @@ public class LCMSMultiPlotPanel extends LCMSPlotPanel {
 						refData.getLabel(), TextAnchor.BOTTOM_LEFT));
 		
 		newPlot.getRenderer().removeAnnotations();
+		if(unkData.getImage() != null || refData.getImage() != null) {
+			
+			try {
+				newPlot.setRenderer(1, (XYItemRenderer) defaultMsRenderer.clone());
+			} catch (CloneNotSupportedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 		if(unkData.getImage() != null) {
 			
 			LockedXYImageAnnotation unkImage = 
 					new LockedXYImageAnnotation(
 							unkData.getImage(), RectangleAnchor.TOP_RIGHT, 0.03d, 1.0f);
-			newPlot.getRenderer().addAnnotation(unkImage, Layer.BACKGROUND);
+			newPlot.getRenderer(1).addAnnotation(unkImage, Layer.BACKGROUND);
 		}
 		if(refData.getImage() != null) {
 			
 			LockedXYImageAnnotation unkImage = 
 					new LockedXYImageAnnotation(
 							refData.getImage(), RectangleAnchor.BOTTOM_RIGHT, 0.03d, 1.0f);
-			newPlot.getRenderer().addAnnotation(unkImage, Layer.BACKGROUND);
+			newPlot.getRenderer(1).addAnnotation(unkImage, Layer.BACKGROUND);
 		}
 		return newPlot;
 	}
@@ -728,6 +744,89 @@ public class LCMSMultiPlotPanel extends LCMSPlotPanel {
 //		if(update && !fileFeatureMap.isEmpty()) {
 		
 //		}
+	}
+
+	public void showMSMSLibraryMatches(
+			MsFeature feature,
+			Collection<MsFeatureIdentity> idList, 
+			MSReferenceDisplayType displayType) {
+		
+		removeAllDataSets();
+
+		List<ReferenceMsMsLibraryMatch> msmsMatches = idList.stream().
+				filter(id -> Objects.nonNull(id.getReferenceMsMsLibraryMatch())).
+				map(id -> id.getReferenceMsMsLibraryMatch()).
+				collect(Collectors.toList());
+		if(msmsMatches.size() > 0) {
+			
+			MsPlotDataObject unknownMSMSMpda = createMSMSPlotDataObject(feature);
+			if(unknownMSMSMpda == null)
+				return;
+			
+			for(ReferenceMsMsLibraryMatch match : msmsMatches) {
+				
+				XYPlot newPlot = null;
+				
+				if(displayType.equals(MSReferenceDisplayType.HEAD_TO_TAIL)) {
+
+					MsPlotDataObject libMatchMpda = 
+							createMSMSPlotDataObjectForLibraryMatch(match);
+					newPlot = createHeadToTailPlot(
+							unknownMSMSMpda, libMatchMpda, MsDepth.MS2);
+				}
+				if(displayType.equals(MSReferenceDisplayType.DIFFERENCE)) {
+					
+				}
+				if(displayType.equals(MSReferenceDisplayType.OVERLAY)) {
+					
+				}
+				if(newPlot != null) {
+					try {
+						((CombinedDomainXYPlot)plot).add(newPlot);
+						plotCount++;
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}				
+				}
+			}
+			adjustSize(plotCount);
+			chart.fireChartChanged();
+			revalidate();
+			repaint();
+		}
+	}
+
+	private MsPlotDataObject createMSMSPlotDataObjectForLibraryMatch(
+			ReferenceMsMsLibraryMatch match) {
+				
+		if(match.getMatchedLibraryFeature() == null 
+				|| match.getMatchedLibraryFeature().getSpectrum() == null) 
+			return null;
+		
+		MsMsLibraryFeature libFeature = match.getMatchedLibraryFeature();
+		if(libFeature == null)
+			return null;
+		
+		MsPlotDataObject lmPda = new MsPlotDataObject(
+				libFeature.getSpectrum(), 
+				libFeature.getParent(), 
+				libFeature.getCompoundIdentity().getName());
+		lmPda.setImage(getCompoundImage(libFeature.getCompoundIdentity()));
+		return lmPda;
+	}
+
+	private MsPlotDataObject createMSMSPlotDataObject(MsFeature feature) {
+		
+		if(feature.getSpectrum() == null
+				|| feature.getSpectrum().getExperimentalTandemSpectrum() == null) 
+			return null;
+			
+		TandemMassSpectrum msms = 
+				feature.getSpectrum().getExperimentalTandemSpectrum();
+		
+		return new MsPlotDataObject(
+				msms.getSpectrum(), msms.getParent(), feature.getName());
 	}
 }
 

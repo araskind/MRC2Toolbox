@@ -316,6 +316,8 @@ public class LibrarySearchTask  extends AbstractTask implements TaskListener{
 					matches,
 					mslf.getRetentionTime(),
 					mslf.getSpectrum());
+			rtlMatch.setObservedRetention(f.getRetentionTime());
+			
 			rtlMatch.setLibraryId(mslf.getLibraryId());
 			rtlMatch.setLibraryTargetName(mslf.getName());
 			match.setMsRtLibraryMatch(rtlMatch);

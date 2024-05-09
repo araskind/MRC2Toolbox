@@ -36,6 +36,7 @@ import org.openscience.cdk.interfaces.IMolecularFormula;
 import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator;
 
 import edu.umich.med.mrc2.datoolbox.data.enums.CompoundDatabaseEnum;
+import edu.umich.med.mrc2.datoolbox.utils.IdentificationUtils;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 
 public class CompoundIdentity implements Serializable, Comparable<CompoundIdentity> {
@@ -400,6 +401,10 @@ public class CompoundIdentity implements Serializable, Comparable<CompoundIdenti
 
 	public void setCharge(int charge) {
 		this.charge = charge;
+	}
+	
+	public Entry<CompoundDatabaseEnum, String>getTopRankingDatabaseId(){		
+		return IdentificationUtils.getTopRankingDatabaseId(this);
 	}
 }
 

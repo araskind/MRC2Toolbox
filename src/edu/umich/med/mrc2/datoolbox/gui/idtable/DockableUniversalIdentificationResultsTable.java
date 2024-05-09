@@ -39,9 +39,11 @@ import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
 import edu.umich.med.mrc2.datoolbox.data.enums.CompoundIdSource;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
+import edu.umich.med.mrc2.datoolbox.gui.plot.lcms.multi.MultipleSpectraDisplayDialog;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.tables.XTableColumnModel;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
+import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 
 public class DockableUniversalIdentificationResultsTable 
 	extends DefaultSingleCDockable implements ActionListener, BackedByPreferences {
@@ -52,6 +54,7 @@ public class DockableUniversalIdentificationResultsTable
 	
 	private static final Icon msrtIcon = GuiUtils.getIcon("feature", 16);
 	private static final Icon msmsIcon = GuiUtils.getIcon("msTwo", 16);
+	private static final Icon msmsMultiIcon = GuiUtils.getIcon("msmsMulti", 16);
 
 	private UniversalIdentificationResultsTable idTable;
 	
@@ -63,7 +66,9 @@ public class DockableUniversalIdentificationResultsTable
 	private boolean showUniqueIdsOnly;	
 	private SimpleButtonAction toggelUniqueIdsButton;
 	private SimpleButtonAction toggelColumnSubsetButton;
+	private SimpleButtonAction showMultiSpectraPlotButton;
 	private Collection<CompoundIdSource>sorcesToExclude;
+	private MultipleSpectraDisplayDialog multipleSpectraDisplayDialog;
 
 	public DockableUniversalIdentificationResultsTable(String id, String title) {
 
@@ -103,6 +108,13 @@ public class DockableUniversalIdentificationResultsTable
 		actions.add(toggelColumnSubsetButton);
 		
 		actions.addSeparator();
+		
+		showMultiSpectraPlotButton = GuiUtils.setupButtonAction(
+				MainActionCommands.SHOW_MULTISPECTRA_DISPLAY_COMMAND.getName(), 
+				MainActionCommands.SHOW_MULTISPECTRA_DISPLAY_COMMAND.getName(), 
+				msmsMultiIcon, this);
+		actions.add(showMultiSpectraPlotButton);
+		
 		intern().setActionOffers(actions);
 	}
 
@@ -138,13 +150,25 @@ public class DockableUniversalIdentificationResultsTable
 	public void setModelFromMsFeature(MsFeature feature) {
 		this.sorcesToExclude = null;
 		idTable.setModelFromMsFeature(feature, showUniqueIdsOnly);
+		
+		if(multipleSpectraDisplayDialog != null 				
+				&& multipleSpectraDisplayDialog.isVisible()) {
+			multipleSpectraDisplayDialog.showMSMSLibraryMatches(
+					feature, idTable.getAllIdentities());
+		}
 	}
 	
-	public void setModelFromMsFeature(MsFeature feature, Collection<CompoundIdSource>sorcesToExclude) {
+	private void setModelFromMsFeature(
+			MsFeature feature, Collection<CompoundIdSource>sorcesToExclude) {
 		
 		this.sorcesToExclude = sorcesToExclude;
 		idTable.setModelFromMsFeature(
 				feature, sorcesToExclude, showUniqueIdsOnly);
+		if(multipleSpectraDisplayDialog != null 				
+				&& multipleSpectraDisplayDialog.isVisible()) {
+			multipleSpectraDisplayDialog.showMSMSLibraryMatches(
+					feature, idTable.getAllIdentities());
+		}
 	}
 
 	public MsFeatureIdentity getSelectedIdentity() {
@@ -169,6 +193,23 @@ public class DockableUniversalIdentificationResultsTable
 		
 		if(command.equals(MainActionCommands.SHOW_MSMS_COLUMN_SUBSET.getName()))
 			showMSMSColumnSubset();
+		
+		if (command.equals(MainActionCommands.SHOW_MULTISPECTRA_DISPLAY_COMMAND.getName()))
+			showMultipleSpectraDisplayDialog();
+	}
+	
+	private void showMultipleSpectraDisplayDialog() {
+		
+		if(multipleSpectraDisplayDialog != null 
+				&& multipleSpectraDisplayDialog.isVisible()) {
+			multipleSpectraDisplayDialog.toFront();
+			return;
+		}
+		else {
+			multipleSpectraDisplayDialog = new MultipleSpectraDisplayDialog();
+			multipleSpectraDisplayDialog.setLocationRelativeTo(MRC2ToolBoxCore.getMainWindow());
+			multipleSpectraDisplayDialog.setVisible(true);
+		}
 	}
 	
 	public void showMSRTColumnSubset() {
@@ -207,8 +248,6 @@ public class DockableUniversalIdentificationResultsTable
 	}
 
 	private void switchUniqueIdPrferences(boolean uniqueOnly) {
-		
-		//	TODO reload table data
 		
 		showUniqueIdsOnly = uniqueOnly;		
 		if (showUniqueIdsOnly) {
