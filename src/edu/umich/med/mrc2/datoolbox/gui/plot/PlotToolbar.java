@@ -59,7 +59,7 @@ public class PlotToolbar extends CommonToolbar implements ActionListener{
 	protected static final Icon printIcon = GuiUtils.getIcon("print", 24);
 	protected static final Icon settingsIcon = GuiUtils.getIcon("plotSettings", 24);
 	protected static final Icon showLegendIcon = GuiUtils.getIcon("showLegend", 24);
-	protected static final Icon hideLegendIcon = GuiUtils.getIcon("hideLegend", 24);
+	protected static final Icon hideLegendIcon = GuiUtils.getIcon("hiddenLegend", 24);
 	protected static final Icon savePngIcon = GuiUtils.getIcon("savePng", 24);
 	protected static final Icon savePdfIcon = GuiUtils.getIcon("savePdf", 24);
 	protected static final Icon saveSvgIcon = GuiUtils.getIcon("saveSvg", 24);

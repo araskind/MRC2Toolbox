@@ -100,6 +100,13 @@ public class CompoundMsReadyCuratorToolbar extends CommonToolbar {
 				MainActionCommands.EDIT_ZWITTER_ION_GENERATOR_SETTINGS_COMMAND.getName(),
 				MainActionCommands.EDIT_ZWITTER_ION_GENERATOR_SETTINGS_COMMAND.getName(),
 				buttonDimension);
+		
+		addSeparator();
+		
+		GuiUtils.addButton(this, null, tautomerIcon, commandListener,
+				MainActionCommands.BATCH_GENERATE_TAUTOMERS.getName(),
+				MainActionCommands.BATCH_GENERATE_TAUTOMERS.getName(),
+				buttonDimension);
 	}
 	
 	public CompoundDatabaseEnum getSelectedDatabase() {

@@ -35,8 +35,10 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.prefs.Preferences;
 
 import javax.swing.Icon;
@@ -84,6 +86,7 @@ import edu.umich.med.mrc2.datoolbox.data.CompoundIdentity;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
 import edu.umich.med.mrc2.datoolbox.data.enums.CompoundDatabaseEnum;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
+import edu.umich.med.mrc2.datoolbox.dbparse.CompoundDatabaseScripts;
 import edu.umich.med.mrc2.datoolbox.dbparse.StandardizedStructure;
 import edu.umich.med.mrc2.datoolbox.dbparse.StructureStandardizationUtils;
 import edu.umich.med.mrc2.datoolbox.gui.cpddatabase.msready.cpd.CompoundCurationPopupMenu;
@@ -305,8 +308,32 @@ public class CompoundMsReadyCuratorFrame extends JFrame
 		
 		if(command.equals(MainActionCommands.GENERATE_ZWITTER_IONSS.getName()))
 			generateZwitterIons();
+		
+		if(command.equals(MainActionCommands.BATCH_GENERATE_TAUTOMERS.getName()))
+			batchGenerateTautomers();
 	}
 
+	private void batchGenerateTautomers() {
+
+		String logDirPath = "E:\\DataAnalysis\\Databases\\_LATEST";
+		Map<String,String>dbMap = new LinkedHashMap<String,String>();
+//		dbMap.put("DRUGBANK_COMPOUND_DATA", "DRUGBANK");
+//		dbMap.put("LIPIDMAPS_COMPOUND_DATA", "LIPIDMAPS");
+//		dbMap.put("T3DB_COMPOUND_DATA", "T3DB");	
+		dbMap.put("FOODB_COMPOUND_DATA", "FOODB");	
+		dbMap.put("HMDB_COMPOUND_DATA", "HMDB");
+		
+		for(Entry<String, String> dbe : dbMap.entrySet()) {
+			System.out.println("Started processing " + dbe.getValue() + " data");
+			try {				
+				CompoundDatabaseScripts.generateTautomersForCompoundDatabaseUsingIndigo(
+						dbe.getKey(), dbe.getValue(), true, logDirPath);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}
 
 	private Collection<String> generateZwitterIons() {
 

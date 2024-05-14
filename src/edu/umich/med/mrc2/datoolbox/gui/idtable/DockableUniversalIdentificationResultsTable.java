@@ -209,6 +209,7 @@ public class DockableUniversalIdentificationResultsTable
 			multipleSpectraDisplayDialog = new MultipleSpectraDisplayDialog();
 			multipleSpectraDisplayDialog.setLocationRelativeTo(MRC2ToolBoxCore.getMainWindow());
 			multipleSpectraDisplayDialog.setVisible(true);
+			multipleSpectraDisplayDialog.toFront();
 		}
 	}
 	

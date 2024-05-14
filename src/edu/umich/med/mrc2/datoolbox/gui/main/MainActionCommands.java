@@ -1345,6 +1345,8 @@ public enum MainActionCommands {
 	
 	EDIT_ZWITTER_ION_GENERATOR_SETTINGS_COMMAND("Edit zwitter-ion Generator settings"),
 	SAVE_ZWITTER_ION_GENERATOR_SETTINGS_COMMAND("Save zwitter-ion Generator settings"),
+	
+	BATCH_GENERATE_TAUTOMERS("Batch-generate tautomers"),
 
 	//	Tautomer curator
 	MARK_COMPOUND_GROUP_CURATED_COMMAND("Mark compound group as curated"),

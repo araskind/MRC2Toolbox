@@ -100,6 +100,12 @@ public class MultipleSpectraDisplayDialog extends JDialog
 			MSReferenceDisplayType displayType) {
 		plotPanel.showMSFeatureCluster(
 				cluster, msLevel, refType, displayType);
+	}	
+
+	public void showMSMSLibraryMatches(
+			MsFeature feature, Collection<MsFeatureIdentity> idList) {
+		plotPanel.showMSMSLibraryMatches(
+				feature, idList, MSReferenceDisplayType.HEAD_TO_TAIL);		
 	}
 	
 	@Override
@@ -134,12 +140,6 @@ public class MultipleSpectraDisplayDialog extends JDialog
 
 	public void clearPanel() {
 		plotPanel.removeAllDataSets();
-	}
-
-	public void showMSMSLibraryMatches(
-			MsFeature feature, Collection<MsFeatureIdentity> idList) {
-		plotPanel.showMSMSLibraryMatches(
-				feature, idList, MSReferenceDisplayType.HEAD_TO_TAIL);		
 	}
 }
 

@@ -62,7 +62,7 @@ public class CompoundDbIntegrationUtils {
 		MRC2ToolBoxConfiguration.initConfiguration();
 
 		try {
-			HMDBIntegration.copyHMDBdata2compoundsNoDeprecationCheck();
+			LipidMapsIntegration.addCrossrefForLipidMapsBasedOnHMDBmapping();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

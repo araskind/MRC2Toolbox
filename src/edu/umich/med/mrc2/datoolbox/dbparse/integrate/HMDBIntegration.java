@@ -69,11 +69,12 @@ public class HMDBIntegration {
 				"INSERT INTO COMPOUNDDB.COMPOUND_DATA "
 				+ "(ACCESSION, SOURCE_DB, PRIMARY_NAME, MOL_FORMULA, EXACT_MASS, SMILES, "
 				+ "INCHI, INCHI_KEY, INCHI_KEY2D, CHARGE, MS_READY_MOL_FORMULA, "
-				+ "MS_READY_EXACT_MASS, MS_READY_SMILES, MS_READY_INCHI_KEY, MS_READY_INCHI_KEY2D, MS_READY_CHARGE) "
+				+ "MS_READY_EXACT_MASS, MS_READY_SMILES, MS_READY_INCHI_KEY, MS_READY_INCHI_KEY2D, "
+				+ "MS_READY_CHARGE, MS_READY_CANONICAL_SMILES) "
 				+ "(SELECT ACCESSION, 'HMDB', NAME, FORMULA_FROM_SMILES, MASS_FROM_SMILES, "
 				+ "SMILES, INCHI, INCHI_KEY_FROM_SMILES, INCHI_KEY_FS_CONNECT, CHARGE, "
 				+ "MS_READY_MOL_FORMULA, MS_READY_EXACT_MASS, MS_READY_SMILES, MS_READY_INCHI_KEY, "
-				+ "MS_READY_INCHI_KEY2D, MS_READY_CHARGE "
+				+ "MS_READY_INCHI_KEY2D, MS_READY_CHARGE, MS_READY_CANONICAL_SMILES "
 				+ "FROM COMPOUNDDB.HMDB_COMPOUND_DATA WHERE ACCESSION = ?)";
 		PreparedStatement compoundCopyPs = conn.prepareStatement(compoundCopyQuery);
 		
@@ -96,11 +97,10 @@ public class HMDBIntegration {
 			compoundCopyPs.setString(1, currentAccession);
 			compoundCopyPs.executeUpdate();
 			
-			sameCompoundPs.setString(1, currentAccession);
-			sameCompoundPs.setString(2, accessionEntry.getValue());
-			
 			if(!inGroups.contains(currentAccession)) {
 				
+				sameCompoundPs.setString(1, currentAccession);
+				sameCompoundPs.setString(2, accessionEntry.getValue());
 				ResultSet rs = sameCompoundPs.executeQuery();
 				while(rs.next()) 
 					matchingCompoundAccessions.add(rs.getString(1));
@@ -108,13 +108,12 @@ public class HMDBIntegration {
 			if(!matchingCompoundAccessions.isEmpty()) {
 				
 				inGroups.add(currentAccession);
+				inGroups.addAll(matchingCompoundAccessions);
+				insertGroupPs.setString(1,currentAccession);
 				
-				String[]ids = matchingCompoundAccessions.stream().toArray(String[]::new);
-				insertGroupPs.setString(1, ids[0]);
-				for(int i=1; i<ids.length; i++) {
+				for(String matchingId : matchingCompoundAccessions) {
 					
-					inGroups.add(ids[i]);
-					insertGroupPs.setString(3, ids[i]);
+					insertGroupPs.setString(3, matchingId);
 					insertGroupPs.addBatch();				
 				}
 				insertGroupPs.executeBatch();

@@ -8,6 +8,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -54,6 +55,9 @@ import edu.umich.med.mrc2.datoolbox.data.MsPlotDataObject;
 import edu.umich.med.mrc2.datoolbox.data.MsPoint;
 import edu.umich.med.mrc2.datoolbox.data.ReferenceMsMsLibraryMatch;
 import edu.umich.med.mrc2.datoolbox.data.TandemMassSpectrum;
+import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureIdentityComparator;
+import edu.umich.med.mrc2.datoolbox.data.compare.SortDirection;
+import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.enums.MsDepth;
 import edu.umich.med.mrc2.datoolbox.data.msclust.IMsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
@@ -88,6 +92,9 @@ public class LCMSMultiPlotPanel extends LCMSPlotPanel {
 	private static final DepictionGenerator dptgen = 
 			new DepictionGenerator().withAtomColors().
 					withBackgroundColor(new Color(255,255,255,0));
+	private static final MsFeatureIdentityComparator eScoreComparator = 
+			new MsFeatureIdentityComparator(SortProperty.msmsEntropyScore, SortDirection.DESC);
+	private static final DecimalFormat scoreFormat = new DecimalFormat("###.##");
 
 	public LCMSMultiPlotPanel(PlotType plotType) {
 		
@@ -583,13 +590,21 @@ public class LCMSMultiPlotPanel extends LCMSPlotPanel {
 		ValueMarker marker = new ValueMarker(0.0d);
 		marker.setPaint(Color.GRAY);
 		newPlot.addRangeMarker(marker);
-		newPlot.addAnnotation(
-				createLockedAnnotation(
-						unkData.getLabel(), TextAnchor.TOP_LEFT));
-		newPlot.addAnnotation(
-				createLockedAnnotation(
-						refData.getLabel(), TextAnchor.BOTTOM_LEFT));
 		
+		String unkLabel = unkData.getLabel();
+		if(unkData.getMetaData() != null)
+			unkLabel += "\n" + unkData.getMetaData();
+		
+		newPlot.addAnnotation(
+				createLockedAnnotation(unkLabel, TextAnchor.TOP_LEFT));
+		
+		String refLabel = refData.getLabel();
+		if(refData.getMetaData() != null)
+			refLabel += "\n" + refData.getMetaData();
+		
+		newPlot.addAnnotation(
+				createLockedAnnotation(refLabel, TextAnchor.BOTTOM_LEFT));
+
 		newPlot.getRenderer().removeAnnotations();
 		if(unkData.getImage() != null || refData.getImage() != null) {
 			
@@ -755,7 +770,8 @@ public class LCMSMultiPlotPanel extends LCMSPlotPanel {
 
 		List<ReferenceMsMsLibraryMatch> msmsMatches = idList.stream().
 				filter(id -> Objects.nonNull(id.getReferenceMsMsLibraryMatch())).
-				map(id -> id.getReferenceMsMsLibraryMatch()).
+				sorted(eScoreComparator).
+				map(id -> id.getReferenceMsMsLibraryMatch()).			
 				collect(Collectors.toList());
 		if(msmsMatches.size() > 0) {
 			
@@ -813,6 +829,17 @@ public class LCMSMultiPlotPanel extends LCMSPlotPanel {
 				libFeature.getParent(), 
 				libFeature.getCompoundIdentity().getName());
 		lmPda.setImage(getCompoundImage(libFeature.getCompoundIdentity()));
+		
+		double score = match.getEntropyBasedScore();
+		if(score == 0.0d)
+			score = match.getScore();
+		if(match.getHybridScore() > 0.0d)
+			score = match.getHybridScore();
+		
+		String mdString = match.getMatchType().name() + 
+				"; EntScore = " + scoreFormat.format(score);
+		lmPda.setMetaData(mdString);
+		
 		return lmPda;
 	}
 

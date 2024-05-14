@@ -29,6 +29,7 @@ public class MsPlotDataObject {
 	private Collection<MsPoint>spectrum;
 	private MsPoint parent;
 	private String label;
+	private String metaData;
 	private Image image;
 	
 	public MsPlotDataObject(
@@ -59,5 +60,13 @@ public class MsPlotDataObject {
 
 	public void setImage(Image image) {
 		this.image = image;
+	}
+
+	public String getMetaData() {
+		return metaData;
+	}
+
+	public void setMetaData(String metaData) {
+		this.metaData = metaData;
 	}
 }

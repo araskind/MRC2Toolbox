@@ -32,7 +32,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
-import java.net.URL;
+import java.nio.file.Paths;
 import java.util.prefs.Preferences;
 
 import javax.swing.DefaultComboBoxModel;
@@ -59,6 +59,7 @@ import ambit2.tautomers.ranking.EnergyRanking;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
+import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 
 public class TautomerGeneratorSettingsDialog extends JDialog implements BackedByPreferences, ItemListener {
@@ -407,11 +408,13 @@ public class TautomerGeneratorSettingsDialog extends JDialog implements BackedBy
 	
 	private EnergyRanking loadEnergyRankings() {		
 		
-		URL resource =  
-				MRC2ToolBoxConfiguration.class.getClassLoader().getResource("ambit2/tautomers/energy-rules.json");
+//		URL resource =  
+//				MRC2ToolBoxConfiguration.class.getClassLoader().getResource("ambit2/tautomers/energy-rules.json");
 		EnergyRanking er = null;
 		try {
-			er = new EnergyRanking(resource.getFile());
+			//	er = new EnergyRanking(resource.getFile());
+			er = new EnergyRanking(Paths.get(
+					MRC2ToolBoxCore.configDir, "energy-rules.json").toString());
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

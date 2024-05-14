@@ -22,7 +22,6 @@
 package edu.umich.med.mrc2.datoolbox.gui.plot;
 
 import java.awt.Graphics2D;
-import java.awt.Shape;
 import java.awt.geom.Rectangle2D;
 
 import org.jfree.chart.annotations.XYTextAnnotation;
@@ -33,7 +32,6 @@ import org.jfree.chart.plot.PlotRenderingInfo;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.text.TextUtils;
 import org.jfree.chart.ui.RectangleEdge;
-import org.jfree.chart.ui.TextAnchor;
 
 public class LockedXYTextAnnotation extends XYTextAnnotation {
 
@@ -61,49 +59,61 @@ public class LockedXYTextAnnotation extends XYTextAnnotation {
      *              entity information.
      */
     @Override
-    public void draw(Graphics2D g2, XYPlot plot, Rectangle2D dataArea,
-                     ValueAxis domainAxis, ValueAxis rangeAxis,
-                     int rendererIndex, PlotRenderingInfo info) {
+	public void draw(
+			Graphics2D g2, XYPlot plot, Rectangle2D dataArea, 
+			ValueAxis domainAxis, ValueAxis rangeAxis,
+			int rendererIndex, PlotRenderingInfo info) {
 
-        PlotOrientation orientation = plot.getOrientation();
-        RectangleEdge domainEdge = Plot.resolveDomainAxisLocation(
-                plot.getDomainAxisLocation(), orientation);
-        RectangleEdge rangeEdge = Plot.resolveRangeAxisLocation(
-                plot.getRangeAxisLocation(), orientation);
-        
-        float anchorX = getXanchor(g2, dataArea, domainAxis, domainEdge);
-        float anchorY = getYanchor(g2, dataArea, rangeAxis, rangeEdge);
-        
-        if (orientation == PlotOrientation.HORIZONTAL) {
-            float tempAnchor = anchorX;
-            anchorX = anchorY;
-            anchorY = tempAnchor;
-        }
+		PlotOrientation orientation = plot.getOrientation();
+		RectangleEdge domainEdge = Plot.resolveDomainAxisLocation(
+				plot.getDomainAxisLocation(), orientation);
+		RectangleEdge rangeEdge = Plot.resolveRangeAxisLocation(
+				plot.getRangeAxisLocation(), orientation);
 
-        g2.setFont(getFont());
-        Shape hotspot = TextUtils.calculateRotatedStringBounds(
-                getText(), g2, anchorX, anchorY, getTextAnchor(),
-                0.0d, TextAnchor.TOP_LEFT);
-        if (this.getBackgroundPaint() != null) {
-            g2.setPaint(this.getBackgroundPaint());
-            g2.fill(hotspot);
-        }
-        g2.setPaint(getPaint());
-        TextUtils.drawRotatedString(getText(), g2, anchorX, anchorY,
-                getTextAnchor(), 0.0, TextAnchor.TOP_LEFT);
-        if (this.isOutlineVisible()) {
-            g2.setStroke(this.getOutlineStroke());
-            g2.setPaint(this.getOutlinePaint());
-            g2.draw(hotspot);
-        }
+		float anchorX = getXanchor(g2, dataArea, domainAxis, domainEdge);
+		float anchorY = getYanchor(g2, dataArea, rangeAxis, rangeEdge);
 
-        String toolTip = getToolTipText();
-        String url = getURL();
-        if (toolTip != null || url != null) {
-            addEntity(info, hotspot, rendererIndex, toolTip, url);
-        }
-     }
-    
+		if (orientation == PlotOrientation.HORIZONTAL) {
+			float tempAnchor = anchorX;
+			anchorX = anchorY;
+			anchorY = tempAnchor;
+		}
+		g2.setFont(getFont());
+		if(getText().split("\n").length == 1) {
+			
+			Rectangle2D hotspot = TextUtils.calcAlignedStringBounds(
+					getText(), g2, anchorX, anchorY, getTextAnchor());
+			if (this.getBackgroundPaint() != null) {
+				g2.setPaint(this.getBackgroundPaint());
+				g2.fill(hotspot);
+			}
+			g2.setPaint(getPaint());
+			TextUtils.drawAlignedString(
+					getText(), g2, anchorX, anchorY, getTextAnchor());
+			if (this.isOutlineVisible()) {
+				g2.setStroke(this.getOutlineStroke());
+				g2.setPaint(this.getOutlinePaint());
+				g2.draw(hotspot);
+			}
+			String toolTip = getToolTipText();
+			String url = getURL();
+			if (toolTip != null || url != null) {
+				addEntity(info, hotspot, rendererIndex, toolTip, url);
+			}
+		}
+		if(getText().split("\n").length > 1) {
+			
+			g2.setPaint(getPaint());
+			float lineHeight = (float)g2.getFontMetrics().getStringBounds(getText(), g2).getHeight();
+			for(String line : getText().split("\n")) {
+				
+				TextUtils.drawAlignedString(
+						line, g2, anchorX, anchorY, getTextAnchor());
+				anchorY = anchorY + lineHeight;
+			}
+		}
+	}
+
     private float getXanchor(
     		Graphics2D g2, 
     		Rectangle2D dataArea,
@@ -148,10 +158,11 @@ public class LockedXYTextAnnotation extends XYTextAnnotation {
         if(getTextAnchor().isBottom()) {
 
             Rectangle2D bounds = TextUtils.getTextBounds(getText(), g2, g2.getFontMetrics());
-            float extraOffset = (float)(bounds.getHeight() + bounds.getY());
+            double lineNum = getText().split("\n").length;
+            float extraOffset = (float)((bounds.getHeight() * lineNum) + bounds.getY());
           	anchorY = (float) (rangeAxis.valueToJava2D(
                     (rangeAxis.getRange().getLowerBound() + 
-                    		(rangeAxis.getRange().getLength() * edgeOffset)), dataArea, rangeEdge) + extraOffset);
+                    		(rangeAxis.getRange().getLength() * edgeOffset)), dataArea, rangeEdge) - extraOffset );
         }
     	return anchorY;
     }

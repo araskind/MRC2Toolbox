@@ -61,6 +61,10 @@ import org.openscience.cdk.smiles.SmilesParser;
 import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator;
 import org.slf4j.LoggerFactory;
 
+import com.epam.indigo.Indigo;
+import com.epam.indigo.IndigoInchi;
+import com.epam.indigo.IndigoObject;
+
 import ambit2.tautomers.TautomerManager;
 import ambit2.tautomers.ranking.EnergyRanking;
 import ambit2.tautomers.zwitterion.ZwitterionManager;
@@ -101,12 +105,9 @@ public class CompoundDatabaseScripts {
 		((LoggerContext) LogManager.getContext(false)).setConfigLocation(file.toURI());			
 		logger = LoggerFactory.getLogger(CompoundDatabaseScripts.class);
 		logger.info("Statring the program");
-		MRC2ToolBoxConfiguration.initConfiguration();		
-		try {
-			//	standardizeNoConflictLipidMapsData();
-			//	createLipidMapsSMILESBasedData(true);
-			//	generateTautomersAndZwitterIonsForCompoundDatabase("LIPIDMAPS_COMPOUND_DATA", "LIPIDMAPS", true);
-			getPubChemIdsForLipidMapsEntriesByInchiOrName();
+		MRC2ToolBoxConfiguration.initConfiguration();	
+		String logDirPath = "E:\\DataAnalysis\\Databases\\_LATEST";
+		try {			
 
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
@@ -462,6 +463,255 @@ public class CompoundDatabaseScripts {
 		
 		Path outputPath = Paths.get(
 				"E:\\DataAnalysis\\Databases\\_LATEST\\" + sourceDb + "_tautomersLog.txt");
+		try {
+			Files.write(outputPath, 
+					errorLog, 
+					StandardCharsets.UTF_8,
+					StandardOpenOption.CREATE, 
+					StandardOpenOption.TRUNCATE_EXISTING);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public static void generateCanonicalSmilesForCompoundDatabaseUsingIndigo(String sourceTable) throws Exception {
+		
+		Indigo indigo = new Indigo();
+		
+		Connection conn = ConnectionManager.getConnection();
+		String query = 
+				"SELECT ACCESSION, MS_READY_SMILES FROM "
+				+ "COMPOUNDDB." + sourceTable + " WHERE MS_READY_SMILES IS NOT NULL "
+				+ "AND MS_READY_CANONICAL_SMILES IS NULL "
+				+ "ORDER BY ACCESSION";
+
+		PreparedStatement ps = conn.prepareStatement(query);
+		
+		String insertQuery = 
+				"UPDATE COMPOUNDDB." + sourceTable +
+				" SET MS_READY_CANONICAL_SMILES = ? WHERE ACCESSION = ?";
+		PreparedStatement insertPs = conn.prepareStatement(insertQuery);
+		
+		int counter = 0;
+		ResultSet rs = ps.executeQuery();		
+		while(rs.next()) {
+
+			String smiles = rs.getString("MS_READY_SMILES");	
+			String smilesCanonical = null;
+			IndigoObject molecule = null;		
+			try {
+				molecule = indigo.loadMolecule(smiles);
+			} catch (Exception e) {
+				System.out.println("\n"+ rs.getString("ACCESSION") + "\n" + smiles+ "\n");
+				//	e.printStackTrace();
+			}
+			if(molecule != null) {
+
+				molecule.foldHydrogens();
+				try {
+					smilesCanonical = molecule.canonicalSmiles();
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+					
+				}
+				if(smilesCanonical != null) {
+					insertPs.setString(1, smilesCanonical);
+					insertPs.setString(2, rs.getString("ACCESSION"));
+					insertPs.executeUpdate();
+				}
+			}
+			counter++;
+			if(counter % 1000 == 0)
+				System.out.print(".");
+			if(counter % 30000 == 0)
+				System.out.print(".\n");
+		}
+		rs.close();
+		ps.close();
+		insertPs.close();
+		ConnectionManager.releaseConnection(conn);
+	}
+	
+	public static void generateTautomersForCompoundDatabaseUsingIndigo(
+			String sourceTable, 
+			String sourceDb, 
+			boolean newEntriesOnly, 
+			String logDirPath) throws Exception {
+		
+		Indigo indigo = new Indigo();
+		IndigoInchi indigoInchi = new IndigoInchi(indigo);
+		
+		Connection conn = ConnectionManager.getConnection();
+		String query = 
+				"SELECT ACCESSION, MS_READY_SMILES FROM "
+				+ "COMPOUNDDB." + sourceTable + " WHERE MS_READY_SMILES IS NOT NULL "
+				+ "AND EXACT_MASS < 1000 "
+				+ "ORDER BY ACCESSION";
+		if(newEntriesOnly) {
+			
+			query = "SELECT D.ACCESSION, D.MS_READY_SMILES  " +
+					"FROM  COMPOUNDDB." + sourceTable + " D  " +
+					"WHERE  D.ACCESSION NOT IN( " +
+					"SELECT  T.ACCESSION  " +
+					"FROM COMPOUNDDB.COMPOUND_TAUTOMERS_INDIGO T  " +
+					"WHERE T.SOURCE_DB = '" + sourceDb + "') " +
+					"AND D.MS_READY_SMILES IS NOT NULL " +
+					"AND EXACT_MASS < 1000 ";
+		}
+		PreparedStatement ps = conn.prepareStatement(query);
+		
+		String insertQuery = 
+				"INSERT INTO COMPOUNDDB.COMPOUND_TAUTOMERS_INDIGO "
+				+ "(ACCESSION, TAUTOMER_SMILES, TAUTOMER_INCHI_KEY, SOURCE_DB) VALUES (?, ?, ?, ?)";
+		PreparedStatement insertPs = conn.prepareStatement(insertQuery);
+		
+		ArrayList<String>errorLog = new ArrayList<String>();
+		Map<String,String>inputDataMap = new TreeMap<String,String>();
+		Map<String,String>tautomerDataMap = new TreeMap<String,String>();
+//		int counter = 0;
+		ResultSet rs = ps.executeQuery();		
+		while(rs.next()) {
+			inputDataMap.put(rs.getString("ACCESSION"), 
+			rs.getString("MS_READY_SMILES"));
+		}
+		rs.close();
+		ps.close();
+		
+		for(Entry<String, String> ent : inputDataMap.entrySet()) {
+		
+			String accession = ent.getKey();
+			String smiles = ent.getValue();	
+			System.out.println("Processing " + accession + "\t" + smiles);
+			IndigoObject molecule = null;		
+			tautomerDataMap.clear();
+			try {
+				molecule = indigo.loadMolecule(smiles);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			String inchi = null;
+			if(molecule != null) {
+
+				molecule.foldHydrogens();
+				try {
+					inchi = indigoInchi.getInchi(molecule.clone());
+				} catch (Exception e) {
+					errorLog.add("Failed to convert SMILES to INCHI for " + accession + "\t" + smiles);
+					e.printStackTrace();
+				}
+				if(inchi != null) {
+
+					tautomerDataMap.put(
+							molecule.clone().canonicalSmiles(), 
+							indigoInchi.getInchiKey(inchi));
+				}
+			}
+			else {
+				errorLog.add("Failed to convert SMILES to INCHI KEY for " + accession + "\t" + smiles);
+			}
+			//	Generate tautomers
+			IndigoObject taitomerIterator = null;
+			try {
+				taitomerIterator = indigo.iterateTautomers(molecule, "INCHI");
+			} catch (Exception e) {
+				errorLog.add("Failed to create INCHI tautomers for " + accession);
+				e.printStackTrace();
+			}
+			if(taitomerIterator != null) {
+				
+				int tautCount = 0;
+				for(IndigoObject tautomer : taitomerIterator){
+					
+					IndigoObject t = tautomer.clone();
+					String inchiT = null;
+					try {
+						inchiT = indigoInchi.getInchi(t);
+					} catch (Exception e) {
+						errorLog.add("Failed to create INCHI for " + accession);
+						e.printStackTrace();
+					}
+					if(inchiT != null) {
+						String canSmiles = null;
+						try {
+							canSmiles = t.canonicalSmiles();
+						} catch (Exception e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						if(canSmiles != null) {
+							tautomerDataMap.put(
+									t.canonicalSmiles(),
+									indigoInchi.getInchiKey(inchiT));
+						}
+						tautCount++;
+						if(tautCount > 50)
+							break;
+					}			
+				}
+			}
+			taitomerIterator = null;
+			try {
+				taitomerIterator = indigo.iterateTautomers(molecule, "RSMARTS");
+			} catch (Exception e) {
+				errorLog.add("Failed to create RSMARTS tautomers for " + accession);
+				e.printStackTrace();
+			}
+			if(taitomerIterator != null) {
+				
+				int tautCount = 0;
+				for(IndigoObject tautomer : taitomerIterator){
+					
+					IndigoObject t = tautomer.clone();
+					String inchiT = null;
+					try {
+						inchiT = indigoInchi.getInchi(t);
+					} catch (Exception e) {
+						errorLog.add("Failed to create INCHI for " + accession);
+						e.printStackTrace();
+					}
+					if(inchiT != null) {
+						String canSmiles = null;
+						try {
+							canSmiles = t.canonicalSmiles();
+						} catch (Exception e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						if(canSmiles != null) {
+							tautomerDataMap.put(
+									t.canonicalSmiles(),
+									indigoInchi.getInchiKey(inchiT));
+						}
+						tautCount++;
+						if(tautCount > 50)
+							break;
+					}			
+				}
+			}
+			//	Insert tautomer data
+			insertPs.setString(1, accession);
+			insertPs.setString(4, sourceDb);
+			for(Entry<String,String>td : tautomerDataMap.entrySet()) {
+				
+				insertPs.setString(2, td.getKey());
+				insertPs.setString(3, td.getValue());
+				insertPs.addBatch();
+			}
+			insertPs.executeBatch();
+//			counter++;
+//			if(counter % 1000 == 0)
+//				System.out.print(".");
+//			if(counter % 30000 == 0)
+//				System.out.print(".\n");
+		}
+
+		insertPs.close();
+		ConnectionManager.releaseConnection(conn);
+		
+		Path outputPath = Paths.get(
+				logDirPath, sourceDb + "_indigo_tautomersLog.txt");
 		try {
 			Files.write(outputPath, 
 					errorLog, 
