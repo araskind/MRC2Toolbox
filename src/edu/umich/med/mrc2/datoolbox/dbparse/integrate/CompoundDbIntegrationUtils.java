@@ -22,7 +22,12 @@
 package edu.umich.med.mrc2.datoolbox.dbparse.integrate;
 
 import java.io.File;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.text.DecimalFormat;
+import java.util.Set;
+import java.util.TreeSet;
 
 import org.openscience.cdk.aromaticity.Aromaticity;
 import org.openscience.cdk.inchi.InChIGenerator;
@@ -35,6 +40,7 @@ import org.openscience.cdk.smiles.SmilesGenerator;
 import org.openscience.cdk.smiles.SmilesParser;
 import org.openscience.cdk.tautomers.InChITautomerGenerator;
 
+import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.FilePreferencesFactory;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
@@ -62,10 +68,28 @@ public class CompoundDbIntegrationUtils {
 		MRC2ToolBoxConfiguration.initConfiguration();
 
 		try {
-			LipidMapsIntegration.addCrossrefForLipidMapsBasedOnHMDBmapping();
+			T3DBIntegration.copyT3DBData2compounds();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+	
+	public static Set<String>getValidAccessionsSet() throws Exception{
+		
+		Connection conn = ConnectionManager.getConnection();
+		String query = "SELECT ACCESSION FROM COMPOUNDDB.COMPOUND_DATA";
+		PreparedStatement ps = conn.prepareStatement(query);
+		
+		TreeSet<String>validAccessions = new TreeSet<String>();
+		ResultSet rs = ps.executeQuery();
+		while(rs.next())
+			validAccessions.add(rs.getString(1));
+		
+		rs.close();
+		ps.close();
+		ConnectionManager.releaseConnection(conn);
+		
+		return validAccessions;
 	}
 }
