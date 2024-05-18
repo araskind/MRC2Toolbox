@@ -37,6 +37,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -68,13 +69,16 @@ import com.epam.indigo.IndigoObject;
 import ambit2.tautomers.TautomerManager;
 import ambit2.tautomers.ranking.EnergyRanking;
 import ambit2.tautomers.zwitterion.ZwitterionManager;
+import edu.umich.med.mrc2.datoolbox.data.CompoundIdentity;
 import edu.umich.med.mrc2.datoolbox.data.PubChemCompoundDescriptionBundle;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.FilePreferencesFactory;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
+import edu.umich.med.mrc2.datoolbox.utils.CASUtils;
 import edu.umich.med.mrc2.datoolbox.utils.ChemInfoUtils;
 import edu.umich.med.mrc2.datoolbox.utils.CompoundStructureUtils;
+import edu.umich.med.mrc2.datoolbox.utils.DelimitedTextParser;
 import edu.umich.med.mrc2.datoolbox.utils.PubChemUtils;
 import io.github.dan2097.jnainchi.InchiStatus;
 
@@ -107,12 +111,51 @@ public class CompoundDatabaseScripts {
 		logger.info("Statring the program");
 		MRC2ToolBoxConfiguration.initConfiguration();	
 		String logDirPath = "E:\\DataAnalysis\\Databases\\_LATEST";
-		try {			
-
+		try {	
+			//	generateCanonicalSmilesForNIST();
+			addMissingDataToNISTbyCASnumber();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+	
+	private static void addMissingDataToNISTbyCASnumber() throws Exception{
+		
+		Connection conn = ConnectionManager.getConnection();
+		String query = 
+				"SELECT CAS_NUMBER FROM COMPOUNDDB.NIST_UNIQUE_COMPOUND_DATA "
+				+ "WHERE CAS_NUMBER IS NOT NULL AND (INCHI_KEY IS NULL OR CANONICAL_SMILES IS NULL)";
+		PreparedStatement ps = conn.prepareStatement(query);
+		ArrayList<String>casList = new ArrayList<String>();
+		ResultSet rs = ps.executeQuery();
+		while(rs.next())
+			casList.add(rs.getString(1));
+		
+		rs.close();	
+		
+		query = "UPDATE COMPOUNDDB.NIST_COMPOUND_DATA "
+				+ "SET INCHI_KEY = ?, SMILES = ? WHERE CAS_NUMBER = ?";
+		ps = conn.prepareStatement(query);
+		int counter = 0;
+		for(String cas : casList) {
+			
+			Thread.sleep(500);
+			CompoundIdentity cid = CASUtils.getCompoundByCASnumber(cas);
+			if(cid != null) {
+				
+				ps.setString(1, cid.getInChiKey());
+				ps.setString(2, cid.getSmiles());
+				ps.setString(3, cas);
+				ps.executeUpdate();
+			}
+			counter++;
+			System.out.print(".");
+			if(counter % 50 == 0)
+				System.out.print(".\n");
+		}		
+		ps.close();
+		ConnectionManager.releaseConnection(conn);
 	}
 	
 	private static void retTest() {
@@ -531,6 +574,77 @@ public class CompoundDatabaseScripts {
 		ps.close();
 		insertPs.close();
 		ConnectionManager.releaseConnection(conn);
+	}
+	
+	public static void generateCanonicalSmilesForNIST() throws Exception {
+		
+		Indigo indigo = new Indigo();
+		Connection conn = ConnectionManager.getConnection();
+		String query = 
+				"SELECT DISTINCT SMILES FROM COMPOUNDDB.NIST_COMPOUND_DATA "
+				+ "WHERE SMILES IS NOT NULL AND CANONICAL_SMILES IS NULL";
+		PreparedStatement ps = conn.prepareStatement(query);
+
+		HashSet<String>inputSmiles = new HashSet<String>();
+		ResultSet rs = ps.executeQuery();
+		while(rs.next())
+			inputSmiles.add(rs.getString(1));
+		
+		rs.close();
+		ps.close();
+		
+		ArrayList<String>errorLog = new ArrayList<String>();
+		String updQuery =
+				"UPDATE COMPOUNDDB.NIST_COMPOUND_DATA "
+				+ "SET CANONICAL_SMILES = ? WHERE SMILES = ?";
+		PreparedStatement updPs = conn.prepareStatement(updQuery);
+		int counter = 0;
+		for(String smi : inputSmiles) {
+			
+			IndigoObject molecule = null;	
+			String canonicalSmi = null;
+			try {
+				molecule = indigo.loadMolecule(smi);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			if(molecule != null) {
+
+				try {
+					canonicalSmi = molecule.clone().canonicalSmiles();
+				} catch (Exception e) {
+					errorLog.add("Failed to create canonical form from SMILES " + smi);
+				}
+			}
+			else {
+				errorLog.add("Failed to create molecule from SMILES " + smi);
+			}
+			if(canonicalSmi != null) {
+				updPs.setString(1, canonicalSmi);
+				updPs.setString(2, smi);
+				updPs.executeUpdate();
+			}
+			counter++;
+			if(counter % 1000 == 0)
+				System.out.print(".");
+			if(counter % 30000 == 0)
+				System.out.print(".\n");
+		}
+		updPs.close();
+		ConnectionManager.releaseConnection(conn);
+		
+		Path outputPath = Paths.get(
+				"E:\\DataAnalysis\\Databases\\NIST\\NIST23_bad_SMILES.txt");
+		try {
+			Files.write(outputPath, 
+					errorLog, 
+					StandardCharsets.UTF_8,
+					StandardOpenOption.CREATE, 
+					StandardOpenOption.TRUNCATE_EXISTING);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	public static void generateTautomersForCompoundDatabaseUsingIndigo(
@@ -1546,6 +1660,101 @@ public class CompoundDatabaseScripts {
 		ps.close();
 		ConnectionManager.releaseConnection(conn);
 	}
+	
+	public static void createNISTlibSMILESBasedData() throws Exception{
+		
+		igfactory = null;
+		try {
+			igfactory = InChIGeneratorFactory.getInstance();
+		} catch (CDKException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}		
+		double toRound = 1000000.0d;
+		
+		Connection conn = ConnectionManager.getConnection();
+		String query = "SELECT NIST_ID, SMILES, FORMULA"
+				+ " FROM COMPOUNDDB.NIST_COMPOUND_DATA"
+				+ " WHERE SMILES IS NOT NULL";
+								
+		PreparedStatement ps = conn.prepareStatement(query);
+		
+		String updQuery = "UPDATE COMPOUNDDB.NIST_COMPOUND_DATA "
+				+ "SET CHARGE = ?, FORMULA_FROM_SMILES = ?, "
+				+ "MASS_FROM_SMILES = ?, INCHI_KEY_FROM_SMILES = ?, "
+				+ "INCHI_KEY_FS2D = ?, FORMULA_CONFLICT = ? WHERE NIST_ID = ?";
+		PreparedStatement updps = conn.prepareStatement(updQuery);		
+		ResultSet rs = ps.executeQuery();
+
+		int counter = 0;
+		while(rs.next()) {
+			
+			String smiles = rs.getString("SMILES");
+			String accession = rs.getString("NIST_ID");						
+			String dbFormula = rs.getString("FORMULA");
+			IAtomContainer mol = null;
+			try {
+				mol = smipar.parseSmiles(smiles);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			if(mol != null) {
+				IMolecularFormula molFormula = 
+						MolecularFormulaManipulator.getMolecularFormula(mol);
+				String mfFromFStringFromSmiles = 
+						MolecularFormulaManipulator.getString(molFormula);	
+				double smilesMass = 
+						Math.round(MolecularFormulaManipulator.getMass(
+								molFormula, MolecularFormulaManipulator.MonoIsotopic) * toRound)/toRound;	
+				String inchiKey = null;
+				try {
+					inChIGenerator = igfactory.getInChIGenerator(mol);
+					InchiStatus inchiStatus = inChIGenerator.getStatus();
+					if (inchiStatus.equals(InchiStatus.WARNING)) {
+						System.out.println(accession + "\tInChI warning: " + inChIGenerator.getMessage());
+					} else if (!inchiStatus.equals(InchiStatus.SUCCESS)) {
+						System.out.println(accession + "\tInChI failed: [" + inChIGenerator.getMessage() + "]");
+					}
+					inchiKey = inChIGenerator.getInchiKey();
+				} catch (CDKException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}				
+				updps.setInt(1, molFormula.getCharge());
+				updps.setString(2, mfFromFStringFromSmiles);
+				updps.setDouble(3, smilesMass);
+				if(inchiKey != null) {
+					updps.setString(4, inchiKey);
+					updps.setString(5, inchiKey.substring(0, 14));
+				}
+				else {
+					updps.setNull(4, java.sql.Types.NULL);
+					updps.setNull(5, java.sql.Types.NULL);
+				}
+				if(dbFormula == null || !dbFormula.equals(mfFromFStringFromSmiles)) {
+					updps.setString(6, "Y");
+				}
+				else {
+					updps.setNull(6, java.sql.Types.NULL);
+				}
+				updps.setString(7, accession);				
+				updps.executeUpdate();
+			}
+			else {
+				System.out.println("Failed to convert SMILES for " + accession + "\t" + smiles);
+			}
+			counter++;
+			if(counter % 1000 == 0)
+				System.out.print(".");
+			if(counter % 30000 == 0)
+				System.out.print(".\n");
+		}
+		rs.close();
+		updps.close();
+		ps.close();
+		ConnectionManager.releaseConnection(conn);
+	}
 		
 	private static void getPubChemIdsForDrugBankEntriesByInchiKey() throws Exception{
 		
@@ -2305,6 +2514,32 @@ public class CompoundDatabaseScripts {
 				e.printStackTrace();
 			}
 		}
+	}
+	
+	public static void fixNISTcanonicalSMILES() throws Exception{
+		
+		File mappingFile = 
+				new File("E:\\DataAnalysis\\Databases\\NIST\\NIST23\\canonical_SMILES_fix.txt");
+		String[][] mappingData = null;
+		try {
+			mappingData = DelimitedTextParser.parseTextFileWithEncoding(
+							mappingFile, MRC2ToolBoxConfiguration.getTabDelimiter());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}			
+		Connection conn = ConnectionManager.getConnection();
+		String query = "UPDATE COMPOUNDDB.NIST_COMPOUND_DATA "
+				+ "SET CANONICAL_SMILES = ? WHERE CAS_NUMBER = ?";
+		PreparedStatement ps = conn.prepareStatement(query);
+		for(int i=0; i<mappingData.length; i++) {
+			
+			ps.setString(1, mappingData[i][1]);		
+			ps.setString(2, mappingData[i][0]);						
+			ps.executeQuery();
+		}
+		ps.close();
+		ConnectionManager.releaseConnection(conn);
 	}
 }
 

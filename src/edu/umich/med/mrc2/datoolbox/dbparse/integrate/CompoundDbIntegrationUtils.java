@@ -68,7 +68,7 @@ public class CompoundDbIntegrationUtils {
 		MRC2ToolBoxConfiguration.initConfiguration();
 
 		try {
-			T3DBIntegration.copyT3DBData2compounds();
+			
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
