@@ -47,18 +47,26 @@ import java.util.TreeSet;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.LoggerContext;
 import org.openscience.cdk.DefaultChemObjectBuilder;
+import org.openscience.cdk.aromaticity.Aromaticity;
+import org.openscience.cdk.aromaticity.ElectronDonation;
 import org.openscience.cdk.exception.CDKException;
+import org.openscience.cdk.graph.Cycles;
 import org.openscience.cdk.inchi.InChIGenerator;
 import org.openscience.cdk.inchi.InChIGeneratorFactory;
 import org.openscience.cdk.interfaces.IAtomContainer;
+import org.openscience.cdk.interfaces.IBioPolymer;
 import org.openscience.cdk.interfaces.IChemObjectBuilder;
 import org.openscience.cdk.interfaces.IMolecularFormula;
 import org.openscience.cdk.io.MDLV2000Reader;
 import org.openscience.cdk.io.iterator.IteratingSDFReader;
+import org.openscience.cdk.silent.AtomContainer;
 import org.openscience.cdk.silent.SilentChemObjectBuilder;
 import org.openscience.cdk.smiles.SmiFlavor;
 import org.openscience.cdk.smiles.SmilesGenerator;
 import org.openscience.cdk.smiles.SmilesParser;
+import org.openscience.cdk.tools.CDKHydrogenAdder;
+import org.openscience.cdk.tools.ProteinBuilderTool;
+import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator;
 import org.slf4j.LoggerFactory;
 
@@ -113,7 +121,7 @@ public class CompoundDatabaseScripts {
 		String logDirPath = "E:\\DataAnalysis\\Databases\\_LATEST";
 		try {	
 			//	generateCanonicalSmilesForNIST();
-			addMissingDataToNISTbyCASnumber();
+			generateSMilesInchiForNonmodifiedPeptides();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -2519,7 +2527,7 @@ public class CompoundDatabaseScripts {
 	public static void fixNISTcanonicalSMILES() throws Exception{
 		
 		File mappingFile = 
-				new File("E:\\DataAnalysis\\Databases\\NIST\\NIST23\\canonical_SMILES_fix.txt");
+				new File("E:\\DataAnalysis\\Databases\\NIST\\NIST23\\canonical_SMILES_fix_2.txt");
 		String[][] mappingData = null;
 		try {
 			mappingData = DelimitedTextParser.parseTextFileWithEncoding(
@@ -2532,14 +2540,110 @@ public class CompoundDatabaseScripts {
 		String query = "UPDATE COMPOUNDDB.NIST_COMPOUND_DATA "
 				+ "SET CANONICAL_SMILES = ? WHERE CAS_NUMBER = ?";
 		PreparedStatement ps = conn.prepareStatement(query);
+		
+		String query2 = "UPDATE COMPOUNDDB.NIST_UNIQUE_COMPOUND_DATA "
+				+ "SET CANONICAL_SMILES = ? WHERE CAS_NUMBER = ?";
+		PreparedStatement ps2 = conn.prepareStatement(query2);
+		
 		for(int i=0; i<mappingData.length; i++) {
 			
 			ps.setString(1, mappingData[i][1]);		
 			ps.setString(2, mappingData[i][0]);						
 			ps.executeQuery();
+			
+			ps2.setString(1, mappingData[i][1]);		
+			ps2.setString(2, mappingData[i][0]);						
+			ps2.executeQuery();
 		}
 		ps.close();
+		ps2.close();
 		ConnectionManager.releaseConnection(conn);
+	}
+	
+	//
+	
+	
+	private static void generateSMilesInchiForNonmodifiedPeptides() throws Exception{
+		
+		Connection conn = ConnectionManager.getConnection();
+		String query = "SELECT NAME, PEPTIDE_SEQUENCE "
+				+ "FROM COMPOUNDDB.NIST_UNIQUE_COMPOUND_DATA "
+				+ "WHERE CANONICAL_SMILES IS NULL "
+				+ "AND PEPTIDE_SEQUENCE IS NOT NULL "
+				+ "AND PEPTIDE_MODS IS NULL";
+		PreparedStatement ps = conn.prepareStatement(query);
+		
+		String updQuery = 
+				"UPDATE COMPOUNDDB.NIST_UNIQUE_COMPOUND_DATA "
+				+ "SET CANONICAL_SMILES = ? WHERE NAME = ?";
+		PreparedStatement updPs = conn.prepareStatement(updQuery);
+		
+		ResultSet rs = ps.executeQuery();
+		while(rs.next()) {
+			
+			String smiles = null;
+			try {
+				smiles = getPeptideSmiles(rs.getString("PEPTIDE_SEQUENCE"));
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			if(smiles != null) {
+				
+				updPs.setString(1, smiles);
+				updPs.setString(2, rs.getString("NAME"));
+				updPs.executeUpdate();
+			}
+		}
+		rs.close();
+		ps.close();
+		updPs.close();
+		ConnectionManager.releaseConnection(conn);
+	}
+	
+	private static String getPeptideSmiles(String pepSeq) {
+		
+		IBioPolymer peptide = null;
+		String smiles = null;
+		String oneLetter = pepSeq;
+		SmilesGenerator smilesGenerator = new SmilesGenerator(SmiFlavor.Canonical);
+		Aromaticity aromaticity = new Aromaticity(
+				ElectronDonation.cdk(),
+                Cycles.or(Cycles.all(), Cycles.all(6)));
+		try {
+			peptide = ProteinBuilderTool.createProtein(oneLetter);
+	        AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(peptide);
+	        CDKHydrogenAdder.getInstance(peptide.getBuilder())
+	                        .addImplicitHydrogens(peptide);
+	        aromaticity.apply(peptide);
+		} catch (CDKException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		if(peptide != null){
+			try {
+				AtomContainer mpep = new AtomContainer(peptide);
+				smiles = smilesGenerator.create(mpep);
+//				inChIGenerator = igfactory.getInChIGenerator(mpep);
+//				INCHI_RET ret = inChIGenerator.getReturnStatus();
+//				if (ret == INCHI_RET.WARNING) {
+//
+//					System.out.println("InChI warning: " + inChIGenerator.getMessage());
+//				} else if (ret != INCHI_RET.OKAY) {
+//
+//					throw new CDKException(
+//							"InChI failed: " + ret.toString() + " [" + inChIGenerator.getMessage() + "]");
+//				}
+//				String inchi = inChIGenerator.getInchi();
+//				String auxinfo = inChIGenerator.getAuxInfo();
+//				System.out.println(inchi);
+//				System.out.println(inChIGenerator.getInchiKey());
+			} catch (CDKException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		return smiles;	
 	}
 }
 

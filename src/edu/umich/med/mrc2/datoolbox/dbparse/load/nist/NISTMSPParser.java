@@ -144,9 +144,11 @@ public class NISTMSPParser {
 						}
 						else if(entry.getKey().equals(MSPField.PEPTIDE_MODS)) {
 							msmsSet.setPeptideModifications(regexMatcher.group(1));
+							msmsSet.addProperty(MSPField.PEPTIDE_MODS, msmsSet.getPeptideModifications());
 						}
 						else if(entry.getKey().equals(MSPField.PEPTIDE_SEQUENCE)) {
 							msmsSet.setPeptideSequence(regexMatcher.group(1));
+							msmsSet.addProperty(MSPField.PEPTIDE_SEQUENCE, msmsSet.getPeptideSequence());
 						}
 						else {
 							msmsSet.addProperty(entry.getKey(), regexMatcher.group(1));

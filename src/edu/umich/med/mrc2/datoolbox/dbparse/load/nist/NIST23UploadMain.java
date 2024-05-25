@@ -84,14 +84,59 @@ public class NIST23UploadMain {
 				MRC2ToolBoxCore.configDir + "MRC2ToolBoxPrefs.txt");
 		MRC2ToolBoxConfiguration.initConfiguration();
 		try {
-			compateHashesAndAssignMRC2libIdsToNIST23entries();
+			addPepSeqsPepMods();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}	
 	}
+
 	
-	private static void compateHashesAndAssignMRC2libIdsToNIST23entries() throws Exception {
+	private static void addPepSeqsPepMods() throws Exception{
+		
+		File mspDirectory = new File("E:\\DataAnalysis\\Databases\\NIST\\NIST23\\ExportUpload\\_MISMATCHED\\MSP");	
+		Collection<File> mspFiles = 
+				FileUtils.listFiles(mspDirectory, new String[] {"msp", "MSP"}, false);
+		
+		Connection conn = ConnectionManager.getConnection();
+		String query = 
+				"UPDATE COMPOUNDDB.NIST_LIBRARY_COMPONENT "
+				+ "SET PEPTIDE_SEQUENCE =?, PEPTIDE_MODS = ? WHERE NIST_ID =?";
+		PreparedStatement ps = conn.prepareStatement(query);
+
+		for(File mspFile : mspFiles) {
+			
+			System.out.println("\n*************** ");
+			System.out.println("Parsing file " + mspFile.getName());
+			
+			List<NISTTandemMassSpectrum>msmsList = NISTParserUtils.parseNISTmspFile(mspFile);
+			for(NISTTandemMassSpectrum msms : msmsList) {
+				
+				int count = 0;
+				if(msms.getPeptideSequence() != null) {
+					
+					ps.setString(1, msms.getPeptideSequence());
+					if(msms.getPeptideModifications() != null)
+						ps.setString(2, msms.getPeptideModifications());
+					else
+						ps.setNull(2, java.sql.Types.NULL);
+					
+					ps.setInt(3,msms.getNistNum());
+					ps.executeUpdate();
+				}
+				count++;
+				if(count % 50 == 0)
+					System.out.print(".");
+				
+				if(count % 5000 == 0)
+					System.out.println("\n" + count + " records processed");
+			}
+		}		 
+		ps.close();
+		ConnectionManager.releaseConnection(conn);
+	}
+	
+	private static void compareHashesAndAssignMRC2libIdsToNIST23entries() throws Exception {
 		
 		Connection conn = ConnectionManager.getConnection();
 		
