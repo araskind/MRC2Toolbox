@@ -60,14 +60,14 @@ import net.sf.jniinchi.INCHI_RET;
 
 public class MonaParser {
 
-	private static final String COMMENT_FIELD = "COMMENT";
-	private static final String MSMS_ELEMENT = "MASS SPECTRAL PEAKS";
-	private static Pattern COMMENT_PATTERN = Pattern.compile("^([^=]+)=(.+)$");
-    private static Pattern MDL_VERSION = Pattern.compile("[vV](2000|3000)");
-    private static String  M_END = "M  END";
-    private static String  MONA_M_END = ">  <";
-    private static String  SDF_RECORD_SEPARATOR = "$$$$";
-    private static String  SDF_DATA_HEADER      = "> ";
+	public static final String COMMENT_FIELD = "COMMENT";
+	public static final String MSMS_ELEMENT = "MASS SPECTRAL PEAKS";
+	public static Pattern COMMENT_PATTERN = Pattern.compile("^([^=]+)=(.+)$");
+    public static Pattern MDL_VERSION = Pattern.compile("[vV](2000|3000)");
+    public static String  M_END = "M  END";
+    public static String  MONA_M_END = ">  <";
+    public static String  SDF_RECORD_SEPARATOR = "$$$$";
+    public static String  SDF_DATA_HEADER      = "> ";
 
 	private static int totalCount = 0;
 	private static Connection conn;
@@ -107,7 +107,7 @@ public class MonaParser {
 		}
 	}
 
-	public static List<List<String>> pareseInputFile(File inputFile) throws Exception {
+	public static List<List<String>> parseAndUploadDataFromInputFile(File inputFile) throws Exception {
 
 		List<List<String>> sdfChunks = new ArrayList<List<String>>();
 		List<String> chunk = new ArrayList<String>();
@@ -165,7 +165,7 @@ public class MonaParser {
 		sdfChunks.clear();
 	}
 
-	private static IAtomContainer parseChunk(List<String> chunk) throws CDKException {
+	public static IAtomContainer parseChunk(List<String> chunk) throws CDKException {
 		List<String>mdlMol = new ArrayList<String>();
 		IAtomContainer molecule = null;
 		int propertyStart = 0;

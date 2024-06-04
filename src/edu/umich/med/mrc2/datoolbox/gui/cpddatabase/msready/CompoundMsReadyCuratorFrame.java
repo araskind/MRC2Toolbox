@@ -652,6 +652,15 @@ public class CompoundMsReadyCuratorFrame extends JFrame
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
+			}	
+			if(db.equals(CompoundDatabaseEnum.NIST_MS)) {
+				
+				try {					
+					compoundCollection = fetchNISTMSMStDataForCuration();
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 			if(compoundCollection != null && !compoundCollection.isEmpty()) {
 				
@@ -913,6 +922,39 @@ public class CompoundMsReadyCuratorFrame extends JFrame
 		return idList;		
 	}
 	
+	private Collection<CompoundIdentity> fetchNISTMSMStDataForCuration() throws Exception{
+
+		Collection<CompoundIdentity>idList = new ArrayList<CompoundIdentity>();
+		Connection conn = ConnectionManager.getConnection();
+		String query =
+			"SELECT NAME, FORMULA_FROM_SMILES, MASS_FROM_SMILES, "
+			+ "CANONICAL_SMILES, INCHI_KEY, CHARGE " +
+			"FROM COMPOUNDDB.NIST_UNIQUE_COMPOUND_DATA D "
+			+ "WHERE MS_READY_INCHI_KEY IS NULL "
+			+ "AND CANONICAL_SMILES IS NOT NULL";
+
+		PreparedStatement ps = conn.prepareStatement(query);
+		ResultSet rs = ps.executeQuery();
+		while (rs.next()){
+
+			CompoundIdentity identity = new CompoundIdentity(
+					CompoundDatabaseEnum.NIST_MS, 
+					rs.getString("NAME"),
+					rs.getString("NAME"), 					
+					rs.getString("NAME"), 
+					rs.getString("FORMULA_FROM_SMILES"), 
+					rs.getDouble("MASS_FROM_SMILES"), 
+					rs.getString("CANONICAL_SMILES"));
+			identity.setInChiKey(rs.getString("INCHI_KEY"));
+			identity.setCharge(rs.getInt("CHARGE"));
+			idList.add(identity);
+		}
+		rs.close();
+		ps.close();
+		ConnectionManager.releaseConnection(conn);
+		return idList;
+	}
+	
 	private void validateMsReadyStructureAndShowErrors() {
 		
 		Collection<String>errors = validateMsReadyStructure();
@@ -1088,6 +1130,14 @@ public class CompoundMsReadyCuratorFrame extends JFrame
 				e.printStackTrace();
 			}
 		}
+		if(toolbar.getSelectedDatabase().equals(CompoundDatabaseEnum.NIST_MS)) {
+			try {
+				updateNISTMSMSCompoundData();
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 		CompoundIdentity curatedId =  new CompoundIdentity(
 				selectedIdentity.getPrimaryDatabase(), 
 				selectedIdentity.getPrimaryDatabaseId(),
@@ -1100,7 +1150,7 @@ public class CompoundMsReadyCuratorFrame extends JFrame
 		curatedId.setCharge(msReadyStructuralDescriptorsPanel.getCharge());
 		curatedCompounds.put(selectedIdentity, curatedId);
 	}
-	
+
 	private void updateHMDBCompoundData() throws Exception{
 		
 		String query = 
@@ -1118,6 +1168,29 @@ public class CompoundMsReadyCuratorFrame extends JFrame
 		ps.setString(5, msReadyStructuralDescriptorsPanel.getInchiKey().substring(0, 14));	//	MS_READY_INCHI_KEY2D
 		ps.setInt(6, msReadyStructuralDescriptorsPanel.getCharge());		//	MS_READY_CHARGE
 		ps.setString(7, selectedIdentity.getPrimaryDatabaseId());			//	ACCESSION
+		
+		ps.executeUpdate();
+		ps.close();		
+		ConnectionManager.releaseConnection(conn);
+	}
+		
+	private void updateNISTMSMSCompoundData() throws Exception{
+		
+		String query = 
+				"UPDATE COMPOUNDDB.NIST_UNIQUE_COMPOUND_DATA " +
+				"SET MS_READY_MOL_FORMULA = ?, MS_READY_EXACT_MASS = ?,  " +
+				"MS_READY_SMILES = ?, MS_READY_INCHI_KEY = ?,  " +
+				"MS_READY_INCHI_KEY2D = ?, MS_READY_CHARGE = ? " +
+				"WHERE NAME = ? ";
+		Connection conn = ConnectionManager.getConnection();
+		PreparedStatement ps = conn.prepareStatement(query);
+		ps.setString(1, msReadyStructuralDescriptorsPanel.getFormula());	//	MS_READY_MOL_FORMULA
+		ps.setDouble(2, msReadyStructuralDescriptorsPanel.getMass());		//	MS_READY_EXACT_MASS
+		ps.setString(3, msReadyStructuralDescriptorsPanel.getSmiles());		//	MS_READY_SMILES
+		ps.setString(4, msReadyStructuralDescriptorsPanel.getInchiKey());	//	MS_READY_INCHI_KEY
+		ps.setString(5, msReadyStructuralDescriptorsPanel.getInchiKey().substring(0, 14));	//	MS_READY_INCHI_KEY2D
+		ps.setInt(6, msReadyStructuralDescriptorsPanel.getCharge());		//	MS_READY_CHARGE
+		ps.setString(7, selectedIdentity.getName());			//	ACCESSION
 		
 		ps.executeUpdate();
 		ps.close();		

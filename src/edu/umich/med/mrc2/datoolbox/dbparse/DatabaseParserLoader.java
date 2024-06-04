@@ -264,7 +264,7 @@ public class DatabaseParserLoader extends JFrame
 		File sdfFile = new File(textField.getText().trim());
 		MonaParser.initParser();
 		try {
-			MonaParser.pareseInputFile(sdfFile);
+			MonaParser.parseAndUploadDataFromInputFile(sdfFile);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

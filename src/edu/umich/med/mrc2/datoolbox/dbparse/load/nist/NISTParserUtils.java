@@ -32,6 +32,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -52,10 +53,14 @@ import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.inchi.InChIGenerator;
 import org.openscience.cdk.inchi.InChIGeneratorFactory;
 import org.openscience.cdk.interfaces.IAtomContainer;
+import org.openscience.cdk.interfaces.IMolecularFormula;
 import org.openscience.cdk.io.SDFWriter;
 import org.openscience.cdk.silent.AtomContainer;
+import org.openscience.cdk.silent.SilentChemObjectBuilder;
 import org.openscience.cdk.smiles.SmiFlavor;
 import org.openscience.cdk.smiles.SmilesGenerator;
+import org.openscience.cdk.smiles.SmilesParser;
+import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator;
 
 import edu.umich.med.mrc2.datoolbox.data.enums.CompoundIdentityField;
 import edu.umich.med.mrc2.datoolbox.data.enums.MSPField;
@@ -901,4 +906,125 @@ public class NISTParserUtils {
 		
 		ConnectionManager.releaseConnection(conn);
 	}
+	
+	public static void fillMisingInchiKeysForNISTcompounds() throws Exception{
+
+		try {
+			igfactory = InChIGeneratorFactory.getInstance();
+		} catch (CDKException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		SmilesParser smipar = 
+				new SmilesParser(SilentChemObjectBuilder.getInstance());
+
+		Connection conn = ConnectionManager.getConnection();
+		String query = 
+				"SELECT NAME, FORMULA, INCHI_KEY, CANONICAL_SMILES "
+				+ "FROM COMPOUNDDB.NIST_UNIQUE_COMPOUND_DATA "
+				+ "WHERE CANONICAL_SMILES IS NOT NULL";
+		PreparedStatement ps = conn.prepareStatement(query);
+
+		String inchiKeyUpdateQuery = 
+				"UPDATE COMPOUNDDB.NIST_UNIQUE_COMPOUND_DATA "
+				+ "SET INCHI_KEY = ? WHERE NAME = ? AND INCHI_KEY IS NULL";
+		PreparedStatement updIKps = conn.prepareStatement(inchiKeyUpdateQuery);
+		
+		ResultSet rs = ps.executeQuery();
+		while(rs.next()) {
+			
+			String name = rs.getString("NAME");
+			String smiles = rs.getString("CANONICAL_SMILES");
+			String inchiKey = rs.getString("INCHI_KEY");
+			IAtomContainer mol = null;
+			try {
+				mol = smipar.parseSmiles(smiles);
+			} catch (Exception e1) {
+				e1.printStackTrace();
+			}
+			if (mol != null) {
+				
+				if(inchiKey == null || inchiKey.trim().isEmpty()) {
+					
+					try {
+						inChIGenerator = igfactory.getInChIGenerator(mol);		
+						InchiStatus inchiStatus = inChIGenerator.getStatus();
+						if (inchiStatus.equals(InchiStatus.ERROR)) {
+							System.out.println("InChI failed: [" + inChIGenerator.getMessage() + "]");
+						}
+						inchiKey = inChIGenerator.getInchiKey();
+					} catch (CDKException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					if(inchiKey != null) {
+						updIKps.setString(1, inchiKey);
+						updIKps.setString(2, name);
+						updIKps.executeUpdate();
+					}
+				}
+			}
+		}
+		rs.close();
+		updIKps.close();
+		ps.close();
+		ConnectionManager.releaseConnection(conn);
+	}
+//	
+//	public static void prepareNISTcompoundsForCuration() throws Exception{
+//		
+//		Connection conn = ConnectionManager.getConnection();
+//		String query = 
+//				"SELECT NAME, FORMULA, CANONICAL_SMILES "
+//				+ "FROM COMPOUNDDB.NIST_UNIQUE_COMPOUND_DATA "
+//				+ "WHERE CANONICAL_SMILES IS NOT NULL";
+//		PreparedStatement ps = conn.prepareStatement(query);
+//
+//		String updateQuery = 
+//				"UPDATE COMPOUNDDB.NIST_UNIQUE_COMPOUND_DATA "
+//				+ "SET INCHI_KEY = ? WHERE NAME = ? AND INCHI_KEY IS NULL";
+//		PreparedStatement updIKps = conn.prepareStatement(updateQuery);
+//		
+//		ResultSet rs = ps.executeQuery();
+//		while(rs.next()) {
+//			
+//			String name = rs.getString("NAME");
+//			String smiles = rs.getString("CANONICAL_SMILES");
+//			String inchiKey = rs.getString("INCHI_KEY");
+//			IAtomContainer mol = null;
+//			try {
+//				mol = smipar.parseSmiles(smiles);
+//			} catch (Exception e1) {
+//				e1.printStackTrace();
+//			}
+//			if (mol != null) {
+//				
+//				if(inchiKey == null || inchiKey.trim().isEmpty()) {
+//					
+//					try {
+//						inChIGenerator = igfactory.getInChIGenerator(mol);		
+//						InchiStatus inchiStatus = inChIGenerator.getStatus();
+//						if (inchiStatus.equals(InchiStatus.ERROR)) {
+//							System.out.println("InChI failed: [" + inChIGenerator.getMessage() + "]");
+//						}
+//						inchiKey = inChIGenerator.getInchiKey();
+//					} catch (CDKException e1) {
+//						// TODO Auto-generated catch block
+//						e1.printStackTrace();
+//					}
+//					if(inchiKey != null) {
+//						updIKps.setString(1, inchiKey);
+//						updIKps.setString(2, name);
+//						updIKps.executeUpdate();
+//					}
+//				}
+//			}
+//		}
+//		rs.close();
+//		updIKps.close();
+//		ps.close();
+//		rs.close();
+//		ps.close();
+//		ConnectionManager.releaseConnection(conn);
+//	}
 }

@@ -188,6 +188,30 @@ public class PubChemUtils {
 		return molecule;
 	}
 	
+	public static IAtomContainer getMoleculeFromPubChemById(String pubchemId) {
+		
+		String requestUrl = pubchemCidUrl + pubchemId + "/record/SDF";
+		InputStream pubchemDataStream = null;
+
+		try {
+			pubchemDataStream = WebUtils.getInputStreamFromURL(requestUrl);
+		} catch (Exception e) {
+			//	e.printStackTrace();
+		}		
+		if(pubchemDataStream == null)
+			return null;
+		
+		IteratingSDFReaderFixed reader = 
+				new IteratingSDFReaderFixed(
+						pubchemDataStream, SilentChemObjectBuilder.getInstance());
+		
+		IAtomContainer molecule = null;
+		while (reader.hasNext())
+			molecule = (IAtomContainer)reader.next();
+					
+		return molecule;
+	}
+	
 	
 	public static IAtomContainer getMoleculeFromPubChemByName(String compoundName) throws Exception{
 

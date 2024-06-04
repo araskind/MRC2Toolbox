@@ -80,6 +80,7 @@ import ambit2.tautomers.zwitterion.ZwitterionManager;
 import edu.umich.med.mrc2.datoolbox.data.CompoundIdentity;
 import edu.umich.med.mrc2.datoolbox.data.PubChemCompoundDescriptionBundle;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
+import edu.umich.med.mrc2.datoolbox.dbparse.load.nist.NISTParserUtils;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.FilePreferencesFactory;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
@@ -121,7 +122,8 @@ public class CompoundDatabaseScripts {
 		String logDirPath = "E:\\DataAnalysis\\Databases\\_LATEST";
 		try {	
 			//	generateCanonicalSmilesForNIST();
-			generateSMilesInchiForNonmodifiedPeptides();
+			//	NISTParserUtils.fillMisingInchiKeysForNISTcompounds();
+			getPubChemIdsForNISTMSMSByInchiKey();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -2560,8 +2562,88 @@ public class CompoundDatabaseScripts {
 		ConnectionManager.releaseConnection(conn);
 	}
 	
-	//
+	public static void updateNISTfromPubChem() throws Exception{
+		
+		File mappingFile = 
+				new File("E:\\DataAnalysis\\Databases\\NIST\\NIST23\\fix_from_pubchem.txt");
+		String[][] mappingData = null;
+		try {
+			mappingData = DelimitedTextParser.parseTextFileWithEncoding(
+							mappingFile, MRC2ToolBoxConfiguration.getTabDelimiter());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		Connection conn = ConnectionManager.getConnection();
+		String query = "UPDATE COMPOUNDDB.NIST_COMPOUND_DATA "
+				+ "SET SMILES = ?, INCHI_KEY = ? WHERE NAME = ?";
+		PreparedStatement ps = conn.prepareStatement(query);
+		
+		for(int i=0; i<mappingData.length; i++) {
+			
+			Thread.sleep(300);
+			
+			String pubchemId = mappingData[i][1];
+			String cpdName = mappingData[i][0];
+			IAtomContainer mol = PubChemUtils.getMoleculeFromPubChemById(pubchemId);
+			if(mol != null) {
+				
+				String inchiKey = mol.getProperty("PUBCHEM_IUPAC_INCHIKEY");
+				String smiles = mol.getProperty("PUBCHEM_OPENEYE_ISO_SMILES");
+				if(smiles == null || smiles.isEmpty())
+					smiles = mol.getProperty("PUBCHEM_OPENEYE_CAN_SMILES");
+				
+				System.out.println("***");
+				ps.setString(1, smiles);		
+				ps.setString(2, inchiKey);
+				ps.setString(3, cpdName);						
+				ps.executeQuery();				
+			}
+		}
+		ps.close();
+		ConnectionManager.releaseConnection(conn);
+	}
 	
+	public static void updateNISTfromPubChemWithInchiKey() throws Exception{
+		
+		File mappingFile = 
+				new File("E:\\DataAnalysis\\Databases\\NIST\\NIST23\\fix_from_pubchem_inchi_key.txt");
+		String[][] mappingData = null;
+		try {
+			mappingData = DelimitedTextParser.parseTextFileWithEncoding(
+							mappingFile, MRC2ToolBoxConfiguration.getTabDelimiter());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		Connection conn = ConnectionManager.getConnection();
+		String query = "UPDATE COMPOUNDDB.NIST_UNIQUE_COMPOUND_DATA "
+				+ "SET CANONICAL_SMILES = ? WHERE NAME = ?";
+		PreparedStatement ps = conn.prepareStatement(query);
+		
+		for(int i=0; i<mappingData.length; i++) {
+			
+			Thread.sleep(300);
+			
+			String inchiKey = mappingData[i][1];
+			String cpdName = mappingData[i][0];
+			IAtomContainer mol = PubChemUtils.getMoleculeFromPubChemByInChiKey(inchiKey);
+			if(mol != null) {
+				
+				String smiles = mol.getProperty("PUBCHEM_OPENEYE_CAN_SMILES");
+				
+				System.out.println(inchiKey);
+				ps.setString(1, smiles);		
+				ps.setString(2, cpdName);						
+				ps.executeQuery();				
+			}
+			else {
+				System.out.println("Not found: " + inchiKey);
+			}
+		}
+		ps.close();
+		ConnectionManager.releaseConnection(conn);
+	}
 	
 	private static void generateSMilesInchiForNonmodifiedPeptides() throws Exception{
 		
@@ -2644,6 +2726,163 @@ public class CompoundDatabaseScripts {
 			}
 		}
 		return smiles;	
+	}
+	
+	public static void createNISTCompoundSMILESBasedData() throws Exception{
+		
+		igfactory = null;
+		try {
+			igfactory = InChIGeneratorFactory.getInstance();
+		} catch (CDKException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}		
+		double toRound = 1000000.0d;
+		
+		Connection conn = ConnectionManager.getConnection();
+		String query = "SELECT NAME, CANONICAL_SMILES, FORMULA"
+				+ " FROM COMPOUNDDB.NIST_UNIQUE_COMPOUND_DATA"
+				+ " WHERE CANONICAL_SMILES IS NOT NULL";		
+		PreparedStatement ps = conn.prepareStatement(query);
+		
+		String updQuery = "UPDATE COMPOUNDDB.NIST_UNIQUE_COMPOUND_DATA "
+				+ "SET CHARGE = ?, FORMULA_FROM_SMILES = ?, "
+				+ "MASS_FROM_SMILES = ?, INCHI_KEY_FROM_SMILES = ?, "
+				+ "INCHI_KEY_FS2D = ?, FORMULA_CONFLICT = ? WHERE NAME = ?";
+		PreparedStatement updps = conn.prepareStatement(updQuery);		
+		ResultSet rs = ps.executeQuery();
+
+		int counter = 0;
+		while(rs.next()) {
+			
+			String smiles = rs.getString("CANONICAL_SMILES");
+			String accession = rs.getString("NAME");						
+			String dbFormula = rs.getString("FORMULA");
+			IAtomContainer mol = null;
+			try {
+				mol = smipar.parseSmiles(smiles);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			if(mol != null) {
+				IMolecularFormula molFormula = 
+						MolecularFormulaManipulator.getMolecularFormula(mol);
+				String mfFromFStringFromSmiles = 
+						MolecularFormulaManipulator.getString(molFormula);	
+				double smilesMass = 
+						Math.round(MolecularFormulaManipulator.getMass(
+								molFormula, MolecularFormulaManipulator.MonoIsotopic) * toRound)/toRound;	
+				String inchiKey = null;
+				try {
+					inChIGenerator = igfactory.getInChIGenerator(mol);
+					InchiStatus inchiStatus = inChIGenerator.getStatus();
+					if (inchiStatus.equals(InchiStatus.WARNING)) {
+						System.out.println(accession + "\tInChI warning: " + inChIGenerator.getMessage());
+					} else if (!inchiStatus.equals(InchiStatus.SUCCESS)) {
+						System.out.println(accession + "\tInChI failed: [" + inChIGenerator.getMessage() + "]");
+					}
+					inchiKey = inChIGenerator.getInchiKey();
+				} catch (CDKException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}				
+				updps.setInt(1, molFormula.getCharge());
+				updps.setString(2, mfFromFStringFromSmiles);
+				updps.setDouble(3, smilesMass);
+				if(inchiKey != null) {
+					updps.setString(4, inchiKey);
+					updps.setString(5, inchiKey.substring(0, 14));
+				}
+				else {
+					updps.setNull(4, java.sql.Types.NULL);
+					updps.setNull(5, java.sql.Types.NULL);
+				}
+				if(!dbFormula.equals(mfFromFStringFromSmiles)) {
+					updps.setString(6, "Y");
+				}
+				else {
+					updps.setNull(6, java.sql.Types.NULL);
+				}
+				updps.setString(7, accession);				
+				updps.executeUpdate();
+			}
+			else {
+				System.out.println("Failed to convert SMILES for " + accession + "\t" + smiles);
+			}
+			counter++;
+			if(counter % 1000 == 0)
+				System.out.print(".");
+			if(counter % 30000 == 0)
+				System.out.print(".\n");
+		}
+		rs.close();
+		updps.close();
+		ps.close();
+		ConnectionManager.releaseConnection(conn);
+	}
+	
+	private static void getPubChemIdsForNISTMSMSByInchiKey() throws Exception{
+		
+		Connection conn = ConnectionManager.getConnection();
+		
+		String query = "SELECT D.NAME, D.INCHI_KEY "
+				+ "FROM COMPOUNDDB.NIST_UNIQUE_COMPOUND_DATA D "
+				+ "WHERE D.PUBCHEM_ID IS NULL AND D.INCHI_KEY IS NOT NULL";
+		PreparedStatement ps = conn.prepareStatement(query);
+		
+		String query2 = "UPDATE COMPOUNDDB.NIST_UNIQUE_COMPOUND_DATA D "
+				+ "SET D.PUBCHEM_ID = ? WHERE D.NAME = ?";
+		PreparedStatement ps2 = conn.prepareStatement(query2);
+		
+		ArrayList<String>notFound = new ArrayList<String>();
+		ResultSet rs = ps.executeQuery();
+		int count = 0;
+		while(rs.next()) {
+			
+			Thread.sleep(300);
+			
+			String accession = rs.getString(1);
+			String inchiKey = rs.getString(2);			
+			
+			PubChemCompoundDescriptionBundle db = 
+					PubChemUtils.getCompoundDescriptionByInchiKey(inchiKey);
+			
+			if(db == null) {
+				notFound.add(accession + "\t" + inchiKey);
+			}
+			else {
+				ps2.setString(1, db.getCid());
+				ps2.setString(2, accession);
+				ps2.executeUpdate();
+			}
+			count++;
+			if(count % 50 == 0)
+				System.out.print(".");
+			
+			if(count % 5000 == 0)
+				System.out.println("\n" + count + " records processed");
+		}
+		rs.close();
+		ps.close();
+		ps2.close();
+
+		ConnectionManager.releaseConnection(conn);
+		
+		if(!notFound.isEmpty()) {
+			
+			File mismatchLog = new File(
+					"E:\\DataAnalysis\\Databases\\NIST\\NIST23\\NIST_NotFoundInPubChem_by_inchikey.txt");
+			try {
+				Files.write(mismatchLog.toPath(), 
+						notFound, 
+						StandardCharsets.UTF_8,
+						StandardOpenOption.CREATE, 
+						StandardOpenOption.TRUNCATE_EXISTING);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 }
 
