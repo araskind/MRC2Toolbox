@@ -108,10 +108,8 @@ public class PubChemParser {
 			}
 		}
 		IMolecularFormula mf = MolecularFormulaManipulator.getMolecularFormula(molecule);
-		
-		//	CDK 2.3 and above
-		//	double exactMass = MolecularFormulaManipulator.getMass(mf, MolecularFormulaManipulator.MonoIsotopic);
-		double exactMass = MolecularFormulaManipulator.getMajorIsotopeMass(mf);		
+		double exactMass = MolecularFormulaManipulator.getMass(
+				mf, MolecularFormulaManipulator.MonoIsotopic);	
 		String mfString = MolecularFormulaManipulator.getString(mf);
 		String smiles = pubchemDataMap.get(PubChemFields.SMILES_ISOMERIC.toString());
 		if(smiles.isEmpty())

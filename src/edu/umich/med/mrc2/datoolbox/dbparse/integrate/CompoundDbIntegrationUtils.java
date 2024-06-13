@@ -68,7 +68,7 @@ public class CompoundDbIntegrationUtils {
 		MRC2ToolBoxConfiguration.initConfiguration();
 
 		try {
-			
+			NISTIntegration.copyNISTMSMSData2compounds();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

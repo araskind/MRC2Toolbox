@@ -323,8 +323,7 @@ public class LipidMapsIntegration {
 			validAccessions.add(rs.getString(1));
 		
 		rs.close();
-		ps.close();
-		
+		ps.close();		
 		return validAccessions;
 	}
 }

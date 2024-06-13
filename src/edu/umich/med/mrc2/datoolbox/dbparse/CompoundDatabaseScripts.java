@@ -25,6 +25,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -41,9 +42,15 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.ListUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.LoggerContext;
 import org.openscience.cdk.DefaultChemObjectBuilder;
@@ -78,9 +85,16 @@ import ambit2.tautomers.TautomerManager;
 import ambit2.tautomers.ranking.EnergyRanking;
 import ambit2.tautomers.zwitterion.ZwitterionManager;
 import edu.umich.med.mrc2.datoolbox.data.CompoundIdentity;
+import edu.umich.med.mrc2.datoolbox.data.PubChemCompoundDescription;
 import edu.umich.med.mrc2.datoolbox.data.PubChemCompoundDescriptionBundle;
+import edu.umich.med.mrc2.datoolbox.data.enums.CompoundDatabaseEnum;
+import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
-import edu.umich.med.mrc2.datoolbox.dbparse.load.nist.NISTParserUtils;
+import edu.umich.med.mrc2.datoolbox.dbparse.load.msdial.MSDialMSMSRecord;
+import edu.umich.med.mrc2.datoolbox.dbparse.load.msdial.MSDialMetabolomicsLibraryParser;
+import edu.umich.med.mrc2.datoolbox.dbparse.load.pubchem.PubChemFields;
+import edu.umich.med.mrc2.datoolbox.dbparse.load.pubchem.PubChemNameFields;
+import edu.umich.med.mrc2.datoolbox.dbparse.load.pubchem.PubChemParser;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.FilePreferencesFactory;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
@@ -89,22 +103,24 @@ import edu.umich.med.mrc2.datoolbox.utils.ChemInfoUtils;
 import edu.umich.med.mrc2.datoolbox.utils.CompoundStructureUtils;
 import edu.umich.med.mrc2.datoolbox.utils.DelimitedTextParser;
 import edu.umich.med.mrc2.datoolbox.utils.PubChemUtils;
+import edu.umich.med.mrc2.datoolbox.utils.WebUtils;
 import io.github.dan2097.jnainchi.InchiStatus;
 
 public class CompoundDatabaseScripts {
 	
 	public static String dataDir = "." + File.separator + "data" + File.separator;
 	public static String configDir = dataDir + "config" + File.separator;
-	public static org.slf4j.Logger logger;
-	
+	public static org.slf4j.Logger logger;	
 	public static final String pubchemCidUrl = "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/";
 	public static final IChemObjectBuilder builder = SilentChemObjectBuilder.getInstance();
 	public static final SmilesParser smipar = new SmilesParser(builder);
+	private static final SmilesGenerator smilesGenerator = new SmilesGenerator(SmiFlavor.Isomeric);
 	public static final MDLV2000Reader molReader  = new MDLV2000Reader();
 	public static InChIGeneratorFactory igfactory;
-	public static InChIGenerator inChIGenerator;
-	
+	public static InChIGenerator inChIGenerator;	
 	public static final String encoding = StandardCharsets.UTF_8.toString();
+	private final static Pattern inchiKeyPatternOne = Pattern.compile("SA-[KLMNOPR]$");
+	private final static Pattern inchiKeyPatternTwo = Pattern.compile("NA-[KLMNOPR]$");
 	
 	public static void main(String[] args) {
 
@@ -123,11 +139,36 @@ public class CompoundDatabaseScripts {
 		try {	
 			//	generateCanonicalSmilesForNIST();
 			//	NISTParserUtils.fillMisingInchiKeysForNISTcompounds();
-			getPubChemIdsForNISTMSMSByInchiKey();
+			getPubChemIdsForMSDIALmetabSBySmiles();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+		
+	private static String switchInchiKeyVersion(String inchiKey) {
+		
+		String newKey = null;
+		Matcher regexMatcher = inchiKeyPatternOne.matcher(inchiKey);
+		if(regexMatcher.find() && regexMatcher.group(0) != null) {
+
+			String suffix = regexMatcher.group(0);
+			newKey = inchiKey.replaceFirst(suffix + "$", "NA-" + suffix.charAt(suffix.length()-1));
+		}
+		if(newKey == null) {
+			
+			regexMatcher = inchiKeyPatternTwo.matcher(inchiKey);
+			if(regexMatcher.find() && regexMatcher.group(0) != null) {
+
+				String suffix = regexMatcher.group(0);
+				newKey = inchiKey.replaceFirst(suffix + "$", "SA-" + suffix.charAt(suffix.length()-1));
+			}
+		}
+//		if(newKey == null)
+//			newKey = inchiKey;
+		
+		System.out.println(newKey);
+		return newKey;
 	}
 	
 	private static void addMissingDataToNISTbyCASnumber() throws Exception{
@@ -2882,6 +2923,1085 @@ public class CompoundDatabaseScripts {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
+		}
+	}
+	
+	public static void updateNISTwithManualLookupPubChem() throws Exception{
+		
+		File mappingFile = 
+				new File("E:\\DataAnalysis\\Databases\\NIST\\"
+						+ "NIST23\\NIST23_MANUAL_PUBCHEM_ID_LOOKUP_UTF8.TXT");
+		String[][] mappingData = null;
+		try {
+			mappingData = DelimitedTextParser.parseTextFileWithEncoding(
+							mappingFile, MRC2ToolBoxConfiguration.getTabDelimiter());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		Connection conn = ConnectionManager.getConnection();
+		String query = "UPDATE COMPOUNDDB.NIST_UNIQUE_COMPOUND_DATA "
+				+ "SET PUBCHEM_ID = ? WHERE NAME = ?";
+		PreparedStatement ps = conn.prepareStatement(query);
+		
+		for(int i=1; i<mappingData.length; i++) {
+
+			ps.setString(1, mappingData[i][1]);		
+			ps.setString(2, mappingData[i][0]);						
+			ps.executeQuery();				
+		}
+		ps.close();
+		ConnectionManager.releaseConnection(conn);
+	}
+	
+	public static void updateNISTwithManualLookupPubChemUsingInChiKey() throws Exception{
+		
+		File mappingFile = 
+				new File("E:\\DataAnalysis\\Databases\\NIST\\"
+						+ "NIST23\\NIST23_MANUAL_PUBCHEM_ID_LOOKUP_IK.TXT");
+		String[][] mappingData = null;
+		try {
+			mappingData = DelimitedTextParser.parseTextFileWithEncoding(
+							mappingFile, MRC2ToolBoxConfiguration.getTabDelimiter());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		Connection conn = ConnectionManager.getConnection();
+		String query = "UPDATE COMPOUNDDB.NIST_UNIQUE_COMPOUND_DATA "
+				+ "SET PUBCHEM_ID = ? WHERE MS_READY_INCHI_KEY = ?";
+		PreparedStatement ps = conn.prepareStatement(query);
+		
+		for(int i=1; i<mappingData.length; i++) {
+
+			ps.setString(1, mappingData[i][1]);		
+			ps.setString(2, mappingData[i][0]);						
+			ps.executeQuery();				
+		}
+		ps.close();
+		ConnectionManager.releaseConnection(conn);
+	}
+	
+	public static void fetchPubChemData() throws Exception{
+		
+		Set<String>idSet = getSetOfPubChemIdsWithMisingData();
+		idSet.remove("0");
+		ArrayList<String>fetchLog = new ArrayList<String>();
+		IteratingSDFReader reader;
+		IChemObjectBuilder coBuilder = DefaultChemObjectBuilder.getInstance();
+		InputStream pubchemDataStream = null;
+		List<List<String>> chunks =
+				ListUtils.partition(
+						idSet.stream().distinct().collect(Collectors.toList()), 10);
+
+		Connection conn = ConnectionManager.getConnection();
+		String cpdQuery = 
+				"INSERT INTO COMPOUNDDB.PUBCHEM_COMPOUND (PUBCHEM_ID, NAME) VALUES(?,?)";
+		PreparedStatement cpdPs = conn.prepareStatement(cpdQuery);
+		
+		String propQuery = 
+				"INSERT INTO COMPOUNDDB.PUBCHEM_COMPOUND_PROPERTY "
+				+ "(PUBCHEM_ID, PROPERTY_NAME, PROPERTY_VALUE) VALUES(?,?,?)";
+		PreparedStatement propPs = conn.prepareStatement(propQuery);
+				
+		String synonQuery = 
+				"INSERT INTO COMPOUNDDB.PUBCHEM_SYNONYM (PUBCHEM_ID, NAME_SYNONYM) VALUES(?,?)";
+		PreparedStatement synonPs = conn.prepareStatement(synonQuery);
+		
+		String descQuery = 
+				"INSERT INTO COMPOUNDDB.PUBCHEM_DESCRIPTIONS "
+				+ "(PUBCHEM_ID, DESC_SOURCE, DESC_TEXT, DESC_URL) VALUES(?,?,?,?)";
+		PreparedStatement descPs = conn.prepareStatement(descQuery);
+		
+		for(List<String>chunk : chunks) {
+
+			String requestUrl = pubchemCidUrl + StringUtils.join(chunk, ",") + "/SDF";
+			try {
+				pubchemDataStream = WebUtils.getInputStreamFromURL(requestUrl);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			if(pubchemDataStream != null) {
+				
+				reader = new IteratingSDFReader(pubchemDataStream, coBuilder);
+				while (reader.hasNext()) {
+				
+					Thread.sleep(300);
+					
+					IAtomContainer molecule = (IAtomContainer)reader.next();
+					String cid = molecule.getProperty(PubChemFields.PUBCHEM_ID.toString());
+					PubChemCompoundDescriptionBundle descBundle = 
+							PubChemUtils.getCompoundDescriptionById(cid);
+					
+					cpdPs.setInt(1, Integer.valueOf(cid));
+					if(descBundle != null && descBundle.getTitle() != null)
+						cpdPs.setString(2, descBundle.getTitle());
+					else
+						cpdPs.setString(2, "CID ");
+						
+					cpdPs.executeUpdate();					
+					
+					if(descBundle != null && !descBundle.getDescriptions().isEmpty()) {
+						
+						descPs.setInt(1, Integer.valueOf(cid));
+						for(PubChemCompoundDescription desc : descBundle.getDescriptions()) {
+							
+							descPs.setString(2, desc.getSourceName());
+							descPs.setString(3, desc.getText());
+							descPs.setString(4, desc.getUrl());
+							descPs.addBatch();
+						}
+						descPs.executeBatch();
+					}					
+					propPs.setInt(1, Integer.valueOf(cid));
+					for(Entry<Object,Object> pe : molecule.getProperties().entrySet()) {
+						propPs.setString(2, pe.getKey().toString());
+						propPs.setString(3, pe.getValue().toString());
+						propPs.addBatch();
+					}
+					propPs.executeBatch();
+					String[]synonyms = PubChemUtils.getPubChemSynonymsByCid(cid);
+					if(synonyms != null && synonyms.length > 0) {
+						
+						synonPs.setInt(1, Integer.valueOf(cid));
+						for(String synonym : synonyms) {
+							
+							synonPs.setString(2, synonym);
+							synonPs.addBatch();
+						}	
+						synonPs.executeBatch();
+					}
+				}
+			}
+		}
+		cpdPs.close();
+		propPs.close();
+		synonPs.close();
+		descPs.close();
+		ConnectionManager.releaseConnection(conn);
+//		Path logPath = Paths.get("");
+//		try {
+//			Files.write(
+//					logPath, 
+//					fetchLog, 
+//					StandardCharsets.UTF_8, 
+//					StandardOpenOption.CREATE,
+//					StandardOpenOption.APPEND);
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
+	}
+
+	private static Set<String> getSetOfPubChemIdsWithMisingData() throws Exception{
+		
+		Set<String>idSet = new TreeSet<String>();
+		Connection conn = ConnectionManager.getConnection();
+		String query = 
+				"SELECT DISTINCT PUBCHEM_ID FROM COMPOUNDDB.NIST_UNIQUE_COMPOUND_DATA"
+				+ " WHERE PUBCHEM_ID IS NOT NULL AND PUBCHEM_ID NOT IN "
+				+ "(SELECT PUBCHEM_ID FROM COMPOUNDDB.PUBCHEM_COMPOUND)";
+		PreparedStatement ps = conn.prepareStatement(query);
+		ResultSet rs = ps.executeQuery();
+		while(rs.next())
+			idSet.add(rs.getString(1));
+		
+		rs.close();
+		
+		query = 
+				"SELECT DISTINCT PUBCHEM_ID FROM COMPOUNDDB.DRUGBANK_COMPOUND_DATA"
+				+ " WHERE PUBCHEM_ID IS NOT NULL AND PUBCHEM_ID NOT IN "
+				+ "(SELECT PUBCHEM_ID FROM COMPOUNDDB.PUBCHEM_COMPOUND)";
+		ps = conn.prepareStatement(query);
+		rs = ps.executeQuery();
+		while(rs.next())
+			idSet.add(rs.getString(1));
+		
+		rs.close();
+		
+		query = 
+				"SELECT DISTINCT PUBCHEM_ID FROM COMPOUNDDB.FOODB_COMPOUND_DATA"
+				+ " WHERE PUBCHEM_ID IS NOT NULL AND PUBCHEM_ID NOT IN "
+				+ "(SELECT PUBCHEM_ID FROM COMPOUNDDB.PUBCHEM_COMPOUND)";
+		ps = conn.prepareStatement(query);
+		rs = ps.executeQuery();
+		while(rs.next())
+			idSet.add(rs.getString(1));
+		
+		rs.close();
+		
+		query = 
+				"SELECT DISTINCT PUBCHEM_ID FROM COMPOUNDDB.HMDB_COMPOUND_DATA"
+				+ " WHERE PUBCHEM_ID IS NOT NULL AND PUBCHEM_ID NOT IN "
+				+ "(SELECT PUBCHEM_ID FROM COMPOUNDDB.PUBCHEM_COMPOUND)";
+		ps = conn.prepareStatement(query);
+		rs = ps.executeQuery();
+		while(rs.next())
+			idSet.add(rs.getString(1));
+		
+		rs.close();
+		
+		query = 
+				"SELECT DISTINCT PUBCHEM_ID FROM COMPOUNDDB.LIPIDMAPS_COMPOUND_DATA"
+				+ " WHERE PUBCHEM_ID IS NOT NULL AND PUBCHEM_ID NOT IN "
+				+ "(SELECT PUBCHEM_ID FROM COMPOUNDDB.PUBCHEM_COMPOUND)";
+		ps = conn.prepareStatement(query);
+		rs = ps.executeQuery();
+		while(rs.next())
+			idSet.add(rs.getString(1));
+		
+		rs.close();
+		
+		query = 
+				"SELECT DISTINCT PUBCHEM_ID FROM COMPOUNDDB.T3DB_COMPOUND_DATA"
+				+ " WHERE PUBCHEM_ID IS NOT NULL AND PUBCHEM_ID NOT IN "
+				+ "(SELECT PUBCHEM_ID FROM COMPOUNDDB.PUBCHEM_COMPOUND)";
+		ps = conn.prepareStatement(query);
+		rs = ps.executeQuery();
+		while(rs.next())
+			idSet.add(rs.getString(1));
+		
+		rs.close();
+		
+		ps.close();
+		ConnectionManager.releaseConnection(conn);		
+		
+		System.out.println("Totatl IDs to fetch: " + idSet.size());
+		return idSet;
+	}
+	
+	private static void insertPubchemRecord(
+			IAtomContainer molecule, 
+			String[] synonyms, 
+			PubChemCompoundDescriptionBundle descBundle, 
+			Connection conn) throws Exception {
+
+		Map<String, String> pubchemDataMap = PubChemParser.getCompoundDataMap();
+		Map<String, String> namingMap = PubChemParser.getCompoundNamingMap();
+		molecule.getProperties().forEach((k,v)->{
+
+			if(pubchemDataMap.containsKey(k.toString()))
+				pubchemDataMap.put(k.toString(), v.toString());
+
+			if(namingMap.containsKey(k.toString()))
+				namingMap.put(k.toString(), v.toString());
+		});
+		String id = pubchemDataMap.get(PubChemFields.PUBCHEM_ID.toString());
+		String inchiKey = pubchemDataMap.get(PubChemFields.INCHIKEY.toString());
+		
+		String commonName = descBundle.getTitle();
+		String iupacName = null;
+		Pattern casPattern = Pattern.compile("^\\d+-\\d+-\\d+$");
+		Pattern zincPattern = Pattern.compile("^ZINC\\d+$");
+		Pattern scPattern = Pattern.compile("^SCHEMBL\\d+$");
+		Pattern cidPattern = Pattern.compile("^CID \\d+$");
+		Matcher casMatcher = casPattern.matcher(commonName);
+		Matcher zincMatcher = zincPattern.matcher(commonName);
+		Matcher scMatcher = scPattern.matcher(commonName);
+		Matcher cidMatcher = cidPattern.matcher(commonName);
+
+		if(casMatcher.find() || zincMatcher.find() 
+				|| scMatcher.find() || cidMatcher.find() 
+				|| commonName.equals(inchiKey) || commonName.equals(id)) {
+
+			for(PubChemNameFields nf : PubChemNameFields.values()) {
+
+				if(!namingMap.get(nf.toString()).isEmpty()) {
+					iupacName = namingMap.get(nf.toString());
+					commonName = iupacName;
+					break;
+				}
+			}
+		}
+		IMolecularFormula mf = MolecularFormulaManipulator.getMolecularFormula(molecule);
+		double exactMass = MolecularFormulaManipulator.getMass(
+				mf, MolecularFormulaManipulator.MonoIsotopic);	
+		String mfString = MolecularFormulaManipulator.getString(mf);
+		String smiles = pubchemDataMap.get(PubChemFields.SMILES_ISOMERIC.toString());
+		if(smiles.isEmpty())
+			pubchemDataMap.get(PubChemFields.SMILES_CANONICAL.toString());
+
+		if(smiles.isEmpty()) {
+			try {
+				smiles = smilesGenerator.create(molecule);
+			} catch (CDKException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		//	Insert primary data
+		String dataQuery =
+			"INSERT INTO COMPOUND_DATA " +
+			"(ACCESSION, SOURCE_DB, PRIMARY_NAME, MOL_FORMULA, EXACT_MASS, "
+			+ "SMILES, INCHI, INCHI_KEY, INCHI_KEY_CONNECT) " +
+			"VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+		PreparedStatement ps = conn.prepareStatement(dataQuery);
+		
+		ps.setString(1, id);
+		ps.setString(2, CompoundDatabaseEnum.PUBCHEM.name());
+		ps.setString(3, commonName);
+		ps.setString(4, mfString);
+		ps.setDouble(5, exactMass);
+		ps.setString(6, smiles);
+		ps.setString(7, pubchemDataMap.get(PubChemFields.INCHI.toString()));
+		ps.setString(8, inchiKey);
+		ps.setString(9, inchiKey.substring(0, 14));
+		ps.executeUpdate();
+		ps.close();
+
+		//	Insert names
+		dataQuery = "INSERT INTO COMPOUND_SYNONYMS (ACCESSION, NAME, NTYPE) VALUES (?, ?, ?)";
+		ps = conn.prepareStatement(dataQuery);
+		ps.setString(1, id);
+
+		//	Primary name
+		ps.setString(2, commonName);
+		ps.setString(3, "PRI");
+		ps.addBatch();
+		for(int i=1; i<synonyms.length; i++) {
+
+			ps.setString(2, synonyms[i]);
+			ps.setString(3, "SYN");
+			ps.addBatch();
+		}
+		if(iupacName != null && !iupacName.isEmpty()) {
+			
+			ps.setString(2, iupacName);
+			ps.setString(3, "IUP");
+			ps.addBatch();
+		}
+		ps.executeBatch();
+		ps.close();
+		
+		//	TODO - insert descriptions if available
+		if(descBundle != null && !descBundle.getDescriptions().isEmpty()) {
+			
+		}
+	}
+	
+	public static void generateTautomersForNISTUsingIndigo() throws Exception {
+		
+		Indigo indigo = new Indigo();
+		IndigoInchi indigoInchi = new IndigoInchi(indigo);
+		
+		Connection conn = ConnectionManager.getConnection();
+		String query = 
+				"SELECT D.PUBCHEM_ID, D.MS_READY_SMILES  " +
+				"FROM  COMPOUNDDB.NIST_UNIQUE_COMPOUND_DATA D  " +
+				"WHERE  D.PUBCHEM_ID NOT IN( " +
+				"SELECT  T.ACCESSION  " +
+				"FROM COMPOUNDDB.COMPOUND_TAUTOMERS_INDIGO T  " +
+				"WHERE T.SOURCE_DB = 'PUBCHEM') " +
+				"AND D.MS_READY_SMILES IS NOT NULL AND D.PUBCHEM_ID IS NOT NULL " +
+				"AND D.MS_READY_EXACT_MASS < 1000";
+		
+		PreparedStatement ps = conn.prepareStatement(query);		
+		String insertQuery = 
+				"INSERT INTO COMPOUNDDB.COMPOUND_TAUTOMERS_INDIGO "
+				+ "(ACCESSION, TAUTOMER_SMILES, TAUTOMER_INCHI_KEY, SOURCE_DB) VALUES (?, ?, ?, ?)";
+		PreparedStatement insertPs = conn.prepareStatement(insertQuery);
+		
+		ArrayList<String>errorLog = new ArrayList<String>();
+		Map<String,String>inputDataMap = new TreeMap<String,String>();
+		Map<String,String>tautomerDataMap = new TreeMap<String,String>();
+		int counter = 0;
+		ResultSet rs = ps.executeQuery();		
+		while(rs.next()) {
+			inputDataMap.put(rs.getString("PUBCHEM_ID"), 
+			rs.getString("MS_READY_SMILES"));
+		}
+		rs.close();
+		ps.close();
+		
+		for(Entry<String, String> ent : inputDataMap.entrySet()) {
+		
+			String accession = ent.getKey();
+			String smiles = ent.getValue();	
+			System.out.println("Processing " + accession + "\t" + smiles);
+			IndigoObject molecule = null;		
+			tautomerDataMap.clear();
+			try {
+				molecule = indigo.loadMolecule(smiles);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			String inchi = null;
+			if(molecule != null) {
+
+				molecule.foldHydrogens();
+				try {
+					inchi = indigoInchi.getInchi(molecule.clone());
+				} catch (Exception e) {
+					errorLog.add("Failed to convert SMILES to INCHI for " + accession + "\t" + smiles);
+					e.printStackTrace();
+				}
+				if(inchi != null) {
+
+					tautomerDataMap.put(
+							molecule.clone().canonicalSmiles(), 
+							indigoInchi.getInchiKey(inchi));
+				}
+			}
+			else {
+				errorLog.add("Failed to convert SMILES to INCHI KEY for " + accession + "\t" + smiles);
+			}
+			//	Generate tautomers
+			IndigoObject taitomerIterator = null;
+			try {
+				taitomerIterator = indigo.iterateTautomers(molecule, "INCHI");
+			} catch (Exception e) {
+				errorLog.add("Failed to create INCHI tautomers for " + accession);
+				e.printStackTrace();
+			}
+			if(taitomerIterator != null) {
+				
+				int tautCount = 0;
+				for(IndigoObject tautomer : taitomerIterator){
+					
+					IndigoObject t = tautomer.clone();
+					String inchiT = null;
+					try {
+						inchiT = indigoInchi.getInchi(t);
+					} catch (Exception e) {
+						errorLog.add("Failed to create INCHI for " + accession);
+						e.printStackTrace();
+					}
+					if(inchiT != null) {
+						String canSmiles = null;
+						try {
+							canSmiles = t.canonicalSmiles();
+						} catch (Exception e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						if(canSmiles != null) {
+							tautomerDataMap.put(
+									t.canonicalSmiles(),
+									indigoInchi.getInchiKey(inchiT));
+						}
+						tautCount++;
+						if(tautCount > 50)
+							break;
+					}			
+				}
+			}
+			taitomerIterator = null;
+			try {
+				taitomerIterator = indigo.iterateTautomers(molecule, "RSMARTS");
+			} catch (Exception e) {
+				errorLog.add("Failed to create RSMARTS tautomers for " + accession);
+				e.printStackTrace();
+			}
+			if(taitomerIterator != null) {
+				
+				int tautCount = 0;
+				for(IndigoObject tautomer : taitomerIterator){
+					
+					IndigoObject t = tautomer.clone();
+					String inchiT = null;
+					try {
+						inchiT = indigoInchi.getInchi(t);
+					} catch (Exception e) {
+						errorLog.add("Failed to create INCHI for " + accession);
+						e.printStackTrace();
+					}
+					if(inchiT != null) {
+						String canSmiles = null;
+						try {
+							canSmiles = t.canonicalSmiles();
+						} catch (Exception e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						if(canSmiles != null) {
+							tautomerDataMap.put(
+									t.canonicalSmiles(),
+									indigoInchi.getInchiKey(inchiT));
+						}
+						tautCount++;
+						if(tautCount > 50)
+							break;
+					}			
+				}
+			}
+			//	Insert tautomer data
+			insertPs.setString(1, accession);
+			insertPs.setString(4, "PUBCHEM");
+			for(Entry<String,String>td : tautomerDataMap.entrySet()) {
+				
+				insertPs.setString(2, td.getKey());
+				insertPs.setString(3, td.getValue());
+				insertPs.addBatch();
+			}
+			insertPs.executeBatch();
+			counter++;
+			if(counter % 1000 == 0)
+				System.out.print(".");
+			if(counter % 30000 == 0)
+				System.out.print(".\n");
+		}
+	}
+	
+	private static void parseAndUploadMSDIALdata() {
+		
+		File posInputFile = 
+				new File("E:\\DataAnalysis\\Databases\\MSDIAL\\"
+						+ "Metabolomics-VS17\\MSMS_Public_EXP_Pos_VS17.msp");
+		Collection<MSDialMSMSRecord> posRecords = null;
+		try {
+			posRecords = MSDialMetabolomicsLibraryParser.processMSDialRecords(
+					posInputFile, Polarity.Positive);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		if(posRecords != null && !posRecords.isEmpty()) {
+			
+			try {
+				MSDialMetabolomicsLibraryParser.insertRecords(posRecords);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		File negInputFile = 
+				new File("E:\\DataAnalysis\\Databases\\MSDIAL\\"
+						+ "Metabolomics-VS17\\MSMS_Public_EXP_NEG_VS17.msp");
+		Collection<MSDialMSMSRecord> negRecords = null;
+		try {
+			negRecords = MSDialMetabolomicsLibraryParser.processMSDialRecords(
+					negInputFile, Polarity.Negative);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		if(negRecords != null && !negRecords.isEmpty()) {
+			
+			try {
+				MSDialMetabolomicsLibraryParser.insertRecords(negRecords);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	public static void createMSDIALmetabSMILESBasedData() throws Exception{
+		
+		igfactory = null;
+		try {
+			igfactory = InChIGeneratorFactory.getInstance();
+		} catch (CDKException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}		
+		double toRound = 1000000.0d;
+		
+		Connection conn = ConnectionManager.getConnection();
+		String query = "SELECT MSDM_ID, SMILES, FORMULA"
+				+ " FROM COMPOUNDDB.MSDIAL_METABOLITE_COMPONENTS"
+				+ " WHERE SMILES IS NOT NULL";
+		PreparedStatement ps = conn.prepareStatement(query);
+
+		String updQuery = "UPDATE COMPOUNDDB.MSDIAL_METABOLITE_COMPONENTS "
+				+ "SET CHARGE = ?, FORMULA_FROM_SMILES = ?, "
+				+ "MASS_FROM_SMILES = ?, INCHI_KEY_FROM_SMILES = ?, "
+				+ "INCHI_KEY_FS2D = ?, FORMULA_CONFLICT = ? WHERE MSDM_ID = ?";
+		PreparedStatement updps = conn.prepareStatement(updQuery);		
+		ResultSet rs = ps.executeQuery();
+
+		int counter = 0;
+		while(rs.next()) {
+			
+			String smiles = rs.getString("SMILES");
+			String accession = rs.getString("MSDM_ID");						
+			String dbFormula = rs.getString("FORMULA");
+			IAtomContainer mol = null;
+			try {
+				mol = smipar.parseSmiles(smiles);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			if(mol != null) {
+				IMolecularFormula molFormula = 
+						MolecularFormulaManipulator.getMolecularFormula(mol);
+				String mfFromFStringFromSmiles = 
+						MolecularFormulaManipulator.getString(molFormula);	
+				double smilesMass = 
+						Math.round(MolecularFormulaManipulator.getMass(
+								molFormula, MolecularFormulaManipulator.MonoIsotopic) * toRound)/toRound;	
+				String inchiKey = null;
+				try {
+					inChIGenerator = igfactory.getInChIGenerator(mol);
+					InchiStatus inchiStatus = inChIGenerator.getStatus();
+					if (inchiStatus.equals(InchiStatus.WARNING)) {
+						System.out.println(accession + "\tInChI warning: " + inChIGenerator.getMessage());
+					} else if (!inchiStatus.equals(InchiStatus.SUCCESS)) {
+						System.out.println(accession + "\tInChI failed: [" + inChIGenerator.getMessage() + "]");
+					}
+					inchiKey = inChIGenerator.getInchiKey();
+				} catch (CDKException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}				
+				updps.setInt(1, molFormula.getCharge());
+				updps.setString(2, mfFromFStringFromSmiles);
+				updps.setDouble(3, smilesMass);
+				if(inchiKey != null) {
+					updps.setString(4, inchiKey);
+					updps.setString(5, inchiKey.substring(0, 14));
+				}
+				else {
+					updps.setNull(4, java.sql.Types.NULL);
+					updps.setNull(5, java.sql.Types.NULL);
+				}
+				if(!dbFormula.equals(mfFromFStringFromSmiles)) {
+					updps.setString(6, "Y");
+				}
+				else {
+					updps.setNull(6, java.sql.Types.NULL);
+				}
+				updps.setString(7, accession);				
+				updps.executeUpdate();
+			}
+			else {
+				System.out.println("Failed to convert SMILES for " + accession + "\t" + smiles);
+			}
+			counter++;
+			if(counter % 1000 == 0)
+				System.out.print(".");
+			if(counter % 30000 == 0)
+				System.out.print(".\n");
+		}
+		rs.close();
+		updps.close();
+		ps.close();
+		ConnectionManager.releaseConnection(conn);
+	}
+	
+	public static void fillInMSDIALmetabDataBasedOnManualSMILES() throws Exception{
+		
+		String[]namesToUpdate = new String[] {
+				"Stachybotrysin B",
+				"Stachybotrysin C",
+				"Eicosanoids_15kPGF1?_C20H34O5",
+				"[(2S,3R,4S,5S,6R)-2-[3-[(2S,3R,4S,5S,6R)-4,5-dihydroxy-6-(hydroxymethyl)-3-[(2S,3R,4R,5R,6S)-3,4,5-trihydroxy-6-methyloxan-2-yl]oxyoxan-2-yl]oxy-5-hydroxy-2-(4-hydroxyphenyl)-4-oxochromen-7-yl]oxy-4,5-dihydroxy-6-(hydroxymethyl)oxan-3-yl] (E)-3-(4-hydroxyphenyl)prop-2-enoate",
+				"Stachybotrydial",
+		};
+		
+		igfactory = null;
+		try {
+			igfactory = InChIGeneratorFactory.getInstance();
+		} catch (CDKException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}		
+		double toRound = 1000000.0d;
+		
+		Connection conn = ConnectionManager.getConnection();
+		String query = 
+				"SELECT SMILES"
+				+ " FROM COMPOUNDDB.MSDIAL_METAB_UNIQUE_COMPOUNDS"
+				+ " WHERE NAME = ?";
+		PreparedStatement ps = conn.prepareStatement(query);
+
+		String updQuery = 
+				"UPDATE COMPOUNDDB.MSDIAL_METAB_UNIQUE_COMPOUNDS "
+				+ "SET FORMULA = ?, EXACT_MASS = ?, INCHI_KEY = ?, INCHI_KEY2D =?, "
+				+ "CHARGE = ?, FORMULA_FROM_SMILES = ?, MASS_FROM_SMILES = ?, "
+				+ "INCHI_KEY_FROM_SMILES = ?, INCHI_KEY_FS2D = ?, WHERE NAME = ?";
+		PreparedStatement updps = conn.prepareStatement(updQuery);		
+		
+		String noChargeUpdQuery = 
+				"UPDATE COMPOUNDDB.MSDIAL_METAB_UNIQUE_COMPOUNDS "
+				+ "SET FORMULA = ?, EXACT_MASS = ?, INCHI_KEY = ?, INCHI_KEY2D =?, "
+				+ "CHARGE = ?, FORMULA_FROM_SMILES = ?, MASS_FROM_SMILES = ?, "
+				+ "INCHI_KEY_FROM_SMILES = ?, INCHI_KEY_FS2D = ?, MS_READY_MOL_FORMULA = ?, "
+				+ "MS_READY_EXACT_MASS = ?, MS_READY_SMILES = ?, MS_READY_INCHI_KEY = ?, "
+				+ "MS_READY_INCHI_KEY2D = ?, MS_READY_CHARGE = ? WHERE NAME = ?";
+		PreparedStatement noChargeUpdps = conn.prepareStatement(noChargeUpdQuery);	
+		
+		for(String name : namesToUpdate) {
+			
+			ps.setString(1, name);
+			ResultSet rs = ps.executeQuery();
+			while(rs.next()) {
+				
+				String smiles = rs.getString("SMILES");
+				IAtomContainer mol = null;
+				try {
+					mol = smipar.parseSmiles(smiles);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				if(mol != null) {
+					IMolecularFormula molFormula = 
+							MolecularFormulaManipulator.getMolecularFormula(mol);
+					String mfFromFStringFromSmiles = 
+							MolecularFormulaManipulator.getString(molFormula);	
+					double smilesMass = 
+							Math.round(MolecularFormulaManipulator.getMass(
+									molFormula, MolecularFormulaManipulator.MonoIsotopic) * toRound)/toRound;	
+					int charge = molFormula.getCharge();
+					String inchiKey = null;
+					try {
+						inChIGenerator = igfactory.getInChIGenerator(mol);
+						InchiStatus inchiStatus = inChIGenerator.getStatus();
+						if (inchiStatus.equals(InchiStatus.WARNING)) {
+							System.out.println(name + "\tInChI warning: " + inChIGenerator.getMessage());
+						} else if (!inchiStatus.equals(InchiStatus.SUCCESS)) {
+							System.out.println(name + "\tInChI failed: [" + inChIGenerator.getMessage() + "]");
+						}
+						inchiKey = inChIGenerator.getInchiKey();
+					} catch (CDKException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}	
+					if(charge == 0) {
+						
+						noChargeUpdps.setString(1, mfFromFStringFromSmiles);
+						noChargeUpdps.setDouble(2, smilesMass);
+						noChargeUpdps.setString(3, inchiKey);
+						noChargeUpdps.setString(4, inchiKey.substring(0, 14));
+						noChargeUpdps.setInt(5, charge);
+						noChargeUpdps.setString(6, mfFromFStringFromSmiles);
+						noChargeUpdps.setDouble(7, smilesMass);
+						noChargeUpdps.setString(8, inchiKey);
+						noChargeUpdps.setString(9, inchiKey.substring(0, 14));
+						noChargeUpdps.setString(10, mfFromFStringFromSmiles);
+						noChargeUpdps.setDouble(11, smilesMass);
+						noChargeUpdps.setString(12, smiles);
+						noChargeUpdps.setString(13, inchiKey);
+						noChargeUpdps.setString(14, inchiKey.substring(0, 14));
+						noChargeUpdps.setInt(15, charge);
+						noChargeUpdps.setString(16, name);
+						noChargeUpdps.executeUpdate();
+					}
+					else {
+						updps.setString(1, mfFromFStringFromSmiles);
+						updps.setDouble(2, smilesMass);
+						updps.setString(3, inchiKey);
+						updps.setString(4, inchiKey.substring(0, 14));
+						updps.setInt(5, charge);
+						updps.setString(6, mfFromFStringFromSmiles);
+						updps.setDouble(7, smilesMass);
+						updps.setString(8, inchiKey);
+						updps.setString(9, inchiKey.substring(0, 14));
+						updps.setString(10, name);
+						updps.executeUpdate();
+					}	
+				}
+				else {
+					System.out.println("Failed to convert SMILES for " + name + "\t" + smiles);
+				}
+			}
+			rs.close();
+		}	
+		noChargeUpdps.close();
+		updps.close();
+		ps.close();
+		ConnectionManager.releaseConnection(conn);
+	}
+	
+	public static void generateTautomersForMSDIALmetabUsingIndigo() throws Exception {
+		
+		Indigo indigo = new Indigo();
+		IndigoInchi indigoInchi = new IndigoInchi(indigo);
+		
+		Connection conn = ConnectionManager.getConnection();
+		String query = 
+				"SELECT D.PUBCHEM_ID, D.MS_READY_SMILES " +
+				"FROM COMPOUNDDB.NIST_UNIQUE_COMPOUND_DATA D " +
+				"WHERE D.PUBCHEM_ID NOT IN( " +
+				"SELECT T.ACCESSION " +
+				"FROM COMPOUNDDB.COMPOUND_TAUTOMERS_INDIGO T " +
+				"WHERE T.SOURCE_DB = 'PUBCHEM') " +
+				"AND D.MS_READY_SMILES IS NOT NULL AND D.PUBCHEM_ID IS NOT NULL " +
+				"AND D.MS_READY_EXACT_MASS < 1000";
+		
+		PreparedStatement ps = conn.prepareStatement(query);		
+		String insertQuery = 
+				"INSERT INTO COMPOUNDDB.COMPOUND_TAUTOMERS_INDIGO "
+				+ "(ACCESSION, TAUTOMER_SMILES, TAUTOMER_INCHI_KEY, SOURCE_DB) VALUES (?, ?, ?, ?)";
+		PreparedStatement insertPs = conn.prepareStatement(insertQuery);
+		
+		ArrayList<String>errorLog = new ArrayList<String>();
+		Map<String,String>inputDataMap = new TreeMap<String,String>();
+		Map<String,String>tautomerDataMap = new TreeMap<String,String>();
+		int counter = 0;
+		ResultSet rs = ps.executeQuery();		
+		while(rs.next()) {
+			inputDataMap.put(rs.getString("PUBCHEM_ID"), 
+			rs.getString("MS_READY_SMILES"));
+		}
+		rs.close();
+		ps.close();
+		
+		for(Entry<String, String> ent : inputDataMap.entrySet()) {
+		
+			String accession = ent.getKey();
+			String smiles = ent.getValue();	
+			System.out.println("Processing " + accession + "\t" + smiles);
+			IndigoObject molecule = null;		
+			tautomerDataMap.clear();
+			try {
+				molecule = indigo.loadMolecule(smiles);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			String inchi = null;
+			if(molecule != null) {
+
+				molecule.foldHydrogens();
+				try {
+					inchi = indigoInchi.getInchi(molecule.clone());
+				} catch (Exception e) {
+					errorLog.add("Failed to convert SMILES to INCHI for " + accession + "\t" + smiles);
+					e.printStackTrace();
+				}
+				if(inchi != null) {
+
+					tautomerDataMap.put(
+							molecule.clone().canonicalSmiles(), 
+							indigoInchi.getInchiKey(inchi));
+				}
+			}
+			else {
+				errorLog.add("Failed to convert SMILES to INCHI KEY for " + accession + "\t" + smiles);
+			}
+			//	Generate tautomers
+			IndigoObject taitomerIterator = null;
+			try {
+				taitomerIterator = indigo.iterateTautomers(molecule, "INCHI");
+			} catch (Exception e) {
+				errorLog.add("Failed to create INCHI tautomers for " + accession);
+				e.printStackTrace();
+			}
+			if(taitomerIterator != null) {
+				
+				int tautCount = 0;
+				for(IndigoObject tautomer : taitomerIterator){
+					
+					IndigoObject t = tautomer.clone();
+					String inchiT = null;
+					try {
+						inchiT = indigoInchi.getInchi(t);
+					} catch (Exception e) {
+						errorLog.add("Failed to create INCHI for " + accession);
+						e.printStackTrace();
+					}
+					if(inchiT != null) {
+						String canSmiles = null;
+						try {
+							canSmiles = t.canonicalSmiles();
+						} catch (Exception e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						if(canSmiles != null) {
+							tautomerDataMap.put(
+									t.canonicalSmiles(),
+									indigoInchi.getInchiKey(inchiT));
+						}
+						tautCount++;
+						if(tautCount > 50)
+							break;
+					}			
+				}
+			}
+			taitomerIterator = null;
+			try {
+				taitomerIterator = indigo.iterateTautomers(molecule, "RSMARTS");
+			} catch (Exception e) {
+				errorLog.add("Failed to create RSMARTS tautomers for " + accession);
+				e.printStackTrace();
+			}
+			if(taitomerIterator != null) {
+				
+				int tautCount = 0;
+				for(IndigoObject tautomer : taitomerIterator){
+					
+					IndigoObject t = tautomer.clone();
+					String inchiT = null;
+					try {
+						inchiT = indigoInchi.getInchi(t);
+					} catch (Exception e) {
+						errorLog.add("Failed to create INCHI for " + accession);
+						e.printStackTrace();
+					}
+					if(inchiT != null) {
+						String canSmiles = null;
+						try {
+							canSmiles = t.canonicalSmiles();
+						} catch (Exception e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						if(canSmiles != null) {
+							tautomerDataMap.put(
+									t.canonicalSmiles(),
+									indigoInchi.getInchiKey(inchiT));
+						}
+						tautCount++;
+						if(tautCount > 50)
+							break;
+					}			
+				}
+			}
+			//	Insert tautomer data
+			insertPs.setString(1, accession);
+			insertPs.setString(4, "PUBCHEM");
+			for(Entry<String,String>td : tautomerDataMap.entrySet()) {
+				
+				insertPs.setString(2, td.getKey());
+				insertPs.setString(3, td.getValue());
+				insertPs.addBatch();
+			}
+			insertPs.executeBatch();
+			counter++;
+			if(counter % 1000 == 0)
+				System.out.print(".");
+			if(counter % 30000 == 0)
+				System.out.print(".\n");
+		}
+	}
+	
+	private static void getPubChemIdsForMSDIALmetabSByInchiKey() throws Exception{
+		
+		Connection conn = ConnectionManager.getConnection();
+		
+		String query = "SELECT DISTINCT D.INCHI_KEY "
+				+ "FROM COMPOUNDDB.MSDIAL_METAB_UNIQUE_COMPOUNDS D "
+				+ "WHERE D.PUBCHEM_ID IS NULL AND D.INCHI_KEY IS NOT NULL";
+		PreparedStatement ps = conn.prepareStatement(query);
+		
+		String query2 = "UPDATE COMPOUNDDB.MSDIAL_METAB_UNIQUE_COMPOUNDS D "
+				+ "SET D.PUBCHEM_ID = ? WHERE D.INCHI_KEY = ?";
+		PreparedStatement ps2 = conn.prepareStatement(query2);
+		
+		ArrayList<String>notFound = new ArrayList<String>();
+		ResultSet rs = ps.executeQuery();
+		int count = 0;
+		while(rs.next()) {
+			
+			Thread.sleep(300);
+			String inchiKey = rs.getString(1);			
+			
+			PubChemCompoundDescriptionBundle db = 
+					PubChemUtils.getCompoundDescriptionByInchiKey(inchiKey);
+			if(db == null) {
+				
+				Thread.sleep(300);
+				String newKey =  switchInchiKeyVersion(new String(inchiKey));
+				if(newKey != null)
+					db = PubChemUtils.getCompoundDescriptionByInchiKey(newKey);
+			}			
+			if(db == null) {
+				notFound.add(inchiKey);
+			}
+			else {
+				ps2.setString(1, db.getCid());
+				ps2.setString(2, inchiKey);
+				ps2.executeUpdate();
+			}
+			count++;
+			if(count % 50 == 0)
+				System.out.print(".");
+			
+			if(count % 5000 == 0)
+				System.out.println("\n" + count + " records processed");
+		}
+		rs.close();
+		ps.close();
+		ps2.close();
+
+		ConnectionManager.releaseConnection(conn);
+		
+		if(!notFound.isEmpty()) {
+			
+			File mismatchLog = new File(
+					"E:\\DataAnalysis\\Databases\\MSDIAL\\Metabolomics-VS17\\"
+					+ "MSDIAL_metab_NotFoundInPubChem_by_inchikey.txt");
+			try {
+				Files.write(mismatchLog.toPath(), 
+						notFound, 
+						StandardCharsets.UTF_8,
+						StandardOpenOption.CREATE, 
+						StandardOpenOption.TRUNCATE_EXISTING);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	private static void getPubChemIdsForMSDIALmetabSBySmiles() throws Exception{
+		
+		Connection conn = ConnectionManager.getConnection();
+		String query = "SELECT MSDM_CPD_ID, MS_READY_SMILES "
+			+ "FROM COMPOUNDDB.MSDIAL_METAB_UNIQUE_COMPOUNDS "
+			+ "WHERE PUBCHEM_ID IS NULL AND MS_READY_SMILES IS NOT NULL";
+		PreparedStatement ps = conn.prepareStatement(query);
+		
+		String query2 = "UPDATE COMPOUNDDB.MSDIAL_METAB_UNIQUE_COMPOUNDS D "
+				+ "SET D.PUBCHEM_ID = ? WHERE D.MSDM_CPD_ID = ?";
+		PreparedStatement ps2 = conn.prepareStatement(query2);
+		
+		ArrayList<String>notFound = new ArrayList<String>();
+		ResultSet rs = ps.executeQuery();
+		int count = 0;
+		while(rs.next()) {
+			
+			Thread.sleep(300);
+			String msdmId = rs.getString(1);	
+			String smiles = rs.getString(2);						
+			Set<Integer>cids = PubChemUtils.getPubChemIdsBySMILESstring(smiles);		
+			if(cids.isEmpty()) {
+				notFound.add(smiles);
+			}
+			else {
+				ps2.setString(1, Integer.toString(cids.iterator().next()));
+				ps2.setString(2, msdmId);
+				ps2.executeUpdate();
+			}
+			count++;
+			if(count % 50 == 0)
+				System.out.print(".");
+			
+			if(count % 5000 == 0)
+				System.out.println("\n" + count + " records processed");
+		}
+		rs.close();
+		ps.close();
+		ps2.close();
+		ConnectionManager.releaseConnection(conn);
+		
+		if(!notFound.isEmpty()) {
+			
+			File mismatchLog = new File(
+					"E:\\DataAnalysis\\Databases\\MSDIAL\\Metabolomics-VS17\\"
+					+ "MSDIAL_metab_NotFoundInPubChem_by_smiles.txt");
+			try {
+				Files.write(mismatchLog.toPath(), 
+						notFound, 
+						StandardCharsets.UTF_8,
+						StandardOpenOption.CREATE, 
+						StandardOpenOption.TRUNCATE_EXISTING);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	private static void testPCBYSMILES() {
+		
+		String smiles = "O=C(OC1CC(=CCCC(=CC(O)C1C(C)C)C)C)C2=CC=C(O)C=C2";
+		Set<Integer>cids = PubChemUtils.getPubChemIdsBySMILESstring(smiles);
+		
+		for(Integer cid : cids) {
+			System.out.println(cid);
 		}
 	}
 }

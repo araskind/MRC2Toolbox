@@ -35,10 +35,8 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.prefs.Preferences;
 
 import javax.swing.Icon;
@@ -86,7 +84,6 @@ import edu.umich.med.mrc2.datoolbox.data.CompoundIdentity;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
 import edu.umich.med.mrc2.datoolbox.data.enums.CompoundDatabaseEnum;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
-import edu.umich.med.mrc2.datoolbox.dbparse.CompoundDatabaseScripts;
 import edu.umich.med.mrc2.datoolbox.dbparse.StandardizedStructure;
 import edu.umich.med.mrc2.datoolbox.dbparse.StructureStandardizationUtils;
 import edu.umich.med.mrc2.datoolbox.gui.cpddatabase.msready.cpd.CompoundCurationPopupMenu;
@@ -314,25 +311,33 @@ public class CompoundMsReadyCuratorFrame extends JFrame
 	}
 
 	private void batchGenerateTautomers() {
-
-		String logDirPath = "E:\\DataAnalysis\\Databases\\_LATEST";
-		Map<String,String>dbMap = new LinkedHashMap<String,String>();
-//		dbMap.put("DRUGBANK_COMPOUND_DATA", "DRUGBANK");
-//		dbMap.put("LIPIDMAPS_COMPOUND_DATA", "LIPIDMAPS");
-//		dbMap.put("T3DB_COMPOUND_DATA", "T3DB");	
-		dbMap.put("FOODB_COMPOUND_DATA", "FOODB");	
-		dbMap.put("HMDB_COMPOUND_DATA", "HMDB");
 		
-		for(Entry<String, String> dbe : dbMap.entrySet()) {
-			System.out.println("Started processing " + dbe.getValue() + " data");
-			try {				
-				CompoundDatabaseScripts.generateTautomersForCompoundDatabaseUsingIndigo(
-						dbe.getKey(), dbe.getValue(), true, logDirPath);
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+		try {
+			//	CompoundDatabaseScripts.fetchPubChemData();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
+
+//		String logDirPath = "E:\\DataAnalysis\\Databases\\_LATEST";
+//		Map<String,String>dbMap = new LinkedHashMap<String,String>();
+////		dbMap.put("DRUGBANK_COMPOUND_DATA", "DRUGBANK");
+////		dbMap.put("LIPIDMAPS_COMPOUND_DATA", "LIPIDMAPS");
+////		dbMap.put("T3DB_COMPOUND_DATA", "T3DB");	
+//		dbMap.put("FOODB_COMPOUND_DATA", "FOODB");	
+//		dbMap.put("HMDB_COMPOUND_DATA", "HMDB");
+//		
+//		for(Entry<String, String> dbe : dbMap.entrySet()) {
+//			System.out.println("Started processing " + dbe.getValue() + " data");
+//			try {				
+//				CompoundDatabaseScripts.generateTautomersForCompoundDatabaseUsingIndigo(
+//						dbe.getKey(), dbe.getValue(), true, logDirPath);
+//			} catch (Exception e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//		}
+		
 	}
 
 	private Collection<String> generateZwitterIons() {
@@ -662,6 +667,24 @@ public class CompoundMsReadyCuratorFrame extends JFrame
 					e.printStackTrace();
 				}
 			}
+			if(db.equals(CompoundDatabaseEnum.MSDIAL_METABOLITES)) {
+				
+				try {					
+					compoundCollection = fetchMSDIALMetabolitesDataForCuration();
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			if(db.equals(CompoundDatabaseEnum.MSDIAL_LIPIDS)) {
+				
+				try {					
+					compoundCollection = fetchMSDIALLipidBlastDataForCuration();
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}			
 			if(compoundCollection != null && !compoundCollection.isEmpty()) {
 				
 				curatedCompounds.clear();
@@ -813,6 +836,74 @@ public class CompoundMsReadyCuratorFrame extends JFrame
 					rs.getString("MOLDB_SMILES"));
 			identity.setInChiKey(rs.getString("MOLDB_INCHIKEY"));
 			identity.setInChi(rs.getString("MOLDB_INCHI"));
+			identity.setCharge(rs.getInt("CHARGE"));
+			idList.add(identity);
+		}
+		rs.close();
+		ps.close();
+		ConnectionManager.releaseConnection(conn);
+		return idList;
+	}
+	
+	private Collection<CompoundIdentity> fetchMSDIALLipidBlastDataForCuration() throws Exception{
+		
+		Collection<CompoundIdentity>idList = new ArrayList<CompoundIdentity>();
+		Connection conn = ConnectionManager.getConnection();
+//		String query =
+//			"SELECT PUBLIC_ID, NAME, FORMULA_FROM_SMILES, "
+//			+ "MOLDB_MONO_MASS, MOLDB_SMILES, MOLDB_INCHI, "
+//			+ "MOLDB_INCHIKEY, CHARGE " +
+//			"FROM COMPOUNDDB.FOODB_COMPOUND_DATA D "
+//			+ "WHERE MS_READY_INCHI_KEY IS NULL "
+//			+ "AND MOLDB_SMILES IS NOT NULL";
+//	
+//		PreparedStatement ps = conn.prepareStatement(query);
+//		ResultSet rs = ps.executeQuery();
+//		while (rs.next()){
+//
+//			CompoundIdentity identity = new CompoundIdentity(
+//					CompoundDatabaseEnum.FOODB, 
+//					rs.getString("PUBLIC_ID"),
+//					rs.getString("NAME"), 					
+//					rs.getString("NAME"), 
+//					rs.getString("FORMULA_FROM_SMILES"), 
+//					rs.getDouble("MOLDB_MONO_MASS"), 
+//					rs.getString("MOLDB_SMILES"));
+//			identity.setInChiKey(rs.getString("MOLDB_INCHIKEY"));
+//			identity.setInChi(rs.getString("MOLDB_INCHI"));
+//			identity.setCharge(rs.getInt("CHARGE"));
+//			idList.add(identity);
+//		}
+//		rs.close();
+//		ps.close();
+		ConnectionManager.releaseConnection(conn);
+		return idList;
+	}
+
+	private Collection<CompoundIdentity> fetchMSDIALMetabolitesDataForCuration() throws Exception{
+
+		Collection<CompoundIdentity>idList = new ArrayList<CompoundIdentity>();
+		Connection conn = ConnectionManager.getConnection();
+		String query =
+			"SELECT MSDM_CPD_ID, NAME, FORMULA_FROM_SMILES, "
+			+ "EXACT_MASS, SMILES, INCHI_KEY, CHARGE "
+			+ "FROM COMPOUNDDB.MSDIAL_METAB_UNIQUE_COMPOUNDS D "
+			+ "WHERE MS_READY_INCHI_KEY IS NULL "
+			+ "AND SMILES IS NOT NULL";
+	
+		PreparedStatement ps = conn.prepareStatement(query);
+		ResultSet rs = ps.executeQuery();
+		while (rs.next()){
+
+			CompoundIdentity identity = new CompoundIdentity(
+					CompoundDatabaseEnum.MSDIAL_METABOLITES, 
+					rs.getString("MSDM_CPD_ID"),
+					rs.getString("NAME"), 					
+					rs.getString("NAME"), 
+					rs.getString("FORMULA_FROM_SMILES"), 
+					rs.getDouble("EXACT_MASS"), 
+					rs.getString("SMILES"));
+			identity.setInChiKey(rs.getString("INCHI_KEY"));
 			identity.setCharge(rs.getInt("CHARGE"));
 			idList.add(identity);
 		}
@@ -1138,6 +1229,22 @@ public class CompoundMsReadyCuratorFrame extends JFrame
 				e.printStackTrace();
 			}
 		}
+		if(toolbar.getSelectedDatabase().equals(CompoundDatabaseEnum.MSDIAL_METABOLITES)) {
+			try {
+				updateMSDIALMetabolitesCompoundData();
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		if(toolbar.getSelectedDatabase().equals(CompoundDatabaseEnum.MSDIAL_LIPIDS)) {
+			try {
+				updateMSDIALLipidBlastCompoundData();
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 		CompoundIdentity curatedId =  new CompoundIdentity(
 				selectedIdentity.getPrimaryDatabase(), 
 				selectedIdentity.getPrimaryDatabaseId(),
@@ -1191,6 +1298,34 @@ public class CompoundMsReadyCuratorFrame extends JFrame
 		ps.setString(5, msReadyStructuralDescriptorsPanel.getInchiKey().substring(0, 14));	//	MS_READY_INCHI_KEY2D
 		ps.setInt(6, msReadyStructuralDescriptorsPanel.getCharge());		//	MS_READY_CHARGE
 		ps.setString(7, selectedIdentity.getName());			//	ACCESSION
+		
+		ps.executeUpdate();
+		ps.close();		
+		ConnectionManager.releaseConnection(conn);
+	}
+	
+	private void updateMSDIALLipidBlastCompoundData() throws Exception{
+		// TODO Auto-generated method stub
+
+	}
+
+	private void updateMSDIALMetabolitesCompoundData() throws Exception{
+		
+		String query = 
+				"UPDATE COMPOUNDDB.MSDIAL_METAB_UNIQUE_COMPOUNDS " +
+				"SET MS_READY_MOL_FORMULA = ?, MS_READY_EXACT_MASS = ?,  " +
+				"MS_READY_SMILES = ?, MS_READY_INCHI_KEY = ?,  " +
+				"MS_READY_INCHI_KEY2D = ?, MS_READY_CHARGE = ? " +
+				"WHERE MSDM_CPD_ID = ? ";
+		Connection conn = ConnectionManager.getConnection();
+		PreparedStatement ps = conn.prepareStatement(query);
+		ps.setString(1, msReadyStructuralDescriptorsPanel.getFormula());	//	MS_READY_MOL_FORMULA
+		ps.setDouble(2, msReadyStructuralDescriptorsPanel.getMass());		//	MS_READY_EXACT_MASS
+		ps.setString(3, msReadyStructuralDescriptorsPanel.getSmiles());		//	MS_READY_SMILES
+		ps.setString(4, msReadyStructuralDescriptorsPanel.getInchiKey());	//	MS_READY_INCHI_KEY
+		ps.setString(5, msReadyStructuralDescriptorsPanel.getInchiKey().substring(0, 14));	//	MS_READY_INCHI_KEY2D
+		ps.setInt(6, msReadyStructuralDescriptorsPanel.getCharge());		//	MS_READY_CHARGE
+		ps.setString(7, selectedIdentity.getDbId(CompoundDatabaseEnum.MSDIAL_METABOLITES));			//	ACCESSION
 		
 		ps.executeUpdate();
 		ps.close();		

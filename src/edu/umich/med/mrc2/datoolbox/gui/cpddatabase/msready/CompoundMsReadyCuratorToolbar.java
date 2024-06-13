@@ -73,9 +73,11 @@ public class CompoundMsReadyCuratorToolbar extends CommonToolbar {
 							CompoundDatabaseEnum.T3DB,
 							CompoundDatabaseEnum.LIPIDMAPS,							
 							CompoundDatabaseEnum.NIST_MS,
+							CompoundDatabaseEnum.MSDIAL_METABOLITES,
+							CompoundDatabaseEnum.MSDIAL_LIPIDS,
 //							CompoundDatabaseEnum.CHEBI,
 //							CompoundDatabaseEnum.NATURAL_PRODUCTS_ATLAS,
-							CompoundDatabaseEnum.COCONUT,
+//							CompoundDatabaseEnum.COCONUT,
 					});
 		dbTypecomboBox.setModel(model);
 		

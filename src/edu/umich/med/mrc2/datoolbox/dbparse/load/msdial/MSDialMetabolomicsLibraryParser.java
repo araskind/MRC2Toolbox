@@ -172,7 +172,7 @@ public class MSDialMetabolomicsLibraryParser {
 //		PreparedStatement idps = conn.prepareStatement(idQuery);
 		
 		String dataQuery =
-				"INSERT INTO MSDIAL_METABOLITE_COMPONENTS " +
+				"INSERT INTO COMPOUNDDB.MSDIAL_METABOLITE_COMPONENTS " +
 				"(MSDM_ID, NAME, SMILES, INCHI_KEY, FORMULA,  " +
 				"PRECURSOR_MZ, PRECURSOR_TYPE, IONMODE,  " +
 				"RETENTION_TIME, CCS, COMMENTS, COLLISION_ENERGY, EXACT_MASS, NUM_CARBONS)  " +
@@ -180,7 +180,7 @@ public class MSDialMetabolomicsLibraryParser {
 		PreparedStatement ps = conn.prepareStatement(dataQuery);
 		
 		String peaksQuery =
-				"INSERT INTO MSDIAL_METABOLITE_PEAKS (MSDM_ID, MZ, INTENSITY) " +
+				"INSERT INTO COMPOUNDDB.MSDIAL_METABOLITE_PEAKS (MSDM_ID, MZ, INTENSITY) " +
 				"VALUES(?, ?, ?)";
 		PreparedStatement peaksps = conn.prepareStatement(peaksQuery);
 		
@@ -190,7 +190,7 @@ public class MSDialMetabolomicsLibraryParser {
 //			while(rs.next())
 //				id = rs.getString(1);
 			id = SQLUtils.getNextIdFromSequence(conn, 
-					"MSDIAL_METABOLITE_SEQ",
+					"COMPOUNDDB.MSDIAL_METABOLITE_SEQ",
 					DataPrefix.MSDIAL_METABOLITE,
 					"0",
 					8);			
@@ -251,9 +251,6 @@ public class MSDialMetabolomicsLibraryParser {
 		ps.close();
 		ConnectionManager.releaseConnection(conn);
 	}
-
-//	MSMSLIB0035	mmet_neg
-//	MSMSLIB0036	mdmet_pos
 	
 	public static void copyLibraryComponentsToMainLibraryTables(
 			String libId, 
@@ -265,13 +262,13 @@ public class MSDialMetabolomicsLibraryParser {
 		//	Get MSDIAL metabolomics component data
 		String inputQuery =
 				"SELECT MSDM_ID, PRECURSOR_MZ, PRECURSOR_TYPE, ACCESSION, COLLISION_ENERGY, COMMENTS "
-				+ "FROM MSDIAL_METABOLITE_COMPONENTS "
+				+ "FROM COMPOUNDDB.MSDIAL_METABOLITE_COMPONENTS "
 				+ "WHERE IONMODE = ? AND ACCESSION IS NOT NULL ORDER BY 1";
 		PreparedStatement inputPs = conn.prepareStatement(inputQuery);
 		inputPs.setString(1, polarity);
 		
 		String inputMsQuery = 
-				"SELECT MZ, INTENSITY FROM MSDIAL_METABOLITE_PEAKS "
+				"SELECT MZ, INTENSITY FROM COMPOUNDDB.MSDIAL_METABOLITE_PEAKS "
 				+ "WHERE MSDM_ID = ?";
 		PreparedStatement inputMsPs = conn.prepareStatement(inputMsQuery);
 		

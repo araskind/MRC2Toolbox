@@ -24,12 +24,15 @@ package edu.umich.med.mrc2.datoolbox.utils;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 import org.apache.commons.io.IOUtils;
 import org.jdom2.Document;
@@ -52,9 +55,56 @@ public class PubChemUtils {
 			"https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/";
 	public static final String pubchemInchiUrl = 
 			"https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/inchi/";
+	public static final String pubchemSmilesUrl = 
+			"https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/fastidentity/smiles/";
 	
 	public static final String encoding = StandardCharsets.UTF_8.toString();
 
+	
+	public static String urlEncodeSmiles(String smiles) {
+		
+		String result = null;
+	    try {
+	        result = URLEncoder.encode(smiles, "UTF-8")
+	                .replaceAll("\\+", "%20")
+	                .replaceAll("\\%21", "!")
+	                .replaceAll("\\%27", "'")
+	                .replaceAll("\\%28", "(")
+	                .replaceAll("\\%29", ")")
+	                .replaceAll("\\%7E", "~");
+	    } catch (UnsupportedEncodingException e) {
+	        result = smiles;
+	    }
+	    System.out.println(result);
+	    return result;
+	}
+	 
+	public static Set<Integer>getPubChemIdsBySMILESstring(String smiles){
+		
+		String[] cids = new String[0];
+		String urlEncodedSmiles = urlEncodeSmiles(smiles);
+		InputStream cidStream = null;
+		try {
+			cidStream = WebUtils.getInputStreamFromURL(pubchemSmilesUrl + urlEncodedSmiles + "/cids/TXT");
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
+		if(cidStream != null) {
+			try {
+				cids = IOUtils.toString(cidStream, StandardCharsets.UTF_8).split("\\r?\\n");
+			}
+			catch (Exception e) {
+				System.out.println(e.getMessage());
+			}
+		}
+		Set<Integer>cidSet = new TreeSet<Integer>();
+		if(cids.length > 0) {
+			for(String cid : cids)
+				cidSet.add(Integer.parseInt(cid));
+		}		
+		return cidSet;
+	}
+	 
 	public static PubChemCompoundDescriptionBundle getCompoundDescriptionById(String cid) {
 		
 		InputStream descStream = null;
