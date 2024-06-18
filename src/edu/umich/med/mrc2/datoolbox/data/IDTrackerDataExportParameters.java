@@ -52,6 +52,7 @@ public class IDTrackerDataExportParameters {
 	private boolean exportIndividualFeatures;	//	For cluster export
 	private DecoyExportHandling decoyExportHandling;
 	private MajorClusterFeatureDefiningProperty majorClusterFeatureDefiningProperty;
+	private CompoundIdFilter compoundIdFilter;
 	
 	public IDTrackerDataExportParameters() {
 		super();
@@ -243,5 +244,13 @@ public class IDTrackerDataExportParameters {
 	public void setMajorClusterFeatureDefiningProperty(
 			MajorClusterFeatureDefiningProperty majorClusterFeatureDefiningProperty) {
 		this.majorClusterFeatureDefiningProperty = majorClusterFeatureDefiningProperty;
+	}
+
+	public CompoundIdFilter getCompoundIdFilter() {
+		return compoundIdFilter;
+	}
+
+	public void setCompoundIdFilter(CompoundIdFilter compoundIdFilter) {
+		this.compoundIdFilter = compoundIdFilter;
 	}
 }

@@ -1094,6 +1094,9 @@ public enum MainActionCommands {
 	SHOW_MSMS_CLUSTER_DATA_EXPORT_DIALOG_COMMAND("MSMS clusters data export setup"),
 	EXPORT_MSMS_CLUSTER_DATA_COMMAND("Export MSMS clusters data"),
 	EXPORT_MSMS_CLUSTER_DATA_FOR_SIRIUS_COMMAND("Export MSMS clusters data for SIRIUS"),
+	DEFINE_COMPOUND_FILTER_FOR_EXPORT_COMMAND("Define compound filter"),
+	ADD_COMPOUND_FILTER_FOR_EXPORT_COMMAND("Add compound filter"),
+	CLEAR_COMPOUND_FILTER_FOR_EXPORT_COMMAND("Clear compound filter"),
 	
 	//	Tracker search dialog
 	SHOW_IDTRACKER_SEARCH_DIALOG_COMMAND("MetIDTracker database search setup"),
@@ -1106,10 +1109,15 @@ public enum MainActionCommands {
 	//	Tracker by experiment search dialog
 	SHOW_IDTRACKER_BY_EXPERIMENT_MZ_RT_SEARCH_DIALOG_COMMAND("MetIDTracker database search by MZ/RT setup"),
 	SEARCH_IDTRACKER_BY_EXPERIMENT_MZ_RT_COMMAND("Get selected MZ/RT data from MetIDTracker"),
+	SETUP_IDTRACKER_SEARCH_BY_MULTIPLE_COMPOUND_IDS_COMMAND("Set up MetIDTracker search using multiple compound identifiers"),
+	SEARCH_IDTRACKER_BY_MULTIPLE_COMPOUND_IDS_COMMAND("Search MetIDTracker using multiple compound identifiers"),
 	SHOW_ACTIVE_DATA_SET_MZ_RT_SEARCH_DIALOG_COMMAND("Active data set search by MZ/RT setup"),
 	SEARCH_ACTIVE_DATA_SET_BY_MZ_RT_COMMAND("Get selected MZ/RT data from active data set"),
 	SHOW_ACTIVE_DATA_SET_BINNER_ANNOTATION_SEARCH_DIALOG_COMMAND("Active data set search using Binner annotations setup"),
 	SEARCH_ACTIVE_DATA_SET_BY_BINNER_ANNOTATION_COMMAND("Search active data set using Binner annotations"),
+	LOAD_COMPOUND_IDENTIFIERS_FILTER_FROM_DATABASE_COMMAND("Load compound identifiers filter from database"),
+	SAVE_COMPOUND_IDENTIFIERS_FILTER_TO_DATABASE_COMMAND("Save compound identifiers filter to database"),
+	CLEAR_COMPOUND_IDENTIFIERS_FILTER_COMMAND("Clear compound identifiers filter"),
 	
 	//	Summary
 	SHOW_ACTIVE_DATA_SET_SUMMARY_COMMAND("Show active data set summary"),

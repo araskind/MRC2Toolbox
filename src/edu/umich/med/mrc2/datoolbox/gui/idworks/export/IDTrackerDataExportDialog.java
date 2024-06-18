@@ -89,7 +89,7 @@ public class IDTrackerDataExportDialog extends JDialog
 	 * 
 	 */
 	private static final long serialVersionUID = 412209008488860214L;
-	protected static final Icon dialogIcon = GuiUtils.getIcon("saveList", 32);
+	protected static final Icon dialogIcon = GuiUtils.getIcon("saveList", 32);	
 	
 	protected Preferences preferences;
 	public static final String BASE_DIR = "BASE_DIR";
@@ -874,6 +874,8 @@ public class IDTrackerDataExportDialog extends JDialog
 				getMSMSSearchTypes(),
 				excludeIfNoIdsLeft());
 		params.setDecoyExportHandling(getDecoyExportHandling());
+		params.setCompoundIdFilter(
+				identificationExportSettingsPanel.getCompoundFilter());
 		return params;
 	}	
 	

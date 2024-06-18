@@ -25,6 +25,8 @@ import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.text.DecimalFormat;
@@ -34,6 +36,8 @@ import java.util.Collection;
 import java.util.prefs.Preferences;
 
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.Icon;
+import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFormattedTextField;
@@ -44,18 +48,22 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 
+import edu.umich.med.mrc2.datoolbox.data.CompoundIdFilter;
 import edu.umich.med.mrc2.datoolbox.data.enums.DecoyExportHandling;
 import edu.umich.med.mrc2.datoolbox.data.enums.FeatureIDSubset;
 import edu.umich.med.mrc2.datoolbox.data.enums.MSMSMatchType;
 import edu.umich.med.mrc2.datoolbox.data.enums.MSMSScoringParameter;
+import edu.umich.med.mrc2.datoolbox.gui.idworks.export.cpdfilter.CompoundFilterDefinitionDialog;
+import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
+import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 
-public class IdentificationExportSettingsPanel extends JPanel implements ItemListener{
+public class IdentificationExportSettingsPanel extends JPanel implements ItemListener, ActionListener{
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1779207710366698893L;
-
+	private static final Icon filterIcon = GuiUtils.getIcon("filter", 16);
 	private static final NumberFormat twoDecFormat = new DecimalFormat("###.##");
 
 	public static final String MIN_SCORE = "MIN_SCORE";
@@ -76,6 +84,10 @@ public class IdentificationExportSettingsPanel extends JPanel implements ItemLis
 	private JCheckBox excludeIfNoIdsLeftCheckBox;
 	private JLabel lblNewLabel;
 	private JComboBox decoyHitsHadlingComboBox;
+	private JButton compoundFilterButton;
+	private CompoundFilterDefinitionDialog compoundFilterDefinitionDialog;
+	private CompoundIdFilter compoundFilter;
+	private JButton clearCompoundFilterButton;
 	
 	public IdentificationExportSettingsPanel() {
 		super();
@@ -206,13 +218,36 @@ public class IdentificationExportSettingsPanel extends JPanel implements ItemLis
 			gbc_minScoreTextField.gridy = 3;
 			add(minScoreTextField, gbc_minScoreTextField);
 			
-			excludeIfNoIdsLeftCheckBox = new JCheckBox("Exclude features from export if all IDs were filtered out");
+			excludeIfNoIdsLeftCheckBox = new JCheckBox(
+					"Exclude features from export if all IDs were filtered out");
 			GridBagConstraints gbc_excludeIfNoIdsLeftCheckBox = new GridBagConstraints();
+			gbc_excludeIfNoIdsLeftCheckBox.insets = new Insets(0, 0, 0, 5);
 			gbc_excludeIfNoIdsLeftCheckBox.anchor = GridBagConstraints.WEST;
-			gbc_excludeIfNoIdsLeftCheckBox.gridwidth = 5;
+			gbc_excludeIfNoIdsLeftCheckBox.gridwidth = 3;
 			gbc_excludeIfNoIdsLeftCheckBox.gridx = 0;
 			gbc_excludeIfNoIdsLeftCheckBox.gridy = 4;
 			add(excludeIfNoIdsLeftCheckBox, gbc_excludeIfNoIdsLeftCheckBox);
+			
+			compoundFilterButton = new JButton(
+					MainActionCommands.DEFINE_COMPOUND_FILTER_FOR_EXPORT_COMMAND.getName());
+			compoundFilterButton.setActionCommand(
+					MainActionCommands.DEFINE_COMPOUND_FILTER_FOR_EXPORT_COMMAND.getName());
+			compoundFilterButton.addActionListener(this);
+			GridBagConstraints gbc_compoundFilterButton = new GridBagConstraints();
+			gbc_compoundFilterButton.fill = GridBagConstraints.HORIZONTAL;
+			gbc_compoundFilterButton.insets = new Insets(0, 0, 0, 5);
+			gbc_compoundFilterButton.gridx = 3;
+			gbc_compoundFilterButton.gridy = 4;
+			add(compoundFilterButton, gbc_compoundFilterButton);
+			
+			clearCompoundFilterButton = new JButton("Clear filter");
+			clearCompoundFilterButton.setActionCommand(
+					MainActionCommands.CLEAR_COMPOUND_FILTER_FOR_EXPORT_COMMAND.getName());
+			clearCompoundFilterButton.addActionListener(this);
+			GridBagConstraints gbc_clearCompoundFilterButton = new GridBagConstraints();
+			gbc_clearCompoundFilterButton.gridx = 4;
+			gbc_clearCompoundFilterButton.gridy = 4;
+			add(clearCompoundFilterButton, gbc_clearCompoundFilterButton);
 	}
 	
 	public MSMSScoringParameter getMSMSScoringParameter() {
@@ -311,6 +346,51 @@ public class IdentificationExportSettingsPanel extends JPanel implements ItemLis
 				decoyHitsHadlingComboBox.setEnabled(true);
 			}
 		}
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		
+		if(e.getActionCommand().equals(
+				MainActionCommands.DEFINE_COMPOUND_FILTER_FOR_EXPORT_COMMAND.getName())) {
+			showCompoundFilterDefinitionDialog();
+		}
+		if(e.getActionCommand().equals(
+				MainActionCommands.ADD_COMPOUND_FILTER_FOR_EXPORT_COMMAND.getName())) {
+			addCompoundFilterDefinition();
+		}
+		if(e.getActionCommand().equals(
+				MainActionCommands.CLEAR_COMPOUND_FILTER_FOR_EXPORT_COMMAND.getName())) {
+			clearCompoundFilter();
+		}		
+	}
+
+	private void clearCompoundFilter() {
+		compoundFilter = null;
+		compoundFilterButton.setIcon(null);
+	}
+
+	private void addCompoundFilterDefinition() {
+		
+		compoundFilter  = compoundFilterDefinitionDialog.getCompoundIdFilter();
+		if(compoundFilter != null)
+			compoundFilterButton.setIcon(filterIcon);
+		
+		compoundFilterDefinitionDialog.dispose();
+	}
+
+	private void showCompoundFilterDefinitionDialog() {
+
+		compoundFilterDefinitionDialog = new CompoundFilterDefinitionDialog(this);
+		if(compoundFilter != null)
+			compoundFilterDefinitionDialog.loadFilter(compoundFilter);
+		
+		compoundFilterDefinitionDialog.setLocationRelativeTo(this);
+		compoundFilterDefinitionDialog.setVisible(true);
+	}
+
+	public CompoundIdFilter getCompoundFilter() {
+		return compoundFilter;
 	}
 }
 

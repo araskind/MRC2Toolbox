@@ -166,6 +166,7 @@ import edu.umich.med.mrc2.datoolbox.gui.idworks.nist.pepsearch.io.PepserchResult
 import edu.umich.med.mrc2.datoolbox.gui.idworks.search.ads.ActiveDataSetMZRTDataSearchDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.search.binner.ActiveDataSetBinnerAnnotationsSearchDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.search.byexp.ExperimentMZRTDataSearchDialog;
+import edu.umich.med.mrc2.datoolbox.gui.idworks.search.cpdid.MultipleCompoundIdSearchSetupDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.search.dbwide.IDTrackerDataSearchDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.search.msms.FeatureVsFeatureMSMSSearchSetupDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.stan.DockableStandardFeatureAnnotationTable;
@@ -230,6 +231,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.IDTrackerSiriusMsClust
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.IDTrackerSiriusMsExportWithClusteringTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.MSMSClusterDataSetUploadTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.MSMSFeatureClusteringTask;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.SearchMSMSfeaturesByCompoundIdentifiersTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.SpectrumEntropyRecalculationTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io.ExtendedMSPExportTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.rawdata.ChromatogramExtractionTask;
@@ -329,6 +331,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 	private MzFrequencyAnalysisResultsDialog mzFrequencyAnalysisResultsDialog;
 	private FeatureVsFeatureMSMSSearchSetupDialog featureVsFeatureMSMSSearchSetupDialog;
 	private MultipleSpectraDisplayDialog multipleSpectraDisplayDialog;
+	private MultipleCompoundIdSearchSetupDialog multipleCompoundIdSearchSetupDialog;
 	
 	private static final Icon searchIdTrackerIcon = GuiUtils.getIcon("searchDatabase", 24);
 	private static final Icon searchExperimentIcon = GuiUtils.getIcon("searchIdExperiment", 24);
@@ -620,6 +623,12 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 
 		if (command.equals(MainActionCommands.SHOW_ACTIVE_DATA_SET_MZ_RT_SEARCH_DIALOG_COMMAND.getName()))
 			showTrackerSearchActiveDataSetBMzRtDialog();
+		
+		if (command.equals(MainActionCommands.SETUP_IDTRACKER_SEARCH_BY_MULTIPLE_COMPOUND_IDS_COMMAND.getName()))
+			setupTrackerSearchByMultipleCompoundIdentifiers();
+		
+		if (command.equals(MainActionCommands.SEARCH_IDTRACKER_BY_MULTIPLE_COMPOUND_IDS_COMMAND.getName()))
+			searchTrackerByMultipleCompoundIdentifiers();
 		
 		if (command.equals(MainActionCommands.SEARCH_ACTIVE_DATA_SET_BY_MZ_RT_COMMAND.getName()))
 			searchActiveDataSetBMzRt();	
@@ -2056,6 +2065,41 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		idTrackerDataSearchDialog.setVisible(true);
 	}
 	
+	private void setupTrackerSearchByMultipleCompoundIdentifiers() {
+		
+		if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() != null) {
+			MessageDialog.showWarningMsg(
+					"Please close active offline raw data analysis experiment first.", 
+					this.getContentPane());
+			return;
+		}
+		multipleCompoundIdSearchSetupDialog = new MultipleCompoundIdSearchSetupDialog(this);
+		multipleCompoundIdSearchSetupDialog.setLocationRelativeTo(this.getContentPane());
+		multipleCompoundIdSearchSetupDialog.setVisible(true);
+	}
+	
+	private void searchTrackerByMultipleCompoundIdentifiers(){
+		
+		SearchMSMSfeaturesByCompoundIdentifiersTask task = 
+				new SearchMSMSfeaturesByCompoundIdentifiersTask(
+						multipleCompoundIdSearchSetupDialog.getCompoundIdFilter(), 
+						multipleCompoundIdSearchSetupDialog.getPolarity());
+		task.addTaskListener(this);		
+		multipleCompoundIdSearchSetupDialog.dispose();
+		MRC2ToolBoxCore.getTaskController().addTask(task);	}
+	
+	private void showTrackerSearchActiveDataSetBMzRtDialog(){
+
+		Collection<MSFeatureInfoBundle> allFeatures = 
+				msTwoFeatureTable.getBundles(TableRowSubset.ALL);
+		if(allFeatures.isEmpty())
+			return;
+		
+		activeDataSetMZRTDataSearchDialog = new ActiveDataSetMZRTDataSearchDialog(this);
+		activeDataSetMZRTDataSearchDialog.setLocationRelativeTo(this.getContentPane());
+		activeDataSetMZRTDataSearchDialog.setVisible(true);
+	}
+	
 	private void showTrackerSearchByExperimentMzRtDialog(){
 		
 		if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() != null) {
@@ -2069,18 +2113,6 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		experimentMzRtDataSearchDialog.setVisible(true);
 	}
 	
-	private void showTrackerSearchActiveDataSetBMzRtDialog(){
-
-		Collection<MSFeatureInfoBundle> allFeatures = 
-				msTwoFeatureTable.getBundles(TableRowSubset.ALL);
-		if(allFeatures.isEmpty())
-			return;
-		
-		activeDataSetMZRTDataSearchDialog = new ActiveDataSetMZRTDataSearchDialog(this);
-		activeDataSetMZRTDataSearchDialog.setLocationRelativeTo(this.getContentPane());
-		activeDataSetMZRTDataSearchDialog.setVisible(true);
-	}
-
 	private void searchActiveDataSetBMzRt(){
 
 		Collection<String>errors = 
@@ -3804,13 +3836,23 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 				finalizeBinnerAnnotationLookupTask((BinnerAnnotationLookupTask)e.getSource());
 			
 			if (e.getSource().getClass().equals(FeatureVsFeatureMSMSSearchTask.class))
-				finalizeFeatureVsFeatureMSMSSearchTask((FeatureVsFeatureMSMSSearchTask)e.getSource());		
+				finalizeFeatureVsFeatureMSMSSearchTask((FeatureVsFeatureMSMSSearchTask)e.getSource());	
+			
+			if (e.getSource().getClass().equals(SearchMSMSfeaturesByCompoundIdentifiersTask.class))
+				finalizeSearchMSMSfeaturesByCompoundIdentifiersTask((SearchMSMSfeaturesByCompoundIdentifiersTask)e.getSource());	
+			
 		}
 		if (e.getStatus() == TaskStatus.CANCELED || e.getStatus() == TaskStatus.ERROR) {
 			((AbstractTask) e.getSource()).removeTaskListener(this);
 			MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
 			MainWindow.hideProgressDialog();
 		}
+	}
+
+	private void finalizeSearchMSMSfeaturesByCompoundIdentifiersTask(
+			SearchMSMSfeaturesByCompoundIdentifiersTask source) {
+		// TODO Auto-generated method stub
+		
 	}
 
 	private void finalizeFeatureVsFeatureMSMSSearchTask(FeatureVsFeatureMSMSSearchTask task) {

@@ -52,7 +52,7 @@ public class CompoundDatabaseCompatrator  extends ObjectCompatrator<CompoundData
 				else
 					return -result;
 				
-			case Rank:
+			case Rank:	//	Lower rank number means more important, so the sorting is reverse
 				
 				if(o1.getRank() != null && o2.getRank() == null)					
 					result = 1;
@@ -61,10 +61,10 @@ public class CompoundDatabaseCompatrator  extends ObjectCompatrator<CompoundData
 					result = -1;
 								
 				if(o1.getRank() != null && o2.getRank() != null)					
-					result = Integer.compare(o1.getRank(), o2.getRank());
+					result = Integer.compare(o2.getRank(), o1.getRank());
 				
 				if(result == 0)
-					result = o1.name().compareToIgnoreCase(o2.name());
+					result = o2.name().compareToIgnoreCase(o1.name());
 				
 				if (direction == SortDirection.ASC)
 					return result;

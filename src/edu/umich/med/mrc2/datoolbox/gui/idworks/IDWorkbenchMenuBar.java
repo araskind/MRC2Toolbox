@@ -89,6 +89,7 @@ public class IDWorkbenchMenuBar extends CommonMenuBar {
 	private static final Icon binnerLookupIcon = GuiUtils.getIcon("binnerLookupIcon", 24);
 	private static final Icon statsFilteredIcon = GuiUtils.getIcon("calcFilteredStats", 24);
 	private static final Icon msmsMultiIcon = GuiUtils.getIcon("msmsMulti", 24);
+	private static final Icon searchByCompoundIcon = GuiUtils.getIcon("searchCompounds", 24);
 	
 	// Menus
 	private JMenu
@@ -104,6 +105,7 @@ public class IDWorkbenchMenuBar extends CommonMenuBar {
 	private JMenuItem
 		databaseSearchMenuItem,
 		experimentSearchMenuItem,
+		searchByCompoundIdMenuItem,
 		findMSMSFeaturesMenuItem,
 		filterMSMSFeaturesMenuItem,
 		filterMSMSFeaturesByIDLMenuItem,
@@ -175,6 +177,10 @@ public class IDWorkbenchMenuBar extends CommonMenuBar {
 		experimentSearchMenuItem = addItem(databaseSearchMenu, 
 				MainActionCommands.SHOW_IDTRACKER_BY_EXPERIMENT_MZ_RT_SEARCH_DIALOG_COMMAND, 
 				searchExperimentIcon);
+		
+		searchByCompoundIdMenuItem = addItem(databaseSearchMenu, 
+				MainActionCommands.SETUP_IDTRACKER_SEARCH_BY_MULTIPLE_COMPOUND_IDS_COMMAND, 
+				searchByCompoundIcon);
 
 		databaseSearchMenu.addSeparator();
 		

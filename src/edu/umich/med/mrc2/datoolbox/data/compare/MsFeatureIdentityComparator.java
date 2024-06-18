@@ -39,6 +39,8 @@ public class MsFeatureIdentityComparator extends ObjectCompatrator<MsFeatureIden
 			CompoundIdSource.getLibraryIdSources();
 	private static final AdductRankComparator adductComparator = 
 			new AdductRankComparator();
+	public static final CompoundDatabaseCompatrator compoundDatabaseRankSorter = 
+			new CompoundDatabaseCompatrator(SortProperty.Rank);
 	
 	public MsFeatureIdentityComparator(SortProperty property, SortDirection direction) {
 		super(property,direction);
@@ -151,7 +153,8 @@ public class MsFeatureIdentityComparator extends ObjectCompatrator<MsFeatureIden
 					result = 1;
 				
 				if(hr1 != null && hr2 != null) {
-					result = Integer.compare(hr1.getKey().getRank(), hr2.getKey().getRank());
+					
+					result = compoundDatabaseRankSorter.compare(hr1.getKey(), hr2.getKey());
 					if(result == 0)
 						result = hr1.getValue().compareToIgnoreCase(hr2.getValue());
 				}

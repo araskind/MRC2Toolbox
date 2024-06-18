@@ -735,6 +735,7 @@ public class IDTrackerMSMSClusterDataSetExportDialog extends JDialog
 				excludeIfNoIdsLeft(),
 				getMajorClusterFeatureDefiningProperty());
 		params.setDecoyExportHandling(getDecoyExportHandling());
+		params.setCompoundIdFilter(identificationExportSettingsPanel.getCompoundFilter());
 		return params;
 	}
 }

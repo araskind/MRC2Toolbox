@@ -39,6 +39,7 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import edu.umich.med.mrc2.datoolbox.data.Adduct;
+import edu.umich.med.mrc2.datoolbox.data.CompoundIdFilter;
 import edu.umich.med.mrc2.datoolbox.data.CompoundNameSet;
 import edu.umich.med.mrc2.datoolbox.data.IDTrackerDataExportParameters;
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureIdentificationLevel;
@@ -429,9 +430,22 @@ public abstract class IDTrackerFeatureExportTask extends AbstractTask {
 				filter(id -> IdentificationUtils.isDecoyHit(id)).
 				collect(Collectors.toList());
 		
+		if(params.getCompoundIdFilter() != null)
+			filteredIds = applyCompoundIdFilter(filteredIds);
+				
 		return filteredIds;
 	}
 	
+	protected Collection<MsFeatureIdentity> applyCompoundIdFilter(
+			Collection<MsFeatureIdentity>idsToFilter) {
+				
+		CompoundIdFilter idFilter = params.getCompoundIdFilter();
+		if(idFilter == null)
+			return idsToFilter;
+		else	
+			return idFilter.filterIdentifications(idsToFilter);
+	}
+
 	protected String getFeatureProperty(
 			MSFeatureInfoBundle bundle, 
 			IDTrackerMsFeatureProperties property) {

@@ -101,7 +101,7 @@
 										<fullscreen-action>false</fullscreen-action>
 										<node nodeId="1648658649940" orientation="HORIZONTAL" divider="0.21476246564585788">
 											<node nodeId="1648659078148" orientation="VERTICAL" divider="0.4817127564674398">
-												<leaf id="9" nodeId="1648658649946">
+												<leaf id="3" nodeId="1648658649946">
 													<placeholders>
 														<placeholder>dock.single.DockableDataTreePanel</placeholder>
 													</placeholders>
@@ -130,7 +130,7 @@
 															</entry>
 														</placeholder-map>
 													</leaf>
-													<leaf id="0" nodeId="1675460411118">
+													<leaf id="7" nodeId="1675460411118">
 														<placeholders>
 															<placeholder>dock.single.DockableRawDataFilePropertiesTable</placeholder>
 														</placeholders>
@@ -139,7 +139,7 @@
 											</node>
 											<node nodeId="1648658649947" orientation="VERTICAL" divider="0.49907235621521334">
 												<node nodeId="1677721233042" orientation="VERTICAL" divider="0.708955223880597">
-													<leaf id="2" nodeId="1648658649949">
+													<leaf id="4" nodeId="1648658649949">
 														<placeholders>
 															<placeholder>dock.single.DockableSpectraListingPanel</placeholder>
 															<placeholder>dock.single.RawDataExaminerPanelDockableChromatogramPlot</placeholder>
@@ -154,7 +154,7 @@
 															</entry>
 														</placeholder-map>
 													</leaf>
-													<leaf id="1" nodeId="1677721233041">
+													<leaf id="8" nodeId="1677721233041">
 														<placeholders>
 															<placeholder>dock.single.DockableXICListingPanel</placeholder>
 														</placeholders>
@@ -181,7 +181,7 @@
 												<node nodeId="1648658649951" orientation="HORIZONTAL" divider="0.6666666666666666">
 													<node nodeId="1648659691901" orientation="VERTICAL" divider="0.5105263157894737">
 														<node nodeId="1648744205808" orientation="HORIZONTAL" divider="0.7283609576427257">
-															<leaf id="7" nodeId="1648658649953">
+															<leaf id="2" nodeId="1648658649953">
 																<placeholders>
 																	<placeholder>dock.single.RawDataExaminerPanelDockableSpectumPlotMS1</placeholder>
 																</placeholders>
@@ -195,14 +195,14 @@
 																	</entry>
 																</placeholder-map>
 															</leaf>
-															<leaf id="4" nodeId="1648744205806">
+															<leaf id="0" nodeId="1648744205806">
 																<placeholders>
 																	<placeholder>dock.single.RawDataExaminerPanelDockableMsTableMS1</placeholder>
 																</placeholders>
 															</leaf>
 														</node>
 														<node nodeId="1648744210405" orientation="HORIZONTAL" divider="0.7290451335584895">
-															<leaf id="3" nodeId="1648659691900">
+															<leaf id="9" nodeId="1648659691900">
 																<placeholders>
 																	<placeholder>dock.single.RawDataExaminerPanelDockableSpectumPlotMS2</placeholder>
 																</placeholders>
@@ -216,7 +216,7 @@
 																	</entry>
 																</placeholder-map>
 															</leaf>
-															<leaf id="8" nodeId="1648744210404">
+															<leaf id="1" nodeId="1648744210404">
 																<placeholders>
 																	<placeholder>dock.single.RawDataExaminerPanelDockableMsMsTable</placeholder>
 																</placeholders>
@@ -260,99 +260,50 @@
 							</adjacent>
 							<children ignore="false">
 								<child>
-									<layout factory="predefined" placeholder="dock.single.DockableRawDataFilePropertiesTable">
-										<replacement id="dockablesingle DockableRawDataFilePropertiesTable"/>
+									<layout factory="predefined" placeholder="dock.single.RawDataExaminerPanelDockableMsTableMS1">
+										<replacement id="dockablesingle RawDataExaminerPanelDockableMsTableMS1"/>
 										<delegate id="delegate_ccontrol backup factory id">
-											<id>DockableRawDataFilePropertiesTable</id>
+											<id>RawDataExaminerPanelDockableMsTableMS1</id>
 											<area/>
 										</delegate>
 									</layout>
 									<children ignore="false"/>
 								</child>
 								<child>
-									<layout factory="delegate_StackDockStationFactory">
-										<selected>0</selected>
-										<placeholders>
-											<version>0</version>
-											<format>dock.PlaceholderList</format>
-											<entry>
-												<key shared="false">
-													<placeholder>dock.single.DockableXICListingPanel</placeholder>
-												</key>
-												<item key="convert" type="b">true</item>
-												<item key="convert-keys" type="a">
-													<item type="s">index</item>
-													<item type="s">id</item>
-													<item type="s">placeholder</item>
-												</item>
-												<item key="dock.index" type="i">0</item>
-												<item key="dock.id" type="i">0</item>
-												<item key="dock.placeholder" type="s">dock.single.DockableXICListingPanel</item>
-											</entry>
-											<entry>
-												<key shared="false">
-													<placeholder>dock.single.DockableSpectraListingPanel</placeholder>
-												</key>
-												<item key="convert" type="b">true</item>
-												<item key="convert-keys" type="a">
-													<item type="s">index</item>
-													<item type="s">id</item>
-													<item type="s">placeholder</item>
-												</item>
-												<item key="dock.index" type="i">1</item>
-												<item key="dock.id" type="i">1</item>
-												<item key="dock.placeholder" type="s">dock.single.DockableSpectraListingPanel</item>
-											</entry>
-										</placeholders>
+									<layout factory="predefined" placeholder="dock.single.RawDataExaminerPanelDockableMsMsTable">
+										<replacement id="dockablesingle RawDataExaminerPanelDockableMsMsTable"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>RawDataExaminerPanelDockableMsMsTable</id>
+											<area/>
+										</delegate>
 									</layout>
-									<children ignore="false">
-										<child>
-											<layout factory="predefined" placeholder="dock.single.DockableXICListingPanel">
-												<replacement id="dockablesingle DockableXICListingPanel"/>
-												<delegate id="delegate_ccontrol backup factory id">
-													<id>DockableXICListingPanel</id>
-													<area/>
-												</delegate>
-											</layout>
-											<children ignore="false"/>
-										</child>
-										<child>
-											<layout factory="predefined" placeholder="dock.single.DockableSpectraListingPanel">
-												<replacement id="dockablesingle DockableSpectraListingPanel"/>
-												<delegate id="delegate_ccontrol backup factory id">
-													<id>DockableSpectraListingPanel</id>
-													<area/>
-												</delegate>
-											</layout>
-											<children ignore="false"/>
-										</child>
-									</children>
+									<children ignore="false"/>
+								</child>
+								<child>
+									<layout factory="predefined" placeholder="dock.single.RawDataExaminerPanelDockableSpectumPlotMS1">
+										<replacement id="dockablesingle RawDataExaminerPanelDockableSpectumPlotMS1"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>RawDataExaminerPanelDockableSpectumPlotMS1</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
+								</child>
+								<child>
+									<layout factory="predefined" placeholder="dock.single.DockableDataTreePanel">
+										<replacement id="dockablesingle DockableDataTreePanel"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>DockableDataTreePanel</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
 								</child>
 								<child>
 									<layout factory="predefined" placeholder="dock.single.RawDataExaminerPanelDockableChromatogramPlot">
 										<replacement id="dockablesingle RawDataExaminerPanelDockableChromatogramPlot"/>
 										<delegate id="delegate_ccontrol backup factory id">
 											<id>RawDataExaminerPanelDockableChromatogramPlot</id>
-											<area/>
-										</delegate>
-									</layout>
-									<children ignore="false"/>
-								</child>
-								<child>
-									<layout factory="predefined" placeholder="dock.single.RawDataExaminerPanelDockableSpectumPlotMS2">
-										<replacement id="dockablesingle RawDataExaminerPanelDockableSpectumPlotMS2"/>
-										<delegate id="delegate_ccontrol backup factory id">
-											<id>RawDataExaminerPanelDockableSpectumPlotMS2</id>
-											<area/>
-										</delegate>
-									</layout>
-									<children ignore="false"/>
-								</child>
-								<child>
-									<layout factory="predefined" placeholder="dock.single.RawDataExaminerPanelDockableMsTableMS1">
-										<replacement id="dockablesingle RawDataExaminerPanelDockableMsTableMS1"/>
-										<delegate id="delegate_ccontrol backup factory id">
-											<id>RawDataExaminerPanelDockableMsTableMS1</id>
 											<area/>
 										</delegate>
 									</layout>
@@ -428,30 +379,79 @@
 									<children ignore="false"/>
 								</child>
 								<child>
-									<layout factory="predefined" placeholder="dock.single.RawDataExaminerPanelDockableSpectumPlotMS1">
-										<replacement id="dockablesingle RawDataExaminerPanelDockableSpectumPlotMS1"/>
+									<layout factory="predefined" placeholder="dock.single.DockableRawDataFilePropertiesTable">
+										<replacement id="dockablesingle DockableRawDataFilePropertiesTable"/>
 										<delegate id="delegate_ccontrol backup factory id">
-											<id>RawDataExaminerPanelDockableSpectumPlotMS1</id>
+											<id>DockableRawDataFilePropertiesTable</id>
 											<area/>
 										</delegate>
 									</layout>
 									<children ignore="false"/>
 								</child>
 								<child>
-									<layout factory="predefined" placeholder="dock.single.RawDataExaminerPanelDockableMsMsTable">
-										<replacement id="dockablesingle RawDataExaminerPanelDockableMsMsTable"/>
-										<delegate id="delegate_ccontrol backup factory id">
-											<id>RawDataExaminerPanelDockableMsMsTable</id>
-											<area/>
-										</delegate>
+									<layout factory="delegate_StackDockStationFactory">
+										<selected>0</selected>
+										<placeholders>
+											<version>0</version>
+											<format>dock.PlaceholderList</format>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.DockableXICListingPanel</placeholder>
+												</key>
+												<item key="convert" type="b">true</item>
+												<item key="convert-keys" type="a">
+													<item type="s">index</item>
+													<item type="s">id</item>
+													<item type="s">placeholder</item>
+												</item>
+												<item key="dock.index" type="i">0</item>
+												<item key="dock.id" type="i">0</item>
+												<item key="dock.placeholder" type="s">dock.single.DockableXICListingPanel</item>
+											</entry>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.DockableSpectraListingPanel</placeholder>
+												</key>
+												<item key="convert" type="b">true</item>
+												<item key="convert-keys" type="a">
+													<item type="s">index</item>
+													<item type="s">id</item>
+													<item type="s">placeholder</item>
+												</item>
+												<item key="dock.index" type="i">1</item>
+												<item key="dock.id" type="i">1</item>
+												<item key="dock.placeholder" type="s">dock.single.DockableSpectraListingPanel</item>
+											</entry>
+										</placeholders>
 									</layout>
-									<children ignore="false"/>
+									<children ignore="false">
+										<child>
+											<layout factory="predefined" placeholder="dock.single.DockableXICListingPanel">
+												<replacement id="dockablesingle DockableXICListingPanel"/>
+												<delegate id="delegate_ccontrol backup factory id">
+													<id>DockableXICListingPanel</id>
+													<area/>
+												</delegate>
+											</layout>
+											<children ignore="false"/>
+										</child>
+										<child>
+											<layout factory="predefined" placeholder="dock.single.DockableSpectraListingPanel">
+												<replacement id="dockablesingle DockableSpectraListingPanel"/>
+												<delegate id="delegate_ccontrol backup factory id">
+													<id>DockableSpectraListingPanel</id>
+													<area/>
+												</delegate>
+											</layout>
+											<children ignore="false"/>
+										</child>
+									</children>
 								</child>
 								<child>
-									<layout factory="predefined" placeholder="dock.single.DockableDataTreePanel">
-										<replacement id="dockablesingle DockableDataTreePanel"/>
+									<layout factory="predefined" placeholder="dock.single.RawDataExaminerPanelDockableSpectumPlotMS2">
+										<replacement id="dockablesingle RawDataExaminerPanelDockableSpectumPlotMS2"/>
 										<delegate id="delegate_ccontrol backup factory id">
-											<id>DockableDataTreePanel</id>
+											<id>RawDataExaminerPanelDockableSpectumPlotMS2</id>
 											<area/>
 										</delegate>
 									</layout>

@@ -21,9 +21,13 @@
 
 package edu.umich.med.mrc2.datoolbox.utils;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.openscience.cdk.CDKConstants;
 import org.openscience.cdk.DefaultChemObjectBuilder;
 import org.openscience.cdk.exception.CDKException;
+import org.openscience.cdk.exception.InvalidSmilesException;
 import org.openscience.cdk.inchi.InChIGenerator;
 import org.openscience.cdk.inchi.InChIGeneratorFactory;
 import org.openscience.cdk.inchi.InChIToStructure;
@@ -31,6 +35,7 @@ import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IChemObjectBuilder;
 import org.openscience.cdk.interfaces.IMolecularFormula;
 import org.openscience.cdk.silent.SilentChemObjectBuilder;
+import org.openscience.cdk.smarts.SmartsPattern;
 import org.openscience.cdk.smiles.SmiFlavor;
 import org.openscience.cdk.smiles.SmilesGenerator;
 import org.openscience.cdk.smiles.SmilesParser;
@@ -47,6 +52,11 @@ public class ChemInfoUtils {
 			new SmilesGenerator(SmiFlavor.Isomeric);	
 	private static final SmilesParser smilesParser = 
 			new SmilesParser(builder);
+	private final static Pattern inchiKeyPatternOne = Pattern.compile("SA-[KLMNOPR]$");
+	private final static Pattern inchiKeyPatternTwo = Pattern.compile("NA-[KLMNOPR]$");
+	private final static Pattern completeInchiKeyPattern = 
+			Pattern.compile("^[A-Z]{14}-[A-Z]{8}[NS]A-[HIJKLMNOPRSTU]$");
+	private final static Pattern inchiKey2DPattern = Pattern.compile("^[A-Z]{14}$");
 	
 	private static InChIGeneratorFactory igfactory;
 	private static InChIGenerator inChIGenerator;
@@ -89,7 +99,7 @@ public class ChemInfoUtils {
 			return null;
 	}
 	
-	public static IAtomContainer generateMoleculeFromSMILES(String smiles) throws CDKException {
+	public static IAtomContainer generateMoleculeFromSMILES(String smiles) throws Exception {
 		
 		IAtomContainer mol = null;
 		if (smiles == null || smiles.isEmpty() || smiles.equals("NoSmile")) 
@@ -145,7 +155,86 @@ public class ChemInfoUtils {
 			return inChIGenerator.getInchi();
 		else
 			return null;
+	}	
+	
+	public static String switchInchiKeyVersion(String inchiKey) {
+		
+		String newKey = null;
+		Matcher regexMatcher = inchiKeyPatternOne.matcher(inchiKey);
+		if(regexMatcher.find() && regexMatcher.group(0) != null) {
+	
+			String suffix = regexMatcher.group(0);
+			newKey = inchiKey.replaceFirst(suffix + "$", "NA-" + suffix.charAt(suffix.length()-1));
+		}
+		if(newKey == null) {
+			
+			regexMatcher = inchiKeyPatternTwo.matcher(inchiKey);
+			if(regexMatcher.find() && regexMatcher.group(0) != null) {
+	
+				String suffix = regexMatcher.group(0);
+				newKey = inchiKey.replaceFirst(suffix + "$", "SA-" + suffix.charAt(suffix.length()-1));
+			}
+		}
+		return newKey;
 	}
+	
+	public static boolean isInchiKeyValid(String inchiKey) {
+		
+		Matcher regexMatcher = completeInchiKeyPattern.matcher(inchiKey);
+		if(regexMatcher.find() && regexMatcher.group(0) != null)
+			return true;
+		else
+			return false;
+	}
+	
+	public static boolean isInchiKey2DValid(String inchiKey2D) {
+		
+		Matcher regexMatcher = inchiKey2DPattern.matcher(inchiKey2D);
+		if(regexMatcher.find() && regexMatcher.group(0) != null)
+			return true;
+		else
+			return false;
+	}
+	
+	public static boolean isSMARTSstringValid(String smartsString) {
+		
+		SmartsPattern pattern = null;
+		try {
+			pattern = SmartsPattern.create(smartsString, builder);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			//	e.printStackTrace();
+		}
+		if(pattern == null)
+			return false;
+		else
+			return true;
+	}
+	
+	public static boolean doSMILESmatchSMATRSpattern(String smilesString, String smartsString) {
+
+		IAtomContainer atomContainer = null;
+		try {
+			atomContainer = smilesParser.parseSmiles(smilesString);
+		} catch (InvalidSmilesException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		if(atomContainer == null)
+			return false;
+		
+		SmartsPattern pattern = null;
+		try {
+			pattern = SmartsPattern.create(smartsString, builder);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			//	e.printStackTrace();
+		}
+		if(pattern == null)
+			return false;
+				
+		return pattern.matches(atomContainer);
+	}	
 }
 
 

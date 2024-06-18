@@ -119,8 +119,6 @@ public class CompoundDatabaseScripts {
 	public static InChIGeneratorFactory igfactory;
 	public static InChIGenerator inChIGenerator;	
 	public static final String encoding = StandardCharsets.UTF_8.toString();
-	private final static Pattern inchiKeyPatternOne = Pattern.compile("SA-[KLMNOPR]$");
-	private final static Pattern inchiKeyPatternTwo = Pattern.compile("NA-[KLMNOPR]$");
 	
 	public static void main(String[] args) {
 
@@ -139,36 +137,22 @@ public class CompoundDatabaseScripts {
 		try {	
 			//	generateCanonicalSmilesForNIST();
 			//	NISTParserUtils.fillMisingInchiKeysForNISTcompounds();
-			getPubChemIdsForMSDIALmetabSBySmiles();
+			testInchiKeyValidator();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
-		
-	private static String switchInchiKeyVersion(String inchiKey) {
-		
-		String newKey = null;
-		Matcher regexMatcher = inchiKeyPatternOne.matcher(inchiKey);
-		if(regexMatcher.find() && regexMatcher.group(0) != null) {
 
-			String suffix = regexMatcher.group(0);
-			newKey = inchiKey.replaceFirst(suffix + "$", "NA-" + suffix.charAt(suffix.length()-1));
-		}
-		if(newKey == null) {
-			
-			regexMatcher = inchiKeyPatternTwo.matcher(inchiKey);
-			if(regexMatcher.find() && regexMatcher.group(0) != null) {
-
-				String suffix = regexMatcher.group(0);
-				newKey = inchiKey.replaceFirst(suffix + "$", "SA-" + suffix.charAt(suffix.length()-1));
-			}
-		}
-//		if(newKey == null)
-//			newKey = inchiKey;
+	private static void testInchiKeyValidator() {
 		
-		System.out.println(newKey);
-		return newKey;
+		String inchiKey = "QQZ";
+		if(ChemInfoUtils.isSMARTSstringValid(inchiKey)) {
+			System.out.println(inchiKey);
+		}
+		else {
+			System.out.println("NOT VALID: " + inchiKey);
+		}
 	}
 	
 	private static void addMissingDataToNISTbyCASnumber() throws Exception{
@@ -3896,7 +3880,7 @@ public class CompoundDatabaseScripts {
 			if(db == null) {
 				
 				Thread.sleep(300);
-				String newKey =  switchInchiKeyVersion(new String(inchiKey));
+				String newKey =  ChemInfoUtils.switchInchiKeyVersion(new String(inchiKey));
 				if(newKey != null)
 					db = PubChemUtils.getCompoundDescriptionByInchiKey(newKey);
 			}			

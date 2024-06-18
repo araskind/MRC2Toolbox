@@ -58,6 +58,11 @@ public class IDTMSMSFeatureDataPullTask extends IDTMSMSFeatureSearchTask {
 	protected Collection<String>featureIds;
 	protected MsFeatureInfoBundleCollection parentCollection;
 
+	public IDTMSMSFeatureDataPullTask() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
+
 	public IDTMSMSFeatureDataPullTask(Collection<String> featureIds) {
 		super();
 		this.featureIds = featureIds;
