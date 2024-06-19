@@ -3850,9 +3850,21 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 	}
 
 	private void finalizeSearchMSMSfeaturesByCompoundIdentifiersTask(
-			SearchMSMSfeaturesByCompoundIdentifiersTask source) {
-		// TODO Auto-generated method stub
+			SearchMSMSfeaturesByCompoundIdentifiersTask task) {
 		
+		if(task.getSelectedFeatures() == null || task.getSelectedFeatures().isEmpty()) {
+			activeFeatureCollection = null;
+			StatusBar.setActiveFeatureCollection(activeFeatureCollection);
+			MessageDialog.showWarningMsg("No features found!", this.getContentPane());
+			return;
+		}
+		else {
+			activeFeatureCollection = new MsFeatureInfoBundleCollection(
+					"MSMS feautures based on compound identifiers search");
+			activeFeatureCollection.addFeatures(task.getSelectedFeatures());
+			safelyLoadMSMSFeatures(activeFeatureCollection.getFeatures());
+			StatusBar.setActiveFeatureCollection(activeFeatureCollection);
+		}
 	}
 
 	private void finalizeFeatureVsFeatureMSMSSearchTask(FeatureVsFeatureMSMSSearchTask task) {

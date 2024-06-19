@@ -32,13 +32,15 @@ import edu.umich.med.mrc2.datoolbox.gui.utils.CommonToolbar;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 
-public class MobilePhasePanelToolbar extends CommonToolbar {
-	
+public class GradientMobilePhaseManagerToolbar extends CommonToolbar {
+
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = -1749415219653657813L;
+	private static final long serialVersionUID = 8245791796145041236L;
+	
 	private static final Icon addMobilePhaseIcon = GuiUtils.getIcon("newMobilePhase", 32);
+	private static final Icon editMobilePhaseIcon = GuiUtils.getIcon("editMobilePhase", 32);
 	private static final Icon deleteMobilePhaseIcon = GuiUtils.getIcon("deleteMobilePhase", 32);
 
 	@SuppressWarnings("unused")
@@ -47,18 +49,23 @@ public class MobilePhasePanelToolbar extends CommonToolbar {
 		editMobilePhaseButton,
 		deleteMobilePhaseButton;
 
-	public MobilePhasePanelToolbar(ActionListener commandListener) {
+	public GradientMobilePhaseManagerToolbar(ActionListener commandListener) {
 
 		super(commandListener);
 
-		addMobilePhaseButton = GuiUtils.addButton(this, null, addMobilePhaseIcon, commandListener,
-				MainActionCommands.ADD_MOBILE_PHASE_DIALOG_COMMAND.getName(),
-				MainActionCommands.ADD_MOBILE_PHASE_DIALOG_COMMAND.getName(),
+//		addMobilePhaseButton = GuiUtils.addButton(this, null, addMobilePhaseIcon, commandListener,
+//				MainActionCommands.ADD_MOBILE_PHASE_DIALOG_COMMAND.getName(),
+//				MainActionCommands.ADD_MOBILE_PHASE_DIALOG_COMMAND.getName(),
+//				buttonDimension);
+
+		editMobilePhaseButton = GuiUtils.addButton(this, null, editMobilePhaseIcon, commandListener,
+				MainActionCommands.SET_MOBILE_PHASE_FOR_GRADIENT_CHANEL_DIALOG_COMMAND.getName(),
+				MainActionCommands.SET_MOBILE_PHASE_FOR_GRADIENT_CHANEL_DIALOG_COMMAND.getName(),
 				buttonDimension);
 
 		deleteMobilePhaseButton = GuiUtils.addButton(this, null, deleteMobilePhaseIcon, commandListener,
-				MainActionCommands.DELETE_MOBILE_PHASE_COMMAND.getName(),
-				MainActionCommands.DELETE_MOBILE_PHASE_COMMAND.getName(),
+				MainActionCommands.CLEAR_MOBILE_PHASE_FOR_GRADIENT_CHANEL_COMMAND.getName(),
+				MainActionCommands.CLEAR_MOBILE_PHASE_FOR_GRADIENT_CHANEL_COMMAND.getName(),
 				buttonDimension);
 	}
 

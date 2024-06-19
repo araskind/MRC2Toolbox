@@ -66,8 +66,8 @@ public class LibraryListingTable extends BasicTable {
 		
 		columnModel.getColumnById(LibraryListingTableModel.LOADED_COLUMN).setMaxWidth(50);
 		columnModel.getColumnById(LibraryListingTableModel.POLARITY_COLUMN).setMaxWidth(50);
-		fixedWidthColumns.add(getColumnIndex(LibraryListingTableModel.LOADED_COLUMN));
-		fixedWidthColumns.add(getColumnIndex(LibraryListingTableModel.POLARITY_COLUMN));
+		fixedWidthColumns.add(model.getColumnIndex(LibraryListingTableModel.LOADED_COLUMN));
+		fixedWidthColumns.add(model.getColumnIndex(LibraryListingTableModel.POLARITY_COLUMN));
 		
 		setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
 		thf = new TableFilterHeader(this, AutoChoices.ENABLED);

@@ -44,17 +44,16 @@ public class ObjectAnnotationTable extends BasicTable {
 
 		model = new ObjectAnnotationTableModel();
 		setModel(model);
+		
 		columnModel.getColumnById(ObjectAnnotationTableModel.ANNOTATION_COLUMN)
 				.setCellRenderer(new ObjectAnnotationTextPreviewRenderer(
 						SortProperty.Name, maxAnnotationPreviewLength));
-//		getColumnModel().getColumn(model.getColumnIndex(ObjectAnnotationTableModel.FILE_PREVIEW_COLUMN))
-//				.setCellRenderer(new ObjectAnnotationFilePreviewRenderer(this));
 		columnModel.getColumnById(ObjectAnnotationTableModel.FILE_DOWNLOAD_COLUMN)
 				.setCellRenderer(new ObjectAnnotationDocumentTypeRenderer(this));
 		
 		columnModel.getColumnById(
 				ObjectAnnotationTableModel.FILE_DOWNLOAD_COLUMN).setWidth(iconSize * 2);
-		fixedWidthColumns.add(columnModel.getColumnIndex(
+		fixedWidthColumns.add(model.getColumnIndex(
 				ObjectAnnotationTableModel.FILE_DOWNLOAD_COLUMN));
 		currentObject = null;
 		

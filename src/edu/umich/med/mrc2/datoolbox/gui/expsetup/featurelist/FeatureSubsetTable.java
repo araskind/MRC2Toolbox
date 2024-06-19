@@ -80,13 +80,13 @@ public class FeatureSubsetTable extends BasicTable {
 		columnModel.getColumnById(
 				FeatureSubsetTableModel.ACTIVE_COLUMN).setWidth(50);
 		columnModel.getColumnById(
-				FeatureSubsetTableModel.NUM_FEATURES_COLUMN).setMaxWidth(150);	
-		columnModel.getColumnById(
-				FeatureSubsetTableModel.NUM_FEATURES_COLUMN).setMinWidth(100);	
-		fixedWidthColumns.add(getColumnIndex(
+				FeatureSubsetTableModel.NUM_FEATURES_COLUMN).setWidth(150);	
+//		columnModel.getColumnById(
+//				FeatureSubsetTableModel.NUM_FEATURES_COLUMN).setMinWidth(100);	
+		fixedWidthColumns.add(model.getColumnIndex(
 				FeatureSubsetTableModel.ACTIVE_COLUMN));
-//		fixedWidthColumns.add(getColumnIndex(
-//				FeatureSubsetTableModel.NUM_FEATURES_COLUMN));
+		fixedWidthColumns.add(model.getColumnIndex(
+				FeatureSubsetTableModel.NUM_FEATURES_COLUMN));
 		
 		this.addMouseListener(
 

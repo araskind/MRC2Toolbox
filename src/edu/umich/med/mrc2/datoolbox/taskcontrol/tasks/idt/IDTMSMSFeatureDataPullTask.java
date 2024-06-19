@@ -130,7 +130,7 @@ public class IDTMSMSFeatureDataPullTask extends IDTMSMSFeatureSearchTask {
 		if(featureIds == null || featureIds.isEmpty())
 			return;
 
-		taskDescription = "Getting feature data from IDTracker database";
+		taskDescription = "Getting feature data from cash";
 		total = featureIds.size();
 		processed = 0;
 		Set<String>cachedIds = new HashSet<String>();

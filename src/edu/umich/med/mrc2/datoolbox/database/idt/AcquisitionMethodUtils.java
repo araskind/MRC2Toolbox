@@ -221,17 +221,22 @@ public class AcquisitionMethodUtils {
 		ConnectionManager.releaseConnection(conn);
 	}
 
-	public static void getAcquisitionMethodFile(DataAcquisitionMethod selectedMethod, File destinationFolder)  throws Exception{
+	public static void getAcquisitionMethodFile(
+			DataAcquisitionMethod selectedMethod, 
+			File destinationFolder)  throws Exception{
 
 		//	Get zip from database
 		Connection conn = ConnectionManager.getConnection();
-		String query = "SELECT METHOD_CONTAINER FROM DATA_ACQUISITION_METHOD WHERE ACQ_METHOD_ID = ?";
+		String query = "SELECT METHOD_CONTAINER "
+				+ "FROM DATA_ACQUISITION_METHOD WHERE ACQ_METHOD_ID = ?";
 		PreparedStatement ps = conn.prepareStatement(query);
 		ps.setString(1, selectedMethod.getId());
 		ResultSet rs = ps.executeQuery();
-		File zipFile = Paths.get(destinationFolder.getAbsolutePath(), selectedMethod.getName() + ".zip").toFile();
+		File zipFile = Paths.get(destinationFolder.getAbsolutePath(), 
+				selectedMethod.getName() + ".zip").toFile();
 		while (rs.next()) {
-			BufferedInputStream is = new BufferedInputStream(rs.getBinaryStream("METHOD_CONTAINER"));
+			BufferedInputStream is = 
+					new BufferedInputStream(rs.getBinaryStream("METHOD_CONTAINER"));
 			FileOutputStream fos = new FileOutputStream(zipFile);
 			byte[] buffer = new byte[2048];
 			int r = 0;
@@ -254,7 +259,9 @@ public class AcquisitionMethodUtils {
 		//	Extract archive and delete zip;
 		if(zipFile.exists()) {
 
-            ZipArchiveInputStream zipStream = new ZipArchiveInputStream(new BufferedInputStream(new FileInputStream(zipFile)));
+            ZipArchiveInputStream zipStream = 
+            		new ZipArchiveInputStream(
+            				new BufferedInputStream(new FileInputStream(zipFile)));
             ZipArchiveEntry entry;
             FileOutputStream fos;
             while ((entry = zipStream.getNextZipEntry()) != null) {

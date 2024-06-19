@@ -267,8 +267,10 @@ public class DockableAcquisitionMethodManagerPanel extends AbstractIDTrackerLims
 
 	private void showAcquisitionMethodEditor(DataAcquisitionMethod method) {
 
-		acquisitionMethodEditorDialog = new AcquisitionMethodExtendedEditorDialog(method, this);
-		acquisitionMethodEditorDialog.setLocationRelativeTo(idTrackerLimsManager.getContentPane());
+		acquisitionMethodEditorDialog = 
+				new AcquisitionMethodExtendedEditorDialog(method, this);
+		acquisitionMethodEditorDialog.setLocationRelativeTo(
+				idTrackerLimsManager.getContentPane());
 		acquisitionMethodEditorDialog.setVisible(true);
 	}
 
@@ -302,7 +304,8 @@ public class DockableAcquisitionMethodManagerPanel extends AbstractIDTrackerLims
 	@Override
 	public void loadPreferences(Preferences prefs) {
 		preferences = prefs;
-		baseDirectory =  new File(preferences.get(BASE_DIRECTORY, MRC2ToolBoxConfiguration.getDefaultDataDirectory()));
+		baseDirectory =  new File(preferences.get(BASE_DIRECTORY, 
+				MRC2ToolBoxConfiguration.getDefaultDataDirectory()));
 	}
 
 	@Override

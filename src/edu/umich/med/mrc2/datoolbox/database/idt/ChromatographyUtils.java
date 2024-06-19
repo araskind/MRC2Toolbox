@@ -46,9 +46,11 @@ public class ChromatographyUtils {
 				4);
 		gradient.setId(nextId);
 		String query  = 
-				"INSERT INTO CHROMATOGRAPHIC_GRADIENT(GRADIENT_ID, GRADIENT_NAME, GRADIENT_DESCRIPTION, "
-				+ "MOBILE_PHASE_A, MOBILE_PHASE_B, MOBILE_PHASE_C, MOBILE_PHASE_D, COLUMN_COMPARTMENT_TEMPERATURE, STOP_TIME) "
-				+ "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)";
+			"INSERT INTO CHROMATOGRAPHIC_GRADIENT("
+			+ "GRADIENT_ID, GRADIENT_NAME, GRADIENT_DESCRIPTION, "
+			+ "MOBILE_PHASE_A, MOBILE_PHASE_B, MOBILE_PHASE_C, "
+			+ "MOBILE_PHASE_D, COLUMN_COMPARTMENT_TEMPERATURE, STOP_TIME) "
+			+ "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
 		PreparedStatement ps = conn.prepareStatement(query);
 		ps.setString(1, gradient.getId());
@@ -65,9 +67,11 @@ public class ChromatographyUtils {
 		
 		//	Insert gradient steps		
 		query = 
-				"INSERT INTO CHROMATOGRAPHIC_GRADIENT(GRADIENT_ID, START_TIME, MOBILE_PHASE_A_START_VALUE, "
-				+ "MOBILE_PHASE_B_START_VALUE, MOBILE_PHASE_C_START_VALUE, MOBILE_PHASE_D_START_VALUE, FLOW_RATE) "
-				+ "VALUES(?, ?, ?, ?, ?, ?, ?)";
+			"INSERT INTO CHROMATOGRAPHIC_GRADIENT_STEP("
+			+ "GRADIENT_ID, START_TIME, MOBILE_PHASE_A_START_VALUE, "
+			+ "MOBILE_PHASE_B_START_VALUE, MOBILE_PHASE_C_START_VALUE, "
+			+ "MOBILE_PHASE_D_START_VALUE, FLOW_RATE) "
+			+ "VALUES(?, ?, ?, ?, ?, ?, ?)";
 		ps = conn.prepareStatement(query);
 		ps.setString(1, gradient.getId());
 		for(ChromatographicGradientStep step : gradient.getGradientSteps()) {
@@ -135,7 +139,9 @@ public class ChromatographyUtils {
 				4);
 		phase.setId(nextId);
 		String query  = 
-				"INSERT INTO MOBILE_PHASE (MOBILE_PHASE_ID, MOBILE_PHASE_NAME) VALUES(?, ?)";
+				"INSERT INTO MOBILE_PHASE ("
+				+ "MOBILE_PHASE_ID, MOBILE_PHASE_NAME) "
+				+ "VALUES(?, ?)";
 
 		PreparedStatement ps = conn.prepareStatement(query);
 		ps.setString(1, phase.getId());
@@ -167,7 +173,8 @@ public class ChromatographyUtils {
 		
 		Connection conn = ConnectionManager.getConnection();
 		String query = 
-			"UPDATE MOBILE_PHASE SET MOBILE_PHASE_NAME = ? WHERE MOBILE_PHASE_ID = ?";
+			"UPDATE MOBILE_PHASE SET MOBILE_PHASE_NAME = ? "
+			+ "WHERE MOBILE_PHASE_ID = ?";
 
 		PreparedStatement ps = conn.prepareStatement(query);
 		ps.setString(1, phase.getName());
@@ -202,7 +209,8 @@ public class ChromatographyUtils {
 		
 		Collection<MobilePhase>mobilePhaseList = new TreeSet<MobilePhase>();
 		String query = 
-				"SELECT MOBILE_PHASE_ID, MOBILE_PHASE_NAME FROM MOBILE_PHASE ORDER BY 1";
+				"SELECT MOBILE_PHASE_ID, MOBILE_PHASE_NAME "
+				+ "FROM MOBILE_PHASE ORDER BY 1";
 
 		PreparedStatement ps = conn.prepareStatement(query);
 		ResultSet rs = ps.executeQuery();
@@ -223,7 +231,8 @@ public class ChromatographyUtils {
 		String id = null;
 		Connection conn = ConnectionManager.getConnection();
 		String query = 
-			"SELECT MOBILE_PHASE_ID FROM MOBILE_PHASE WHERE UPPER(MOBILE_PHASE_NAME) = ?";
+			"SELECT MOBILE_PHASE_ID FROM MOBILE_PHASE "
+			+ "WHERE UPPER(MOBILE_PHASE_NAME) = ?";
 
 		PreparedStatement ps = conn.prepareStatement(query);
 		ps.setString(1, phaseToCheck.getName().toUpperCase());
@@ -242,7 +251,8 @@ public class ChromatographyUtils {
 		boolean hasConflict = false;
 		Connection conn = ConnectionManager.getConnection();
 		String query = 
-			"SELECT MOBILE_PHASE_ID FROM MOBILE_PHASE WHERE UPPER(MOBILE_PHASE_NAME) = ?";
+			"SELECT MOBILE_PHASE_ID FROM MOBILE_PHASE "
+			+ "WHERE UPPER(MOBILE_PHASE_NAME) = ?";
 
 		PreparedStatement ps = conn.prepareStatement(query);
 		ps.setString(1, phaseToCheck.getName().toUpperCase());

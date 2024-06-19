@@ -103,7 +103,8 @@ public class DockableAcquisitionMethodDataPanel extends DefaultSingleCDockable
 	
 	public DockableAcquisitionMethodDataPanel(JDialog parentDialog) {
 
-		super("DockableAcquisitionMethodDataPanel", componentIcon, "Method data", null, Permissions.MIN_MAX_STACK);
+		super("DockableAcquisitionMethodDataPanel", componentIcon, 
+				"Method data", null, Permissions.MIN_MAX_STACK);
 		setCloseable(false);
 		setLayout(new BorderLayout(0,0));
 		this.parentDialog = parentDialog;
@@ -162,6 +163,31 @@ public class DockableAcquisitionMethodDataPanel extends DefaultSingleCDockable
 		loadPreferences();
 		//initChooser();
 		separationTypeComboBox.addItemListener(this);
+	}
+	
+	@SuppressWarnings("unchecked")
+	public void clearPanel() {
+		
+		method = null;	
+		polarityComboBox.setSelectedIndex(-1);
+		msTypeComboBox.setSelectedIndex(-1);
+		
+		columnComboBox.setModel(
+				new SortedComboBoxModel<LIMSChromatographicColumn>(
+						IDTDataCache.getChromatographicColumns()));
+		columnComboBox.setSelectedIndex(-1);
+		
+		ionizationTypeComboBox.setSelectedIndex(-1);
+		massAnalyzerComboBox.setSelectedIndex(-1);
+		separationTypeComboBox.setSelectedIndex(-1);
+		separationTypeComboBox.removeItemListener(this);
+		separationTypeComboBox.addItemListener(this);		
+		idValueLabel.setText("");
+		dateCreatedLabel.setText("");
+		methodNameTextField.setText("");
+		descriptionTextArea.setText("");
+		methodAuthorLabel.setText("");
+		softwareNameTextField.setText("");
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })

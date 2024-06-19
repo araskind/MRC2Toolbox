@@ -62,6 +62,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
@@ -210,7 +211,7 @@ public class RegexTest {
 				MRC2ToolBoxCore.configDir + "MRC2ToolBoxPrefs.txt");
 		MRC2ToolBoxConfiguration.initConfiguration();
 		try {
-			batchDFileRename();
+			downloadAllAcqMethods();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -738,7 +739,9 @@ public class RegexTest {
 	}
 	
 	private static void downloadAllAcqMethods() {
-		File destination = new File("E:\\DataAnalysis\\METHODS\\Acquisition\\Uploaded\\AS_OF_20220104_2");
+		
+		File destination = 
+				new File("E:\\DataAnalysis\\METHODS\\Acquisition\\Uploaded\\AS_OF_20240618\\MSMS");
 		Collection<DataAcquisitionMethod> list = null;
 		try {
 			list = AcquisitionMethodUtils.getAcquisitionMethodList();
@@ -746,16 +749,21 @@ public class RegexTest {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		for(DataAcquisitionMethod method : list) {
-			
-			if (method.getIonizationType() != null && method.getIonizationType().getId().equals("ESI")) {
-				try {
-					AcquisitionMethodUtils.getAcquisitionMethodFile(method, destination);
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
+		List<DataAcquisitionMethod> toDownload = list.stream().
+			filter(m -> Objects.nonNull(m.getIonizationType())).
+			filter(m -> m.getIonizationType().getId().equals("ESI")).			
+			filter(m -> Objects.nonNull(m.getMsType())).
+			filter(m -> m.getMsType().getId().equals("HRMSMS")).
+			collect(Collectors.toList());
+		
+		for(DataAcquisitionMethod method : toDownload) {			
+
+			try {
+				AcquisitionMethodUtils.getAcquisitionMethodFile(method, destination);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}			
 		}
 	}
 	

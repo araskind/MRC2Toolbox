@@ -97,8 +97,12 @@ public class AcquisitionMethodExtendedEditorDialog extends JDialog implements Pe
 		dataPanel = new DockableAcquisitionMethodDataPanel(this);
 		gradientChartPanel = new DockableGradientChartPanel();
 		gradientTable = new DockableChromatographicGradientTable();
-		mobilePhaseAndParametersPanel = new DockableMobilePhaseAndParametersPanel();
-		grid.add(0, 0, 75, 100, dataPanel, gradientChartPanel, gradientTable, mobilePhaseAndParametersPanel);
+
+		mobilePhaseAndParametersPanel = 
+				new DockableMobilePhaseAndParametersPanel();
+		grid.add(0, 0, 75, 100, dataPanel, 
+				gradientChartPanel, gradientTable, 
+				mobilePhaseAndParametersPanel);
 
 		control.getContentArea().deploy(grid);
 		getContentPane().add(control.getContentArea(), BorderLayout.CENTER);
@@ -122,7 +126,8 @@ public class AcquisitionMethodExtendedEditorDialog extends JDialog implements Pe
 		btnSave.addActionListener(actionListener);
 		panel.add(btnSave);
 		JRootPane rootPane = SwingUtilities.getRootPane(btnSave);
-		rootPane.registerKeyboardAction(al, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
+		rootPane.registerKeyboardAction(al, stroke, 
+				JComponent.WHEN_IN_FOCUSED_WINDOW);
 		rootPane.setDefaultButton(btnSave);
 		
 		loadMethodData();
@@ -143,18 +148,24 @@ public class AcquisitionMethodExtendedEditorDialog extends JDialog implements Pe
 
 			setTitle("Add new data acquisition method");
 			setIconImage(((ImageIcon) addMethodIcon).getImage());
-			btnSave.setActionCommand(MainActionCommands.ADD_ACQUISITION_METHOD_COMMAND.getName());
+			btnSave.setActionCommand(
+					MainActionCommands.ADD_ACQUISITION_METHOD_COMMAND.getName());
 		}
 		else {
 			setTitle("Edit information for " + method.getName());
 			setIconImage(((ImageIcon) editMethodIcon).getImage());
-			btnSave.setActionCommand(MainActionCommands.EDIT_ACQUISITION_METHOD_COMMAND.getName());
+			btnSave.setActionCommand(
+					MainActionCommands.EDIT_ACQUISITION_METHOD_COMMAND.getName());
 		}
 		dataPanel.loadMethodData(method);
+		loadGradientData(method.getChromatographicGradient());
+	}
+	
+	public void loadGradientData(ChromatographicGradient gradient) {
 		
-		//	TODO load gradient
-		
-//		pack();
+		gradientChartPanel.showGradient(gradient);
+		gradientTable.setTableModelFromGradient(gradient);
+		mobilePhaseAndParametersPanel.loadGradientData(gradient);
 	}
 	
 	public void setMethodFile(File methodFile) {
@@ -167,25 +178,18 @@ public class AcquisitionMethodExtendedEditorDialog extends JDialog implements Pe
 	
 	public synchronized void clearPanel() {
 		
+		dataPanel.clearPanel();
 		gradientChartPanel.clearPanel();
 		gradientTable.clearTable();
 		mobilePhaseAndParametersPanel.clearPanel();
-	}
-
-	public void loadGradientData(ChromatographicGradient gradient) {
-		
-		gradientChartPanel.showGradient(gradient);
-		gradientTable.setTableModelFromGradient(gradient);
-		mobilePhaseAndParametersPanel.loadGradientData(gradient);
 	}
 	
 	public Collection<String>validateMethodData(){
 		
 		Collection<String>errors = new ArrayList<String>();
 		errors.addAll(dataPanel.validateMethodData());
-		
-		//	TODO other panels data validation
-
+		errors.addAll(gradientTable.validateGradientTableData());
+		errors.addAll(mobilePhaseAndParametersPanel.validateMobilePhaseData());
 		return errors;
 	}
 	

@@ -58,13 +58,12 @@ public class CompoundSynonymTable extends BasicTable {
 		defaultColumn.setCellRenderer(new RadioButtonRenderer());
 		defaultColumn.setCellEditor(new RadioButtonEditor(new JCheckBox()));
 		defaultColumn.setWidth(70);
-		fixedWidthColumns.add(model.getColumnIndex(CompoundSynonymTableModel.DEFAULT_COLUMN));
+		fixedWidthColumns.add(defaultColumn.getModelIndex());
+		
 		columnModel.getColumnById(CompoundSynonymTableModel.SYNONYM_COLUMN).
 				setCellRenderer(new WordWrapCellRenderer());
 
 		thf = new TableFilterHeader(this, AutoChoices.ENABLED);
-//		loadSavedLayout();
-//		tll = new TableLayoutListener(this);
 		finalizeLayout();
 	}
 	

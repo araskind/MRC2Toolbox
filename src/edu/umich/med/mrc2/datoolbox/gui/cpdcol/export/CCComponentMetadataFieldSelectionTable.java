@@ -51,9 +51,9 @@ public class CCComponentMetadataFieldSelectionTable extends BasicTable {
 		columnModel.getColumnById(
 				CCComponentMetadataFieldSelectionTableModel.CATEGORY_COLUMN).setMaxWidth(150);
 		
-		fixedWidthColumns.add(getColumnIndex(
+		fixedWidthColumns.add(model.getColumnIndex(
 				CCComponentMetadataFieldSelectionTableModel.SELECTED_COLUMN));
-		fixedWidthColumns.add(getColumnIndex(
+		fixedWidthColumns.add(model.getColumnIndex(
 				CCComponentMetadataFieldSelectionTableModel.CATEGORY_COLUMN));
 		
 		thf = new TableFilterHeader(this, AutoChoices.ENABLED);

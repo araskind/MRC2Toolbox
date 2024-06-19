@@ -62,4 +62,6 @@ public class DockableGradientChartPanel extends DefaultSingleCDockable {
 	public void setPreferredChartSize(int width, int height) {
 		gradientChartPanel.setPreferredSize(new Dimension(width, height));
 	}
+	
+
 }

@@ -54,7 +54,7 @@ public class ConcentrationsTable extends BasicTable {
 				columnModel.getColumnById(ConcentrationsTableModel.COMMENTS_COLUMN);
 		commentsColumn.setCellRenderer(new WordWrapCellRenderer()); 
 		commentsColumn.setMinWidth(200);
-		fixedWidthColumns.add(model.getColumnIndex(ConcentrationsTableModel.COMMENTS_COLUMN));
+		fixedWidthColumns.add(commentsColumn.getModelIndex());
 
 		thf = new TableFilterHeader(this, AutoChoices.ENABLED);
 		finalizeLayout();

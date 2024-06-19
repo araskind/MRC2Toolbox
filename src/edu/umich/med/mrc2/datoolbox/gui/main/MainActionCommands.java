@@ -824,6 +824,11 @@ public enum MainActionCommands {
 	EDIT_MOBILE_PHASE_COMMAND("Save edited mobile phase"),
 	DELETE_MOBILE_PHASE_COMMAND("Delete mobile phase"),
 	
+	//	Gradient mobile phase editor
+	SET_MOBILE_PHASE_FOR_GRADIENT_CHANEL_DIALOG_COMMAND("Select mobile phase for gradient chanel"),
+	SET_MOBILE_PHASE_FOR_GRADIENT_CHANEL_COMMAND("Set mobile phase for gradient chanel"),
+	CLEAR_MOBILE_PHASE_FOR_GRADIENT_CHANEL_COMMAND("Clear mobile phase for gradient chanel"),
+	
 	//	Gradient step editor
 	ADD_GRADIENT_STEP_COMMAND("Add gradient step"),
 	DELETE_GRADIENT_STEP_COMMAND("Delete gradient step"),

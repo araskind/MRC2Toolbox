@@ -29,6 +29,8 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import javax.xml.xpath.XPathExpressionException;
+
 import org.apache.commons.jcs3.access.exception.InvalidArgumentException;
 import org.openscience.cdk.aromaticity.Aromaticity;
 import org.openscience.cdk.inchi.InChIGenerator;
@@ -44,6 +46,7 @@ import org.openscience.cdk.tautomers.InChITautomerGenerator;
 import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator;
 
 import edu.umich.med.mrc2.datoolbox.data.MsPoint;
+import edu.umich.med.mrc2.datoolbox.data.lims.ChromatographicGradient;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusteringParameterSet;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.database.idt.MSMSClusteringDBUtils;
@@ -53,6 +56,7 @@ import edu.umich.med.mrc2.datoolbox.main.config.FilePreferencesFactory;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.utils.MSMSClusteringUtils;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
+import edu.umich.med.mrc2.datoolbox.utils.acqmethod.AgilentAcquisitionMethodParser;
 
 public class RunContainer2 {
 
@@ -78,8 +82,25 @@ public class RunContainer2 {
 		MRC2ToolBoxConfiguration.initConfiguration();
 
 		try {
-			getMSMSClusteringParameterSets();
+			testAgilentMethodParser();
 		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	private static void testAgilentMethodParser() {
+		
+		File methodFolder = 
+				new File ("E:\\DataAnalysis\\METHODS\\Acquisition\\Uploaded\\"
+				+ "AS_OF_20240618\\MSMS\\0226ST_posCSH_autoMS2_targetISTDMS2_tissue_it3.m");
+		AgilentAcquisitionMethodParser amp = 
+				new AgilentAcquisitionMethodParser(methodFolder);
+		amp.parseParameterFiles();
+		ChromatographicGradient grad = null;		
+		try {
+			grad = amp.extractGradientData();
+		} catch (XPathExpressionException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}

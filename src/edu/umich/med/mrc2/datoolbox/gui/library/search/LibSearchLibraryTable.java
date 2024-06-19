@@ -62,8 +62,8 @@ public class LibSearchLibraryTable extends BasicTable {
 		
 		columnModel.getColumnById(LibSearchLibraryTableModel.USE_COLUMN).setMaxWidth(50);
 		columnModel.getColumnById(LibSearchLibraryTableModel.POLARITY_COLUMN).setMaxWidth(50);
-		fixedWidthColumns.add(getColumnIndex(LibSearchLibraryTableModel.USE_COLUMN));
-		fixedWidthColumns.add(getColumnIndex(LibSearchLibraryTableModel.POLARITY_COLUMN));
+		fixedWidthColumns.add(model.getColumnIndex(LibSearchLibraryTableModel.USE_COLUMN));
+		fixedWidthColumns.add(model.getColumnIndex(LibSearchLibraryTableModel.POLARITY_COLUMN));
 
 		thf = new TableFilterHeader(this, AutoChoices.ENABLED);
 		finalizeLayout();

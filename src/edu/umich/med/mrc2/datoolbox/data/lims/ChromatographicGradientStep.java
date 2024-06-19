@@ -34,16 +34,16 @@ public class ChromatographicGradientStep implements Serializable, Comparable<Chr
 	private double flowRate;
 	private double[] mobilePhaseStartingPercent;
 
-	public ChromatographicGradientStep(double startTime, double mobilePhaseBpercent, double flowRate) {
-		super();
-		this.startTime = startTime;
-		this.flowRate = flowRate;
-		mobilePhaseStartingPercent = new double[]{
+	public ChromatographicGradientStep(
+			double startTime, 
+			double mobilePhaseBpercent, 
+			double flowRate) {
+		this(startTime, 
+			flowRate,
 			100.0d - mobilePhaseBpercent,
 			mobilePhaseBpercent,
 			0.0d,
-			0.0
-		};
+			0.0d);
 	}
 
 	public ChromatographicGradientStep(

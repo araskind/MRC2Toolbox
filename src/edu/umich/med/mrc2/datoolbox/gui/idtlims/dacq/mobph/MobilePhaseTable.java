@@ -46,13 +46,12 @@ public class MobilePhaseTable extends BasicTable {
 		model =  new MobilePhaseTableModel();
 		setModel(model);
 		rowSorter = new TableRowSorter<MobilePhaseTableModel>((MobilePhaseTableModel)model);
-		setRowSorter(rowSorter);
-		
+		setRowSorter(rowSorter);		
 		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-
 		columnModel.getColumnById(MobilePhaseTableModel.MOBILE_PHASE_DESCRIPTION_COLUMN)
 			.setCellRenderer(new WordWrapCellRenderer());
 		columnModel.getColumnById(MobilePhaseTableModel.MOBILE_PHASE_ID_COLUMN).setWidth(80);
+		columnModel.getColumnById(MobilePhaseTableModel.MOBILE_PHASE_ID_COLUMN).setMaxWidth(80);
 		fixedWidthColumns.add(model.getColumnIndex(MobilePhaseTableModel.MOBILE_PHASE_ID_COLUMN));
 		thf = new TableFilterHeader(this, AutoChoices.ENABLED);
 		thf.getParserModel().setFormat(MobilePhase.class, new MobilePhaseFormat(SortProperty.ID));		
@@ -74,6 +73,22 @@ public class MobilePhaseTable extends BasicTable {
 
 		return (MobilePhase) model.getValueAt(convertRowIndexToModel(row),
 				model.getColumnIndex(MobilePhaseTableModel.MOBILE_PHASE_ID_COLUMN));
+	}
+	
+	public void selectMobilePhase(MobilePhase toSelect) {
+		
+		if(toSelect == null) {
+			clearSelection();
+			return;
+		}
+		int col = model.getColumnIndex(MobilePhaseTableModel.MOBILE_PHASE_ID_COLUMN);
+		for(int i= 0; i<getRowCount(); i++) {
+			
+			if(((MobilePhase) model.getValueAt(convertRowIndexToModel(i),col)).equals(toSelect)){
+				setRowSelectionInterval(i, i);
+				return;
+			}
+		}
 	}
 }
 

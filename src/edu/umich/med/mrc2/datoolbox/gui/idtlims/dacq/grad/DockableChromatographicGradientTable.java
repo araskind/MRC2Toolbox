@@ -22,6 +22,8 @@
 package edu.umich.med.mrc2.datoolbox.gui.idtlims.dacq.grad;
 
 import java.awt.BorderLayout;
+import java.util.ArrayList;
+import java.util.Collection;
 
 import javax.swing.Icon;
 import javax.swing.JScrollPane;
@@ -57,5 +59,13 @@ public class DockableChromatographicGradientTable extends DefaultSingleCDockable
 	
 	public void setTableModelFromGradient(ChromatographicGradient gradient) {
 		gradientTable.setTableModelFromGradient(gradient);
+	}
+	
+	//	TODO
+	public Collection<String>validateGradientTableData(){
+		
+		Collection<String>errors = new ArrayList<String>();
+
+		return errors;
 	}
 }

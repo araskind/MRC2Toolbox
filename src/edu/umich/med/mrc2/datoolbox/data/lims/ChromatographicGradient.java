@@ -24,6 +24,10 @@ package edu.umich.med.mrc2.datoolbox.data.lims;
 import java.io.Serializable;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.UUID;
+
+import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
+import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
 
 public class ChromatographicGradient implements Serializable {
 
@@ -40,6 +44,15 @@ public class ChromatographicGradient implements Serializable {
 	private Set<ChromatographicGradientStep>gradientSteps;
 	private MobilePhase[] mobilePhases;
 	
+	public ChromatographicGradient() {
+		super();
+		id = DataPrefix.CROMATOGRAPHIC_GRADIENT.getName() + 
+				UUID.randomUUID().toString().substring(0, 6);
+		name = "ChromGradient-" + FIOUtils.getTimestamp();
+		mobilePhases = new MobilePhase[4];
+		gradientSteps = new TreeSet<ChromatographicGradientStep>();
+	}
+
 	public ChromatographicGradient(
 			String id, 
 			String name, 
@@ -62,15 +75,7 @@ public class ChromatographicGradient implements Serializable {
 			String description, 
 			double columnCompartmentTemperature,
 			double stopTime) {
-		super();
-		this.id = null;
-		this.name = name;
-		this.description = description;
-		this.columnCompartmentTemperature = columnCompartmentTemperature;
-		this.stopTime = stopTime;
-		
-		mobilePhases = new MobilePhase[4];
-		gradientSteps = new TreeSet<ChromatographicGradientStep>();
+		this(null, name, description, columnCompartmentTemperature, stopTime);
 	}
 	
 	public void setMobilePhase(MobilePhase phase, int order) {
@@ -118,6 +123,11 @@ public class ChromatographicGradient implements Serializable {
 	 */
 	public Set<ChromatographicGradientStep> getGradientSteps() {
 		return gradientSteps;
+	}
+	
+	public ChromatographicGradientStep[]getGradientStepsArray() {
+		return gradientSteps.toArray(
+				new ChromatographicGradientStep[gradientSteps.size()]);
 	}
 
 	/**

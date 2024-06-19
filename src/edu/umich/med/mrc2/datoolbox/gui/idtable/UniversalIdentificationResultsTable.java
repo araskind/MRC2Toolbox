@@ -182,10 +182,10 @@ public class UniversalIdentificationResultsTable extends BasicTable {
 		columnModel.getColumnById(UniversalIdentificationResultsTableModel.ID_CONFIDENCE_COLUMN).setWidth(50);
 		columnModel.getColumnById(UniversalIdentificationResultsTableModel.IDENTIFICATION_COLUMN).setMinWidth(200);
 		
-		fixedWidthColumns.add(getColumnIndex(UniversalIdentificationResultsTableModel.DEFAULT_ID_COLUMN));
-		fixedWidthColumns.add(getColumnIndex(UniversalIdentificationResultsTableModel.ID_LEVEL_COLUMN));
-		fixedWidthColumns.add(getColumnIndex(UniversalIdentificationResultsTableModel.MSMS_MATCH_TYPE_COLUMN));
-		fixedWidthColumns.add(getColumnIndex(UniversalIdentificationResultsTableModel.ID_CONFIDENCE_COLUMN));
+		fixedWidthColumns.add(model.getColumnIndex(UniversalIdentificationResultsTableModel.DEFAULT_ID_COLUMN));
+		fixedWidthColumns.add(model.getColumnIndex(UniversalIdentificationResultsTableModel.ID_LEVEL_COLUMN));
+		fixedWidthColumns.add(model.getColumnIndex(UniversalIdentificationResultsTableModel.MSMS_MATCH_TYPE_COLUMN));
+		fixedWidthColumns.add(model.getColumnIndex(UniversalIdentificationResultsTableModel.ID_CONFIDENCE_COLUMN));
 		
 		//	Database link adapter
 		MouseMotionAdapter mma = new MouseMotionAdapter() {

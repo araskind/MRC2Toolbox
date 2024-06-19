@@ -192,6 +192,10 @@ public class DataAcquisitionMethod extends AnalysisMethod implements Serializabl
 	 * @return the chromatographicGradient
 	 */
 	public ChromatographicGradient getChromatographicGradient() {
+		
+		if(chromatographicGradient == null)
+			chromatographicGradient = new ChromatographicGradient();
+		
 		return chromatographicGradient;
 	}
 
