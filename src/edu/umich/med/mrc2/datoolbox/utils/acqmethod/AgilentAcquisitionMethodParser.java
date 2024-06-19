@@ -45,6 +45,7 @@ import org.jdom2.Namespace;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortDirection;
 import edu.umich.med.mrc2.datoolbox.data.lims.ChromatographicGradient;
 import edu.umich.med.mrc2.datoolbox.data.lims.ChromatographicGradientStep;
+import edu.umich.med.mrc2.datoolbox.data.lims.MobilePhase;
 import edu.umich.med.mrc2.datoolbox.utils.MapUtils;
 import edu.umich.med.mrc2.datoolbox.utils.XmlUtils;
 
@@ -64,7 +65,7 @@ public class AgilentAcquisitionMethodParser {
 			Namespace.getNamespace("xsi", "http://www.w3.org/2001/XMLSchema-instance");
 		
 	private File methodFolder;
-	//	private File tmpProcessingFolder;
+	private Map<String,Integer>agilentChannelMap;
 	
 	@SuppressWarnings("unused")
 	private Document 
@@ -85,6 +86,12 @@ public class AgilentAcquisitionMethodParser {
 		quaternaryPumpParameterDocument = null;
 		columnCompartmentParameterDocument = null;
 		autosamplerParameterDocument = null;
+		
+		agilentChannelMap = new TreeMap<String,Integer>();
+		agilentChannelMap.put("Channel_A", 0);
+		agilentChannelMap.put("Channel_B", 1);
+		agilentChannelMap.put("Channel_C", 2);
+		agilentChannelMap.put("Channel_D", 3);
 	}
 	
 	public void parseParameterFiles() {
@@ -131,11 +138,62 @@ public class AgilentAcquisitionMethodParser {
 					parseTimetableElement(timeTableElement, ns, startingFlowRate);
 			grad.getGradientSteps().addAll(gradSteps);
 		}
-		//	Optionally get column compartment temperature. How to handle 2 compartments?
-		if(columnCompartmentParameterDocument != null) {
+		Element solventCompositionElement = 
+				pumpConfigElement.getChild("SolventComposition", ns);
+		if(solventCompositionElement != null) {
 			
-		}		
+			MobilePhase[]mobilePhases = 
+					parseSolventCompositionElement(solventCompositionElement,  ns);
+			for(int i=0; i<4; i++)
+				grad.setMobilePhase(mobilePhases[i], i);			
+		}
+		//	Optionally get column compartment temperature. 
+		//	How to handle 2 compartments?
+		//		if(columnCompartmentParameterDocument != null) {
+		//			
+		//			Element ccConfigElement = columnCompartmentParameterDocument.getRootElement();
+		//			ns = ccConfigElement.getNamespace();
+		//		}		
 		return grad;
+	}
+	
+	private MobilePhase[]parseSolventCompositionElement(
+			Element solventCompositionElement,
+			Namespace ns){
+		
+		MobilePhase[]mobilePhases = new MobilePhase[4];
+		List<Element> solventElementList = 
+				solventCompositionElement.getChildren("SolventElement", ns);
+		
+		for(int i=0; i<4; i++) {
+			
+			if(solventElementList.size() > i) {
+				
+				Element solventElement = solventElementList.get(i);
+				if(solventElement.getChild("Used").getText().equalsIgnoreCase("true")) {
+					
+					String channelName = solventElement.getChild("Channel").getText();
+					int mpIndex = agilentChannelMap.get(channelName);
+					
+					String selectedSolventChannelDefElementName = 
+							solventElement.getChild("SelectedSolventChannel").getText() + 
+							"ExtendedSolventType";					
+					Element solvDefElement = 
+							solventElement.getChild(selectedSolventChannelDefElementName).
+							getChild("SolventDescription");
+					String solventName = 
+							solvDefElement.getChild("Definition").
+							getChildText("Name").replaceFirst("V\\.\\d\\d", "").trim();
+					if(solvDefElement.getChild("Definition").getChildText("IsPure").equalsIgnoreCase("false")) {
+						
+						String percentString = ", " + solvDefElement.getChildText("Percent") + "%";
+						solventName += percentString;						
+					}
+					mobilePhases[mpIndex] = new MobilePhase(solventName);
+				}
+			}
+		}		
+		return mobilePhases;
 	}
 	
 	private Set<ChromatographicGradientStep> parseTimetableElement(
@@ -249,6 +307,9 @@ public class AgilentAcquisitionMethodParser {
 					percentB, 
 					percentC, 
 					percentD);
+			if(newStep.getFlowRate() <= 0)
+				newStep.setFlowRate(startingFlowRate);
+			
 			gradSteps.add(newStep);
 		}
 		//	Add zero time step

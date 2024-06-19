@@ -93,7 +93,7 @@ public class RunContainer2 {
 		
 		File methodFolder = 
 				new File ("E:\\DataAnalysis\\METHODS\\Acquisition\\Uploaded\\"
-				+ "AS_OF_20240618\\MSMS\\0226ST_posCSH_autoMS2_targetISTDMS2_tissue_it3.m");
+						+ "AS_OF_20240618\\MSMS\\2.1 mm Gradient MS2 240 min.m");
 		AgilentAcquisitionMethodParser amp = 
 				new AgilentAcquisitionMethodParser(methodFolder);
 		amp.parseParameterFiles();
