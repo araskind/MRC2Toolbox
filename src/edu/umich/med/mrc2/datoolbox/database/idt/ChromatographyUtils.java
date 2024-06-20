@@ -147,27 +147,25 @@ public class ChromatographyUtils {
 		ps.setString(1, phase.getId());
 		ps.setString(2, phase.getName());
 		ps.executeUpdate();
+		
+		if(!phase.getSynonyms().isEmpty()) {
+			
+			query  = 
+				"INSERT INTO MOBILE_PHASE_SYNONYMS ("
+				+ "MOBILE_PHASE_ID, MP_SYNONYM) "
+				+ "VALUES(?, ?)";
+			ps = conn.prepareStatement(query);
+			ps.setString(1, phase.getId());
+			for(String syn : phase.getSynonyms()) {
+				ps.setString(2, syn);
+				ps.addBatch();
+			}
+			ps.executeBatch();
+		}
 		ps.close();
 		ConnectionManager.releaseConnection(conn);
 		return nextId;
 	}
-	
-//	public static String getNextMobilePhaseId(Connection conn) throws Exception{
-//		
-//		String nextId = null;
-//		String query  =
-//				"SELECT '" + DataPrefix.MOBILE_PHASE.getName() + 
-//				"' || LPAD(MOBILE_PHASE_SEQ.NEXTVAL, 4, '0') AS NEXT_ID FROM DUAL";
-//		
-//		PreparedStatement ps = conn.prepareStatement(query);
-//		ResultSet rs = ps.executeQuery();
-//		while(rs.next()) {
-//			nextId = rs.getString("NEXT_ID");
-//		}
-//		rs.close();
-//		ps.close();			
-//		return nextId;
-//	}
 	
 	public static void editMobilePhase(MobilePhase phase) throws Exception{
 		
@@ -180,6 +178,28 @@ public class ChromatographyUtils {
 		ps.setString(1, phase.getName());
 		ps.setString(2, phase.getId());
 		ps.executeUpdate();
+		
+		//	Update synonyms
+		query  = 
+			"DELETE FROM MOBILE_PHASE_SYNONYMS MOBILE_PHASE "
+			+ "WHERE MOBILE_PHASE_ID = ?";
+		ps = conn.prepareStatement(query);
+		ps.setString(1, phase.getId());
+		ps.executeUpdate();
+		if(!phase.getSynonyms().isEmpty()) {
+			
+			query  = 
+				"INSERT INTO MOBILE_PHASE_SYNONYMS ("
+				+ "MOBILE_PHASE_ID, MP_SYNONYM) "
+				+ "VALUES(?, ?)";
+			ps = conn.prepareStatement(query);
+			ps.setString(1, phase.getId());
+			for(String syn : phase.getSynonyms()) {
+				ps.setString(2, syn);
+				ps.addBatch();
+			}
+			ps.executeBatch();
+		}	
 		ps.close();
 		ConnectionManager.releaseConnection(conn);
 	}
@@ -211,14 +231,25 @@ public class ChromatographyUtils {
 		String query = 
 				"SELECT MOBILE_PHASE_ID, MOBILE_PHASE_NAME "
 				+ "FROM MOBILE_PHASE ORDER BY 1";
-
 		PreparedStatement ps = conn.prepareStatement(query);
+		String synonymQquery = 
+				"SELECT MP_SYNONYM FROM MOBILE_PHASE_SYNONYMS "
+				+ "WHERE  MOBILE_PHASE_ID = ?";
+		PreparedStatement synonymPs = conn.prepareStatement(synonymQquery);
+		
 		ResultSet rs = ps.executeQuery();
 		while(rs.next()) {
 			
 			MobilePhase p = new MobilePhase(
 					rs.getString("MOBILE_PHASE_ID"), 
 					rs.getString("MOBILE_PHASE_NAME"));
+			
+			synonymPs.setString(1, p.getId());
+			ResultSet synRs = synonymPs.executeQuery();
+			while(synRs.next())
+				p.getSynonyms().add(synRs.getString(1));
+				
+			synRs.close();
 			mobilePhaseList.add(p);
 		}
 		rs.close();

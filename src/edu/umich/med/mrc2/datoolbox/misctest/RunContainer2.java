@@ -22,15 +22,28 @@
 package edu.umich.med.mrc2.datoolbox.misctest;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Set;
+import java.util.TreeSet;
 
 import javax.xml.xpath.XPathExpressionException;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.filefilter.DirectoryFileFilter;
+import org.apache.commons.io.filefilter.FileFilterUtils;
+import org.apache.commons.io.filefilter.IOFileFilter;
+import org.apache.commons.io.filefilter.RegexFileFilter;
 import org.apache.commons.jcs3.access.exception.InvalidArgumentException;
 import org.openscience.cdk.aromaticity.Aromaticity;
 import org.openscience.cdk.inchi.InChIGenerator;
@@ -47,8 +60,10 @@ import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator;
 
 import edu.umich.med.mrc2.datoolbox.data.MsPoint;
 import edu.umich.med.mrc2.datoolbox.data.lims.ChromatographicGradient;
+import edu.umich.med.mrc2.datoolbox.data.lims.MobilePhase;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusteringParameterSet;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.database.idt.MSMSClusteringDBUtils;
 import edu.umich.med.mrc2.datoolbox.dbparse.load.nist.NISTParserUtils;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
@@ -82,7 +97,9 @@ public class RunContainer2 {
 		MRC2ToolBoxConfiguration.initConfiguration();
 
 		try {
-			testAgilentMethodParser();
+			//	extractSolventsFromAgilentMethods();
+			Collection<MobilePhase> mpList = IDTDataCache.getMobilePhaseList();
+			System.out.println("***");
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -102,6 +119,73 @@ public class RunContainer2 {
 			grad = amp.extractGradientData();
 		} catch (XPathExpressionException e) {
 			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	private static void extractSolventsFromAgilentMethods() {
+		
+		File dirToScan = new File(
+				"E:\\DataAnalysis\\METHODS\\Acquisition\\Uploaded\\AS_OF_20240618\\MSMS");
+		IOFileFilter dotMfilter = 
+				FileFilterUtils.makeDirectoryOnly(new RegexFileFilter(".+\\.[mM]$"));
+		Collection<File> methodFolders = FileUtils.listFilesAndDirs(
+				dirToScan,
+				DirectoryFileFilter.DIRECTORY,
+				dotMfilter);
+		Set<String>solventSet  = new TreeSet<String>();
+		Set<String>problemMethodSet  = new TreeSet<String>();
+		int solvCount = 0;
+		for(File methodFolder : methodFolders) {
+			
+			AgilentAcquisitionMethodParser amp = 
+					new AgilentAcquisitionMethodParser(methodFolder);
+			amp.parseParameterFiles();
+			ChromatographicGradient grad = null;		
+			try {
+				grad = amp.extractGradientData();
+			} catch (XPathExpressionException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			if(grad != null) {
+				
+				solvCount = 0;
+				for(MobilePhase mp : grad.getMobilePhases()) {
+					
+					if(mp != null) {
+						solventSet.add(mp.getName());
+						solvCount++;
+					}
+				}
+				if(solvCount == 0)
+					problemMethodSet.add(methodFolder.getName());
+				else
+					System.out.println("Added solvents from " + methodFolder.getName());
+			}
+		}
+		Path outputPath = 
+				Paths.get(dirToScan.getParentFile().getAbsolutePath(), 
+						"MSMSSolvents.txt");
+		try {
+			Files.write(outputPath, 
+					solventSet, 
+					StandardCharsets.UTF_8,
+					StandardOpenOption.CREATE, 
+					StandardOpenOption.TRUNCATE_EXISTING);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		Path errorPath = 
+				Paths.get(dirToScan.getParentFile().getAbsolutePath(), 
+						"MSMSMethodsWithoutSolvents.txt");
+		try {
+			Files.write(errorPath, 
+					problemMethodSet, 
+					StandardCharsets.UTF_8,
+					StandardOpenOption.CREATE, 
+					StandardOpenOption.TRUNCATE_EXISTING);
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}

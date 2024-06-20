@@ -910,6 +910,37 @@ public class IDTDataCache {
 		return mobilePhaseList;
 	}
 	
+	public static MobilePhase getMobilePhaseById(String id) {
+		
+		return getMobilePhaseList().stream().
+				filter(p -> p.getId().equals(id)).
+				findFirst().orElse(null);
+	}
+	
+	public static MobilePhase getMobilePhaseByNameOrSynonym(String query) {
+		
+		getMobilePhaseList();
+		MobilePhase mp = mobilePhaseList.stream().
+				filter(p -> p.getName().equalsIgnoreCase(query)).
+				findFirst().orElse(null);
+		if(mp != null)
+			return mp;
+		else {							
+			for(MobilePhase p : mobilePhaseList) {
+				
+				if(!p.getSynonyms().isEmpty()) {
+					
+					for(String synonym : p.getSynonyms()) {
+						
+						if(synonym.equalsIgnoreCase(query))
+							return p;
+					}
+				}
+			}
+			return null;
+		}
+	}
+	
 	public static Collection<MSFeatureIdentificationLevel>getMsFeatureIdentificationLevelList(){
 		
 		if(msFeatureIdentificationLevelList == null) 

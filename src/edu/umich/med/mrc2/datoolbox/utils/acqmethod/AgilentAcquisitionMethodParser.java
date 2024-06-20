@@ -177,19 +177,24 @@ public class AgilentAcquisitionMethodParser {
 					
 					String selectedSolventChannelDefElementName = 
 							solventElement.getChild("SelectedSolventChannel").getText() + 
-							"ExtendedSolventType";					
-					Element solvDefElement = 
-							solventElement.getChild(selectedSolventChannelDefElementName).
-							getChild("SolventDescription");
-					String solventName = 
-							solvDefElement.getChild("Definition").
-							getChildText("Name").replaceFirst("V\\.\\d\\d", "").trim();
-					if(solvDefElement.getChild("Definition").getChildText("IsPure").equalsIgnoreCase("false")) {
+							"ExtendedSolventType";	
+					
+					Element extendedSolventTypeElement = 
+							solventElement.getChild(selectedSolventChannelDefElementName);
+					if(extendedSolventTypeElement != null) {
 						
-						String percentString = ", " + solvDefElement.getChildText("Percent") + "%";
-						solventName += percentString;						
+						Element solvDefElement = 
+								extendedSolventTypeElement.getChild("SolventDescription");
+						String solventName = 
+								solvDefElement.getChild("Definition").
+								getChildText("Name").replaceFirst("V\\.\\d\\d", "").trim();
+						if(solvDefElement.getChild("Definition").getChildText("IsPure").equalsIgnoreCase("false")) {
+							
+							String percentString = ", " + solvDefElement.getChildText("Percent") + "%";
+							solventName += percentString;						
+						}
+						mobilePhases[mpIndex] = new MobilePhase(solventName);
 					}
-					mobilePhases[mpIndex] = new MobilePhase(solventName);
 				}
 			}
 		}		
@@ -313,19 +318,22 @@ public class AgilentAcquisitionMethodParser {
 			gradSteps.add(newStep);
 		}
 		//	Add zero time step
-		ChromatographicGradientStep firstStep =
-				((TreeSet<ChromatographicGradientStep>)gradSteps).first();
-		if(firstStep.getStartTime() > 0) {
+		if(!gradSteps.isEmpty()) {
 			
-			ChromatographicGradientStep zeroStep = 
-					new ChromatographicGradientStep(
-					0.0d, 
-					startingFlowRate, 
-					firstStep.getMobilePhaseStartingPercent()[0],
-					firstStep.getMobilePhaseStartingPercent()[1], 
-					firstStep.getMobilePhaseStartingPercent()[2], 
-					firstStep.getMobilePhaseStartingPercent()[3]);
-			gradSteps.add(zeroStep);
+			ChromatographicGradientStep firstStep =
+					((TreeSet<ChromatographicGradientStep>)gradSteps).first();
+			if(firstStep.getStartTime() > 0) {
+				
+				ChromatographicGradientStep zeroStep = 
+						new ChromatographicGradientStep(
+						0.0d, 
+						startingFlowRate, 
+						firstStep.getMobilePhaseStartingPercent()[0],
+						firstStep.getMobilePhaseStartingPercent()[1], 
+						firstStep.getMobilePhaseStartingPercent()[2], 
+						firstStep.getMobilePhaseStartingPercent()[3]);
+				gradSteps.add(zeroStep);
+			}
 		}		
 		return gradSteps;
 	}

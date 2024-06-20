@@ -235,6 +235,8 @@ public class AcquisitionMethodUtils {
 		File zipFile = Paths.get(destinationFolder.getAbsolutePath(), 
 				selectedMethod.getName() + ".zip").toFile();
 		while (rs.next()) {
+			
+			Thread.sleep(100);
 			BufferedInputStream is = 
 					new BufferedInputStream(rs.getBinaryStream("METHOD_CONTAINER"));
 			FileOutputStream fos = new FileOutputStream(zipFile);

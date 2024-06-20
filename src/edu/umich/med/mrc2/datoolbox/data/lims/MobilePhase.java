@@ -22,6 +22,8 @@
 package edu.umich.med.mrc2.datoolbox.data.lims;
 
 import java.io.Serializable;
+import java.util.Set;
+import java.util.TreeSet;
 
 public class MobilePhase implements Serializable, Comparable<MobilePhase>{
 
@@ -31,17 +33,17 @@ public class MobilePhase implements Serializable, Comparable<MobilePhase>{
 	private static final long serialVersionUID = -9155091023958759740L;
 	private String id;
 	private String name;
+	private Set<String>synonyms;
 	
 	public MobilePhase(String id, String name) {
 		super();
 		this.id = id;
 		this.name = name;
+		synonyms = new TreeSet<String>();
 	}
 	
 	public MobilePhase(String name) {
-		super();
-		this.id = null;
-		this.name = name;
+		this(null, name);
 	}
 
 	/**
@@ -109,4 +111,8 @@ public class MobilePhase implements Serializable, Comparable<MobilePhase>{
         hash = 53 * hash + (this.id != null ? this.id.hashCode() : 0);
         return hash;
     }
+
+	public Set<String> getSynonyms() {
+		return synonyms;
+	}
 }

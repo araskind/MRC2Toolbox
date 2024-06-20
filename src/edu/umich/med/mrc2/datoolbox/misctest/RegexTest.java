@@ -741,7 +741,7 @@ public class RegexTest {
 	private static void downloadAllAcqMethods() {
 		
 		File destination = 
-				new File("E:\\DataAnalysis\\METHODS\\Acquisition\\Uploaded\\AS_OF_20240618\\MSMS");
+				new File("E:\\DataAnalysis\\METHODS\\Acquisition\\Uploaded\\AS_OF_20240618\\MS1");
 		Collection<DataAcquisitionMethod> list = null;
 		try {
 			list = AcquisitionMethodUtils.getAcquisitionMethodList();
@@ -753,7 +753,7 @@ public class RegexTest {
 			filter(m -> Objects.nonNull(m.getIonizationType())).
 			filter(m -> m.getIonizationType().getId().equals("ESI")).			
 			filter(m -> Objects.nonNull(m.getMsType())).
-			filter(m -> m.getMsType().getId().equals("HRMSMS")).
+			filter(m -> m.getMsType().getId().equals("HRMS")).
 			collect(Collectors.toList());
 		
 		for(DataAcquisitionMethod method : toDownload) {			
