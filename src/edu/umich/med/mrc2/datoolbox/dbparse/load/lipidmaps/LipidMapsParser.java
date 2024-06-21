@@ -273,18 +273,13 @@ public class LipidMapsParser {
 				new ArrayList<LipidMapsClassificationObject>();
 		
 		Connection conn = ConnectionManager.getConnection();		
-//		String query = 
-//				"SELECT ID, CLASS_NAME, CLASS_LEVEL FROM LIPIDMAPS_CLASS";	
-		String query = "SELECT CLASS_ID, NAME, CLASS_LEVEL FROM COMPOUNDDB.LIPIDMAPS_CLASSES";
+		String query = 
+				"SELECT CLASS_ID, NAME, CLASS_LEVEL "
+				+ "FROM COMPOUNDDB.LIPIDMAPS_CLASSES";
 
 		PreparedStatement ps = conn.prepareStatement(query);
 		ResultSet rs = ps.executeQuery();
 		while(rs.next()) {
-//
-//			LipidMapsClassificationObject lco = new LipidMapsClassificationObject(
-//					LipidMapsClassification.getLipidMapsClassificationLevelByName(rs.getString("CLASS_LEVEL")), 
-//					rs.getString("ID"),
-//					rs.getString("CLASS_NAME"));
 			
 			LipidMapsClassificationObject lco = new LipidMapsClassificationObject(
 					LipidMapsClassification.getLipidMapsClassificationLevelByName(rs.getString("CLASS_LEVEL")), 
