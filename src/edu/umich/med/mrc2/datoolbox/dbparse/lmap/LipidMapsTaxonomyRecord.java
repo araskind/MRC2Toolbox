@@ -21,24 +21,45 @@
 
 package edu.umich.med.mrc2.datoolbox.dbparse.lmap;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Map;
+import java.util.TreeMap;
 
 import edu.umich.med.mrc2.datoolbox.dbparse.load.lipidmaps.LipidMapsClassification;
-import edu.umich.med.mrc2.datoolbox.dbparse.load.lipidmaps.LipidMapsClassificationObject;
 
 public class LipidMapsTaxonomyRecord implements Comparable<LipidMapsTaxonomyRecord>{
 
 	private String lmid;
 	private String formula;
 	private String abbreviation;
-	private Set<LipidMapsClassificationObject>lmTaxonomy;
+	private Map<LipidMapsClassification,String>lmTaxonomy;
 		
 	public LipidMapsTaxonomyRecord(String lmid, String formula) {
 		super();
 		this.lmid = lmid;
 		this.formula = formula;
-		lmTaxonomy = new HashSet<LipidMapsClassificationObject>();
+		lmTaxonomy = new TreeMap<LipidMapsClassification,String>();
+	}
+	
+	public boolean hasSameTaxonomy(LipidMapsTaxonomyRecord other) {
+		
+		Map<LipidMapsClassification, String> otherTaxonomy = other.getLmTaxonomy();
+		
+		for(LipidMapsClassification level : LipidMapsClassification.values()) {
+			
+			if(lmTaxonomy.get(level) == null 
+					&& otherTaxonomy.get(level) != null)
+				return false;
+			
+			if(lmTaxonomy.get(level) != null 
+					&& otherTaxonomy.get(level) == null)
+				return false;
+			
+			if(lmTaxonomy.get(level) != null 
+					&& otherTaxonomy.get(level) != null
+					&& !lmTaxonomy.get(level).equals(otherTaxonomy.get(level)))
+				return false;
+		}
+		return true;
 	}
 
 	public String getLmid() {
@@ -50,22 +71,16 @@ public class LipidMapsTaxonomyRecord implements Comparable<LipidMapsTaxonomyReco
 		return lmid;
 	}
 	
-	public Set<LipidMapsClassificationObject> getLmTaxonomy() {
+	public Map<LipidMapsClassification,String> getLmTaxonomy() {
 		return lmTaxonomy;
 	}
 	
-	public String getTaxonomyCodeForLevel(LipidMapsClassification level) {
-		
-		LipidMapsClassificationObject entry = lmTaxonomy.stream().
-				filter(t -> t.getGroup().equals(level)).findFirst().orElse(null);
-		if(entry == null)
-			return null;
-		else
-			return entry.getCode();
+	public String getTaxonomyCodeForLevel(LipidMapsClassification level) {	
+		return lmTaxonomy.get(level);
 	}
     
-    public void addTaxonomyLevel(LipidMapsClassificationObject lmco) {    	
-    	lmTaxonomy.add(lmco);
+    public void addTaxonomyLevel(LipidMapsClassification level, String code) {    	
+    	lmTaxonomy.put(level, code);
     }
 
 	public String getAbbreviation() {

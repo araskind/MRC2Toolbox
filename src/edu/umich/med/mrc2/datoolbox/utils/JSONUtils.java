@@ -59,6 +59,9 @@ public class JSONUtils {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+			if(jsonText == null || jsonText.isEmpty() || !jsonText.startsWith("{"))
+				return null;
+			
 			json = new JSONObject(jsonText);
 		}
 		return json;

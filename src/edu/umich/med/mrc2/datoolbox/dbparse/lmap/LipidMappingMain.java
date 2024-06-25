@@ -29,9 +29,17 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import org.json.JSONObject;
+
+import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.dbparse.load.lipidmaps.LipidMapsClassification;
 import edu.umich.med.mrc2.datoolbox.dbparse.load.lipidmaps.LipidMapsClassificationObject;
@@ -39,6 +47,10 @@ import edu.umich.med.mrc2.datoolbox.dbparse.load.lipidmaps.LipidMapsParser;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.FilePreferencesFactory;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
+import edu.umich.med.mrc2.datoolbox.utils.JSONUtils;
+import edu.umich.med.mrc2.datoolbox.utils.MolFormulaUtils;
+import edu.umich.med.mrc2.datoolbox.utils.PubChemUtils;
+import edu.umich.med.mrc2.datoolbox.utils.SQLUtils;
 
 public class LipidMappingMain {
 
@@ -52,15 +64,530 @@ public class LipidMappingMain {
 				MRC2ToolBoxCore.configDir + "MRC2ToolBoxPrefs.txt");
 		MRC2ToolBoxConfiguration.initConfiguration();
 
-		try {
-			populateLipidMapswithBulkAccessions();
-			//	System.out.println("***");
+		try {			
+			updateBulkIdsFromLipidMaps();
+			
+//			Collection<String>idSet = getLMIDsByAbbreviation("SM(d41:1)");
+//			System.out.println("***");
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 	
+	private static void remapToBulkIdRemovingBrackets2() throws Exception{
+		
+		Connection conn = ConnectionManager.getConnection();
+		String query = 
+				"SELECT DISTINCT LOOKUP_NAME FROM "
+				+ "COMPOUNDDB.RO3_LIPID_REMAP "
+				+ "WHERE BULK_LIPID_ID IS NULL ORDER BY 1";
+		PreparedStatement ps = conn.prepareStatement(query);
+		Map<String,String>abbreviationLookupMap = new TreeMap<String,String>();
+
+		ResultSet rs = ps.executeQuery();
+		while(rs.next()) {
+			String lookupName = rs.getString(1);
+			String correctedName = lookupName.replace("(", " ").replace(")", "").
+					replaceAll("\\s+", " ").trim().toUpperCase();
+			abbreviationLookupMap.put(lookupName, correctedName);		
+		}
+		rs.close();
+		
+		String updQuery =  
+				"UPDATE COMPOUNDDB.RO3_LIPID_REMAP R SET R.BULK_LIPID_ID =  " +
+				"(SELECT B.LM_BULK_ID FROM COMPOUNDDB.LIPIDMAPS_BULK_LIPIDS B " +
+				"WHERE B.ABBREVIATION = ?) " +
+				"WHERE R.LOOKUP_NAME = ? AND R.BULK_LIPID_ID IS NULL ";		
+		PreparedStatement updPs = conn.prepareStatement(updQuery);	
+		for(Entry<String, String> pair : abbreviationLookupMap.entrySet()) {
+			
+			updPs.setString(1, pair.getValue());
+			updPs.setString(2, pair.getKey());
+			updPs.executeUpdate();
+		}
+		ps.close();
+		updPs.close();
+		ConnectionManager.releaseConnection(conn);				
+	}
+	
+	private static void updateBulkIdsFromLipidMaps() throws Exception{
+		
+		Connection conn = ConnectionManager.getConnection();	
+		String query = 
+				"SELECT LOOKUP_NAME, MOL_FORMULA  " +
+				"FROM COMPOUNDDB.RO3_LIPID_REMAP " +
+				"WHERE BULK_LIPID_ID IS NULL  " +
+				//	"AND MOL_FORMULA IS NOT NULL AND MOL_FORMULA NOT LIKE '%D%' " +
+				"ORDER BY 1,2";
+		PreparedStatement ps = conn.prepareStatement(query);		
+		String selectQuery = 
+				"SELECT C.LM_BULK_ID " +
+				"FROM COMPOUNDDB.LIPIDMAPS_BULK_LIPIDS C, " +
+				"COMPOUNDDB.LIPIDMAPS_COMPOUND_DATA D " +
+				"WHERE D.LMID = ? " +
+				"AND D.ABBREVIATION = C.ABBREVIATION ";
+		PreparedStatement selectPs = conn.prepareStatement(selectQuery);
+		
+		String updQuery = "UPDATE COMPOUNDDB.RO3_LIPID_REMAP "
+				+ "SET BULK_LIPID_ID = ? WHERE LOOKUP_NAME = ?";
+		PreparedStatement updPs = conn.prepareStatement(updQuery);
+		
+		Map<String,String>abrFormulaMap = new TreeMap<String,String>();
+		Map<String,String>abrFixedMap = new TreeMap<String,String>();	
+		ResultSet rs = ps.executeQuery();
+		while(rs.next()) {
+			
+			String abbr = rs.getString(1);
+			if(abrFormulaMap.containsKey(abbr)) {	//|| !abbr.contains("(")
+				//	System.out.println(abbr + " | F1: " + abrFormulaMap.get(abbr) + " | F2: " + rs.getString(2));
+			}
+			else {
+				abrFormulaMap.put(abbr, rs.getString(2));				
+			}
+		}
+		rs.close();
+		
+		for(String abbr : abrFormulaMap.keySet()) {
+			
+			//	String abbrFixed = abbr.replace("(", " ").replace(")", "").replaceAll("\\s+", " ").trim().toUpperCase();
+			String abbrFixed = abbr.replaceAll("\\s+", " ").trim().toUpperCase();
+			Collection<String>lmIds = getLMIDsByAbbreviation(abbrFixed);	
+			if(!lmIds.isEmpty()) {
+				
+				String bulkId = null;
+				for(String lmid : lmIds) {
+					
+					selectPs.setString(1, abbrFixed);
+					rs = ps.executeQuery();
+					while(rs.next())
+						bulkId = rs.getString(1);
+					
+					rs.close();
+					if(bulkId != null) {
+						
+						updPs.setString(1, bulkId);
+						updPs.setString(2, abbr);
+						updPs.executeUpdate();
+						break;
+					}					
+				}			
+			}
+		}
+		selectPs.close();
+		ps.close();
+		updPs.close();
+		ConnectionManager.releaseConnection(conn);
+	}
+	
+	private static Collection<String>getLMIDsByAbbreviation(String abbreviation){
+		
+		Collection<String>idSet = new TreeSet<String>();
+		String lipidMapsRestUrl = "https://lipidmaps.org/rest/compound/abbrev/";
+		JSONObject casJson = null;	
+		String req = lipidMapsRestUrl + PubChemUtils.urlEncodeSmiles(abbreviation) + "/lm_id";
+		System.out.println(req);
+		try {
+			casJson = JSONUtils.readJsonFromUrl(lipidMapsRestUrl + 
+					PubChemUtils.urlEncodeSmiles(abbreviation) + "/lm_id");
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		if(casJson == null)
+			return idSet;
+		
+		for(String key : casJson.keySet()) {
+			
+			String lmid = casJson.getJSONObject(key).get("lm_id").toString();
+			idSet.add(lmid);
+		}
+		return idSet;
+	}
+
+	private static void addBulkIdsFromCompoundTable() throws Exception{
+			
+		Connection conn = ConnectionManager.getConnection();	
+		String query = 
+				"SELECT DISTINCT L.ABBREVIATION, L.MOLECULAR_FORMULA " +
+				"FROM  COMPOUNDDB.LIPIDMAPS_COMPOUND_DATA L " +
+				"LEFT JOIN COMPOUNDDB.LIPIDMAPS_BULK_LIPIDS  I ON L.ABBREVIATION = I.ABBREVIATION " +
+				"WHERE I.ABBREVIATION IS NULL AND L.ABBREVIATION IS NOT NULL " +
+				"ORDER BY 1,2 ";
+		PreparedStatement ps = conn.prepareStatement(query);
+		Map<String,String>abrFormulaMap = new TreeMap<String,String>();
+		ResultSet rs = ps.executeQuery();
+		while(rs.next()) {
+			
+			String abbr = rs.getString(1);
+			if(abrFormulaMap.containsKey(abbr))
+				System.out.println(abbr + " | F1: " + abrFormulaMap.get(abbr) + " | F2: " + rs.getString(2));
+			else
+				abrFormulaMap.put(abbr, rs.getString(2));
+		}
+		rs.close();
+		ps.close();
+		Pattern numPattern = Pattern.compile("([A-Za-z\\-*]+[ ]*)(\\d+:\\d+)");
+		Matcher regexMatcher;
+		String insertQuery = 
+				"INSERT INTO COMPOUNDDB.LIPIDMAPS_BULK_LIPIDS ("
+				+ "LM_BULK_ID, HEAD_GROUP, ABBREVIATION, MASS, "
+				+ "MOL_FORMULA, CHAIN_TYPE, NUM_CARBONS, NUM_DOUBLE_BONDS) "
+				+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";		
+		PreparedStatement insertPs = conn.prepareStatement(insertQuery);
+		for(Entry<String, String> pair : abrFormulaMap.entrySet()) {
+			
+			String abbreviation = pair.getKey();		
+			regexMatcher = numPattern.matcher(abbreviation);
+			int numC = -1;
+			int numDouble = -1;		
+			String headGroup = null;
+			String chainType = "odd";
+			if(regexMatcher.find()) {
+				
+				headGroup = regexMatcher.group(1);
+				String[]counts = regexMatcher.group(2).split(":");
+				numC = Integer.parseInt(counts[0]);
+				numDouble = Integer.parseInt(counts[1]);
+				if(numC % 2 == 0)
+					chainType = "even";				
+			}			
+			String formula = pair.getValue();			
+			double mass = MolFormulaUtils.calculateExactMonoisotopicMass(formula);
+			if(headGroup != null) {
+				String nextId = null;
+				try {
+					nextId = SQLUtils.getNextIdFromSequence(
+							"COMPOUNDDB.LIPIDMAPS_BULK_SEQ", 
+							DataPrefix.LIPID_MAPS_BULK, "0", 7);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				insertPs.setString(1, nextId);
+				insertPs.setString(2, headGroup);
+				insertPs.setString(3, abbreviation);
+				insertPs.setDouble(4, mass);
+				insertPs.setString(5, formula);
+				insertPs.setString(6, chainType);
+				if(numC > 0)
+					insertPs.setInt(7, numC);
+				else
+					insertPs.setNull(7, java.sql.Types.NULL);
+				
+				if(numDouble >= 0)
+					insertPs.setInt(8, numDouble);
+				else
+					insertPs.setNull(8, java.sql.Types.NULL);
+				
+				insertPs.executeUpdate();
+			}
+		}
+		insertPs.close();
+		
+		ConnectionManager.releaseConnection(conn);		
+	}
+	
+	private static void remapToBulkIdRemovingBrackets() throws Exception{
+		
+		Connection conn = ConnectionManager.getConnection();
+		String query = 
+				"SELECT DISTINCT LOOKUP_NAME FROM "
+				+ "COMPOUNDDB.RO3_LIPID_REMAP "
+				+ "WHERE BULK_LIPID_ID IS NULL ORDER BY 1";
+		PreparedStatement ps = conn.prepareStatement(query);
+		Map<String,String>abbreviationLookupMap = new TreeMap<String,String>();
+		Pattern numPattern = Pattern.compile("^([A-Za-z]+[ ]*)\\((\\d+:\\d+.*)\\)");
+		Matcher regexMatcher;
+		ResultSet rs = ps.executeQuery();
+		while(rs.next()) {
+			String lookupName = rs.getString(1);
+			regexMatcher = numPattern.matcher(lookupName);
+			if(regexMatcher.find()) {
+				
+				String correctedName = 
+						regexMatcher.group(1).trim() + " " + regexMatcher.group(2);
+				abbreviationLookupMap.put(lookupName, correctedName);
+			}
+		}
+		rs.close();
+		
+		String updQuery =  
+				"UPDATE COMPOUNDDB.RO3_LIPID_REMAP R SET R.BULK_LIPID_ID = " +
+				"(SELECT DISTINCT C.LM_BULK_ID FROM COMPOUNDDB.LIPIDMAPS_BULK_LIPIDS C  " +
+				"WHERE C.ABBREVIATION = ?) " +
+				"WHERE R.LOOKUP_NAME = ? AND  R.BULK_LIPID_ID IS NULL ";		
+		PreparedStatement updPs = conn.prepareStatement(updQuery);	
+		for(Entry<String, String> pair : abbreviationLookupMap.entrySet()) {
+			
+			updPs.setString(1, pair.getValue());
+			updPs.setString(2, pair.getKey());
+			updPs.executeUpdate();
+		}
+		ps.close();
+		updPs.close();
+		ConnectionManager.releaseConnection(conn);				
+	}
+	
+	private static void assignLowestUniqueTaxNodeToBulkId() throws Exception{
+		
+		Map<String,String>bulkIdAbbreviationMap = new TreeMap<String,String>();
+		Map<LipidMapsClassification,List<String>>bulkIdTaxMap = 
+				new TreeMap<LipidMapsClassification,List<String>>();
+		for(LipidMapsClassification c : LipidMapsClassification.values())
+			bulkIdTaxMap.put(c, new ArrayList<String>());
+		
+		String bulkId = null;		
+		
+		Connection conn = ConnectionManager.getConnection();
+		String query = 
+				"SELECT LM_BULK_ID, ABBREVIATION FROM "
+				+ "COMPOUNDDB.LIPIDMAPS_BULK_LIPIDS ORDER BY 1";
+		PreparedStatement ps = conn.prepareStatement(query);
+
+		ResultSet rs = ps.executeQuery();
+		while(rs.next())
+			bulkIdAbbreviationMap.put(rs.getString(1), rs.getString(2));
+		
+		rs.close();
+		
+		query = 
+				"SELECT CATEGORY, MAIN_CLASS, SUB_CLASS, CLASS_LEVEL4 FROM "
+				+ "COMPOUNDDB.LIPIDMAPS_BULK_LIPIDS_TAXONOMY_MAP WHERE LM_BULK_ID = ?";
+		ps = conn.prepareStatement(query);
+		
+		String updQuery = 
+				"UPDATE COMPOUNDDB.LIPIDMAPS_BULK_LIPIDS "
+				+ "SET UNIQUE_TAX_NODE = ? WHERE LM_BULK_ID = ?" ;		
+		PreparedStatement updPs = conn.prepareStatement(updQuery);	
+
+		for(Entry<String, String> pair : bulkIdAbbreviationMap.entrySet()) {
+			
+			ps.setString(1, pair.getKey());
+			rs = ps.executeQuery();
+			while(rs.next()) {
+				
+				for(Entry<LipidMapsClassification,List<String>> me : bulkIdTaxMap.entrySet())
+					me.getValue().clear();
+				
+				if(rs.getString(1) != null)
+					bulkIdTaxMap.get(LipidMapsClassification.CATEGORY).add(rs.getString(1));
+				
+				if(rs.getString(2) != null)
+					bulkIdTaxMap.get(LipidMapsClassification.MAIN_CLASS).add(rs.getString(2));
+				
+				if(rs.getString(3) != null)
+					bulkIdTaxMap.get(LipidMapsClassification.SUB_CLASS).add(rs.getString(3));
+				
+				if(rs.getString(4) != null)
+					bulkIdTaxMap.get(LipidMapsClassification.CLASS_LEVEL4).add(rs.getString(4));			
+			}
+			rs.close();
+			
+			String uniqueTaxId = null;
+			if(bulkIdTaxMap.get(LipidMapsClassification.CLASS_LEVEL4).size() == 1)
+				uniqueTaxId = bulkIdTaxMap.get(LipidMapsClassification.CLASS_LEVEL4).get(0);
+			
+			if(uniqueTaxId == null && bulkIdTaxMap.get(LipidMapsClassification.SUB_CLASS).size() == 1)
+				uniqueTaxId = bulkIdTaxMap.get(LipidMapsClassification.SUB_CLASS).get(0);
+			
+			if(uniqueTaxId == null && bulkIdTaxMap.get(LipidMapsClassification.MAIN_CLASS).size() == 1)
+				uniqueTaxId = bulkIdTaxMap.get(LipidMapsClassification.MAIN_CLASS).get(0);
+			
+			if(uniqueTaxId == null && bulkIdTaxMap.get(LipidMapsClassification.CATEGORY).size() == 1)
+				uniqueTaxId = bulkIdTaxMap.get(LipidMapsClassification.CATEGORY).get(0);
+			
+			if(uniqueTaxId != null) {
+				updPs.setString(1, uniqueTaxId);
+				updPs.setString(2, pair.getKey());
+				updPs.executeUpdate();
+			}
+		}
+		ps.close();
+		updPs.close();
+		ConnectionManager.releaseConnection(conn);	
+	}
+	
+	private static void populateLipidBulkWithNumCarbNumDoubleBonds() throws Exception{
+		
+		Map<String,String>bulkIdAbbreviationMap = new TreeMap<String,String>();
+		Connection conn = ConnectionManager.getConnection();
+		String query = 
+				"SELECT LM_BULK_ID, ABBREVIATION FROM "
+				+ "COMPOUNDDB.LIPIDMAPS_BULK_LIPIDS ORDER BY 1";
+		PreparedStatement ps = conn.prepareStatement(query);
+
+		ResultSet rs = ps.executeQuery();
+		while(rs.next())
+			bulkIdAbbreviationMap.put(rs.getString(1), rs.getString(2));
+		
+		rs.close();
+		
+		Pattern numPattern = Pattern.compile("\\d+:\\d+");
+		Matcher regexMatcher;
+		
+		String updQuery = 
+				"UPDATE COMPOUNDDB.LIPIDMAPS_BULK_LIPIDS "
+				+ "SET NUM_CARBONS = ?, NUM_DOUBLE_BONDS = ? "
+				+ "WHERE LM_BULK_ID = ?" ;		
+		PreparedStatement updPs = conn.prepareStatement(updQuery);		
+		for(Entry<String, String> pair : bulkIdAbbreviationMap.entrySet()) {
+				
+			regexMatcher = numPattern.matcher(pair.getValue());
+			if(regexMatcher.find()) {
+				String[]counts = regexMatcher.group(0).split(":");
+				updPs.setInt(1, Integer.parseInt(counts[0]));
+				updPs.setInt(2, Integer.parseInt(counts[1]));
+				updPs.setString(3, pair.getKey());
+				updPs.executeUpdate();
+			}	
+		}
+		ps.close();
+		updPs.close();
+		ConnectionManager.releaseConnection(conn);		
+	}
+
+	private static void populateLipidBulkToLipidOntologyMap() throws Exception{
+		
+		Map<String,String>bulkIdAbbreviationMap = new TreeMap<String,String>();
+		Connection conn = ConnectionManager.getConnection();
+		String query = 
+				"SELECT LM_BULK_ID, ABBREVIATION FROM "
+				+ "COMPOUNDDB.LIPIDMAPS_BULK_LIPIDS ORDER BY 1";
+		PreparedStatement ps = conn.prepareStatement(query);
+
+		ResultSet rs = ps.executeQuery();
+		while(rs.next())
+			bulkIdAbbreviationMap.put(rs.getString(1), rs.getString(2));
+		
+		rs.close();
+		
+		query = 
+			"SELECT DISTINCT CATEGORY, MAIN_CLASS, SUB_CLASS, CLASS_LEVEL4  " +
+			"FROM COMPOUNDDB.LIPIDMAPS_COMPOUND_DATA WHERE ABBREVIATION = ?";
+		ps = conn.prepareStatement(query);
+		
+		String inserQuery = 
+				"INSERT INTO COMPOUNDDB.LIPIDMAPS_BULK_LIPIDS_TAXONOMY_MAP("
+				+ "LM_BULK_ID, CATEGORY, MAIN_CLASS, SUB_CLASS, CLASS_LEVEL4) "
+				+ "VALUES(?,?,?,?,?)";
+		PreparedStatement insertPs = conn.prepareStatement(inserQuery);
+		
+		for(Entry<String, String> pair : bulkIdAbbreviationMap.entrySet()) {
+						
+			ps.setString(1, pair.getValue());
+			rs = ps.executeQuery();
+			while(rs.next()) {
+				
+				insertPs.setString(1, pair.getKey());
+				
+				//	Category
+				if(rs.getString(1) != null)
+					insertPs.setString(2, rs.getString(1));
+				else
+					insertPs.setNull(2, java.sql.Types.NULL);
+
+				//	Main class
+				if(rs.getString(2) != null)
+					insertPs.setString(3, rs.getString(2));
+				else
+					insertPs.setNull(3, java.sql.Types.NULL);
+				
+				//	Subclass
+				if(rs.getString(3) != null)
+					insertPs.setString(4, rs.getString(3));
+				else
+					insertPs.setNull(4, java.sql.Types.NULL);
+				
+				//	Class level 4
+				if(rs.getString(4) != null)
+					insertPs.setString(5, rs.getString(4));
+				else
+					insertPs.setNull(5, java.sql.Types.NULL);
+				
+				insertPs.executeUpdate();
+			}
+			rs.close();
+		}
+		ps.close();
+		insertPs.close();
+		ConnectionManager.releaseConnection(conn);
+	}
+
+	private static void gatherStatsOnLipidOntology() throws Exception{
+		
+		Set<String>abbreviations = new TreeSet<String>();
+		Connection conn = ConnectionManager.getConnection();
+		String query = 
+				"SELECT ABBREVIATION FROM COMPOUNDDB.LIPIDMAPS_BULK_LIPIDS ORDER BY 1";
+		PreparedStatement ps = conn.prepareStatement(query);
+
+		ResultSet rs = ps.executeQuery();
+		while(rs.next())
+			abbreviations.add(rs.getString(1));
+		
+		rs.close();
+		int maxCategoryCount = 0;
+		int maxMainClassCount = 0;
+		int maxSubClassCount = 0;
+		int maxClass4Count = 0;
+		
+		Set<String>categories = new TreeSet<String>();
+		Set<String>mainClasses = new TreeSet<String>();
+		Set<String>subClasses = new TreeSet<String>();
+		Set<String>level4s = new TreeSet<String>();
+		
+		query = 
+			"SELECT DISTINCT CATEGORY, MAIN_CLASS, SUB_CLASS, CLASS_LEVEL4  " +
+			"FROM COMPOUNDDB.LIPIDMAPS_COMPOUND_DATA WHERE ABBREVIATION = ?";
+		ps = conn.prepareStatement(query);
+		for(String abbrev : abbreviations) {
+			
+			categories.clear();
+			mainClasses.clear();
+			subClasses.clear();
+			level4s.clear();
+			
+			ps.setString(1, abbrev);
+			rs = ps.executeQuery();
+			while(rs.next()) {
+				
+				if(rs.getString(1) != null)
+					categories.add(rs.getString(1));
+
+				if(rs.getString(2) != null)
+					mainClasses.add(rs.getString(2));
+				
+				if(rs.getString(3) != null)
+					subClasses.add(rs.getString(3));
+				
+				if(rs.getString(4) != null)
+					level4s.add(rs.getString(4));
+				
+			}
+			rs.close();
+			
+			if(categories.size() > maxCategoryCount)
+				maxCategoryCount = categories.size();
+			
+			if(mainClasses.size() > maxMainClassCount)
+				maxMainClassCount = mainClasses.size();
+			
+			if(subClasses.size() > maxSubClassCount)
+				maxSubClassCount = subClasses.size();
+			
+			if(level4s.size() > maxClass4Count)
+				maxClass4Count = level4s.size();
+		}
+		ps.close();
+		ConnectionManager.releaseConnection(conn);
+		
+		System.out.println("Max categories " + maxCategoryCount);
+		System.out.println("Max main classes " + maxMainClassCount);
+		System.out.println("Max sub-classes " + maxSubClassCount);
+		System.out.println("Max level 4 classes " + maxClass4Count);
+	}
+		
 	private static void populateLipidMapswithBulkAccessions() throws Exception{
 		
 		Map<LipidMapsClassification, List<LipidMapsClassificationObject>>ipidMapsClassesMap = 
@@ -81,47 +608,19 @@ public class LipidMappingMain {
 			LipidMapsTaxonomyRecord record = 
 					new LipidMapsTaxonomyRecord(
 							rs.getString("LMID"),
-							rs.getString("MS_READY_MOL_FORMULA"));
-			String category = rs.getString("CATEGORY");
-			String mainClass = rs.getString("MAIN_CLASS");
-			String subClass = rs.getString("SUB_CLASS");
-			String classLevel4 = rs.getString("CLASS_LEVEL4");
-			if(category != null) {
-				
-				LipidMapsClassificationObject categoryObject = 
-						ipidMapsClassesMap.get(LipidMapsClassification.CATEGORY).
-							stream().filter(o -> o.getCode().equals(category)).
-							findFirst().orElse(null);
-				if(categoryObject != null)
-					record.getLmTaxonomy().add(categoryObject);
-			}
-			if(mainClass != null) {
-				
-				LipidMapsClassificationObject mainClassObject = 
-						ipidMapsClassesMap.get(LipidMapsClassification.MAIN_CLASS).
-							stream().filter(o -> o.getCode().equals(mainClass)).
-							findFirst().orElse(null);
-				if(mainClassObject != null)
-					record.getLmTaxonomy().add(mainClassObject);
-			}
-			if(subClass != null) {
-				
-				LipidMapsClassificationObject subClassObject = 
-						ipidMapsClassesMap.get(LipidMapsClassification.SUB_CLASS).
-							stream().filter(o -> o.getCode().equals(subClass)).
-							findFirst().orElse(null);
-				if(subClassObject != null)
-					record.getLmTaxonomy().add(subClassObject);
-			}
-			if(classLevel4 != null) {
-				
-				LipidMapsClassificationObject classLevel4Object = 
-						ipidMapsClassesMap.get(LipidMapsClassification.CLASS_LEVEL4).
-							stream().filter(o -> o.getCode().equals(classLevel4)).
-							findFirst().orElse(null);
-				if(classLevel4Object != null)
-					record.getLmTaxonomy().add(classLevel4Object);
-			}
+							rs.getString("MS_READY_MOL_FORMULA"));			
+			record.addTaxonomyLevel(
+					LipidMapsClassification.CATEGORY,
+					rs.getString("CATEGORY"));
+			record.addTaxonomyLevel(
+					LipidMapsClassification.MAIN_CLASS,
+					rs.getString("MAIN_CLASS"));
+			record.addTaxonomyLevel(
+					LipidMapsClassification.SUB_CLASS,
+					rs.getString("SUB_CLASS"));
+			record.addTaxonomyLevel(
+					LipidMapsClassification.CLASS_LEVEL4,
+					rs.getString("CLASS_LEVEL4"));
 			taxRecords.add(record);
 		}
 		rs.close();
@@ -142,6 +641,13 @@ public class LipidMappingMain {
 				+ "SET BULK_LIPID_ID = ? WHERE ACCESSION = ?";
 		PreparedStatement updPs = conn.prepareStatement(updQuery);
 			
+		for(Entry<String, String> pair : bulkFormulaMap.entrySet()) {
+			
+			String formula = pair.getValue();
+			List<LipidMapsTaxonomyRecord> sameFormulaRecords = 
+					taxRecords.stream().filter(r -> r.getFormula().equals(formula)).
+					collect(Collectors.toList());
+		}
 		selectPs.close();
 		updPs.close();
 		ConnectionManager.releaseConnection(conn);
