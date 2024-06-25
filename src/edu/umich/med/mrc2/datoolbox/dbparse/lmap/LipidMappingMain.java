@@ -22,6 +22,14 @@
 package edu.umich.med.mrc2.datoolbox.dbparse.lmap;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -37,6 +45,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
@@ -47,6 +56,7 @@ import edu.umich.med.mrc2.datoolbox.dbparse.load.lipidmaps.LipidMapsParser;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.FilePreferencesFactory;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
+import edu.umich.med.mrc2.datoolbox.utils.DelimitedTextParser;
 import edu.umich.med.mrc2.datoolbox.utils.JSONUtils;
 import edu.umich.med.mrc2.datoolbox.utils.MolFormulaUtils;
 import edu.umich.med.mrc2.datoolbox.utils.PubChemUtils;
@@ -65,12 +75,158 @@ public class LipidMappingMain {
 		MRC2ToolBoxConfiguration.initConfiguration();
 
 		try {			
-			updateBulkIdsFromLipidMaps();
-			
+			updateAbbreviationsFromManualLookups();
 //			Collection<String>idSet = getLMIDsByAbbreviation("SM(d41:1)");
 //			System.out.println("***");
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	private static void updateAbbreviationsFromManualLookups() throws Exception {
+		
+		File inputFile = new File("E:\\DataAnalysis\\Lipidomics\\_RO3 Lipidomics Data for Remapping\\manualLookups3.txt");
+		String[][] compoundData = null;
+		try {
+			compoundData = DelimitedTextParser.parseTextFileWithEncoding(
+					inputFile, MRC2ToolBoxConfiguration.getTabDelimiter());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		Connection conn = ConnectionManager.getConnection();
+		String selectQuery = 
+				"SELECT C.LM_BULK_ID " +
+				"FROM COMPOUNDDB.LIPIDMAPS_BULK_LIPIDS C, " +
+				"COMPOUNDDB.LIPIDMAPS_COMPOUND_DATA D " +
+				"WHERE D.LMID = ? " +
+				"AND C.ABBREVIATION IS NOT NULL " +
+				"AND D.ABBREVIATION = C.ABBREVIATION ";
+		PreparedStatement selectPs = conn.prepareStatement(selectQuery);
+		
+		String updQuery = "UPDATE COMPOUNDDB.RO3_LIPID_REMAP "
+				+ "SET BULK_LIPID_ID = ? WHERE LOOKUP_NAME = ?";
+		PreparedStatement updPs = conn.prepareStatement(updQuery);
+		
+		if (compoundData != null) {
+			
+			for(int i=1; i<compoundData.length; i++) {
+				
+				String lookupName = compoundData[i][0];
+				String lmid = compoundData[i][1];
+				String bulkId = null;
+				
+				selectPs.setString(1, lmid);
+				ResultSet rs = selectPs.executeQuery();
+				while(rs.next())
+					bulkId = rs.getString(1);
+				
+				if(bulkId != null) {
+					updPs.setString(1, bulkId);
+					updPs.setString(2, lookupName);
+					updPs.executeUpdate();					
+				}
+				else {
+					System.out.println("No abbreviation for " + lmid);
+				}
+			}
+		}
+		selectPs.close();		
+		updPs.close();
+		ConnectionManager.releaseConnection(conn);
+	}
+	
+	private static void getAbbreviationsFromLipidMapsHTML() throws Exception {
+		
+		Connection conn = ConnectionManager.getConnection();
+		String query = 
+				"SELECT DISTINCT LOOKUP_NAME FROM "
+				+ "COMPOUNDDB.RO3_LIPID_REMAP "
+				+ "WHERE BULK_LIPID_ID IS NULL ORDER BY 1";
+		PreparedStatement ps = conn.prepareStatement(query);
+		Set<String>abbreviationLookupSet = new TreeSet<String>();
+		
+		String selectQuery = 
+				"SELECT C.LM_BULK_ID " +
+				"FROM COMPOUNDDB.LIPIDMAPS_BULK_LIPIDS C, " +
+				"COMPOUNDDB.LIPIDMAPS_COMPOUND_DATA D " +
+				"WHERE D.LMID = ? " +
+				"AND C.ABBREVIATION IS NOT NULL " +
+				"AND D.ABBREVIATION = C.ABBREVIATION ";
+		PreparedStatement selectPs = conn.prepareStatement(selectQuery);
+		
+		String updQuery = "UPDATE COMPOUNDDB.RO3_LIPID_REMAP "
+				+ "SET BULK_LIPID_ID = ? WHERE LOOKUP_NAME = ?";
+		PreparedStatement updPs = conn.prepareStatement(updQuery);
+
+		ResultSet rs = ps.executeQuery();
+		while(rs.next())
+			abbreviationLookupSet.add(rs.getString(1));
+		
+		rs.close();
+		
+		Pattern numPattern = Pattern.compile("/databases/lmsd/([A-Z]+\\d+)");
+		Matcher regexMatcher = null;;	
+		String lipidMapsQuickSearchUrl = "https://lipidmaps.org/quick_search?q=";
+		
+		Set<String>lmidSet = new TreeSet<String>();
+		List<String>lines = new ArrayList<String>();
+		lines.add("LookupName\tURL");
+		for(String abbr : abbreviationLookupSet) {
+			
+			lmidSet.clear();
+			String abbrNoBrackets = abbr.replace("(", " ").replace(")", "");
+			String requestUrl = lipidMapsQuickSearchUrl + urlEncodeAbbr4chains(abbrNoBrackets);
+			lines.add(abbr + "\t" + requestUrl);
+			
+//			String htmlString = WebUtils.readGetResponseAsHTMLpageFromURL(requestUrl);
+//			
+//			if(htmlString == null || htmlString.isEmpty()){
+//				
+//				System.out.println("Data for " + abbr + " not found");
+//				continue;
+//			}
+//			regexMatcher = numPattern.matcher(htmlString);
+//			while (regexMatcher.find())
+//				lmidSet.add(regexMatcher.group(1));	
+//			
+//			if(!lmidSet.isEmpty()) {
+//				
+//				String bulkId = null;
+//				for(String lmid : lmidSet) {
+//					
+//					selectPs.setString(1, lmid);
+//					rs = selectPs.executeQuery();
+//					while(rs.next())
+//						bulkId = rs.getString(1);
+//					
+//					if(bulkId != null)
+//						break;
+//				}	
+//				if(bulkId != null) {
+//					
+//					updPs.setString(1, bulkId);
+//					updPs.setString(1, abbr);
+//					updPs.executeUpdate();
+//				}					
+//			}			
+		}
+		ps.close();
+		selectPs.close();		
+		updPs.close();
+		ConnectionManager.releaseConnection(conn);
+		
+		Path outputPath = Paths.get("E:\\DataAnalysis\\Lipidomics\\"
+				+ "_RO3 Lipidomics Data for Remapping\\LipidMapsNameLookups2.txt");
+		try {
+			Files.write(outputPath, 
+					lines, 
+					StandardCharsets.UTF_8,
+					StandardOpenOption.CREATE, 
+					StandardOpenOption.TRUNCATE_EXISTING);
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
@@ -151,8 +307,11 @@ public class LipidMappingMain {
 		for(String abbr : abrFormulaMap.keySet()) {
 			
 			//	String abbrFixed = abbr.replace("(", " ").replace(")", "").replaceAll("\\s+", " ").trim().toUpperCase();
-			String abbrFixed = abbr.replaceAll("\\s+", " ").trim().toUpperCase();
-			Collection<String>lmIds = getLMIDsByAbbreviation(abbrFixed);	
+//			String abbrFixed = abbr.replaceAll("\\s+", " ").trim().toUpperCase();
+//			Collection<String>lmIds = getLMIDsByAbbreviation(abbrFixed);	
+			
+			String abbrFixed = abbr.replaceAll("\\s+", " ").trim();
+			Collection<String>lmIds = getLMIDsByAbbreviationChain(abbrFixed);	
 			if(!lmIds.isEmpty()) {
 				
 				String bulkId = null;
@@ -203,6 +362,54 @@ public class LipidMappingMain {
 			idSet.add(lmid);
 		}
 		return idSet;
+	}
+	
+	private static Collection<String>getLMIDsByAbbreviationChain(String abbreviation){
+		
+		Collection<String>idSet = new TreeSet<String>();
+		String lipidMapsRestUrl = "https://lipidmaps.org/rest/compound/abbrev_chains/";
+		JSONObject casJson = null;	
+		String req = lipidMapsRestUrl + urlEncodeAbbr4chains(abbreviation) + "/lm_id";
+		
+		if(abbreviation.startsWith("Cer"))
+			System.out.println(req);
+		
+		try {
+			casJson = JSONUtils.readJsonFromUrl(req);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		if(casJson == null)
+			return idSet;
+
+		String lmid = null;
+		try {
+			lmid = casJson.getString("lm_id");
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		if(lmid != null)
+			idSet.add(lmid);
+		
+		return idSet;
+	}
+	
+	public static String urlEncodeAbbr4chains(String abbr) {
+		
+		String result = null;
+	    try {
+	        result = URLEncoder.encode(abbr, "UTF-8")
+	        		.replaceAll("\\+", "%20")
+	                .replaceAll("\\%2F", "/")
+	                .replaceAll("\\%3A", ":")
+	                .replaceAll("\\%3B", ";");
+	    } catch (UnsupportedEncodingException e) {
+	        result = abbr;
+	    }
+	    //	System.out.println(result);
+	    return result;
 	}
 
 	private static void addBulkIdsFromCompoundTable() throws Exception{

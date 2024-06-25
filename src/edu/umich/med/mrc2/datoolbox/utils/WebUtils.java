@@ -21,13 +21,17 @@
 
 package edu.umich.med.mrc2.datoolbox.utils;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
 import java.net.Proxy;
 import java.net.URL;
+import java.net.URLConnection;
+import java.util.Scanner;
 
 public class WebUtils {
 
@@ -121,4 +125,55 @@ public class WebUtils {
 		}
 		return stream;
 	}
+	
+	public static String readHTMLpageFromURL(String urlAddress) {
+		
+		String content = null;
+		URLConnection connection = null;
+		try {
+		  connection =  new URL("http://www.google.com").openConnection();
+		  Scanner scanner = new Scanner(connection.getInputStream());
+		  scanner.useDelimiter("\\Z");
+		  content = scanner.next();
+		  scanner.close();
+		}catch ( Exception ex ) {
+		    ex.printStackTrace();
+		}
+		return content;
+	}
+	
+	public static String readGetResponseAsHTMLpageFromURL(String urlAddress) throws Exception {
+	
+	    URL obj = new URL(urlAddress);
+	    HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+	    con.setRequestMethod("GET");
+	    con.setRequestProperty("User-Agent", 
+	    		"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36");
+	
+	    int responseCode = con.getResponseCode();
+		if (responseCode != 200 && responseCode != 404 && responseCode != 202) 
+			return null;
+			
+	    BufferedReader in = new BufferedReader(
+	            new InputStreamReader(con.getInputStream()));
+	    String inputLine;
+	    StringBuffer response = new StringBuffer();
+	    while ((inputLine = in.readLine()) != null) 
+	        response.append(inputLine);
+	    
+	    in.close();
+	    return response.toString();	
+	}
 }
+
+
+
+
+
+
+
+
+
+
+
+
