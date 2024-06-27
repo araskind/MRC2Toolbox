@@ -75,7 +75,7 @@ public class LipidMappingMain {
 		MRC2ToolBoxConfiguration.initConfiguration();
 
 		try {			
-			updateAbbreviationsFromManualLookups();
+			updateBulkIdsFromLipidMaps();
 //			Collection<String>idSet = getLMIDsByAbbreviation("SM(d41:1)");
 //			System.out.println("***");
 		} catch (Exception e) {
@@ -84,9 +84,123 @@ public class LipidMappingMain {
 		}
 	}
 	
+	private static void updateBulkIDFromHeadGroupAndRefMetFormula() throws Exception {
+		
+		Connection conn = ConnectionManager.getConnection();
+		String selectQuery = 
+				"SELECT LOOKUP_NAME, REFMET_FORMULA " +
+				"FROM COMPOUNDDB.RO3_LIPID_REMAP " +
+				"WHERE BULK_LIPID_ID IS NULL";
+		PreparedStatement selectPs = conn.prepareStatement(selectQuery);
+		Map<String,String>nameFormulaMap = new TreeMap<String,String>();
+		ResultSet rs = selectPs.executeQuery();
+		while(rs.next()) 
+			nameFormulaMap.put(rs.getString(1), rs.getString(2));
+		
+		rs.close();
+		
+		selectQuery = 
+				"SELECT LM_BULK_ID FROM COMPOUNDDB.LIPIDMAPS_BULK_LIPIDS "
+				+ "WHERE HEAD_GROUP = ? AND MOL_FORMULA = ?";
+		selectPs = conn.prepareStatement(selectQuery);
+		
+		String updQuery = "UPDATE COMPOUNDDB.RO3_LIPID_REMAP "
+				+ "SET BULK_LIPID_ID = ? WHERE LOOKUP_NAME = ?";			
+		PreparedStatement updPs = conn.prepareStatement(updQuery);
+		
+		for(Entry<String, String> pair : nameFormulaMap.entrySet()) {
+			
+			String headGroupString = pair.getKey().split("\\(")[0].trim();
+			selectPs.setString(1, headGroupString);
+			selectPs.setString(2, pair.getValue());
+			rs = selectPs.executeQuery();
+			String bulkId = null;
+			while(rs.next()) 
+				bulkId =  rs.getString(1);
+			
+			rs.close();
+			
+			if(bulkId != null) {
+				updPs.setString(1, bulkId);
+				updPs.setString(2, pair.getKey());
+				updPs.executeUpdate();					
+			}
+		}
+		selectPs.close();		
+		updPs.close();
+		ConnectionManager.releaseConnection(conn);		
+	}
+	
+	private static void updateRefMetNameFromManualLookups() throws Exception {
+		
+		File inputFile = new File("E:\\DataAnalysis\\Lipidomics\\_RO3 Lipidomics Data for Remapping\\refmetRemap_extra2.txt");
+		String[][] compoundData = null;
+		try {
+			compoundData = DelimitedTextParser.parseTextFileWithEncoding(
+					inputFile, MRC2ToolBoxConfiguration.getTabDelimiter());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		Connection conn = ConnectionManager.getConnection();		
+		String updQuery = "UPDATE COMPOUNDDB.RO3_LIPID_REMAP "
+				+ "SET REFMET_NAME = ? WHERE LOOKUP_NAME = ? "
+				//+ "AND REFMET_NAME IS NULL"
+				;
+		PreparedStatement updPs = conn.prepareStatement(updQuery);
+		
+		if (compoundData != null) {
+			
+			for(int i=1; i<compoundData.length; i++) {
+				
+				String lookupName = compoundData[i][0];
+				String refMetName = compoundData[i][1];
+				updPs.setString(1, refMetName);
+				updPs.setString(2, lookupName);
+				updPs.executeUpdate();					
+			}
+		}		
+		updPs.close();
+		ConnectionManager.releaseConnection(conn);
+	}
+	
+	private static void updateRefMetNameFromStudyLipidNameManualLookups() throws Exception {
+		
+		File inputFile = new File("E:\\DataAnalysis\\Lipidomics\\_RO3 Lipidomics Data for Remapping\\refmetRemap2studyName.txt");
+		String[][] compoundData = null;
+		try {
+			compoundData = DelimitedTextParser.parseTextFileWithEncoding(
+					inputFile, MRC2ToolBoxConfiguration.getTabDelimiter());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		Connection conn = ConnectionManager.getConnection();		
+		String updQuery = "UPDATE COMPOUNDDB.RO3_LIPID_REMAP "
+				+ "SET REFMET_NAME = ? WHERE LIPID_ID_FROM_STUDY = ? "
+				+ "AND REFMET_NAME IS NULL";
+		PreparedStatement updPs = conn.prepareStatement(updQuery);
+		
+		if (compoundData != null) {
+			
+			for(int i=1; i<compoundData.length; i++) {
+				
+				String lookupName = compoundData[i][0];
+				String refMetName = compoundData[i][1];
+				updPs.setString(1, refMetName);
+				updPs.setString(2, lookupName);
+				updPs.executeUpdate();					
+			}
+		}		
+		updPs.close();
+		ConnectionManager.releaseConnection(conn);
+	}
+	
 	private static void updateAbbreviationsFromManualLookups() throws Exception {
 		
-		File inputFile = new File("E:\\DataAnalysis\\Lipidomics\\_RO3 Lipidomics Data for Remapping\\manualLookups3.txt");
+		File inputFile = new File("E:\\DataAnalysis\\Lipidomics\\_RO3 Lipidomics Data for Remapping\\manualLookups4.txt");
 		String[][] compoundData = null;
 		try {
 			compoundData = DelimitedTextParser.parseTextFileWithEncoding(
@@ -549,7 +663,7 @@ public class LipidMappingMain {
 		Connection conn = ConnectionManager.getConnection();
 		String query = 
 				"SELECT LM_BULK_ID, ABBREVIATION FROM "
-				+ "COMPOUNDDB.LIPIDMAPS_BULK_LIPIDS ORDER BY 1";
+				+ "COMPOUNDDB.LIPIDMAPS_BULK_LIPIDS WHERE LM_BULK_ID ORDER BY 1";
 		PreparedStatement ps = conn.prepareStatement(query);
 
 		ResultSet rs = ps.executeQuery();
