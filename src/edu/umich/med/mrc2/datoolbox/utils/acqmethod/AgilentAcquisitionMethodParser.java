@@ -138,6 +138,7 @@ public class AgilentAcquisitionMethodParser {
 					parseTimetableElement(timeTableElement, ns, startingFlowRate);
 			grad.getGradientSteps().addAll(gradSteps);
 		}
+		//	When empty - isocratic method? read percentages from solvent composition?
 		Element solventCompositionElement = 
 				pumpConfigElement.getChild("SolventComposition", ns);
 		if(solventCompositionElement != null) {
@@ -174,6 +175,7 @@ public class AgilentAcquisitionMethodParser {
 					
 					String channelName = solventElement.getChild("Channel").getText();
 					int mpIndex = agilentChannelMap.get(channelName);
+					String solventName = null;
 					
 					String selectedSolventChannelDefElementName = 
 							solventElement.getChild("SelectedSolventChannel").getText() + 
@@ -185,16 +187,36 @@ public class AgilentAcquisitionMethodParser {
 						
 						Element solvDefElement = 
 								extendedSolventTypeElement.getChild("SolventDescription");
-						String solventName = 
+						solventName = 
 								solvDefElement.getChild("Definition").
 								getChildText("Name").replaceFirst("V\\.\\d\\d", "").trim();
 						if(solvDefElement.getChild("Definition").getChildText("IsPure").equalsIgnoreCase("false")) {
 							
 							String percentString = ", " + solvDefElement.getChildText("Percent") + "%";
 							solventName += percentString;						
-						}
-						mobilePhases[mpIndex] = new MobilePhase(solventName);
+						}						
 					}
+					else {
+						selectedSolventChannelDefElementName = 
+								solventElement.getChild("SelectedSolventChannel").getText() + 
+								"SolventType";
+						Element simpleSolventTypeElement = 
+								solventElement.getChild(selectedSolventChannelDefElementName);
+						if(simpleSolventTypeElement != null) {
+							
+							solventName = simpleSolventTypeElement.getChildText("SolventName");
+						
+//							String percentage = solventElement.getChildText("Percentage");
+//							if(percentage != null && !percentage.equals("100") && !percentage.equals("0"))
+//								solventName += ", " + percentage + "%";
+						}
+						else {								
+							solventName = solventElement.getChildText(
+									solventElement.getChild("SelectedSolventChannel").getText() + "UserName");
+						}
+					}
+					if(solventName != null && !solventName.isEmpty())
+						mobilePhases[mpIndex] = new MobilePhase(solventName);
 				}
 			}
 		}		

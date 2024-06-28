@@ -34,12 +34,16 @@ import java.sql.ResultSet;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
 
 import javax.xml.xpath.XPathExpressionException;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.apache.commons.io.filefilter.FileFilterUtils;
 import org.apache.commons.io.filefilter.IOFileFilter;
@@ -60,9 +64,11 @@ import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator;
 
 import edu.umich.med.mrc2.datoolbox.data.MsPoint;
 import edu.umich.med.mrc2.datoolbox.data.lims.ChromatographicGradient;
+import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.MobilePhase;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusteringParameterSet;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
+import edu.umich.med.mrc2.datoolbox.database.idt.ChromatographyDatabaseUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.database.idt.MSMSClusteringDBUtils;
 import edu.umich.med.mrc2.datoolbox.dbparse.load.nist.NISTParserUtils;
@@ -72,6 +78,7 @@ import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.utils.MSMSClusteringUtils;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 import edu.umich.med.mrc2.datoolbox.utils.acqmethod.AgilentAcquisitionMethodParser;
+import edu.umich.med.mrc2.datoolbox.utils.acqmethod.ChromatographicGradientUtils;
 
 public class RunContainer2 {
 
@@ -97,12 +104,179 @@ public class RunContainer2 {
 		MRC2ToolBoxConfiguration.initConfiguration();
 
 		try {
-			//	extractSolventsFromAgilentMethods();
-			Collection<MobilePhase> mpList = IDTDataCache.getMobilePhaseList();
-			System.out.println("***");
+
+			//	gradTest();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		}
+	}
+	
+	private static void extractMultipleGradients() throws Exception{
+		
+		File dirToScan = new File(
+				"E:\\DataAnalysis\\METHODS\\Acquisition\\Uploaded\\AS_OF_20240618\\MSMS");
+		IOFileFilter dotMfilter = 
+				FileFilterUtils.makeDirectoryOnly(new RegexFileFilter(".+\\.[mM]$"));
+		Collection<File> methodFolders = FileUtils.listFilesAndDirs(
+				dirToScan,
+				DirectoryFileFilter.DIRECTORY,
+				dotMfilter);
+		dirToScan = new File(
+				"E:\\DataAnalysis\\METHODS\\Acquisition\\Uploaded\\AS_OF_20240618\\MS1");
+		Collection<File> msOneMethodFolders = FileUtils.listFilesAndDirs(
+				dirToScan,
+				DirectoryFileFilter.DIRECTORY,
+				dotMfilter);
+		methodFolders.addAll(msOneMethodFolders);
+		
+		Map<ChromatographicGradient,Collection<File>>gradientMethodMap = 
+				new HashMap<ChromatographicGradient,Collection<File>>();
+		for(File methodFolder : methodFolders) {
+			
+			if(!FilenameUtils.getExtension(methodFolder.getName()).equalsIgnoreCase("m"))
+				continue;
+			
+			AgilentAcquisitionMethodParser amp = 
+					new AgilentAcquisitionMethodParser(methodFolder);
+			amp.parseParameterFiles();
+			ChromatographicGradient grad = null;		
+			try {
+				grad = amp.extractGradientData();
+			} catch (XPathExpressionException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			if(grad != null) {
+				
+				if(grad.getGradientSteps().isEmpty()) {
+					System.err.println("No timetable in \"" + methodFolder.getName() + "\"");
+					continue;
+				}				
+				MobilePhase[] gradMobilePhases = new MobilePhase[4];
+				int mpCount = 0;
+				for(int i=0; i<4; i++) {
+					
+					MobilePhase mp = grad.getMobilePhases()[i];
+					if(mp != null) {
+						
+						MobilePhase existing = IDTDataCache.getMobilePhaseByNameOrSynonym(mp.getName());
+						if(existing == null)
+							System.err.println("Didn't find existing mobile phase for \"" 
+									+ mp.getName() + "\" in \"" + methodFolder.getName() + "\"");
+						else
+							gradMobilePhases[i] = existing;
+					}
+					else
+						gradMobilePhases[i] = null;
+				}
+				for(int i=0; i<4; i++) {
+					grad.getMobilePhases()[i] = gradMobilePhases[i];
+					if(grad.getMobilePhases()[i] != null)
+						mpCount++;
+				}
+				if(mpCount == 0) {
+					System.err.println("No mobile phases found in  \"" + methodFolder.getName() + "\"");
+					continue;
+				}
+				ChromatographicGradient existingGrad = null;
+				for(ChromatographicGradient g : gradientMethodMap.keySet()) {
+					
+					if(ChromatographicGradientUtils.gradientsEquivalent(g, grad)) {
+						existingGrad = g;
+						break;
+					}
+				}
+				if(existingGrad == null) {
+					gradientMethodMap.put(grad, new TreeSet<File>());
+					gradientMethodMap.get(grad).add(methodFolder);
+				}
+				else {
+					gradientMethodMap.get(existingGrad).add(methodFolder);
+				}		
+			}
+			else {
+				System.err.println("Failed to extract gradient from  \"" + methodFolder.getName() + "\"");
+			}
+		}
+		for(ChromatographicGradient g : gradientMethodMap.keySet()) {
+			
+			try {
+				ChromatographyDatabaseUtils.addNewChromatographicGradient(g);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		//	Assign gradients to methods
+		Connection conn = ConnectionManager.getConnection();
+		String updQuery = 
+				"UPDATE DATA_ACQUISITION_METHOD "
+				+ "SET GRADIENT_ID = ? WHERE ACQ_METHOD_ID = ?";
+		PreparedStatement ps = conn.prepareStatement(updQuery);
+		
+		for(Entry<ChromatographicGradient, Collection<File>> pair : gradientMethodMap.entrySet()) {
+			
+			for(File f : pair.getValue()) {
+				
+				DataAcquisitionMethod method = IDTDataCache.getAcquisitionMethodByName(f.getName());
+				if(method != null) {
+					
+					ps.setString(1, pair.getKey().getId());
+					ps.setString(2, method.getId());
+					ps.executeUpdate();
+				}
+			}
+		}
+		ps.close();
+		ConnectionManager.releaseConnection(conn);
+
+		System.out.println("***");
+	}
+	
+	private static void gradTest() {
+
+		File methodFolder = new File("E:\\DataAnalysis\\METHODS\\Acquisition\\Uploaded\\"
+				+ "AS_OF_20240618\\MS1\\QTOF-002-HILIC-27min-1mm-Flux-squishyInsert - A2B2-port1-6.m");
+		AgilentAcquisitionMethodParser amp = 
+				new AgilentAcquisitionMethodParser(methodFolder);
+		amp.parseParameterFiles();
+		ChromatographicGradient grad = null;		
+		try {
+			grad = amp.extractGradientData();
+		} catch (XPathExpressionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		if(grad != null) {
+			
+			MobilePhase[] gradMobilePhases = new MobilePhase[4];
+			int mpCount = 0;
+			for(int i=0; i<4; i++) {
+				
+				MobilePhase mp = grad.getMobilePhases()[i];
+				if(mp != null) {
+					
+					MobilePhase existing = IDTDataCache.getMobilePhaseByNameOrSynonym(mp.getName());
+					if(existing == null)
+						System.err.println("Didn't find existing mobile phase for \"" + mp.getName() + "\"");
+					else
+						gradMobilePhases[i] = existing;
+				}
+				else
+					gradMobilePhases[i] = null;
+			}
+			for(int i=0; i<4; i++) {
+				grad.getMobilePhases()[i] = gradMobilePhases[i];
+				if(grad.getMobilePhases()[i] != null)
+					mpCount++;
+			}
+			if(mpCount == 0) {
+				System.err.println("No mobile phases found in  \"" + methodFolder.getName() + "\"");
+			}
+		}
+		else {
+			System.err.println("Failed to extract gradient from  \"" + methodFolder.getName() + "\"");
 		}
 	}
 	

@@ -738,7 +738,7 @@ public class IDTUtils {
 		Connection conn = ConnectionManager.getConnection();
 		String query  =
 			"SELECT SOFTWARE_ID, SOFTWARE_TYPE, SOFTWARE_NAME, "
-			+ "SOFTWARE_DESCRIPTION, MANUFACTURER_ID "
+			+ "SOFTWARE_DESCRIPTION, MANUFACTURER_ID, PLATFORM_ID "
 			+ "FROM DATA_ANALYSIS_SOFTWARE";
 		PreparedStatement ps = conn.prepareStatement(query);
 		ResultSet rs = ps.executeQuery();
@@ -754,6 +754,11 @@ public class IDTUtils {
 					rs.getString("SOFTWARE_NAME"),
 					rs.getString("SOFTWARE_DESCRIPTION"),
 					vendor);
+			String platformId = rs.getString("SOFTWARE_NAME");
+			if(platformId != null) {
+				item.setPlatform(
+						LIMSDataCache.getInstrumentPlatformById(platformId));
+			}
 			softwareList.add(item);
 		}
 		rs.close();

@@ -291,8 +291,10 @@ public class AcquisitionMethodUtils {
 		Collection<DataAcquisitionMethod>methodList = new TreeSet<DataAcquisitionMethod>();
 		Connection conn = ConnectionManager.getConnection();
 		String query  =
-			"SELECT ACQ_METHOD_ID, METHOD_NAME, METHOD_DESCRIPTION, POLARITY, CREATED_BY, " +
-			"CREATED_ON, IONIZATION_TYPE, MASS_ANALYZER, MS_TYPE, COLUMN_ID, SEPARATION_TYPE, SOFTWARE_ID " +
+			"SELECT ACQ_METHOD_ID, METHOD_NAME, METHOD_DESCRIPTION, "
+			+ "POLARITY, CREATED_BY, CREATED_ON, IONIZATION_TYPE, "
+			+ "MASS_ANALYZER, MS_TYPE, COLUMN_ID, SEPARATION_TYPE, "
+			+ "SOFTWARE_ID, GRADIENT_ID " +
 			"FROM DATA_ACQUISITION_METHOD ORDER BY 1 ";
 		PreparedStatement ps = conn.prepareStatement(query);
 		ResultSet rs = ps.executeQuery();
@@ -314,14 +316,24 @@ public class AcquisitionMethodUtils {
 					createdBy,
 					createdOn);
 
-			method.setPolarity(Polarity.getPolarityByCode(rs.getString("POLARITY")));
-			method.setCreatedBy(IDTDataCache.getUserById(rs.getString("CREATED_BY")));
-			method.setColumn(IDTDataCache.getColumnById(rs.getString("COLUMN_ID")));
-			method.setIonizationType(IDTDataCache.getIonizationTypeById(rs.getString("IONIZATION_TYPE")));
-			method.setMassAnalyzerType(IDTDataCache.getMassAnalyzerTypeById(rs.getString("MASS_ANALYZER")));
-			method.setMsType(IDTDataCache.getMsTypeById(rs.getString("MS_TYPE")));
-			method.setSeparationType(IDTDataCache.getChromatographicSeparationTypeById(rs.getString("SEPARATION_TYPE")));
-			method.setSoftware(IDTDataCache.getSoftwareById(rs.getString("SOFTWARE_ID")));
+			method.setPolarity(
+					Polarity.getPolarityByCode(rs.getString("POLARITY")));
+			method.setCreatedBy(
+					IDTDataCache.getUserById(rs.getString("CREATED_BY")));
+			method.setColumn(
+					IDTDataCache.getColumnById(rs.getString("COLUMN_ID")));
+			method.setIonizationType(
+					IDTDataCache.getIonizationTypeById(rs.getString("IONIZATION_TYPE")));
+			method.setMassAnalyzerType(
+					IDTDataCache.getMassAnalyzerTypeById(rs.getString("MASS_ANALYZER")));
+			method.setMsType(
+					IDTDataCache.getMsTypeById(rs.getString("MS_TYPE")));
+			method.setSeparationType(
+					IDTDataCache.getChromatographicSeparationTypeById(rs.getString("SEPARATION_TYPE")));
+			method.setSoftware(
+					IDTDataCache.getSoftwareById(rs.getString("SOFTWARE_ID")));
+			method.setChromatographicGradient(
+					IDTDataCache.getChromatographicGradientById(rs.getString("GRADIENT_ID")));
 
 			methodList.add(method);
 		}

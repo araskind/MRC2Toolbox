@@ -115,6 +115,14 @@ public class IDTrackerMetadataPullTask extends AbstractTask {
 			taskDescription = "Refreshing chromatographic column list ";
 			IDTDataCache.refreshChromatographicColumnList();
 			processed = processed + 3;
+					
+			taskDescription = "Refreshing mobile phase list ";
+			IDTDataCache.refreshMobilePhaseList();
+			processed = processed + 3;
+			
+			taskDescription = "Refreshing gradient list ";
+			IDTDataCache.refreshChromatographicGradientList();
+			processed = processed + 3;
 
 			taskDescription = "Refreshing acquisition method list ";
 			IDTDataCache.refreshAcquisitionMethodList();
@@ -170,10 +178,6 @@ public class IDTrackerMetadataPullTask extends AbstractTask {
 						
 			taskDescription = "Refreshing MS feature identification level list";
 			IDTDataCache.refreshMsFeatureIdentificationLevelList();
-			processed = processed + 3;
-			
-			taskDescription = "Refreshing mobile phase list ";
-			IDTDataCache.refreshMobilePhaseList();
 			processed = processed + 3;
 			
 			taskDescription = "Refreshing NIST PepSearch parameters list ";

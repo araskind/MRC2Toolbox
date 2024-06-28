@@ -50,6 +50,7 @@ import edu.umich.med.mrc2.datoolbox.data.compare.SortDirection;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
 import edu.umich.med.mrc2.datoolbox.data.enums.UserAffiliation;
+import edu.umich.med.mrc2.datoolbox.data.lims.ChromatographicGradient;
 import edu.umich.med.mrc2.datoolbox.data.lims.ChromatographicSeparationType;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
@@ -148,7 +149,14 @@ public class IDTDataCache {
 	private static Collection<CompoundLibrary>msRtLibraryList = 
 			new TreeSet<CompoundLibrary>();	
 	private static Map<String, Integer>msRtLibraryEntryCounts = 
-			new TreeMap<String, Integer>();
+			new TreeMap<String, Integer>();	
+	private static Collection<ChromatographicGradient>chromatographicGradientList = 
+			new HashSet<ChromatographicGradient>();	
+	
+	public static void refreshChromatographicGradientList() {
+		chromatographicGradientList.clear();
+		getChromatographicGradientList();
+	}
 	
 	public static void refreshExperimentPolarityMap() {
 		experimentPolarityMap.clear();
@@ -573,9 +581,31 @@ public class IDTDataCache {
 		return stockSamples;
 	}
 
-	/**
-	 * @return the users
-	 */
+	public static Collection<ChromatographicGradient>getChromatographicGradientList(){
+		
+		if(chromatographicGradientList == null)
+			chromatographicGradientList = new HashSet<ChromatographicGradient>();	
+		
+		if(chromatographicGradientList.isEmpty()) {
+			
+			try {
+				chromatographicGradientList.addAll(
+						ChromatographyDatabaseUtils.getChromatographicGradientList());
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}		
+		return chromatographicGradientList;
+	}
+	
+	public static ChromatographicGradient getChromatographicGradientById(String id) {
+		
+		return getChromatographicGradientList().
+				stream().filter(g -> g.getId().equals(id)).
+				findFirst().orElse(null);
+	}
+
 	public static Collection<LIMSChromatographicColumn> getChromatographicColumns() {
 
 		if(chromatographicColumns == null)
@@ -902,7 +932,7 @@ public class IDTDataCache {
 
 		if(mobilePhaseList.isEmpty()) {
 			try {
-				mobilePhaseList.addAll(ChromatographyUtils.getMobilePhaseList());
+				mobilePhaseList.addAll(ChromatographyDatabaseUtils.getMobilePhaseList());
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

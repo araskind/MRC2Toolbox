@@ -33,7 +33,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 
 import edu.umich.med.mrc2.datoolbox.data.lims.MobilePhase;
-import edu.umich.med.mrc2.datoolbox.database.idt.ChromatographyUtils;
+import edu.umich.med.mrc2.datoolbox.database.idt.ChromatographyDatabaseUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.AbstractIDTrackerLimsPanel;
@@ -154,7 +154,7 @@ public class DockableMobilePhaseManagerPanel extends AbstractIDTrackerLimsPanel 
 		MobilePhase newPhase = new MobilePhase(mpName);
 		String mpid = null;
 		try {
-			mpid = ChromatographyUtils.getMobilePhaseId(newPhase);
+			mpid = ChromatographyDatabaseUtils.getMobilePhaseId(newPhase);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -165,7 +165,7 @@ public class DockableMobilePhaseManagerPanel extends AbstractIDTrackerLimsPanel 
 			return;
 		}
 		try {
-			ChromatographyUtils.addNewMobilePhase(newPhase);
+			ChromatographyDatabaseUtils.addNewMobilePhase(newPhase);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -194,7 +194,7 @@ public class DockableMobilePhaseManagerPanel extends AbstractIDTrackerLimsPanel 
 		MobilePhase phaseToCheck = new MobilePhase(mobPhase.getId(), mpName);
 		boolean hasNameConflict = false;
 		try {
-			hasNameConflict = ChromatographyUtils.hasNameConflict(phaseToCheck);
+			hasNameConflict = ChromatographyDatabaseUtils.hasNameConflict(phaseToCheck);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -206,7 +206,7 @@ public class DockableMobilePhaseManagerPanel extends AbstractIDTrackerLimsPanel 
 		}
 		mobPhase.setName(mpName);
 		try {
-			ChromatographyUtils.editMobilePhase(mobPhase);
+			ChromatographyDatabaseUtils.editMobilePhase(mobPhase);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -232,7 +232,7 @@ public class DockableMobilePhaseManagerPanel extends AbstractIDTrackerLimsPanel 
 		if(res == JOptionPane.YES_OPTION) {
 			
 			try {
-				ChromatographyUtils.deleteMobilePhase(mobPhase);
+				ChromatographyDatabaseUtils.deleteMobilePhase(mobPhase);
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

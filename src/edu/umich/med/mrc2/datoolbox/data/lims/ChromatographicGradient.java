@@ -27,7 +27,6 @@ import java.util.TreeSet;
 import java.util.UUID;
 
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
-import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
 
 public class ChromatographicGradient implements Serializable {
 
@@ -48,7 +47,7 @@ public class ChromatographicGradient implements Serializable {
 		super();
 		id = DataPrefix.CROMATOGRAPHIC_GRADIENT.getName() + 
 				UUID.randomUUID().toString().substring(0, 6);
-		name = "ChromGradient-" + FIOUtils.getTimestamp();
+		//	name = "ChromGradient-" + FIOUtils.getTimestamp();
 		mobilePhases = new MobilePhase[4];
 		gradientSteps = new TreeSet<ChromatographicGradientStep>();
 	}
@@ -178,4 +177,32 @@ public class ChromatographicGradient implements Serializable {
 	public void setId(String id) {
 		this.id = id;
 	}
+	
+	@Override
+	public boolean equals(Object obj) {
+
+		if (obj == this)
+			return true;
+
+		if (obj == null)
+			return false;
+
+		if (!ChromatographicGradient.class.isAssignableFrom(obj.getClass()))
+			return false;
+
+		final ChromatographicGradient other = (ChromatographicGradient) obj;
+
+		if ((this.id == null) ? (other.getId() != null) : !this.id.equals(other.getId()))
+			return false;
+
+		return true;
+	}
+	
+    @Override
+    public int hashCode() {
+
+        int hash = 3;
+        hash = 53 * hash + (this.id != null ? this.id.hashCode() : 0);
+        return hash;
+    }
 }

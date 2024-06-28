@@ -741,7 +741,7 @@ public class RegexTest {
 	private static void downloadAllAcqMethods() {
 		
 		File destination = 
-				new File("E:\\DataAnalysis\\METHODS\\Acquisition\\Uploaded\\AS_OF_20240618\\MS1");
+				new File("E:\\DataAnalysis\\METHODS\\Acquisition\\Uploaded\\AS_OF_20240618");
 		Collection<DataAcquisitionMethod> list = null;
 		try {
 			list = AcquisitionMethodUtils.getAcquisitionMethodList();

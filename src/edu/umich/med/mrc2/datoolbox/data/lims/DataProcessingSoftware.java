@@ -23,6 +23,7 @@ package edu.umich.med.mrc2.datoolbox.data.lims;
 
 import java.io.Serializable;
 
+import edu.umich.med.mrc2.datoolbox.data.InstrumentPlatform;
 import edu.umich.med.mrc2.datoolbox.data.enums.SoftwareType;
 
 public class DataProcessingSoftware implements Serializable, Comparable<DataProcessingSoftware>{
@@ -37,6 +38,7 @@ public class DataProcessingSoftware implements Serializable, Comparable<DataProc
 	private String description;
 	private Manufacturer vendor;
 	private SoftwareType softwareType;
+	private InstrumentPlatform platform;
 	
 	public DataProcessingSoftware(
 			String id, 
@@ -128,6 +130,14 @@ public class DataProcessingSoftware implements Serializable, Comparable<DataProc
 
 	public void setSoftwareType(SoftwareType softwareType) {
 		this.softwareType = softwareType;
+	}
+
+	public InstrumentPlatform getPlatform() {
+		return platform;
+	}
+
+	public void setPlatform(InstrumentPlatform platform) {
+		this.platform = platform;
 	}
 
 }
