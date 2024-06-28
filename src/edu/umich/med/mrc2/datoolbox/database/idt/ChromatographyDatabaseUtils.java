@@ -112,6 +112,90 @@ public class ChromatographyDatabaseUtils {
 		return nextId;
 	}
 	
+	public static String addChromatographicGradientForAcqMethod(
+			ChromatographicGradient gradient, String acqMethodId) throws Exception{
+
+		Connection conn = ConnectionManager.getConnection();
+		String nextId = SQLUtils.getNextIdFromSequence(conn, 
+				"TMP_CHROMATOGRAPHIC_GRADIENT_SEQ",
+				DataPrefix.CROMATOGRAPHIC_GRADIENT_TMP,
+				"0",
+				4);
+		gradient.setId(nextId);
+		if(gradient.getName() == null || gradient.getName().isEmpty())
+			gradient.setName("Gradient " + nextId);
+		
+		String query  = 
+			"INSERT INTO TMP_CHROMATOGRAPHIC_GRADIENT("
+			+ "GRADIENT_ID, GRADIENT_NAME, GRADIENT_DESCRIPTION, "
+			+ "MOBILE_PHASE_A, MOBILE_PHASE_B, MOBILE_PHASE_C, "
+			+ "MOBILE_PHASE_D, COLUMN_COMPARTMENT_TEMPERATURE, STOP_TIME) "
+			+ "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+		PreparedStatement ps = conn.prepareStatement(query);
+		ps.setString(1, gradient.getId());
+		ps.setString(2, gradient.getName());
+		ps.setString(3, gradient.getDescription());
+		
+		if(gradient.getMobilePhases()[0] != null)
+			ps.setString(4, gradient.getMobilePhases()[0].getId());
+		else
+			ps.setNull(4, java.sql.Types.NULL);
+		
+		if(gradient.getMobilePhases()[1] != null)
+			ps.setString(5, gradient.getMobilePhases()[1].getId());
+		else
+			ps.setNull(5, java.sql.Types.NULL);
+		
+		if(gradient.getMobilePhases()[2] != null)
+			ps.setString(6, gradient.getMobilePhases()[2].getId());
+		else
+			ps.setNull(6, java.sql.Types.NULL);
+		
+		if(gradient.getMobilePhases()[3] != null)
+			ps.setString(7, gradient.getMobilePhases()[3].getId());
+		else
+			ps.setNull(7, java.sql.Types.NULL);
+
+		ps.setDouble(8, gradient.getColumnCompartmentTemperature());
+		ps.setDouble(9, gradient.getStopTime());
+
+		ps.executeUpdate();
+		
+		//	Insert gradient steps		
+		query = 
+			"INSERT INTO TMP_CHROMATOGRAPHIC_GRADIENT_STEP("
+			+ "GRADIENT_ID, START_TIME, MOBILE_PHASE_A_START_VALUE, "
+			+ "MOBILE_PHASE_B_START_VALUE, MOBILE_PHASE_C_START_VALUE, "
+			+ "MOBILE_PHASE_D_START_VALUE, FLOW_RATE) "
+			+ "VALUES(?, ?, ?, ?, ?, ?, ?)";
+		ps = conn.prepareStatement(query);
+		ps.setString(1, gradient.getId());
+		for(ChromatographicGradientStep step : gradient.getGradientSteps()) {
+			
+			ps.setDouble(2, step.getStartTime());			
+			ps.setDouble(3, step.getMobilePhaseStartingPercent()[0]);
+			ps.setDouble(4, step.getMobilePhaseStartingPercent()[1]);
+			ps.setDouble(5, step.getMobilePhaseStartingPercent()[2]);
+			ps.setDouble(6, step.getMobilePhaseStartingPercent()[3]);
+			ps.setDouble(7, step.getFlowRate());
+			ps.addBatch();
+		}
+		ps.executeBatch();
+		
+		query = 
+			"UPDATE DATA_ACQUISITION_METHOD "
+			+ "SET TMP_GRADIENT_ID = ? WHERE ACQ_METHOD_ID = ?";				
+		ps = conn.prepareStatement(query);
+		ps.setString(1, gradient.getId());
+		ps.setString(2, acqMethodId);
+		ps.executeUpdate();
+		
+		ps.close();
+		ConnectionManager.releaseConnection(conn);
+		return nextId;
+	}
+	
 	public static void editChromatographicGradient(
 			ChromatographicGradient gradient) throws Exception{
 		

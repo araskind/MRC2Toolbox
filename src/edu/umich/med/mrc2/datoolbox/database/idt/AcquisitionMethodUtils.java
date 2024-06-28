@@ -135,7 +135,8 @@ public class AcquisitionMethodUtils {
 		return newId;
 	}
 
-	public static void updateAcquisitionMethod(DataAcquisitionMethod selectedMethod, File methodFile) throws Exception{
+	public static void updateAcquisitionMethod(
+			DataAcquisitionMethod selectedMethod, File methodFile) throws Exception{
 
 		//	TODO update gradient if present
 		Connection conn = ConnectionManager.getConnection();
@@ -161,7 +162,11 @@ public class AcquisitionMethodUtils {
 		ps.setString(4, selectedMethod.getIonizationType().getId());
 		ps.setString(5, selectedMethod.getMassAnalyzerType().getId());
 		ps.setString(6, selectedMethod.getMsType().getId());
-		ps.setString(7, selectedMethod.getColumn().getColumnId());
+		
+		if(selectedMethod.getColumn() != null)
+			ps.setString(7, selectedMethod.getColumn().getColumnId());
+		else
+			ps.setNull(7, java.sql.Types.NULL);
 
 		FileInputStream fis = null;
 		File archive = null;

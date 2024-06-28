@@ -754,7 +754,7 @@ public class IDTUtils {
 					rs.getString("SOFTWARE_NAME"),
 					rs.getString("SOFTWARE_DESCRIPTION"),
 					vendor);
-			String platformId = rs.getString("SOFTWARE_NAME");
+			String platformId = rs.getString("PLATFORM_ID");
 			if(platformId != null) {
 				item.setPlatform(
 						LIMSDataCache.getInstrumentPlatformById(platformId));

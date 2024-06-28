@@ -55,6 +55,26 @@ public class ChromatographicGradientUtils {
 		return true;
 	}
 	
+	public static boolean timeTableEquivalent(
+			ChromatographicGradient gradOne, 
+			ChromatographicGradient gradTwo) {
+		
+		if(gradOne.getGradientSteps().size() != gradTwo.getGradientSteps().size())		
+			return false;
+		
+		ChromatographicGradientStep[]gradOneSteps = 
+				gradOne.getGradientStepsArray();
+		ChromatographicGradientStep[]gradTwoSteps = 
+				gradTwo.getGradientStepsArray();
+		
+		for(int i=0; i<gradOneSteps.length; i++) {
+			
+			if(!gradientStepsEquivalent(gradOneSteps[i], gradTwoSteps[i]))
+				return false;
+		}		
+		return true;
+	}
+	
 	public static boolean mobilePhaseSetsEquivalent(
 			MobilePhase[] setOne, 
 			MobilePhase[] setTwo) {

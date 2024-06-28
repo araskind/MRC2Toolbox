@@ -187,14 +187,17 @@ public class AgilentAcquisitionMethodParser {
 						
 						Element solvDefElement = 
 								extendedSolventTypeElement.getChild("SolventDescription");
-						solventName = 
-								solvDefElement.getChild("Definition").
-								getChildText("Name").replaceFirst("V\\.\\d\\d", "").trim();
-						if(solvDefElement.getChild("Definition").getChildText("IsPure").equalsIgnoreCase("false")) {
+						if(solvDefElement != null) {
 							
-							String percentString = ", " + solvDefElement.getChildText("Percent") + "%";
-							solventName += percentString;						
-						}						
+							solventName = 
+									solvDefElement.getChild("Definition").
+									getChildText("Name").replaceFirst("V\\.\\d\\d", "").trim();
+							if(solvDefElement.getChild("Definition").getChildText("IsPure").equalsIgnoreCase("false")) {
+								
+								String percentString = ", " + solvDefElement.getChildText("Percent") + "%";
+								solventName += percentString;						
+							}	
+						}					
 					}
 					else {
 						selectedSolventChannelDefElementName = 

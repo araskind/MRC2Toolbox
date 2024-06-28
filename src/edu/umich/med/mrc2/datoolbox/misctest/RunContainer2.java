@@ -35,10 +35,14 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.xml.xpath.XPathExpressionException;
 
@@ -68,6 +72,7 @@ import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.MobilePhase;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusteringParameterSet;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
+import edu.umich.med.mrc2.datoolbox.database.idt.AcquisitionMethodUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.ChromatographyDatabaseUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.database.idt.MSMSClusteringDBUtils;
@@ -75,6 +80,8 @@ import edu.umich.med.mrc2.datoolbox.dbparse.load.nist.NISTParserUtils;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.FilePreferencesFactory;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
+import edu.umich.med.mrc2.datoolbox.utils.DelimitedTextParser;
+import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
 import edu.umich.med.mrc2.datoolbox.utils.MSMSClusteringUtils;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 import edu.umich.med.mrc2.datoolbox.utils.acqmethod.AgilentAcquisitionMethodParser;
@@ -104,10 +111,491 @@ public class RunContainer2 {
 		MRC2ToolBoxConfiguration.initConfiguration();
 
 		try {
-
-			//	gradTest();
+			downloadMethodsToExtractGradients();
+			//	extractTemporaryGradients();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}		
+	}
+	
+	private static void extractTemporaryGradients() throws Exception{
+		
+		Collection<String>logData = new ArrayList<String>();
+		File tmpFolder = new File(
+				"E:\\DataAnalysis\\METHODS\\Acquisition\\Uploaded\\AS_OF_20240618\\TMP");
+		
+		Connection conn = ConnectionManager.getConnection();
+		String selectQuery = 
+				"SELECT ACQ_METHOD_ID FROM DATA_ACQUISITION_METHOD "
+				+ "WHERE METHOD_CONTAINER IS NOT NULL AND TMP_GRADIENT_ID IS NULL";
+		PreparedStatement ps = conn.prepareStatement(selectQuery);
+		Collection<String>validIds = new TreeSet<String>();
+		ResultSet rs = ps.executeQuery();
+		while(rs.next())
+			validIds.add(rs.getString(1));
+		
+		rs.close();
+		
+		String query = 
+				"UPDATE DATA_ACQUISITION_METHOD "
+				+ "SET METHOD_NAME = ? WHERE ACQ_METHOD_ID = ?";
+		ps = conn.prepareStatement(query);
+		
+		//	Get all Agilent methodsfrom the database
+		Collection<DataAcquisitionMethod> allMethods = 
+				IDTDataCache.getAcquisitionMethods().stream().
+					filter(m -> validIds.contains(m.getId())).
+					filter(m -> m.getSoftware().getPlatform().getId().equals("PL001")).
+					filter(m -> (m.getSeparationType().getId().equals("HPLC")
+							|| m.getSeparationType().getId().equals("UPLC")
+							|| m.getSeparationType().getId().equals("LC"))).
+					collect(Collectors.toList());
+
+		for(DataAcquisitionMethod method : allMethods) {
+			
+			try {
+				AcquisitionMethodUtils.getAcquisitionMethodFile(method, tmpFolder);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			File[]downloaded = tmpFolder.listFiles(File::isDirectory);
+			if(downloaded.length == 0) {
+				logData.add(method.getId() + "\t" + method.getName() + "\tNo method file");
+				FileUtils.cleanDirectory(tmpFolder);
+				continue;
+			}
+			File methodFolder = downloaded[0];
+			if(!methodFolder.isDirectory()) {
+				logData.add(method.getId() + "\t" + method.getName() + "\tMethod is not directory");
+				FileUtils.cleanDirectory(tmpFolder);
+				continue;
+			}
+			List<Path>realMethodFolderPaths = 
+					FIOUtils.findDirectoriesByExtension(methodFolder.toPath(), "m");
+			
+			if(realMethodFolderPaths != null && !realMethodFolderPaths.isEmpty()) {
+				
+				File realMethodFolder = null;
+				if(realMethodFolderPaths.size() == 1)
+					realMethodFolder = realMethodFolderPaths.get(0).toFile();
+				
+				if(realMethodFolderPaths.size() > 1)
+					realMethodFolder = realMethodFolderPaths.get(1).toFile();
+				
+				//	Replace method file and update the name if method was not saved properly
+				if(!realMethodFolder.equals(methodFolder)) {
+					
+					try {
+						AcquisitionMethodUtils.updateAcquisitionMethod(method, realMethodFolder);
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}							
+					ps.setString(1, realMethodFolder.getName());
+					ps.setString(2, method.getId());
+					ps.executeUpdate();
+					logData.add(method.getId() + "\t" + method.getName() + "\tReplaced method file and updated name");
+				}
+				//	Extract gradient and save as temporary
+				AgilentAcquisitionMethodParser amp = 
+						new AgilentAcquisitionMethodParser(methodFolder);
+				amp.parseParameterFiles();
+				ChromatographicGradient grad = null;		
+				try {
+					grad = amp.extractGradientData();
+				} catch (XPathExpressionException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				if(grad != null) {					
+					if(grad.getGradientSteps().isEmpty()) {
+						logData.add(method.getId() + "\t" + method.getName() + "\tNo time table");
+						FileUtils.cleanDirectory(tmpFolder);
+						continue;
+					}				
+					MobilePhase[] gradMobilePhases = new MobilePhase[4];
+					boolean hasUnknownMobPhase = false;
+					for(int i=0; i<4; i++) {
+						
+						MobilePhase mp = grad.getMobilePhases()[i];
+						if(mp != null) {							
+							MobilePhase existing = IDTDataCache.getMobilePhaseByNameOrSynonym(mp.getName());
+							if(existing == null) {
+								logData.add(method.getId() + "\t" + method.getName() + "\tUnknown mobile phase " + mp.getName());
+								hasUnknownMobPhase = true;
+							}
+							else
+								gradMobilePhases[i] = existing;
+						}
+						else
+							gradMobilePhases[i] = null;
+					}
+					if(hasUnknownMobPhase) {
+						FileUtils.cleanDirectory(tmpFolder);
+						continue;
+					}
+					
+					if(!grad.isDefined()) {
+						logData.add(method.getId() + "\t" + method.getName() + "\tNo mobile phases found");
+						FileUtils.cleanDirectory(tmpFolder);
+						continue;
+					}
+					//	Upload temp gradient for method		
+					try {
+						ChromatographyDatabaseUtils.addChromatographicGradientForAcqMethod(grad, method.getId());
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+				else {
+					logData.add(method.getId() + "\t" + method.getName() + "\tFailed to extract gradient");
+					FileUtils.cleanDirectory(tmpFolder);
+				}			
+			}	
+			FileUtils.cleanDirectory(tmpFolder);
+		}
+		ps.close();
+		ConnectionManager.releaseConnection(conn);
+		
+		//	Save Log file
+		Path logPath = 
+				Paths.get(tmpFolder.getParentFile().getAbsolutePath(), 
+				"tmp_gradient_import_log.txt");
+		try {
+			Files.write(logPath, 
+					logData, 
+					StandardCharsets.UTF_8, 
+					StandardOpenOption.CREATE,
+					StandardOpenOption.TRUNCATE_EXISTING);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private static void findGradientWithEquivalentTimeTable() {
+
+		Collection<ChromatographicGradient> existingGradients = 
+				IDTDataCache.getChromatographicGradientList();
+		
+		File methodFolder = new File("E:\\DataAnalysis\\METHODS\\Acquisition\\"
+				+ "Uploaded\\AS_OF_20240618\\Dups2fix\\2.1 mm Gradient MS2 180 min.m");
+		
+		AgilentAcquisitionMethodParser amp = 
+				new AgilentAcquisitionMethodParser(methodFolder);
+		amp.parseParameterFiles();
+		ChromatographicGradient grad = null;		
+		try {
+			grad = amp.extractGradientData();
+		} catch (XPathExpressionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		if(grad != null) {
+			
+			for(ChromatographicGradient g : existingGradients) {
+				
+				if(ChromatographicGradientUtils.timeTableEquivalent(g, grad))
+					System.out.println(g.getId());
+			}
+		}
+		System.out.println("***");
+	}
+	
+	private static void mapAdditionalGradients() throws Exception {
+		
+		File dirToScan = new File("E:\\DataAnalysis\\METHODS\\Acquisition\\"
+				+ "Uploaded\\AS_OF_20240618\\GradReextract");
+		IOFileFilter dotMfilter = 
+				FileFilterUtils.makeDirectoryOnly(new RegexFileFilter(".+\\.[mM]$"));
+		Collection<File> methodFolders = FileUtils.listFilesAndDirs(
+				dirToScan,
+				DirectoryFileFilter.DIRECTORY,
+				dotMfilter);
+		
+		Collection<ChromatographicGradient> existingGradients = 
+				IDTDataCache.getChromatographicGradientList();
+		Map<ChromatographicGradient,Collection<File>>gradientMethodMap = 
+				new HashMap<ChromatographicGradient,Collection<File>>();
+		for(ChromatographicGradient grad : existingGradients)
+			gradientMethodMap.put(grad, new TreeSet<File>());
+		
+		for(File methodFolder : methodFolders) {
+			
+			if(!FilenameUtils.getExtension(methodFolder.getName()).equalsIgnoreCase("m"))
+				continue;
+			
+			AgilentAcquisitionMethodParser amp = 
+					new AgilentAcquisitionMethodParser(methodFolder);
+			amp.parseParameterFiles();
+			ChromatographicGradient grad = null;		
+			try {
+				grad = amp.extractGradientData();
+			} catch (XPathExpressionException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			if(grad != null) {
+				
+				if(grad.getGradientSteps().isEmpty()) {
+					System.err.println("No timetable in \"" + methodFolder.getName() + "\"");
+					continue;
+				}				
+				MobilePhase[] gradMobilePhases = new MobilePhase[4];
+				int mpCount = 0;
+				for(int i=0; i<4; i++) {
+					
+					MobilePhase mp = grad.getMobilePhases()[i];
+					if(mp != null) {
+						
+						MobilePhase existing = IDTDataCache.getMobilePhaseByNameOrSynonym(mp.getName());
+						if(existing == null)
+							System.err.println("Didn't find existing mobile phase for \"" 
+									+ mp.getName() + "\" in \"" + methodFolder.getName() + "\"");
+						else
+							gradMobilePhases[i] = existing;
+					}
+					else
+						gradMobilePhases[i] = null;
+				}
+				if(!grad.isDefined()) {
+					System.err.println("No mobile phases found in  \"" 
+							+ methodFolder.getName() + "\"");
+					continue;
+				}
+				ChromatographicGradient existingGrad = null;
+				for(ChromatographicGradient g : gradientMethodMap.keySet()) {
+					
+					if(ChromatographicGradientUtils.gradientsEquivalent(g, grad)) {
+						existingGrad = g;
+						break;
+					}
+				}
+				if(existingGrad == null) {
+					gradientMethodMap.put(grad, new TreeSet<File>());
+					gradientMethodMap.get(grad).add(methodFolder);
+				}
+				else {
+					gradientMethodMap.get(existingGrad).add(methodFolder);
+				}		
+			}
+			else {
+				System.err.println("Failed to extract gradient from  \"" + methodFolder.getName() + "\"");
+			}
+		}
+		for(ChromatographicGradient g : gradientMethodMap.keySet()) {
+			
+			if(!existingGradients.contains(g)) {
+				
+				try {
+					ChromatographyDatabaseUtils.addNewChromatographicGradient(g);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+		//	Assign gradients to methods
+		Connection conn = ConnectionManager.getConnection();
+		String updQuery = 
+				"UPDATE DATA_ACQUISITION_METHOD "
+				+ "SET GRADIENT_ID = ? WHERE ACQ_METHOD_ID = ?";
+		PreparedStatement ps = conn.prepareStatement(updQuery);
+		
+		for(Entry<ChromatographicGradient, Collection<File>> pair : gradientMethodMap.entrySet()) {
+			
+			for(File f : pair.getValue()) {
+				
+				DataAcquisitionMethod method = IDTDataCache.getAcquisitionMethodByName(f.getName());
+				if(method != null) {
+					
+					ps.setString(1, pair.getKey().getId());
+					ps.setString(2, method.getId());
+					ps.executeUpdate();
+				}
+			}
+		}
+		ps.close();
+		ConnectionManager.releaseConnection(conn);
+
+		System.out.println("***");
+	}
+	
+	private static void downloadMethodsToExtractGradients() {
+		
+		File destination = 
+				new File("E:\\DataAnalysis\\METHODS\\Acquisition\\"
+						+ "Uploaded\\AS_OF_20240618\\ProblemMethods");
+		Collection<DataAcquisitionMethod> list = null;
+		try {
+			list = AcquisitionMethodUtils.getAcquisitionMethodList();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		File methodList = new File("E:\\DataAnalysis\\METHODS\\Acquisition\\"
+				+ "Uploaded\\AS_OF_20240618\\tmp_gradient_import_log.txt");
+		String[][] methodListData = DelimitedTextParser.parseTextFile(
+				methodList, MRC2ToolBoxConfiguration.getTabDelimiter());
+		Collection<String>methodIds = new TreeSet<String>();
+		for(int i=0; i<methodListData.length; i++)
+			methodIds.add(methodListData[i][0]);
+		
+		List<DataAcquisitionMethod> toDownload = list.stream().
+			filter(m -> methodIds.contains(m.getId())).
+			collect(Collectors.toList());
+		
+		for(DataAcquisitionMethod method : toDownload) {			
+
+			try {
+				AcquisitionMethodUtils.getAcquisitionMethodFile(method, destination);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}			
+		}		
+	}
+	
+	private static void updateNamesForFixedMethods() throws Exception{
+		
+		//	Read all downloaded method folders
+		File dirToScan = new File(
+				"E:\\DataAnalysis\\METHODS\\Acquisition\\Uploaded\\AS_OF_20240618\\MSMS");		
+		Collection<File> methodFolders = Stream.of(dirToScan.listFiles()).
+				filter(file -> file.isDirectory()).collect(Collectors.toList());	      
+		dirToScan = new File(
+				"E:\\DataAnalysis\\METHODS\\Acquisition\\Uploaded\\AS_OF_20240618\\MS1");
+		Collection<File> msOneMethodFolders = Stream.of(dirToScan.listFiles()).
+				filter(file -> file.isDirectory()).collect(Collectors.toList());		
+		methodFolders.addAll(msOneMethodFolders);
+		
+		//	Get all methods with un-assigned gradients from the database
+		Collection<DataAcquisitionMethod> allMethods = 
+				IDTDataCache.getAcquisitionMethods().stream().
+					filter(m -> (Objects.isNull(m.getChromatographicGradient()) 
+							|| !m.getChromatographicGradient().isDefined())).
+					filter(m -> m.getIonizationType().getId().equals("ESI")).
+					filter(m -> (m.getMsType().getId().equals("HRMS")
+							|| m.getMsType().getId().equals("HRMSMS"))).
+					collect(Collectors.toList());
+		
+		Collection<String>updatedMethods = new TreeSet<String>();
+		
+		Connection conn = ConnectionManager.getConnection();
+		String query = 
+				"UPDATE DATA_ACQUISITION_METHOD "
+				+ "SET METHOD_NAME = ? WHERE ACQ_METHOD_ID = ?";
+		PreparedStatement ps = conn.prepareStatement(query);
+		
+		for(DataAcquisitionMethod method : allMethods) {
+			
+			File methodFolder = methodFolders.stream().
+					filter(f -> f.getName().equals(method.getName())).
+					findFirst().orElse(null);
+			if(methodFolder != null) {
+				
+				List<Path>realMethodFolderPaths = 
+						FIOUtils.findDirectoriesByExtension(methodFolder.toPath(), "m");
+				
+				if(realMethodFolderPaths != null && !realMethodFolderPaths.isEmpty()) {
+					
+					File realMethodFolder = realMethodFolderPaths.get(0).toFile();
+					if(!realMethodFolder.equals(methodFolder)) {
+						
+						ps.setString(1, realMethodFolder.getName());
+						ps.setString(2, method.getId());
+						ps.executeUpdate();
+						System.out.println("Updated file for method " + method.getName() );
+					}
+				}
+			}
+		}
+		ps.close();
+		ConnectionManager.releaseConnection(conn);
+	}
+	
+	private static void fixMethodFilesInDatabase() throws Exception{
+		
+		//	Read all downloaded method folders
+		File dirToScan = new File(
+				"E:\\DataAnalysis\\METHODS\\Acquisition\\Uploaded\\AS_OF_20240618\\MSMS");		
+		Collection<File> methodFolders = Stream.of(dirToScan.listFiles()).
+				filter(file -> file.isDirectory()).collect(Collectors.toList());	      
+		dirToScan = new File(
+				"E:\\DataAnalysis\\METHODS\\Acquisition\\Uploaded\\AS_OF_20240618\\MS1");
+		Collection<File> msOneMethodFolders = Stream.of(dirToScan.listFiles()).
+				filter(file -> file.isDirectory()).collect(Collectors.toList());		
+		methodFolders.addAll(msOneMethodFolders);
+		
+		//	Get all methods with un-assigned gradients from the database
+		Collection<DataAcquisitionMethod> allMethods = 
+				IDTDataCache.getAcquisitionMethods().stream().
+					filter(m -> (Objects.isNull(m.getChromatographicGradient()) 
+							|| !m.getChromatographicGradient().isDefined())).
+					filter(m -> m.getIonizationType().getId().equals("ESI")).
+					filter(m -> (m.getMsType().getId().equals("HRMS")
+							|| m.getMsType().getId().equals("HRMSMS"))).
+					collect(Collectors.toList());
+		
+		Connection conn = ConnectionManager.getConnection();
+		String query = 
+				"UPDATE DATA_ACQUISITION_METHOD "
+				+ "SET METHOD_NAME = ? WHERE ACQ_METHOD_ID = ?";
+		PreparedStatement ps = conn.prepareStatement(query);
+		
+		Collection<String>updatedMethods = new TreeSet<String>();
+		for(DataAcquisitionMethod method : allMethods) {
+			
+			File methodFolder = methodFolders.stream().
+					filter(f -> f.getName().equals(method.getName())).
+					findFirst().orElse(null);
+			if(methodFolder != null) {
+				
+				List<Path>realMethodFolderPaths = 
+						FIOUtils.findDirectoriesByExtension(methodFolder.toPath(), "m");
+				
+				if(realMethodFolderPaths != null && !realMethodFolderPaths.isEmpty()) {
+					
+					File realMethodFolder = null;
+					if(realMethodFolderPaths.size() == 1)
+						realMethodFolder = realMethodFolderPaths.get(0).toFile();
+					
+					if(realMethodFolderPaths.size() > 1)
+						realMethodFolder = realMethodFolderPaths.get(1).toFile();
+					
+					if(!realMethodFolder.equals(methodFolder)) {
+						
+						try {
+							AcquisitionMethodUtils.updateAcquisitionMethod(method, realMethodFolder);
+						} catch (Exception e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}							
+						ps.setString(1, realMethodFolder.getName());
+						ps.setString(2, method.getId());
+						ps.executeUpdate();
+						
+						updatedMethods.add(method.getId());
+						System.out.println("Updated file for method " + method.getName() );
+					}
+				}
+			}
+		}
+		ps.close();
+		ConnectionManager.releaseConnection(conn);
+		
+		Path logPath = 
+				Paths.get(dirToScan.getParentFile().getAbsolutePath(), 
+				"updated_methods2.txt");
+		try {
+			Files.write(logPath, 
+					updatedMethods, 
+					StandardCharsets.UTF_8, 
+					StandardOpenOption.CREATE,
+					StandardOpenOption.TRUNCATE_EXISTING);
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}

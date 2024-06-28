@@ -110,10 +110,29 @@ public class FIOUtils {
 		if (!Files.isDirectory(path)) {
 			throw new IllegalArgumentException("Path must be a directory!");
 		}
+		String ext = fileExtension.toLowerCase();
 		List<String> result = null;
 		try (Stream<Path> walk = Files.walk(path)) {
 			result = walk.filter(p -> !Files.isDirectory(p))
-					.map(p -> p.toString().toLowerCase()).filter(f -> f.endsWith(fileExtension))
+					.map(p -> p.toString().toLowerCase()).filter(f -> f.endsWith(ext))
+					.collect(Collectors.toList());
+		}
+		catch(IOException e) {
+			e.printStackTrace();
+		}
+		return result;
+	}
+	
+	public static List<Path> findDirectoriesByExtension(Path path, String fileExtension) {
+
+		if (!Files.isDirectory(path)) {
+			throw new IllegalArgumentException("Path must be a directory!");
+		}
+		String ext = fileExtension.toLowerCase();
+		List<Path> result = null;
+		try (Stream<Path> walk = Files.walk(path)) {
+			result = walk.filter(p -> Files.isDirectory(p))
+					.filter(p -> p.toString().toLowerCase().endsWith(ext))
 					.collect(Collectors.toList());
 		}
 		catch(IOException e) {

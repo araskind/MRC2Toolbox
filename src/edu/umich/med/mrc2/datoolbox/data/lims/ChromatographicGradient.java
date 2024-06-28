@@ -178,6 +178,20 @@ public class ChromatographicGradient implements Serializable {
 		this.id = id;
 	}
 	
+	public boolean isDefined() {
+		
+		int mpCount = 0;
+		for(MobilePhase m : mobilePhases) {
+			
+			if(m != null)
+				mpCount++;
+		}
+		if(mpCount == 0)
+			return false;
+		
+		return true;
+	}
+	
 	@Override
 	public boolean equals(Object obj) {
 
