@@ -31,11 +31,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
-import javax.xml.xpath.XPathFactory;
 
 import org.jdom2.Attribute;
 import org.jdom2.Document;
@@ -53,6 +49,7 @@ public class AgilentAcquisitionMethodParser {
 
 	public static final String ISOCRATIC_PUMP_PARAMETERS_FILE = "IsoPump_1.xml";
 	public static final String BINARY_PUMP_PARAMETERS_FILE = "BinPump_1.xml";
+	// public static final String BINARY_PUMP_PARAMETERS_FILE = "BinPump_2.xml";
 	public static final String QUATERNARY_PUMP_PARAMETERS_FILE = "QuatPump_1.xml";
 	public static final String COLUMN_COMPARTMENT_PARAMETERS_FILE = "TCC_1.xml";
 	public static final String AUTOSAMPLER_PARAMETERS_FILE = "HiP-ALS_1.xml";
@@ -124,29 +121,61 @@ public class AgilentAcquisitionMethodParser {
 				&& !stopTimeElement.getText().trim().isEmpty()) {
 			stopTime = Double.parseDouble(stopTimeElement.getText());
 			grad.setStopTime(stopTime);
-		}
-				
+		}				
 		Element startingFlowElement = pumpConfigElement.getChild("Flow", ns);	
 		double startingFlowRate = 0.0d;
 		if(startingFlowElement != null && startingFlowElement.getText() != null
 				&& !startingFlowElement.getText().trim().isEmpty())
 			startingFlowRate = Double.parseDouble(startingFlowElement.getText());
 		
-		Element timeTableElement = pumpConfigElement.getChild("Timetable", ns);
-		if(timeTableElement != null) {
-			Set<ChromatographicGradientStep>gradSteps = 
-					parseTimetableElement(timeTableElement, ns, startingFlowRate);
-			grad.getGradientSteps().addAll(gradSteps);
-		}
-		//	When empty - isocratic method? read percentages from solvent composition?
 		Element solventCompositionElement = 
 				pumpConfigElement.getChild("SolventComposition", ns);
+		
+		MobilePhase[]mobilePhases = new MobilePhase[4];
 		if(solventCompositionElement != null) {
 			
-			MobilePhase[]mobilePhases = 
+			mobilePhases = 
 					parseSolventCompositionElement(solventCompositionElement,  ns);
 			for(int i=0; i<4; i++)
 				grad.setMobilePhase(mobilePhases[i], i);			
+		}	
+		Set<ChromatographicGradientStep>gradSteps = null;
+		Element timeTableElement = pumpConfigElement.getChild("Timetable", ns);
+		if(timeTableElement != null) {
+			
+			gradSteps = parseTimetableElement(
+					timeTableElement, ns, startingFlowRate);
+			grad.getGradientSteps().addAll(gradSteps);
+		}
+		//	When empty - isocratic method, read percentages from solvent composition
+		if(gradSteps == null || gradSteps.isEmpty()) {
+			
+			double percentA = 0.0d;
+			double percentB = 0.0d;
+			double percentC = 0.0d;
+			double percentD = 0.0d;
+			
+			if(mobilePhases[0] != null)
+				percentA = mobilePhases[0].getStartingPercentage();
+			
+			if(mobilePhases[1] != null)
+				percentB = mobilePhases[1].getStartingPercentage();
+			
+			if(mobilePhases[2] != null)
+				percentC = mobilePhases[2].getStartingPercentage();
+			
+			if(mobilePhases[3] != null)
+				percentD = mobilePhases[3].getStartingPercentage();
+						
+			ChromatographicGradientStep zeroStep = 
+					new ChromatographicGradientStep(
+					0.0d, 
+					startingFlowRate, 
+					percentA,
+					percentB, 
+					percentC, 
+					percentD);
+			grad.getGradientSteps().add(zeroStep);
 		}
 		//	Optionally get column compartment temperature. 
 		//	How to handle 2 compartments?
@@ -218,8 +247,23 @@ public class AgilentAcquisitionMethodParser {
 									solventElement.getChild("SelectedSolventChannel").getText() + "UserName");
 						}
 					}
-					if(solventName != null && !solventName.isEmpty())
-						mobilePhases[mpIndex] = new MobilePhase(solventName);
+					if(solventName != null && !solventName.isEmpty()) {
+						
+						mobilePhases[mpIndex] = new MobilePhase(solventName);						
+						String startingPercentage = solventElement.getChildText("Percentage");
+						if(startingPercentage != null && !startingPercentage.isEmpty()) {
+							
+							Double startingPercentageValue = null;
+							try {
+								startingPercentageValue = Double.parseDouble(startingPercentage);
+							} catch (NumberFormatException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+							if(startingPercentageValue != null)
+								mobilePhases[mpIndex].setStartingPercentage(startingPercentageValue);
+						}					
+					}
 				}
 			}
 		}		
@@ -236,6 +280,7 @@ public class AgilentAcquisitionMethodParser {
 		
 		Map<String,List<AgilentGradientTimetableEntry>>entries = 
 				new TreeMap<String,List<AgilentGradientTimetableEntry>>();
+	
 		for(Element timetableEntry : timetableEntries) {
 			
 			Attribute ti = timetableEntry.getAttribute("type", xsiNamespace);
@@ -363,41 +408,10 @@ public class AgilentAcquisitionMethodParser {
 		return gradSteps;
 	}
 	
-	@SuppressWarnings("unchecked")
-	private double getStartingFlowRate(Document gradientDoc, XPathFactory factory) 
-			throws IllegalArgumentException, XPathExpressionException{
-		
-		double flow = 0.0;
-		XPath xpath = factory.newXPath();
-		XPathExpression expr = xpath.compile(GLOBAL_FLOW_NODE);
-		List<Element>flowNodes = (List<Element>) expr.evaluate(gradientDoc, XPathConstants.NODESET);
-		if(flowNodes.size() == 0)
-			throw new IllegalArgumentException("Flow rate not specified");
-		
-		Element flowElement = flowNodes.get(0);
-		flow = Double.parseDouble(flowElement.getChildren().get(0).getText());
-		return flow;
-	}
-	
-	@SuppressWarnings("unchecked")
-	private double getStopTime(Document gradientDoc, XPathFactory factory) 
-			throws IllegalArgumentException, XPathExpressionException{
-		
-		double stopTime = 0.0;
-		XPath xpath = factory.newXPath();
-		XPathExpression expr = xpath.compile(STOP_TIME_NODE);
-		List<Element>flowNodes = (List<Element>) expr.evaluate(gradientDoc, XPathConstants.NODESET);
-		if(flowNodes.size() == 0)
-			throw new IllegalArgumentException("Stop time not specified");
-		
-		Element stopTimeElement = flowNodes.get(0);
-		stopTime = Double.parseDouble(stopTimeElement.getChildren().get(0).getText());
-		return stopTime;
-	}
-	
 	private Document getGradientDefinitionDocument() {
 		
-		if(binaryPumpParameterDocument == null && quaternaryPumpParameterDocument == null)
+		if(binaryPumpParameterDocument == null 
+				&& quaternaryPumpParameterDocument == null)
 			return null;
 		
 		if(quaternaryPumpParameterDocument != null)
@@ -405,8 +419,6 @@ public class AgilentAcquisitionMethodParser {
 		else
 			return binaryPumpParameterDocument;
 	}
-	
-
 	
 	private void parseIsocraticPumpParameters() {
 		
@@ -456,25 +468,5 @@ public class AgilentAcquisitionMethodParser {
 			return;
 		
 		autosamplerParameterDocument = XmlUtils.readXmlFile(autosamplerParameterFile);
-	}
-	
-//	private void parseMainDocumet() {
-//		
-//	}
-//	
-//	public void extractMethodData() {
-//		
-//		File methodDocumentFile = 
-//				Paths.get(methodFolder.getAbsolutePath(), ISOCRATIC_PUMP_PARAMETERS_FILE).toFile();
-//		if(!methodDocumentFile.exists())
-//			return;
-//		
-//		methodDocument = XmlUtils.readXmlFile(methodDocumentFile);
-//	}
-//	
-//	public void extractEncodedSubdocuments() {
-//		
-//		
-//	}
-	
+	}	
 }

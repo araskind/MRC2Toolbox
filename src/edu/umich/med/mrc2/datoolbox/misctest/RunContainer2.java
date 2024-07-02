@@ -40,6 +40,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -111,12 +112,139 @@ public class RunContainer2 {
 		MRC2ToolBoxConfiguration.initConfiguration();
 
 		try {
-			downloadMethodsToExtractGradients();
+			groupAndReassignGradients();
+			//	downloadMethodsToExtractGradients();
 			//	extractTemporaryGradients();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}		
+	}
+	
+	private static void groupAndReassignGradients() throws Exception{
+		
+		Collection<ChromatographicGradient>tmpGradients = 
+				ChromatographyDatabaseUtils.getTempChromatographicGradientList();
+		Map<Integer,List<ChromatographicGradient>>gradientGroups = 
+				new TreeMap<Integer,List<ChromatographicGradient>>();
+		ChromatographicGradient[]tmpGradArray = 
+				tmpGradients.toArray(new ChromatographicGradient[tmpGradients.size()]);
+		int groupCount = 0;
+		gradientGroups.put(0, new ArrayList<ChromatographicGradient>());
+		gradientGroups.get(0).add(tmpGradArray[0]);
+		for(int i=1; i<tmpGradArray.length; i++) {
+			
+			boolean matched = false;
+			for(int j : gradientGroups.keySet()) {
+				
+				for(ChromatographicGradient grad : gradientGroups.get(j)) {
+					
+					if(ChromatographicGradientUtils.gradientsEquivalent(tmpGradArray[i], grad)) {						
+						matched = true;
+						break;
+					}
+				}
+				if(matched) {
+					 gradientGroups.get(j).add(tmpGradArray[i]);
+					 break;
+				}					
+			}
+			if(!matched) {
+				groupCount++;
+				gradientGroups.put(groupCount, new ArrayList<ChromatographicGradient>());
+				gradientGroups.get(groupCount).add(tmpGradArray[i]);
+			}
+		}
+		System.out.println("Gradients grouped");
+		int groupedCount = 0;
+		Set<String>tmpIds = new TreeSet<String>();		
+		for(List<ChromatographicGradient>gradList : gradientGroups.values()) {
+			groupedCount += gradList.size();
+			gradList.stream().forEach(g -> tmpIds.add(g.getId()));
+		}		
+		System.out.println("Count in grouped " + groupedCount);
+		System.out.println("Count unique " + tmpIds.size());
+		//ArrayList<String>logData = new 	ArrayList<String>();
+		Connection conn = ConnectionManager.getConnection();
+		String query = 
+				"UPDATE DATA_ACQUISITION_METHOD "
+				+ "SET GRADIENT_ID = ? WHERE TMP_GRADIENT_ID = ?";
+		PreparedStatement ps = conn.prepareStatement(query);
+		for(List<ChromatographicGradient>gradList : gradientGroups.values()) {
+			
+			ChromatographicGradient newGrad = gradList.get(0);
+			String tmpId = newGrad.getId();
+			ChromatographyDatabaseUtils.addNewChromatographicGradient(newGrad);	
+			
+			ps.setString(1, newGrad.getId());
+			ps.setString(2, tmpId);
+			ps.executeUpdate();				
+			if(gradList.size() > 1) {
+				
+				for(int i=1; i<gradList.size(); i++) {
+					
+					//logData.add(gradList.get(i).getId() + "" + newGrad.getId());
+					ps.setString(1, newGrad.getId());
+					ps.setString(2, gradList.get(i).getId());
+					ps.executeUpdate();	
+				}	
+			}	
+		}
+		ps.close();
+		ConnectionManager.releaseConnection(conn);
+//		Path logPath = 
+//				Paths.get("E:\\DataAnalysis\\METHODS\\Acquisition\\Uploaded\\AS_OF_20240618", "tmpToRegGradMap.txt");
+//		try {
+//			Files.write(logPath, 
+//					logData, 
+//					StandardCharsets.UTF_8, 
+//					StandardOpenOption.CREATE,
+//					StandardOpenOption.TRUNCATE_EXISTING);
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
+	}
+	
+	private static void debugGradientExtraction() throws Exception{
+		
+		File methodFolder = new File(
+				"E:\\DataAnalysis\\METHODS\\Acquisition\\Uploaded\\"
+				+ "AS_OF_20240618\\ProblemMethods\\Tryptophan.m");
+		
+		//	Extract gradient and save as temporary
+		AgilentAcquisitionMethodParser amp = 
+				new AgilentAcquisitionMethodParser(methodFolder);
+		amp.parseParameterFiles();
+		ChromatographicGradient grad = null;		
+		try {
+			grad = amp.extractGradientData();
+		} catch (XPathExpressionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		if(grad != null) {					
+			if(grad.getGradientSteps().isEmpty())
+				System.out.println(methodFolder.getName() + "\tNo time table");
+						
+			MobilePhase[] gradMobilePhases = new MobilePhase[4];
+			for(int i=0; i<4; i++) {
+				
+				MobilePhase mp = grad.getMobilePhases()[i];
+				if(mp != null) {							
+					MobilePhase existing = IDTDataCache.getMobilePhaseByNameOrSynonym(mp.getName());
+					if(existing == null) 
+						System.out.println(methodFolder.getName() + "\tUnknown mobile phase " + mp.getName());
+					else
+						gradMobilePhases[i] = existing;
+				}
+				else
+					gradMobilePhases[i] = null;
+			}		
+			if(!grad.isDefined()) 
+				System.out.println(methodFolder.getName() + "\tNo mobile phases found");
+		}
+		else 
+			System.out.println(methodFolder.getName() + "\tFailed to extract gradient");
 	}
 	
 	private static void extractTemporaryGradients() throws Exception{
@@ -236,7 +364,9 @@ public class RunContainer2 {
 						FileUtils.cleanDirectory(tmpFolder);
 						continue;
 					}
-					
+					for(int i=0; i<4; i++)
+						grad.setMobilePhase(gradMobilePhases[i], i);
+										
 					if(!grad.isDefined()) {
 						logData.add(method.getId() + "\t" + method.getName() + "\tNo mobile phases found");
 						FileUtils.cleanDirectory(tmpFolder);
@@ -263,7 +393,7 @@ public class RunContainer2 {
 		//	Save Log file
 		Path logPath = 
 				Paths.get(tmpFolder.getParentFile().getAbsolutePath(), 
-				"tmp_gradient_import_log.txt");
+				"tmp_gradient_import_log_20240701_1.txt");
 		try {
 			Files.write(logPath, 
 					logData, 

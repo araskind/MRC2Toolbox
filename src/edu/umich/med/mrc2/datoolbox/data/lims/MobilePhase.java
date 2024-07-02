@@ -34,6 +34,7 @@ public class MobilePhase implements Serializable, Comparable<MobilePhase>{
 	private String id;
 	private String name;
 	private Set<String>synonyms;
+	private double startingPercentage;
 	
 	public MobilePhase(String id, String name) {
 		super();
@@ -114,5 +115,13 @@ public class MobilePhase implements Serializable, Comparable<MobilePhase>{
 
 	public Set<String> getSynonyms() {
 		return synonyms;
+	}
+
+	public double getStartingPercentage() {
+		return startingPercentage;
+	}
+
+	public void setStartingPercentage(double startingPercentage) {
+		this.startingPercentage = startingPercentage;
 	}
 }

@@ -279,7 +279,68 @@ public class ChromatographyDatabaseUtils {
 		return chromatographicGradientList;
 	}
 	
-	
+	public static Collection<ChromatographicGradient>getTempChromatographicGradientList() throws Exception{
+		
+		Collection<ChromatographicGradient>chromatographicGradientList = 
+				new HashSet<ChromatographicGradient>();
+		
+		Connection conn = ConnectionManager.getConnection();
+		String query = 
+				"SELECT GRADIENT_ID, GRADIENT_NAME, GRADIENT_DESCRIPTION,  " +
+				"MOBILE_PHASE_A, MOBILE_PHASE_B, MOBILE_PHASE_C,  " +
+				"MOBILE_PHASE_D, COLUMN_COMPARTMENT_TEMPERATURE, STOP_TIME " +
+				"FROM TMP_CHROMATOGRAPHIC_GRADIENT ";
+		PreparedStatement ps = conn.prepareStatement(query);
+		
+		String stepQuery = 
+				"SELECT START_TIME, MOBILE_PHASE_A_START_VALUE,  " +
+				"MOBILE_PHASE_B_START_VALUE, MOBILE_PHASE_C_START_VALUE,  " +
+				"MOBILE_PHASE_D_START_VALUE, FLOW_RATE " +
+				"FROM TMP_CHROMATOGRAPHIC_GRADIENT_STEP " +
+				"WHERE GRADIENT_ID = ? ";
+		PreparedStatement stepPs = conn.prepareStatement(stepQuery);
+		
+		ResultSet rs = ps.executeQuery();
+		while(rs.next()) {
+			
+			ChromatographicGradient grad = new ChromatographicGradient(
+					rs.getString("GRADIENT_ID"), 
+					rs.getString("GRADIENT_NAME"),
+					rs.getString("GRADIENT_DESCRIPTION"),
+					rs.getDouble("COLUMN_COMPARTMENT_TEMPERATURE"),
+					rs.getDouble("STOP_TIME"));
+			grad.setMobilePhase(
+					IDTDataCache.getMobilePhaseById(rs.getString("MOBILE_PHASE_A")), 0);
+			grad.setMobilePhase(
+					IDTDataCache.getMobilePhaseById(rs.getString("MOBILE_PHASE_B")), 1);
+			grad.setMobilePhase(
+					IDTDataCache.getMobilePhaseById(rs.getString("MOBILE_PHASE_C")), 2);
+			grad.setMobilePhase(
+					IDTDataCache.getMobilePhaseById(rs.getString("MOBILE_PHASE_D")), 3);
+			
+			stepPs.setString(1, grad.getId());
+			ResultSet stepRs = stepPs.executeQuery();
+			while(stepRs.next()) {
+				
+				ChromatographicGradientStep step = new ChromatographicGradientStep(
+						stepRs.getDouble("START_TIME"), 
+						stepRs.getDouble("FLOW_RATE"), 
+						stepRs.getDouble("MOBILE_PHASE_A_START_VALUE"),
+						stepRs.getDouble("MOBILE_PHASE_B_START_VALUE"), 
+						stepRs.getDouble("MOBILE_PHASE_C_START_VALUE"), 
+						stepRs.getDouble("MOBILE_PHASE_D_START_VALUE"));
+				grad.addChromatographicGradientStep(step);				
+			}
+			stepRs.close();
+			chromatographicGradientList.add(grad);
+		}
+		rs.close();
+		ps.close();
+		stepPs.close();
+		ConnectionManager.releaseConnection(conn);
+		
+		return chromatographicGradientList;
+	}
 	/*
 	 * MOBILE_PHASE
 	 * */
