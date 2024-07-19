@@ -58,6 +58,7 @@ import edu.umich.med.mrc2.datoolbox.gui.idtlims.AbstractIDTrackerLimsPanel;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.IDTrackerLimsManagerPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainWindow;
+import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTablePopupMenu;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.IndeterminateProgressDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.InformationDialog;
@@ -114,6 +115,8 @@ public class DockableWorklistManagerPanel extends AbstractIDTrackerLimsPanel imp
 		getContentPane().add(menuBar, BorderLayout.NORTH);
 
 		worklistTable = new InstrumentSequenceTable();
+		worklistTable.addTablePopupMenu(
+				new BasicTablePopupMenu(null, worklistTable, true));
 		JScrollPane designScrollPane = new JScrollPane(worklistTable);
 		getContentPane().add(designScrollPane, BorderLayout.CENTER);
 

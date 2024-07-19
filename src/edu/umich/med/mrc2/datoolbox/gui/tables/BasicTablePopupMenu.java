@@ -59,6 +59,18 @@ public class BasicTablePopupMenu extends JPopupMenu {
 		this.copyListener = copyListener;
 	}
 	
+	public BasicTablePopupMenu(
+			ActionListener mainActionListener,
+			BasicTable copyListener,
+			boolean initCopyBlock) {
+
+		super();
+		this.mainActionListener = mainActionListener;
+		this.copyListener = copyListener;
+		if(initCopyBlock)
+			 addCopyBlock();
+	}
+	
 	public void addCopyBlock() {
 		
 		if(copyListener == null)

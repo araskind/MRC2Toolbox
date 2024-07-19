@@ -54,6 +54,12 @@ import org.apache.commons.io.filefilter.FileFilterUtils;
 import org.apache.commons.io.filefilter.IOFileFilter;
 import org.apache.commons.io.filefilter.RegexFileFilter;
 import org.apache.commons.jcs3.access.exception.InvalidArgumentException;
+import org.apache.poi.hpsf.NoPropertySetStreamException;
+import org.apache.poi.hpsf.Property;
+import org.apache.poi.hpsf.PropertySet;
+import org.apache.poi.poifs.filesystem.DirectoryEntry;
+import org.apache.poi.poifs.filesystem.DocumentInputStream;
+import org.apache.poi.poifs.filesystem.DocumentNode;
 import org.openscience.cdk.aromaticity.Aromaticity;
 import org.openscience.cdk.inchi.InChIGenerator;
 import org.openscience.cdk.inchi.InChIGeneratorFactory;
@@ -87,6 +93,7 @@ import edu.umich.med.mrc2.datoolbox.utils.MSMSClusteringUtils;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 import edu.umich.med.mrc2.datoolbox.utils.acqmethod.AgilentAcquisitionMethodParser;
 import edu.umich.med.mrc2.datoolbox.utils.acqmethod.ChromatographicGradientUtils;
+import edu.umich.med.mrc2.datoolbox.utils.acqmethod.ThermoAcquisitionMethodParser;
 
 public class RunContainer2 {
 
@@ -112,13 +119,356 @@ public class RunContainer2 {
 		MRC2ToolBoxConfiguration.initConfiguration();
 
 		try {
-			groupAndReassignGradients();
+			groupAndReassignThermoGradients();
 			//	downloadMethodsToExtractGradients();
 			//	extractTemporaryGradients();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}		
+	}
+	
+	private static void groupAndReassignThermoGradients() throws Exception{
+		
+		Collection<ChromatographicGradient>tmpGradients = 
+				ChromatographyDatabaseUtils.getTempChromatographicGradientList();
+		Set<String>tmpGradIds = getTmpThermoGradientIds();
+		List<ChromatographicGradient> thermoTmpGrads = tmpGradients.stream().
+				filter(g -> tmpGradIds.contains(g.getId())).
+				collect(Collectors.toList());		
+		Map<Integer,List<ChromatographicGradient>>gradientGroups = 
+				new TreeMap<Integer,List<ChromatographicGradient>>();
+		ChromatographicGradient[]tmpGradArray = 
+				thermoTmpGrads.toArray(new ChromatographicGradient[thermoTmpGrads.size()]);
+		int groupCount = 0;
+		gradientGroups.put(0, new ArrayList<ChromatographicGradient>());
+		gradientGroups.get(0).add(tmpGradArray[0]);
+		for(int i=1; i<tmpGradArray.length; i++) {
+			
+			boolean matched = false;
+			for(int j : gradientGroups.keySet()) {
+				
+				for(ChromatographicGradient grad : gradientGroups.get(j)) {
+					
+					if(ChromatographicGradientUtils.gradientsEquivalent(tmpGradArray[i], grad)) {						
+						matched = true;
+						break;
+					}
+				}
+				if(matched) {
+					 gradientGroups.get(j).add(tmpGradArray[i]);
+					 break;
+				}					
+			}
+			if(!matched) {
+				groupCount++;
+				gradientGroups.put(groupCount, new ArrayList<ChromatographicGradient>());
+				gradientGroups.get(groupCount).add(tmpGradArray[i]);
+			}
+		}
+		System.out.println("Gradients grouped");
+		int groupedCount = 0;
+		Set<String>tmpIds = new TreeSet<String>();		
+		for(List<ChromatographicGradient>gradList : gradientGroups.values()) {
+			groupedCount += gradList.size();
+			gradList.stream().forEach(g -> tmpIds.add(g.getId()));
+		}		
+		System.out.println("Count in grouped " + groupedCount);
+		System.out.println("Count unique " + tmpIds.size());
+		//ArrayList<String>logData = new 	ArrayList<String>();
+		Connection conn = ConnectionManager.getConnection();
+		String query = 
+				"UPDATE DATA_ACQUISITION_METHOD "
+				+ "SET GRADIENT_ID = ? WHERE TMP_GRADIENT_ID = ?";
+		PreparedStatement ps = conn.prepareStatement(query);
+		for(List<ChromatographicGradient>gradList : gradientGroups.values()) {
+			
+			ChromatographicGradient newGrad = gradList.get(0);
+			String tmpId = newGrad.getId();
+			ChromatographyDatabaseUtils.addNewChromatographicGradient(newGrad);	
+			
+			ps.setString(1, newGrad.getId());
+			ps.setString(2, tmpId);
+			ps.executeUpdate();				
+			if(gradList.size() > 1) {
+				
+				for(int i=1; i<gradList.size(); i++) {
+					
+					//logData.add(gradList.get(i).getId() + "" + newGrad.getId());
+					ps.setString(1, newGrad.getId());
+					ps.setString(2, gradList.get(i).getId());
+					ps.executeUpdate();	
+				}	
+			}	
+		}
+		ps.close();
+		ConnectionManager.releaseConnection(conn);
+//		Path logPath = 
+//				Paths.get("E:\\DataAnalysis\\METHODS\\Acquisition\\Uploaded\\AS_OF_20240618", "tmpToRegGradMap.txt");
+//		try {
+//			Files.write(logPath, 
+//					logData, 
+//					StandardCharsets.UTF_8, 
+//					StandardOpenOption.CREATE,
+//					StandardOpenOption.TRUNCATE_EXISTING);
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
+	}
+	
+	private static Set<String>getTmpThermoGradientIds() throws Exception{
+		
+		Connection conn = ConnectionManager.getConnection();
+		String query = 
+				"SELECT TMP_GRADIENT_ID FROM DATA_ACQUISITION_METHOD "
+				+ "WHERE GRADIENT_ID IS NULL AND TMP_GRADIENT_ID IS NOT NULL";
+		PreparedStatement ps = conn.prepareStatement(query);
+		Set<String>tmpGradIds = new TreeSet<String>();
+		ResultSet rs = ps.executeQuery();
+		while(rs.next())
+			tmpGradIds.add(rs.getString(1));
+		
+		rs.close();
+		ps.close();
+		ConnectionManager.releaseConnection(conn);	
+		
+		return tmpGradIds;
+	}
+	
+	private static void checkThermoGradientTimetablesAgainstExisting() throws Exception{
+		
+		Connection conn = ConnectionManager.getConnection();
+		String query = 
+				"SELECT TMP_GRADIENT_ID FROM DATA_ACQUISITION_METHOD "
+				+ "WHERE GRADIENT_ID IS NULL AND TMP_GRADIENT_ID IS NOT NULL";
+		PreparedStatement ps = conn.prepareStatement(query);
+		Set<String>tmpGradIds = new TreeSet<String>();
+		ResultSet rs = ps.executeQuery();
+		while(rs.next())
+			tmpGradIds.add(rs.getString(1));
+		
+		rs.close();
+		
+		Collection<ChromatographicGradient>tmpGradsAll = 
+				ChromatographyDatabaseUtils.getTempChromatographicGradientList();
+		List<ChromatographicGradient> thermoTmpGrads = tmpGradsAll.stream().
+				filter(g -> tmpGradIds.contains(g.getId())).
+				collect(Collectors.toList());
+		Collection<ChromatographicGradient>existingGrads = 
+				ChromatographyDatabaseUtils.getChromatographicGradientList();
+		
+		Map<ChromatographicGradient,List<ChromatographicGradient>>gradientGroups = 
+				new HashMap<ChromatographicGradient,List<ChromatographicGradient>>();
+
+		for(ChromatographicGradient grad :existingGrads)
+			gradientGroups.put(grad, new ArrayList<ChromatographicGradient>());
+		
+		for(ChromatographicGradient grad :existingGrads) {
+			
+			for(ChromatographicGradient tmpGrad : thermoTmpGrads) {
+				
+				if(ChromatographicGradientUtils.timeTableEquivalent(tmpGrad, grad))
+					gradientGroups.get(grad).add(tmpGrad);								
+			}
+		}
+		ps.close();
+		ConnectionManager.releaseConnection(conn);		
+	}
+	
+	private static void extractThermoTempGradients() {
+		
+		File destination = 
+				new File("E:\\DataAnalysis\\METHODS\\Acquisition\\"
+						+ "Uploaded\\AS_OF_20240618\\Thermo");
+		Collection<DataAcquisitionMethod> list = null;
+		try {
+			list = AcquisitionMethodUtils.getAcquisitionMethodList();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		ArrayList<String>badMethods = new ArrayList<String>();
+		for(File methodFile : destination.listFiles()) {
+			
+			if(!methodFile.getName().endsWith(".meth"))
+				continue;
+			
+			ChromatographicGradient grad = 
+					ThermoAcquisitionMethodParser.extractGradient(methodFile);
+			if(grad == null) 
+				badMethods.add(methodFile.getName());
+			else {
+				DataAcquisitionMethod method = list.stream().
+						filter(m -> m.getName().equals(methodFile.getName())).
+						findFirst().orElse(null);
+				if(method != null) {
+					
+					try {
+						ChromatographyDatabaseUtils.addTmpChromatographicGradientForAcqMethod(
+								grad, method.getId(), false);
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+				else {
+					System.out.println("Name / file name mismatch for " + methodFile.getName());
+				}
+			}			
+		}	
+		if (!badMethods.isEmpty()) {
+			Path logPath = Paths.get(
+					destination.getAbsolutePath(), "failedGradExtraction.txt");
+			try {
+				Files.write(
+						logPath, 
+						badMethods, 
+						StandardCharsets.UTF_8, 
+						StandardOpenOption.CREATE,
+						StandardOpenOption.TRUNCATE_EXISTING);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		
+	}
+	
+	private static void downloadThermoMethodsToExtractGradients() {
+		
+		File destination = 
+				new File("E:\\DataAnalysis\\METHODS\\Acquisition\\"
+						+ "Uploaded\\AS_OF_20240618\\Thermo");
+		Collection<DataAcquisitionMethod> list = null;
+		try {
+			list = AcquisitionMethodUtils.getAcquisitionMethodList();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		List<DataAcquisitionMethod> toDownload = list.stream().
+				filter(m -> m.getName().endsWith(".meth")).
+				collect(Collectors.toList());
+			
+		for(DataAcquisitionMethod method : toDownload) {			
+	
+			try {
+				AcquisitionMethodUtils.getAcquisitionMethodFile(method, destination);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}			
+		}
+	}
+	
+	private static void thermoMethodReadTest() throws Exception {
+
+		File methodFile = new File("C:\\Users\\Sasha\\Downloads\\BEH_Amide_MS2_20min_Neg.meth");
+		
+		ThermoAcquisitionMethodParser.extractGradient(methodFile);
+		
+//		byte[] bytes = Files.readAllBytes(methodFile.toPath());
+//		String contents = new String(bytes, StandardCharsets.UTF_8);		
+//		String contentsCleaned = StringUtils.remove(contents, '\u0000');		
+//		int startMethodXML = contentsCleaned.indexOf("<?xml version");
+//		int endMethodXML = contentsCleaned.lastIndexOf("</CmData>");		
+//		String methodXML = contentsCleaned.substring(startMethodXML, endMethodXML).
+//				replaceAll("[^\\x00-\\x7F]", " ").replaceAll("\\p{C}", " ");		
+//		
+//		Path outputPath = Paths.get(methodFile.getParentFile().getAbsolutePath(), 
+//				FileNameUtils.getBaseName(methodFile.getName()) + "-instrumentMethod.xml");
+//		try {
+//		Files.writeString(outputPath, 
+//				methodXML + "</CmData>", 
+//				StandardCharsets.UTF_8,
+//				StandardOpenOption.CREATE, 
+//				StandardOpenOption.TRUNCATE_EXISTING);
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
+		
+		
+//		Document xmlMethodDoc = XmlUtils.readXmlFromString(methodXML + "</CmData>");
+//		if(xmlMethodDoc != null) {
+//			
+//			File instrumentMethodXml = Paths.get(methodFile.getParentFile().getAbsolutePath(), 
+//					FileNameUtils.getBaseName(methodFile.getName()) + "-instrumentMethod.xml").toFile();
+//			XmlUtils.writeXMLDocumentToFile(xmlMethodDoc, instrumentMethodXml);
+//		}
+						
+//		int startCalibration = contentsCleaned.indexOf("<TuneFiles>");
+//		int endCalibration = contentsCleaned.indexOf("</TuneFiles>");
+//		String calibration = contentsCleaned.substring(startCalibration, endCalibration);
+//		System.out.println(calibration + "</TuneFiles>");
+	
+//		int startOverview = contentsCleaned.indexOf("---- Overview");
+//		int endOverview = contentsCleaned.indexOf("Stop Run");
+//		String overview = contentsCleaned.substring(startOverview, endOverview);		
+//		System.out.println(overview + " Stop Run");
+		
+//		Path outputPath = Paths.get(methodFile.getParentFile().getAbsolutePath(), 
+//				FileNameUtils.getBaseName(methodFile.getName()) + "-LC-method-overview.txt");
+//		try {
+//			Files.writeString(outputPath, 
+//					overview + "Stop Run", 
+//					StandardCharsets.UTF_8,
+//					StandardOpenOption.CREATE, 
+//					StandardOpenOption.TRUNCATE_EXISTING);
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
+//		
+//		int startIDXmethod = contentsCleaned.indexOf("ID-X Method Summary");
+//		int endIDXmethod = contentsCleaned.indexOf("AuditData");
+//		String idxMethod = contentsCleaned.substring(startIDXmethod, endIDXmethod);		
+////		System.out.println(idxMethod);
+//		
+//		outputPath = Paths.get(methodFile.getParentFile().getAbsolutePath(), 
+//				FileNameUtils.getBaseName(methodFile.getName()) + "-IDX-method-overview.txt");
+//		try {
+//			Files.writeString(outputPath, 
+//					idxMethod, 
+//					StandardCharsets.UTF_8,
+//					StandardOpenOption.CREATE, 
+//					StandardOpenOption.TRUNCATE_EXISTING);
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}			
+	}
+	
+	public static void dump(DirectoryEntry root) throws IOException {
+		
+	    System.out.println(root.getName() + " : storage CLSID " + root.getStorageClsid());
+	    while(root.iterator().hasNext()) {
+	    	
+	    	org.apache.poi.poifs.filesystem.Entry entry = root.iterator().next();
+	        if (entry instanceof DocumentNode) {
+	            DocumentNode node = (DocumentNode) entry;
+	            System.out.println("Node name: " + node.getName());
+	            System.out.println("Node desc: " + node.getShortDescription());
+	            System.out.println("Node size: " + node.getSize());
+	            DocumentInputStream is = new DocumentInputStream(node);
+	            try {
+	                PropertySet ps = new PropertySet(is);
+	                if (ps.getSectionCount() != 0) {
+	                    for (Property p : ps.getProperties()) {
+	                        System.out.println("Prop: " + p.getID() + " " + p.getValue());
+	                    }
+	                }
+	            } catch (NoPropertySetStreamException e) {
+	                // TODO Auto-generated catch block
+	                e.printStackTrace();
+	            } catch (Exception e) {
+	                // TODO Auto-generated catch block
+	                e.printStackTrace();
+	            }
+	        } else if (entry instanceof DirectoryEntry) {
+	            DirectoryEntry dir = (DirectoryEntry) entry;
+	            dump(dir);
+	        } else {
+	            System.err.println("Skipping unsupported POIFS entry: " + entry);
+	        }
+	    }
 	}
 	
 	private static void groupAndReassignGradients() throws Exception{
@@ -240,7 +590,7 @@ public class RunContainer2 {
 				else
 					gradMobilePhases[i] = null;
 			}		
-			if(!grad.isDefined()) 
+			if(!grad.areMobilePhasesDefined()) 
 				System.out.println(methodFolder.getName() + "\tNo mobile phases found");
 		}
 		else 
@@ -367,14 +717,14 @@ public class RunContainer2 {
 					for(int i=0; i<4; i++)
 						grad.setMobilePhase(gradMobilePhases[i], i);
 										
-					if(!grad.isDefined()) {
+					if(!grad.areMobilePhasesDefined()) {
 						logData.add(method.getId() + "\t" + method.getName() + "\tNo mobile phases found");
 						FileUtils.cleanDirectory(tmpFolder);
 						continue;
 					}
 					//	Upload temp gradient for method		
 					try {
-						ChromatographyDatabaseUtils.addChromatographicGradientForAcqMethod(grad, method.getId());
+						ChromatographyDatabaseUtils.addTmpChromatographicGradientForAcqMethod(grad, method.getId(), false);
 					} catch (Exception e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -490,7 +840,7 @@ public class RunContainer2 {
 					else
 						gradMobilePhases[i] = null;
 				}
-				if(!grad.isDefined()) {
+				if(!grad.areMobilePhasesDefined()) {
 					System.err.println("No mobile phases found in  \"" 
 							+ methodFolder.getName() + "\"");
 					continue;
@@ -552,6 +902,7 @@ public class RunContainer2 {
 
 		System.out.println("***");
 	}
+
 	
 	private static void downloadMethodsToExtractGradients() {
 		
@@ -605,7 +956,7 @@ public class RunContainer2 {
 		Collection<DataAcquisitionMethod> allMethods = 
 				IDTDataCache.getAcquisitionMethods().stream().
 					filter(m -> (Objects.isNull(m.getChromatographicGradient()) 
-							|| !m.getChromatographicGradient().isDefined())).
+							|| !m.getChromatographicGradient().areMobilePhasesDefined())).
 					filter(m -> m.getIonizationType().getId().equals("ESI")).
 					filter(m -> (m.getMsType().getId().equals("HRMS")
 							|| m.getMsType().getId().equals("HRMSMS"))).
@@ -663,7 +1014,7 @@ public class RunContainer2 {
 		Collection<DataAcquisitionMethod> allMethods = 
 				IDTDataCache.getAcquisitionMethods().stream().
 					filter(m -> (Objects.isNull(m.getChromatographicGradient()) 
-							|| !m.getChromatographicGradient().isDefined())).
+							|| !m.getChromatographicGradient().areMobilePhasesDefined())).
 					filter(m -> m.getIonizationType().getId().equals("ESI")).
 					filter(m -> (m.getMsType().getId().equals("HRMS")
 							|| m.getMsType().getId().equals("HRMSMS"))).

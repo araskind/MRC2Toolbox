@@ -58,7 +58,11 @@ public class DockableChromatographicGradientTable extends DefaultSingleCDockable
 	}
 	
 	public void setTableModelFromGradient(ChromatographicGradient gradient) {
-		gradientTable.setTableModelFromGradient(gradient);
+		
+		if(gradient == null)
+			gradientTable.clearTable();
+		else
+			gradientTable.setTableModelFromGradient(gradient);
 	}
 	
 	//	TODO

@@ -30,6 +30,7 @@ import javax.swing.JScrollPane;
 
 import bibliothek.gui.dock.common.DefaultSingleCDockable;
 import edu.umich.med.mrc2.datoolbox.data.lims.ObjectAnnotation;
+import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTablePopupMenu;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 
 public class DockableDocumentsPanel extends DefaultSingleCDockable {
@@ -48,6 +49,8 @@ public class DockableDocumentsPanel extends DefaultSingleCDockable {
 		add(toolbar, BorderLayout.NORTH);
 
 		docsTable = new PrepDocumentsTable();
+		docsTable.addTablePopupMenu(
+				new BasicTablePopupMenu(null, docsTable, true));
 		add(new JScrollPane(docsTable), BorderLayout.CENTER);
 	}
 

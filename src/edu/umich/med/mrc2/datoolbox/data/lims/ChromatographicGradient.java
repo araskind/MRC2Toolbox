@@ -178,7 +178,15 @@ public class ChromatographicGradient implements Serializable {
 		this.id = id;
 	}
 	
-	public boolean isDefined() {
+	public boolean isTimeTableDefined() {
+		
+		if(gradientSteps.isEmpty())
+			return false;
+		else
+			return true;
+	}
+	
+	public boolean areMobilePhasesDefined() {
 		
 		int mpCount = 0;
 		for(MobilePhase m : mobilePhases) {

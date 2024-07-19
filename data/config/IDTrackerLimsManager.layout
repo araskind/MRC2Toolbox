@@ -88,6 +88,24 @@
 													</entry>
 												</item>
 											</entry>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.DockableIdProjectTree</placeholder>
+												</key>
+												<item key="convert" type="b">true</item>
+												<item key="convert-keys" type="a">
+													<item type="s">size</item>
+													<item type="s">index</item>
+													<item type="s">id</item>
+													<item type="s">placeholder</item>
+													<item type="s">hold</item>
+												</item>
+												<item key="dock.size" type="i">400</item>
+												<item key="dock.index" type="i">0</item>
+												<item key="dock.id" type="i">0</item>
+												<item key="dock.placeholder" type="s">dock.single.DockableIdProjectTree</item>
+												<item key="dock.hold" type="b">false</item>
+											</entry>
 										</placeholders>
 									</content>
 								</delegate>
@@ -97,7 +115,18 @@
 									<type>dock.CContentArea.minimize</type>
 								</layout>
 							</adjacent>
-							<children ignore="false"/>
+							<children ignore="false">
+								<child>
+									<layout factory="predefined" placeholder="dock.single.DockableIdProjectTree">
+										<replacement id="dockablesingle DockableIdProjectTree"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>DockableIdProjectTree</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
+								</child>
+							</children>
 						</root>
 						<root name="ccontrol south">
 							<layout factory="predefined">
@@ -150,13 +179,13 @@
 									<content delegate="SplitDockStationFactory">
 										<fullscreen-action>false</fullscreen-action>
 										<node nodeId="1652718002959" orientation="HORIZONTAL" divider="0.15618101545253862">
-											<leaf id="0" nodeId="1652718002961">
+											<leaf id="-1" nodeId="1652718002961">
 												<placeholders>
 													<placeholder>dock.single.DockableIdProjectTree</placeholder>
 												</placeholders>
 											</leaf>
-											<node nodeId="1652718303238" orientation="VERTICAL" divider="0.5862445414847162">
-												<leaf id="1" nodeId="1652718002963">
+											<node nodeId="1652718303238" orientation="VERTICAL" divider="0.21921641791044777">
+												<leaf id="0" nodeId="1652718002963">
 													<placeholders>
 														<placeholder>dock.single.DockableIDTrackerResultsOverviewPanel</placeholder>
 														<placeholder>dock.single.DockableStockSampleManagerPanel</placeholder>
@@ -212,7 +241,7 @@
 														</entry>
 													</placeholder-map>
 												</leaf>
-												<leaf id="2" nodeId="1652718303236">
+												<leaf id="1" nodeId="1652718303236">
 													<placeholders>
 														<placeholder>dock.single.DockableInstrumentManagerPanel</placeholder>
 														<placeholder>dock.single.DockableDataExtractionMethodManagerPanel</placeholder>
@@ -287,16 +316,6 @@
 								</layout>
 							</adjacent>
 							<children ignore="false">
-								<child>
-									<layout factory="predefined" placeholder="dock.single.DockableIdProjectTree">
-										<replacement id="dockablesingle DockableIdProjectTree"/>
-										<delegate id="delegate_ccontrol backup factory id">
-											<id>DockableIdProjectTree</id>
-											<area/>
-										</delegate>
-									</layout>
-									<children ignore="false"/>
-								</child>
 								<child>
 									<layout factory="delegate_StackDockStationFactory">
 										<selected>2</selected>
@@ -878,11 +897,25 @@
 								</property>
 							</properties>
 						</entry>
-						<entry id="single DockableIdProjectTree" current="dock.mode.normal">
+						<entry id="single DockableIdProjectTree" current="dock.mode.minimized">
 							<history>
 								<mode>dock.mode.normal</mode>
+								<mode>dock.mode.minimized</mode>
 							</history>
 							<properties>
+								<property id="dock.mode.minimized">
+									<mode>dock.mode.minimized</mode>
+									<root>ccontrol north</root>
+									<applicationDefined>false</applicationDefined>
+									<location>
+										<property factory="flap dock">
+											<index>0</index>
+											<holding>false</holding>
+											<size>400</size>
+											<placeholder>dock.single.DockableIdProjectTree</placeholder>
+										</property>
+									</location>
+								</property>
 								<property id="dock.mode.normal">
 									<mode>dock.mode.normal</mode>
 									<root>ccontrol center</root>
@@ -891,7 +924,7 @@
 										<property factory="SplitDockPlaceholderProperty">
 											<placeholder>dock.single.DockableIdProjectTree</placeholder>
 											<backup-path>
-												<node location="LEFT" size="0.25" id="1652718002959"/>
+												<node location="LEFT" size="0.15618101545253862" id="1652718002959"/>
 												<leaf id="1652718002961"/>
 											</backup-path>
 										</property>

@@ -54,10 +54,6 @@ public class AgilentAcquisitionMethodParser {
 	public static final String COLUMN_COMPARTMENT_PARAMETERS_FILE = "TCC_1.xml";
 	public static final String AUTOSAMPLER_PARAMETERS_FILE = "HiP-ALS_1.xml";
 	
-	public static final String TIMETABLE_ENTRY_NODE = "//PumpMethod/Timetable/TimetableEntry";
-	public static final String GLOBAL_FLOW_NODE = "//PumpMethod/Flow";
-	public static final String STOP_TIME_NODE = "//PumpMethod/StopTime/StopTimeMode";
-	
 	public static final Namespace xsiNamespace = 
 			Namespace.getNamespace("xsi", "http://www.w3.org/2001/XMLSchema-instance");
 		

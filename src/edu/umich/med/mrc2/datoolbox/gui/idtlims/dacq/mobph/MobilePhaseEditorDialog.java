@@ -32,6 +32,7 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.util.Set;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -41,17 +42,23 @@ import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRootPane;
-import javax.swing.JTextArea;
+import javax.swing.JScrollPane;
+import javax.swing.JTextField;
 import javax.swing.KeyStroke;
+import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
+import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
+import javax.swing.border.EtchedBorder;
+import javax.swing.border.TitledBorder;
 
 import edu.umich.med.mrc2.datoolbox.data.lims.MobilePhase;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 
-public class MobilePhaseEditorDialog extends JDialog {
+public class MobilePhaseEditorDialog extends JDialog implements ActionListener {
 
 	/**
 	 *
@@ -64,14 +71,15 @@ public class MobilePhaseEditorDialog extends JDialog {
 	private MobilePhase mobilePhase;
 	private JButton btnSave;
 	private JLabel idValueLabel;
-
-	private JTextArea textArea;
+	private JTextField mobPhaseNameTextField;
+	private MobilePhaseSynonymsTable synonymsTable;
+	private MobilePhaseSynonymsToolbar toolBar;
 
 	public MobilePhaseEditorDialog(MobilePhase mobilePhase, ActionListener actionListener) {
 		super();
 		this.mobilePhase = mobilePhase;
 
-		setPreferredSize(new Dimension(600, 250));
+		setPreferredSize(new Dimension(640, 480));
 		setSize(new Dimension(600, 250));
 		setModalityType(ModalityType.APPLICATION_MODAL);
 		setResizable(true);
@@ -81,10 +89,10 @@ public class MobilePhaseEditorDialog extends JDialog {
 		dataPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
 		getContentPane().add(dataPanel, BorderLayout.CENTER);
 		GridBagLayout gbl_dataPanel = new GridBagLayout();
-		gbl_dataPanel.columnWidths = new int[]{0, 0, 0};
-		gbl_dataPanel.rowHeights = new int[]{0, 0, 0, 0};
-		gbl_dataPanel.columnWeights = new double[]{0.0, 1.0, Double.MIN_VALUE};
-		gbl_dataPanel.rowWeights = new double[]{0.0, 0.0, 1.0, Double.MIN_VALUE};
+		gbl_dataPanel.columnWidths = new int[]{0, 0, 0, 0};
+		gbl_dataPanel.rowHeights = new int[]{0, 0, 0, 0, 0};
+		gbl_dataPanel.columnWeights = new double[]{0.0, 1.0, 0.0, Double.MIN_VALUE};
+		gbl_dataPanel.rowWeights = new double[]{0.0, 0.0, 0.0, 1.0, Double.MIN_VALUE};
 		dataPanel.setLayout(gbl_dataPanel);
 
 		JLabel lblId = new JLabel("ID");
@@ -101,7 +109,7 @@ public class MobilePhaseEditorDialog extends JDialog {
 		idValueLabel.setForeground(Color.BLACK);
 		idValueLabel.setFont(new Font("Tahoma", Font.BOLD, 12));
 		GridBagConstraints gbc_idValueLabel = new GridBagConstraints();
-		gbc_idValueLabel.insets = new Insets(0, 0, 5, 0);
+		gbc_idValueLabel.insets = new Insets(0, 0, 5, 5);
 		gbc_idValueLabel.anchor = GridBagConstraints.SOUTHWEST;
 		gbc_idValueLabel.gridx = 1;
 		gbc_idValueLabel.gridy = 0;
@@ -118,16 +126,35 @@ public class MobilePhaseEditorDialog extends JDialog {
 		gbc_lblName.gridy = 1;
 		dataPanel.add(lblName, gbc_lblName);
 		
-		textArea = new JTextArea();
-		textArea.setLineWrap(true);
-		textArea.setWrapStyleWord(true);
+		mobPhaseNameTextField = new JTextField();
 		GridBagConstraints gbc_textArea = new GridBagConstraints();
+		gbc_textArea.insets = new Insets(0, 0, 5, 5);
 		gbc_textArea.gridwidth = 2;
-		gbc_textArea.insets = new Insets(0, 0, 0, 5);
 		gbc_textArea.fill = GridBagConstraints.BOTH;
 		gbc_textArea.gridx = 0;
 		gbc_textArea.gridy = 2;
-		dataPanel.add(textArea, gbc_textArea);
+		dataPanel.add(mobPhaseNameTextField, gbc_textArea);
+		
+		JPanel panel_1 = new JPanel(new BorderLayout(0, 0));
+		panel_1.setBorder(new CompoundBorder(
+				new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED, 
+						new Color(255, 255, 255), new Color(160, 160, 160)), 
+						"Synonyms", TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)), 
+				new EmptyBorder(10, 10, 10, 10)));
+		GridBagConstraints gbc_panel_1 = new GridBagConstraints();
+		gbc_panel_1.insets = new Insets(0, 0, 0, 5);
+		gbc_panel_1.gridwidth = 2;
+		gbc_panel_1.fill = GridBagConstraints.BOTH;
+		gbc_panel_1.gridx = 0;
+		gbc_panel_1.gridy = 3;
+		dataPanel.add(panel_1, gbc_panel_1);
+
+		synonymsTable = new MobilePhaseSynonymsTable();
+		panel_1.add(new JScrollPane(synonymsTable), BorderLayout.CENTER);
+		
+		toolBar = new MobilePhaseSynonymsToolbar(this);
+		toolBar.setOrientation(SwingConstants.VERTICAL);
+		panel_1.add(toolBar, BorderLayout.EAST);
 
 		JPanel panel = new JPanel();
 		FlowLayout flowLayout = (FlowLayout) panel.getLayout();
@@ -166,7 +193,9 @@ public class MobilePhaseEditorDialog extends JDialog {
 			setTitle("Edit information for " + mobilePhase.getName());
 			setIconImage(((ImageIcon) editMobilePhaseIcon).getImage());
 			btnSave.setActionCommand(MainActionCommands.EDIT_MOBILE_PHASE_COMMAND.getName());
-			textArea.setText(mobilePhase.getName());
+			mobPhaseNameTextField.setText(mobilePhase.getName());
+			synonymsTable.setTableModelFromSynonymList(mobilePhase.getSynonyms());
+			idValueLabel.setText(mobilePhase.getId());
 		}
 		pack();
 	}
@@ -176,7 +205,27 @@ public class MobilePhaseEditorDialog extends JDialog {
 	}
 
 	public String getmobilePhaseDescription() {
-		return textArea.getText().trim();
+		return mobPhaseNameTextField.getText().trim();
+	}
+	
+	public Set<String> getmobilePhaseSynonyms() {
+		return synonymsTable.getSynonymList();
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+
+		String command = e.getActionCommand();
+		if(command.equals(MainActionCommands.ADD_MOBILE_PHASE_SYNONYM_COMMAND.getName()))
+			synonymsTable.addNewSynonym();
+		
+		if(command.equals(MainActionCommands.DELETE_MOBILE_PHASE_SYNONYM_COMMAND.getName())) {
+			
+			if(!IDTUtils.isSuperUser(this.getContentPane()))
+				return;
+			
+			synonymsTable.removeSelectedSynonym();
+		}
 	}
 }
 

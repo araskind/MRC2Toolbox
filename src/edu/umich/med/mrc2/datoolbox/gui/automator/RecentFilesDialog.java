@@ -96,7 +96,7 @@ public class RecentFilesDialog extends JDialog implements ActionListener {
 		btnCancel.addActionListener(al);
 
 		JButton btnSave = new JButton(selectCommand);
-		btnSave .setActionCommand(selectCommand);
+		btnSave.setActionCommand(selectCommand);
 		btnSave.addActionListener(actionListener);
 		panel.add(btnSave);
 		JRootPane rootPane = SwingUtilities.getRootPane(btnSave);

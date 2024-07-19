@@ -80,12 +80,16 @@ public class AcquisitionMethodTableModel extends BasicTableModel {
 			LIMSChromatographicColumn columnName = null;
 			if(method.getColumn() != null)
 				columnName = method.getColumn();
+			
+			String polName = null;
+			if(method.getPolarity() != null)
+				polName = method.getPolarity().name();
 
 			Object[] obj = {
 					method.getId(),
 					method,
 					method.getDescription(),
-					method.getPolarity().name(),
+					polName,
 					method.getIonizationType(),
 					method.getMsType(),
 					columnName,

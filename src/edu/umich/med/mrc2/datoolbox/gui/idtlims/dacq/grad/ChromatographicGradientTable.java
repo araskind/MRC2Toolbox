@@ -27,6 +27,8 @@ import javax.swing.ListSelectionModel;
 
 import edu.umich.med.mrc2.datoolbox.data.lims.ChromatographicGradient;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
+import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.AutoChoices;
+import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.TableFilterHeader;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.FormattedDecimalRenderer;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 
@@ -61,6 +63,7 @@ public class ChromatographicGradientTable extends BasicTable {
 		columnModel.getColumnById(ChromatographicGradientTableModel.START_TIME_COLUMN)
 			.setCellRenderer(new FormattedDecimalRenderer(MRC2ToolBoxConfiguration.getPpmFormat(), false));
 		
+		thf = new TableFilterHeader(this, AutoChoices.ENABLED);
 		finalizeLayout();
 	}
 

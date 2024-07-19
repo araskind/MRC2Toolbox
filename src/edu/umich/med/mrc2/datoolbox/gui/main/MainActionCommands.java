@@ -823,6 +823,8 @@ public enum MainActionCommands {
 	EDIT_MOBILE_PHASE_DIALOG_COMMAND("Edit mobile phase"),
 	EDIT_MOBILE_PHASE_COMMAND("Save edited mobile phase"),
 	DELETE_MOBILE_PHASE_COMMAND("Delete mobile phase"),
+	ADD_MOBILE_PHASE_SYNONYM_COMMAND("Add mobile phase"),
+	DELETE_MOBILE_PHASE_SYNONYM_COMMAND("Delete mobile phase synonym"),
 	
 	//	Gradient mobile phase editor
 	SET_MOBILE_PHASE_FOR_GRADIENT_CHANEL_DIALOG_COMMAND("Select mobile phase for gradient chanel"),

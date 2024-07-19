@@ -39,6 +39,7 @@ import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.AbstractIDTrackerLimsPanel;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.IDTrackerLimsManagerPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
+import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTablePopupMenu;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 
@@ -65,6 +66,8 @@ public class DockableMobilePhaseManagerPanel extends AbstractIDTrackerLimsPanel 
 		getContentPane().add(toolbar, BorderLayout.NORTH);
 		
 		mobilePhaseTable = new MobilePhaseTable();	
+		mobilePhaseTable.addTablePopupMenu(
+				new BasicTablePopupMenu(null, mobilePhaseTable, true));
 		JScrollPane designScrollPane = new JScrollPane(mobilePhaseTable);
 		getContentPane().add(designScrollPane, BorderLayout.CENTER);
 		
@@ -152,16 +155,21 @@ public class DockableMobilePhaseManagerPanel extends AbstractIDTrackerLimsPanel 
 			return;
 		}		
 		MobilePhase newPhase = new MobilePhase(mpName);
-		String mpid = null;
-		try {
-			mpid = ChromatographyDatabaseUtils.getMobilePhaseId(newPhase);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}	
-		if(mpid != null) {
-			MessageDialog.showErrorMsg("Mobile phase \"" + newPhase.getName() + 
-					"\" already exists.", mobilePhaseEditorDialog);
+		if(!mobilePhaseEditorDialog.getmobilePhaseSynonyms().isEmpty())
+			newPhase.getSynonyms().addAll(mobilePhaseEditorDialog.getmobilePhaseSynonyms());
+
+		MobilePhase existing = getExistingMobilePhaseByComparingNameAndSynonyms(newPhase);
+		if(existing != null) {
+			
+			String message = "Mobile phase with the name \"" + existing.getName() + "\n";
+			if(!existing.getSynonyms().isEmpty()) {
+				
+				message += " and the following synonyms:\n";
+				for(String synonym : existing.getSynonyms())					
+					message += "\"" + synonym + "\"\n";								
+			}
+			message += "already exists";
+			MessageDialog.showErrorMsg(message, mobilePhaseEditorDialog);
 			return;
 		}
 		try {
@@ -173,6 +181,27 @@ public class DockableMobilePhaseManagerPanel extends AbstractIDTrackerLimsPanel 
 		mobilePhaseEditorDialog.dispose();
 		IDTDataCache.refreshMobilePhaseList();
 		mobilePhaseTable.setTableModelFromMobilePhaseCollection(IDTDataCache.getMobilePhaseList());
+	}
+	
+	private MobilePhase getExistingMobilePhaseByComparingNameAndSynonyms(MobilePhase newPhase) {
+		
+		MobilePhase existing = IDTDataCache.getMobilePhaseByNameOrSynonym(newPhase.getName());
+		if(existing != null) {
+			return existing;
+		}
+		else {
+			if(!newPhase.getSynonyms().isEmpty()) {
+				
+				for(String synonym : newPhase.getSynonyms()) {
+					
+					existing = IDTDataCache.getMobilePhaseByNameOrSynonym(synonym);
+					if(existing != null)
+						return existing;
+					
+				}
+			}
+		}
+		return null;
 	}
 
 	private void editMobilePhase() {
@@ -186,22 +215,22 @@ public class DockableMobilePhaseManagerPanel extends AbstractIDTrackerLimsPanel 
 			MessageDialog.showErrorMsg("Please provide a description!", mobilePhaseEditorDialog);
 			return;
 		}
-		//	No change in description
-		if(mpName.equals(mobPhase.getName())) {
-			mobilePhaseEditorDialog.dispose();
-			return;
-		}
-		MobilePhase phaseToCheck = new MobilePhase(mobPhase.getId(), mpName);
-		boolean hasNameConflict = false;
-		try {
-			hasNameConflict = ChromatographyDatabaseUtils.hasNameConflict(phaseToCheck);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		if(hasNameConflict) {
-			MessageDialog.showErrorMsg("Name \"" + mpName + 
-					"\" is already assigned to a different mobile phase.", mobilePhaseEditorDialog);
+		mobPhase.getSynonyms().clear();
+		if(!mobilePhaseEditorDialog.getmobilePhaseSynonyms().isEmpty())
+			mobPhase.getSynonyms().addAll(mobilePhaseEditorDialog.getmobilePhaseSynonyms());
+		
+		MobilePhase existing = getExistingMobilePhaseByComparingNameAndSynonyms(mobPhase);
+		if(existing != null && !mobPhase.getId().equals(existing.getId())) {
+			
+			String message = "A different mobile phase with the name \"" + existing.getName() + "\n";
+			if(!existing.getSynonyms().isEmpty()) {
+				
+				message += " and the following synonyms:\n";
+				for(String synonym : existing.getSynonyms())					
+					message += "\"" + synonym + "\"\n";							
+			}
+			message += "already exists";
+			MessageDialog.showErrorMsg(message, mobilePhaseEditorDialog);
 			return;
 		}
 		mobPhase.setName(mpName);
@@ -213,8 +242,7 @@ public class DockableMobilePhaseManagerPanel extends AbstractIDTrackerLimsPanel 
 		}
 		mobilePhaseEditorDialog.dispose();
 		IDTDataCache.refreshMobilePhaseList();
-		mobilePhaseTable.setTableModelFromMobilePhaseCollection(IDTDataCache.getMobilePhaseList());
-		
+		mobilePhaseTable.setTableModelFromMobilePhaseCollection(IDTDataCache.getMobilePhaseList());		
 	}
 
 	private void deleteMobilePhase() {

@@ -123,6 +123,23 @@ public class FIOUtils {
 		return result;
 	}
 	
+	public static List<Path> findDirectoriesByName(Path path, String dirName) {
+
+		if (!Files.isDirectory(path)) {
+			throw new IllegalArgumentException("Path must be a directory!");
+		}
+		List<Path> result = null;
+		try (Stream<Path> walk = Files.walk(path)) {
+			result = walk.filter(p -> Files.isDirectory(p))
+					.filter(p -> p.getFileName().toString().equals(dirName))
+					.collect(Collectors.toList());
+		}
+		catch(IOException e) {
+			e.printStackTrace();
+		}
+		return result;
+	}
+	
 	public static List<Path> findDirectoriesByExtension(Path path, String fileExtension) {
 
 		if (!Files.isDirectory(path)) {

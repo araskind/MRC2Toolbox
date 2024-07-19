@@ -41,6 +41,7 @@ import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.AbstractIDTrackerLimsPanel;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.IDTrackerLimsManagerPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
+import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTablePopupMenu;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 
@@ -68,6 +69,8 @@ public class DockableChromatographicColumnManagerPanel extends AbstractIDTracker
 		getContentPane().add(toolbar, BorderLayout.NORTH);
 
 		cromatographicColumnTable = new ChromatographicColumnTable();
+		cromatographicColumnTable.addTablePopupMenu(
+				new BasicTablePopupMenu(null, cromatographicColumnTable, true));
 		JScrollPane designScrollPane = new JScrollPane(cromatographicColumnTable);
 		getContentPane().add(designScrollPane, BorderLayout.CENTER);
 		

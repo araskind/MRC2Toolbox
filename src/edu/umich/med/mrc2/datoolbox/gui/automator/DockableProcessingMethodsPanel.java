@@ -181,6 +181,7 @@ public class DockableProcessingMethodsPanel extends DefaultSingleCDockable
 		File methodFile = recentFilesDialog.getSelectedFile();
 		if(methodFile == null)
 			return;
+		
 		methodsBaseDirectory = methodFile.getParentFile();
 		
 		if(command.equals(MainActionCommands.SET_NEGATIVE_MODE_METHOD.getName()))

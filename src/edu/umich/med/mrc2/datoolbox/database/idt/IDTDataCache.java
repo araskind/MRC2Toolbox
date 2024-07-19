@@ -1125,7 +1125,7 @@ public class IDTDataCache {
 
 		return getAcquisitionMethods().stream().
 				filter(e -> (e.getName().equals(methodName) 
-						|| FilenameUtils.getBaseName(e.getName()).equals(methodName))).
+						|| FilenameUtils.getBaseName(e.getName()).equalsIgnoreCase(methodName))).
 				findFirst().orElse(null);
 	}
 
@@ -1138,7 +1138,7 @@ public class IDTDataCache {
 	public static DataExtractionMethod getDataExtractionMethodByName(String methodName) {
 
 		return getDataExtractionMethods().stream().
-				filter(e -> e.getName().equals(methodName)).findFirst().orElse(null);
+				filter(e -> e.getName().equalsIgnoreCase(methodName)).findFirst().orElse(null);
 	}
 	
 	public static DataExtractionMethod getDataExtractionMethodByMd5(String md5) {

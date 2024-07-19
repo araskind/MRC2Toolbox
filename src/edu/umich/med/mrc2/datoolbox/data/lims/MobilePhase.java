@@ -24,6 +24,9 @@ package edu.umich.med.mrc2.datoolbox.data.lims;
 import java.io.Serializable;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.UUID;
+
+import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 
 public class MobilePhase implements Serializable, Comparable<MobilePhase>{
 
@@ -39,6 +42,10 @@ public class MobilePhase implements Serializable, Comparable<MobilePhase>{
 	public MobilePhase(String id, String name) {
 		super();
 		this.id = id;
+		if(id == null)
+			id = DataPrefix.MOBILE_PHASE.getName() + 
+				UUID.randomUUID().toString().substring(0, 6);
+		
 		this.name = name;
 		synonyms = new TreeSet<String>();
 	}
@@ -82,7 +89,7 @@ public class MobilePhase implements Serializable, Comparable<MobilePhase>{
 	
 	@Override
 	public String toString() {
-		return id;
+		return name;
 	}
 	
 	@Override

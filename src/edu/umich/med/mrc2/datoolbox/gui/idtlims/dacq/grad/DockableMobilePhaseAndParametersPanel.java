@@ -85,7 +85,7 @@ public class DockableMobilePhaseAndParametersPanel extends DefaultSingleCDockabl
 		gbc_lblEndTimeMin.gridy = 0;
 		parametersPanel.add(lblEndTimeMin, gbc_lblEndTimeMin);
 		
-		add(parametersPanel, BorderLayout.SOUTH);		
+		add(parametersPanel, BorderLayout.SOUTH);	
 		
 		columnTemperatureFormattedTextField = 
 				new JFormattedTextField(MRC2ToolBoxConfiguration.getPpmFormat());
@@ -105,13 +105,21 @@ public class DockableMobilePhaseAndParametersPanel extends DefaultSingleCDockabl
 		columnTemperatureFormattedTextField.setText("");
 	}
 	
-	public void loadGradientData(ChromatographicGradient gradient) {
+	public void setGradient(ChromatographicGradient methodGradient) {
 		
-		this.gradient = gradient;
+		gradient = methodGradient;
+		if(gradient == null)
+			gradient = new ChromatographicGradient();
+		
 		gradientMobilePhaseTable.setTableModelFromMobilePhaseArray(gradient.getMobilePhases());
 		columnTemperatureFormattedTextField.setText("");
 		if(gradient.getColumnCompartmentTemperature() > 0)
-			columnTemperatureFormattedTextField.setText(Double.toString(gradient.getColumnCompartmentTemperature()));
+			columnTemperatureFormattedTextField.setText(
+					Double.toString(gradient.getColumnCompartmentTemperature()));
+	}
+	
+	public void setCommandsEnabled(boolean enabled) {
+		toolbar.setCommandsEnabled(enabled);
 	}
 
 	@Override
@@ -174,6 +182,10 @@ public class DockableMobilePhaseAndParametersPanel extends DefaultSingleCDockabl
 		Collection<String>errors = new ArrayList<String>();
 
 		return errors;
+	}
+
+	public ChromatographicGradient getGradient() {
+		return gradient;
 	}
 }
 

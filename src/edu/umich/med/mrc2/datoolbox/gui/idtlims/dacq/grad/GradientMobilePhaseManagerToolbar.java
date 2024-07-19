@@ -68,6 +68,12 @@ public class GradientMobilePhaseManagerToolbar extends CommonToolbar {
 				MainActionCommands.CLEAR_MOBILE_PHASE_FOR_GRADIENT_CHANEL_COMMAND.getName(),
 				buttonDimension);
 	}
+	
+	public void setCommandsEnabled(boolean enabled) {
+		
+		editMobilePhaseButton.setEnabled(enabled);
+		deleteMobilePhaseButton.setEnabled(enabled);
+	}
 
 	@Override
 	public void updateGuiFromExperimentAndDataPipeline(DataAnalysisProject project, DataPipeline newDataPipeline) {

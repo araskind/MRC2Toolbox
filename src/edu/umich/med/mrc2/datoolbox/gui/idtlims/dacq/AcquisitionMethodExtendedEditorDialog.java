@@ -156,16 +156,17 @@ public class AcquisitionMethodExtendedEditorDialog extends JDialog implements Pe
 			setIconImage(((ImageIcon) editMethodIcon).getImage());
 			btnSave.setActionCommand(
 					MainActionCommands.EDIT_ACQUISITION_METHOD_COMMAND.getName());
+			
+			loadGradientData(method.getChromatographicGradient());
 		}
-		dataPanel.loadMethodData(method);
-		loadGradientData(method.getChromatographicGradient());
+		dataPanel.loadMethodData(method);			
 	}
 	
 	public void loadGradientData(ChromatographicGradient gradient) {
-		
+
 		gradientChartPanel.showGradient(gradient);
 		gradientTable.setTableModelFromGradient(gradient);
-		mobilePhaseAndParametersPanel.loadGradientData(gradient);
+		mobilePhaseAndParametersPanel.setGradient(gradient);
 	}
 	
 	public void setMethodFile(File methodFile) {

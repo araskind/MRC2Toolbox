@@ -122,28 +122,11 @@ public class CefDataImportTask extends CEFProcessingTask {
 			return;
 		}
 		recordDataIntoFeatureMatrix();
-//		try {
-//			dataDocument = XmlUtils.readXmlFile(new File(cefPath));
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//			setStatus(TaskStatus.ERROR);
-//		}
-//		//	Parse CEF data
-//		if(dataDocument != null) {
-//			try {
-//				parseCefData();
-//				setStatus(TaskStatus.FINISHED);
-//			}
-//			catch (Exception e) {
-//				e.printStackTrace();
-//				setStatus(TaskStatus.ERROR);
-//			}
-//		}
 		setStatus(TaskStatus.FINISHED);
 	}
 
 	private void recordDataIntoFeatureMatrix() {
-		// TODO Auto-generated method stub
+
 		taskDescription = "Parsing CEF data file...";
 		features = new HashSet<SimpleMsFeature>();
 		total = inputFeatureList.size();
@@ -155,6 +138,7 @@ public class CefDataImportTask extends CEFProcessingTask {
 		for(MsFeature feature : inputFeatureList) {
 
 			SimpleMsFeature msf = new SimpleMsFeature(feature, dataPipeline);
+			
 				if(featureCoordinateMap.get(msf.getLibraryTargetId()) != null) {
 
 					retentionMap.get(msf.getLibraryTargetId()).add(msf.getRetentionTime());
@@ -172,124 +156,6 @@ public class CefDataImportTask extends CEFProcessingTask {
 			processed++;
 		}
 	}
-
-//	private void parseCefData() throws Exception {
-//
-//		taskDescription = "Parsing CEF data file...";
-//		features = new HashSet<SimpleMsFeature>();
-//		XPathExpression expr = null;
-//		NodeList targetNodes;
-//		XPathFactory factory = XPathFactory.newInstance();
-//		XPath xpath = factory.newXPath();
-//
-//		expr = xpath.compile("//CEF/CompoundList/Compound");
-//		targetNodes = (NodeList) expr.evaluate(dataDocument, XPathConstants.NODESET);
-//		total = targetNodes.getLength();
-//		processed = 0;
-//		long[] coordinates = new long[2];
-//		coordinates[0] = fileIndex;
-//
-//		for (int i = 0; i < targetNodes.getLength(); i++) {
-//
-//			Element cpdElement = (Element) targetNodes.item(i);
-//			Element locationElement = (Element) cpdElement.getElementsByTagName("Location").item(0);
-//			double rt = Double.parseDouble(locationElement.getAttribute("rt"));
-//			double neutralMass = Double.parseDouble(locationElement.getAttribute("m"));
-//			
-//			//	Polarity 
-//			Element msDetailsElement = (Element) cpdElement.getElementsByTagName("MSDetails").item(0);
-//			String sign = msDetailsElement.getAttribute("p");
-//			Polarity polarity = Polarity.Positive;
-//			if(sign.equals("-"))
-//				polarity = Polarity.Negative;
-//
-//			// Parse spectrum
-//			MassSpectrum spectrum = new MassSpectrum();
-//			NodeList peaks = cpdElement.getElementsByTagName("p");
-//
-//			for (int j = 0; j < peaks.getLength(); j++) {
-//
-//				Element peakElement = (Element) peaks.item(j);
-//				String adduct = peakElement.getAttribute("s");
-//				double mz = Double.parseDouble(peakElement.getAttribute("x"));
-//				double intensity = Double.parseDouble(peakElement.getAttribute("y"));
-//				int charge = Integer.parseInt(peakElement.getAttribute("z"));
-//
-//				spectrum.addDataPoint(mz, intensity, adduct, charge);
-//			}
-//			unmatchedAdducts.addAll(spectrum.finalizeCefImportSpectrum());
-//
-//			// Parse identifications
-//			String targetId = getTargetId(cpdElement);
-//			SimpleMsFeature msf = new SimpleMsFeature(targetId, spectrum, rt, dataPipeline);
-//			msf.setPolarity(polarity);
-//
-//			// TODO	This is not required when matching to library, 
-////			String name = DataPrefix.MS_LIBRARY_UNKNOWN_TARGET.getName() + 
-////					locationElement.getAttribute("m") + "_" + 
-////					locationElement.getAttribute("rt");
-////			if(cpdElement.getElementsByTagName("Molecule").item(0) != null) {
-////
-////				Element moleculeElement = (Element) cpdElement.getElementsByTagName("Molecule").item(0);
-////				name = moleculeElement.getAttribute("name");
-////
-////				// Work-around for old data
-////				if (name.isEmpty())
-////					name = moleculeElement.getAttribute("formula");
-////			}
-////			msf.setName(name);
-////
-////			//	Add extra data for feature
-////			msf.setNeutralMass(neutralMass);
-//
-//			if(!locationElement.getAttribute("a").isEmpty())
-//				msf.setArea(Double.parseDouble(locationElement.getAttribute("a")));
-//
-//			if(!locationElement.getAttribute("y").isEmpty())
-//				msf.setHeight(Double.parseDouble(locationElement.getAttribute("y")));
-//
-//			//	Insert feature in arrays
-//			if(featureCoordinateMap != null) {
-//				
-//				if(featureCoordinateMap.get(msf.getLibraryTargetId()) != null) {
-//
-//					retentionMap.get(msf.getLibraryTargetId()).add(msf.getRetentionTime());
-//					mzMap.get(msf.getLibraryTargetId()).add(msf.getObservedSpectrum().getMonoisotopicMz());
-//					coordinates[1] = featureCoordinateMap.get(msf.getLibraryTargetId());
-//					featureMatrix.setAsObject(msf, coordinates);
-//					dataMatrix.setAsDouble(msf.getArea(), coordinates);
-//				}
-//				else {
-//					//	TODO handle library mismatches
-//					System.out.println(msf.getName() + "(" + msf.getLibraryTargetId() + ") not in the library.");
-//				}
-//			}
-//			features.add(msf);
-//			processed++;
-//		}
-//	}
-
-//	private String getTargetId(Element cpdElement) {
-//
-//		NodeList dbReference = cpdElement.getElementsByTagName("Accession");
-//		if (dbReference.getLength() > 0) {
-//
-//			for (int j = 0; j < dbReference.getLength(); j++) {
-//
-//				Element idElement = (Element) dbReference.item(j);
-//				String database = idElement.getAttribute("db");
-//				String accession = idElement.getAttribute("id");
-//
-//				if (!database.isEmpty() && !accession.isEmpty()) {
-//
-//					if (accession.startsWith(DataPrefix.MS_LIBRARY_TARGET.getName())
-//							|| accession.startsWith(DataPrefix.MS_FEATURE.getName()))
-//						return accession;
-//				}
-//			}
-//		}
-//		return null;
-//	}
 
 	public DataFile getInputCefFile() {
 		return dataFile;

@@ -32,6 +32,7 @@ import org.jfree.chart.ui.RectangleInsets;
 
 import edu.umich.med.mrc2.datoolbox.data.lims.ChromatographicGradient;
 import edu.umich.med.mrc2.datoolbox.gui.plot.MasterPlotPanel;
+import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.ChromatographicGradientDataSet;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 
 public class GradientChartPanel extends MasterPlotPanel {
@@ -123,7 +124,9 @@ public class GradientChartPanel extends MasterPlotPanel {
 	
 	public void showGradient(ChromatographicGradient gradient) {
 
-		//	TODO
+		ChromatographicGradientDataSet dataSet = 
+				new ChromatographicGradientDataSet(gradient);
+		plot.setDataset(dataSet);
 	}
 
 }

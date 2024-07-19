@@ -40,6 +40,7 @@ import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.AbstractIDTrackerLimsPanel;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.IDTrackerLimsManagerPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
+import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTablePopupMenu;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
@@ -66,6 +67,8 @@ public class DockableSoftwareManagerPanel extends AbstractIDTrackerLimsPanel {
 		getContentPane().add(toolbar, BorderLayout.NORTH);
 
 		softwareTable =  new SoftwareTable();
+		softwareTable.addTablePopupMenu(
+				new BasicTablePopupMenu(null, softwareTable, true));
 		softwareTable.addMouseListener(
 				new MouseAdapter() {
 					public void mouseClicked(MouseEvent e) {

@@ -118,9 +118,7 @@ public class AutomatorPanel extends DockableMRC2ToolboxPanel implements TaskCont
 		initActions();
 		loadLayout(layoutConfigFile);
 		populatePanelsMenu();
-		
-//		dotDfilter = new RegexFileFilter(".+\\.[dD]$");
-		
+
 		dotDfilter = FileFilterUtils.makeDirectoryOnly(new RegexFileFilter(".+\\.[dD]$"));
 		cefFilter = FileFilterUtils.makeFileOnly(new RegexFileFilter("(?i).+\\.cef$"));
 		tasksToRerurn = new ArrayList<Task>();

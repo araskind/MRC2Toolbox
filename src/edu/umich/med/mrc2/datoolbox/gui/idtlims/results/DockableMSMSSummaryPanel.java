@@ -29,6 +29,7 @@ import javax.swing.JScrollPane;
 
 import bibliothek.gui.dock.common.DefaultSingleCDockable;
 import edu.umich.med.mrc2.datoolbox.data.lims.IDTMsSummary;
+import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTablePopupMenu;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 
 public class DockableMSMSSummaryPanel extends DefaultSingleCDockable{
@@ -43,6 +44,8 @@ public class DockableMSMSSummaryPanel extends DefaultSingleCDockable{
 		setLayout(new BorderLayout(0, 0));
 
 		summaryTable = new ReferenceMSMSSummaryTable();
+		summaryTable.addTablePopupMenu(
+				new BasicTablePopupMenu(null, summaryTable, true));
 		JScrollPane designScrollPane = new JScrollPane(summaryTable);
 		getContentPane().add(designScrollPane, BorderLayout.CENTER);
 	}

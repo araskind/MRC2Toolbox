@@ -41,6 +41,7 @@ import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.AbstractIDTrackerLimsPanel;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.IDTrackerLimsManagerPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
+import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTablePopupMenu;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 
@@ -66,6 +67,8 @@ public class DockableInstrumentManagerPanel extends AbstractIDTrackerLimsPanel {
 		getContentPane().add(toolbar, BorderLayout.NORTH);
 
 		instrumentTable = new InstrumentTable();
+		instrumentTable.addTablePopupMenu(
+				new BasicTablePopupMenu(null, instrumentTable, true));
 		JScrollPane designScrollPane = new JScrollPane(instrumentTable);
 		getContentPane().add(designScrollPane, BorderLayout.CENTER);
 		instrumentTable.addMouseListener(

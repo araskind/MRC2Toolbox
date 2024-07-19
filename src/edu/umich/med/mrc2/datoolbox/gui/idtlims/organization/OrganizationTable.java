@@ -36,6 +36,7 @@ import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.IdTrackerOrganization;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
+import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTablePopupMenu;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.AutoChoices;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.TableFilterHeader;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.AnalysisMethodRenderer;
@@ -78,6 +79,9 @@ public class OrganizationTable extends BasicTable {
 		thf.getParserModel().setComparator(LIMSUser.class, new LIMSUserComparator(SortProperty.Name));
 		thf.getParserModel().setComparator(IdTrackerOrganization.class, new IDTrackerOrganizationComparator(SortProperty.Name));
 		thf.getParserModel().setFormat(IdTrackerOrganization.class, new IDTrackerOrganizationFormat(SortProperty.Name));
+		
+		addTablePopupMenu(new BasicTablePopupMenu(null, this, true));
+		
 		finalizeLayout();
 	}
 

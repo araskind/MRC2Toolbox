@@ -52,7 +52,11 @@ public class DockableGradientChartPanel extends DefaultSingleCDockable {
 	}
 	
 	public void showGradient(ChromatographicGradient gradient) {
-		gradientChartPanel.showGradient(gradient);
+		
+		if(gradient == null)
+			 clearPanel();
+		else
+			gradientChartPanel.showGradient(gradient);
 	}
 	
 	public synchronized void clearPanel() {

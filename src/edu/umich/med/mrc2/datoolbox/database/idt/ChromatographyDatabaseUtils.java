@@ -112,8 +112,10 @@ public class ChromatographyDatabaseUtils {
 		return nextId;
 	}
 	
-	public static String addChromatographicGradientForAcqMethod(
-			ChromatographicGradient gradient, String acqMethodId) throws Exception{
+	public static String addTmpChromatographicGradientForAcqMethod(
+			ChromatographicGradient gradient, 
+			String acqMethodId, 
+			boolean isActual) throws Exception{
 
 		Connection conn = ConnectionManager.getConnection();
 		String nextId = SQLUtils.getNextIdFromSequence(conn, 
@@ -183,9 +185,13 @@ public class ChromatographyDatabaseUtils {
 		}
 		ps.executeBatch();
 		
+		String fieldToUpdate = "TMP_GRADIENT_ID";
+		if(isActual)
+			fieldToUpdate = "TMP_ACTUAL_GRADIENT_ID";
+		
 		query = 
 			"UPDATE DATA_ACQUISITION_METHOD "
-			+ "SET TMP_GRADIENT_ID = ? WHERE ACQ_METHOD_ID = ?";				
+			+ "SET " + fieldToUpdate + " = ? WHERE ACQ_METHOD_ID = ?";				
 		ps = conn.prepareStatement(query);
 		ps.setString(1, gradient.getId());
 		ps.setString(2, acqMethodId);

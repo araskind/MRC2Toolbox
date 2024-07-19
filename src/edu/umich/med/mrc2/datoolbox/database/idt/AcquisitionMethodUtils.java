@@ -53,7 +53,6 @@ import edu.umich.med.mrc2.datoolbox.data.lims.LIMSInstrument;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
 import edu.umich.med.mrc2.datoolbox.data.lims.Manufacturer;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
-import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.utils.CompressionUtils;
 import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
 import edu.umich.med.mrc2.datoolbox.utils.SQLUtils;
@@ -67,7 +66,7 @@ public class AcquisitionMethodUtils {
 			DataAcquisitionMethod selectedMethod, File methodFile) throws Exception{
 
 		//	TODO insert or connect gradient if present
-		LIMSUser sysUser = MRC2ToolBoxCore.getIdTrackerUser();
+		LIMSUser sysUser = selectedMethod.getCreatedBy();
 		if(sysUser == null)
 			return null;
 
@@ -88,13 +87,33 @@ public class AcquisitionMethodUtils {
 		ps.setString(1, selectedMethod.getId());
 		ps.setString(2, selectedMethod.getName());
 		ps.setString(3, selectedMethod.getDescription());
-		ps.setString(4, selectedMethod.getPolarity().getCode());
+		if(selectedMethod.getPolarity() != null)
+			ps.setString(4, selectedMethod.getPolarity().getCode());
+		else
+			ps.setNull(4, java.sql.Types.NULL);
+					
 		ps.setString(5, sysUser.getId());
-		ps.setDate(6, new java.sql.Date(new java.util.Date().getTime()));	
-		ps.setString(7, selectedMethod.getIonizationType().getId());
-		ps.setString(8, selectedMethod.getMassAnalyzerType().getId());
-		ps.setString(9, selectedMethod.getMsType().getId());
-		ps.setString(10, selectedMethod.getColumn().getColumnId());
+		ps.setDate(6, new java.sql.Date(new java.util.Date().getTime()));
+		
+		if(selectedMethod.getIonizationType() != null)
+			ps.setString(7, selectedMethod.getIonizationType().getId());
+		else
+			ps.setNull(7, java.sql.Types.NULL);
+		
+		if(selectedMethod.getMassAnalyzerType() != null)
+			ps.setString(8, selectedMethod.getMassAnalyzerType().getId());
+		else
+			ps.setNull(8, java.sql.Types.NULL);
+		
+		if(selectedMethod.getMsType() != null)
+			ps.setString(9, selectedMethod.getMsType().getId());
+		else
+			ps.setNull(9, java.sql.Types.NULL);
+		
+		if(selectedMethod.getColumn() != null)
+			ps.setString(10, selectedMethod.getColumn().getColumnId());
+		else
+			ps.setNull(10, java.sql.Types.NULL);
 
 		// Insert method file
 		FileInputStream fis = null;
@@ -158,10 +177,26 @@ public class AcquisitionMethodUtils {
 		PreparedStatement ps = conn.prepareStatement(query);
 		ps.setString(1, selectedMethod.getName());
 		ps.setString(2, selectedMethod.getDescription());
-		ps.setString(3, selectedMethod.getPolarity().getCode());
-		ps.setString(4, selectedMethod.getIonizationType().getId());
-		ps.setString(5, selectedMethod.getMassAnalyzerType().getId());
-		ps.setString(6, selectedMethod.getMsType().getId());
+		
+		if(selectedMethod.getPolarity() != null)
+			ps.setString(3, selectedMethod.getPolarity().getCode());
+		else
+			ps.setNull(3, java.sql.Types.NULL);
+		
+		if(selectedMethod.getIonizationType() != null)
+			ps.setString(4, selectedMethod.getIonizationType().getId());
+		else
+			ps.setNull(4, java.sql.Types.NULL);
+		
+		if(selectedMethod.getMassAnalyzerType() != null)
+			ps.setString(5, selectedMethod.getMassAnalyzerType().getId());
+		else
+			ps.setNull(5, java.sql.Types.NULL);
+		
+		if(selectedMethod.getMsType() != null)
+			ps.setString(6, selectedMethod.getMsType().getId());
+		else
+			ps.setNull(6, java.sql.Types.NULL);
 		
 		if(selectedMethod.getColumn() != null)
 			ps.setString(7, selectedMethod.getColumn().getColumnId());

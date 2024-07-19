@@ -36,9 +36,12 @@ import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.stax.StAXSource;
 
 import org.jdom2.Document;
+import org.jdom2.JDOMException;
 import org.jdom2.input.SAXBuilder;
+import org.jdom2.input.sax.XMLReaders;
 import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
+import org.xml.sax.InputSource;
 
 public class XmlUtils {
 
@@ -47,19 +50,42 @@ public class XmlUtils {
 		Document xmlDocument = null;
 		try {
 			SAXBuilder sax = new SAXBuilder();
-
-			// https://rules.sonarsource.com/java/RSPEC-2755
-			// prevent xxe
-//			sax.setProperty("http://javax.xml.XMLConstants/property/accessExternalDTD", "");
-//			sax.setProperty("http://javax.xml.XMLConstants/property/accessExternalSchema", "");		
-//	          sax.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
-//	          sax.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
-
 			xmlDocument = sax.build(file);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return xmlDocument;
+	}
+	
+	public static Document readXmlString(String input) {
+		
+		Document xmlDocument = null;
+		try {
+			SAXBuilder sax = new SAXBuilder();
+			xmlDocument = sax.build(new InputSource(input));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return xmlDocument;
+	}
+	
+	public static Document readXmlFromString(String input) {
+		
+		Document xmlDocument = null;
+		SAXBuilder sax = new SAXBuilder();
+		sax.setXMLReaderFactory(XMLReaders.NONVALIDATING);
+		sax.setFeature("http://xml.org/sax/features/namespaces", true);
+		sax.setFeature("http://xml.org/sax/features/namespace-prefixes", true);
+		
+	    InputSource lSource = new InputSource(new java.io.StringReader(input));
+        lSource.setEncoding("UTF-8");
+        try {
+			xmlDocument = sax.build(lSource);
+		} catch (JDOMException | IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	    return xmlDocument;
 	}
 
 	public static Document readXmlStream(InputStream stream) {
@@ -67,12 +93,6 @@ public class XmlUtils {
 		Document xmlDocument = null;
 		try {
 			SAXBuilder sax = new SAXBuilder();
-
-			// https://rules.sonarsource.com/java/RSPEC-2755
-			// prevent xxe
-//			sax.setProperty("http://javax.xml.XMLConstants/property/accessExternalDTD", "");
-//			sax.setProperty("http://javax.xml.XMLConstants/property/accessExternalSchema", "");
-
 			xmlDocument = sax.build(stream);
 		} catch (Exception e) {
 			e.printStackTrace();

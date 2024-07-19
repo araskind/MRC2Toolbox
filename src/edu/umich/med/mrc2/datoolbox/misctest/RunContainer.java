@@ -176,7 +176,7 @@ public class RunContainer {
 		MRC2ToolBoxConfiguration.initConfiguration();
 
 		try {
-			
+			readThermoWorklistFromJson();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -728,8 +728,8 @@ public class RunContainer {
 	private static void readThermoWorklistFromJson() {
 		
 		String outputName = 
-				"Y:\\F2rats\\2023-03-15 F2 plasma RPLC new\\RPLCpos\\2023-03-15-F2-plasma-RPLC-new-POS.txt";
-		File jsonFolder = new File("Y:\\F2rats\\2023-03-15 F2 plasma RPLC new\\RPLCpos\\JSON");
+				"Y:\\Ashley\\Bielawski_3X_exp1\\plasma\\Manifests\\POS-B4.txt";
+		File jsonFolder = new File("Y:\\Ashley\\Bielawski_3X_exp1\\plasma\\Manifests\\POS-B4");
 		File[] jsonFileList = JSONUtils.getJsonFileList(jsonFolder);
 		Collection<ThermoRawMetadata>metadataList = 
 				new ArrayList<ThermoRawMetadata>();

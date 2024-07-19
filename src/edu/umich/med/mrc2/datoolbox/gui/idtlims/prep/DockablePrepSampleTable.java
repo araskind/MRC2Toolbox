@@ -30,6 +30,7 @@ import javax.swing.JScrollPane;
 import bibliothek.gui.dock.common.DefaultSingleCDockable;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentalSample;
 import edu.umich.med.mrc2.datoolbox.data.IDTExperimentalSample;
+import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTablePopupMenu;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 
 public class DockablePrepSampleTable extends DefaultSingleCDockable {
@@ -43,6 +44,8 @@ public class DockablePrepSampleTable extends DefaultSingleCDockable {
 		setCloseable(false);
 
 		prepSampleTable = new PrepSampleTable();
+		prepSampleTable.addTablePopupMenu(
+				new BasicTablePopupMenu(null, prepSampleTable, true));
 		JScrollPane designScrollPane = new JScrollPane(prepSampleTable);
 		getContentPane().add(designScrollPane, BorderLayout.CENTER);
 	}

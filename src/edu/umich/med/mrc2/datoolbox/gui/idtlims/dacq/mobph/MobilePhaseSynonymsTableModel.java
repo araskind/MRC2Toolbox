@@ -25,62 +25,44 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import edu.umich.med.mrc2.datoolbox.data.lims.MobilePhase;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTableModel;
 import edu.umich.med.mrc2.datoolbox.gui.tables.ColumnContext;
 
-public class MobilePhaseTableModel extends BasicTableModel {
+public class MobilePhaseSynonymsTableModel extends BasicTableModel {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 3417856068405445036L;
+	private static final long serialVersionUID = 5386419982114129215L;
 
-	public static final String MOBILE_PHASE_ID_COLUMN = "ID";
-	public static final String MOBILE_PHASE_DESCRIPTION_COLUMN = "Description";
+	public static final String SYNONYM_COLUMN = "Synonym";
 
-	public MobilePhaseTableModel() {
+	public MobilePhaseSynonymsTableModel() {
 
 		super();
 		columnArray = new ColumnContext[] {
-			new ColumnContext(MOBILE_PHASE_ID_COLUMN, MOBILE_PHASE_ID_COLUMN, String.class, false),
-			new ColumnContext(MOBILE_PHASE_DESCRIPTION_COLUMN, MOBILE_PHASE_DESCRIPTION_COLUMN, MobilePhase.class, false),
+			new ColumnContext(SYNONYM_COLUMN, SYNONYM_COLUMN, String.class, true),
 		};
 	}
 
-	public void setTableModelFromMobilePhaseCollection(Collection<MobilePhase>phases) {
+	public void setTableModelFromSynonymList(Collection<String>synonyms) {
 
 		setRowCount(0);
-		if(phases.isEmpty())
-			return;
-
 		List<Object[]>rowData = new ArrayList<Object[]>();
-		for (MobilePhase phase : phases) {
+		for (String synonym : synonyms) {
 
-			if(phase == null)
-				continue;
-			
-			Object[] obj = {
-					phase.getId(),
-					phase,
-			};
+			Object[] obj = { synonym };
 			rowData.add(obj);
 		}
 		if(!rowData.isEmpty())
 			addRows(rowData);
 	}
+	
+	public void addNewSynonym() {
+
+		Object[] obj = {
+				null,
+			};
+		super.addRow(obj);
+	}
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-

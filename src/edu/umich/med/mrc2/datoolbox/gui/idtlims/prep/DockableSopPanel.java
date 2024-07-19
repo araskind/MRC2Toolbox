@@ -31,6 +31,7 @@ import javax.swing.JScrollPane;
 import bibliothek.gui.dock.common.DefaultSingleCDockable;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSProtocol;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.sop.ProtocolTable;
+import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTablePopupMenu;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 
 public class DockableSopPanel extends DefaultSingleCDockable {
@@ -49,6 +50,8 @@ public class DockableSopPanel extends DefaultSingleCDockable {
 		add(toolbar, BorderLayout.NORTH);
 
 		sopTable = new ProtocolTable();
+		sopTable.addTablePopupMenu(
+				new BasicTablePopupMenu(null, sopTable, true));
 		add(new JScrollPane(sopTable), BorderLayout.CENTER);
 	}
 

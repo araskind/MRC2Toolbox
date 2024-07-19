@@ -44,6 +44,7 @@ import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.AbstractIDTrackerLimsPanel;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.IDTrackerLimsManagerPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
+import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTablePopupMenu;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
@@ -78,6 +79,8 @@ public class DockableSOPProtocolsManagerPanel extends AbstractIDTrackerLimsPanel
 		getContentPane().add(toolbar, BorderLayout.NORTH);
 
 		protocolTable = new ProtocolTable();
+		protocolTable.addTablePopupMenu(
+				new BasicTablePopupMenu(null, protocolTable, true));
 		JScrollPane designScrollPane = new JScrollPane(protocolTable);
 		getContentPane().add(designScrollPane, BorderLayout.CENTER);
 		protocolTable.addMouseListener(

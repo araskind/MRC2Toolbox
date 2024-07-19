@@ -590,6 +590,12 @@ public final class BuildInformation {
 		    <groupId>com.epam.indigo</groupId>
 		    <artifactId>indigo-inchi</artifactId>
 		    <version>1.19.0</version>
-		</dependency>		
+		</dependency>	
+		<!-- https://mvnrepository.com/artifact/org.apache.poi/poi -->
+		<dependency>
+		    <groupId>org.apache.poi</groupId>
+		    <artifactId>poi</artifactId>
+		    <version>5.2.5</version>
+		</dependency>	
 	</dependencies>
 </project>

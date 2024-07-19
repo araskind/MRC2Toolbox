@@ -368,13 +368,6 @@
 															<item key="convert" type="b">true</item>
 															<item key="convert-keys" type="a"/>
 														</entry>
-														<entry>
-															<key shared="false">
-																<placeholder>dock.single.AutomatorPanel</placeholder>
-															</key>
-															<item key="convert" type="b">true</item>
-															<item key="convert-keys" type="a"/>
-														</entry>
 													</placeholder-map>
 												</leaf>
 											</node>
@@ -752,14 +745,13 @@
 								<property factory="SplitDockPlaceholderProperty">
 									<placeholder>dock.single.AutomatorPanel</placeholder>
 									<backup-path>
-										<node location="BOTTOM" size="0.5" id="1707276684834"/>
 										<node location="RIGHT" size="0.7217529039070749" id="1672779742083"/>
-										<node location="RIGHT" size="0.71682398667407" id="1676064563113"/>
+										<node location="RIGHT" size="0.8086065573770491" id="1676064563113"/>
 										<leaf id="1672779039466"/>
 									</backup-path>
 								</property>
 								<property factory="StackDockPropertyFactory">
-									<index>12</index>
+									<index>11</index>
 									<placeholder>dock.single.AutomatorPanel</placeholder>
 								</property>
 							</location>
