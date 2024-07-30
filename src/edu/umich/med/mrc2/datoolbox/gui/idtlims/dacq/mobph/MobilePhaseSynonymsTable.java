@@ -48,6 +48,7 @@ public class MobilePhaseSynonymsTable extends BasicTable {
 		setModel(model);
 		rowSorter = new TableRowSorter<MobilePhaseSynonymsTableModel>(model);
 		setRowSorter(rowSorter);
+		rowSorter.setSortable(0, false);
 		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		setCellSelectionEnabled(true);
 		setColumnSelectionAllowed(true);

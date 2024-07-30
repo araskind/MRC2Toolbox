@@ -211,6 +211,12 @@ public class MobilePhaseEditorDialog extends JDialog implements ActionListener {
 	public Set<String> getmobilePhaseSynonyms() {
 		return synonymsTable.getSynonymList();
 	}
+	
+	public void completeEditing() {
+		
+		if (synonymsTable.isEditing())
+			synonymsTable.getCellEditor().stopCellEditing();
+	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {

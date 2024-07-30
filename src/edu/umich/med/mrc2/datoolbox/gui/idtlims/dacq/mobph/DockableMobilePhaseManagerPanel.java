@@ -149,6 +149,7 @@ public class DockableMobilePhaseManagerPanel extends AbstractIDTrackerLimsPanel 
 	
 	private void addNewMobilePhase() {
 
+		mobilePhaseEditorDialog.completeEditing();
 		String mpName = mobilePhaseEditorDialog.getmobilePhaseDescription();
 		if(mpName.isEmpty()) {
 			MessageDialog.showErrorMsg("Please provide a description!", mobilePhaseEditorDialog);
@@ -205,11 +206,12 @@ public class DockableMobilePhaseManagerPanel extends AbstractIDTrackerLimsPanel 
 	}
 
 	private void editMobilePhase() {
-
+		
 		MobilePhase mobPhase = mobilePhaseTable.getSelectedMobilePhase();
 		if(mobPhase == null)
 			return;
 		
+		mobilePhaseEditorDialog.completeEditing();
 		String mpName = mobilePhaseEditorDialog.getmobilePhaseDescription();
 		if(mpName.isEmpty()) {
 			MessageDialog.showErrorMsg("Please provide a description!", mobilePhaseEditorDialog);

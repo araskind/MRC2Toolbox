@@ -63,6 +63,7 @@ import edu.umich.med.mrc2.datoolbox.gui.plot.lcms.spectrum.DockableSpectumPlot;
 import edu.umich.med.mrc2.datoolbox.gui.plot.stats.DockableDataPlot;
 import edu.umich.med.mrc2.datoolbox.gui.structure.DockableMolStructurePanel;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicFeatureTable;
+import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTableModel;
 import edu.umich.med.mrc2.datoolbox.gui.tables.ms.DockableMsTable;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
@@ -494,7 +495,7 @@ public abstract class ClusterDisplayPanel extends DockableMRC2ToolboxPanel
 
 			if (e.getStatus().equals(ParameterSetStatus.CHANGED)) {
 
-				((ClusterFeatureSelectionTableModel) 
+				((BasicTableModel) 
 						featureDataTable.getModel()).fireTableDataChanged();
 
 				if (e.getSource().equals(featureAnnotationPanel.getCurrentAnnotatedObject()))

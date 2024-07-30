@@ -26,6 +26,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Set;
 import java.util.TreeSet;
 
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
@@ -347,6 +348,24 @@ public class ChromatographyDatabaseUtils {
 		
 		return chromatographicGradientList;
 	}
+	
+	public static Set<String> getUnassignedTemporaryGradientIds() throws Exception{
+		
+		Set<String>idSet = new TreeSet<String>();
+		Connection conn = ConnectionManager.getConnection();
+		String query = "";
+		PreparedStatement ps = conn.prepareStatement(query);
+
+		ResultSet rs = ps.executeQuery();
+		while(rs.next()) {
+
+		}
+		rs.close();
+		ps.close();
+		ConnectionManager.releaseConnection(conn);	
+		return idSet;
+	}
+	
 	/*
 	 * MOBILE_PHASE
 	 * */

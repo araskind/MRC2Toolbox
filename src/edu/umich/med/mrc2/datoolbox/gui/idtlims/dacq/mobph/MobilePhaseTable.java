@@ -26,6 +26,7 @@ import java.util.Collection;
 import javax.swing.ListSelectionModel;
 import javax.swing.table.TableRowSorter;
 
+import edu.umich.med.mrc2.datoolbox.data.compare.MobilePhaseComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.format.MobilePhaseFormat;
 import edu.umich.med.mrc2.datoolbox.data.lims.MobilePhase;
@@ -46,7 +47,11 @@ public class MobilePhaseTable extends BasicTable {
 		model =  new MobilePhaseTableModel();
 		setModel(model);
 		rowSorter = new TableRowSorter<MobilePhaseTableModel>((MobilePhaseTableModel)model);
-		setRowSorter(rowSorter);		
+		setRowSorter(rowSorter);
+		rowSorter.setComparator(model.getColumnIndex(
+				MobilePhaseTableModel.MOBILE_PHASE_DESCRIPTION_COLUMN),
+				new MobilePhaseComparator(SortProperty.Name));
+		
 		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		columnModel.getColumnById(MobilePhaseTableModel.MOBILE_PHASE_DESCRIPTION_COLUMN)
 			.setCellRenderer(new WordWrapCellRenderer());
@@ -54,7 +59,8 @@ public class MobilePhaseTable extends BasicTable {
 		columnModel.getColumnById(MobilePhaseTableModel.MOBILE_PHASE_ID_COLUMN).setMaxWidth(80);
 		fixedWidthColumns.add(model.getColumnIndex(MobilePhaseTableModel.MOBILE_PHASE_ID_COLUMN));
 		thf = new TableFilterHeader(this, AutoChoices.ENABLED);
-		thf.getParserModel().setFormat(MobilePhase.class, new MobilePhaseFormat(SortProperty.ID));	
+		thf.getParserModel().setFormat(MobilePhase.class, new MobilePhaseFormat(SortProperty.Name));	
+		thf.getParserModel().setComparator(MobilePhase.class, new MobilePhaseComparator(SortProperty.Name));
 		finalizeLayout();
 	}
 

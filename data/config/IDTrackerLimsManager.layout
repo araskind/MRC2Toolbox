@@ -184,7 +184,7 @@
 													<placeholder>dock.single.DockableIdProjectTree</placeholder>
 												</placeholders>
 											</leaf>
-											<node nodeId="1652718303238" orientation="VERTICAL" divider="0.21921641791044777">
+											<node nodeId="1652718303238" orientation="VERTICAL" divider="0.2020972354623451">
 												<leaf id="0" nodeId="1652718002963">
 													<placeholders>
 														<placeholder>dock.single.DockableIDTrackerResultsOverviewPanel</placeholder>
@@ -508,7 +508,7 @@
 								</child>
 								<child>
 									<layout factory="delegate_StackDockStationFactory">
-										<selected>1</selected>
+										<selected>3</selected>
 										<placeholders>
 											<version>0</version>
 											<format>dock.PlaceholderList</format>

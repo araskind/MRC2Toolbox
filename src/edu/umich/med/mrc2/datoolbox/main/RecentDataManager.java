@@ -193,9 +193,14 @@ public class RecentDataManager {
 		Collection<ExperimentPointer> projectsOfType = 
 				recentExperimentsMap.get(toAdd.getProjectType());
 		
-		if(projectsOfType.size() == MAX_OBJECTS_COUNT)
-			projectsOfType.iterator().remove();
-		
+		if(projectsOfType.size() == MAX_OBJECTS_COUNT) {
+			
+			ExperimentPointer toRemove = 
+					projectsOfType.stream().
+					skip(projectsOfType.size()-1).findFirst().orElse(null);
+			if(toRemove != null)			
+				projectsOfType.remove(toRemove);
+		}		
 		recentExperimentsMap.get(toAdd.getProjectType()).add(new ExperimentPointer(toAdd));
 		
 		MRC2ToolBoxCore.getMainWindow().updateGuiWithRecentData();
@@ -208,10 +213,15 @@ public class RecentDataManager {
 		
 		Collection<ExperimentPointer> projectsOfType = 
 				recentExperimentsMap.get(ProjectType.ID_TRACKER_DATA_ANALYSIS);
-		
-		if(projectsOfType.size() == MAX_OBJECTS_COUNT)
-			projectsOfType.iterator().remove();
-		
+
+		if(projectsOfType.size() == MAX_OBJECTS_COUNT) {
+			
+			ExperimentPointer toRemove = 
+					projectsOfType.stream().
+					skip(projectsOfType.size()-1).findFirst().orElse(null);
+			if(toRemove != null)			
+				projectsOfType.remove(toRemove);
+		}			
 		recentExperimentsMap.get(ProjectType.ID_TRACKER_DATA_ANALYSIS).add(new ExperimentPointer(limsExperiment));
 		
 		MRC2ToolBoxCore.getMainWindow().updateGuiWithRecentData();
@@ -229,9 +239,13 @@ public class RecentDataManager {
 		if(featureCollections.contains(toAdd))
 			return;
 		
-		if(featureCollections.size() == MAX_OBJECTS_COUNT)
-			featureCollections.iterator().remove();
-		
+		if(featureCollections.size() == MAX_OBJECTS_COUNT) {
+			
+			MsFeatureInfoBundleCollection toRemove = featureCollections.stream().
+					skip(featureCollections.size()-1).findFirst().orElse(null);
+			if(toRemove != null)			
+				featureCollections.remove(toRemove);
+		}
 		featureCollections.add(toAdd);
 		
 		MRC2ToolBoxCore.getMainWindow().updateGuiWithRecentData();
@@ -256,9 +270,13 @@ public class RecentDataManager {
 		if(featureClusterDataSets.contains(toAdd))
 			return;
 		
-		if(featureClusterDataSets.size() == MAX_OBJECTS_COUNT)
-			featureClusterDataSets.iterator().remove();
+		if(featureClusterDataSets.size() == MAX_OBJECTS_COUNT) {
 		
+			IMSMSClusterDataSet toRemove = featureClusterDataSets.stream().
+					skip(featureClusterDataSets.size()-1).findFirst().orElse(null);
+			if(toRemove != null)			
+				featureClusterDataSets.remove(toRemove);
+		}
 		featureClusterDataSets.add(toAdd);
 		
 		MRC2ToolBoxCore.getMainWindow().updateGuiWithRecentData();
