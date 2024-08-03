@@ -40,8 +40,15 @@ public class ChromatographyDatabaseUtils {
 
 	public static String addNewChromatographicGradient(
 			ChromatographicGradient gradient) throws Exception{
-
 		Connection conn = ConnectionManager.getConnection();
+		addNewChromatographicGradient(gradient, conn);
+		ConnectionManager.releaseConnection(conn);
+		return gradient.getId();
+	}
+	
+	public static String addNewChromatographicGradient(
+			ChromatographicGradient gradient, Connection conn) throws Exception{
+		
 		String nextId = SQLUtils.getNextIdFromSequence(conn, 
 				"CHROMATOGRAPHIC_GRADIENT_SEQ",
 				DataPrefix.CROMATOGRAPHIC_GRADIENT,
@@ -109,7 +116,6 @@ public class ChromatographyDatabaseUtils {
 		}
 		ps.executeBatch();
 		ps.close();
-		ConnectionManager.releaseConnection(conn);
 		return nextId;
 	}
 	
@@ -219,6 +225,21 @@ public class ChromatographyDatabaseUtils {
 		PreparedStatement ps = conn.prepareStatement(query);
 		ps.setString(1, gradient.getId());
 		ps.executeUpdate();
+		ps.close();
+		ConnectionManager.releaseConnection(conn);
+	}
+	
+	public static void setGradientForMethod(
+			String gradientId, String acqMethodId) throws Exception{
+		
+		Connection conn = ConnectionManager.getConnection();
+		String query = 
+				"UPDATE DATA_ACQUISITION_METHOD "
+				+ "SET GRADIENT_ID = ? WHERE ACQ_METHOD_ID = ?";				
+		PreparedStatement ps = conn.prepareStatement(query);
+		ps.setString(1, gradientId);
+		ps.setString(2, acqMethodId);
+		ps.executeUpdate();			
 		ps.close();
 		ConnectionManager.releaseConnection(conn);
 	}

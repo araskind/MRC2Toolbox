@@ -1124,7 +1124,7 @@ public class IDTDataCache {
 	public static DataAcquisitionMethod getAcquisitionMethodByName(String methodName) {
 
 		return getAcquisitionMethods().stream().
-				filter(e -> (e.getName().equals(methodName) 
+				filter(e -> (e.getName().equalsIgnoreCase(methodName) 
 						|| FilenameUtils.getBaseName(e.getName()).equalsIgnoreCase(methodName))).
 				findFirst().orElse(null);
 	}

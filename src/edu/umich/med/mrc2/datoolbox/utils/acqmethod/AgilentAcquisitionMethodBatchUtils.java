@@ -28,12 +28,16 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -46,19 +50,29 @@ import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.apache.commons.io.filefilter.FileFilterUtils;
 import org.apache.commons.io.filefilter.IOFileFilter;
 import org.apache.commons.io.filefilter.RegexFileFilter;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.text.StringEscapeUtils;
+import org.jdom2.Document;
+import org.jdom2.Element;
+import org.jdom2.Namespace;
 
 import edu.umich.med.mrc2.datoolbox.data.IonizationType;
 import edu.umich.med.mrc2.datoolbox.data.MassAnalyzerType;
 import edu.umich.med.mrc2.datoolbox.data.MsType;
 import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
+import edu.umich.med.mrc2.datoolbox.data.lims.ChromatographicGradient;
 import edu.umich.med.mrc2.datoolbox.data.lims.ChromatographicSeparationType;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataProcessingSoftware;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
+import edu.umich.med.mrc2.datoolbox.data.lims.MobilePhase;
+import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.database.idt.AcquisitionMethodUtils;
+import edu.umich.med.mrc2.datoolbox.database.idt.ChromatographyDatabaseUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.database.lims.LIMSDataCache;
 import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
+import edu.umich.med.mrc2.datoolbox.utils.XmlUtils;
 
 public class AgilentAcquisitionMethodBatchUtils {
 	
@@ -146,6 +160,210 @@ public class AgilentAcquisitionMethodBatchUtils {
 	}
 	
 	/**
+	 * Extract RCDevicesXml and SCICDevicesXml as new XML documents 
+	 * from previously collected AcqMethod.xml files
+	 * The function assumes that specific folder structure is in place
+	 * inside the specified methodsFolder:
+	 * <UL>
+	 * <LI>Original method reports copied from AcqMethod.xml are in MethodReports folder
+	 * <LI>RCDevicesXml and SCICDevicesXml folders should be present
+	 * </UL>
+	 * If RCDevicesXml or SCICDevicesXml are not found in method files
+	 * the log file nonConformingMethods.txt will be created in methodsFolder 
+	 * listing these methods
+	 * 
+	 * @param methodsFolder
+	 */
+	public static void extractEmbededXmlFromAcqMethodReport(File methodsFolder) {
+		
+		Path methodReportsFolder = Paths.get(methodsFolder.getAbsolutePath(), "MethodReports");
+		String rcDevicesDir = "RCDevicesXml";
+		String scicDevicesDir = "SCICDevicesXml";
+		ArrayList<String>log = new ArrayList<String>();
+		List<String> methodReportsList = FIOUtils.findFilesByExtension(methodReportsFolder, "xml");
+		for(String mrName : methodReportsList) {
+			
+			File reportFile = new File(mrName);
+			Document methodDocument = XmlUtils.readXmlFile(reportFile);
+			Namespace ns = methodDocument.getRootElement().getNamespace();
+			Element mr = methodDocument.getRootElement().getChild("MethodReport", ns);
+			if(mr == null) {
+				log.add(reportFile.getName());
+				continue;
+			}
+			Element rcDevicesXmlElement = mr.getChild("RCDevicesXml", ns);
+			if(rcDevicesXmlElement == null 
+					|| rcDevicesXmlElement.getText() == null
+					|| rcDevicesXmlElement.getText().isEmpty()) {
+				log.add(reportFile.getName());
+				continue;
+			}			
+			String rcDevicesXml = 
+					StringEscapeUtils.unescapeXml(rcDevicesXmlElement.getText());
+			Path outputPath = Paths.get(
+					methodsFolder.getAbsolutePath(), rcDevicesDir, reportFile.getName());
+			try {
+				Files.writeString(outputPath, 
+						rcDevicesXml, 
+						StandardCharsets.UTF_8,
+						StandardOpenOption.CREATE, 
+						StandardOpenOption.TRUNCATE_EXISTING);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			Element scicDevicesXmlElement = mr.getChild("RCDevicesXml", ns);
+			if(scicDevicesXmlElement == null 
+					|| scicDevicesXmlElement.getText() == null
+					|| scicDevicesXmlElement.getText().isEmpty()) {
+				log.add(reportFile.getName() + "\t" + "No SCICDevicesXml Element");
+				continue;
+			}			
+			String scicDevicesXml = 
+					StringEscapeUtils.unescapeXml(rcDevicesXmlElement.getText());
+			outputPath = Paths.get(
+					methodsFolder.getAbsolutePath(), scicDevicesDir, reportFile.getName());
+			try {
+				Files.writeString(outputPath, 
+						scicDevicesXml, 
+						StandardCharsets.UTF_8,
+						StandardOpenOption.CREATE, 
+						StandardOpenOption.TRUNCATE_EXISTING);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		if(!log.isEmpty()){
+			
+			Path logPath = 
+					Paths.get(methodsFolder.getAbsolutePath(), "nonConformingMethods.txt");
+			try {
+				Files.write(logPath, 
+						log,
+						StandardCharsets.UTF_8,
+						StandardOpenOption.CREATE, 
+						StandardOpenOption.TRUNCATE_EXISTING);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}		
+	}
+	
+	/**
+	 * Create method to mobile phase mapping using RCDevicesXml documents.<BR>
+	 * Output is a file listing the method and all found mobile phases 
+	 * in tab-separated format.<BR>
+	 * Only methods already in database are considered (matched by name)<BR>
+	 * Found mobile phases are NOT matched to the database, this is just 
+	 * a first-path exploratory list when batch-processing the methods
+	 * 
+	 * @param rcDevicesXmlFolder - folder containing RCDevicesXml documents to scan
+	 * @param methodMobilePhaseMap - output mapping file
+	 */
+	public static void createMobilePhaseNameAndSynonymListByMethod(
+			File rcDevicesXmlFolder,
+			File methodMobilePhaseMap) {
+
+		ArrayList<String>log = new ArrayList<String>();
+		List<String> chromMethodList = 
+				FIOUtils.findFilesByExtension(rcDevicesXmlFolder.toPath(), "xml");
+		ArrayList<String>line = new ArrayList<String>();
+		for(String mrName : chromMethodList) {
+
+			String acqName = FileNameUtils.getBaseName(mrName) + ".m";
+			DataAcquisitionMethod acqMethod = 
+					IDTDataCache.getAcquisitionMethodByName(acqName);
+			if(acqMethod == null)
+				continue;
+					
+			File methodFile = new File(mrName);
+			ExtractedAgilentAcquisitionMethodParser parser = 
+					new ExtractedAgilentAcquisitionMethodParser(methodFile);
+			parser.setDoNotMatchMobilePhases(true);
+			ChromatographicGradient grad = 
+					parser.extractChromatographicGradientFromFile();
+			if(grad != null) {
+				
+				line.add(acqName);
+				for(MobilePhase mp : grad.getMobilePhases()) {
+					
+					line.clear();
+					if(mp != null) {
+						line.add(acqName);
+						line.add(mp.getName());
+						if(!mp.getSynonyms().isEmpty())
+							line.addAll(mp.getSynonyms());
+						
+						log.add(StringUtils.join(line, "\t"));
+					}
+				}
+			}
+		}
+		if (!log.isEmpty()) {
+
+			try {
+				Files.write(methodMobilePhaseMap.toPath(), 
+						log, 
+						StandardCharsets.UTF_8, 
+						StandardOpenOption.CREATE,
+						StandardOpenOption.TRUNCATE_EXISTING);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	/**
+	 * Create the list of mobile phases not mapping to those already in database 
+	 * using RCDevicesXml documents.
+	 * 
+	 * @param rcDevicesXmlFolder - folder containing RCDevicesXml documents to scan
+	 * @param unknownListFile - output file
+	 */
+	public static void extractUnknownMobilePhaseList(
+			File rcDevicesXmlFolder,
+			File unknownListFile) {
+
+		ArrayList<String>log = new ArrayList<String>();
+		List<String> chromMethodList = 
+				FIOUtils.findFilesByExtension(rcDevicesXmlFolder.toPath(), "xml");
+		String unkLine = "Unknown mobile phase";
+		for(String mrName : chromMethodList) {
+
+			String acqName = FileNameUtils.getBaseName(mrName) + ".m";
+			DataAcquisitionMethod acqMethod = 
+					IDTDataCache.getAcquisitionMethodByName(acqName);
+			if(acqMethod == null)
+				continue;
+					
+			File methodFile = new File(mrName);
+			ExtractedAgilentAcquisitionMethodParser parser = 
+					new ExtractedAgilentAcquisitionMethodParser(methodFile);
+			ChromatographicGradient grad = 
+					parser.extractChromatographicGradientFromFile();
+			if(!parser.getErrorLog().isEmpty()) {
+				
+				for(String logLine : parser.getErrorLog()) {
+					
+					if(logLine.contains(unkLine))
+						log.add(unkLine);					
+				}
+			}
+		}
+		if (!log.isEmpty()) {
+
+			try {
+				Files.write(unknownListFile.toPath(), 
+						log, 
+						StandardCharsets.UTF_8, 
+						StandardOpenOption.CREATE,
+						StandardOpenOption.TRUNCATE_EXISTING);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	/**
 	 * Copy method files not present in the database to a single directory
 	 * Methods are compared by name (case-insensitive)
 	 * 
@@ -158,14 +376,13 @@ public class AgilentAcquisitionMethodBatchUtils {
 			File destination) {
 		
 		Map<String,String> methodLocationMap = 
-				getMethodPropertyMap(methodLocationLog);		
-		Collection<DataAcquisitionMethod> existingMethods = 
-				IDTDataCache.getAcquisitionMethods();
+				getMethodPropertyMap(methodLocationLog);
+		
 		for(String mName : methodLocationMap.keySet()) {
 			
-			DataAcquisitionMethod existing = existingMethods.stream().
-					filter(m -> m.getName().equalsIgnoreCase(mName)).
-					findFirst().orElse(null);
+			DataAcquisitionMethod existing = 
+					IDTDataCache.getAcquisitionMethodByName(mName);
+			
 			if(existing == null) {
 				//	System.err.println(mName + "\t" + methodLocationMap.get(mName));
 				Path methodPath = Paths.get(destination.getAbsolutePath(), mName);
@@ -185,11 +402,15 @@ public class AgilentAcquisitionMethodBatchUtils {
 	}
 	
 	/**
-	 * Create method name/method property map from existing list
-	 * Method name is converted to lower case to avoid ambiguity
+	 * Create method name/method property map from file.<BR>
+	 * Method name is converted to lower case to avoid ambiguity. 
+	 * Mapping file is a tab-separated plain text document with two columns:
+	 * <UL>
+	 * 	<LI>Method name
+	 * 	<LI>Property value
+	 * </UL>
 	 * 
-	 * @param methodPropertyFile - method property list, tab separated file with 2 columns: 
-	 * method file name and method property
+	 * @param methodPropertyFile
 	 * @return methodPropertyMap - key is method name, value - method property
 	 */
 	public static Map<String,String> getMethodPropertyMap(File methodPropertyFile) {
@@ -204,8 +425,10 @@ public class AgilentAcquisitionMethodBatchUtils {
 		}	
 		Map<String,String> methodPropertyMap = new TreeMap<String,String>();
 		for(String ml : methodProperties) {
+			
 			String[]mla = ml.split("\t");
-			methodPropertyMap.put(mla[0].toLowerCase(), mla[1]);
+			if(mla.length >= 2) 
+				methodPropertyMap.put(mla[0].toLowerCase(), mla[1]);			
 		}
 		return methodPropertyMap;
 	}
@@ -249,6 +472,23 @@ public class AgilentAcquisitionMethodBatchUtils {
 		}
 	}
 	
+	/**
+	 * Batch upload new acquisition methods to the database
+	 * The function assumes that all methods are in the same folder
+	 * and requires method locations mapping file and method
+	 * to mass analyzer mapping file. It is using generic AUTO user ID (U00077)
+	 * and sets a few default parameters:
+	 * <UL>
+	 * 	<LI>Ionization Type - ESI
+	 * 	<LI>Chromatographic Separation Type - UPLC
+	 *  <LI>Control software - MassHunter Acquisition
+	 * </UL>
+	 * Method names are checked against existing to avoid uploading duplicates
+	 * 
+	 * @param methodsDir - directory containing methods to upload
+	 * @param methodMassAnalyzerMapFile - method name to mass analyzer type mapping file
+	 * @param methodLocationsMapFile - method name to method location mapping file
+	 */
 	public static void uploadMissingMethods(
 			File methodsDir,
 			File methodMassAnalyzerMapFile,
@@ -268,12 +508,18 @@ public class AgilentAcquisitionMethodBatchUtils {
 				IDTDataCache.getChromatographicSeparationTypeById("UPLC");
 		DataProcessingSoftware software = IDTDataCache.getSoftwareById("SW0010");
 		
-		//	TODO check if method already in database
 		for(File methodFolder : methodFolders) {
 			
 			if(!FilenameUtils.getExtension(methodFolder.getName()).equalsIgnoreCase("m"))
 				continue;
 			
+			DataAcquisitionMethod existingMethod = 
+					IDTDataCache.getAcquisitionMethodByName(methodFolder.getName());
+			if(existingMethod != null) {
+				
+				System.err.println("Method \"" + methodFolder.getName() + "\" alredy in database");
+				continue;
+			}			
 			DataAcquisitionMethod newMethod = new DataAcquisitionMethod(
 					null,
 					methodFolder.getName(),
@@ -369,6 +615,13 @@ public class AgilentAcquisitionMethodBatchUtils {
 		return null;
 	}
 	
+	/**
+	 * List all Agilent method (.m) files inside the specified directory 
+	 * and its subdirectories
+	 * 
+	 * @param dirToScan
+	 * @return
+	 */
 	public static Collection<File>getListOfMethodFilesInFolder(File dirToScan) {
 		
 		IOFileFilter dotMfilter = 
@@ -381,6 +634,27 @@ public class AgilentAcquisitionMethodBatchUtils {
 		return methodFolders;
 	}
 	
+	/**
+	 * Create method name to mass analyzer type map from the mapping file
+	 * Mapping file is a tab-separated plain text document with two columns:
+	 * <UL>
+	 * 	<LI>Method name
+	 * 	<LI>Mass analyzer abbreviation
+	 * </UL>
+	 * The following abbreviations are supported:
+	 * <UL>
+	 * 	<LI>Q - Sigle quadrupol
+	 * 	<LI>QQQ - Tripple quadrupol
+	 * 	<LI>QTOF - Quadrupol-time of flight
+	 * 	<LI>IT - Quadrupole ion trap
+	 * 	<LI>TOF - Time of flight
+	 * 	<LI>ORBI - Orbitrap
+	 * 	<LI>FTICR - Fourier transform ion cyclotron resonance
+	 * 	<LI>TRIBRID - Tribrid
+	 * </UL>
+	 * @param massAnalyzerMapFile
+	 * @return
+	 */
 	public static Map<String,MassAnalyzerType> getMethodMassAnalyzerMap(File massAnalyzerMapFile) {
 		
 		Map<String,String>mmaMap = getMethodPropertyMap(massAnalyzerMapFile);
@@ -395,4 +669,318 @@ public class AgilentAcquisitionMethodBatchUtils {
 		}
 		return methodMassAnalyzerMap;
 	}	
+	
+	/**
+	 * Batch extract and upload into the database actual gradients
+	 * as recorded in AcqMethod.xml files. Gradients are uploaded 
+	 * only for methods already in database (matched by name) and
+	 * only if data from RCDevicesXml document are successfully parsed
+	 * into the gradient including matching mobile phases. 
+	 * All gradient parsing errors are saved to log file.
+	 * 
+	 * @param rcDevicesXmlFolder
+	 * @param logFile
+	 */
+	public static void extractAndUploadActualGradients(
+			File rcDevicesXmlFolder,
+			File logFile) {
+		
+		ArrayList<String>log = new ArrayList<String>();
+		List<String> chromMethodList = FIOUtils.findFilesByExtension(
+				rcDevicesXmlFolder.toPath(), "xml");
+		
+		for(String mrName : chromMethodList) {
+			
+			File methodFile = new File(mrName);
+			
+//			if(methodFile.getName().equalsIgnoreCase("pos-lc-tof-2018-460ul-min.xml"))
+//				System.out.println("***");
+				
+			String acqName = FileNameUtils.getBaseName(mrName) + ".m";
+			DataAcquisitionMethod acqMethod = 
+					IDTDataCache.getAcquisitionMethodByName(acqName);
+			if(acqMethod == null) {
+				log.add(acqName + "\tNot in database");
+				continue;
+			}	
+			if(acqMethod.getChromatographicGradient() != null) {
+				
+				ChromatographicGradient existingGrad = IDTDataCache.getChromatographicGradientById(
+						acqMethod.getChromatographicGradient().getId());
+				
+				if(existingGrad != null) {
+					log.add(acqName + "\thas assigned gradient " 
+							+ acqMethod.getChromatographicGradient().getId());
+					continue;
+				}
+			}
+			ExtractedAgilentAcquisitionMethodParser parser = 
+					new ExtractedAgilentAcquisitionMethodParser(methodFile);
+			ChromatographicGradient grad = 
+					parser.extractChromatographicGradientFromFile();
+			if(grad == null) {
+				log.add(methodFile.getName() + "\tFailed to extract gradient");
+				continue;
+			}
+			else if(!parser.getErrorLog().isEmpty()) { 
+				log.addAll(parser.getErrorLog());
+				continue;
+			}
+			else {
+				String gradId = null;
+				try {
+					gradId = ChromatographyDatabaseUtils.addNewChromatographicGradient(grad);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				if(gradId != null) {
+					
+					try {
+						ChromatographyDatabaseUtils.setGradientForMethod(gradId, acqMethod.getId());
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+			}
+		}
+		if (!log.isEmpty()) {
+
+			try {
+				Files.write(logFile.toPath(), 
+						log, 
+						StandardCharsets.UTF_8, 
+						StandardOpenOption.CREATE,
+						StandardOpenOption.TRUNCATE_EXISTING);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	/**
+	 * Extract method descriptions from RCDevicesXml
+	 * RCDevicesXml is an XML element in AcqMethod.xml file that contains 
+	 * an XML document with the actual method data with RC standing for RapidControl
+	 * 
+	 * @param rcDevicesDir - directory containing RCDevicesXml documents for methods
+	 * @param descriptionsFile - mapping file, tab-separated; column 1 - method name, column 2 - method description
+	 */
+	public static void extractMethodDescriptions(
+			File rcDevicesDir,
+			File descriptionsFile) {
+
+		ArrayList<String>log = new ArrayList<String>();
+		List<String> chromMethodList = FIOUtils.findFilesByExtension(
+				rcDevicesDir.toPath(), "xml");
+		
+		for(String mrName : chromMethodList) {
+			
+			String acqName = FileNameUtils.getBaseName(mrName) + ".m";
+			File methodFile = new File(mrName);
+			ExtractedAgilentAcquisitionMethodParser parser = 
+					new ExtractedAgilentAcquisitionMethodParser(methodFile);
+			String description = parser.extractMethodDescriptionFromFile();
+			if(description != null && !description.trim().isEmpty())
+				log.add(acqName + "\t" + description);
+		}
+		if (!log.isEmpty()) {
+
+			try {
+				Files.write(descriptionsFile.toPath(), 
+						log, 
+						StandardCharsets.UTF_8, 
+						StandardOpenOption.CREATE,
+						StandardOpenOption.TRUNCATE_EXISTING);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	/**
+	 * Update method descriptions in the database using external mapping file.<BR>
+	 * Methods are matched by name, descriptions are updated if mapping contains
+	 * description and there is no existing description or it equals method name.
+	 * If there is existing description other than metod name, new description is appended to it.
+	 * 
+	 * @param methodDescriptionsFile
+	 * @throws Exception
+	 */
+	public static void updateMethodDescriptions(File methodDescriptionsFile) throws Exception {
+		
+		Map<String,String> methodDescriptionsMap = 
+				getMethodPropertyMap(methodDescriptionsFile);
+		Collection<DataAcquisitionMethod> methodList = 
+				IDTDataCache.getAcquisitionMethods();
+		
+		Connection conn = ConnectionManager.getConnection();
+		String query  =
+				"UPDATE DATA_ACQUISITION_METHOD "
+				+ "SET METHOD_DESCRIPTION = ? WHERE ACQ_METHOD_ID = ?";		
+		PreparedStatement ps = conn.prepareStatement(query);
+		
+		for(DataAcquisitionMethod method : methodList) {
+			
+			String forUpdate = null;
+			String newDescription = methodDescriptionsMap.get(method.getName().toLowerCase());
+			if(newDescription != null && !newDescription.trim().isEmpty()) {
+
+				if(method.getDescription() == null || method.getDescription().isEmpty() 
+						|| (method.getDescription() != null 
+								&& method.getDescription().equalsIgnoreCase(method.getName()))) {
+					forUpdate = newDescription;
+				}
+				else {
+					forUpdate = method.getDescription() + "; " + newDescription;
+				}
+				ps.setString(1, forUpdate);
+				ps.setString(2, method.getId());
+				ps.executeUpdate();
+			}
+		}
+		ps.close();
+		ConnectionManager.releaseConnection(conn);
+	}
+	
+	public static void reassignTemporaryGradientsAsPermanent() throws Exception {
+		
+		Map<String,String> methodIdTmpGradIdMap = new TreeMap<String,String>();
+		Connection conn = ConnectionManager.getConnection();
+		String query = 
+				"SELECT ACQ_METHOD_ID, TMP_GRADIENT_ID " +
+				"FROM DATA_ACQUISITION_METHOD " +
+				"WHERE TMP_ACTUAL_GRADIENT_ID IS NULL " +
+				"AND TMP_GRADIENT_ID IS NOT NULL";
+		PreparedStatement ps = conn.prepareStatement(query);
+
+		ResultSet rs = ps.executeQuery();
+		while(rs.next()) 
+			methodIdTmpGradIdMap.put(rs.getString(1), rs.getString(2));
+		
+		rs.close();
+		
+		query = "SELECT ACQ_METHOD_ID, TMP_ACTUAL_GRADIENT_ID " +
+				"FROM DATA_ACQUISITION_METHOD  " +
+				"WHERE TMP_ACTUAL_GRADIENT_ID IS NOT NULL " +
+				"AND TMP_GRADIENT_ID IS NULL";
+		ps = conn.prepareStatement(query);
+
+		rs = ps.executeQuery();
+		while(rs.next()) 
+			methodIdTmpGradIdMap.put(rs.getString(1), rs.getString(2));
+		
+		rs.close();	
+		
+		query = "UPDATE DATA_ACQUISITION_METHOD SET GRADIENT_ID = ? "
+				+ "WHERE ACQ_METHOD_ID = ?";
+		ps = conn.prepareStatement(query);	
+		
+		Collection<ChromatographicGradient> tmpGradList = 
+				ChromatographyDatabaseUtils.getTempChromatographicGradientList();
+		
+		for(Entry<String, String> pair : methodIdTmpGradIdMap.entrySet()) {
+			
+			ChromatographicGradient tmpGrad = 
+					tmpGradList.stream().
+					filter(g -> g.getId().equals(pair.getValue())).
+					findFirst().orElse(null);
+			if(tmpGrad != null) {
+				
+				String gradId = 
+						ChromatographyDatabaseUtils.addNewChromatographicGradient(tmpGrad);
+				ps.setString(1, gradId);
+				ps.setString(2, pair.getKey());
+				ps.executeUpdate();
+			}
+		}
+		ps.close();	
+		ConnectionManager.releaseConnection(conn);
+	}
+	
+	public static void addMissingGradientsUsingExternalMobilePhaseAndColumnKey(
+			File rcDevicesXmlFolder,
+			File externalKeyFile) {
+		
+		Collection<ChromatographicGradient> existingGradients = 
+				IDTDataCache.getChromatographicGradientList();
+		Set<String> gradIds = existingGradients.stream().
+				map(g -> g.getId()).collect(Collectors.toSet());
+		Collection<DataAcquisitionMethod> methods = IDTDataCache.getAcquisitionMethods();
+		Collection<DataAcquisitionMethod>methodsToUpdate = methods.stream().
+			filter(m-> Objects.nonNull(m.getSoftware())).
+			filter(m-> m.getSoftware().getId().equals("SW0010")).
+			filter(m-> Objects.nonNull(m.getChromatographicGradient())).
+			filter(m -> !gradIds.contains(m.getChromatographicGradient().getId())).
+			collect(Collectors.toList());
+		
+		List<String> chromMethodList = 
+				FIOUtils.findFilesByExtension(rcDevicesXmlFolder.toPath(), "xml");
+		Set<String>availableXml = new TreeSet<String>();
+		for(String xmlName : chromMethodList) {
+			
+			String methodName = FileNameUtils.getBaseName(xmlName).toLowerCase() + ".m";
+			availableXml.add(methodName);
+		}
+		List<String>missingXml = methodsToUpdate.stream().
+			map(m -> m.getName().toLowerCase()).
+			filter(n -> !availableXml.contains(n)).
+			collect(Collectors.toList());
+		
+		if(!missingXml.isEmpty()) {
+			
+			for(String m : missingXml)
+				System.err.println(m);
+		}
+	}
+	
+	public static void copyNewMethodReports(File reportDir, File destination) {
+		
+		List<String> chromMethodList = FIOUtils.findFilesByExtension(
+				reportDir.toPath(), "xml");
+		
+		for(String methodNameXml : chromMethodList) {
+			
+			String methodName = FileNameUtils.getBaseName(methodNameXml).toLowerCase() + ".m";
+			DataAcquisitionMethod existingMethod = 
+					IDTDataCache.getAcquisitionMethodByName(methodName);
+			if(existingMethod == null) {
+				
+				Path xmlReportPath = Paths.get(methodNameXml);
+				Path newXmlReportPath = 
+						Paths.get(destination.getAbsolutePath(), xmlReportPath.toFile().getName());
+				try {
+					Files.copy(xmlReportPath, newXmlReportPath);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}		
+	}
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	

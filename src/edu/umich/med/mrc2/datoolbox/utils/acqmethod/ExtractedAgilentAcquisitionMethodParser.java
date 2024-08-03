@@ -82,6 +82,10 @@ public class ExtractedAgilentAcquisitionMethodParser {
 		deviceOptions.add("QQQ");
 		deviceOptions.add("Q-TOF");
 		Document methodDocument = XmlUtils.readXmlFile(rcDevicesXmlFile);
+		if(methodDocument == null) {
+			System.err.println("Can not create XML document form " + rcDevicesXmlFile.getName());
+			return null;
+		}
 		Namespace ns = methodDocument.getRootElement().getNamespace();
 		List<Element> deviceElements = 
 				methodDocument.getRootElement().getChildren("Device", ns);
