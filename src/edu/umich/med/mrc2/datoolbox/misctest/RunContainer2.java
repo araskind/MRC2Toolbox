@@ -45,8 +45,6 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.xml.xpath.XPathExpressionException;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
@@ -565,13 +563,7 @@ public class RunContainer2 {
 		AgilentAcquisitionMethodParser amp = 
 				new AgilentAcquisitionMethodParser(methodFolder);
 		amp.parseParameterFiles();
-		ChromatographicGradient grad = null;		
-		try {
-			grad = amp.extractGradientData();
-		} catch (XPathExpressionException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		ChromatographicGradient grad = amp.extractGradientData();
 		if(grad != null) {					
 			if(grad.getGradientSteps().isEmpty())
 				System.out.println(methodFolder.getName() + "\tNo time table");
@@ -680,13 +672,7 @@ public class RunContainer2 {
 				AgilentAcquisitionMethodParser amp = 
 						new AgilentAcquisitionMethodParser(methodFolder);
 				amp.parseParameterFiles();
-				ChromatographicGradient grad = null;		
-				try {
-					grad = amp.extractGradientData();
-				} catch (XPathExpressionException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+				ChromatographicGradient grad = amp.extractGradientData();
 				if(grad != null) {					
 					if(grad.getGradientSteps().isEmpty()) {
 						logData.add(method.getId() + "\t" + method.getName() + "\tNo time table");
@@ -766,13 +752,7 @@ public class RunContainer2 {
 		AgilentAcquisitionMethodParser amp = 
 				new AgilentAcquisitionMethodParser(methodFolder);
 		amp.parseParameterFiles();
-		ChromatographicGradient grad = null;		
-		try {
-			grad = amp.extractGradientData();
-		} catch (XPathExpressionException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		ChromatographicGradient grad = amp.extractGradientData();
 		if(grad != null) {
 			
 			for(ChromatographicGradient g : existingGradients) {
@@ -810,13 +790,7 @@ public class RunContainer2 {
 			AgilentAcquisitionMethodParser amp = 
 					new AgilentAcquisitionMethodParser(methodFolder);
 			amp.parseParameterFiles();
-			ChromatographicGradient grad = null;		
-			try {
-				grad = amp.extractGradientData();
-			} catch (XPathExpressionException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			ChromatographicGradient grad = amp.extractGradientData();
 			if(grad != null) {
 				
 				if(grad.getGradientSteps().isEmpty()) {
@@ -1109,13 +1083,7 @@ public class RunContainer2 {
 			AgilentAcquisitionMethodParser amp = 
 					new AgilentAcquisitionMethodParser(methodFolder);
 			amp.parseParameterFiles();
-			ChromatographicGradient grad = null;		
-			try {
-				grad = amp.extractGradientData();
-			} catch (XPathExpressionException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			ChromatographicGradient grad = amp.extractGradientData();
 			if(grad != null) {
 				
 				if(grad.getGradientSteps().isEmpty()) {
@@ -1210,13 +1178,7 @@ public class RunContainer2 {
 		AgilentAcquisitionMethodParser amp = 
 				new AgilentAcquisitionMethodParser(methodFolder);
 		amp.parseParameterFiles();
-		ChromatographicGradient grad = null;		
-		try {
-			grad = amp.extractGradientData();
-		} catch (XPathExpressionException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		ChromatographicGradient grad = amp.extractGradientData();
 		if(grad != null) {
 			
 			MobilePhase[] gradMobilePhases = new MobilePhase[4];
@@ -1257,13 +1219,7 @@ public class RunContainer2 {
 		AgilentAcquisitionMethodParser amp = 
 				new AgilentAcquisitionMethodParser(methodFolder);
 		amp.parseParameterFiles();
-		ChromatographicGradient grad = null;		
-		try {
-			grad = amp.extractGradientData();
-		} catch (XPathExpressionException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		ChromatographicGradient grad = amp.extractGradientData();
 	}
 	
 	private static void extractSolventsFromAgilentMethods() {
@@ -1284,13 +1240,7 @@ public class RunContainer2 {
 			AgilentAcquisitionMethodParser amp = 
 					new AgilentAcquisitionMethodParser(methodFolder);
 			amp.parseParameterFiles();
-			ChromatographicGradient grad = null;		
-			try {
-				grad = amp.extractGradientData();
-			} catch (XPathExpressionException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			ChromatographicGradient grad = amp.extractGradientData();
 			if(grad != null) {
 				
 				solvCount = 0;

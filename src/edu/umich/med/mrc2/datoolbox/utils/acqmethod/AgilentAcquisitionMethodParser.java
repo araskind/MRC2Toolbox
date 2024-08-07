@@ -31,8 +31,6 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import javax.xml.xpath.XPathExpressionException;
-
 import org.jdom2.Attribute;
 import org.jdom2.Document;
 import org.jdom2.Element;
@@ -96,8 +94,7 @@ public class AgilentAcquisitionMethodParser {
 		parseAutosamplerParameters();
 	}
 	
-	@SuppressWarnings("unchecked")
-	public ChromatographicGradient extractGradientData() throws XPathExpressionException {
+	public ChromatographicGradient extractGradientData() {
 		
 		//	Needs binary or quaternary pump. 
 		//	Iso will work for isocratic elution, but for now it will be too complicated

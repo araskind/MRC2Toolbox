@@ -26,6 +26,7 @@ import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -924,7 +925,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 			boolean loadResults = acc.loadResults();
 			File selectedFile = chooser.getSelectedFile();
 			if(selectedFile.isDirectory()) {
-				List<String> pfList = FIOUtils.findFilesByExtension(
+				List<Path> pfList = FIOUtils.findFilesByExtension(
 						Paths.get(selectedFile.getAbsolutePath()), 
 						MRC2ToolBoxConfiguration.RAW_DATA_EXPERIMENT_FILE_EXTENSION);
 				if(pfList == null || pfList.isEmpty()) {
@@ -932,7 +933,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 							" is not a valid experiment", chooser);
 					return;
 				}
-				experimentFile = new File(pfList.get(0));
+				experimentFile = pfList.get(0).toFile();
 				baseDirectory = selectedFile.getParentFile();
 			}
 			else {

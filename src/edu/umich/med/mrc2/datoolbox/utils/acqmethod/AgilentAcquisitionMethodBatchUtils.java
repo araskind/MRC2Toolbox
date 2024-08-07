@@ -180,10 +180,10 @@ public class AgilentAcquisitionMethodBatchUtils {
 		String rcDevicesDir = "RCDevicesXml";
 		String scicDevicesDir = "SCICDevicesXml";
 		ArrayList<String>log = new ArrayList<String>();
-		List<String> methodReportsList = FIOUtils.findFilesByExtension(methodReportsFolder, "xml");
-		for(String mrName : methodReportsList) {
+		List<Path> methodReportsList = FIOUtils.findFilesByExtension(methodReportsFolder, "xml");
+		for(Path mrPath : methodReportsList) {
 			
-			File reportFile = new File(mrName);
+			File reportFile = mrPath.toFile();
 			Document methodDocument = XmlUtils.readXmlFile(reportFile);
 			Namespace ns = methodDocument.getRootElement().getNamespace();
 			Element mr = methodDocument.getRootElement().getChild("MethodReport", ns);
@@ -264,18 +264,18 @@ public class AgilentAcquisitionMethodBatchUtils {
 			File methodMobilePhaseMap) {
 
 		ArrayList<String>log = new ArrayList<String>();
-		List<String> chromMethodList = 
+		List<Path> chromMethodList = 
 				FIOUtils.findFilesByExtension(rcDevicesXmlFolder.toPath(), "xml");
 		ArrayList<String>line = new ArrayList<String>();
-		for(String mrName : chromMethodList) {
+		for(Path mrPath : chromMethodList) {
 
-			String acqName = FileNameUtils.getBaseName(mrName) + ".m";
+			String acqName = FileNameUtils.getBaseName(mrPath.toString()) + ".m";
 			DataAcquisitionMethod acqMethod = 
 					IDTDataCache.getAcquisitionMethodByName(acqName);
 			if(acqMethod == null)
 				continue;
 					
-			File methodFile = new File(mrName);
+			File methodFile = mrPath.toFile();
 			ExtractedAgilentAcquisitionMethodParser parser = 
 					new ExtractedAgilentAcquisitionMethodParser(methodFile);
 			parser.setDoNotMatchMobilePhases(true);
@@ -324,18 +324,18 @@ public class AgilentAcquisitionMethodBatchUtils {
 			File unknownListFile) {
 
 		ArrayList<String>log = new ArrayList<String>();
-		List<String> chromMethodList = 
+		List<Path> chromMethodList = 
 				FIOUtils.findFilesByExtension(rcDevicesXmlFolder.toPath(), "xml");
 		String unkLine = "Unknown mobile phase";
-		for(String mrName : chromMethodList) {
+		for(Path mrPath : chromMethodList) {
 
-			String acqName = FileNameUtils.getBaseName(mrName) + ".m";
+			String acqName = FileNameUtils.getBaseName(mrPath.toString()) + ".m";
 			DataAcquisitionMethod acqMethod = 
 					IDTDataCache.getAcquisitionMethodByName(acqName);
 			if(acqMethod == null)
 				continue;
 					
-			File methodFile = new File(mrName);
+			File methodFile = mrPath.toFile();
 			ExtractedAgilentAcquisitionMethodParser parser = 
 					new ExtractedAgilentAcquisitionMethodParser(methodFile);
 			ChromatographicGradient grad = 
@@ -446,13 +446,13 @@ public class AgilentAcquisitionMethodBatchUtils {
 			File instrumentTypesFile) {
 
 		ArrayList<String>log = new ArrayList<String>();
-		List<String> chromMethodList = 
+		List<Path> chromMethodList = 
 				FIOUtils.findFilesByExtension(rcDevicesDir.toPath(), "xml");
 		
-		for(String mrName : chromMethodList) {
+		for(Path mrPath : chromMethodList) {
 			
-			String acqName = FileNameUtils.getBaseName(mrName) + ".m";
-			File methodFile = new File(mrName);
+			String acqName = FileNameUtils.getBaseName(mrPath.toString()) + ".m";
+			File methodFile = mrPath.toFile();
 			ExtractedAgilentAcquisitionMethodParser parser = 
 					new ExtractedAgilentAcquisitionMethodParser(methodFile);
 			String instrumentType = parser.extractInstrumentTypeFromFile();
@@ -686,17 +686,17 @@ public class AgilentAcquisitionMethodBatchUtils {
 			File logFile) {
 		
 		ArrayList<String>log = new ArrayList<String>();
-		List<String> chromMethodList = FIOUtils.findFilesByExtension(
+		List<Path> chromMethodList = FIOUtils.findFilesByExtension(
 				rcDevicesXmlFolder.toPath(), "xml");
 		
-		for(String mrName : chromMethodList) {
+		for(Path mrPath : chromMethodList) {
 			
-			File methodFile = new File(mrName);
+			File methodFile = mrPath.toFile();
 			
 //			if(methodFile.getName().equalsIgnoreCase("pos-lc-tof-2018-460ul-min.xml"))
 //				System.out.println("***");
 				
-			String acqName = FileNameUtils.getBaseName(mrName) + ".m";
+			String acqName = FileNameUtils.getBaseName(mrPath.toString()) + ".m";
 			DataAcquisitionMethod acqMethod = 
 					IDTDataCache.getAcquisitionMethodByName(acqName);
 			if(acqMethod == null) {
@@ -772,13 +772,13 @@ public class AgilentAcquisitionMethodBatchUtils {
 			File descriptionsFile) {
 
 		ArrayList<String>log = new ArrayList<String>();
-		List<String> chromMethodList = FIOUtils.findFilesByExtension(
+		List<Path> chromMethodList = FIOUtils.findFilesByExtension(
 				rcDevicesDir.toPath(), "xml");
 		
-		for(String mrName : chromMethodList) {
+		for(Path mrPath : chromMethodList) {
 			
-			String acqName = FileNameUtils.getBaseName(mrName) + ".m";
-			File methodFile = new File(mrName);
+			String acqName = FileNameUtils.getBaseName(mrPath.toString()) + ".m";
+			File methodFile = mrPath.toFile();
 			ExtractedAgilentAcquisitionMethodParser parser = 
 					new ExtractedAgilentAcquisitionMethodParser(methodFile);
 			String description = parser.extractMethodDescriptionFromFile();
@@ -903,24 +903,15 @@ public class AgilentAcquisitionMethodBatchUtils {
 			File rcDevicesXmlFolder,
 			File externalKeyFile) {
 		
-		Collection<ChromatographicGradient> existingGradients = 
-				IDTDataCache.getChromatographicGradientList();
-		Set<String> gradIds = existingGradients.stream().
-				map(g -> g.getId()).collect(Collectors.toSet());
-		Collection<DataAcquisitionMethod> methods = IDTDataCache.getAcquisitionMethods();
-		Collection<DataAcquisitionMethod>methodsToUpdate = methods.stream().
-			filter(m-> Objects.nonNull(m.getSoftware())).
-			filter(m-> m.getSoftware().getId().equals("SW0010")).
-			filter(m-> Objects.nonNull(m.getChromatographicGradient())).
-			filter(m -> !gradIds.contains(m.getChromatographicGradient().getId())).
-			collect(Collectors.toList());
+		Collection<DataAcquisitionMethod>methodsToUpdate = 
+				getMethodsWithMissingGradientData();
 		
-		List<String> chromMethodList = 
+		List<Path> chromMethodList = 
 				FIOUtils.findFilesByExtension(rcDevicesXmlFolder.toPath(), "xml");
 		Set<String>availableXml = new TreeSet<String>();
-		for(String xmlName : chromMethodList) {
+		for(Path xmlPath : chromMethodList) {
 			
-			String methodName = FileNameUtils.getBaseName(xmlName).toLowerCase() + ".m";
+			String methodName = FileNameUtils.getBaseName(xmlPath.toString()).toLowerCase() + ".m";
 			availableXml.add(methodName);
 		}
 		List<String>missingXml = methodsToUpdate.stream().
@@ -935,19 +926,36 @@ public class AgilentAcquisitionMethodBatchUtils {
 		}
 	}
 	
+	public static Collection<DataAcquisitionMethod>getMethodsWithMissingGradientData(){
+		
+		Collection<ChromatographicGradient> existingGradients = 
+				IDTDataCache.getChromatographicGradientList();
+		Set<String> gradIds = existingGradients.stream().
+				map(g -> g.getId()).collect(Collectors.toSet());
+		Collection<DataAcquisitionMethod> methods = IDTDataCache.getAcquisitionMethods();
+		Collection<DataAcquisitionMethod>methodsWithMissingGradientData = methods.stream().
+			filter(m-> Objects.nonNull(m.getSoftware())).
+			filter(m-> m.getSoftware().getId().equals("SW0010")).
+			filter(m-> Objects.nonNull(m.getChromatographicGradient())).
+			filter(m -> !gradIds.contains(m.getChromatographicGradient().getId())).
+			collect(Collectors.toList());
+		
+		return methodsWithMissingGradientData;
+	}
+	
 	public static void copyNewMethodReports(File reportDir, File destination) {
 		
-		List<String> chromMethodList = FIOUtils.findFilesByExtension(
+		List<Path> chromMethodList = FIOUtils.findFilesByExtension(
 				reportDir.toPath(), "xml");
 		
-		for(String methodNameXml : chromMethodList) {
+		for(Path xmlReportPath : chromMethodList) {
 			
-			String methodName = FileNameUtils.getBaseName(methodNameXml).toLowerCase() + ".m";
+			String methodName = FileNameUtils.getBaseName(
+					xmlReportPath.toString()).toLowerCase() + ".m";
 			DataAcquisitionMethod existingMethod = 
 					IDTDataCache.getAcquisitionMethodByName(methodName);
 			if(existingMethod == null) {
-				
-				Path xmlReportPath = Paths.get(methodNameXml);
+
 				Path newXmlReportPath = 
 						Paths.get(destination.getAbsolutePath(), xmlReportPath.toFile().getName());
 				try {
@@ -958,6 +966,139 @@ public class AgilentAcquisitionMethodBatchUtils {
 				}
 			}
 		}		
+	}
+	
+	public static void extractGradientsFromMethodFiles(File tmpFolder, File logFile){
+		
+		Collection<String>logData = new ArrayList<String>();
+		Collection<DataAcquisitionMethod>methodsToUpdate = 
+				getMethodsWithMissingGradientData();
+
+		for(DataAcquisitionMethod method : methodsToUpdate) {
+			
+			try {
+				AcquisitionMethodUtils.getAcquisitionMethodFile(method, tmpFolder);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			File[]downloaded = tmpFolder.listFiles(File::isDirectory);
+			if(downloaded.length == 0) {
+				logData.add(method.getId() + "\t" + method.getName() + "\tNo method file");
+				try {
+					FileUtils.cleanDirectory(tmpFolder);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				continue;
+			}
+			File methodFolder = downloaded[0];
+			if(!methodFolder.isDirectory()) {
+				logData.add(method.getId() + "\t" + method.getName() + "\tMethod is not directory");
+				try {
+					FileUtils.cleanDirectory(tmpFolder);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				continue;
+			}
+			List<Path>realMethodFolderPaths = 
+					FIOUtils.findDirectoriesByExtension(methodFolder.toPath(), "m");
+			
+			if(realMethodFolderPaths != null && !realMethodFolderPaths.isEmpty()) {
+				
+				//	Extract gradient and save as temporary
+				AgilentAcquisitionMethodParser amp = 
+						new AgilentAcquisitionMethodParser(methodFolder);
+				amp.parseParameterFiles();
+				ChromatographicGradient grad = amp.extractGradientData();
+				if(grad != null) {					
+					if(grad.getGradientSteps().isEmpty()) {
+						logData.add(method.getId() + "\t" + method.getName() + "\tNo time table");
+						try {
+							FileUtils.cleanDirectory(tmpFolder);
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						continue;
+					}				
+					MobilePhase[] gradMobilePhases = new MobilePhase[4];
+					boolean hasUnknownMobPhase = false;
+					for(int i=0; i<4; i++) {
+						
+						MobilePhase mp = grad.getMobilePhases()[i];
+						if(mp != null) {							
+							MobilePhase existing = IDTDataCache.getMobilePhaseByNameOrSynonym(mp.getName());
+							if(existing == null) {
+								logData.add(method.getId() + "\t" + method.getName() + "\tUnknown mobile phase " + mp.getName());
+								hasUnknownMobPhase = true;
+							}
+							else
+								gradMobilePhases[i] = existing;
+						}
+						else
+							gradMobilePhases[i] = null;
+					}
+					if(hasUnknownMobPhase) {
+						try {
+							FileUtils.cleanDirectory(tmpFolder);
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						continue;
+					}
+					for(int i=0; i<4; i++)
+						grad.setMobilePhase(gradMobilePhases[i], i);
+										
+					if(!grad.areMobilePhasesDefined()) {
+						logData.add(method.getId() + "\t" + method.getName() + "\tNo mobile phases found");
+						try {
+							FileUtils.cleanDirectory(tmpFolder);
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						continue;
+					}
+					//	Upload temp gradient for method		
+//					try {
+//						ChromatographyDatabaseUtils.addTmpChromatographicGradientForAcqMethod(grad, method.getId(), false);
+//					} catch (Exception e) {
+//						// TODO Auto-generated catch block
+//						e.printStackTrace();
+//					}
+				}
+				else {
+					logData.add(method.getId() + "\t" + method.getName() + "\tFailed to extract gradient");
+					try {
+						FileUtils.cleanDirectory(tmpFolder);
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}			
+			}	
+			try {
+				FileUtils.cleanDirectory(tmpFolder);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		//	Save Log file
+		try {
+			Files.write(logFile.toPath(),
+					logData, 
+					StandardCharsets.UTF_8, 
+					StandardOpenOption.CREATE,
+					StandardOpenOption.TRUNCATE_EXISTING);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 }
 

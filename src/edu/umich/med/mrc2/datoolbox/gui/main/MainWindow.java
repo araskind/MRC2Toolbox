@@ -38,6 +38,7 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -990,7 +991,7 @@ public class MainWindow extends JFrame
 			if(experimentType.equals(ProjectType.DATA_ANALYSIS)) {
 
 				if(selectedFile.isDirectory()) {
-					List<String> pfList = FIOUtils.findFilesByExtension(
+					List<Path> pfList = FIOUtils.findFilesByExtension(
 							Paths.get(selectedFile.getAbsolutePath()), 
 							MRC2ToolBoxConfiguration.EXPERIMENT_FILE_EXTENSION);
 					if(pfList == null || pfList.isEmpty()) {
@@ -998,7 +999,7 @@ public class MainWindow extends JFrame
 								" is not a valid metabolomics experiment", chooser);
 						return;
 					}
-					experimentFile = new File(pfList.get(0));
+					experimentFile = pfList.get(0).toFile();
 					experimentBaseDirectory = selectedFile.getParentFile();
 				}
 				else {
@@ -1011,7 +1012,7 @@ public class MainWindow extends JFrame
 				loadResults = acc.loadResults();
 				
 				if(selectedFile.isDirectory()) {
-					List<String> pfList = FIOUtils.findFilesByExtension(
+					List<Path> pfList = FIOUtils.findFilesByExtension(
 							Paths.get(selectedFile.getAbsolutePath()), 
 							MRC2ToolBoxConfiguration.RAW_DATA_EXPERIMENT_FILE_EXTENSION);
 					if(pfList == null || pfList.isEmpty()) {
@@ -1019,7 +1020,7 @@ public class MainWindow extends JFrame
 								" is not a valid raw data analysis experiment", chooser);
 						return;
 					}
-					experimentFile = new File(pfList.get(0));
+					experimentFile = pfList.get(0).toFile();
 					experimentBaseDirectory = selectedFile.getParentFile();
 				}
 				else {
