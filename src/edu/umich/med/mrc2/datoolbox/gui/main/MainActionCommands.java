@@ -293,6 +293,7 @@ public enum MainActionCommands {
 	EXPORT_RESULTS_4BINNER_COMMAND("Export results for Binner"),
 	EXPORT_RESULTS_TO_MWTAB_COMMAND("Export experiment report in MWTab format"),
 	EXPORT_MZRT_STATISTICS_COMMAND("Export M/Z & RT data for individual samples"),
+	EXPORT_PEAK_WIDTH_STATISTICS_COMMAND("Export peak width data for individual samples"),
 	SHOW_RAWA_DATA_UPLOAD_PREP_DIALOG("Prepare raw data for upload"),
 	EXPORT_FEATURE_STATISTICS_COMMAND("Export feature statistics for active feature set"),
 	

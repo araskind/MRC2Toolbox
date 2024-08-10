@@ -231,6 +231,9 @@ public class FIOUtils {
 		if (type.equals(MainActionCommands.EXPORT_MZRT_STATISTICS_COMMAND))
 			typeString = "_FEATURE_MZ_RT_STATS_";
 		
+		if (type.equals(MainActionCommands.EXPORT_PEAK_WIDTH_STATISTICS_COMMAND))
+			typeString = "_FEATURE_PEAK_WIDTH_STATS_";
+		
 		if (type.equals(MainActionCommands.EXPORT_FEATURE_STATISTICS_COMMAND))
 			typeString = "_FEATURE_MULTIPLE_QC_STATS_";
 				

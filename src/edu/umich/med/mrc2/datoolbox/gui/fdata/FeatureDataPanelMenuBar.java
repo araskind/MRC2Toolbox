@@ -77,7 +77,8 @@ public class FeatureDataPanelMenuBar extends CommonMenuBar {
 	private static final Icon exportExcelIcon = GuiUtils.getIcon("excel", 24);
 	private static final Icon exportMwTabIcon = GuiUtils.getIcon("mwTabReport", 24);
 	private static final Icon dataFileToolsIcon = GuiUtils.getIcon("dataFileTools", 24);	
-	private static final Icon exportMzRtStatsIcon = GuiUtils.getIcon("exportMZRT", 24);
+	private static final Icon exportMzRtStatsIcon = GuiUtils.getIcon("exportMZRT", 24);	
+	private static final Icon exportPeakWidthStatsIcon = GuiUtils.getIcon("smoothChromatogram", 24);	
 	private static final Icon featureCleanupIcon = GuiUtils.getIcon("clearAnnotation", 24);
 	private static final Icon mzFrequencyIcon = GuiUtils.getIcon("mzFrequency", 24);
 	private static final Icon exportStatsIcon = GuiUtils.getIcon("exportStats", 24);
@@ -128,6 +129,7 @@ public class FeatureDataPanelMenuBar extends CommonMenuBar {
 		exportForMPPAnalysisMenuItem,
 		exportForRAnalysisMenuItem,
 		exportMzRtStatsMenuItem,
+		exportPeakWidthStatsMenuItem,
 		exportDialogMenuItem,
 		exportIntegratedReportMenuItem,
 		exportMWTabReportMenuItem;
@@ -262,6 +264,10 @@ public class FeatureDataPanelMenuBar extends CommonMenuBar {
 		exportMzRtStatsMenuItem = addItem(exportMenu, 
 				MainActionCommands.EXPORT_MZRT_STATISTICS_COMMAND, 
 				exportMzRtStatsIcon);
+		
+		exportPeakWidthStatsMenuItem = addItem(exportMenu, 
+				MainActionCommands.EXPORT_PEAK_WIDTH_STATISTICS_COMMAND, 
+				exportPeakWidthStatsIcon);
 		
 		exportMenu.addSeparator();
 		

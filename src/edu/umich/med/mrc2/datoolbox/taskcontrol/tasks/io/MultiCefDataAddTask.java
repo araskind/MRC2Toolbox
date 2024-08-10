@@ -81,6 +81,7 @@ public class MultiCefDataAddTask extends AbstractTask implements TaskListener{
 	private Map<String,Integer>featureCoordinateMap;
 	private int fileCounter;
 	private Map<String, List<Double>>retentionMap;
+	private Map<String, List<Double>> peakWidthMap;
 	private Map<String, List<Double>>mzMap;
 	private HashMap<DataFile, HashSet<SimpleMsFeature>> featureDataPers;
 	private File cacheFile;
@@ -130,6 +131,7 @@ public class MultiCefDataAddTask extends AbstractTask implements TaskListener{
 
 		featureCoordinateMap = new ConcurrentHashMap<String,Integer>();
 		retentionMap = new ConcurrentHashMap<String, List<Double>>();
+		peakWidthMap = new ConcurrentHashMap<String, List<Double>>();
 		mzMap = new ConcurrentHashMap<String, List<Double>>();
 		AtomicInteger counter = new AtomicInteger(0);
 		features =
@@ -138,6 +140,7 @@ public class MultiCefDataAddTask extends AbstractTask implements TaskListener{
 			map(f -> {
 				featureCoordinateMap.put(f.getId(), counter.getAndIncrement());
 				retentionMap.put(f.getId(), new CopyOnWriteArrayList<Double>());
+				peakWidthMap.put(f.getId(), new CopyOnWriteArrayList<Double>());
 				mzMap.put(f.getId(), new CopyOnWriteArrayList<Double>());
 				return f;
 			}).
@@ -179,7 +182,8 @@ public class MultiCefDataAddTask extends AbstractTask implements TaskListener{
 					addedDataMatrix, 
 					featureCoordinateMap, 
 					retentionMap, 
-					mzMap);
+					mzMap,
+					peakWidthMap);
 			cdit.addTaskListener(this);
 			MRC2ToolBoxCore.getTaskController().addTask(cdit);
 		}
@@ -303,6 +307,20 @@ public class MultiCefDataAddTask extends AbstractTask implements TaskListener{
 			}
 			mzStatsMap.put(mzCollection.getKey(), new DescriptiveStatistics(mzValues));
 		}
+		// Calculate peak width stats
+		Map<String, DescriptiveStatistics>peakWidthStatsMap = new TreeMap<String, DescriptiveStatistics>();
+		for(Entry<String, List<Double>> pwCollection : peakWidthMap.entrySet()) {
+			
+			double[] pwValues = new double[0];
+			try {
+				pwValues = pwCollection.getValue().stream().
+						filter(pw -> Objects.nonNull(pw)).
+						mapToDouble(Double::doubleValue).toArray();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			peakWidthStatsMap.put(pwCollection.getKey(), new DescriptiveStatistics(pwValues));
+		}
 		for(MsFeature msf : features) {
 			
 			//	Set feature coordinate
@@ -327,6 +345,7 @@ public class MultiCefDataAddTask extends AbstractTask implements TaskListener{
 				newDataMatrix.setAsDouble(addedValue, newCoordinates);	
 			}
 			MsFeatureStatisticalSummary statSummary = msf.getStatsSummary();
+			
 			// Update RT stats;
 			DescriptiveStatistics newRtStats = rtStatsMap.get(msf.getId());
 			if(newRtStats != null) {
@@ -338,6 +357,12 @@ public class MultiCefDataAddTask extends AbstractTask implements TaskListener{
 			if(newMzStats != null) {
 				for(double mz : newMzStats.getValues())
 					statSummary.getMzStatistics().addValue(mz);
+			}
+			// Update peak width stats;
+			DescriptiveStatistics newPwStats = peakWidthStatsMap.get(msf.getId());
+			if(newPwStats != null) {
+				for(double pw : newPwStats.getValues())
+					statSummary.getPeakWidthStatistics().addValue(pw);
 			}
 			processed++;
 		}

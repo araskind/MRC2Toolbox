@@ -57,8 +57,10 @@ public class FeatureDataTableModel extends BasicTableModel {
 	public static final String SCORE_COLUMN = "Score";
 	public static final String RETENTION_COLUMN = "RT lib";
 	public static final String RETENTION_OBSERVED_MEDIAN_COLUMN = "RT med";
+	public static final String RETENTION_RANGE_COLUMN = "RT range";
 	public static final String NEUTRAL_MASS_COLUMN = "Neutral mass";
 	public static final String MONOISOTOPIC_PEAK_COLUMN = "Monoisotopic peak";
+	public static final String MZ_RANGE_COLUMN = "M/Z range";
 	public static final String MCMILLAN_PERCENT_DELTA_COLUMN = "McM %"+'\u0394';
 	public static final String KMD_COLUMN = "KMD";
 	public static final String KMD_MOD_COLUMN = "KMD mod";
@@ -89,8 +91,10 @@ public class FeatureDataTableModel extends BasicTableModel {
 				new ColumnContext(CHEM_MOD_LIBRARY_COLUMN, "Adduct based on library match", Adduct.class, false),
 				new ColumnContext(RETENTION_COLUMN, "Retention time from feature library", Double.class, false),
 				new ColumnContext(RETENTION_OBSERVED_MEDIAN_COLUMN, "Observed retention time (median for all samples)", Double.class, false),
+				new ColumnContext(RETENTION_RANGE_COLUMN, "Retention time range", Double.class, false),
 				new ColumnContext(NEUTRAL_MASS_COLUMN, "Monoisotopic neutral mass", Double.class, false),
 				new ColumnContext(MONOISOTOPIC_PEAK_COLUMN, "Monoisotopic M/Z", Double.class, false),
+				new ColumnContext(MZ_RANGE_COLUMN, "M/Z range of monoisotopic peak", Double.class, false),		
 				new ColumnContext(MCMILLAN_PERCENT_DELTA_COLUMN, "McMillan mass defect, %", Double.class, false),			
 				new ColumnContext(KMD_COLUMN, "Kendrick mass defect", Double.class, false),
 				new ColumnContext(KMD_MOD_COLUMN, "Kendrick mass defect, modified", Double.class, false),
@@ -120,6 +124,8 @@ public class FeatureDataTableModel extends BasicTableModel {
 			for (MsFeature cf : sortedFeatures) {
 
 				Double bp = null;
+				Double mzRange = null;
+				Double rtRange = null;
 				Integer charge = null;
 				Adduct chmodObserved = null;
 				Adduct chmodLibrary = null;
@@ -139,8 +145,7 @@ public class FeatureDataTableModel extends BasicTableModel {
 				}
 				boolean ambig = cf.getIdentifications().stream().
 						filter(i -> Objects.nonNull(i.getCompoundIdentity())).count() > 1;
-				
-				
+									
 				Object[] obj = {
 						count,
 						cf,
@@ -151,8 +156,10 @@ public class FeatureDataTableModel extends BasicTableModel {
 						chmodLibrary,
 						cf.getRetentionTime(),
 						cf.getStatsSummary().getMedianObservedRetention(),
+						cf.getStatsSummary().getRetentionRange().getSize(),
 						cf.getNeutralMass(),
 						bp,
+						cf.getStatsSummary().getMzRange().getSize(),
 						mcMillanDelta,
 						cf.getKmd(),
 						cf.getModifiedKmd(),

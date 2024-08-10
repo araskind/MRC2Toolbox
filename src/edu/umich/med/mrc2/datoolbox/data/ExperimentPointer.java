@@ -143,7 +143,8 @@ public class ExperimentPointer {
 		
 		super();
 		this.id = pointerElement.getAttributeValue(EXPERIMENT_ID);
-		this.projectType = ProjectType.valueOf(pointerElement.getAttributeValue(EXPERIMENT_TYPE));
+		this.projectType = 
+				ProjectType.valueOf(pointerElement.getAttributeValue(EXPERIMENT_TYPE));
 		this.name = pointerElement.getAttributeValue(EXPERIMENT_NAME);
 		this.description = pointerElement.getAttributeValue(EXPERIMENT_DESCRIPTION);
 		

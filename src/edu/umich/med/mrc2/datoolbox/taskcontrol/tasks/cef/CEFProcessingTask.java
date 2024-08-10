@@ -68,6 +68,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 import edu.umich.med.mrc2.datoolbox.utils.LibraryUtils;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
+import edu.umich.med.mrc2.datoolbox.utils.Range;
 import edu.umich.med.mrc2.datoolbox.utils.XmlUtils;
 
 public abstract class CEFProcessingTask extends AbstractTask {
@@ -207,9 +208,38 @@ public abstract class CEFProcessingTask extends AbstractTask {
 		List<Element> spectrumElements = cpdElement.getChildren("Spectrum");	
 		MassSpectrum spectrum = new MassSpectrum();
 		TandemMassSpectrum observedMsms = null;
-
+		
+		Element forPeakWidthElement = null;
 		for(Element spectrumElement : spectrumElements) {
 			
+			String spectrumType = spectrumElement.getAttributeValue("type");
+			if(spectrumType.equals(AgilentCefFields.MS1_SPECTRUM.getName())) {
+				forPeakWidthElement = spectrumElement;
+				break;
+			}
+			if(spectrumType.equals(AgilentCefFields.MFE_SPECTRUM.getName())
+					&& forPeakWidthElement == null) {
+				forPeakWidthElement = spectrumElement;
+			}
+		}
+		//	Add RT range
+		if(forPeakWidthElement != null) {
+			
+			if(forPeakWidthElement.getChild("RTRanges") != null
+					&& !forPeakWidthElement.getChild("RTRanges").getChildren().isEmpty()) {
+				Element rtRangeElement = 
+						forPeakWidthElement.getChild("RTRanges").getChild("RTRange");
+				if(rtRangeElement != null) {
+					
+					double min = rtRangeElement.getAttribute("min").getDoubleValue();
+					double max = rtRangeElement.getAttribute("max").getDoubleValue();
+					if(min < max) 
+						feature.setRtRange(new Range(min, max));						
+				}
+			}
+		}
+		for(Element spectrumElement : spectrumElements) {
+
 			String spectrumType = spectrumElement.getAttributeValue("type");
 			
 			if(spectrumType.equals(AgilentCefFields.MS1_SPECTRUM.getName())
@@ -234,8 +264,6 @@ public abstract class CEFProcessingTask extends AbstractTask {
 				String detectionAlgorithm = spectrumElement.getAttributeValue("cpdAlgo");
 				if(detectionAlgorithm != null && !detectionAlgorithm.isEmpty())
 					spectrum.setDetectionAlgorithm(detectionAlgorithm);
-				
-				//	spectrum.finalizeCefImportSpectrum();
 			}
 			if(spectrumType.equals(AgilentCefFields.MS2_SPECTRUM.getName())) {
 				

@@ -746,7 +746,8 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 		if(exportType == null)
 			return;
 		
-		if(exportType.equals(MainActionCommands.EXPORT_MZRT_STATISTICS_COMMAND)) {
+		if(exportType.equals(MainActionCommands.EXPORT_MZRT_STATISTICS_COMMAND)
+				|| exportType.equals(MainActionCommands.EXPORT_PEAK_WIDTH_STATISTICS_COMMAND)) {
 			
 			if(currentExperiment.getFeatureMatrixFileNameForDataPipeline(activeDataPipeline) == null) {
 				MessageDialog.showWarningMsg(

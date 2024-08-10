@@ -92,6 +92,7 @@ public class MultiCefImportTask extends AbstractTask implements TaskListener{
 	private int fileCounter;
 	private Map<String, List<Double>>retentionMap;
 	private Map<String, List<Double>>mzMap;
+	private Map<String, List<Double>> peakWidthMap;
 	private HashMap<DataFile, HashSet<SimpleMsFeature>> featureDataPers;
 	private File cacheFile;
 	private File tmpCefDirectory;
@@ -274,9 +275,8 @@ public class MultiCefImportTask extends AbstractTask implements TaskListener{
 				processed = 80;
 			} catch (IOException e) {
 				e.printStackTrace();
-//					setStatus(TaskStatus.ERROR);
-return;
-
+				//	setStatus(TaskStatus.ERROR);
+				return;
 			}
 			String featureMatrixFileName = experimentToSave.getFeatureMatrixFileNameForDataPipeline(dataPipeline);
 			if(featureMatrixFileName != null) {
@@ -294,9 +294,8 @@ return;
 					processed = 100;
 				} catch (IOException e) {
 					e.printStackTrace();
-//					setStatus(TaskStatus.ERROR);
-return;
-
+					//	setStatus(TaskStatus.ERROR);
+					return;
 				}
 				experimentToSave.setFeatureMatrixForDataPipeline(dataPipeline, null);
 				featureMatrix = null;
@@ -379,11 +378,26 @@ return;
 			}
 			mzStatsMap.put(mzCollection.getKey(), new DescriptiveStatistics(mzValues));
 		}
+		// Calculate peak width stats
+		Map<String, DescriptiveStatistics>peakWidthStatsMap = new TreeMap<String, DescriptiveStatistics>();
+		for(Entry<String, List<Double>> pwCollection : peakWidthMap.entrySet()) {
+			
+			double[] pwValues = new double[0];
+			try {
+				pwValues = pwCollection.getValue().stream().
+						filter(pw -> Objects.nonNull(pw)).
+						mapToDouble(Double::doubleValue).toArray();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			peakWidthStatsMap.put(pwCollection.getKey(), new DescriptiveStatistics(pwValues));
+		}
 		for(MsFeature feature : library.getFeatures()) {
 
 			MsFeatureStatisticalSummary ss = feature.getStatsSummary();			
 			ss.setRtStatistics(rtStatsMap.get(feature.getId()));
-			ss.setMzStatistics(mzStatsMap.get(feature.getId()));
+			ss.setPeakWidthStatistics(peakWidthStatsMap.get(feature.getId()));
+			ss.setMzStatistics(mzStatsMap.get(feature.getId()));			
 			processed++;
 		}
 		//	TODO - deal with standard samples
@@ -404,6 +418,7 @@ return;
 		featureCoordinateMap = new ConcurrentHashMap<String,Integer>();
 		retentionMap = new ConcurrentHashMap<String, List<Double>>();
 		mzMap = new ConcurrentHashMap<String, List<Double>>();
+		peakWidthMap = new ConcurrentHashMap<String, List<Double>>();
 		AtomicInteger counter = new AtomicInteger(0);
 		MsFeature[] features =
 			library.getFeatures().stream().
@@ -412,6 +427,7 @@ return;
 				f.setStatsSummary(new MsFeatureStatisticalSummary(f));
 				featureCoordinateMap.put(f.getId(), counter.getAndIncrement());
 				retentionMap.put(f.getId(), new CopyOnWriteArrayList<Double>());
+				peakWidthMap.put(f.getId(), new CopyOnWriteArrayList<Double>());
 				mzMap.put(f.getId(), new CopyOnWriteArrayList<Double>());
 				return f;
 			}).
@@ -490,7 +506,8 @@ return;
 					dataMatrix, 
 					featureCoordinateMap, 
 					retentionMap, 
-					mzMap);
+					mzMap,
+					peakWidthMap);
 
 			cdit.addTaskListener(this);
 			MRC2ToolBoxCore.getTaskController().addTask(cdit);

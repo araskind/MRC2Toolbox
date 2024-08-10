@@ -106,6 +106,7 @@ public class DataExportDialog extends JDialog
 			MainActionCommands.EXPORT_RESULTS_4METSCAPE_COMMAND,
 			MainActionCommands.EXPORT_DUPLICATES_COMMAND,
 			MainActionCommands.EXPORT_MZRT_STATISTICS_COMMAND,
+			MainActionCommands.EXPORT_PEAK_WIDTH_STATISTICS_COMMAND,
 		};
 	private JComboBox exportTypeComboBox;
 	private JComboBox<MissingExportType> missingTypeComboBox;

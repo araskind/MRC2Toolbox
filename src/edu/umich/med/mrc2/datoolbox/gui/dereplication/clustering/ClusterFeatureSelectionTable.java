@@ -99,8 +99,12 @@ public class ClusterFeatureSelectionTable extends FeatureSelectionTable {
 		
 		columnModel.getColumnById(ClusterFeatureSelectionTableModel.PRIMARY_COLUMN)
 			.setWidth(50);
+		columnModel.getColumnById(ClusterFeatureSelectionTableModel.PRIMARY_COLUMN)
+			.setMaxWidth(50);
 		columnModel.getColumnById(ClusterFeatureSelectionTableModel.INCLUDE_COLUMN)
 			.setWidth(50);
+		columnModel.getColumnById(ClusterFeatureSelectionTableModel.INCLUDE_COLUMN)
+			.setMaxWidth(50);
 		fixedWidthColumns.add(model.getColumnIndex(
 				ClusterFeatureSelectionTableModel.PRIMARY_COLUMN));
 		fixedWidthColumns.add(model.getColumnIndex(

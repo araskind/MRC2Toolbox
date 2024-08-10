@@ -227,6 +227,16 @@ public class DataExportTask extends AbstractTask {
 				return;
 			}
 		}
+		if (exportType.equals(MainActionCommands.EXPORT_PEAK_WIDTH_STATISTICS_COMMAND)) {
+			try {
+				writePeakWidthDataExportFile();
+				setStatus(TaskStatus.FINISHED);
+			} catch (Exception e) {
+				e.printStackTrace();
+				setStatus(TaskStatus.ERROR);
+				return;
+			}
+		}
 		if (exportType.equals(MainActionCommands.EXPORT_FEATURE_STATISTICS_COMMAND)) {
 			try {
 				writeFeatureQCDataExportFile();
@@ -375,6 +385,128 @@ public class DataExportTask extends AbstractTask {
 		mzWriter.close();			
 		rtWriter.flush();
 		rtWriter.close();	
+	}
+	
+	private void writePeakWidthDataExportFile() throws Exception {
+		
+		taskDescription = "Reading feature data matrix ...";
+		Matrix dataMatrix = readFeatureMatrix();
+		if(dataMatrix == null) {
+			errorMessage = "Unable to read feature data matrix file";
+			setStatus(TaskStatus.ERROR);
+			return;
+		}
+		taskDescription = "Writing Peak Width data export file ...";
+		final Writer pwWriter = new BufferedWriter(new FileWriter(exportFile));
+
+		// Create header
+		TreeMap<ExperimentalSample, TreeMap<DataPipeline, DataFile[]>>sampleFileMap
+			= DataExportUtils.createSampleFileMapForDataPipeline(
+					currentExperiment, experimentDesignSubset, dataPipeline, namingField);
+
+		String[] columnList =
+			DataExportUtils.createSampleColumnNameArrayForDataPipeline(
+					sampleFileMap, namingField, dataPipeline);
+
+		String[] header = new String[columnList.length + 9];
+		int columnCount = 0;
+		header[columnCount] = BinnerExportFields.FEATURE_NAME.getName();
+		header[++columnCount] = BinnerExportFields.METABOLITE_NAME.getName();
+		header[++columnCount] = BinnerExportFields.BINNER_NAME.getName();
+		header[++columnCount] = BinnerExportFields.NEUTRAL_MASS.getName();
+		header[++columnCount] = BinnerExportFields.BINNER_MZ.getName();
+		header[++columnCount] = BinnerExportFields.RT_EXPECTED.getName();
+		header[++columnCount] = BinnerExportFields.RT_OBSERVED.getName();
+		header[++columnCount] = BinnerExportFields.MZ.getName();
+		header[++columnCount] = BinnerExportFields.CHARGE.getName();
+
+		HashMap<DataFile, Integer> fileColumnMap = 
+				DataExportUtils.createFileColumnMap(sampleFileMap, columnCount);
+
+		if(replaceSpecialCharacters) {
+			for(String columnName : columnList)
+				header[++columnCount] = columnName.replaceAll("\\p{Punct}+", "-");
+		}
+		else {
+			for(String columnName : columnList)
+				header[++columnCount] = columnName;
+		}
+		pwWriter.append(StringUtils.join(header, columnSeparator));
+		pwWriter.append(lineSeparator);
+
+		MsFeature[] featureList = msFeatureSet4export.stream().
+				sorted(new MsFeatureComparator(SortProperty.RT)).toArray(size -> new MsFeature[size]);
+
+		long[] coordinates = new long[2];
+		total = featureList.length;
+		processed = 0;
+
+		for( MsFeature msf : featureList){
+
+			String[] mzLine = new String[header.length];
+			columnCount = 0;
+			//	String compoundName = msf.getName();
+			String compoundName = msf.getBicMetaboliteName();
+			if(msf.isIdentified()){
+
+				compoundName = msf.getPrimaryIdentity().getCompoundName();
+
+				if(msf.getPrimaryIdentity().getMsRtLibraryMatch() != null) {
+
+					AdductMatch tam = msf.getPrimaryIdentity().getMsRtLibraryMatch().getTopAdductMatch();
+					if(tam != null)
+						compoundName += " (" + tam.getLibraryMatch().getName() + ")";
+				}
+			}
+			double binnerMass =
+				MsUtils.calculateModifiedMz(msf.getNeutralMass(),
+						AdductManager.getDefaultAdductForPolarity(msf.getPolarity()));
+			if(msf.getSpectrum().getPrimaryAdduct() != null 
+					&& Math.abs(msf.getSpectrum().getPrimaryAdduct().getCharge()) == 1
+					&& msf.getSpectrum().getPrimaryAdduct().getOligomericState() > 1)
+				binnerMass =msf.getMonoisotopicMz();
+				
+			mzLine[columnCount] = msf.getName();
+			mzLine[++columnCount] = compoundName;
+			mzLine[++columnCount] = DataPrefix.MS_LIBRARY_UNKNOWN_TARGET.getName() + 
+									mzFormat.format(msf.getNeutralMass()) + "_" + 
+									rtFormat.format(msf.getRetentionTime());
+			mzLine[++columnCount] = mzFormat.format(msf.getNeutralMass());
+			mzLine[++columnCount] = mzFormat.format(binnerMass);
+			mzLine[++columnCount] = rtFormat.format(msf.getRetentionTime());
+			mzLine[++columnCount] = rtFormat.format(msf.getStatsSummary().getMedianObservedRetention());
+			mzLine[++columnCount] = mzFormat.format(msf.getMonoisotopicMz());
+			mzLine[++columnCount] = Integer.toString(msf.getCharge());
+
+			String[] rtLine = Arrays.copyOf(mzLine, mzLine.length);
+			
+			// Data
+			coordinates[1] = dataMatrix.getColumnForLabel(msf);
+			for (Entry<ExperimentalSample, TreeMap<DataPipeline, DataFile[]>> entry : sampleFileMap.entrySet()) {
+
+				for(DataFile df : entry.getValue().get(dataPipeline)) {
+
+					SimpleMsFeature value = null;
+					coordinates[0] = dataMatrix.getRowForLabel(df);
+					if(coordinates[0] >= 0) //	TODO find out why it happens - screwed up design cleanup?
+						value = (SimpleMsFeature)dataMatrix.getAsObject(coordinates);
+					else {
+						System.out.println(df.getName());
+					}
+					String pwString = "";
+					if(value != null && value.getRtRange() != null) {
+						pwString = MRC2ToolBoxConfiguration.defaultRtFormat.format(
+								value.getRtRange().getSize());
+					}
+					rtLine[fileColumnMap.get(df)] = pwString;
+				}
+			}			
+			pwWriter.append(StringUtils.join(rtLine, columnSeparator));
+			pwWriter.append(lineSeparator);
+			processed++;
+		}		
+		pwWriter.flush();
+		pwWriter.close();
 	}
 	
 	private Matrix readFeatureMatrix() {

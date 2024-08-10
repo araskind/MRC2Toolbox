@@ -39,6 +39,7 @@ public class MsFeatureStatisticalSummary implements Serializable {
 	private double sampleMean, sampleMedian, sampleStDev, sampleFrequency;
 	private double totalMedian;
 	private DescriptiveStatistics rtStatistics;
+	private DescriptiveStatistics peakWidthStatistics;
 	private DescriptiveStatistics mzStatistics;
 
 	public MsFeatureStatisticalSummary(MsFeature cf) {
@@ -60,6 +61,7 @@ public class MsFeatureStatisticalSummary implements Serializable {
 		
 		rtStatistics = sourceSummary.getRtStatistics();
 		mzStatistics = sourceSummary.getMzStatistics();
+		peakWidthStatistics = sourceSummary.getPeakWidthStatistics();
 	}
 
 	public MsFeature getFeature() {
@@ -318,6 +320,14 @@ public class MsFeatureStatisticalSummary implements Serializable {
 				break;
 		}
 		return null;
+	}
+
+	public DescriptiveStatistics getPeakWidthStatistics() {
+		return peakWidthStatistics;
+	}
+
+	public void setPeakWidthStatistics(DescriptiveStatistics peakWidthStatistics) {
+		this.peakWidthStatistics = peakWidthStatistics;
 	}
 }
 

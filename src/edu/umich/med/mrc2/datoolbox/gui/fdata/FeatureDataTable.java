@@ -101,10 +101,14 @@ public class FeatureDataTable extends BasicFeatureTable {
 			.setCellRenderer(rtRenderer); // Retention time
 		columnModel.getColumnById(FeatureDataTableModel.RETENTION_OBSERVED_MEDIAN_COLUMN)
 			.setCellRenderer(rtRenderer); // Retention time median
+		columnModel.getColumnById(FeatureDataTableModel.RETENTION_RANGE_COLUMN)
+			.setCellRenderer(rtRenderer); // Retention time range
 		columnModel.getColumnById(FeatureDataTableModel.NEUTRAL_MASS_COLUMN)
 			.setCellRenderer(mzRenderer); // Neutral mass
 		columnModel.getColumnById(FeatureDataTableModel.MONOISOTOPIC_PEAK_COLUMN)
 			.setCellRenderer(mzRenderer); // Base peak mass
+		columnModel.getColumnById(FeatureDataTableModel.MZ_RANGE_COLUMN)
+			.setCellRenderer(mzRenderer);	//	M/Z range
 		columnModel.getColumnById(FeatureDataTableModel.MCMILLAN_PERCENT_DELTA_COLUMN)
 			.setCellRenderer(new McMillanDeltaPercentColorRenderer(new DecimalFormat("#.#"))); // McMillan % diff	
 		columnModel.getColumnById(FeatureDataTableModel.POOLED_MEAN_COLUMN)
@@ -276,8 +280,8 @@ public class FeatureDataTable extends BasicFeatureTable {
 		int dpcol = model.getColumnIndex(FeatureDataTableModel.DATA_PIPELINE_COLUMN);
 		for (int i : getSelectedRows()) {
 			
-			MsFeature rowFeature = (MsFeature) getValueAt(i, fcol);
-			DataPipeline dp = (DataPipeline) getValueAt(i, dpcol);
+			MsFeature rowFeature = (MsFeature) model.getValueAt(convertRowIndexToModel(i), fcol);
+			DataPipeline dp = (DataPipeline) model.getValueAt(convertRowIndexToModel(i), dpcol);
 			if(!featureMap.containsKey(dp))
 				featureMap.put(dp, new TreeSet<MsFeature>(new MsFeatureComparator(SortProperty.Name)));
 

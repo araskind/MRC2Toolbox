@@ -27,6 +27,7 @@ import java.util.UUID;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
+import edu.umich.med.mrc2.datoolbox.utils.Range;
 
 public class SimpleMsFeature implements Serializable {
 
@@ -45,6 +46,7 @@ public class SimpleMsFeature implements Serializable {
 	protected double area, height, volume;
 	protected DataPipeline dataPipeline;	
 	protected Polarity polarity;
+	protected Range rtRange;
 	
 	public SimpleMsFeature(
 			String libraryTargetId, 
@@ -159,11 +161,11 @@ public class SimpleMsFeature implements Serializable {
 		this.volume = volume;
 	}
 
-	public DataPipeline getAssayMethod() {
+	public DataPipeline getDataPipeline() {
 		return dataPipeline;
 	}
 
-	public void setAssayMethod(DataPipeline dataPipeline) {
+	public void setDataPipeline(DataPipeline dataPipeline) {
 		this.dataPipeline = dataPipeline;
 	}
 
@@ -181,6 +183,14 @@ public class SimpleMsFeature implements Serializable {
 
 	public void setPolarity(Polarity polarity) {
 		this.polarity = polarity;
+	}
+
+	public Range getRtRange() {
+		return rtRange;
+	}
+
+	public void setRtRange(Range rtRange) {
+		this.rtRange = rtRange;
 	}
 }
 

@@ -103,7 +103,9 @@ public class DuplicateSelectionTable extends FeatureSelectionTable {
 				.setCellRenderer(pieChartFrequencyRenderer);
 
 		columnModel.getColumnById(DuplicateSelectionTableModel.ID_COLUMN).setWidth(50);
-		fixedWidthColumns.add(model.getColumnIndex(DuplicateSelectionTableModel.ID_COLUMN));	
+		columnModel.getColumnById(DuplicateSelectionTableModel.ID_COLUMN).setMaxWidth(50);
+		fixedWidthColumns.add(model.getColumnIndex(DuplicateSelectionTableModel.ID_COLUMN));
+	
 		thf = new TableFilterHeader(this, AutoChoices.ENABLED);
 		finalizeLayout();
 	}

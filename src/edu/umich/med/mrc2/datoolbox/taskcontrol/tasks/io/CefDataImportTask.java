@@ -51,6 +51,7 @@ public class CefDataImportTask extends CEFProcessingTask {
 	private Map<String, Integer> featureCoordinateMap;
 	private Map<String, List<Double>> retentionMap;
 	private Map<String, List<Double>> mzMap;
+	private Map<String, List<Double>> peakWidthMap;
 	
 	public CefDataImportTask(
 			DataFile dataFile,
@@ -60,7 +61,8 @@ public class CefDataImportTask extends CEFProcessingTask {
 			Matrix dataMatrix,
 			Map<String, Integer> featureCoordinateMap,
 			Map<String, List<Double>> retentionMap,
-			Map<String, List<Double>> mzMap) {
+			Map<String, List<Double>> mzMap,
+			Map<String, List<Double>> peakWidthMap) {
 
 		this.dataFile = dataFile;
 		this.resultsFile = resultsFile;
@@ -70,6 +72,7 @@ public class CefDataImportTask extends CEFProcessingTask {
 		this.featureCoordinateMap = featureCoordinateMap;
 		this.retentionMap = retentionMap;
 		this.mzMap = mzMap;
+		this.peakWidthMap = peakWidthMap;
 
 		total = 100;
 		processed = 2;
@@ -88,7 +91,8 @@ public class CefDataImportTask extends CEFProcessingTask {
 				 dataMatrix,
 				 featureCoordinateMap,
 				 retentionMap,
-				 mzMap);
+				 mzMap,
+				 peakWidthMap);
 	}
 
 	@Override
@@ -138,11 +142,15 @@ public class CefDataImportTask extends CEFProcessingTask {
 		for(MsFeature feature : inputFeatureList) {
 
 			SimpleMsFeature msf = new SimpleMsFeature(feature, dataPipeline);
+			msf.setRtRange(feature.getRtRange());
 			
 				if(featureCoordinateMap.get(msf.getLibraryTargetId()) != null) {
 
 					retentionMap.get(msf.getLibraryTargetId()).add(msf.getRetentionTime());
 					mzMap.get(msf.getLibraryTargetId()).add(msf.getObservedSpectrum().getMonoisotopicMz());
+					if(feature.getRtRange() != null)
+						peakWidthMap.get(msf.getLibraryTargetId()).add(feature.getRtRange().getSize());
+						
 					coordinates[1] = featureCoordinateMap.get(msf.getLibraryTargetId());
 					featureMatrix.setAsObject(msf, coordinates);
 					dataMatrix.setAsDouble(msf.getArea(), coordinates);
