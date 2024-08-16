@@ -989,22 +989,23 @@ public class MsUtils {
 			boolean cleanup) {
 		
 		List<MsPoint> calculatedPattern = null;
-		int charge = Math.abs(queryFormula.getCharge());
 		IsotopePattern isoPattern = 
 				isotopePatternGenerator.getIsotopes(queryFormula);
 
-		if(charge == 0) {
+		if(queryFormula.getCharge() == null || queryFormula.getCharge() == 0) {
+			
 			calculatedPattern  =  isoPattern.getIsotopes().stream().
 				map(ic -> new MsPoint(ic.getMass(), ic.getIntensity() 
 						* SPECTRUM_NORMALIZATION_BASE_INTENSITY)).
 				sorted(mzSorter).collect(Collectors.toList());
 		}
-		else				
+		else {
+			int charge = Math.abs(queryFormula.getCharge());
 			calculatedPattern =  isoPattern.getIsotopes().stream().
 				map(ic -> new MsPoint((ic.getMass() - MsUtils.ELECTRON_MASS * charge)/charge, ic.getIntensity() 
 						* SPECTRUM_NORMALIZATION_BASE_INTENSITY)).
 				sorted(mzSorter).collect(Collectors.toList());
-		
+		}		
 		if(cleanup)
 			return cleanupIsotopicPattern(calculatedPattern, 100.0d, MassErrorType.mDa);
 		else

@@ -53,7 +53,6 @@ public class ElementSelectionTable extends BasicTable{
 		
 		setRowHeight(25);
 		setDefaultRenderer(IIsotope.class, new CdkIsotopeRenderer());
-
 		setDefaultEditor(Integer.class, new SpinnerEditor(0, 1000));
 		finalizeLayout();
 	}

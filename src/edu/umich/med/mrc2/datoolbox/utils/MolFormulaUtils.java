@@ -22,10 +22,13 @@
 package edu.umich.med.mrc2.datoolbox.utils;
 
 import java.io.IOException;
+import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import org.openscience.cdk.config.Isotopes;
 import org.openscience.cdk.exception.InvalidSmilesException;
+import org.openscience.cdk.formula.MolecularFormulaRange;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IChemObjectBuilder;
 import org.openscience.cdk.interfaces.IIsotope;
@@ -115,4 +118,38 @@ public class MolFormulaUtils {
 		else 
 			return null;
 	}
+		
+	public static boolean isInRange(
+			IMolecularFormula formula, 
+			MolecularFormulaRange ranges) {
+		
+		Set<String> elementSymbolFilter = 
+				StreamSupport.stream(ranges.isotopes().spliterator(), false).
+			map(i -> i.getSymbol()).collect(Collectors.toSet());
+
+		
+		for(IIsotope isotope : formula.isotopes()) {
+			
+			if(!ranges.contains(isotope))
+				return false;
+			
+			if(formula.getIsotopeCount(isotope) > ranges.getIsotopeCountMax(isotope)
+					|| formula.getIsotopeCount(isotope) < ranges.getIsotopeCountMin(isotope))
+				return false;
+		}
+		return true;
+	}
 }
+
+
+
+
+
+
+
+
+
+
+
+
+

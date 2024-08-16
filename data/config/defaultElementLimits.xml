@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ElementNumberLimits version="1.0.0.0">
+  <Isotope IsotopeName="Cl" min="0" max="3" />
+  <Isotope IsotopeName="H" min="0" max="126" />
+  <Isotope IsotopeName="C" min="0" max="78" />
+  <Isotope IsotopeName="P" min="0" max="9" />
+  <Isotope IsotopeName="O" min="0" max="27" />
+  <Isotope IsotopeName="K" min="0" max="2" />
+  <Isotope IsotopeName="Mg" min="0" max="2" />
+  <Isotope IsotopeName="N" min="0" max="20" />
+  <Isotope IsotopeName="S" min="0" max="14" />
+  <Isotope IsotopeName="Ca" min="0" max="2" />
+  <Isotope IsotopeName="Na" min="0" max="2" />
+  <Isotope IsotopeName="I" min="0" max="3" />
+</ElementNumberLimits>

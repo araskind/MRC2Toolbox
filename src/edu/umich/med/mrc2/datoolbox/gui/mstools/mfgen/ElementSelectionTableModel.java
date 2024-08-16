@@ -23,14 +23,17 @@ package edu.umich.med.mrc2.datoolbox.gui.mstools.mfgen;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.openscience.cdk.config.IsotopeFactory;
 import org.openscience.cdk.config.Isotopes;
+import org.openscience.cdk.formula.MolecularFormulaRange;
 import org.openscience.cdk.interfaces.IIsotope;
 
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTableModel;
 import edu.umich.med.mrc2.datoolbox.gui.tables.ColumnContext;
+import edu.umich.med.mrc2.datoolbox.utils.isopat.IsotopicPatternUtils;
 
 public class ElementSelectionTableModel  extends BasicTableModel {
 
@@ -63,64 +66,53 @@ public class ElementSelectionTableModel  extends BasicTableModel {
 
 	public void populateDefaultModel() throws IOException{
 
-		IsotopeFactory ifac = Isotopes.getInstance();
-		String[] elementSymbols = 
-				new String[]{"H","C","N","S","P","O","Na","K","Ca", "Mg", "Cl","I"};
-
-		List<Object[]>rowData = new ArrayList<Object[]>();
-		for(String element : elementSymbols){
-
-			 IIsotope elementObject = ifac.getMajorIsotope(element);
-			 int min = 0, max = 0;
-			 boolean enabled = false;
-
-			 switch (element) {
-
-	            case "H":  min = 0; max = 126; enabled = true;
-	            	break;
-
-	            case "C":  min = 0; max = 78; enabled = true;
-            		break;
-
-	            case "N":  min = 0; max = 20; enabled = true;
-            		break;
-
-	            case "S":  min = 0; max = 14; enabled = true;
-            		break;
-
-	            case "P":  min = 0; max = 9; enabled = true;
-            		break;
-
-	            case "O":  min = 0; max = 27; enabled = true;
-            		break;
-
-	            case "Na":  min = 0; max = 2; enabled = true;
-            		break;
-
-	            case "K":  min = 0; max = 2; enabled = true;
-            		break;
-
-	            case "Ca":  min = 0; max = 2; enabled = false;
-            		break;
-
-	            case "Mg":  min = 0; max = 2; enabled = false;
-        			break;
-
-	            case "Cl":  min = 0; max = 3; enabled = false;
-            		break;
-
-	            case "I":  min = 0; max = 3; enabled = false;
-            		break;
-			 }
-			Object[] obj = {
-					enabled,
-					elementObject,
-					min,
-					max
-			};
-			rowData.add(obj);
+		IsotopeFactory ifac = null;
+		try {
+			ifac = Isotopes.getInstance();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
-		if(!rowData.isEmpty())
+		if(ifac == null)
+			return;
+			
+		MolecularFormulaRange ranges =  
+			 IsotopicPatternUtils.getDefaultElementRanges();
+		List<String>elementSymbols = Arrays.asList(new String[]{
+					"H","C","N","S","P","O","Na","K",
+					"Ca", "Mg", "Cl","I"});				
+		List<String>defaultDisabled = 
+				Arrays.asList(new String[] {"Ca", "Mg", "Cl","I"});
+
+		List<Object[]> rowData = new ArrayList<Object[]>();
+		for (String element : elementSymbols) {
+
+			IIsotope isotope = ifac.getMajorIsotope(element);
+			int min = 0;
+			int max = 0;
+			if(ranges.contains(isotope)) {
+				min = ranges.getIsotopeCountMin(isotope);
+				max= ranges.getIsotopeCountMax(isotope);
+				boolean enabled = !defaultDisabled.contains(element);
+				Object[] obj = { enabled, isotope, min, max };
+				rowData.add(obj);
+			}			
+		}
+		//	Add defaults if not in the list
+		for(IIsotope isotope : ranges.isotopes()) {
+			
+			if(!elementSymbols.contains(isotope.getSymbol())) {
+				
+				Object[] obj = { 
+					true, 
+					isotope, 
+					ranges.getIsotopeCountMin(isotope), 
+					ranges.getIsotopeCountMax(isotope),
+				};
+				rowData.add(obj);
+			}
+		}		
+		if (!rowData.isEmpty())
 			addRows(rowData);
 	}
 }
