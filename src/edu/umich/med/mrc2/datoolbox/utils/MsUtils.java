@@ -1666,6 +1666,23 @@ public class MsUtils {
 		
 		return (lighterIsotope) != null;
 	}
+	
+	public static String getMsOneSpectrumForPrintout(MassSpectrum ms) {
+		
+		String msString = "";
+		if(ms.getAdducts() == null || ms.getAdducts().isEmpty())
+			return msString;
+		
+		for(Adduct adduct : ms.getAdducts()) {
+			
+			for(MsPoint p : ms.getMsPointsForAdduct(adduct)) {
+				msString += adduct.getName() + "\t" 
+					+ spectrumMzExportFormat.format(p.getMz()) + "\t" 
+					+ spectrumIntensityFormat.format(p.getIntensity()) + "\n";
+			}
+		}		
+		return msString;
+	}
 }
 
 

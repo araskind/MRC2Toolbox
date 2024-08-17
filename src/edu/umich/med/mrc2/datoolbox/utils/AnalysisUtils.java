@@ -29,7 +29,9 @@ import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 
 public class AnalysisUtils {
 
-	public static MsFeature findTopScoringFeature(Collection<MsFeature> inputFeatures, double areaWeight,
+	public static MsFeature findTopScoringFeature(
+			Collection<MsFeature> inputFeatures, 
+			double areaWeight,
 			double frequencyWeight) {
 
 		double maxFrequency = 0;

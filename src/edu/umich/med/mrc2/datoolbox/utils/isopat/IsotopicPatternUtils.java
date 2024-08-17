@@ -28,6 +28,8 @@ import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -43,8 +45,11 @@ import org.openscience.cdk.config.Isotopes;
 import org.openscience.cdk.formula.MolecularFormulaRange;
 import org.openscience.cdk.interfaces.IIsotope;
 
+import edu.umich.med.mrc2.datoolbox.data.IsotopicPatternReferenceBin;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
+import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
+import edu.umich.med.mrc2.datoolbox.utils.DelimitedTextParser;
 
 public class IsotopicPatternUtils {
 
@@ -54,6 +59,9 @@ public class IsotopicPatternUtils {
 	public static final String MIN_COUNTS_ATTRIBUTE = "min";
 	public static final String MAX_COUNTS_ATTRIBUTE = "max";
 	public static final String DEFAULT_ELEMET_LIMITS_FILE_NAME = "defaultElementLimits.xml";
+	
+	public static final String REGULAR_ISOTOPIC_PATTERN_MODEL_FILE_NAME = "isotopesByFormulaModel.txt";
+	public static final String CL_ADDUCT_ISOTOPIC_PATTERN_MODEL_FILE_NAME = "isotopesClAdductByFormulaModel.txt";
 	
 	public static Map<String,Integer>getCompoundFormulasWithCounts() throws Exception{
 		
@@ -217,6 +225,129 @@ public class IsotopicPatternUtils {
 		}
 		else
 			return readMolecularFormulaRangesFromXML(defaultsFile);
+	}
+	
+	public static Collection<IsotopicPatternReferenceBin>getIsotopicPatternModel(
+			boolean includeClAdductModel){
+		
+		Collection<IsotopicPatternReferenceBin>ipModel = 
+				new ArrayList<IsotopicPatternReferenceBin>();
+		
+		//	Read regular model
+		File regModelFile = Paths.get(
+				MRC2ToolBoxCore.configDir, 
+				REGULAR_ISOTOPIC_PATTERN_MODEL_FILE_NAME).toFile();
+		if(regModelFile != null && regModelFile.exists() && regModelFile.canRead())
+			ipModel.addAll(readIsotopicPatternModelFromFile(regModelFile));
+		
+		// Read model for Cl adducts
+		if(includeClAdductModel) {
+			
+			File clAdModelFile = Paths.get(
+					MRC2ToolBoxCore.configDir, 
+					CL_ADDUCT_ISOTOPIC_PATTERN_MODEL_FILE_NAME).toFile();
+			if(clAdModelFile != null && clAdModelFile.exists() && clAdModelFile.canRead()) {
+				
+				Collection<IsotopicPatternReferenceBin>clModel = 
+						readIsotopicPatternModelFromFile(clAdModelFile);
+				clModel.stream().forEach(b -> b.setClAdduct(true));
+				ipModel.addAll(clModel);
+			}
+		}
+		return ipModel;
+	}
+	
+	public enum IsotopicPatternModelColumns {
+		
+		MOL_FORMULA,
+		NUM_REPEATS,
+		EXACT_MASS,
+		NUM_CARBONS,
+		ISOTOPE_2,
+		ISOTOPE_3,
+		ISOTOPE_4,
+		ISOTOPE_5,
+		ISOTOPE_6,
+		;
+		
+		public static IsotopicPatternModelColumns getOptionByName(String name) {
+
+			for(IsotopicPatternModelColumns source : IsotopicPatternModelColumns.values()) {
+
+				if(source.name().equals(name))
+					return source;
+			}
+			return null;
+		}
+	}
+	
+	public static Collection<IsotopicPatternReferenceBin>readIsotopicPatternModelFromFile(File modelFile){
+		
+		Collection<IsotopicPatternReferenceBin>ipModel = 
+				new ArrayList<IsotopicPatternReferenceBin>();
+		
+		String[][] modelData = DelimitedTextParser.parseTextFile(
+				modelFile, MRC2ToolBoxConfiguration.getTabDelimiter());
+		Map<IsotopicPatternModelColumns,Integer>headerMap = 
+				createModelHeaderMap(modelData[0]);
+		if(headerMap == null)
+			return ipModel;
+		
+		for(int i=1; i<modelData.length; i++) {
+			
+			String formula = modelData[i][headerMap.get(IsotopicPatternModelColumns.MOL_FORMULA)];
+			int numberOfRepeats = Integer.parseInt(
+					modelData[i][headerMap.get(IsotopicPatternModelColumns.NUM_REPEATS)]);
+			int numberOfCarbons = Integer.parseInt(
+					modelData[i][headerMap.get(IsotopicPatternModelColumns.NUM_CARBONS)]);
+			double exactMass = Double.parseDouble(
+					modelData[i][headerMap.get(IsotopicPatternModelColumns.EXACT_MASS)]);
+			
+			IsotopicPatternReferenceBin bin = 
+					new IsotopicPatternReferenceBin(formula, 
+													numberOfRepeats, 
+													numberOfCarbons,
+													exactMass);
+			
+			String iso2relIntString = modelData[i][headerMap.get(IsotopicPatternModelColumns.ISOTOPE_2)];
+			if(iso2relIntString != null && !iso2relIntString.isEmpty())
+				bin.getIsotopeRelativeIntensities()[0] = Double.parseDouble(iso2relIntString);
+						
+			String iso3relIntString = modelData[i][headerMap.get(IsotopicPatternModelColumns.ISOTOPE_3)];
+			if(iso3relIntString != null && !iso3relIntString.isEmpty())
+				bin.getIsotopeRelativeIntensities()[1] = Double.parseDouble(iso3relIntString);
+			
+			String iso4relIntString = modelData[i][headerMap.get(IsotopicPatternModelColumns.ISOTOPE_4)];
+			if(iso4relIntString != null && !iso4relIntString.isEmpty())
+				bin.getIsotopeRelativeIntensities()[2] = Double.parseDouble(iso4relIntString);
+			
+			String iso5relIntString = modelData[i][headerMap.get(IsotopicPatternModelColumns.ISOTOPE_5)];
+			if(iso5relIntString != null && !iso5relIntString.isEmpty())
+				bin.getIsotopeRelativeIntensities()[3] = Double.parseDouble(iso5relIntString);
+			
+			String iso6relIntString = modelData[i][headerMap.get(IsotopicPatternModelColumns.ISOTOPE_6)];
+			if(iso6relIntString != null && !iso6relIntString.isEmpty())
+				bin.getIsotopeRelativeIntensities()[4] = Double.parseDouble(iso6relIntString);			
+			
+			ipModel.add(bin);
+		}
+		return ipModel;
+	}
+	
+	private static Map<IsotopicPatternModelColumns,Integer>createModelHeaderMap(String[]header){
+		
+		Map<IsotopicPatternModelColumns,Integer>headerMap = 
+				new TreeMap<IsotopicPatternModelColumns,Integer>();
+		for(int i=0; i<header.length; i++) {
+			
+			IsotopicPatternModelColumns col = 
+					IsotopicPatternModelColumns.getOptionByName(header[i]);
+			if(col == null)
+				return null;
+			else
+				headerMap.put(col, i);
+		}		
+		return headerMap;
 	}
 }
 

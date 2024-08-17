@@ -4284,8 +4284,16 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		FeatureCollectionManager.msmsSearchResults.clearCollection();
 		FeatureCollectionManager.msmsSearchResults.addFeatures(task.getSelectedFeatures());
 		clearMSMSFeatureData();		
-		activeFeatureCollection.clearCollection();	
-		activeFeatureCollection.setName(FeatureCollectionManager.msmsSearchResults.getName());			
+		if(activeFeatureCollection != null) {
+			activeFeatureCollection.clearCollection();
+			activeFeatureCollection.setName(
+					FeatureCollectionManager.msmsSearchResults.getName());	
+		}
+		else {
+			activeFeatureCollection = 
+				new MsFeatureInfoBundleCollection(
+						FeatureCollectionManager.msmsSearchResults.getName());
+		}
 		activeFeatureCollection.addFeatures(FeatureCollectionManager.msmsSearchResults.getFeatures());
 		StatusBar.setActiveFeatureCollection(activeFeatureCollection);
 		safelyLoadMSMSFeatures(activeFeatureCollection.getFeatures());

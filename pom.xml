@@ -241,9 +241,35 @@ public final class BuildInformation {
 		    <version>1.2.6</version>
 		</dependency>
 		<dependency>
+		    <groupId>org.apache.commons.math4</groupId>
+		    <artifactId>commons-math4-core</artifactId>
+		    <version>4.0-beta1</version>
+		</dependency>
+		<dependency>
+		    <groupId>org.apache.commons.math4</groupId>
+		    <artifactId>commons-math4-legacy</artifactId>
+		    <version>4.0-beta1</version>
+		</dependency>
+		<dependency>
+		    <groupId>org.apache.commons.math4</groupId>
+		    <artifactId>commons-math4-legacy-core</artifactId>
+		    <version>4.0-beta1</version>
+		</dependency>
+		<dependency>
+		    <groupId>org.apache.commons.math4</groupId>
+		    <artifactId>commons-math4-legacy-exception</artifactId>
+		    <version>4.0-beta1</version>
+		</dependency>
+		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-math3</artifactId>
 			<version>3.6.1</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.apache.commons/commons-statistics-distribution -->
+		<dependency>
+		    <groupId>org.apache.commons</groupId>
+		    <artifactId>commons-statistics-distribution</artifactId>
+		    <version>1.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
