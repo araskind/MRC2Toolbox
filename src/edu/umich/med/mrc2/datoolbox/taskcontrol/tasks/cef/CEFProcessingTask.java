@@ -191,11 +191,13 @@ public abstract class CEFProcessingTask extends AbstractTask {
 					
 				String dbId = id.getCompoundIdentity().getPrimaryDatabaseId();
 				if(!dbId.startsWith(DataPrefix.MS_LIBRARY_TARGET.getName())
-						&& !dbId.startsWith(DataPrefix.MS_FEATURE.getName()))
+						&& !dbId.startsWith(DataPrefix.MS_FEATURE.getName())
+						&& !dbId.startsWith(DataPrefix.MS_LIBRARY_TARGET_OLD.getName()))
 					feature.addIdentity(id);
 				
 				if(dbId.startsWith(DataPrefix.MS_LIBRARY_TARGET.getName())
-						|| dbId.startsWith(DataPrefix.MS_FEATURE.getName()))
+						|| dbId.startsWith(DataPrefix.MS_FEATURE.getName())
+						|| dbId.startsWith(DataPrefix.MS_LIBRARY_TARGET_OLD.getName()))
 					feature.setTargetId(dbId);
 			}	
 			feature.setTopScoreIdAsDefault();

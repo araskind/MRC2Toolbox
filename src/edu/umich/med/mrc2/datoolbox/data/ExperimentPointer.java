@@ -118,8 +118,8 @@ public class ExperimentPointer {
 				new Element(ELEMENT_NAME);
 		experimentPointerElement.setAttribute(EXPERIMENT_TYPE, projectType.name());	
 		experimentPointerElement.setAttribute(EXPERIMENT_ID, id);	
-		experimentPointerElement.setAttribute(EXPERIMENT_NAME, name);
-		experimentPointerElement.setAttribute(EXPERIMENT_DESCRIPTION, description);
+		experimentPointerElement.setAttribute(EXPERIMENT_NAME, name.trim());
+		experimentPointerElement.setAttribute(EXPERIMENT_DESCRIPTION, description.trim());
 		
 		if(experimentFile != null)
 			experimentPointerElement.setAttribute(

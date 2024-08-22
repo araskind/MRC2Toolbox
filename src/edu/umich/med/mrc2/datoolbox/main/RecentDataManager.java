@@ -139,7 +139,6 @@ public class RecentDataManager {
 				
         Document document = new Document();
         Element documentRoot = new Element(DOCUMENT_ROOT);
-        documentRoot.setAttribute("version", "1.0.0.0");
 
         Set<String> fcIdSet = featureCollections.stream().
         		filter(c -> Objects.nonNull(c.getId())).
@@ -170,7 +169,7 @@ public class RecentDataManager {
         try {
             FileWriter writer = new FileWriter(recentObjectFilePath.toFile(), false);
             XMLOutputter outputter = new XMLOutputter();
-            outputter.setFormat(Format.getCompactFormat());
+            outputter.setFormat(Format.getPrettyFormat());
             outputter.output(document, writer);
          } catch (Exception e) {
             e.printStackTrace();

@@ -1170,6 +1170,9 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ItemList
 	
 	private void loadFeatureData(LibraryMsFeature featureToShow) {
 
+		if(featureToShow.getPolarity() == null)
+			featureToShow.setPolarity(currentLibrary.getPolarity());			
+		
 		libraryFeatureEditorPanel.loadFeature(featureToShow, featureToShow.getPolarity());
 
 		if (featureToShow.getPrimaryIdentity() == null)

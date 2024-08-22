@@ -294,6 +294,7 @@ public class DatabaseToLibraryDialog  extends JDialog implements ActionListener{
 
 		LibraryMsFeature lf = new LibraryMsFeature(compoundName, newCompound2.getExactMass(), 0.0d);
 		lf.setPrimaryIdentity(msid);
+		lf.setPolarity(library.getPolarity());
 		boolean added = false;
 		try {
 			MSRTLibraryUtils.loadLibraryFeature(lf, library.getLibraryId());

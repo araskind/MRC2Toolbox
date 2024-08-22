@@ -61,6 +61,7 @@ import edu.umich.med.mrc2.datoolbox.data.enums.MSMSComponentTableFields;
 import edu.umich.med.mrc2.datoolbox.data.enums.MSMSMatchType;
 import edu.umich.med.mrc2.datoolbox.data.enums.MSMSScoringParameter;
 import edu.umich.med.mrc2.datoolbox.data.enums.MsDepth;
+import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
 import edu.umich.med.mrc2.datoolbox.data.enums.RefMetClassificationLevels;
 import edu.umich.med.mrc2.datoolbox.data.enums.SpectrumSource;
 import edu.umich.med.mrc2.datoolbox.data.lims.Injection;
@@ -495,6 +496,13 @@ public abstract class IDTrackerFeatureExportTask extends AbstractTask {
 			else
 				return "";
 		}
+		if(property.equals(IDTrackerMsFeatureProperties.CHROMATOGRAPHIC_COLUMN)) {	
+			if(bundle.getAcquisitionMethod() != null 
+					&& bundle.getAcquisitionMethod().getColumn() != null)
+				return bundle.getAcquisitionMethod().getColumn().getColumnName();
+			else
+				return "";
+		}		
 		if(property.equals(IDTrackerMsFeatureProperties.DATA_ANALYSIS_METHOD)) {
 			if(bundle.getDataExtractionMethod() != null)
 				return bundle.getDataExtractionMethod().getName();
@@ -511,15 +519,27 @@ public abstract class IDTrackerFeatureExportTask extends AbstractTask {
 				return inj.getDataFileName();
 			else
 				return bundle.getDataFile().getName();
-		}		
+		}
+		if(property.equals(IDTrackerMsFeatureProperties.CHARGE))
+			return Integer.toString(feature.getCharge());
+		
+		if(property.equals(IDTrackerMsFeatureProperties.POLARITY)) {
+			
+			if(bundle.getMsFeature().getPolarity() != null)
+				return bundle.getMsFeature().getPolarity().getCode();
+			else {
+				if(feature.getCharge() > 0)
+					return Polarity.Positive.getCode();
+				
+				if(feature.getCharge() < 0)
+					return Polarity.Negative.getCode();
+			}
+		}
 		//	MS1 only properties
 		if(msLevel.equals(MsDepth.MS1)) {
 			
 			if(property.equals(IDTrackerMsFeatureProperties.BASE_PEAK_MZ))
 					return mzFormat.format(feature.getBasePeakMz());
-			
-			if(property.equals(IDTrackerMsFeatureProperties.CHARGE))
-					return Integer.toString(feature.getCharge());
 			
 			if(property.equals(IDTrackerMsFeatureProperties.ADDUCT)) {
 				if(feature.getSpectrum() != null) {
