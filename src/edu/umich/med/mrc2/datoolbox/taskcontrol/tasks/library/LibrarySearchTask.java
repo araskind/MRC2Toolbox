@@ -216,6 +216,8 @@ public class LibrarySearchTask  extends AbstractTask implements TaskListener{
 					MsFeatureIdentity bestRtMatch = MSRTSearchUtils.getIDwithClosestRT(f);
 					if(bestRtMatch != null)
 						f.setPrimaryIdentity(bestRtMatch);
+					else
+						f.setPrimaryIdentity(ids.iterator().next());
 				}
 			}
 			if(addToList)

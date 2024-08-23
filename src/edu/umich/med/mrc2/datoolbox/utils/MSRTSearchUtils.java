@@ -30,7 +30,7 @@ public class MSRTSearchUtils {
 
 	public static Double calculateRetentionShift(MsFeature parentFeature, MsFeatureIdentity id) {
 
-		if(id.getMsRtLibraryMatch() == null)
+		if(id == null || id.getMsRtLibraryMatch() == null)
 			return null;
 
 		double expectedRt = id.getMsRtLibraryMatch().getExpectedRetention();
@@ -64,10 +64,14 @@ public class MSRTSearchUtils {
 			double diff = 1000000.0d;
 			for(MsFeatureIdentity id : msRTidList) {
 				
-				Double shift = Math.abs(calculateRetentionShift(parentFeature, id));
-				if(shift != null && shift < diff) {
-					diff = shift;
-					bestId = id;
+				Double signedShift = calculateRetentionShift(parentFeature, id);
+				if(signedShift != null) {
+					
+					double shift = Math.abs(signedShift);
+					if(shift < diff) {
+						diff = shift;
+						bestId = id;
+					}
 				}
 			}
 			return bestId;

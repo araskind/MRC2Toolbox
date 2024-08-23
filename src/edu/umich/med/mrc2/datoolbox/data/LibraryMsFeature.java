@@ -145,6 +145,9 @@ public class LibraryMsFeature extends MsFeature implements Serializable {
 
 		if(useCustomRange && rtRange.getSize() > 0.0d)
 			return rtRange;
+		
+		if(retentionTime == 0.0d)
+			return new Range(0.0d, rtWindow * 2.0d);
 		else
 			return new Range(
 					retentionTime - rtWindow, 
