@@ -81,7 +81,9 @@ public class FeatureDataTable extends BasicFeatureTable {
 				new MsFeatureComparator(SortProperty.Name));
 		rowSorter.setComparator(model.getColumnIndex(FeatureDataTableModel.DATABSE_LINK_COLUMN),
 				new MsFeatureIdentityComparator(SortProperty.ID));
-
+		getRowSorter().setSortable(
+				model.getColumnIndex(FeatureDataTableModel.ORDER_COLUMN), false);
+		
 		msfIdRenderer = new CompoundIdentityDatabaseLinkRenderer();
 		chmodRenderer = new AdductRenderer();
 		pieChartFrequencyRenderer = new PieChartFrequencyRenderer();
@@ -156,7 +158,16 @@ public class FeatureDataTable extends BasicFeatureTable {
 		finalizeLayout();
 	}
 
-
+	@Override
+	public Object getValueAt(int row, int column) {
+		
+		if(convertColumnIndexToModel(column) == 
+				model.getColumnIndex(FeatureDataTableModel.ORDER_COLUMN))
+			return row+1;
+		else
+			return super.getValueAt(row, column);
+	}
+	
 	@Override
 	public MsFeature getSelectedFeature() {
 		

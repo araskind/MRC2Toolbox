@@ -756,45 +756,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 		}
 		else {
 			experimentDataExtractionMethod = existingMethod;
-		}
-		
-		//	Check if existing method was changed
-//		if(msmsFeatureExtractionSetupDialog.getInitialParameterSet() != null 
-//				&& msmsFeatureExtractionSetupDialog.getDataExtractionMethod() != null
-//				&& msmsFeatureExtractionSetupDialog.getInitialParameterSet().getParameterSetHash().equals(methodMd5)) {
-//			experimentDataExtractionMethod = msmsFeatureExtractionSetupDialog.getDataExtractionMethod();
-//			ps = msmsFeatureExtractionSetupDialog.getInitialParameterSet();
-//		}
-//		else {
-//	    	DataExtractionMethod sameNameDeMethod = 
-//					 IDTDataCache.getDataExtractionMethodByName(ps.getName());
-//	    	if(sameNameDeMethod != null) {
-//	    		
-//	    		String version = " V-" + ExperimentUtils.dateTimeFormat.format(new Date());
-//	    		String newName = ps.getName() + version;
-//	    		String newDescription = ps.getDescription() + "\n" + version + 
-//	    				"("+ MRC2ToolBoxCore.getIdTrackerUser().getFullName() + ")";	    		
-//	    		ps.setName(newName);
-//	    		ps.setDescription(newDescription);
-//	    	}	
-//	    	//	Upload new method
-//			try {
-//				experimentDataExtractionMethod = 
-//						IDTUtils.addNewTrackerDataExtractionMethod(ps);
-//			} catch (Exception e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//				MessageDialog.showErrorMsg("Failed to upload data analysis method for the experiment", 
-//						 this.getContentPane());
-//				return;
-//			}
-//			if(experimentDataExtractionMethod != null) {
-//				IDTDataCache.getDataExtractionMethods().add(experimentDataExtractionMethod);
-//				ps.setId(experimentDataExtractionMethod.getId());
-//				MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment().
-//					setMsmsExtractionParameterSet(ps);
-//			}
-//		}		
+		}		
 		MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment().setMsmsExtractionParameterSet(ps);
 		MsMsfeatureBatchExtractionTask task = 
 				new MsMsfeatureBatchExtractionTask(

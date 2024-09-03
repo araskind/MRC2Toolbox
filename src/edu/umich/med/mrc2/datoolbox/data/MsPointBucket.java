@@ -35,31 +35,24 @@ public class MsPointBucket implements Serializable {
 	 */
 	private static final long serialVersionUID = 527228795168227893L;
 	private ArrayList<MsPoint> basketPoints;
-	private Range mzRange, testTange;
-	private double massWindow;
-	private MassErrorType errorType;
+	private Range mzRange;
 
 	public MsPointBucket(MsPoint p, double massWindow, MassErrorType errorType) {
 		super();
-		this.massWindow = massWindow;
-		this.errorType = errorType;
 		basketPoints = new ArrayList<MsPoint>();
 		basketPoints.add(p);
 		mzRange = MsUtils.createMassRange(p.getMz(), massWindow, errorType);
 	}
-	
-	public MsPointBucket() {
-		basketPoints = new ArrayList<MsPoint>();
-	}
 
-	public void addPoint(MsPoint newPoint) {
+	public boolean addPoint(MsPoint newPoint) {
 
-		basketPoints.add(newPoint);
-
-		if (mzRange == null)
-			mzRange = new Range(newPoint.getMz());
-		else
-			mzRange.extendRange(newPoint.getMz());
+		if(mzRange.contains(newPoint.getMz())) {
+			basketPoints.add(newPoint);
+			return true;
+		}
+		else {
+			return false;
+		}
 	}
 	
 	public MsPoint getAveragePoint() {
@@ -91,14 +84,16 @@ public class MsPointBucket implements Serializable {
 	}
 
 	public double getMz() {
-		return mzRange.getAverage();
+		return getAveragePoint().getMz();
 	}
-
-	public boolean pointBelongs(MsPoint newPoint) {
-
-		if (MsUtils.createMassRange(mzRange.getAverage(), massWindow, errorType).contains(newPoint.getMz()))
+	
+	public boolean pointBelongs(MsPoint p) {
+		
+		if(mzRange.contains(p.getMz())) 
 			return true;
 		else
 			return false;
 	}
 }
+
+

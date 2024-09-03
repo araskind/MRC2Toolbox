@@ -210,16 +210,15 @@ public class MsUtils {
 
 			for (MsPointBucket basket : pointBaskets) {
 
-				if (basket.pointBelongs(p)) {
-					basket.addPoint(p);
+				if (basket.addPoint(p)) {
 					added = true;
 					break;
 				}
 			}
 			if (!added) {
 
-				MsPointBucket newBasket = new MsPointBucket();
-				newBasket.addPoint(p);
+				MsPointBucket newBasket = 
+						new MsPointBucket(p, massAccuracy, MassErrorType.ppm);
 				pointBaskets.add(newBasket);
 			}
 		}
@@ -1123,9 +1122,7 @@ public class MsUtils {
 		for(int i= 1; i< points.length; i++) {
 			
 			MsPointBucket current = msBins.get(msBins.size()-1);
-			if(current.pointBelongs(points[i]))
-				current.addPoint(points[i]);
-			else
+			if(!current.addPoint(points[i]))
 				msBins.add(new MsPointBucket(points[i], mzBinWidth, errorType));
 		}
 		return msBins.stream().map(b -> b.getMostIntensivePoint()).
@@ -1497,9 +1494,7 @@ public class MsUtils {
 		for(int i=1; i<points.length; i++) {
 			
 			MsPointBucket current = msBins.get(msBins.size()-1);
-			if(current.pointBelongs(points[i]))
-				current.addPoint(points[i]);
-			else
+			if(!current.addPoint(points[i]))
 				msBins.add(new MsPointBucket(points[i], mzBinWidth, errorType));
 		}
 		Collection<MsPoint>avgSpectrum =  msBins.stream().

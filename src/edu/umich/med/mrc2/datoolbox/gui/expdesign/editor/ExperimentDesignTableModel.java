@@ -39,6 +39,7 @@ public class ExperimentDesignTableModel extends DefaultTableModel {
 	 */
 	private static final long serialVersionUID = 7744317016355708140L;
 
+	public static final String ROWNUM_COLUMN = "##";
 	public static final String ENABLED_COLUMN = "Enabled";
 	public static final String SAMPLE_ID_COLUMN = "Sample ID";
 	public static final String SAMPLE_NAME_COLUMN = "Sample name";
@@ -48,6 +49,7 @@ public class ExperimentDesignTableModel extends DefaultTableModel {
 	 */
 	public ExperimentDesignTableModel() {
 		super();
+		addColumn(ROWNUM_COLUMN);
 		addColumn(ENABLED_COLUMN);
 		addColumn(SAMPLE_ID_COLUMN);
 		addColumn(SAMPLE_NAME_COLUMN);
@@ -56,18 +58,20 @@ public class ExperimentDesignTableModel extends DefaultTableModel {
 	public void clearModel() {
 
 		setRowCount(0);
-		for (int i = columnIdentifiers.size() - 1; i > 2; i--)
+		for (int i = columnIdentifiers.size() - 1; i > 3; i--)
 			columnIdentifiers.removeElementAt(i);
 	}
 
 	@Override
 	public Class getColumnClass(int col) {
 
-		if (col == 0) // Sample enabled column
+		if (col == 0) // row num column
+			return Integer.class;
+		else if (col == 1) // Sample enabled column
 			return Boolean.class;
-		else if (col == 1) // Sample ID
+		else if (col == 2) // Sample ID
 			return ExperimentalSample.class;
-		else if(col == 2)
+		else if(col == 3)
 			return String.class;
 		else
 			return ExperimentDesignLevel.class; // Level columns
@@ -88,7 +92,7 @@ public class ExperimentDesignTableModel extends DefaultTableModel {
 	@Override
 	public boolean isCellEditable(int row, int column) {
 
-		if (column == 1) // Sample ID column is locked
+		if (column == 0 || column == 2) // Row number and sample ID columns are locked
 			return false;
 		else if(isReferenceSampleRow(row) && column > 0)	//	Lock reference sample columns for editing
 			return false;
@@ -121,13 +125,15 @@ public class ExperimentDesignTableModel extends DefaultTableModel {
 			addColumn(ef);
 
 		int columnCount;
-
+		int rowCount = 0;
+		
 		for (ExperimentalSample es : experimentDesign.getSamples()) {
 
 			columnCount = 0;
-			Object[] newRow = new Object[experimentDesign.getFactors().size() + 3];
-
-			newRow[columnCount] = es.isEnabled();
+			rowCount++;
+			Object[] newRow = new Object[experimentDesign.getFactors().size() + 4];
+			newRow[columnCount] = rowCount;
+			newRow[++columnCount] = es.isEnabled();
 			newRow[++columnCount] = es;
 			newRow[++columnCount] = es.getName();
 

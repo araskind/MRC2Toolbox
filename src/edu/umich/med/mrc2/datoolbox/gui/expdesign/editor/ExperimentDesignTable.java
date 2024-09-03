@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JTextArea;
 import javax.swing.JTextPane;
@@ -99,6 +100,15 @@ public class ExperimentDesignTable extends BasicTable {
 		setDefaultEditor(ExperimentDesignLevel.class, levelEditor);
 		finalizeTable();
 	}
+	
+	@Override
+	public Object getValueAt(int row, int column) {
+		
+		if(column == 0)
+			return row+1;
+		else
+			return super.getValueAt(row, column);
+	}
 
 	private class DesignTableModelListener implements TableModelListener {
 
@@ -160,6 +170,17 @@ public class ExperimentDesignTable extends BasicTable {
 		model.addTableModelListener(new DesignTableModelListener());
 		addColumnSelectorPopup();
 		setTablePopupEnabled(getModel().getRowCount() > 0);
+		getTableHeader().setReorderingAllowed(false);
+		getRowSorter().setSortable(0, false);
+		
+		((JComponent)thf.getFilterEditor(0)).setEnabled(false);
+		
+		columnModel.getColumnById(ExperimentDesignTableModel.ROWNUM_COLUMN).setWidth(50);
+		columnModel.getColumnById(ExperimentDesignTableModel.ROWNUM_COLUMN).setMaxWidth(50);
+		fixedWidthColumns.add(model.getColumnIndex(ExperimentDesignTableModel.ROWNUM_COLUMN));
+		columnModel.getColumnById(ExperimentDesignTableModel.ENABLED_COLUMN).setWidth(50);
+		columnModel.getColumnById(ExperimentDesignTableModel.ENABLED_COLUMN).setMaxWidth(50);
+		fixedWidthColumns.add(model.getColumnIndex(ExperimentDesignTableModel.ENABLED_COLUMN));
 	}
 
 	public Collection<ExperimentalSample>getSelectedSamples(){

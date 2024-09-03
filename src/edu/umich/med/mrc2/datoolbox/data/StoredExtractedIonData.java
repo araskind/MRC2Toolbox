@@ -26,6 +26,7 @@ import edu.umich.med.mrc2.datoolbox.utils.Range;
 
 public class StoredExtractedIonData extends ExtractedIonData {
 
+	private static final long serialVersionUID = 1L;
 	private String featureId;
 	private String injectionId;
 	private int msLevel;

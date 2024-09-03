@@ -34,8 +34,7 @@ import edu.umich.med.mrc2.datoolbox.data.ReferenceMsMsLibraryMatch;
 import edu.umich.med.mrc2.datoolbox.data.SpectumPair;
 import edu.umich.med.mrc2.datoolbox.data.TandemMassSpectrum;
 import edu.umich.med.mrc2.datoolbox.data.compare.MsDataPointComparator;
-import edu.umich.med.mrc2.datoolbox.data.compare.SortDirection;
-import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
+import edu.umich.med.mrc2.datoolbox.data.enums.MSMSSearchDirection;
 import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
@@ -43,10 +42,9 @@ import edu.umich.med.mrc2.datoolbox.utils.Range;
 
 public class MSMSScoreCalculator {
 
-	public static final MsDataPointComparator mzSorter = 
-			MsUtils.mzSorter;
+	public static final MsDataPointComparator mzSorter = MsUtils.mzSorter;
 	public static final MsDataPointComparator reverseIntensitySorter = 
-			new MsDataPointComparator(SortProperty.Intensity, SortDirection.DESC);
+				MsUtils.reverseIntensitySorter;
 	
 	public static final double DEFAULT_MS_REL_INT_NOISE_CUTOFF = 0.01d;
 	
@@ -181,7 +179,7 @@ public class MSMSScoreCalculator {
 			Collection<MsPoint> librarySpectrum,
 			double mzWindowValue, 
 			MassErrorType massErrorType,
-			MatchDirection direction) {
+			MSMSSearchDirection direction) {
 		
 		unknownSpectrum = 
 				MsUtils.averageMassSpectrum(unknownSpectrum, mzWindowValue, massErrorType);
@@ -191,7 +189,7 @@ public class MSMSScoreCalculator {
 		Collection<MsPoint> alignedUnknownSpectrum = new ArrayList<MsPoint>(); 
 		Collection<MsPoint> alignedLibrarySpectrum = new ArrayList<MsPoint>();
 		
-		if(direction.equals(MatchDirection.Forward)) {
+		if(direction.equals(MSMSSearchDirection.DIRECT)) {
 			
 			alignedLibrarySpectrum.addAll(librarySpectrum);
 			for(MsPoint u : unknownSpectrum) {
@@ -207,7 +205,7 @@ public class MSMSScoreCalculator {
 					alignedUnknownSpectrum.add(new MsPoint(u.getMz(), 0.0d));
 			}
 		}
-		if(direction.equals(MatchDirection.Reverse)) {
+		if(direction.equals(MSMSSearchDirection.REVERSE)) {
 			
 			alignedUnknownSpectrum.addAll(unknownSpectrum);
 			for(MsPoint u : librarySpectrum) {
@@ -364,9 +362,7 @@ public class MSMSScoreCalculator {
 		for(int i=1; i<points.length; i++) {
 			
 			MsPointBucket current = msBins.get(msBins.size()-1);
-			if(current.pointBelongs(points[i]))
-				current.addPoint(points[i]);
-			else
+			if(!current.addPoint(points[i]))
 				msBins.add(new MsPointBucket(points[i], mzWindowValue, massErrorType));
 		}
 		double[][]matchedIntensities = new double[3][msBins.size()];
