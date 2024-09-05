@@ -36,6 +36,8 @@ import org.apache.commons.lang.StringUtils;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.FilePreferencesFactory;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
+import edu.umich.med.mrc2.datoolbox.utils.DelimitedTextParser;
+import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
 
 public class RQCScriptGenerator {
 
@@ -48,10 +50,63 @@ public class RQCScriptGenerator {
 		MRC2ToolBoxConfiguration.initConfiguration();
 
 		try {
-			generateSummaryQcScript();
+			generateParameterDistributionScriptForEX01409rpneg();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		}
+	}
+	
+	private static void generateParameterDistributionScriptForEX01409rpneg() {
+		
+		String experimentId = "EX01409";
+		String assayType = "IONP-NEG";
+		String assayType4R = "ionpneg";	
+		File inputMap = new File("Y:\\DataAnalysis\\_Reports\\EX01409 - Human EDTA Tranche 1 plasma W20000960M\\"
+				+ "A003 - Untargeted\\Documents\\NEG\\EX01409-RP-NEG-QC-input-map.txt");
+		File rWorkingDir = new File(
+				"Y:\\DataAnalysis\\_Reports\\EX01409 - Human EDTA Tranche 1 plasma W20000960M\\"
+				+ "A049 - Central carbon metabolism profiling\\Documents");	
+		generateParameterDistributionScript(
+				experimentId,
+				assayType,
+				assayType4R,
+				inputMap,
+				rWorkingDir);
+	}
+	
+	private static void generateParameterDistributionScript(
+			String experimentId,
+			String assayType,
+			String assayType4R,
+			File inputMap,
+			File rWorkingDir) {
+		String[][] methodListData = DelimitedTextParser.parseTextFile(
+				inputMap, MRC2ToolBoxConfiguration.getTabDelimiter());
+		String workDirForR = rWorkingDir.getAbsolutePath().replaceAll("\\\\", "/");
+		
+		List<String>rscriptParts = new ArrayList<String>();
+		rscriptParts.add("# " + experimentId + " " + assayType + " running QC, parameter distributions ####\n");
+		rscriptParts.add("setwd(\"" + workDirForR + "\")\n");
+		rscriptParts.add("library(ggplot2)");
+		rscriptParts.add("library(reshape2)");
+		rscriptParts.add("library(dplyr)");
+		
+		for(int i=1; i<=methodListData.length; i++) {
+			
+		}		
+		String rScriptFileName = experimentId + "-" + assayType + 
+				"-RunningQC-" + FIOUtils.getTimestamp() + ".R";
+		Path outputPath = Paths.get(
+				rWorkingDir.getAbsolutePath(), rScriptFileName);
+		try {
+		    Files.write(outputPath, 
+		    		rscriptParts,
+		            StandardCharsets.UTF_8,
+		            StandardOpenOption.CREATE, 
+		            StandardOpenOption.TRUNCATE_EXISTING);
+		} catch (IOException e) {
+		    e.printStackTrace();
 		}
 	}
 	
@@ -157,7 +212,8 @@ public class RQCScriptGenerator {
 		rscriptParts.add("ggsave(\"" + experimentId + "-" + assayType + "-totalAreas.png\","
 				+ " plot = areasPlot,  width = 14, height = 8.5)\n");
 		
-		String rScriptFileName = experimentId + "-" + assayType + "-SummaryQC.R";
+		String rScriptFileName = experimentId + "-" + assayType + 
+				"-SummaryQC-" + FIOUtils.getTimestamp() + ".R";
 		Path outputPath = Paths.get(
 				rWorkingDir.getAbsolutePath(), rScriptFileName);
 		try {
