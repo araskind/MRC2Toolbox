@@ -80,32 +80,52 @@ public class TandemMassSpectrum implements AnnotatedObject, Serializable {
 	protected double parentIonPurity = 1.0d;
 	protected boolean hasScans;
 
-
 	public TandemMassSpectrum(
 			int depth,
 			MsPoint parent,
 			Collection<MsPoint> spectrum,
 			Polarity polarity) {
 		super();
+		initSpectrum();
 		this.depth = depth;
 		this.parent = parent;
 		this.spectrum = spectrum;
 		this.polarity = polarity;
-
-		uniqueId = DataPrefix.MSMS_SPECTRUM.getName() + 
-				UUID.randomUUID().toString().substring(0, 12);
-		annotations = new TreeSet<ObjectAnnotation>();
-		minorParentIons = new TreeSet<MsPoint>(MsUtils.mzSorter);
-		averagedScanNumbers = new TreeMap<Integer,Integer>();
-		scanRtMap = new TreeMap<Integer,Double>();
 	}
 
 	public TandemMassSpectrum(int depth, MsPoint parent, Polarity polarity) {
 		super();
+		initSpectrum();
 		this.depth = depth;
 		this.parent = parent;
 		this.polarity = polarity;
-		uniqueId = DataPrefix.MSMS_SPECTRUM.getName() + 
+	}	
+
+	public TandemMassSpectrum(
+			String uniqueId,
+			int depth,
+			double fragmenterVoltage,
+			double cidLevel,
+			Polarity polarity) {
+		super();
+		initSpectrum();
+		this.uniqueId = uniqueId;
+		this.depth = depth;
+		this.fragmenterVoltage = fragmenterVoltage;
+		this.cidLevel = cidLevel;
+		this.polarity = polarity;
+	}
+
+	public TandemMassSpectrum(Polarity polarity) {
+		super();
+		initSpectrum();
+		this.depth = 2;
+		this.polarity = polarity;		
+	}
+	
+	private void initSpectrum() {
+		
+		this.uniqueId = DataPrefix.MSMS_SPECTRUM.getName() + 
 				UUID.randomUUID().toString().substring(0, 12);
 		spectrum = new TreeSet<MsPoint>(MsUtils.mzSorter);
 		annotations = new TreeSet<ObjectAnnotation>();
@@ -138,37 +158,6 @@ public class TandemMassSpectrum implements AnnotatedObject, Serializable {
 		scanRtMap.putAll(source.getScanRtMap());
 	}
 
-	public TandemMassSpectrum(
-			String uniqueId,
-			int depth,
-			double fragmenterVoltage,
-			double cidLevel,
-			Polarity polarity) {
-		super();
-		this.uniqueId = uniqueId;
-		this.depth = depth;
-		this.fragmenterVoltage = fragmenterVoltage;
-		this.cidLevel = cidLevel;
-		this.polarity = polarity;
-		spectrum = new TreeSet<MsPoint>(MsUtils.mzSorter);
-		annotations = new TreeSet<ObjectAnnotation>();
-		minorParentIons = new TreeSet<MsPoint>(MsUtils.mzSorter);
-		averagedScanNumbers = new TreeMap<Integer,Integer>();
-		scanRtMap = new TreeMap<Integer,Double>();
-	}
-
-	public TandemMassSpectrum(Polarity polarity) {
-		super();
-		this.uniqueId = DataPrefix.MSMS_SPECTRUM.getName() + 
-				UUID.randomUUID().toString().substring(0, 12);;
-		this.depth = 2;
-		this.polarity = polarity;
-		spectrum = new TreeSet<MsPoint>(MsUtils.mzSorter);
-		annotations = new TreeSet<ObjectAnnotation>();
-		minorParentIons = new TreeSet<MsPoint>(MsUtils.mzSorter);
-		averagedScanNumbers = new TreeMap<Integer,Integer>();
-		scanRtMap = new TreeMap<Integer,Double>();
-	}
 
 	public int getDepth() {
 		return depth;
@@ -188,10 +177,6 @@ public class TandemMassSpectrum implements AnnotatedObject, Serializable {
 	
 	public Collection<MsPoint> getSpectrum() {
 		return spectrum;
-	}
-	
-	public void setSpectrum(Collection<MsPoint> spectrum) {
-		this.spectrum = spectrum;
 	}
 
 	public MsPoint[] getMassSortedSpectrum() {
@@ -509,7 +494,7 @@ public class TandemMassSpectrum implements AnnotatedObject, Serializable {
 		this.entropy = entropy;
 	}
 	
-	public void setSpecrum(Collection<MsPoint>newSpectrum) {
+	public void setSpectrum(Collection<MsPoint>newSpectrum) {
 		spectrum.clear();
 		spectrum.addAll(newSpectrum);
 	}
@@ -531,7 +516,9 @@ public class TandemMassSpectrum implements AnnotatedObject, Serializable {
 		averagedScanNumbers.put(msmsScan, parentScan);
 	}
 
-	public void setMinorParentIons(Collection<MsPoint> newMinorParentIons, MsPoint msOneParent) {
+	public void setMinorParentIons(
+			Collection<MsPoint> newMinorParentIons, 
+			MsPoint msOneParent) {
 		minorParentIons.clear();
 		minorParentIons.addAll(newMinorParentIons);
 		calculateParentIonPurity(msOneParent);

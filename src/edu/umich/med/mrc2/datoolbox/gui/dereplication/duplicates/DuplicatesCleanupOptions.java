@@ -23,25 +23,42 @@ package edu.umich.med.mrc2.datoolbox.gui.dereplication.duplicates;
 
 public enum DuplicatesCleanupOptions {
 
-	TOP_SCORE_ONLY("Leave only top-scoring feature"), USE_HIGHEST_AREA("Use highest area for each sample"),
-	// USE_HIGHEST_AREA_NO_OUTLIERS("Use highest area, remove outliers")
+	USE_PRIMARY_AND_FILL_MISSING("Use primary feature data and fill missing from others"),
+	USE_HIGHEST_AREA("Use highest area for each sample"),
+	TOP_SCORE_ONLY("Leave only top-scoring feature"), 
 	;
 
-	private final String name;
+	private final String uiName;
 
-	DuplicatesCleanupOptions(String type) {
-
-		this.name = type;
+	DuplicatesCleanupOptions(String uiName) {
+		this.uiName = uiName;
 	}
 
 	public String getName() {
-
-		return name;
+		return uiName;
 	}
 
 	@Override
 	public String toString() {
+		return uiName;
+	}
+	
+	public static DuplicatesCleanupOptions getOptionByName(String name) {
 
-		return name;
+		for(DuplicatesCleanupOptions source : DuplicatesCleanupOptions.values()) {
+
+			if(source.name().equals(name))
+				return source;
+		}
+		return null;
+	}
+	
+	public static DuplicatesCleanupOptions getOptionByUIName(String fieldName) {
+		
+		for(DuplicatesCleanupOptions f : DuplicatesCleanupOptions.values()) {
+			if(f.getName().equals(fieldName))
+				return f;
+		}
+		return null;
 	}
 }

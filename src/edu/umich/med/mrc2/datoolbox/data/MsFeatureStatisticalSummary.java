@@ -124,6 +124,7 @@ public class MsFeatureStatisticalSummary implements Serializable {
 		return sampleStDev;
 	}
 
+	//	TODO
 	public boolean hasBetterStatsThan(MsFeatureStatisticalSummary statsToCompare) {
 
 		boolean betterStats = false;

@@ -37,6 +37,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+import org.apache.commons.math3.util.Precision;
 import org.ujmp.core.Matrix;
 import org.ujmp.core.calculation.Calculation.Ret;
 
@@ -62,7 +63,7 @@ public class MsFeatureCluster implements Serializable {
 	 */
 	private static final long serialVersionUID = -5100249593042159601L;
 
-	
+	public static final double eps = 0.00001d;
 	private String clusterId;
 	private Map<DataPipeline, Collection<MsFeature>>clusterFeatures;
 	private Map<DataPipeline, DescriptiveStatistics>featureRTStatistics;	
@@ -490,7 +491,8 @@ public class MsFeatureCluster implements Serializable {
 
 		return clusterFeatures.values().stream().
 				flatMap(c -> c.stream()).
-				filter(f -> MsUtils.matchesOnMSMSParentIon(f, cf, massAccuracy, massErrorType, rtWindow, true)).
+				filter(f -> MsUtils.matchesOnMSMSParentIon(
+						f, cf, massAccuracy, massErrorType, rtWindow, true)).
 				findFirst().isPresent();
 	}
 	
@@ -518,7 +520,13 @@ public class MsFeatureCluster implements Serializable {
 				map(f -> f.getSpectrum().getExperimentalTandemSpectrum().getCidLevel()).
 				collect(Collectors.toSet());
 				
-		return cidLevels.contains(cf.getSpectrum().getExperimentalTandemSpectrum().getCidLevel());		
+		double newCid = cf.getSpectrum().getExperimentalTandemSpectrum().getCidLevel();
+		for(double cid : cidLevels) {
+			
+			if(Precision.equalsIncludingNaN(cid, newCid, eps))
+				return true;
+		}				
+		return false;	
 	}
 
 	public void removeFeature(MsFeature cf) {

@@ -600,7 +600,7 @@ return;
 					discarded.add(feature);
 				}
 				else {
-					msms.setSpecrum(msmsFiltered);
+					msms.setSpectrum(msmsFiltered);
 					msms.setEntropy(MsUtils.calculateSpectrumEntropyNatLog(msmsFiltered));
 				}
 			}

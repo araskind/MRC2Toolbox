@@ -46,11 +46,12 @@ import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
 
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
+import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.SortedComboBoxModel;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 
-public class DuplicateMergeDialog extends JDialog {
+public class DuplicateMergeDialog extends JDialog implements BackedByPreferences{
 
 	/**
 	 *
@@ -65,6 +66,7 @@ public class DuplicateMergeDialog extends JDialog {
 
 	public static final String MERGE_OPTION = "MERGE_OPTION";
 
+	@SuppressWarnings("unchecked")
 	public DuplicateMergeDialog(ActionListener listener) {
 
 		super(MRC2ToolBoxCore.getMainWindow(), "Merge duplicate features");
@@ -94,9 +96,8 @@ public class DuplicateMergeDialog extends JDialog {
 		panel.add(mergeOptionsLabel, gbc_mergeOptionsLabel);
 
 		mergeTypeComboBox = new JComboBox<DuplicatesCleanupOptions>();
-		SortedComboBoxModel<DuplicatesCleanupOptions> options = new SortedComboBoxModel<DuplicatesCleanupOptions>(
-				DuplicatesCleanupOptions.values());
-		mergeTypeComboBox.setModel(options);
+		mergeTypeComboBox.setModel(
+				new SortedComboBoxModel<DuplicatesCleanupOptions>(DuplicatesCleanupOptions.values()));
 		GridBagConstraints gbc_mergeTypeComboBox = new GridBagConstraints();
 		gbc_mergeTypeComboBox.insets = new Insets(0, 0, 5, 0);
 		gbc_mergeTypeComboBox.fill = GridBagConstraints.HORIZONTAL;
@@ -138,36 +139,40 @@ public class DuplicateMergeDialog extends JDialog {
 		JRootPane rootPane = SwingUtilities.getRootPane(mergeButton);
 		rootPane.registerKeyboardAction(al, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 		rootPane.setDefaultButton(mergeButton);
-
 		loadPreferences();
-
 		pack();
 	}
 
 	public DuplicatesCleanupOptions getMergeOption() {
-
 		return (DuplicatesCleanupOptions) mergeTypeComboBox.getSelectedItem();
 	}
 
+	@Override
 	public void loadPreferences() {
-
-		preferences = Preferences.userNodeForPackage(this.getClass());
-		int mergeOptionIndex = preferences.getInt(MERGE_OPTION, 1);
-		mergeTypeComboBox.setSelectedIndex(mergeOptionIndex);
+		loadPreferences(Preferences.userNodeForPackage(this.getClass()));
 	}
-
-	public void savePreferences() {
-
-		preferences = Preferences.userNodeForPackage(this.getClass());
-		preferences.putInt(MERGE_OPTION, mergeTypeComboBox.getSelectedIndex());
+	
+	@Override
+	public void loadPreferences(Preferences prefs) {
+		
+		this.preferences = prefs;
+		DuplicatesCleanupOptions option = DuplicatesCleanupOptions.getOptionByName(
+				preferences.get(MERGE_OPTION, 
+						DuplicatesCleanupOptions.USE_PRIMARY_AND_FILL_MISSING.name()));
+		
+		mergeTypeComboBox.setSelectedItem(option);
 	}
 
 	@Override
-	public void setVisible(boolean visible) {
+	public void savePreferences() {
+		preferences = Preferences.userNodeForPackage(this.getClass());
+		preferences.put(MERGE_OPTION, getMergeOption().name());
+	}
 
-		if(!visible)
-			savePreferences();
+	@Override
+	public void dispose() {
 
-		super.setVisible(visible);
+		savePreferences();
+		super.dispose();
 	}
 }

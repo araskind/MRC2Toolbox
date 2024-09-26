@@ -50,10 +50,204 @@ public class RQCScriptGenerator {
 		MRC2ToolBoxConfiguration.initConfiguration();
 
 		try {
-			generateParameterDistributionScriptForEX01409rpneg();
+			generateSummaryQcScriptForEX01409rppos();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		}
+	}
+	
+	private static void generateSummaryQcScriptForEX01414rppos() {
+		
+		String experimentId = "EX01414";
+		File rWorkingDir = new File("Y:\\DataAnalysis\\_Reports\\EX01414 - META Metabolomics Repeat\\"
+				+ "A003 - Untargeted\\Documents\\POS");
+		File xlQCfile  = new File("Y:\\DataAnalysis\\_Reports\\EX01414 - META Metabolomics Repeat\\"
+				+ "A003 - Untargeted\\Documents\\EX01414-QC.xlsx");
+		File inputMap =  new File("Y:\\DataAnalysis\\_Reports\\EX01414 - META Metabolomics Repeat\\"
+				+ "A003 - Untargeted\\Documents\\POS\\EX01414-RP-POS-SummaryQC-inputMap.txt");
+		String assayType = "RP-POS";
+		String assayType4R = "rppos";
+		
+		generateSummaryQcScript(
+				experimentId,
+				rWorkingDir,
+				xlQCfile,
+				inputMap,
+				assayType,
+				assayType4R);
+	}
+	
+	private static void generateSummaryQcScriptForEX01414rpneg() {
+		
+		String experimentId = "EX01414";
+		File rWorkingDir = new File("Y:\\DataAnalysis\\_Reports\\EX01414 - META Metabolomics Repeat\\"
+				+ "A003 - Untargeted\\Documents\\NEG");
+		File xlQCfile  = new File("Y:\\DataAnalysis\\_Reports\\EX01414 - META Metabolomics Repeat\\"
+				+ "A003 - Untargeted\\Documents\\EX01414-QC.xlsx");
+		File inputMap =  new File("Y:\\DataAnalysis\\_Reports\\EX01414 - META Metabolomics Repeat\\"
+				+ "A003 - Untargeted\\Documents\\NEG\\EX01414-RP-NEG-SummaryQC-inputMap.txt");
+		String assayType = "RP-NEG";
+		String assayType4R = "rpneg";
+		
+		generateSummaryQcScript(
+				experimentId,
+				rWorkingDir,
+				xlQCfile,
+				inputMap,
+				assayType,
+				assayType4R);
+	}
+	
+	private static void generateSummaryQcScriptForEX01409rppos() {
+		
+		String experimentId = "EX01409";
+		File rWorkingDir = new File("Y:\\DataAnalysis\\_Reports\\"
+				+ "EX01409 - Human EDTA Tranche 1 plasma W20000960M\\A003 - Untargeted\\Documents\\POS");
+		File xlQCfile  = new File("Y:\\DataAnalysis\\_Reports\\EX01409 - Human EDTA Tranche 1 plasma W20000960M\\"
+				+ "A003 - Untargeted\\Documents\\EX01409-QC-from-toolbox.xlsx");
+		File inputMap =  new File("Y:\\DataAnalysis\\_Reports\\EX01409 - Human EDTA Tranche 1 plasma W20000960M\\"
+				+ "A003 - Untargeted\\Documents\\POS\\EX01409_RP-POS-SummaryQC-inputMap.txt");
+		String assayType = "RP-POS";
+		String assayType4R = "rppos";
+		
+		generateSummaryQcScript(
+				experimentId,
+				rWorkingDir,
+				xlQCfile,
+				inputMap,
+				assayType,
+				assayType4R);
+	}
+	
+	private static void generateSummaryQcScriptForEX01409rpneg() {
+		
+		String experimentId = "EX01409";
+		File rWorkingDir = new File("Y:\\DataAnalysis\\_Reports\\"
+				+ "EX01409 - Human EDTA Tranche 1 plasma W20000960M\\A003 - Untargeted\\Documents\\NEG");
+		File xlQCfile  = new File("Y:\\DataAnalysis\\_Reports\\EX01409 - Human EDTA Tranche 1 plasma W20000960M\\"
+				+ "A003 - Untargeted\\Documents\\EX01409-QC-from-toolbox.xlsx");
+		File inputMap =  new File("Y:\\DataAnalysis\\_Reports\\EX01409 - Human EDTA Tranche 1 plasma W20000960M\\"
+				+ "A003 - Untargeted\\Documents\\NEG\\EX01409_RP-NEG-SummaryQC-inputMap.txt");
+		String assayType = "RP-NEG";
+		String assayType4R = "rpneg";
+		
+		generateSummaryQcScript(
+				experimentId,
+				rWorkingDir,
+				xlQCfile,
+				inputMap,
+				assayType,
+				assayType4R);
+	}
+	
+	private static void generateSummaryQcScriptForEX01409ionpneg() {
+		
+		String experimentId = "EX01409";
+		File rWorkingDir = new File("Y:\\DataAnalysis\\_Reports\\EX01409 - Human EDTA Tranche 1 plasma W20000960M\\"
+				+ "A049 - Central carbon metabolism profiling\\Documents");
+		File xlQCfile  = new File("Y:\\DataAnalysis\\_Reports\\EX01409 - Human EDTA Tranche 1 plasma W20000960M\\"
+				+ "A003 - Untargeted\\Documents\\EX01409-QC-from-toolbox.xlsx");
+		File inputMap =  new File("Y:\\DataAnalysis\\_Reports\\EX01409 - Human EDTA Tranche 1 plasma W20000960M\\"
+				+ "A049 - Central carbon metabolism profiling\\Documents\\EX01409_IONP-NEG-SummaryQC-inputMap.txt");
+		String assayType = "IONP-NEG";
+		String assayType4R = "ionpneg";
+		
+		generateSummaryQcScript(
+				experimentId,
+				rWorkingDir,
+				xlQCfile,
+				inputMap,
+				assayType,
+				assayType4R);
+	}
+
+	private static void generateSummaryQcScript(
+			String experimentId,
+			File rWorkingDir,
+			File xlQCfile,
+			File inputMap,
+			String assayType,
+			String assayType4R) {
+		
+		List<String>qcSummaryNames = new ArrayList<String>();
+		List<String>rscriptParts = new ArrayList<String>();
+		String workDirForR = rWorkingDir.getAbsolutePath().replaceAll("\\\\", "/");
+		String xlFilePath4R = xlQCfile.getAbsolutePath().replaceAll("\\\\", "/");
+		String[][] methodListData = DelimitedTextParser.parseTextFile(
+				inputMap, MRC2ToolBoxConfiguration.getTabDelimiter());
+		
+		rscriptParts.add("# " + experimentId + " " + assayType + " summary QC ####\n");
+		rscriptParts.add("setwd(\"" + workDirForR + "\")\n");
+		rscriptParts.add("library(ggplot2)");
+		rscriptParts.add("library(reshape2)");
+		rscriptParts.add("library(dplyr)");
+		rscriptParts.add("library(readxl)\n");	
+		rscriptParts.add("## Feature count and total area summaries ####\n");
+		
+		for(int i=1; i<=methodListData.length; i++) {
+			
+			String baseName = assayType4R + ".qcSummary.B" + i;
+			rscriptParts.add("\n## " + methodListData[i-1][2] + " ####\n");
+			rscriptParts.add(baseName + " <- read_excel(\"" + 
+					xlFilePath4R + " \", sheet = \"" + methodListData[i-1][1] + "\")");
+			rscriptParts.add(baseName + ".design.in <- read.delim(\"" + 
+					methodListData[i-1][0] + "\", check.names=FALSE)");
+			rscriptParts.add(baseName + ".design <- as.data.frame(" + 
+					baseName + ".design.in[,c(5,2)])");
+			rscriptParts.add("colnames(" + baseName + ".design) <- c(\"Data file\",\"sample_type\")");
+			rscriptParts.add(baseName + ".design$batch <- \"" + methodListData[i-1][2] + "\"");
+			rscriptParts.add(baseName + ".des <- merge(" + 
+					baseName + ".design, " + baseName + ", by = \"Data file\", all = T)");
+			
+			qcSummaryNames.add(baseName + ".des");
+		}
+		rscriptParts.add("\n## Summary plots ####\n");
+		
+		String masterName = assayType4R + ".QC.summary";		
+		rscriptParts.add(masterName + " <- rbind(" + StringUtils.join(qcSummaryNames, ",") + ")");
+		rscriptParts.add(masterName + "$sample_type <- as.factor(" + masterName + "$sample_type)");
+		rscriptParts.add(masterName + "$batch <- as.factor(" + masterName + "$batch)");
+		rscriptParts.add(masterName +".melt <- melt(" + masterName + 
+				", id.vars = c(\"sample_type\",\"batch\"), measure.vars = c(\"Observations\",\"Total area\"))");		
+		String pivotName = assayType4R + ".QC.pivot";
+		rscriptParts.add(pivotName + " <- " + masterName + ".melt %>% group_by(sample_type, batch, variable) "
+				+ "%>% summarise(medianVal = median(value, na.rm = T), "
+				+ "meanVal = mean(value, na.rm = T), stDev = sd(value, na.rm = T))");
+		rscriptParts.add(pivotName + "$RSD <- " + pivotName + "$stDev / " + pivotName + "$meanVal * 100");
+		rscriptParts.add(pivotName + "$sample_type <- as.factor(" + pivotName + "$sample_type)");
+		rscriptParts.add(pivotName + "$batch <- as.factor(" + pivotName + "$batch)\n");
+		rscriptParts.add(pivotName + ".counts <- " + pivotName + "[(" + pivotName + "$variable %in% c(\"Observations\")),]\n");
+		
+		rscriptParts.add("featureCountsPlot <- ggplot(" + pivotName + ".counts, aes(x = sample_type, y = medianVal, fill = batch))+");
+		rscriptParts.add("\tgeom_col( position = \"dodge\", width = 0.5, alpha = 0.7, color = \"black\", linewidth = 0.1)+");
+		rscriptParts.add("\t geom_errorbar(aes(ymin = medianVal-stDev, ymax = medianVal+stDev), "
+				+ "position =  position_dodge(width = 0.5), width = 0.2)+");
+		rscriptParts.add("ggtitle(\"" + experimentId + " " + assayType + " median feature counts by sample type / batch\")");
+		rscriptParts.add("ggsave(\"" + experimentId + "-" + assayType + "-featureCounts.png\","
+				+ " plot = featureCountsPlot,  width = 14, height = 8.5)\n");
+
+		rscriptParts.add(pivotName + ".areas <- " + pivotName + "[(" + pivotName + "$variable %in% c(\"Total area\")),]");
+		rscriptParts.add("areasPlot <- ggplot(" + pivotName + ".areas, aes(x = sample_type, y = medianVal, fill = batch))+");
+		rscriptParts.add("geom_col( position = \"dodge\", width = 0.5, alpha = 0.7, color = \"black\", linewidth = 0.1)+");
+		rscriptParts.add("geom_errorbar(aes(ymin = medianVal-stDev, ymax = medianVal+stDev), "
+				+ "position =  position_dodge(width = 0.5), width = 0.2)+");
+		rscriptParts.add("ggtitle(\"" + experimentId + " " + assayType + " median total areas by sample type / batch\")");
+		rscriptParts.add("ggsave(\"" + experimentId + "-" + assayType + "-totalAreas.png\","
+				+ " plot = areasPlot,  width = 14, height = 8.5)\n");
+		
+		String rScriptFileName = experimentId + "-" + assayType + 
+				"-SummaryQC-" + FIOUtils.getTimestamp() + ".R";
+		Path outputPath = Paths.get(
+				rWorkingDir.getAbsolutePath(), rScriptFileName);
+		try {
+		    Files.write(outputPath, 
+		    		rscriptParts,
+		            StandardCharsets.UTF_8,
+		            StandardOpenOption.CREATE, 
+		            StandardOpenOption.TRUNCATE_EXISTING);
+		} catch (IOException e) {
+		    e.printStackTrace();
 		}
 	}
 	

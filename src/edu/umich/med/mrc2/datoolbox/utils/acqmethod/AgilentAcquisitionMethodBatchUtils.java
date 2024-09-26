@@ -61,6 +61,7 @@ import edu.umich.med.mrc2.datoolbox.data.MassAnalyzerType;
 import edu.umich.med.mrc2.datoolbox.data.MsType;
 import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
 import edu.umich.med.mrc2.datoolbox.data.lims.ChromatographicGradient;
+import edu.umich.med.mrc2.datoolbox.data.lims.ChromatographicGradientStep;
 import edu.umich.med.mrc2.datoolbox.data.lims.ChromatographicSeparationType;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataProcessingSoftware;
@@ -71,6 +72,7 @@ import edu.umich.med.mrc2.datoolbox.database.idt.AcquisitionMethodUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.ChromatographyDatabaseUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.database.lims.LIMSDataCache;
+import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
 import edu.umich.med.mrc2.datoolbox.utils.XmlUtils;
 
@@ -1093,6 +1095,61 @@ public class AgilentAcquisitionMethodBatchUtils {
 		try {
 			Files.write(logFile.toPath(),
 					logData, 
+					StandardCharsets.UTF_8, 
+					StandardOpenOption.CREATE,
+					StandardOpenOption.TRUNCATE_EXISTING);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public static void saveGradientToTextFile(
+			ChromatographicGradient gradient, File destination) {
+		
+		String[]mpNames = new String[] {"A","B","C","D"};
+		
+		ArrayList<String>gradientData = new ArrayList<String>();
+		if(gradient.getName() != null && !gradient.getName().isEmpty())
+			gradientData.add(gradient.getName());
+		
+		if(gradient.getDescription() != null && !gradient.getDescription().isEmpty())
+			gradientData.add(gradient.getDescription());
+		
+		if(gradient.getColumnCompartmentTemperature() > 0.0d)
+			gradientData.add("Column compartment temperature: " +
+					MRC2ToolBoxConfiguration.getPpmFormat().format(
+							gradient.getColumnCompartmentTemperature()) + "C");
+		
+		for(int i=0; i<4; i++) {
+			
+			if(gradient.getMobilePhases()[i] != null) {
+				gradientData.add("Channel " + mpNames[i] + ": " 
+						+ gradient.getMobilePhases()[i].getName());
+			}
+		}
+		ArrayList<String>header = new ArrayList<String>();
+		header.add("Start time");
+		header.add("Flow rate");
+		header.add("%A");
+		header.add("%B");
+		header.add("%C");
+		header.add("%D");
+		gradientData.add(StringUtils.join(header, "\t"));
+		ArrayList<String>line = new ArrayList<String>();
+		for(ChromatographicGradientStep step : gradient.getGradientSteps()) {
+			
+			line.clear();
+			line.add(MRC2ToolBoxConfiguration.getPpmFormat().format(step.getStartTime()));
+			line.add(MRC2ToolBoxConfiguration.getPpmFormat().format(step.getFlowRate()));
+			line.add(MRC2ToolBoxConfiguration.getPpmFormat().format(step.getMobilePhaseStartingPercent()[0]));
+			line.add(MRC2ToolBoxConfiguration.getPpmFormat().format(step.getMobilePhaseStartingPercent()[1]));
+			line.add(MRC2ToolBoxConfiguration.getPpmFormat().format(step.getMobilePhaseStartingPercent()[2]));
+			line.add(MRC2ToolBoxConfiguration.getPpmFormat().format(step.getMobilePhaseStartingPercent()[3]));
+			gradientData.add(StringUtils.join(line, "\t"));
+		}		
+		try {
+			Files.write(destination.toPath(),
+					gradientData, 
 					StandardCharsets.UTF_8, 
 					StandardOpenOption.CREATE,
 					StandardOpenOption.TRUNCATE_EXISTING);

@@ -266,6 +266,23 @@ public class MsUtils {
 		Range mzRange = new Range(keyMass - diff, keyMass + diff);
 		return mzRange;
 	}
+	
+	public static double calculateAbsoluteMassError(MsPoint p1, MsPoint p2, MassErrorType type) {		
+		return calculateAbsoluteMassError(p1.getMz(), p2.getMz(), type);
+	}
+	
+	public static double calculateAbsoluteMassError(double p1, double p2, MassErrorType type) {		
+		
+		if(type.equals(MassErrorType.mDa)) {
+			return Math.abs(p1 - p2) / 1000.0d;
+		}
+		if(type.equals(MassErrorType.ppm)) {
+			
+			double maxMass = Math.max(p1, p2);
+			return Math.abs(p1 - p2) / maxMass * 1000000.0d;
+		}		
+		return 0.0d;
+	}
 
 	public static double getAdductMz(double neutralMass, Adduct adduct) {
 
@@ -598,7 +615,6 @@ public class MsUtils {
 			double rtWindow,
 			boolean ignoreAdductAssignment) {
 
-		boolean match = false;
 		MassSpectrum referenceMs = reference.getSpectrum();
 		MassSpectrum possibleMatchMs = possibleMatch.getSpectrum();
 		if(referenceMs == null || possibleMatchMs == null)
@@ -623,16 +639,18 @@ public class MsUtils {
 					rtChecked = true;
 			}
 		}
-		if (!rtChecked && Math.abs(reference.getRetentionTime() - possibleMatch.getRetentionTime()) > rtWindow)
+		if (!rtChecked 
+				&& Math.abs(reference.getRetentionTime() - possibleMatch.getRetentionTime()) > rtWindow)
 			return false;
 
-		double refMz = refMsMs.getParent().getMz();
-		double pmMz = matchMsMs.getParent().getMz();
-		double error = Math.abs(calculateMassError(refMz, pmMz, massErrorType));
+		double error = calculateAbsoluteMassError(
+				refMsMs.getParent().getMz(), 
+				matchMsMs.getParent().getMz(), 
+				massErrorType);
 		if(error < massAccuracy)
 			return true;
-		
-		return match;
+		else
+			return false;
 	}
 	
 	public static Collection<MsPoint[]>getIsotopicGroupsForSpectrum(MassSpectrum spectrum, int maxCharge){

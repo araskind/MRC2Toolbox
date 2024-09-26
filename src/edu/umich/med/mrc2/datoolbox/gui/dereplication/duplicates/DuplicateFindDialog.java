@@ -220,12 +220,10 @@ public class DuplicateFindDialog extends JDialog implements BackedByPreferences{
 	}
 
 	@Override
-	public void setVisible(boolean visible) {
+	public void dispose() {
 
-		if(!visible)
-			savePreferences();
-
-		super.setVisible(visible);
+		savePreferences();
+		super.dispose();
 	}
 }
 

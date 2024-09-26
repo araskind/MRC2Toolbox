@@ -74,8 +74,7 @@ public class FindDuplicateFeaturesTask extends AbstractTask {
 
 			e.printStackTrace();
 			setStatus(TaskStatus.ERROR);
-return;
-
+			return;
 		}
 		setStatus(TaskStatus.FINISHED);
 	}
@@ -121,9 +120,19 @@ return;
 		
 		total = featureList.size();
 		processed = 0;
-		
+		boolean assigned = false;
 		for (MsFeature cf : featureList) {
 			
+			if(isCanceled())
+				return;
+			
+			//	DEBUG - print feature stats if MZ standard deviation > 0.1
+			if(cf.getStatsSummary() != null 
+					&& cf.getStatsSummary().getMzStatistics().getStandardDeviation() > 0.1d) {
+				System.out.println(cf.getName() + " | Charge = "+ cf.getCharge());
+				//	DebugUtils.printMsFeatureStatisticalSummary(cf.getStatsSummary());
+			}			
+			assigned = false;
 			if(assignedFeatures.contains(cf))
 				continue;
 
@@ -134,10 +143,11 @@ return;
 
 					fClust.addFeature(cf, dataPipeline);
 					assignedFeatures.add(cf);
+					assigned = true;
 					break;
 				}
 			}
-			if (!assignedFeatures.contains(cf)) {
+			if (!assigned) {
 
 				MsFeatureCluster newCluster = new MsFeatureCluster();
 				newCluster.addFeature(cf, dataPipeline);
@@ -149,6 +159,25 @@ return;
 		duplicateList = clusters.stream().
 				filter(c -> c.getFeatures().size() > 1).
 				collect(Collectors.toList());
+		
+		//	DEBUG print 
+		Collection<MsFeatureCluster>chargeMismatched = 
+				duplicateList.stream().
+				filter(c -> c.hasChargeMismatch()).
+				collect(Collectors.toList());
+//		if(!chargeMismatched.isEmpty()) {
+//			
+//			System.out.println("\n*************************");
+//			System.out.println("Stats for charge-mismatched");
+//			for(MsFeatureCluster clust :chargeMismatched) {
+//				System.out.println("");
+//				System.out.println(clust.toString());
+//				for(MsFeature f : clust.getFeatures())
+//					DebugUtils.printMsFeatureStatisticalSummary(f.getStatsSummary());
+//				
+//				System.out.println("\n*************************\n");
+//			}
+//		}
 	}
 
 	private void calculateDuplicateScores() {

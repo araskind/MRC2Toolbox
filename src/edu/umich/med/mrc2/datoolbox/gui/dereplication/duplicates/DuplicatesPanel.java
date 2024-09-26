@@ -56,6 +56,7 @@ import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.InformationDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
+import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
@@ -87,10 +88,7 @@ public class DuplicatesPanel extends ClusterDisplayPanel {
 		clusterTree = new DockableClusterTree("DuplicatesPanelDockableClusterTree", "Feature clusters", this, this);
 		clusterTree.getTree().setFeaturePopupMenu(new DuplicateFeaturePopupMenu(this));
 		duplicateSelectionTable =  new DockableDuplicateSelectionTable(this);
-		duplicateFindDialog = new DuplicateFindDialog(this);
-		duplicateMergeDialog = new DuplicateMergeDialog(this);
 		featureDataTable = duplicateSelectionTable.getTable();
-
 		createPanelLayout();
 		finalizeLayout();
 		initActions();
@@ -161,23 +159,17 @@ public class DuplicatesPanel extends ClusterDisplayPanel {
 
 		String command = event.getActionCommand();
 
-		if (command.equals(MainActionCommands.SHOW_FIND_DUPLICATES_DIALOG_COMMAND.getName())) {
-
-			duplicateFindDialog.setLocationRelativeTo(this.getContentPane());
-			duplicateFindDialog.setVisible(true);
-		}
+		if (command.equals(MainActionCommands.SHOW_FIND_DUPLICATES_DIALOG_COMMAND.getName()))
+			setUpDuplicateSearch();
 
 		if (command.equals(MainActionCommands.FIND_DUPLICATES_COMMAND.getName()))
 			findDuplicateFeatures();
 
+		if (command.equals(MainActionCommands.SHOW_DUPLICATES_MERGE_DIALOG_COMMAND.getName()))
+			setUpDuplicateMerge();
+		
 		if (command.equals(MainActionCommands.MERGE_DUPLICATES_COMMAND.getName()))
 			mergeDuplicateFeatures();
-
-		if (command.equals(MainActionCommands.SHOW_DUPLICATES_MERGE_DIALOG_COMMAND.getName())) {
-
-			duplicateMergeDialog.setLocationRelativeTo(this.getContentPane());
-			duplicateMergeDialog.setVisible(true);
-		}
 
 		if (command.equals(MainActionCommands.FILTER_CLUSTERS_COMMAND.getName()))
 			filterClusters();
@@ -196,6 +188,79 @@ public class DuplicatesPanel extends ClusterDisplayPanel {
 		
 		if (command.equals(MainActionCommands.SHOW_ONLY_PROBLEM_CLUSTERS_COMMAND.getName()))
 			showProblemFeatureClusters();		
+	}
+	
+	private void setUpDuplicateSearch() {
+		
+		if(currentExperiment == null 
+				|| activeDataPipeline == null
+				|| !currentExperiment.dataPipelineHasData(activeDataPipeline))
+			return;
+		
+		if (!currentExperiment.statsCalculetedForDataPipeline(activeDataPipeline)) {
+			MessageDialog.showWarningMsg(
+					"Please calculate descriptive statistics first!",
+					this.getContentPane());
+			return;
+		}
+		//	Check if duplicates already found
+		Set<MsFeatureCluster> dups = 
+				currentExperiment.getDuplicateClustersForDataPipeline(activeDataPipeline);
+		if(dups != null && !dups.isEmpty()){
+			int res = MessageDialog.showChoiceWithWarningMsg(
+					"Duplicate search results already exist\n"
+					+ "Do you want to discard them and start the new search?",
+					this.getContentPane());	
+			if(res != JOptionPane.YES_OPTION)
+				return;
+			else {
+				currentExperiment.getDuplicateClustersForDataPipeline(activeDataPipeline).clear();
+				clearPanel();
+			}
+		}		
+		duplicateFindDialog = new DuplicateFindDialog(this);
+		duplicateFindDialog.setLocationRelativeTo(this.getContentPane());
+		duplicateFindDialog.setVisible(true);
+	}
+	
+	private void findDuplicateFeatures() {
+
+		FindDuplicateFeaturesTask fdt = new FindDuplicateFeaturesTask(
+				currentExperiment,
+				activeDataPipeline, 
+				duplicateFindDialog.getMassWindow(),
+				duplicateFindDialog.getRetentionWindow());
+
+		fdt.addTaskListener(this);
+		duplicateFindDialog.dispose();
+		MRC2ToolBoxCore.getTaskController().addTask(fdt);
+	}
+	
+	private void setUpDuplicateMerge() {
+		
+		if(currentExperiment == null 
+				|| activeDataPipeline == null
+				|| !currentExperiment.dataPipelineHasData(activeDataPipeline)
+				|| currentExperiment.getDuplicateClustersForDataPipeline(activeDataPipeline) == null
+				|| currentExperiment.getDuplicateClustersForDataPipeline(activeDataPipeline).isEmpty())
+			return;
+		
+		duplicateMergeDialog = new DuplicateMergeDialog(this);
+		duplicateMergeDialog.setLocationRelativeTo(this.getContentPane());
+		duplicateMergeDialog.setVisible(true);
+	}
+
+	private void mergeDuplicateFeatures() {
+
+		clearPanel();			
+		MergeDuplicateFeaturesTask ddt = 
+				new MergeDuplicateFeaturesTask(
+						currentExperiment,
+						activeDataPipeline, 
+						duplicateMergeDialog.getMergeOption());
+		ddt.addTaskListener(this);
+		duplicateMergeDialog.dispose();
+		MRC2ToolBoxCore.getTaskController().addTask(ddt);			
 	}
 	
 	private void showAllFeatureClusters() {
@@ -272,55 +337,6 @@ public class DuplicatesPanel extends ClusterDisplayPanel {
 					clusterTree.removeFeature(f);
 			}
 		}
-	}
-
-	private void findDuplicateFeatures() {
-
-		duplicateFindDialog.setVisible(false);
-
-		if (currentExperiment != null) {
-
-			if (currentExperiment.dataPipelineHasData(activeDataPipeline)) {
-
-				if (!currentExperiment.statsCalculetedForDataPipeline(activeDataPipeline)) {
-
-					MessageDialog.showWarningMsg("Please calculate descriptive statistics first!");
-					return;
-				}
-				FindDuplicateFeaturesTask fdt = new FindDuplicateFeaturesTask(
-						currentExperiment,
-						activeDataPipeline, 
-						duplicateFindDialog.getMassWindow(),
-						duplicateFindDialog.getRetentionWindow());
-
-				fdt.addTaskListener(this);
-				MRC2ToolBoxCore.getTaskController().addTask(fdt);
-			}
-		}
-	}
-
-	private void mergeDuplicateFeatures() {
-
-		if(currentExperiment == null || activeDataPipeline == null)
-			return;
-
-		if (currentExperiment.dataPipelineHasData(activeDataPipeline)
-				&& currentExperiment.getDuplicateClustersForDataPipeline(activeDataPipeline) != null) {
-
-			if (!currentExperiment.getDuplicateClustersForDataPipeline(activeDataPipeline).isEmpty()) {
-
-				clearPanel();
-				clearPanel();
-				duplicateMergeDialog.setVisible(false);
-				MergeDuplicateFeaturesTask ddt = 
-						new MergeDuplicateFeaturesTask(
-								currentExperiment,
-								activeDataPipeline, 
-								duplicateMergeDialog.getMergeOption());
-				ddt.addTaskListener(this);
-				MRC2ToolBoxCore.getTaskController().addTask(ddt);
-			}
-		}		
 	}
 
 	@Override
@@ -419,6 +435,11 @@ public class DuplicatesPanel extends ClusterDisplayPanel {
 
 		if (!clusterTree.getSelectedFeatures().isEmpty())
 			selectFeatures(clusterTree.getSelectedFeatures());
+		
+		for(MsFeature f : activeCluster.getFeatures()) {
+			System.out.println(f.getName() + " = " + 
+					MRC2ToolBoxConfiguration.getMzFormat().format(f.getSpectrum().getMonoisotopicMz()));
+		}
 	}
 
 	@Override
@@ -435,7 +456,7 @@ public class DuplicatesPanel extends ClusterDisplayPanel {
 		if (currentExperiment != null && activeDataPipeline != null) {
 
 			Set<MsFeatureCluster> clusterList = 
-					currentExperiment.getMsFeatureClustersForDataPipeline(activeDataPipeline);
+					currentExperiment.getDuplicateClustersForDataPipeline(activeDataPipeline);
 			if (clusterList != null)
 				loadFeatureClusters(clusterList);
 		}

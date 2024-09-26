@@ -51,6 +51,7 @@ public class MergeDuplicateFeaturesTask extends AbstractTask {
 	private DataAnalysisProject currentExperiment;
 	private Set<MsFeatureCluster> duplicateList;
 	private DuplicatesCleanupOptions mergeOption;
+	private Matrix msFeatureMatrix;
 
 	public MergeDuplicateFeaturesTask(
 			DataAnalysisProject experiment,
@@ -84,8 +85,20 @@ public class MergeDuplicateFeaturesTask extends AbstractTask {
 
 	@Override
 	public void run() {
-
+		
+		if (duplicateList.isEmpty()) {
+			setStatus(TaskStatus.FINISHED);
+			return;
+		}
 		setStatus(TaskStatus.PROCESSING);
+		try {
+			readFeatureMatrix();
+		} catch (Exception e) {
+
+			e.printStackTrace();
+			setStatus(TaskStatus.ERROR);
+			return;
+		}
 		try {
 			removeDuplicateFeatures();
 			setStatus(TaskStatus.FINISHED);
@@ -93,13 +106,12 @@ public class MergeDuplicateFeaturesTask extends AbstractTask {
 
 			e.printStackTrace();
 			setStatus(TaskStatus.ERROR);
-return;
-
+			return;
 		}
 		setStatus(TaskStatus.FINISHED);
 	}
 	
-	private Matrix readFeatureMatrix() {
+	private void readFeatureMatrix() {
 
 		taskDescription = "Reading MS feature matrix data";
 		processed = 30;
@@ -108,35 +120,44 @@ return;
 				Paths.get(currentExperiment.getExperimentDirectory().getAbsolutePath(), 
 				currentExperiment.getFeatureMatrixFileNameForDataPipeline(activeDataPipeline)).toFile();
 		if (!featureMatrixFile.exists())
-			return null;
+			return;
 		
-		Matrix featureMatrix = null;
+		msFeatureMatrix = null;
 		if (featureMatrixFile.exists()) {
 			try {
-				featureMatrix = Matrix.Factory.load(featureMatrixFile);
+				msFeatureMatrix = Matrix.Factory.load(featureMatrixFile);
 			} catch (ClassNotFoundException | IOException e) {
 				e.printStackTrace();
 				setStatus(TaskStatus.ERROR);
-				return null;				
+				return;				
 			}
-			if (featureMatrix != null) {
+			if (msFeatureMatrix != null) {
 
-				featureMatrix.setMetaDataDimensionMatrix(0, 
+				msFeatureMatrix.setMetaDataDimensionMatrix(0, 
 						currentExperiment.getMetaDataMatrixForDataPipeline(activeDataPipeline, 0));
-				featureMatrix.setMetaDataDimensionMatrix(1, 
+				msFeatureMatrix.setMetaDataDimensionMatrix(1, 
 						currentExperiment.getMetaDataMatrixForDataPipeline(activeDataPipeline, 1));
 			}
 		}		
-		return featureMatrix;
 	}
-
+	
 	public void removeDuplicateFeatures() {
 
-		if (duplicateList.isEmpty())
-			return;
-				
-		Matrix msFeatureMatrix = readFeatureMatrix();		
+		taskDescription = "Merging duplicate feature data for active data pipeline";
+		total = duplicateList.size();
+		processed = 0;
+		Matrix dataMatrix = 
+				currentExperiment.getDataMatrixForDataPipeline(activeDataPipeline);
+		Matrix featureMatrix = dataMatrix.getMetaDataDimensionMatrix(0);
 		
+		for (MsFeatureCluster fclust : duplicateList) {
+			
+			processed++;
+		}
+	}
+
+	public void removeDuplicateFeaturesOld() {
+
 		taskDescription = "Merging duplicate feature data for active data pipeline";
 		total = duplicateList.size();
 		processed = 0;
