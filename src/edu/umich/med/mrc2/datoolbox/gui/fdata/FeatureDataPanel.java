@@ -82,6 +82,7 @@ import edu.umich.med.mrc2.datoolbox.gui.communication.FeatureSetEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.MsFeatureEvent;
 import edu.umich.med.mrc2.datoolbox.gui.cpddatabase.DatabaseSearchSetupDialog;
 import edu.umich.med.mrc2.datoolbox.gui.datexp.DataExplorerPlotFrame;
+import edu.umich.med.mrc2.datoolbox.gui.datexp.msone.MultiSpectraPlotFrame;
 import edu.umich.med.mrc2.datoolbox.gui.dereplication.duplicates.DuplicateMergeDialog;
 import edu.umich.med.mrc2.datoolbox.gui.expdesign.pools.ExperimentPooledSampleManagerDialog;
 import edu.umich.med.mrc2.datoolbox.gui.fdata.cleanup.FeatureCleanupParameters;
@@ -177,6 +178,7 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 	private boolean cleanEmtyFeatures;
 	private MzFrequencyAnalysisSetupDialog mzFrequencyAnalysisSetupDialog;
 	private ExperimentPooledSampleManagerDialog experimentPooledSampleManagerDialog;
+	private MultiSpectraPlotFrame multiSpectraPlotFrame;
 
 	private static final Icon componentIcon = GuiUtils.getIcon("barChart", 16);
 	private static final Icon loadLibraryIcon = GuiUtils.getIcon("loadLibrary", 24);
@@ -455,6 +457,9 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 
 			if (command.equals(MainActionCommands.SHOW_DATA_EXPLORER_FRAME.getName()))
 				showDataExplorerFrame();
+			
+			if (command.equals(MainActionCommands.SHOW_MS_MULTIPLOT_FRAME.getName()))
+				showMsMultiplotFrame();
 			
 			if (command.equals(MainActionCommands.MS_RT_LIBRARY_SEARCH_SETUP_FOR_SELECTED_COMMAND.getName()))
 				showLibrarySearchSetup(TableRowSubset.SELECTED);
@@ -747,7 +752,8 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 			return;
 		
 		if(exportType.equals(MainActionCommands.EXPORT_MZRT_STATISTICS_COMMAND)
-				|| exportType.equals(MainActionCommands.EXPORT_PEAK_WIDTH_STATISTICS_COMMAND)) {
+				|| exportType.equals(MainActionCommands.EXPORT_PEAK_WIDTH_STATISTICS_COMMAND)
+				|| exportType.equals(MainActionCommands.EXPORT_ALL_FEATURE_STATISTICS_COMMAND)) {
 			
 			if(currentExperiment.getFeatureMatrixFileNameForDataPipeline(activeDataPipeline) == null) {
 				MessageDialog.showWarningMsg(
@@ -843,6 +849,21 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 			dataExplorerPlotDialog.setVisible(true);
 			dataExplorerPlotDialog.loadMzRtFromFeatureCollection(activeMsFeatureSet);
 		}
+	}
+	
+	public void showMsMultiplotFrame() {
+		
+		if (currentExperiment == null || activeDataPipeline == null)
+			return;
+		
+		multiSpectraPlotFrame = new MultiSpectraPlotFrame(
+				currentExperiment,activeDataPipeline);
+		multiSpectraPlotFrame.setLocationRelativeTo(this.getContentPane());
+		multiSpectraPlotFrame.setVisible(true);
+		
+		MsFeature firstSelected = featureDataTable.getSelectedFeature();
+		if(firstSelected != null)			
+			multiSpectraPlotFrame.loadFeatureData(firstSelected);
 	}
 
 	private void showMissingIdentifications() {
@@ -1853,6 +1874,8 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 					msf[0], activeDataPipeline, 
 					msf[1], activeDataPipeline);
 		}
+		if(multiSpectraPlotFrame != null && multiSpectraPlotFrame.isVisible())
+			multiSpectraPlotFrame.loadFeatureData(firstSelected);	
 	}
 
 	@Override

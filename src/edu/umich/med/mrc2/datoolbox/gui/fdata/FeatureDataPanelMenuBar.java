@@ -82,6 +82,8 @@ public class FeatureDataPanelMenuBar extends CommonMenuBar {
 	private static final Icon featureCleanupIcon = GuiUtils.getIcon("clearAnnotation", 24);
 	private static final Icon mzFrequencyIcon = GuiUtils.getIcon("mzFrequency", 24);
 	private static final Icon exportStatsIcon = GuiUtils.getIcon("exportStats", 24);
+	private static final Icon multiSpectraIcon = GuiUtils.getIcon("multiSpectra", 24);
+	private static final Icon exportAuxDataMatrixIcon = GuiUtils.getIcon("exportAuxDataMatrix", 24);
 
 	// Menus
 	private JMenu
@@ -130,6 +132,7 @@ public class FeatureDataPanelMenuBar extends CommonMenuBar {
 		exportForRAnalysisMenuItem,
 		exportMzRtStatsMenuItem,
 		exportPeakWidthStatsMenuItem,
+		exportAllStatsMenuItem,
 		exportDialogMenuItem,
 		exportIntegratedReportMenuItem,
 		exportMWTabReportMenuItem;
@@ -142,7 +145,8 @@ public class FeatureDataPanelMenuBar extends CommonMenuBar {
 	
 	// Graphics items
 	private JMenuItem
-		bubblePlotMenuItem;
+		bubblePlotMenuItem,
+		multiMsPlotMenuItem;
 
 	public FeatureDataPanelMenuBar(ActionListener listener) {
 
@@ -261,6 +265,8 @@ public class FeatureDataPanelMenuBar extends CommonMenuBar {
 				MainActionCommands.EXPORT_RESULTS_4R_COMMAND, 
 				exportResults4RIcon);
 		
+		exportMenu.addSeparator();
+		
 		exportMzRtStatsMenuItem = addItem(exportMenu, 
 				MainActionCommands.EXPORT_MZRT_STATISTICS_COMMAND, 
 				exportMzRtStatsIcon);
@@ -268,6 +274,10 @@ public class FeatureDataPanelMenuBar extends CommonMenuBar {
 		exportPeakWidthStatsMenuItem = addItem(exportMenu, 
 				MainActionCommands.EXPORT_PEAK_WIDTH_STATISTICS_COMMAND, 
 				exportPeakWidthStatsIcon);
+		
+		exportAllStatsMenuItem = addItem(exportMenu, 
+				MainActionCommands.EXPORT_ALL_FEATURE_STATISTICS_COMMAND, 
+				exportAuxDataMatrixIcon);
 		
 		exportMenu.addSeparator();
 		
@@ -315,7 +325,10 @@ public class FeatureDataPanelMenuBar extends CommonMenuBar {
 		
 		bubblePlotMenuItem = addItem(graphicsMenu,  
 				MainActionCommands.SHOW_DATA_EXPLORER_FRAME, 
-				bubblePlotIcon);
+				bubblePlotIcon);		
+		multiMsPlotMenuItem = addItem(graphicsMenu,  
+				MainActionCommands.SHOW_MS_MULTIPLOT_FRAME, 
+				multiSpectraIcon);
 		
 		add(graphicsMenu);
 		

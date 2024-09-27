@@ -81,6 +81,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 import edu.umich.med.mrc2.datoolbox.utils.DataExportUtils;
+import edu.umich.med.mrc2.datoolbox.utils.ExperimentUtils;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 import edu.umich.med.mrc2.datoolbox.utils.WorklistUtils;
 
@@ -237,6 +238,16 @@ public class DataExportTask extends AbstractTask {
 				return;
 			}
 		}
+		if (exportType.equals(MainActionCommands.EXPORT_ALL_FEATURE_STATISTICS_COMMAND)) {
+			try {
+				writeMZRTPeakWidthDataExportFiles();
+				setStatus(TaskStatus.FINISHED);
+			} catch (Exception e) {
+				e.printStackTrace();
+				setStatus(TaskStatus.ERROR);
+				return;
+			}
+		}		
 		if (exportType.equals(MainActionCommands.EXPORT_FEATURE_STATISTICS_COMMAND)) {
 			try {
 				writeFeatureQCDataExportFile();
@@ -252,7 +263,8 @@ public class DataExportTask extends AbstractTask {
 	private void writeMZRTDataExportFile() throws Exception {
 
 		taskDescription = "Reading feature data matrix ...";
-		Matrix dataMatrix = readFeatureMatrix();
+		Matrix dataMatrix = 
+				ExperimentUtils.readFeatureMatrix(currentExperiment, dataPipeline);
 		if(dataMatrix == null) {
 			errorMessage = "Unable to read feature data matrix file";
 			setStatus(TaskStatus.ERROR);
@@ -390,7 +402,8 @@ public class DataExportTask extends AbstractTask {
 	private void writePeakWidthDataExportFile() throws Exception {
 		
 		taskDescription = "Reading feature data matrix ...";
-		Matrix dataMatrix = readFeatureMatrix();
+		Matrix dataMatrix = 
+				ExperimentUtils.readFeatureMatrix(currentExperiment, dataPipeline);
 		if(dataMatrix == null) {
 			errorMessage = "Unable to read feature data matrix file";
 			setStatus(TaskStatus.ERROR);
@@ -509,31 +522,156 @@ public class DataExportTask extends AbstractTask {
 		pwWriter.close();
 	}
 	
-	private Matrix readFeatureMatrix() {
-		
-		File featureMatrixFile = Paths.get(currentExperiment.getExperimentDirectory().getAbsolutePath(), 
-				currentExperiment.getFeatureMatrixFileNameForDataPipeline(dataPipeline)).toFile();
-		if (!featureMatrixFile.exists())
-			return null;
-		
-		Matrix featureMatrix = null;
-		if (featureMatrixFile.exists()) {
-			try {
-				featureMatrix = Matrix.Factory.load(featureMatrixFile);
-			} catch (ClassNotFoundException | IOException e) {
-				e.printStackTrace();
-				setStatus(TaskStatus.ERROR);
-				return null;
-			}
-			if (featureMatrix != null) {
+	private void writeMZRTPeakWidthDataExportFiles() throws Exception {
 
-				featureMatrix.setMetaDataDimensionMatrix(0, 
-						currentExperiment.getMetaDataMatrixForDataPipeline(dataPipeline, 0));
-				featureMatrix.setMetaDataDimensionMatrix(1, 
-						currentExperiment.getMetaDataMatrixForDataPipeline(dataPipeline, 1));
+		taskDescription = "Reading feature data matrix ...";
+		Matrix dataMatrix = 
+				ExperimentUtils.readFeatureMatrix(currentExperiment, dataPipeline);
+		if(dataMatrix == null) {
+			errorMessage = "Unable to read feature data matrix file";
+			setStatus(TaskStatus.ERROR);
+			return;
+		}
+		taskDescription = "Writing M/Z, RT & peak width data export files ...";
+		String parent = exportFile.getParentFile().getAbsolutePath();
+		String baseName = FileNameUtils.getBaseName(exportFile.getName());
+		
+		File mzExportFile = Paths.get(parent, baseName + "_MZ_VALUES.txt").toFile();
+		final Writer mzWriter = new BufferedWriter(new FileWriter(mzExportFile));
+		File rtExportFile = Paths.get(parent, baseName + "_RT_VALUES.txt").toFile();
+		final Writer rtWriter = new BufferedWriter(new FileWriter(rtExportFile));
+		File peakWidthExportFile = Paths.get(parent, baseName + "_PEAK_WIDTH_VALUES.txt").toFile();
+		final Writer pwWriter = new BufferedWriter(new FileWriter(peakWidthExportFile));
+
+		// Create header
+		TreeMap<ExperimentalSample, TreeMap<DataPipeline, DataFile[]>>sampleFileMap
+			= DataExportUtils.createSampleFileMapForDataPipeline(
+					currentExperiment, experimentDesignSubset, dataPipeline, namingField);
+
+		String[] columnList =
+			DataExportUtils.createSampleColumnNameArrayForDataPipeline(
+					sampleFileMap, namingField, dataPipeline);
+
+		String[] header = new String[columnList.length + 9];
+		int columnCount = 0;
+		header[columnCount] = BinnerExportFields.FEATURE_NAME.getName();
+		header[++columnCount] = BinnerExportFields.METABOLITE_NAME.getName();
+		header[++columnCount] = BinnerExportFields.BINNER_NAME.getName();
+		header[++columnCount] = BinnerExportFields.NEUTRAL_MASS.getName();
+		header[++columnCount] = BinnerExportFields.BINNER_MZ.getName();
+		header[++columnCount] = BinnerExportFields.RT_EXPECTED.getName();
+		header[++columnCount] = BinnerExportFields.RT_OBSERVED.getName();
+		header[++columnCount] = BinnerExportFields.MZ.getName();
+		header[++columnCount] = BinnerExportFields.CHARGE.getName();
+
+		HashMap<DataFile, Integer> fileColumnMap = 
+				DataExportUtils.createFileColumnMap(sampleFileMap, columnCount);
+
+		if(replaceSpecialCharacters) {
+			for(String columnName : columnList)
+				header[++columnCount] = columnName.replaceAll("\\p{Punct}+", "-");
+		}
+		else {
+			for(String columnName : columnList)
+				header[++columnCount] = columnName;
+		}
+		String headerString = StringUtils.join(header, columnSeparator) + lineSeparator;
+		mzWriter.append(headerString);
+		rtWriter.append(headerString);
+		pwWriter.append(headerString);
+
+		MsFeature[] featureList = msFeatureSet4export.stream().
+				sorted(new MsFeatureComparator(SortProperty.RT)).toArray(size -> new MsFeature[size]);
+
+		long[] coordinates = new long[2];
+		total = featureList.length;
+		processed = 0;
+
+		for( MsFeature msf : featureList){
+
+			String[] mzLine = new String[header.length];
+			columnCount = 0;
+			//	String compoundName = msf.getName();
+			String compoundName = msf.getBicMetaboliteName();
+			if(msf.isIdentified()){
+
+				compoundName = msf.getPrimaryIdentity().getCompoundName();
+
+				if(msf.getPrimaryIdentity().getMsRtLibraryMatch() != null) {
+
+					AdductMatch tam = msf.getPrimaryIdentity().getMsRtLibraryMatch().getTopAdductMatch();
+					if(tam != null)
+						compoundName += " (" + tam.getLibraryMatch().getName() + ")";
+				}
 			}
-		}		
-		return featureMatrix;
+			double binnerMass =
+				MsUtils.calculateModifiedMz(msf.getNeutralMass(),
+						AdductManager.getDefaultAdductForPolarity(msf.getPolarity()));
+			if(msf.getSpectrum().getPrimaryAdduct() != null 
+					&& Math.abs(msf.getSpectrum().getPrimaryAdduct().getCharge()) == 1
+					&& msf.getSpectrum().getPrimaryAdduct().getOligomericState() > 1)
+				binnerMass =msf.getMonoisotopicMz();
+				
+			mzLine[columnCount] = msf.getName();
+			mzLine[++columnCount] = compoundName;
+			mzLine[++columnCount] = DataPrefix.MS_LIBRARY_UNKNOWN_TARGET.getName() + 
+									mzFormat.format(msf.getNeutralMass()) + "_" + 
+									rtFormat.format(msf.getRetentionTime());
+			mzLine[++columnCount] = mzFormat.format(msf.getNeutralMass());
+			mzLine[++columnCount] = mzFormat.format(binnerMass);
+			mzLine[++columnCount] = rtFormat.format(msf.getRetentionTime());
+			mzLine[++columnCount] = rtFormat.format(msf.getStatsSummary().getMedianObservedRetention());
+			mzLine[++columnCount] = mzFormat.format(msf.getMonoisotopicMz());
+			mzLine[++columnCount] = Integer.toString(msf.getCharge());
+
+			String[] rtLine = Arrays.copyOf(mzLine, mzLine.length);
+			String[] pwLine = Arrays.copyOf(mzLine, mzLine.length);
+			
+			// Data
+			coordinates[1] = dataMatrix.getColumnForLabel(msf);
+			for (Entry<ExperimentalSample, TreeMap<DataPipeline, DataFile[]>> entry : sampleFileMap.entrySet()) {
+
+				for(DataFile df : entry.getValue().get(dataPipeline)) {
+
+					SimpleMsFeature value = null;
+					coordinates[0] = dataMatrix.getRowForLabel(df);
+					if(coordinates[0] >= 0) //	TODO find out why it happens - screwed up design cleanup?
+						value = (SimpleMsFeature)dataMatrix.getAsObject(coordinates);
+					else {
+						System.out.println(df.getName());
+					}
+					String mzString = "";
+					String rtString = "";
+					String pwString = "";
+					if(value != null) {
+						mzString = MRC2ToolBoxConfiguration.defaultMzFormat.format(
+								value.getObservedSpectrum().getMonoisotopicMz());
+						rtString = MRC2ToolBoxConfiguration.defaultRtFormat.format(
+								value.getRetentionTime());
+						if(value.getRtRange() != null) {
+							pwString = MRC2ToolBoxConfiguration.defaultRtFormat.format(
+								value.getRtRange().getSize());
+						}
+					}
+					mzLine[fileColumnMap.get(df)] = mzString;
+					rtLine[fileColumnMap.get(df)] = rtString;
+					pwLine[fileColumnMap.get(df)] = pwString;
+				}
+			}			
+			mzWriter.append(StringUtils.join(mzLine, columnSeparator));
+			mzWriter.append(lineSeparator);
+			rtWriter.append(StringUtils.join(rtLine, columnSeparator));
+			rtWriter.append(lineSeparator);
+			pwWriter.append(StringUtils.join(pwLine, columnSeparator));
+			pwWriter.append(lineSeparator);
+			processed++;
+		}
+		mzWriter.flush();
+		mzWriter.close();			
+		rtWriter.flush();
+		rtWriter.close();	
+		pwWriter.flush();
+		pwWriter.close();
 	}
 
 	private void writeManifestFile() {
@@ -847,7 +985,7 @@ public class DataExportTask extends AbstractTask {
 	
 	private void writeFeatureQCDataExportFile() {
 		
-		taskDescription = "Writing data export file for Metabolomics Workbench ...";
+		taskDescription = "Writing data export file for feature statistics ...";
 		List<MsFeature> featureList = msFeatureSet4export.stream().
 				sorted(new MsFeatureComparator(SortProperty.RT)).collect(Collectors.toList());
 		total = featureList.size();

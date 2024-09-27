@@ -294,6 +294,7 @@ public enum MainActionCommands {
 	EXPORT_RESULTS_TO_MWTAB_COMMAND("Export experiment report in MWTab format"),
 	EXPORT_MZRT_STATISTICS_COMMAND("Export M/Z & RT data for individual samples"),
 	EXPORT_PEAK_WIDTH_STATISTICS_COMMAND("Export peak width data for individual samples"),
+	EXPORT_ALL_FEATURE_STATISTICS_COMMAND("Export M/Z, RT & peak width data for individual samples"),
 	SHOW_RAWA_DATA_UPLOAD_PREP_DIALOG("Prepare raw data for upload"),
 	EXPORT_FEATURE_STATISTICS_COMMAND("Export feature statistics for active feature set"),
 	
@@ -449,7 +450,8 @@ public enum MainActionCommands {
 	FIND_REATURES_BY_ADDUCT_MASS("Find feaures with adduct masses"),
 	SHOW_DATA_EXPLORER_FRAME("Show graphical data explorer window"),
 	SHOW_MZ_RT_PLOT_FOAR_ACTIVE_FEATURE_SET("Show M/Z - RT plot for active feature set"),
-
+	SHOW_MS_MULTIPLOT_FRAME("Show MS multiplot window"),
+	
 	//	LIMS commands
 	REFRESH_LIMS_DATA_COMMAND("Load/refresh data from LIMS"),
 	SHOW_DATA_UPLOAD_WIZARD_COMMAND("Show data upload wizard"),

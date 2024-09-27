@@ -99,40 +99,26 @@
 									<root>true</root>
 									<content delegate="SplitDockStationFactory">
 										<fullscreen-action>false</fullscreen-action>
-										<node nodeId="1600214236975" orientation="VERTICAL" divider="0.3971690258118235">
-											<node nodeId="1600214254698" orientation="HORIZONTAL" divider="0.29376854599406527">
-												<leaf id="2" nodeId="1600214254696">
-													<placeholders>
-														<placeholder>dock.single.DockableLabNoteSearchForm</placeholder>
-													</placeholders>
-												</leaf>
-												<leaf id="1" nodeId="1600213803647">
-													<placeholders>
-														<placeholder>dock.single.DockableLabNotesTable</placeholder>
-													</placeholders>
-													<placeholder-map>
-														<version>0</version>
-														<format>dock.PlaceholderList</format>
-														<entry>
-															<key shared="false">
-																<placeholder>dock.single.DockableLabNotesTable</placeholder>
-															</key>
-														</entry>
-													</placeholder-map>
-												</leaf>
-											</node>
-											<node nodeId="1600214241002" orientation="HORIZONTAL" divider="0.5984174085064293">
-												<leaf id="0" nodeId="1600214236973">
-													<placeholders>
-														<placeholder>dock.single.LabNoteBookPanelDockableRTFEditor</placeholder>
-													</placeholders>
-												</leaf>
-												<leaf id="3" nodeId="1600214241000">
-													<placeholders>
-														<placeholder>dock.single.DockableLabNotePlainTextViewer</placeholder>
-													</placeholders>
-												</leaf>
-											</node>
+										<node nodeId="1727386224658" orientation="VERTICAL" divider="0.25">
+											<leaf id="1" nodeId="1727386001801">
+												<placeholders>
+													<placeholder>dock.single.DockableMZandRTvariationPlotPanel</placeholder>
+												</placeholders>
+												<placeholder-map>
+													<version>0</version>
+													<format>dock.PlaceholderList</format>
+													<entry>
+														<key shared="false">
+															<placeholder>dock.single.DockableMZandRTvariationPlotPanel</placeholder>
+														</key>
+													</entry>
+												</placeholder-map>
+											</leaf>
+											<leaf id="0" nodeId="1727386224656">
+												<placeholders>
+													<placeholder>dock.single.DockableMultispectrumPlotPanel</placeholder>
+												</placeholders>
+											</leaf>
 										</node>
 									</content>
 								</delegate>
@@ -144,40 +130,20 @@
 							</adjacent>
 							<children ignore="false">
 								<child>
-									<layout factory="predefined" placeholder="dock.single.LabNoteBookPanelDockableRTFEditor">
-										<replacement id="dockablesingle LabNoteBookPanelDockableRTFEditor"/>
+									<layout factory="predefined" placeholder="dock.single.DockableMultispectrumPlotPanel">
+										<replacement id="dockablesingle DockableMultispectrumPlotPanel"/>
 										<delegate id="delegate_ccontrol backup factory id">
-											<id>LabNoteBookPanelDockableRTFEditor</id>
+											<id>DockableMultispectrumPlotPanel</id>
 											<area/>
 										</delegate>
 									</layout>
 									<children ignore="false"/>
 								</child>
 								<child>
-									<layout factory="predefined" placeholder="dock.single.DockableLabNotesTable">
-										<replacement id="dockablesingle DockableLabNotesTable"/>
+									<layout factory="predefined" placeholder="dock.single.DockableMZandRTvariationPlotPanel">
+										<replacement id="dockablesingle DockableMZandRTvariationPlotPanel"/>
 										<delegate id="delegate_ccontrol backup factory id">
-											<id>DockableLabNotesTable</id>
-											<area/>
-										</delegate>
-									</layout>
-									<children ignore="false"/>
-								</child>
-								<child>
-									<layout factory="predefined" placeholder="dock.single.DockableLabNoteSearchForm">
-										<replacement id="dockablesingle DockableLabNoteSearchForm"/>
-										<delegate id="delegate_ccontrol backup factory id">
-											<id>DockableLabNoteSearchForm</id>
-											<area/>
-										</delegate>
-									</layout>
-									<children ignore="false"/>
-								</child>
-								<child>
-									<layout factory="predefined" placeholder="dock.single.DockableLabNotePlainTextViewer">
-										<replacement id="dockablesingle DockableLabNotePlainTextViewer"/>
-										<delegate id="delegate_ccontrol backup factory id">
-											<id>DockableLabNotePlainTextViewer</id>
+											<id>DockableMZandRTvariationPlotPanel</id>
 											<area/>
 										</delegate>
 									</layout>
@@ -211,7 +177,7 @@
 				</base>
 				<modes>
 					<dockables>
-						<entry id="single LabNoteBookPanelDockableRTFEditor" current="dock.mode.normal">
+						<entry id="single DockableMZandRTvariationPlotPanel" current="dock.mode.normal">
 							<history>
 								<mode>dock.mode.normal</mode>
 							</history>
@@ -222,17 +188,20 @@
 									<applicationDefined>false</applicationDefined>
 									<location>
 										<property factory="SplitDockPlaceholderProperty">
-											<placeholder>dock.single.LabNoteBookPanelDockableRTFEditor</placeholder>
+											<placeholder>dock.single.DockableMZandRTvariationPlotPanel</placeholder>
 											<backup-path>
-												<node location="BOTTOM" size="0.75" id="1600214236975"/>
-												<leaf id="1600214236973"/>
+												<leaf id="1727386001801"/>
 											</backup-path>
+										</property>
+										<property factory="StackDockPropertyFactory">
+											<index>0</index>
+											<placeholder>dock.single.DockableMZandRTvariationPlotPanel</placeholder>
 										</property>
 									</location>
 								</property>
 							</properties>
 						</entry>
-						<entry id="single DockableLabNoteSearchForm" current="dock.mode.normal">
+						<entry id="single DockableMultispectrumPlotPanel" current="dock.mode.normal">
 							<history>
 								<mode>dock.mode.normal</mode>
 							</history>
@@ -243,56 +212,14 @@
 									<applicationDefined>false</applicationDefined>
 									<location>
 										<property factory="SplitDockPlaceholderProperty">
-											<placeholder>dock.single.DockableLabNoteSearchForm</placeholder>
+											<placeholder>dock.single.DockableMultispectrumPlotPanel</placeholder>
 											<backup-path>
-												<node location="TOP" size="0.3971690258118235" id="1600214236975"/>
-												<node location="LEFT" size="0.29376854599406527" id="1600214254698"/>
-												<leaf id="1600214254696"/>
+												<leaf id="1727386001801"/>
 											</backup-path>
 										</property>
-									</location>
-								</property>
-							</properties>
-						</entry>
-						<entry id="single DockableLabNotesTable" current="dock.mode.normal">
-							<history>
-								<mode>dock.mode.normal</mode>
-							</history>
-							<properties>
-								<property id="dock.mode.normal">
-									<mode>dock.mode.normal</mode>
-									<root>ccontrol center</root>
-									<applicationDefined>false</applicationDefined>
-									<location>
-										<property factory="SplitDockPlaceholderProperty">
-											<placeholder>dock.single.DockableLabNotesTable</placeholder>
-											<backup-path>
-												<node location="TOP" size="0.3971690258118235" id="1600214236975"/>
-												<node location="RIGHT" size="0.7062314540059347" id="1600214254698"/>
-												<leaf id="1600213803647"/>
-											</backup-path>
-										</property>
-									</location>
-								</property>
-							</properties>
-						</entry>
-						<entry id="single DockableLabNotePlainTextViewer" current="dock.mode.normal">
-							<history>
-								<mode>dock.mode.normal</mode>
-							</history>
-							<properties>
-								<property id="dock.mode.normal">
-									<mode>dock.mode.normal</mode>
-									<root>ccontrol center</root>
-									<applicationDefined>false</applicationDefined>
-									<location>
-										<property factory="SplitDockPlaceholderProperty">
-											<placeholder>dock.single.DockableLabNotePlainTextViewer</placeholder>
-											<backup-path>
-												<node location="BOTTOM" size="0.75" id="1600214236975"/>
-												<node location="RIGHT" size="0.13254203758654803" id="1600214241002"/>
-												<leaf id="1600214241000"/>
-											</backup-path>
+										<property factory="StackDockPropertyFactory">
+											<index>1</index>
+											<placeholder>dock.single.DockableMultispectrumPlotPanel</placeholder>
 										</property>
 									</location>
 								</property>

@@ -47,6 +47,7 @@ import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
+import org.ujmp.core.Matrix;
 
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.io.xml.StaxDriver;
@@ -230,6 +231,34 @@ public class ExperimentUtils {
 		else {
 			return Arrays.asList(idListString.split(","));
 		}
+	}
+	
+	public static Matrix readFeatureMatrix(			
+			DataAnalysisProject currentExperiment,
+			DataPipeline dataPipeline) {
+		
+		File featureMatrixFile = Paths.get(currentExperiment.getExperimentDirectory().getAbsolutePath(), 
+				currentExperiment.getFeatureMatrixFileNameForDataPipeline(dataPipeline)).toFile();
+		if (!featureMatrixFile.exists())
+			return null;
+		
+		Matrix featureMatrix = null;
+		if (featureMatrixFile.exists()) {
+			try {
+				featureMatrix = Matrix.Factory.load(featureMatrixFile);
+			} catch (ClassNotFoundException | IOException e) {
+				e.printStackTrace();
+				return null;
+			}
+			if (featureMatrix != null) {
+
+				featureMatrix.setMetaDataDimensionMatrix(0, 
+						currentExperiment.getMetaDataMatrixForDataPipeline(dataPipeline, 0));
+				featureMatrix.setMetaDataDimensionMatrix(1, 
+						currentExperiment.getMetaDataMatrixForDataPipeline(dataPipeline, 1));
+			}
+		}		
+		return featureMatrix;
 	}
 }
 
