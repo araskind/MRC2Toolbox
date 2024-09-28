@@ -99,7 +99,7 @@
 									<root>true</root>
 									<content delegate="SplitDockStationFactory">
 										<fullscreen-action>false</fullscreen-action>
-										<node nodeId="1727386224658" orientation="VERTICAL" divider="0.25">
+										<node nodeId="1727386224658" orientation="VERTICAL" divider="0.31400437636761486">
 											<leaf id="1" nodeId="1727386001801">
 												<placeholders>
 													<placeholder>dock.single.DockableMZandRTvariationPlotPanel</placeholder>

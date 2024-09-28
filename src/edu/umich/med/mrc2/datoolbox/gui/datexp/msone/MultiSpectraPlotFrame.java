@@ -29,6 +29,8 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.prefs.Preferences;
 
 import javax.swing.Icon;
@@ -42,7 +44,9 @@ import bibliothek.gui.dock.common.CControl;
 import bibliothek.gui.dock.common.CGrid;
 import bibliothek.gui.dock.common.intern.CDockable;
 import bibliothek.gui.dock.common.theme.ThemeMap;
+import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
+import edu.umich.med.mrc2.datoolbox.data.SimpleMsFeature;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.gui.main.PersistentLayout;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
@@ -87,8 +91,8 @@ public class MultiSpectraPlotFrame extends JFrame
 		this.dataPipeline = dataPipeline;
 		
 		setIconImage(((ImageIcon) multiSpectraIcon).getImage());
-		setSize(new Dimension(800, 1000));
-		setPreferredSize(new Dimension(800, 1000));
+		setSize(new Dimension(1000, 1000));
+		setPreferredSize(new Dimension(1000, 1000));
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		getContentPane().setLayout(new BorderLayout(0, 0));
 		
@@ -248,10 +252,33 @@ public class MultiSpectraPlotFrame extends JFrame
 
 	public void loadFeatureData(MsFeature feature) {
 
-		mzRTvariationPlotPanel.loadFeatureData(feature);
+		activeFeature = feature;
+		Map<DataFile,SimpleMsFeature>fileFeatureMap = createFileFeatureMap(activeFeature);
+		mzRTvariationPlotPanel.loadFeatureData(activeFeature, fileFeatureMap);
 	}
 	
-
+	private Map<DataFile,SimpleMsFeature>createFileFeatureMap(MsFeature feature) {
+		
+		Map<DataFile,SimpleMsFeature>fileFeatureMap = new HashMap<DataFile,SimpleMsFeature>();
+		long[] coordinates = new long[2];
+		coordinates[1] = featureDataMatrix.getColumnForLabel(feature);
+		
+		long[] fileCoordinates = new long[2];
+		fileCoordinates[1] = 0;
+		
+		Matrix dataFileMatrix = featureDataMatrix.getMetaDataDimensionMatrix(1);
+		for(int i=0; i<dataFileMatrix.getRowCount(); i++) {
+			
+			fileCoordinates[0] = i;
+			DataFile df = (DataFile) dataFileMatrix.getAsObject(fileCoordinates);
+			
+			coordinates[0] = i;
+			SimpleMsFeature msf = (SimpleMsFeature)featureDataMatrix.getAsObject(coordinates);
+			
+			fileFeatureMap.put(df, msf);
+		}
+		return fileFeatureMap;
+	}
 }
 
 

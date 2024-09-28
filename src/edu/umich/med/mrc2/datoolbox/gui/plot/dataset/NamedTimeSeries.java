@@ -34,7 +34,8 @@ public class NamedTimeSeries extends TimeSeries {
 	 * 
 	 */
 	private static final long serialVersionUID = -6516578883875846474L;
-	private ArrayList<String> labels;
+	
+	protected ArrayList<String> labels;
 
 	public NamedTimeSeries(Comparable name) {
 

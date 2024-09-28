@@ -49,6 +49,11 @@ public class TimedScatterDataSet extends TimeSeriesCollection {
 	private MsFeature[] featuresToPlot;
 	private DataAnalysisProject experiment;
 
+	public TimedScatterDataSet() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
+
 	public TimedScatterDataSet(
 			Map<DataPipeline,Collection<MsFeature>> selectedFeaturesMap, 
 			ExperimentDesignSubset activeDesign, 

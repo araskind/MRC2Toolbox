@@ -608,6 +608,7 @@ public class GuiUtils {
 
 		SimpleButtonAction button = new SimpleButtonAction();
 		button.setText(text);
+		button.setTooltip(text);
 		button.setIcon(icon);
 		button.setCommand(command);
 		button.addActionListener(listener);

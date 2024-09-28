@@ -22,16 +22,44 @@
 package edu.umich.med.mrc2.datoolbox.gui.datexp.msone;
 
 import java.awt.BorderLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.Map;
 
 import javax.swing.Icon;
 
+import bibliothek.gui.dock.action.DefaultDockActionSource;
+import bibliothek.gui.dock.action.LocationHint;
+import bibliothek.gui.dock.action.actions.SimpleButtonAction;
 import bibliothek.gui.dock.common.DefaultSingleCDockable;
+import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
+import edu.umich.med.mrc2.datoolbox.data.SimpleMsFeature;
+import edu.umich.med.mrc2.datoolbox.data.compare.ChartColorOption;
+import edu.umich.med.mrc2.datoolbox.data.enums.FileSortingOrder;
+import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
+import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
+import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 
-public class DockableMZandRTvariationPlotPanel extends DefaultSingleCDockable {
+public class DockableMZandRTvariationPlotPanel extends DefaultSingleCDockable implements ActionListener{
 
+	protected static final Icon sortByNameIcon = GuiUtils.getIcon("sortByClusterName", 16);
 	protected static final Icon sortByTimeIcon = GuiUtils.getIcon("sortByTime", 16);
+	protected static final Icon colorByFileIcon = GuiUtils.getIcon("barChart", 16);
+	protected static final Icon colorBySampleTypeIcon = GuiUtils.getIcon("barChartGrouped", 16);
+	
+	protected FileSortingOrder sortingOrder; 
+	protected ChartColorOption chartColorOption;
+	
+	protected DataAnalysisProject currentExperiment;
+	protected DataPipeline dataPipeline;
+	protected FeaturePropertiesTimelinePlot featurePropertiesTimelinePlot;
+	protected SimpleButtonAction sortOrderButton;
+	protected SimpleButtonAction colorOptionButton;
+	
+	protected MsFeature activeFeature;
+	protected Map<DataFile, SimpleMsFeature> fileFeatureMap;
 	
 	public DockableMZandRTvariationPlotPanel() {
 
@@ -39,11 +67,112 @@ public class DockableMZandRTvariationPlotPanel extends DefaultSingleCDockable {
 				"MZ and RT values for individual features", null, Permissions.MIN_MAX_STACK);
 		setCloseable(false);
 		setLayout(new BorderLayout(0, 0));
+		featurePropertiesTimelinePlot = new FeaturePropertiesTimelinePlot();
+		add(featurePropertiesTimelinePlot, BorderLayout.CENTER);
 		
+		sortingOrder = FileSortingOrder.TIMESTAMP;
+		chartColorOption = ChartColorOption.BY_SAMPLE_TYPE;
+		initButtons();
 	}	
 	
-	public void loadFeatureData(MsFeature feature) {
-		// TODO Auto-generated method stub
+	private void initButtons() {
+
+		DefaultDockActionSource actions = new DefaultDockActionSource(
+				new LocationHint(LocationHint.DOCKABLE, LocationHint.LEFT));
+
+		sortOrderButton = GuiUtils.setupButtonAction(
+				MainActionCommands.SORT_BY_FILE_NAME_COMMAND.getName(), 
+				MainActionCommands.SORT_BY_FILE_NAME_COMMAND.getName(), 
+				sortByTimeIcon, this);
+		actions.add(sortOrderButton);
 		
+		colorOptionButton = GuiUtils.setupButtonAction(
+				MainActionCommands.COLOR_BY_FILE_NAME_COMMAND.getName(), 
+				MainActionCommands.COLOR_BY_FILE_NAME_COMMAND.getName(), 
+				colorBySampleTypeIcon, this);		
+		actions.add(colorOptionButton);
+		actions.addSeparator();
+		intern().setActionOffers(actions);
+	}	
+	
+	public void loadFeatureData(
+			MsFeature feature, 
+			Map<DataFile, SimpleMsFeature> fileFeatureMap) {
+
+		this.activeFeature = feature;
+		this.fileFeatureMap = fileFeatureMap;
+		featurePropertiesTimelinePlot.showFeatureData(
+				fileFeatureMap, sortingOrder, chartColorOption, currentExperiment, dataPipeline);
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+
+		String command = e.getActionCommand();
+		if(command.equals(MainActionCommands.SORT_BY_FILE_NAME_COMMAND.getName()))
+			sortDataByFileName();
+		
+		if(command.equals(MainActionCommands.SORT_BY_INJECTION_TIME_COMMAND.getName()))
+			sortDataByInjectionTime();
+			
+		if(command.equals(MainActionCommands.COLOR_BY_FILE_NAME_COMMAND.getName()))
+			colorByDataFile();
+		
+		if(command.equals(MainActionCommands.COLOR_BY_SAMPLE_TYPE_COMMAND.getName()))
+			colorBySampleType();
+	}
+	
+	private void sortDataByFileName(){
+		
+		sortOrderButton.setIcon(sortByNameIcon);
+		sortOrderButton.setCommand(MainActionCommands.SORT_BY_INJECTION_TIME_COMMAND.getName());
+		sortOrderButton.setText(MainActionCommands.SORT_BY_INJECTION_TIME_COMMAND.getName());
+		sortOrderButton.setTooltip(MainActionCommands.SORT_BY_INJECTION_TIME_COMMAND.getName());
+		sortingOrder = FileSortingOrder.NAME;
+		updatePlot();
+	}
+
+	private void sortDataByInjectionTime(){
+		
+		sortOrderButton.setIcon(sortByTimeIcon);
+		sortOrderButton.setCommand(MainActionCommands.SORT_BY_FILE_NAME_COMMAND.getName());
+		sortOrderButton.setText(MainActionCommands.SORT_BY_FILE_NAME_COMMAND.getName());
+		sortOrderButton.setTooltip(MainActionCommands.SORT_BY_FILE_NAME_COMMAND.getName());
+		sortingOrder = FileSortingOrder.TIMESTAMP;
+		updatePlot();
+	}
+	
+	private void colorByDataFile(){
+		
+		colorOptionButton.setIcon(colorByFileIcon);
+		colorOptionButton.setCommand(MainActionCommands.COLOR_BY_SAMPLE_TYPE_COMMAND.getName());
+		colorOptionButton.setText(MainActionCommands.COLOR_BY_SAMPLE_TYPE_COMMAND.getName());
+		colorOptionButton.setTooltip(MainActionCommands.COLOR_BY_SAMPLE_TYPE_COMMAND.getName());
+		chartColorOption = ChartColorOption.BY_FILE;
+		updatePlot();
+	}
+	
+	private void colorBySampleType(){
+		
+		colorOptionButton.setIcon(colorBySampleTypeIcon);
+		colorOptionButton.setCommand(MainActionCommands.COLOR_BY_FILE_NAME_COMMAND.getName());
+		colorOptionButton.setText(MainActionCommands.COLOR_BY_FILE_NAME_COMMAND.getName());
+		colorOptionButton.setTooltip(MainActionCommands.COLOR_BY_FILE_NAME_COMMAND.getName());
+		chartColorOption = ChartColorOption.BY_SAMPLE_TYPE;
+		updatePlot();
+	}
+		
+	private void updatePlot() {
+
+		featurePropertiesTimelinePlot.showFeatureData(
+				fileFeatureMap, sortingOrder, chartColorOption, currentExperiment, dataPipeline);
+	}
+
+	public void setCurrentExperiment(DataAnalysisProject currentExperiment) {
+		this.currentExperiment = currentExperiment;
+	}
+
+	public void setDataPipeline(DataPipeline dataPipeline) {
+		this.dataPipeline = dataPipeline;
 	}
 }
