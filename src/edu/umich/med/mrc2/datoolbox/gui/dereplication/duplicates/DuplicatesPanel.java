@@ -396,12 +396,12 @@ public class DuplicatesPanel extends ClusterDisplayPanel {
 
 	private void finalizeDuplicatesMerge() {
 
-//		((FeatureDataPanel) MRC2ToolBoxCore.getMainWindow().getPanel(PanelList.FEATURE_DATA))
-//				.setTableModelFromFeatureSet(currentProject.getActiveFeatureSetForDataPipeline(activeDataPipeline));
-
 		MRC2ToolBoxCore.getMainWindow().showPanel(PanelList.FEATURE_DATA);
 		MRC2ToolBoxCore.getMainWindow().getPreferencesDraw().
 			switchDataPipeline(currentExperiment, activeDataPipeline);
+		
+		if(currentExperiment.getDuplicateClustersForDataPipeline(activeDataPipeline) != null)
+			currentExperiment.getDuplicateClustersForDataPipeline(activeDataPipeline).clear();
 		
 		CalculateStatisticsTask cst = 
 				new CalculateStatisticsTask(currentExperiment, activeDataPipeline);

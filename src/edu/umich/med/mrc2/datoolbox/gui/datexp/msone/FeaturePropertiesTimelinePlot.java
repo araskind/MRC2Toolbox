@@ -22,6 +22,7 @@
 package edu.umich.med.mrc2.datoolbox.gui.datexp.msone;
 
 import java.awt.Color;
+import java.awt.event.ItemEvent;
 import java.text.SimpleDateFormat;
 import java.util.Map;
 import java.util.TreeMap;
@@ -43,16 +44,19 @@ import edu.umich.med.mrc2.datoolbox.data.compare.DataFileComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.enums.FileSortingOrder;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
-import edu.umich.med.mrc2.datoolbox.gui.plot.MasterPlotPanel;
+import edu.umich.med.mrc2.datoolbox.gui.plot.AbstractControlledDataPlot;
+import edu.umich.med.mrc2.datoolbox.gui.plot.TwoDimDataPlotParameterObject;
+import edu.umich.med.mrc2.datoolbox.gui.plot.stats.DataPlotControlsPanel;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 
-public class FeaturePropertiesTimelinePlot extends MasterPlotPanel {
+public class FeaturePropertiesTimelinePlot extends AbstractControlledDataPlot {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
 	
+	protected TwoDimDataPlotParameterObject plotParameters;
 	protected CombinedDomainXYPlot dataPlot;
 	protected XYPlot rtPlot;
 	protected XYPlot mzPlot;
@@ -213,6 +217,31 @@ public class FeaturePropertiesTimelinePlot extends MasterPlotPanel {
 //			valuePlot.add(scatterPlot);
 //			valuePlot.getRangeAxis().setRange(new Range(lowerBound, upperBound));
 //		}
+	}
+
+	@Override
+	public void itemStateChanged(ItemEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void updateParametersFromControls() {
+		// TODO Auto-generated method stub
+		
+		
+	}
+
+	@Override
+	public void redrawPlot() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void setDataPlotControlsPanel(DataPlotControlsPanel dataPlotControlsPanel) {
+		// TODO Auto-generated method stub
+		
 	}
 }
 

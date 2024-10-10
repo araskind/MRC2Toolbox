@@ -366,11 +366,14 @@ public class TwoDimQCPlot extends AbstractControlledDataPlot {
 		numberOfDataSets = 0;		
 	}
 
+	
 	public void setDataPlotControlsPanel(DataPlotControlsPanel dataPlotControlsPanel) {
 		this.dataPlotControlsPanel = dataPlotControlsPanel;
 	}
 
+
 	public void setToolbar(TwoDqcPlotToolbar toolbar) {
 		this.toolbar = toolbar;
 	}
+
 }

@@ -50,7 +50,7 @@ public class RQCScriptGenerator {
 		MRC2ToolBoxConfiguration.initConfiguration();
 
 		try {
-			generateSummaryQcScriptForEX01409rppos();
+			generateSummaryQcScriptForEX01409ionpneg();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

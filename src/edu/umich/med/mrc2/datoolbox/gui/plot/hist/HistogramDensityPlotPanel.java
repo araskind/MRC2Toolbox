@@ -24,6 +24,7 @@ package edu.umich.med.mrc2.datoolbox.gui.plot.hist;
 import java.awt.event.ItemEvent;
 
 import edu.umich.med.mrc2.datoolbox.gui.plot.AbstractControlledDataPlot;
+import edu.umich.med.mrc2.datoolbox.gui.plot.stats.DataPlotControlsPanel;
 
 public class HistogramDensityPlotPanel extends AbstractControlledDataPlot {
 
@@ -72,6 +73,12 @@ public class HistogramDensityPlotPanel extends AbstractControlledDataPlot {
 	public void removeAllDataSets() {
 		// TODO Auto-generated method stub
 
+	}
+
+	@Override
+	public void setDataPlotControlsPanel(DataPlotControlsPanel dataPlotControlsPanel) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

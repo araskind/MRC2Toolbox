@@ -23,6 +23,8 @@ package edu.umich.med.mrc2.datoolbox.gui.plot;
 
 import java.awt.event.ItemListener;
 
+import edu.umich.med.mrc2.datoolbox.gui.plot.stats.DataPlotControlsPanel;
+
 public abstract class AbstractControlledDataPlot extends MasterPlotPanel 
 			implements ItemListener, ControlledStatsPlot {
 
@@ -33,4 +35,6 @@ public abstract class AbstractControlledDataPlot extends MasterPlotPanel
 
 	@Override
 	public abstract void redrawPlot();
+	
+	public abstract void setDataPlotControlsPanel(DataPlotControlsPanel dataPlotControlsPanel);
 }

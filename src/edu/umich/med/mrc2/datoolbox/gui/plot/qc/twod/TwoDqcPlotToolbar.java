@@ -49,7 +49,7 @@ import edu.umich.med.mrc2.datoolbox.gui.plot.stats.StatsPlotType;
 import edu.umich.med.mrc2.datoolbox.gui.utils.ComboBoxRendererWithIcons;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 
-public class TwoDqcPlotToolbar extends PlotToolbar implements ActionListener, ItemListener{
+public class TwoDqcPlotToolbar extends PlotToolbar implements ItemListener{
 
 	/**
 	 * 

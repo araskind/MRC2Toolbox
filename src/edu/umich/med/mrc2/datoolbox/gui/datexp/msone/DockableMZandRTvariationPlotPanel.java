@@ -39,6 +39,7 @@ import edu.umich.med.mrc2.datoolbox.data.compare.ChartColorOption;
 import edu.umich.med.mrc2.datoolbox.data.enums.FileSortingOrder;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
+import edu.umich.med.mrc2.datoolbox.gui.plot.stats.DataPlotControlsPanel;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 
@@ -48,6 +49,9 @@ public class DockableMZandRTvariationPlotPanel extends DefaultSingleCDockable im
 	protected static final Icon sortByTimeIcon = GuiUtils.getIcon("sortByTime", 16);
 	protected static final Icon colorByFileIcon = GuiUtils.getIcon("barChart", 16);
 	protected static final Icon colorBySampleTypeIcon = GuiUtils.getIcon("barChartGrouped", 16);
+	protected static final Icon sidePanelShowIcon = GuiUtils.getIcon("sidePanelShow", 16);
+	protected static final Icon sidePanelHideIcon = GuiUtils.getIcon("sidePanelHide", 16);		
+
 	
 	protected FileSortingOrder sortingOrder; 
 	protected ChartColorOption chartColorOption;
@@ -57,9 +61,11 @@ public class DockableMZandRTvariationPlotPanel extends DefaultSingleCDockable im
 	protected FeaturePropertiesTimelinePlot featurePropertiesTimelinePlot;
 	protected SimpleButtonAction sortOrderButton;
 	protected SimpleButtonAction colorOptionButton;
+	protected SimpleButtonAction sidePanelButton;
 	
 	protected MsFeature activeFeature;
 	protected Map<DataFile, SimpleMsFeature> fileFeatureMap;
+	protected DataPlotControlsPanel dataPlotControlsPanel;
 	
 	public DockableMZandRTvariationPlotPanel() {
 
@@ -69,6 +75,11 @@ public class DockableMZandRTvariationPlotPanel extends DefaultSingleCDockable im
 		setLayout(new BorderLayout(0, 0));
 		featurePropertiesTimelinePlot = new FeaturePropertiesTimelinePlot();
 		add(featurePropertiesTimelinePlot, BorderLayout.CENTER);
+		
+		dataPlotControlsPanel = new DataPlotControlsPanel(featurePropertiesTimelinePlot);
+		add(dataPlotControlsPanel, BorderLayout.EAST);
+		featurePropertiesTimelinePlot.setDataPlotControlsPanel(dataPlotControlsPanel);
+		featurePropertiesTimelinePlot.updateParametersFromControls();
 		
 		sortingOrder = FileSortingOrder.TIMESTAMP;
 		chartColorOption = ChartColorOption.BY_SAMPLE_TYPE;
@@ -91,7 +102,17 @@ public class DockableMZandRTvariationPlotPanel extends DefaultSingleCDockable im
 				MainActionCommands.COLOR_BY_FILE_NAME_COMMAND.getName(), 
 				colorBySampleTypeIcon, this);		
 		actions.add(colorOptionButton);
+		
 		actions.addSeparator();
+		
+		sidePanelButton= GuiUtils.setupButtonAction(
+				MainActionCommands.HIDE_CHART_SIDE_PANEL_COMMAND.getName(), 
+				MainActionCommands.HIDE_CHART_SIDE_PANEL_COMMAND.getName(), 
+				sidePanelHideIcon, this);
+		actions.add(sidePanelButton);
+		
+		actions.addSeparator();
+		
 		intern().setActionOffers(actions);
 	}	
 	
@@ -120,6 +141,29 @@ public class DockableMZandRTvariationPlotPanel extends DefaultSingleCDockable im
 		
 		if(command.equals(MainActionCommands.COLOR_BY_SAMPLE_TYPE_COMMAND.getName()))
 			colorBySampleType();
+		
+		if(command.equals(MainActionCommands.HIDE_CHART_SIDE_PANEL_COMMAND.getName()))
+			setSidePanelVisible(false);
+		
+		if(command.equals(MainActionCommands.SHOW_CHART_SIDE_PANEL_COMMAND.getName()))
+			setSidePanelVisible(true);
+	}
+	
+	public void setSidePanelVisible(boolean b) {
+		
+		dataPlotControlsPanel.setVisible(b);
+		if(b) {
+			sidePanelButton.setIcon(sidePanelHideIcon);
+			sidePanelButton.setCommand(MainActionCommands.HIDE_CHART_SIDE_PANEL_COMMAND.getName());
+			sidePanelButton.setText(MainActionCommands.HIDE_CHART_SIDE_PANEL_COMMAND.getName());
+			sidePanelButton.setTooltip(MainActionCommands.HIDE_CHART_SIDE_PANEL_COMMAND.getName());
+		}
+		else {
+			sidePanelButton.setIcon(sidePanelShowIcon);
+			sidePanelButton.setCommand(MainActionCommands.SHOW_CHART_SIDE_PANEL_COMMAND.getName());
+			sidePanelButton.setText(MainActionCommands.SHOW_CHART_SIDE_PANEL_COMMAND.getName());
+			sidePanelButton.setTooltip(MainActionCommands.SHOW_CHART_SIDE_PANEL_COMMAND.getName());
+		}
 	}
 	
 	private void sortDataByFileName(){
