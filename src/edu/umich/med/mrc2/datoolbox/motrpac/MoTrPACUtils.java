@@ -1,6 +1,6 @@
 /*******************************************************************************
  *
- * (C) Copyright 2018-2020 MRC2 (http://mrc2.umich.edu).
+duplicateDataUploadDirectoryForResultsCorrection4PreCovidPlasma * (C) Copyright 2018-2020 MRC2 (http://mrc2.umich.edu).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,7 +64,9 @@ import edu.umich.med.mrc2.datoolbox.main.config.FilePreferencesFactory;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.utils.CompressionUtils;
 import edu.umich.med.mrc2.datoolbox.utils.DelimitedTextParser;
+import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
 import edu.umich.med.mrc2.datoolbox.utils.LIMSReportingUtils;
+import edu.umich.med.mrc2.datoolbox.utils.filefilter.DirectoryFileFilterIE;
 
 public class MoTrPACUtils {
 	
@@ -90,9 +92,106 @@ public class MoTrPACUtils {
 		//	File parentDir = new File("Y:\\DataAnalysis\\_Reports\\EX01117 - PASS 1C\\4BIC\\PASS1A-06\\_FINALS");
 		try {
 			//	createMoTrPACFileManifests4PreCovidAdipose();
-			createMoTrPACFileManifests1263Heart();
+			duplicateDataUploadDirectoryForResultsCorrection4PreCovidAdipose();
 		} catch (Exception e) {
 			e.printStackTrace();
+		}
+	}
+	
+	private static void duplicateDataUploadDirectoryForResultsCorrection4PASS1A06() {
+		
+		File sourceDir = new File("Y:\\DataAnalysis\\_Reports\\EX01117 - PASS 1C\\4BIC\\PASS06-FromBIC");
+		File destinationDir = new File("Y:\\DataAnalysis\\_Reports\\EX01117 - PASS 1C\\4BIC\\PASS06-20241017");
+		String processingDateIdentifier = "20241017";
+		
+		duplicateDataUploadDirectoryForResultsCorrection(
+				sourceDir,
+				destinationDir,
+				processingDateIdentifier);
+	}
+	
+	private static void duplicateDataUploadDirectoryForResultsCorrection4PreCovidAdipose() {
+		
+		File sourceDir = new File("Y:\\DataAnalysis\\_Reports\\"
+				+ "EX01242 - preCovid adipose Shipment W20000044X\\4BIC\\HUMAN\\T11-FromBIC");
+		File destinationDir = new File("Y:\\DataAnalysis\\_Reports\\"
+				+ "EX01242 - preCovid adipose Shipment W20000044X\\4BIC\\HUMAN\\T11-20241017");
+		String processingDateIdentifier = "20241017";
+		
+		duplicateDataUploadDirectoryForResultsCorrection(
+				sourceDir,
+				destinationDir,
+				processingDateIdentifier);
+	}
+	
+	private static void duplicateDataUploadDirectoryForResultsCorrection4PreCovidMuscle() {
+		
+		File sourceDir = new File("Y:\\DataAnalysis\\_Reports\\EX01094-tmp\\T06-FromBIC");
+		File destinationDir = new File("Y:\\DataAnalysis\\_Reports\\EX01094-tmp\\T06-20241017");
+		String processingDateIdentifier = "20241017";
+		
+		duplicateDataUploadDirectoryForResultsCorrection(
+				sourceDir,
+				destinationDir,
+				processingDateIdentifier);
+	}
+	
+	private static void duplicateDataUploadDirectoryForResultsCorrection4PreCovidPlasma() {
+		
+		File sourceDir = new File("Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\4BIC\\HUMAN\\T02-FromBIC");
+		File destinationDir = new File("Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\4BIC\\HUMAN\\T02-20241017");
+		String processingDateIdentifier = "20241017";
+		
+		duplicateDataUploadDirectoryForResultsCorrection(
+				sourceDir,
+				destinationDir,
+				processingDateIdentifier);
+	}
+	
+	//
+	
+	private static void duplicateDataUploadDirectoryForResultsCorrection(
+			File sourceDir,
+			File destinationDir,
+			String processingDateIdentifier) {
+		
+		//	Copy excluding RAW directories
+		DirectoryFileFilterIE filter = new DirectoryFileFilterIE("RAW", true);
+		try {
+			FileUtils.copyDirectory(sourceDir, destinationDir, filter);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		if(destinationDir.exists()) {
+			
+			//	Rename PROCESSED_ directories 
+			Path newDirPath = Paths.get(destinationDir.getAbsolutePath());
+			List<Path>processedDirs = FIOUtils.findDirectoriesByNameStartingWith(newDirPath, "PROCESSED_");
+			String processedFolderId  = "PROCESSED_" + processingDateIdentifier;
+			for(Path pd : processedDirs) {
+				
+				Path newProcessedPath = Paths.get(pd.getParent().toString(), processedFolderId);
+				try {					
+					Files.move(pd, newProcessedPath);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				//	Truncate "results" files
+				if(newProcessedPath.toFile().exists()) {
+					
+					List<Path>results = FIOUtils.findFilesByNameStartingWith(newProcessedPath, "results_metabolites_");
+					for(Path res : results) {
+						try {
+							Files.write(res, new byte[0], StandardOpenOption.TRUNCATE_EXISTING);
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
+				}
+			}			
 		}
 	}
 		
@@ -474,9 +573,9 @@ public class MoTrPACUtils {
 	private static void createMotrpacDataUploadDirectoryStructure4PreCovidPlasma() {
 		
 		List<String>tissueTypes = new ArrayList<String>(Arrays.asList("T02"));
-		File parentDirectory = new File("Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\4BIC\\Interm");
+		File parentDirectory = new File("Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\4BIC\\Interm2");
 		String batchDateIdentifier = "20230124";
-		String processingDateIdentifier = "20230124";
+		String processingDateIdentifier = "20241016";
 		String studyPhase = "HUMAN-PRECOVID";
 		createMotrpacDataUploadDirectoryStructure(
 				tissueTypes, 

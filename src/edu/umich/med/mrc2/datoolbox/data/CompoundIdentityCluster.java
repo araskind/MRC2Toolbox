@@ -95,7 +95,7 @@ public class CompoundIdentityCluster implements Serializable {
 		if(idList.containsKey(toRemove.getCompoundIdentity()))
 			idList.remove(toRemove.getCompoundIdentity());
 		
-		if(primaryIdentity != null && primaryIdentity.equals(toRemove))
+		if(primaryIdentity != null && primaryIdentity.equals(toRemove.getCompoundIdentity()))
 			primaryIdentity = null;
 		
 		finalizeCluster();

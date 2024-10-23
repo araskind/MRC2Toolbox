@@ -48,11 +48,24 @@ public class MoTrPacRQCScriptGenerator {
 		MRC2ToolBoxConfiguration.initConfiguration();
 
 		try {
-			generateMoTrPACQCScriptEX01263();
+			generateMoTrPACQCScriptEX01117();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+	
+	private static void generateMoTrPACQCScriptEX01117() {
+		
+		String experimentId = "EX01117";
+		File baseDir = new File("Y:\\DataAnalysis\\_Reports\\EX01117 - PASS 1C\\4BIC\\QC-20241010");
+		File inputMap = new File("Y:\\DataAnalysis\\_Reports\\EX01117 - PASS 1C\\"
+				+ "4BIC\\QC-20241010\\EX01117-MoTrPAC-QC-inputMap.txt");
+
+		generateMoTrPACQCScript(
+				experimentId,
+				baseDir,
+				inputMap);
 	}
 	
 	private static void generateMoTrPACQCScriptEX01263() {
@@ -101,6 +114,8 @@ public class MoTrPacRQCScriptGenerator {
 			scriptBlock.add("\t");
 			scriptBlock.add("## Read design ####");
 			scriptBlock.add(tissueCode + "." + assayCode + ".design.in <- read.delim(\"" + manifestFileName +".txt\", check.names=FALSE)");
+			scriptBlock.add(tissueCode + "." + assayCode + ".design.in <- within(" + tissueCode + "." + assayCode + 
+					".design.in, sample_type[grepl('CS0000OP0',sample_id)] <- 'OTHER-Pooled')");
 			scriptBlock.add(tissueCode + "." + assayCode + ".design.in <- within(" + tissueCode + "." + assayCode + 
 					".design.in, sample_type[grepl('CS0000OP1',sample_id)] <- 'OTHER-Pooled')");
 			scriptBlock.add(tissueCode + "." + assayCode + ".design <- as.data.frame(" + tissueCode + "." + assayCode + ".design.in[,2])");

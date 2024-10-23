@@ -269,7 +269,7 @@ public final class MRC2ToolBoxCore {
 			JCS.shutdown();
 		} catch (Exception e) {
 			e.printStackTrace();
-		}
+		}		
 		RecentDataManager.saveDataToFile();
 		mainWindow.saveApplicationLayout();
 		mainWindow.savePreferences();

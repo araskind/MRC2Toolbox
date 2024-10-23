@@ -166,7 +166,43 @@ public class FIOUtils {
 		List<Path> result = null;
 		try (Stream<Path> walk = Files.walk(path)) {
 			result = walk.filter(p -> !Files.isDirectory(p))
-					.filter(p -> p.getName(p.getNameCount()-1).toString().toLowerCase().equals(fileName))
+					.filter(p -> p.getName(p.getNameCount()-1).toString().toLowerCase().equalsIgnoreCase(fileName))
+					.collect(Collectors.toList());
+		}
+		catch(IOException e) {
+			e.printStackTrace();
+		}
+		return result;
+	}
+	
+	public static List<Path> findFilesByNameStartingWith(Path path, String nameStart) {
+
+		if (!Files.isDirectory(path)) {
+			throw new IllegalArgumentException("Path must be a directory!");
+		}
+		String nameStartSearch = nameStart.toLowerCase();
+		List<Path> result = null;
+		try (Stream<Path> walk = Files.walk(path)) {
+			result = walk.filter(p -> !Files.isDirectory(p))
+					.filter(p -> p.getName(p.getNameCount()-1).toString().toLowerCase().startsWith(nameStartSearch))
+					.collect(Collectors.toList());
+		}
+		catch(IOException e) {
+			e.printStackTrace();
+		}
+		return result;
+	}
+	
+	public static List<Path> findDirectoriesByNameStartingWith(Path path, String nameStart) {
+
+		if (!Files.isDirectory(path)) {
+			throw new IllegalArgumentException("Path must be a directory!");
+		}
+		String nameStartSearch = nameStart.toLowerCase();
+		List<Path> result = null;
+		try (Stream<Path> walk = Files.walk(path)) {
+			result = walk.filter(p -> Files.isDirectory(p))
+					.filter(p -> p.getName(p.getNameCount()-1).toString().toLowerCase().startsWith(nameStartSearch))
 					.collect(Collectors.toList());
 		}
 		catch(IOException e) {
@@ -252,6 +288,8 @@ public class FIOUtils {
 		
 		return fileName;
 	}
+	
+	
 }
 
 
