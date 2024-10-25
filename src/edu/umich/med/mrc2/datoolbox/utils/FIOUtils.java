@@ -48,63 +48,59 @@ public class FIOUtils {
 
 	public static File changeExtension(File f, String newExtension) {
 
-		if(FilenameUtils.getExtension(f.getPath()).equals(newExtension))
+		if (FilenameUtils.getExtension(f.getPath()).equals(newExtension))
 			return f;
 
-		String newFileName =
-				FilenameUtils.getFullPath(f.getAbsolutePath()) +
-				FilenameUtils.getBaseName(f.getName()) +
-				"." + newExtension;
+		String newFileName = FilenameUtils.getFullPath(f.getAbsolutePath()) + FilenameUtils.getBaseName(f.getName())
+				+ "." + newExtension;
 
 		return new File(newFileName);
 	}
-	
+
 	public static String calculateFileChecksum(String filePath) {
-		
+
 		try (InputStream is = Files.newInputStream(Paths.get(filePath))) {
-		    return DigestUtils.md5Hex(is);
-		}
-		catch(Exception e) {
+			return DigestUtils.md5Hex(is);
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return null;
 	}
-	
+
 	public static String calculateFileChecksum(File file) {
-		
+
 		try (InputStream is = Files.newInputStream(Paths.get(file.getAbsolutePath()))) {
-		    return DigestUtils.md5Hex(is);
-		}
-		catch(Exception e) {
+			return DigestUtils.md5Hex(is);
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return null;
 	}
-	
+
 	public static String getTimestamp() {
 		return MRC2ToolBoxConfiguration.getFileTimeStampFormat().format(new Date());
 	}
-	
+
 	public static File getFileForLocation(String location) {
-		
-		if(location == null || location.trim().isEmpty())
+
+		if (location == null || location.trim().isEmpty())
 			return null;
-		
+
 		Path filePath = null;
 		try {
 			filePath = Paths.get(location);
 		} catch (Exception e) {
 			System.out.println("File at " + location + " was not found.");
 		}
-		if(filePath != null) {
-			
+		if (filePath != null) {
+
 			File fileToReturn = filePath.toFile();
-			if(fileToReturn.exists())
+			if (fileToReturn.exists())
 				return fileToReturn;
-		}		
+		}
 		return null;
 	}
-	
+
 	public static List<Path> findFilesByExtension(Path path, String fileExtension) {
 
 		if (!Files.isDirectory(path)) {
@@ -113,16 +109,14 @@ public class FIOUtils {
 		String ext = fileExtension.toLowerCase();
 		List<Path> result = null;
 		try (Stream<Path> walk = Files.walk(path)) {
-			result = walk.filter(p -> !Files.isDirectory(p))
-					.filter(p -> p.toString().toLowerCase().endsWith(ext))
+			result = walk.filter(p -> !Files.isDirectory(p)).filter(p -> p.toString().toLowerCase().endsWith(ext))
 					.collect(Collectors.toList());
-		}
-		catch(IOException e) {
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		return result;
 	}
-	
+
 	public static List<Path> findDirectoriesByName(Path path, String dirName) {
 
 		if (!Files.isDirectory(path)) {
@@ -130,16 +124,14 @@ public class FIOUtils {
 		}
 		List<Path> result = null;
 		try (Stream<Path> walk = Files.walk(path)) {
-			result = walk.filter(p -> Files.isDirectory(p))
-					.filter(p -> p.getFileName().toString().equals(dirName))
+			result = walk.filter(p -> Files.isDirectory(p)).filter(p -> p.getFileName().toString().equals(dirName))
 					.collect(Collectors.toList());
-		}
-		catch(IOException e) {
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		return result;
 	}
-	
+
 	public static List<Path> findDirectoriesByExtension(Path path, String fileExtension) {
 
 		if (!Files.isDirectory(path)) {
@@ -148,16 +140,14 @@ public class FIOUtils {
 		String ext = fileExtension.toLowerCase();
 		List<Path> result = null;
 		try (Stream<Path> walk = Files.walk(path)) {
-			result = walk.filter(p -> Files.isDirectory(p))
-					.filter(p -> p.toString().toLowerCase().endsWith(ext))
+			result = walk.filter(p -> Files.isDirectory(p)).filter(p -> p.toString().toLowerCase().endsWith(ext))
 					.collect(Collectors.toList());
-		}
-		catch(IOException e) {
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		return result;
 	}
-	
+
 	public static List<Path> findFilesByName(Path path, String fileName) {
 
 		if (!Files.isDirectory(path)) {
@@ -166,15 +156,14 @@ public class FIOUtils {
 		List<Path> result = null;
 		try (Stream<Path> walk = Files.walk(path)) {
 			result = walk.filter(p -> !Files.isDirectory(p))
-					.filter(p -> p.getName(p.getNameCount()-1).toString().toLowerCase().equalsIgnoreCase(fileName))
+					.filter(p -> p.getName(p.getNameCount() - 1).toString().toLowerCase().equalsIgnoreCase(fileName))
 					.collect(Collectors.toList());
-		}
-		catch(IOException e) {
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		return result;
 	}
-	
+
 	public static List<Path> findFilesByNameStartingWith(Path path, String nameStart) {
 
 		if (!Files.isDirectory(path)) {
@@ -184,15 +173,14 @@ public class FIOUtils {
 		List<Path> result = null;
 		try (Stream<Path> walk = Files.walk(path)) {
 			result = walk.filter(p -> !Files.isDirectory(p))
-					.filter(p -> p.getName(p.getNameCount()-1).toString().toLowerCase().startsWith(nameStartSearch))
+					.filter(p -> p.getName(p.getNameCount() - 1).toString().toLowerCase().startsWith(nameStartSearch))
 					.collect(Collectors.toList());
-		}
-		catch(IOException e) {
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		return result;
 	}
-	
+
 	public static List<Path> findDirectoriesByNameStartingWith(Path path, String nameStart) {
 
 		if (!Files.isDirectory(path)) {
@@ -202,15 +190,14 @@ public class FIOUtils {
 		List<Path> result = null;
 		try (Stream<Path> walk = Files.walk(path)) {
 			result = walk.filter(p -> Files.isDirectory(p))
-					.filter(p -> p.getName(p.getNameCount()-1).toString().toLowerCase().startsWith(nameStartSearch))
+					.filter(p -> p.getName(p.getNameCount() - 1).toString().toLowerCase().startsWith(nameStartSearch))
 					.collect(Collectors.toList());
-		}
-		catch(IOException e) {
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		return result;
 	}
-	
+
 //	try (Stream<Path> walkStream = Files.walk(Paths.get("your search directory"))) {
 //	    walkStream.filter(p -> p.toFile().isFile()).forEach(f -> {
 //	        if (f.toString().endsWith("file to be searched")) {
@@ -218,12 +205,12 @@ public class FIOUtils {
 //	        }
 //	    });
 //	}
-	
+
 	public static void findFilesByNameRecursively(File sourceDir, String fileName, Set<File> results) {
 
-		if (!sourceDir.isDirectory()) 
+		if (!sourceDir.isDirectory())
 			throw new IllegalArgumentException("Source must be a directory!");
-		
+
 		if (sourceDir.canRead()) {
 
 			for (File temp : sourceDir.listFiles()) {
@@ -238,8 +225,8 @@ public class FIOUtils {
 		} else {
 			throw new IllegalArgumentException(sourceDir.getAbsoluteFile() + "Permission Denied");
 		}
-	}	
-	
+	}
+
 	public static String createFileNameForDataExportType(MainActionCommands type) {
 
 		DataAnalysisProject currentProject = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
@@ -263,38 +250,30 @@ public class FIOUtils {
 
 		if (type.equals(MainActionCommands.EXPORT_RESULTS_FOR_METABOLOMICS_WORKBENCH_COMMAND))
 			typeString = "_4MWB_";
-		
+
 		if (type.equals(MainActionCommands.EXPORT_MZRT_STATISTICS_COMMAND))
 			typeString = "_FEATURE_MZ_RT_STATS_";
-		
+
 		if (type.equals(MainActionCommands.EXPORT_PEAK_WIDTH_STATISTICS_COMMAND))
 			typeString = "_FEATURE_PEAK_WIDTH_STATS_";
-		
+
 		if (type.equals(MainActionCommands.EXPORT_FEATURE_STATISTICS_COMMAND))
 			typeString = "_FEATURE_MULTIPLE_QC_STATS_";
-				
+
 		String timestamp = MRC2ToolBoxConfiguration.getFileTimeStampFormat().format(new Date());
 		DataPipeline dataPipeline = currentProject.getActiveDataPipeline();
 		String fileName = currentProject.getName();
-		if(currentProject.getLimsExperiment() != null)
+		if (currentProject.getLimsExperiment() != null)
 			fileName = currentProject.getLimsExperiment().getId();
-		
-		fileName +=  "_" + dataPipeline.getName();		
+
+		fileName += "_" + dataPipeline.getName();
 		MsFeatureSet fSet = currentProject.getActiveFeatureSetForDataPipeline(dataPipeline);
-		if(!fSet.getName().equals(GlobalDefaults.ALL_FEATURES.getName()))
-			fileName +=  "_" + currentProject.getActiveFeatureSetForDataPipeline(dataPipeline).getName();
-		
-		fileName +=  typeString + timestamp + ".txt";
-		
+		if (!fSet.getName().equals(GlobalDefaults.ALL_FEATURES.getName()))
+			fileName += "_" + currentProject.getActiveFeatureSetForDataPipeline(dataPipeline).getName();
+
+		fileName += typeString + timestamp + ".txt";
+
 		return fileName;
 	}
-	
-	
+
 }
-
-
-
-
-
-
-

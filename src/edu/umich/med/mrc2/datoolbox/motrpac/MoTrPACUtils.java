@@ -38,6 +38,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -92,11 +93,132 @@ public class MoTrPACUtils {
 		//	File parentDir = new File("Y:\\DataAnalysis\\_Reports\\EX01117 - PASS 1C\\4BIC\\PASS1A-06\\_FINALS");
 		try {
 			//	createMoTrPACFileManifests4PreCovidAdipose();
-			duplicateDataUploadDirectoryForResultsCorrection4PreCovidAdipose();
+			extractRefmetDisrepanciesForAllExperiments();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
+	
+	private static void createMultiTissueFixScriptGenInputMapForEX01263(){
+		
+		File partialInput = new File("Y:\\DataAnalysis\\_Reports\\EX01263 - PASS 1A 1C 18mo P20000245T C20000316E\\"
+				+ "4BIC\\PASS1A-18-interm\\QCANVAS\\MAIN\\fixInputInterm.txt");
+		File bicDataDir = new File("Y:\\DataAnalysis\\_Reports\\EX01263 - PASS 1A 1C 18mo P20000245T C20000316E\\"
+				+ "4BIC\\20241023FIX\\PASS1A-18");
+		File outputFile = new File("Y:\\DataAnalysis\\_Reports\\EX01263 - PASS 1A 1C 18mo P20000245T C20000316E\\"
+				+ "4BIC\\PASS1A-18-interm\\QCANVAS\\MAIN\\fixInputComplete.txt");
+		
+		createMultiTissueFixScriptGenInputMap(partialInput, bicDataDir, outputFile);
+	}
+	
+	private static void createMultiTissueFixScriptGenInputMap(File partialInput, File bicDataDir, File outputFile) {
+		
+		String[][] inputData = DelimitedTextParser.parseTextFile(
+				partialInput, MRC2ToolBoxConfiguration.getTabDelimiter());
+		ArrayList<String>outputData = new ArrayList<String>();
+		List<Path> manifestPathList = new ArrayList<Path>();
+		List<Path> resultPathList = new ArrayList<Path>();
+		
+		for(int i=0; i<inputData.length; i++) {
+			
+			manifestPathList.clear();
+			resultPathList.clear();
+			
+			String manifestPath = null;
+			String resultPath = null;
+			
+			Path searchPath = Paths.get(bicDataDir.toPath().toString(), inputData[i][1], inputData[i][2]);
+			manifestPathList = FIOUtils.findFilesByNameStartingWith(searchPath, "metadata_sample_");
+			for(Path mp : manifestPathList) {
+				
+				for(Path part : mp) {
+					 if(part.toString().equalsIgnoreCase(inputData[i][3])) {
+						 manifestPath = mp.toString();
+						 break;
+					 }
+				}
+			}	
+			resultPathList = FIOUtils.findFilesByNameStartingWith(searchPath, "results_metabolites_");
+			for(Path rp : resultPathList) {
+				
+				for(Path part : rp) {
+					 if(part.toString().equalsIgnoreCase(inputData[i][3])) {
+						 resultPath = rp.toString();
+						 break;
+					 }
+				}
+			}
+			String line = StringUtils.join(inputData[i], "\t");
+			if(manifestPath == null || resultPath == null) {
+				System.err.println(line + " not found");
+			}
+			else{
+				outputData.add(line + "\t" + manifestPath + "\t" + resultPath);
+			}
+		}
+		try {
+		    Files.write(outputFile.toPath(), 
+		    		outputData,
+		            StandardCharsets.UTF_8,
+		            StandardOpenOption.CREATE, 
+		            StandardOpenOption.TRUNCATE_EXISTING);
+		} catch (IOException e) {
+		    e.printStackTrace();
+		}
+	}
+	
+	private static void getFulPathsToQcanvasDirsForEX01263() {
+		
+		File dirNamesFile = new File("Y:\\DataAnalysis\\_Reports\\"
+				+ "EX01263 - PASS 1A 1C 18mo P20000245T C20000316E\\4BIC\\PASS1A-18-interm\\QCANVAS\\MAIN\\QCANVASdirList.txt");
+		File lookupDir = new File("Y:\\DataAnalysis\\_Reports\\"
+				+ "EX01263 - PASS 1A 1C 18mo P20000245T C20000316E\\4BIC\\PASS1A-18-interm\\QCANVAS\\MAIN");
+		File outputFile = new File("Y:\\DataAnalysis\\_Reports\\"
+				+ "EX01263 - PASS 1A 1C 18mo P20000245T C20000316E\\4BIC\\PASS1A-18-interm\\QCANVAS\\MAIN\\QCANVASdirMap.txt");
+		
+		getFulPathsToQcanvasDirs(dirNamesFile, lookupDir, outputFile);
+	}
+	
+	private static void getFulPathsToQcanvasDirs(File dirNamesFile, File lookupDir, File outputFile) {
+		
+		String[][] inputData = DelimitedTextParser.parseTextFile(
+				dirNamesFile, MRC2ToolBoxConfiguration.getTabDelimiter());
+		ArrayList<String>outputData = new ArrayList<String>();
+		List<Path> pathList = new ArrayList<Path>();
+		for(int i=0; i<inputData.length; i++) {
+			pathList.clear();
+			pathList = FIOUtils.findDirectoriesByName(lookupDir.toPath(), inputData[i][0]);
+			if(pathList.isEmpty()) {
+				System.err.println(inputData[i][0] + " not found");
+			}
+			else {
+				outputData.add(inputData[i][0] + "\t" + pathList.get(0).toString());
+			}
+		}
+		try {
+		    Files.write(outputFile.toPath(), 
+		    		outputData,
+		            StandardCharsets.UTF_8,
+		            StandardOpenOption.CREATE, 
+		            StandardOpenOption.TRUNCATE_EXISTING);
+		} catch (IOException e) {
+		    e.printStackTrace();
+		}
+	}
+	
+	private static void duplicateDataUploadDirectoryForResultsCorrection4PASS1A18() {
+		
+		File sourceDir = new File("Y:\\DataAnalysis\\_Reports\\"
+				+ "EX01263 - PASS 1A 1C 18mo P20000245T C20000316E\\4BIC\\PASS1A-18-FromBIC");
+		File destinationDir = new File("Y:\\DataAnalysis\\_Reports\\"
+				+ "EX01263 - PASS 1A 1C 18mo P20000245T C20000316E\\4BIC\\20241023FIX\\PASS1A-18");
+		String processingDateIdentifier = "20241023";
+		
+		duplicateDataUploadDirectoryForResultsCorrection(
+				sourceDir,
+				destinationDir,
+				processingDateIdentifier);
+	}	
 	
 	private static void duplicateDataUploadDirectoryForResultsCorrection4PASS1A06() {
 		
@@ -122,7 +244,7 @@ public class MoTrPACUtils {
 				sourceDir,
 				destinationDir,
 				processingDateIdentifier);
-	}
+	}	
 	
 	private static void duplicateDataUploadDirectoryForResultsCorrection4PreCovidMuscle() {
 		
@@ -1300,4 +1422,81 @@ public class MoTrPACUtils {
 				sourceFolders, 
 				destinationFolder);
 	}
+	
+	public static void extractRefmetDisrepanciesForAllExperiments() {
+		
+		File logLocationList = new File("E:\\DataAnalysis\\_MOTRPAC_DEVEL\\QC-log-locations.txt");
+		File output = new File("E:\\DataAnalysis\\_MOTRPAC_DEVEL\\RefmetDisrepancies.txt");
+		extractRefmetDisrepancies(logLocationList, output);
+	}
+	
+	public static void extractRefmetDisrepancies(File logLocationList, File output) {
+		
+		List<String> logLocations = new ArrayList<String>();
+		List<File>qcLogFiles = new ArrayList<File>();
+		Set<String>refmetDiscrepancies = new TreeSet<String>();
+		try {
+			logLocations = Files.readAllLines(logLocationList.toPath());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		for(String ll : logLocations) {
+			
+			File logDir = new File(ll);
+			if(logDir.exists()) 				
+				qcLogFiles.addAll(Arrays.asList(logDir.listFiles()));			
+		}
+		List<String> loglines = new ArrayList<String>(); 
+		List<String> refmetErrors = new ArrayList<String>(); 
+		for(File qcLog : qcLogFiles) {
+			
+			loglines.clear();
+			refmetErrors.clear();
+			try {
+				loglines = Files.readAllLines(qcLog.toPath());
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			refmetErrors = loglines.stream().
+					filter(l -> l.contains("(-) `refmet_name`")).
+					collect(Collectors.toList());
+			if(!refmetErrors.isEmpty()) {
+				
+				for(String refmetError : refmetErrors) {
+					
+					String line = refmetError.replace("(-) `refmet_name`", "").
+						replaceAll("\\[`", "").replaceAll("`\\]\\s+", "\t").replaceAll("\\(Error.+\\)", "").trim();
+					refmetDiscrepancies.add(line);
+				}				
+			}
+		}
+		try {
+		    Files.write(output.toPath(), 
+		    		refmetDiscrepancies,
+		            StandardCharsets.UTF_8,
+		            StandardOpenOption.CREATE, 
+		            StandardOpenOption.TRUNCATE_EXISTING);
+		} catch (IOException e) {
+		    e.printStackTrace();
+		}
+	}
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
