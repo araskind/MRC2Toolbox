@@ -44,6 +44,7 @@ public enum SortProperty {
 	reverseDotProduct("Reverse dot-product"),
 	probability("Probability"),
 	sample("Sample ID"),
+	sampleName("Sample name"),
 	dataFile("Data file name"),
 	resultFile("Result file name"),
 	spectrumEntropy("Spectrum entropy"),

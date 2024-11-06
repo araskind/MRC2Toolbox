@@ -33,6 +33,7 @@ import edu.umich.med.mrc2.datoolbox.data.SimpleMsFeature;
 import edu.umich.med.mrc2.datoolbox.data.enums.FileSortingOrder;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
+import edu.umich.med.mrc2.datoolbox.utils.ArrayUtils;
 
 public class TimedScatterDataSetWithCustomErrors extends TimedScatterDataSet implements DataSetWithCustomErrors{
 
@@ -41,7 +42,8 @@ public class TimedScatterDataSetWithCustomErrors extends TimedScatterDataSet imp
 	 */
 	private static final long serialVersionUID = 1L;
 
-
+	private DatasetWithErrorsStats dataSetStats;
+	
 	//	Single series
 	public TimedScatterDataSetWithCustomErrors(Map<DataFile,SimpleMsFeature>dataFileFeatureMap) {		
 		super();		
@@ -54,22 +56,19 @@ public class TimedScatterDataSetWithCustomErrors extends TimedScatterDataSet imp
 			DataAnalysisProject currentExperiment,
 			DataPipeline pipeline) {
 		super();
-		if (currentExperiment == null)
-			return;
-
-		if (currentExperiment.getExperimentDesign() == null 
+		if (currentExperiment == null || currentExperiment.getExperimentDesign() == null 
 				|| currentExperiment.getExperimentDesign().getSamples().isEmpty())
 			return;
 		
-		Map<String, DataFile[]>seriesMap = PlotDataSetUtils.mapSeriesIgnoreDesign(
+		Map<String, DataFile[]>seriesMap = PlotDataSetUtils.mapSeriesBySampleType(
 				pipeline,
 				FileSortingOrder.TIMESTAMP,
-				currentExperiment.getExperimentDesign().getActiveDesignSubset());
-		
-		NamedTimeSeriesWithCustomErrors series = 
-				new NamedTimeSeriesWithCustomErrors(feature.getName());
+				currentExperiment.getExperimentDesign().getActiveDesignSubset());	
 		
 		for( Entry<String, DataFile[]> smEntry : seriesMap.entrySet()){
+			
+			NamedTimeSeriesWithCustomErrors series = 
+					new NamedTimeSeriesWithCustomErrors(smEntry.getKey());
 			
 			for(DataFile df : smEntry.getValue()) {
 				
@@ -87,11 +86,45 @@ public class TimedScatterDataSetWithCustomErrors extends TimedScatterDataSet imp
 				series.add(df.getInjectionTime(), 
 						msf.getRetentionTime(), 
 						rtMin, rtMax, label);
-			}
+			}	
 			addSeries(series);
-		}
+		}	
+		combineSeriesStats();
 	}
 	
+	private void combineSeriesStats() {
+
+		dataSetStats = new DatasetWithErrorsStats(); 
+	    double[]valueArray = new double[0];	  	   
+	    double[]lowerBorderArray = new double[0];
+	    double[]upperBorderArray = new double[0];
+	    for(int i=0; i<getSeriesCount(); i++) {	    	
+        	
+        	NamedTimeSeriesWithCustomErrors series = (NamedTimeSeriesWithCustomErrors) getSeries(i);
+        	if(series.getSeriesStats() == null)
+        		continue;
+        		
+        	if(series.getSeriesStats().getValueStats() != null) {
+        		double[]result = ArrayUtils.concatDoubleArrays(
+        				valueArray, series.getSeriesStats().getValueStats().getValues());
+        		valueArray = result;
+        	}
+        	if(series.getSeriesStats().getLowerBorderStats() != null) {
+        		double[]lbresult = ArrayUtils.concatDoubleArrays(
+        				lowerBorderArray, series.getSeriesStats().getLowerBorderStats().getValues());
+        		lowerBorderArray = lbresult;
+        	}
+        	if(series.getSeriesStats().getUpperBorderStats() != null)    {   		
+        		double[]ubresult = ArrayUtils.concatDoubleArrays(
+        				upperBorderArray, series.getSeriesStats().getUpperBorderStats().getValues());
+        		upperBorderArray = ubresult;
+        	}
+        }
+        dataSetStats.setValues(valueArray);
+        dataSetStats.setLowperBorderValues(lowerBorderArray);
+        dataSetStats.setUpperBorderValues(upperBorderArray);
+	}
+
 	@Override
     public Range getRangeBounds(boolean includeInterval) {
 		
@@ -148,6 +181,10 @@ public class TimedScatterDataSetWithCustomErrors extends TimedScatterDataSet imp
 	public double getUpperXBorder(int series, int item) {
 		// TODO Auto-generated method stub
 		return 0;
+	}
+
+	public DatasetWithErrorsStats getDataSetStats() {
+		return dataSetStats;
 	}
 }
 

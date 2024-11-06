@@ -42,10 +42,12 @@ public class NamedTimeSeriesWithCustomErrors extends NamedTimeSeries {
 	
 	private Map<RegularTimePeriod,Number[]>errors;
 	private Range fullDataRange;
+	private DatasetWithErrorsStats stats;
 
 	public NamedTimeSeriesWithCustomErrors(Comparable name) {
 		super(name);
 		errors = new TreeMap<RegularTimePeriod,Number[]>();
+		stats = new DatasetWithErrorsStats();
 	}
 	
 	public void add(Date x, Number y, Number min, Number max, String label) {
@@ -66,6 +68,25 @@ public class NamedTimeSeriesWithCustomErrors extends NamedTimeSeries {
 
 	public Range getFullDataRange() {
 		return fullDataRange;
+	}
+	
+	public DatasetWithErrorsStats getSeriesStats() {
+
+		double[] values = new double[this.data.size()];
+		double[] lowerBorderValues = new double[this.data.size()];
+		double[] upperBorderValues = new double[this.data.size()];
+		
+		for (int i = 0; i < this.data.size(); i++) {
+			
+			values[i] = ((TimeSeriesDataItem) this.data.get(i)).getValue().doubleValue();
+			Number[]errorRange = getBorders(i);
+			lowerBorderValues[i] = errorRange[0].doubleValue();
+			upperBorderValues[i] = errorRange[1].doubleValue();
+		}
+		stats.setValues(values);
+		stats.setLowperBorderValues(lowerBorderValues);
+		stats.setUpperBorderValues(upperBorderValues);
+		return stats;
 	}
 	
 	@Override

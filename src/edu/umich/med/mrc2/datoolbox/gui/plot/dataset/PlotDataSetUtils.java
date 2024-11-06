@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -45,11 +46,14 @@ import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignLevel;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignSubset;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentalSample;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
+import edu.umich.med.mrc2.datoolbox.data.compare.DataFileComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.DataFileTimeStampComparator;
+import edu.umich.med.mrc2.datoolbox.data.compare.ObjectCompatrator;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataScale;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataSetQcField;
 import edu.umich.med.mrc2.datoolbox.data.enums.FileSortingOrder;
 import edu.umich.med.mrc2.datoolbox.data.enums.PlotDataGrouping;
+import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
@@ -389,18 +393,13 @@ public class PlotDataSetUtils {
 			FileSortingOrder sortingOrder,
 			ExperimentDesignSubset activeDesign){
 
-		if (MRC2ToolBoxCore.getActiveMetabolomicsExperiment() == null)
-			return null;
-
-		if (MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExperimentDesign() == null)
-			return null;
-
-		if (MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExperimentDesign().getSamples().isEmpty())
+		DataAnalysisProject experiment = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
+		if (experiment == null || experiment.getExperimentDesign() == null 
+				|| experiment.getExperimentDesign().getSamples().isEmpty())
 			return null;
 
 		Map<String, DataFile[]> dataFileMap = new LinkedHashMap<String, DataFile[]>();
-		DataFile[] sorted = DataSetUtils.sortFiles(pipeline, sortingOrder, activeDesign);
-		DataAnalysisProject experiment = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
+		DataFile[] sorted = DataSetUtils.sortFiles(pipeline, sortingOrder, activeDesign);		
 		Collection<ExperimentalSample> samples = 
 				experiment.getExperimentDesign().getSamplesForDesignSubset(activeDesign);
 
@@ -435,7 +434,44 @@ public class PlotDataSetUtils {
 		}
 		return dataFileMap;
 	}
+	
+	public static Map<String, DataFile[]> mapSeriesBySampleType(
+			DataPipeline pipeline,
+			FileSortingOrder sortingOrder,
+			ExperimentDesignSubset activeDesign){
 
+		DataAnalysisProject experiment = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
+		if (experiment == null || experiment.getExperimentDesign() == null 
+				|| experiment.getExperimentDesign().getSamples().isEmpty())
+			return null;
+		
+		ExperimentDesignFactor stf = experiment.getExperimentDesign().getSampleTypeFactor();
+		Collection<ExperimentDesignLevel> sampleTypes = activeDesign.getLevelsForFactor(stf);
+		TreeSet<ExperimentalSample> activeSamples = 
+				experiment.getExperimentDesign().getActiveSamplesForDesignSubset(activeDesign);
+		DataAcquisitionMethod acqMethod = pipeline.getAcquisitionMethod();
+		ObjectCompatrator<DataFile>sorter = new DataFileComparator(sortingOrder);
+		Map<String, DataFile[]> dataFileMap = new LinkedHashMap<String, DataFile[]>();
+		for(ExperimentDesignLevel l : sampleTypes) {
+
+			Set<ExperimentalSample> samplesOfType = 
+					activeSamples.stream().
+					filter(s -> s.getSampleType().equals(l)).
+					collect(Collectors.toSet());
+			if(!samplesOfType.isEmpty()) {
+				
+				Set<DataFile> filesOfType = samplesOfType.stream().
+						flatMap(s -> s.getDataFilesForMethod(acqMethod).stream()).
+						filter(f -> f.isEnabled()).sorted(sorter).
+						collect(Collectors.toSet());
+				if(!filesOfType.isEmpty())					
+					dataFileMap.put(l.getName(), filesOfType.toArray(new DataFile[filesOfType.size()]));
+				
+			}
+		}
+		return dataFileMap;
+	}
+	
 	public static Map<DataFile, ExperimentalSample> createDataFileSampleMap(DataFile[] files) {
 
 		if (MRC2ToolBoxCore.getActiveMetabolomicsExperiment() == null)

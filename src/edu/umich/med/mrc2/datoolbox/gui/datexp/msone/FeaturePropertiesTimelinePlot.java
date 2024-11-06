@@ -33,7 +33,9 @@ import org.jfree.chart.axis.DateAxis;
 import org.jfree.chart.plot.CombinedDomainXYPlot;
 import org.jfree.chart.plot.DatasetRenderingOrder;
 import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.chart.plot.ValueMarker;
 import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.chart.ui.RectangleEdge;
 import org.jfree.chart.ui.RectangleInsets;
 
@@ -50,6 +52,7 @@ import edu.umich.med.mrc2.datoolbox.gui.plot.TwoDimDataPlotParameterObject;
 import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.TimedScatterDataSetWithCustomErrors;
 import edu.umich.med.mrc2.datoolbox.gui.plot.renderer.XYCustomErrorRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.plot.stats.DataPlotControlsPanel;
+import edu.umich.med.mrc2.datoolbox.gui.utils.ColorUtils;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 
 public class FeaturePropertiesTimelinePlot extends AbstractControlledDataPlot {
@@ -146,12 +149,14 @@ public class FeaturePropertiesTimelinePlot extends AbstractControlledDataPlot {
 				rtPlot.setDataset(i, null);
 
 			rtPlot.clearAnnotations();
+			rtPlot.clearRangeMarkers();
 		}
 		if(mzPlot != null) {
 			for (int i = 0; i < mzPlot.getDatasetCount(); i++)
 				mzPlot.setDataset(i, null);
 
 			mzPlot.clearAnnotations();
+			mzPlot.clearRangeMarkers();
 		}
 	}
 	
@@ -190,8 +195,40 @@ public class FeaturePropertiesTimelinePlot extends AbstractControlledDataPlot {
 			TimedScatterDataSetWithCustomErrors tsds = 
 					new TimedScatterDataSetWithCustomErrors(
 							feature, sortedFileFeatureMap, currentExperiment, dataPipeline);
+			
+			XYItemRenderer peakWidtRenderer = rtPlot.getRenderer();
+			for(int i=0; i<tsds.getSeriesCount(); i++)
+				peakWidtRenderer.setSeriesPaint(i, ColorUtils.getColor(i));
+			
 			rtPlot.setDataset(tsds);
+
+			addRangeMarkers(tsds, rtPlot);
 		}
+	}
+	
+	private void addRangeMarkers(TimedScatterDataSetWithCustomErrors tsds, XYPlot targetPlot) {
+		
+		if(tsds.getDataSetStats() == null)
+			return;
+			
+		if(tsds.getDataSetStats().getValueStats() != null) {
+			
+			ValueMarker marker = new ValueMarker(tsds.getDataSetStats().getValueStats().getPercentile(50.0d)); 
+			marker.setPaint(Color.red);
+			targetPlot.addRangeMarker(marker);
+		}
+		if(tsds.getDataSetStats().getLowerBorderStats() != null) {
+			
+			ValueMarker lbmarker = new ValueMarker(tsds.getDataSetStats().getLowerBorderStats().getPercentile(50.0d)); 
+			lbmarker.setPaint(Color.black);
+			targetPlot.addRangeMarker(lbmarker);
+		}
+		if(tsds.getDataSetStats().getUpperBorderStats() != null) {
+			
+			ValueMarker ubmarker = new ValueMarker(tsds.getDataSetStats().getUpperBorderStats().getPercentile(50.0d)); 
+			ubmarker.setPaint(Color.black);
+			targetPlot.addRangeMarker(ubmarker);
+		}		
 	}
 
 	@Override
