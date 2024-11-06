@@ -45,8 +45,7 @@ public class NamedTimeSeries extends TimeSeries {
 
 	public void add(Date x, Number y, String label) {
 
-		Second current = new Second(x);
-		add(current, y, true);
+		add(new Second(x), y, true);
 		labels.add(label);
 	}
 
@@ -59,7 +58,6 @@ public class NamedTimeSeries extends TimeSeries {
 	}
 
 	public String getLabel(int index) {
-
 		return labels.get(index);
 	}
 

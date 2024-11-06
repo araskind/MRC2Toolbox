@@ -84,7 +84,11 @@ public class DockableMZandRTvariationPlotPanel extends DefaultSingleCDockable im
 		sortingOrder = FileSortingOrder.TIMESTAMP;
 		chartColorOption = ChartColorOption.BY_SAMPLE_TYPE;
 		initButtons();
-	}	
+	}
+
+	public void clearPanel() {
+		featurePropertiesTimelinePlot.removeAllDataSets();
+	}
 	
 	private void initButtons() {
 
@@ -123,7 +127,12 @@ public class DockableMZandRTvariationPlotPanel extends DefaultSingleCDockable im
 		this.activeFeature = feature;
 		this.fileFeatureMap = fileFeatureMap;
 		featurePropertiesTimelinePlot.showFeatureData(
-				fileFeatureMap, sortingOrder, chartColorOption, currentExperiment, dataPipeline);
+				feature,
+				fileFeatureMap, 
+				sortingOrder, 
+				chartColorOption, 
+				currentExperiment, 
+				dataPipeline);
 	}
 
 	@Override
@@ -209,7 +218,8 @@ public class DockableMZandRTvariationPlotPanel extends DefaultSingleCDockable im
 	private void updatePlot() {
 
 		featurePropertiesTimelinePlot.showFeatureData(
-				fileFeatureMap, sortingOrder, chartColorOption, currentExperiment, dataPipeline);
+				activeFeature, fileFeatureMap, sortingOrder, 
+				chartColorOption, currentExperiment, dataPipeline);
 	}
 
 	public void setCurrentExperiment(DataAnalysisProject currentExperiment) {

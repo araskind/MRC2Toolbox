@@ -223,6 +223,28 @@ public class QCANVASMoTrPACreportFixer {
 		generateMoTrPACMutiTissueQCANVASfixerScript(experimentId, baseDir, ioMap);
 	}
 	
+	private static void generateMoTrPACMutiTissueQCANVASfixerScriptForEX01190() {
+		
+		String experimentId = "EX01190";
+		File baseDir = new File("Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\4BIC\\20241017FIX\\HUMAN\\T02");	
+		File ioMap = new File("Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\4BIC\\"
+				+ "QCANVAS\\EX01190_resultFixInputMapComplete.txt");	
+		
+		generateMoTrPACMutiTissueQCANVASfixerScript(experimentId, baseDir, ioMap);
+	}
+	
+	private static void generateMoTrPACMutiTissueQCANVASfixerScriptForEX01242() {
+		
+		String experimentId = "EX01242";
+		File baseDir = new File("Y:\\DataAnalysis\\_Reports\\EX01242 - preCovid adipose Shipment W20000044X\\"
+				+ "4BIC\\20241017FIX\\HUMAN\\T11");	
+		File ioMap = new File("Y:\\DataAnalysis\\_Reports\\EX01242 - preCovid adipose Shipment W20000044X\\"
+				+ "4BIC\\QCANVAS\\EX01242_resultFixInputMapComplete.txt");	
+		
+		generateMoTrPACMutiTissueQCANVASfixerScript(experimentId, baseDir, ioMap);
+	}
+	//
+	
 	private static void generateMoTrPACMutiTissueQCANVASfixerScript(
 			String experimentId,
 			File baseDir,			

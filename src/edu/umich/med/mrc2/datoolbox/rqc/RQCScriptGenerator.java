@@ -50,11 +50,53 @@ public class RQCScriptGenerator {
 		MRC2ToolBoxConfiguration.initConfiguration();
 
 		try {
-			generateSummaryQcScriptForEX01409ionpneg();
+			generateSummaryQcScriptForEX01426rpneg();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+	
+	private static void generateSummaryQcScriptForEX01426rpneg() {
+		
+		String experimentId = "EX01426";
+		File rWorkingDir = new File("Y:\\DataAnalysis\\_Reports\\"
+				+ "EX01426 - Human EDTA Tranche 2 plasma W20001176L\\A003 - Untargeted\\Documents\\NEG");		
+		File xlQCfile  = new File("Y:\\DataAnalysis\\_Reports\\"
+				+ "EX01426 - Human EDTA Tranche 2 plasma W20001176L\\EX01426-QC-summary-tables.xlsx");		
+		File inputMap =  new File("Y:\\DataAnalysis\\_Reports\\EX01426 - Human EDTA Tranche 2 plasma W20001176L\\"
+				+ "A003 - Untargeted\\Documents\\NEG\\EX01426_RP-NEG-SummaryQC-inputMap.txt");
+		String assayType = "RP-NEG";
+		String assayType4R = "rpneg";
+		
+		generateSummaryQcScript(
+				experimentId,
+				rWorkingDir,
+				xlQCfile,
+				inputMap,
+				assayType,
+				assayType4R);
+	}
+	
+	private static void generateSummaryQcScriptForEX01426rppos() {
+		
+		String experimentId = "EX01426";
+		File rWorkingDir = new File("Y:\\DataAnalysis\\_Reports\\"
+				+ "EX01426 - Human EDTA Tranche 2 plasma W20001176L\\A003 - Untargeted\\Documents\\POS");		
+		File xlQCfile  = new File("Y:\\DataAnalysis\\_Reports\\"
+				+ "EX01426 - Human EDTA Tranche 2 plasma W20001176L\\EX01426-QC-summary-tables.xlsx");		
+		File inputMap =  new File("Y:\\DataAnalysis\\_Reports\\EX01426 - Human EDTA Tranche 2 plasma W20001176L\\"
+				+ "A003 - Untargeted\\Documents\\POS\\EX01426_RP-POS-SummaryQC-inputMap.txt");
+		String assayType = "RP-POS";
+		String assayType4R = "rppos";
+		
+		generateSummaryQcScript(
+				experimentId,
+				rWorkingDir,
+				xlQCfile,
+				inputMap,
+				assayType,
+				assayType4R);
 	}
 	
 	private static void generateSummaryQcScriptForEX01414rppos() {

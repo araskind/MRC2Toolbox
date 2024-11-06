@@ -38,6 +38,7 @@ import org.jfree.chart.ui.RectangleEdge;
 import org.jfree.chart.ui.RectangleInsets;
 
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
+import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.SimpleMsFeature;
 import edu.umich.med.mrc2.datoolbox.data.compare.ChartColorOption;
 import edu.umich.med.mrc2.datoolbox.data.compare.DataFileComparator;
@@ -46,6 +47,8 @@ import edu.umich.med.mrc2.datoolbox.data.enums.FileSortingOrder;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.gui.plot.AbstractControlledDataPlot;
 import edu.umich.med.mrc2.datoolbox.gui.plot.TwoDimDataPlotParameterObject;
+import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.TimedScatterDataSetWithCustomErrors;
+import edu.umich.med.mrc2.datoolbox.gui.plot.renderer.XYCustomErrorRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.plot.stats.DataPlotControlsPanel;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 
@@ -115,6 +118,10 @@ public class FeaturePropertiesTimelinePlot extends AbstractControlledDataPlot {
 				false // generate URLs?
 		).getPlot();
 		setBasicPlotGui(rtPlot);
+		XYCustomErrorRenderer peakWidtRenderer = new XYCustomErrorRenderer();
+		peakWidtRenderer.setDrawYError(true);
+		peakWidtRenderer.setDrawXError(false);
+		rtPlot.setRenderer(peakWidtRenderer);		
 		dataPlot.add(rtPlot);
 		
 		mzPlot = (XYPlot) ChartFactory.createScatterPlot(
@@ -149,12 +156,13 @@ public class FeaturePropertiesTimelinePlot extends AbstractControlledDataPlot {
 	}
 	
 	public void showFeatureData(
+			MsFeature feature,
 			Map<DataFile, SimpleMsFeature> fileFeatureMap, 
 			FileSortingOrder sortingOrder,
 			ChartColorOption colorOption, 
 			DataAnalysisProject currentExperiment, 
 			DataPipeline dataPipeline) {
-		
+	
 		removeAllDataSets();
 		if(!sortingOrder.equals(FileSortingOrder.NAME) 
 				&& !sortingOrder.equals(FileSortingOrder.TIMESTAMP))
@@ -172,51 +180,18 @@ public class FeaturePropertiesTimelinePlot extends AbstractControlledDataPlot {
 			dateAxis.setDateFormatOverride(new SimpleDateFormat("MM/dd HH:mm"));
 			dataPlot.setDomainAxis(dateAxis);
 		}
-		sortedFileFeatureMap.putAll(fileFeatureMap);
+		if(sortedFileFeatureMap == null)
+			return;
 		
-//		if (plotParameters.getSortingOrder().equals(FileSortingOrder.TIMESTAMP)) {
-//
-//			DateAxis dateAxis = new DateAxis("Timestamp");
-//			dateAxis.setDateFormatOverride(new SimpleDateFormat("MM/dd HH:mm"));
-//			scatterPlot.setDomainAxis(dateAxis);
-//			TimedScatterDataSet tscs = 
-//					new TimedScatterDataSet(
-//							plottedFeaturesMap, activeDesign, plotParameters.getDataScale());
-//
-//			if(tscs.getRangeBounds(true) == null)
-//				return;
-//
-//			for(int i=0; i<tscs.getSeriesCount(); i++) {
-//
-//				scatterPlot.getRenderer().setSeriesPaint(i, getSeriesPaint(i));
-//				scatterPlot.getRenderer().setSeriesShape(i, getSeriesShape(i));
-//			}
-//			scatterPlot.setDataset(tscs);
-//			double upperBound = tscs.getRangeBounds(true).getUpperBound() + 
-//					Math.abs(tscs.getRangeBounds(true).getUpperBound()) * 0.05;
-//			double lowerBound = tscs.getRangeBounds(true).getLowerBound() - 
-//					Math.abs(tscs.getRangeBounds(true).getLowerBound()) * 0.05;
-//			scatterPlot.getRangeAxis().setRange(new Range(lowerBound, upperBound));
-//			valuePlot.add(scatterPlot);
-//			valuePlot.getRangeAxis().setRange(new Range(lowerBound, upperBound));
-//		}
-//		if (plotParameters.getSortingOrder().equals(FileSortingOrder.NAME)) {
-//
-//			ScatterDataSet scs = 
-//					new ScatterDataSet(
-//							plottedFeaturesMap, activeDesign, plotParameters.getDataScale());
-//			for(int i=0; i<scs.getSeriesCount(); i++) {
-//
-//				scatterPlot.getRenderer().setSeriesPaint(i, getSeriesPaint(i));
-//				scatterPlot.getRenderer().setSeriesShape(i, getSeriesShape(i));
-//			}
-//			scatterPlot.setDataset(scs);
-//			double upperBound = scs.getRangeUpperBound(true) + Math.abs(scs.getRangeUpperBound(true)) * 0.05;
-//			double lowerBound = scs.getRangeLowerBound(true) - Math.abs(scs.getRangeLowerBound(true)) * 0.05;
-//			scatterPlot.getRangeAxis().setRange(new Range(lowerBound, upperBound));
-//			valuePlot.add(scatterPlot);
-//			valuePlot.getRangeAxis().setRange(new Range(lowerBound, upperBound));
-//		}
+		sortedFileFeatureMap.putAll(fileFeatureMap);
+		if(sortingOrder.equals(FileSortingOrder.TIMESTAMP)) {
+			
+			//	Peak width plot
+			TimedScatterDataSetWithCustomErrors tsds = 
+					new TimedScatterDataSetWithCustomErrors(
+							feature, sortedFileFeatureMap, currentExperiment, dataPipeline);
+			rtPlot.setDataset(tsds);
+		}
 	}
 
 	@Override

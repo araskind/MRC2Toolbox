@@ -21,9 +21,18 @@
 
 package edu.umich.med.mrc2.datoolbox.main;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetDecoder;
+import java.nio.charset.CodingErrorAction;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
@@ -84,8 +93,17 @@ public class RecentDataManager {
 		}
 		SAXBuilder sax = new SAXBuilder();
 		Document doc = null;
+		
+		CharsetDecoder utf8Decoder = Charset.forName("UTF-8").newDecoder();
+		utf8Decoder.onMalformedInput(CodingErrorAction.REPLACE);
+		utf8Decoder.onUnmappableCharacter(CodingErrorAction.REPLACE);
+		utf8Decoder.replaceWith(" ");
 		try {
-			doc = sax.build(dataFile);
+			byte[] data = Files.readAllBytes(recentObjectFilePath);
+			ByteBuffer input = ByteBuffer.wrap(data);
+			CharBuffer output = utf8Decoder.decode(input);		
+			InputStream stream = new ByteArrayInputStream(output.toString().getBytes(StandardCharsets.UTF_8));
+			doc = sax.build(stream);
 		} catch (JDOMException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();

@@ -21,11 +21,13 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.plot.dataset;
 
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.TimeZone;
 import java.util.stream.Collectors;
 
 import org.jfree.data.time.TimeSeriesCollection;
@@ -46,12 +48,14 @@ public class TimedScatterDataSet extends TimeSeriesCollection {
 	 * 
 	 */
 	private static final long serialVersionUID = -9053487866402210888L;
-	private MsFeature[] featuresToPlot;
-	private DataAnalysisProject experiment;
+	
+	protected MsFeature[] featuresToPlot;
+	protected DataAnalysisProject experiment;
+	protected Calendar activeCalendar;
 
 	public TimedScatterDataSet() {
 		super();
-		// TODO Auto-generated constructor stub
+		activeCalendar = Calendar.getInstance(TimeZone.getDefault());
 	}
 
 	public TimedScatterDataSet(
@@ -60,6 +64,8 @@ public class TimedScatterDataSet extends TimeSeriesCollection {
 			DataScale dataScale) {
 
 		super();
+		activeCalendar = Calendar.getInstance(TimeZone.getDefault());
+		
 		experiment = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
 		featuresToPlot = selectedFeaturesMap.values().stream().
 				flatMap(c -> c.stream()).toArray(size -> new MsFeature[size]);

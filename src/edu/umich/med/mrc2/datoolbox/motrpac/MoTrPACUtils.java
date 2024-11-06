@@ -92,11 +92,203 @@ public class MoTrPACUtils {
 		// File parentDir = new File("Y:\\DataAnalysis\\_Reports\\EX01094 - MoTrPAC Muscle PreCOVID-20210219\\4Upload\\_4BIC\\HUMAN");
 		//	File parentDir = new File("Y:\\DataAnalysis\\_Reports\\EX01117 - PASS 1C\\4BIC\\PASS1A-06\\_FINALS");
 		try {
-			//	createMoTrPACFileManifests4PreCovidAdipose();
-			extractRefmetDisrepanciesForAllExperiments();
+			//	extractRefmetDisrepanciesForAllExperiments();
+			fixRefMetNames();
+			//	collectAllMetaboliteNames();
+			//	duplicateDataUploadDirectoryForResultsCorrection4PASS1A18();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+	
+	private static void renameProcessedDirs4EX01263() {
+		
+		File destinationDir = new File("Y:\\DataAnalysis\\_Reports\\"
+				+ "EX01263 - PASS 1A 1C 18mo P20000245T C20000316E\\4BIC\\20241023FIX\\PASS1A-18");
+		String oldName = "PROCESSED_20241101";
+		String newName = "PROCESSED_20241101";
+		renameProcessedDirs(destinationDir, oldName, newName);
+	}
+	
+	private static void renameProcessedDirs4EX01242() {
+		
+		File destinationDir = new File("Y:\\DataAnalysis\\_Reports\\"
+				+ "EX01242 - preCovid adipose Shipment W20000044X\\4BIC\\20241017FIX\\HUMAN\\T11");
+		String oldName = "PROCESSED_20220926";
+		String newName = "PROCESSED_20241031";
+		renameProcessedDirs(destinationDir, oldName, newName);
+	}
+	
+	private static void renameProcessedDirs4EX01117() {
+		
+		File destinationDir = new File("Y:\\DataAnalysis\\_Reports\\"
+				+ "EX01117 - MoTrPAC-1C\\4BIC\\20241023FIX\\PASS1A-06");
+		String oldName = "PROCESSED_20220926";
+		String newName = "PROCESSED_20241031";
+		renameProcessedDirs(destinationDir, oldName, newName);
+	}	
+	
+	private static void renameProcessedDirs(File destinationDir, String oldName, String newName) {
+
+		Path newDirPath = Paths.get(destinationDir.getAbsolutePath());
+		List<Path>processedDirs = FIOUtils.findDirectoriesByName(newDirPath, oldName);
+		for(Path pd : processedDirs) {
+			
+			Path newProcessedPath = Paths.get(pd.getParent().toString(), newName);
+			try {					
+				Files.move(pd, newProcessedPath);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	private static void collectAllMetaboliteNames() {
+		
+		File[] experimentFolders = new File[] {
+				new File("Y:\\DataAnalysis\\_Reports\\EX01117 - MoTrPAC-1C\\4BIC\\20241023FIX\\PASS1A-06"),
+				new File("Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\4BIC\\20241017FIX\\HUMAN\\T02"),
+				new File("Y:\\DataAnalysis\\_Reports\\EX01242 - preCovid adipose Shipment W20000044X\\4BIC\\20241017FIX\\HUMAN\\T11"),
+				new File("Y:\\DataAnalysis\\_Reports\\EX01263 - PASS 1A 1C 18mo P20000245T C20000316E\\4BIC\\PASS1A-18"),
+		};
+		TreeSet<String>allNames = new TreeSet<String>();
+		for(File experiment : experimentFolders) {
+			
+			//	Process metadata_metabolites_named_ ... files
+			List<Path> mdmnList = FIOUtils.findFilesByNameStartingWith(
+					experiment.toPath(), "metadata_metabolites_named_");
+						
+			for(Path mdmnPath : mdmnList) {
+					
+				int metabColumn = -1;
+				String[][] compoundMetaData = DelimitedTextParser.parseTextFile(
+						mdmnPath.toFile(), MRC2ToolBoxConfiguration.getTabDelimiter());
+				
+				for(int i=0; i<compoundMetaData[0].length; i++) {
+					
+					if(compoundMetaData[0][i].equals("metabolite_name")) {
+						metabColumn = i;
+						break;
+					}
+				}
+				for(int i=1; i<compoundMetaData.length; i++)					
+					allNames.add(compoundMetaData[i][metabColumn]);								
+			}
+		}
+		Path outputPath = Paths.get("E:\\DataAnalysis\\_MOTRPAC_DEVEL\\allMoTrPACnamed.txt");
+		try {
+		    Files.write(outputPath, 
+		    		allNames,
+		            StandardCharsets.UTF_8,
+		            StandardOpenOption.CREATE, 
+		            StandardOpenOption.TRUNCATE_EXISTING);
+		} catch (IOException e) {
+		    e.printStackTrace();
+		}		
+	}
+	
+	private static void fixRefMetNames() {
+		
+		File renameMapFile = new File("E:\\DataAnalysis\\_MOTRPAC_DEVEL\\RefmetNameReplacementMap.txt");
+		String[][] renameData = DelimitedTextParser.parseTextFile(
+				renameMapFile, MRC2ToolBoxConfiguration.getTabDelimiter());
+		
+		Map<String,String>renameMap = new TreeMap<String,String>();
+		for(int i=0; i<renameData.length; i++) 
+			renameMap.put(renameData[i][0], renameData[i][1]);
+		
+		File[] experimentFolders = new File[] {
+				//	new File("Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\4BIC\\20241017FIX\\HUMAN\\T02"),
+//				new File("Y:\\DataAnalysis\\_Reports\\EX01117 - MoTrPAC-1C\\4BIC\\20241023FIX\\PASS1A-06"),
+//				new File("Y:\\DataAnalysis\\_Reports\\EX01242 - preCovid adipose Shipment W20000044X\\4BIC\\20241017FIX\\HUMAN\\T11"),
+				new File("Y:\\DataAnalysis\\_Reports\\EX01263 - PASS 1A 1C 18mo P20000245T C20000316E\\4BIC\\20241023FIX\\PASS1A-18"),
+		};
+		for(File experiment : experimentFolders) {
+			
+			//	Process metadata_metabolites_named_ ... files
+			List<Path> mdmnList = FIOUtils.findFilesByNameStartingWith(
+					experiment.toPath(), "metadata_metabolites_named_");
+						
+			for(Path mdmnPath : mdmnList) {
+				
+//				int metabColumn = -1;
+				int refmetColumn = -1;
+				String[][] compoundMetaData = DelimitedTextParser.parseTextFile(
+						mdmnPath.toFile(), MRC2ToolBoxConfiguration.getTabDelimiter());
+				
+				for(int i=0; i<compoundMetaData[0].length; i++) {
+					
+//					if(compoundMetaData[0][i].equals("metabolite_name"))
+//						metabColumn = i;
+					
+					if(compoundMetaData[0][i].equals("refmet_name"))
+						refmetColumn = i;
+				}
+				for(int i=1; i<compoundMetaData.length; i++) {
+					
+//					String newName = renameMap.get(compoundMetaData[i][metabColumn]);
+//					if(newName != null) 
+//						compoundMetaData[i][metabColumn] = newName;
+						
+					String newRefMetName = renameMap.get(compoundMetaData[i][refmetColumn]);
+					if(newRefMetName != null)	
+						compoundMetaData[i][refmetColumn] = newRefMetName;					
+				}
+				//	Write out file with replaced names
+				ArrayList<String>metadataOut = new ArrayList<String>();
+				for(int i=0; i<compoundMetaData.length; i++)
+					metadataOut.add(StringUtils.join(compoundMetaData[i], MRC2ToolBoxConfiguration.getTabDelimiter()));
+				
+				try {
+				    Files.write(mdmnPath, 
+				    		metadataOut,
+				            StandardCharsets.UTF_8,
+				            StandardOpenOption.CREATE, 
+				            StandardOpenOption.TRUNCATE_EXISTING);
+				} catch (IOException e) {
+				    e.printStackTrace();
+				}
+			}	
+			//	Process results_metabolites_named_ ... files
+//			List<Path> resultsList = FIOUtils.findFilesByNameStartingWith(
+//					experiment.toPath(), "results_metabolites_named_");
+//						
+//			for(Path resultPath : resultsList) {
+//				
+//				int metabColumn = -1;
+//				String[][] resultsData = DelimitedTextParser.parseTextFile(
+//						resultPath.toFile(), MRC2ToolBoxConfiguration.getTabDelimiter());
+//				
+//				for(int i=0; i<resultsData[0].length; i++) {
+//					
+//					if(resultsData[0][i].equals("metabolite_name")) {
+//						metabColumn = i;
+//						break;
+//					}
+//				}
+//				for(int i=1; i<resultsData.length; i++) {
+//					
+//					String newName = renameMap.get(resultsData[i][metabColumn]);
+//					if(newName != null)
+//						resultsData[i][metabColumn] = newName;
+//				}
+//				//	Write out file with replaced names
+//				ArrayList<String>metadataOut = new ArrayList<String>();
+//				for(int i=0; i<resultsData.length; i++)
+//					metadataOut.add(StringUtils.join(resultsData[i], MRC2ToolBoxConfiguration.getTabDelimiter()));
+//				
+//				try {
+//				    Files.write(resultPath, 
+//				    		metadataOut,
+//				            StandardCharsets.UTF_8,
+//				            StandardOpenOption.CREATE, 
+//				            StandardOpenOption.TRUNCATE_EXISTING);
+//				} catch (IOException e) {
+//				    e.printStackTrace();
+//				}
+//			}
+		}		
 	}
 	
 	private static void createMultiTissueFixScriptGenInputMapForEX01263(){
@@ -212,7 +404,7 @@ public class MoTrPACUtils {
 				+ "EX01263 - PASS 1A 1C 18mo P20000245T C20000316E\\4BIC\\PASS1A-18-FromBIC");
 		File destinationDir = new File("Y:\\DataAnalysis\\_Reports\\"
 				+ "EX01263 - PASS 1A 1C 18mo P20000245T C20000316E\\4BIC\\20241023FIX\\PASS1A-18");
-		String processingDateIdentifier = "20241023";
+		String processingDateIdentifier = "20241101";
 		
 		duplicateDataUploadDirectoryForResultsCorrection(
 				sourceDir,
@@ -237,8 +429,8 @@ public class MoTrPACUtils {
 		File sourceDir = new File("Y:\\DataAnalysis\\_Reports\\"
 				+ "EX01242 - preCovid adipose Shipment W20000044X\\4BIC\\HUMAN\\T11-FromBIC");
 		File destinationDir = new File("Y:\\DataAnalysis\\_Reports\\"
-				+ "EX01242 - preCovid adipose Shipment W20000044X\\4BIC\\HUMAN\\T11-20241017");
-		String processingDateIdentifier = "20241017";
+				+ "EX01242 - preCovid adipose Shipment W20000044X\\4BIC\\HUMAN\\T11-20241031");
+		String processingDateIdentifier = "20241031";
 		
 		duplicateDataUploadDirectoryForResultsCorrection(
 				sourceDir,
@@ -261,8 +453,8 @@ public class MoTrPACUtils {
 	private static void duplicateDataUploadDirectoryForResultsCorrection4PreCovidPlasma() {
 		
 		File sourceDir = new File("Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\4BIC\\HUMAN\\T02-FromBIC");
-		File destinationDir = new File("Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\4BIC\\HUMAN\\T02-20241017");
-		String processingDateIdentifier = "20241017";
+		File destinationDir = new File("Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\4BIC\\HUMAN\\T02-20241031");
+		String processingDateIdentifier = "20241031";
 		
 		duplicateDataUploadDirectoryForResultsCorrection(
 				sourceDir,
@@ -270,7 +462,53 @@ public class MoTrPACUtils {
 				processingDateIdentifier);
 	}
 	
-	//
+	private static void duplicateDataUploadDirectoryForResultsCorrectionNoTruncExcludeOldBatch4Pass1A06() {
+		
+		File sourceDir = new File("Y:\\DataAnalysis\\_Reports\\EX01117 - PASS 1C\\4BIC\\PASS1A-06-fromBIC");
+		File destinationDir = new File("Y:\\DataAnalysis\\_Reports\\EX01117 - PASS 1C\\4BIC\\20241023FIX\\PASS1A-06");
+		String processingDateIdentifier = "20241030";
+		String excludeBatchIdentifier = "BATCH1_20190909";
+		
+		duplicateDataUploadDirectoryForResultsCorrectionNoTruncExcludeOldBatch(
+				sourceDir,
+				destinationDir,
+				processingDateIdentifier,
+				excludeBatchIdentifier);
+	}
+	
+	private static void duplicateDataUploadDirectoryForResultsCorrectionNoTruncExcludeOldBatch(
+			File sourceDir,
+			File destinationDir,
+			String processingDateIdentifier,
+			String excludeBatchIdentifier) {
+		
+		//	Copy excluding RAW directories
+		String[] filters = new String[] {"RAW", excludeBatchIdentifier};
+		DirectoryFileFilterIE filter = new DirectoryFileFilterIE(filters, true);
+		try {
+			FileUtils.copyDirectory(sourceDir, destinationDir, filter);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		if(destinationDir.exists()) {
+			
+			//	Rename PROCESSED_ directories 
+			Path newDirPath = Paths.get(destinationDir.getAbsolutePath());
+			List<Path>processedDirs = FIOUtils.findDirectoriesByNameStartingWith(newDirPath, "PROCESSED_");
+			String processedFolderId  = "PROCESSED_" + processingDateIdentifier;
+			for(Path pd : processedDirs) {
+				
+				Path newProcessedPath = Paths.get(pd.getParent().toString(), processedFolderId);
+				try {					
+					Files.move(pd, newProcessedPath);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}			
+		}
+	}
 	
 	private static void duplicateDataUploadDirectoryForResultsCorrection(
 			File sourceDir,
@@ -1139,7 +1377,8 @@ public class MoTrPACUtils {
 				metNameFilter,
 				null);
 		
-		Path bucketFileListing = Paths.get("Y:\\DataAnalysis\\_Reports\\EX00979 - PASS 1B\\UploadPrep docs\\metadata_metabolites_named_listing.txt");
+		Path bucketFileListing = Paths.get(
+				"Y:\\DataAnalysis\\_Reports\\EX00979 - PASS 1B\\UploadPrep docs\\metadata_metabolites_named_listing.txt");
 		List<String>bucketAddresses = Files.readAllLines(bucketFileListing);
 		List<String>copyCommands = new ArrayList<String>();		
 		String[]lipidsWithNoIsomers = new String[] {"LPC(15:0)", "MG(14:0)", "LPC(18:1)", "LPC(17:0)",};
@@ -1426,7 +1665,7 @@ public class MoTrPACUtils {
 	public static void extractRefmetDisrepanciesForAllExperiments() {
 		
 		File logLocationList = new File("E:\\DataAnalysis\\_MOTRPAC_DEVEL\\QC-log-locations.txt");
-		File output = new File("E:\\DataAnalysis\\_MOTRPAC_DEVEL\\RefmetDisrepancies.txt");
+		File output = new File("E:\\DataAnalysis\\_MOTRPAC_DEVEL\\RefmetDisrepancies_20241031_2.txt");
 		extractRefmetDisrepancies(logLocationList, output);
 	}
 	

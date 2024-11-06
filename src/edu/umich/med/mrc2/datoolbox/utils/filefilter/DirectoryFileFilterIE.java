@@ -26,12 +26,18 @@ import java.io.FileFilter;
 
 public class DirectoryFileFilterIE  implements FileFilter {
 
-    protected final String dirName;
+    protected final String[] dirNames;
     protected final boolean exclude;
 
     public DirectoryFileFilterIE(String dirName, boolean exclude) {
 
-        this.dirName = dirName.toLowerCase();
+        this.dirNames = new String[] { dirName.toLowerCase() };
+        this.exclude = exclude;
+    }
+    
+    public DirectoryFileFilterIE(String[] dirNames, boolean exclude) {
+
+        this.dirNames = dirNames;
         this.exclude = exclude;
     }
 
@@ -40,9 +46,27 @@ public class DirectoryFileFilterIE  implements FileFilter {
         if (!file.isDirectory()) 
         	return true;
         
-        if(file.getName().equalsIgnoreCase(dirName))
-        	return  !exclude;
-        else 
-        	return true;
+        boolean acceptDir = true;
+        if(exclude) {
+        	
+        	for(String check : dirNames) {  
+        		
+        		 if(file.getName().equalsIgnoreCase(check)) {
+        			 acceptDir = false;
+        			 break;
+        		 }
+        	}       	
+        }
+        else {
+        	acceptDir = false;
+        	for(String check : dirNames) { 
+        		
+	       		 if(file.getName().equalsIgnoreCase(check)) {
+        			 acceptDir = true;
+        			 break;
+        		 }
+        	}
+        }       
+        return acceptDir;
     }
 }

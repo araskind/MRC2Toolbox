@@ -27,11 +27,16 @@ import javax.swing.Icon;
 
 import bibliothek.gui.dock.common.DefaultSingleCDockable;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
+import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
+import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 
 public class DockableMultispectrumPlotPanel extends DefaultSingleCDockable {
 
 	private static final Icon multiSpectraIcon = GuiUtils.getIcon("multiSpectra", 16);
+	
+	protected DataAnalysisProject currentExperiment;
+	protected DataPipeline dataPipeline;
 	
 	public DockableMultispectrumPlotPanel() {
 
@@ -45,5 +50,17 @@ public class DockableMultispectrumPlotPanel extends DefaultSingleCDockable {
 	public void loadFeatureData(MsFeature feature) {
 		// TODO Auto-generated method stub
 		
+	}
+	
+	public void clearPanel() {
+		
+	}
+
+	public void setCurrentExperiment(DataAnalysisProject currentExperiment) {
+		this.currentExperiment = currentExperiment;
+	}
+
+	public void setDataPipeline(DataPipeline dataPipeline) {
+		this.dataPipeline = dataPipeline;
 	}
 }

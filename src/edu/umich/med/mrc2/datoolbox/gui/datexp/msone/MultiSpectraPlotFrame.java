@@ -104,7 +104,13 @@ public class MultiSpectraPlotFrame extends JFrame
 		grid = new CGrid(control);
 		
 		mzRTvariationPlotPanel = new DockableMZandRTvariationPlotPanel();
+		mzRTvariationPlotPanel.setCurrentExperiment(currentExperiment);
+		mzRTvariationPlotPanel.setDataPipeline(dataPipeline);
+		
 		multispectrumPlotPanel = new DockableMultispectrumPlotPanel();
+		multispectrumPlotPanel.setCurrentExperiment(currentExperiment);
+		multispectrumPlotPanel.setDataPipeline(dataPipeline);
+		
 		grid.add(0, 0, 1, 1,
 				mzRTvariationPlotPanel,
 				multispectrumPlotPanel);
@@ -114,6 +120,11 @@ public class MultiSpectraPlotFrame extends JFrame
 		loadLayout(layoutConfigFile);
 		loadPreferences();
 		
+	}
+	
+	public void clearData() {
+		mzRTvariationPlotPanel.clearPanel();
+		multispectrumPlotPanel.clearPanel();
 	}
 	
 	@Override
@@ -278,6 +289,29 @@ public class MultiSpectraPlotFrame extends JFrame
 			fileFeatureMap.put(df, msf);
 		}
 		return fileFeatureMap;
+	}
+	
+	public void setCurrentExperiment(DataAnalysisProject newExperiment) {
+		
+		if(this.currentExperiment != null && this.currentExperiment.equals(newExperiment))
+			return;
+		
+		clearData();
+		this.currentExperiment = newExperiment;
+		mzRTvariationPlotPanel.setCurrentExperiment(currentExperiment);
+		multispectrumPlotPanel.setCurrentExperiment(currentExperiment);
+	}
+
+	public void setDataPipeline(DataPipeline newDataPipeline) {
+		
+		if(this.dataPipeline != null && this.dataPipeline.equals(newDataPipeline))
+			return;
+		
+		clearData();
+		this.dataPipeline = newDataPipeline;
+		mzRTvariationPlotPanel.setDataPipeline(dataPipeline);
+		multispectrumPlotPanel.setDataPipeline(dataPipeline);
+		initDataMatrix();
 	}
 }
 

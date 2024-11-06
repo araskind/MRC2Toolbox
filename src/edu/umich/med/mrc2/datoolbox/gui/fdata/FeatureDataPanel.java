@@ -1894,7 +1894,12 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 			dataPlot.setActiveDesign(currentExperiment.getExperimentDesign().getActiveDesignSubset());
 			if(activeDataPipeline != null)
 				setTableModelFromFeatureSet(currentExperiment.getActiveFeatureSetForDataPipeline(activeDataPipeline));
-		}
+		}		
+		if(multiSpectraPlotFrame != null) {
+			
+			multiSpectraPlotFrame.setCurrentExperiment(project);
+			multiSpectraPlotFrame.setDataPipeline(newDataPipeline);		
+		}		
 	}
 
 	@Override

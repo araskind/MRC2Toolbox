@@ -21,16 +21,20 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.plot.dataset;
 
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+
+import org.jfree.data.Range;
 
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
+import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.SimpleMsFeature;
 import edu.umich.med.mrc2.datoolbox.data.enums.FileSortingOrder;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
-import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 
-public class TimedScatterDataSetWithCustomErrors extends TimedScatterDataSet {
+public class TimedScatterDataSetWithCustomErrors extends TimedScatterDataSet implements DataSetWithCustomErrors{
 
 	/**
 	 * 
@@ -39,36 +43,114 @@ public class TimedScatterDataSetWithCustomErrors extends TimedScatterDataSet {
 
 
 	//	Single series
-	public TimedScatterDataSetWithCustomErrors(Map<DataFile,SimpleMsFeature>dataFileFeatureMap) {
-		
-		super();
-		
+	public TimedScatterDataSetWithCustomErrors(Map<DataFile,SimpleMsFeature>dataFileFeatureMap) {		
+		super();		
 	}
 		
 	//	Series by sample type
 	public TimedScatterDataSetWithCustomErrors(
+			MsFeature feature,
 			Map<DataFile,SimpleMsFeature>dataFileFeatureMap,
 			DataAnalysisProject currentExperiment,
 			DataPipeline pipeline) {
 		super();
-		if (MRC2ToolBoxCore.getActiveMetabolomicsExperiment() == null)
+		if (currentExperiment == null)
 			return;
 
-		if (MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExperimentDesign() == null)
-			return;
-
-		if (MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExperimentDesign().getSamples().isEmpty())
+		if (currentExperiment.getExperimentDesign() == null 
+				|| currentExperiment.getExperimentDesign().getSamples().isEmpty())
 			return;
 		
 		Map<String, DataFile[]>seriesMap = PlotDataSetUtils.mapSeriesIgnoreDesign(
 				pipeline,
 				FileSortingOrder.TIMESTAMP,
 				currentExperiment.getExperimentDesign().getActiveDesignSubset());
+		
+		NamedTimeSeriesWithCustomErrors series = 
+				new NamedTimeSeriesWithCustomErrors(feature.getName());
+		
+		for( Entry<String, DataFile[]> smEntry : seriesMap.entrySet()){
+			
+			for(DataFile df : smEntry.getValue()) {
+				
+				SimpleMsFeature msf = dataFileFeatureMap.get(df);
+				if(msf == null)
+					continue;
+				
+				String label = "";
+				double rtMin = msf.getRetentionTime();
+				double rtMax = msf.getRetentionTime();
+				if(msf.getRtRange() != null) {
+					rtMin = msf.getRtRange().getMin();
+					rtMax = msf.getRtRange().getMax();
+				}
+				series.add(df.getInjectionTime(), 
+						msf.getRetentionTime(), 
+						rtMin, rtMax, label);
+			}
+			addSeries(series);
+		}
 	}
+	
+	@Override
+    public Range getRangeBounds(boolean includeInterval) {
+		
+        Range result = null;
+        while (getSeries().iterator().hasNext()) {
+        	
+        	NamedTimeSeriesWithCustomErrors series = (NamedTimeSeriesWithCustomErrors) getSeries().iterator().next();
+            Range r = new Range(series.getFullDataRange().getMin(), series.getFullDataRange().getMax());
+            result = Range.combineIgnoringNaN(result, r);
+        }
+        return result;
+    }
+	
+    @Override
+    public Range getRangeBounds(List visibleSeriesKeys, Range xRange,
+            boolean includeInterval) {
+        Range result = null;
+        for (Object visibleSeriesKey : visibleSeriesKeys) {
+            Comparable seriesKey = (Comparable) visibleSeriesKey;
+            NamedTimeSeriesWithCustomErrors series = (NamedTimeSeriesWithCustomErrors)getSeries(seriesKey);
+            Range r = series.findValueRange(xRange, this.getXPosition(), activeCalendar);
+            result = Range.combineIgnoringNaN(result, r);
+        }
+        return result;
+    }
 	
 	private void createSeriesBySampleType() {
 		
 	}
-	
-	
+
+	@Override
+	public double getLowerYBorder(int series, int item) {
+
+		Number[]borders = 
+				((NamedTimeSeriesWithCustomErrors)getSeries(series)).getBorders(item);
+		return (double) borders[0];
+	}
+
+	@Override
+	public double getUpperYBorder(int series, int item) {
+
+		Number[]borders = 
+				((NamedTimeSeriesWithCustomErrors)getSeries(series)).getBorders(item);
+		return (double) borders[1];
+	}
+
+	@Override
+	public double getLowerXBorder(int series, int item) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public double getUpperXBorder(int series, int item) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
 }
+
+
+
+
