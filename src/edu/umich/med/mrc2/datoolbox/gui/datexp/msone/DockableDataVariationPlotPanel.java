@@ -43,16 +43,18 @@ import edu.umich.med.mrc2.datoolbox.gui.plot.stats.DataPlotControlsPanel;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 
-public class DockableMZandRTvariationPlotPanel extends DefaultSingleCDockable implements ActionListener{
+public class DockableDataVariationPlotPanel extends DefaultSingleCDockable implements ActionListener{
 
 	protected static final Icon sortByNameIcon = GuiUtils.getIcon("sortByClusterName", 16);
 	protected static final Icon sortByTimeIcon = GuiUtils.getIcon("sortByTime", 16);
 	protected static final Icon colorByFileIcon = GuiUtils.getIcon("barChart", 16);
 	protected static final Icon colorBySampleTypeIcon = GuiUtils.getIcon("barChartGrouped", 16);
 	protected static final Icon sidePanelShowIcon = GuiUtils.getIcon("sidePanelShow", 16);
-	protected static final Icon sidePanelHideIcon = GuiUtils.getIcon("sidePanelHide", 16);		
+	protected static final Icon sidePanelHideIcon = GuiUtils.getIcon("sidePanelHide", 16);	
+	protected static final Icon msmsIcon = GuiUtils.getIcon("msms", 16);	
+	protected static final Icon peakIcon = GuiUtils.getIcon("smoothChromatogram", 16);	
 
-	
+	private LCMSPlotType plotType;	
 	protected FileSortingOrder sortingOrder; 
 	protected ChartColorOption chartColorOption;
 	
@@ -67,13 +69,25 @@ public class DockableMZandRTvariationPlotPanel extends DefaultSingleCDockable im
 	protected Map<DataFile, SimpleMsFeature> fileFeatureMap;
 	protected DataPlotControlsPanel dataPlotControlsPanel;
 	
-	public DockableMZandRTvariationPlotPanel() {
+	public DockableDataVariationPlotPanel(LCMSPlotType plotType) {
 
-		super("DockableMZandRTvariationPlotPanel", sortByTimeIcon, 
-				"MZ and RT values for individual features", null, Permissions.MIN_MAX_STACK);
+		super("DockableDataVariationPlotPanel" + plotType.name(), sortByTimeIcon, 
+				null, null, Permissions.MIN_MAX_STACK);
+		this.plotType = plotType;
 		setCloseable(false);
 		setLayout(new BorderLayout(0, 0));
-		featurePropertiesTimelinePlot = new FeaturePropertiesTimelinePlot();
+		
+		if(this.plotType.equals(LCMSPlotType.MZ)) {
+			
+	       setTitleIcon(msmsIcon);
+	       setTitleText("MZ values for individual features");
+		}
+		if(this.plotType.equals(LCMSPlotType.RT_AND_PEAK_WIDTH)) {
+			
+		       setTitleIcon(msmsIcon);
+		       setTitleText("RT and peak width values for individual features");
+		}	
+		featurePropertiesTimelinePlot = new FeaturePropertiesTimelinePlot(plotType);
 		add(featurePropertiesTimelinePlot, BorderLayout.CENTER);
 		
 		dataPlotControlsPanel = new DataPlotControlsPanel(featurePropertiesTimelinePlot);

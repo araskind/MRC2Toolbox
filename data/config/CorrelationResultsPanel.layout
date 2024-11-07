@@ -100,7 +100,7 @@
 									<content delegate="SplitDockStationFactory">
 										<fullscreen-action>false</fullscreen-action>
 										<node nodeId="1600213795362" orientation="HORIZONTAL" divider="0.2">
-											<leaf id="0" nodeId="1600213795364">
+											<leaf id="3" nodeId="1600213795364">
 												<placeholders>
 													<placeholder>dock.single.CorrelationResultsPanelDockableClusterTree</placeholder>
 												</placeholders>
@@ -132,7 +132,7 @@
 																</entry>
 															</placeholder-map>
 														</leaf>
-														<leaf id="5" nodeId="1600213795373">
+														<leaf id="4" nodeId="1600213795373">
 															<placeholders>
 																<placeholder>dock.single.ClusterDisplayPanelDockableMolStructurePanel</placeholder>
 															</placeholders>
@@ -145,7 +145,7 @@
 													</leaf>
 												</node>
 												<node nodeId="1600213795377" orientation="HORIZONTAL" divider="0.5">
-													<leaf id="3" nodeId="1600213795382">
+													<leaf id="0" nodeId="1600213795382">
 														<placeholders>
 															<placeholder>dock.single.ClusterDisplayPanelDockableFeatureIntensitiesTable</placeholder>
 															<placeholder>dock.single.ClusterDisplayPanelDockableDataPlot</placeholder>
@@ -177,7 +177,7 @@
 															</entry>
 														</placeholder-map>
 													</leaf>
-													<leaf id="4" nodeId="1600213795391">
+													<leaf id="5" nodeId="1600213795391">
 														<placeholders>
 															<placeholder>dock.single.ClusterDisplayPanelDockableMsTableMS1</placeholder>
 															<placeholder>dock.single.ClusterDisplayPanelAnnotations</placeholder>
@@ -221,85 +221,6 @@
 								</layout>
 							</adjacent>
 							<children ignore="false">
-								<child>
-									<layout factory="predefined" placeholder="dock.single.CorrelationResultsPanelDockableClusterTree">
-										<replacement id="dockablesingle CorrelationResultsPanelDockableClusterTree"/>
-										<delegate id="delegate_ccontrol backup factory id">
-											<id>CorrelationResultsPanelDockableClusterTree</id>
-											<area/>
-										</delegate>
-									</layout>
-									<children ignore="false"/>
-								</child>
-								<child>
-									<layout factory="predefined" placeholder="dock.single.ClusterDisplayPanelDockableIdentificationResultsTable">
-										<replacement id="dockablesingle ClusterDisplayPanelDockableIdentificationResultsTable"/>
-										<delegate id="delegate_ccontrol backup factory id">
-											<id>ClusterDisplayPanelDockableIdentificationResultsTable</id>
-											<area/>
-										</delegate>
-									</layout>
-									<children ignore="false"/>
-								</child>
-								<child>
-									<layout factory="delegate_StackDockStationFactory">
-										<selected>1</selected>
-										<placeholders>
-											<version>0</version>
-											<format>dock.PlaceholderList</format>
-											<entry>
-												<key shared="false">
-													<placeholder>dock.single.DockableClusterFeatureSelectionTable</placeholder>
-												</key>
-												<item key="convert" type="b">true</item>
-												<item key="convert-keys" type="a">
-													<item type="s">index</item>
-													<item type="s">id</item>
-													<item type="s">placeholder</item>
-												</item>
-												<item key="dock.index" type="i">0</item>
-												<item key="dock.id" type="i">0</item>
-												<item key="dock.placeholder" type="s">dock.single.DockableClusterFeatureSelectionTable</item>
-											</entry>
-											<entry>
-												<key shared="false">
-													<placeholder>dock.single.DockableMassDifferenceTable</placeholder>
-												</key>
-												<item key="convert" type="b">true</item>
-												<item key="convert-keys" type="a">
-													<item type="s">index</item>
-													<item type="s">id</item>
-													<item type="s">placeholder</item>
-												</item>
-												<item key="dock.index" type="i">1</item>
-												<item key="dock.id" type="i">1</item>
-												<item key="dock.placeholder" type="s">dock.single.DockableMassDifferenceTable</item>
-											</entry>
-										</placeholders>
-									</layout>
-									<children ignore="false">
-										<child>
-											<layout factory="predefined" placeholder="dock.single.DockableClusterFeatureSelectionTable">
-												<replacement id="dockablesingle DockableClusterFeatureSelectionTable"/>
-												<delegate id="delegate_ccontrol backup factory id">
-													<id>DockableClusterFeatureSelectionTable</id>
-													<area/>
-												</delegate>
-											</layout>
-											<children ignore="false"/>
-										</child>
-										<child>
-											<layout factory="predefined" placeholder="dock.single.DockableMassDifferenceTable">
-												<replacement id="dockablesingle DockableMassDifferenceTable"/>
-												<delegate id="delegate_ccontrol backup factory id">
-													<id>DockableMassDifferenceTable</id>
-													<area/>
-												</delegate>
-											</layout>
-											<children ignore="false"/>
-										</child>
-									</children>
-								</child>
 								<child>
 									<layout factory="delegate_StackDockStationFactory">
 										<selected>2</selected>
@@ -384,6 +305,95 @@
 									</children>
 								</child>
 								<child>
+									<layout factory="predefined" placeholder="dock.single.ClusterDisplayPanelDockableIdentificationResultsTable">
+										<replacement id="dockablesingle ClusterDisplayPanelDockableIdentificationResultsTable"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>ClusterDisplayPanelDockableIdentificationResultsTable</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
+								</child>
+								<child>
+									<layout factory="delegate_StackDockStationFactory">
+										<selected>1</selected>
+										<placeholders>
+											<version>0</version>
+											<format>dock.PlaceholderList</format>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.DockableClusterFeatureSelectionTable</placeholder>
+												</key>
+												<item key="convert" type="b">true</item>
+												<item key="convert-keys" type="a">
+													<item type="s">index</item>
+													<item type="s">id</item>
+													<item type="s">placeholder</item>
+												</item>
+												<item key="dock.index" type="i">0</item>
+												<item key="dock.id" type="i">0</item>
+												<item key="dock.placeholder" type="s">dock.single.DockableClusterFeatureSelectionTable</item>
+											</entry>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.DockableMassDifferenceTable</placeholder>
+												</key>
+												<item key="convert" type="b">true</item>
+												<item key="convert-keys" type="a">
+													<item type="s">index</item>
+													<item type="s">id</item>
+													<item type="s">placeholder</item>
+												</item>
+												<item key="dock.index" type="i">1</item>
+												<item key="dock.id" type="i">1</item>
+												<item key="dock.placeholder" type="s">dock.single.DockableMassDifferenceTable</item>
+											</entry>
+										</placeholders>
+									</layout>
+									<children ignore="false">
+										<child>
+											<layout factory="predefined" placeholder="dock.single.DockableClusterFeatureSelectionTable">
+												<replacement id="dockablesingle DockableClusterFeatureSelectionTable"/>
+												<delegate id="delegate_ccontrol backup factory id">
+													<id>DockableClusterFeatureSelectionTable</id>
+													<area/>
+												</delegate>
+											</layout>
+											<children ignore="false"/>
+										</child>
+										<child>
+											<layout factory="predefined" placeholder="dock.single.DockableMassDifferenceTable">
+												<replacement id="dockablesingle DockableMassDifferenceTable"/>
+												<delegate id="delegate_ccontrol backup factory id">
+													<id>DockableMassDifferenceTable</id>
+													<area/>
+												</delegate>
+											</layout>
+											<children ignore="false"/>
+										</child>
+									</children>
+								</child>
+								<child>
+									<layout factory="predefined" placeholder="dock.single.CorrelationResultsPanelDockableClusterTree">
+										<replacement id="dockablesingle CorrelationResultsPanelDockableClusterTree"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>CorrelationResultsPanelDockableClusterTree</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
+								</child>
+								<child>
+									<layout factory="predefined" placeholder="dock.single.ClusterDisplayPanelDockableMolStructurePanel">
+										<replacement id="dockablesingle ClusterDisplayPanelDockableMolStructurePanel"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>ClusterDisplayPanelDockableMolStructurePanel</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
+								</child>
+								<child>
 									<layout factory="delegate_StackDockStationFactory">
 										<selected>2</selected>
 										<placeholders>
@@ -465,16 +475,6 @@
 											<children ignore="false"/>
 										</child>
 									</children>
-								</child>
-								<child>
-									<layout factory="predefined" placeholder="dock.single.ClusterDisplayPanelDockableMolStructurePanel">
-										<replacement id="dockablesingle ClusterDisplayPanelDockableMolStructurePanel"/>
-										<delegate id="delegate_ccontrol backup factory id">
-											<id>ClusterDisplayPanelDockableMolStructurePanel</id>
-											<area/>
-										</delegate>
-									</layout>
-									<children ignore="false"/>
 								</child>
 							</children>
 						</root>

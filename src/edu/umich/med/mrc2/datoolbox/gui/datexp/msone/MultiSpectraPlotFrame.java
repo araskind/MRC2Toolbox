@@ -74,7 +74,9 @@ public class MultiSpectraPlotFrame extends JFrame
 	private MultiSpectraToolbar toolbar;
 	private CControl control;
 	private CGrid grid;
-	private DockableMZandRTvariationPlotPanel mzRTvariationPlotPanel;
+	
+	private DockableDataVariationPlotPanel rtVariationPlotPanel;
+	private DockableDataVariationPlotPanel mzVariationPlotPanel;
 	private DockableMultispectrumPlotPanel multispectrumPlotPanel;
 	
 	private DataAnalysisProject currentExperiment;
@@ -103,16 +105,21 @@ public class MultiSpectraPlotFrame extends JFrame
 		control.setTheme(ThemeMap.KEY_ECLIPSE_THEME);
 		grid = new CGrid(control);
 		
-		mzRTvariationPlotPanel = new DockableMZandRTvariationPlotPanel();
-		mzRTvariationPlotPanel.setCurrentExperiment(currentExperiment);
-		mzRTvariationPlotPanel.setDataPipeline(dataPipeline);
+		rtVariationPlotPanel = new DockableDataVariationPlotPanel(LCMSPlotType.RT_AND_PEAK_WIDTH);
+		rtVariationPlotPanel.setCurrentExperiment(currentExperiment);
+		rtVariationPlotPanel.setDataPipeline(dataPipeline);
+		
+		mzVariationPlotPanel = new DockableDataVariationPlotPanel(LCMSPlotType.MZ);
+		mzVariationPlotPanel.setCurrentExperiment(currentExperiment);
+		mzVariationPlotPanel.setDataPipeline(dataPipeline);
 		
 		multispectrumPlotPanel = new DockableMultispectrumPlotPanel();
 		multispectrumPlotPanel.setCurrentExperiment(currentExperiment);
 		multispectrumPlotPanel.setDataPipeline(dataPipeline);
 		
 		grid.add(0, 0, 1, 1,
-				mzRTvariationPlotPanel,
+				rtVariationPlotPanel,
+				mzVariationPlotPanel,
 				multispectrumPlotPanel);
 		
 		control.getContentArea().deploy(grid);
@@ -123,7 +130,9 @@ public class MultiSpectraPlotFrame extends JFrame
 	}
 	
 	public void clearData() {
-		mzRTvariationPlotPanel.clearPanel();
+		
+		rtVariationPlotPanel.clearPanel();
+		mzVariationPlotPanel.clearPanel();
 		multispectrumPlotPanel.clearPanel();
 	}
 	
@@ -265,7 +274,8 @@ public class MultiSpectraPlotFrame extends JFrame
 
 		activeFeature = feature;
 		Map<DataFile,SimpleMsFeature>fileFeatureMap = createFileFeatureMap(activeFeature);
-		mzRTvariationPlotPanel.loadFeatureData(activeFeature, fileFeatureMap);
+		rtVariationPlotPanel.loadFeatureData(activeFeature, fileFeatureMap);
+		mzVariationPlotPanel.loadFeatureData(activeFeature, fileFeatureMap);
 	}
 	
 	private Map<DataFile,SimpleMsFeature>createFileFeatureMap(MsFeature feature) {
@@ -298,7 +308,8 @@ public class MultiSpectraPlotFrame extends JFrame
 		
 		clearData();
 		this.currentExperiment = newExperiment;
-		mzRTvariationPlotPanel.setCurrentExperiment(currentExperiment);
+		rtVariationPlotPanel.setCurrentExperiment(currentExperiment);
+		mzVariationPlotPanel.setCurrentExperiment(currentExperiment);
 		multispectrumPlotPanel.setCurrentExperiment(currentExperiment);
 	}
 
@@ -309,7 +320,8 @@ public class MultiSpectraPlotFrame extends JFrame
 		
 		clearData();
 		this.dataPipeline = newDataPipeline;
-		mzRTvariationPlotPanel.setDataPipeline(dataPipeline);
+		rtVariationPlotPanel.setDataPipeline(dataPipeline);
+		mzVariationPlotPanel.setDataPipeline(dataPipeline);
 		multispectrumPlotPanel.setDataPipeline(dataPipeline);
 		initDataMatrix();
 	}

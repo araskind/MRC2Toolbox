@@ -30,7 +30,6 @@ import java.util.TreeMap;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.DateAxis;
-import org.jfree.chart.plot.CombinedDomainXYPlot;
 import org.jfree.chart.plot.DatasetRenderingOrder;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.ValueMarker;
@@ -63,14 +62,13 @@ public class FeaturePropertiesTimelinePlot extends AbstractControlledDataPlot {
 	private static final long serialVersionUID = 1L;
 	
 	protected TwoDimDataPlotParameterObject plotParameters;
-	protected CombinedDomainXYPlot dataPlot;
-	protected XYPlot rtPlot;
-	protected XYPlot mzPlot;
+	protected XYPlot dataPlot;
+	protected LCMSPlotType plotType;
 	
-	public FeaturePropertiesTimelinePlot() {
+	public FeaturePropertiesTimelinePlot(LCMSPlotType plotType) {
 		super();
+		this.plotType = plotType;
 		initChart();
-		initPlot();
 		initTitles();
 		initLegend(RectangleEdge.BOTTOM, false);
 	}
@@ -83,9 +81,36 @@ public class FeaturePropertiesTimelinePlot extends AbstractControlledDataPlot {
 
 	@Override
 	protected void initChart() {
-
-		chart = new JFreeChart(new CombinedDomainXYPlot());
-		dataPlot = (CombinedDomainXYPlot) chart.getPlot();
+		
+		String yAxisLabel = "RT, min";
+		if(plotType.equals(LCMSPlotType.MZ))
+			yAxisLabel = "M/Z, Da";
+		
+		dataPlot = (XYPlot) ChartFactory.createScatterPlot(
+				"", // title
+				"", // x-axis label
+				yAxisLabel, // y-axis label
+				null, // data set
+				PlotOrientation.VERTICAL, // orientation
+				false, // create legend?
+				true, // generate tooltips?
+				false // generate URLs?
+		).getPlot();
+		setBasicPlotGui(dataPlot);
+		
+		//	Set renderes for MZ plot
+		if(plotType.equals(LCMSPlotType.MZ)) {
+			
+		}
+		//	Set renderes for RT plot
+		if(plotType.equals(LCMSPlotType.RT_AND_PEAK_WIDTH)) {
+			
+			XYCustomErrorRenderer peakWidtRenderer = new XYCustomErrorRenderer();
+			peakWidtRenderer.setDrawYError(true);
+			peakWidtRenderer.setDrawXError(false);
+			dataPlot.setRenderer(peakWidtRenderer);	
+		}		
+		chart = new JFreeChart(dataPlot);
 		chart.setBackgroundPaint(Color.white);
 		setChart(chart);
 	}
@@ -108,55 +133,14 @@ public class FeaturePropertiesTimelinePlot extends AbstractControlledDataPlot {
 	}
 
 	@Override
-	protected void initPlot() {
-
-		rtPlot = (XYPlot) ChartFactory.createScatterPlot(
-				"", // title
-				"", // x-axis label
-				"RT, min", // y-axis label
-				null, // data set
-				PlotOrientation.VERTICAL, // orientation
-				false, // create legend?
-				true, // generate tooltips?
-				false // generate URLs?
-		).getPlot();
-		setBasicPlotGui(rtPlot);
-		XYCustomErrorRenderer peakWidtRenderer = new XYCustomErrorRenderer();
-		peakWidtRenderer.setDrawYError(true);
-		peakWidtRenderer.setDrawXError(false);
-		rtPlot.setRenderer(peakWidtRenderer);		
-		dataPlot.add(rtPlot);
-		
-		mzPlot = (XYPlot) ChartFactory.createScatterPlot(
-				"", // title
-				"", // x-axis label
-				"M/Z, Da", // y-axis label
-				null, // data set
-				PlotOrientation.VERTICAL, // orientation
-				false, // create legend?
-				true, // generate tooltips?
-				false // generate URLs?
-		).getPlot();
-		setBasicPlotGui(mzPlot);
-		dataPlot.add(mzPlot);
-	}
-
-	@Override
 	public void removeAllDataSets() {
 
-		if(rtPlot != null) {
-			for (int i = 0; i < rtPlot.getDatasetCount(); i++)
-				rtPlot.setDataset(i, null);
+		if(dataPlot != null) {
+			for (int i = 0; i < dataPlot.getDatasetCount(); i++)
+				dataPlot.setDataset(i, null);
 
-			rtPlot.clearAnnotations();
-			rtPlot.clearRangeMarkers();
-		}
-		if(mzPlot != null) {
-			for (int i = 0; i < mzPlot.getDatasetCount(); i++)
-				mzPlot.setDataset(i, null);
-
-			mzPlot.clearAnnotations();
-			mzPlot.clearRangeMarkers();
+			dataPlot.clearAnnotations();
+			dataPlot.clearRangeMarkers();
 		}
 	}
 	
@@ -189,6 +173,48 @@ public class FeaturePropertiesTimelinePlot extends AbstractControlledDataPlot {
 			return;
 		
 		sortedFileFeatureMap.putAll(fileFeatureMap);
+		
+		if(plotType.equals(LCMSPlotType.RT_AND_PEAK_WIDTH)) {
+			
+			createRtPeakWidthPlot(
+					feature,
+					sortedFileFeatureMap, 
+					sortingOrder,
+					colorOption, 
+					currentExperiment, 
+					dataPipeline);
+		}
+		if(plotType.equals(LCMSPlotType.MZ)) {
+			
+			createMZPlot(
+					feature,
+					sortedFileFeatureMap, 
+					sortingOrder,
+					colorOption, 
+					currentExperiment, 
+					dataPipeline);
+		}
+	}
+	
+	private void createMZPlot(
+			MsFeature feature, 
+			Map<DataFile, SimpleMsFeature> sortedFileFeatureMap,
+			FileSortingOrder sortingOrder, 
+			ChartColorOption colorOption, 
+			DataAnalysisProject currentExperiment,
+			DataPipeline dataPipeline) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private void createRtPeakWidthPlot(			
+			MsFeature feature,
+			Map<DataFile, SimpleMsFeature> sortedFileFeatureMap, 
+			FileSortingOrder sortingOrder,
+			ChartColorOption colorOption, 
+			DataAnalysisProject currentExperiment, 
+			DataPipeline dataPipeline) {
+
 		if(sortingOrder.equals(FileSortingOrder.TIMESTAMP)) {
 			
 			//	Peak width plot
@@ -196,16 +222,15 @@ public class FeaturePropertiesTimelinePlot extends AbstractControlledDataPlot {
 					new TimedScatterDataSetWithCustomErrors(
 							feature, sortedFileFeatureMap, currentExperiment, dataPipeline);
 			
-			XYItemRenderer peakWidtRenderer = rtPlot.getRenderer();
+			XYItemRenderer peakWidtRenderer = dataPlot.getRenderer();
 			for(int i=0; i<tsds.getSeriesCount(); i++)
 				peakWidtRenderer.setSeriesPaint(i, ColorUtils.getColor(i));
 			
-			rtPlot.setDataset(tsds);
-
-			addRangeMarkers(tsds, rtPlot);
+			dataPlot.setDataset(tsds);
+			addRangeMarkers(tsds, dataPlot);
 		}
 	}
-	
+
 	private void addRangeMarkers(TimedScatterDataSetWithCustomErrors tsds, XYPlot targetPlot) {
 		
 		if(tsds.getDataSetStats() == null)
@@ -252,6 +277,12 @@ public class FeaturePropertiesTimelinePlot extends AbstractControlledDataPlot {
 
 	@Override
 	public void setDataPlotControlsPanel(DataPlotControlsPanel dataPlotControlsPanel) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void initPlot() {
 		// TODO Auto-generated method stub
 		
 	}
