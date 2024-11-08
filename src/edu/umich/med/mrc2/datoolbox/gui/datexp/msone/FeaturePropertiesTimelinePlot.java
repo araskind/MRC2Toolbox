@@ -22,6 +22,7 @@
 package edu.umich.med.mrc2.datoolbox.gui.datexp.msone;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.event.ItemEvent;
 import java.text.SimpleDateFormat;
 import java.util.Map;
@@ -35,6 +36,7 @@ import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.ValueMarker;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYItemRenderer;
+import org.jfree.chart.ui.RectangleAnchor;
 import org.jfree.chart.ui.RectangleEdge;
 import org.jfree.chart.ui.RectangleInsets;
 
@@ -48,10 +50,13 @@ import edu.umich.med.mrc2.datoolbox.data.enums.FileSortingOrder;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.gui.plot.AbstractControlledDataPlot;
 import edu.umich.med.mrc2.datoolbox.gui.plot.TwoDimDataPlotParameterObject;
+import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.TimedScatterDataSet;
 import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.TimedScatterDataSetWithCustomErrors;
 import edu.umich.med.mrc2.datoolbox.gui.plot.renderer.XYCustomErrorRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.plot.stats.DataPlotControlsPanel;
+import edu.umich.med.mrc2.datoolbox.gui.plot.tooltip.NamedTimeSeriesToolTipGenerator;
 import edu.umich.med.mrc2.datoolbox.gui.utils.ColorUtils;
+import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 
 public class FeaturePropertiesTimelinePlot extends AbstractControlledDataPlot {
@@ -70,7 +75,7 @@ public class FeaturePropertiesTimelinePlot extends AbstractControlledDataPlot {
 		this.plotType = plotType;
 		initChart();
 		initTitles();
-		initLegend(RectangleEdge.BOTTOM, false);
+		initLegend(RectangleEdge.BOTTOM, legendVisible);
 	}
 
 	@Override
@@ -97,11 +102,7 @@ public class FeaturePropertiesTimelinePlot extends AbstractControlledDataPlot {
 				false // generate URLs?
 		).getPlot();
 		setBasicPlotGui(dataPlot);
-		
-		//	Set renderes for MZ plot
-		if(plotType.equals(LCMSPlotType.MZ)) {
-			
-		}
+
 		//	Set renderes for RT plot
 		if(plotType.equals(LCMSPlotType.RT_AND_PEAK_WIDTH)) {
 			
@@ -109,7 +110,8 @@ public class FeaturePropertiesTimelinePlot extends AbstractControlledDataPlot {
 			peakWidtRenderer.setDrawYError(true);
 			peakWidtRenderer.setDrawXError(false);
 			dataPlot.setRenderer(peakWidtRenderer);	
-		}		
+		}	
+		dataPlot.getRenderer().setDefaultToolTipGenerator(new NamedTimeSeriesToolTipGenerator());
 		chart = new JFreeChart(dataPlot);
 		chart.setBackgroundPaint(Color.white);
 		setChart(chart);
@@ -196,6 +198,7 @@ public class FeaturePropertiesTimelinePlot extends AbstractControlledDataPlot {
 		}
 	}
 	
+	//	Monoisotopic M/Z variation plot
 	private void createMZPlot(
 			MsFeature feature, 
 			Map<DataFile, SimpleMsFeature> sortedFileFeatureMap,
@@ -203,10 +206,23 @@ public class FeaturePropertiesTimelinePlot extends AbstractControlledDataPlot {
 			ChartColorOption colorOption, 
 			DataAnalysisProject currentExperiment,
 			DataPipeline dataPipeline) {
-		// TODO Auto-generated method stub
 		
+		if(sortingOrder.equals(FileSortingOrder.TIMESTAMP)) {
+			
+			TimedScatterDataSet tsds = 
+					new TimedScatterDataSet(feature, sortedFileFeatureMap, 
+							colorOption, currentExperiment, dataPipeline);
+			
+			XYItemRenderer mzRenderer = dataPlot.getRenderer();
+			for(int i=0; i<tsds.getSeriesCount(); i++)
+				mzRenderer.setSeriesPaint(i, ColorUtils.getColor(i));
+			
+			dataPlot.setDataset(tsds);
+			addSDRangeMarkers(tsds, dataPlot);
+		}		
 	}
 
+	//	Peak width plot
 	private void createRtPeakWidthPlot(			
 			MsFeature feature,
 			Map<DataFile, SimpleMsFeature> sortedFileFeatureMap, 
@@ -217,7 +233,6 @@ public class FeaturePropertiesTimelinePlot extends AbstractControlledDataPlot {
 
 		if(sortingOrder.equals(FileSortingOrder.TIMESTAMP)) {
 			
-			//	Peak width plot
 			TimedScatterDataSetWithCustomErrors tsds = 
 					new TimedScatterDataSetWithCustomErrors(
 							feature, sortedFileFeatureMap, currentExperiment, dataPipeline);
@@ -227,11 +242,11 @@ public class FeaturePropertiesTimelinePlot extends AbstractControlledDataPlot {
 				peakWidtRenderer.setSeriesPaint(i, ColorUtils.getColor(i));
 			
 			dataPlot.setDataset(tsds);
-			addRangeMarkers(tsds, dataPlot);
+			addMedianToBottomRangeMarkers(tsds, dataPlot);
 		}
 	}
 
-	private void addRangeMarkers(TimedScatterDataSetWithCustomErrors tsds, XYPlot targetPlot) {
+	private void addMedianToBottomRangeMarkers(TimedScatterDataSetWithCustomErrors tsds, XYPlot targetPlot) {
 		
 		if(tsds.getDataSetStats() == null)
 			return;
@@ -254,6 +269,38 @@ public class FeaturePropertiesTimelinePlot extends AbstractControlledDataPlot {
 			ubmarker.setPaint(Color.black);
 			targetPlot.addRangeMarker(ubmarker);
 		}		
+	}
+	
+	private void addSDRangeMarkers(TimedScatterDataSet tsds, XYPlot targetPlot) {
+
+		if(tsds.getDataSetStats() == null 
+				|| tsds.getDataSetStats().getValueStats() == null)
+			return;
+		
+		double median = tsds.getDataSetStats().getValueStats().getPercentile(50.0d);
+		ValueMarker marker = new ValueMarker(median); 
+		marker.setPaint(Color.red);
+		targetPlot.addRangeMarker(marker);
+		
+		double min = tsds.getDataSetStats().getValueStats().getMin();
+		double max = tsds.getDataSetStats().getValueStats().getMax();
+		double upperPpm = (max - median)/median * 1000000.0d;
+		double lowerPpm = (median - min)/median * 1000000.0d;
+		Font labelFont = new Font("Arial", Font.PLAIN, 18);
+						
+		ValueMarker upperMarker = new ValueMarker(max); 
+		upperMarker.setPaint(ColorUtils.getBrewerColor(2));
+		upperMarker.setLabelAnchor(RectangleAnchor.CENTER);
+		upperMarker.setLabelFont(labelFont);
+		upperMarker.setLabel("+" + MRC2ToolBoxConfiguration.getPpmFormat().format(upperPpm) + " ppm");
+		targetPlot.addRangeMarker(upperMarker);
+		
+		ValueMarker lowerMarker = new ValueMarker(min); 
+		lowerMarker.setPaint(ColorUtils.getBrewerColor(2));
+		lowerMarker.setLabelAnchor(RectangleAnchor.CENTER);
+		lowerMarker.setLabelFont(labelFont);
+		lowerMarker.setLabel("-" + MRC2ToolBoxConfiguration.getPpmFormat().format(lowerPpm) + " ppm");
+		targetPlot.addRangeMarker(lowerMarker);		
 	}
 
 	@Override

@@ -23,13 +23,13 @@ package edu.umich.med.mrc2.datoolbox.gui.plot.dataset;
 
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
-public class DatasetWithErrorsStats {
+public class PlotValuesStats {
 
 	private DescriptiveStatistics valueStats;
 	private DescriptiveStatistics upperBorderStats;
 	private DescriptiveStatistics lowerBorderStats;
 	
-	public DatasetWithErrorsStats() {
+	public PlotValuesStats() {
 		super();
 	}
 	

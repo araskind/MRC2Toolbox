@@ -28,6 +28,8 @@ import java.util.Map;
 
 import javax.swing.Icon;
 
+import org.jfree.chart.ChartPanel;
+
 import bibliothek.gui.dock.action.DefaultDockActionSource;
 import bibliothek.gui.dock.action.LocationHint;
 import bibliothek.gui.dock.action.actions.SimpleButtonAction;
@@ -53,6 +55,11 @@ public class DockableDataVariationPlotPanel extends DefaultSingleCDockable imple
 	protected static final Icon sidePanelHideIcon = GuiUtils.getIcon("sidePanelHide", 16);	
 	protected static final Icon msmsIcon = GuiUtils.getIcon("msms", 16);	
 	protected static final Icon peakIcon = GuiUtils.getIcon("smoothChromatogram", 16);	
+	
+	protected static final Icon showLegendIcon = GuiUtils.getIcon("showLegend", 24);
+	protected static final Icon hideLegendIcon = GuiUtils.getIcon("hiddenLegend", 24);
+	protected static final Icon autoRangeIcon = GuiUtils.getIcon("fitAll", 16);
+	protected static final Icon copyIcon = GuiUtils.getIcon("clipBoard", 16);	
 
 	private LCMSPlotType plotType;	
 	protected FileSortingOrder sortingOrder; 
@@ -64,6 +71,7 @@ public class DockableDataVariationPlotPanel extends DefaultSingleCDockable imple
 	protected SimpleButtonAction sortOrderButton;
 	protected SimpleButtonAction colorOptionButton;
 	protected SimpleButtonAction sidePanelButton;
+	protected SimpleButtonAction toggleLegendButton;
 	
 	protected MsFeature activeFeature;
 	protected Map<DataFile, SimpleMsFeature> fileFeatureMap;
@@ -87,8 +95,11 @@ public class DockableDataVariationPlotPanel extends DefaultSingleCDockable imple
 		       setTitleIcon(msmsIcon);
 		       setTitleText("RT and peak width values for individual features");
 		}	
+		initButtons();
 		featurePropertiesTimelinePlot = new FeaturePropertiesTimelinePlot(plotType);
 		add(featurePropertiesTimelinePlot, BorderLayout.CENTER);
+		toggleLegendIcon(featurePropertiesTimelinePlot.isLegendVisible());
+		featurePropertiesTimelinePlot.hideAnnotations();
 		
 		dataPlotControlsPanel = new DataPlotControlsPanel(featurePropertiesTimelinePlot);
 		add(dataPlotControlsPanel, BorderLayout.EAST);
@@ -97,7 +108,7 @@ public class DockableDataVariationPlotPanel extends DefaultSingleCDockable imple
 		
 		sortingOrder = FileSortingOrder.TIMESTAMP;
 		chartColorOption = ChartColorOption.BY_SAMPLE_TYPE;
-		initButtons();
+		
 	}
 
 	public void clearPanel() {
@@ -108,7 +119,27 @@ public class DockableDataVariationPlotPanel extends DefaultSingleCDockable imple
 
 		DefaultDockActionSource actions = new DefaultDockActionSource(
 				new LocationHint(LocationHint.DOCKABLE, LocationHint.LEFT));
+		
+		SimpleButtonAction autorangeButton = GuiUtils.setupButtonAction(
+				"Autorange",
+				ChartPanel.ZOOM_RESET_BOTH_COMMAND, 
+				autoRangeIcon, this);
+		actions.add(autorangeButton);
+		
+		SimpleButtonAction copyButton = GuiUtils.setupButtonAction(
+				ChartPanel.COPY_COMMAND,
+				ChartPanel.COPY_COMMAND,
+				copyIcon, this);
+		actions.add(copyButton);
+		
+		toggleLegendButton = GuiUtils.setupButtonAction(
+				MainActionCommands.SHOW_PLOT_LEGEND_COMMAND.getName(), 
+				MainActionCommands.SHOW_PLOT_LEGEND_COMMAND.getName(), 
+				hideLegendIcon, this);
+		actions.add(toggleLegendButton);
 
+		actions.addSeparator();
+		
 		sortOrderButton = GuiUtils.setupButtonAction(
 				MainActionCommands.SORT_BY_FILE_NAME_COMMAND.getName(), 
 				MainActionCommands.SORT_BY_FILE_NAME_COMMAND.getName(), 
@@ -134,25 +165,51 @@ public class DockableDataVariationPlotPanel extends DefaultSingleCDockable imple
 		intern().setActionOffers(actions);
 	}	
 	
-	public void loadFeatureData(
-			MsFeature feature, 
-			Map<DataFile, SimpleMsFeature> fileFeatureMap) {
+	protected void toggleLegendIcon(boolean isLegendVisible) {
 
-		this.activeFeature = feature;
-		this.fileFeatureMap = fileFeatureMap;
-		featurePropertiesTimelinePlot.showFeatureData(
-				feature,
-				fileFeatureMap, 
-				sortingOrder, 
-				chartColorOption, 
-				currentExperiment, 
-				dataPipeline);
+		if(toggleLegendButton == null)
+			return;
+		
+		if (isLegendVisible) {
+
+			toggleLegendButton.setIcon(showLegendIcon);
+			toggleLegendButton.setCommand(
+					MainActionCommands.HIDE_PLOT_LEGEND_COMMAND.getName());
+			toggleLegendButton.setText(
+					MainActionCommands.HIDE_PLOT_LEGEND_COMMAND.getName());
+		} 
+		else {			
+			toggleLegendButton.setIcon(hideLegendIcon);
+			toggleLegendButton.setCommand(
+					MainActionCommands.SHOW_PLOT_LEGEND_COMMAND.getName());
+			toggleLegendButton.setText(
+					MainActionCommands.SHOW_PLOT_LEGEND_COMMAND.getName());
+		}		
 	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
 
 		String command = e.getActionCommand();
+		
+		if (command.equals(ChartPanel.ZOOM_RESET_BOTH_COMMAND))
+			featurePropertiesTimelinePlot.restoreAutoBounds();
+		
+		if (command.equals(ChartPanel.COPY_COMMAND)) {
+			try {
+				featurePropertiesTimelinePlot.doCopy();
+			} catch (Exception e1) {
+				// TODO Auto-generated catch block
+			}
+		}
+		if (command.equals(MainActionCommands.SHOW_PLOT_LEGEND_COMMAND.getName())) {
+			featurePropertiesTimelinePlot.showLegend();
+			toggleLegendIcon(true);
+		}
+		if (command.equals(MainActionCommands.HIDE_PLOT_LEGEND_COMMAND.getName())) { 
+			featurePropertiesTimelinePlot.hideLegend();
+			toggleLegendIcon(false);
+		}
 		if(command.equals(MainActionCommands.SORT_BY_FILE_NAME_COMMAND.getName()))
 			sortDataByFileName();
 		
@@ -228,7 +285,22 @@ public class DockableDataVariationPlotPanel extends DefaultSingleCDockable imple
 		chartColorOption = ChartColorOption.BY_SAMPLE_TYPE;
 		updatePlot();
 	}
-		
+	
+	public void loadFeatureData(
+			MsFeature feature, 
+			Map<DataFile, SimpleMsFeature> fileFeatureMap) {
+
+		this.activeFeature = feature;
+		this.fileFeatureMap = fileFeatureMap;
+		featurePropertiesTimelinePlot.showFeatureData(
+				feature,
+				fileFeatureMap, 
+				sortingOrder, 
+				chartColorOption, 
+				currentExperiment, 
+				dataPipeline);
+	}
+	
 	private void updatePlot() {
 
 		featurePropertiesTimelinePlot.showFeatureData(

@@ -42,12 +42,12 @@ public class NamedTimeSeriesWithCustomErrors extends NamedTimeSeries {
 	
 	private Map<RegularTimePeriod,Number[]>errors;
 	private Range fullDataRange;
-	private DatasetWithErrorsStats stats;
+	
 
 	public NamedTimeSeriesWithCustomErrors(Comparable name) {
 		super(name);
 		errors = new TreeMap<RegularTimePeriod,Number[]>();
-		stats = new DatasetWithErrorsStats();
+		stats = new PlotValuesStats();
 	}
 	
 	public void add(Date x, Number y, Number min, Number max, String label) {
@@ -70,8 +70,12 @@ public class NamedTimeSeriesWithCustomErrors extends NamedTimeSeries {
 		return fullDataRange;
 	}
 	
-	public DatasetWithErrorsStats getSeriesStats() {
-
+	@Override
+	protected void calculateSeriesStats() {
+		
+		if(stats == null)
+			stats = new PlotValuesStats();
+		
 		double[] values = new double[this.data.size()];
 		double[] lowerBorderValues = new double[this.data.size()];
 		double[] upperBorderValues = new double[this.data.size()];
@@ -86,7 +90,6 @@ public class NamedTimeSeriesWithCustomErrors extends NamedTimeSeries {
 		stats.setValues(values);
 		stats.setLowperBorderValues(lowerBorderValues);
 		stats.setUpperBorderValues(upperBorderValues);
-		return stats;
 	}
 	
 	@Override

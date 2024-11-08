@@ -32,8 +32,8 @@ import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.SimpleMsFeature;
 import edu.umich.med.mrc2.datoolbox.data.enums.FileSortingOrder;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
+import edu.umich.med.mrc2.datoolbox.gui.datexp.msone.LCMSPlotType;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
-import edu.umich.med.mrc2.datoolbox.utils.ArrayUtils;
 
 public class TimedScatterDataSetWithCustomErrors extends TimedScatterDataSet implements DataSetWithCustomErrors{
 
@@ -41,8 +41,6 @@ public class TimedScatterDataSetWithCustomErrors extends TimedScatterDataSet imp
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-
-	private DatasetWithErrorsStats dataSetStats;
 	
 	//	Single series
 	public TimedScatterDataSetWithCustomErrors(Map<DataFile,SimpleMsFeature>dataFileFeatureMap) {		
@@ -76,7 +74,8 @@ public class TimedScatterDataSetWithCustomErrors extends TimedScatterDataSet imp
 				if(msf == null)
 					continue;
 				
-				String label = "";
+				String label = generateLabelForSimpleMsFeature(
+						df, msf, smEntry.getKey(), LCMSPlotType.RT_AND_PEAK_WIDTH);
 				double rtMin = msf.getRetentionTime();
 				double rtMax = msf.getRetentionTime();
 				if(msf.getRtRange() != null) {
@@ -90,39 +89,6 @@ public class TimedScatterDataSetWithCustomErrors extends TimedScatterDataSet imp
 			addSeries(series);
 		}	
 		combineSeriesStats();
-	}
-	
-	private void combineSeriesStats() {
-
-		dataSetStats = new DatasetWithErrorsStats(); 
-	    double[]valueArray = new double[0];	  	   
-	    double[]lowerBorderArray = new double[0];
-	    double[]upperBorderArray = new double[0];
-	    for(int i=0; i<getSeriesCount(); i++) {	    	
-        	
-        	NamedTimeSeriesWithCustomErrors series = (NamedTimeSeriesWithCustomErrors) getSeries(i);
-        	if(series.getSeriesStats() == null)
-        		continue;
-        		
-        	if(series.getSeriesStats().getValueStats() != null) {
-        		double[]result = ArrayUtils.concatDoubleArrays(
-        				valueArray, series.getSeriesStats().getValueStats().getValues());
-        		valueArray = result;
-        	}
-        	if(series.getSeriesStats().getLowerBorderStats() != null) {
-        		double[]lbresult = ArrayUtils.concatDoubleArrays(
-        				lowerBorderArray, series.getSeriesStats().getLowerBorderStats().getValues());
-        		lowerBorderArray = lbresult;
-        	}
-        	if(series.getSeriesStats().getUpperBorderStats() != null)    {   		
-        		double[]ubresult = ArrayUtils.concatDoubleArrays(
-        				upperBorderArray, series.getSeriesStats().getUpperBorderStats().getValues());
-        		upperBorderArray = ubresult;
-        	}
-        }
-        dataSetStats.setValues(valueArray);
-        dataSetStats.setLowperBorderValues(lowerBorderArray);
-        dataSetStats.setUpperBorderValues(upperBorderArray);
 	}
 
 	@Override
@@ -139,7 +105,9 @@ public class TimedScatterDataSetWithCustomErrors extends TimedScatterDataSet imp
     }
 	
     @Override
-    public Range getRangeBounds(List visibleSeriesKeys, Range xRange,
+    public Range getRangeBounds(
+    		List visibleSeriesKeys, 
+    		Range xRange,
             boolean includeInterval) {
         Range result = null;
         for (Object visibleSeriesKey : visibleSeriesKeys) {
@@ -181,10 +149,6 @@ public class TimedScatterDataSetWithCustomErrors extends TimedScatterDataSet imp
 	public double getUpperXBorder(int series, int item) {
 		// TODO Auto-generated method stub
 		return 0;
-	}
-
-	public DatasetWithErrorsStats getDataSetStats() {
-		return dataSetStats;
 	}
 }
 

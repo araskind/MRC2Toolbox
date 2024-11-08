@@ -27,6 +27,7 @@ import java.util.Date;
 import org.jfree.data.time.RegularTimePeriod;
 import org.jfree.data.time.Second;
 import org.jfree.data.time.TimeSeries;
+import org.jfree.data.time.TimeSeriesDataItem;
 
 public class NamedTimeSeries extends TimeSeries {
 
@@ -36,6 +37,7 @@ public class NamedTimeSeries extends TimeSeries {
 	private static final long serialVersionUID = -6516578883875846474L;
 	
 	protected ArrayList<String> labels;
+	protected PlotValuesStats stats;
 
 	public NamedTimeSeries(Comparable name) {
 
@@ -60,5 +62,22 @@ public class NamedTimeSeries extends TimeSeries {
 	public String getLabel(int index) {
 		return labels.get(index);
 	}
+	
+	protected void calculateSeriesStats() {
+		
+		if(stats == null)
+			stats = new PlotValuesStats();
+		
+		double[] values = new double[this.data.size()];
+		for (int i = 0; i < this.data.size(); i++)		
+			values[i] = ((TimeSeriesDataItem) this.data.get(i)).getValue().doubleValue();
+		
+		stats.setValues(values);
+	}
+	
+	public PlotValuesStats getSeriesStats() {
 
+		calculateSeriesStats();
+		return stats;
+	}
 }
