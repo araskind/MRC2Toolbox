@@ -23,7 +23,6 @@ package edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -72,6 +71,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskListener;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.library.CefLibraryImportTask;
+import edu.umich.med.mrc2.datoolbox.utils.ExperimentUtils;
 
 public class MultiCefImportTask extends AbstractTask implements TaskListener{
 
@@ -259,48 +259,51 @@ public class MultiCefImportTask extends AbstractTask implements TaskListener{
 	
 	private void saveDataMatrixes() {
 		
-		DataAnalysisProject experimentToSave = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
+		DataAnalysisProject experimentToSave = 
+				MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
 		if (experimentToSave.getDataMatrixForDataPipeline(dataPipeline) != null) {
 
 			taskDescription = "Saving data matrix for  " + experimentToSave.getName() +
 					"(" + dataPipeline.getName() + ")";
-			processed = 50;
-			File dataMatrixFile = Paths.get(experimentToSave.getExperimentDirectory().getAbsolutePath(), 
-					experimentToSave.getDataMatrixFileNameForDataPipeline(dataPipeline)).toFile();
-			try {
-				Matrix dataMatrix = Matrix.Factory
-						.linkToArray(experimentToSave.getDataMatrixForDataPipeline(dataPipeline).
-								toDoubleArray());
-				dataMatrix.save(dataMatrixFile);
-				processed = 80;
-			} catch (IOException e) {
-				e.printStackTrace();
-				//	setStatus(TaskStatus.ERROR);
-				return;
-			}
-			String featureMatrixFileName = experimentToSave.getFeatureMatrixFileNameForDataPipeline(dataPipeline);
-			if(featureMatrixFileName != null) {
-				
-				taskDescription = "Saving feature matrix for  " + experimentToSave.getName() +
-						"(" + dataPipeline.getName() + ")";
-				processed = 90;
-				File featureMatrixFile = 
-						Paths.get(experimentToSave.getExperimentDirectory().getAbsolutePath(), 
-						featureMatrixFileName).toFile();
-				try {
-					Matrix featureMatrix = Matrix.Factory
-							.linkToArray(experimentToSave.getFeatureMatrixForDataPipeline(dataPipeline).toObjectArray());
-					featureMatrix.save(featureMatrixFile);
-					processed = 100;
-				} catch (IOException e) {
-					e.printStackTrace();
-					//	setStatus(TaskStatus.ERROR);
-					return;
-				}
-				experimentToSave.setFeatureMatrixForDataPipeline(dataPipeline, null);
-				featureMatrix = null;
-				System.gc();
-			}
+			processed = 50;			
+			ExperimentUtils.saveDataMatrixForPipeline(experimentToSave, dataPipeline);
+			
+			taskDescription = "Saving feature matrix for  " + experimentToSave.getName() +
+					"(" + dataPipeline.getName() + ")";
+			processed = 70;
+
+			ExperimentUtils.saveFeatureMatrixToFile(
+					featureMatrix,
+					experimentToSave, 
+					dataPipeline);
+			
+			experimentToSave.setFeatureMatrixForDataPipeline(dataPipeline, null);
+			featureMatrix = null;
+			System.gc();
+			
+//			String featureMatrixFileName = experimentToSave.getFeatureMatrixFileNameForDataPipeline(dataPipeline);
+//			if(featureMatrixFileName != null) {
+//				
+//				taskDescription = "Saving feature matrix for  " + experimentToSave.getName() +
+//						"(" + dataPipeline.getName() + ")";
+//				processed = 90;
+//				File featureMatrixFile = 
+//						Paths.get(experimentToSave.getExperimentDirectory().getAbsolutePath(), 
+//						featureMatrixFileName).toFile();
+//				try {
+//					Matrix featureMatrix = Matrix.Factory
+//							.linkToArray(experimentToSave.getFeatureMatrixForDataPipeline(dataPipeline).toObjectArray());
+//					featureMatrix.save(featureMatrixFile);
+//					processed = 100;
+//				} catch (IOException e) {
+//					e.printStackTrace();
+//					//	setStatus(TaskStatus.ERROR);
+//					return;
+//				}
+//				experimentToSave.setFeatureMatrixForDataPipeline(dataPipeline, null);
+//				featureMatrix = null;
+//				System.gc();
+//			}
 		}		
 	}
 

@@ -252,13 +252,57 @@ public class ExperimentUtils {
 			}
 			if (featureMatrix != null) {
 
-				featureMatrix.setMetaDataDimensionMatrix(0, 
-						currentExperiment.getMetaDataMatrixForDataPipeline(dataPipeline, 0));
-				featureMatrix.setMetaDataDimensionMatrix(1, 
-						currentExperiment.getMetaDataMatrixForDataPipeline(dataPipeline, 1));
+				if(featureMatrix.getMetaDataDimensionMatrix(0).getMetaData() == null)
+					featureMatrix.setMetaDataDimensionMatrix(0, 
+							currentExperiment.getMetaDataMatrixForDataPipeline(dataPipeline, 0));
+				
+				if(featureMatrix.getMetaDataDimensionMatrix(1).getMetaData() == null)
+					featureMatrix.setMetaDataDimensionMatrix(1, 
+							currentExperiment.getMetaDataMatrixForDataPipeline(dataPipeline, 1));
 			}
 		}		
 		return featureMatrix;
+	}
+	
+	public static void saveFeatureMatrixToFile(
+			Matrix msFeatureMatrix,
+			DataAnalysisProject currentExperiment, 
+			DataPipeline dataPipeline) {
+		
+		String featureMatrixFileName = 
+				currentExperiment.getFeatureMatrixFileNameForDataPipeline(dataPipeline);
+		if(featureMatrixFileName == null || featureMatrixFileName.isEmpty()) 
+			return;
+			
+		File featureMatrixFile = 
+				Paths.get(currentExperiment.getExperimentDirectory().getAbsolutePath(), 
+				featureMatrixFileName).toFile();
+		try {
+			Matrix featureMatrix = 
+					Matrix.Factory.linkToArray(msFeatureMatrix.toObjectArray());
+			featureMatrix.save(featureMatrixFile);
+		} catch (IOException e) {
+			e.printStackTrace();
+			return;
+		}		
+	}
+	
+	public static void saveDataMatrixForPipeline(
+			DataAnalysisProject currentExperiment,
+			DataPipeline dataPipeline) {
+		
+		File dataMatrixFile = Paths.get(currentExperiment.getExperimentDirectory().getAbsolutePath(), 
+				currentExperiment.getDataMatrixFileNameForDataPipeline(dataPipeline)).toFile();
+		try {
+			Matrix dataMatrix = Matrix.Factory
+					.linkToArray(currentExperiment.getDataMatrixForDataPipeline(dataPipeline).
+							toDoubleArray());
+			dataMatrix.save(dataMatrixFile);
+
+		} catch (IOException e) {
+			e.printStackTrace();
+			return;
+		}
 	}
 }
 

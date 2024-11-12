@@ -118,9 +118,6 @@ public class DuplicateSelectionTable extends FeatureSelectionTable {
 			int row = e.getFirstRow();
 			int col = e.getColumn();
 			MsFeature selectedFeature = (MsFeature) model.getValueAt(row, featureCol);
-//			int row = convertRowIndexToView(e.getFirstRow());
-//			int col = convertColumnIndexToView(e.getColumn());
-
 			if (col == model.getColumnIndex(DuplicateSelectionTableModel.ID_COLUMN)) {
 
 				if((boolean) model.getValueAt(row, col))
@@ -130,22 +127,6 @@ public class DuplicateSelectionTable extends FeatureSelectionTable {
 				((DuplicateSelectionTableModel)model).reloadData();
 				model.addTableModelListener(modelListener);
 			}
-//			if (col == model.getColumnIndex(DuplicateSelectionTableModel.DATA_COLUMN)) {
-//
-//				if((boolean) model.getValueAt(row, col)) {
-//
-//					for(MsFeature f : activeCluster.getFeatures()) {
-//
-//						if(f.equals(selectedFeature))
-//							activeCluster.setFeatureEnabled(f, true);
-//						else
-//							activeCluster.setFeatureEnabled(f, false);
-//					}
-//				}
-//				model.removeTableModelListener(modelListener);
-//				((DuplicateSelectionTableModel)model).reloadData();
-//				model.addTableModelListener(modelListener);
-//			}
 		}
 	}
 

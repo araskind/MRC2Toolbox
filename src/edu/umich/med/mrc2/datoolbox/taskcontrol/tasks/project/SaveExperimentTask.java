@@ -26,7 +26,6 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.OutputStream;
 import java.io.RandomAccessFile;
 import java.nio.file.Paths;
@@ -61,6 +60,7 @@ import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
+import edu.umich.med.mrc2.datoolbox.utils.ExperimentUtils;
 
 public class SaveExperimentTask extends AbstractTask {
 
@@ -144,48 +144,70 @@ return;
 	
 	private void saveDataMatrixes() {
 		
+		total = (experimentToSave.getDataPipelines().size() * 2) + 1;
+		processed = 0;
 		for (DataPipeline dp : experimentToSave.getDataPipelines()) {
 
 			if (experimentToSave.getDataMatrixForDataPipeline(dp) != null) {
 
 				taskDescription = "Saving data matrix for  " + experimentToSave.getName() +
 						"(" + dp.getName() + ")";
-				processed = 50;
-				File dataMatrixFile = Paths.get(experimentToSave.getExperimentDirectory().getAbsolutePath(), 
-						experimentToSave.getDataMatrixFileNameForDataPipeline(dp)).toFile();
-				try {
-					Matrix dataMatrix = Matrix.Factory
-							.linkToArray(experimentToSave.getDataMatrixForDataPipeline(dp).
-									toDoubleArray());
-					dataMatrix.save(dataMatrixFile);
-					processed = 80;
-				} catch (IOException e) {
-					e.printStackTrace();
-					setStatus(TaskStatus.ERROR);
-return;
+								
+				ExperimentUtils.saveDataMatrixForPipeline(experimentToSave, dp);
+				processed++;
+				
+				taskDescription = "Saving feature matrix for  " + experimentToSave.getName() +
+						"(" + dp.getName() + ")";
+								
+				Matrix msFeatureMatrix = Matrix.Factory
+						.linkToArray(experimentToSave.getFeatureMatrixForDataPipeline(dp).toObjectArray());
 
-				}
-				if(experimentToSave.getFeatureMatrixFileNameForDataPipeline(dp) != null
-						&& experimentToSave.getFeatureMatrixForDataPipeline(dp) != null) {
-					
-					taskDescription = "Saving feature matrix for  " + experimentToSave.getName() +
-							"(" + dp.getName() + ")";
-					
-					File featureMatrixFile = Paths.get(experimentToSave.getExperimentDirectory().getAbsolutePath(), 
-							experimentToSave.getFeatureMatrixFileNameForDataPipeline(dp)).toFile();
-					try {
-						Matrix featureMatrix = Matrix.Factory
-								.linkToArray(experimentToSave.getFeatureMatrixForDataPipeline(dp).toObjectArray());
-						featureMatrix.save(featureMatrixFile);
-						processed = 100;
-					} catch (IOException e) {
-						e.printStackTrace();
-						setStatus(TaskStatus.ERROR);
-return;
+				ExperimentUtils.saveFeatureMatrixToFile(
+						msFeatureMatrix,
+						experimentToSave, 
+						dp);
+				processed++;
+				experimentToSave.setFeatureMatrixForDataPipeline(dp, null);
+				msFeatureMatrix = null;
 
-					}
-				}
+				
+//				File dataMatrixFile = Paths.get(experimentToSave.getExperimentDirectory().getAbsolutePath(), 
+//						experimentToSave.getDataMatrixFileNameForDataPipeline(dp)).toFile();
+//				try {
+//					Matrix dataMatrix = Matrix.Factory
+//							.linkToArray(experimentToSave.getDataMatrixForDataPipeline(dp).
+//									toDoubleArray());
+//					dataMatrix.save(dataMatrixFile);
+//					processed = 80;
+//				} catch (IOException e) {
+//					e.printStackTrace();
+//					setStatus(TaskStatus.ERROR);
+//return;
+//
+//				}
+//				if(experimentToSave.getFeatureMatrixFileNameForDataPipeline(dp) != null
+//						&& experimentToSave.getFeatureMatrixForDataPipeline(dp) != null) {
+//					
+//					taskDescription = "Saving feature matrix for  " + experimentToSave.getName() +
+//							"(" + dp.getName() + ")";
+//					
+//					File featureMatrixFile = Paths.get(experimentToSave.getExperimentDirectory().getAbsolutePath(), 
+//							experimentToSave.getFeatureMatrixFileNameForDataPipeline(dp)).toFile();
+//					try {
+//						Matrix featureMatrix = Matrix.Factory
+//								.linkToArray(experimentToSave.getFeatureMatrixForDataPipeline(dp).toObjectArray());
+//						featureMatrix.save(featureMatrixFile);
+//						processed = 100;
+//					} catch (IOException e) {
+//						e.printStackTrace();
+//						setStatus(TaskStatus.ERROR);
+//return;
+//
+//					}
+//				}
 			}
+			System.gc();
+			processed = total;
 		}
 	}
 

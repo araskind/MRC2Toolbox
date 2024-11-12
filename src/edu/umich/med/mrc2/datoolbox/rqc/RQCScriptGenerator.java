@@ -57,6 +57,27 @@ public class RQCScriptGenerator {
 		}
 	}
 	
+	private static void generateSummaryQcScriptForEX01426ionpneg() {
+		
+		String experimentId = "EX01426";
+		File rWorkingDir = new File("Y:\\DataAnalysis\\_Reports\\EX01426 - Human EDTA Tranche 2 plasma W20001176L\\"
+				+ "A049 - Central carbon metabolism profiling\\Documents");		
+		File xlQCfile  = new File("Y:\\DataAnalysis\\_Reports\\"
+				+ "EX01426 - Human EDTA Tranche 2 plasma W20001176L\\EX01426-QC-summary-tables.xlsx");		
+		File inputMap =  new File("Y:\\DataAnalysis\\_Reports\\EX01426 - Human EDTA Tranche 2 plasma W20001176L\\"
+				+ "A049 - Central carbon metabolism profiling\\Documents\\EX01426_IONP-NEG-SummaryQC-inputMap.txt");
+		String assayType = "IONP-NEG";
+		String assayType4R = "ionpneg";
+
+		generateSummaryQcScript(
+				experimentId,
+				rWorkingDir,
+				xlQCfile,
+				inputMap,
+				assayType,
+				assayType4R);
+	}
+	
 	private static void generateSummaryQcScriptForEX01426rpneg() {
 		
 		String experimentId = "EX01426";

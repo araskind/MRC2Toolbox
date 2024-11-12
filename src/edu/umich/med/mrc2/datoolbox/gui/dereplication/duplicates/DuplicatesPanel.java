@@ -56,7 +56,6 @@ import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.InformationDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
-import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
@@ -436,10 +435,10 @@ public class DuplicatesPanel extends ClusterDisplayPanel {
 		if (!clusterTree.getSelectedFeatures().isEmpty())
 			selectFeatures(clusterTree.getSelectedFeatures());
 		
-		for(MsFeature f : activeCluster.getFeatures()) {
-			System.out.println(f.getName() + " = " + 
-					MRC2ToolBoxConfiguration.getMzFormat().format(f.getSpectrum().getMonoisotopicMz()));
-		}
+//		for(MsFeature f : activeCluster.getFeatures()) {
+//			System.out.println(f.getName() + " = " + 
+//					MRC2ToolBoxConfiguration.getMzFormat().format(f.getSpectrum().getMonoisotopicMz()));
+//		}
 	}
 
 	@Override

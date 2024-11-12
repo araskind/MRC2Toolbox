@@ -154,20 +154,20 @@ public class MultiSpectraPlotFrame extends JFrame
 
 	private void initDataMatrix() {
 
-		ExperimentDesignRetrievalTask task = 
-				new ExperimentDesignRetrievalTask(currentExperiment, dataPipeline);
+		FeatureMatrixLoadTask task = 
+				new FeatureMatrixLoadTask(currentExperiment, dataPipeline);
 		IndeterminateProgressDialog idp = new IndeterminateProgressDialog(
 				"Reading feature data matrix ...", this.getContentPane(), task);
 		idp.setLocationRelativeTo(this.getContentPane());
 		idp.setVisible(true);
 	}
 
-	class ExperimentDesignRetrievalTask extends LongUpdateTask {
+	class FeatureMatrixLoadTask extends LongUpdateTask {
 
 		private DataAnalysisProject currentExperiment;
 		private DataPipeline dataPipeline;
 
-		public ExperimentDesignRetrievalTask(
+		public FeatureMatrixLoadTask(
 				DataAnalysisProject currentExperiment, 
 				DataPipeline dataPipeline) {
 			super();
