@@ -36,6 +36,7 @@ import edu.umich.med.mrc2.datoolbox.data.ExperimentalSample;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureCluster;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureStatisticalSummary;
+import edu.umich.med.mrc2.datoolbox.data.SimpleMsFeature;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.gui.dereplication.duplicates.DuplicatesCleanupOptions;
@@ -114,34 +115,14 @@ public class MergeDuplicateFeaturesTask extends AbstractTask {
 	private void readFeatureMatrix() {
 
 		taskDescription = "Reading MS feature matrix data";
+		total = 100;
 		processed = 30;
-		
 		msFeatureMatrix = 
-				ExperimentUtils.readFeatureMatrix(currentExperiment, activeDataPipeline);
-		
-//		File featureMatrixFile = 
-//				Paths.get(currentExperiment.getExperimentDirectory().getAbsolutePath(), 
-//				currentExperiment.getFeatureMatrixFileNameForDataPipeline(activeDataPipeline)).toFile();
-//		if (!featureMatrixFile.exists())
-//			return;
-//		
-//		msFeatureMatrix = null;
-//		if (featureMatrixFile.exists()) {
-//			try {
-//				msFeatureMatrix = Matrix.Factory.load(featureMatrixFile);
-//			} catch (ClassNotFoundException | IOException e) {
-//				e.printStackTrace();
-//				setStatus(TaskStatus.ERROR);
-//				return;				
-//			}
-//			if (msFeatureMatrix != null) {
-//
-//				msFeatureMatrix.setMetaDataDimensionMatrix(0, 
-//						currentExperiment.getMetaDataMatrixForDataPipeline(activeDataPipeline, 0));
-//				msFeatureMatrix.setMetaDataDimensionMatrix(1, 
-//						currentExperiment.getMetaDataMatrixForDataPipeline(activeDataPipeline, 1));
-//			}
-//		}		
+				ExperimentUtils.readFeatureMatrix(currentExperiment, activeDataPipeline, true);
+		if(msFeatureMatrix == null)
+			msFeatureMatrix = 
+				ExperimentUtils.readFeatureMatrix(currentExperiment, activeDataPipeline, false);
+		processed = 100;
 	}
 	
 	public void removeDuplicateFeatures() {
@@ -151,7 +132,7 @@ public class MergeDuplicateFeaturesTask extends AbstractTask {
 		processed = 0;
 		Matrix dataMatrix = 
 				currentExperiment.getDataMatrixForDataPipeline(activeDataPipeline);
-		Matrix featureMatrix = dataMatrix.getMetaDataDimensionMatrix(0);
+		//Matrix featureMatrix = dataMatrix.getMetaDataDimensionMatrix(0);
 		ArrayList<MsFeature> featuresToRemove = new ArrayList<MsFeature>();
 		ArrayList<MsFeature> featuresToMerge = new ArrayList<MsFeature>();
 		TreeSet<Long>secondaryFeatureCoorinates = new TreeSet<Long>();
@@ -160,9 +141,9 @@ public class MergeDuplicateFeaturesTask extends AbstractTask {
 			.stream().flatMap(s -> s.getDataFilesForMethod(acquisitionMethod).stream())
 			.collect(Collectors.toCollection(TreeSet::new));
 				
-		long[] coordinates = new long[2];
-		long[] coordinatesForReplacement = new long[2];
-		long primaryFeatureCoordinate = -1;
+		long[] primaryFeatureCoordinates = new long[2];
+		long[] replacementFeatureCoordinates = new long[2];
+
 		long bestFit = -1;
 		double area, topArea, median, delta, diff, replacementValue;
 		
@@ -171,7 +152,7 @@ public class MergeDuplicateFeaturesTask extends AbstractTask {
 			featuresToMerge.clear();
 			secondaryFeatureCoorinates.clear();
 			MsFeature primFeature = fclust.getPrimaryFeature();
-			primaryFeatureCoordinate = dataMatrix.getColumnForLabel(primFeature);
+			primaryFeatureCoordinates[1] = dataMatrix.getColumnForLabel(primFeature);
 			fclust.getFeatureMap().get(activeDataPipeline)
 				.stream().filter(f -> !f.equals(primFeature))
 				.forEach(f -> {
@@ -182,22 +163,21 @@ public class MergeDuplicateFeaturesTask extends AbstractTask {
 			
 			for(DataFile df : dataFiles) {
 				
-				coordinates[0] = dataMatrix.getRowForLabel(df);
-				coordinatesForReplacement[0] = dataMatrix.getRowForLabel(df);				
-				coordinates[1] = primaryFeatureCoordinate;				
+				primaryFeatureCoordinates[0] = dataMatrix.getRowForLabel(df);
+				replacementFeatureCoordinates[0] = dataMatrix.getRowForLabel(df);				
 				if (mergeOption.equals(DuplicatesCleanupOptions.USE_HIGHEST_AREA)) {
 					
 				}
 				if (mergeOption.equals(DuplicatesCleanupOptions.USE_PRIMARY_AND_FILL_MISSING)) {
 					
-					double primaryValue = dataMatrix.getAsDouble(coordinates);
+					double primaryValue = dataMatrix.getAsDouble(primaryFeatureCoordinates);
 					double newValue = 0.0d;
 					if(primaryValue <= 0.0d) {
 						
 						if(secondaryFeatureCoorinates.size() == 1) {
 							
-							coordinatesForReplacement[1] = secondaryFeatureCoorinates.iterator().next();
-							newValue = dataMatrix.getAsDouble(coordinatesForReplacement);
+							replacementFeatureCoordinates[1] = secondaryFeatureCoorinates.iterator().next();
+							newValue = dataMatrix.getAsDouble(replacementFeatureCoordinates);
 						}
 						if(secondaryFeatureCoorinates.size() > 1) {
 							
@@ -208,16 +188,22 @@ public class MergeDuplicateFeaturesTask extends AbstractTask {
 
 							for(long sc : secondaryFeatureCoorinates) {
 								
-								coordinatesForReplacement[1] = sc;
-								replacementValue = dataMatrix.getAsDouble(coordinatesForReplacement);
-								diff = Math.abs(median - replacementValue);
-								if(diff < delta) {
-									delta = diff;
-									newValue = replacementValue;
+								replacementFeatureCoordinates[1] = sc;
+								replacementValue = dataMatrix.getAsDouble(replacementFeatureCoordinates);
+								if(replacementValue > 0.0d) {
+									
+									diff = Math.abs(median - replacementValue);
+									if(diff < delta) {
+										delta = diff;
+										newValue = replacementValue;
+									}
 								}
 							}
 						}						
-						dataMatrix.setAsDouble(newValue, coordinates);						
+						dataMatrix.setAsDouble(newValue, primaryFeatureCoordinates);
+						SimpleMsFeature replacementSmf = 
+								(SimpleMsFeature)msFeatureMatrix.getAsObject(replacementFeatureCoordinates);
+						msFeatureMatrix.setAsObject(replacementSmf, primaryFeatureCoordinates);
 					}
 				}
 			}
@@ -247,6 +233,8 @@ public class MergeDuplicateFeaturesTask extends AbstractTask {
 		newDataMatrix.setMetaDataDimensionMatrix(1, dataMatrix.getMetaDataDimensionMatrix(1));
 		currentExperiment.setDataMatrixForDataPipeline(activeDataPipeline, newDataMatrix);
 		
+		processed = 40;
+		
 		if(msFeatureMatrix != null) {
 			
 			Matrix newMsFeatureLabelMatrix = 
@@ -258,7 +246,7 @@ public class MergeDuplicateFeaturesTask extends AbstractTask {
 			//	TODO - there is no undo for it here, if the experiment is not saved
 			//	Same for areas matrix?? they need backup for this case !!!
 			//	Maybe for now force save the experiment and warn that there is no UNDO
-			
+			processed = 70;
 			saveMsFeatureMatrix(newMsFeatureMatrix);
 			
 			//			System.err.println("Data: " + newDataMatrix.getRowCount() + 
@@ -268,6 +256,7 @@ public class MergeDuplicateFeaturesTask extends AbstractTask {
 		}
 		currentExperiment.setDuplicateClustersForDataPipeline(
 				activeDataPipeline, new HashSet<MsFeatureCluster>());
+		processed = 100;
 	}
 
 	public void removeDuplicateFeaturesUsingHighestAreaFeature() {
@@ -416,33 +405,12 @@ public class MergeDuplicateFeaturesTask extends AbstractTask {
 		ExperimentUtils.saveFeatureMatrixToFile(
 				msFeatureMatrix,
 				currentExperiment, 
-				activeDataPipeline);
+				activeDataPipeline,
+				true);
 		currentExperiment.setFeatureMatrixForDataPipeline(activeDataPipeline, null);
 		msFeatureMatrix = null;
 		System.gc();
-		processed = 100;
-		
-//		if(featureMatrixFileName != null) {
-//			
-//			taskDescription = "Saving feature matrix for  " + currentExperiment.getName() +
-//					"(" + currentExperiment.getName() + ")";
-//			processed = 90;
-//			File featureMatrixFile = 
-//					Paths.get(currentExperiment.getExperimentDirectory().getAbsolutePath(), 
-//					featureMatrixFileName).toFile();
-//			try {
-//				Matrix featureMatrix = 
-//						Matrix.Factory.linkToArray(msFeatureMatrix.toObjectArray());
-//				featureMatrix.save(featureMatrixFile);
-//				processed = 100;
-//			} catch (IOException e) {
-//				e.printStackTrace();
-//				// setStatus(TaskStatus.ERROR);
-//				return;
-//			}
-//			msFeatureMatrix = null;
-//			System.gc();
-//		}				
+		processed = 100;				
 	}
 
 	private void swapFeatureStats(MsFeature featureOne, MsFeature featureTwo) {

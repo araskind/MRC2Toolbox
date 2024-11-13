@@ -211,6 +211,26 @@ public class IsotopicPatternUtils {
 		return ranges;
 	}
 	
+	public static MolecularFormulaRange createElementRanges4SimpleIsoPatternScoring() {
+		
+		MolecularFormulaRange ranges = new MolecularFormulaRange();
+		IsotopeFactory ifac = null;
+		try {
+			ifac = Isotopes.getInstance();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		if(ifac == null)
+			return null;	
+
+		ranges.addIsotope(ifac.getMajorIsotope("H"), 2, 322);
+		ranges.addIsotope(ifac.getMajorIsotope("C"), 0, 160);
+		ranges.addIsotope(ifac.getMajorIsotope("Na"), 0, 2);
+		ranges.addIsotope(ifac.getMajorIsotope("Cl"), 0, 2);
+		return ranges;
+	}
+	
 	public static MolecularFormulaRange getDefaultElementRanges() {
 		
 		File defaultsFile =  Paths.get(

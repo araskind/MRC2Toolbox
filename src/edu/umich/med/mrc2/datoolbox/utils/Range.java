@@ -103,6 +103,10 @@ public class Range implements Serializable, Comparable<Range> {
 	public boolean contains(double value) {
 		return ((min <= value) && (max >= value));
 	}
+	
+	public boolean containsExcludingUpperBorder(double value) {
+		return ((min <= value) && (max > value));
+	}
 
 	/**
 	 * Returns true if this range contains the whole given range as a subset.
@@ -276,9 +280,8 @@ public class Range implements Serializable, Comparable<Range> {
     }
 
 	@Override
-	public int compareTo(Range o) {
-		// TODO Auto-generated method stub
-		return 0;
+	public int compareTo(Range o) {		
+		return Double.compare(this.getAverage(), o.getAverage());
 	}
 	
 	public String getStorableString() {

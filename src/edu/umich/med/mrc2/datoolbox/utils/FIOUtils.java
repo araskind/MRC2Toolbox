@@ -27,6 +27,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -275,5 +276,14 @@ public class FIOUtils {
 
 		return fileName;
 	}
-
+	
+	public static void replaceFile(File newFile, File oldFile) throws IOException {
+		
+	    Files.move(newFile.toPath(), oldFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+	}
+	
+	public static void replaceFile(Path newFile, Path oldFile) throws IOException {
+		
+	    Files.move(newFile, oldFile, StandardCopyOption.REPLACE_EXISTING);
+	}
 }

@@ -1042,14 +1042,14 @@ public class MsUtils {
 		if (!adduct.getAddedGroup().isEmpty()) {
 
 			IMolecularFormula addedGroup = 
-					MolecularFormulaManipulator.getMolecularFormula(adduct.getAddedGroup(), builder);
+					MolecularFormulaManipulator.getMajorIsotopeMolecularFormula(adduct.getAddedGroup(), builder);
 			for (IIsotope iso : addedGroup.isotopes())
 				adductCompleteFormula.addIsotope(iso, addedGroup.getIsotopeCount(iso));
 		}
 		if (!adduct.getRemovedGroup().isEmpty()) {
 
 			IMolecularFormula neutralLoss =
-					MolecularFormulaManipulator.getMolecularFormula(adduct.getRemovedGroup(), builder);
+					MolecularFormulaManipulator.getMajorIsotopeMolecularFormula(adduct.getRemovedGroup(), builder);
 			
 			for (IIsotope nliso : neutralLoss.isotopes()) {				
 				try {

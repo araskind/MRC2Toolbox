@@ -71,6 +71,7 @@ public class ExperimentUtils {
 	
 	public static final DateFormat dateTimeFormat = 
 			new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	public static final String tmpSuffix = "_TMP";
 
 	public static boolean designValidForStats(
 			DataAnalysisProject currentExperiment,
@@ -235,10 +236,21 @@ public class ExperimentUtils {
 	
 	public static Matrix readFeatureMatrix(			
 			DataAnalysisProject currentExperiment,
-			DataPipeline dataPipeline) {
+			DataPipeline dataPipeline,
+			boolean readTemporary) {
 		
-		File featureMatrixFile = Paths.get(currentExperiment.getExperimentDirectory().getAbsolutePath(), 
-				currentExperiment.getFeatureMatrixFileNameForDataPipeline(dataPipeline)).toFile();
+		String matrixFileName = 
+				currentExperiment.getFeatureMatrixFileNameForDataPipeline(dataPipeline);
+		if(matrixFileName == null || matrixFileName.isEmpty())
+			return null;
+		
+		if(readTemporary)
+			matrixFileName = FilenameUtils.getBaseName(matrixFileName) 
+					+ tmpSuffix + "." + FilenameUtils.getExtension(matrixFileName);
+		
+		
+		File featureMatrixFile = 
+				Paths.get(currentExperiment.getExperimentDirectory().getAbsolutePath(), matrixFileName).toFile();
 		if (!featureMatrixFile.exists())
 			return null;
 		
@@ -252,13 +264,10 @@ public class ExperimentUtils {
 			}
 			if (featureMatrix != null) {
 
-				if(featureMatrix.getMetaDataDimensionMatrix(0).getMetaData() == null)
-					featureMatrix.setMetaDataDimensionMatrix(0, 
-							currentExperiment.getMetaDataMatrixForDataPipeline(dataPipeline, 0));
-				
-				if(featureMatrix.getMetaDataDimensionMatrix(1).getMetaData() == null)
-					featureMatrix.setMetaDataDimensionMatrix(1, 
-							currentExperiment.getMetaDataMatrixForDataPipeline(dataPipeline, 1));
+				featureMatrix.setMetaDataDimensionMatrix(0, 
+						currentExperiment.getMetaDataMatrixForDataPipeline(dataPipeline, 0));				
+				featureMatrix.setMetaDataDimensionMatrix(1, 
+						currentExperiment.getMetaDataMatrixForDataPipeline(dataPipeline, 1));
 			}
 		}		
 		return featureMatrix;
@@ -267,13 +276,18 @@ public class ExperimentUtils {
 	public static void saveFeatureMatrixToFile(
 			Matrix msFeatureMatrix,
 			DataAnalysisProject currentExperiment, 
-			DataPipeline dataPipeline) {
+			DataPipeline dataPipeline,
+			boolean saveAsTemporary) {
 		
 		String featureMatrixFileName = 
 				currentExperiment.getFeatureMatrixFileNameForDataPipeline(dataPipeline);
 		if(featureMatrixFileName == null || featureMatrixFileName.isEmpty()) 
 			return;
-			
+		
+		if(saveAsTemporary)
+			featureMatrixFileName = FilenameUtils.getBaseName(featureMatrixFileName) 
+					+ tmpSuffix + "." + FilenameUtils.getExtension(featureMatrixFileName);
+		
 		File featureMatrixFile = 
 				Paths.get(currentExperiment.getExperimentDirectory().getAbsolutePath(), 
 				featureMatrixFileName).toFile();
@@ -303,6 +317,55 @@ public class ExperimentUtils {
 			e.printStackTrace();
 			return;
 		}
+	}
+	
+	//	Will replace existing primery feature matrix file for 
+	//	pipeline with temporary if both files are present
+	public static void saveTemporaryFeatureMatrixFileAsPrimary(
+			DataAnalysisProject currentExperiment,
+			DataPipeline dataPipeline) {
+		
+		String featureMatrixFileName = 
+				currentExperiment.getFeatureMatrixFileNameForDataPipeline(dataPipeline);
+		if(featureMatrixFileName == null || featureMatrixFileName.isEmpty()) 
+			return;
+		
+		String tmpFeatureMatrixFileName = FilenameUtils.getBaseName(featureMatrixFileName) 
+					+ tmpSuffix + "." + FilenameUtils.getExtension(featureMatrixFileName);		
+		File featureMatrixFile = 
+				Paths.get(currentExperiment.getExperimentDirectory().getAbsolutePath(), 
+				featureMatrixFileName).toFile();		
+		File tmpFeatureMatrixFile = 
+				Paths.get(currentExperiment.getExperimentDirectory().getAbsolutePath(), 
+						tmpFeatureMatrixFileName).toFile();
+		
+		if(featureMatrixFile.exists() && tmpFeatureMatrixFile.exists()) {
+			try {
+				FIOUtils.replaceFile(tmpFeatureMatrixFile, featureMatrixFile);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	public static void deleteTemporaryFeatureMatrixFile(
+			DataAnalysisProject currentExperiment,
+			DataPipeline dataPipeline) {
+		
+		String featureMatrixFileName = 
+				currentExperiment.getFeatureMatrixFileNameForDataPipeline(dataPipeline);
+		if(featureMatrixFileName == null || featureMatrixFileName.isEmpty()) 
+			return;
+		
+		String tmpFeatureMatrixFileName = FilenameUtils.getBaseName(featureMatrixFileName) 
+					+ tmpSuffix + "." + FilenameUtils.getExtension(featureMatrixFileName);			
+		File tmpFeatureMatrixFile = 
+				Paths.get(currentExperiment.getExperimentDirectory().getAbsolutePath(), 
+						tmpFeatureMatrixFileName).toFile();
+		
+		if(tmpFeatureMatrixFile.exists())
+			tmpFeatureMatrixFile.delete();			
 	}
 }
 

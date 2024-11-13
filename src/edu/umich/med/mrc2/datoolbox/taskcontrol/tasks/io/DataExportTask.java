@@ -264,7 +264,7 @@ public class DataExportTask extends AbstractTask {
 
 		taskDescription = "Reading feature data matrix ...";
 		Matrix dataMatrix = 
-				ExperimentUtils.readFeatureMatrix(currentExperiment, dataPipeline);
+				ExperimentUtils.readFeatureMatrix(currentExperiment, dataPipeline, false);
 		if(dataMatrix == null) {
 			errorMessage = "Unable to read feature data matrix file";
 			setStatus(TaskStatus.ERROR);
@@ -403,7 +403,7 @@ public class DataExportTask extends AbstractTask {
 		
 		taskDescription = "Reading feature data matrix ...";
 		Matrix dataMatrix = 
-				ExperimentUtils.readFeatureMatrix(currentExperiment, dataPipeline);
+				ExperimentUtils.readFeatureMatrix(currentExperiment, dataPipeline, false);
 		if(dataMatrix == null) {
 			errorMessage = "Unable to read feature data matrix file";
 			setStatus(TaskStatus.ERROR);
@@ -526,7 +526,7 @@ public class DataExportTask extends AbstractTask {
 
 		taskDescription = "Reading feature data matrix ...";
 		Matrix dataMatrix = 
-				ExperimentUtils.readFeatureMatrix(currentExperiment, dataPipeline);
+				ExperimentUtils.readFeatureMatrix(currentExperiment, dataPipeline, false);
 		if(dataMatrix == null) {
 			errorMessage = "Unable to read feature data matrix file";
 			setStatus(TaskStatus.ERROR);

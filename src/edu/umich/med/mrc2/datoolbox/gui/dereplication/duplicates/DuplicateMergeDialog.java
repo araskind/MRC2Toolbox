@@ -73,8 +73,8 @@ public class DuplicateMergeDialog extends JDialog implements BackedByPreferences
 		setIconImage(((ImageIcon) clearDuplicatesIcon).getImage());
 
 		setModalityType(ModalityType.APPLICATION_MODAL);
-		setSize(new Dimension(350, 150));
-		setPreferredSize(new Dimension(350, 150));
+		setSize(new Dimension(450, 150));
+		setPreferredSize(new Dimension(450, 150));
 		setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
 
 		JPanel panel = new JPanel();

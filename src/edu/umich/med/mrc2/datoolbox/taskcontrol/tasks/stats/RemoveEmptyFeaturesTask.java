@@ -61,8 +61,7 @@ public class RemoveEmptyFeaturesTask extends AbstractTask {
 
 			e.printStackTrace();
 			setStatus(TaskStatus.ERROR);
-return;
-
+			return;
 		}
 		setStatus(TaskStatus.FINISHED);
 	}
@@ -129,7 +128,8 @@ return;
 		ExperimentUtils.saveFeatureMatrixToFile(
 				msFeatureMatrix,
 				currentExperiment, 
-				dataPipeline);
+				dataPipeline,
+				true);
 		msFeatureMatrix = null;
 		currentExperiment.setFeatureMatrixForDataPipeline(dataPipeline, null);
 		System.gc();

@@ -275,35 +275,12 @@ public class MultiCefImportTask extends AbstractTask implements TaskListener{
 			ExperimentUtils.saveFeatureMatrixToFile(
 					featureMatrix,
 					experimentToSave, 
-					dataPipeline);
+					dataPipeline,
+					false);
 			
 			experimentToSave.setFeatureMatrixForDataPipeline(dataPipeline, null);
 			featureMatrix = null;
 			System.gc();
-			
-//			String featureMatrixFileName = experimentToSave.getFeatureMatrixFileNameForDataPipeline(dataPipeline);
-//			if(featureMatrixFileName != null) {
-//				
-//				taskDescription = "Saving feature matrix for  " + experimentToSave.getName() +
-//						"(" + dataPipeline.getName() + ")";
-//				processed = 90;
-//				File featureMatrixFile = 
-//						Paths.get(experimentToSave.getExperimentDirectory().getAbsolutePath(), 
-//						featureMatrixFileName).toFile();
-//				try {
-//					Matrix featureMatrix = Matrix.Factory
-//							.linkToArray(experimentToSave.getFeatureMatrixForDataPipeline(dataPipeline).toObjectArray());
-//					featureMatrix.save(featureMatrixFile);
-//					processed = 100;
-//				} catch (IOException e) {
-//					e.printStackTrace();
-//					//	setStatus(TaskStatus.ERROR);
-//					return;
-//				}
-//				experimentToSave.setFeatureMatrixForDataPipeline(dataPipeline, null);
-//				featureMatrix = null;
-//				System.gc();
-//			}
 		}		
 	}
 

@@ -179,9 +179,12 @@ public class MultiSpectraPlotFrame extends JFrame
 		@Override
 		public Void doInBackground() {
 
+			if(currentExperiment == null || dataPipeline == null)
+				return null;
+			
 			try {
 				featureDataMatrix = 
-						ExperimentUtils.readFeatureMatrix(currentExperiment, dataPipeline);
+						ExperimentUtils.readFeatureMatrix(currentExperiment, dataPipeline, false);
 				if(featureDataMatrix == null) {
 					return null;
 				}
