@@ -173,18 +173,18 @@ public class ConvertCefLibraryForRecursionTask extends CEFProcessingTask {
 
 		//	Debug only
 		for(Entry<Range,Collection<LibraryMsFeature>>fEntry : featuresByScore.entrySet()) {
-			
-			String outName = "featuresForScoreRange_" + 
-					MRC2ToolBoxConfiguration.getPpmFormat().format(fEntry.getKey().getMin()) + "_" + 
-					MRC2ToolBoxConfiguration.getPpmFormat().format(fEntry.getKey().getMax()) + ".cef";
-			File outputFile = new File(outputCefFile.getParent(), outName);
-			try {
-				writeDebugCefLibrary(fEntry.getValue(), outputFile);
-			} catch (Exception e) {
-				e.printStackTrace();
-				setStatus(TaskStatus.ERROR);
-				return;
-			}
+//			
+//			String outName = "featuresForScoreRange_" + 
+//					MRC2ToolBoxConfiguration.getPpmFormat().format(fEntry.getKey().getMin()) + "_" + 
+//					MRC2ToolBoxConfiguration.getPpmFormat().format(fEntry.getKey().getMax()) + ".cef";
+//			File outputFile = new File(outputCefFile.getParent(), outName);
+//			try {
+//				writeDebugCefLibrary(fEntry.getValue(), outputFile);
+//			} catch (Exception e) {
+//				e.printStackTrace();
+//				setStatus(TaskStatus.ERROR);
+//				return;
+//			}
 		}
 		//	End debug
 		
