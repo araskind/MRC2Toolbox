@@ -19,7 +19,7 @@
  *
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.misctest;
+package edu.umich.med.mrc2.datoolbox.utils;
 
 import java.io.BufferedReader;
 import java.io.IOException;

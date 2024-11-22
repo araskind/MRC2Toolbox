@@ -41,10 +41,10 @@ import edu.umich.med.mrc2.datoolbox.dbparse.load.lipidmaps.LipidMapsClassificati
 import edu.umich.med.mrc2.datoolbox.dbparse.load.lipidmaps.LipidMapsClassificationObject;
 import edu.umich.med.mrc2.datoolbox.dbparse.load.lipidmaps.LipidMapsParser;
 import edu.umich.med.mrc2.datoolbox.dbparse.load.lipidmaps.LipidMapsRecord;
-import edu.umich.med.mrc2.datoolbox.misctest.IteratingSDFReaderFixed;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
+import edu.umich.med.mrc2.datoolbox.utils.IteratingSDFReaderFixed;
 
 public class LipidMapsParseAndUploadTask extends AbstractTask {
 

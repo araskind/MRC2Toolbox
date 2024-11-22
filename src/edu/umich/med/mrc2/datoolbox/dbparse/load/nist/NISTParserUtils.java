@@ -63,7 +63,7 @@ import org.openscience.cdk.smiles.SmilesParser;
 import edu.umich.med.mrc2.datoolbox.data.enums.CompoundIdentityField;
 import edu.umich.med.mrc2.datoolbox.data.enums.MSPField;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
-import edu.umich.med.mrc2.datoolbox.misctest.IteratingSDFReaderFixed;
+import edu.umich.med.mrc2.datoolbox.utils.IteratingSDFReaderFixed;
 import edu.umich.med.mrc2.datoolbox.utils.MsImportUtils;
 import edu.umich.med.mrc2.datoolbox.utils.PubChemUtils;
 import io.github.dan2097.jnainchi.InchiStatus;

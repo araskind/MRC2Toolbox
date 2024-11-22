@@ -63,7 +63,7 @@ import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.FilePreferencesFactory;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
-import edu.umich.med.mrc2.datoolbox.misctest.IteratingSDFReaderFixed;
+import edu.umich.med.mrc2.datoolbox.utils.IteratingSDFReaderFixed;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 import edu.umich.med.mrc2.datoolbox.utils.PubChemUtils;
 import io.github.dan2097.jnainchi.InchiStatus;

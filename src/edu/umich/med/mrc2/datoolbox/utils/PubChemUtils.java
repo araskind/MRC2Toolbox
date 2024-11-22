@@ -43,7 +43,6 @@ import org.openscience.cdk.silent.SilentChemObjectBuilder;
 
 import edu.umich.med.mrc2.datoolbox.data.PubChemCompoundDescription;
 import edu.umich.med.mrc2.datoolbox.data.PubChemCompoundDescriptionBundle;
-import edu.umich.med.mrc2.datoolbox.misctest.IteratingSDFReaderFixed;
 
 public class PubChemUtils {
 	

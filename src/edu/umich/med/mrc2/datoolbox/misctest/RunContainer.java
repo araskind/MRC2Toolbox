@@ -144,6 +144,7 @@ import edu.umich.med.mrc2.datoolbox.utils.ClassyFireUtils;
 import edu.umich.med.mrc2.datoolbox.utils.CompoundStructureUtils;
 import edu.umich.med.mrc2.datoolbox.utils.DelimitedTextParser;
 import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
+import edu.umich.med.mrc2.datoolbox.utils.IteratingSDFReaderFixed;
 import edu.umich.med.mrc2.datoolbox.utils.JSONUtils;
 import edu.umich.med.mrc2.datoolbox.utils.MSReadyUtils;
 import edu.umich.med.mrc2.datoolbox.utils.NISTPepSearchUtils;

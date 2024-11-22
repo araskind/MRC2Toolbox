@@ -237,6 +237,27 @@ public class CompressionUtils {
             e.printStackTrace();
         }
     }
+    
+    public static void createZipFileFromMultipleFiles(Path zipFilePath, Collection<Path>filesToCompress) {
+    	
+        BufferedOutputStream bufferedOutputStream = null;
+        ZipArchiveOutputStream zipArchiveOutputStream = null;
+        OutputStream outputStream = null;
+        try {
+            outputStream = Files.newOutputStream(zipFilePath);
+            bufferedOutputStream = new BufferedOutputStream(outputStream);
+            zipArchiveOutputStream = new ZipArchiveOutputStream(bufferedOutputStream);
+            
+            for(Path filePath : filesToCompress)
+            	addFileToZipStream(zipArchiveOutputStream, filePath.toFile(), "");
+
+            zipArchiveOutputStream.close();
+            bufferedOutputStream.close();
+            outputStream.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     private static void addFileToZipStream(
     		ZipArchiveOutputStream zipArchiveOutputStream, 

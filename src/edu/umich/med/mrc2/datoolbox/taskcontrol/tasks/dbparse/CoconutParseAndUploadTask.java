@@ -36,10 +36,10 @@ import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.dbparse.load.coconut.CoconutParser;
 import edu.umich.med.mrc2.datoolbox.dbparse.load.coconut.CoconutParser.CoconutRecordFields;
 import edu.umich.med.mrc2.datoolbox.dbparse.load.coconut.CoconutRecord;
-import edu.umich.med.mrc2.datoolbox.misctest.IteratingSDFReaderFixed;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
+import edu.umich.med.mrc2.datoolbox.utils.IteratingSDFReaderFixed;
 
 public class CoconutParseAndUploadTask extends AbstractTask {
 

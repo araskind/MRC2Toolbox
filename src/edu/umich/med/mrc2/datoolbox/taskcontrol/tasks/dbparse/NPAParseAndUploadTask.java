@@ -36,10 +36,10 @@ import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.dbparse.load.npa.NPALiteratureReference;
 import edu.umich.med.mrc2.datoolbox.dbparse.load.npa.NPAParser;
 import edu.umich.med.mrc2.datoolbox.dbparse.load.npa.NPARecord;
-import edu.umich.med.mrc2.datoolbox.misctest.IteratingSDFReaderFixed;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
+import edu.umich.med.mrc2.datoolbox.utils.IteratingSDFReaderFixed;
 
 public class NPAParseAndUploadTask extends AbstractTask {
 
