@@ -26,7 +26,11 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.apache.commons.math4.legacy.stat.descriptive.DescriptiveStatistics;
+
 public class IsotopePatternScorer {
+	
+	private DescriptiveStatistics ds;
 
 	private static final String[]elementSets = new String[] {
 			"CH",
@@ -110,6 +114,7 @@ public class IsotopePatternScorer {
 	public IsotopePatternScorer() {
 		super();
 		populateScorersMap();
+		ds = new DescriptiveStatistics();
 	}
 
 	private void populateScorersMap() {
@@ -120,11 +125,60 @@ public class IsotopePatternScorer {
 		ispScorersMap.put(4, new ArrayList<IsoPatternScoringObject>());
 		for(int i=0; i<elementSets.length; i++) {
 			
+			for(int j=2; j<5; j++) {
+				
+				IsoPatternScoringObject ipso = new  IsoPatternScoringObject(
+						IsotopeIntensityApproximationType.Linear, 
+						elementSets[i], 
+						elementSetWeights[i]);
+				
+				if(j==2) {
+					ipso.setCoefficient(secondIsotopeLinearCoefficients[i][0], 0);
+					ipso.setCoefficient(secondIsotopeLinearCoefficients[i][1], 1);
+				}
+				if(j==3) {
+					ipso.setCoefficient(thirdIsotopeLinearCoefficients[i][0], 0);
+					ipso.setCoefficient(thirdIsotopeLinearCoefficients[i][1], 1);
+				}
+				if(j==4) {
+					ipso.setCoefficient(fourthIsotopeLinearCoefficients[i][0], 0);
+					ipso.setCoefficient(fourthIsotopeLinearCoefficients[i][1], 1);
+				}
+				ispScorersMap.get(j).add(ipso);
+			}
 		}
 	}
 	
+	public double getWeightedExpectedRelativeIntensityForIsotope(double monoisotopicMass, int isotopeNumber) {
+		
+		double totalWeight = 0.0d;
+		double weightedRiSum = 0.0d;
+		
+		for(IsoPatternScoringObject ipso : ispScorersMap.get(isotopeNumber)){
+						
+			totalWeight += ipso.getWeight();
+			weightedRiSum += ipso.getWeight() * ipso.getExpectedRelativeIntensityForMass(monoisotopicMass);
+		}
+		return weightedRiSum / totalWeight;		
+	}
 	
+	public double getMedianExpectedRelativeIntensityForIsotope(double monoisotopicMass, int isotopeNumber) {
+		
+		ds.clear();;
+		
+		for(IsoPatternScoringObject ipso : ispScorersMap.get(isotopeNumber))						
+			ds.addValue(ipso.getExpectedRelativeIntensityForMass(monoisotopicMass));
+		
+		return ds.getPercentile(50.0);		
+	}
 }
+
+
+
+
+
+
+
 
 
 

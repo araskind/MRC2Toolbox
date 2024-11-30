@@ -231,6 +231,24 @@ public class IsotopicPatternUtils {
 		return ranges;
 	}
 	
+	public static MolecularFormulaRange createHydrocarbonElementRanges() {
+		
+		MolecularFormulaRange ranges = new MolecularFormulaRange();
+		IsotopeFactory ifac = null;
+		try {
+			ifac = Isotopes.getInstance();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		if(ifac == null)
+			return null;	
+
+		ranges.addIsotope(ifac.getMajorIsotope("H"), 2, 322);
+		ranges.addIsotope(ifac.getMajorIsotope("C"), 2, 160);
+		return ranges;
+	}
+	
 	public static MolecularFormulaRange getDefaultElementRanges() {
 		
 		File defaultsFile =  Paths.get(
