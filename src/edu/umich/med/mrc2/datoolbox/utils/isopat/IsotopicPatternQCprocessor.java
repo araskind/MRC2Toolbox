@@ -110,11 +110,202 @@ public class IsotopicPatternQCprocessor {
 		MRC2ToolBoxConfiguration.initConfiguration();
 
 		try {
-			calculateCHIsotopeDistributionFromCompoundDatabase();
+			correctMassDefectForClAdducts();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}		
+	}
+	
+	private static void correctMassDefectForClAdducts() throws Exception {
+		
+		Connection conn = ConnectionManager.getConnection();
+		String query = 
+				"SELECT MOL_FORMULA FROM COMPOUNDDB.FORMULA_ISOTOPIC_PATTERNS_CL "
+				+ "WHERE MOL_FORMULA LIKE 'C%' AND EXACT_MASS < 1500";
+		PreparedStatement ps = conn.prepareStatement(query);
+		
+		String updQuery = 
+				"UPDATE COMPOUNDDB.FORMULA_ISOTOPIC_PATTERNS_CL  " +
+				"SET MASS_DEFECT = ? WHERE MOL_FORMULA = ? ";
+		PreparedStatement updPs = conn.prepareStatement(updQuery);	
+		IMolecularFormula chlorineFormula = 
+				MolecularFormulaManipulator.getMolecularFormula("Cl", builder);
+		
+		ResultSet rs = ps.executeQuery();
+		while(rs.next()) {
+			
+			String mf = rs.getString(1);			
+			IMolecularFormula formula = 
+					MolecularFormulaManipulator.getMolecularFormula(mf, builder);	
+			formula.add(chlorineFormula);
+
+			double massDefect = 
+					MolecularFormulaManipulator.getMass(formula, MolecularFormulaManipulator.MonoIsotopic) 
+					-  MolecularFormulaManipulator.getTotalMassNumber(formula);
+
+			updPs.setDouble(1, massDefect);
+			updPs.setString(2, mf);
+			updPs.executeUpdate();						
+		}
+		rs.close();
+		ps.close();
+		updPs.close();
+		ConnectionManager.releaseConnection(conn);
+	}
+	
+	private static void addIsotopeMassDifferencesAndMassDefectForClAdducts() throws Exception {
+			
+		Connection conn = ConnectionManager.getConnection();
+		String query = 
+				"SELECT MOL_FORMULA, EXACT_MASS FROM COMPOUNDDB.FORMULA_ISOTOPIC_PATTERNS_CL "
+				+ "WHERE MOL_FORMULA LIKE 'C%' AND EXACT_MASS < 1500";
+		PreparedStatement ps = conn.prepareStatement(query);
+		
+		String updQuery = "UPDATE COMPOUNDDB.FORMULA_ISOTOPIC_PATTERNS_CL  " +
+				"SET ISO_1_2_DIFF = ?, ISO_1_3_DIFF = ?, ISO_2_3_DIFF = ?, MASS_DEFECT = ? " +
+				"WHERE MOL_FORMULA = ? ";
+		PreparedStatement updPs = conn.prepareStatement(updQuery);	
+		IMolecularFormula chlorineFormula = 
+				MolecularFormulaManipulator.getMolecularFormula("Cl", builder);
+		
+		ResultSet rs = ps.executeQuery();
+		while(rs.next()) {
+			
+			String mf = rs.getString(1);			
+			IMolecularFormula formula = 
+					MolecularFormulaManipulator.getMolecularFormula(mf, builder);	
+			formula.add(chlorineFormula);
+			Collection<MsPoint>isoPattern = 
+					MsUtils.calculateIsotopeDistribution(formula, true);
+			MsPoint[] normPattern = MsUtils.normalizeAndSortMsPattern(isoPattern, 1.0d);
+			double nominalMass = MolecularFormulaManipulator.getTotalMassNumber(formula);
+			double massDefect = rs.getDouble(2) - nominalMass;
+			
+			if(normPattern.length >=2)
+				updPs.setDouble(1, normPattern[1].getMz() - normPattern[0].getMz() - 1.0d);
+			else
+				updPs.setNull(1, java.sql.Types.NULL);
+			
+			if(normPattern.length >=3) {
+				updPs.setDouble(2, normPattern[2].getMz() - normPattern[0].getMz() - 2.0d);
+				updPs.setDouble(3, normPattern[2].getMz() - normPattern[1].getMz() - 1.0d);
+			}
+			else {
+				updPs.setNull(2, java.sql.Types.NULL);
+				updPs.setNull(3, java.sql.Types.NULL);
+			}
+			updPs.setDouble(4, massDefect);
+			updPs.setString(5, mf);
+			updPs.executeUpdate();						
+		}
+		rs.close();
+		ps.close();
+		updPs.close();
+		ConnectionManager.releaseConnection(conn);
+	}
+	
+	private static void calculateCHIsotopeDistributionForClAdductsFromCompoundDatabase() throws Exception {
+		
+		Set<String>formulas = new TreeSet<String>();		
+		Connection conn = ConnectionManager.getConnection();
+		String query = 
+				"SELECT MOL_FORMULA FROM COMPOUNDDB.FORMULA_ISOTOPIC_PATTERNS_CL "
+				+ "WHERE MOL_FORMULA LIKE 'C%' AND EXACT_MASS < 1500";
+		PreparedStatement ps = conn.prepareStatement(query);
+		ResultSet rs = ps.executeQuery();
+		while(rs.next()) 
+			formulas.add(rs.getString(1));
+		
+		rs.close();
+		
+		query = "UPDATE COMPOUNDDB.FORMULA_ISOTOPIC_PATTERNS_CL  " +
+				"SET CH_FORMULA = ?, CH_MASS = ?, CH_ISOTOPE_2 = ?,  " +
+				"CH_ISOTOPE_3 = ?, CH_ISOTOPE_4 = ?, CH_ISOTOPE_5 = ?  " +
+				"WHERE MOL_FORMULA = ? ";
+		ps = conn.prepareStatement(query);	
+		
+		IMolecularFormula chlorineFormula = 
+				MolecularFormulaManipulator.getMolecularFormula("Cl", builder);
+		
+		MolecularFormulaRange ranges = 
+				IsotopicPatternUtils.createHydrocarbonElementRanges();
+		MolecularFormulaGenerator mfg = null;
+		double error = 2.0d;
+		
+		IIsotope carbon = null;
+		try {
+			carbon = Isotopes.getInstance().getMajorIsotope("C");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		IIsotope hydrogen = null;
+		try {
+			hydrogen = Isotopes.getInstance().getMajorIsotope("H");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		for(String mf : formulas) {
+			
+			IMolecularFormula formula = 
+					MolecularFormulaManipulator.getMolecularFormula(mf, builder);
+			double exactMass = MolecularFormulaManipulator.getMass(
+					formula, MolecularFormulaManipulator.MonoIsotopic);
+			mfg = new MolecularFormulaGenerator(
+					builder, exactMass - error, exactMass + error, ranges);
+			
+			IMolecularFormula chFormula = null;
+			for (IMolecularFormula nextFormula = mfg.getNextFormula(); nextFormula != null; nextFormula = mfg.getNextFormula()) {
+				
+				int hCount = MolecularFormulaManipulator.getElementCount(nextFormula, hydrogen);
+				int cCount = MolecularFormulaManipulator.getElementCount(nextFormula, carbon);
+				if(hCount <= cCount * 2 + 2 && cCount < hCount * 2.5) {
+					chFormula = nextFormula;
+					break;
+				}
+			}		
+			if(chFormula == null) {
+				
+				System.out.println("No CH formula for\t" + mf);
+				continue;
+			}
+			chFormula = MolecularFormulaManipulator.getMolecularFormula(
+					MolecularFormulaManipulator.getString(chFormula),builder);
+			chFormula.add(chlorineFormula);
+			Collection<MsPoint>isoPattern = 
+					MsUtils.calculateIsotopeDistribution(chFormula, true);
+			MsPoint[] normPattern = MsUtils.normalizeAndSortMsPattern(isoPattern, 1.0d);
+			
+			ps.setString(1, MolecularFormulaManipulator.getString(chFormula));
+			ps.setDouble(2, MolecularFormulaManipulator.getMass(chFormula, MolecularFormulaManipulator.MonoIsotopic));
+			
+			if(normPattern.length >=2)
+				ps.setDouble(3, normPattern[1].getIntensity());
+			else
+				ps.setNull(3, java.sql.Types.NULL);
+			
+			if(normPattern.length >=3)
+				ps.setDouble(4, normPattern[2].getIntensity());
+			else
+				ps.setNull(4, java.sql.Types.NULL);
+			
+			if(normPattern.length >=4)
+				ps.setDouble(5, normPattern[3].getIntensity());
+			else
+				ps.setNull(5, java.sql.Types.NULL);
+			
+			if(normPattern.length >=5)
+				ps.setDouble(6, normPattern[4].getIntensity());
+			else
+				ps.setNull(6, java.sql.Types.NULL);
+
+			ps.setString(7, mf);
+			
+			ps.executeUpdate();						
+		}	
+		ps.close();
+		ConnectionManager.releaseConnection(conn);
 	}
 	
 	private static void testScoringProcedure() {
@@ -488,6 +679,84 @@ public class IsotopicPatternQCprocessor {
 		}		
 		ps.close();
 		ConnectionManager.releaseConnection(conn);		
+	}
+	
+	private static void addMassDefect() throws Exception {
+			
+		Connection conn = ConnectionManager.getConnection();
+		String query = 
+				"SELECT MOL_FORMULA, EXACT_MASS FROM COMPOUNDDB.FORMULA_ISOTOPIC_PATTERNS "
+				+ "WHERE MOL_FORMULA LIKE 'C%' AND EXACT_MASS < 1500";
+		PreparedStatement ps = conn.prepareStatement(query);
+		
+		String updQuery = "UPDATE COMPOUNDDB.FORMULA_ISOTOPIC_PATTERNS  " +
+				"SET MASS_DEFECT = ? WHERE MOL_FORMULA = ? ";
+		PreparedStatement updPs = conn.prepareStatement(updQuery);		
+		
+		ResultSet rs = ps.executeQuery();
+		while(rs.next()) {
+			
+			String mf = rs.getString(1);
+			IMolecularFormula formula = 
+					MolecularFormulaManipulator.getMolecularFormula(mf, builder);
+			double nominalMass = MolecularFormulaManipulator.getTotalMassNumber(formula);
+			double massDefect = rs.getDouble(2) - nominalMass;
+
+			updPs.setDouble(1, massDefect);
+			updPs.setString(2, mf);
+			updPs.executeUpdate();						
+		}	
+		rs.close();
+		ps.close();
+		updPs.close();
+		ConnectionManager.releaseConnection(conn);
+	}
+	
+	private static void addIsotopeMassDifferences() throws Exception {
+		
+		Set<String>formulas = new TreeSet<String>();		
+		Connection conn = ConnectionManager.getConnection();
+		String query = 
+				"SELECT MOL_FORMULA FROM COMPOUNDDB.FORMULA_ISOTOPIC_PATTERNS "
+				+ "WHERE MOL_FORMULA LIKE 'C%' AND EXACT_MASS < 1500";
+		PreparedStatement ps = conn.prepareStatement(query);
+		ResultSet rs = ps.executeQuery();
+		while(rs.next()) 
+			formulas.add(rs.getString(1));
+		
+		rs.close();
+		
+		query = "UPDATE COMPOUNDDB.FORMULA_ISOTOPIC_PATTERNS  " +
+				"SET ISO_1_2_DIFF = ?, ISO_1_3_DIFF = ?, ISO_2_3_DIFF = ? " +
+				"WHERE MOL_FORMULA = ? ";
+		ps = conn.prepareStatement(query);		
+		
+		for(String mf : formulas) {
+			
+			IMolecularFormula formula = 
+					MolecularFormulaManipulator.getMolecularFormula(mf, builder);						
+			Collection<MsPoint>isoPattern = 
+					MsUtils.calculateIsotopeDistribution(formula, true);
+			MsPoint[] normPattern = MsUtils.normalizeAndSortMsPattern(isoPattern, 1.0d);
+			
+			if(normPattern.length >=2)
+				ps.setDouble(1, normPattern[1].getMz() - normPattern[0].getMz() - 1.0d);
+			else
+				ps.setNull(1, java.sql.Types.NULL);
+			
+			if(normPattern.length >=3) {
+				ps.setDouble(2, normPattern[2].getMz() - normPattern[0].getMz() - 2.0d);
+				ps.setDouble(3, normPattern[2].getMz() - normPattern[1].getMz() - 1.0d);
+			}
+			else {
+				ps.setNull(2, java.sql.Types.NULL);
+				ps.setNull(3, java.sql.Types.NULL);
+			}
+			ps.setString(4, mf);
+			ps.executeUpdate();						
+		}	
+		ps.close();
+		ConnectionManager.releaseConnection(conn);
 	}
 	
 	private static void calculateCHIsotopeDistributionFromCompoundDatabase() throws Exception {
