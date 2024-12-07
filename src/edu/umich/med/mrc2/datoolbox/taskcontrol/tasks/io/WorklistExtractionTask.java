@@ -97,8 +97,7 @@ public class WorklistExtractionTask extends WorklistTask {
 
 					e.printStackTrace();
 					setStatus(TaskStatus.ERROR);
-return;
-
+					return;
 				}
 			}
 		}

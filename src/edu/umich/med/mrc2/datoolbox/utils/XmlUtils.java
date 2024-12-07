@@ -22,10 +22,13 @@
 package edu.umich.med.mrc2.datoolbox.utils;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
@@ -69,6 +72,18 @@ public class XmlUtils {
 		return xmlDocument;
 	}
 	
+	public static Document readXmlStream(InputStream stream) {
+
+		Document xmlDocument = null;
+		try {
+			SAXBuilder sax = new SAXBuilder();
+			xmlDocument = sax.build(stream);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return xmlDocument;
+	}
+	
 	public static Document readXmlFromString(String input) {
 		
 		Document xmlDocument = null;
@@ -87,17 +102,31 @@ public class XmlUtils {
 		}
 	    return xmlDocument;
 	}
-
-	public static Document readXmlStream(InputStream stream) {
+	
+	public static Document readXmlFileWithEncoding(File file, Charset encoding) {
 
 		Document xmlDocument = null;
+		SAXBuilder sax = new SAXBuilder();
+		sax.setXMLReaderFactory(XMLReaders.NONVALIDATING);
+		sax.setFeature("http://xml.org/sax/features/namespaces", true);
+		sax.setFeature("http://xml.org/sax/features/namespace-prefixes", true);
+		
+		InputStream inputStream = null;
 		try {
-			SAXBuilder sax = new SAXBuilder();
-			xmlDocument = sax.build(stream);
-		} catch (Exception e) {
+			inputStream = new FileInputStream(file);
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}		
+	    InputSource lSource = new InputSource(inputStream);
+        lSource.setEncoding(encoding.displayName());
+        try {
+			xmlDocument = sax.build(lSource);
+		} catch (JDOMException | IOException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		return xmlDocument;
+	    return xmlDocument;
 	}
 	
 	public static int countRecords(File inputFile, String rootNodeName) {

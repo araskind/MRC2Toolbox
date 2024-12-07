@@ -23,6 +23,7 @@ package edu.umich.med.mrc2.datoolbox.utils.isopat;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -31,10 +32,14 @@ import java.nio.file.StandardOpenOption;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.text.DateFormat;
 import java.text.DecimalFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -42,9 +47,17 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.filefilter.DirectoryFileFilter;
+import org.apache.commons.io.filefilter.FileFilterUtils;
+import org.apache.commons.io.filefilter.IOFileFilter;
+import org.apache.commons.io.filefilter.RegexFileFilter;
 import org.apache.commons.math4.legacy.distribution.EmpiricalDistribution;
 import org.jdom2.DataConversionException;
 import org.jdom2.Document;
@@ -65,23 +78,33 @@ import org.openscience.cdk.smiles.SmilesGenerator;
 import org.openscience.cdk.smiles.SmilesParser;
 import org.openscience.cdk.tautomers.InChITautomerGenerator;
 import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator;
+import org.ujmp.core.Matrix;
 
 import edu.umich.med.mrc2.datoolbox.data.Adduct;
+import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.IsotopicPatternReferenceBin;
 import edu.umich.med.mrc2.datoolbox.data.MassSpectrum;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsPoint;
+import edu.umich.med.mrc2.datoolbox.data.WorklistItem;
 import edu.umich.med.mrc2.datoolbox.data.enums.AgilentCefFields;
+import edu.umich.med.mrc2.datoolbox.data.enums.AgilentSampleInfoFields;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
+import edu.umich.med.mrc2.datoolbox.data.enums.WorklistImportType;
+import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.main.AdductManager;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.FilePreferencesFactory;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io.WorklistExtractionTask;
 import edu.umich.med.mrc2.datoolbox.utils.MolFormulaUtils;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
+import edu.umich.med.mrc2.datoolbox.utils.SQLUtils;
 import edu.umich.med.mrc2.datoolbox.utils.XmlUtils;
 
 public class IsotopicPatternQCprocessor {
@@ -110,11 +133,212 @@ public class IsotopicPatternQCprocessor {
 		MRC2ToolBoxConfiguration.initConfiguration();
 
 		try {
-			correctMassDefectForClAdducts();
+			loadEX01426Injections();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}		
+	}
+	
+	private static void loadEX01426Injections() {
+		
+		File posRawDataFolder = new File(
+				"Y:\\DataAnalysis\\_Reports\\EX01426 - Human EDTA Tranche 2 plasma W20001176L\\"
+				+ "A003 - Untargeted\\Raw data\\POS");
+		
+		for(int i=3; i<8; i++) {
+			
+			String batch= "BATCH0" + Integer.toString(i);
+			File batchFolder = Paths.get(posRawDataFolder.getAbsolutePath(), batch).toFile();
+			try {
+				loadInjectionsFromRawDataFolder(batchFolder);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}	
+		}
+		File negRawDataFolder = new File(
+				"Y:\\DataAnalysis\\_Reports\\EX01426 - Human EDTA Tranche 2 plasma W20001176L\\"
+				+ "A003 - Untargeted\\Raw data\\NEG");
+		
+		for(int i=2; i<8; i++) {
+			
+			String batch= "BATCH0" + Integer.toString(i);
+			File batchFolder = Paths.get(negRawDataFolder.getAbsolutePath(), batch).toFile();
+			try {
+				loadInjectionsFromRawDataFolder(batchFolder);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}	
+		}
+	}
+	
+	private static void loadInjectionsFromRawDataFolder(File rawDataFolder) throws Exception {
+		
+		if (rawDataFolder == null || !rawDataFolder.exists()) 
+			return;
+
+		IOFileFilter dotDfilter = 
+				FileFilterUtils.makeDirectoryOnly(new RegexFileFilter(".+\\.[dD]$"));
+		Collection<File> dataFiles = FileUtils.listFilesAndDirs(
+				rawDataFolder,
+				DirectoryFileFilter.DIRECTORY,
+				dotDfilter);
+
+		if (dataFiles.isEmpty()) 
+			return;
+		
+		IDTDataCache.refreshAcquisitionMethodList();
+		Connection conn = ConnectionManager.getConnection();
+		String query = 
+				"INSERT INTO COMPOUNDDB.INJECTION_MAP  " +
+				"(INJECTION_ID, DATA_FILE_NAME, INJECTION_TIMESTAMP,  " +
+				"ACQUISITION_METHOD_ID, INJECTION_VOLUME, EXPERIMENT_ID, INSTRUMENT_ID,  " +
+				"ASSAY_ID, SAMPLE_ID, REP_NUMBER, POLARITY) " +
+				"VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+		PreparedStatement ps = conn.prepareStatement(query);		
+		
+		String DATA_FILE_NAME_PATTERN = 
+				"^\\d{8}-(EX\\d{5})-(A\\d{3})-(IN\\d{4})-(S\\d{8})-.+(N|P)";
+		String CONTROL_FILE_NAME_PATTERN = 
+				"^\\d{8}-(EX\\d{5})-(A\\d{3})-(IN\\d{4})-([A-Z]+\\d+[A-Z]*\\d*)-(\\d{2})-(N|P)";
+		Pattern dfPattern = Pattern.compile(DATA_FILE_NAME_PATTERN);
+		Pattern controlPattern = Pattern.compile(CONTROL_FILE_NAME_PATTERN);
+		Matcher fnMatcher = null;
+
+		DateFormat dFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		for (File df : dataFiles) {
+			
+			String baseName = FilenameUtils.getBaseName(df.getName());
+			
+			String timeString = null;
+			Date injectionTime = null;
+			Double injectionVolume = null;
+			String experimentId = null;
+			String assayId = null;
+			String instrumentId = null;
+			String sampleId = null;
+			String acqMethodName = null;
+			String acqMethodId = null;
+			int replica = 1;
+			String polarity = null;
+			
+			File sampleInfoFile = Paths.get(df.getAbsolutePath(), "AcqData", "sample_info.xml").toFile();
+			if (!sampleInfoFile.exists()) {
+				System.err.println("Missing sample_info.xml file for " + df.getName());
+				continue;
+			}
+
+			Document sampleInfo = XmlUtils.readXmlFileWithEncoding(sampleInfoFile, StandardCharsets.UTF_8);
+			if (sampleInfo == null) {
+				System.err.println("Failed parsing sample_info.xml for " + df.getName());
+				continue;
+			}
+			List<Element> fieldElements = sampleInfo.getRootElement().getChildren("Field");
+			TreeMap<String, String> sampleData = new TreeMap<String, String>();
+			for (Element fieldElement : fieldElements) {
+
+				String name = fieldElement.getChild("Name").getText().trim();
+				Element valueElement = fieldElement.getChild("Value");
+				if (valueElement != null)
+					sampleData.put(name, fieldElement.getChild("Value").getText().trim());
+			}					
+			if (sampleData.get(AgilentSampleInfoFields.ACQUISITION_TIME.getName()) != null)
+				timeString = sampleData.get(AgilentSampleInfoFields.ACQUISITION_TIME.getName());
+			else {
+				if (sampleData.get(AgilentSampleInfoFields.ACQTIME.getName()) != null)
+					timeString = sampleData.get(AgilentSampleInfoFields.ACQTIME.getName());
+			}
+			if (timeString != null) {
+
+				timeString = timeString.replace('T', ' ').replace('Z', ' ').trim();
+				try {
+					injectionTime = dFormat.parse(timeString);
+				} catch (ParseException e) {
+					e.printStackTrace();
+				}
+			}
+			if (sampleData.get(AgilentSampleInfoFields.INJ_VOL_UTF8.getName()) != null
+					&& !sampleData.get(AgilentSampleInfoFields.INJ_VOL_UTF8.getName()).isEmpty()) {				
+				try {
+					injectionVolume = Double.parseDouble(sampleData.get(AgilentSampleInfoFields.INJ_VOL_UTF8.getName()));
+				} catch (NumberFormatException e) {
+					e.printStackTrace();
+				}					
+			}
+			if (sampleData.get(AgilentSampleInfoFields.METHOD.getName()) != null
+					&& !sampleData.get(AgilentSampleInfoFields.METHOD.getName()).isEmpty()) {
+				acqMethodName = new File(sampleData.get(AgilentSampleInfoFields.METHOD.getName())).getName();
+				DataAcquisitionMethod method = IDTDataCache.getAcquisitionMethodByName(acqMethodName);
+				if(method != null)
+					acqMethodId = method.getId();
+				else
+					System.err.println("Unknown method " + acqMethodName);
+			}
+			//	Parse file name
+			fnMatcher = null;
+			if(baseName.contains("-S00")) {
+				
+				fnMatcher = dfPattern.matcher(baseName);
+				if(fnMatcher.matches()) {
+					
+					experimentId = fnMatcher.group(1);
+					assayId = fnMatcher.group(2);
+					instrumentId = fnMatcher.group(3);
+					sampleId = fnMatcher.group(4);
+					polarity = fnMatcher.group(5);
+				}
+			}
+			else {
+				fnMatcher = controlPattern.matcher(baseName);
+				if(fnMatcher.matches()) {
+					
+					experimentId = fnMatcher.group(1);
+					assayId = fnMatcher.group(2);
+					instrumentId = fnMatcher.group(3);
+					sampleId = fnMatcher.group(4);
+					polarity = fnMatcher.group(6);
+					replica = Integer.parseInt(fnMatcher.group(5));
+				}
+			}
+			if(!fnMatcher.matches()) {
+				System.err.println("Unable to parse file name " + df.getName());
+				continue;
+			}
+			String newId = SQLUtils.getNextIdFromSequence(conn, 
+					"COMPOUNDDB.INJECTION_MAP_SEQ",
+					DataPrefix.INJECTION,
+					"0",
+					9);
+			ps.setString(1, newId);
+			ps.setString(2, baseName);
+			
+			if(injectionTime != null)
+				ps.setDate(3, new java.sql.Date(injectionTime.getTime()));
+			else
+				ps.setNull(3, java.sql.Types.NULL);
+			
+			if(acqMethodId != null)
+				ps.setString(4, acqMethodId);
+			else
+				ps.setNull(4, java.sql.Types.NULL);
+			
+			if(injectionVolume != null && injectionVolume > 0)
+				ps.setDouble(5, injectionVolume);
+			else
+				ps.setNull(5, java.sql.Types.NULL);
+			
+			ps.setString(6, experimentId);
+			ps.setString(7, instrumentId);
+			ps.setString(8, assayId);
+			ps.setString(9, sampleId);
+			ps.setInt(10, replica);
+			ps.setString(11, polarity);
+			ps.executeUpdate();
+		}
+		ps.close();
+		ConnectionManager.releaseConnection(conn);
 	}
 	
 	private static void correctMassDefectForClAdducts() throws Exception {

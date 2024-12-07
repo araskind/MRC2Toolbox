@@ -37,6 +37,7 @@ public enum AgilentSampleInfoFields {
 	METHOD_TYPE("Method Type"),
 	BALANCE_OVERRIDE("Balance Override"),
 	INJ_VOL("Inj Vol ("+ '\u03BC' + "l)"),
+	INJ_VOL_UTF8("Inj Vol (µl)"),
 	EQUILIB_TIME("Equilib Time (min)"),
 	DILUTION("Dilution"),
 	WT_VOL("Wt/Vol"),
