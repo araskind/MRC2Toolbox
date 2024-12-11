@@ -23,7 +23,6 @@ package edu.umich.med.mrc2.datoolbox.utils.isopat;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -52,6 +51,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import org.apache.commons.compress.utils.FileNameUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
@@ -78,20 +78,17 @@ import org.openscience.cdk.smiles.SmilesGenerator;
 import org.openscience.cdk.smiles.SmilesParser;
 import org.openscience.cdk.tautomers.InChITautomerGenerator;
 import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator;
-import org.ujmp.core.Matrix;
 
 import edu.umich.med.mrc2.datoolbox.data.Adduct;
-import edu.umich.med.mrc2.datoolbox.data.DataFile;
+import edu.umich.med.mrc2.datoolbox.data.BinnerAnnotation;
 import edu.umich.med.mrc2.datoolbox.data.IsotopicPatternReferenceBin;
 import edu.umich.med.mrc2.datoolbox.data.MassSpectrum;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsPoint;
-import edu.umich.med.mrc2.datoolbox.data.WorklistItem;
 import edu.umich.med.mrc2.datoolbox.data.enums.AgilentCefFields;
 import edu.umich.med.mrc2.datoolbox.data.enums.AgilentSampleInfoFields;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
-import edu.umich.med.mrc2.datoolbox.data.enums.WorklistImportType;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
@@ -99,8 +96,7 @@ import edu.umich.med.mrc2.datoolbox.main.AdductManager;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.FilePreferencesFactory;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
-import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
-import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io.WorklistExtractionTask;
+import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
 import edu.umich.med.mrc2.datoolbox.utils.MolFormulaUtils;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
@@ -132,8 +128,10 @@ public class IsotopicPatternQCprocessor {
 				MRC2ToolBoxCore.configDir + "MRC2ToolBoxPrefs.txt");
 		MRC2ToolBoxConfiguration.initConfiguration();
 
+		File cefFolder = new File("Y:\\DataAnalysis\\_Reports\\EX01426 - Human EDTA Tranche 2 plasma W20001176L\\"
+				+ "A003 - Untargeted\\FBF-recursive\\NEG\\BATCH06\\_TEST");
 		try {
-			loadEX01426Injections();
+			loadMsFbFFeatureDataFromCefFolder(cefFolder);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -340,6 +338,73 @@ public class IsotopicPatternQCprocessor {
 		ps.close();
 		ConnectionManager.releaseConnection(conn);
 	}
+	
+	private static void loadMsFbFFeatureDataFromCefFolder(File cefFolder) throws Exception {
+		
+		Connection conn = ConnectionManager.getConnection();
+		
+		ResultSet rs = null;
+		
+		String injQuery = 
+				"SELECT INJECTION_ID FROM COMPOUNDDB.INJECTION_MAP WHERE DATA_FILE_NAME = ?";
+		PreparedStatement injPs = conn.prepareStatement(injQuery);
+		
+		String query = 
+				"INSERT INTO COMPOUNDDB.MS_FEATURES (FEATURE_ID,LIB_ID,INJECTION_ID,RT,"
+				+ "RT_MIN,RT_MAX,NUM_SCANS,AREA,HEIGHT,SCORE,SCORE_FLAG,FLAG_SEBVERITY) "
+				+ "VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
+		PreparedStatement ps = conn.prepareStatement(query);
+		
+		String updQuery = 
+				"INSERT INTO COMPOUNDDB.MS_PEAKS ("
+				+ "FEATURE_ID,ISOTOPE_NUMBER,MZ,INTENSITY,REL_INTENSITY,ADDUCT) "
+				+ "VALUES (?,?,?,?,?,?)";
+		PreparedStatement updPs = conn.prepareStatement(updQuery);	
+		
+		List<Path>cefPathList = FIOUtils.findFilesByExtension(cefFolder.toPath(), "cef");
+		if(cefPathList == null || cefPathList.isEmpty()) {
+			
+			System.err.println("No CEF files in " + cefFolder.getAbsolutePath());
+			return;
+		}		
+		for(Path cefPath : cefPathList) {
+			
+			Collection<MsFeature>featureList = new ArrayList<MsFeature>();
+			try {
+				featureList = parseInputCefFile(cefPath.toFile());
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			if(featureList.isEmpty()) {
+				
+				System.err.println("Unable to parse " + cefPath.getFileName());
+				return;
+			}
+			String baseName = FileNameUtils.getBaseName(cefPath);
+			injPs.setString(1, baseName);
+			rs = injPs.executeQuery();
+			String injectionId = null;
+			while(rs.next())
+				injectionId = rs.getString(1);
+			
+			rs.close();
+			
+			if(injectionId == null) {
+				
+				System.err.println("Injection not found for " + cefPath.getFileName());
+				return;
+			}
+			System.out.println("Uploading MS features for " + cefPath.getFileName());
+			for(MsFeature msf : featureList) {
+				
+			}
+		}
+		injPs.close();
+		ps.close();
+		updPs.close();
+		ConnectionManager.releaseConnection(conn);
+	}	
 	
 	private static void correctMassDefectForClAdducts() throws Exception {
 		
@@ -673,7 +738,45 @@ public class IsotopicPatternQCprocessor {
 			
 			feature.setName(name);
 		}
+		extractScore(cpdElement, feature);
+		
 		return feature;
+	}
+	
+	private static void extractScore(Element cpdElement,  MsFeature feature) throws DataConversionException {
+		
+		Element resultsElement = cpdElement.getChild("Results");
+		if(resultsElement == null)
+			return;
+		
+		Element moleculeElement = resultsElement.getChild("Molecule");						
+		if(moleculeElement == null)
+			return;
+				
+		Element matchScoreList = moleculeElement.getChild("MatchScores");						
+		if(matchScoreList == null)
+			return;
+		
+		List<Element> scoreElements = matchScoreList.getChildren("Match");
+		if(scoreElements.isEmpty())
+			return;
+		
+		double tgtScore = 0.0d;
+		String flag = null;
+		String flagSeverity = null;
+		for(Element scoreElement : scoreElements) {
+			
+			if(scoreElement.getAttributeValue("algo") != null 
+					&& scoreElement.getAttributeValue("algo").equals("tgt")) {
+				tgtScore = scoreElement.getAttribute("score").getDoubleValue();
+				flag = scoreElement.getAttributeValue("tgtFlagsString");
+				flagSeverity = scoreElement.getAttributeValue("tgtFlagsSeverity");
+			}
+		}	
+		//	Just a workaround not to create new objects in MS feature
+		BinnerAnnotation ba = new BinnerAnnotation(null, flag, flagSeverity);
+		ba.setMassError(tgtScore);
+		feature.setBinnerAnnotation(ba);
 	}
 	
 	private static void parseSpectra(Element cpdElement,  MsFeature feature) throws DataConversionException {
