@@ -54,6 +54,7 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
@@ -127,6 +128,7 @@ public class MultiFileDataImportDialog extends JDialog
 	public static final String BASE_LIBRARY_DIRECTORY = "BASE_LIBRARY_DIRECTORY";
 	public static final String BASE_DATA_FILES_DIRECTORY = "BASE_DATA_FILES_DIRECTORY";
 	public static final String BASE_DESIGN_DIRECTORY = "BASE_DESIGN_DIRECTORY";
+	public static final String REMOVE_ABNORMAL_ISO_PATTERNS = "REMOVE_ABNORMAL_ISO_PATTERNS";
 
 	private DataPipeline existingDataPipeline = null;
 	private DataPipeline newDataPipeline = null;
@@ -150,6 +152,8 @@ public class MultiFileDataImportDialog extends JDialog
 //	private String followupCommand;
 	
 	private JComboBox featureSubsetcomboBox;
+	private JCheckBox removeAbnormalIsoPatternsCheckBox;
+	
 	private DataFileSampleMatchPanel matchPanel;
 	private TaskListener dataLoadTaskListener;
 	private DataPipelineDefinitionPanel dataPipelineDefinitionPanel;
@@ -190,9 +194,9 @@ public class MultiFileDataImportDialog extends JDialog
 		main.add(panel_1, BorderLayout.SOUTH);
 		GridBagLayout gbl_panel_1 = new GridBagLayout();
 		gbl_panel_1.columnWidths = new int[]{81, 290, 65, 89, 0};
-		gbl_panel_1.rowHeights = new int[]{0, 0, 23, 0};
+		gbl_panel_1.rowHeights = new int[]{0, 0, 0, 23, 0};
 		gbl_panel_1.columnWeights = new double[]{1.0, 0.0, 0.0, 1.0, Double.MIN_VALUE};
-		gbl_panel_1.rowWeights = new double[]{0.0, 1.0, 0.0, Double.MIN_VALUE};
+		gbl_panel_1.rowWeights = new double[]{0.0, 0.0, 1.0, 0.0, Double.MIN_VALUE};
 		panel_1.setLayout(gbl_panel_1);
 
 		JLabel lblNewLabel = new JLabel("Features to align ");
@@ -275,19 +279,28 @@ public class MultiFileDataImportDialog extends JDialog
 								TitledBorder.TOP, null, new Color(0, 0, 0))));
 		
 		dataPipelineDefinitionPanel.addListener(this);
+		
+		removeAbnormalIsoPatternsCheckBox = 
+				new JCheckBox("Remove features with abnormal isotopic patterns");
+		GridBagConstraints gbc_removeAbnormalIsoPatternsCheckBox = new GridBagConstraints();
+		gbc_removeAbnormalIsoPatternsCheckBox.anchor = GridBagConstraints.WEST;
+		gbc_removeAbnormalIsoPatternsCheckBox.insets = new Insets(0, 0, 5, 5);
+		gbc_removeAbnormalIsoPatternsCheckBox.gridx = 1;
+		gbc_removeAbnormalIsoPatternsCheckBox.gridy = 1;
+		panel_1.add(removeAbnormalIsoPatternsCheckBox, gbc_removeAbnormalIsoPatternsCheckBox);
 		GridBagConstraints gbc_panel = new GridBagConstraints();
 		gbc_panel.gridwidth = 4;
-		gbc_panel.insets = new Insets(0, 0, 5, 5);
+		gbc_panel.insets = new Insets(0, 0, 5, 0);
 		gbc_panel.fill = GridBagConstraints.BOTH;
 		gbc_panel.gridx = 0;
-		gbc_panel.gridy = 1;
+		gbc_panel.gridy = 2;
 		panel_1.add(dataPipelineDefinitionPanel, gbc_panel);
 		JButton cancelButton = new JButton("Cancel");
 		GridBagConstraints gbc_cancelButton = new GridBagConstraints();
 		gbc_cancelButton.anchor = GridBagConstraints.NORTHWEST;
 		gbc_cancelButton.insets = new Insets(0, 0, 0, 5);
 		gbc_cancelButton.gridx = 2;
-		gbc_cancelButton.gridy = 2;
+		gbc_cancelButton.gridy = 3;
 		panel_1.add(cancelButton, gbc_cancelButton);
 		cancelButton.addActionListener(al);
 
@@ -299,7 +312,7 @@ public class MultiFileDataImportDialog extends JDialog
 		GridBagConstraints gbc_importDataButton = new GridBagConstraints();
 		gbc_importDataButton.anchor = GridBagConstraints.NORTHEAST;
 		gbc_importDataButton.gridx = 3;
-		gbc_importDataButton.gridy = 2;
+		gbc_importDataButton.gridy = 3;
 		panel_1.add(importDataButton, gbc_importDataButton);
 		JRootPane rootPane = SwingUtilities.getRootPane(importDataButton);
 		rootPane.setDefaultButton(importDataButton);		
@@ -708,6 +721,11 @@ public class MultiFileDataImportDialog extends JDialog
 		matchPanel.clearTable();
 		libraryTextField.setText("");
 	}
+	
+	public boolean removeAbnormalIsoPatterns() {
+		
+		return removeAbnormalIsoPatternsCheckBox.isSelected();
+	}
 
 	private void importData() {
 		
@@ -752,6 +770,7 @@ public class MultiFileDataImportDialog extends JDialog
 					importPipeline, 
 					FeatureAlignmentType.ALIGN_TO_LIBRARY,
 					pfaTempDir);
+			task.setRemoveAbnormalIsoPatterns(removeAbnormalIsoPatterns());
 			task.addTaskListener(dataLoadTaskListener);
 			MRC2ToolBoxCore.getTaskController().addTask(task);
 		}		
@@ -946,6 +965,9 @@ public class MultiFileDataImportDialog extends JDialog
 		baseDesignDirectory =  
 				new File(preferences.get(BASE_DESIGN_DIRECTORY, 
 						MRC2ToolBoxConfiguration.getDefaultDataDirectory()));
+		
+		removeAbnormalIsoPatternsCheckBox.setSelected(
+				preferences.getBoolean(REMOVE_ABNORMAL_ISO_PATTERNS, true));				
 	}
 
 	@Override
@@ -955,10 +977,12 @@ public class MultiFileDataImportDialog extends JDialog
 
 	@Override
 	public void savePreferences() {
+		
 		preferences = Preferences.userRoot().node(PREFS_NODE);
 		preferences.put(BASE_LIBRARY_DIRECTORY, baseLibraryDirectory.getAbsolutePath());
 		preferences.put(BASE_DATA_FILES_DIRECTORY, dataFileDirectory.getAbsolutePath());
 		preferences.put(BASE_DESIGN_DIRECTORY, baseDesignDirectory.getAbsolutePath());
+		preferences.putBoolean(REMOVE_ABNORMAL_ISO_PATTERNS, removeAbnormalIsoPatterns());
 	}
 
 	@Override

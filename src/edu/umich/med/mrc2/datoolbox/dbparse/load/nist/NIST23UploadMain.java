@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.sql.Connection;
@@ -59,6 +60,7 @@ import edu.umich.med.mrc2.datoolbox.data.MinimalNISTTandemMassSpectrum;
 import edu.umich.med.mrc2.datoolbox.data.MsPoint;
 import edu.umich.med.mrc2.datoolbox.data.enums.CompoundIdentityField;
 import edu.umich.med.mrc2.datoolbox.data.enums.MSPField;
+import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.FilePreferencesFactory;
@@ -84,13 +86,59 @@ public class NIST23UploadMain {
 				MRC2ToolBoxCore.configDir + "MRC2ToolBoxPrefs.txt");
 		MRC2ToolBoxConfiguration.initConfiguration();
 		try {
-			addPepSeqsPepMods();
+			filterMSPbyPolarity();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}	
 	}
+	
+	private static void filterMSPbyPolarity() {
 
+		File mspDirectory = new File("E:\\DataAnalysis\\Databases\\NIST\\NIST23\\ExportUpload\\MSP");
+		Collection<File> mspFiles = 
+				FileUtils.listFiles(mspDirectory, new String[] {"msp", "MSP"}, false);
+		
+		Path posModeMspPath = 
+				Paths.get("E:\\DataAnalysis\\Databases\\NIST\\NIST23\\ExportUpload\\MSPbyPolarity", "NIST23_POS.MSP");
+		Path negModeMspPath = 
+				Paths.get("E:\\DataAnalysis\\Databases\\NIST\\NIST23\\ExportUpload\\MSPbyPolarity", "NIST23_NEG.MSP");
+		
+		for(File mspFile : mspFiles) {
+			
+			System.out.println("Processing " + mspFile.getName());
+			
+			List<List<String>> mspChunks = NISTMSPParser.parseInputMspFile(mspFile);
+			for(List<String>chunk : mspChunks) {
+				
+				NISTTandemMassSpectrum msms = NISTMSPParser.parseNistMspDataSource(chunk);
+				if(msms.getPolarity().equals(Polarity.Positive)) {			
+					
+					try {
+					    Files.write(posModeMspPath, 
+					    		chunk,
+					            StandardCharsets.UTF_8,
+					            StandardOpenOption.CREATE, 
+					            StandardOpenOption.APPEND);
+					} catch (IOException e) {
+					    e.printStackTrace();
+					}
+				}
+				if(msms.getPolarity().equals(Polarity.Negative)) {			
+					
+					try {
+					    Files.write(negModeMspPath, 
+					    		chunk,
+					            StandardCharsets.UTF_8,
+					            StandardOpenOption.CREATE, 
+					            StandardOpenOption.APPEND);
+					} catch (IOException e) {
+					    e.printStackTrace();
+					}
+				}
+			}			
+		}
+	}
 	
 	private static void addPepSeqsPepMods() throws Exception{
 		

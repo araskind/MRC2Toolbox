@@ -114,16 +114,12 @@ import edu.umich.med.mrc2.datoolbox.data.PubChemCompoundDescriptionBundle;
 import edu.umich.med.mrc2.datoolbox.data.classyfire.ClassyFireObject;
 import edu.umich.med.mrc2.datoolbox.data.classyfire.ClassyFireOntologyEntry;
 import edu.umich.med.mrc2.datoolbox.data.classyfire.ClassyFireOntologyLevel;
-import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.cpdcoll.CompoundMultiplexMixture;
 import edu.umich.med.mrc2.datoolbox.data.enums.CompoundDatabaseEnum;
 import edu.umich.med.mrc2.datoolbox.data.enums.MSPField;
 import edu.umich.med.mrc2.datoolbox.data.enums.MsLibraryFormat;
 import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
 import edu.umich.med.mrc2.datoolbox.data.lims.MobilePhase;
-import edu.umich.med.mrc2.datoolbox.data.thermo.raw.ThermoRawMetadata;
-import edu.umich.med.mrc2.datoolbox.data.thermo.raw.ThermoRawMetadataComparator;
-import edu.umich.med.mrc2.datoolbox.data.thermo.raw.ThermoUtils;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.database.cpdcol.CompoundMultiplexUtils;
 import edu.umich.med.mrc2.datoolbox.database.lipid.LipidOntologyUtils;
@@ -177,7 +173,7 @@ public class RunContainer {
 		MRC2ToolBoxConfiguration.initConfiguration();
 
 		try {
-			readThermoWorklistFromJson();
+			
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -726,71 +722,7 @@ public class RunContainer {
 		}
 	}
 	
-	private static void readThermoWorklistFromJson() {
-		
-		String outputName = 
-				"Y:\\Ashley\\Bielawski_3X_exp1\\plasma\\Manifests\\POS-B4.txt";
-		File jsonFolder = new File("Y:\\Ashley\\Bielawski_3X_exp1\\plasma\\Manifests\\POS-B4");
-		File[] jsonFileList = JSONUtils.getJsonFileList(jsonFolder);
-		Collection<ThermoRawMetadata>metadataList = 
-				new ArrayList<ThermoRawMetadata>();
 
-		for(File jsonFile : jsonFileList) {
-			
-			JSONObject jso = JSONUtils.readJsonFromFile(jsonFile);	
-			
-			ThermoRawMetadata md = 
-					ThermoUtils.parseMetadataObjectFromJson(
-							FilenameUtils.getBaseName(jsonFile.getName().replace("-metadata", "")), jso);
-			if(md != null)
-				metadataList.add(md);
-		}
-		metadataList = metadataList.stream().
-				sorted(new ThermoRawMetadataComparator(SortProperty.injectionTime)).
-				collect(Collectors.toList());		
-		
-		//	Create output 
-		Collection<String>dataToExport = new ArrayList<String>();
-		String[] header = new String[] {
-			"MRC2 sample ID",	
-			"sample_id",	
-			"raw_file",	
-			"Injection time",	
-			"Sample Position",	
-			"Sample Name",	
-			"sample_type",	
-			"sample_order",	
-			"batch_override",	
-		};
-		dataToExport.add(StringUtils.join(header, "\t"));
-		Collection<String>line = new ArrayList<String>();
-		int counter = 1;
-		for(ThermoRawMetadata md : metadataList) {
-			
-			line.clear();
-			line.add(""); //"MRC2 sample ID",	
-			line.add(md.getSampleName()); //"sample_id",	
-			line.add(md.getFileName()); //"raw_file",	
-			line.add(MRC2ToolBoxConfiguration.defaultTimeStampFormat.format(md.getInjectionTime())); //"Injection time",	
-			line.add(md.getSamplePosition()); //"Sample Position",	
-			line.add(md.getSampleName()); //"Sample Name",	
-			line.add(""); //"sample_type",	
-			line.add(Integer.toString(counter)); //"sample_order",	
-			line.add(""); //"batch_override",
-			dataToExport.add(StringUtils.join(line, "\t"));
-			counter++;
-		}	
-		Path outputPath = Paths.get(outputName);
-		try {
-			Files.write(outputPath, 
-					dataToExport, 
-					StandardCharsets.UTF_8,
-					StandardOpenOption.CREATE, 
-					StandardOpenOption.TRUNCATE_EXISTING);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
 	
 	public static void setNIST20asEntrySource() throws Exception{
 		

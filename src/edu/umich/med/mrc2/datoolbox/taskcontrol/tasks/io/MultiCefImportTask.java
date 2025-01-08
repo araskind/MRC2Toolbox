@@ -96,6 +96,8 @@ public class MultiCefImportTask extends AbstractTask implements TaskListener{
 	private HashMap<DataFile, HashSet<SimpleMsFeature>> featureDataPers;
 	private File cacheFile;
 	private File tmpCefDirectory;
+	private boolean removeAbnormalIsoPatterns;
+	private Collection<MsFeature>featuresWithAbnormalIsoPattern;
 
 	public MultiCefImportTask(
 			File libraryFile, 
@@ -380,6 +382,19 @@ public class MultiCefImportTask extends AbstractTask implements TaskListener{
 			ss.setMzStatistics(mzStatsMap.get(feature.getId()));			
 			processed++;
 		}
+		if(removeAbnormalIsoPatterns) {
+			
+			featuresWithAbnormalIsoPattern = new ArrayList<MsFeature>();
+			for(MsFeature feature : library.getFeatures()) {
+				
+				if(feature.getStatsSummary() != null 
+						&& feature.getStatsSummary().getMzStatistics().getStandardDeviation() > 0.1d) {
+					featuresWithAbnormalIsoPattern.add(feature);
+				}
+			}
+			if(!featuresWithAbnormalIsoPattern.isEmpty())
+				removeFeaturesWithAbnormalIsoPattern(featuresWithAbnormalIsoPattern);			
+		}
 		//	TODO - deal with standard samples
 		//	Move "remove empty features" to a separate task to allow multipart imports
 		//	removeEmptyFeatures();
@@ -391,6 +406,35 @@ public class MultiCefImportTask extends AbstractTask implements TaskListener{
 				e.printStackTrace();
 			}
 		}
+	}
+	
+	private void removeFeaturesWithAbnormalIsoPattern(Collection<MsFeature>featuresToRemove) {
+		
+		taskDescription = "Removing features with abnormal isotopic patterns";
+		
+		ArrayList<Long> rem = new ArrayList<Long>();
+		for (MsFeature cf : featuresToRemove)
+			rem.add(dataMatrix.getColumnForLabel(cf));
+
+		Matrix newFeatureMatrix = 
+				dataMatrix.getMetaDataDimensionMatrix(0).deleteColumns(Ret.NEW, rem);
+		Matrix newDataMatrix = dataMatrix.deleteColumns(Ret.NEW, rem);
+		newDataMatrix.setMetaDataDimensionMatrix(0, newFeatureMatrix);
+		newDataMatrix.setMetaDataDimensionMatrix(1, dataMatrix.getMetaDataDimensionMatrix(1));
+		dataMatrix = newDataMatrix;
+		
+		if(featureMatrix != null) {
+			
+			Matrix newMsFeatureLabelMatrix = 
+					featureMatrix.getMetaDataDimensionMatrix(0).deleteColumns(Ret.NEW, rem);			
+			Matrix newMsFeatureMatrix = featureMatrix.deleteColumns(Ret.NEW, rem);
+			newMsFeatureMatrix.setMetaDataDimensionMatrix(0, newMsFeatureLabelMatrix);
+			newMsFeatureMatrix.setMetaDataDimensionMatrix(1, featureMatrix.getMetaDataDimensionMatrix(1));
+			featureMatrix = newMsFeatureMatrix;
+		}
+		library.getFeatures().removeAll(featuresToRemove);
+		
+		//	TODO write log with removed features
 	}
 
 	private void initDataMatrixes() {
@@ -534,6 +578,14 @@ public class MultiCefImportTask extends AbstractTask implements TaskListener{
 	 */
 	public Collection<DataFile> getDataFiles() {		
 		return Arrays.asList(dataFiles);
+	}
+
+	public boolean isRemoveAbnormalIsoPatterns() {
+		return removeAbnormalIsoPatterns;
+	}
+
+	public void setRemoveAbnormalIsoPatterns(boolean removeAbnormalIsoPatterns) {
+		this.removeAbnormalIsoPatterns = removeAbnormalIsoPatterns;
 	}
 }
 

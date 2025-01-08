@@ -81,6 +81,7 @@ import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator;
 
 import edu.umich.med.mrc2.datoolbox.data.Adduct;
 import edu.umich.med.mrc2.datoolbox.data.BinnerAnnotation;
+import edu.umich.med.mrc2.datoolbox.data.ExperimentalSample;
 import edu.umich.med.mrc2.datoolbox.data.IsotopicPatternReferenceBin;
 import edu.umich.med.mrc2.datoolbox.data.MassSpectrum;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
@@ -94,6 +95,7 @@ import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.main.AdductManager;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
+import edu.umich.med.mrc2.datoolbox.main.ReferenceSamplesManager;
 import edu.umich.med.mrc2.datoolbox.main.config.FilePreferencesFactory;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
@@ -129,9 +131,12 @@ public class IsotopicPatternQCprocessor {
 		MRC2ToolBoxConfiguration.initConfiguration();
 
 		File cefFolder = new File("Y:\\DataAnalysis\\_Reports\\EX01426 - Human EDTA Tranche 2 plasma W20001176L\\"
-				+ "A003 - Untargeted\\FBF-recursive\\NEG\\BATCH06\\_TEST");
+				+ "A003 - Untargeted\\FBF-recursive\\POS\\BATCH01\\V2");
 		try {
-			loadMsFbFFeatureDataFromCefFolder(cefFolder);
+			//loadMsFbFFeatureDataFromCefFolder(cefFolder);
+			//	loadInjectionsFromRawDataFolder(batchFolder);
+			loadEX01426Features();
+			//	loadEX01426Injections();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -140,29 +145,44 @@ public class IsotopicPatternQCprocessor {
 	
 	private static void loadEX01426Injections() {
 		
-		File posRawDataFolder = new File(
+//		File posRawDataFolder = new File(
+//				"Y:\\DataAnalysis\\_Reports\\EX01426 - Human EDTA Tranche 2 plasma W20001176L\\"
+//				+ "A003 - Untargeted\\Raw data\\POS");
+//		
+//		for(int i=8; i<9; i++) {
+//			
+//			String batch= "BATCH0" + Integer.toString(i);
+//			File batchFolder = Paths.get(posRawDataFolder.getAbsolutePath(), batch).toFile();
+//			try {
+//				loadInjectionsFromRawDataFolder(batchFolder);
+//			} catch (Exception e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}	
+//		}
+//		File negRawDataFolder = new File(
+//				"Y:\\DataAnalysis\\_Reports\\EX01426 - Human EDTA Tranche 2 plasma W20001176L\\"
+//				+ "A003 - Untargeted\\Raw data\\NEG");
+//		
+//		for(int i=8; i<9; i++) {
+//			
+//			String batch= "BATCH0" + Integer.toString(i);
+//			File batchFolder = Paths.get(negRawDataFolder.getAbsolutePath(), batch).toFile();
+//			try {
+//				loadInjectionsFromRawDataFolder(batchFolder);
+//			} catch (Exception e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}	
+//		}
+		File ionpNegRawDataFolder = new File(
 				"Y:\\DataAnalysis\\_Reports\\EX01426 - Human EDTA Tranche 2 plasma W20001176L\\"
-				+ "A003 - Untargeted\\Raw data\\POS");
+				+ "A049 - Central carbon metabolism profiling\\Raw data\\NEG");
 		
-		for(int i=3; i<8; i++) {
+		for(int i=1; i<8; i++) {
 			
 			String batch= "BATCH0" + Integer.toString(i);
-			File batchFolder = Paths.get(posRawDataFolder.getAbsolutePath(), batch).toFile();
-			try {
-				loadInjectionsFromRawDataFolder(batchFolder);
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}	
-		}
-		File negRawDataFolder = new File(
-				"Y:\\DataAnalysis\\_Reports\\EX01426 - Human EDTA Tranche 2 plasma W20001176L\\"
-				+ "A003 - Untargeted\\Raw data\\NEG");
-		
-		for(int i=2; i<8; i++) {
-			
-			String batch= "BATCH0" + Integer.toString(i);
-			File batchFolder = Paths.get(negRawDataFolder.getAbsolutePath(), batch).toFile();
+			File batchFolder = Paths.get(ionpNegRawDataFolder.getAbsolutePath(), batch).toFile();
 			try {
 				loadInjectionsFromRawDataFolder(batchFolder);
 			} catch (Exception e) {
@@ -193,8 +213,8 @@ public class IsotopicPatternQCprocessor {
 				"INSERT INTO COMPOUNDDB.INJECTION_MAP  " +
 				"(INJECTION_ID, DATA_FILE_NAME, INJECTION_TIMESTAMP,  " +
 				"ACQUISITION_METHOD_ID, INJECTION_VOLUME, EXPERIMENT_ID, INSTRUMENT_ID,  " +
-				"ASSAY_ID, SAMPLE_ID, REP_NUMBER, POLARITY) " +
-				"VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+				"ASSAY_ID, SAMPLE_ID, REP_NUMBER, POLARITY, SAMPLE_OR_REF_TYPE) " +
+				"VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 		PreparedStatement ps = conn.prepareStatement(query);		
 		
 		String DATA_FILE_NAME_PATTERN = 
@@ -217,6 +237,7 @@ public class IsotopicPatternQCprocessor {
 			String assayId = null;
 			String instrumentId = null;
 			String sampleId = null;
+			String refSampleType = null;
 			String acqMethodName = null;
 			String acqMethodId = null;
 			int replica = 1;
@@ -286,6 +307,7 @@ public class IsotopicPatternQCprocessor {
 					instrumentId = fnMatcher.group(3);
 					sampleId = fnMatcher.group(4);
 					polarity = fnMatcher.group(5);
+					refSampleType = "SAMPLE";
 				}
 			}
 			else {
@@ -298,12 +320,18 @@ public class IsotopicPatternQCprocessor {
 					sampleId = fnMatcher.group(4);
 					polarity = fnMatcher.group(6);
 					replica = Integer.parseInt(fnMatcher.group(5));
+					if(sampleId != null) {
+						ExperimentalSample refSample = ReferenceSamplesManager.getReferenceSampleById(sampleId);
+						if(refSample != null)
+							refSampleType = refSample.getMoTrPACQCSampleType().getName();
+					}
 				}
 			}
 			if(!fnMatcher.matches()) {
 				System.err.println("Unable to parse file name " + df.getName());
 				continue;
 			}
+
 			String newId = SQLUtils.getNextIdFromSequence(conn, 
 					"COMPOUNDDB.INJECTION_MAP_SEQ",
 					DataPrefix.INJECTION,
@@ -333,10 +361,65 @@ public class IsotopicPatternQCprocessor {
 			ps.setString(9, sampleId);
 			ps.setInt(10, replica);
 			ps.setString(11, polarity);
+			
+			if(refSampleType != null)
+				ps.setString(12, refSampleType);
+			else
+				ps.setNull(12, java.sql.Types.NULL);
+			
 			ps.executeUpdate();
 		}
 		ps.close();
 		ConnectionManager.releaseConnection(conn);
+	}
+	
+	private static void loadEX01426Features() {
+		
+		File posRawDataFolder = new File(
+				"Y:\\DataAnalysis\\_Reports\\EX01426 - Human EDTA Tranche 2 plasma W20001176L\\"
+				+ "A003 - Untargeted\\FBF-recursive\\POS");
+		
+		for(int i=8; i<9; i++) {
+			
+			String batch= "BATCH0" + Integer.toString(i);
+			File batchFolder = Paths.get(posRawDataFolder.getAbsolutePath(), batch).toFile();
+			try {
+				loadMsFbFFeatureDataFromCefFolder(batchFolder);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}	
+		}
+		File negRawDataFolder = new File(
+				"Y:\\DataAnalysis\\_Reports\\EX01426 - Human EDTA Tranche 2 plasma W20001176L\\"
+				+ "A003 - Untargeted\\FBF-recursive\\NEG");
+		
+		for(int i=8; i<9; i++) {
+			
+			String batch= "BATCH0" + Integer.toString(i);
+			File batchFolder = Paths.get(negRawDataFolder.getAbsolutePath(), batch).toFile();
+			try {
+				loadMsFbFFeatureDataFromCefFolder(batchFolder);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}	
+		}
+		File ionpNegRawDataFolder = new File(
+				"Y:\\DataAnalysis\\_Reports\\EX01426 - Human EDTA Tranche 2 plasma W20001176L\\"
+				+ "A049 - Central carbon metabolism profiling\\FBF-recursive\\NEG");
+		
+		for(int i=1; i<8; i++) {
+			
+			String batch= "BATCH0" + Integer.toString(i);
+			File batchFolder = Paths.get(ionpNegRawDataFolder.getAbsolutePath(), batch).toFile();
+			try {
+				loadMsFbFFeatureDataFromCefFolder(batchFolder);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}	
+		}
 	}
 	
 	private static void loadMsFbFFeatureDataFromCefFolder(File cefFolder) throws Exception {
@@ -351,8 +434,8 @@ public class IsotopicPatternQCprocessor {
 		
 		String query = 
 				"INSERT INTO COMPOUNDDB.MS_FEATURES (FEATURE_ID,LIB_ID,INJECTION_ID,RT,"
-				+ "RT_MIN,RT_MAX,NUM_SCANS,AREA,HEIGHT,SCORE,SCORE_FLAG,FLAG_SEBVERITY) "
-				+ "VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
+				+ "RT_MIN,RT_MAX,AREA,HEIGHT,SCORE,SCORE_FLAG,FLAG_SEVERITY) "
+				+ "VALUES (?,?,?,?,?,?,?,?,?,?,?)";
 		PreparedStatement ps = conn.prepareStatement(query);
 		
 		String updQuery = 
@@ -398,6 +481,62 @@ public class IsotopicPatternQCprocessor {
 			System.out.println("Uploading MS features for " + cefPath.getFileName());
 			for(MsFeature msf : featureList) {
 				
+				//	Feature
+				String newId = SQLUtils.getNextIdFromSequence(conn, 
+						"COMPOUNDDB.MS_FEATURE_SEQ",
+						DataPrefix.MS_FEATURE,
+						"0",
+						11);
+				
+				ps.setString(1,newId); //	FEATURE_ID
+				if(msf.getTargetId() != null)
+					ps.setString(2, msf.getTargetId()); //	LIB_ID
+				else
+					ps.setNull(2, java.sql.Types.NULL);
+				
+				ps.setString(3, injectionId); //	INJECTION_ID
+				ps.setDouble(4, msf.getRetentionTime()); //	RT
+				ps.setDouble(5, msf.getRtRange().getMin()); //	RT_MIN
+				ps.setDouble(6, msf.getRtRange().getMax()); //	RT_MAX
+				ps.setDouble(7, msf.getArea()); //	AREA
+				ps.setDouble(8, msf.getHeight()); //	HEIGHT
+				
+				if(msf.getBinnerAnnotation() != null)
+					ps.setDouble(9, msf.getBinnerAnnotation().getMassError()); //	SCORE
+				else
+					ps.setNull(9, java.sql.Types.NULL);
+				
+				if(msf.getBinnerAnnotation() != null 
+						&& msf.getBinnerAnnotation().getFeatureName() != null)
+					ps.setString(10, msf.getBinnerAnnotation().getFeatureName()); //	SCORE_FLAG
+				else
+					ps.setNull(10, java.sql.Types.NULL);
+				
+				if(msf.getBinnerAnnotation() != null 
+						&& msf.getBinnerAnnotation().getAnnotation() != null)
+					ps.setString(11, msf.getBinnerAnnotation().getAnnotation()); //	FLAG_SEVERITY
+				else
+					ps.setNull(11, java.sql.Types.NULL);
+				
+				ps.executeUpdate();	
+				
+				//	Spectrum
+				updPs.setString(1, newId);
+				for(Adduct adduct : msf.getSpectrum().getAdducts()) {
+						
+					MsPoint[]rawMs = msf.getSpectrum().getMsForAdduct(adduct);
+					MsPoint[]scaledMs = MsUtils.normalizeAndSortMsPattern(rawMs);
+					for(int i=0; i<rawMs.length; i++) {
+						
+						updPs.setInt(2, i+1);
+						updPs.setDouble(3, rawMs[i].getMz());
+						updPs.setDouble(4, rawMs[i].getIntensity());
+						updPs.setDouble(5, scaledMs[i].getIntensity());
+						updPs.setString(6, adduct.getName());
+						updPs.addBatch();
+					}
+				}
+				updPs.executeBatch();
 			}
 		}
 		injPs.close();
@@ -683,8 +822,6 @@ public class IsotopicPatternQCprocessor {
 		
 		return ed.probability(isotopeNormIntensity * 0.8d, isotopeNormIntensity * 1.2d);
 	}
-	
-	
 
 	private static Collection<MsFeature>parseInputCefFile(File inputCefFile) throws Exception {
 
@@ -738,8 +875,7 @@ public class IsotopicPatternQCprocessor {
 			
 			feature.setName(name);
 		}
-		extractScore(cpdElement, feature);
-		
+		extractScore(cpdElement, feature);		
 		return feature;
 	}
 	
@@ -752,7 +888,17 @@ public class IsotopicPatternQCprocessor {
 		Element moleculeElement = resultsElement.getChild("Molecule");						
 		if(moleculeElement == null)
 			return;
-				
+
+		if(moleculeElement.getChild("Database") != null) {
+			
+			Element accElement = moleculeElement.getChild("Database").getChild("Accession");
+			String tgtId = null;
+			if(accElement != null)
+				tgtId = accElement.getAttributeValue("id");
+			
+			if(tgtId != null)
+				feature.setTargetId(tgtId);
+		}				
 		Element matchScoreList = moleculeElement.getChild("MatchScores");						
 		if(matchScoreList == null)
 			return;

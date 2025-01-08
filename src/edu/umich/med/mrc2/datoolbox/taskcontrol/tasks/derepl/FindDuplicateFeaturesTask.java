@@ -127,11 +127,11 @@ public class FindDuplicateFeaturesTask extends AbstractTask {
 				return;
 			
 			//	DEBUG - print feature stats if MZ standard deviation > 0.1
-			if(cf.getStatsSummary() != null 
-					&& cf.getStatsSummary().getMzStatistics().getStandardDeviation() > 0.1d) {
-				System.out.println(cf.getName() + " | Charge = "+ cf.getCharge());
-				//	DebugUtils.printMsFeatureStatisticalSummary(cf.getStatsSummary());
-			}			
+//			if(cf.getStatsSummary() != null 
+//					&& cf.getStatsSummary().getMzStatistics().getStandardDeviation() > 0.1d) {
+//				System.out.println(cf.getName() + " | Charge = "+ cf.getCharge());
+//				//	DebugUtils.printMsFeatureStatisticalSummary(cf.getStatsSummary());
+//			}			
 			assigned = false;
 			if(assignedFeatures.contains(cf))
 				continue;
