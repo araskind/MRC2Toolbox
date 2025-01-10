@@ -31,6 +31,7 @@ import java.util.TreeMap;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.DateAxis;
+import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.DatasetRenderingOrder;
 import org.jfree.chart.plot.Plot;
 import org.jfree.chart.plot.PlotOrientation;
@@ -118,6 +119,8 @@ public class FeaturePropertiesTimelinePlot extends AbstractControlledDataPlot {
 				true, // generate tooltips?
 				false // generate URLs?
 		).getPlot();
+		((NumberAxis) dataPlot.getRangeAxis()).
+			setNumberFormatOverride(MRC2ToolBoxConfiguration.getPpmFormat());
 	}
 	
 	private void initMZplot() {
@@ -132,6 +135,8 @@ public class FeaturePropertiesTimelinePlot extends AbstractControlledDataPlot {
 				true, // generate tooltips?
 				false // generate URLs?
 		).getPlot();
+		((NumberAxis) dataPlot.getRangeAxis()).
+			setNumberFormatOverride(MRC2ToolBoxConfiguration.getMzFormat());
 	}
 	
 	private void initRTwidthPlot() {
@@ -146,6 +151,8 @@ public class FeaturePropertiesTimelinePlot extends AbstractControlledDataPlot {
 				true, // generate tooltips?
 				false // generate URLs?
 		).getPlot();
+		((NumberAxis) dataPlot.getRangeAxis()).
+			setNumberFormatOverride(MRC2ToolBoxConfiguration.getRtFormat());
 		
 		XYCustomErrorRenderer peakWidtRenderer = new XYCustomErrorRenderer();
 		peakWidtRenderer.setDrawYError(true);
@@ -265,42 +272,14 @@ public class FeaturePropertiesTimelinePlot extends AbstractControlledDataPlot {
 			
 			dataPlot.setDataset(tsds);
 			
-			if(dataType.equals(LCMSPlotType.FEATURE_QUALITY)) {
+			if(dataType.equals(LCMSPlotType.FEATURE_QUALITY) 
+					&& dataPlot.getDataRange(dataPlot.getRangeAxis()) != null) {
 				double border  = dataPlot.getDataRange(dataPlot.getRangeAxis()).getUpperBound() * 1.15;
 				dataPlot.getRangeAxis().setRange(new org.jfree.data.Range(0.0d, border));
 			}			
 			addSDRangeMarkers(tsds, dataPlot);
 		}	
 	}
-
-	//	Monoisotopic M/Z variation plot
-//	private void createMZPlot(
-//			MsFeature feature, 
-//			Map<DataFile, SimpleMsFeature> sortedFileFeatureMap,
-//			FileSortingOrder sortingOrder, 
-//			ChartColorOption colorOption, 
-//			DataAnalysisProject currentExperiment,
-//			DataPipeline dataPipeline) {
-//		
-//		if(sortingOrder.equals(FileSortingOrder.TIMESTAMP)) {
-//			
-//			TimedScatterDataSet tsds = 
-//					new TimedScatterDataSet(
-//							feature, 
-//							sortedFileFeatureMap, 
-//							colorOption, 
-//							currentExperiment, 
-//							dataPipeline,
-//							LCMSPlotType.MZ);
-//			
-//			XYItemRenderer mzRenderer = dataPlot.getRenderer();
-//			for(int i=0; i<tsds.getSeriesCount(); i++)
-//				mzRenderer.setSeriesPaint(i, ColorUtils.getColor(i));
-//			
-//			dataPlot.setDataset(tsds);
-//			addSDRangeMarkers(tsds, dataPlot);
-//		}		
-//	}
 
 	//	Peak width plot
 	private void createRtPeakWidthPlot(			

@@ -21,8 +21,8 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.plot.dataset;
 
-import java.util.ArrayList;
 import java.util.Date;
+import java.util.TreeMap;
 
 import org.jfree.data.time.RegularTimePeriod;
 import org.jfree.data.time.Second;
@@ -36,31 +36,31 @@ public class NamedTimeSeries extends TimeSeries {
 	 */
 	private static final long serialVersionUID = -6516578883875846474L;
 	
-	protected ArrayList<String> labels;
+	protected TreeMap<RegularTimePeriod,String> labels;
 	protected PlotValuesStats stats;
 
 	public NamedTimeSeries(Comparable name) {
 
 		super(name);
-		labels = new ArrayList<String>();
+		labels = new TreeMap<RegularTimePeriod,String>();
 	}
 
 	public void add(Date x, Number y, String label) {
 
-		add(new Second(x), y, true);
-		labels.add(label);
+		Second sec = new Second(x);
+		add(sec, y, true);
+		labels.put(sec,label);
 	}
 
 	@Override
 	public void delete(RegularTimePeriod period) {
 
 		super.delete(period);
-		int index = getIndex(period);
-		labels.remove(index);
+		labels.remove(period);
 	}
 
 	public String getLabel(int index) {
-		return labels.get(index);
+		return labels.get(getTimePeriod(index));
 	}
 	
 	protected void calculateSeriesStats() {

@@ -21,6 +21,7 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.plot.dataset;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.LinkedHashSet;
@@ -62,6 +63,8 @@ public class TimedScatterDataSet extends TimeSeriesCollection {
 	protected DataAnalysisProject experiment;
 	protected Calendar activeCalendar;
 	protected PlotValuesStats dataSetStats;
+	protected static final SimpleDateFormat injectionTimeFormat = 
+			new SimpleDateFormat("yyyy-MM-dd HH:mm");
 
 	public TimedScatterDataSet() {
 		super();
@@ -152,11 +155,31 @@ public class TimedScatterDataSet extends TimeSeriesCollection {
 	protected String generateLabelForSimpleMsFeature(
 			DataFile df, SimpleMsFeature msf, String seriesKey, LCMSPlotType plotValueType) {
 		
-        String label = "<HTML><B>Data file: </B>" + df.getName();  	
+		
+        String label = "<HTML><B>Data file: </B>" + df.getName(); 
+    	label += "<BR><B>Injection time: </B>" + injectionTimeFormat.format(df.getInjectionTime()) + "<BR>";
+       
+        if(plotValueType.equals(LCMSPlotType.MZ))
+        	label += "<B>M/Z: </B>" + MRC2ToolBoxConfiguration.getMzFormat().format(
+        			msf.getObservedSpectrum().getMonoisotopicMz());
+        
+        if(plotValueType.equals(LCMSPlotType.RT_AND_PEAK_WIDTH)) {
+        	
+        	label += "<B>RT: </B>" + MRC2ToolBoxConfiguration.getRtFormat().format(
+        			msf.getRetentionTime()) + " min<BR>";
+        	label += "<B>RT range: </B>" + msf.getRtRange().getFormattedString(
+        			MRC2ToolBoxConfiguration.getRtFormat()) + " min<BR>";
+        	label += "<B>Peak width: </B>" + MRC2ToolBoxConfiguration.getRtFormat().format(
+        			msf.getRtRange().getSize()) + " min";
+        }  
+        if(plotValueType.equals(LCMSPlotType.FEATURE_QUALITY))
+        	label += "<B>Quality score: </B>" + MRC2ToolBoxConfiguration.getPpmFormat().format(
+        			msf.getQualityScore());
+        
     	TreeMap<ExperimentDesignFactor, ExperimentDesignLevel> desCell = null;
     	if(df.getParentSample() != null) {
     		desCell = df.getParentSample().getDesignCell();
-    		label += "<BR><B>Sample: </B>" + df.getParentSample().getName() 
+    		label += "<HR><B>Sample: </B>" + df.getParentSample().getName() 
     				+ " (" + df.getParentSample().getId() + ")";
     	}
     	if(desCell != null && !desCell.isEmpty()) {
@@ -167,18 +190,6 @@ public class TimedScatterDataSet extends TimeSeriesCollection {
     		label += "<BR>";
     	}      	
         label += "<B>Series: </B>" + seriesKey + "<BR>";
-        
-        if(plotValueType.equals(LCMSPlotType.MZ))
-        	label += "<B>M/Z: </B>" + MRC2ToolBoxConfiguration.getMzFormat().format(msf.getObservedSpectrum().getMonoisotopicMz());
-        
-        if(plotValueType.equals(LCMSPlotType.RT_AND_PEAK_WIDTH)) {
-        	
-        	label += "<B>RT: </B>" + MRC2ToolBoxConfiguration.getRtFormat().format(msf.getRetentionTime()) + " min<BR>";
-        	label += "<B>RT range: </B>" + msf.getRtRange().getFormattedString(MRC2ToolBoxConfiguration.getRtFormat()) + " min<BR>";
-        	label += "<B>Peak width: </B>" + MRC2ToolBoxConfiguration.getRtFormat().format(msf.getRtRange().getSize()) + " min";
-        }  
-        if(plotValueType.equals(LCMSPlotType.FEATURE_QUALITY))
-        	label += "<B>Quality score: </B>" + MRC2ToolBoxConfiguration.getPpmFormat().format(msf.getQualityScore());
         
         return label;
 	}

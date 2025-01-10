@@ -101,37 +101,36 @@
 										<fullscreen-action>false</fullscreen-action>
 										<node nodeId="1736470065442" orientation="VERTICAL" divider="0.550328227571116">
 											<node nodeId="1736470405478" orientation="VERTICAL" divider="0.4910179640718562">
-												<leaf id="0" nodeId="1736470058031">
-													<placeholders>
-														<placeholder>dock.single.DockableDataVariationPlotPanelFEATURE_QUALITY</placeholder>
-														<placeholder>dock.single.DockableDataVariationPlotPanelRT_AND_PEAK_WIDTH</placeholder>
-													</placeholders>
-													<placeholder-map>
-														<version>0</version>
-														<format>dock.PlaceholderList</format>
-														<entry>
-															<key shared="false">
-																<placeholder>dock.single.DockableDataVariationPlotPanelRT_AND_PEAK_WIDTH</placeholder>
-															</key>
-															<item key="convert" type="b">true</item>
-															<item key="convert-keys" type="a"/>
-														</entry>
-														<entry>
-															<key shared="false">
-																<placeholder>dock.single.DockableDataVariationPlotPanelFEATURE_QUALITY</placeholder>
-															</key>
-															<item key="convert" type="b">true</item>
-															<item key="convert-keys" type="a"/>
-														</entry>
-													</placeholder-map>
-												</leaf>
-												<leaf id="1" nodeId="1736470405476">
+												<node nodeId="1736538021870" orientation="VERTICAL" divider="0.546485260770975">
+													<leaf id="0" nodeId="1736470058031">
+														<placeholders>
+															<placeholder>dock.single.DockableDataVariationPlotPanelRT_AND_PEAK_WIDTH</placeholder>
+														</placeholders>
+														<placeholder-map>
+															<version>0</version>
+															<format>dock.PlaceholderList</format>
+															<entry>
+																<key shared="false">
+																	<placeholder>dock.single.DockableDataVariationPlotPanelRT_AND_PEAK_WIDTH</placeholder>
+																</key>
+																<item key="convert" type="b">true</item>
+																<item key="convert-keys" type="a"/>
+															</entry>
+														</placeholder-map>
+													</leaf>
+													<leaf id="1" nodeId="1736538021868">
+														<placeholders>
+															<placeholder>dock.single.DockableDataVariationPlotPanelFEATURE_QUALITY</placeholder>
+														</placeholders>
+													</leaf>
+												</node>
+												<leaf id="-1" nodeId="1736470405476">
 													<placeholders>
 														<placeholder>dock.single.DockableDataVariationPlotPanelMZ</placeholder>
 													</placeholders>
 												</leaf>
 											</node>
-											<leaf id="2" nodeId="1736470065440">
+											<leaf id="-1" nodeId="1736470065440">
 												<placeholders>
 													<placeholder>dock.single.DockableMultispectrumPlotPanel</placeholder>
 												</placeholders>
@@ -168,12 +167,12 @@
 											</entry>
 											<entry>
 												<key shared="false">
-													<placeholder>dock.single.DockableDataVariationPlotPanelMZ</placeholder>
+													<placeholder>dock.single.DockableDataVariationPlotPanelFEATURE_QUALITY</placeholder>
 												</key>
 											</entry>
 											<entry>
 												<key shared="false">
-													<placeholder>dock.single.DockableDataVariationPlotPanelFEATURE_QUALITY</placeholder>
+													<placeholder>dock.single.DockableDataVariationPlotPanelMZ</placeholder>
 												</key>
 												<item key="convert" type="b">true</item>
 												<item key="convert-keys" type="a">
@@ -183,12 +182,21 @@
 												</item>
 												<item key="dock.index" type="i">1</item>
 												<item key="dock.id" type="i">1</item>
-												<item key="dock.placeholder" type="s">dock.single.DockableDataVariationPlotPanelFEATURE_QUALITY</item>
+												<item key="dock.placeholder" type="s">dock.single.DockableDataVariationPlotPanelMZ</item>
 											</entry>
 											<entry>
 												<key shared="false">
 													<placeholder>dock.single.DockableMultispectrumPlotPanel</placeholder>
 												</key>
+												<item key="convert" type="b">true</item>
+												<item key="convert-keys" type="a">
+													<item type="s">index</item>
+													<item type="s">id</item>
+													<item type="s">placeholder</item>
+												</item>
+												<item key="dock.index" type="i">2</item>
+												<item key="dock.id" type="i">2</item>
+												<item key="dock.placeholder" type="s">dock.single.DockableMultispectrumPlotPanel</item>
 											</entry>
 										</placeholders>
 									</layout>
@@ -204,10 +212,20 @@
 											<children ignore="false"/>
 										</child>
 										<child>
-											<layout factory="predefined" placeholder="dock.single.DockableDataVariationPlotPanelFEATURE_QUALITY">
-												<replacement id="dockablesingle DockableDataVariationPlotPanelFEATURE_QUALITY"/>
+											<layout factory="predefined" placeholder="dock.single.DockableDataVariationPlotPanelMZ">
+												<replacement id="dockablesingle DockableDataVariationPlotPanelMZ"/>
 												<delegate id="delegate_ccontrol backup factory id">
-													<id>DockableDataVariationPlotPanelFEATURE_QUALITY</id>
+													<id>DockableDataVariationPlotPanelMZ</id>
+													<area/>
+												</delegate>
+											</layout>
+											<children ignore="false"/>
+										</child>
+										<child>
+											<layout factory="predefined" placeholder="dock.single.DockableMultispectrumPlotPanel">
+												<replacement id="dockablesingle DockableMultispectrumPlotPanel"/>
+												<delegate id="delegate_ccontrol backup factory id">
+													<id>DockableMultispectrumPlotPanel</id>
 													<area/>
 												</delegate>
 											</layout>
@@ -216,20 +234,10 @@
 									</children>
 								</child>
 								<child>
-									<layout factory="predefined" placeholder="dock.single.DockableDataVariationPlotPanelMZ">
-										<replacement id="dockablesingle DockableDataVariationPlotPanelMZ"/>
+									<layout factory="predefined" placeholder="dock.single.DockableDataVariationPlotPanelFEATURE_QUALITY">
+										<replacement id="dockablesingle DockableDataVariationPlotPanelFEATURE_QUALITY"/>
 										<delegate id="delegate_ccontrol backup factory id">
-											<id>DockableDataVariationPlotPanelMZ</id>
-											<area/>
-										</delegate>
-									</layout>
-									<children ignore="false"/>
-								</child>
-								<child>
-									<layout factory="predefined" placeholder="dock.single.DockableMultispectrumPlotPanel">
-										<replacement id="dockablesingle DockableMultispectrumPlotPanel"/>
-										<delegate id="delegate_ccontrol backup factory id">
-											<id>DockableMultispectrumPlotPanel</id>
+											<id>DockableDataVariationPlotPanelFEATURE_QUALITY</id>
 											<area/>
 										</delegate>
 									</layout>
@@ -277,11 +285,12 @@
 											<placeholder>dock.single.DockableDataVariationPlotPanelFEATURE_QUALITY</placeholder>
 											<backup-path>
 												<node location="TOP" size="0.550328227571116" id="1736470065442"/>
+												<node location="TOP" size="0.4910179640718562" id="1736470405478"/>
 												<leaf id="1736470058031"/>
 											</backup-path>
 										</property>
 										<property factory="StackDockPropertyFactory">
-											<index>2</index>
+											<index>1</index>
 											<placeholder>dock.single.DockableDataVariationPlotPanelFEATURE_QUALITY</placeholder>
 										</property>
 									</location>
@@ -301,7 +310,7 @@
 										<property factory="SplitDockPlaceholderProperty">
 											<placeholder>dock.single.DockableMultispectrumPlotPanel</placeholder>
 											<backup-path>
-												<node location="BOTTOM" size="0.75" id="1736470065442"/>
+												<node location="BOTTOM" size="0.449671772428884" id="1736470065442"/>
 												<leaf id="1736470065440"/>
 											</backup-path>
 										</property>
@@ -323,12 +332,9 @@
 											<placeholder>dock.single.DockableDataVariationPlotPanelMZ</placeholder>
 											<backup-path>
 												<node location="TOP" size="0.550328227571116" id="1736470065442"/>
-												<leaf id="1736470058031"/>
+												<node location="BOTTOM" size="0.5089820359281438" id="1736470405478"/>
+												<leaf id="1736470405476"/>
 											</backup-path>
-										</property>
-										<property factory="StackDockPropertyFactory">
-											<index>1</index>
-											<placeholder>dock.single.DockableDataVariationPlotPanelMZ</placeholder>
 										</property>
 									</location>
 								</property>
