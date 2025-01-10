@@ -32,6 +32,7 @@ import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.DateAxis;
 import org.jfree.chart.plot.DatasetRenderingOrder;
+import org.jfree.chart.plot.Plot;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.ValueMarker;
 import org.jfree.chart.plot.XYPlot;
@@ -87,42 +88,78 @@ public class FeaturePropertiesTimelinePlot extends AbstractControlledDataPlot {
 	@Override
 	protected void initChart() {
 		
-		String yAxisLabel = "RT, min";
+		if(plotType.equals(LCMSPlotType.RT_AND_PEAK_WIDTH))
+			initRTwidthPlot();
+		
 		if(plotType.equals(LCMSPlotType.MZ))
-			yAxisLabel = "M/Z, Da";
+			initMZplot();
+		
+		if(plotType.equals(LCMSPlotType.FEATURE_QUALITY))
+			initFeatureQualityPlot();
+		
+		setBasicPlotGui(dataPlot);
+		dataPlot.getRenderer().setDefaultToolTipGenerator(
+				new NamedTimeSeriesToolTipGenerator());
+
+		chart = new JFreeChart(dataPlot);
+		chart.setBackgroundPaint(Color.white);
+		setChart(chart);
+	}
+	
+	private void initFeatureQualityPlot() {
 		
 		dataPlot = (XYPlot) ChartFactory.createScatterPlot(
 				"", // title
 				"", // x-axis label
-				yAxisLabel, // y-axis label
+				"Quality score", // y-axis label
 				null, // data set
 				PlotOrientation.VERTICAL, // orientation
 				false, // create legend?
 				true, // generate tooltips?
 				false // generate URLs?
 		).getPlot();
-		setBasicPlotGui(dataPlot);
-
-		//	Set renderes for RT plot
-		if(plotType.equals(LCMSPlotType.RT_AND_PEAK_WIDTH)) {
-			
-			XYCustomErrorRenderer peakWidtRenderer = new XYCustomErrorRenderer();
-			peakWidtRenderer.setDrawYError(true);
-			peakWidtRenderer.setDrawXError(false);
-			dataPlot.setRenderer(peakWidtRenderer);	
-		}	
-		dataPlot.getRenderer().setDefaultToolTipGenerator(new NamedTimeSeriesToolTipGenerator());
-		chart = new JFreeChart(dataPlot);
-		chart.setBackgroundPaint(Color.white);
-		setChart(chart);
+	}
+	
+	private void initMZplot() {
+		
+		dataPlot = (XYPlot) ChartFactory.createScatterPlot(
+				"", // title
+				"", // x-axis label
+				"M/Z, Da", // y-axis label
+				null, // data set
+				PlotOrientation.VERTICAL, // orientation
+				false, // create legend?
+				true, // generate tooltips?
+				false // generate URLs?
+		).getPlot();
+	}
+	
+	private void initRTwidthPlot() {
+		
+		dataPlot = (XYPlot) ChartFactory.createScatterPlot(
+				"", // title
+				"", // x-axis label
+				"RT, min", // y-axis label
+				null, // data set
+				PlotOrientation.VERTICAL, // orientation
+				false, // create legend?
+				true, // generate tooltips?
+				false // generate URLs?
+		).getPlot();
+		
+		XYCustomErrorRenderer peakWidtRenderer = new XYCustomErrorRenderer();
+		peakWidtRenderer.setDrawYError(true);
+		peakWidtRenderer.setDrawXError(false);
+		dataPlot.setRenderer(peakWidtRenderer);	
 	}
 
-	private void setBasicPlotGui(XYPlot newPlot) {
+	private void setBasicPlotGui(Plot newPlot) {
 
+		newPlot.setBackgroundPaint(Color.white);
+		
 		if(newPlot instanceof XYPlot) {
 			
-			XYPlot xyPlot = (XYPlot)newPlot;
-			newPlot.setBackgroundPaint(Color.white);
+			XYPlot xyPlot = (XYPlot)newPlot;			
 			xyPlot.setAxisOffset(new RectangleInsets(5.0, 5.0, 5.0, 5.0));
 			xyPlot.setDatasetRenderingOrder(DatasetRenderingOrder.FORWARD);
 			xyPlot.setDomainGridlinePaint(GRID_COLOR);
@@ -136,14 +173,15 @@ public class FeaturePropertiesTimelinePlot extends AbstractControlledDataPlot {
 
 	@Override
 	public void removeAllDataSets() {
+		
+		if(dataPlot == null)
+			return;
+			
+		for (int i = 0; i < dataPlot.getDatasetCount(); i++)
+			dataPlot.setDataset(i, null);
 
-		if(dataPlot != null) {
-			for (int i = 0; i < dataPlot.getDatasetCount(); i++)
-				dataPlot.setDataset(i, null);
-
-			dataPlot.clearAnnotations();
-			dataPlot.clearRangeMarkers();
-		}
+		dataPlot.clearAnnotations();
+		dataPlot.clearRangeMarkers();
 	}
 	
 	public void showFeatureData(
@@ -169,7 +207,9 @@ public class FeaturePropertiesTimelinePlot extends AbstractControlledDataPlot {
 					new DataFileComparator(SortProperty.injectionTime));
 			DateAxis dateAxis = new DateAxis("Timestamp");
 			dateAxis.setDateFormatOverride(new SimpleDateFormat("MM/dd HH:mm"));
-			dataPlot.setDomainAxis(dateAxis);
+			
+			if(dataPlot instanceof XYPlot)
+				dataPlot.setDomainAxis(dateAxis);
 		}
 		if(sortedFileFeatureMap == null)
 			return;
@@ -186,41 +226,81 @@ public class FeaturePropertiesTimelinePlot extends AbstractControlledDataPlot {
 					currentExperiment, 
 					dataPipeline);
 		}
-		if(plotType.equals(LCMSPlotType.MZ)) {
+		if(plotType.equals(LCMSPlotType.MZ) || plotType.equals(LCMSPlotType.FEATURE_QUALITY)) {
 			
-			createMZPlot(
+			createFeatureSingleValueDataPlot(
 					feature,
 					sortedFileFeatureMap, 
 					sortingOrder,
 					colorOption, 
 					currentExperiment, 
-					dataPipeline);
+					dataPipeline,
+					plotType);
 		}
 	}
 	
-	//	Monoisotopic M/Z variation plot
-	private void createMZPlot(
+	private void createFeatureSingleValueDataPlot(
 			MsFeature feature, 
-			Map<DataFile, SimpleMsFeature> sortedFileFeatureMap,
+			TreeMap<DataFile, SimpleMsFeature> sortedFileFeatureMap,
 			FileSortingOrder sortingOrder, 
 			ChartColorOption colorOption, 
 			DataAnalysisProject currentExperiment,
-			DataPipeline dataPipeline) {
-		
+			DataPipeline dataPipeline,
+			LCMSPlotType dataType) {
+
 		if(sortingOrder.equals(FileSortingOrder.TIMESTAMP)) {
 			
 			TimedScatterDataSet tsds = 
-					new TimedScatterDataSet(feature, sortedFileFeatureMap, 
-							colorOption, currentExperiment, dataPipeline);
+					new TimedScatterDataSet(
+							feature, 
+							sortedFileFeatureMap, 
+							colorOption, 
+							currentExperiment, 
+							dataPipeline,
+							dataType);
 			
 			XYItemRenderer mzRenderer = dataPlot.getRenderer();
 			for(int i=0; i<tsds.getSeriesCount(); i++)
 				mzRenderer.setSeriesPaint(i, ColorUtils.getColor(i));
 			
 			dataPlot.setDataset(tsds);
+			
+			if(dataType.equals(LCMSPlotType.FEATURE_QUALITY)) {
+				double border  = dataPlot.getDataRange(dataPlot.getRangeAxis()).getUpperBound() * 1.15;
+				dataPlot.getRangeAxis().setRange(new org.jfree.data.Range(0.0d, border));
+			}			
 			addSDRangeMarkers(tsds, dataPlot);
-		}		
+		}	
 	}
+
+	//	Monoisotopic M/Z variation plot
+//	private void createMZPlot(
+//			MsFeature feature, 
+//			Map<DataFile, SimpleMsFeature> sortedFileFeatureMap,
+//			FileSortingOrder sortingOrder, 
+//			ChartColorOption colorOption, 
+//			DataAnalysisProject currentExperiment,
+//			DataPipeline dataPipeline) {
+//		
+//		if(sortingOrder.equals(FileSortingOrder.TIMESTAMP)) {
+//			
+//			TimedScatterDataSet tsds = 
+//					new TimedScatterDataSet(
+//							feature, 
+//							sortedFileFeatureMap, 
+//							colorOption, 
+//							currentExperiment, 
+//							dataPipeline,
+//							LCMSPlotType.MZ);
+//			
+//			XYItemRenderer mzRenderer = dataPlot.getRenderer();
+//			for(int i=0; i<tsds.getSeriesCount(); i++)
+//				mzRenderer.setSeriesPaint(i, ColorUtils.getColor(i));
+//			
+//			dataPlot.setDataset(tsds);
+//			addSDRangeMarkers(tsds, dataPlot);
+//		}		
+//	}
 
 	//	Peak width plot
 	private void createRtPeakWidthPlot(			
@@ -284,22 +364,31 @@ public class FeaturePropertiesTimelinePlot extends AbstractControlledDataPlot {
 		
 		double min = tsds.getDataSetStats().getValueStats().getMin();
 		double max = tsds.getDataSetStats().getValueStats().getMax();
-		double upperPpm = (max - median)/median * 1000000.0d;
-		double lowerPpm = (median - min)/median * 1000000.0d;
 		Font labelFont = new Font("Arial", Font.PLAIN, 18);
-						
+		
 		ValueMarker upperMarker = new ValueMarker(max); 
 		upperMarker.setPaint(ColorUtils.getBrewerColor(2));
 		upperMarker.setLabelAnchor(RectangleAnchor.CENTER);
 		upperMarker.setLabelFont(labelFont);
-		upperMarker.setLabel("+" + MRC2ToolBoxConfiguration.getPpmFormat().format(upperPpm) + " ppm");
-		targetPlot.addRangeMarker(upperMarker);
 		
 		ValueMarker lowerMarker = new ValueMarker(min); 
 		lowerMarker.setPaint(ColorUtils.getBrewerColor(2));
 		lowerMarker.setLabelAnchor(RectangleAnchor.CENTER);
 		lowerMarker.setLabelFont(labelFont);
-		lowerMarker.setLabel("-" + MRC2ToolBoxConfiguration.getPpmFormat().format(lowerPpm) + " ppm");
+		
+		if(plotType.equals(LCMSPlotType.MZ)) {
+			
+			double upperPpm = (max - median)/median * 1000000.0d;
+			double lowerPpm = (median - min)/median * 1000000.0d;
+			upperMarker.setLabel("+" + MRC2ToolBoxConfiguration.getPpmFormat().format(upperPpm) + " ppm");
+			lowerMarker.setLabel("-" + MRC2ToolBoxConfiguration.getPpmFormat().format(lowerPpm) + " ppm");
+		}
+		if(plotType.equals(LCMSPlotType.FEATURE_QUALITY)) {
+			
+			upperMarker.setLabel(MRC2ToolBoxConfiguration.getPpmFormat().format(max));
+			lowerMarker.setLabel(MRC2ToolBoxConfiguration.getPpmFormat().format(min));
+		}
+		targetPlot.addRangeMarker(upperMarker);
 		targetPlot.addRangeMarker(lowerMarker);		
 	}
 

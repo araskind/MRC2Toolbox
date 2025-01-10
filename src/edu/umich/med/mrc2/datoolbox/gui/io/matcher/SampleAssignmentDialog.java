@@ -51,6 +51,7 @@ import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignFactor;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignLevel;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentalSample;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
+import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.ExperimentalSampleComboboxRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.SortedComboBoxModel;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
@@ -104,6 +105,7 @@ public class SampleAssignmentDialog extends JDialog {
 			samples = MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExperimentDesign().getSamples();
 
 		sampleComboBox = new JComboBox(new SortedComboBoxModel(samples));
+		sampleComboBox.setRenderer(new ExperimentalSampleComboboxRenderer());
 		sampleComboBox.setSelectedIndex(-1);
 		GridBagConstraints gbc_sampleComboBox = new GridBagConstraints();
 		gbc_sampleComboBox.gridwidth = 2;

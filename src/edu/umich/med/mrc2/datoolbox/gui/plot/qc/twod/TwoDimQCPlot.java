@@ -195,34 +195,9 @@ public class TwoDimQCPlot extends AbstractControlledDataPlot {
 		}
 		else if (command.equals(ChartPanel.ZOOM_RESET_BOTH_COMMAND))
 			this.restoreAutoBounds();
-
-//		else if (command.equals(MasterPlotPanel.TOGGLE_ANNOTATIONS_COMMAND))
-//			toggleAnnotations();
-//
-//		else if (command.equals(MasterPlotPanel.TOGGLE_DATA_POINTS_COMMAND))
-//			toggleDataPoints();
 		else
 			super.actionPerformed(event);
 	}
-	
-//	public void toggleAnnotations() {
-//
-//		annotationsVisible = !annotationsVisible;
-//
-//		if (activePlot instanceof CategoryPlot)
-//			((CategoryPlot) activePlot).getRenderer().setDefaultItemLabelsVisible(annotationsVisible);
-//
-//		if (activePlot instanceof XYPlot)
-//			((XYPlot) activePlot).getRenderer().setDefaultItemLabelsVisible(annotationsVisible);
-//	}
-//
-//	public void toggleDataPoints() {
-//
-//		dataPointsVisible = !dataPointsVisible;
-//
-//		if (activePlot instanceof XYPlot) 			
-//			((XYLineAndShapeRenderer)((XYPlot) activePlot).getRenderer()).setDefaultShapesVisible(dataPointsVisible);				
-//	}
 	
 	@Override
 	public void itemStateChanged(ItemEvent e) {

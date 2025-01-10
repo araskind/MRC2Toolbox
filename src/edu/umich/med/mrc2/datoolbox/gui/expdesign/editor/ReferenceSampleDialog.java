@@ -29,6 +29,8 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Set;
@@ -186,6 +188,23 @@ public class ReferenceSampleDialog extends JDialog implements ActionListener{
 		gbc_removeButton.gridx = 1;
 		gbc_removeButton.gridy = 3;
 		panel.add(removeButton, gbc_removeButton);
+		
+		availableReferenceList.addMouseListener(
+				new MouseAdapter() {
+					public void mouseClicked(MouseEvent e) {
+						if (e.getClickCount() == 2) {
+							addButton.doClick();
+						}
+					}
+				});
+		usedReferenceList.addMouseListener(
+				new MouseAdapter() {
+					public void mouseClicked(MouseEvent e) {
+						if (e.getClickCount() == 2) {
+							removeButton.doClick();
+						}
+					}
+				});
 
 		JButton btnCancel = new JButton("Cancel");
 		GridBagConstraints gbc_btnCancel = new GridBagConstraints();

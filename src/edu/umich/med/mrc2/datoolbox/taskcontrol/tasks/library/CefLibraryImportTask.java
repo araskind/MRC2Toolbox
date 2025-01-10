@@ -138,6 +138,13 @@ public class CefLibraryImportTask extends CEFProcessingTask {
 		taskDescription = "Clearing old library data...";
 		total = 100;
 		processed = 10;
+		
+		if(dataPipeline == null)
+			return;
+		
+		if(currentExperiment.getMsFeaturesForDataPipeline(dataPipeline) == null ||
+				currentExperiment.getMsFeaturesForDataPipeline(dataPipeline).isEmpty())
+			return;
 
 		for (MsFeature cf : currentExperiment.getMsFeaturesForDataPipeline(dataPipeline)) {
 

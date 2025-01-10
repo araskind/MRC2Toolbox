@@ -105,13 +105,14 @@ public class TimedScatterDataSet extends TimeSeriesCollection {
 		}	
 	}
 	
-	//	Plot feature M/Z values
+	//	Plot single point feature values
 	public TimedScatterDataSet(
 						MsFeature feature,
 						Map<DataFile, SimpleMsFeature> sortedFileFeatureMap,
 						ChartColorOption colorOption,
 						DataAnalysisProject currentExperiment,
-						DataPipeline dataPipeline) {
+						DataPipeline dataPipeline,
+						LCMSPlotType dataType) {
 		super();
 		if (currentExperiment == null || currentExperiment.getExperimentDesign() == null 
 				|| currentExperiment.getExperimentDesign().getSamples().isEmpty())
@@ -129,12 +130,19 @@ public class TimedScatterDataSet extends TimeSeriesCollection {
 			
 			for(DataFile df : smEntry.getValue()) {
 				
+				Double value = null;
 				SimpleMsFeature msf = sortedFileFeatureMap.get(df);
 				if(msf == null)
 					continue;
 				
-				String label = generateLabelForSimpleMsFeature(df, msf, smEntry.getKey(), LCMSPlotType.MZ);
-				series.add(df.getInjectionTime(), msf.getObservedSpectrum().getMonoisotopicMz(), label);
+				if(dataType.equals(LCMSPlotType.MZ))
+					value = msf.getObservedSpectrum().getMonoisotopicMz();
+				
+				if(dataType.equals(LCMSPlotType.FEATURE_QUALITY))
+					value = msf.getQualityScore();
+				
+				String label = generateLabelForSimpleMsFeature(df, msf, smEntry.getKey(), dataType);
+				series.add(df.getInjectionTime(), value, label);
 			}	
 			addSeries(series);
 		}	
@@ -159,6 +167,7 @@ public class TimedScatterDataSet extends TimeSeriesCollection {
     		label += "<BR>";
     	}      	
         label += "<B>Series: </B>" + seriesKey + "<BR>";
+        
         if(plotValueType.equals(LCMSPlotType.MZ))
         	label += "<B>M/Z: </B>" + MRC2ToolBoxConfiguration.getMzFormat().format(msf.getObservedSpectrum().getMonoisotopicMz());
         
@@ -167,7 +176,10 @@ public class TimedScatterDataSet extends TimeSeriesCollection {
         	label += "<B>RT: </B>" + MRC2ToolBoxConfiguration.getRtFormat().format(msf.getRetentionTime()) + " min<BR>";
         	label += "<B>RT range: </B>" + msf.getRtRange().getFormattedString(MRC2ToolBoxConfiguration.getRtFormat()) + " min<BR>";
         	label += "<B>Peak width: </B>" + MRC2ToolBoxConfiguration.getRtFormat().format(msf.getRtRange().getSize()) + " min";
-        }       
+        }  
+        if(plotValueType.equals(LCMSPlotType.FEATURE_QUALITY))
+        	label += "<B>Quality score: </B>" + MRC2ToolBoxConfiguration.getPpmFormat().format(msf.getQualityScore());
+        
         return label;
 	}
 

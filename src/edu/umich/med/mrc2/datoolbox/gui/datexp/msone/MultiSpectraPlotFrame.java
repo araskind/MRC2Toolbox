@@ -77,6 +77,7 @@ public class MultiSpectraPlotFrame extends JFrame
 	
 	private DockableDataVariationPlotPanel rtVariationPlotPanel;
 	private DockableDataVariationPlotPanel mzVariationPlotPanel;
+	private DockableDataVariationPlotPanel featureQualityPlotPanel;
 	private DockableMultispectrumPlotPanel multispectrumPlotPanel;
 	
 	private DataAnalysisProject currentExperiment;
@@ -113,6 +114,10 @@ public class MultiSpectraPlotFrame extends JFrame
 		mzVariationPlotPanel.setCurrentExperiment(currentExperiment);
 		mzVariationPlotPanel.setDataPipeline(dataPipeline);
 		
+		featureQualityPlotPanel = new DockableDataVariationPlotPanel(LCMSPlotType.FEATURE_QUALITY);
+		featureQualityPlotPanel.setCurrentExperiment(currentExperiment);
+		featureQualityPlotPanel.setDataPipeline(dataPipeline);
+		
 		multispectrumPlotPanel = new DockableMultispectrumPlotPanel();
 		multispectrumPlotPanel.setCurrentExperiment(currentExperiment);
 		multispectrumPlotPanel.setDataPipeline(dataPipeline);
@@ -120,6 +125,7 @@ public class MultiSpectraPlotFrame extends JFrame
 		grid.add(0, 0, 1, 1,
 				rtVariationPlotPanel,
 				mzVariationPlotPanel,
+				featureQualityPlotPanel,
 				multispectrumPlotPanel);
 		
 		control.getContentArea().deploy(grid);
@@ -279,6 +285,7 @@ public class MultiSpectraPlotFrame extends JFrame
 		Map<DataFile,SimpleMsFeature>fileFeatureMap = createFileFeatureMap(activeFeature);
 		rtVariationPlotPanel.loadFeatureData(activeFeature, fileFeatureMap);
 		mzVariationPlotPanel.loadFeatureData(activeFeature, fileFeatureMap);
+		featureQualityPlotPanel.loadFeatureData(activeFeature, fileFeatureMap);
 	}
 	
 	private Map<DataFile,SimpleMsFeature>createFileFeatureMap(MsFeature feature) {

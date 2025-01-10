@@ -23,6 +23,11 @@ package edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -64,6 +69,7 @@ import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainWindow;
 import edu.umich.med.mrc2.datoolbox.gui.utils.InformationDialog;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
+import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
@@ -384,13 +390,15 @@ public class MultiCefImportTask extends AbstractTask implements TaskListener{
 		}
 		if(removeAbnormalIsoPatterns) {
 			
-			featuresWithAbnormalIsoPattern = new ArrayList<MsFeature>();
+			featuresWithAbnormalIsoPattern = new HashSet<MsFeature>();
 			for(MsFeature feature : library.getFeatures()) {
 				
 				if(feature.getStatsSummary() != null 
 						&& feature.getStatsSummary().getMzStatistics().getStandardDeviation() > 0.1d) {
 					featuresWithAbnormalIsoPattern.add(feature);
 				}
+				if(Math.abs(feature.getMonoisotopicMz() - feature.getBasePeakMz()) > 0.01)
+					featuresWithAbnormalIsoPattern.add(feature);
 			}
 			if(!featuresWithAbnormalIsoPattern.isEmpty())
 				removeFeaturesWithAbnormalIsoPattern(featuresWithAbnormalIsoPattern);			
@@ -435,6 +443,32 @@ public class MultiCefImportTask extends AbstractTask implements TaskListener{
 		library.getFeatures().removeAll(featuresToRemove);
 		
 		//	TODO write log with removed features
+		ArrayList<String>removedFeaturesLog = new ArrayList<String>();
+		ArrayList<String>fLine = new ArrayList<String>();
+		removedFeaturesLog.add("The following features with abnormal isotopic patterns were removed:\n");
+		for (MsFeature cf : featuresToRemove) {
+			
+			fLine.clear();
+			fLine.add(cf.getId());
+			fLine.add(cf.getName());
+			fLine.add(MRC2ToolBoxConfiguration.getRtFormat().format(cf.getRetentionTime()));
+			fLine.add(MRC2ToolBoxConfiguration.getMzFormat().format(cf.getMonoisotopicMz()));
+			removedFeaturesLog.add(StringUtils.join(fLine, "\t"));
+		}
+		DataAnalysisProject currentExperiment = 
+				MRC2ToolBoxCore.getActiveMetabolomicsExperiment();	
+		
+		Path logPath = Paths.get(currentExperiment.getExportsDirectory().getAbsolutePath(), 
+				dataPipeline.getName() + "_featureRemovalLog.txt");
+		try {
+		    Files.write(logPath, 
+		    		removedFeaturesLog,
+		            StandardCharsets.UTF_8,
+		            StandardOpenOption.CREATE, 
+		            StandardOpenOption.TRUNCATE_EXISTING);
+		} catch (IOException e) {
+		    e.printStackTrace();
+		}
 	}
 
 	private void initDataMatrixes() {

@@ -87,6 +87,9 @@ public class SimpleMsFeature implements Serializable {
 		this.polarity = parent.getPolarity();
 		this.area = parent.getArea();
 		this.height = parent.getHeight();
+		
+		if(parent.getPrimaryIdentity() != null)
+			this.qualityScore = parent.getPrimaryIdentity().getScoreCarryOver();
 	}	
 
 	public String getUniqueId() {

@@ -51,6 +51,7 @@ public class FeatureIntensitiesTableModel extends BasicTableModel {
 	public static final String SAMPLE_COLUMN = "Sample";
 	public static final String AREA_COLUMN = "Area";
 	public static final String IMPUTED_AREA_COLUMN = "Area with imputation";
+	public static final String FEATURE_QUALITY_COLUMN = "Quality score";
 
 	public FeatureIntensitiesTableModel() {
 		super();
@@ -60,6 +61,7 @@ public class FeatureIntensitiesTableModel extends BasicTableModel {
 			new ColumnContext(SAMPLE_COLUMN, "Sample name", DataFile.class, true),
 			new ColumnContext(AREA_COLUMN, "Peak area", Double.class, false),
 			//	new ColumnContext(IMPUTED_AREA_COLUMN, Double.class, false)
+			//	new ColumnContext(FEATURE_QUALITY_COLUMN, "Peak area", Double.class, false),
 		};
 	}
 
@@ -102,18 +104,23 @@ public class FeatureIntensitiesTableModel extends BasicTableModel {
 						coordinates[0] = i;
 						nameCoordinates[0] = i;
 						double value  = dataMatrix.getAsDouble(coordinates);
-						double iputed = value;
+						
+//						double iputed = value;
+//						if(imputedDataMatrix != null)
+//							iputed = imputedDataMatrix.getAsDouble(coordinates);
 
-						if(imputedDataMatrix != null)
-							iputed = imputedDataMatrix.getAsDouble(coordinates);
-
+//						Double qualityScore = null;
+//						if(cf.getPrimaryIdentity() != null && cf.getPrimaryIdentity().getScoreCarryOver() > 0)
+//							qualityScore = cf.getPrimaryIdentity().getScoreCarryOver();
+							
 						Object[] obj = {
 								rowCount,
 								cf,
 								sampleNameMatrix.getAsObject(nameCoordinates),
 								value,
 								//	iputed
-								};
+								//	qualityScore,
+							};
 						rowData.add(obj);
 						rowCount++;
 					}

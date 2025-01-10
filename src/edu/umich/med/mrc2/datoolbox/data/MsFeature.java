@@ -250,9 +250,17 @@ public class MsFeature implements AnnotatedObject, Serializable {
 		setStatus(ParameterSetStatus.CHANGED);
 	}
 
-	public void setTopScoreIdAsDefault() {
-
-		if(!identifications.isEmpty()) {
+	public void setTopScoreIdAsDefault() {		
+		
+		if(identifications.isEmpty())
+			return;
+		
+		if(identifications.size() == 1) {
+			primaryIdentity = identifications.iterator().next();
+			primaryIdentity.setPrimary(true);
+			return;
+		}
+		if(identifications.size() > 1) {
 
 			identifications.stream().forEach(i -> i.setPrimary(false));
 			MsFeatureIdentity[] ids = 

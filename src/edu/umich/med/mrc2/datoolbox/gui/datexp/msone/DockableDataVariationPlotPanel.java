@@ -54,7 +54,8 @@ public class DockableDataVariationPlotPanel extends DefaultSingleCDockable imple
 	protected static final Icon sidePanelShowIcon = GuiUtils.getIcon("sidePanelShow", 16);
 	protected static final Icon sidePanelHideIcon = GuiUtils.getIcon("sidePanelHide", 16);	
 	protected static final Icon msmsIcon = GuiUtils.getIcon("msms", 16);	
-	protected static final Icon peakIcon = GuiUtils.getIcon("smoothChromatogram", 16);	
+	protected static final Icon peakIcon = GuiUtils.getIcon("smoothChromatogram", 16);
+	protected static final Icon qualityIcon = GuiUtils.getIcon("dial", 16);	
 	
 	protected static final Icon showLegendIcon = GuiUtils.getIcon("showLegend", 24);
 	protected static final Icon hideLegendIcon = GuiUtils.getIcon("hiddenLegend", 24);
@@ -92,9 +93,14 @@ public class DockableDataVariationPlotPanel extends DefaultSingleCDockable imple
 		}
 		if(this.plotType.equals(LCMSPlotType.RT_AND_PEAK_WIDTH)) {
 			
-		       setTitleIcon(msmsIcon);
+		       setTitleIcon(peakIcon);
 		       setTitleText("RT and peak width values for individual features");
-		}	
+		}
+		if(this.plotType.equals(LCMSPlotType.FEATURE_QUALITY)) {
+			
+		       setTitleIcon(qualityIcon);
+		       setTitleText("Feature quality scores");
+		}
 		initButtons();
 		featurePropertiesTimelinePlot = new FeaturePropertiesTimelinePlot(plotType);
 		add(featurePropertiesTimelinePlot, BorderLayout.CENTER);

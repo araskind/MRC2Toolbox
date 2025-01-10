@@ -25,6 +25,7 @@ import java.io.File;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -144,7 +145,7 @@ public abstract class CEFProcessingTask extends AbstractTask {
 				name = moleculeElement.getAttributeValue("name");
 
 				// Work-around for old data
-				if (name.isEmpty())
+				if (name == null || name.isEmpty())
 					name = moleculeElement.getAttributeValue("formula");
 			}
 			else{
@@ -159,6 +160,9 @@ public abstract class CEFProcessingTask extends AbstractTask {
 				MRC2ToolBoxConfiguration.getRtFormat().format(rt);
 		}
 		MsFeature feature = new MsFeature(name, rt);
+		feature.getIdentifications().clear();
+		feature.setPrimaryIdentity(null);
+		
 		feature.setNeutralMass(neutralMass);
 		if(location.getAttribute("a") != null)
 			feature.setArea(location.getAttribute("a").getDoubleValue());
@@ -185,20 +189,21 @@ public abstract class CEFProcessingTask extends AbstractTask {
 			
 			for(MsFeatureIdentity id : identifications) {
 				
+				feature.addIdentity(id);
+				
 				if(id.getCompoundIdentity() == null 
 						|| id.getCompoundIdentity().getPrimaryDatabaseId() == null)
 					continue;
 					
 				String dbId = id.getCompoundIdentity().getPrimaryDatabaseId();
-				if(!dbId.startsWith(DataPrefix.MS_LIBRARY_TARGET.getName())
-						&& !dbId.startsWith(DataPrefix.MS_FEATURE.getName())
-						&& !dbId.startsWith(DataPrefix.MS_LIBRARY_TARGET_OLD.getName()))
-					feature.addIdentity(id);
-				
 				if(dbId.startsWith(DataPrefix.MS_LIBRARY_TARGET.getName())
-						|| dbId.startsWith(DataPrefix.MS_FEATURE.getName())
-						|| dbId.startsWith(DataPrefix.MS_LIBRARY_TARGET_OLD.getName()))
+						&& !dbId.startsWith(DataPrefix.MS_FEATURE.getName())
+						&& !dbId.startsWith(DataPrefix.MS_LIBRARY_TARGET_OLD.getName())) {
+					
+					feature.clearIdentification();
+					feature.getPrimaryIdentity().setScoreCarryOver(id.getScoreCarryOver());
 					feature.setTargetId(dbId);
+				}					
 			}	
 			feature.setTopScoreIdAsDefault();
 		}
@@ -401,10 +406,10 @@ public abstract class CEFProcessingTask extends AbstractTask {
 			MsFeature feature, Element compoundElement, Connection conn){
 		
 		Collection<MsFeatureIdentity>identifications = 
-				new ArrayList<MsFeatureIdentity>();
+				new HashSet<MsFeatureIdentity>();
 		if(compoundElement.getChild("Results") == null) {
-			CompoundIdentity unkId = new CompoundIdentity();
-			unkId.setCommonName(feature.getName());
+			
+			CompoundIdentity unkId = new CompoundIdentity(feature.getName(), null);
 			MsFeatureIdentity msid = 
 					new MsFeatureIdentity(unkId, CompoundIdentificationConfidence.UNKNOWN_ACCURATE_MASS_RT);
 			msid.setIdSource(CompoundIdSource.UNKNOWN);
@@ -419,7 +424,7 @@ public abstract class CEFProcessingTask extends AbstractTask {
 			if(molecularFormula != null)
 				molecularFormula = molecularFormula.replaceAll("\\s+","");
 			
-			if(name == null || name.isEmpty())	{
+			if(molecularFormula != null && (name == null || name.isEmpty()))	{
 				
 				CompoundIdentity mfId = new CompoundIdentity(molecularFormula, molecularFormula);
 				if(mfId.getExactMass() == 0)
@@ -427,129 +432,152 @@ public abstract class CEFProcessingTask extends AbstractTask {
 					
 				msid = new MsFeatureIdentity(mfId, CompoundIdentificationConfidence.ACCURATE_MASS);
 				msid.setIdSource(CompoundIdSource.FORMULA_GENERATOR);
-			}	
+			}
+			else if(name.startsWith(DataPrefix.MS_LIBRARY_UNKNOWN_TARGET.getName())) {
+				
+				CompoundIdentity unkId = new CompoundIdentity(feature.getName(), null);
+				addDatabaseReferencesToCompoundIdentity(unkId, molElement);
+				msid = new MsFeatureIdentity(unkId, CompoundIdentificationConfidence.UNKNOWN_ACCURATE_MASS_RT);
+				msid.setIdSource(CompoundIdSource.UNKNOWN);
+				
+				//	Add FbF score
+				if(molElement.getChild("MatchScores") != null) {
+					
+					for(Element scoreElement : molElement.getChild("MatchScores").getChildren("Match")) {
+						
+						if(scoreElement.getAttributeValue("algo").equals("overall")) {
+							
+							double score = 0.0d;
+							try {
+								score = scoreElement.getAttribute("score").getDoubleValue();
+							} catch (DataConversionException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+							msid.setScoreCarryOver(score);
+						}
+					}
+				}				
+			}
 			else {
 				CompoundIdentity cid = new CompoundIdentity(name, molecularFormula);
 				if(cid.getExactMass() == 0)
 					cid.setExactMass(feature.getNeutralMass());
 				
-				for(Element dbElement : molElement.getChild("Database").getChildren("Accession")) {
-					
-					String databaseName = dbElement.getAttributeValue("db");
-					String databaseId = dbElement.getAttributeValue("id");
-					
-					if(databaseName != null && !databaseName.isEmpty() 
-							&& databaseId != null && !databaseId.isEmpty()) {		
-							
-//						if(databaseName.equals(AgilentDatabaseFields.CAS_ID.getName())
-//								&& databaseId.startsWith(DataPrefix.MS_LIBRARY_TARGET.getName())){
-//								feature.setId(databaseId);
-//						}
-						CompoundDatabaseEnum database = 
-								LibraryUtils.parseCompoundDatabaseName(databaseName);
-						if(database == null)
-							continue;
-						
-						if(database.equals(CompoundDatabaseEnum.METLIN))
-							databaseId = "METLIN:" + databaseId;
-
-						//	TODO may change if Agilent upgrades PCDL to use new HMDB ID format
-						if(database.equals(CompoundDatabaseEnum.HMDB))
-							databaseId = databaseId.replace("HMDB", "HMDB00");
-
-						cid.addDbId(database, databaseId);
-					}
-					msid = new MsFeatureIdentity(cid, CompoundIdentificationConfidence.ACCURATE_MASS);
-					msid.setIdSource(CompoundIdSource.DATABASE);
-				}
-				if (!cid.getDbIdMap().isEmpty()) {
-
-					for (String accession : cid.getDbIdMap().values()) {
-
-						CompoundIdentity newId = null;
-						try {
-							newId = CompoundDatabaseUtils.getCompoundById(accession, conn);
-						} catch (Exception e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-						if (newId != null) {
-							msid.setCompoundIdentity(newId);
-							newId.getDbIdMap().putAll(cid.getDbIdMap());
-							break;
-						}
-					}
-				}
+				addDatabaseReferencesToCompoundIdentity(cid, molElement);
+				msid = new MsFeatureIdentity(cid, CompoundIdentificationConfidence.ACCURATE_MASS);
+				msid.setIdSource(CompoundIdSource.DATABASE);
+				CompoundIdentity newId = attachCompoundIdsFromDatabase(cid, conn);
+				if (newId != null)
+					msid.setCompoundIdentity(newId);
 			}
-			Element spectrumElement = molElement.getChild("Spectrum");
-			if(spectrumElement != null && spectrumElement.getAttributeValue("type").equals(
-					AgilentCefFields.LIBRARY_MS2_SPECTRUM.getName())) {
+			attachAgilentMatchingMSMSspectrum(molElement, feature, msid);
+			if(msid != null && !identifications.contains(msid))
+				identifications.add(msid);
+		}
+		return identifications;
+	}
+	
+	private void attachAgilentMatchingMSMSspectrum(
+			Element molElement, 
+			MsFeature feature, 
+			MsFeatureIdentity msid) {
+		
+		Element spectrumElement = molElement.getChild("Spectrum");
+		if(spectrumElement != null && spectrumElement.getAttributeValue("type").equals(
+				AgilentCefFields.LIBRARY_MS2_SPECTRUM.getName())) {
 
-				TandemMassSpectrum libMsms = null;
+			TandemMassSpectrum libMsms = null;
+			try {
+				libMsms = parseLibMsTwoSpectrumElement(spectrumElement, feature.getPolarity());
+			} catch (DataConversionException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			if (libMsms != null) {
+				libMsms.setSpectrumSource(SpectrumSource.LIBRARY);
+				feature.getSpectrum().addTandemMs(libMsms);
+				msid.setIdSource(CompoundIdSource.LIBRARY_MS2);
+				msid.setConfidenceLevel(CompoundIdentificationConfidence.ACCURATE_MASS_MSMS);				
+				if(molElement.getChild("MatchScores") != null) {
+					
+					for(Element scoreElement : molElement.getChild("MatchScores").getChildren("Match")) {
+						if(scoreElement.getAttributeValue("algo").equals("lib")) {
+							
+							double score = 0.0d;
+							try {
+								score = scoreElement.getAttribute("score").getDoubleValue();
+							} catch (DataConversionException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+							msid.setScoreCarryOver(score);
+						}
+					}
+				}
+			}			
+		}
+	}
+	
+	protected CompoundIdentity attachCompoundIdsFromDatabase(CompoundIdentity cid, Connection conn) {
+		
+		CompoundIdentity newId = null;
+		
+		if (!cid.getDbIdMap().isEmpty()) {
+
+			for (String accession : cid.getDbIdMap().values()) {
+				
+				if(!accession.startsWith(DataPrefix.MS_LIBRARY_TARGET.getName())
+						&& !accession.startsWith(DataPrefix.MS_FEATURE.getName())
+						&& !accession.startsWith(DataPrefix.MS_LIBRARY_TARGET_OLD.getName()))
+					continue;
+
 				try {
-					libMsms = parseLibMsTwoSpectrumElement(spectrumElement, feature.getPolarity());
-				} catch (DataConversionException e) {
+					newId = CompoundDatabaseUtils.getCompoundById(accession, conn);
+				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				if (libMsms != null) {
-					libMsms.setSpectrumSource(SpectrumSource.LIBRARY);
-					feature.getSpectrum().addTandemMs(libMsms);
-					msid.setIdSource(CompoundIdSource.LIBRARY_MS2);
-					msid.setConfidenceLevel(CompoundIdentificationConfidence.ACCURATE_MASS_MSMS);				
-					if(molElement.getChild("MatchScores") != null) {
-						
-						for(Element scoreElement : molElement.getChild("MatchScores").getChildren("Match")) {
-							if(scoreElement.getAttributeValue("algo").equals("lib")) {
-								
-								double score = 0.0d;
-								try {
-									score = scoreElement.getAttribute("score").getDoubleValue();
-								} catch (DataConversionException e) {
-									// TODO Auto-generated catch block
-									e.printStackTrace();
-								}
-								msid.setScoreCarryOver(score);
-							}
-						}
-					}
-				}			
-			}
-			if(msid != null)
-				identifications.add(msid);
+				if (newId != null) {
+					newId.getDbIdMap().putAll(cid.getDbIdMap());
+					break;
+				}
+			}			
 		}
-//		if(identifications.isEmpty()) {
-//			
-//			// Add ID by name if not specified in the library
-//			if(!feature.getName().startsWith(DataPrefix.MS_LIBRARY_UNKNOWN_TARGET.getName())
-//					&& feature.getName().indexOf('@') == -1
-//					&& feature.getPrimaryIdentity() == null) {
-//
-//				CompoundIdentity pcId = null;
-//				try {
-//					pcId = CompoundDatabaseUtils.getCompoundIdentityByName(feature.getName(), conn);
-//				} catch (Exception e) {
-//					// TODO Auto-generated catch block
-//					e.printStackTrace();
-//				}
-//				if( pcId != null){
-//
-//					MsFeatureIdentity msId2 = 
-//							new MsFeatureIdentity(pcId, CompoundIdentificationConfidence.ACCURATE_MASS_RT);
-//					if (feature.getPrimaryIdentity() == null)
-//						feature.setPrimaryIdentity(msId2);
-//					else{
-//						for(Entry<CompoundDatabaseEnum, String> entry : pcId.getDbIdMap().entrySet()){
-//
-//							if(feature.getPrimaryIdentity().getCompoundIdentity().getDbId(entry.getKey()) == null)
-//								feature.getPrimaryIdentity().getCompoundIdentity().addDbId(entry.getKey(), entry.getValue());
-//						}
-//					}
-//					identifications.add(msId2);
-//				}
-//			}
-//		}
-		return identifications;
+		return newId;
+	}
+	
+	protected void addDatabaseReferencesToCompoundIdentity(CompoundIdentity cid, Element molElement) {
+		
+		if(molElement.getChild("Database") == null)
+			return;
+		
+		if(molElement.getChild("Database").getChildren("Accession").isEmpty())
+			return;
+		
+		for(Element dbElement : molElement.getChild("Database").getChildren("Accession")) {
+			
+			String databaseName = dbElement.getAttributeValue("db");
+			String databaseId = dbElement.getAttributeValue("id");
+			
+			if(databaseName != null && !databaseName.isEmpty() 
+					&& databaseId != null && !databaseId.isEmpty()) {		
+
+				CompoundDatabaseEnum database = 
+						LibraryUtils.parseCompoundDatabaseName(databaseName);
+				if(database == null)
+					continue;
+				
+				if(database.equals(CompoundDatabaseEnum.METLIN))
+					databaseId = "METLIN:" + databaseId;
+
+				//	TODO may change if Agilent upgrades PCDL to use new HMDB ID format
+				if(database.equals(CompoundDatabaseEnum.HMDB))
+					databaseId = databaseId.replace("HMDB", "HMDB00");
+
+				cid.addDbId(database, databaseId);
+			}
+		}
 	}
 	
 	protected void writeCefLibrary(
