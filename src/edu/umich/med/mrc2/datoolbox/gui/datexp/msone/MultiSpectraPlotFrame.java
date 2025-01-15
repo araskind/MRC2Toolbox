@@ -78,7 +78,7 @@ public class MultiSpectraPlotFrame extends JFrame
 	private DockableDataVariationPlotPanel rtVariationPlotPanel;
 	private DockableDataVariationPlotPanel mzVariationPlotPanel;
 	private DockableDataVariationPlotPanel featureQualityPlotPanel;
-	private DockableMultispectrumPlotPanel multispectrumPlotPanel;
+	private DockableMultispectraPlotPanel multispectrumPlotPanel;
 	
 	private DataAnalysisProject currentExperiment;
 	private DataPipeline dataPipeline;
@@ -118,7 +118,7 @@ public class MultiSpectraPlotFrame extends JFrame
 		featureQualityPlotPanel.setCurrentExperiment(currentExperiment);
 		featureQualityPlotPanel.setDataPipeline(dataPipeline);
 		
-		multispectrumPlotPanel = new DockableMultispectrumPlotPanel();
+		multispectrumPlotPanel = new DockableMultispectraPlotPanel();
 		multispectrumPlotPanel.setCurrentExperiment(currentExperiment);
 		multispectrumPlotPanel.setDataPipeline(dataPipeline);
 		

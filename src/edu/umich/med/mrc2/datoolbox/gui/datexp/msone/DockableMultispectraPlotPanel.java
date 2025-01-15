@@ -22,33 +22,44 @@
 package edu.umich.med.mrc2.datoolbox.gui.datexp.msone;
 
 import java.awt.BorderLayout;
+import java.util.Map;
 
 import javax.swing.Icon;
 
 import bibliothek.gui.dock.common.DefaultSingleCDockable;
+import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
+import edu.umich.med.mrc2.datoolbox.data.SimpleMsFeature;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 
-public class DockableMultispectrumPlotPanel extends DefaultSingleCDockable {
+public class DockableMultispectraPlotPanel extends DefaultSingleCDockable {
 
 	private static final Icon multiSpectraIcon = GuiUtils.getIcon("multiSpectra", 16);
 	
 	protected DataAnalysisProject currentExperiment;
 	protected DataPipeline dataPipeline;
+	protected MultispectraPlotPanel mspPlotPanel;
 	
-	public DockableMultispectrumPlotPanel() {
+	public DockableMultispectraPlotPanel() {
 
 		super("DockableMultispectrumPlotPanel", multiSpectraIcon, 
 				"Mass spectra for individual features", null, Permissions.MIN_MAX_STACK);
 		setCloseable(false);
 		setLayout(new BorderLayout(0, 0));
-		
+		mspPlotPanel = new MultispectraPlotPanel();
+		add(mspPlotPanel, BorderLayout.CENTER);
 	}	
 	
 	public void loadFeatureData(MsFeature feature) {
 		// TODO Auto-generated method stub
+		
+	}
+	
+	public void loadFeatureData(
+			MsFeature feature, 
+			Map<DataFile, SimpleMsFeature> fileFeatureMap) {
 		
 	}
 	
