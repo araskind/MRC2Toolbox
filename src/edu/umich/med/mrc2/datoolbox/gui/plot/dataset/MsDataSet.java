@@ -42,6 +42,7 @@ import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureCluster;
 import edu.umich.med.mrc2.datoolbox.data.MsMsCluster;
 import edu.umich.med.mrc2.datoolbox.data.MsPoint;
+import edu.umich.med.mrc2.datoolbox.data.SimpleMsFeature;
 import edu.umich.med.mrc2.datoolbox.data.SimpleMsMs;
 import edu.umich.med.mrc2.datoolbox.data.TandemMassSpectrum;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
@@ -88,7 +89,7 @@ public class MsDataSet extends AbstractXYDataset implements IntervalXYDataset {
 		
 		this();
 		spectrumSource = selectedFeatures;
-		createDataSetFromMsCollection(selectedFeatures);
+		createDataSetFromSimpleMSMSCollection(selectedFeatures);
 	}
 
 	public MsDataSet(MsFeature selectedFeature) {
@@ -110,7 +111,7 @@ public class MsDataSet extends AbstractXYDataset implements IntervalXYDataset {
 	}
 
 	public MsDataSet(MsMsCluster selectedCluster) {
-		createDataSetFromMsCollection(selectedCluster.getClusterFeatures());
+		createDataSetFromSimpleMSMSCollection(selectedCluster.getClusterFeatures());
 	}
 
 	//	HeadToTail
@@ -213,14 +214,15 @@ public class MsDataSet extends AbstractXYDataset implements IntervalXYDataset {
 		isNormalized = false;
 	}
 
-	private void createDataSetFromCompoundFeature(MsFeature feature) {
+	public void createDataSetFromCompoundFeature(MsFeature feature) {
 		createDataSetFromFeatureCollection(Collections.singleton(feature));
 	}
 
-	private void createDataSetFromFeatureCollection(
+	public void createDataSetFromFeatureCollection(
 			Collection<MsFeature> featureCollection) {
 
 		int featureCount = 0;
+		spectrumSource = featureCollection;
 		for (MsFeature cf : featureCollection) {
 
 			if (cf.getSpectrum() == null)
@@ -239,14 +241,43 @@ public class MsDataSet extends AbstractXYDataset implements IntervalXYDataset {
 		createNormalizedData();
 		createDataRanges();
 	}
+	
+	public void createDataSetFromSimpleMsFeature(SimpleMsFeature feature) {
+		
+		createDataSetFromSimpleMsFeatureCollection(Collections.singleton(feature));
+	}
+	
+	public void createDataSetFromSimpleMsFeatureCollection(
+			Collection<SimpleMsFeature> featureCollection) {
 
-	private void createDataSetFromLibraryTarget(
+		int featureCount = 0;
+		spectrumSource = featureCollection;
+		for (SimpleMsFeature cf : featureCollection) {
+
+			if (cf.getObservedSpectrum() == null)
+				continue;
+
+			MsPoint[] libPattern = cf.getObservedSpectrum().getCompletePattern(false);
+			msSeries.put(featureCount, libPattern);
+			String fName = Integer.toString(featureCount + 1) + " - " + cf.getName();
+			
+			labels.put(featureCount, fName);			
+			allPoints.addAll(cf.getObservedSpectrum().getMsPoints());
+			featureCount++;
+		}
+		createNormalizedData();
+		createDataRanges();
+	}
+	
+
+	public void createDataSetFromLibraryTarget(
 			LibraryMsFeature selectedTarget) {
 		
 		int featureCount = 0;
-
 		if(selectedTarget.getSpectrum() == null)
 			return;
+		
+		spectrumSource = selectedTarget;
 
 		MassSpectrum spectrum = selectedTarget.getSpectrum();
 		for(Adduct ad : spectrum.getAdducts()){
@@ -265,11 +296,12 @@ public class MsDataSet extends AbstractXYDataset implements IntervalXYDataset {
 		createDataRanges();
 	}
 
-	private void createDataSetFromMsCollection(
+	public void createDataSetFromSimpleMSMSCollection(
 			Collection<SimpleMsMs> featureCollection) {
 
 		int featureCount = 0;
-
+		spectrumSource = featureCollection;
+		
 		for (SimpleMsMs ms : featureCollection) {
 
 			msSeries.put(featureCount, ms.getDataPoints());

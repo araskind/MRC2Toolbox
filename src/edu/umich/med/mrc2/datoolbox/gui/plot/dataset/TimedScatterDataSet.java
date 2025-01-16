@@ -122,6 +122,7 @@ public class TimedScatterDataSet extends TimeSeriesCollection {
 			return;
 		
 		Map<String, DataFile[]>seriesMap = PlotDataSetUtils.mapSeriesBySampleType(
+				currentExperiment,
 				dataPipeline,
 				FileSortingOrder.TIMESTAMP,
 				currentExperiment.getExperimentDesign().getActiveDesignSubset());	

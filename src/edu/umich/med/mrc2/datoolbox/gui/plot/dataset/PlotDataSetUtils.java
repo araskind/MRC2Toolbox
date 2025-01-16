@@ -436,11 +436,11 @@ public class PlotDataSetUtils {
 	}
 	
 	public static Map<String, DataFile[]> mapSeriesBySampleType(
+			DataAnalysisProject experiment,
 			DataPipeline pipeline,
 			FileSortingOrder sortingOrder,
 			ExperimentDesignSubset activeDesign){
-
-		DataAnalysisProject experiment = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
+		
 		if (experiment == null || experiment.getExperimentDesign() == null 
 				|| experiment.getExperimentDesign().getSamples().isEmpty())
 			return null;
@@ -470,6 +470,41 @@ public class PlotDataSetUtils {
 			}
 		}
 		return dataFileMap;
+	}
+	
+	public static Map<DataFile,String> mapFilesBySampleType(
+			DataAnalysisProject experiment,
+			DataPipeline pipeline,
+			ExperimentDesignSubset activeDesign){
+		
+		if (experiment == null || experiment.getExperimentDesign() == null 
+				|| experiment.getExperimentDesign().getSamples().isEmpty())
+			return null;
+		
+		ExperimentDesignFactor stf = experiment.getExperimentDesign().getSampleTypeFactor();
+		Collection<ExperimentDesignLevel> sampleTypes = activeDesign.getLevelsForFactor(stf);
+		TreeSet<ExperimentalSample> activeSamples = 
+				experiment.getExperimentDesign().getActiveSamplesForDesignSubset(activeDesign);
+		DataAcquisitionMethod acqMethod = pipeline.getAcquisitionMethod();
+		
+		final Map<DataFile, String> fileTypeMap =  new HashMap<DataFile,String>();
+		for(ExperimentDesignLevel l : sampleTypes) {
+
+			Set<ExperimentalSample> samplesOfType = 
+					activeSamples.stream().
+					filter(s -> s.getSampleType().equals(l)).
+					collect(Collectors.toSet());
+			if(!samplesOfType.isEmpty()) {
+				
+				Set<DataFile> filesOfType = samplesOfType.stream().
+						flatMap(s -> s.getDataFilesForMethod(acqMethod).stream()).
+						filter(f -> f.isEnabled()).
+						collect(Collectors.toSet());
+				if(!filesOfType.isEmpty())					
+					filesOfType.stream().forEach(f -> fileTypeMap.put(f, l.getName()));				
+			}
+		}		
+		return fileTypeMap;
 	}
 	
 	public static Map<DataFile, ExperimentalSample> createDataFileSampleMap(DataFile[] files) {

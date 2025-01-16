@@ -420,8 +420,8 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 	@Override
 	protected void initChart() {
 
-		chart = ChartFactory.createXYLineChart("", // title
-				"", // x-axis label
+		chart = ChartFactory.createXYLineChart(null, // title
+				null, // x-axis label
 				"Intensity", // y-axis label
 				null, // data set
 				PlotOrientation.VERTICAL, // orientation

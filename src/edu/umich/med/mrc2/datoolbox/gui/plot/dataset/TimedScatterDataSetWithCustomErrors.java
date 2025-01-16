@@ -59,6 +59,7 @@ public class TimedScatterDataSetWithCustomErrors extends TimedScatterDataSet imp
 			return;
 		
 		Map<String, DataFile[]>seriesMap = PlotDataSetUtils.mapSeriesBySampleType(
+				currentExperiment,
 				pipeline,
 				FileSortingOrder.TIMESTAMP,
 				currentExperiment.getExperimentDesign().getActiveDesignSubset());	

@@ -30,6 +30,7 @@ import bibliothek.gui.dock.common.DefaultSingleCDockable;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.SimpleMsFeature;
+import edu.umich.med.mrc2.datoolbox.data.enums.FileSortingOrder;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
@@ -52,15 +53,16 @@ public class DockableMultispectraPlotPanel extends DefaultSingleCDockable {
 		add(mspPlotPanel, BorderLayout.CENTER);
 	}	
 	
-	public void loadFeatureData(MsFeature feature) {
-		// TODO Auto-generated method stub
-		
-	}
-	
 	public void loadFeatureData(
-			MsFeature feature, 
+			MsFeature feature,
 			Map<DataFile, SimpleMsFeature> fileFeatureMap) {
-		
+	
+		mspPlotPanel.createSimpleMSFeatureSpectraPlot(
+				feature, 
+				fileFeatureMap,
+				FileSortingOrder.TIMESTAMP,
+				currentExperiment,
+				dataPipeline);
 	}
 	
 	public void clearPanel() {

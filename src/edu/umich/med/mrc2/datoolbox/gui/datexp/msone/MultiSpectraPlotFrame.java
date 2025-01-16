@@ -139,6 +139,7 @@ public class MultiSpectraPlotFrame extends JFrame
 		
 		rtVariationPlotPanel.clearPanel();
 		mzVariationPlotPanel.clearPanel();
+		featureQualityPlotPanel.clearPanel();
 		multispectrumPlotPanel.clearPanel();
 	}
 	
@@ -286,6 +287,8 @@ public class MultiSpectraPlotFrame extends JFrame
 		rtVariationPlotPanel.loadFeatureData(activeFeature, fileFeatureMap);
 		mzVariationPlotPanel.loadFeatureData(activeFeature, fileFeatureMap);
 		featureQualityPlotPanel.loadFeatureData(activeFeature, fileFeatureMap);
+		multispectrumPlotPanel.loadFeatureData(activeFeature, fileFeatureMap);
+		
 	}
 	
 	private Map<DataFile,SimpleMsFeature>createFileFeatureMap(MsFeature feature) {
@@ -303,10 +306,12 @@ public class MultiSpectraPlotFrame extends JFrame
 			fileCoordinates[0] = i;
 			DataFile df = (DataFile) dataFileMatrix.getAsObject(fileCoordinates);
 			
-			coordinates[0] = i;
-			SimpleMsFeature msf = (SimpleMsFeature)featureDataMatrix.getAsObject(coordinates);
-			
-			fileFeatureMap.put(df, msf);
+			if(df.isEnabled() && df.getParentSample().isEnabled()) {
+				
+				coordinates[0] = i;
+				SimpleMsFeature msf = (SimpleMsFeature)featureDataMatrix.getAsObject(coordinates);				
+				fileFeatureMap.put(df, msf);
+			}
 		}
 		return fileFeatureMap;
 	}
