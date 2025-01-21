@@ -82,7 +82,7 @@ import edu.umich.med.mrc2.datoolbox.gui.communication.FeatureSetEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.MsFeatureEvent;
 import edu.umich.med.mrc2.datoolbox.gui.cpddatabase.DatabaseSearchSetupDialog;
 import edu.umich.med.mrc2.datoolbox.gui.datexp.DataExplorerPlotFrame;
-import edu.umich.med.mrc2.datoolbox.gui.datexp.msone.MultiSpectraPlotFrame;
+import edu.umich.med.mrc2.datoolbox.gui.datexp.msone.MultiMSFeatureQCPlotFrame;
 import edu.umich.med.mrc2.datoolbox.gui.dereplication.duplicates.DuplicateMergeDialog;
 import edu.umich.med.mrc2.datoolbox.gui.expdesign.pools.ExperimentPooledSampleManagerDialog;
 import edu.umich.med.mrc2.datoolbox.gui.fdata.cleanup.FeatureCleanupParameters;
@@ -178,7 +178,7 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 	private boolean cleanEmtyFeatures;
 	private MzFrequencyAnalysisSetupDialog mzFrequencyAnalysisSetupDialog;
 	private ExperimentPooledSampleManagerDialog experimentPooledSampleManagerDialog;
-	private MultiSpectraPlotFrame multiSpectraPlotFrame;
+	private MultiMSFeatureQCPlotFrame multiSpectraPlotFrame;
 
 	private static final Icon componentIcon = GuiUtils.getIcon("barChart", 16);
 	private static final Icon loadLibraryIcon = GuiUtils.getIcon("loadLibrary", 24);
@@ -856,7 +856,7 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 		if (currentExperiment == null || activeDataPipeline == null)
 			return;
 		
-		multiSpectraPlotFrame = new MultiSpectraPlotFrame(
+		multiSpectraPlotFrame = new MultiMSFeatureQCPlotFrame(
 				currentExperiment,activeDataPipeline);
 		multiSpectraPlotFrame.setLocationRelativeTo(this.getContentPane());
 		multiSpectraPlotFrame.setVisible(true);

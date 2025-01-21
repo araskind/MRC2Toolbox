@@ -40,7 +40,6 @@ import java.util.Collection;
 import org.geotools.brewer.color.ColorBrewer;
 import org.jfree.chart.ChartColor;
 import org.jfree.chart.ChartMouseEvent;
-import org.jfree.chart.ChartMouseListener;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.block.BlockBorder;
@@ -110,7 +109,9 @@ public abstract class MasterPlotPanel extends ChartPanel{
 	protected LegendTitle legend;
 	protected Paint[] paintArray;
 	protected Shape[] shapeArray;
-
+	protected DoubleClickResetChartMouseListener doubleClickResetChartMouseListener;
+	protected boolean suppressMouseClicks;
+	
 	public static final String TOGGLE_ANNOTATIONS_COMMAND = "TOGGLE_ANNOTATIONS";
 	public static final String TOGGLE_DATA_POINTS_COMMAND = "TOGGLE_DATA_POINTS";
 	public static final String TOGGLE_MS_HEAD_TO_TAIL_COMMAND = "TOGGLE_MS_HEAD_TO_TAIL";
@@ -190,22 +191,29 @@ public abstract class MasterPlotPanel extends ChartPanel{
 	}
 
 	public void addDoubleClickReset() {
+		
+		if(doubleClickResetChartMouseListener == null)
+			doubleClickResetChartMouseListener = 
+				new DoubleClickResetChartMouseListener(this);
 
-		this.addChartMouseListener(new ChartMouseListener() {
-
-			@Override
-			public void chartMouseMoved(ChartMouseEvent event) {
-				// TODO Auto-generated method stub
-
-			}
-
-			@Override
-			public void chartMouseClicked(ChartMouseEvent event) {
-				// TODO Auto-generated method stub
-				if(event.getTrigger().getClickCount() == 2)
-					restoreAutoBounds();
-			}
-		});
+		this.addChartMouseListener(doubleClickResetChartMouseListener);
+	}
+	
+	public void removeDoubleClickReset() {
+		
+		if(doubleClickResetChartMouseListener != null)
+			this.removeChartMouseListener(doubleClickResetChartMouseListener);
+	}
+	
+	public void disableMouseInputs() {
+		
+		setMouseZoomable(false);
+		setMouseWheelEnabled(false);
+		setPopupMenu(null);
+		plot.setRangePannable(false);
+		plot.setDomainPannable(false);
+		removeDoubleClickReset();
+		suppressMouseClicks = true;
 	}
 
 	public boolean areAnnotationsVisible() {
@@ -269,6 +277,9 @@ public abstract class MasterPlotPanel extends ChartPanel{
 
 	@Override
 	public void mouseClicked(MouseEvent event) {
+		
+		if(suppressMouseClicks)
+			return;
 
 		// let the parent handle the event (selection etc.)
 		super.mouseClicked(event);
@@ -412,6 +423,10 @@ public abstract class MasterPlotPanel extends ChartPanel{
 			for (Object m : rangeMarkers) 
 				 plot.removeRangeMarker((Marker) m, Layer.FOREGROUND);	
 		}	
+	}
+
+	public void setSuppressMouseClicks(boolean suppressMouseClicks) {
+		this.suppressMouseClicks = suppressMouseClicks;
 	}
 }
 

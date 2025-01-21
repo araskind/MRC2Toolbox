@@ -28,6 +28,8 @@ import java.util.Map;
 
 import javax.swing.Icon;
 
+import org.jfree.chart.ChartPanel;
+
 import bibliothek.gui.dock.action.DefaultDockActionSource;
 import bibliothek.gui.dock.action.LocationHint;
 import bibliothek.gui.dock.action.actions.SimpleButtonAction;
@@ -43,7 +45,7 @@ import edu.umich.med.mrc2.datoolbox.gui.plot.stats.DataPlotControlsPanel;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 
-public class DockableMZvariationPlotPanel extends DefaultSingleCDockable implements ActionListener{
+public abstract class DockableMSFeatureQCPlotPanel extends DefaultSingleCDockable implements ActionListener {
 
 	protected static final Icon sortByNameIcon = GuiUtils.getIcon("sortByClusterName", 16);
 	protected static final Icon sortByTimeIcon = GuiUtils.getIcon("sortByTime", 16);
@@ -52,63 +54,63 @@ public class DockableMZvariationPlotPanel extends DefaultSingleCDockable impleme
 	protected static final Icon sidePanelShowIcon = GuiUtils.getIcon("sidePanelShow", 16);
 	protected static final Icon sidePanelHideIcon = GuiUtils.getIcon("sidePanelHide", 16);	
 	protected static final Icon msmsIcon = GuiUtils.getIcon("msms", 16);	
-	protected static final Icon peakIcon = GuiUtils.getIcon("smoothChromatogram", 16);	
-
-	private LCMSPlotType plotType;	
-	protected FileSortingOrder sortingOrder; 
-	protected ChartColorOption chartColorOption;
+	protected static final Icon peakIcon = GuiUtils.getIcon("smoothChromatogram", 16);
+	protected static final Icon qualityIcon = GuiUtils.getIcon("dial", 16);	
 	
-	protected DataAnalysisProject currentExperiment;
-	protected DataPipeline dataPipeline;
-	protected FeaturePropertiesTimelinePlot featurePropertiesTimelinePlot;
+	protected static final Icon showLegendIcon = GuiUtils.getIcon("showLegend", 24);
+	protected static final Icon hideLegendIcon = GuiUtils.getIcon("hiddenLegend", 24);
+	protected static final Icon autoRangeIcon = GuiUtils.getIcon("fitAll", 16);
+	protected static final Icon copyIcon = GuiUtils.getIcon("clipBoard", 16);	
+	
 	protected SimpleButtonAction sortOrderButton;
 	protected SimpleButtonAction colorOptionButton;
 	protected SimpleButtonAction sidePanelButton;
+	protected SimpleButtonAction toggleLegendButton;
+	
+	protected FileSortingOrder sortingOrder; 
+	protected ChartColorOption chartColorOption;
+	protected DataAnalysisProject currentExperiment;
+	protected DataPipeline dataPipeline;
+	protected DataPlotControlsPanel dataPlotControlsPanel;
 	
 	protected MsFeature activeFeature;
 	protected Map<DataFile, SimpleMsFeature> fileFeatureMap;
-	protected DataPlotControlsPanel dataPlotControlsPanel;
+	protected MSQualityDataPlotParameterObject plotParametersObject;
 	
-	public DockableMZvariationPlotPanel(LCMSPlotType plotType) {
-
-		super("DockableVariationPlotPanel" + plotType.name(), sortByTimeIcon, 
-				null, null, Permissions.MIN_MAX_STACK);
-		this.plotType = plotType;
+	public DockableMSFeatureQCPlotPanel(String id, String title, Icon icon) {
+		
+		super(id, icon, title, null, Permissions.MIN_MAX_STACK);
 		setCloseable(false);
 		setLayout(new BorderLayout(0, 0));
-		
-		if(this.plotType.equals(LCMSPlotType.MZ)) {
-			
-	       setTitleIcon(msmsIcon);
-	       setTitleText("MZ values for individual features");
-		}
-		if(this.plotType.equals(LCMSPlotType.RT_AND_PEAK_WIDTH)) {
-			
-		       setTitleIcon(msmsIcon);
-		       setTitleText("RT and peak width values for individual features");
-		}	
-		featurePropertiesTimelinePlot = new FeaturePropertiesTimelinePlot(plotType);
-		add(featurePropertiesTimelinePlot, BorderLayout.CENTER);
-		
-		dataPlotControlsPanel = new DataPlotControlsPanel(featurePropertiesTimelinePlot);
-		add(dataPlotControlsPanel, BorderLayout.EAST);
-		featurePropertiesTimelinePlot.setDataPlotControlsPanel(dataPlotControlsPanel);
-		featurePropertiesTimelinePlot.updateParametersFromControls();
-		
-		sortingOrder = FileSortingOrder.TIMESTAMP;
-		chartColorOption = ChartColorOption.BY_SAMPLE_TYPE;
-		initButtons();
-	}
-
-	public void clearPanel() {
-		featurePropertiesTimelinePlot.removeAllDataSets();
 	}
 	
-	private void initButtons() {
+	protected void initButtons(boolean isSinglePlot) {
 
 		DefaultDockActionSource actions = new DefaultDockActionSource(
 				new LocationHint(LocationHint.DOCKABLE, LocationHint.LEFT));
-
+		
+		SimpleButtonAction autorangeButton = GuiUtils.setupButtonAction(
+				"Autorange",
+				ChartPanel.ZOOM_RESET_BOTH_COMMAND, 
+				autoRangeIcon, this);
+		actions.add(autorangeButton);
+		
+		if(isSinglePlot) {
+			
+			SimpleButtonAction copyButton = GuiUtils.setupButtonAction(
+					ChartPanel.COPY_COMMAND,
+					ChartPanel.COPY_COMMAND,
+					copyIcon, this);
+			actions.add(copyButton);
+			
+			toggleLegendButton = GuiUtils.setupButtonAction(
+					MainActionCommands.SHOW_PLOT_LEGEND_COMMAND.getName(), 
+					MainActionCommands.SHOW_PLOT_LEGEND_COMMAND.getName(), 
+					hideLegendIcon, this);
+			actions.add(toggleLegendButton);
+		}
+		actions.addSeparator();
+		
 		sortOrderButton = GuiUtils.setupButtonAction(
 				MainActionCommands.SORT_BY_FILE_NAME_COMMAND.getName(), 
 				MainActionCommands.SORT_BY_FILE_NAME_COMMAND.getName(), 
@@ -134,25 +136,48 @@ public class DockableMZvariationPlotPanel extends DefaultSingleCDockable impleme
 		intern().setActionOffers(actions);
 	}	
 	
-	public void loadFeatureData(
-			MsFeature feature, 
-			Map<DataFile, SimpleMsFeature> fileFeatureMap) {
+	protected void toggleLegendIcon(boolean isLegendVisible) {
 
-		this.activeFeature = feature;
-		this.fileFeatureMap = fileFeatureMap;
-		featurePropertiesTimelinePlot.showFeatureData(
-				feature,
-				fileFeatureMap, 
-				sortingOrder, 
-				chartColorOption, 
-				currentExperiment, 
-				dataPipeline);
+		if(toggleLegendButton == null)
+			return;
+		
+		if (isLegendVisible) {
+
+			toggleLegendButton.setIcon(showLegendIcon);
+			toggleLegendButton.setCommand(
+					MainActionCommands.HIDE_PLOT_LEGEND_COMMAND.getName());
+			toggleLegendButton.setText(
+					MainActionCommands.HIDE_PLOT_LEGEND_COMMAND.getName());
+		} 
+		else {			
+			toggleLegendButton.setIcon(hideLegendIcon);
+			toggleLegendButton.setCommand(
+					MainActionCommands.SHOW_PLOT_LEGEND_COMMAND.getName());
+			toggleLegendButton.setText(
+					MainActionCommands.SHOW_PLOT_LEGEND_COMMAND.getName());
+		}		
 	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
 
 		String command = e.getActionCommand();
+		
+		if (command.equals(ChartPanel.ZOOM_RESET_BOTH_COMMAND))
+			restorePlotAutoBounds();
+		
+		if (command.equals(ChartPanel.COPY_COMMAND))
+			copyPlotToClipboard();
+
+		if (command.equals(MainActionCommands.SHOW_PLOT_LEGEND_COMMAND.getName())) {
+			showPlotLegend(true);
+			toggleLegendIcon(true);
+		}
+		if (command.equals(MainActionCommands.HIDE_PLOT_LEGEND_COMMAND.getName())) { 
+			showPlotLegend(false);
+			toggleLegendIcon(false);
+		}
+		
 		if(command.equals(MainActionCommands.SORT_BY_FILE_NAME_COMMAND.getName()))
 			sortDataByFileName();
 		
@@ -172,7 +197,7 @@ public class DockableMZvariationPlotPanel extends DefaultSingleCDockable impleme
 			setSidePanelVisible(true);
 	}
 	
-	public void setSidePanelVisible(boolean b) {
+	protected void setSidePanelVisible(boolean b) {
 		
 		dataPlotControlsPanel.setVisible(b);
 		if(b) {
@@ -189,7 +214,7 @@ public class DockableMZvariationPlotPanel extends DefaultSingleCDockable impleme
 		}
 	}
 	
-	private void sortDataByFileName(){
+	protected void sortDataByFileName(){
 		
 		sortOrderButton.setIcon(sortByNameIcon);
 		sortOrderButton.setCommand(MainActionCommands.SORT_BY_INJECTION_TIME_COMMAND.getName());
@@ -199,7 +224,7 @@ public class DockableMZvariationPlotPanel extends DefaultSingleCDockable impleme
 		updatePlot();
 	}
 
-	private void sortDataByInjectionTime(){
+	protected void sortDataByInjectionTime(){
 		
 		sortOrderButton.setIcon(sortByTimeIcon);
 		sortOrderButton.setCommand(MainActionCommands.SORT_BY_FILE_NAME_COMMAND.getName());
@@ -209,7 +234,7 @@ public class DockableMZvariationPlotPanel extends DefaultSingleCDockable impleme
 		updatePlot();
 	}
 	
-	private void colorByDataFile(){
+	protected void colorByDataFile(){
 		
 		colorOptionButton.setIcon(colorByFileIcon);
 		colorOptionButton.setCommand(MainActionCommands.COLOR_BY_SAMPLE_TYPE_COMMAND.getName());
@@ -228,14 +253,7 @@ public class DockableMZvariationPlotPanel extends DefaultSingleCDockable impleme
 		chartColorOption = ChartColorOption.BY_SAMPLE_TYPE;
 		updatePlot();
 	}
-		
-	private void updatePlot() {
-
-		featurePropertiesTimelinePlot.showFeatureData(
-				activeFeature, fileFeatureMap, sortingOrder, 
-				chartColorOption, currentExperiment, dataPipeline);
-	}
-
+	
 	public void setCurrentExperiment(DataAnalysisProject currentExperiment) {
 		this.currentExperiment = currentExperiment;
 	}
@@ -243,4 +261,18 @@ public class DockableMZvariationPlotPanel extends DefaultSingleCDockable impleme
 	public void setDataPipeline(DataPipeline dataPipeline) {
 		this.dataPipeline = dataPipeline;
 	}
+	
+	protected abstract void restorePlotAutoBounds();
+	
+	protected abstract void showPlotLegend(boolean doShow);
+	
+	protected abstract void copyPlotToClipboard();
+	
+	public abstract void clearPanel();
+	
+	public abstract void loadFeatureData(
+			MsFeature feature, 
+			Map<DataFile, SimpleMsFeature> fileFeatureMap);
+	
+	protected abstract void updatePlot();
 }

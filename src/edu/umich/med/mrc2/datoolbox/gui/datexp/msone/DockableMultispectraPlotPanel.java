@@ -22,37 +22,52 @@
 package edu.umich.med.mrc2.datoolbox.gui.datexp.msone;
 
 import java.awt.BorderLayout;
+import java.awt.event.ActionEvent;
 import java.util.Map;
 
 import javax.swing.Icon;
 
-import bibliothek.gui.dock.common.DefaultSingleCDockable;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.SimpleMsFeature;
 import edu.umich.med.mrc2.datoolbox.data.enums.FileSortingOrder;
-import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
+import edu.umich.med.mrc2.datoolbox.gui.plot.stats.DataPlotControlsPanel;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
-import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 
-public class DockableMultispectraPlotPanel extends DefaultSingleCDockable {
+public class DockableMultispectraPlotPanel extends DockableMSFeatureQCPlotPanel{
 
-	private static final Icon multiSpectraIcon = GuiUtils.getIcon("multiSpectra", 16);
-	
-	protected DataAnalysisProject currentExperiment;
-	protected DataPipeline dataPipeline;
+	private static final Icon multiSpectraIcon = GuiUtils.getIcon("multiSpectra", 16);	
 	protected MultispectraPlotPanel mspPlotPanel;
 	
 	public DockableMultispectraPlotPanel() {
 
-		super("DockableMultispectrumPlotPanel", multiSpectraIcon, 
-				"Mass spectra for individual features", null, Permissions.MIN_MAX_STACK);
-		setCloseable(false);
-		setLayout(new BorderLayout(0, 0));
+		super("DockableMultispectrumPlotPanel", "Mass spectra for individual features", multiSpectraIcon);
+
 		mspPlotPanel = new MultispectraPlotPanel();
 		add(mspPlotPanel, BorderLayout.CENTER);
+		
+		dataPlotControlsPanel = new DataPlotControlsPanel(mspPlotPanel);
+		add(dataPlotControlsPanel, BorderLayout.EAST);
+		mspPlotPanel.setDataPlotControlsPanel(dataPlotControlsPanel);
+		mspPlotPanel.updateParametersFromControls();
+		
+		initButtons(false);
 	}	
 	
+	@Override
+	public void actionPerformed(ActionEvent e) {
+
+		super.actionPerformed(e);
+		
+		String command = e.getActionCommand();
+	}
+
+	
+	protected void updatePlot() {
+		// TODO Auto-generated method stub
+		mspPlotPanel.updateParametersFromControls();
+	}
+
 	public void loadFeatureData(
 			MsFeature feature,
 			Map<DataFile, SimpleMsFeature> fileFeatureMap) {
@@ -66,14 +81,24 @@ public class DockableMultispectraPlotPanel extends DefaultSingleCDockable {
 	}
 	
 	public void clearPanel() {
+		mspPlotPanel.clearPanel();
+	}
+
+	@Override
+	protected void restorePlotAutoBounds() {
+		// TODO Auto-generated method stub
 		
 	}
 
-	public void setCurrentExperiment(DataAnalysisProject currentExperiment) {
-		this.currentExperiment = currentExperiment;
+	@Override
+	protected void showPlotLegend(boolean doShow) {
+		// TODO Auto-generated method stub
+		
 	}
 
-	public void setDataPipeline(DataPipeline dataPipeline) {
-		this.dataPipeline = dataPipeline;
+	@Override
+	protected void copyPlotToClipboard() {
+		// TODO Auto-generated method stub
+		
 	}
 }

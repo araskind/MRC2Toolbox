@@ -82,7 +82,9 @@ public class PlotToolbar extends CommonToolbar implements ActionListener{
 		toggleDataPointsButton,
 		saveButton,
 		toggleSmoothingButton,
-		smoothingPreferencesButton;
+		smoothingPreferencesButton,
+		resetDomainButton,
+		resetBothButton;
 
 	protected String xAxisUnits;
 
@@ -166,10 +168,10 @@ public class PlotToolbar extends CommonToolbar implements ActionListener{
 		GuiUtils.addButton(this, null, autoRangeVerticalIcon, commandListener, ChartPanel.ZOOM_RESET_RANGE_COMMAND,
 				"Fit to intensity range", buttonDimension);
 
-		GuiUtils.addButton(this, null, autoRangeHorizontalIcon, commandListener, ChartPanel.ZOOM_RESET_DOMAIN_COMMAND,
+		resetDomainButton = GuiUtils.addButton(this, null, autoRangeHorizontalIcon, commandListener, ChartPanel.ZOOM_RESET_DOMAIN_COMMAND,
 				"Fit to " + xAxisUnits + " range", buttonDimension);
 
-		GuiUtils.addButton(this, null, autoRangeIcon, commandListener, ChartPanel.ZOOM_RESET_BOTH_COMMAND,
+		resetBothButton = GuiUtils.addButton(this, null, autoRangeIcon, commandListener, ChartPanel.ZOOM_RESET_BOTH_COMMAND,
 				"Fit to  " + xAxisUnits + "  and intensity ranges", buttonDimension);
 
 		addSeparator(buttonDimension);

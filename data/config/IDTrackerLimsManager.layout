@@ -155,7 +155,7 @@
 									<content delegate="SplitDockStationFactory">
 										<fullscreen-action>false</fullscreen-action>
 										<node nodeId="1652718002959" orientation="HORIZONTAL" divider="0.15618101545253862">
-											<leaf id="1" nodeId="1652718002961">
+											<leaf id="0" nodeId="1652718002961">
 												<placeholders>
 													<placeholder>dock.single.DockableIdProjectTree</placeholder>
 												</placeholders>
@@ -217,7 +217,7 @@
 														</entry>
 													</placeholder-map>
 												</leaf>
-												<leaf id="0" nodeId="1652718303236">
+												<leaf id="1" nodeId="1652718303236">
 													<placeholders>
 														<placeholder>dock.single.DockableInstrumentManagerPanel</placeholder>
 														<placeholder>dock.single.DockableDataExtractionMethodManagerPanel</placeholder>
@@ -292,6 +292,16 @@
 								</layout>
 							</adjacent>
 							<children ignore="false">
+								<child>
+									<layout factory="predefined" placeholder="dock.single.DockableIdProjectTree">
+										<replacement id="dockablesingle DockableIdProjectTree"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>DockableIdProjectTree</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
+								</child>
 								<child>
 									<layout factory="delegate_StackDockStationFactory">
 										<selected>1</selected>
@@ -470,16 +480,6 @@
 											<children ignore="false"/>
 										</child>
 									</children>
-								</child>
-								<child>
-									<layout factory="predefined" placeholder="dock.single.DockableIdProjectTree">
-										<replacement id="dockablesingle DockableIdProjectTree"/>
-										<delegate id="delegate_ccontrol backup factory id">
-											<id>DockableIdProjectTree</id>
-											<area/>
-										</delegate>
-									</layout>
-									<children ignore="false"/>
 								</child>
 								<child>
 									<layout factory="delegate_StackDockStationFactory">

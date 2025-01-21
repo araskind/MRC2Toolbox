@@ -62,6 +62,7 @@ import edu.umich.med.mrc2.datoolbox.data.enums.FileSortingOrder;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.gui.plot.ColorGradient;
 import edu.umich.med.mrc2.datoolbox.gui.plot.ColorScale;
+import edu.umich.med.mrc2.datoolbox.gui.plot.IControlledDataPlot;
 import edu.umich.med.mrc2.datoolbox.gui.plot.LockedXYTextAnnotation;
 import edu.umich.med.mrc2.datoolbox.gui.plot.MasterPlotPanel;
 import edu.umich.med.mrc2.datoolbox.gui.plot.PlotType;
@@ -70,18 +71,21 @@ import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.MsDataSet;
 import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.PlotDataSetUtils;
 import edu.umich.med.mrc2.datoolbox.gui.plot.lcms.LCMSPlotPanel;
 import edu.umich.med.mrc2.datoolbox.gui.plot.renderer.MassSpectrumRenderer;
+import edu.umich.med.mrc2.datoolbox.gui.plot.stats.DataPlotControlsPanel;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.ColorCodingUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.ColorUtils;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 
-public class MultispectraPlotPanel extends JPanel implements ActionListener, ItemListener, BackedByPreferences {
+public class MultispectraPlotPanel extends JPanel 
+	implements ActionListener, ItemListener, BackedByPreferences, IControlledDataPlot {
 	
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
+	
 	private MultispectraPlotPanelToolbar toolbar;
 	private JPanel plotPanel;
 	private Map<Object,LCMSPlotPanel>objectPlotMap;
@@ -115,43 +119,6 @@ public class MultispectraPlotPanel extends JPanel implements ActionListener, Ite
 		
 		add(new JScrollPane(plotPanel), BorderLayout.CENTER);
 	}
-	
-//	private void createGraphGrid() {
-//		
-//		int numGraps = 20;
-//		int numRows = 1;
-//		if(numGraps > numColumns)
-//			numRows = Math.floorDiv(numGraps, numColumns) + 1;
-//
-//		int count = 0;
-//		int width = graphWidth * numColumns;
-//		int height = graphHeight * numRows;
-//		plotPanel.setPreferredSize(new Dimension(width, height));
-//		
-//		for(int i=0; i<numColumns; i++) {
-//			
-//			for(int j=0; j<numRows; j++) {
-//				
-//				count++;
-//				String gn = "Graph# "  + Integer.toString(count);
-//				LCMSPlotPanel spectrumPlot = new LCMSPlotPanel(PlotType.SPECTRUM);
-//				((XYPlot)spectrumPlot.getChart().getPlot()).getRangeAxis().setLabel(null);
-//
-//				objectPlotMap.put(gn, spectrumPlot);
-//				
-//				GridBagConstraints gbc_spectrumPlot = new GridBagConstraints();
-//				gbc_spectrumPlot.fill = GridBagConstraints.BOTH;
-//				gbc_spectrumPlot.insets = new Insets(0, 0, 5, 5);
-//				gbc_spectrumPlot.gridx = i;
-//				gbc_spectrumPlot.gridy = j;
-//				plotPanel.add(spectrumPlot, gbc_spectrumPlot);
-//			}
-//		}		
-//		gbl_plotPanel.rowWeights = new double[numRows];
-//		Arrays.fill(gbl_plotPanel.rowWeights, 1.0d);
-//		gbl_plotPanel.columnWeights = new double[numColumns];
-//		Arrays.fill(gbl_plotPanel.columnWeights, 1.0d);
-//	}
 	
 	public void clearPanel() {
 		
@@ -216,6 +183,7 @@ public class MultispectraPlotPanel extends JPanel implements ActionListener, Ite
 				ColorGradient.GREEN_RED, 
 				ColorScale.LOGARITHMIC,
 				10);
+
 		
 		for(Entry<DataFile, SimpleMsFeature> ff : sortedFileFeatureMap.entrySet()) {
 			
@@ -230,9 +198,10 @@ public class MultispectraPlotPanel extends JPanel implements ActionListener, Ite
 			((XYPlot)spectrumPlot.getChart().getPlot()).getRangeAxis().setLabel(null);
 			spectrumPlot.setBorder(BorderFactory.createLineBorder(colorMap.get(ff.getKey()), 2));
 			spectrumPlot.hideLegend();
+			spectrumPlot.disableMouseInputs();
+			
 			TextTitle tt = new TextTitle(ff.getKey().getName(), 
 					new java.awt.Font("SansSerif", java.awt.Font.PLAIN, 10));
-			//	tt.setPaint(colorMap.get(ff.getKey()));
 			tt.setVerticalAlignment(VerticalAlignment.TOP);
 			spectrumPlot.getChart().addSubtitle(tt);
 			
@@ -374,10 +343,28 @@ public class MultispectraPlotPanel extends JPanel implements ActionListener, Ite
 		loadPreferences(Preferences.userNodeForPackage(this.getClass()));
 	}
 
-		@Override
+	@Override
 	public void savePreferences() {
 
 		prefs = Preferences.userNodeForPackage(this.getClass());
 		prefs.putInt(NUMBER_OF_COLUMNS, numColumns);
+	}
+
+	@Override
+	public void updateParametersFromControls() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void redrawPlot() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void setDataPlotControlsPanel(DataPlotControlsPanel dataPlotControlsPanel) {
+		// TODO Auto-generated method stub
+		
 	}
 }

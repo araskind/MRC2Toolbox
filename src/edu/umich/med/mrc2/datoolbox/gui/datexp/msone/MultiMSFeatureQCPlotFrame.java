@@ -57,7 +57,7 @@ import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.utils.ExperimentUtils;
 
-public class MultiSpectraPlotFrame extends JFrame
+public class MultiMSFeatureQCPlotFrame extends JFrame
 		implements ActionListener, BackedByPreferences, PersistentLayout, ItemListener {
 
 	/**
@@ -65,11 +65,11 @@ public class MultiSpectraPlotFrame extends JFrame
 	 */
 	private static final long serialVersionUID = 1L;
 	private Preferences preferences;
-	public static final String PREFS_NODE = MultiSpectraPlotFrame.class.getName();
+	public static final String PREFS_NODE = MultiMSFeatureQCPlotFrame.class.getName();
 	
 	private static final Icon multiSpectraIcon = GuiUtils.getIcon("multiSpectra", 32);
 	private static final File layoutConfigFile = 
-			new File(MRC2ToolBoxCore.configDir + "MultiSpectraPlotFrame.layout");
+			new File(MRC2ToolBoxCore.configDir + "MultiMSFeatureQCPlotFrame.layout");
 	
 	private MultiSpectraToolbar toolbar;
 	private CControl control;
@@ -85,7 +85,7 @@ public class MultiSpectraPlotFrame extends JFrame
 	private Matrix featureDataMatrix;
 	private MsFeature activeFeature;
 		
-	public MultiSpectraPlotFrame(
+	public MultiMSFeatureQCPlotFrame(
 			DataAnalysisProject currentExperiment, 
 			DataPipeline dataPipeline) {
 

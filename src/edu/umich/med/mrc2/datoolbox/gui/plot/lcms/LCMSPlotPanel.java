@@ -160,7 +160,6 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 		dataPointsVisible = false;
 		annotationsVisible = true;
 		precursorMarkers = new TreeSet<Double>();
-		//setRangeZoomable(false);
 		addDoubleClickReset();
 	}
 
@@ -193,8 +192,15 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 			return;
 		}
 		if (command.equals(ChartPanel.ZOOM_RESET_DOMAIN_COMMAND)) {
-			plot.getDomainAxis().setAutoRange(true);
-			return;
+			
+			if(plotType.equals(PlotType.CHROMATOGRAM)) {
+				
+				plot.getDomainAxis().setAutoRange(true);
+				adjustRange();
+				return;
+			}
+			else
+				return;
 		}
 		if (command.equals(ChartPanel.ZOOM_RESET_RANGE_COMMAND)) {
 			plot.getRangeAxis().setAutoRange(true);			
@@ -202,10 +208,16 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 			return;
 		}
 		if (command.equals(ChartPanel.ZOOM_RESET_BOTH_COMMAND)) {
-			plot.getDomainAxis().setAutoRange(true);
-			plot.getRangeAxis().setAutoRange(true);
-			adjustRange();
-			return;
+			
+			if(plotType.equals(PlotType.CHROMATOGRAM)) {
+				
+				plot.getDomainAxis().setAutoRange(true);
+				plot.getRangeAxis().setAutoRange(true);
+				adjustRange();
+				return;
+			}
+			else
+				return;
 		}		
 		if (command.equals(MainActionCommands.SHOW_PLOT_DATA_POINTS_COMMAND.getName())) {
 			toggleDataPoints(true);
@@ -653,6 +665,9 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 	@Override
 	public void mouseClicked(MouseEvent e) {
 		
+		if(suppressMouseClicks)
+			return;
+		
 		if (e.getModifiersEx() == InputEvent.SHIFT_DOWN_MASK)	{
 			markerStartPoint = null;
 //			markerEndPoint = null;
@@ -674,7 +689,7 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 		else 
 			super.mouseReleased(e);	
 		
-		plot.getRangeAxis().setAutoRange(true);	
+//		plot.getRangeAxis().setAutoRange(true);	
 		adjustRange();
 	}
 	
@@ -684,14 +699,16 @@ public class LCMSPlotPanel extends MasterPlotPanel {
         		((ValueAxisPlot) plot).getDataRange(plot.getRangeAxis()); 
         if(r == null)
         	return;
+        
+        if(r.getUpperBound() == 0 && r.getLowerBound() == 0)
+        	return;
         	
         double maxIntensity = r.getUpperBound() * 1.15;
         double minIntensity = r.getLowerBound();
         if(minIntensity < 0.0d)
         	minIntensity = 1.15 * minIntensity;
-        
-        if(minIntensity == 0 && maxIntensity == 0)
-        	return;
+        else
+        	minIntensity = 0;
         
         plot.getRangeAxis().setRange(new org.jfree.data.Range(minIntensity, maxIntensity));
 	}

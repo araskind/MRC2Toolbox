@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <RecentObjects>
-  <RecentFeatureCollections>Current MSMS feature search,MSFC000405,MSFC000322,MSFC000321,MSFC000442,MSFC000409,MSFC000361</RecentFeatureCollections>
+  <RecentFeatureCollections>Current MSMS feature search,MSFC000381,MSFC000405,MSFC000322,MSFC000321,MSFC000442,MSFC000409,MSFC000361</RecentFeatureCollections>
   <RecentClusterSets>M2CDS00341,M2CDS00365</RecentClusterSets>
   <RecentExperiments>
     <experimentPointer projectType="DATA_ANALYSIS" id="30d1ad8f-6176-42f2-9012-4321c1b9e5a8" name="EX01332 - Starr County BATCH02" description="Metabolomics on 600 individuals from Starr County, Texas, 300 with normal glycemia and 300 with prediabetes at six time points over three years, at baseline and 3, 6, 12, 24, 36 months after." experimentFile="y:\dataanalysis\mrc2toolboxprojects\_core\ex01332\ex01332-starr-county-batch02\ex01332-starr-county-batch02.caproject" dateCreated="2024-03-01 13:54:50" lastModified="2024-03-18 19:57:50" limsExperiment="EX01332" />

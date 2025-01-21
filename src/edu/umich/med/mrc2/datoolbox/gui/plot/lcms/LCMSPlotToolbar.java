@@ -109,6 +109,10 @@ public class LCMSPlotToolbar extends PlotToolbar implements ItemListener {
 		addSeparator(buttonDimension);
 
 		createZoomBlock();
+		if(plotType.equals(PlotType.SPECTRUM)) {
+			resetDomainButton.addActionListener(plotTypeSwitchListener);
+			resetBothButton.addActionListener(plotTypeSwitchListener);
+		}
 
 		addSeparator(buttonDimension);
 

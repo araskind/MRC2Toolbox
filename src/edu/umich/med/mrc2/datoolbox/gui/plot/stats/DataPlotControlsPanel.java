@@ -40,7 +40,7 @@ import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignFactor;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignSubset;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataTypeName;
 import edu.umich.med.mrc2.datoolbox.data.enums.PlotDataGrouping;
-import edu.umich.med.mrc2.datoolbox.gui.plot.ControlledStatsPlot;
+import edu.umich.med.mrc2.datoolbox.gui.plot.IControlledDataPlot;
 import edu.umich.med.mrc2.datoolbox.gui.utils.SortedComboBoxModel;
 
 public class DataPlotControlsPanel extends JPanel implements ItemListener {
@@ -54,10 +54,10 @@ public class DataPlotControlsPanel extends JPanel implements ItemListener {
 	private JComboBox categoryComboBox;
 	private JComboBox subCategoryComboBox;	
 
-	private ControlledStatsPlot plot;
+	private IControlledDataPlot plot;
 	
 	@SuppressWarnings("unchecked")
-	public DataPlotControlsPanel(ControlledStatsPlot parentPlot) {
+	public DataPlotControlsPanel(IControlledDataPlot parentPlot) {
 		super();
 
 		this.plot = parentPlot;

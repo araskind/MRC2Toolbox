@@ -36,6 +36,7 @@ import java.util.prefs.Preferences;
 
 import javax.swing.Icon;
 
+import org.jfree.chart.ChartPanel;
 import org.jfree.chart.plot.IntervalMarker;
 import org.jfree.chart.plot.Marker;
 import org.jfree.chart.plot.ValueMarker;
@@ -178,6 +179,13 @@ public class DockableSpectumPlot extends DefaultSingleCDockable implements Actio
 		
 		if(command.equals(MainActionCommands.SHOW_RAW_SPECTRA_COMMAND.getName()))
 			toggleSpectraNormalization(false);	
+		
+		if (command.equals(ChartPanel.ZOOM_RESET_DOMAIN_COMMAND))
+			setPlotMZMargins(activeMsDataSet);
+		
+		if (command.equals(ChartPanel.ZOOM_RESET_BOTH_COMMAND))
+			setPlotMargins(activeMsDataSet);
+		
 	}
 	
 	private void toggleSpectraNormalization(boolean norm) {
@@ -295,6 +303,21 @@ public class DockableSpectumPlot extends DefaultSingleCDockable implements Actio
 		else {
 			((XYPlot) spectrumPlot.getPlot()).getRangeAxis().
 				setRange(new Range(0.0d, border));
+		}
+	}
+	
+	private void setPlotMZMargins(MsDataSet msDataSet) {
+
+		activeMsDataSet = msDataSet;	
+		edu.umich.med.mrc2.datoolbox.utils.Range massRange = activeMsDataSet.getMassRange();
+		if(massRange.getSize() < 6 && massRange.getSize() > 0) {
+			Range plotMassRange = new Range(
+					massRange.getAverage() - 3.0d * massRange.getSize(),
+					massRange.getAverage() + 3.0d * massRange.getSize());
+			((XYPlot) spectrumPlot.getPlot()).getDomainAxis().setRange(plotMassRange);
+		}
+		else {
+			((XYPlot) spectrumPlot.getPlot()).getDomainAxis().setAutoRange(true);
 		}
 	}
 

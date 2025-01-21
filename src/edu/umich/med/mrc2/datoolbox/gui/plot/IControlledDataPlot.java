@@ -21,21 +21,14 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.plot;
 
-import java.awt.event.ItemListener;
-
 import edu.umich.med.mrc2.datoolbox.gui.plot.stats.DataPlotControlsPanel;
 
-public abstract class AbstractControlledDataPlot extends MasterPlotPanel 
-			implements ItemListener, ControlledStatsPlot, IControlledDataPlot {
+public interface IControlledDataPlot {
 
-	private static final long serialVersionUID = 1L;
+	void updateParametersFromControls();
 
-	@Override
-	public abstract void updateParametersFromControls();
+	void redrawPlot();
 
-	@Override
-	public abstract void redrawPlot();
-	
-	@Override
-	public abstract void setDataPlotControlsPanel(DataPlotControlsPanel dataPlotControlsPanel);
+	void setDataPlotControlsPanel(DataPlotControlsPanel dataPlotControlsPanel);
+
 }

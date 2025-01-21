@@ -21,21 +21,32 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.plot;
 
-import java.awt.event.ItemListener;
+import org.jfree.chart.ChartMouseEvent;
+import org.jfree.chart.ChartMouseListener;
+import org.jfree.chart.ChartPanel;
 
-import edu.umich.med.mrc2.datoolbox.gui.plot.stats.DataPlotControlsPanel;
-
-public abstract class AbstractControlledDataPlot extends MasterPlotPanel 
-			implements ItemListener, ControlledStatsPlot, IControlledDataPlot {
-
-	private static final long serialVersionUID = 1L;
-
-	@Override
-	public abstract void updateParametersFromControls();
-
-	@Override
-	public abstract void redrawPlot();
+public class DoubleClickResetChartMouseListener implements ChartMouseListener {
 	
+	private ChartPanel parentChartPanel;
+	
+	
+
+	public DoubleClickResetChartMouseListener(ChartPanel parentChartPanel) {
+		super();
+		this.parentChartPanel = parentChartPanel;
+	}
+
 	@Override
-	public abstract void setDataPlotControlsPanel(DataPlotControlsPanel dataPlotControlsPanel);
+	public void chartMouseMoved(ChartMouseEvent event) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void chartMouseClicked(ChartMouseEvent event) {
+
+		if(event.getTrigger().getClickCount() == 2)
+			parentChartPanel.restoreAutoBounds();
+	}
+
 }
