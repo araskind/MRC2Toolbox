@@ -162,7 +162,6 @@ public class Dockable3DChartPanel  extends DefaultSingleCDockable implements Act
 
 		Map<String, DataFile[]> dataMap = PlotDataSetUtils.createSeriesFileMap(
 										aciveDataPipeline,
-										dataFiles,
 										FileSortingOrder.NAME,
 										activeDesign,
 										groupingType,

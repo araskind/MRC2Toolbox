@@ -109,6 +109,7 @@ public class DockableSpectumPlot extends DefaultSingleCDockable implements Actio
 		setLayout(new BorderLayout(0, 0));
 
 		spectrumPlot = new LCMSPlotPanel(PlotType.SPECTRUM);
+		spectrumPlot.setHandleResetExternally(true);
 		add(spectrumPlot, BorderLayout.CENTER);
 
 		msPlotToolbar = 
@@ -131,13 +132,13 @@ public class DockableSpectumPlot extends DefaultSingleCDockable implements Actio
 			zoomToMSMSPrecursorButton = GuiUtils.setupButtonAction(
 					MainActionCommands.SHOW_FULL_MS_RANGE_COMMAND.getName(), 
 					MainActionCommands.SHOW_FULL_MS_RANGE_COMMAND.getName(), 
-					multipleIdsIcon, this);
+					uniqueIdsIcon, this);
 		}
 		else {
 			zoomToMSMSPrecursorButton = GuiUtils.setupButtonAction(
 					MainActionCommands.ZOOM_TO_MSMS_PRECURSOR_COMMAND.getName(), 
 					MainActionCommands.ZOOM_TO_MSMS_PRECURSOR_COMMAND.getName(), 
-					uniqueIdsIcon, this);
+					multipleIdsIcon, this);
 		}
 		actions.add(zoomToMSMSPrecursorButton);
 		
@@ -184,8 +185,7 @@ public class DockableSpectumPlot extends DefaultSingleCDockable implements Actio
 			setPlotMZMargins(activeMsDataSet);
 		
 		if (command.equals(ChartPanel.ZOOM_RESET_BOTH_COMMAND))
-			setPlotMargins(activeMsDataSet);
-		
+			setPlotMargins(activeMsDataSet);		
 	}
 	
 	private void toggleSpectraNormalization(boolean norm) {
@@ -193,6 +193,8 @@ public class DockableSpectumPlot extends DefaultSingleCDockable implements Actio
 		normalizeSpectra = norm;
 		if(normalizeSpectra) {
 			
+			toggleSpectraNormalizationButton.setTooltip(
+					MainActionCommands.SHOW_NORMALIZED_SPECTRA_COMMAND.getName());
 			toggleSpectraNormalizationButton.setText(
 					MainActionCommands.SHOW_NORMALIZED_SPECTRA_COMMAND.getName());
 			toggleSpectraNormalizationButton.setCommand(
@@ -200,6 +202,8 @@ public class DockableSpectumPlot extends DefaultSingleCDockable implements Actio
 			toggleSpectraNormalizationButton.setIcon(normalizeSpectrumIcon);
 		}
 		else {
+			toggleSpectraNormalizationButton.setTooltip(
+					MainActionCommands.SHOW_RAW_SPECTRA_COMMAND.getName());
 			toggleSpectraNormalizationButton.setText(
 					MainActionCommands.SHOW_RAW_SPECTRA_COMMAND.getName());
 			toggleSpectraNormalizationButton.setCommand(
@@ -218,33 +222,42 @@ public class DockableSpectumPlot extends DefaultSingleCDockable implements Actio
 
 		zoomToMSMSPrecursor = zoom;		
 		if (zoomToMSMSPrecursor) {
+			zoomToMSMSPrecursorButton.setTooltip(
+					MainActionCommands.SHOW_FULL_MS_RANGE_COMMAND.getName());
 			zoomToMSMSPrecursorButton.setText(
 					MainActionCommands.SHOW_FULL_MS_RANGE_COMMAND.getName());
 			zoomToMSMSPrecursorButton.setCommand(
 					MainActionCommands.SHOW_FULL_MS_RANGE_COMMAND.getName());
-			zoomToMSMSPrecursorButton.setIcon(multipleIdsIcon);
+			zoomToMSMSPrecursorButton.setIcon(uniqueIdsIcon);
 			
 			if(activeMsDataSet == null)
 				return;
 			
 			//	TODO this may need change to handle library MSMS and multiple MSMS
-			if(MsFeature.class.isAssignableFrom(activeMsDataSet.getSpectrumSource().getClass())) {
-				
-				MsFeature f = (MsFeature)activeMsDataSet.getSpectrumSource();
-				if(f.getSpectrum() != null 
-						&& f.getSpectrum().getExperimentalTandemSpectrum() != null
-						&& f.getSpectrum().getExperimentalTandemSpectrum().getParent() != null) {
-					zoomToInterval(f.getSpectrum().getExperimentalTandemSpectrum().getParent().getMz(), 10.0d);
-				}
+			MsFeature f = null;
+					
+			if(MsFeature.class.isAssignableFrom(activeMsDataSet.getSpectrumSource().getClass()))				
+				f = (MsFeature)activeMsDataSet.getSpectrumSource();
+
+			if (activeMsDataSet.getSpectrumSource() instanceof Collection<?>) {
+				Object o = ((Collection<?>)activeMsDataSet.getSpectrumSource()).iterator().next();
+				if(MsFeature.class.isAssignableFrom(o.getClass()))
+						f = (MsFeature)o;
+			}			
+			if(f != null &&f.getSpectrum() != null 
+					&& f.getSpectrum().getExperimentalTandemSpectrum() != null
+					&& f.getSpectrum().getExperimentalTandemSpectrum().getParent() != null) {
+				zoomToInterval(f.getSpectrum().getExperimentalTandemSpectrum().getParent().getMz(), 10.0d);
 			}
 		}
 		else {
+			zoomToMSMSPrecursorButton.setTooltip(
+					MainActionCommands.ZOOM_TO_MSMS_PRECURSOR_COMMAND.getName());
 			zoomToMSMSPrecursorButton.setText(
 					MainActionCommands.ZOOM_TO_MSMS_PRECURSOR_COMMAND.getName());
 			zoomToMSMSPrecursorButton.setCommand(
 					MainActionCommands.ZOOM_TO_MSMS_PRECURSOR_COMMAND.getName());
-			zoomToMSMSPrecursorButton.setIcon(uniqueIdsIcon);
-			//((XYPlot)spectrumPlot.getPlot()).getDomainAxis().setAutoRange(true);
+			zoomToMSMSPrecursorButton.setIcon(multipleIdsIcon);
 			spectrumPlot.restoreAutoBounds();
 		}
 		savePreferences();
@@ -276,49 +289,13 @@ public class DockableSpectumPlot extends DefaultSingleCDockable implements Actio
 	private void setPlotMargins(MsDataSet msDataSet) {
 
 		activeMsDataSet = msDataSet;	
-		
-		//	MZ axis
-		edu.umich.med.mrc2.datoolbox.utils.Range massRange = activeMsDataSet.getMassRange();
-		if(massRange.getSize() < 6 && massRange.getSize() > 0) {
-			Range plotMassRange = new Range(
-					massRange.getAverage() - 3.0d * massRange.getSize(),
-					massRange.getAverage() + 3.0d * massRange.getSize());
-			((XYPlot) spectrumPlot.getPlot()).getDomainAxis().setRange(plotMassRange);
-		}
-		else {
-			((XYPlot) spectrumPlot.getPlot()).getDomainAxis().setAutoRange(true);
-		}
-		//	Intensity axis
-		if(msDataSet.getIntensityRange() == null) {
-			((XYPlot) spectrumPlot.getPlot()).getRangeAxis().setAutoRange(true);
-			return;
-		}
-		XYPlot plot = ((XYPlot) spectrumPlot.getPlot());
-		double border  = plot.getDataRange(plot.getRangeAxis()).getUpperBound() * 1.15;
-		if(msDataSet instanceof HeadToTailMsDataSet) {
-			
-			((XYPlot) spectrumPlot.getPlot()).getRangeAxis().
-			setRange(new Range(-border, border));
-		}
-		else {
-			((XYPlot) spectrumPlot.getPlot()).getRangeAxis().
-				setRange(new Range(0.0d, border));
-		}
+		spectrumPlot.adjustMSPlotMargins(activeMsDataSet, true);
 	}
 	
 	private void setPlotMZMargins(MsDataSet msDataSet) {
 
-		activeMsDataSet = msDataSet;	
-		edu.umich.med.mrc2.datoolbox.utils.Range massRange = activeMsDataSet.getMassRange();
-		if(massRange.getSize() < 6 && massRange.getSize() > 0) {
-			Range plotMassRange = new Range(
-					massRange.getAverage() - 3.0d * massRange.getSize(),
-					massRange.getAverage() + 3.0d * massRange.getSize());
-			((XYPlot) spectrumPlot.getPlot()).getDomainAxis().setRange(plotMassRange);
-		}
-		else {
-			((XYPlot) spectrumPlot.getPlot()).getDomainAxis().setAutoRange(true);
-		}
+		activeMsDataSet = msDataSet;
+		spectrumPlot.adjustMSPlotMargins(activeMsDataSet, false);
 	}
 
 	public void showMsForPointCollection(
@@ -579,9 +556,9 @@ public class DockableSpectumPlot extends DefaultSingleCDockable implements Actio
         				childScan.getPrecursor().getMzRangeEnd(), 
         				Color.RED, new BasicStroke( 2.0f ), null, null, 0.5f );
 		        isolationWindow.setPaint( Color.RED );
-		        ((XYPlot) spectrumPlot.getPlot()).addDomainMarker(isolationWindow);					
-				
-			} else if (childScan.getPrecursor().getMzTarget() != null) {
+		        ((XYPlot) spectrumPlot.getPlot()).addDomainMarker(isolationWindow);
+			}
+			else if (childScan.getPrecursor().getMzTarget() != null) {
 				precursorMz = childScan.getPrecursor().getMzTarget();
 			} else {
 				if (childScan.getPrecursor().getMzTargetMono() != null) {
@@ -599,7 +576,7 @@ public class DockableSpectumPlot extends DefaultSingleCDockable implements Actio
 				
 				MsPoint trueParent = new MsPoint(precursorMz, intensity);
 				parentSeries.add(trueParent.getMz(), trueParent.getIntensity());			
-			}
+			}			
 		}
 		if(parentSeries.getItemCount() > 0) {
 			parentSet.addSeries(parentSeries);

@@ -30,7 +30,6 @@ import javax.swing.Icon;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.SimpleMsFeature;
-import edu.umich.med.mrc2.datoolbox.data.enums.FileSortingOrder;
 import edu.umich.med.mrc2.datoolbox.gui.plot.stats.DataPlotControlsPanel;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 
@@ -71,13 +70,10 @@ public class DockableMultispectraPlotPanel extends DockableMSFeatureQCPlotPanel{
 	public void loadFeatureData(
 			MsFeature feature,
 			Map<DataFile, SimpleMsFeature> fileFeatureMap) {
-	
-		mspPlotPanel.createSimpleMSFeatureSpectraPlot(
-				feature, 
-				fileFeatureMap,
-				FileSortingOrder.TIMESTAMP,
-				currentExperiment,
-				dataPipeline);
+
+		super.loadFeatureData(feature, fileFeatureMap);
+		
+		mspPlotPanel.showFeatureData(plotParametersObject);
 	}
 	
 	public void clearPanel() {
@@ -86,8 +82,7 @@ public class DockableMultispectraPlotPanel extends DockableMSFeatureQCPlotPanel{
 
 	@Override
 	protected void restorePlotAutoBounds() {
-		// TODO Auto-generated method stub
-		
+		mspPlotPanel.restoreAllPlotsAutoBounds();
 	}
 
 	@Override

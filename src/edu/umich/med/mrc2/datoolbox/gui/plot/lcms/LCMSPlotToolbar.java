@@ -49,7 +49,7 @@ public class LCMSPlotToolbar extends PlotToolbar implements ItemListener {
 	protected PlotType plotType;	
 	protected JButton toggleTailHeadButton;
 	protected JComboBox chromatogramTypeComboBox;
-	protected ActionListener plotTypeSwitchListener;
+	protected ActionListener secondaryActionListener;
 		
 //	public LCMSPlotToolbar(ActionListener plotTypeSwitchListener) {
 //		
@@ -63,7 +63,7 @@ public class LCMSPlotToolbar extends PlotToolbar implements ItemListener {
 			ActionListener plotTypeSwitchListener) {
 
 		super(parentPlot);
-		this.plotTypeSwitchListener = plotTypeSwitchListener;
+		this.secondaryActionListener = plotTypeSwitchListener;
 		this.plotType = plotType;
 		
 		initToolbar(plotType);
@@ -109,9 +109,9 @@ public class LCMSPlotToolbar extends PlotToolbar implements ItemListener {
 		addSeparator(buttonDimension);
 
 		createZoomBlock();
-		if(plotType.equals(PlotType.SPECTRUM)) {
-			resetDomainButton.addActionListener(plotTypeSwitchListener);
-			resetBothButton.addActionListener(plotTypeSwitchListener);
+		if(plotType.equals(PlotType.SPECTRUM) && secondaryActionListener != null) {
+			resetDomainButton.addActionListener(secondaryActionListener);
+			resetBothButton.addActionListener(secondaryActionListener);
 		}
 
 		addSeparator(buttonDimension);

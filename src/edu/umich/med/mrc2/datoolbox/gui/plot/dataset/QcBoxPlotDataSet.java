@@ -28,7 +28,8 @@ import org.jfree.data.statistics.DefaultBoxAndWhiskerCategoryDataset;
 
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.DataFileStatisticalSummary;
-import edu.umich.med.mrc2.datoolbox.data.compare.DataFileTimeStampComparator;
+import edu.umich.med.mrc2.datoolbox.data.compare.DataFileComparator;
+import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.enums.FileSortingOrder;
 import edu.umich.med.mrc2.datoolbox.gui.plot.qc.twod.TwoDqcPlotParameterObject;
 
@@ -48,7 +49,7 @@ public class QcBoxPlotDataSet extends DefaultBoxAndWhiskerCategoryDataset {
 			Arrays.sort(files);
 
 		if (sortingOrder.equals(FileSortingOrder.TIMESTAMP))
-			Arrays.sort(files, new DataFileTimeStampComparator());
+			Arrays.sort(files, new DataFileComparator(SortProperty.injectionTime));
 		
 		for (DataFile f : files) {
 

@@ -72,6 +72,8 @@ import edu.umich.med.mrc2.datoolbox.data.compare.SortDirection;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.plot.MasterPlotPanel;
 import edu.umich.med.mrc2.datoolbox.gui.plot.PlotType;
+import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.HeadToTailMsDataSet;
+import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.MsDataSet;
 import edu.umich.med.mrc2.datoolbox.gui.plot.lcms.chromatogram.ChromatogramRenderingType;
 import edu.umich.med.mrc2.datoolbox.gui.plot.lcms.chromatogram.SmoothingPreferencesDialog;
 import edu.umich.med.mrc2.datoolbox.gui.plot.lcms.spectrum.MSReferenceDisplayType;
@@ -139,6 +141,7 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 	protected boolean smoothChromatogram;
 	protected Filter smoothingFilter;
 	protected String filterId;
+	protected boolean handleResetExternally;
 
 	public LCMSPlotPanel(PlotType type) {
 
@@ -161,6 +164,7 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 		annotationsVisible = true;
 		precursorMarkers = new TreeSet<Double>();
 		addDoubleClickReset();
+		handleResetExternally = false;
 	}
 
 	public void actionPerformed(ActionEvent event) {
@@ -193,7 +197,7 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 		}
 		if (command.equals(ChartPanel.ZOOM_RESET_DOMAIN_COMMAND)) {
 			
-			if(plotType.equals(PlotType.CHROMATOGRAM)) {
+			if(!handleResetExternally) {
 				
 				plot.getDomainAxis().setAutoRange(true);
 				adjustRange();
@@ -209,7 +213,7 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 		}
 		if (command.equals(ChartPanel.ZOOM_RESET_BOTH_COMMAND)) {
 			
-			if(plotType.equals(PlotType.CHROMATOGRAM)) {
+			if(!handleResetExternally) {
 				
 				plot.getDomainAxis().setAutoRange(true);
 				plot.getRangeAxis().setAutoRange(true);
@@ -712,6 +716,39 @@ public class LCMSPlotPanel extends MasterPlotPanel {
         
         plot.getRangeAxis().setRange(new org.jfree.data.Range(minIntensity, maxIntensity));
 	}
+	
+	public void adjustMSPlotMargins(MsDataSet msDataSet, boolean adjustBoth) {
+		
+		Range massRange = msDataSet.getMassRange();
+		if(massRange.getSize() < 6 && massRange.getSize() > 0) {
+			org.jfree.data.Range plotMassRange = new org.jfree.data.Range(
+					massRange.getAverage() - 3.0d * massRange.getSize(),
+					massRange.getAverage() + 3.0d * massRange.getSize());
+			((XYPlot) this.getPlot()).getDomainAxis().setRange(plotMassRange);
+		}
+		else {
+			((XYPlot) this.getPlot()).getDomainAxis().setAutoRange(true);
+		}
+		if(!adjustBoth)
+			return;
+		
+		//	Intensity axis
+		if(msDataSet.getIntensityRange() == null) {
+			((XYPlot) this.getPlot()).getRangeAxis().setAutoRange(true);
+			return;
+		}
+		XYPlot plot = ((XYPlot) this.getPlot());
+		double border  = plot.getDataRange(plot.getRangeAxis()).getUpperBound() * 1.15;
+		if(msDataSet instanceof HeadToTailMsDataSet) {
+			
+			((XYPlot) this.getPlot()).getRangeAxis().setRange(
+					new org.jfree.data.Range(-border, border));
+		}
+		else {
+			((XYPlot) this.getPlot()).getRangeAxis().
+				setRange(new org.jfree.data.Range(0.0d, border));
+		}
+	}
 
 	public void removeMarkers() {
 
@@ -1024,6 +1061,10 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 
 	public XYItemRenderer getDefaultParentIonRenderer() {
 		return defaultParentIonRenderer;
+	}
+
+	public void setHandleResetExternally(boolean handleResetExternally) {
+		this.handleResetExternally = handleResetExternally;
 	}
 }
 

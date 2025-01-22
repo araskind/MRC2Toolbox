@@ -59,7 +59,7 @@ public class MsFeatureBarChartDataSet extends DefaultCategoryDataset {
 				
 		DataAnalysisProject experiment = 
 				MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
-		if(experiment == null)
+		if(experiment == null || experiment.getActiveDataPipeline() == null)
 			return;
 		
 		DataPipeline pipeline = experiment.getActiveDataPipeline();
@@ -72,8 +72,7 @@ public class MsFeatureBarChartDataSet extends DefaultCategoryDataset {
 
 		Map<String, DataFile[]> seriesFileMap = 
 				PlotDataSetUtils.createSeriesFileMap(
-						pipeline, 
-						files,
+						pipeline,
 						plotParameters.getSortingOrder(), 
 						experiment.getExperimentDesign().getCompleteDesignSubset(), 
 						plotParameters.getGroupingType(), 
@@ -85,7 +84,7 @@ public class MsFeatureBarChartDataSet extends DefaultCategoryDataset {
 						plotParameters.getChartColorOption());
 		Integer rowCount = 0;
 		Map<DataFile, Double> dataMap = 
-				PlotDataSetUtils.getNormalizedDataForFeature(
+				PlotDataSetUtils.getScaledDataForFeature(
 						experiment, feature, pipeline, files, plotParameters.getDataScale());
 
 		for (Entry<String, DataFile[]> entry : seriesFileMap.entrySet()) {

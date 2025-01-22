@@ -74,7 +74,7 @@ public class BoxAndWhiskerCategoryDatasetCa extends DefaultBoxAndWhiskerCategory
 
 		//	Collect data
 		Collection<ExperimentalSample> samples = 
-				experiment.getExperimentDesign().getSamplesForDesignSubset(activeDesign);
+				experiment.getExperimentDesign().getSamplesForDesignSubset(activeDesign, true);
 
 		for (Entry<DataPipeline, Collection<MsFeature>> entry : selectedFeaturesMap.entrySet()) {
 			
@@ -86,10 +86,10 @@ public class BoxAndWhiskerCategoryDatasetCa extends DefaultBoxAndWhiskerCategory
 						collect(Collectors.toCollection(LinkedHashSet::new));
 				
 				Map<DataFile, Double> dataMap = 
-						PlotDataSetUtils.getNormalizedDataForFeature(experiment, msf, entry.getKey(),  files, dataScale);
+						PlotDataSetUtils.getScaledDataForFeature(experiment, msf, entry.getKey(),  files, dataScale);
 				Map<String, DataFile[]> seriesFileMap = 
-						PlotDataSetUtils.createSeriesFileMap(entry.getKey(), files,
-						sortingOrder, activeDesign, groupingType, category, subCategory);
+						PlotDataSetUtils.createSeriesFileMap(entry.getKey(), sortingOrder, 
+								activeDesign, groupingType, category, subCategory);
 
 				//	Add data
 				for (Entry<String, DataFile[]> seriesEntry : seriesFileMap.entrySet()) {

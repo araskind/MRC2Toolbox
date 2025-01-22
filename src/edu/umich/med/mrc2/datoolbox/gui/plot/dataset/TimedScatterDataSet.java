@@ -42,7 +42,8 @@ import edu.umich.med.mrc2.datoolbox.data.ExperimentalSample;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.SimpleMsFeature;
 import edu.umich.med.mrc2.datoolbox.data.compare.ChartColorOption;
-import edu.umich.med.mrc2.datoolbox.data.compare.DataFileTimeStampComparator;
+import edu.umich.med.mrc2.datoolbox.data.compare.DataFileComparator;
+import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataScale;
 import edu.umich.med.mrc2.datoolbox.data.enums.FileSortingOrder;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
@@ -82,7 +83,7 @@ public class TimedScatterDataSet extends TimeSeriesCollection {
 		featuresToPlot = selectedFeaturesMap.values().stream().
 				flatMap(c -> c.stream()).toArray(size -> new MsFeature[size]);
 		Collection<ExperimentalSample> samples = 
-				experiment.getExperimentDesign().getSamplesForDesignSubset(activeDesign);
+				experiment.getExperimentDesign().getSamplesForDesignSubset(activeDesign, true);
 		
 		int seriesCount = 1;
 		for (Entry<DataPipeline, Collection<MsFeature>> entry : selectedFeaturesMap.entrySet()) {
@@ -91,11 +92,11 @@ public class TimedScatterDataSet extends TimeSeriesCollection {
 				
 				Set<DataFile> files = samples.stream().
 						flatMap(s -> s.getDataFilesForMethod(entry.getKey().getAcquisitionMethod()).stream()).
-						filter(s -> s.isEnabled()).sorted(new DataFileTimeStampComparator()).
+						filter(s -> s.isEnabled()).sorted(new DataFileComparator(SortProperty.injectionTime)).
 						collect(Collectors.toCollection(LinkedHashSet::new));
 				
 				Map<DataFile, Double> dataMap = 
-						PlotDataSetUtils.getNormalizedDataForFeature(experiment, msf, entry.getKey(), files, dataScale);
+						PlotDataSetUtils.getScaledDataForFeature(experiment, msf, entry.getKey(), files, dataScale);
 				NamedTimeSeries series = new NamedTimeSeries(Integer.toString(seriesCount) + " - " + msf.getName());	
 				for(DataFile df : files) {
 					

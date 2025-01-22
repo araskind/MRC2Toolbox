@@ -89,22 +89,14 @@ public class DockableDataVariationPlotPanel extends DockableMSFeatureQCPlotPanel
 			MsFeature feature, 
 			Map<DataFile, SimpleMsFeature> fileFeatureMap) {
 
-		this.activeFeature = feature;
-		this.fileFeatureMap = fileFeatureMap;
-		featurePropertiesTimelinePlot.showFeatureData(
-				feature,
-				fileFeatureMap, 
-				sortingOrder, 
-				chartColorOption, 
-				currentExperiment, 
-				dataPipeline);
+		super.loadFeatureData(feature, fileFeatureMap);
+		featurePropertiesTimelinePlot.showFeatureData(plotParametersObject);
 	}
 	
 	protected void updatePlot() {
-
-		featurePropertiesTimelinePlot.showFeatureData(
-				activeFeature, fileFeatureMap, sortingOrder, 
-				chartColorOption, currentExperiment, dataPipeline);
+		
+		super.loadFeatureData(activeFeature, activeFileFeatureMap);
+		featurePropertiesTimelinePlot.showFeatureData(plotParametersObject);
 	}
 
 	@Override

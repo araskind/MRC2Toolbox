@@ -58,7 +58,7 @@ public class ExperimentDesignSubset implements Comparable<ExperimentDesignSubset
 	private Set<ExperimentDesignSubsetListener> eventListeners;
 	private TreeMap<Integer, ExperimentDesignFactor>orderedFactorMap;
 	private TreeMap<ExperimentDesignFactor, 
-	TreeMap<Integer, ExperimentDesignLevel>>orderedLevelMap;
+		TreeMap<Integer, ExperimentDesignLevel>>orderedLevelMap;
 
 	public ExperimentDesignSubset(String name) {
 

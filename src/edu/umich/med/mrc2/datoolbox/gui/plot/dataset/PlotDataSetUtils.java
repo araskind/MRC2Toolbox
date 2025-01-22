@@ -39,7 +39,6 @@ import org.apache.commons.math3.stat.StatUtils;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.ujmp.core.Matrix;
 
-import edu.umich.med.mrc2.datoolbox.data.Assay;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignFactor;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignLevel;
@@ -47,7 +46,6 @@ import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignSubset;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentalSample;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.compare.DataFileComparator;
-import edu.umich.med.mrc2.datoolbox.data.compare.DataFileTimeStampComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.ObjectCompatrator;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataScale;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataSetQcField;
@@ -55,6 +53,7 @@ import edu.umich.med.mrc2.datoolbox.data.enums.FileSortingOrder;
 import edu.umich.med.mrc2.datoolbox.data.enums.PlotDataGrouping;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
+import edu.umich.med.mrc2.datoolbox.gui.plot.TwoDimDataPlotParameterObject;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
@@ -63,35 +62,7 @@ import edu.umich.med.mrc2.datoolbox.utils.NormalizationUtils;
 
 public class PlotDataSetUtils {
 
-	//	TODO check if used in the project
-	public static Map<Assay, DataFile[]> createDataFileMap(
-			MsFeature[] selectedFeatures,
-			FileSortingOrder fileSortingOrder,
-			ExperimentDesignSubset activeDesign) {
-
-		Map<Assay, DataFile[]> dataFileMap = new HashMap<Assay, DataFile[]>();
-		DataAnalysisProject experiment = 
-				MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
-
-//		if(experiment != null) {
-//
-//			for(MsFeature f : selectedFeatures) {
-//
-//				//	TODO
-//				if(dataFileMap.get(f.getAssayMethod()) == null) {
-//
-//					DataFile[] sortedFiles = 
-//							DataSetUtils.sortFiles(f.getAssayMethod(), fileSortingOrder, activeDesign);
-//					dataFileMap.put(f.getAssayMethod(), sortedFiles);
-//				}
-//			}
-//		}
-//		return dataFileMap;
-		
-		return null;
-	}
-
-	public static Map<DataFile,Double>getNormalizedDataForFeature(
+	public static Map<DataFile,Double>getScaledDataForFeature(
 			DataAnalysisProject experiment,
 			MsFeature feature,
 			DataPipeline pipeline,
@@ -163,10 +134,22 @@ public class PlotDataSetUtils {
 		}
 		return dataMap;
 	}
+	
+	public static Map<String, DataFile[]> createSeriesFileMap(
+			DataPipeline pipeline,
+			ExperimentDesignSubset activeDesign,
+			TwoDimDataPlotParameterObject plotParameters){
+		return createSeriesFileMap(
+				pipeline,
+				plotParameters.getSortingOrder(),
+				activeDesign,
+				plotParameters.getGroupingType(),
+				plotParameters.getCategory(),
+				plotParameters.getSubCategory());
+	}
 
 	public static Map<String, DataFile[]> createSeriesFileMap(
 			DataPipeline pipeline,
-			Collection<DataFile>files,
 			FileSortingOrder sortingOrder,
 			ExperimentDesignSubset activeDesign,
 			PlotDataGrouping groupingType,
@@ -179,137 +162,51 @@ public class PlotDataSetUtils {
 		if (MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExperimentDesign() == null)
 			return null;
 
-		if (MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExperimentDesign().getSamples().isEmpty())
+		if (MRC2ToolBoxCore.getActiveMetabolomicsExperiment().
+					getExperimentDesign().getSamples().isEmpty())
 			return null;
 
-		Map<String, DataFile[]> dataFileMap = new LinkedHashMap<String, DataFile[]>();
+		Map<String, DataFile[]> dataFileMap = 
+				new LinkedHashMap<String, DataFile[]>();
 
 		if(groupingType.equals(PlotDataGrouping.IGNORE_DESIGN)) {
 
-//			if(splitByBatch)
-//				return PlotDataSetUtils.mapSeriesByBatch(pipeline, sortingOrder, activeDesign);
-//			else
-				return PlotDataSetUtils.mapSeriesIgnoreDesign(pipeline, sortingOrder, activeDesign);
+			return mapSeriesIgnoreDesign(pipeline, sortingOrder, activeDesign);
 		}
 		else {
 			Collection<ExperimentalSample> samples =
-					MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExperimentDesign().getSamplesForDesignSubset(activeDesign);
+					MRC2ToolBoxCore.getActiveMetabolomicsExperiment().
+						getExperimentDesign().getSamplesForDesignSubset(activeDesign, true);
 
 			Set<Set<ExperimentDesignLevel>>seriesSet =
-					PlotDataSetUtils.createExpLevelSeries(activeDesign, groupingType, category, subCategory);
+					createExpLevelSeries(activeDesign, groupingType, category, subCategory);
 
-			Map<String, ArrayList<DataFile>> dataFileMapInterm = new LinkedHashMap<String, ArrayList<DataFile>>();
+			Map<String, TreeSet<DataFile>> dataFileMapInterm = 
+					new LinkedHashMap<String, TreeSet<DataFile>>();
 
 			for(Set<ExperimentDesignLevel>levelSet : seriesSet) {
 
-				List<String> labList = levelSet.stream().map(l -> l.getName()).collect(Collectors.toList());
+				List<String> labList = levelSet.stream().
+						map(l -> l.getName()).collect(Collectors.toList());
 				String seriesLabel = StringUtils.join(labList, "\n");
-				dataFileMapInterm.put(seriesLabel, new ArrayList<DataFile>());
+				dataFileMapInterm.put(seriesLabel, new TreeSet<DataFile>());
 
 				for(ExperimentalSample s : samples) {
 
-					if(s.getDesignCell().values().containsAll(levelSet))
-						dataFileMapInterm.get(seriesLabel).addAll(
-								s.getDataFilesForMethod(pipeline.getAcquisitionMethod()));
+					Set<DataFile>activeFiles = 
+							s.getDataFilesForMethod(pipeline.getAcquisitionMethod()).stream().
+							filter(f -> f.isEnabled()).collect(Collectors.toSet());
+					if(!activeFiles.isEmpty() 
+							&& s.getDesignCell().values().containsAll(levelSet))
+						dataFileMapInterm.get(seriesLabel).addAll(activeFiles);
 				}
 			}
-//			if(splitByBatch) {
-//
-//				for (Entry<String, ArrayList<DataFile>> entry : dataFileMapInterm.entrySet()) {
-//
-//					int[] batches = entry.getValue().stream().mapToInt(f -> f.getBatchNumber()).distinct().sorted().toArray();
-//					for(int batch : batches) {
-//
-//						String batchSeriesKey = entry.getKey() + "\nBatch " + Integer.toString(batch);
-//
-//						if (sortingOrder.equals(FileSortingOrder.NAME))
-//							dataFileMap.put(batchSeriesKey,
-//									entry.getValue().stream().filter(f -> f.getBatchNumber() == batch).sorted()
-//											.toArray(size -> new DataFile[size]));
-//
-//						if (sortingOrder.equals(FileSortingOrder.TIMESTAMP))
-//							dataFileMap.put(batchSeriesKey,
-//									entry.getValue().stream().filter(f -> f.getBatchNumber() == batch)
-//											.sorted(new DataFileTimeStampComparator())
-//											.toArray(size -> new DataFile[size]));
-//					}
-//				}
-//			}
-//			else {
-				for (Entry<String, ArrayList<DataFile>> entry : dataFileMapInterm.entrySet()) {
-
-					if(sortingOrder.equals(FileSortingOrder.NAME))
-						dataFileMap.put(entry.getKey(), entry.getValue().stream().sorted().toArray(size -> new DataFile[size]));
-
-					if(sortingOrder.equals(FileSortingOrder.TIMESTAMP))
-						dataFileMap.put(entry.getKey(), entry.getValue().stream().
-								sorted(new DataFileTimeStampComparator()).
-								toArray(size -> new DataFile[size]));
-				}
-//			}
-		}
-		return dataFileMap;
-	}
-
-	private static Map<String, DataFile[]> mapSeriesByBatch(
-			DataPipeline pipeline,
-			FileSortingOrder sortingOrder,
-			ExperimentDesignSubset activeDesign) {
-
-		if (MRC2ToolBoxCore.getActiveMetabolomicsExperiment() == null)
-			return null;
-
-		if (MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExperimentDesign() == null)
-			return null;
-
-		if (MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExperimentDesign().getSamples().isEmpty())
-			return null;
-
-		Map<String, DataFile[]> dataFileMap = new LinkedHashMap<String, DataFile[]>();
-		DataFile[] sorted = DataSetUtils.sortFiles(pipeline, sortingOrder, activeDesign);
-		DataAnalysisProject experiment = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
-		Collection<ExperimentalSample> samples = 
-				experiment.getExperimentDesign().getSamplesForDesignSubset(activeDesign);
-		int[] batches = experiment.getDataFilesForAcquisitionMethod(pipeline.getAcquisitionMethod()).
-				stream().mapToInt(f -> f.getBatchNumber()).distinct().sorted().toArray();
-
-		if(sortingOrder.equals(FileSortingOrder.SAMPLE_ID) || sortingOrder.equals(FileSortingOrder.SAMPLE_NAME)) {
-
-			for(int batch : batches) {
-
-				LinkedHashMap<ExperimentalSample, ArrayList<DataFile>>sfMap = 
-						new LinkedHashMap<ExperimentalSample, ArrayList<DataFile>>();
-
-				for(DataFile df : sorted) {
-
-					for(ExperimentalSample sample : samples) {
-
-						if(sample.hasDataFile(df) && df.getBatchNumber() == batch) {
-
-							if(!sfMap.containsKey(sample))
-								sfMap.put(sample, new ArrayList<DataFile>());
-
-							sfMap.get(sample).add(df);
-						}
-					}
-				}
-				if(sortingOrder.equals(FileSortingOrder.SAMPLE_ID))
-					sfMap.forEach((k,v)->dataFileMap.put(k.getId() + "\nBatch" + 
-							Integer.toString(batch), v.toArray(new DataFile[v.size()])));
-
-				if(sortingOrder.equals(FileSortingOrder.SAMPLE_NAME))
-					sfMap.forEach((k,v)->dataFileMap.put(k.getName() + "\nBatch" + 
-							Integer.toString(batch), v.toArray(new DataFile[v.size()])));
-			}
-		}
-		else {
-			for(int batch : batches) {
-
-				for(DataFile df : sorted) {
-
-					if(df.getBatchNumber() == batch)
-						dataFileMap.put(df.getName() + "\nBatch" + 
-								Integer.toString(batch), new DataFile[] {df});
+			for (Entry<String, TreeSet<DataFile>> entry : dataFileMapInterm.entrySet()) {
+				
+				if(!entry.getValue().isEmpty()) {
+					dataFileMap.put(entry.getKey(), entry.getValue().stream().
+							sorted(new DataFileComparator(sortingOrder)).
+							toArray(size -> new DataFile[size]));
 				}
 			}
 		}
@@ -322,28 +219,30 @@ public class PlotDataSetUtils {
 			ExperimentDesignFactor category,
 			ExperimentDesignFactor subCategory){
 
-		Set<Set<ExperimentDesignLevel>>seriesSet = new LinkedHashSet<Set<ExperimentDesignLevel>>();
-		Set<Set<ExperimentDesignLevel>>filteredSeriesSet = new LinkedHashSet<Set<ExperimentDesignLevel>>();
+		Set<Set<ExperimentDesignLevel>>seriesSet = 
+				new LinkedHashSet<Set<ExperimentDesignLevel>>();
+		Set<Set<ExperimentDesignLevel>>filteredSeriesSet = 
+				new LinkedHashSet<Set<ExperimentDesignLevel>>();
 
 		if(groupingType.equals(PlotDataGrouping.EACH_FACTOR)) {
 
 			for(ExperimentDesignFactor factor : activeDesign.getOrderedDesign().keySet())
-				seriesSet = PlotDataSetUtils.addFactorToSeries(seriesSet, activeDesign, factor);
+				seriesSet = addFactorToSeries(seriesSet, activeDesign, factor);
 		}
 		if(groupingType.equals(PlotDataGrouping.ONE_FACTOR) ||
 				(groupingType.equals(PlotDataGrouping.TWO_FACTORS) && category.equals(subCategory))) {
 
-			seriesSet = PlotDataSetUtils.addFactorToSeries(seriesSet, activeDesign, category);
+			seriesSet = addFactorToSeries(seriesSet, activeDesign, category);
 		}
 		if(groupingType.equals(PlotDataGrouping.TWO_FACTORS) && !category.equals(subCategory)) {
 
-			seriesSet = PlotDataSetUtils.addFactorToSeries(seriesSet, activeDesign, category);
-			seriesSet = PlotDataSetUtils.addFactorToSeries(seriesSet, activeDesign, subCategory);
+			seriesSet = addFactorToSeries(seriesSet, activeDesign, category);
+			seriesSet = addFactorToSeries(seriesSet, activeDesign, subCategory);
 		}
 		//	Filter level combinations to exclude non-existent
 		Collection<ExperimentalSample> samples =
 				MRC2ToolBoxCore.getActiveMetabolomicsExperiment().
-					getExperimentDesign().getSamplesForDesignSubset(activeDesign);
+					getExperimentDesign().getSamplesForDesignSubset(activeDesign, true);
 
 		for(Set<ExperimentDesignLevel>levelSet : seriesSet) {
 
@@ -365,19 +264,22 @@ public class PlotDataSetUtils {
 
 			for(ExperimentDesignLevel l : activeDesign.getOrderedDesign().get(factorToAdd)) {
 
-				Set<ExperimentDesignLevel>levelSet = new LinkedHashSet<ExperimentDesignLevel>();
+				Set<ExperimentDesignLevel>levelSet = 
+						new LinkedHashSet<ExperimentDesignLevel>();
 				levelSet.add(l);
 				seriesSet.add(levelSet);
 			}
 		}
 		else {
-			Set<Set<ExperimentDesignLevel>>seriesSetUpdated = new LinkedHashSet<Set<ExperimentDesignLevel>>();
+			Set<Set<ExperimentDesignLevel>>seriesSetUpdated = 
+					new LinkedHashSet<Set<ExperimentDesignLevel>>();
 
 			for(ExperimentDesignLevel l : activeDesign.getOrderedDesign().get(factorToAdd)) {
 
 				for(Set<ExperimentDesignLevel>levelSet : seriesSet) {
 
-					Set<ExperimentDesignLevel>newLset = new LinkedHashSet<ExperimentDesignLevel>(levelSet);
+					Set<ExperimentDesignLevel>newLset = 
+							new LinkedHashSet<ExperimentDesignLevel>(levelSet);
 					newLset.add(l);
 					seriesSetUpdated.add(newLset);
 				}
@@ -401,7 +303,7 @@ public class PlotDataSetUtils {
 		Map<String, DataFile[]> dataFileMap = new LinkedHashMap<String, DataFile[]>();
 		DataFile[] sorted = DataSetUtils.sortFiles(pipeline, sortingOrder, activeDesign);		
 		Collection<ExperimentalSample> samples = 
-				experiment.getExperimentDesign().getSamplesForDesignSubset(activeDesign);
+				experiment.getExperimentDesign().getSamplesForDesignSubset(activeDesign, true);
 
 		if(sortingOrder.equals(FileSortingOrder.SAMPLE_ID) || 
 				sortingOrder.equals(FileSortingOrder.SAMPLE_NAME)) {

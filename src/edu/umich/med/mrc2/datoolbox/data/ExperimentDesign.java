@@ -431,15 +431,22 @@ public class ExperimentDesign implements ExperimentDesignFactorListener, Seriali
 		eventListeners.addAll(newListeners);
 	}
 
-	public Collection<ExperimentalSample>getSamplesForDesignSubset(ExperimentDesignSubset subset){
+	public Collection<ExperimentalSample>getSamplesForDesignSubset(
+			ExperimentDesignSubset subset, boolean enabledOnly){
 
-		Collection<ExperimentalSample>subsetSamples  = new HashSet<ExperimentalSample>();
+		Collection<ExperimentalSample>subsetSamples = new HashSet<ExperimentalSample>();
 		TreeSet<ExperimentDesignLevel> levels = subset.getDesignMap();
 		for(ExperimentalSample s : sampleSet) {
 
-			if(!s.getDesignCell().values().stream().filter((e) -> levels.contains(e)).collect(Collectors.toList()).isEmpty())
+			if(!s.getDesignCell().values().stream().
+					filter((e) -> levels.contains(e)).
+					collect(Collectors.toList()).isEmpty())
 				subsetSamples.add(s);
 		}
+		if(enabledOnly)
+			subsetSamples = subsetSamples.stream().
+				filter(s -> s.isEnabled()).collect(Collectors.toSet());
+			
 		return subsetSamples;
 	}
 

@@ -41,6 +41,7 @@ import edu.umich.med.mrc2.datoolbox.data.enums.FileSortingOrder;
 import edu.umich.med.mrc2.datoolbox.data.enums.PlotDataGrouping;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.gui.plot.MasterPlotPanel;
+import edu.umich.med.mrc2.datoolbox.gui.plot.TwoDimDataPlotParameterObject;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 
@@ -54,6 +55,34 @@ public class BarChartDataSet extends DefaultCategoryDataset {
 	private MsFeature[] featuresToPlot;
 	private Map<DataPipeline, DataFile[]> dataFileMap;
 	private Map<Integer,Paint>seriesPaintMap;
+	
+	public BarChartDataSet(
+			MsFeature msf,
+			DataScale dataScale,
+			TwoDimDataPlotParameterObject plotParameters){
+
+			this(msf,
+				MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getActiveDataPipeline(),
+				MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExperimentDesign().getActiveDesignSubset(),
+				dataScale,
+				plotParameters);
+	}
+	
+	public BarChartDataSet(
+			MsFeature msf,
+			DataPipeline pipeline,
+			ExperimentDesignSubset activeDesign,
+			DataScale dataScale,
+			TwoDimDataPlotParameterObject plotParameters){
+			this(msf,
+				pipeline,
+				plotParameters.getSortingOrder(),
+				dataScale,
+				activeDesign,
+				plotParameters.getGroupingType(),
+				plotParameters.getCategory(),
+				plotParameters.getSubCategory());
+	}
 
  	public BarChartDataSet(
 			MsFeature msf,
@@ -71,15 +100,16 @@ public class BarChartDataSet extends DefaultCategoryDataset {
 
 		//	Collect data
 		Collection<ExperimentalSample> samples = 
-				experiment.getExperimentDesign().getSamplesForDesignSubset(activeDesign);
+				experiment.getExperimentDesign().getSamplesForDesignSubset(activeDesign, true);
 		HashSet<DataFile> files = samples.stream().
 				flatMap(s -> s.getDataFilesForMethod(pipeline.getAcquisitionMethod()).stream()).
 				filter(s -> s.isEnabled()).collect(Collectors.toCollection(HashSet::new));
 		Map<DataFile, Double> dataMap = 
-				PlotDataSetUtils.getNormalizedDataForFeature(experiment, msf, pipeline, files, dataScale);
+				PlotDataSetUtils.getScaledDataForFeature(
+						experiment, msf, pipeline, files, dataScale);
 		Map<String, DataFile[]> seriesFileMap = 
-				PlotDataSetUtils.createSeriesFileMap(pipeline, files,
-				sortingOrder, activeDesign, groupingType, category, subCategory);
+				PlotDataSetUtils.createSeriesFileMap(pipeline, sortingOrder, 
+						activeDesign, groupingType, category, subCategory);
 		Map<String,Paint>seriesPaintNameMap = new TreeMap<String,Paint>();
 		seriesPaintMap = new TreeMap<Integer,Paint>();
 		int sCount = 0;

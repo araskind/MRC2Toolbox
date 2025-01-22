@@ -31,6 +31,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.general.AbstractDataset;
@@ -96,7 +97,6 @@ public class VariableCategorySizeBarChartDataSet extends AbstractDataset impleme
 		Map<String, DataFile[]> seriesFileMap = 
 				PlotDataSetUtils.createSeriesFileMap(
 						pipeline, 
-						files,
 						sortingOrder, 
 						experiment.getExperimentDesign().getCompleteDesignSubset(), 
 						groupingType, 
@@ -162,7 +162,6 @@ public class VariableCategorySizeBarChartDataSet extends AbstractDataset impleme
 		Map<String, DataFile[]> seriesFileMap = 
 				PlotDataSetUtils.createSeriesFileMap(
 						pipeline, 
-						files,
 						plotParameters.getSortingOrder(), 
 						experiment.getExperimentDesign().getCompleteDesignSubset(), 
 						plotParameters.getGroupingType(), 
@@ -224,14 +223,15 @@ public class VariableCategorySizeBarChartDataSet extends AbstractDataset impleme
 		Map<String, DataFile[]> seriesFileMap = 
 				PlotDataSetUtils.createSeriesFileMap(
 						pipeline, 
-						files,
 						plotParameters.getSortingOrder(), 
 						experiment.getExperimentDesign().getCompleteDesignSubset(), 
 						plotParameters.getGroupingType(), 
 						plotParameters.getCategory(), 
 						plotParameters.getSubCategory());
 		//	calculateCategoryItemCount(seriesFileMap);
-		categoryItemCount = new int[seriesFileMap.size()];		
+		categoryItemCount = new int[seriesFileMap.size()];
+		
+		int fileCount = IntStream.of(categoryItemCount).sum();
 
 		Map<String,Paint>seriesPaintNameMap = 
 				createSeriesPaintMap(seriesFileMap, plotParameters.getGroupingType(), 
@@ -241,10 +241,12 @@ public class VariableCategorySizeBarChartDataSet extends AbstractDataset impleme
 		columnMap = new LinkedHashMap<Comparable,Integer>();
 		Integer rowCount = 0;
 		Integer columnCount = 0;
-		data = new Double[files.size()][seriesFileMap.size()];
+		
+		//data = new Double[files.size()][seriesFileMap.size()];
+		data = new Double[fileCount][seriesFileMap.size()];
 		
 		Map<DataFile, Double> dataMap = 
-				PlotDataSetUtils.getNormalizedDataForFeature(
+				PlotDataSetUtils.getScaledDataForFeature(
 						experiment, feature, pipeline, files, plotParameters.getDataScale());
 
 		for (Entry<String, DataFile[]> entry : seriesFileMap.entrySet()) {

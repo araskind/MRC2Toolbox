@@ -74,7 +74,7 @@ public abstract class DockableMSFeatureQCPlotPanel extends DefaultSingleCDockabl
 	protected DataPlotControlsPanel dataPlotControlsPanel;
 	
 	protected MsFeature activeFeature;
-	protected Map<DataFile, SimpleMsFeature> fileFeatureMap;
+	protected Map<DataFile, SimpleMsFeature> activeFileFeatureMap;
 	protected MSQualityDataPlotParameterObject plotParametersObject;
 	
 	public DockableMSFeatureQCPlotPanel(String id, String title, Icon icon) {
@@ -270,9 +270,21 @@ public abstract class DockableMSFeatureQCPlotPanel extends DefaultSingleCDockabl
 	
 	public abstract void clearPanel();
 	
-	public abstract void loadFeatureData(
+	public void loadFeatureData(
 			MsFeature feature, 
-			Map<DataFile, SimpleMsFeature> fileFeatureMap);
+			Map<DataFile, SimpleMsFeature> fileFeatureMap) {
+		
+		this.activeFeature = feature;
+		this.activeFileFeatureMap = fileFeatureMap;		
+		plotParametersObject = new MSQualityDataPlotParameterObject(
+				activeFeature,
+				activeFileFeatureMap,
+				sortingOrder, 
+				chartColorOption, 
+				dataPlotControlsPanel.getDataGroupingType(), 
+				dataPlotControlsPanel.getCategory(),
+				dataPlotControlsPanel.getSububCategory());
+	}
 	
 	protected abstract void updatePlot();
 }

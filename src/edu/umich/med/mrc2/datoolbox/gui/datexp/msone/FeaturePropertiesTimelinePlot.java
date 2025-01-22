@@ -51,24 +51,25 @@ import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.enums.FileSortingOrder;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.gui.plot.AbstractControlledDataPlot;
-import edu.umich.med.mrc2.datoolbox.gui.plot.TwoDimDataPlotParameterObject;
+import edu.umich.med.mrc2.datoolbox.gui.plot.IFeaturePropertiesPlot;
 import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.TimedScatterDataSet;
 import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.TimedScatterDataSetWithCustomErrors;
 import edu.umich.med.mrc2.datoolbox.gui.plot.renderer.XYCustomErrorRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.plot.stats.DataPlotControlsPanel;
 import edu.umich.med.mrc2.datoolbox.gui.plot.tooltip.NamedTimeSeriesToolTipGenerator;
 import edu.umich.med.mrc2.datoolbox.gui.utils.ColorUtils;
+import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 
-public class FeaturePropertiesTimelinePlot extends AbstractControlledDataPlot {
+public class FeaturePropertiesTimelinePlot extends AbstractControlledDataPlot implements IFeaturePropertiesPlot {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
 	
-	protected TwoDimDataPlotParameterObject plotParameters;
+	protected MSQualityDataPlotParameterObject plotParameters;
 	protected XYPlot dataPlot;
 	protected LCMSPlotType plotType;
 	
@@ -191,60 +192,60 @@ public class FeaturePropertiesTimelinePlot extends AbstractControlledDataPlot {
 		dataPlot.clearRangeMarkers();
 	}
 	
-	public void showFeatureData(
-			MsFeature feature,
-			Map<DataFile, SimpleMsFeature> fileFeatureMap, 
-			FileSortingOrder sortingOrder,
-			ChartColorOption colorOption, 
-			DataAnalysisProject currentExperiment, 
-			DataPipeline dataPipeline) {
-	
-		removeAllDataSets();
-		if(!sortingOrder.equals(FileSortingOrder.NAME) 
-				&& !sortingOrder.equals(FileSortingOrder.TIMESTAMP))
-			return;
-		
-		TreeMap<DataFile, SimpleMsFeature> sortedFileFeatureMap = null;
-		if(sortingOrder.equals(FileSortingOrder.NAME)) {
-			sortedFileFeatureMap = new TreeMap<DataFile, SimpleMsFeature>(
-					new DataFileComparator(SortProperty.Name));
-		}
-		if(sortingOrder.equals(FileSortingOrder.TIMESTAMP)) {
-			sortedFileFeatureMap = new TreeMap<DataFile, SimpleMsFeature>(
-					new DataFileComparator(SortProperty.injectionTime));
-			DateAxis dateAxis = new DateAxis("Timestamp");
-			dateAxis.setDateFormatOverride(new SimpleDateFormat("MM/dd HH:mm"));
-			
-			if(dataPlot instanceof XYPlot)
-				dataPlot.setDomainAxis(dateAxis);
-		}
-		if(sortedFileFeatureMap == null)
-			return;
-		
-		sortedFileFeatureMap.putAll(fileFeatureMap);
-		
-		if(plotType.equals(LCMSPlotType.RT_AND_PEAK_WIDTH)) {
-			
-			createRtPeakWidthPlot(
-					feature,
-					sortedFileFeatureMap, 
-					sortingOrder,
-					colorOption, 
-					currentExperiment, 
-					dataPipeline);
-		}
-		if(plotType.equals(LCMSPlotType.MZ) || plotType.equals(LCMSPlotType.FEATURE_QUALITY)) {
-			
-			createFeatureSingleValueDataPlot(
-					feature,
-					sortedFileFeatureMap, 
-					sortingOrder,
-					colorOption, 
-					currentExperiment, 
-					dataPipeline,
-					plotType);
-		}
-	}
+//	public void showFeatureData(
+//			MsFeature feature,
+//			Map<DataFile, SimpleMsFeature> fileFeatureMap, 
+//			FileSortingOrder sortingOrder,
+//			ChartColorOption colorOption, 
+//			DataAnalysisProject currentExperiment, 
+//			DataPipeline dataPipeline) {
+//	
+//		removeAllDataSets();
+//		if(!sortingOrder.equals(FileSortingOrder.NAME) 
+//				&& !sortingOrder.equals(FileSortingOrder.TIMESTAMP))
+//			return;
+//		
+//		TreeMap<DataFile, SimpleMsFeature> sortedFileFeatureMap = null;
+//		if(sortingOrder.equals(FileSortingOrder.NAME)) {
+//			sortedFileFeatureMap = new TreeMap<DataFile, SimpleMsFeature>(
+//					new DataFileComparator(SortProperty.Name));
+//		}
+//		if(sortingOrder.equals(FileSortingOrder.TIMESTAMP)) {
+//			sortedFileFeatureMap = new TreeMap<DataFile, SimpleMsFeature>(
+//					new DataFileComparator(SortProperty.injectionTime));
+//			DateAxis dateAxis = new DateAxis("Timestamp");
+//			dateAxis.setDateFormatOverride(new SimpleDateFormat("MM/dd HH:mm"));
+//			
+//			if(dataPlot instanceof XYPlot)
+//				dataPlot.setDomainAxis(dateAxis);
+//		}
+//		if(sortedFileFeatureMap == null)
+//			return;
+//		
+//		sortedFileFeatureMap.putAll(fileFeatureMap);
+//		
+//		if(plotType.equals(LCMSPlotType.RT_AND_PEAK_WIDTH)) {
+//			
+//			createRtPeakWidthPlot(
+//					feature,
+//					sortedFileFeatureMap, 
+//					sortingOrder,
+//					colorOption, 
+//					currentExperiment, 
+//					dataPipeline);
+//		}
+//		if(plotType.equals(LCMSPlotType.MZ) || plotType.equals(LCMSPlotType.FEATURE_QUALITY)) {
+//			
+//			createFeatureSingleValueDataPlot(
+//					feature,
+//					sortedFileFeatureMap, 
+//					sortingOrder,
+//					colorOption, 
+//					currentExperiment, 
+//					dataPipeline,
+//					plotType);
+//		}
+//	}
 	
 	private void createFeatureSingleValueDataPlot(
 			MsFeature feature, 
@@ -400,6 +401,70 @@ public class FeaturePropertiesTimelinePlot extends AbstractControlledDataPlot {
 	protected void initPlot() {
 		// TODO Auto-generated method stub
 		
+	}
+
+	@Override
+	public void showFeatureData(MSQualityDataPlotParameterObject plotParametersObject) {
+
+		this.plotParameters = plotParametersObject;
+		removeAllDataSets();
+		
+		DataAnalysisProject currentExperiment = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
+		if(currentExperiment == null)
+			return;
+		
+		DataPipeline dataPipeline = currentExperiment.getActiveDataPipeline();
+		if(dataPipeline == null)
+			return;
+		
+		if (currentExperiment.getExperimentDesign() == null 
+				|| currentExperiment.getExperimentDesign().getSamples().isEmpty())
+			return;
+		
+		if(!plotParameters.getSortingOrder().equals(FileSortingOrder.NAME) 
+				&& !plotParameters.getSortingOrder().equals(FileSortingOrder.TIMESTAMP))
+			return;
+		
+		TreeMap<DataFile, SimpleMsFeature> sortedFileFeatureMap = null;
+		if(plotParameters.getSortingOrder().equals(FileSortingOrder.NAME)) {
+			sortedFileFeatureMap = new TreeMap<DataFile, SimpleMsFeature>(
+					new DataFileComparator(SortProperty.Name));
+		}
+		if(plotParameters.getSortingOrder().equals(FileSortingOrder.TIMESTAMP)) {
+			sortedFileFeatureMap = new TreeMap<DataFile, SimpleMsFeature>(
+					new DataFileComparator(SortProperty.injectionTime));
+			DateAxis dateAxis = new DateAxis("Timestamp");
+			dateAxis.setDateFormatOverride(new SimpleDateFormat("MM/dd HH:mm"));
+			
+			if(dataPlot instanceof XYPlot)
+				dataPlot.setDomainAxis(dateAxis);
+		}
+		if(sortedFileFeatureMap == null)
+			return;
+		
+		sortedFileFeatureMap.putAll(plotParameters.getFileFeatureMap());
+		
+		if(plotType.equals(LCMSPlotType.RT_AND_PEAK_WIDTH)) {
+			
+			createRtPeakWidthPlot(
+					plotParameters.getMsFeature(),
+					sortedFileFeatureMap, 
+					plotParameters.getSortingOrder(),
+					plotParameters.getChartColorOption(), 
+					currentExperiment, 
+					dataPipeline);
+		}
+		if(plotType.equals(LCMSPlotType.MZ) || plotType.equals(LCMSPlotType.FEATURE_QUALITY)) {
+			
+			createFeatureSingleValueDataPlot(
+					plotParameters.getMsFeature(),
+					sortedFileFeatureMap, 
+					plotParameters.getSortingOrder(),
+					plotParameters.getChartColorOption(), 
+					currentExperiment, 
+					dataPipeline,
+					plotType);
+		}
 	}
 }
 
