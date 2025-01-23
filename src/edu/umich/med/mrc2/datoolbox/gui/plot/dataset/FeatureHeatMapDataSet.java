@@ -23,6 +23,7 @@ package edu.umich.med.mrc2.datoolbox.gui.plot.dataset;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.jfree.data.DomainInfo;
@@ -34,20 +35,20 @@ import org.ujmp.core.calculation.Calculation.Ret;
 
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
+import edu.umich.med.mrc2.datoolbox.data.compare.DataFileComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataScale;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.gui.datexp.MZRTPlotParameterObject;
-import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
-import edu.umich.med.mrc2.datoolbox.utils.DataSetUtils;
 import edu.umich.med.mrc2.datoolbox.utils.NormalizationUtils;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
 
 public class FeatureHeatMapDataSet extends DefaultXYZDataset implements RangeInfo, DomainInfo, IHeatMapDataSet{
 
 	private static final long serialVersionUID = -2535216261141143315L;
-	
+
+	private DataPipeline dataPipeline;
 	private Matrix featureSubsetMatrix;
 	private double[][] data;
 	private String[]rowLabels;
@@ -59,13 +60,15 @@ public class FeatureHeatMapDataSet extends DefaultXYZDataset implements RangeInf
 	private MZRTPlotParameterObject params;
 
 	public FeatureHeatMapDataSet(
+			DataPipeline dataPipeline,
 			Matrix featureSubsetMatrix,
 			MZRTPlotParameterObject params) {
 
 		super();
+		this.dataPipeline = dataPipeline;
 		this.featureSubsetMatrix = featureSubsetMatrix;
 		this.params = params;
-		dataScale = params.getDataScale();
+		this.dataScale = params.getDataScale();
 		createDataSet();
 	}
 	
@@ -113,10 +116,6 @@ public class FeatureHeatMapDataSet extends DefaultXYZDataset implements RangeInf
 		if (featureSubsetMatrix == null)
 			return;	
 		
-		if(MRC2ToolBoxCore.getActiveMetabolomicsExperiment() == null
-				|| MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getActiveDataPipeline() == null)
-			return;
-
 		params = newParams;
 		List<MsFeature>filteredFeatures = filterAndSortFeatures(			
 				params.getMzRange(), params.getRtRange(), params.getFeatureSortingOrder());
@@ -126,12 +125,12 @@ public class FeatureHeatMapDataSet extends DefaultXYZDataset implements RangeInf
 				collect(Collectors.toList());
 		Matrix featureMetadataMatrix = featureSubsetMatrix.getMetaDataDimensionMatrix(0);
 		Matrix newFeatureMetadataMatrix = featureMetadataMatrix.selectColumns(Ret.NEW, featureCoordinates);
-		
-		DataPipeline dataPipeline = MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getActiveDataPipeline();
-		List<DataFile>filteredDataFiles = DataSetUtils.getDataFilesForSamples(
-				params.getActiveSamples(), 
-				dataPipeline, 
-				params.getFileSortingOrder());
+		Set<DataFile>filteredDataFiles = newParams.getActiveSamples().stream().
+				flatMap(s -> s.getDataFilesForMethod(dataPipeline.getAcquisitionMethod()).stream()).
+				filter(f -> f.isEnabled()).
+				distinct().
+				sorted(new DataFileComparator(params.getFileSortingOrder())).
+				collect(Collectors.toSet());
 				
 		List<Long>dataFileCoordinates = 
 				filteredDataFiles.stream().

@@ -26,6 +26,7 @@ import edu.umich.med.mrc2.datoolbox.data.compare.ChartColorOption;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataScale;
 import edu.umich.med.mrc2.datoolbox.data.enums.FileSortingOrder;
 import edu.umich.med.mrc2.datoolbox.data.enums.PlotDataGrouping;
+import edu.umich.med.mrc2.datoolbox.gui.plot.stats.StatsPlotType;
 
 public class TwoDimDataPlotParameterObject {
 
@@ -35,6 +36,7 @@ public class TwoDimDataPlotParameterObject {
 	protected DataScale dataScale;
 	protected ExperimentDesignFactor category;
 	protected ExperimentDesignFactor subCategory;
+	protected StatsPlotType statPlotType;
 	
 	public TwoDimDataPlotParameterObject(
 			FileSortingOrder sortingOrder, 
@@ -42,7 +44,8 @@ public class TwoDimDataPlotParameterObject {
 			ChartColorOption chartColorOption,
 			PlotDataGrouping groupingType, 
 			ExperimentDesignFactor category, 
-			ExperimentDesignFactor subCategory) {
+			ExperimentDesignFactor subCategory,
+			StatsPlotType statPlotType) {
 		super();
 		this.sortingOrder = sortingOrder;
 		this.dataScale = dataScale;
@@ -53,6 +56,8 @@ public class TwoDimDataPlotParameterObject {
 		if(this.groupingType.equals(PlotDataGrouping.TWO_FACTORS)
 				&& this.subCategory == null)
 			this.groupingType = PlotDataGrouping.ONE_FACTOR;
+		
+		this.statPlotType = statPlotType;
 	}
 
 	public FileSortingOrder getSortingOrder() {
@@ -77,6 +82,14 @@ public class TwoDimDataPlotParameterObject {
 
 	public DataScale getDataScale() {
 		return dataScale;
+	}
+	
+	public StatsPlotType getStatPlotType() {
+		return statPlotType;
+	}
+
+	public void setStatPlotType(StatsPlotType statPlotType) {
+		this.statPlotType = statPlotType;
 	}
 }
 

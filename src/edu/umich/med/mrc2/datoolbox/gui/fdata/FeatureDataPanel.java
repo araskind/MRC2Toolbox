@@ -673,14 +673,15 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 	    		return;
 	    	}
 	    	else {
-	    		cleanMsFeatureSet.setProperty(FeatureSetProperties.FILTERING_PARAMETERS, fcp);
-	    		MRC2ToolBoxCore.getActiveMetabolomicsExperiment().
-	    			addFeatureSetForDataPipeline(cleanMsFeatureSet, activeDataPipeline);
+	    		cleanMsFeatureSet.setProperty(
+	    				FeatureSetProperties.FILTERING_PARAMETERS, fcp);
+	    		currentExperiment.addFeatureSetForDataPipeline(
+	    				cleanMsFeatureSet, activeDataPipeline);
 	    		
-	    		MainWindow.getExperimentSetupDraw().getFeatureSubsetPanel().addSetListeners(cleanMsFeatureSet);
+	    		MainWindow.getExperimentSetupDraw().
+	    			getFeatureSubsetPanel().addSetListeners(cleanMsFeatureSet);
 	    		
-	    		 MetabolomicsProjectUtils.switchActiveMsFeatureSet(cleanMsFeatureSet);
-				//	setTableModelFromFeatureSet(cleanMsFeatureSet);
+	    		MetabolomicsProjectUtils.switchActiveMsFeatureSet(cleanMsFeatureSet);
 	    	}
 	    }
 	    
@@ -718,8 +719,7 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 	}
 
 	private void showIntegratedReportDialog() {
-		
-		currentExperiment = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
+
 		if (currentExperiment == null)
 			return;
 
@@ -847,7 +847,8 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 			dataExplorerPlotDialog.toFront();
 		else {
 			dataExplorerPlotDialog.setVisible(true);
-			dataExplorerPlotDialog.loadMzRtFromFeatureCollection(activeMsFeatureSet);
+			dataExplorerPlotDialog.loadMzRtFromFeatureCollection(
+					currentExperiment, activeMsFeatureSet);
 		}
 	}
 	
@@ -1515,7 +1516,8 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 				MainWindow.getDataExplorerPlotDialog().clearPanels();
 			}
 			else {
-				MainWindow.getDataExplorerPlotDialog().loadMzRtFromFeatureCollection(activeMsFeatureSet);
+				MainWindow.getDataExplorerPlotDialog().
+					loadMzRtFromFeatureCollection(currentExperiment,activeMsFeatureSet);
 			}
 		}
 	}
@@ -1998,8 +2000,8 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 			return;
 			
 		DataExportTask det = new DataExportTask(
-				MRC2ToolBoxCore.getActiveMetabolomicsExperiment(),
-				MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getActiveDataPipeline(),
+				currentExperiment,
+				activeDataPipeline,
 				exportFile,
 				MainActionCommands.EXPORT_FEATURE_STATISTICS_COMMAND,
 				MissingExportType.AS_MISSING,

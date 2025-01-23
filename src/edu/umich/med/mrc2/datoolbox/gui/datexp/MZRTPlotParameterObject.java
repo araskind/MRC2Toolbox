@@ -26,6 +26,7 @@ import java.util.Collection;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentalSample;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataScale;
+import edu.umich.med.mrc2.datoolbox.data.enums.FileSortingOrder;
 import edu.umich.med.mrc2.datoolbox.data.enums.MSFeatureSetStatisticalParameters;
 import edu.umich.med.mrc2.datoolbox.data.enums.TableRowSubset;
 import edu.umich.med.mrc2.datoolbox.gui.plot.ColorGradient;
@@ -44,7 +45,7 @@ public class MZRTPlotParameterObject {
 	private ColorScale colorScale;
 	private TableRowSubset featureTableRowSubset;
 	private HeatMapDataRange heatMapDataRange;
-	private SortProperty fileSortingOrder;
+	private FileSortingOrder fileSortingOrder;
 	private SortProperty featureSortingOrder;
 	private Collection<ExperimentalSample>activeSamples;
 	
@@ -81,7 +82,7 @@ public class MZRTPlotParameterObject {
 			ColorGradient colorGradient,
 			ColorScale colorScale, 
 			TableRowSubset featureTableRowSubset,
-			SortProperty fileSortingOrder,
+			FileSortingOrder fileSortingOrder,
 			SortProperty featureSortingOrder,
 			Collection<ExperimentalSample>activeSamples) {
 		super();
@@ -172,11 +173,11 @@ public class MZRTPlotParameterObject {
 		this.heatMapDataRange = heatMapDataRange;
 	}
 
-	public SortProperty getFileSortingOrder() {
+	public FileSortingOrder getFileSortingOrder() {
 		return fileSortingOrder;
 	}
 
-	public void setFileSortingOrder(SortProperty fileSortingOrder) {
+	public void setFileSortingOrder(FileSortingOrder fileSortingOrder) {
 		this.fileSortingOrder = fileSortingOrder;
 	}
 

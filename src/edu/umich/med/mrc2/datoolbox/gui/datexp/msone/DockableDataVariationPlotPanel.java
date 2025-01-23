@@ -90,13 +90,15 @@ public class DockableDataVariationPlotPanel extends DockableMSFeatureQCPlotPanel
 			Map<DataFile, SimpleMsFeature> fileFeatureMap) {
 
 		super.loadFeatureData(feature, fileFeatureMap);
-		featurePropertiesTimelinePlot.showFeatureData(plotParametersObject);
+		featurePropertiesTimelinePlot.showFeatureData(
+				currentExperiment, plotParametersObject);
 	}
 	
 	protected void updatePlot() {
 		
 		super.loadFeatureData(activeFeature, activeFileFeatureMap);
-		featurePropertiesTimelinePlot.showFeatureData(plotParametersObject);
+		featurePropertiesTimelinePlot.showFeatureData(
+				currentExperiment, plotParametersObject);
 	}
 
 	@Override

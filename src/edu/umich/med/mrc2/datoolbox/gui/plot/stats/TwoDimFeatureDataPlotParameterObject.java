@@ -44,9 +44,10 @@ public class TwoDimFeatureDataPlotParameterObject extends TwoDimDataPlotParamete
 			ChartColorOption chartColorOption,
 			PlotDataGrouping groupingType, 
 			ExperimentDesignFactor category, 
-			ExperimentDesignFactor subCategory) {
+			ExperimentDesignFactor subCategory,
+			StatsPlotType statPlotType) {
 		super(sortingOrder, dataScale, chartColorOption, 
-				groupingType, category, subCategory);
+				groupingType, category, subCategory, statPlotType);
 
 		this.featuresMap = featuresMap;
 	}

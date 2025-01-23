@@ -31,6 +31,7 @@ import edu.umich.med.mrc2.datoolbox.data.enums.DataSetQcField;
 import edu.umich.med.mrc2.datoolbox.data.enums.FileSortingOrder;
 import edu.umich.med.mrc2.datoolbox.data.enums.PlotDataGrouping;
 import edu.umich.med.mrc2.datoolbox.gui.plot.TwoDimDataPlotParameterObject;
+import edu.umich.med.mrc2.datoolbox.gui.plot.stats.StatsPlotType;
 
 public class TwoDqcPlotParameterObject extends TwoDimDataPlotParameterObject{
 
@@ -45,9 +46,10 @@ public class TwoDqcPlotParameterObject extends TwoDimDataPlotParameterObject{
 			ChartColorOption chartColorOption,
 			PlotDataGrouping groupingType, 
 			ExperimentDesignFactor category, 
-			ExperimentDesignFactor subCategory) {
+			ExperimentDesignFactor subCategory,
+			StatsPlotType statPlotType) {
 		super(sortingOrder, dataScale, chartColorOption, 
-				groupingType, category, subCategory);
+				groupingType, category, subCategory, statPlotType);
 		this.dataSetStats = dataSetStats;
 		this.statsField = statsField;
 	}

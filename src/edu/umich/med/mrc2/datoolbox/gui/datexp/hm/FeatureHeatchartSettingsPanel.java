@@ -48,6 +48,7 @@ import javax.swing.event.TableModelListener;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentalSample;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataScale;
+import edu.umich.med.mrc2.datoolbox.data.enums.FileSortingOrder;
 import edu.umich.med.mrc2.datoolbox.gui.datexp.MZRTPlotParameterObject;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.plot.ColorGradient;
@@ -87,7 +88,7 @@ public class FeatureHeatchartSettingsPanel extends
 	private JComboBox colorScaleComboBox;
 //	private JComboBox dataRangeComboBox;
 	private JComboBox<DataScale> dataScaleComboBox;
-	private JComboBox<SortProperty> fileSortingOrderComboBox;
+	private JComboBox<FileSortingOrder> fileSortingOrderComboBox;
 	private JComboBox<SortProperty> featureSortingOrderComboBox;
 	private SampleGroupTable sampleGroupTable;
 	private JButton refreshPlotButton;
@@ -306,9 +307,8 @@ public class FeatureHeatchartSettingsPanel extends
 		gbc_lblNewLabel_7.gridy = rowCount;
 		add(lblNewLabel_7, gbc_lblNewLabel_7);
 		
-		fileSortingOrderComboBox = new JComboBox<SortProperty>(
-				new DefaultComboBoxModel<SortProperty>(
-						new SortProperty[] {SortProperty.Name, SortProperty.injectionTime}));
+		fileSortingOrderComboBox = new JComboBox<FileSortingOrder>(
+				new DefaultComboBoxModel<FileSortingOrder>(FileSortingOrder.values()));
 		GridBagConstraints gbc_fileSortingOrderComboBox = new GridBagConstraints();
 		gbc_fileSortingOrderComboBox.gridwidth = 2;
 		gbc_fileSortingOrderComboBox.insets = new Insets(0, 0, 5, 0);
@@ -486,8 +486,8 @@ public class FeatureHeatchartSettingsPanel extends
 			return (ColorScale)colorScaleComboBox.getSelectedItem();
 	}
 	
-	public SortProperty getFileSortingOrder() {
-		return (SortProperty)fileSortingOrderComboBox.getSelectedItem();
+	public FileSortingOrder getFileSortingOrder() {
+		return (FileSortingOrder)fileSortingOrderComboBox.getSelectedItem();
 	}
 	
 	public SortProperty getFeatureSortingOrder() {
@@ -581,6 +581,7 @@ public class FeatureHeatchartSettingsPanel extends
 		params.setFileSortingOrder(getFileSortingOrder());
 		params.setFeatureSortingOrder(getFeatureSortingOrder());
 		params.setActiveSamples(sampleGroupTable.getSelectedSamples());
+		
 		return params;
 	}
 

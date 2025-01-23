@@ -50,9 +50,7 @@ import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.IndeterminateProgressDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.LongUpdateTask;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
-import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
-import edu.umich.med.mrc2.datoolbox.project.Experiment;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
 
 public class DockableFeatureHeatMapPanel extends DefaultSingleCDockable implements ActionListener, ItemListener {
@@ -65,6 +63,7 @@ public class DockableFeatureHeatMapPanel extends DefaultSingleCDockable implemen
 	private FeatureHeatMapDataSet heatMapDataSet;
 	private MZRTPlotParameterObject lastUsedParameters;
 	private Matrix featureSubsetMatrix;
+	private DataAnalysisProject experiment;
 	
 	public DockableFeatureHeatMapPanel() {
 
@@ -82,8 +81,13 @@ public class DockableFeatureHeatMapPanel extends DefaultSingleCDockable implemen
 		add(chartSettingsPanel, BorderLayout.EAST);
 	}
 	
-	public void loadSampleTypes(Experiment experiment) {
+	public void loadNewDataSet(
+			DataAnalysisProject experiment, 
+			MsFeatureSet subset) {
+		clearPanel();
+		this.experiment = experiment;
 		chartSettingsPanel.loadSampleTypes(experiment);
+		createFeatureHeatMap(subset);
 	}
 
 	@Override
@@ -152,7 +156,7 @@ public class DockableFeatureHeatMapPanel extends DefaultSingleCDockable implemen
 //				return null;
 //			}
 			if(redrawTrigger instanceof MsFeatureSet) {
-				loadFeatureCollection((MsFeatureSet)redrawTrigger);
+				loadFeatureCollection(experiment, (MsFeatureSet)redrawTrigger);
 				return null;
 			}	
 			else if (redrawTrigger instanceof TableRowSubset) {
@@ -251,21 +255,32 @@ public class DockableFeatureHeatMapPanel extends DefaultSingleCDockable implemen
 		return errors;
 	}
 	
-	private void loadFeatureCollection(MsFeatureSet featureSet) {
+	private void loadFeatureCollection(
+			DataAnalysisProject experiment, 
+			MsFeatureSet featureSet) {
 
-		this.featureSet = featureSet;
-		DataAnalysisProject experiment = 
-				MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
+		clearPanel();
+		
+		if(experiment == null || experiment.getExperimentDesign() == null 
+				|| experiment.getExperimentDesign().getSamples().isEmpty()
+				|| featureSet == null || featureSet.getFeatures().isEmpty())
+			return;
+		
 		chartSettingsPanel.loadSampleTypes(experiment);
 		featureSubsetMatrix = 
 				experiment.getDataMatrixForFeatureSetAndDesign(
 						this.featureSet, 
 						experiment.getExperimentDesign().getActiveDesignSubset(), 
 						experiment.getActiveDataPipeline());
-		lastUsedParameters = chartSettingsPanel.getPlotParameters();
 		
+		if(featureSubsetMatrix == null)
+			return;
+		
+		lastUsedParameters = chartSettingsPanel.getPlotParameters();		
 		heatMapDataSet = new FeatureHeatMapDataSet(
-				featureSubsetMatrix, lastUsedParameters);
+				experiment.getActiveDataPipeline(),
+				featureSubsetMatrix, 
+				lastUsedParameters);
 		heatChart.showFeatureHeatMap(heatMapDataSet, lastUsedParameters);
 	}
 	
@@ -276,10 +291,11 @@ public class DockableFeatureHeatMapPanel extends DefaultSingleCDockable implemen
 		
 		if(recalculateDataSet()) {
 			
-			lastUsedParameters = currentParameters;
-			//heatMapDataSet.updateDataSetWithParameters(lastUsedParameters, true);			
+			lastUsedParameters = currentParameters;	
 			heatMapDataSet = new FeatureHeatMapDataSet(
-					featureSubsetMatrix, lastUsedParameters);
+					experiment.getActiveDataPipeline(),
+					featureSubsetMatrix, 
+					lastUsedParameters);
 			heatChart.showFeatureHeatMap(heatMapDataSet, lastUsedParameters);
 		}
 		else {

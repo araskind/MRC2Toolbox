@@ -33,6 +33,7 @@ public class DataFileComparator extends ObjectCompatrator<DataFile> {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
+	
 	@SuppressWarnings("serial")
 	private static final Map<FileSortingOrder,SortProperty>sortPropertyMap = 
 			new TreeMap<FileSortingOrder,SortProperty>(){{
@@ -41,16 +42,7 @@ public class DataFileComparator extends ObjectCompatrator<DataFile> {
 			    put(FileSortingOrder.SAMPLE_ID, SortProperty.sample);
 			    put(FileSortingOrder.SAMPLE_NAME, SortProperty.sampleName);
 			}};
-
-	public DataFileComparator(SortProperty property) {
-		super(property);
-	}
-	
-	public DataFileComparator(SortProperty property, SortDirection direction) {
-		super(property, direction);
-		// TODO Auto-generated constructor stub
-	}
-
+			
 	public DataFileComparator(FileSortingOrder property) {
 		super(sortPropertyMap.get(property));
 	}
@@ -77,7 +69,7 @@ public class DataFileComparator extends ObjectCompatrator<DataFile> {
 		case injectionTime:
 			
 			if(df1.getInjectionTime() != null && df2.getInjectionTime() != null)
-				result = df1.getInjectionTime().compareTo(df2.getInjectionTime());			
+				result = df1.getInjectionTime().compareTo(df2.getInjectionTime());	
 
 			if (direction == SortDirection.ASC)
 				return result;
@@ -89,6 +81,9 @@ public class DataFileComparator extends ObjectCompatrator<DataFile> {
 			if(df1.getParentSample() != null && df2.getParentSample() != null)
 				result = df1.getParentSample().getId().compareTo(df2.getParentSample().getId());			
 
+			if(result == 0)
+				result = df1.getName().compareTo(df2.getName());
+			
 			if (direction == SortDirection.ASC)
 				return result;
 			else
@@ -98,6 +93,9 @@ public class DataFileComparator extends ObjectCompatrator<DataFile> {
 			if(df1.getParentSample() != null && df2.getParentSample() != null)
 				result = df1.getParentSample().getName().compareTo(df2.getParentSample().getName());			
 
+			if(result == 0)
+				result = df1.getName().compareTo(df2.getName());
+			
 			if (direction == SortDirection.ASC)
 				return result;
 			else

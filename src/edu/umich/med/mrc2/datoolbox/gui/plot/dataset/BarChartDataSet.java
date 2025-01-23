@@ -22,19 +22,16 @@
 package edu.umich.med.mrc2.datoolbox.gui.plot.dataset;
 
 import java.awt.Paint;
-import java.util.Collection;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.TreeMap;
-import java.util.stream.Collectors;
 
 import org.jfree.data.category.DefaultCategoryDataset;
 
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignFactor;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignSubset;
-import edu.umich.med.mrc2.datoolbox.data.ExperimentalSample;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataScale;
 import edu.umich.med.mrc2.datoolbox.data.enums.FileSortingOrder;
@@ -44,6 +41,7 @@ import edu.umich.med.mrc2.datoolbox.gui.plot.MasterPlotPanel;
 import edu.umich.med.mrc2.datoolbox.gui.plot.TwoDimDataPlotParameterObject;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
+import edu.umich.med.mrc2.datoolbox.utils.DataSetUtils;
 
 public class BarChartDataSet extends DefaultCategoryDataset {
 
@@ -51,17 +49,18 @@ public class BarChartDataSet extends DefaultCategoryDataset {
 	 *
 	 */
 	private static final long serialVersionUID = 8775114218336997418L;
-	private DataAnalysisProject experiment;
+
 	private MsFeature[] featuresToPlot;
 	private Map<DataPipeline, DataFile[]> dataFileMap;
 	private Map<Integer,Paint>seriesPaintMap;
 	
-	public BarChartDataSet(
+	public BarChartDataSet(			
 			MsFeature msf,
 			DataScale dataScale,
 			TwoDimDataPlotParameterObject plotParameters){
 
 			this(msf,
+				MRC2ToolBoxCore.getActiveMetabolomicsExperiment(),
 				MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getActiveDataPipeline(),
 				MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExperimentDesign().getActiveDesignSubset(),
 				dataScale,
@@ -70,11 +69,13 @@ public class BarChartDataSet extends DefaultCategoryDataset {
 	
 	public BarChartDataSet(
 			MsFeature msf,
+			DataAnalysisProject experiment,
 			DataPipeline pipeline,
 			ExperimentDesignSubset activeDesign,
 			DataScale dataScale,
 			TwoDimDataPlotParameterObject plotParameters){
 			this(msf,
+				experiment,
 				pipeline,
 				plotParameters.getSortingOrder(),
 				dataScale,
@@ -86,6 +87,7 @@ public class BarChartDataSet extends DefaultCategoryDataset {
 
  	public BarChartDataSet(
 			MsFeature msf,
+			DataAnalysisProject experiment,
 			DataPipeline pipeline,
 			FileSortingOrder sortingOrder,
 			DataScale dataScale,
@@ -95,20 +97,18 @@ public class BarChartDataSet extends DefaultCategoryDataset {
 			ExperimentDesignFactor subCategory) {
 
 		super();
-		experiment = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
 		featuresToPlot = new MsFeature[] {msf};
 
-		//	Collect data
-		Collection<ExperimentalSample> samples = 
-				experiment.getExperimentDesign().getSamplesForDesignSubset(activeDesign, true);
-		HashSet<DataFile> files = samples.stream().
-				flatMap(s -> s.getDataFilesForMethod(pipeline.getAcquisitionMethod()).stream()).
-				filter(s -> s.isEnabled()).collect(Collectors.toCollection(HashSet::new));
+		//	Collect data	
+		Set<DataFile>files = 
+				DataSetUtils.getActiveFilesForPipelineAndDesignSubset(
+						experiment,pipeline,activeDesign,sortingOrder);
+		
 		Map<DataFile, Double> dataMap = 
-				PlotDataSetUtils.getScaledDataForFeature(
+				PlotDataSetUtils.getScaledPeakAreasForFeature(
 						experiment, msf, pipeline, files, dataScale);
 		Map<String, DataFile[]> seriesFileMap = 
-				PlotDataSetUtils.createSeriesFileMap(pipeline, sortingOrder, 
+				PlotDataSetUtils.createSeriesFileMap(experiment, pipeline, sortingOrder, 
 						activeDesign, groupingType, category, subCategory);
 		Map<String,Paint>seriesPaintNameMap = new TreeMap<String,Paint>();
 		seriesPaintMap = new TreeMap<Integer,Paint>();
@@ -122,7 +122,6 @@ public class BarChartDataSet extends DefaultCategoryDataset {
 		Integer rowCount = 0;
 		for (Entry<String, DataFile[]> entry : seriesFileMap.entrySet()) {
 
-			Integer count = 1;
 			for(DataFile df : entry.getValue()) {
 
 				//TODO handle through custom object to allow proper labels
@@ -131,7 +130,6 @@ public class BarChartDataSet extends DefaultCategoryDataset {
 				addValue(dataMap.get(df), rowCount, entry.getKey());
 				seriesPaintMap.put(rowCount, seriesPaintNameMap.get(entry.getKey()));
 				rowCount++;
-				count++;
 			}
 		}
 	}

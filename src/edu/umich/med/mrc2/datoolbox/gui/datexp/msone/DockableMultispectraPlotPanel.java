@@ -73,7 +73,7 @@ public class DockableMultispectraPlotPanel extends DockableMSFeatureQCPlotPanel{
 
 		super.loadFeatureData(feature, fileFeatureMap);
 		
-		mspPlotPanel.showFeatureData(plotParametersObject);
+		mspPlotPanel.showFeatureData(currentExperiment, plotParametersObject);
 	}
 	
 	public void clearPanel() {

@@ -28,7 +28,6 @@ import org.jfree.data.time.TimeSeriesCollection;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.DataFileStatisticalSummary;
 import edu.umich.med.mrc2.datoolbox.data.compare.DataFileComparator;
-import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataSetQcField;
 import edu.umich.med.mrc2.datoolbox.data.enums.FileSortingOrder;
 import edu.umich.med.mrc2.datoolbox.gui.plot.qc.twod.TwoDqcPlotParameterObject;
@@ -36,6 +35,8 @@ import edu.umich.med.mrc2.datoolbox.gui.plot.qc.twod.TwoDqcPlotParameterObject;
 public class QcTimedScatterSet  extends TimeSeriesCollection {
 
 	
+	private static final long serialVersionUID = 1L;
+
 	public QcTimedScatterSet(
 			Collection<DataFileStatisticalSummary> dataSetStats, 
 			FileSortingOrder sortingOrder,
@@ -45,7 +46,7 @@ public class QcTimedScatterSet  extends TimeSeriesCollection {
 
 			DataFile[] files = dataSetStats.stream().
 					map(s -> s.getFile()).
-					sorted(new DataFileComparator(SortProperty.injectionTime)).
+					sorted(new DataFileComparator(sortingOrder)).
 					toArray(size -> new DataFile[size]);
 
 			NamedTimeSeries series = new NamedTimeSeries(statsField);
@@ -75,7 +76,7 @@ public class QcTimedScatterSet  extends TimeSeriesCollection {
 
 			DataFile[] files = dataSetStats.stream().
 					map(s -> s.getFile()).
-					sorted(new DataFileComparator(SortProperty.injectionTime)).
+					sorted(new DataFileComparator(FileSortingOrder.TIMESTAMP)).
 					toArray(size -> new DataFile[size]);
 
 			NamedTimeSeries series = new NamedTimeSeries(statsField);

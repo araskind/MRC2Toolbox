@@ -77,6 +77,7 @@ public class Dockable3DChartPanel  extends DefaultSingleCDockable implements Act
 	private boolean splitByBatch;
 
 	private Matrix projection;
+	private DataAnalysisProject currentExperiment;
 	private DataPipeline aciveDataPipeline;
 	private ExperimentDesignSubset activeDesign;
 	private Collection<DataFile>dataFiles;
@@ -136,12 +137,13 @@ public class Dockable3DChartPanel  extends DefaultSingleCDockable implements Act
 		if(chartType.equals(ThreeDChartType.PCA)) {
 
 			if(projection != null && aciveDataPipeline != null && activeDesign != null)
-				showPca(projection, aciveDataPipeline, activeDesign);
+				showPca(projection, currentExperiment, aciveDataPipeline, activeDesign);
 		}
 	}
 
 	public void showPca(
 			Matrix projection, 
+			DataAnalysisProject experiment,
 			DataPipeline aciveDataPipeline, 
 			ExperimentDesignSubset activeDesign) {
 
@@ -161,6 +163,7 @@ public class Dockable3DChartPanel  extends DefaultSingleCDockable implements Act
 		projNorm.setMetaDataDimensionMatrix(1, projection.getMetaDataDimensionMatrix(1));
 
 		Map<String, DataFile[]> dataMap = PlotDataSetUtils.createSeriesFileMap(
+										experiment,
 										aciveDataPipeline,
 										FileSortingOrder.NAME,
 										activeDesign,
@@ -294,19 +297,23 @@ public class Dockable3DChartPanel  extends DefaultSingleCDockable implements Act
 	
 	public void updateGuiFromExperimentAndDataPipeline(
 			DataAnalysisProject experiment, DataPipeline activeDataPipeline) {
-		if(experiment != null)
-			toolbar.populateCategories(experiment.getExperimentDesign().getActiveDesignSubset());
+		
+		clearPlotPanel();		
+		this.currentExperiment = experiment;
+		this.aciveDataPipeline = activeDataPipeline;
+		if(currentExperiment == null || activeDataPipeline == null
+				|| currentExperiment.getExperimentDesign() == null)
+			return;
+		
+		this.activeDesign = experiment.getExperimentDesign().getActiveDesignSubset();
+		toolbar.populateCategories(activeDesign);
 
-		redrawPlot();
+		//	redrawPlot();
 	}
 
     public XYZDataset<String> createInitDataset() {
 
     	XYZSeriesCollection<String> dataset = new XYZSeriesCollection<String>();
-//    	XYZSeries<String> s = new XYZSeries<String>("Series1");
-//    	s.add(Math.random() * 100, Math.random() / 100, Math.random() * 100);
-//    	dataset.add(s);
-
     	for(int i=1; i<5; i++) {
 
     		XYZSeries<String> s = createRandomSeries("S-"+i, i*20);

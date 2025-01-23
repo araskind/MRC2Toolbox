@@ -21,15 +21,17 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.plot.dataset;
 
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.jfree.data.statistics.DefaultBoxAndWhiskerCategoryDataset;
 
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.DataFileStatisticalSummary;
 import edu.umich.med.mrc2.datoolbox.data.compare.DataFileComparator;
-import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.enums.FileSortingOrder;
 import edu.umich.med.mrc2.datoolbox.gui.plot.qc.twod.TwoDqcPlotParameterObject;
 
@@ -43,22 +45,15 @@ public class QcBoxPlotDataSet extends DefaultBoxAndWhiskerCategoryDataset {
 	public QcBoxPlotDataSet(Collection<DataFileStatisticalSummary> dataSetStats, FileSortingOrder sortingOrder) {
 
 
-		DataFile[] files = dataSetStats.stream().map(s -> s.getFile()).toArray(size -> new DataFile[size]);
+		List<DataFile>files = dataSetStats.stream().
+				map(s -> s.getFile()).distinct().
+				sorted(new DataFileComparator(sortingOrder)).
+				collect(Collectors.toList());
 		
-		if (sortingOrder.equals(FileSortingOrder.NAME))
-			Arrays.sort(files);
+		 Map<DataFile, DataFileStatisticalSummary> map = dataSetStats.stream()
+			      .collect(Collectors.toMap(DataFileStatisticalSummary::getFile, Function.identity()));
 
-		if (sortingOrder.equals(FileSortingOrder.TIMESTAMP))
-			Arrays.sort(files, new DataFileComparator(SortProperty.injectionTime));
-		
-		for (DataFile f : files) {
-
-			for (DataFileStatisticalSummary stats : dataSetStats) {
-
-				if (f.equals(stats.getFile()))
-					add(stats.getBoxplotItem(), stats.getFile().getName(), "");
-			}
-		}
+		 files.stream().forEach(f -> add(map.get(f).getBoxplotItem(), f.getName(), ""));
 	}
 
 	public QcBoxPlotDataSet(TwoDqcPlotParameterObject plotParameters) {

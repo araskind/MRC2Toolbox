@@ -21,28 +21,29 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.plot.dataset;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedHashSet;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.TreeMap;
 
 import org.jfree.data.statistics.DefaultBoxAndWhiskerCategoryDataset;
 
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignFactor;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignSubset;
-import edu.umich.med.mrc2.datoolbox.data.ExperimentalSample;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
+import edu.umich.med.mrc2.datoolbox.data.compare.DataFileComparator;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataScale;
 import edu.umich.med.mrc2.datoolbox.data.enums.FileSortingOrder;
 import edu.umich.med.mrc2.datoolbox.data.enums.PlotDataGrouping;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.gui.plot.stats.StatsPlotType;
-import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
+import edu.umich.med.mrc2.datoolbox.gui.plot.stats.TwoDimFeatureDataPlotParameterObject;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
+import edu.umich.med.mrc2.datoolbox.utils.ArrayUtils;
+import edu.umich.med.mrc2.datoolbox.utils.DataSetUtils;
 
 public class BoxAndWhiskerCategoryDatasetCa extends DefaultBoxAndWhiskerCategoryDataset{
 
@@ -50,64 +51,118 @@ public class BoxAndWhiskerCategoryDatasetCa extends DefaultBoxAndWhiskerCategory
 	 *
 	 */
 	private static final long serialVersionUID = 7334649551613689395L;
-	private DataAnalysisProject experiment;
 	private MsFeature[] featuresToPlot;
-
-	public MsFeature[] getFeaturesToPlot() {
-		return featuresToPlot;
+	
+	public BoxAndWhiskerCategoryDatasetCa(
+			TwoDimFeatureDataPlotParameterObject plotParameters,
+			DataAnalysisProject experiment,
+			ExperimentDesignSubset activeDesign) {
+		
+		this(plotParameters.getFeaturesMap(),
+			experiment,
+			activeDesign,
+			plotParameters.getStatPlotType(),
+			plotParameters.getSortingOrder(),
+			plotParameters.getDataScale(),			
+			plotParameters.getGroupingType(),
+			plotParameters.getCategory(),
+			plotParameters.getSubCategory());
 	}
 
 	public BoxAndWhiskerCategoryDatasetCa(
 			Map<DataPipeline,Collection<MsFeature>> selectedFeaturesMap,
-			StatsPlotType boxplotType,
+			DataAnalysisProject experiment,
+			ExperimentDesignSubset activeDesign,
+			StatsPlotType statPlotType,
 			FileSortingOrder sortingOrder,
 			DataScale dataScale,
-			ExperimentDesignSubset activeDesign,
 			PlotDataGrouping groupingType,
 			ExperimentDesignFactor category,
 			ExperimentDesignFactor subCategory) {
 
 		super();
-		experiment = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
-		featuresToPlot = selectedFeaturesMap.values().stream().
-				flatMap(c -> c.stream()).toArray(size -> new MsFeature[size]);
-
-		//	Collect data
-		Collection<ExperimentalSample> samples = 
-				experiment.getExperimentDesign().getSamplesForDesignSubset(activeDesign, true);
-
-		for (Entry<DataPipeline, Collection<MsFeature>> entry : selectedFeaturesMap.entrySet()) {
+		if(experiment== null || activeDesign == null 
+				|| selectedFeaturesMap.isEmpty())
+			return;
+		
+		Map<DataPipeline,Set<DataFile>>pipelineDataFilesMap = 
+				new TreeMap<DataPipeline,Set<DataFile>>();
+		Map<DataFile, Double> dataMap = 
+				new TreeMap<DataFile,Double>(new DataFileComparator(sortingOrder));
+		
+		Map<String, DataFile[]> seriesFileMap = new LinkedHashMap<String, DataFile[]>();
+		
+		for(DataPipeline pipeline : selectedFeaturesMap.keySet()) {
 			
-			for(MsFeature msf : entry.getValue()) {
+			Set<DataFile>pipelineFiles = 
+					DataSetUtils.getActiveFilesForPipelineAndDesignSubset(
+					experiment, pipeline, activeDesign, sortingOrder);
+			
+			if(!pipelineFiles.isEmpty()) { 
 
-				Set<DataFile> files = samples.stream().
-						flatMap(s -> s.getDataFilesForMethod(entry.getKey().getAcquisitionMethod()).stream()).
-						filter(s -> s.isEnabled()).sorted().
-						collect(Collectors.toCollection(LinkedHashSet::new));
-				
-				Map<DataFile, Double> dataMap = 
-						PlotDataSetUtils.getScaledDataForFeature(experiment, msf, entry.getKey(),  files, dataScale);
-				Map<String, DataFile[]> seriesFileMap = 
-						PlotDataSetUtils.createSeriesFileMap(entry.getKey(), sortingOrder, 
+				pipelineDataFilesMap.put(pipeline,pipelineFiles);
+				Map<String, DataFile[]> pipelineSeriesFileMap = 
+						PlotDataSetUtils.createSeriesFileMap(experiment, pipeline, sortingOrder, 
 								activeDesign, groupingType, category, subCategory);
-
-				//	Add data
-				for (Entry<String, DataFile[]> seriesEntry : seriesFileMap.entrySet()) {
-
-					Integer count = 1;
-					ArrayList<Double>seriesValues = new ArrayList<Double>();
-
-					for(DataFile df : seriesEntry.getValue())
-						seriesValues.add(dataMap.get(df));
-
-					if(boxplotType.equals(StatsPlotType.BOXPLOT_BY_FEATURE))
-						add(seriesValues, entry.getKey(), msf.getName());
-
-					if(boxplotType.equals(StatsPlotType.BOXPLOT_BY_GROUP))
-						add(seriesValues, msf.getName(), entry.getKey());
+				
+				for(Entry<String, DataFile[]> psme : pipelineSeriesFileMap.entrySet()) {
+					
+					if(seriesFileMap.containsKey(psme.getKey())) {
+						
+						DataFile[]combined = 
+								ArrayUtils.concatObjectArrays
+										(seriesFileMap.get(psme.getKey()), 
+										pipelineSeriesFileMap.get(psme.getKey()));
+						seriesFileMap.put(psme.getKey(), combined);
+					}
+					else {
+						seriesFileMap.put(psme.getKey(), psme.getValue());
+					}
 				}
 			}
 		}
+		//	TODO ...
+		
+//		featuresToPlot = selectedFeaturesMap.values().stream().
+//				flatMap(c -> c.stream()).toArray(size -> new MsFeature[size]);
+//
+//		//	Collect data
+//		Collection<ExperimentalSample> samples = 
+//				experiment.getExperimentDesign().getSamplesForDesignSubset(activeDesign, true);
+//
+//		for (Entry<DataPipeline, Collection<MsFeature>> entry : selectedFeaturesMap.entrySet()) {
+//			
+//			for(MsFeature msf : entry.getValue()) {
+//
+//				Map<DataFile, Double> dataMap = 
+//						PlotDataSetUtils.getScaledPeakAreasForFeature(
+//								experiment, msf, entry.getKey(),allDataFiles, dataScale);
+//				
+//				Map<String, DataFile[]> seriesFileMap = 
+//						PlotDataSetUtils.createSeriesFileMap(entry.getKey(), sortingOrder, 
+//								activeDesign, groupingType, category, subCategory);
+//
+//				//	Add data
+//				for (Entry<String, DataFile[]> seriesEntry : seriesFileMap.entrySet()) {
+//
+//					Integer count = 1;
+//					ArrayList<Double>seriesValues = new ArrayList<Double>();
+//
+//					for(DataFile df : seriesEntry.getValue())
+//						seriesValues.add(dataMap.get(df));
+//
+//					if(boxplotType.equals(StatsPlotType.BOXPLOT_BY_FEATURE))
+//						add(seriesValues, entry.getKey(), msf.getName());
+//
+//					if(boxplotType.equals(StatsPlotType.BOXPLOT_BY_GROUP))
+//						add(seriesValues, msf.getName(), entry.getKey());
+//				}
+//			}
+//		}
+	}
+	
+	public MsFeature[] getFeaturesToPlot() {
+		return featuresToPlot;
 	}
 }
 

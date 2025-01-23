@@ -56,9 +56,6 @@ import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignFactor;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignLevel;
 import edu.umich.med.mrc2.datoolbox.data.SimpleMsFeature;
 import edu.umich.med.mrc2.datoolbox.data.compare.DataFileComparator;
-import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
-import edu.umich.med.mrc2.datoolbox.data.enums.FileSortingOrder;
-import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.gui.plot.ColorGradient;
 import edu.umich.med.mrc2.datoolbox.gui.plot.ColorScale;
 import edu.umich.med.mrc2.datoolbox.gui.plot.IControlledDataPlot;
@@ -75,7 +72,6 @@ import edu.umich.med.mrc2.datoolbox.gui.plot.stats.DataPlotControlsPanel;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.ColorCodingUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.ColorUtils;
-import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 
@@ -370,42 +366,28 @@ public class MultispectraPlotPanel extends JPanel
 	}
 
 	@Override
-	public void showFeatureData(MSQualityDataPlotParameterObject plotParametersObject) {
+	public void showFeatureData(
+			DataAnalysisProject currentExperiment,
+			MSQualityDataPlotParameterObject plotParametersObject) {
 
 		clearPanel();
-		
-		DataAnalysisProject currentExperiment = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
-		if(currentExperiment == null)
+		if(currentExperiment == null || currentExperiment.getActiveDataPipeline() == null
+				|| currentExperiment.getExperimentDesign() == null 
+				|| currentExperiment.getExperimentDesign().getSamples().isEmpty()
+				|| plotParametersObject.getFileFeatureMap().isEmpty())
 			return;
 		
-		DataPipeline dataPipeline = currentExperiment.getActiveDataPipeline();
-		if(dataPipeline == null)
-			return;
-		
-		if (currentExperiment.getExperimentDesign() == null 
-				|| currentExperiment.getExperimentDesign().getSamples().isEmpty())
-			return;
-		
-		if(!plotParametersObject.getSortingOrder().equals(FileSortingOrder.NAME) 
-				&& !plotParametersObject.getSortingOrder().equals(FileSortingOrder.TIMESTAMP))
-			return;
-		
-		TreeMap<DataFile, SimpleMsFeature> sortedFileFeatureMap = null;
-		if(plotParametersObject.getSortingOrder().equals(FileSortingOrder.NAME))
-			sortedFileFeatureMap = new TreeMap<DataFile, SimpleMsFeature>(
-					new DataFileComparator(SortProperty.Name));
-		
-		if(plotParametersObject.getSortingOrder().equals(FileSortingOrder.TIMESTAMP))
-			sortedFileFeatureMap = new TreeMap<DataFile, SimpleMsFeature>(
-					new DataFileComparator(SortProperty.injectionTime));
-		
+		TreeMap<DataFile, SimpleMsFeature> sortedFileFeatureMap = 
+				new TreeMap<DataFile, SimpleMsFeature>(
+						new DataFileComparator(plotParametersObject.getSortingOrder()));		
 		sortedFileFeatureMap.putAll(plotParametersObject.getFileFeatureMap());
 
-		Map<DataFile,String>fileTypeMap = PlotDataSetUtils.mapFilesBySampleType(
-				currentExperiment,
-				dataPipeline,
-				currentExperiment.getExperimentDesign().getActiveDesignSubset());
-		if(fileTypeMap == null)
+		Map<DataFile,String>fileTypeMap = 
+				PlotDataSetUtils.mapFilesBySampleType(
+					currentExperiment,
+					currentExperiment.getActiveDataPipeline(),
+					currentExperiment.getExperimentDesign().getActiveDesignSubset());
+		if(fileTypeMap == null || fileTypeMap.isEmpty())
 			return;
 		
 		Map<DataFile,Color>colorMap = createColorMap(fileTypeMap, currentExperiment);

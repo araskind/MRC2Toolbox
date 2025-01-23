@@ -47,7 +47,8 @@ public class MSQualityDataPlotParameterObject extends TwoDimDataPlotParameterObj
 			ExperimentDesignFactor category,
 			ExperimentDesignFactor subCategory) {
 		
-		super(sortingOrder, DataScale.RAW, chartColorOption, groupingType, category, subCategory);
+		super(sortingOrder, DataScale.RAW, chartColorOption, 
+				groupingType, category, subCategory, null);
 		
 		this.msFeature = msFeature;
 		this.fileFeatureMap = fileFeatureMap;

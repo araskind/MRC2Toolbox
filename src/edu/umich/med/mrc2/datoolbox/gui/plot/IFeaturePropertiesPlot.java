@@ -22,8 +22,11 @@
 package edu.umich.med.mrc2.datoolbox.gui.plot;
 
 import edu.umich.med.mrc2.datoolbox.gui.datexp.msone.MSQualityDataPlotParameterObject;
+import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 
 public interface IFeaturePropertiesPlot {
 
-	public void showFeatureData(MSQualityDataPlotParameterObject plotParametersObject);
+	public void showFeatureData(
+			DataAnalysisProject currentExperiment,
+			MSQualityDataPlotParameterObject plotParametersObject);
 }

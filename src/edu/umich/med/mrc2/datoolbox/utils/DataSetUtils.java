@@ -21,8 +21,6 @@
 
 package edu.umich.med.mrc2.datoolbox.utils;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -33,13 +31,12 @@ import org.ujmp.core.Matrix;
 import org.ujmp.core.calculation.Calculation.Ret;
 
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
+import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignFactor;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignSubset;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentalSample;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureSet;
 import edu.umich.med.mrc2.datoolbox.data.compare.DataFileComparator;
-import edu.umich.med.mrc2.datoolbox.data.compare.ExperimentalSampleComparator;
-import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.enums.FileSortingOrder;
 import edu.umich.med.mrc2.datoolbox.data.enums.GlobalDefaults;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
@@ -49,6 +46,15 @@ import edu.umich.med.mrc2.datoolbox.main.ReferenceSamplesManager;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 
 public class DataSetUtils {
+	
+	public static Matrix subsetCurrentlyActiveDataMatrix(MsFeatureSet activeFeatures) {
+		
+		return subsetDataMatrix(
+				MRC2ToolBoxCore.getActiveMetabolomicsExperiment(),
+				MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getActiveDataPipeline(),
+				MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExperimentDesign().getActiveDesignSubset(),
+				activeFeatures);
+	}
 
 	public static Matrix subsetDataMatrix(
 			DataAnalysisProject currentExperiment,
@@ -56,7 +62,18 @@ public class DataSetUtils {
 			ExperimentDesignSubset activeDesign,
 			MsFeatureSet activeFeatures) {
 
-		if(currentExperiment == null || acivePipeline == null)
+		if(currentExperiment == null || acivePipeline == null || activeDesign == null 
+				|| activeFeatures == null || activeFeatures.getFeatures().isEmpty())
+			return null;
+		
+		Set<DataFile>activeFiles = 
+				getActiveFilesForPipelineAndDesignSubset(
+						currentExperiment,
+						acivePipeline,
+						activeDesign,
+						null);
+		
+		if(activeFiles.isEmpty())
 			return null;
 
 		Matrix source = currentExperiment.getDataMatrixForDataPipeline(acivePipeline);
@@ -69,10 +86,7 @@ public class DataSetUtils {
 				sorted().collect(Collectors.toList());
 		Matrix newFeatureMatrix = featureMatrix.selectColumns(Ret.NEW, features);
 
-		DataFile[] activeFiles = 
-				sortFiles(acivePipeline, FileSortingOrder.NAME, activeDesign);
-		Collection<Long>files = 
-				Arrays.asList(activeFiles).stream().
+		Collection<Long>files = activeFiles.stream().
 				map(file -> source.getRowForLabel(file)).
 				collect(Collectors.toList());
 		Matrix newFileMatrix = fileMatrix.selectRows(Ret.NEW, files);
@@ -99,20 +113,23 @@ public class DataSetUtils {
 	}
 	
 	public static Set<DataFile> getActiveFilesForPipelineAndDesignSubset(
+			DataAnalysisProject currentExperiment,
 			DataPipeline dataPipeline,
-			ExperimentDesignSubset activeDesign) {
-		Set<DataFile>files = new TreeSet<DataFile>();
+			ExperimentDesignSubset activeDesign,
+			FileSortingOrder sortingOrder) {
 		
-		if (MRC2ToolBoxCore.getActiveMetabolomicsExperiment() == null)
-			return files;
-
-		if (MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExperimentDesign() == null 
-				|| MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExperimentDesign().getSamples().isEmpty())
+		Set<DataFile>files = new TreeSet<DataFile>();
+		if(sortingOrder != null)
+			files = new TreeSet<DataFile>(new DataFileComparator(sortingOrder));
+		
+		if (dataPipeline == null || activeDesign == null 
+			|| currentExperiment == null
+			|| currentExperiment.getExperimentDesign() == null 
+			|| currentExperiment.getExperimentDesign().getSamples().isEmpty())
 			return files;
 		
 		Collection<ExperimentalSample> samples =
-				MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExperimentDesign().
-					getSamplesForDesignSubset(activeDesign, true);
+				currentExperiment.getExperimentDesign().getSamplesForDesignSubset(activeDesign, true);
 		
 		if(!samples.isEmpty()) {
 			
@@ -126,87 +143,57 @@ public class DataSetUtils {
 		}
 		return files;
 	}
-	
-	//	TODO simplify
-	public static DataFile[] sortFiles(
+
+	public static Collection<DataFile> sortFiles(
+			DataAnalysisProject currentExperiment,
 			DataPipeline dataPipeline,
 			FileSortingOrder order,
 			ExperimentDesignSubset activeDesign) {
 		
-		//Set<DataFile> getActiveFilesForPipelineAndDesignSubset(dataPipeline, activeDesign);
-
-		if (MRC2ToolBoxCore.getActiveMetabolomicsExperiment() == null)
-			return null;
-
-		if (MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExperimentDesign() == null)
-			return null;
-
-		if (MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExperimentDesign().getSamples().isEmpty())
-			return new DataFile[0];
-
-		Collection<ExperimentalSample> samples =
-				MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExperimentDesign().
-					getSamplesForDesignSubset(activeDesign, true);
-
-		if (order.equals(FileSortingOrder.NAME))
-			return samples.stream().
-					flatMap(s -> s.getDataFilesForMethod(dataPipeline.getAcquisitionMethod()).
-					stream()).filter(s -> s.isEnabled()).
-					sorted().toArray(size -> new DataFile[size]);
-
-		if (order.equals(FileSortingOrder.TIMESTAMP))
-			return samples.stream().flatMap(s -> s.getDataFilesForMethod(dataPipeline.getAcquisitionMethod()).
-					stream()).filter(s -> s.isEnabled()).
-					sorted(new DataFileComparator(SortProperty.injectionTime)).
-					toArray(size -> new DataFile[size]);
-
-		if (order.equals(FileSortingOrder.SAMPLE_ID)) {
-
-			return samples.stream().
-					sorted(new ExperimentalSampleComparator(SortProperty.ID)).
-					flatMap(s -> s.getDataFilesForMethod(dataPipeline.getAcquisitionMethod()).
-					stream()).filter(s -> s.isEnabled()).toArray(size -> new DataFile[size]);
-		}
-		if (order.equals(FileSortingOrder.SAMPLE_NAME))
-			return samples.stream().sorted(new ExperimentalSampleComparator(SortProperty.Name)).
-					flatMap(s -> s.getDataFilesForMethod(dataPipeline.getAcquisitionMethod()).stream()).
-					filter(s -> s.isEnabled()).toArray(size -> new DataFile[size]);
-
-		ArrayList<DataFile>sortedFiles = new ArrayList<DataFile>();
-		return sortedFiles.toArray(new DataFile[sortedFiles.size()]) ;
+		Set<DataFile>activeFiles = 
+				getActiveFilesForPipelineAndDesignSubset(
+						currentExperiment, dataPipeline, activeDesign, order);
+		
+		return activeFiles;
 	}
-	
-	//	TODO ???
-	public static List<DataFile> getDataFilesForSamples(
+
+	public static Set<DataFile> getDataFilesForSamples(
 			Collection<ExperimentalSample>samples, 
 			DataPipeline dataPipeline, 
-			SortProperty fileSortingOrder) {
+			FileSortingOrder fileSortingOrder) {
 		
-		List<DataFile>dataFiles = new ArrayList<DataFile>();
-		if (MRC2ToolBoxCore.getActiveMetabolomicsExperiment() == null
-				|| MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExperimentDesign() == null 
-				|| MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExperimentDesign().getSamples().isEmpty())
+		Set<DataFile>dataFiles = 
+				new TreeSet<DataFile>(new DataFileComparator(fileSortingOrder));
+		ExperimentDesignFactor refFactor = ReferenceSamplesManager.getSampleControlTypeFactor();
+		List<ExperimentalSample>regularSamples = samples.stream().
+				filter(s -> s.getLevel(refFactor).equals(ReferenceSamplesManager.sampleLevel)).
+				collect(Collectors.toList());
+		if(regularSamples.isEmpty())
 			return dataFiles;
 		
 		DataAcquisitionMethod acqMethod = dataPipeline.getAcquisitionMethod();
-		for(ExperimentalSample s : samples) {
+		for(ExperimentalSample s : regularSamples) {
 			
-			if(s.equals(ReferenceSamplesManager.getGenericRegularSample())) {
-				
-				for(ExperimentalSample regSample : MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExperimentDesign().getRegularSamples()) {
-					
-					TreeSet<DataFile> sampleFiles = regSample.getDataFilesForMethod(acqMethod);
-					if(sampleFiles != null && !sampleFiles.isEmpty())
-						dataFiles.addAll(sampleFiles);
-				}
-			}
-			else {
-				TreeSet<DataFile> sampleFiles = s.getDataFilesForMethod(acqMethod);
-				if(sampleFiles != null && !sampleFiles.isEmpty())
-					dataFiles.addAll(sampleFiles);
-			}
+			TreeSet<DataFile> sampleFiles = s.getDataFilesForMethod(acqMethod);
+			if(!sampleFiles.isEmpty())				
+				sampleFiles.stream().filter(f -> f.isEnabled()).forEach(f -> dataFiles.add(f));
+			
+//			if(s.equals(ReferenceSamplesManager.getGenericRegularSample())) {
+//				
+//				for(ExperimentalSample regSample : MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExperimentDesign().getRegularSamples()) {
+//					
+//					TreeSet<DataFile> sampleFiles = regSample.getDataFilesForMethod(acqMethod);
+//					if(sampleFiles != null && !sampleFiles.isEmpty())
+//						dataFiles.addAll(sampleFiles);
+//				}
+//			}
+//			else {
+//				TreeSet<DataFile> sampleFiles = s.getDataFilesForMethod(acqMethod);
+//				if(sampleFiles != null && !sampleFiles.isEmpty())
+//					dataFiles.addAll(sampleFiles);
+//			}
 		}
-		return dataFiles.stream().sorted(new DataFileComparator(fileSortingOrder)).collect(Collectors.toList());
+		return dataFiles;
 	}
 	
 	public static ExperimentDesignSubset getSamplesOnlyDesignSubset(DataAnalysisProject currentExperiment) {
@@ -222,19 +209,20 @@ public class DataSetUtils {
 	
 	public static Set<DataFile> getCurrentActiveFiles(){
 		
+		DataAnalysisProject experiment = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
+		
 		Set<DataFile>files = new TreeSet<DataFile>();
 		
-		if (MRC2ToolBoxCore.getActiveMetabolomicsExperiment() == null 
-				|| MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getActiveDataPipeline() == null)
-			return files;
-
-		if (MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExperimentDesign() == null 
-				|| MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExperimentDesign().getSamples().isEmpty()
-				|| MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExperimentDesign().getActiveDesignSubset() == null)
+		if (experiment == null || experiment.getActiveDataPipeline() == null
+				|| experiment.getExperimentDesign() == null 
+				|| experiment.getExperimentDesign().getSamples().isEmpty()
+				|| experiment.getExperimentDesign().getActiveDesignSubset() == null)
 			return files;
 		
 		return getActiveFilesForPipelineAndDesignSubset(
-				MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getActiveDataPipeline(),
-				MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExperimentDesign().getActiveDesignSubset());
+				experiment,
+				experiment.getActiveDataPipeline(),
+				experiment.getExperimentDesign().getActiveDesignSubset(),
+				null);
 	}
 }

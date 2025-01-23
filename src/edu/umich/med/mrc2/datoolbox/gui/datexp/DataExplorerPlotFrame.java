@@ -126,18 +126,14 @@ public class DataExplorerPlotFrame extends JFrame implements PersistentLayout, B
 		featureHeatMapPanel.clearPanel();
 	}
 
-	public void loadMzRtFromFeatureCollection(MsFeatureSet subset) {
+	public void loadMzRtFromFeatureCollection(
+			DataAnalysisProject experiment, MsFeatureSet subset) {
 
 		mzRtBubblePlotPanel.loadFeatureSet(subset);
 		qcHistogramPanel.createQCvalueHistogram(subset);
+		featureHeatMapPanel.loadNewDataSet(experiment,subset);
 		
-		DataAnalysisProject experiment = 
-				MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
-		featureHeatMapPanel.loadSampleTypes(experiment);
-		featureHeatMapPanel.createFeatureHeatMap(subset);
-		
-//		mzMassDefectBubblePlotPanel.setMsFeatures(subset.getFeatures());
-//		mzMassDefectBubblePlotPanel.setFeatureSetTitle(subset.getName());
+		//	mzMassDefectBubblePlotPanel.loadNewDataSet(experiment,subset);
 	}
 	
 	@Override

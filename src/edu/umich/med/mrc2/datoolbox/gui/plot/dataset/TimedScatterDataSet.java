@@ -24,13 +24,11 @@ package edu.umich.med.mrc2.datoolbox.gui.plot.dataset;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Collection;
-import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.TreeMap;
-import java.util.stream.Collectors;
 
 import org.jfree.data.time.TimeSeriesCollection;
 
@@ -42,8 +40,6 @@ import edu.umich.med.mrc2.datoolbox.data.ExperimentalSample;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.SimpleMsFeature;
 import edu.umich.med.mrc2.datoolbox.data.compare.ChartColorOption;
-import edu.umich.med.mrc2.datoolbox.data.compare.DataFileComparator;
-import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataScale;
 import edu.umich.med.mrc2.datoolbox.data.enums.FileSortingOrder;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
@@ -52,6 +48,7 @@ import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.utils.ArrayUtils;
+import edu.umich.med.mrc2.datoolbox.utils.DataSetUtils;
 
 public class TimedScatterDataSet extends TimeSeriesCollection {
 
@@ -85,19 +82,23 @@ public class TimedScatterDataSet extends TimeSeriesCollection {
 		Collection<ExperimentalSample> samples = 
 				experiment.getExperimentDesign().getSamplesForDesignSubset(activeDesign, true);
 		
+		//	TODO handle multiple pipelines
+		 Set<DataFile>files = DataSetUtils.getActiveFilesForPipelineAndDesignSubset(
+						 experiment,
+						 experiment.getActiveDataPipeline(),
+						 experiment.getExperimentDesign().getActiveDesignSubset(),
+						FileSortingOrder.TIMESTAMP);
+		
 		int seriesCount = 1;
 		for (Entry<DataPipeline, Collection<MsFeature>> entry : selectedFeaturesMap.entrySet()) {
 			
 			for(MsFeature msf : entry.getValue()) {
 				
-				Set<DataFile> files = samples.stream().
-						flatMap(s -> s.getDataFilesForMethod(entry.getKey().getAcquisitionMethod()).stream()).
-						filter(s -> s.isEnabled()).sorted(new DataFileComparator(SortProperty.injectionTime)).
-						collect(Collectors.toCollection(LinkedHashSet::new));
-				
 				Map<DataFile, Double> dataMap = 
-						PlotDataSetUtils.getScaledDataForFeature(experiment, msf, entry.getKey(), files, dataScale);
-				NamedTimeSeries series = new NamedTimeSeries(Integer.toString(seriesCount) + " - " + msf.getName());	
+						PlotDataSetUtils.getScaledPeakAreasForFeature(
+								experiment, msf, entry.getKey(), files, dataScale);
+				NamedTimeSeries series = new NamedTimeSeries(
+						Integer.toString(seriesCount) + " - " + msf.getName());	
 				for(DataFile df : files) {
 					
 					if (df.getInjectionTime() != null)

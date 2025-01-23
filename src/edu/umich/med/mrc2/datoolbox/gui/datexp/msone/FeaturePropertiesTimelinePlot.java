@@ -47,7 +47,6 @@ import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.SimpleMsFeature;
 import edu.umich.med.mrc2.datoolbox.data.compare.ChartColorOption;
 import edu.umich.med.mrc2.datoolbox.data.compare.DataFileComparator;
-import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.enums.FileSortingOrder;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.gui.plot.AbstractControlledDataPlot;
@@ -58,7 +57,6 @@ import edu.umich.med.mrc2.datoolbox.gui.plot.renderer.XYCustomErrorRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.plot.stats.DataPlotControlsPanel;
 import edu.umich.med.mrc2.datoolbox.gui.plot.tooltip.NamedTimeSeriesToolTipGenerator;
 import edu.umich.med.mrc2.datoolbox.gui.utils.ColorUtils;
-import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 
@@ -404,46 +402,32 @@ public class FeaturePropertiesTimelinePlot extends AbstractControlledDataPlot im
 	}
 
 	@Override
-	public void showFeatureData(MSQualityDataPlotParameterObject plotParametersObject) {
+	public void showFeatureData(
+			DataAnalysisProject currentExperiment,
+			MSQualityDataPlotParameterObject plotParametersObject) {
 
 		this.plotParameters = plotParametersObject;
 		removeAllDataSets();
 		
-		DataAnalysisProject currentExperiment = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
-		if(currentExperiment == null)
+		if(currentExperiment == null || currentExperiment.getActiveDataPipeline() == null
+				|| currentExperiment.getExperimentDesign() == null 
+				|| currentExperiment.getExperimentDesign().getSamples().isEmpty()
+				|| plotParameters.getFileFeatureMap().isEmpty())
 			return;
+
+		TreeMap<DataFile, SimpleMsFeature> sortedFileFeatureMap = 
+				new TreeMap<DataFile, SimpleMsFeature>(
+						new DataFileComparator(plotParameters.getSortingOrder()));
+		sortedFileFeatureMap.putAll(plotParameters.getFileFeatureMap());
 		
-		DataPipeline dataPipeline = currentExperiment.getActiveDataPipeline();
-		if(dataPipeline == null)
-			return;
-		
-		if (currentExperiment.getExperimentDesign() == null 
-				|| currentExperiment.getExperimentDesign().getSamples().isEmpty())
-			return;
-		
-		if(!plotParameters.getSortingOrder().equals(FileSortingOrder.NAME) 
-				&& !plotParameters.getSortingOrder().equals(FileSortingOrder.TIMESTAMP))
-			return;
-		
-		TreeMap<DataFile, SimpleMsFeature> sortedFileFeatureMap = null;
-		if(plotParameters.getSortingOrder().equals(FileSortingOrder.NAME)) {
-			sortedFileFeatureMap = new TreeMap<DataFile, SimpleMsFeature>(
-					new DataFileComparator(SortProperty.Name));
-		}
 		if(plotParameters.getSortingOrder().equals(FileSortingOrder.TIMESTAMP)) {
-			sortedFileFeatureMap = new TreeMap<DataFile, SimpleMsFeature>(
-					new DataFileComparator(SortProperty.injectionTime));
+
 			DateAxis dateAxis = new DateAxis("Timestamp");
 			dateAxis.setDateFormatOverride(new SimpleDateFormat("MM/dd HH:mm"));
 			
 			if(dataPlot instanceof XYPlot)
 				dataPlot.setDomainAxis(dateAxis);
 		}
-		if(sortedFileFeatureMap == null)
-			return;
-		
-		sortedFileFeatureMap.putAll(plotParameters.getFileFeatureMap());
-		
 		if(plotType.equals(LCMSPlotType.RT_AND_PEAK_WIDTH)) {
 			
 			createRtPeakWidthPlot(
@@ -452,7 +436,7 @@ public class FeaturePropertiesTimelinePlot extends AbstractControlledDataPlot im
 					plotParameters.getSortingOrder(),
 					plotParameters.getChartColorOption(), 
 					currentExperiment, 
-					dataPipeline);
+					currentExperiment.getActiveDataPipeline());
 		}
 		if(plotType.equals(LCMSPlotType.MZ) || plotType.equals(LCMSPlotType.FEATURE_QUALITY)) {
 			
@@ -462,7 +446,7 @@ public class FeaturePropertiesTimelinePlot extends AbstractControlledDataPlot im
 					plotParameters.getSortingOrder(),
 					plotParameters.getChartColorOption(), 
 					currentExperiment, 
-					dataPipeline,
+					currentExperiment.getActiveDataPipeline(),
 					plotType);
 		}
 	}

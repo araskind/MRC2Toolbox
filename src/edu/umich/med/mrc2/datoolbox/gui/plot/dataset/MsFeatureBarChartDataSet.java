@@ -22,27 +22,25 @@
 package edu.umich.med.mrc2.datoolbox.gui.plot.dataset;
 
 import java.awt.Paint;
-import java.util.Collection;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.TreeMap;
-import java.util.stream.Collectors;
 
 import org.jfree.data.category.DefaultCategoryDataset;
 
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignLevel;
-import edu.umich.med.mrc2.datoolbox.data.ExperimentalSample;
+import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignSubset;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.compare.ChartColorOption;
 import edu.umich.med.mrc2.datoolbox.data.enums.PlotDataGrouping;
-import edu.umich.med.mrc2.datoolbox.data.enums.StandardFactors;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.gui.plot.MasterPlotPanel;
 import edu.umich.med.mrc2.datoolbox.gui.plot.stats.TwoDimFeatureDataPlotParameterObject;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
+import edu.umich.med.mrc2.datoolbox.utils.DataSetUtils;
 
 public class MsFeatureBarChartDataSet extends DefaultCategoryDataset {
 
@@ -56,25 +54,37 @@ public class MsFeatureBarChartDataSet extends DefaultCategoryDataset {
 	public MsFeatureBarChartDataSet(
 			MsFeature feature, 
 			TwoDimFeatureDataPlotParameterObject plotParameters) {
-				
-		DataAnalysisProject experiment = 
-				MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
-		if(experiment == null || experiment.getActiveDataPipeline() == null)
+		this(feature,
+			MRC2ToolBoxCore.getActiveMetabolomicsExperiment(),
+			MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getActiveDataPipeline(),
+			MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExperimentDesign().getActiveDesignSubset(),			
+			plotParameters);
+	}
+	
+	public MsFeatureBarChartDataSet(
+			MsFeature feature, 
+			DataAnalysisProject experiment,
+			DataPipeline pipeline,
+			ExperimentDesignSubset activeDesign,
+			TwoDimFeatureDataPlotParameterObject plotParameters) {
+
+		if(feature == null || experiment == null 
+				|| pipeline == null || activeDesign == null)
 			return;
+
+		Set<DataFile>activeFiles = 
+				DataSetUtils.getActiveFilesForPipelineAndDesignSubset(
+						experiment, pipeline, activeDesign, plotParameters.getSortingOrder());
 		
-		DataPipeline pipeline = experiment.getActiveDataPipeline();
-		
-		Collection<ExperimentalSample> samples = 
-				experiment.getExperimentDesign().getSamples();
-		HashSet<DataFile> files = samples.stream().
-				flatMap(s -> s.getDataFilesForMethod(pipeline.getAcquisitionMethod()).stream()).
-				filter(s -> s.isEnabled()).collect(Collectors.toCollection(HashSet::new));
+		if(activeFiles.isEmpty())
+			return;
 
 		Map<String, DataFile[]> seriesFileMap = 
 				PlotDataSetUtils.createSeriesFileMap(
+						experiment,
 						pipeline,
 						plotParameters.getSortingOrder(), 
-						experiment.getExperimentDesign().getCompleteDesignSubset(), 
+						activeDesign, 
 						plotParameters.getGroupingType(), 
 						plotParameters.getCategory(), 
 						plotParameters.getSubCategory());
@@ -84,8 +94,8 @@ public class MsFeatureBarChartDataSet extends DefaultCategoryDataset {
 						plotParameters.getChartColorOption());
 		Integer rowCount = 0;
 		Map<DataFile, Double> dataMap = 
-				PlotDataSetUtils.getScaledDataForFeature(
-						experiment, feature, pipeline, files, plotParameters.getDataScale());
+				PlotDataSetUtils.getScaledPeakAreasForFeature(
+						experiment, feature, pipeline, activeFiles, plotParameters.getDataScale());
 
 		for (Entry<String, DataFile[]> entry : seriesFileMap.entrySet()) {
 
@@ -109,18 +119,7 @@ public class MsFeatureBarChartDataSet extends DefaultCategoryDataset {
 		if(groupingType.equals(PlotDataGrouping.IGNORE_DESIGN)
 				&& chartColorOption.equals(ChartColorOption.BY_SAMPLE_TYPE)) {
 			
-			Collection<ExperimentDesignLevel> levelList = 
-					MRC2ToolBoxCore.getActiveMetabolomicsExperiment().
-					getExperimentDesign().getFactorByName(StandardFactors.SAMPLE_CONTROL_TYPE.getName()).
-					getLevels();
-			Map<ExperimentDesignLevel,Paint>levelPaintMap = 
-					new TreeMap<ExperimentDesignLevel,Paint>();
-			
 			int lCount = 0;
-			for(ExperimentDesignLevel l : levelList) {
-				levelPaintMap.put(l, MasterPlotPanel.getBrewerColor(lCount));
-				lCount++;
-			}					
 			for(Entry<String, DataFile[]> sfentry : seriesFileMap.entrySet()) {
 				
 				if(sfentry.getValue().length == 0)
@@ -129,7 +128,10 @@ public class MsFeatureBarChartDataSet extends DefaultCategoryDataset {
 				ExperimentDesignLevel sampleType = 
 						sfentry.getValue()[0].getParentSample().getSampleType();
 				if(sampleType != null) 
-					seriesPaintNameMap.put(sfentry.getKey(), levelPaintMap.get(sampleType));
+					seriesPaintNameMap.put(sfentry.getKey(), 
+							MasterPlotPanel.getBrewerColor(lCount));
+				
+				lCount++;
 			}
 		}
 		else {

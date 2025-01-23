@@ -145,14 +145,15 @@ public class TwoDimQCPlot extends AbstractControlledDataPlot {
 		}
 		plotParameters = 
 				new TwoDqcPlotParameterObject(
-				dataSetStats,
-				toolbar.getStatParameter(),
-				toolbar.getSortingOrder(), 
-				toolbar.getDataScale(),
-				toolbar.getChartColorOption(),
-				dataPlotControlsPanel.getDataGroupingType(), 
-				dataPlotControlsPanel.getCategory(), 
-				dataPlotControlsPanel.getSububCategory());	
+					dataSetStats,
+					toolbar.getStatParameter(),
+					toolbar.getSortingOrder(), 
+					toolbar.getDataScale(),
+					toolbar.getChartColorOption(),
+					dataPlotControlsPanel.getDataGroupingType(), 
+					dataPlotControlsPanel.getCategory(), 
+					dataPlotControlsPanel.getSububCategory(),
+					plotType);	
 	}
 	
 	@Override

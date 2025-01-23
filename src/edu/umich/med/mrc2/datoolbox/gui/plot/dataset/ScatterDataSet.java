@@ -73,7 +73,7 @@ public class ScatterDataSet extends XYSeriesCollection {
 						collect(Collectors.toCollection(LinkedHashSet::new));
 
 				Map<DataFile, Double> dataMap = 
-						PlotDataSetUtils.getScaledDataForFeature(experiment, msf, entry.getKey(), files, dataScale);
+						PlotDataSetUtils.getScaledPeakAreasForFeature(experiment, msf, entry.getKey(), files, dataScale);
 				NamedXYSeries series = new NamedXYSeries(Integer.toString(seriesCount) + " - " + msf.getName());
 				int counter = 1;
 				for(DataFile df : files) {

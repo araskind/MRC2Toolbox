@@ -31,7 +31,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
-import java.util.TreeSet;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
@@ -53,8 +52,6 @@ import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
 
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignSubset;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
-import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureComparator;
-import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.enums.FileSortingOrder;
 import edu.umich.med.mrc2.datoolbox.data.enums.PlotDataGrouping;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
@@ -68,6 +65,7 @@ import edu.umich.med.mrc2.datoolbox.gui.plot.renderer.category.VariableCategoryS
 import edu.umich.med.mrc2.datoolbox.gui.plot.renderer.category.VariableCategorySizeCategoryAxis;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
+import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 
 public class MultiPanelDataPlot extends TwoDimQCPlot{
 
@@ -82,6 +80,7 @@ public class MultiPanelDataPlot extends TwoDimQCPlot{
 	protected NumberAxis yAxis;
 	protected Axis xAxis;
 
+	protected DataAnalysisProject experiment;
 	protected ExperimentDesignSubset activeDesign;
 	protected Map<DataPipeline, Collection<MsFeature>> plottedFeaturesMap;
 	protected TwoDimFeatureDataPlotParameterObject plotParameters;
@@ -300,16 +299,17 @@ public class MultiPanelDataPlot extends TwoDimQCPlot{
 	public void loadMultipleFeatureData(Map<DataPipeline, Collection<MsFeature>> pfm) {
 
 		clearPlotMatrix();
-		if(MRC2ToolBoxCore.getActiveMetabolomicsExperiment() == null)
+		experiment = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
+		if(experiment == null || experiment.getExperimentDesign() == null 
+				|| pfm == null || pfm.isEmpty())
 			return;
 		
-		if(pfm.isEmpty())
+		activeDesign = experiment.getExperimentDesign().getActiveDesignSubset();
+		if(activeDesign == null)
 			return;
 		
 		//	Copy map to avoid side effects
 		copyFeatureMap(pfm);
-		activeDesign = MRC2ToolBoxCore.getActiveMetabolomicsExperiment().
-				getExperimentDesign().getActiveDesignSubset();
 		updateParametersFromControls();
 
 		// Create and display data set
@@ -335,12 +335,7 @@ public class MultiPanelDataPlot extends TwoDimQCPlot{
 			return;
 		
 		plottedFeaturesMap.clear();
-		for (Entry<DataPipeline, Collection<MsFeature>> entry : pfm.entrySet()) {
-			
-			plottedFeaturesMap.put(entry.getKey(), 
-					new TreeSet<MsFeature>(new MsFeatureComparator(SortProperty.MZ)));
-			plottedFeaturesMap.get(entry.getKey()).addAll(entry.getValue());
-		}
+		plottedFeaturesMap.putAll(pfm);
 	}
 
 	private void createFeatureLinePlot() {
@@ -463,16 +458,21 @@ public class MultiPanelDataPlot extends TwoDimQCPlot{
 
 		//for(MsFeature msf : plottedFeatures) {}
 
+
 			CategoryPlot boxPlot = getNewBoxPlot();
-			BoxAndWhiskerCategoryDatasetCa ds = new BoxAndWhiskerCategoryDatasetCa(
-					plottedFeaturesMap,
-					boxplotType,
-					plotParameters.getSortingOrder(),
-					plotParameters.getDataScale(),
-					activeDesign,
-					plotParameters.getGroupingType(),
-					plotParameters.getCategory(),
-					plotParameters.getSubCategory());
+			
+			BoxAndWhiskerCategoryDatasetCa ds = 
+					new BoxAndWhiskerCategoryDatasetCa(plotParameters,experiment,activeDesign);
+			
+//			BoxAndWhiskerCategoryDatasetCa ds = new BoxAndWhiskerCategoryDatasetCa(
+//					plottedFeaturesMap,
+//					boxplotType,
+//					plotParameters.getSortingOrder(),
+//					plotParameters.getDataScale(),
+//					activeDesign,
+//					plotParameters.getGroupingType(),
+//					plotParameters.getCategory(),
+//					plotParameters.getSubCategory());
 
 			boxPlot.setDataset(ds);
 
@@ -494,8 +494,7 @@ public class MultiPanelDataPlot extends TwoDimQCPlot{
 				//	MsFeatureBarChartDataSet ds = new MsFeatureBarChartDataSet(msf, plotParameters);
 				VariableCategorySizeBarChartDataSet ds = 
 						new VariableCategorySizeBarChartDataSet(msf, plotParameters);
-				VariableCategorySizeBarRenderer renderer = 
-						new VariableCategorySizeBarRenderer();
+				VariableCategorySizeBarRenderer renderer = new VariableCategorySizeBarRenderer();
 		        renderer.setDefaultToolTipGenerator(
 		        		new StatsPlotDataFileToolTipGenerator(NumberFormat.getNumberInstance(), null));
 				for(int i=0; i<ds.getRowCount(); i++)
@@ -624,8 +623,7 @@ public class MultiPanelDataPlot extends TwoDimQCPlot{
 			initLegend(RectangleEdge.BOTTOM, legendVisible);
 			dataPlotControlsPanel.updatePlotGroupingOptions(plotType);
 			dataPlotControlsPanel.updatePlotGroupingOptions(plotType);
-		}
-				
+		}				
 		plotParameters = 
 				new TwoDimFeatureDataPlotParameterObject(
 					plottedFeaturesMap,
@@ -634,6 +632,7 @@ public class MultiPanelDataPlot extends TwoDimQCPlot{
 					toolbar.getChartColorOption(),
 					dataPlotControlsPanel.getDataGroupingType(), 
 					dataPlotControlsPanel.getCategory(), 
-					dataPlotControlsPanel.getSububCategory());		
+					dataPlotControlsPanel.getSububCategory(),
+					plotType);
 	}
 }

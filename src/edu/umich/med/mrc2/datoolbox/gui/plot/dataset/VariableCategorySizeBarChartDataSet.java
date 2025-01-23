@@ -24,11 +24,11 @@ package edu.umich.med.mrc2.datoolbox.gui.plot.dataset;
 import java.awt.Paint;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -38,13 +38,11 @@ import org.jfree.data.general.AbstractDataset;
 
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.DataFileStatisticalSummary;
-import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignFactor;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignLevel;
-import edu.umich.med.mrc2.datoolbox.data.ExperimentalSample;
+import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignSubset;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.compare.ChartColorOption;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataSetQcField;
-import edu.umich.med.mrc2.datoolbox.data.enums.FileSortingOrder;
 import edu.umich.med.mrc2.datoolbox.data.enums.PlotDataGrouping;
 import edu.umich.med.mrc2.datoolbox.data.enums.StandardFactors;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
@@ -53,6 +51,7 @@ import edu.umich.med.mrc2.datoolbox.gui.plot.qc.twod.TwoDqcPlotParameterObject;
 import edu.umich.med.mrc2.datoolbox.gui.plot.stats.TwoDimFeatureDataPlotParameterObject;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
+import edu.umich.med.mrc2.datoolbox.utils.DataSetUtils;
 
 public class VariableCategorySizeBarChartDataSet extends AbstractDataset implements CategoryDataset {
 
@@ -68,102 +67,31 @@ public class VariableCategorySizeBarChartDataSet extends AbstractDataset impleme
 	private List rowKeys, columnKeys;
 	private int[]categoryItemCount;
 	
-	public VariableCategorySizeBarChartDataSet(
-			Collection<DataFileStatisticalSummary> dataSetStats, 			
-			DataSetQcField statsField,
-			FileSortingOrder sortingOrder, 
-			ChartColorOption chartColorOption,
-			PlotDataGrouping groupingType,
-			ExperimentDesignFactor category,
-			ExperimentDesignFactor subCategory,
-			boolean splitByBatch) {
-		
-		if (statsField == DataSetQcField.RAW_VALUES)
-			return;
-		
-		DataAnalysisProject experiment = 
-				MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
-		if(experiment == null)
-			return;
-		
-		DataPipeline pipeline = experiment.getActiveDataPipeline();
-		
-		Collection<ExperimentalSample> samples = 
-				experiment.getExperimentDesign().getSamples();
-		HashSet<DataFile> files = samples.stream().
-				flatMap(s -> s.getDataFilesForMethod(pipeline.getAcquisitionMethod()).stream()).
-				filter(s -> s.isEnabled()).collect(Collectors.toCollection(HashSet::new));
-
-		Map<String, DataFile[]> seriesFileMap = 
-				PlotDataSetUtils.createSeriesFileMap(
-						pipeline, 
-						sortingOrder, 
-						experiment.getExperimentDesign().getCompleteDesignSubset(), 
-						groupingType, 
-						category, 
-						subCategory);
-		calculateCategoryItemCount(seriesFileMap);
-		
-		Map<String,Paint>seriesPaintNameMap = new HashMap<String,Paint>();
-		seriesPaintMap = new HashMap<Integer,Paint>();
-		rowMap = new LinkedHashMap<Comparable,Integer>();
-		columnMap = new LinkedHashMap<Comparable,Integer>();
-		
-		int sCount = 0;
-		for(String sName : seriesFileMap.keySet()) {
-			seriesPaintNameMap.put(sName, MasterPlotPanel.getBrewerColor(sCount));
-			sCount++;
-		}
-		data = new Double[files.size()][seriesFileMap.size()];
-		Integer rowCount = 0;
-		Integer columnCount = 0;
-		for (Entry<String, DataFile[]> entry : seriesFileMap.entrySet()) {
-
-			columnMap.put(entry.getKey(), columnCount);
-			for(DataFile df : entry.getValue()) {
-				
-				
-				DataFileStatisticalSummary fileSummary = 
-						dataSetStats.stream().
-						filter(st -> st.getFile().equals(df)).
-						findFirst().orElse(null);
-				if(fileSummary != null) {
-					//	addValue(fileSummary.getProperty(statsField).doubleValue(), df.getName(), entry.getKey());
-					data[rowCount][columnCount] = fileSummary.getProperty(statsField).doubleValue();
-					rowMap.put(df.getName(), rowCount);
-					seriesPaintMap.put(rowCount, seriesPaintNameMap.get(entry.getKey()));
-					rowCount++;
-				}				
-			}
-			columnCount++;
-		}
-		rowKeys = rowMap.keySet().stream().collect(Collectors.toList());
-		columnKeys = columnMap.keySet().stream().collect(Collectors.toList());		
-	}
-	
 	public VariableCategorySizeBarChartDataSet(TwoDqcPlotParameterObject plotParameters) {
 		
-		if (plotParameters.getStatsField().equals(DataSetQcField.RAW_VALUES))
-			return;
-		
 		DataAnalysisProject experiment = 
 				MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
-		if(experiment == null)
+		if(experiment == null || experiment.getActiveDataPipeline() == null
+				|| experiment.getExperimentDesign() == null)
 			return;
 		
 		DataPipeline pipeline = experiment.getActiveDataPipeline();
+		ExperimentDesignSubset activeDesign = 
+				experiment.getExperimentDesign().getActiveDesignSubset();
 		
-		Collection<ExperimentalSample> samples = 
-				experiment.getExperimentDesign().getSamples();
-		HashSet<DataFile> files = samples.stream().
-				flatMap(s -> s.getDataFilesForMethod(pipeline.getAcquisitionMethod()).stream()).
-				filter(s -> s.isEnabled()).collect(Collectors.toCollection(HashSet::new));
+		Set<DataFile>activeFiles = 
+				DataSetUtils.getActiveFilesForPipelineAndDesignSubset(
+						experiment, pipeline, activeDesign, plotParameters.getSortingOrder());
 
+		if(activeFiles.isEmpty())
+			return;
+		
 		Map<String, DataFile[]> seriesFileMap = 
 				PlotDataSetUtils.createSeriesFileMap(
+						experiment,
 						pipeline, 
 						plotParameters.getSortingOrder(), 
-						experiment.getExperimentDesign().getCompleteDesignSubset(), 
+						activeDesign, 
 						plotParameters.getGroupingType(), 
 						plotParameters.getCategory(), 
 						plotParameters.getSubCategory());
@@ -177,7 +105,7 @@ public class VariableCategorySizeBarChartDataSet extends AbstractDataset impleme
 		columnMap = new LinkedHashMap<Comparable,Integer>();
 		Integer rowCount = 0;
 		Integer columnCount = 0;
-		data = new Double[files.size()][seriesFileMap.size()];
+		data = new Double[activeFiles.size()][seriesFileMap.size()];
 		
 		DataSetQcField sf = plotParameters.getStatsField();
 		for (Entry<String, DataFile[]> entry : seriesFileMap.entrySet()) {
@@ -209,26 +137,30 @@ public class VariableCategorySizeBarChartDataSet extends AbstractDataset impleme
 				
 		DataAnalysisProject experiment = 
 				MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
-		if(experiment == null)
+		if(experiment == null || experiment.getActiveDataPipeline() == null
+				|| experiment.getExperimentDesign() == null)
 			return;
 		
 		DataPipeline pipeline = experiment.getActiveDataPipeline();
+		ExperimentDesignSubset activeDesign = 
+				experiment.getExperimentDesign().getActiveDesignSubset();
 		
-		Collection<ExperimentalSample> samples = 
-				experiment.getExperimentDesign().getSamples();
-		HashSet<DataFile> files = samples.stream().
-				flatMap(s -> s.getDataFilesForMethod(pipeline.getAcquisitionMethod()).stream()).
-				filter(s -> s.isEnabled()).collect(Collectors.toCollection(HashSet::new));
+		Set<DataFile>activeFiles = 
+				DataSetUtils.getActiveFilesForPipelineAndDesignSubset(
+						experiment, pipeline, activeDesign, plotParameters.getSortingOrder());
 
+		if(activeFiles.isEmpty())
+			return;
+		
 		Map<String, DataFile[]> seriesFileMap = 
 				PlotDataSetUtils.createSeriesFileMap(
+						experiment,
 						pipeline, 
 						plotParameters.getSortingOrder(), 
-						experiment.getExperimentDesign().getCompleteDesignSubset(), 
+						activeDesign, 
 						plotParameters.getGroupingType(), 
 						plotParameters.getCategory(), 
 						plotParameters.getSubCategory());
-		//	calculateCategoryItemCount(seriesFileMap);
 		categoryItemCount = new int[seriesFileMap.size()];
 		
 		int fileCount = IntStream.of(categoryItemCount).sum();
@@ -241,13 +173,11 @@ public class VariableCategorySizeBarChartDataSet extends AbstractDataset impleme
 		columnMap = new LinkedHashMap<Comparable,Integer>();
 		Integer rowCount = 0;
 		Integer columnCount = 0;
-		
-		//data = new Double[files.size()][seriesFileMap.size()];
 		data = new Double[fileCount][seriesFileMap.size()];
 		
 		Map<DataFile, Double> dataMap = 
-				PlotDataSetUtils.getScaledDataForFeature(
-						experiment, feature, pipeline, files, plotParameters.getDataScale());
+				PlotDataSetUtils.getScaledPeakAreasForFeature(
+						experiment, feature, pipeline, activeFiles, plotParameters.getDataScale());
 
 		for (Entry<String, DataFile[]> entry : seriesFileMap.entrySet()) {
 
