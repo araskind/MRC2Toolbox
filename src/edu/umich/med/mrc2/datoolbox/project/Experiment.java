@@ -26,16 +26,19 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesign;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentalSample;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
+import edu.umich.med.mrc2.datoolbox.main.ReferenceSamplesManager;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 
 public abstract class Experiment implements Serializable{
@@ -220,7 +223,49 @@ public abstract class Experiment implements Serializable{
         hash = 53 * hash + (this.id != null ? this.id.hashCode() : 0);
         return hash;
     } 
+    
+    public Set<ExperimentalSample>getExperimentalSamplesBySampleTypes(
+    		Collection<ExperimentalSample>sampleTypes, boolean enabledOnly){
+    	
+    	Set<ExperimentalSample>selectedSamples = new TreeSet<ExperimentalSample>();
+    	if(sampleTypes == null || sampleTypes.isEmpty())
+    		return selectedSamples;
+    	
+    	if(experimentDesign == null ||experimentDesign.getSamples().isEmpty())
+    		return selectedSamples;
+    	
+    	for(ExperimentalSample type : sampleTypes) {
+    		
+    		if(type.equals(ReferenceSamplesManager.getGenericRegularSample()))
+    			selectedSamples.addAll(experimentDesign.getRegularSamples());
+    		
+    		for(ExperimentalSample ref : experimentDesign.getReferenceSamples()) {
+    			 if(ref.equals(type))
+    				 selectedSamples.add(ref);
+    		}
+    	}
+    	if(enabledOnly)
+    		selectedSamples.stream().
+    			filter(s -> s.isEnabled()).
+    			collect(Collectors.toCollection(TreeSet::new));
+    		
+    	return selectedSamples;
+    }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

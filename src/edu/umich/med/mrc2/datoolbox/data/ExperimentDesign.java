@@ -442,7 +442,7 @@ public class ExperimentDesign implements ExperimentDesignFactorListener, Seriali
 					filter((e) -> levels.contains(e)).
 					collect(Collectors.toList()).isEmpty())
 				subsetSamples.add(s);
-		}
+		}	
 		if(enabledOnly)
 			subsetSamples = subsetSamples.stream().
 				filter(s -> s.isEnabled()).collect(Collectors.toSet());

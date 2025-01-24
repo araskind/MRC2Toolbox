@@ -31,7 +31,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.general.AbstractDataset;
@@ -162,8 +161,8 @@ public class VariableCategorySizeBarChartDataSet extends AbstractDataset impleme
 						plotParameters.getCategory(), 
 						plotParameters.getSubCategory());
 		categoryItemCount = new int[seriesFileMap.size()];
-		
-		int fileCount = IntStream.of(categoryItemCount).sum();
+		int fileCount = seriesFileMap.values().stream().mapToInt(v -> v.length).sum();
+		//int fileCount = IntStream.of(categoryItemCount).sum();
 
 		Map<String,Paint>seriesPaintNameMap = 
 				createSeriesPaintMap(seriesFileMap, plotParameters.getGroupingType(), 

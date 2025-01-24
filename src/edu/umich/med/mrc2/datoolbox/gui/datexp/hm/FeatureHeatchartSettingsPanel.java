@@ -31,6 +31,7 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Set;
 import java.util.prefs.Preferences;
 
 import javax.swing.DefaultComboBoxModel;
@@ -92,6 +93,8 @@ public class FeatureHeatchartSettingsPanel extends
 	private JComboBox<SortProperty> featureSortingOrderComboBox;
 	private SampleGroupTable sampleGroupTable;
 	private JButton refreshPlotButton;
+	
+	private Experiment experiment;
 	
 	@SuppressWarnings("unchecked")
 	public FeatureHeatchartSettingsPanel(
@@ -411,6 +414,7 @@ public class FeatureHeatchartSettingsPanel extends
 	
 	public void loadSampleTypes(Experiment experiment) {
 		
+		this.experiment = experiment;
 		sampleGroupTable.getModel().removeTableModelListener(this);
 		sampleGroupTable.loadSampleTypes(experiment);
 		sampleGroupTable.getModel().addTableModelListener(this);
@@ -572,15 +576,19 @@ public class FeatureHeatchartSettingsPanel extends
 	
 	public MZRTPlotParameterObject getPlotParameters() {
 		
+		Set<ExperimentalSample>selectedSamples = 
+				experiment.getExperimentalSamplesBySampleTypes(
+						sampleGroupTable.getSelectedSamples(), true);
+		
 		MZRTPlotParameterObject params = new MZRTPlotParameterObject();
-		params.setMzRange(getMZRange());
-		params.setRtRange(getRtRange());
-		params.setColorGradient(getColorGradient());
-		params.setColorScale(getColorScale());
-		params.setDataScale((DataScale) dataScaleComboBox.getSelectedItem());
-		params.setFileSortingOrder(getFileSortingOrder());
-		params.setFeatureSortingOrder(getFeatureSortingOrder());
-		params.setActiveSamples(sampleGroupTable.getSelectedSamples());
+			params.setMzRange(getMZRange());
+			params.setRtRange(getRtRange());
+			params.setColorGradient(getColorGradient());
+			params.setColorScale(getColorScale());
+			params.setDataScale((DataScale) dataScaleComboBox.getSelectedItem());
+			params.setFileSortingOrder(getFileSortingOrder());
+			params.setFeatureSortingOrder(getFeatureSortingOrder());
+			params.setActiveSamples(selectedSamples);
 		
 		return params;
 	}
@@ -599,7 +607,8 @@ public class FeatureHeatchartSettingsPanel extends
 		
 		sampleGroupTable.getModel().removeTableModelListener(this);
 		sampleGroupTable.clearTable();
-		sampleGroupTable.getModel().addTableModelListener(this);		
+		sampleGroupTable.getModel().addTableModelListener(this);	
+		experiment = null;
 	}
 }
 

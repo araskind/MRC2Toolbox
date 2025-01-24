@@ -55,6 +55,7 @@ import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.gui.plot.TwoDimDataPlotParameterObject;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
+import edu.umich.med.mrc2.datoolbox.main.ReferenceSamplesManager;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.utils.DataSetUtils;
@@ -257,21 +258,18 @@ public class PlotDataSetUtils {
 			seriesSet = addFactorToSeries(seriesSet, activeDesign, category);
 			seriesSet = addFactorToSeries(seriesSet, activeDesign, subCategory);
 		}
-		//	Filter level combinations to exclude non-existent
-//		Collection<ExperimentalSample> samples =
-//				MRC2ToolBoxCore.getActiveMetabolomicsExperiment().
-//					getExperimentDesign().getSamplesForDesignSubset(activeDesign, true);
-//
-//		for(Set<ExperimentDesignLevel>levelSet : seriesSet) {
-//
-//			for(ExperimentalSample s : samples) {
-//
-//				if(s.getDesignCell().values().containsAll(levelSet))
-//					filteredSeriesSet.add(levelSet);
-//			}
-//		}
-//		return filteredSeriesSet;
-		
+		//	Add reference samples
+		ExperimentDesignFactor refFactor = 
+				ReferenceSamplesManager.getSampleControlTypeFactor();
+		if(activeDesign.getOrderedDesign().keySet().contains(refFactor)) {
+			
+			ExperimentDesignLevel[]refLevels = activeDesign.getOrderedDesign().get(refFactor);
+			for(ExperimentDesignLevel rl : refLevels) {	
+				
+				if(!rl.equals(ReferenceSamplesManager.sampleLevel))
+					seriesSet.add(Set.of(rl));
+			}
+		}
 		return seriesSet;
 	}
 

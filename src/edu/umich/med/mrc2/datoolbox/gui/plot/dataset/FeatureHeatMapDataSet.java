@@ -23,7 +23,6 @@ package edu.umich.med.mrc2.datoolbox.gui.plot.dataset;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.jfree.data.DomainInfo;
@@ -125,12 +124,12 @@ public class FeatureHeatMapDataSet extends DefaultXYZDataset implements RangeInf
 				collect(Collectors.toList());
 		Matrix featureMetadataMatrix = featureSubsetMatrix.getMetaDataDimensionMatrix(0);
 		Matrix newFeatureMetadataMatrix = featureMetadataMatrix.selectColumns(Ret.NEW, featureCoordinates);
-		Set<DataFile>filteredDataFiles = newParams.getActiveSamples().stream().
+		List<DataFile>filteredDataFiles = newParams.getActiveSamples().stream().
 				flatMap(s -> s.getDataFilesForMethod(dataPipeline.getAcquisitionMethod()).stream()).
 				filter(f -> f.isEnabled()).
 				distinct().
 				sorted(new DataFileComparator(params.getFileSortingOrder())).
-				collect(Collectors.toSet());
+				collect(Collectors.toList());
 				
 		List<Long>dataFileCoordinates = 
 				filteredDataFiles.stream().
