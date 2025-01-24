@@ -240,7 +240,7 @@ public class DataExportTask extends AbstractTask {
 		}
 		if (exportType.equals(MainActionCommands.EXPORT_ALL_FEATURE_STATISTICS_COMMAND)) {
 			try {
-				writeMZRTPeakWidthDataExportFiles();
+				writeAllQCDataExportFiles();
 				setStatus(TaskStatus.FINISHED);
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -522,7 +522,7 @@ public class DataExportTask extends AbstractTask {
 		pwWriter.close();
 	}
 	
-	private void writeMZRTPeakWidthDataExportFiles() throws Exception {
+	private void writeAllQCDataExportFiles() throws Exception {
 
 		taskDescription = "Reading feature data matrix ...";
 		Matrix dataMatrix = 
@@ -542,7 +542,9 @@ public class DataExportTask extends AbstractTask {
 		final Writer rtWriter = new BufferedWriter(new FileWriter(rtExportFile));
 		File peakWidthExportFile = Paths.get(parent, baseName + "_PEAK_WIDTH_VALUES.txt").toFile();
 		final Writer pwWriter = new BufferedWriter(new FileWriter(peakWidthExportFile));
-
+		File peakQualityExportFile = Paths.get(parent, baseName + "_PEAK_QUALITY_VALUES.txt").toFile();
+		final Writer pqcWriter = new BufferedWriter(new FileWriter(peakQualityExportFile));
+		
 		// Create header
 		TreeMap<ExperimentalSample, TreeMap<DataPipeline, DataFile[]>>sampleFileMap
 			= DataExportUtils.createSampleFileMapForDataPipeline(
@@ -579,6 +581,7 @@ public class DataExportTask extends AbstractTask {
 		mzWriter.append(headerString);
 		rtWriter.append(headerString);
 		pwWriter.append(headerString);
+		pqcWriter.append(headerString);
 
 		MsFeature[] featureList = msFeatureSet4export.stream().
 				sorted(new MsFeatureComparator(SortProperty.RT)).toArray(size -> new MsFeature[size]);
@@ -626,6 +629,7 @@ public class DataExportTask extends AbstractTask {
 
 			String[] rtLine = Arrays.copyOf(mzLine, mzLine.length);
 			String[] pwLine = Arrays.copyOf(mzLine, mzLine.length);
+			String[] qualLine = Arrays.copyOf(mzLine, mzLine.length);
 			
 			// Data
 			coordinates[1] = dataMatrix.getColumnForLabel(msf);
@@ -643,19 +647,23 @@ public class DataExportTask extends AbstractTask {
 					String mzString = "";
 					String rtString = "";
 					String pwString = "";
+					String qualString = "";
+					
 					if(value != null) {
 						mzString = MRC2ToolBoxConfiguration.defaultMzFormat.format(
 								value.getObservedSpectrum().getMonoisotopicMz());
 						rtString = MRC2ToolBoxConfiguration.defaultRtFormat.format(
 								value.getRetentionTime());
-						if(value.getRtRange() != null) {
-							pwString = MRC2ToolBoxConfiguration.defaultRtFormat.format(
-								value.getRtRange().getSize());
-						}
+						if(value.getRtRange() != null) 
+							pwString = MRC2ToolBoxConfiguration.defaultRtFormat.format(value.getRtRange().getSize());
+						
+						if(value.getQualityScore() > 0)
+							qualString = MRC2ToolBoxConfiguration.getPpmFormat().format(value.getQualityScore());
 					}
 					mzLine[fileColumnMap.get(df)] = mzString;
 					rtLine[fileColumnMap.get(df)] = rtString;
 					pwLine[fileColumnMap.get(df)] = pwString;
+					qualLine[fileColumnMap.get(df)] = qualString;
 				}
 			}			
 			mzWriter.append(StringUtils.join(mzLine, columnSeparator));
@@ -663,7 +671,10 @@ public class DataExportTask extends AbstractTask {
 			rtWriter.append(StringUtils.join(rtLine, columnSeparator));
 			rtWriter.append(lineSeparator);
 			pwWriter.append(StringUtils.join(pwLine, columnSeparator));
-			pwWriter.append(lineSeparator);
+			pwWriter.append(lineSeparator);			
+			pqcWriter.append(StringUtils.join(qualLine, columnSeparator));
+			pqcWriter.append(lineSeparator);
+			
 			processed++;
 		}
 		mzWriter.flush();
@@ -672,6 +683,8 @@ public class DataExportTask extends AbstractTask {
 		rtWriter.close();	
 		pwWriter.flush();
 		pwWriter.close();
+		pqcWriter.flush();
+		pqcWriter.close();
 	}
 
 	private void writeManifestFile() {
