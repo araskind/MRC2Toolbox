@@ -48,6 +48,7 @@ public class FeatureDataPanelMenuBar extends CommonMenuBar {
 	private static final Icon loadPlainDataFileIconSmall = GuiUtils.getIcon("importTextfile", 16);
 	private static final Icon loadMultiFileIcon = GuiUtils.getIcon("importMultifile", 24);	
 	private static final Icon addMultiFileIcon = GuiUtils.getIcon("addMultifile", 24);
+	private static final Icon addPeakQualityDataIcon = GuiUtils.getIcon("addStandardSample", 24);	
 	private static final Icon loadFromExcelIcon = GuiUtils.getIcon("excelImport", 24);
 	private static final Icon calcStatsIcon = GuiUtils.getIcon("calcStats", 24);
 	private static final Icon calcStatsIconSmall = GuiUtils.getIcon("calcStats", 16);
@@ -99,6 +100,7 @@ public class FeatureDataPanelMenuBar extends CommonMenuBar {
 	private JMenuItem
 		loadMultiFileMenuItem,
 		addFromMultiFileMenuItem,
+		addPeakQualityDataMenuItem,
 		loadFromTextMenuItem,
 		loadFromExcelMenuItem,
 		loadLibraryDataMenuItem;
@@ -161,7 +163,10 @@ public class FeatureDataPanelMenuBar extends CommonMenuBar {
 				loadMultiFileIcon);
 		addFromMultiFileMenuItem = addItem(loadDataMenu, 
 				MainActionCommands.ADD_DATA_FROM_MULTIFILES_COMMAND, 
-				addMultiFileIcon);
+				addMultiFileIcon);		
+		addPeakQualityDataMenuItem = addItem(loadDataMenu, 
+				MainActionCommands.ADD_PEAK_QUALITY_DATA_FROM_MULTIFILES_COMMAND, 
+				addPeakQualityDataIcon);
 		
 		loadDataMenu.addSeparator();
 		

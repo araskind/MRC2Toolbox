@@ -247,8 +247,7 @@ public class ExperimentUtils {
 		if(readTemporary)
 			matrixFileName = FilenameUtils.getBaseName(matrixFileName) 
 					+ tmpSuffix + "." + FilenameUtils.getExtension(matrixFileName);
-		
-		
+				
 		File featureMatrixFile = 
 				Paths.get(currentExperiment.getExperimentDirectory().getAbsolutePath(), matrixFileName).toFile();
 		if (!featureMatrixFile.exists())

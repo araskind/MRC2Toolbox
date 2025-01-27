@@ -157,6 +157,8 @@ public enum MainActionCommands {
 	LOAD_DATA_FROM_MULTIFILES_COMMAND("Load quantitative data from multiple files"),
 	LOAD_DATA_FROM_PROFINDER_PFA_COMMAND("Load quantitative data from ProFinder PFA file"),
 	ADD_DATA_FROM_MULTIFILES_COMMAND("Add quantitative data to active assay from multiple files"),
+	ADD_PEAK_QUALITY_DATA_FROM_MULTIFILES_COMMAND("Add peak quality data to active assay"),
+	START_PEAK_QUALITY_DATA_IMPORT_COMMAND("Start peak quality data import"),
 	LOAD_MS1_DATA_FROM_MULTIFILES_COMMAND("Load MS1 features from multiple files"),
 	LOAD_AVG_MS1_DATA_FROM_FILE_COMMAND("Load averaged MS1 features from file"),
 	LOAD_MSMS_DATA_FROM_MULTIFILES_COMMAND("Load MSMS data from multiple files"),

@@ -240,7 +240,7 @@ public abstract class CEFProcessingTask extends AbstractTask {
 					
 					double min = rtRangeElement.getAttribute("min").getDoubleValue();
 					double max = rtRangeElement.getAttribute("max").getDoubleValue();
-					if(min < max) 
+					if(min <= max) 
 						feature.setRtRange(new Range(min, max));						
 				}
 			}

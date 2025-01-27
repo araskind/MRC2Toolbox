@@ -94,6 +94,7 @@ import edu.umich.med.mrc2.datoolbox.gui.idtable.MetabolomicsIdentificationTableM
 import edu.umich.med.mrc2.datoolbox.gui.io.DataExportDialog;
 import edu.umich.med.mrc2.datoolbox.gui.io.IntegratedReportDialog;
 import edu.umich.med.mrc2.datoolbox.gui.io.MultiFileDataImportDialog;
+import edu.umich.med.mrc2.datoolbox.gui.io.PeakQualityImportDialog;
 import edu.umich.med.mrc2.datoolbox.gui.io.excel.ExcelImportWizard;
 import edu.umich.med.mrc2.datoolbox.gui.io.mwtab.MWTabExportDialog;
 import edu.umich.med.mrc2.datoolbox.gui.io.txt.TextDataImportDialog;
@@ -123,6 +124,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.derepl.FindDuplicateNamesTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.derepl.MergeDuplicateFeaturesTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io.DataExportTask;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io.MiltiCefPeakQualityImportTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io.MultiCefDataAddTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io.MultiCefImportTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io.QuantMatrixImportTask;
@@ -174,6 +176,7 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 	private MWTabExportDialog mwTabExportDialog;
 	private IntegratedReportDialog integratedReportDialog;
 	private FeatureDataCleanupDialog featureDataCleanupDialog;
+	private PeakQualityImportDialog peakQualityImportDialog;
 	
 	private boolean cleanEmtyFeatures;
 	private MzFrequencyAnalysisSetupDialog mzFrequencyAnalysisSetupDialog;
@@ -412,6 +415,13 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 			return;
 		}
 		else {
+			
+			if (command.equals(MainActionCommands.ADD_PEAK_QUALITY_DATA_FROM_MULTIFILES_COMMAND.getName()))
+				setUpPeakQualityDataImport();
+			
+			if (command.equals(MainActionCommands.START_PEAK_QUALITY_DATA_IMPORT_COMMAND.getName()))
+				addPeakQualityData();
+				
 			if (command.equals(MainActionCommands.CALC_FEATURES_STATS_COMMAND.getName()))
 				calculateDataStats();
 			
@@ -1127,6 +1137,33 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 		textDataImportDialog.setLocationRelativeTo(this.getContentPane());
 		textDataImportDialog.setVisible(true);
 	}
+	
+	private void setUpPeakQualityDataImport() {
+		
+		// If no data imported yet
+		if(currentExperiment.getDataMatrixForDataPipeline(activeDataPipeline) == null)
+			return;
+		
+		peakQualityImportDialog = 
+				new PeakQualityImportDialog(currentExperiment,activeDataPipeline,this);
+		peakQualityImportDialog.setLocationRelativeTo(this.getContentPane());
+		peakQualityImportDialog.setVisible(true);	
+	}
+	
+	private void addPeakQualityData() {
+		// TODO Auto-generated method stub
+		Collection<File> cefFiles = peakQualityImportDialog.getCefFiles();
+		if(cefFiles.isEmpty()) {
+			MessageDialog.showWarningMsg(
+					"No input CEF files selected", dataImputationSetupDialog);
+			return;
+		}		
+		MiltiCefPeakQualityImportTask task = new MiltiCefPeakQualityImportTask(
+				currentExperiment, activeDataPipeline, cefFiles);
+		task.addTaskListener(this);
+		MRC2ToolBoxCore.getTaskController().addTask(task);		
+		peakQualityImportDialog.dispose();
+	}
 
 	private void addSelectedFeaturesToActiveSubset() {
 		// TODO Auto-generated method stub
@@ -1545,8 +1582,10 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 
 			if (e.getSource().getClass().equals(MergeDuplicateFeaturesTask.class)) {
 
-				setTableModelFromFeatureSet(currentExperiment.getActiveFeatureSetForDataPipeline(activeDataPipeline));
-				MRC2ToolBoxCore.getMainWindow().getPreferencesDraw().switchDataPipeline(currentExperiment, activeDataPipeline);
+				setTableModelFromFeatureSet(
+						currentExperiment.getActiveFeatureSetForDataPipeline(activeDataPipeline));
+				MRC2ToolBoxCore.getMainWindow().getPreferencesDraw().
+					switchDataPipeline(currentExperiment, activeDataPipeline);
 			}
 			if (e.getSource().getClass().equals(LoadDatabaseLibraryTask.class))
 				finalizeDatabaseLibraryLoad((LoadDatabaseLibraryTask) e.getSource());
@@ -1569,7 +1608,10 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 				finalizeDuplicateNameSearch((FindDuplicateNamesTask) e.getSource());			
 		
 			if (e.getSource().getClass().equals(MzFrequencyAnalysisTask.class))
-				finalizeMzFrequencyAnalysisTask((MzFrequencyAnalysisTask)e.getSource());	
+				finalizeMzFrequencyAnalysisTask((MzFrequencyAnalysisTask)e.getSource());
+			
+			if (e.getSource().getClass().equals(MiltiCefPeakQualityImportTask.class))
+				finalizePeakQualityImportTask((MiltiCefPeakQualityImportTask)e.getSource());
 		}
 		if (e.getStatus() == TaskStatus.CANCELED || e.getStatus() == TaskStatus.ERROR) {
 			MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
@@ -1577,6 +1619,11 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 		}
 	}
 	
+	private void finalizePeakQualityImportTask(MiltiCefPeakQualityImportTask source) {
+		// TODO Auto-generated method stub
+		MessageDialog.showInfoMsg("Peak quality data import completed", this.getContentPane());
+	}
+
 	private void finalizeMzFrequencyAnalysisTask(MzFrequencyAnalysisTask task) {
 	
 		Collection<MzFrequencyObject>mzFrequencyObjects = task.getMzFrequencyObjects();

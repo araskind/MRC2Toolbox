@@ -366,6 +366,19 @@ public class DataAnalysisProject extends Experiment {
 		}		
 		return files;
 	}
+	
+	public Set<DataFile> getDataFilesWithDataForPipeline(DataPipeline dataPipeline){
+		
+		DataAcquisitionMethod method = dataPipeline.getAcquisitionMethod();
+		Set<DataFile> methodFiles = experimentDesign.getSamples().stream().
+				flatMap(s -> s.getDataFilesForMethod(method).stream()).
+				filter(f -> hasDataForFileInPipeline(f, dataPipeline)).
+				collect(Collectors.toCollection(TreeSet::new));
+	
+		return methodFiles;
+	}
+	
+	//dataFiles .stream() hasDataForFileInPipeline(DataFile file, DataPipeline pipeline)
 
 	public MsFeatureSet getActiveFeatureSetForDataPipeline(DataPipeline pipeline) {
 
