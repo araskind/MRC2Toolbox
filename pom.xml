@@ -13,7 +13,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>edu.umich.mrc2</groupId>
 	<artifactId>MRC2ToolBox</artifactId>
-	<version>1.2.85</version>
+	<version>1.2.86</version>
 	<name>MRC2ToolBox</name>
 	<description>Metabolomics data analysis</description>
 	<properties>
@@ -195,6 +195,7 @@ public final class BuildInformation {
 			<name>Maven Repository Switchboard</name>
 			<url>https://repo1.maven.org/maven2</url>
 		</repository>
+		<!--
 		<repository>
 			<snapshots>
 				<enabled>false</enabled>
@@ -206,7 +207,7 @@ public final class BuildInformation {
 			<name>Gluu Repository</name>
 			<url>https://ox.gluu.org/maven/</url>
 		</repository>		
-		<!---->
+		-->
 		<repository>
 			<id>org.geotools</id>
 			<url>https://repo.osgeo.org/repository/release/</url>

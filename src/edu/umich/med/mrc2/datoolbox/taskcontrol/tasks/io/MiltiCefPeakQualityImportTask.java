@@ -138,9 +138,12 @@ public class MiltiCefPeakQualityImportTask extends AbstractTask implements TaskL
 			if (e.getSource().getClass().equals(CefPeakQualityImportTask.class)) {
 				
 				processedCount++;
-				if(taskCount == processedCount) {
+				System.out.println(Integer.toString(processedCount) + " out of " + Integer.toString(taskCount));
+				if(taskCount == processedCount) {					
 					
+					System.out.println("**********\nSaving updated matrix ...");
 					saveFeatureMatrix();
+					System.out.println("Matrix saved");
 					setStatus(TaskStatus.FINISHED);
 					return;
 				}

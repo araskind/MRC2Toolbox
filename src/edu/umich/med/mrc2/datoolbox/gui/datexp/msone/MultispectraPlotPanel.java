@@ -56,6 +56,7 @@ import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignFactor;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignLevel;
 import edu.umich.med.mrc2.datoolbox.data.SimpleMsFeature;
 import edu.umich.med.mrc2.datoolbox.data.compare.DataFileComparator;
+import edu.umich.med.mrc2.datoolbox.data.enums.FileSortingOrder;
 import edu.umich.med.mrc2.datoolbox.gui.plot.ColorGradient;
 import edu.umich.med.mrc2.datoolbox.gui.plot.ColorScale;
 import edu.umich.med.mrc2.datoolbox.gui.plot.IControlledDataPlot;
@@ -376,10 +377,14 @@ public class MultispectraPlotPanel extends JPanel
 				|| currentExperiment.getExperimentDesign().getSamples().isEmpty()
 				|| plotParametersObject.getFileFeatureMap().isEmpty())
 			return;
+		//	TODO that's a temp fix
+		FileSortingOrder sortOrder = plotParametersObject.getSortingOrder();
+		if(sortOrder == null)
+			sortOrder = FileSortingOrder.NAME;
 		
 		TreeMap<DataFile, SimpleMsFeature> sortedFileFeatureMap = 
 				new TreeMap<DataFile, SimpleMsFeature>(
-						new DataFileComparator(plotParametersObject.getSortingOrder()));		
+						new DataFileComparator(sortOrder));		
 		sortedFileFeatureMap.putAll(plotParametersObject.getFileFeatureMap());
 
 		Map<DataFile,String>fileTypeMap = 

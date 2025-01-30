@@ -100,7 +100,7 @@
 									<content delegate="SplitDockStationFactory">
 										<fullscreen-action>false</fullscreen-action>
 										<node nodeId="1737487741016" orientation="VERTICAL" divider="0.486870897155361">
-											<leaf id="0" nodeId="1737487741014">
+											<leaf id="1" nodeId="1737487741014">
 												<placeholders>
 													<placeholder>dock.single.DockableDataVariationPlotPanelMZ</placeholder>
 												</placeholders>
@@ -123,7 +123,7 @@
 													</entry>
 												</placeholder-map>
 											</leaf>
-											<leaf id="1" nodeId="1737414690337">
+											<leaf id="0" nodeId="1737414690337">
 												<placeholders>
 													<placeholder>dock.single.DockableDataVariationPlotPanelFEATURE_QUALITY</placeholder>
 													<placeholder>dock.single.DockableMultispectrumPlotPanel</placeholder>
@@ -146,66 +146,7 @@
 							<children ignore="false">
 								<child>
 									<layout factory="delegate_StackDockStationFactory">
-										<selected>0</selected>
-										<placeholders>
-											<version>0</version>
-											<format>dock.PlaceholderList</format>
-											<entry>
-												<key shared="false">
-													<placeholder>dock.single.DockableDataVariationPlotPanelMZ</placeholder>
-												</key>
-												<item key="convert" type="b">true</item>
-												<item key="convert-keys" type="a">
-													<item type="s">index</item>
-													<item type="s">id</item>
-													<item type="s">placeholder</item>
-												</item>
-												<item key="dock.index" type="i">0</item>
-												<item key="dock.id" type="i">0</item>
-												<item key="dock.placeholder" type="s">dock.single.DockableDataVariationPlotPanelMZ</item>
-											</entry>
-											<entry>
-												<key shared="false">
-													<placeholder>dock.single.DockableMultispectrumPlotPanel</placeholder>
-												</key>
-												<item key="convert" type="b">true</item>
-												<item key="convert-keys" type="a">
-													<item type="s">index</item>
-													<item type="s">id</item>
-													<item type="s">placeholder</item>
-												</item>
-												<item key="dock.index" type="i">1</item>
-												<item key="dock.id" type="i">1</item>
-												<item key="dock.placeholder" type="s">dock.single.DockableMultispectrumPlotPanel</item>
-											</entry>
-										</placeholders>
-									</layout>
-									<children ignore="false">
-										<child>
-											<layout factory="predefined" placeholder="dock.single.DockableDataVariationPlotPanelMZ">
-												<replacement id="dockablesingle DockableDataVariationPlotPanelMZ"/>
-												<delegate id="delegate_ccontrol backup factory id">
-													<id>DockableDataVariationPlotPanelMZ</id>
-													<area/>
-												</delegate>
-											</layout>
-											<children ignore="false"/>
-										</child>
-										<child>
-											<layout factory="predefined" placeholder="dock.single.DockableMultispectrumPlotPanel">
-												<replacement id="dockablesingle DockableMultispectrumPlotPanel"/>
-												<delegate id="delegate_ccontrol backup factory id">
-													<id>DockableMultispectrumPlotPanel</id>
-													<area/>
-												</delegate>
-											</layout>
-											<children ignore="false"/>
-										</child>
-									</children>
-								</child>
-								<child>
-									<layout factory="delegate_StackDockStationFactory">
-										<selected>0</selected>
+										<selected>1</selected>
 										<placeholders>
 											<version>0</version>
 											<format>dock.PlaceholderList</format>
@@ -265,6 +206,65 @@
 												<replacement id="dockablesingle DockableDataVariationPlotPanelFEATURE_QUALITY"/>
 												<delegate id="delegate_ccontrol backup factory id">
 													<id>DockableDataVariationPlotPanelFEATURE_QUALITY</id>
+													<area/>
+												</delegate>
+											</layout>
+											<children ignore="false"/>
+										</child>
+									</children>
+								</child>
+								<child>
+									<layout factory="delegate_StackDockStationFactory">
+										<selected>0</selected>
+										<placeholders>
+											<version>0</version>
+											<format>dock.PlaceholderList</format>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.DockableDataVariationPlotPanelMZ</placeholder>
+												</key>
+												<item key="convert" type="b">true</item>
+												<item key="convert-keys" type="a">
+													<item type="s">index</item>
+													<item type="s">id</item>
+													<item type="s">placeholder</item>
+												</item>
+												<item key="dock.index" type="i">0</item>
+												<item key="dock.id" type="i">0</item>
+												<item key="dock.placeholder" type="s">dock.single.DockableDataVariationPlotPanelMZ</item>
+											</entry>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.DockableMultispectrumPlotPanel</placeholder>
+												</key>
+												<item key="convert" type="b">true</item>
+												<item key="convert-keys" type="a">
+													<item type="s">index</item>
+													<item type="s">id</item>
+													<item type="s">placeholder</item>
+												</item>
+												<item key="dock.index" type="i">1</item>
+												<item key="dock.id" type="i">1</item>
+												<item key="dock.placeholder" type="s">dock.single.DockableMultispectrumPlotPanel</item>
+											</entry>
+										</placeholders>
+									</layout>
+									<children ignore="false">
+										<child>
+											<layout factory="predefined" placeholder="dock.single.DockableDataVariationPlotPanelMZ">
+												<replacement id="dockablesingle DockableDataVariationPlotPanelMZ"/>
+												<delegate id="delegate_ccontrol backup factory id">
+													<id>DockableDataVariationPlotPanelMZ</id>
+													<area/>
+												</delegate>
+											</layout>
+											<children ignore="false"/>
+										</child>
+										<child>
+											<layout factory="predefined" placeholder="dock.single.DockableMultispectrumPlotPanel">
+												<replacement id="dockablesingle DockableMultispectrumPlotPanel"/>
+												<delegate id="delegate_ccontrol backup factory id">
+													<id>DockableMultispectrumPlotPanel</id>
 													<area/>
 												</delegate>
 											</layout>

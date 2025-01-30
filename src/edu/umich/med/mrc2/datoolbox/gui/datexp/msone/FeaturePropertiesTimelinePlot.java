@@ -274,6 +274,9 @@ public class FeaturePropertiesTimelinePlot extends AbstractControlledDataPlot im
 			if(dataType.equals(LCMSPlotType.FEATURE_QUALITY) 
 					&& dataPlot.getDataRange(dataPlot.getRangeAxis()) != null) {
 				double border  = dataPlot.getDataRange(dataPlot.getRangeAxis()).getUpperBound() * 1.15;
+				if(border <= 0)
+					border = 0.01;
+				
 				dataPlot.getRangeAxis().setRange(new org.jfree.data.Range(0.0d, border));
 			}			
 			addSDRangeMarkers(tsds, dataPlot);

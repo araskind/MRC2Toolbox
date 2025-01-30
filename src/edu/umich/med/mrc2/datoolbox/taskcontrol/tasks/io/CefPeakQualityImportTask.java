@@ -80,10 +80,13 @@ public class CefPeakQualityImportTask extends CEFProcessingTask {
 			try {
 				updateFeaturesWithQCdata();
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
+				errorMessage = "Failed to update data for " + inputCefFile.getName();
+				setStatus(TaskStatus.ERROR);
 				e.printStackTrace();
+				return;
 			}
 		}
+		setStatus(TaskStatus.FINISHED);
 	}
 	
 	@Override
@@ -116,7 +119,8 @@ public class CefPeakQualityImportTask extends CEFProcessingTask {
 			if(qdo == null) {
 				
 				errorMessage = "No QC data in " + fileToParse.getName();
-				setStatus(TaskStatus.FINISHED);
+				System.err.println(errorMessage);
+				setStatus(TaskStatus.ERROR);
 				return;
 			}
 			qcData.add(qdo);

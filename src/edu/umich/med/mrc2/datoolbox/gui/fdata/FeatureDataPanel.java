@@ -1620,7 +1620,9 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 	}
 	
 	private void finalizePeakQualityImportTask(MiltiCefPeakQualityImportTask source) {
-		// TODO Auto-generated method stub
+		
+		MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
+		MainWindow.hideProgressDialog();
 		MessageDialog.showInfoMsg("Peak quality data import completed", this.getContentPane());
 	}
 
