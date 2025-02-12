@@ -26,13 +26,11 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.stream.Collectors;
 
 import org.ujmp.core.Matrix;
 import org.ujmp.core.calculation.Calculation.Ret;
 
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
-import edu.umich.med.mrc2.datoolbox.data.ExperimentalSample;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureCluster;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureStatisticalSummary;
@@ -111,42 +109,36 @@ public class MergeDuplicateFeaturesTask extends AbstractTask {
 		}
 		setStatus(TaskStatus.FINISHED);
 	}
-	
-	private void readFeatureMatrix() {
 
-		taskDescription = "Reading MS feature matrix data";
-		total = 100;
-		processed = 30;
-		msFeatureMatrix = 
-				ExperimentUtils.readFeatureMatrix(currentExperiment, activeDataPipeline, true);
-		if(msFeatureMatrix == null)
-			msFeatureMatrix = 
-				ExperimentUtils.readFeatureMatrix(currentExperiment, activeDataPipeline, false);
-		processed = 100;
-	}
 	
 	public void removeDuplicateFeatures() {
 		
-		taskDescription = "Merging duplicate feature data for active data pipeline";
+		if (mergeOption.equals(DuplicatesCleanupOptions.USE_HIGHEST_AREA))
+			removeDuplicateFeaturesUsingHighestAreaFeature();
+		
+		if (mergeOption.equals(DuplicatesCleanupOptions.USE_PRIMARY_AND_FILL_MISSING)) 
+			removeDuplicateFeaturesFillingMissingValues();
+	}	
+	
+	private void removeDuplicateFeaturesFillingMissingValues() {
+
+		taskDescription = "Merging duplicate features filling missing values in primary";
 		total = duplicateList.size();
 		processed = 0;
 		Matrix dataMatrix = 
 				currentExperiment.getDataMatrixForDataPipeline(activeDataPipeline);
-		//Matrix featureMatrix = dataMatrix.getMetaDataDimensionMatrix(0);
 		ArrayList<MsFeature> featuresToRemove = new ArrayList<MsFeature>();
 		ArrayList<MsFeature> featuresToMerge = new ArrayList<MsFeature>();
-		TreeSet<Long>secondaryFeatureCoorinates = new TreeSet<Long>();
-		DataAcquisitionMethod acquisitionMethod = activeDataPipeline.getAcquisitionMethod();		
-		TreeSet<DataFile> dataFiles = currentExperiment.getExperimentDesign().getSamples()
-			.stream().flatMap(s -> s.getDataFilesForMethod(acquisitionMethod).stream())
-			.collect(Collectors.toCollection(TreeSet::new));
+		TreeSet<Long>secondaryFeatureCoorinates = new TreeSet<Long>();	
+		Set<DataFile> dataFiles = 
+				currentExperiment.getDataFilesForAcquisitionMethod(
+						activeDataPipeline.getAcquisitionMethod());
 				
 		long[] primaryFeatureCoordinates = new long[2];
 		long[] replacementFeatureCoordinates = new long[2];
-
-		long bestFit = -1;
-		double area, topArea, median, delta, diff, replacementValue;
-		
+		long replacementFeaturePosition = -1;
+		double median, delta, diff, replacementValue;
+				
 		for (MsFeatureCluster fclust : duplicateList) {
 			
 			featuresToMerge.clear();
@@ -164,54 +156,119 @@ public class MergeDuplicateFeaturesTask extends AbstractTask {
 			for(DataFile df : dataFiles) {
 				
 				primaryFeatureCoordinates[0] = dataMatrix.getRowForLabel(df);
-				replacementFeatureCoordinates[0] = dataMatrix.getRowForLabel(df);				
-				if (mergeOption.equals(DuplicatesCleanupOptions.USE_HIGHEST_AREA)) {
+				double primaryValue = dataMatrix.getAsDouble(primaryFeatureCoordinates);
+				if(primaryValue > 0.0d)
+					continue;
+				
+				replacementFeatureCoordinates[0] = primaryFeatureCoordinates[0];				
+				double newValue = 0.0d;
+				if(secondaryFeatureCoorinates.size() == 1) {
 					
+					replacementFeatureCoordinates[1] = secondaryFeatureCoorinates.iterator().next();
+					newValue = dataMatrix.getAsDouble(replacementFeatureCoordinates);
 				}
-				if (mergeOption.equals(DuplicatesCleanupOptions.USE_PRIMARY_AND_FILL_MISSING)) {
+				if(secondaryFeatureCoorinates.size() > 1) {
 					
-					double primaryValue = dataMatrix.getAsDouble(primaryFeatureCoordinates);
-					double newValue = 0.0d;
-					if(primaryValue <= 0.0d) {
-						
-						if(secondaryFeatureCoorinates.size() == 1) {
-							
-							replacementFeatureCoordinates[1] = secondaryFeatureCoorinates.iterator().next();
-							newValue = dataMatrix.getAsDouble(replacementFeatureCoordinates);
-						}
-						if(secondaryFeatureCoorinates.size() > 1) {
-							
-							median = primFeature.getStatsSummary().getSampleMedian();
-							delta = 1.5E20;
-							bestFit = -1;
-							replacementValue = 0.0d;
+					median = primFeature.getStatsSummary().getSampleMedian();
+					delta = 1.5E20;
+					replacementValue = 0.0d;
+					replacementFeaturePosition = -1;
 
-							for(long sc : secondaryFeatureCoorinates) {
-								
-								replacementFeatureCoordinates[1] = sc;
-								replacementValue = dataMatrix.getAsDouble(replacementFeatureCoordinates);
-								if(replacementValue > 0.0d) {
-									
-									diff = Math.abs(median - replacementValue);
-									if(diff < delta) {
-										delta = diff;
-										newValue = replacementValue;
-									}
-								}
+					for(long sc : secondaryFeatureCoorinates) {
+						
+						replacementFeatureCoordinates[1] = sc;
+						replacementValue = dataMatrix.getAsDouble(replacementFeatureCoordinates);
+						if(replacementValue > 0.0d) {
+							
+							diff = Math.abs(median - replacementValue);
+							if(diff < delta) {
+								delta = diff;
+								newValue = replacementValue;
+								replacementFeaturePosition = sc;
 							}
-						}						
-						dataMatrix.setAsDouble(newValue, primaryFeatureCoordinates);
-						SimpleMsFeature replacementSmf = 
-								(SimpleMsFeature)msFeatureMatrix.getAsObject(replacementFeatureCoordinates);
-						msFeatureMatrix.setAsObject(replacementSmf, primaryFeatureCoordinates);
+						}
 					}
+				}	
+				if(newValue > 0 && replacementFeaturePosition >=0) {
+					
+					dataMatrix.setAsDouble(newValue, primaryFeatureCoordinates);
+					replacementFeatureCoordinates[1] = replacementFeaturePosition;
+					SimpleMsFeature replacementSmf = 
+							(SimpleMsFeature)msFeatureMatrix.getAsObject(replacementFeatureCoordinates);
+					msFeatureMatrix.setAsObject(replacementSmf, primaryFeatureCoordinates);
 				}
 			}
 			processed++;
 		}
 		removeRedundantFeatures(featuresToRemove);
 	}
-	
+
+	public void removeDuplicateFeaturesUsingHighestAreaFeature() {
+		
+		taskDescription = "Merging duplicate features using largest peak area";
+		total = duplicateList.size();
+		processed = 0;
+		Matrix dataMatrix = 
+				currentExperiment.getDataMatrixForDataPipeline(activeDataPipeline);
+		ArrayList<MsFeature> featuresToRemove = new ArrayList<MsFeature>();
+		ArrayList<MsFeature> featuresToMerge = new ArrayList<MsFeature>();
+		DataAcquisitionMethod acquisitionMethod = activeDataPipeline.getAcquisitionMethod();
+		MsFeature dataFeature = null;
+		long[] coordinates = new long[2];
+		long[] replacementFeatureCoordinates = new long[2];
+		double area, topArea;
+
+		for (MsFeatureCluster fclust : duplicateList) {
+
+			coordinates[0] = 0;
+			featuresToMerge.clear();
+			for (MsFeature cf : fclust.getFeatures()) {
+
+				if (cf.equals(fclust.getPrimaryFeature())) {
+					dataFeature = cf;
+				}
+				else {
+					featuresToRemove.add(cf);
+					featuresToMerge.add(cf);
+				}
+			}
+			for (DataFile df : currentExperiment.getDataFilesForAcquisitionMethod(acquisitionMethod)) {
+
+				coordinates[0] = dataMatrix.getRowForLabel(df);
+				replacementFeatureCoordinates[0] = coordinates[0];
+				boolean replace = false;
+				
+				if (coordinates[0] > -1) {
+					
+					coordinates[1] = dataMatrix.getColumnForLabel(dataFeature);
+					topArea = dataMatrix.getAsDouble(coordinates);
+
+					for (MsFeature msf : featuresToMerge) {
+
+						coordinates[1] = dataMatrix.getColumnForLabel(msf);
+						area = dataMatrix.getAsDouble(coordinates);
+						if (area > topArea) {
+							topArea = area;
+							replacementFeatureCoordinates[1] = coordinates[1];
+							replace = true;
+						}
+					}
+					if(replace) {
+						
+						coordinates[1] = dataMatrix.getColumnForLabel(dataFeature);
+						dataMatrix.setAsDouble(topArea, coordinates);
+						
+						SimpleMsFeature replacementSmf = 
+								(SimpleMsFeature)msFeatureMatrix.getAsObject(replacementFeatureCoordinates);
+						msFeatureMatrix.setAsObject(replacementSmf, coordinates);
+					}
+				}
+			}										
+			processed++;
+		}
+		removeRedundantFeatures(featuresToRemove);
+	}
+
 	private void removeRedundantFeatures(Collection<MsFeature>featuresToRemove) {
 		
 		taskDescription = "Removing duplicate features from data matrices";
@@ -242,158 +299,25 @@ public class MergeDuplicateFeaturesTask extends AbstractTask {
 			Matrix newMsFeatureMatrix = msFeatureMatrix.deleteColumns(Ret.NEW, rem);
 			newMsFeatureMatrix.setMetaDataDimensionMatrix(0, newMsFeatureLabelMatrix);
 			newMsFeatureMatrix.setMetaDataDimensionMatrix(1, msFeatureMatrix.getMetaDataDimensionMatrix(1));
-			
-			//	TODO - there is no undo for it here, if the experiment is not saved
-			//	Same for areas matrix?? they need backup for this case !!!
-			//	Maybe for now force save the experiment and warn that there is no UNDO
 			processed = 70;
 			saveMsFeatureMatrix(newMsFeatureMatrix);
-			
-			//			System.err.println("Data: " + newDataMatrix.getRowCount() + 
-			//					" by " + newDataMatrix.getColumnCount());
-			//			System.err.println("Features: " + newMsFeatureMatrix.getRowCount() + 
-			//					" by " + newMsFeatureMatrix.getColumnCount());
 		}
 		currentExperiment.setDuplicateClustersForDataPipeline(
 				activeDataPipeline, new HashSet<MsFeatureCluster>());
 		processed = 100;
 	}
-
-	public void removeDuplicateFeaturesUsingHighestAreaFeature() {
-
 		
-		total = duplicateList.size();
-		processed = 0;
-		Matrix dataMatrix = 
-				currentExperiment.getDataMatrixForDataPipeline(activeDataPipeline);
-		Matrix featureMatrix = dataMatrix.getMetaDataDimensionMatrix(0);
-		ArrayList<MsFeature> featuresToRemove = new ArrayList<MsFeature>();
-		ArrayList<MsFeature> featuresToMerge = new ArrayList<MsFeature>();
-		DataAcquisitionMethod acquisitionMethod = activeDataPipeline.getAcquisitionMethod();
+	private void readFeatureMatrix() {
 
-		// Swap ID and data source feature where necessary to get better quality data
-		MsFeature idFeature = null;
-		MsFeature dataFeature = null;
-		MsFeature labelFeature = null;
-
-		int idfId = 0;
-		int dfId = 0;
-		long[] coordinates = new long[2];
-		double area, topArea;
-
-		for (MsFeatureCluster fclust : duplicateList) {
-
-			coordinates[0] = 0;
-			idFeature = null;
-			featuresToMerge.clear();
-
-			for (MsFeature cf : fclust.getFeatures()) {
-
-				if (cf.equals(fclust.getPrimaryFeature())) {
-					idFeature = cf;
-				}
-				else {
-					featuresToRemove.add(cf);
-					featuresToMerge.add(cf);
-				}
-				if (cf.isActive())
-					dataFeature = cf;
-			}
-			// Swap feature coordinates
-			if (!idFeature.equals(dataFeature)) {
-
-				for (int i = 0; i < featureMatrix.getColumnCount(); i++) {
-
-					coordinates[1] = i;
-					labelFeature = (MsFeature) featureMatrix.getAsObject(coordinates);
-
-					if (labelFeature.equals(idFeature))
-						idfId = i;
-
-					if (labelFeature.equals(dataFeature))
-						dfId = i;
-				}
-				swapFeatureStats(idFeature, dataFeature);
-
-				coordinates[1] = dfId;
-				featureMatrix.setAsObject(idFeature, coordinates);
-
-				coordinates[1] = idfId;
-				featureMatrix.setAsObject(dataFeature, coordinates);
-			}
-			// Set sample values to top area among all features if the option is
-			// selected
-			if (mergeOption.equals(DuplicatesCleanupOptions.USE_HIGHEST_AREA)) {
-
-				long idColumn = dataMatrix.getColumnForLabel(idFeature);
-				coordinates[1] = idColumn;
-				for (ExperimentalSample sample : currentExperiment.getExperimentDesign().getSamples()) {
-
-					if (sample.getDataFilesForMethod(acquisitionMethod) != null) {
-
-						for (DataFile df : sample.getDataFilesForMethod(acquisitionMethod)) {
-
-							coordinates[0] = dataMatrix.getRowForLabel(df);
-
-							if (coordinates[0] > -1) {
-								topArea = dataMatrix.getAsDouble(coordinates);
-
-								for (MsFeature msf : featuresToMerge) {
-
-									coordinates[1] = dataMatrix.getColumnForLabel(msf);
-									area = dataMatrix.getAsDouble(coordinates);
-									if (area > topArea)
-										topArea = area;
-								}
-								coordinates[1] = idColumn;
-								dataMatrix.setAsDouble(topArea, coordinates);
-							}
-						}
-					}
-				}
-			}
-			processed++;
-		}
-		taskDescription = "Removing duplicate features from data matrices";
+		taskDescription = "Reading MS feature matrix data";
 		total = 100;
-		processed = 20;
-		
-		ArrayList<Long> rem = new ArrayList<Long>();
-		for (MsFeature cf : featuresToRemove)
-			rem.add(dataMatrix.getColumnForLabel(cf));
-
-		currentExperiment.deleteFeatures(featuresToRemove, activeDataPipeline);
-		Matrix newDataMatrix = dataMatrix.deleteColumns(Ret.NEW, rem);
-		Matrix newFeatureMatrix = featureMatrix.deleteColumns(Ret.NEW, rem);
-
-		newDataMatrix.setMetaDataDimensionMatrix(
-				0, newFeatureMatrix);
-		newDataMatrix.setMetaDataDimensionMatrix(
-				1, dataMatrix.getMetaDataDimensionMatrix(1));
-		
-		if(msFeatureMatrix != null) {
-			
-			Matrix newMsFeatureMatrix = msFeatureMatrix.deleteColumns(Ret.NEW, rem);
-			newMsFeatureMatrix.setMetaDataDimensionMatrix(
-					0, newFeatureMatrix);
-			newMsFeatureMatrix.setMetaDataDimensionMatrix(
-					1, dataMatrix.getMetaDataDimensionMatrix(1));
-			
-			//	TODO - there is no undo for it here, if the experiment is not saved
-			//	Same for areas matrix?? they need backup for this case !!!
-			//	Maybe for now force save the experiment and warn that there is no UNDO
-			saveMsFeatureMatrix(newMsFeatureMatrix);
-			
-			System.err.println("Data: " + newDataMatrix.getRowCount() + 
-					" by " + newDataMatrix.getColumnCount());
-			System.err.println("Features: " + newMsFeatureMatrix.getRowCount() + 
-					" by " + newMsFeatureMatrix.getColumnCount());
-		}
-		currentExperiment.setDataMatrixForDataPipeline(
-				activeDataPipeline, newDataMatrix);
-		duplicateList = new HashSet<MsFeatureCluster>();
-		currentExperiment.setDuplicateClustersForDataPipeline(
-				activeDataPipeline, duplicateList);
+		processed = 30;
+		msFeatureMatrix = 
+				ExperimentUtils.readFeatureMatrix(currentExperiment, activeDataPipeline, true);
+		if(msFeatureMatrix == null)
+			msFeatureMatrix = 
+				ExperimentUtils.readFeatureMatrix(currentExperiment, activeDataPipeline, false);
+		processed = 100;
 	}
 	
 	private void saveMsFeatureMatrix(Matrix msFeatureMatrix) {

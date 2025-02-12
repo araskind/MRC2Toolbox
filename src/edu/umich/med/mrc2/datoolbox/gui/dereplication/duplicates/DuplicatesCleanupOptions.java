@@ -25,7 +25,7 @@ public enum DuplicatesCleanupOptions {
 
 	USE_PRIMARY_AND_FILL_MISSING("Use primary feature data and fill missing from others"),
 	USE_HIGHEST_AREA("Use highest area for each sample"),
-	TOP_SCORE_ONLY("Leave only top-scoring feature"), 
+	//	TOP_SCORE_ONLY("Leave only top-scoring feature"), //	TODO?
 	;
 
 	private final String uiName;

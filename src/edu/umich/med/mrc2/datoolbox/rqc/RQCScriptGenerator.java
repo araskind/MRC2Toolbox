@@ -50,11 +50,52 @@ public class RQCScriptGenerator {
 		MRC2ToolBoxConfiguration.initConfiguration();
 
 		try {
-			generateSummaryQcScriptForEX01426ionpneg();
+			generateSummaryQcScriptForEX01426rppos();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+	
+	private static void generateSummaryQcScriptForEMvoltageExperiment() {
+		
+		String experimentId = "EX01426-96";
+		File rWorkingDir = new File("Y:\\_QUALTMP\\EM_Voltage_test_20250131\\Documents");		
+		File xlQCfile  = new File("Y:\\_QUALTMP\\EM_Voltage_test_20250131\\Documents\\EMV-QC.xlsx");		
+		File inputMap =  new File("Y:\\_QUALTMP\\EM_Voltage_test_20250131\\Documents\\QC-summary.txt");
+		String assayType = "Untargeted";
+		String assayType4R = "untarg";
+
+		generateSummaryQcScript(
+				experimentId,
+				rWorkingDir,
+				xlQCfile,
+				inputMap,
+				assayType,
+				assayType4R);
+	}	
+	
+	private static void generateSummaryQcScriptForEX01426ionpnegMFEparams() {
+		
+		String experimentId = "EX01426";
+		File rWorkingDir = new File("Y:\\DataAnalysis\\_Reports\\EX01426 - Human EDTA Tranche 2 plasma W20001176L\\"
+				+ "A049 - Central carbon metabolism profiling\\Documents\\MFEParams");		
+		File xlQCfile  = new File("Y:\\DataAnalysis\\_Reports\\EX01426 - Human EDTA Tranche 2 plasma W20001176L\\"
+				+ "A049 - Central carbon metabolism profiling\\Documents\\MFEParams"
+				+ "\\EX01426-IONP-NEG-MFE_CUTOFFS-QC.xlsm");		
+		File inputMap =  new File("Y:\\DataAnalysis\\_Reports\\EX01426 - Human EDTA Tranche 2 plasma W20001176L\\"
+				+ "A049 - Central carbon metabolism profiling\\Documents\\"
+				+ "MFEParams\\EX01426_IONP-NEG-SummaryQC-inputMap.txt");
+		String assayType = "IONP-NEG";
+		String assayType4R = "ionpneg";
+
+		generateSummaryQcScript(
+				experimentId,
+				rWorkingDir,
+				xlQCfile,
+				inputMap,
+				assayType,
+				assayType4R);
 	}
 	
 	private static void generateSummaryQcScriptForEX01426ionpneg() {
@@ -63,7 +104,7 @@ public class RQCScriptGenerator {
 		File rWorkingDir = new File("Y:\\DataAnalysis\\_Reports\\EX01426 - Human EDTA Tranche 2 plasma W20001176L\\"
 				+ "A049 - Central carbon metabolism profiling\\Documents");		
 		File xlQCfile  = new File("Y:\\DataAnalysis\\_Reports\\"
-				+ "EX01426 - Human EDTA Tranche 2 plasma W20001176L\\EX01426-QC-summary-tables.xlsx");		
+				+ "EX01426 - Human EDTA Tranche 2 plasma W20001176L\\EX01426-QC-summary-tables.xlsm");		
 		File inputMap =  new File("Y:\\DataAnalysis\\_Reports\\EX01426 - Human EDTA Tranche 2 plasma W20001176L\\"
 				+ "A049 - Central carbon metabolism profiling\\Documents\\EX01426_IONP-NEG-SummaryQC-inputMap.txt");
 		String assayType = "IONP-NEG";
@@ -84,7 +125,7 @@ public class RQCScriptGenerator {
 		File rWorkingDir = new File("Y:\\DataAnalysis\\_Reports\\"
 				+ "EX01426 - Human EDTA Tranche 2 plasma W20001176L\\A003 - Untargeted\\Documents\\NEG");		
 		File xlQCfile  = new File("Y:\\DataAnalysis\\_Reports\\"
-				+ "EX01426 - Human EDTA Tranche 2 plasma W20001176L\\EX01426-QC-summary-tables.xlsx");		
+				+ "EX01426 - Human EDTA Tranche 2 plasma W20001176L\\EX01426-QC-summary-tables.xlsm");		
 		File inputMap =  new File("Y:\\DataAnalysis\\_Reports\\EX01426 - Human EDTA Tranche 2 plasma W20001176L\\"
 				+ "A003 - Untargeted\\Documents\\NEG\\EX01426_RP-NEG-SummaryQC-inputMap.txt");
 		String assayType = "RP-NEG";
@@ -105,7 +146,7 @@ public class RQCScriptGenerator {
 		File rWorkingDir = new File("Y:\\DataAnalysis\\_Reports\\"
 				+ "EX01426 - Human EDTA Tranche 2 plasma W20001176L\\A003 - Untargeted\\Documents\\POS");		
 		File xlQCfile  = new File("Y:\\DataAnalysis\\_Reports\\"
-				+ "EX01426 - Human EDTA Tranche 2 plasma W20001176L\\EX01426-QC-summary-tables.xlsx");		
+				+ "EX01426 - Human EDTA Tranche 2 plasma W20001176L\\EX01426-QC-summary-tables.xlsm");		
 		File inputMap =  new File("Y:\\DataAnalysis\\_Reports\\EX01426 - Human EDTA Tranche 2 plasma W20001176L\\"
 				+ "A003 - Untargeted\\Documents\\POS\\EX01426_RP-POS-SummaryQC-inputMap.txt");
 		String assayType = "RP-POS";
@@ -126,7 +167,7 @@ public class RQCScriptGenerator {
 		File rWorkingDir = new File("Y:\\DataAnalysis\\_Reports\\EX01414 - META Metabolomics Repeat\\"
 				+ "A003 - Untargeted\\Documents\\POS");
 		File xlQCfile  = new File("Y:\\DataAnalysis\\_Reports\\EX01414 - META Metabolomics Repeat\\"
-				+ "A003 - Untargeted\\Documents\\EX01414-QC.xlsx");
+				+ "A003 - Untargeted\\Documents\\EX01414-QC.xlsm");
 		File inputMap =  new File("Y:\\DataAnalysis\\_Reports\\EX01414 - META Metabolomics Repeat\\"
 				+ "A003 - Untargeted\\Documents\\POS\\EX01414-RP-POS-SummaryQC-inputMap.txt");
 		String assayType = "RP-POS";
@@ -186,8 +227,7 @@ public class RQCScriptGenerator {
 	private static void generateSummaryQcScriptForEX01409rpneg() {
 		
 		String experimentId = "EX01409";
-		File rWorkingDir = new File("Y:\\DataAnalysis\\_Reports\\"
-				+ "EX01409 - Human EDTA Tranche 1 plasma W20000960M\\A003 - Untargeted\\Documents\\NEG");
+		File rWorkingDir = new File("Y:\\DataAnalysis\\_Reports\\EX01409 - Human EDTA Tranche 1 plasma W20000960M\\A003 - Untargeted\\Documents\\NEG");
 		File xlQCfile  = new File("Y:\\DataAnalysis\\_Reports\\EX01409 - Human EDTA Tranche 1 plasma W20000960M\\"
 				+ "A003 - Untargeted\\Documents\\EX01409-QC-from-toolbox.xlsx");
 		File inputMap =  new File("Y:\\DataAnalysis\\_Reports\\EX01409 - Human EDTA Tranche 1 plasma W20000960M\\"
