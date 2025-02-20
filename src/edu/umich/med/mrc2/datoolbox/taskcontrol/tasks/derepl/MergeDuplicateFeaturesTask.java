@@ -33,7 +33,6 @@ import org.ujmp.core.calculation.Calculation.Ret;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureCluster;
-import edu.umich.med.mrc2.datoolbox.data.MsFeatureStatisticalSummary;
 import edu.umich.med.mrc2.datoolbox.data.SimpleMsFeature;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
@@ -234,35 +233,35 @@ public class MergeDuplicateFeaturesTask extends AbstractTask {
 			}
 			for (DataFile df : currentExperiment.getDataFilesForAcquisitionMethod(acquisitionMethod)) {
 
-				coordinates[0] = dataMatrix.getRowForLabel(df);
-				replacementFeatureCoordinates[0] = coordinates[0];
-				boolean replace = false;
+				long dfIndex = dataMatrix.getRowForLabel(df);
+				if (dfIndex < 0)
+					continue;
 				
-				if (coordinates[0] > -1) {
-					
-					coordinates[1] = dataMatrix.getColumnForLabel(dataFeature);
-					topArea = dataMatrix.getAsDouble(coordinates);
+				coordinates[0] = dfIndex;
+				replacementFeatureCoordinates[0] = dfIndex;
+				boolean replace = false;					
+				coordinates[1] = dataMatrix.getColumnForLabel(dataFeature);
+				topArea = dataMatrix.getAsDouble(coordinates);
 
-					for (MsFeature msf : featuresToMerge) {
+				for (MsFeature msf : featuresToMerge) {
 
-						coordinates[1] = dataMatrix.getColumnForLabel(msf);
-						area = dataMatrix.getAsDouble(coordinates);
-						if (area > topArea) {
-							topArea = area;
-							replacementFeatureCoordinates[1] = coordinates[1];
-							replace = true;
-						}
-					}
-					if(replace) {
-						
-						coordinates[1] = dataMatrix.getColumnForLabel(dataFeature);
-						dataMatrix.setAsDouble(topArea, coordinates);
-						
-						SimpleMsFeature replacementSmf = 
-								(SimpleMsFeature)msFeatureMatrix.getAsObject(replacementFeatureCoordinates);
-						msFeatureMatrix.setAsObject(replacementSmf, coordinates);
+					coordinates[1] = dataMatrix.getColumnForLabel(msf);
+					area = dataMatrix.getAsDouble(coordinates);
+					if (area > topArea) {
+						topArea = area;
+						replacementFeatureCoordinates[1] = coordinates[1];
+						replace = true;
 					}
 				}
+				if(replace) {
+					
+					coordinates[1] = dataMatrix.getColumnForLabel(dataFeature);
+					dataMatrix.setAsDouble(topArea, coordinates);
+					
+					SimpleMsFeature replacementSmf = 
+							(SimpleMsFeature)msFeatureMatrix.getAsObject(replacementFeatureCoordinates);
+					msFeatureMatrix.setAsObject(replacementSmf, coordinates);
+				}				
 			}										
 			processed++;
 		}
@@ -330,23 +329,23 @@ public class MergeDuplicateFeaturesTask extends AbstractTask {
 				msFeatureMatrix,
 				currentExperiment, 
 				activeDataPipeline,
-				true);
+				false);	//	TODO handle undo for duplicates removal
 		currentExperiment.setFeatureMatrixForDataPipeline(activeDataPipeline, null);
 		msFeatureMatrix = null;
 		System.gc();
 		processed = 100;				
 	}
 
-	private void swapFeatureStats(MsFeature featureOne, MsFeature featureTwo) {
-
-		MsFeatureStatisticalSummary sumOne = 
-				new MsFeatureStatisticalSummary(featureOne.getStatsSummary());
-		MsFeatureStatisticalSummary sumTwo = 
-				new MsFeatureStatisticalSummary(featureTwo.getStatsSummary());
-
-		featureOne.setStatsSummary(sumTwo);
-		featureTwo.setStatsSummary(sumOne);
-	}
+//	private void swapFeatureStats(MsFeature featureOne, MsFeature featureTwo) {
+//
+//		MsFeatureStatisticalSummary sumOne = 
+//				new MsFeatureStatisticalSummary(featureOne.getStatsSummary());
+//		MsFeatureStatisticalSummary sumTwo = 
+//				new MsFeatureStatisticalSummary(featureTwo.getStatsSummary());
+//
+//		featureOne.setStatsSummary(sumTwo);
+//		featureTwo.setStatsSummary(sumOne);
+//	}
 
 	@Override
 	public Task cloneTask() {
