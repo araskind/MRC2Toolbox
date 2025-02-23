@@ -139,7 +139,7 @@ public class RQCScriptGenerator {
 		
 		String prefix = "";
 		ArrayList<String>prefixParts = new ArrayList<String>();
-		ArrayList<String>nonRedundantParts = new ArrayList<String>();
+		ArrayList<String>nonRedundantParts = new ArrayList<String>();		
 		
 		if(!commonFields.isEmpty()) {
 			
@@ -219,14 +219,53 @@ public class RQCScriptGenerator {
 		}
 		rscriptParts.add("\n# Combine and export summaries ####\n");
 		String ts = FIOUtils.getTimestamp();
-		for(Entry<SummaryInputColumns,List<String>> me : mergeComponentsMap.entrySet()) {
-						
-			rscriptParts.add(me.getKey().getRName() + 
-					".data.summary <- bind_rows(" + StringUtils.join(me.getValue(), ", ") + ")");
-			String summaryFileName = prefix + "_" + me.getKey().getRName() + "_summary_" + ts + ".txt";
-			rscriptParts.add("write.table(" + me.getKey().getRName() + ".data.summary, file = \"" + 
-					summaryFileName + "\", quote = F, sep = \"\\t\", na = \"\", row.names = F)");
+
+		
+		ArrayList<String>meltIdParts = new ArrayList<String>();
+		ArrayList<String>condensedSummaryFields = new ArrayList<String>();
+		List<String>paramsToPlot = new ArrayList<String>();
+		
+		meltIdParts.add("\"sample_type\"");
+		condensedSummaryFields.add("sample_type");
+		
+		for(SummaryInputColumns nrs : nonRedundantFields) {
+			meltIdParts.add("\"" + nrs.getRName() + "\"");
+			condensedSummaryFields.add(nrs.getRName());
 		}
+		condensedSummaryFields.add("variable");
+		
+		String meltIdString = StringUtils.join(meltIdParts, ", ");
+		String condensedSummaryFieldList = StringUtils.join(condensedSummaryFields, ", ");
+		
+		for(Entry<SummaryInputColumns,List<String>> me : mergeComponentsMap.entrySet()) {
+			
+			String combinedSummaryObject = me.getKey().getRName() + ".data.summary";
+			rscriptParts.add(combinedSummaryObject + 
+					" <- bind_rows(" + StringUtils.join(me.getValue(), ", ") + ")");
+			String summaryFileName = prefix + "_" + me.getKey().getRName() + "_summary_" + ts + ".txt";
+			rscriptParts.add("write.table(" + combinedSummaryObject + ", file = \"" + 
+					summaryFileName + "\", quote = F, sep = \"\\t\", na = \"\", row.names = F)");
+			
+			//	Create condensed summary and graphics
+			rscriptParts.add(combinedSummaryObject + ".melt <- melt(" + combinedSummaryObject + ", "
+					+ "id = c(" + meltIdString + "), measure.vars = c(\"medianVal\",\"pcmissing\",\"RSD\"))");
+			
+			String condensedSummaryObject = combinedSummaryObject + ".condensed";
+			rscriptParts.add(condensedSummaryObject + " <- " + combinedSummaryObject + 
+					".melt %>% group_by(" + condensedSummaryFieldList + ") " +
+					"%>% summarise(varMedian = median(value, na.rm = T), varMean = mean(value, na.rm = T), stDev = sd(value, na.rm = T))");
+			rscriptParts.add(condensedSummaryObject + "$RSD <- " + 
+					condensedSummaryObject + "$stDev / " + condensedSummaryObject + "$varMean * 100");
+			
+			String condensedSummaryFileName = prefix + "_" + me.getKey().getRName() + "_condensed_summary_" + ts + ".txt";
+			rscriptParts.add("write.table(" + condensedSummaryObject + ", file = \"" + 
+					condensedSummaryFileName + "\", quote = F, sep = \"\\t\", na = \"\", row.names = F)");
+			
+			//	Charts
+			
+			
+		}
+		rscriptParts.add("\n# Create condensed summaries and barcharts ####\n");
 		String rScriptFileName = "UntargetedDataSummarization-" + FIOUtils.getTimestamp() + ".R";
 		Path outputPath = Paths.get(dataDir.getAbsolutePath(), rScriptFileName);
 		try {
@@ -238,6 +277,44 @@ public class RQCScriptGenerator {
 		} catch (IOException e) {
 		    e.printStackTrace();
 		}
+	}
+	
+	private static void generateCondensedSummaryBarCharts(
+			List<String>rscriptParts,
+			String dataLinePrefix,
+			String condensedSummaryObject,
+			SummaryInputColumns fieldToSummarize,
+			List<String>paramsToPlot,
+			String barFillParam,
+			String gridYParam,
+			String gridXParam) {
+		
+		for(String param : paramsToPlot) {
+			
+			String plotObject = dataLinePrefix + "." + 
+					fieldToSummarize.getRName() + "." + param + ".plot";			
+			String plotDataObject = plotObject+ ".data";
+			rscriptParts.add(plotDataObject + " <- " + condensedSummaryObject +
+					"[" + condensedSummaryObject + "$variable == \"medianVal\",]");
+			String gridDefinition = ".";
+			if(gridYParam != null)
+				gridDefinition = gridYParam;
+			
+			if(gridXParam != null)
+				gridDefinition += "~" + gridXParam;
+			
+			String ggplotString = plotObject +  " <- ggplot(" + plotDataObject + "[" + plotDataObject + "$variable == \"" + param + "\",], "
+					+ "aes(x = sample_type, y = varMean, fill = " + barFillParam + ")) + "
+					+ "geom_col( position = \"dodge\", width = 0.5, alpha = 0.7, color = \"black\", linewidth = 0.1) + "
+					+ "geom_errorbar(aes(ymin = varMean-stDev, ymax = varMean+stDev), position =  position_dodge(width = 0.5), width = 0.2)";
+			if(!gridDefinition.equals("."))
+				ggplotString += " + facet_grid(" + gridDefinition + ") ";
+			
+			
+//					+ " + ggtitle(\"\")";
+					
+				rscriptParts.add(ggplotString);
+		}		
 	}
 	
 	private static String createParameterSummaryBlock(
