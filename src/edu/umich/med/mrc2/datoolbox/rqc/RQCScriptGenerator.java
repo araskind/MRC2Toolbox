@@ -56,7 +56,7 @@ public class RQCScriptGenerator {
 		MRC2ToolBoxConfiguration.initConfiguration();
 
 		try {
-			createDataSummariesForEX01426B6rpPosEMvoltageExperiment();
+			createDataSummariesForEX01283rpPosExperiment();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -72,7 +72,17 @@ public class RQCScriptGenerator {
 		createMultyBatchDataSummarizationScript(inputMapFile, dataDir);
 	}
 
-			
+	private static void createDataSummariesForEX01283rpPosExperiment() {
+		
+		File inputMapFile = 
+				new File("Y:\\DataAnalysis\\_Reports\\EX01283 - Starr County Metabolomics IV\\"
+						+ "A003 - Untargeted\\Documents\\POS\\PW\\EX01283_RP-POS-dataSummarization-inputMap.txt");
+		File dataDir = 
+				new File("Y:\\DataAnalysis\\_Reports\\EX01283 - Starr County Metabolomics IV\\"
+						+ "A003 - Untargeted\\Documents\\POS\\PW");
+		createMultyBatchDataSummarizationScript(inputMapFile, dataDir);
+	}
+	
 	private static void createMultyBatchDataSummarizationScript(
 			File inputMapFile, 
 			File dataDir) {
@@ -219,14 +229,12 @@ public class RQCScriptGenerator {
 		}
 		rscriptParts.add("\n# Combine and export summaries ####\n");
 		String ts = FIOUtils.getTimestamp();
-
-		
 		ArrayList<String>meltIdParts = new ArrayList<String>();
 		ArrayList<String>condensedSummaryFields = new ArrayList<String>();
-		List<String>paramsToPlot = new ArrayList<String>();
+		List<DataSummarizationParameters>paramsToPlot = new ArrayList<DataSummarizationParameters>();
 		
-		meltIdParts.add("\"sample_type\"");
-		condensedSummaryFields.add("sample_type");
+		meltIdParts.add("\"" + DataSummarizationParameters.SAMPLE_TYPE.getRName() + "\"");
+		condensedSummaryFields.add(DataSummarizationParameters.SAMPLE_TYPE.getRName());
 		
 		for(SummaryInputColumns nrs : nonRedundantFields) {
 			meltIdParts.add("\"" + nrs.getRName() + "\"");
@@ -236,7 +244,25 @@ public class RQCScriptGenerator {
 		
 		String meltIdString = StringUtils.join(meltIdParts, ", ");
 		String condensedSummaryFieldList = StringUtils.join(condensedSummaryFields, ", ");
-		
+
+		//	
+		String gridYParam = null;
+		String gridXParam = null;
+		for(int i=0; i<nonRedundantFields.size(); i++) {
+			
+			SummaryInputColumns nrf = nonRedundantFields.get(i);
+			if(nrf.equals(SummaryInputColumns.BATCH))
+				continue;
+			
+			if(gridYParam == null)
+				gridYParam = nrf.getRName();
+			
+			if(gridYParam != null && gridXParam == null)
+				gridXParam = nrf.getRName();
+			
+			if(gridYParam != null && gridXParam != null)
+				break;
+		}			
 		for(Entry<SummaryInputColumns,List<String>> me : mergeComponentsMap.entrySet()) {
 			
 			String combinedSummaryObject = me.getKey().getRName() + ".data.summary";
@@ -248,24 +274,191 @@ public class RQCScriptGenerator {
 			
 			//	Create condensed summary and graphics
 			rscriptParts.add(combinedSummaryObject + ".melt <- melt(" + combinedSummaryObject + ", "
-					+ "id = c(" + meltIdString + "), measure.vars = c(\"medianVal\",\"pcmissing\",\"RSD\"))");
+					+ "id = c(" + meltIdString + "), measure.vars = c(\"" 
+					+ DataSummarizationParameters.MEDIAN_VALUE.getRName() + "\",\"" 
+					+ DataSummarizationParameters.PERCENT_MISSING.getRName() + "\",\"" 
+					+ DataSummarizationParameters.RSD.getRName() + "\"))");
 			
 			String condensedSummaryObject = combinedSummaryObject + ".condensed";
 			rscriptParts.add(condensedSummaryObject + " <- " + combinedSummaryObject + 
 					".melt %>% group_by(" + condensedSummaryFieldList + ") " +
-					"%>% summarise(varMedian = median(value, na.rm = T), varMean = mean(value, na.rm = T), stDev = sd(value, na.rm = T))");
-			rscriptParts.add(condensedSummaryObject + "$RSD <- " + 
-					condensedSummaryObject + "$stDev / " + condensedSummaryObject + "$varMean * 100");
+					"%>% summarise(" + DataSummarizationParameters.MEDIAN_VALUE.getRName() 
+					+ " = median(value, na.rm = T), "
+					+ DataSummarizationParameters.MEAN_VALUE.getRName() + " = mean(value, na.rm = T), " 
+					+ DataSummarizationParameters.SD.getRName() + " = sd(value, na.rm = T))");
+			rscriptParts.add(condensedSummaryObject + "$" + DataSummarizationParameters.RSD.getRName() 
+					+ " <- " + condensedSummaryObject + "$" + DataSummarizationParameters.SD.getRName() 
+					+ " / " + condensedSummaryObject + "$" + DataSummarizationParameters.MEAN_VALUE.getRName() + " * 100");
 			
 			String condensedSummaryFileName = prefix + "_" + me.getKey().getRName() + "_condensed_summary_" + ts + ".txt";
 			rscriptParts.add("write.table(" + condensedSummaryObject + ", file = \"" + 
 					condensedSummaryFileName + "\", quote = F, sep = \"\\t\", na = \"\", row.names = F)");
 			
+			paramsToPlot.clear();
+			
 			//	Charts
-			
-			
-		}
-		rscriptParts.add("\n# Create condensed summaries and barcharts ####\n");
+			if(me.getKey().equals(SummaryInputColumns.PEAK_AREAS)) {
+				
+				paramsToPlot.add(DataSummarizationParameters.RSD);
+				generateCondensedSummaryBarCharts(
+						rscriptParts,
+						condensedSummaryObject,
+						me.getKey(),
+						paramsToPlot,
+						SummaryInputColumns.BATCH.getRName(),
+						gridYParam,
+						gridXParam);
+				
+				generateSummaryDensityPlots(
+						rscriptParts,
+						combinedSummaryObject,
+						me.getKey(),
+						paramsToPlot,
+						gridYParam,
+						0.0d, 
+						150.0d);
+				
+				paramsToPlot.clear();
+				paramsToPlot.add(DataSummarizationParameters.MEDIAN_VALUE);
+				generateSummaryDensityPlots(
+						rscriptParts,
+						combinedSummaryObject,
+						me.getKey(),
+						paramsToPlot,
+						gridYParam,
+						0.0d, 
+						300000.0d);
+				
+				paramsToPlot.clear();
+				paramsToPlot.add(DataSummarizationParameters.PERCENT_MISSING);
+				generateSummaryDensityPlots(
+						rscriptParts,
+						combinedSummaryObject,
+						me.getKey(),
+						paramsToPlot,
+						gridYParam,
+						0.0d, 
+						100.0d);	
+			}
+			if(me.getKey().equals(SummaryInputColumns.MZ_VALUES)) {
+				
+				paramsToPlot.add(DataSummarizationParameters.RSD);
+				generateCondensedSummaryBarCharts(
+						rscriptParts,
+						condensedSummaryObject,
+						me.getKey(),
+						paramsToPlot,
+						SummaryInputColumns.BATCH.getRName(),
+						gridYParam,
+						gridXParam);
+				
+				generateSummaryDensityPlots(
+						rscriptParts,
+						combinedSummaryObject,
+						me.getKey(),
+						paramsToPlot,
+						gridYParam,
+						0.0d, 
+						0.001d);
+			}
+			if(me.getKey().equals(SummaryInputColumns.RT_VALUES)) {
+				
+				paramsToPlot.add(DataSummarizationParameters.RSD);
+				generateCondensedSummaryBarCharts(
+						rscriptParts,
+						condensedSummaryObject,
+						me.getKey(),
+						paramsToPlot,
+						SummaryInputColumns.BATCH.getRName(),
+						gridYParam,
+						gridXParam);
+				
+				generateSummaryDensityPlots(
+						rscriptParts,
+						combinedSummaryObject,
+						me.getKey(),
+						paramsToPlot,
+						gridYParam,
+						0.0d, 
+						1.1d);
+			}
+			if(me.getKey().equals(SummaryInputColumns.PEAK_QUALITY)) {
+				
+				paramsToPlot.add(DataSummarizationParameters.RSD);
+				paramsToPlot.add(DataSummarizationParameters.MEDIAN_VALUE);
+				generateCondensedSummaryBarCharts(
+						rscriptParts,
+						condensedSummaryObject,
+						me.getKey(),
+						paramsToPlot,
+						SummaryInputColumns.BATCH.getRName(),
+						gridYParam,
+						gridXParam);
+				
+				paramsToPlot.clear();
+				paramsToPlot.add(DataSummarizationParameters.RSD);
+				generateSummaryDensityPlots(
+						rscriptParts,
+						combinedSummaryObject,
+						me.getKey(),
+						paramsToPlot,
+						gridYParam,
+						0.0d, 
+						60.0d);	
+				
+				paramsToPlot.clear();
+				paramsToPlot.add(DataSummarizationParameters.MEDIAN_VALUE);
+				generateSummaryDensityPlots(
+						rscriptParts,
+						combinedSummaryObject,
+						me.getKey(),
+						paramsToPlot,
+						gridYParam,
+						0.0d, 
+						105.0d);		
+			}	
+			if(me.getKey().equals(SummaryInputColumns.PEAK_WIDTH)) {
+				
+				paramsToPlot.add(DataSummarizationParameters.RSD);				
+				generateCondensedSummaryBarCharts(
+						rscriptParts,
+						condensedSummaryObject,
+						me.getKey(),
+						paramsToPlot,
+						SummaryInputColumns.BATCH.getRName(),
+						gridYParam,
+						gridXParam);
+				
+				generateSummaryDensityPlots(
+						rscriptParts,
+						combinedSummaryObject,
+						me.getKey(),
+						paramsToPlot,
+						gridYParam,
+						0.0d, 
+						150.0d);	
+				
+				paramsToPlot.clear();
+				paramsToPlot.add(DataSummarizationParameters.MEDIAN_VALUE);
+				generateCondensedSummaryBarCharts(
+						rscriptParts,
+						condensedSummaryObject,
+						me.getKey(),
+						paramsToPlot,
+						SummaryInputColumns.BATCH.getRName(),
+						gridYParam,
+						gridXParam);
+				
+				generateSummaryDensityPlots(
+						rscriptParts,
+						combinedSummaryObject,
+						me.getKey(),
+						paramsToPlot,
+						gridYParam,
+						0.0d, 
+						0.6d);
+			}
+		}		
 		String rScriptFileName = "UntargetedDataSummarization-" + FIOUtils.getTimestamp() + ".R";
 		Path outputPath = Paths.get(dataDir.getAbsolutePath(), rScriptFileName);
 		try {
@@ -281,39 +474,105 @@ public class RQCScriptGenerator {
 	
 	private static void generateCondensedSummaryBarCharts(
 			List<String>rscriptParts,
-			String dataLinePrefix,
 			String condensedSummaryObject,
 			SummaryInputColumns fieldToSummarize,
-			List<String>paramsToPlot,
+			List<DataSummarizationParameters>paramsToPlot,
 			String barFillParam,
 			String gridYParam,
 			String gridXParam) {
 		
-		for(String param : paramsToPlot) {
+		for(DataSummarizationParameters param : paramsToPlot) {
 			
-			String plotObject = dataLinePrefix + "." + 
-					fieldToSummarize.getRName() + "." + param + ".plot";			
+			String plotObject = fieldToSummarize.getRName() + "." + param.getRName() + ".plot";			
 			String plotDataObject = plotObject+ ".data";
 			rscriptParts.add(plotDataObject + " <- " + condensedSummaryObject +
-					"[" + condensedSummaryObject + "$variable == \"medianVal\",]");
+					"[" + condensedSummaryObject + "$variable == \"" + param.getRName() + "\",]");
 			String gridDefinition = ".";
-			if(gridYParam != null)
+			String extraByString = "";
+			if(gridYParam != null) {
 				gridDefinition = gridYParam;
-			
-			if(gridXParam != null)
+				extraByString = "/" + gridYParam;
+			}
+			if(gridXParam != null) {
 				gridDefinition += "~" + gridXParam;
-			
-			String ggplotString = plotObject +  " <- ggplot(" + plotDataObject + "[" + plotDataObject + "$variable == \"" + param + "\",], "
-					+ "aes(x = sample_type, y = varMean, fill = " + barFillParam + ")) + "
+				extraByString += "/" + gridXParam;
+			}
+			String condensedBarChartString = plotObject +  " <- ggplot(" + plotDataObject 
+					+ ", aes(x = sample_type, y = " + DataSummarizationParameters.MEAN_VALUE.getRName() 
+					+ ", fill = " + barFillParam + ")) + "
 					+ "geom_col( position = \"dodge\", width = 0.5, alpha = 0.7, color = \"black\", linewidth = 0.1) + "
-					+ "geom_errorbar(aes(ymin = varMean-stDev, ymax = varMean+stDev), position =  position_dodge(width = 0.5), width = 0.2)";
+					+ "geom_errorbar(aes(ymin = " 
+					+ DataSummarizationParameters.MEAN_VALUE.getRName() 
+					+ "-" + DataSummarizationParameters.SD.getRName() 
+					+ ", ymax = " + DataSummarizationParameters.MEAN_VALUE.getRName() 
+					+ "+" + DataSummarizationParameters.SD.getRName() + "), "
+					+ "position =  position_dodge(width = 0.5), width = 0.2)";
 			if(!gridDefinition.equals("."))
-				ggplotString += " + facet_grid(" + gridDefinition + ") ";
+				condensedBarChartString += " + facet_grid(" + gridDefinition + ") ";
 			
+			String plotTitle = "Median values for " + fieldToSummarize.getName() 
+				+ " " + param.getName() + " by " + barFillParam + "/" 
+					+ DataSummarizationParameters.SAMPLE_TYPE.getRName() + extraByString;
+			condensedBarChartString += " + ggtitle(\"" + plotTitle + "\")";
+			rscriptParts.add(condensedBarChartString);	
 			
-//					+ " + ggtitle(\"\")";
-					
-				rscriptParts.add(ggplotString);
+			String plotFileName = plotTitle.replaceAll("[\\\\/:*?\"<>|]", "_").replaceAll("\\s+", "_") + ".png";				
+			rscriptParts.add("ggsave(\"" + plotFileName + "\", plot = " + plotObject + ",  width = 14, height = 8.5)");
+			rscriptParts.add("###");
+		}		
+	}
+	
+	private static void generateSummaryDensityPlots(
+			List<String>rscriptParts,
+			String summaryObject,
+			SummaryInputColumns fieldToSummarize,
+			List<DataSummarizationParameters>paramsToPlot,
+			String gridYParam,
+			double min, 
+			double max) {
+		
+		for(DataSummarizationParameters param : paramsToPlot) {
+			
+			String plotObject = summaryObject + "." + param.getRName() + ".density.plot";			
+
+			String gridDefinition = "";
+			String extraByString = "";
+			if(gridYParam != null) {
+				gridDefinition = gridYParam;
+				extraByString = "/" + gridYParam;
+			}
+			//	Sample type / Batch ...
+			String grDef = gridDefinition + "~" + SummaryInputColumns.BATCH.getRName();
+			String densityPlotString = plotObject +  " <- ggplot(" + summaryObject 
+					+ ", aes(" + param.getRName() + ", colour = " + DataSummarizationParameters.SAMPLE_TYPE.getRName() 
+					+ ")) + geom_density(linewidth=1) + xlim(" 
+					+ Double.toString(min) + "," + Double.toString(max) 
+					+ ") + facet_grid(" + grDef + ")";
+			String plotTitle = "Density plot for " + fieldToSummarize.getName() 
+				+ " " + param.getName() + " by " + SummaryInputColumns.BATCH.getName() + "/" 
+					+ DataSummarizationParameters.SAMPLE_TYPE.getRName() + extraByString;
+			densityPlotString += " + ggtitle(\"" + plotTitle + "\")";
+			rscriptParts.add(densityPlotString);	
+			
+			String plotFileName = plotTitle.replaceAll("[\\\\/:*?\"<>|]", "_").replaceAll("\\s+", "_") + ".png";				
+			rscriptParts.add("ggsave(\"" + plotFileName + "\", plot = " + plotObject + ",  width = 14, height = 8.5)");
+
+			//	Batch / Sample type ...
+			grDef = gridDefinition + "~" + DataSummarizationParameters.SAMPLE_TYPE.getRName();
+			densityPlotString = plotObject +  "2 <- ggplot(" + summaryObject 
+					+ ", aes(" + param.getRName() + ", colour = " + SummaryInputColumns.BATCH.getRName() 
+					+ ")) + geom_density(linewidth=1) + xlim(" 
+					+ Double.toString(min) + "," + Double.toString(max) 
+					+ ") + facet_grid(" + grDef + ")";
+			plotTitle = "Density plot for " + fieldToSummarize.getName() 
+				+ " " + param.getName() + " by " + DataSummarizationParameters.SAMPLE_TYPE.getRName() + "/" 
+					+ SummaryInputColumns.BATCH.getName() + extraByString;
+			densityPlotString += " + ggtitle(\"" + plotTitle + "\")";
+			rscriptParts.add(densityPlotString);	
+			
+			plotFileName = plotTitle.replaceAll("[\\\\/:*?\"<>|]", "_").replaceAll("\\s+", "_") + ".png";				
+			rscriptParts.add("ggsave(\"" + plotFileName + "\", plot = " + plotObject + "2,  width = 14, height = 8.5)");
+			rscriptParts.add("###");
 		}		
 	}
 	
@@ -339,10 +598,13 @@ public class RQCScriptGenerator {
 		
 		String fieldSummaryObject = dataLinePrefix + "." + fieldToSummarize.getRName() + ".summary";
 		rscriptParts.add(fieldSummaryObject + " <- " + dataFieldObject + ".melt %>% group_by(sample_type, variable) "
-				+ "%>% summarise(medianVal = median(value, na.rm = T), meanVal = mean(value, na.rm = T), "
-				+ "stDev = sd(value, na.rm = T), pcmissing = 100 * mean(is.na(value)))");			
-		rscriptParts.add(fieldSummaryObject + "$RSD <- " + fieldSummaryObject + "$stDev / " + 
-				fieldSummaryObject + "$meanVal * 100");
+				+ "%>% summarise(" + DataSummarizationParameters.MEDIAN_VALUE.getRName() 
+				+ " = median(value, na.rm = T), meanVal = mean(value, na.rm = T), "
+				+ DataSummarizationParameters.SD.getRName() + " = sd(value, na.rm = T), "
+				+ DataSummarizationParameters.PERCENT_MISSING.getRName() + " = 100 * mean(is.na(value)))");			
+		rscriptParts.add(fieldSummaryObject + "$" + DataSummarizationParameters.RSD.getRName() 
+		+ " <- " + fieldSummaryObject + "$" + DataSummarizationParameters.SD.getRName() + " / " + 
+				fieldSummaryObject + "$" + DataSummarizationParameters.MEAN_VALUE.getRName() + " * 100");
 		rscriptParts.add(fieldSummaryObject + "$sample_type <- as.factor(" + fieldSummaryObject + "$sample_type)");
 		
 		if(removeExtraControls) {
@@ -403,68 +665,7 @@ public class RQCScriptGenerator {
 				assayType4R);
 	}
 	
-	private static void generateSummaryQcScriptForEX01426ionpneg() {
-		
-		String experimentId = "EX01426";
-		File rWorkingDir = new File("Y:\\DataAnalysis\\_Reports\\EX01426 - Human EDTA Tranche 2 plasma W20001176L\\"
-				+ "A049 - Central carbon metabolism profiling\\Documents\\HighCutoff");		
-		File xlQCfile  = new File("Y:\\DataAnalysis\\_Reports\\"
-				+ "EX01426 - Human EDTA Tranche 2 plasma W20001176L\\EX01426-QC-summary-tables - HighCutoff.xlsm");		
-		File inputMap =  new File("Y:\\DataAnalysis\\_Reports\\EX01426 - Human EDTA Tranche 2 plasma W20001176L\\"
-				+ "A049 - Central carbon metabolism profiling\\Documents\\HighCutoff\\EX01426_IONP-NEG-SummaryQC-inputMap.txt");
-		String assayType = "IONP-NEG";
-		String assayType4R = "ionpneg";
-
-		generateSummaryQcScript(
-				experimentId,
-				rWorkingDir,
-				xlQCfile,
-				inputMap,
-				assayType,
-				assayType4R);
-	}
 	
-	private static void generateSummaryQcScriptForEX01426rpneg() {
-		
-		String experimentId = "EX01426";
-		File rWorkingDir = new File("Y:\\DataAnalysis\\_Reports\\"
-				+ "EX01426 - Human EDTA Tranche 2 plasma W20001176L\\A003 - Untargeted\\Documents\\HighCutoff\\NEG");		
-		File xlQCfile  = new File("Y:\\DataAnalysis\\_Reports\\"
-				+ "EX01426 - Human EDTA Tranche 2 plasma W20001176L\\EX01426-QC-summary-tables - HighCutoff.xlsm");		
-		File inputMap =  new File("Y:\\DataAnalysis\\_Reports\\EX01426 - Human EDTA Tranche 2 plasma W20001176L\\"
-				+ "A003 - Untargeted\\Documents\\HighCutoff\\NEG\\EX01426_RP-NEG-SummaryQC-inputMap.txt");
-		String assayType = "RP-NEG";
-		String assayType4R = "rpneg";
-		
-		generateSummaryQcScript(
-				experimentId,
-				rWorkingDir,
-				xlQCfile,
-				inputMap,
-				assayType,
-				assayType4R);
-	}
-	
-	private static void generateSummaryQcScriptForEX01426rppos() {
-		
-		String experimentId = "EX01426";
-		File rWorkingDir = new File("Y:\\DataAnalysis\\_Reports\\EX01426 - Human EDTA Tranche 2 plasma W20001176L\\"
-				+ "A003 - Untargeted\\Documents\\HighCutoff\\POS");		
-		File xlQCfile  = new File("Y:\\DataAnalysis\\_Reports\\"
-				+ "EX01426 - Human EDTA Tranche 2 plasma W20001176L\\EX01426-QC-summary-tables - HighCutoff.xlsm");		
-		File inputMap =  new File("Y:\\DataAnalysis\\_Reports\\EX01426 - Human EDTA Tranche 2 plasma W20001176L\\"
-				+ "A003 - Untargeted\\Documents\\HighCutoff\\POS\\EX01426_RP-POS-SummaryQC-inputMap.txt");
-		String assayType = "RP-POS";
-		String assayType4R = "rppos";
-		
-		generateSummaryQcScript(
-				experimentId,
-				rWorkingDir,
-				xlQCfile,
-				inputMap,
-				assayType,
-				assayType4R);
-	}
 	
 	private static void generateSummaryQcScriptForEX01414rppos() {
 		
@@ -570,7 +771,7 @@ public class RQCScriptGenerator {
 				assayType4R);
 	}
 
-	private static void generateSummaryQcScript(
+	public static void generateSummaryQcScript(
 			String experimentId,
 			File rWorkingDir,
 			File xlQCfile,

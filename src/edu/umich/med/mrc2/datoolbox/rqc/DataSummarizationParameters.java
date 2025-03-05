@@ -21,34 +21,24 @@
 
 package edu.umich.med.mrc2.datoolbox.rqc;
 
-public enum SummaryInputColumns {
-	
-	EXPERIMENT("Experiment", "exp", true),
-	ASSAY("Assay", "assay", true),
-	BATCH("Batch", "batch", true),
-	EM_VOLTAGE("Multiplier voltage", "EMvolt", true),
-	MFE_CUTOFF("MFE cutoff", "MFEcut",  true),
-	MANIFEST("Manifest", "manifest", false),
-	PEAK_AREAS("Peak area", "area", false),
-	MZ_VALUES("M/Z", "mz", false),
-	PEAK_QUALITY("Peak quality", "pqual", false),
-	PEAK_WIDTH("Peak width", "width", false),
-	RT_VALUES("Apex RT", "rt", false),
+public enum DataSummarizationParameters {
+
+	MEAN_VALUE("Mean", "meanVal"),
+	MEDIAN_VALUE("Median", "medianVal"),
+	SD("Standard deviation", "stDev"),
+	RSD("%RSD", "RSD"),
+	PERCENT_MISSING("% Missing", "pcmissing"),
+	//	Just for convenience
+	SAMPLE_TYPE("Sample type", "sample_type"),
 	;
-	
+
 	private final String uiName;
 	private final String rName;
-	private final boolean isFactor;
 	
-	SummaryInputColumns(String uiName, String rName, boolean isFactor) {
+	DataSummarizationParameters(String uiName, String rName) {
 		
 		this.uiName = uiName;
 		this.rName = rName;
-		this.isFactor = isFactor;
-	}
-
-	public boolean isFactor() {
-		return isFactor;
 	}
 	
 	public String getName() {
@@ -59,9 +49,9 @@ public enum SummaryInputColumns {
 		return rName;
 	}
 	
-	public static SummaryInputColumns getOptionByName(String name) {
+	public static DataSummarizationParameters getOptionByName(String name) {
 
-		for(SummaryInputColumns source : SummaryInputColumns.values()) {
+		for(DataSummarizationParameters source : DataSummarizationParameters.values()) {
 
 			if(source.name().equals(name))
 				return source;
