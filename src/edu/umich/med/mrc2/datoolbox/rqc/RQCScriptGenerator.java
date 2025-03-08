@@ -30,23 +30,295 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
 
+import edu.umich.med.mrc2.datoolbox.data.enums.BinnerExportFields;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.utils.DelimitedTextParser;
 import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
 
 public class RQCScriptGenerator {
 	
-	public static void generateMultiBatchMetabCombinerAlignmentScriptScript() {
+	public static void generateMultiBatchMetabCombinerAlignmentScriptScript(
+			File rWorkingDir,File inputMap) {
 		
+		//	List<String>qcSummaryNames = new ArrayList<String>();
+		List<String>rscriptParts = new ArrayList<String>();
+		String workDirForR = rWorkingDir.getAbsolutePath().replaceAll("\\\\", "/");
+		String[][] inputMapData = DelimitedTextParser.parseTextFile(
+				inputMap, MRC2ToolBoxConfiguration.getTabDelimiter());
+		
+		SummaryInputColumns[]requiredColumns = new SummaryInputColumns[] {
+				SummaryInputColumns.EXPERIMENT,
+				SummaryInputColumns.BATCH,
+				SummaryInputColumns.PEAK_AREAS,
+		};
+		List<SummarizationDataInputObject>inputObjectList = 
+				getDataInputList(inputMapData, requiredColumns);
+		
+		if(inputObjectList == null) {
+			System.err.println("Unable to parse input map file!");
+			return;
+		}
+		rscriptParts.add("# MetabCombiner alignment of multiple batches of untargeted data ####\n");
+		rscriptParts.add("setwd(\"" + workDirForR + "\")\n");
+		rscriptParts.add("library(metabCombiner)");
+		rscriptParts.add("library(reshape2)");
+		rscriptParts.add("library(dplyr)");		
+		rscriptParts.add("## Read in the data for alignment ####\n");
+		rscriptParts.add("clean.data.map.df <- data.frame(data.set = character(), file.name = character())");
+		
+		Map<SummarizationDataInputObject,String>metabDataObjectMap = 
+				new HashMap<SummarizationDataInputObject,String>();
+		Map<SummarizationDataInputObject,String>statsObjectMap = 
+				new HashMap<SummarizationDataInputObject,String>();
+		
+		String columnListToExclude = getBinnerColumnListToExclude();
+		for(SummarizationDataInputObject io : inputObjectList) {
+			
+			String dataObjectPrefix = io.getField(SummaryInputColumns.EXPERIMENT) 
+					+ "." + io.getField(SummaryInputColumns.BATCH);
+			
+			String dataObject = dataObjectPrefix + ".data";
+			rscriptParts.add(dataObject + " <- read.delim(\"" + 
+					io.getField(SummaryInputColumns.PEAK_AREAS) + "\", check.names=FALSE)"
+							+ " %>% select(-any_of(c(" + columnListToExclude + ")))");
+			rscriptParts.add("names(" + dataObject + ")[names(" + dataObject + ") == \"" 
+					+ BinnerExportFields.FEATURE_NAME.getName() + "\"] <- \"feature\"");
+			rscriptParts.add("names(" + dataObject + ")[names(" + dataObject + ") == \"" 
+					+ BinnerExportFields.RT_OBSERVED.getName() + "\"] <- \"rt\"");
+			rscriptParts.add("names(" + dataObject + ")[names(" + dataObject + ") == \"" 
+					+ BinnerExportFields.MZ.getName() + "\"] <- \"mz\"");	
+			
+			//	Write out clean data for final join and record in the data frame
+			String data4join = io.getField(SummaryInputColumns.EXPERIMENT) 
+					+ "-" + io.getField(SummaryInputColumns.BATCH) + "-cleanData.txt";
+			rscriptParts.add("write.table(" + dataObject + "[,-c(2,3)], "
+					+ "file = \"" + data4join + "\", quote = F, sep = \"\\t\", na = \"\", row.names = FALSE)");
+			rscriptParts.add("clean.data.map.df[nrow(clean.data.map.df) + 1,] "
+					+ "= list(data.set = \"" + dataObjectPrefix + "\", file.name = \"" + data4join + "\")"); 
+			
+			rscriptParts.add(dataObject + " <- " + dataObject  
+					+ " %>% select(feature, mz, rt, contains(\"CS00000MP\"))");			
+			rscriptParts.add(dataObject + " <- " + dataObject + "[!(" + dataObject + "$rt == \"NaN\"),]");
+			
+			String metabDataObject = dataObjectPrefix + ".metabData";
+			rscriptParts.add(metabDataObject + " <- metabData(" + dataObject 
+					+ ", id = \"feature\", measure = \"median\", zero = TRUE, duplicate = opts.duplicate())");
+			metabDataObjectMap.put(io, metabDataObject);
+			
+			String statsObject = dataObjectPrefix + ".stats";
+			rscriptParts.add(statsObject + " <- as.data.frame(getStats(" + metabDataObject + "))");
+			rscriptParts.add(statsObject + "$" + SummaryInputColumns.EXPERIMENT.getRName() + " <- \"" 
+					+ io.getField(SummaryInputColumns.EXPERIMENT) + "\"");
+			rscriptParts.add(statsObject + "$" + SummaryInputColumns.BATCH.getRName() + " <- \"" 
+					+ io.getField(SummaryInputColumns.BATCH) + "\"");
+			statsObjectMap.put(io, statsObject);
+		}
+		rscriptParts.add("stats.all <- bind_rows(" + StringUtils.join(statsObjectMap.values(), ",") + ")");
+		String statsFileName = "MetabCombinerMultiAlignmentInputStats" + FIOUtils.getTimestamp() + ".txt";
+		rscriptParts.add("write.table(stats.all, file = \"" + statsFileName +
+				"\", quote = F, sep = \"\\t\", na = \"\", row.names = FALSE)");
+			
+		//	Align all to all and save results
+		Map<String,String>matchListMap = new TreeMap<String,String>();
+		ArrayList<String>listParts = new ArrayList<String>();
+		Map<SummarizationDataInputObject,String>overlapObjectMap = 
+				new HashMap<SummarizationDataInputObject,String>();
+		
+		//	Create data frame to keep track of alignment results
+		rscriptParts.add("alignment.summary.df <- data.frame(dsx = character(), "
+				+ "dsy = character(), report.file = character(), "
+				+ "meta.data = character(), num.matched = integer())");
+		for(SummarizationDataInputObject io : inputObjectList) {
+			
+			matchListMap.clear();
+			listParts.clear();
+			String firstDataSet = io.getField(SummaryInputColumns.EXPERIMENT) + "." 
+					+ io.getField(SummaryInputColumns.BATCH);
+					
+			for(SummarizationDataInputObject io2 : inputObjectList) {
+				
+				if(!io.equals(io2)) {
+					String matchList = createMetabCombinerAlignmentBlock(
+							io, io2, metabDataObjectMap, rscriptParts);
+					
+					String key = io2.getField(SummaryInputColumns.EXPERIMENT) + "." 
+						+ io2.getField(SummaryInputColumns.BATCH);
+					matchListMap.put(key, matchList);
+				}
+			}
+			rscriptParts.add("\n## Find overlap between aligned features for " + firstDataSet + "####");
+			String listString = "match.list.collection <- list(";
+			for(Entry<String,String>ent : matchListMap.entrySet())
+				listParts.add("\"" + ent.getKey() + "\" = " + ent.getValue());
+						
+			listString += StringUtils.join(listParts, ",") + ")";
+			rscriptParts.add(listString);			
+			rscriptParts.add(firstDataSet 
+					+ ".overlap <- Reduce(intersect, match.list.collection)");	
+			overlapObjectMap.put(io, firstDataSet + ".overlap");
+			rscriptParts.add("rm(match.list.collection)");			
+		}
+		listParts.clear();
+		String overlapsListString = "overlap.list.collection <- list(";
+		for(Entry<SummarizationDataInputObject,String>ent : overlapObjectMap.entrySet()) {
+			
+			String key = ent.getKey().getField(SummaryInputColumns.EXPERIMENT) + "." 
+					+ ent.getKey().getField(SummaryInputColumns.BATCH);
+			listParts.add("\"" + key + "\" = " + ent.getValue());
+		}
+		overlapsListString += StringUtils.join(listParts, ",") + ")";
+		rscriptParts.add(overlapsListString);
+		
+		//	Find the longest overlap
+		rscriptParts.add("\n## Find primary batch for alignment ####");
+		rscriptParts.add("match.lengths <- sapply(overlap.list.collection, length)");
+		rscriptParts.add("primary.batch.name <- names(which.max(match.lengths))[[1]]");
+		rscriptParts.add("write.table(alignment.summary.df, file = \"AlignmentSummaryTable.txt\", "
+				+ "quote = F, sep = \"\\t\", na = \"\", row.names = FALSE)");
+		
+		String rScriptFileName = "MetabCombinerMultiAlignment-" + FIOUtils.getTimestamp() + ".R";
+		Path outputPath = Paths.get(
+				rWorkingDir.getAbsolutePath(), rScriptFileName);
+		try {
+		    Files.write(outputPath, 
+		    		rscriptParts,
+		            StandardCharsets.UTF_8,
+		            StandardOpenOption.CREATE, 
+		            StandardOpenOption.TRUNCATE_EXISTING);
+		} catch (IOException e) {
+		    e.printStackTrace();
+		}
+	}
+	
+	private static String createMetabCombinerAlignmentBlock(
+			SummarizationDataInputObject io,
+			SummarizationDataInputObject io2, 
+			Map<SummarizationDataInputObject,String>metabDataObjectMap,
+			List<String> rscriptParts) {
+		
+		Set<String>objectsToClear = new TreeSet<String>();		
+		String outNameSuffix = createOutNameSuffix(io,io2);
+			
+		rscriptParts.add("\n### Aligning " + outNameSuffix + "####");
+		rscriptParts.add("data.combined <- metabCombiner(xdata = " 
+				+ metabDataObjectMap.get(io) + ", ydata = " + metabDataObjectMap.get(io2) 
+				+ ", binGap = 0.005, xid = \"d1\", yid = \"d2\")");
+		objectsToClear.add("data.combined");
+		rscriptParts.add("data.report <- combinedTable(data.combined)");
+		objectsToClear.add("data.report");
+		rscriptParts.add("data.combined <- selectAnchors(data.combined, useID = FALSE, "
+				+ "windx = 0.03, windy = 0.03, tolmz = 0.003, tolQ = 0.3)");
+		rscriptParts.add("anchors <- getAnchors(data.combined)");
+		objectsToClear.add("anchors");
+		String anchorsFileName = "Anchors-" + outNameSuffix +  ".txt";
+		rscriptParts.add("write.table(anchors, file = \"" + anchorsFileName +
+				"\", quote = F, sep = \"\\t\", na = \"\", row.names = FALSE)");
+				
+		rscriptParts.add("set.seed(100)");
+		rscriptParts.add("data.combined <- fit_gam(data.combined, "
+				+ "useID = F, k = seq(12, 20, 2), iterFilter = 2, coef = 2, "
+				+ "prop = 0.5, bs = \"bs\", family = \"scat\", "
+				+ "weights = 1, method = \"REML\", optimizer = \"newton\")");
+		
+		//	Save plot
+		String plotFileName = "AlignmentPlot-" + outNameSuffix +  ".png";
+		rscriptParts.add("png(filename = \"" + plotFileName 
+				+ "\", width = 11, height = 8, units = \"in\",res = 300)");
+		
+		String ploTitle = "MetabCombiner alignment between " 
+				+ io.getField(SummaryInputColumns.EXPERIMENT) + " " 
+				+ io.getField(SummaryInputColumns.BATCH) + " and "
+				+ io2.getField(SummaryInputColumns.EXPERIMENT) + " " 
+				+ io2.getField(SummaryInputColumns.BATCH);
+		String xTitle = io.getField(SummaryInputColumns.EXPERIMENT) + " " 
+				+ io.getField(SummaryInputColumns.BATCH);
+		String yTitle = io2.getField(SummaryInputColumns.EXPERIMENT) + " " 
+				+ io2.getField(SummaryInputColumns.BATCH);
+		rscriptParts.add("plot(data.combined, fit = \"gam\", main = \"" + ploTitle + "\", "
+				+ "xlab = \"" + xTitle + "\",  ylab = \"" + yTitle + "\", "
+				+ "pch = 19, lcol = \"red\", pcol = \"black\", outlier = \"s\")");
+		rscriptParts.add("dev.off()");
+		
+		//	Reports
+		rscriptParts.add("data.combined <- calcScores(data.combined, "
+				+ "A = 90, B = 15, C = 0.5, fit = \"gam\", usePPM = FALSE, groups = NULL)");
+		rscriptParts.add("data.combined <- reduceTable(data.combined, "
+				+ "maxRankX = 2, maxRankY = 2, minScore = 0.5, delta = 0.1)");
+		rscriptParts.add("data.report <- combinedTable(data.combined)");
+		String reportFileName = "AlignmentReport-" + outNameSuffix +  ".txt";		
+		rscriptParts.add("write.table(data.report, file = \"" + reportFileName 
+				+ "\", quote = F, sep = \"\\t\", na = \"\", row.names = FALSE)");
+		
+		String xPrefix = io.getField(SummaryInputColumns.EXPERIMENT) + "." 
+				+ io.getField(SummaryInputColumns.BATCH);
+		String yPrefix = io2.getField(SummaryInputColumns.EXPERIMENT) + "." 
+				+ io2.getField(SummaryInputColumns.BATCH);
+		
+		String alignmentMetaDataObject = xPrefix + "." + yPrefix + "alignmentMetaData";
+		rscriptParts.add(alignmentMetaDataObject + " <- data.report %>% select(idx,mzx,rtx,idy,mzy,rty)");
+		rscriptParts.add("colnames(" + alignmentMetaDataObject + ") <- c(\""
+				+ xPrefix + "\", \"mz." + xPrefix + "\", \"rt." + xPrefix + "\",\"" 
+				+ yPrefix + "\", \"mz." + yPrefix + "\", \"rt." + yPrefix +"\")");
+		
+		//	Add line to summary data frame
+		rscriptParts.add("alignment.summary.df[nrow(alignment.summary.df) + 1,] "
+				+ "= list(dsx=\"" + xTitle.replaceAll("\\s+", ".") 
+				+ "\", dsy=\"" + yTitle.replaceAll("\\s+", ".") 
+				+ "\", report.file = \"" + reportFileName 
+				+ "\", meta.data = \"" + alignmentMetaDataObject 
+				+ "\", num.matched=nrow(data.report))");
+		
+		String firstDataSetMatchedFetureList = "matched.features." + outNameSuffix.replaceAll("-", ".");		
+		rscriptParts.add(firstDataSetMatchedFetureList + " <- as.vector(data.report$idx)");
+		
+		rscriptParts.add("data.combined <- updateTables(data.combined, xdata = " 
+				+ metabDataObjectMap.get(io) + ", ydata = " + metabDataObjectMap.get(io2) + ")");
+		rscriptParts.add("data.report <- combinedTable(data.combined)");
+		String completeReportFileName = "CompleteAlignmentReport-" + outNameSuffix +  ".txt";
+		rscriptParts.add("write.table(data.report, file = \"" + completeReportFileName 
+				+ "\", quote = F, sep = \"\\t\", na = \"\", row.names = FALSE)");		
+
+		rscriptParts.add("rm(" + StringUtils.join(objectsToClear, ",") + ")");
+				
+		return firstDataSetMatchedFetureList;
+	}
+	
+	private static String createOutNameSuffix(			
+			SummarizationDataInputObject io,
+			SummarizationDataInputObject io2) {
+		
+		ArrayList<String>outNameParts = new ArrayList<String>();
+		outNameParts.add(io.getField(SummaryInputColumns.EXPERIMENT));
+		outNameParts.add(io.getField(SummaryInputColumns.BATCH));
+		outNameParts.add(io2.getField(SummaryInputColumns.EXPERIMENT));
+		outNameParts.add(io2.getField(SummaryInputColumns.BATCH));
+		
+		return StringUtils.join(outNameParts, "-");
+	}
+
+	private static String getBinnerColumnListToExclude(){
+		
+		List<String>columnsToExclude = 
+				Arrays.asList(BinnerExportFields.values()).stream().
+				map(v -> v.getName()).collect(Collectors.toList());
+		columnsToExclude.remove(BinnerExportFields.FEATURE_NAME.getName());
+		columnsToExclude.remove(BinnerExportFields.RT_OBSERVED.getName());
+		columnsToExclude.remove(BinnerExportFields.MZ.getName());
+		
+		String columnListToExclude = "\"" + StringUtils.join(columnsToExclude, "\",\"") + "\"";	
+		return columnListToExclude;
 	}
 	
 	public static void generateSummaryQcScript(
@@ -138,43 +410,43 @@ public class RQCScriptGenerator {
 		}
 	}	
 	
-	public static void createMultyBatchDataSummarizationScript(File inputMapFile, File dataDir) {
+	private static List<SummarizationDataInputObject>getDataInputList(
+			String[][]inputMap, SummaryInputColumns[]requiredColumns){
 		
-		List<String>qcSummaryNames = new ArrayList<String>();
-		List<String>rscriptParts = new ArrayList<String>();
-		String workDirForR = dataDir.getAbsolutePath().replaceAll("\\\\", "/");
-		String[][] inputData = DelimitedTextParser.parseTextFile(
-				inputMapFile, MRC2ToolBoxConfiguration.getTabDelimiter());
-		
-		List<String>header = Arrays.asList(inputData[0]);
-		for(SummaryInputColumns field : SummaryInputColumns.values()) {
+		List<String>header = Arrays.asList(inputMap[0]);
+		for(SummaryInputColumns field : requiredColumns) {
 			
 			if(!header.contains(field.name())) {
 				
 				System.err.println(field.name() + " missing in data input map file!");
-				return;
+				return null;
 			}
 		}
 		List<SummarizationDataInputObject>dataInputList = 
 				new ArrayList<SummarizationDataInputObject>();
-		for(int i = 1; i<inputData.length; i++) {
+		for(int i = 1; i<inputMap.length; i++) {
 			
 			SummarizationDataInputObject io = new SummarizationDataInputObject();
-			for(int j = 0; j<inputData[0].length; j++) {
+			for(int j = 0; j<inputMap[0].length; j++) {
 			
-				SummaryInputColumns field = SummaryInputColumns.getOptionByName(inputData[0][j]);
-				String value = inputData[i][j];
+				SummaryInputColumns field = SummaryInputColumns.getOptionByName(inputMap[0][j]);
+				String value = inputMap[i][j];
 				if(value == null || value.isEmpty()) {
 					
 					System.err.println(field.name() + 
 							" missing in data input map file on line " + Integer.toString(i+ 1) + "!");
-					return;
-				}
-					
+					return null;
+				}					
 				io.setField(field, value);			
 			}
 			dataInputList.add(io);			
 		}
+		return dataInputList;
+	}
+	
+	private static Map<SummaryInputColumns,Set<String>>createFeildVariationMap(
+			Collection<SummarizationDataInputObject>dataInputList){
+		
 		Map<SummaryInputColumns,Set<String>>feildVariationMap = 
 				new TreeMap<SummaryInputColumns,Set<String>>();
 		for(SummaryInputColumns field : SummaryInputColumns.values()) {
@@ -191,11 +463,31 @@ public class RQCScriptGenerator {
 				feildVariationMap.put(field, fieldValues);
 			}
 		}
-		List<SummaryInputColumns>nonRedundantFields = new ArrayList<SummaryInputColumns>();
+		return feildVariationMap;
+	}
+	
+	public static void createMultyBatchDataSummarizationScript(File inputMapFile, File dataDir) {
+
+		List<String>rscriptParts = new ArrayList<String>();
+		String workDirForR = dataDir.getAbsolutePath().replaceAll("\\\\", "/");
+		String[][] inputData = DelimitedTextParser.parseTextFile(
+				inputMapFile, MRC2ToolBoxConfiguration.getTabDelimiter());
+		
+		List<SummarizationDataInputObject>dataInputList = 
+				getDataInputList(inputData, SummaryInputColumns.values());
+		if(dataInputList == null)
+			return;
+		
+		Map<SummaryInputColumns,Set<String>>feildVariationMap = 
+				createFeildVariationMap(dataInputList);
+		
+		List<SummaryInputColumns>nonRedundantFields = 
+				new ArrayList<SummaryInputColumns>();
 		feildVariationMap.entrySet().stream().
 			filter(e -> e.getValue().size() > 1).
 			forEach(e -> nonRedundantFields.add(e.getKey()));
-		List<SummaryInputColumns>commonFields = new ArrayList<SummaryInputColumns>();
+		List<SummaryInputColumns>commonFields = 
+				new ArrayList<SummaryInputColumns>();
 		feildVariationMap.entrySet().stream().
 			filter(e -> e.getValue().size() == 1).
 			forEach(e -> commonFields.add(e.getKey()));

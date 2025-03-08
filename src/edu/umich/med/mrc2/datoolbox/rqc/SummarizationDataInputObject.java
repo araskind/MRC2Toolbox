@@ -23,13 +23,17 @@ package edu.umich.med.mrc2.datoolbox.rqc;
 
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.UUID;
 
 public class SummarizationDataInputObject {
 
+	private String uniqueId;
 	private Map<SummaryInputColumns,String>dataInputMap;
 
 	public SummarizationDataInputObject() {
 		super();
+		uniqueId = "SDIO_" +
+				UUID.randomUUID().toString().substring(0, 12);
 		dataInputMap = new TreeMap<SummaryInputColumns,String>();
 	}
 	
@@ -39,5 +43,34 @@ public class SummarizationDataInputObject {
 	
 	public String getField(SummaryInputColumns field) {
 		return dataInputMap.get(field);
+	}
+	
+    @Override
+    public int hashCode() {
+        return uniqueId.hashCode();
+    }
+    
+    @Override
+    public boolean equals(Object obj) {
+
+		if (obj == this)
+			return true;
+
+        if (obj == null)
+            return false;
+
+        if (!SummarizationDataInputObject.class.isAssignableFrom(obj.getClass()))
+            return false;
+
+        final SummarizationDataInputObject other = (SummarizationDataInputObject) obj;
+
+        if (!this.uniqueId.equals(other.getUniqueId()))
+            return false;
+
+        return true;
+    }
+
+	public String getUniqueId() {
+		return uniqueId;
 	}
 }

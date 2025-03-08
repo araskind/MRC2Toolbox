@@ -38,11 +38,23 @@ public class RScriptTestClass {
 		MRC2ToolBoxConfiguration.initConfiguration();
 
 		try {
-			createDataSummariesForEX01283rpPosExperiment();
+			testMetabCombinerAlignmentScript();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+	
+	private static void testMetabCombinerAlignmentScript() {
+		
+		File rWorkingDir = new File("Y:\\DataAnalysis\\_Reports\\"
+				+ "EX01010 - EX01089 - EX01235 - EX01283 - EX01392 - Starr County Metabolomics I-V\\"
+				+ "Unnamed\\POS\\Positive_unnamed_Goo_Jun_normalized\\MetabCombiner\\EX01392\\TEST");
+		File inputMap = new File("Y:\\DataAnalysis\\_Reports\\"
+				+ "EX01010 - EX01089 - EX01235 - EX01283 - EX01392 - Starr County Metabolomics I-V\\"
+				+ "Unnamed\\POS\\Positive_unnamed_Goo_Jun_normalized\\MetabCombiner\\"
+				+ "EX01392\\TEST\\EX01392-MC-alignment-input-map.txt");
+		RQCScriptGenerator.generateMultiBatchMetabCombinerAlignmentScriptScript(rWorkingDir, inputMap);
 	}
 
 	private static void createDataSummariesForEX01283rpPosExperiment() {

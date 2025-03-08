@@ -45,13 +45,13 @@ public class EX01426andEX01496RQCgenerator {
 		MRC2ToolBoxConfiguration.initConfiguration();
 
 		try {
-			generateSummaryQcScriptForEX01426and96rppos(false);
+			generateSummaryQcScriptForEX01426ionpneg(false);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		try {
-			generateSummaryQcScriptForEX01426and96rppos(true);
+			generateSummaryQcScriptForEX01426ionpneg(true);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
