@@ -32,7 +32,6 @@ import java.awt.Toolkit;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.nio.channels.FileLock;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collection;
@@ -125,7 +124,7 @@ public final class MRC2ToolBoxCore {
 	public static void main(String[] args) {
 		
 		//	Prevent second copy running
-		FileLock lock = null;
+//		FileLock lock = null;
 //		try {
 //		    FileChannel fc = FileChannel.open(lockFile.toPath(),
 //		            StandardOpenOption.CREATE,

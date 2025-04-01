@@ -286,4 +286,8 @@ public class FIOUtils {
 		
 	    Files.move(newFile, oldFile, StandardCopyOption.REPLACE_EXISTING);
 	}
+	
+	public static String createSaveSafeName(String fileName) {
+		return fileName.replaceAll("[\\\\/:*?\"<>|]", "");
+	}
 }

@@ -500,10 +500,11 @@ public final class BuildInformation {
 			</exclusions>
 		</dependency>
 		-->
+		<!-- https://mvnrepository.com/artifact/com.thoughtworks.xstream/xstream -->
 		<dependency>
-			<groupId>com.thoughtworks.xstream</groupId>
-			<artifactId>xstream</artifactId>
-			<version>1.4.20</version>
+		    <groupId>com.thoughtworks.xstream</groupId>
+		    <artifactId>xstream</artifactId>
+		    <version>1.4.21</version>
 		</dependency>
 		<dependency>
 			<groupId>com.googlecode.juniversalchardet</groupId>
@@ -635,5 +636,11 @@ public final class BuildInformation {
 		    <artifactId>poi</artifactId>
 		    <version>5.2.5</version>
 		</dependency>	
+		<!-- https://mvnrepository.com/artifact/com.orsonpdf/orsonpdf -->
+		<dependency>
+		    <groupId>com.orsonpdf</groupId>
+		    <artifactId>orsonpdf</artifactId>
+		    <version>1.9.1</version>
+		</dependency>
 	</dependencies>
 </project>

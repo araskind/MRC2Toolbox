@@ -119,14 +119,14 @@ public class ImprovedFileChooser extends JFileChooser {
     }
 
     private static AbstractButton getDetailsViewButton(JFileChooser fileChooser) {
-        AbstractButton detailsButton = SwingUtils.getDescendantOfType(
+        AbstractButton detailsButton = SwingUtilsDB.getDescendantOfType(
                 AbstractButton.class, fileChooser, "Icon", UIManager.getIcon("FileChooser.detailsViewIcon"));
         if (detailsButton != null) {
             return detailsButton;
         }
 
-        JComponent componentWithPopupMenu = SwingUtils.getDescendantOfType(
-                JComponent.class, fileChooser, "ComponentPopupMenu", SwingUtils.NOT_NULL);
+        JComponent componentWithPopupMenu = SwingUtilsDB.getDescendantOfType(
+                JComponent.class, fileChooser, "ComponentPopupMenu", SwingUtilsDB.NOT_NULL);
         if (componentWithPopupMenu == null) {
             return null;
         }

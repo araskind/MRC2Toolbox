@@ -262,8 +262,7 @@ public class OpenStoredRawDataAnalysisExperimentTask extends AbstractTask implem
 		} catch (Exception e) {
 			e.printStackTrace();
 			setStatus(TaskStatus.ERROR);
-return;
-			
+			return;		
 		}	
 		Element limsExperimentElement = 
 				experimentElement.getChild(LIMSExperimentFields.limsExperiment.name());

@@ -45,20 +45,20 @@ public class EX01426andEX01496RQCgenerator {
 		MRC2ToolBoxConfiguration.initConfiguration();
 
 		try {
-			generateSummaryQcScriptForEX01426ionpneg(false);
+			generateSummaryQcScriptForEX01496rppos(false);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		try {
-			generateSummaryQcScriptForEX01426ionpneg(true);
+			generateSummaryQcScriptForEX01496rppos(true);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 	
-	private static void generateSummaryQcScriptForEX01426ionpneg(boolean highCutoffData) {		
+	private static void generateSummaryQcScriptForEX01426and96ionpneg(boolean highCutoffData) {		
 		
 		String assayType = "IONP-NEG";
 		String assayType4R = "ionpneg";
@@ -75,6 +75,30 @@ public class EX01426andEX01496RQCgenerator {
 		File inputMap = Paths.get(rWorkingDir.getAbsolutePath(), "EX01426_96_IONP-NEG-SummaryQC-inputMap.txt").toFile();
 		RQCScriptGenerator.generateSummaryQcScript(
 				experimentId,
+				rWorkingDir,
+				xlQc,
+				inputMap,
+				assayType,
+				assayType4R);
+	}
+	
+	private static void generateSummaryQcScriptForEX01496ionpneg(boolean highCutoffData) {		
+		
+		String assayType = "IONP-NEG";
+		String assayType4R = "ionpneg";
+		File xlQc = xlQCfile;
+		File rWorkingDir = new File("Y:\\DataAnalysis\\_Reports\\"
+				+ "EX01496 - Human EDTA Tranche 3 plasma X20001463K\\"
+				+ "A049 - Central carbon metabolism profiling\\Documents\\CO300-Pk1000\\T2T3");	
+		if(highCutoffData) {
+			rWorkingDir = new File("Y:\\DataAnalysis\\_Reports\\"
+					+ "EX01496 - Human EDTA Tranche 3 plasma X20001463K\\"
+					+ "A049 - Central carbon metabolism profiling\\Documents\\CO900-Pk3000\\T2T3");
+			xlQc = xlHighCutoffQCfile;
+		}	
+		File inputMap = Paths.get(rWorkingDir.getAbsolutePath(), "EX01496_IONP-NEG-SummaryQC-inputMap.txt").toFile();
+		RQCScriptGenerator.generateSummaryQcScript(
+				"EX01496",
 				rWorkingDir,
 				xlQc,
 				inputMap,
@@ -104,6 +128,28 @@ public class EX01426andEX01496RQCgenerator {
 				assayType4R);
 	}
 	
+	private static void generateSummaryQcScriptForEX01496rpneg(boolean highCutoffData) {
+
+		String assayType = "RP-NEG";
+		String assayType4R = "rpneg";
+		File xlQc = xlQCfile;
+		File rWorkingDir = new File("Y:\\DataAnalysis\\_Reports\\"
+				+ "EX01496 - Human EDTA Tranche 3 plasma X20001463K\\A003 - Untargeted\\Documents\\NEG\\CO300-Pk1000\\T2T3");	
+		if(highCutoffData) {
+			rWorkingDir = new File("Y:\\DataAnalysis\\_Reports\\"
+					+ "EX01496 - Human EDTA Tranche 3 plasma X20001463K\\A003 - Untargeted\\Documents\\NEG\\CO900-Pk3000\\T2T3");
+			xlQc = xlHighCutoffQCfile;
+		}	
+		File inputMap = Paths.get(rWorkingDir.getAbsolutePath(), "EX01496_RP-NEG-SummaryQC-inputMap.txt").toFile();
+		RQCScriptGenerator.generateSummaryQcScript(
+				"EX01496",
+				rWorkingDir,
+				xlQc,
+				inputMap,
+				assayType,
+				assayType4R);
+	}
+	
 	private static void generateSummaryQcScriptForEX01426and96rppos(boolean highCutoffData) {
 
 		String assayType = "RP-POS";
@@ -119,6 +165,28 @@ public class EX01426andEX01496RQCgenerator {
 		File inputMap = Paths.get(rWorkingDir.getAbsolutePath(), "EX01426_96_RP-POS-SummaryQC-inputMap.txt").toFile();
 		RQCScriptGenerator.generateSummaryQcScript(
 				experimentId,
+				rWorkingDir,
+				xlQc,
+				inputMap,
+				assayType,
+				assayType4R);
+	}
+	
+	private static void generateSummaryQcScriptForEX01496rppos(boolean highCutoffData) {
+
+		String assayType = "RP-POS";
+		String assayType4R = "rppos";
+		File xlQc = xlQCfile;
+		File rWorkingDir = new File("Y:\\DataAnalysis\\_Reports\\"
+				+ "EX01496 - Human EDTA Tranche 3 plasma X20001463K\\A003 - Untargeted\\Documents\\POS\\CO300-Pk1000\\T2T3");	
+		if(highCutoffData) {
+			rWorkingDir = new File("Y:\\DataAnalysis\\_Reports\\"
+					+ "EX01496 - Human EDTA Tranche 3 plasma X20001463K\\A003 - Untargeted\\Documents\\POS\\CO900-Pk3000\\T2T3");
+			xlQc = xlHighCutoffQCfile;
+		}	
+		File inputMap = Paths.get(rWorkingDir.getAbsolutePath(), "EX01496_RP-POS-SummaryQC-inputMap.txt").toFile();
+		RQCScriptGenerator.generateSummaryQcScript(
+				"EX01496",
 				rWorkingDir,
 				xlQc,
 				inputMap,

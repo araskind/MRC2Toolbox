@@ -24,6 +24,7 @@ package edu.umich.med.mrc2.datoolbox.gui.plot.qc.twod;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
+import java.io.File;
 import java.text.NumberFormat;
 import java.util.Collection;
 
@@ -44,6 +45,8 @@ import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
 import edu.umich.med.mrc2.datoolbox.data.DataFileStatisticalSummary;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataSetQcField;
 import edu.umich.med.mrc2.datoolbox.data.enums.FileSortingOrder;
+import edu.umich.med.mrc2.datoolbox.data.enums.ImageExportFormat;
+import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.plot.AbstractControlledDataPlot;
 import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.PlotDataSetUtils;
 import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.QcBoxPlotDataSet;
@@ -57,6 +60,9 @@ import edu.umich.med.mrc2.datoolbox.gui.plot.stats.StatsPlotDataFileToolTipGener
 import edu.umich.med.mrc2.datoolbox.gui.plot.stats.StatsPlotType;
 import edu.umich.med.mrc2.datoolbox.gui.plot.tooltip.FileStatsBoxAndWhiskerToolTipGenerator;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
+import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
+import edu.umich.med.mrc2.datoolbox.project.Experiment;
+import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
 
 public class TwoDimQCPlot extends AbstractControlledDataPlot {
 	
@@ -74,6 +80,7 @@ public class TwoDimQCPlot extends AbstractControlledDataPlot {
 
 	public TwoDimQCPlot() {
 		super();
+		setHandlePlotSaveExternally(true);
 	}
 	
 	public void loadDataSetStats(Collection<DataFileStatisticalSummary> dataSetStats2) {
@@ -194,12 +201,49 @@ public class TwoDimQCPlot extends AbstractControlledDataPlot {
 			if (activePlot instanceof XYPlot)
 				((XYPlot)activePlot).getRangeAxis().setAutoRange(true);
 		}
-		else if (command.equals(ChartPanel.ZOOM_RESET_BOTH_COMMAND))
+		else if (command.equals(ChartPanel.ZOOM_RESET_BOTH_COMMAND)) {
 			this.restoreAutoBounds();
+		}
+		else if(command.equals(ChartPanel.SAVE_COMMAND) 
+				|| command.equals(MainActionCommands.SAVE_AS_PNG.name()) 
+				|| command.equals(MainActionCommands.SAVE_AS_SVG.name()) 
+				|| command.equals(MainActionCommands.SAVE_AS_PDF.name())){
+				saveQCplot(command);
+		}
 		else
 			super.actionPerformed(event);
 	}
 	
+	private void saveQCplot(String command) {
+		
+		Experiment experiment = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
+		if(experiment == null)
+			experiment = MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment();
+		
+		if(experiment == null)
+			return;
+		
+		String prefix = experiment.getName();
+		if(experiment.getLimsExperiment() != null)
+			prefix = experiment.getLimsExperiment().getId();
+		
+		File exportFolder = experiment.getExportsDirectory();
+		ImageExportFormat format = ImageExportFormat.PNG;
+		
+		if(command.equals(MainActionCommands.SAVE_AS_PDF.name()))
+			format = ImageExportFormat.PDF;
+		
+		if(command.equals(MainActionCommands.SAVE_AS_SVG.name()))
+			format = ImageExportFormat.SVG;
+		
+		String plotFileName = prefix + "_"
+				+ plotParameters.getDesignDescriptor()
+				+ "." + format.getExtension();
+		String plotFileNameClean = FIOUtils.createSaveSafeName(plotFileName).replaceAll("\\s+", "_");
+		
+		saveChartAsImageToFile(exportFolder, plotFileNameClean, format);
+	}
+
 	@Override
 	public void itemStateChanged(ItemEvent e) {
 		// TODO Auto-generated method stub

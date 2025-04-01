@@ -69,6 +69,15 @@ public class TwoDqcPlotParameterObject extends TwoDimDataPlotParameterObject{
 	public void setStatsField(DataSetQcField statsField) {
 		this.statsField = statsField;
 	}
+	
+	@Override
+	public String getDesignDescriptor() {
+		
+		String descriptor = statsField.getName() 
+				+ "_" + super.getDesignDescriptor();
+				
+		return descriptor;
+	}
 }
 
 

@@ -38,6 +38,7 @@ public enum DocumentFormat {
 	PPTX("Microsoft PowerPoint ","application/powerpoint"),
 	R("R script","text/plain"),
 	RTF("Rich text format document","application/rtf"),
+	SVG("Scalable Vector Graphics document","image/svg+xml"),
 	TXT("Plain text","text/plain"),
 	TIFF("Tagged Image File Format image","image/tiff"),
 	XLS("Microsoft Excel (old format)","application/excel"),

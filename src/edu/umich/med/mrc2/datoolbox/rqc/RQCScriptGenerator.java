@@ -84,6 +84,7 @@ public class RQCScriptGenerator {
 				new HashMap<SummarizationDataInputObject,String>();
 		
 		String columnListToExclude = getBinnerColumnListToExclude();
+		String cleanDataFileSuffix = "-cleanData.txt";
 		for(SummarizationDataInputObject io : inputObjectList) {
 			
 			String dataObjectPrefix = io.getField(SummaryInputColumns.EXPERIMENT) 
@@ -101,8 +102,7 @@ public class RQCScriptGenerator {
 					+ BinnerExportFields.MZ.getName() + "\"] <- \"mz\"");	
 			
 			//	Write out clean data for final join and record in the data frame
-			String data4join = io.getField(SummaryInputColumns.EXPERIMENT) 
-					+ "-" + io.getField(SummaryInputColumns.BATCH) + "-cleanData.txt";
+			String data4join = dataObjectPrefix + cleanDataFileSuffix;
 			rscriptParts.add("write.table(" + dataObject + "[,-c(2,3)], "
 					+ "file = \"" + data4join + "\", quote = F, sep = \"\\t\", na = \"\", row.names = FALSE)");
 			rscriptParts.add("clean.data.map.df[nrow(clean.data.map.df) + 1,] "
@@ -178,14 +178,51 @@ public class RQCScriptGenerator {
 					+ ent.getKey().getField(SummaryInputColumns.BATCH);
 			listParts.add("\"" + key + "\" = " + ent.getValue());
 		}
-		overlapsListString += StringUtils.join(listParts, ",") + ")";
+		overlapsListString += StringUtils.join(listParts, ",") + ")\n";
 		rscriptParts.add(overlapsListString);
+		
+		rscriptParts.add("write.table(alignment.summary.df, file = \"AlignmentSummaryTable.txt\", "
+				+ "quote = F, sep = \"\\t\", na = \"\", row.names = FALSE)");
 		
 		//	Find the longest overlap
 		rscriptParts.add("\n## Find primary batch for alignment ####");
 		rscriptParts.add("match.lengths <- sapply(overlap.list.collection, length)");
 		rscriptParts.add("primary.batch.name <- names(which.max(match.lengths))[[1]]");
-		rscriptParts.add("write.table(alignment.summary.df, file = \"AlignmentSummaryTable.txt\", "
+		
+		//	Join metadata and calculate median MZ/RT, create common feature names
+		rscriptParts.add("\n## Create cummulative metadata ####");
+		rscriptParts.add("meta.data.names.list <- as.vector("
+				+ "alignment.summary.df[alignment.summary.df$dsx == primary.batch.name,]$meta.data)");
+		rscriptParts.add("meta.data.list <- mget(meta.data.names.list)");
+		rscriptParts.add("meta.data.joined <- Reduce(inner_join, meta.data.list)");
+		rscriptParts.add("columns.to.remove.from.merged.data <- colnames(meta.data.joined)");		
+		rscriptParts.add("meta.data.joined <- meta.data.joined %>%  rowwise() "
+				+ "%>%  mutate(mzMedian = median(c_across(starts_with(\"mz\")), na.rm = T))");
+		rscriptParts.add("meta.data.joined <- meta.data.joined %>%  rowwise() "
+				+ "%>%  mutate(rtMedian = median(c_across(starts_with(\"rt\")), na.rm = T))");
+		rscriptParts.add("meta.data.joined <- meta.data.joined %>%  rowwise() "
+				+ "%>%  mutate(FeatureID = paste(\"UNK_\", mzMedian, \"_\", rtMedian, sep = \"\"))");
+		rscriptParts.add("write.table(meta.data.joined, file = \"CummulativeMetaData.txt\", "
+				+ "quote = F, sep = \"\\t\", na = \"\", row.names = FALSE)");
+		
+		//	Join actual data using best batch and write out resulsts
+		rscriptParts.add("\n## Create merged aligned data ####");
+		rscriptParts.add("secondary.batch.list <- as.vector("
+				+ "alignment.summary.df[alignment.summary.df$dsx == primary.batch.name,]$dsy)");
+		rscriptParts.add("meta.data <- meta.data.joined %>% select("
+				+ "all_of(c(\"FeatureID\",\"mzMedian\",\"rtMedian\",primary.batch.name,secondary.batch.list)))");
+		rscriptParts.add("merged.data <- read.delim(paste(primary.batch.name, \"" 
+				+ cleanDataFileSuffix + "\", sep = \"\"), check.names=FALSE)");
+		rscriptParts.add("colnames(merged.data)[1] <- primary.batch.name");
+		rscriptParts.add("merged.data <- inner_join(meta.data.joined, merged.data, by = primary.batch.name)");
+		rscriptParts.add("for(sec.batch.name in  secondary.batch.list){");
+		rscriptParts.add("\tsec.batch.data <- read.delim(paste(sec.batch.name, \"" 
+				+ cleanDataFileSuffix + "\", sep = \"\"), check.names=FALSE)");
+		rscriptParts.add("\tcolnames(sec.batch.data)[1] <- sec.batch.name");
+		rscriptParts.add("\tmerged.data <- inner_join(merged.data, sec.batch.data, by = sec.batch.name)");
+		rscriptParts.add("}");
+		rscriptParts.add("merged.data <- merged.data %>% select(-any_of(columns.to.remove.from.merged.data))");
+		rscriptParts.add("write.table(merged.data, file = \"MergedAlignedData.txt\", "
 				+ "quote = F, sep = \"\\t\", na = \"\", row.names = FALSE)");
 		
 		String rScriptFileName = "MetabCombinerMultiAlignment-" + FIOUtils.getTimestamp() + ".R";

@@ -37,6 +37,8 @@ import com.Ostermiller.util.CSVParser;
 
 public class DelimitedTextParser {
 
+	public static final char TAB_DELIMITER = '\t';
+	
 	public static String[][] parseTextFile(File fileToParse, char delimiter) {
 
 		String[][] parsedFile = null;

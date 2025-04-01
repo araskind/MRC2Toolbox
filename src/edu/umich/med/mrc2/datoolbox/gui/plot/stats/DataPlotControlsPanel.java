@@ -268,10 +268,6 @@ public class DataPlotControlsPanel extends JPanel implements ItemListener {
 	public ExperimentDesignFactor getSububCategory() {
 		return (ExperimentDesignFactor)subCategoryComboBox.getSelectedItem();
 	}
-	
-//	public boolean isSplitByBatch() {
-//		return splitByBatchCheckBox.isSelected();
-//	}
 
 	@Override
 	public void itemStateChanged(ItemEvent e) {
@@ -286,10 +282,6 @@ public class DataPlotControlsPanel extends JPanel implements ItemListener {
 			}
 			updatePlot();
 		}
-//		if(e.getStateChange() == ItemEvent.DESELECTED 
-//				&& e.getSource().equals(splitByBatchCheckBox)) {
-//			updatePlot();
-//		}
 	}
 	
 	private void updatePlot() {
@@ -298,3 +290,14 @@ public class DataPlotControlsPanel extends JPanel implements ItemListener {
 		plot.redrawPlot();
 	}
 }
+
+
+
+
+
+
+
+
+
+
+

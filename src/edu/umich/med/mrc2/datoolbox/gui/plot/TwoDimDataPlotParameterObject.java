@@ -91,6 +91,23 @@ public class TwoDimDataPlotParameterObject {
 	public void setStatPlotType(StatsPlotType statPlotType) {
 		this.statPlotType = statPlotType;
 	}
+	
+	public String getDesignDescriptor() {
+		
+		if(groupingType.equals(PlotDataGrouping.IGNORE_DESIGN))
+			return "orderedBy_" + sortingOrder.getName();;
+		
+		String descriptor = "by_";
+		if(category != null)
+			descriptor += category.getName();
+
+		if(subCategory != null)
+			descriptor += "_and_" + subCategory.getName();
+		
+		descriptor += "_orderedBy_" + sortingOrder.getName();
+		
+		return descriptor;
+	}
 }
 
 

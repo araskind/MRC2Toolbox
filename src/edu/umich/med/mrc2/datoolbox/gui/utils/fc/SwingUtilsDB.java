@@ -43,10 +43,10 @@ import javax.swing.UIManager;
  * @author Darryl Burke
  * @see "http://tips4java.wordpress.com/2008/11/13/swing-utils/"
  */
-public final class SwingUtils {
+public final class SwingUtilsDB {
     public static final Object NOT_NULL = new Object();
 
-   private SwingUtils() {
+   private SwingUtilsDB() {
       throw new Error("SwingUtils is just a container for static methods");
    }
 
@@ -93,7 +93,7 @@ public final class SwingUtils {
             tList.add(clazz.cast(component));
          }
          if (nested || !clazz.isAssignableFrom(component.getClass())) {
-            tList.addAll(SwingUtils.<T>getDescendantsOfType(clazz,
+            tList.addAll(SwingUtilsDB.<T>getDescendantsOfType(clazz,
                   (Container) component, nested));
          }
       }
@@ -187,7 +187,7 @@ public final class SwingUtils {
             tList.add(clazz.cast(component));
          }
          if (nested || !clazz.equals(component.getClass())) {
-            tList.addAll(SwingUtils.<T>getDescendantsOfClass(clazz,
+            tList.addAll(SwingUtilsDB.<T>getDescendantsOfClass(clazz,
                   (Container) component, nested));
          }
       }

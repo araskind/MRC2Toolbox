@@ -44,7 +44,8 @@ public class FilePreferencesFactory implements PreferencesFactory {
 	private static final Logger log = Logger.getLogger(FilePreferencesFactory.class.getName());
 
 	Preferences rootPreferences;
-	public static final String SYSTEM_PROPERTY_FILE = "edu.umich.med.mrc2.cefanalyzer.main.config.FilePreferencesFactory.file";
+	public static final String SYSTEM_PROPERTY_FILE = 
+			"edu.umich.med.mrc2.datoolbox.main.config.FilePreferencesFactory.file";
 
 	public Preferences systemRoot() {
 		return userRoot();
@@ -69,24 +70,11 @@ public class FilePreferencesFactory implements PreferencesFactory {
 			String prefsFile = System.getProperty(SYSTEM_PROPERTY_FILE);
 
 			if (prefsFile == null || prefsFile.length() == 0)
-				prefsFile = MRC2ToolBoxCore.configDir + "CefAnalyzerPrefs.fileprefs";
+				prefsFile = MRC2ToolBoxCore.configDir + "MRC2ToolBoxPrefs.txt";
 
 			preferencesFile = new File(prefsFile).getAbsoluteFile();
 			log.finer("Preferences file is " + preferencesFile);
 		}
 		return preferencesFile;
 	}
-/*
-	public static void main(String[] args) throws BackingStoreException {
-		System.setProperty("java.util.prefs.PreferencesFactory", FilePreferencesFactory.class.getName());
-		System.setProperty(SYSTEM_PROPERTY_FILE, "myprefs.txt");
-		Preferences p = Preferences.userNodeForPackage(my.class);
-
-		for (String s : p.keys()) {
-			System.out.println("p[" + s + "]=" + p.get(s, null));
-		}
-
-		p.putBoolean("hi", true);
-		p.put("Number", String.valueOf(System.currentTimeMillis()));
-	}*/
 }
