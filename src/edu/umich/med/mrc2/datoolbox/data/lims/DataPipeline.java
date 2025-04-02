@@ -26,11 +26,14 @@ import java.util.ArrayList;
 import java.util.Date;
 
 import org.apache.commons.lang.StringUtils;
+import org.jdom2.Document;
+import org.jdom2.Element;
 
 import edu.umich.med.mrc2.datoolbox.data.Assay;
 import edu.umich.med.mrc2.datoolbox.data.motrpac.MoTrPACAssay;
+import edu.umich.med.mrc2.datoolbox.project.store.XmlStorable;
 
-public class DataPipeline implements Serializable, Comparable<DataPipeline>{
+public class DataPipeline implements Serializable, Comparable<DataPipeline>, XmlStorable{
 
 	/**
 	 * 
@@ -212,5 +215,11 @@ public class DataPipeline implements Serializable, Comparable<DataPipeline>{
 
 	public void setAssay(Assay assay) {
 		this.assay = assay;
+	}
+
+	@Override
+	public Element getXmlElement(Document parentDocument) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

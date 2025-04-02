@@ -50,6 +50,7 @@ import edu.umich.med.mrc2.datoolbox.main.ReferenceSamplesManager;
 import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisExperiment;
 import edu.umich.med.mrc2.datoolbox.project.store.ExperimentDesignFields;
 import edu.umich.med.mrc2.datoolbox.project.store.IDTExperimentalSampleFields;
+import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
 
 public class ExperimentDesign implements ExperimentDesignFactorListener, Serializable {
 
@@ -670,7 +671,7 @@ public class ExperimentDesign implements ExperimentDesignFactorListener, Seriali
 	public Element getXmlElement() {
 		
 		Element experimentDesignElement = 
-				new Element(ExperimentDesignFields.ExperimentDesign.name());
+				new Element(ObjectNames.ExperimentDesign.name());
 		
 		Element factorSetElement = 
 				new Element(ExperimentDesignFields.FactorSet.name());

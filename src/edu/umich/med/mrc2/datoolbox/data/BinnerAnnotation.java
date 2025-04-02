@@ -29,6 +29,8 @@ import org.jdom2.Element;
 
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.project.store.BinnerAnnotationFields;
+import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
+import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
 
 public class BinnerAnnotation implements Serializable, Comparable<BinnerAnnotation>{
 
@@ -305,10 +307,10 @@ public class BinnerAnnotation implements Serializable, Comparable<BinnerAnnotati
 	public Element getXmlElement() {
 
 		Element binnerAnnotationElement = 
-				new Element(BinnerAnnotationFields.BinnerAnnotation.name());
+				new Element(ObjectNames.BinnerAnnotation.name());
 		
 		binnerAnnotationElement.setAttribute(
-				BinnerAnnotationFields.BaId.name(), id);
+				CommonFields.Id.name(), id);
 		binnerAnnotationElement.setAttribute(
 				BinnerAnnotationFields.FeatureName.name(), Objects.toString(featureName, ""));	
 		binnerAnnotationElement.setAttribute(
@@ -354,7 +356,7 @@ public class BinnerAnnotation implements Serializable, Comparable<BinnerAnnotati
 	public BinnerAnnotation(Element xmlElement) {
 			
 		this.id = 
-				xmlElement.getAttributeValue(BinnerAnnotationFields.BaId.name());
+				xmlElement.getAttributeValue(CommonFields.Id.name());
 		this.featureName = 
 				xmlElement.getAttributeValue(BinnerAnnotationFields.FeatureName.name());
 		this.annotation = 

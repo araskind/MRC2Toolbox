@@ -31,8 +31,8 @@ import java.util.TreeSet;
 
 import org.jdom2.Element;
 
-import edu.umich.med.mrc2.datoolbox.project.store.ExtractedIonDataFields;
 import edu.umich.med.mrc2.datoolbox.project.store.MsFeatureChromatogramBundleFields;
+import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
 import edu.umich.med.mrc2.datoolbox.project.store.XICDefinitionFields;
 import edu.umich.med.mrc2.datoolbox.utils.ChromatogramUtils;
 
@@ -148,7 +148,7 @@ public class MsFeatureChromatogramBundle implements Serializable {
 				
 				List<Element> xicList = 
 						dfElement.getChild(MsFeatureChromatogramBundleFields.XICList.name()).
-						getChildren(ExtractedIonDataFields.XICData.name());
+						getChildren(ObjectNames.XICData.name());
 				Collection<ExtractedIonData>xicObjects = 
 						new TreeSet<ExtractedIonData>(ChromatogramUtils.eidComparator);
 				for (Element xicElement : xicList) 					

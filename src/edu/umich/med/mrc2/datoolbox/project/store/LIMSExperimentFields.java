@@ -22,15 +22,9 @@
 package edu.umich.med.mrc2.datoolbox.project.store;
 
 public enum LIMSExperimentFields {
-	
-	limsExperiment,
-	Id,
+
 	ProjectId,
-	Name,
-	Description,
 	Notes,
-	DateCreated,
-	UserId,
 	SamplePrepList
 	;
 }

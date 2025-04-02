@@ -32,8 +32,9 @@ import org.jdom2.Element;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesign;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisExperiment;
-import edu.umich.med.mrc2.datoolbox.project.store.ExperimentDesignFields;
+import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
 import edu.umich.med.mrc2.datoolbox.project.store.LIMSExperimentFields;
+import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
 import edu.umich.med.mrc2.datoolbox.utils.ExperimentUtils;
 
 public class LIMSExperiment implements Serializable, Comparable<LIMSExperiment>{
@@ -315,23 +316,19 @@ public class LIMSExperiment implements Serializable, Comparable<LIMSExperiment>{
 	public Element getXmlElement() {
 		
 		Element experimentElement = 
-				new Element(LIMSExperimentFields.limsExperiment.name());
+				new Element(ObjectNames.limsExperiment.name());
 
 		if(id != null)
-			experimentElement.setAttribute(
-					LIMSExperimentFields.Id.name(), id);	
+			experimentElement.setAttribute(CommonFields.Id.name(), id);	
 		
 		if(name != null)
-			experimentElement.setAttribute(
-					LIMSExperimentFields.Name.name(), name);
+			experimentElement.setAttribute(CommonFields.Name.name(), name);
 		
 		if(description != null)
-			experimentElement.setAttribute(
-					LIMSExperimentFields.Description.name(), description);
+			experimentElement.setAttribute(CommonFields.Description.name(), description);
 		
 		if(notes != null)
-			experimentElement.setAttribute(
-					LIMSExperimentFields.Notes.name(), notes);
+			experimentElement.setAttribute(LIMSExperimentFields.Notes.name(), notes);
 		
 		if(project != null)
 			experimentElement.setAttribute(
@@ -340,12 +337,11 @@ public class LIMSExperiment implements Serializable, Comparable<LIMSExperiment>{
 		if(startDate == null)
 			startDate = new Date();
 		
-		experimentElement.setAttribute(LIMSExperimentFields.DateCreated.name(), 
+		experimentElement.setAttribute(CommonFields.DateCreated.name(), 
 				ExperimentUtils.dateTimeFormat.format(startDate));
 		
 		if(creator != null)
-			experimentElement.setAttribute(
-					LIMSExperimentFields.UserId.name(), creator.getId());
+			experimentElement.setAttribute(CommonFields.UserId.name(), creator.getId());
 		
 		//	ExperimentDesign
 		if(design != null) 
@@ -369,23 +365,18 @@ public class LIMSExperiment implements Serializable, Comparable<LIMSExperiment>{
 			Element experimentElement, 
 			RawDataAnalysisExperiment parentProject) {
 		
-		id = experimentElement.getAttributeValue(
-				LIMSExperimentFields.Id.name());
-		name = experimentElement.getAttributeValue(
-				LIMSExperimentFields.Name.name());
-		description = experimentElement.getAttributeValue(
-				LIMSExperimentFields.Description.name());
-		notes = experimentElement.getAttributeValue(
-				LIMSExperimentFields.Notes.name());
-		String projectId = 
-				experimentElement.getAttributeValue(
+		id = experimentElement.getAttributeValue(CommonFields.Id.name());
+		name = experimentElement.getAttributeValue(CommonFields.Name.name());
+		description = experimentElement.getAttributeValue(CommonFields.Description.name());
+		notes = experimentElement.getAttributeValue(LIMSExperimentFields.Notes.name());
+		String projectId = experimentElement.getAttributeValue(
 						LIMSExperimentFields.ProjectId.name());
 		if(projectId != null)
 			project = IDTDataCache.getProjectById(projectId);
 		
 		startDate = new Date();
 		String startDateString = 
-				experimentElement.getAttributeValue(LIMSExperimentFields.DateCreated.name());
+				experimentElement.getAttributeValue(CommonFields.DateCreated.name());
 		if(startDateString != null) {
 			try {
 				startDate = ExperimentUtils.dateTimeFormat.parse(startDateString);
@@ -395,13 +386,13 @@ public class LIMSExperiment implements Serializable, Comparable<LIMSExperiment>{
 			} 
 		}
 		String userId = 
-				experimentElement.getAttributeValue(LIMSExperimentFields.UserId.name());
+				experimentElement.getAttributeValue(CommonFields.UserId.name());
 		if(userId != null)
 			creator = IDTDataCache.getUserById(userId);
 		
 		//	ExperimentDesign
 		Element experimentDesignElement =
-				experimentElement.getChild(ExperimentDesignFields.ExperimentDesign.name());
+				experimentElement.getChild(ObjectNames.ExperimentDesign.name());
 		if(experimentDesignElement != null)
 			design = new ExperimentDesign(
 					experimentDesignElement, parentProject);

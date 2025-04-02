@@ -23,13 +23,6 @@ package edu.umich.med.mrc2.datoolbox.project.store;
 
 public enum BinnerAnnotationLookupDataSetFields {
 
-	BinnerAnnotationLookupDataSet,
-	Id,
-	Name,
-	Description,
-	CreatedBy,
-	DateCreated,
-	LastModified,
 	BAList,
 	;
 }

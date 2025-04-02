@@ -21,26 +21,8 @@
 
 package edu.umich.med.mrc2.datoolbox.project.store;
 
-public enum BinnerAnnotationFields {
+public enum ManufacturerFields {
 
-	FeatureName,
-	Annotation,
-	AdditionalGroupAnnotations,
-	FurtherAnnotations,
-	Derivations,
-	Isotopes,
-	AdditionalIsotopes,
-	MassError,
-	Rmd,
-	MolIonNumber,
-	ChargeCarrier,
-	AdditionalAdducts,
-	BinNumber,
-	CorrClusterNumber,
-	RebinSubclusterNumber,
-	RtSubclusterNumber,
-	IsPrimary,
-	BinnerMz,
-	BinnerRt,
+	CatalogWebAddress,
 	;
 }

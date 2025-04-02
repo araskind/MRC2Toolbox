@@ -36,8 +36,9 @@ import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
-import edu.umich.med.mrc2.datoolbox.project.store.FeatureLookupDataSetFields;
+import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
 import edu.umich.med.mrc2.datoolbox.project.store.MinimalMSOneFeatureFields;
+import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
 import edu.umich.med.mrc2.datoolbox.utils.ExperimentUtils;
 
 public class FeatureLookupList implements Comparable<FeatureLookupList>{
@@ -198,28 +199,28 @@ public class FeatureLookupList implements Comparable<FeatureLookupList>{
 	public Element getXmlElement() {
 
 		Element featureLookupDataSetElement = 
-				new Element(FeatureLookupDataSetFields.FeatureLookupDataSet.name());
+				new Element(ObjectNames.FeatureLookupDataSet.name());
 		featureLookupDataSetElement.setAttribute(
-				FeatureLookupDataSetFields.Id.name(), id);	
+				CommonFields.Id.name(), id);	
 		featureLookupDataSetElement.setAttribute(
-				FeatureLookupDataSetFields.Name.name(), name);
+				CommonFields.Name.name(), name);
 		String descString = description;
 		if(descString == null)
 			descString = "";
 		
 		featureLookupDataSetElement.setAttribute(
-				FeatureLookupDataSetFields.Description.name(), descString);
+				CommonFields.Description.name(), descString);
 		featureLookupDataSetElement.setAttribute(
-				FeatureLookupDataSetFields.CreatedBy.name(), createdBy.getId());	
+				CommonFields.CreatedBy.name(), createdBy.getId());	
 		featureLookupDataSetElement.setAttribute(
-				FeatureLookupDataSetFields.DateCreated.name(), 
+				CommonFields.DateCreated.name(), 
 				ExperimentUtils.dateTimeFormat.format(dateCreated));
 		featureLookupDataSetElement.setAttribute(
-				FeatureLookupDataSetFields.LastModified.name(), 
+				CommonFields.LastModified.name(), 
 				ExperimentUtils.dateTimeFormat.format(lastModified));		
 
         Element featureListElement = 
-        		new Element(FeatureLookupDataSetFields.FeatureList.name());
+        		new Element(CommonFields.FeatureList.name());
         if(!features.isEmpty()) {
         	
         	for(MinimalMSOneFeature fbc : features)
@@ -232,28 +233,28 @@ public class FeatureLookupList implements Comparable<FeatureLookupList>{
 	
 	public FeatureLookupList(Element xmlElement) {
 				
-		this.id = xmlElement.getAttributeValue(FeatureLookupDataSetFields.Id.name());
+		this.id = xmlElement.getAttributeValue(CommonFields.Id.name());
 		if(id == null)
 			this.id = DataPrefix.LOOKUP_FEATURE_DATA_SET.getName() + 
 				UUID.randomUUID().toString().substring(0, 6);
 		
-		this.name = xmlElement.getAttributeValue(FeatureLookupDataSetFields.Name.name());
-		this.description = xmlElement.getAttributeValue(FeatureLookupDataSetFields.Description.name());
+		this.name = xmlElement.getAttributeValue(CommonFields.Name.name());
+		this.description = xmlElement.getAttributeValue(CommonFields.Description.name());
 		try {
 			this.dateCreated = ExperimentUtils.dateTimeFormat.parse(
-					xmlElement.getAttributeValue(FeatureLookupDataSetFields.DateCreated.name()));
+					xmlElement.getAttributeValue(CommonFields.DateCreated.name()));
 		} catch (ParseException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		try {
 			this.lastModified = ExperimentUtils.dateTimeFormat.parse(
-					xmlElement.getAttributeValue(FeatureLookupDataSetFields.LastModified.name()));
+					xmlElement.getAttributeValue(CommonFields.LastModified.name()));
 		} catch (ParseException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}		
-		String userId =  xmlElement.getAttributeValue(FeatureLookupDataSetFields.CreatedBy.name());
+		String userId =  xmlElement.getAttributeValue(CommonFields.CreatedBy.name());
 		if(userId != null)
 			this.createdBy = IDTDataCache.getUserById(userId);
 		else
@@ -262,15 +263,15 @@ public class FeatureLookupList implements Comparable<FeatureLookupList>{
 		features = new HashSet<MinimalMSOneFeature>();
 		
 		List<Element> featureListElements = 
-				xmlElement.getChildren(FeatureLookupDataSetFields.FeatureList.name());
-		if(featureListElements.size() > 0) {
+				xmlElement.getChildren(CommonFields.FeatureList.name());
+		if(!featureListElements.isEmpty()) {
 			
 			List<Element> featureElementList = 
-					featureListElements.get(0).getChildren(MinimalMSOneFeatureFields.MinimalMSOneFeature.name());
+					featureListElements.get(0).getChildren(
+							MinimalMSOneFeatureFields.MinimalMSOneFeature.name());
 			for(Element featureElement : featureElementList) {
 				
-				MinimalMSOneFeature newFeature = 
-						new MinimalMSOneFeature(featureElement);
+				MinimalMSOneFeature newFeature = new MinimalMSOneFeature(featureElement);
 				if(newFeature != null)
 					features.add(newFeature);
 			}

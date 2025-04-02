@@ -52,9 +52,9 @@ import edu.umich.med.mrc2.datoolbox.gui.communication.MsFeatureEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.MsFeatureListener;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.msmsscore.MSMSScoreCalculator;
-import edu.umich.med.mrc2.datoolbox.project.store.MassSpectrumFields;
 import edu.umich.med.mrc2.datoolbox.project.store.MsFeatureFields;
 import edu.umich.med.mrc2.datoolbox.project.store.MsFeatureIdentityFields;
+import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
 
@@ -966,7 +966,7 @@ public class MsFeature implements AnnotatedObject, Serializable {
 			rtRange = new Range(rtRangeString);
 		
 		setSpectrum(new MassSpectrum(
-				featureElement.getChild(MassSpectrumFields.Spectrum.name())));	
+				featureElement.getChild(ObjectNames.Spectrum.name())));	
 		String qsValue = 
 				featureElement.getAttributeValue(MsFeatureFields.QS.name());
 		if(qsValue != null)
@@ -975,7 +975,7 @@ public class MsFeature implements AnnotatedObject, Serializable {
 		//	Identifications
 		List<Element> msfIdListElements = 
 				featureElement.getChildren(MsFeatureFields.CIDs.name());
-		if(msfIdListElements.size() > 0) {
+		if(!msfIdListElements.isEmpty()) {
 			
 			primaryIdentity = null;
 			identifications.clear();

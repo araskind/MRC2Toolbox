@@ -38,6 +38,8 @@ import org.jdom2.Element;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
 import edu.umich.med.mrc2.datoolbox.project.store.BinnerAnnotationClusterFields;
+import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
+import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
 
@@ -268,9 +270,9 @@ public class BinnerAnnotationCluster {
 	public Element getXmlElement() {
 
 		Element binnerAnnotationClusterElement = 
-				new Element(BinnerAnnotationClusterFields.BinnerAnnotationCluster.name());
+				new Element(ObjectNames.BinnerAnnotationCluster.name());
 		binnerAnnotationClusterElement.setAttribute(
-				BinnerAnnotationClusterFields.BacId.name(), id);	
+				CommonFields.Id.name(), id);	
 		binnerAnnotationClusterElement.setAttribute(
 				BinnerAnnotationClusterFields.MolIonNumber.name(), Integer.toString(molIonNumber));	
 		Element primaryAnnotationElement = 
@@ -293,7 +295,7 @@ public class BinnerAnnotationCluster {
 	public BinnerAnnotationCluster(Element clusterElement) {
 		
 		
-		id = clusterElement.getAttributeValue(BinnerAnnotationClusterFields.BacId.name());
+		id = clusterElement.getAttributeValue(CommonFields.Id.name());
 		molIonNumber = Integer.parseInt(
 				clusterElement.getAttributeValue(BinnerAnnotationClusterFields.MolIonNumber.name()));
 		annotations = new TreeSet<BinnerAnnotation>();

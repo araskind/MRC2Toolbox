@@ -23,7 +23,12 @@ package edu.umich.med.mrc2.datoolbox.data.lims;
 
 import java.io.Serializable;
 
-public class AnalysisMethod implements Serializable, Comparable<AnalysisMethod>{
+import org.jdom2.Document;
+import org.jdom2.Element;
+
+import edu.umich.med.mrc2.datoolbox.project.store.XmlStorable;
+
+public class AnalysisMethod implements Serializable, Comparable<AnalysisMethod>, XmlStorable{
 
 	/**
 	 * 
@@ -88,5 +93,11 @@ public class AnalysisMethod implements Serializable, Comparable<AnalysisMethod>{
 
 	public void setMd5(String md5) {
 		this.md5 = md5;
+	}
+
+	@Override
+	public Element getXmlElement(Document parentDocument) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

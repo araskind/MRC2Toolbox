@@ -21,26 +21,16 @@
 
 package edu.umich.med.mrc2.datoolbox.project.store;
 
-public enum BinnerAnnotationFields {
+public enum CommonFields {
 
-	FeatureName,
-	Annotation,
-	AdditionalGroupAnnotations,
-	FurtherAnnotations,
-	Derivations,
-	Isotopes,
-	AdditionalIsotopes,
-	MassError,
-	Rmd,
-	MolIonNumber,
-	ChargeCarrier,
-	AdditionalAdducts,
-	BinNumber,
-	CorrClusterNumber,
-	RebinSubclusterNumber,
-	RtSubclusterNumber,
-	IsPrimary,
-	BinnerMz,
-	BinnerRt,
+	Id,
+	Name,
+	Description,
+	CreatedBy,
+	DateCreated,
+	LastModified,
+	Enabled,
+	UserId,
+	FeatureList,
 	;
 }

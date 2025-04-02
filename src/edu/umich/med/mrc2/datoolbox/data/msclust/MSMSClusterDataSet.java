@@ -44,10 +44,10 @@ import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.MSMSClusterDataSetManager;
-import edu.umich.med.mrc2.datoolbox.project.store.FeatureLookupDataSetFields;
 import edu.umich.med.mrc2.datoolbox.project.store.MSMSClusterDataSetFields;
 import edu.umich.med.mrc2.datoolbox.project.store.MSMSClusteringParameterSetFields;
 import edu.umich.med.mrc2.datoolbox.project.store.MsFeatureInfoBundleClusterFields;
+import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
 import edu.umich.med.mrc2.datoolbox.utils.ExperimentUtils;
 
 public class MSMSClusterDataSet implements IMSMSClusterDataSet {
@@ -331,7 +331,7 @@ public class MSMSClusterDataSet implements IMSMSClusterDataSet {
 				xmlElement.getChild(MSMSClusteringParameterSetFields.MSMSClusteringParameterSet.name()));
 		
 		Element lookupListElement = 
-				xmlElement.getChild(FeatureLookupDataSetFields.FeatureLookupDataSet.name());
+				xmlElement.getChild(ObjectNames.FeatureLookupDataSet.name());
         if(lookupListElement != null )
         	featureLookupDataSet = new FeatureLookupList(lookupListElement);     
         
@@ -340,10 +340,11 @@ public class MSMSClusterDataSet implements IMSMSClusterDataSet {
 		
 		List<Element> clusterListElements = 
 				xmlElement.getChildren(MSMSClusterDataSetFields.ClusterList.name());
-		if(clusterListElements.size() > 0) {
+		if(!clusterListElements.isEmpty()) {
 			
 			List<Element> clusterList = 
-					clusterListElements.get(0).getChildren(MsFeatureInfoBundleClusterFields.MsFeatureInfoBundleCluster.name());
+					clusterListElements.get(0).getChildren(
+							MsFeatureInfoBundleClusterFields.MsFeatureInfoBundleCluster.name());
 			for(Element clusterElement : clusterList) {
 				
 				MsFeatureInfoBundleCluster newCluster = 

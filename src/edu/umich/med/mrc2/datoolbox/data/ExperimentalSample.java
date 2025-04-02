@@ -37,7 +37,9 @@ import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.main.ReferenceSamplesManager;
 import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisExperiment;
+import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
 import edu.umich.med.mrc2.datoolbox.project.store.ExperimentalSampleFields;
+import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
 
 public class ExperimentalSample implements Comparable<ExperimentalSample>, Serializable, Renamable {
 
@@ -384,15 +386,13 @@ public class ExperimentalSample implements Comparable<ExperimentalSample>, Seria
 	public Element getXmlElement() {
 		
 		Element sampleElement = 
-				new Element(ExperimentalSampleFields.ExperimentalSample.name());
+				new Element(ObjectNames.ExperimentalSample.name());
 		
 		if(id != null)
-			sampleElement.setAttribute(
-					ExperimentalSampleFields.Id.name(), id);
+			sampleElement.setAttribute(CommonFields.Id.name(), id);
 		
 		if(name != null)
-			sampleElement.setAttribute(
-					ExperimentalSampleFields.Name.name(), name);
+			sampleElement.setAttribute(CommonFields.Name.name(), name);
 		
 		if(limsSampleType != null)
 			sampleElement.setAttribute(
@@ -452,8 +452,8 @@ public class ExperimentalSample implements Comparable<ExperimentalSample>, Seria
 			Element sampleElement, 
 			ExperimentDesign design,
 			RawDataAnalysisExperiment parentProject) {		
-		id = sampleElement.getAttributeValue(ExperimentalSampleFields.Id.name());
-		name = sampleElement.getAttributeValue(ExperimentalSampleFields.Name.name());
+		id = sampleElement.getAttributeValue(CommonFields.Id.name());
+		name = sampleElement.getAttributeValue(CommonFields.Name.name());
 		limsSampleType = 
 				sampleElement.getAttributeValue(ExperimentalSampleFields.LimsSampleType.name());
 		enabled = Boolean.parseBoolean(

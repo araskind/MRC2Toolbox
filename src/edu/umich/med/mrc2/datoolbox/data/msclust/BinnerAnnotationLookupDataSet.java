@@ -37,8 +37,9 @@ import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
-import edu.umich.med.mrc2.datoolbox.project.store.BinnerAnnotationClusterFields;
 import edu.umich.med.mrc2.datoolbox.project.store.BinnerAnnotationLookupDataSetFields;
+import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
+import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
 import edu.umich.med.mrc2.datoolbox.utils.ExperimentUtils;
 
 public class BinnerAnnotationLookupDataSet implements Comparable<BinnerAnnotationLookupDataSet>{
@@ -199,20 +200,20 @@ public class BinnerAnnotationLookupDataSet implements Comparable<BinnerAnnotatio
 	public Element getXmlElement() {
 
 		Element binnerAnnotationLookupDataSetElement = 
-				new Element(BinnerAnnotationLookupDataSetFields.BinnerAnnotationLookupDataSet.name());
+				new Element(ObjectNames.BinnerAnnotationLookupDataSet.name());
 		binnerAnnotationLookupDataSetElement.setAttribute(
-				BinnerAnnotationLookupDataSetFields.Id.name(), id);	
+				CommonFields.Id.name(), id);	
 		binnerAnnotationLookupDataSetElement.setAttribute(
-				BinnerAnnotationLookupDataSetFields.Name.name(), name);
+				CommonFields.Name.name(), name);
 		binnerAnnotationLookupDataSetElement.setAttribute(
-				BinnerAnnotationLookupDataSetFields.Description.name(), Objects.toString(description, ""));
+				CommonFields.Description.name(), Objects.toString(description, ""));
 		binnerAnnotationLookupDataSetElement.setAttribute(
-				BinnerAnnotationLookupDataSetFields.CreatedBy.name(), createdBy.getId());	
+				CommonFields.CreatedBy.name(), createdBy.getId());	
 		binnerAnnotationLookupDataSetElement.setAttribute(
-				BinnerAnnotationLookupDataSetFields.DateCreated.name(), 
+				CommonFields.DateCreated.name(), 
 				ExperimentUtils.dateTimeFormat.format(dateCreated));
 		binnerAnnotationLookupDataSetElement.setAttribute(
-				BinnerAnnotationLookupDataSetFields.LastModified.name(), 
+				CommonFields.LastModified.name(), 
 				ExperimentUtils.dateTimeFormat.format(lastModified));		
 
         Element bacListElement = 
@@ -229,28 +230,28 @@ public class BinnerAnnotationLookupDataSet implements Comparable<BinnerAnnotatio
 	
 	public BinnerAnnotationLookupDataSet(Element xmlElement) {
 				
-		this.id = xmlElement.getAttributeValue(BinnerAnnotationLookupDataSetFields.Id.name());
+		this.id = xmlElement.getAttributeValue(CommonFields.Id.name());
 		if(id == null)
 			this.id = DataPrefix.LOOKUP_FEATURE_DATA_SET.getName() + 
 				UUID.randomUUID().toString().substring(0, 6);
 		
-		this.name = xmlElement.getAttributeValue(BinnerAnnotationLookupDataSetFields.Name.name());
-		this.description = xmlElement.getAttributeValue(BinnerAnnotationLookupDataSetFields.Description.name());
+		this.name = xmlElement.getAttributeValue(CommonFields.Name.name());
+		this.description = xmlElement.getAttributeValue(CommonFields.Description.name());
 		try {
 			this.dateCreated = ExperimentUtils.dateTimeFormat.parse(
-					xmlElement.getAttributeValue(BinnerAnnotationLookupDataSetFields.DateCreated.name()));
+					xmlElement.getAttributeValue(CommonFields.DateCreated.name()));
 		} catch (ParseException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		try {
 			this.lastModified = ExperimentUtils.dateTimeFormat.parse(
-					xmlElement.getAttributeValue(BinnerAnnotationLookupDataSetFields.LastModified.name()));
+					xmlElement.getAttributeValue(CommonFields.LastModified.name()));
 		} catch (ParseException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}		
-		String userId =  xmlElement.getAttributeValue(BinnerAnnotationLookupDataSetFields.CreatedBy.name());
+		String userId =  xmlElement.getAttributeValue(CommonFields.CreatedBy.name());
 		if(userId != null)
 			this.createdBy = IDTDataCache.getUserById(userId);
 		else
@@ -260,10 +261,10 @@ public class BinnerAnnotationLookupDataSet implements Comparable<BinnerAnnotatio
 		
 		List<Element> bacListElements = 
 				xmlElement.getChildren(BinnerAnnotationLookupDataSetFields.BAList.name());
-		if(bacListElements.size() > 0) {
+		if(!bacListElements.isEmpty()) {
 			
 			List<Element> bacElementList = 
-					bacListElements.get(0).getChildren(BinnerAnnotationClusterFields.BinnerAnnotationCluster.name());
+					bacListElements.get(0).getChildren(ObjectNames.BinnerAnnotationCluster.name());
 			for(Element bacElement : bacElementList) {
 				
 				BinnerAnnotationCluster newCluster = 

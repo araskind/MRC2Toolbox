@@ -22,8 +22,7 @@
 package edu.umich.med.mrc2.datoolbox.project.store;
 
 public enum ExtractedIonDataFields {
-	XICData,
-	Name,
+
 	Target,
 	Adduct,
 	Time,

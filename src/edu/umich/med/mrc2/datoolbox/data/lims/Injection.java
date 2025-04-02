@@ -27,7 +27,9 @@ import java.util.Date;
 
 import org.jdom2.Element;
 
+import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
 import edu.umich.med.mrc2.datoolbox.project.store.InjectionFields;
+import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
 import edu.umich.med.mrc2.datoolbox.utils.ExperimentUtils;
 
 public class Injection  implements Serializable, Comparable<Injection>{
@@ -119,8 +121,8 @@ public class Injection  implements Serializable, Comparable<Injection>{
 	public Element getXmlElement() {
 		
 		Element injectionElement = 
-        		new Element(InjectionFields.Injection.name());
-		injectionElement.setAttribute(InjectionFields.InjId.name(), id);	
+        		new Element(ObjectNames.Injection.name());
+		injectionElement.setAttribute(CommonFields.Id.name(), id);	
 		
 		if(dataFileName != null)
 			injectionElement.setAttribute(
@@ -145,9 +147,14 @@ public class Injection  implements Serializable, Comparable<Injection>{
 	}
 
 	public Injection(Element injectionElement) {
+		
 		super();
-		id = injectionElement.getAttributeValue(
-				InjectionFields.InjId.name());
+		id = injectionElement.getAttributeValue(CommonFields.Id.name());
+		
+		//	TMP fix for old name
+		if(id == null)
+			injectionElement.getAttributeValue("InjId");
+			
 		dataFileName = injectionElement.getAttributeValue(
 				InjectionFields.DataFile.name());
 		String injTime = 

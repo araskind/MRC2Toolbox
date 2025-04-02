@@ -60,12 +60,10 @@ import edu.umich.med.mrc2.datoolbox.database.idt.OfflineExperimentLoadCache;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisExperiment;
-import edu.umich.med.mrc2.datoolbox.project.store.DataFileFields;
-import edu.umich.med.mrc2.datoolbox.project.store.ExperimentFields;
-import edu.umich.med.mrc2.datoolbox.project.store.FeatureCollectionFields;
-import edu.umich.med.mrc2.datoolbox.project.store.InjectionFields;
-import edu.umich.med.mrc2.datoolbox.project.store.LIMSExperimentFields;
+import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
+import edu.umich.med.mrc2.datoolbox.project.store.IDTrackerProjectFields;
 import edu.umich.med.mrc2.datoolbox.project.store.MSMSClusterDataSetFields;
+import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
 import edu.umich.med.mrc2.datoolbox.rawdata.MSMSExtractionParameterSet;
 import edu.umich.med.mrc2.datoolbox.rawdata.MSMSExtractionParameters;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
@@ -207,13 +205,18 @@ public class OpenStoredRawDataAnalysisExperimentTask extends AbstractTask implem
 		}
 		Element experimentElement = doc.getRootElement();
 		
-		String id = experimentElement.getAttributeValue(ExperimentFields.Id.name()); 
-		String name = experimentElement.getAttributeValue(ExperimentFields.Name.name()); 
-		String description = experimentElement.getAttributeValue(ExperimentFields.Description.name()); 
+		String id = experimentElement.getAttributeValue(CommonFields.Id.name()); 
+		String name = experimentElement.getAttributeValue(CommonFields.Name.name()); 
+		String description = experimentElement.getAttributeValue(CommonFields.Description.name()); 
 		Date dateCreated = ExperimentUtils.dateTimeFormat.parse(
-				experimentElement.getAttributeValue(ExperimentFields.DateCreated.name())); 
-		Date lastModified = ExperimentUtils.dateTimeFormat.parse(
-				experimentElement.getAttributeValue(ExperimentFields.DateModified.name())); 		
+				experimentElement.getAttributeValue(CommonFields.DateCreated.name()));
+		Date lastModified = dateCreated;
+		String lastModifiedString = 
+				experimentElement.getAttributeValue(CommonFields.LastModified.name());
+		if(lastModifiedString != null && !lastModifiedString.isBlank())
+			lastModified = ExperimentUtils.dateTimeFormat.parse(
+					experimentElement.getAttributeValue(CommonFields.LastModified.name())); 
+		
 		experiment = new RawDataAnalysisExperiment(
 				id, 
 				name, 
@@ -222,7 +225,7 @@ public class OpenStoredRawDataAnalysisExperimentTask extends AbstractTask implem
 				dateCreated, 
 				lastModified);
 		
-		String userId = experimentElement.getAttributeValue(ExperimentFields.UserId.name()); 
+		String userId = experimentElement.getAttributeValue(CommonFields.UserId.name()); 
 		if(userId != null)
 			experiment.setCreatedBy(IDTDataCache.getUserById(userId)); 
 		
@@ -230,7 +233,7 @@ public class OpenStoredRawDataAnalysisExperimentTask extends AbstractTask implem
 			experiment.setCreatedBy(MRC2ToolBoxCore.getIdTrackerUser());
 		
 		String instrumentId = 
-				experimentElement.getAttributeValue(ExperimentFields.Instrument.name()); 
+				experimentElement.getAttributeValue(IDTrackerProjectFields.Instrument.name()); 
 		if(instrumentId != null)
 			experiment.setInstrument(IDTDataCache.getInstrumentById(instrumentId));
 		
@@ -242,19 +245,19 @@ public class OpenStoredRawDataAnalysisExperimentTask extends AbstractTask implem
 		}
 		
 		String compoundIdList = 
-				experimentElement.getChild(ExperimentFields.UniqueCIDList.name()).getText();
+				experimentElement.getChild(IDTrackerProjectFields.UniqueCIDList.name()).getText();
 		uniqueCompoundIds.addAll(ExperimentUtils.getIdList(compoundIdList));
 		
 		String msmsLibIdIdList = 
-				experimentElement.getChild(ExperimentFields.UniqueMSMSLibIdList.name()).getText();
+				experimentElement.getChild(IDTrackerProjectFields.UniqueMSMSLibIdList.name()).getText();
 		uniqueMSMSLibraryIds.addAll(ExperimentUtils.getIdList(msmsLibIdIdList));
 
 		String msRtLibIdIdList = 
-				experimentElement.getChild(ExperimentFields.UniqueMSRTLibIdList.name()).getText();
+				experimentElement.getChild(IDTrackerProjectFields.UniqueMSRTLibIdList.name()).getText();
 		uniqueMSRTLibraryIds.addAll(ExperimentUtils.getIdList(msRtLibIdIdList));
 
 		String sampleIdIdList = 
-				experimentElement.getChild(ExperimentFields.UniqueSampleIdList.name()).getText();
+				experimentElement.getChild(IDTrackerProjectFields.UniqueSampleIdList.name()).getText();
 		uniqueSampleIds.addAll(ExperimentUtils.getIdList(sampleIdIdList));
 				
 		try {
@@ -265,7 +268,7 @@ public class OpenStoredRawDataAnalysisExperimentTask extends AbstractTask implem
 			return;		
 		}	
 		Element limsExperimentElement = 
-				experimentElement.getChild(LIMSExperimentFields.limsExperiment.name());
+				experimentElement.getChild(ObjectNames.limsExperiment.name());
 		if(limsExperimentElement != null) {
 			
 			LIMSExperiment limsExperiment = null;
@@ -278,43 +281,44 @@ public class OpenStoredRawDataAnalysisExperimentTask extends AbstractTask implem
 			if(limsExperiment != null)
 				experiment.setLimsExperiment(limsExperiment);
 		}
-		if(experimentElement.getChild(ExperimentFields.Injections.name()) != null) {
+		if(experimentElement.getChild(IDTrackerProjectFields.Injections.name()) != null) {
 			
 			List<Element> injectionsList = 
-					experimentElement.getChild(ExperimentFields.Injections.name()).
-					getChildren(InjectionFields.Injection.name());
+					experimentElement.getChild(IDTrackerProjectFields.Injections.name()).
+					getChildren(ObjectNames.Injection.name());			
+			
 			for (Element injectionElement : injectionsList) {
 				Injection injection = new Injection(injectionElement);
 				experiment.getInjections().add(injection);			
 			}
 		}
 		List<Element> msmsFileList = 
-				experimentElement.getChild(ExperimentFields.MsTwoFiles.name()).
-				getChildren(DataFileFields.DataFile.name());
+				experimentElement.getChild(IDTrackerProjectFields.MsTwoFiles.name()).
+				getChildren(ObjectNames.DataFile.name());
 		for (Element msmsFileElement : msmsFileList) {
 			DataFile msmsFile = new DataFile(msmsFileElement);
 			experiment.addMSMSDataFile(msmsFile);
 		}
 		//	MS1 files
 		List<Element> msOneFileList = 
-				experimentElement.getChild(ExperimentFields.MsOneFiles.name()).
-				getChildren(DataFileFields.DataFile.name());
+				experimentElement.getChild(IDTrackerProjectFields.MsOneFiles.name()).
+				getChildren(ObjectNames.DataFile.name());
 		for (Element msOneFileElement : msOneFileList) {
 			DataFile msOneFile = new DataFile(msOneFileElement);
 			experiment.addMSOneDataFile(msOneFile);
 		}
 		//	Feature collections
 		Element featureCollectionElement = 
-				experimentElement.getChild(ExperimentFields.FeatureCollectionList.name());
+				experimentElement.getChild(IDTrackerProjectFields.FeatureCollectionList.name());
 		if(featureCollectionElement != null) {
 			List<Element> featureCollectionList = featureCollectionElement.
-					getChildren(FeatureCollectionFields.FeatureCollection.name());
+					getChildren(ObjectNames.FeatureCollection.name());
 			for (Element fce : featureCollectionList)
 				experiment.addMsFeatureInfoBundleCollection(
 						new MsFeatureInfoBundleCollection(fce));
 		}
 		Element msmsClusterListElement = 
-				experimentElement.getChild(ExperimentFields.MSMSClusterDataSetList.name());
+				experimentElement.getChild(IDTrackerProjectFields.MSMSClusterDataSetList.name());
 		if(msmsClusterListElement != null) {
 			List<Element> msmsClusterDataSetList = msmsClusterListElement.
 					getChildren(MSMSClusterDataSetFields.MSMSClusterDataSet.name());

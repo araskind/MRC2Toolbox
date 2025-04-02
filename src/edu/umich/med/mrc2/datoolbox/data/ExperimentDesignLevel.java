@@ -27,7 +27,8 @@ import java.util.UUID;
 import org.jdom2.Element;
 
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
-import edu.umich.med.mrc2.datoolbox.project.store.ExperimentDesignLevelFields;
+import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
+import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
 
 public class ExperimentDesignLevel implements Comparable<ExperimentDesignLevel>, Serializable, Renamable {
 
@@ -189,38 +190,33 @@ public class ExperimentDesignLevel implements Comparable<ExperimentDesignLevel>,
 	public Element getXmlElement() {
 		
 		Element experimentDesignLevelElement = 
-				new Element(ExperimentDesignLevelFields.ExperimentDesignLevel.name());
+				new Element(ObjectNames.ExperimentDesignLevel.name());
 		
 		if(levelId != null)
 			experimentDesignLevelElement.setAttribute(
-					ExperimentDesignLevelFields.Id.name(), levelId);
+					CommonFields.Id.name(), levelId);
 		
 		if(levelName != null)
 			experimentDesignLevelElement.setAttribute(
-					ExperimentDesignLevelFields.Name.name(), levelName);
+					CommonFields.Name.name(), levelName);
 		
 		if(levelDescription != null)
-			experimentDesignLevelElement.setAttribute(
-					ExperimentDesignLevelFields.Description.name(), levelDescription);
+			experimentDesignLevelElement.setAttribute(CommonFields.Description.name(), levelDescription);
 		
 		experimentDesignLevelElement.setAttribute(
-				ExperimentDesignLevelFields.Enabled.name(), Boolean.toString(enabled));
+				CommonFields.Enabled.name(), Boolean.toString(enabled));
 		
 		return experimentDesignLevelElement;
 	}
 	
 	public ExperimentDesignLevel(Element experimentDesignLevelElement) {
-		super();
 		
-		levelId = experimentDesignLevelElement.getAttributeValue(
-				ExperimentDesignLevelFields.Id.name());
-		levelName = experimentDesignLevelElement.getAttributeValue(
-				ExperimentDesignLevelFields.Name.name());
-		levelDescription = experimentDesignLevelElement.getAttributeValue(
-				ExperimentDesignLevelFields.Description.name());
-		
-		enabled = Boolean.parseBoolean(experimentDesignLevelElement.getAttributeValue(
-				ExperimentDesignLevelFields.Enabled.name()));
+		super();		
+		levelId = experimentDesignLevelElement.getAttributeValue(CommonFields.Id.name());
+		levelName = experimentDesignLevelElement.getAttributeValue(CommonFields.Name.name());
+		levelDescription = experimentDesignLevelElement.getAttributeValue(CommonFields.Description.name());		
+		enabled = Boolean.parseBoolean(
+				experimentDesignLevelElement.getAttributeValue(CommonFields.Enabled.name()));
 	}
 }
 

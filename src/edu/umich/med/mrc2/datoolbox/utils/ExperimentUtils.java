@@ -65,7 +65,9 @@ import edu.umich.med.mrc2.datoolbox.main.ReferenceSamplesManager;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisExperiment;
-import edu.umich.med.mrc2.datoolbox.project.store.ExperimentFields;
+import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
+import edu.umich.med.mrc2.datoolbox.project.store.IDTrackerProjectFields;
+import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
 
 public class ExperimentUtils {
 	
@@ -158,35 +160,35 @@ public class ExperimentUtils {
 		
 		Document document = new Document();
 	    Element experimentRoot = 
-	    		new Element(ExperimentFields.IDTrackerRawDataProject.name());
+	    		new Element(ObjectNames.IDTrackerRawDataProject.name());
 		experimentRoot.setAttribute("version", "1.0.0.0");
-		experimentRoot.setAttribute(ExperimentFields.Id.name(), 
+		experimentRoot.setAttribute(CommonFields.Id.name(), 
 				experimentToSave.getId());
-		experimentRoot.setAttribute(ExperimentFields.Name.name(), 
+		experimentRoot.setAttribute(CommonFields.Name.name(), 
 				experimentToSave.getName());
-		experimentRoot.setAttribute(ExperimentFields.Description.name(), 
+		experimentRoot.setAttribute(CommonFields.Description.name(), 
 				experimentToSave.getDescription());
-		experimentRoot.setAttribute(ExperimentFields.ProjectFile.name(), 
+		experimentRoot.setAttribute(IDTrackerProjectFields.ProjectFile.name(), 
 				experimentToSave.getExperimentFile().getAbsolutePath());
-		experimentRoot.setAttribute(ExperimentFields.ProjectDir.name(), 
+		experimentRoot.setAttribute(IDTrackerProjectFields.ProjectDir.name(), 
 				experimentToSave.getExperimentDirectory().getAbsolutePath());	
-		experimentRoot.setAttribute(ExperimentFields.DateCreated.name(), 
+		experimentRoot.setAttribute(CommonFields.DateCreated.name(), 
 				ExperimentUtils.dateTimeFormat.format(experimentToSave.getDateCreated()));
-		experimentRoot.setAttribute(ExperimentFields.DateModified.name(), 
+		experimentRoot.setAttribute(CommonFields.LastModified.name(), 
 				ExperimentUtils.dateTimeFormat.format(experimentToSave.getLastModified()));
 		
 		experimentRoot.addContent(       		
-				new Element(ExperimentFields.UniqueCIDList.name()).setText(""));
+				new Element(IDTrackerProjectFields.UniqueCIDList.name()).setText(""));
 		experimentRoot.addContent(       		
-				new Element(ExperimentFields.UniqueMSMSLibIdList.name()).setText(""));
+				new Element(IDTrackerProjectFields.UniqueMSMSLibIdList.name()).setText(""));
 		experimentRoot.addContent(       		
-				new Element(ExperimentFields.UniqueMSRTLibIdList.name()).setText(""));
+				new Element(IDTrackerProjectFields.UniqueMSRTLibIdList.name()).setText(""));
 		experimentRoot.addContent(       		
-				new Element(ExperimentFields.UniqueSampleIdList.name()).setText(""));
+				new Element(IDTrackerProjectFields.UniqueSampleIdList.name()).setText(""));
 		
 		//	MS2 file list
 		Element msTwoFileListElement = 
-				new Element(ExperimentFields.MsTwoFiles.name());		
+				new Element(IDTrackerProjectFields.MsTwoFiles.name());		
 		for(DataFile ms2dataFile : experimentToSave.getMSMSDataFiles())	        	
 			msTwoFileListElement.addContent(ms2dataFile.getXmlElement());
 		
@@ -194,7 +196,7 @@ public class ExperimentUtils {
 		
 		//	MS1 file list
 		Element msOneFileListElement = 
-				new Element(ExperimentFields.MsOneFiles.name());		
+				new Element(IDTrackerProjectFields.MsOneFiles.name());		
 		for(DataFile msOnedataFile : experimentToSave.getMSOneDataFiles())         	
 			msOneFileListElement.addContent(msOnedataFile.getXmlElement());
 		

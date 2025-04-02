@@ -35,7 +35,9 @@ import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.enums.ParameterSetStatus;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignFactorEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignFactorListener;
+import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
 import edu.umich.med.mrc2.datoolbox.project.store.ExperimentDesignFactorFields;
+import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
 
 public class ExperimentDesignFactor implements Comparable<ExperimentDesignFactor>, Serializable, Renamable {
 
@@ -242,22 +244,22 @@ public class ExperimentDesignFactor implements Comparable<ExperimentDesignFactor
 	public Element getXmlElement() {
 		
 		Element experimentDesignFactorElement = 
-				new Element(ExperimentDesignFactorFields.ExperimentDesignFactor.name());
+				new Element(ObjectNames.ExperimentDesignFactor.name());
 		
 		if(factorId != null)
 			experimentDesignFactorElement.setAttribute(
-					ExperimentDesignFactorFields.Id.name(), factorId);
+					CommonFields.Id.name(), factorId);
 		
 		if(factorName != null)
 			experimentDesignFactorElement.setAttribute(
-					ExperimentDesignFactorFields.Name.name(), factorName);
+					CommonFields.Name.name(), factorName);
 		
 		if(factorDescription != null)
 			experimentDesignFactorElement.setAttribute(
-					ExperimentDesignFactorFields.Description.name(), factorDescription);
+					CommonFields.Description.name(), factorDescription);
 		
 		experimentDesignFactorElement.setAttribute(
-				ExperimentDesignFactorFields.Enabled.name(), Boolean.toString(enabled));
+				CommonFields.Enabled.name(), Boolean.toString(enabled));
 		
 		Element levelSetElement = 
 				new Element(ExperimentDesignFactorFields.LevelSet.name());
@@ -273,14 +275,11 @@ public class ExperimentDesignFactor implements Comparable<ExperimentDesignFactor
 	public ExperimentDesignFactor(Element experimentDesignFactorElement) {
 		super();
 		
-		factorId = experimentDesignFactorElement.getAttributeValue(
-				ExperimentDesignFactorFields.Id.name());
-		factorName = experimentDesignFactorElement.getAttributeValue(
-				ExperimentDesignFactorFields.Name.name());
-		factorDescription = experimentDesignFactorElement.getAttributeValue(
-				ExperimentDesignFactorFields.Description.name());		
-		enabled = Boolean.parseBoolean(experimentDesignFactorElement.getAttributeValue(
-				ExperimentDesignFactorFields.Enabled.name()));
+		factorId = experimentDesignFactorElement.getAttributeValue(CommonFields.Id.name());
+		factorName = experimentDesignFactorElement.getAttributeValue(CommonFields.Name.name());
+		factorDescription = experimentDesignFactorElement.getAttributeValue(CommonFields.Description.name());		
+		enabled = Boolean.parseBoolean(
+				experimentDesignFactorElement.getAttributeValue(CommonFields.Enabled.name()));
 		
 		eventListeners = ConcurrentHashMap.newKeySet();
 		suppressEvents = false;
@@ -288,7 +287,7 @@ public class ExperimentDesignFactor implements Comparable<ExperimentDesignFactor
 		List<Element> levelListElements = 
 				experimentDesignFactorElement.getChildren(
 						ExperimentDesignFactorFields.LevelSet.name());
-		if(levelListElements.size() > 0) {
+		if(!levelListElements.isEmpty()) {
 			
 			for(Element levelElement : levelListElements) {
 				

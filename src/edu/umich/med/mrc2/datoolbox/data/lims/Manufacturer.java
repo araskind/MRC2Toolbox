@@ -23,7 +23,12 @@ package edu.umich.med.mrc2.datoolbox.data.lims;
 
 import java.io.Serializable;
 
-public class Manufacturer implements Serializable, Comparable<Manufacturer>{
+import org.jdom2.Document;
+import org.jdom2.Element;
+
+import edu.umich.med.mrc2.datoolbox.project.store.XmlStorable;
+
+public class Manufacturer implements Serializable, Comparable<Manufacturer>,XmlStorable{
 
 	/**
 	 * 
@@ -116,6 +121,12 @@ public class Manufacturer implements Serializable, Comparable<Manufacturer>{
 
 	public String getId() {
 		return id;
+	}
+
+	@Override
+	public Element getXmlElement(Document parentDocument) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }
 

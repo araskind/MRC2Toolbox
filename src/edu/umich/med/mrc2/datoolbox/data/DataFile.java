@@ -43,8 +43,9 @@ import edu.umich.med.mrc2.datoolbox.data.lims.Injection;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.database.idt.OfflineExperimentLoadCache;
 import edu.umich.med.mrc2.datoolbox.gui.utils.ColorUtils;
-import edu.umich.med.mrc2.datoolbox.project.store.AvgMSFields;
+import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
 import edu.umich.med.mrc2.datoolbox.project.store.DataFileFields;
+import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
 import edu.umich.med.mrc2.datoolbox.project.store.XICFields;
 import edu.umich.med.mrc2.datoolbox.utils.ExperimentUtils;
 
@@ -347,8 +348,8 @@ public class DataFile implements Comparable<DataFile>, Serializable {
 
 	public Element getXmlElement() {
 		Element dataFileElement = 
-        		new Element(DataFileFields.DataFile.name());
-		dataFileElement.setAttribute(DataFileFields.Name.name(), name);	
+        		new Element(ObjectNames.DataFile.name());
+		dataFileElement.setAttribute(CommonFields.Name.name(), name);	
 		dataFileElement.setAttribute(DataFileFields.Path.name(), fullPath);	
 		
 		if(parentSample != null)
@@ -406,7 +407,7 @@ public class DataFile implements Comparable<DataFile>, Serializable {
 	
 	public DataFile(Element fileElement) {
 		
-		name = fileElement.getAttributeValue(DataFileFields.Name.name());
+		name = fileElement.getAttributeValue(CommonFields.Name.name());
 		fullPath = fileElement.getAttributeValue(DataFileFields.Path.name());
 
 		String acqMethodId = 
@@ -471,7 +472,7 @@ public class DataFile implements Comparable<DataFile>, Serializable {
 		if(avgMsListElement != null) {
 			
 			List<Element> avgMsElementList = 
-					avgMsListElement.getChildren(AvgMSFields.AvgMs.name());		
+					avgMsListElement.getChildren(ObjectNames.AvgMs.name());		
 			for (Element avgMsElement : avgMsElementList) {
 				AverageMassSpectrum avgMs = 
 						new AverageMassSpectrum(avgMsElement, this);

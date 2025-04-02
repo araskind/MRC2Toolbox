@@ -34,7 +34,9 @@ import org.jdom2.output.XMLOutputter;
 
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
+import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
 import edu.umich.med.mrc2.datoolbox.project.store.DataFileFields;
+import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
@@ -65,8 +67,7 @@ public class SaveFileMsFeaturesTask extends AbstractTask {
 
 			ex.printStackTrace();
 			setStatus(TaskStatus.ERROR);
-return;
-
+			return;
 		}
 		setStatus(TaskStatus.FINISHED);
 	}
@@ -79,9 +80,9 @@ return;
 		
         Document dataFileDocument = new Document();
         Element dataFileElement = 
-        		new Element(DataFileFields.DataFile.name());
+        		new Element(ObjectNames.DataFile.name());
 		dataFileElement.setAttribute("version", "1.0.0.0");
-		dataFileElement.setAttribute(DataFileFields.Name.name(), file.getName());
+		dataFileElement.setAttribute(CommonFields.Name.name(), file.getName());
 		Element featureListElement =  
 				 new Element(DataFileFields.FeatureList.name());
 

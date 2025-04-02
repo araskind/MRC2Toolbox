@@ -46,6 +46,7 @@ import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
 import edu.umich.med.mrc2.datoolbox.data.enums.SpectrumSource;
 import edu.umich.med.mrc2.datoolbox.main.AdductManager;
 import edu.umich.med.mrc2.datoolbox.project.store.MassSpectrumFields;
+import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
 import edu.umich.med.mrc2.datoolbox.project.store.TandemMassSpectrumFields;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 import edu.umich.med.mrc2.datoolbox.utils.NumberArrayUtils;
@@ -495,8 +496,7 @@ public class MassSpectrum implements Serializable {
 
 	public Element getXmlElement() {
 		
-		Element spectrumElement = new Element(
-				MassSpectrumFields.Spectrum.name());
+		Element spectrumElement = new Element(ObjectNames.Spectrum.name());
 		if(msPoints != null && !msPoints.isEmpty()) {
 			double[]mzValues = msPoints.stream().
 					mapToDouble(p -> Math.floor(p.getMz() * 1000000) / 1000000).toArray();

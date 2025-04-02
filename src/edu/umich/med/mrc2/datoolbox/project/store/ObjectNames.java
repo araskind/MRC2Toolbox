@@ -21,26 +21,25 @@
 
 package edu.umich.med.mrc2.datoolbox.project.store;
 
-public enum BinnerAnnotationFields {
-
-	FeatureName,
-	Annotation,
-	AdditionalGroupAnnotations,
-	FurtherAnnotations,
-	Derivations,
-	Isotopes,
-	AdditionalIsotopes,
-	MassError,
-	Rmd,
-	MolIonNumber,
-	ChargeCarrier,
-	AdditionalAdducts,
-	BinNumber,
-	CorrClusterNumber,
-	RebinSubclusterNumber,
-	RtSubclusterNumber,
-	IsPrimary,
-	BinnerMz,
-	BinnerRt,
+public enum ObjectNames {
+	
+	AvgMs,
+	BinnerAnnotationCluster,
+	BinnerAnnotation,
+	BinnerAnnotationLookupDataSet,
+	DataFile,
+	ExperimentalSample,
+	ExperimentDesignFactor,
+	ExperimentDesign,
+	ExperimentDesignLevel,
+	ExperimentDesignSubset,
+	FeatureCollection,
+	FeatureLookupDataSet,
+	IDTrackerRawDataProject,
+	Injection,
+	limsExperiment,
+	MetabolomicsExperiment,
+	Spectrum,
+	XICData,
 	;
 }

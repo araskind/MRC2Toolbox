@@ -40,7 +40,9 @@ import org.jdom2.Element;
 import edu.umich.med.mrc2.datoolbox.data.enums.ParameterSetStatus;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignSubsetEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignSubsetListener;
+import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
 import edu.umich.med.mrc2.datoolbox.project.store.ExperimentDesignSubsetFields;
+import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
 
 public class ExperimentDesignSubset implements Comparable<ExperimentDesignSubset>, Serializable, Renamable {
 
@@ -363,9 +365,9 @@ public class ExperimentDesignSubset implements Comparable<ExperimentDesignSubset
 	public Element getXmlElement() {
 		
 		Element subsetElement = 
-				new Element(ExperimentDesignSubsetFields.ExperimentDesignSubset.name());
+				new Element(ObjectNames.ExperimentDesignSubset.name());
 		if(subsetName != null)
-			subsetElement.setAttribute(ExperimentDesignSubsetFields.Name.name(), subsetName);
+			subsetElement.setAttribute(CommonFields.Name.name(), subsetName);
 		
 		subsetElement.setAttribute(
 				ExperimentDesignSubsetFields.IsActive.name(), Boolean.toString(active));
@@ -412,8 +414,7 @@ public class ExperimentDesignSubset implements Comparable<ExperimentDesignSubset
 	public ExperimentDesignSubset(
 			Element designSubsetElement,
 			ExperimentDesign parentDesign) {
-		subsetName = designSubsetElement.getAttributeValue(
-				ExperimentDesignSubsetFields.Name.name());
+		subsetName = designSubsetElement.getAttributeValue(CommonFields.Name.name());
 		active = Boolean.parseBoolean(designSubsetElement.getAttributeValue(
 				ExperimentDesignSubsetFields.IsActive.name()));
 		locked = Boolean.parseBoolean(designSubsetElement.getAttributeValue(

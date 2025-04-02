@@ -34,7 +34,7 @@ import org.jdom2.output.XMLOutputter;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureChromatogramBundle;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisExperiment;
-import edu.umich.med.mrc2.datoolbox.project.store.ExperimentFields;
+import edu.umich.med.mrc2.datoolbox.project.store.IDTrackerProjectFields;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
@@ -71,7 +71,7 @@ return;
 		
         Document document = new Document();
         Element chromatogramListRoot = 
-        		new Element(ExperimentFields.FeatureChromatogramList.name());
+        		new Element(IDTrackerProjectFields.FeatureChromatogramList.name());
 		chromatogramListRoot.setAttribute("version", "1.0.0.0");
 
         for(Entry<String, MsFeatureChromatogramBundle> ce : experimentToSave.getChromatogramMap().entrySet()) {   	

@@ -22,12 +22,9 @@
 package edu.umich.med.mrc2.datoolbox.project.store;
 
 public enum BinnerAnnotationClusterFields {
-	
-	BinnerAnnotationCluster,
-	BacId,
+
 	MolIonNumber,
 	Annotations,
 	PrimaryAnnotation,
 	;
-
 }

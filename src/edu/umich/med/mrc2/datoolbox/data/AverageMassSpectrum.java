@@ -32,7 +32,7 @@ import org.jdom2.Element;
 
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.store.AvgMSFields;
-import edu.umich.med.mrc2.datoolbox.project.store.MassSpectrumFields;
+import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
 
 public class AverageMassSpectrum implements Serializable, Comparable<AverageMassSpectrum>{
@@ -109,7 +109,7 @@ public class AverageMassSpectrum implements Serializable, Comparable<AverageMass
 
 	public Element getXmlElement() {
 		
-		Element avgMsElement = new Element(AvgMSFields.AvgMs.name());
+		Element avgMsElement = new Element(ObjectNames.AvgMs.name());
 		avgMsElement.setAttribute(
 				AvgMSFields.MsLevel.name(), Integer.toString(msLevel));
 		
@@ -160,7 +160,7 @@ public class AverageMassSpectrum implements Serializable, Comparable<AverageMass
 			rtRange = new Range(rtRangeString);
 		
 		Element spectrumElement = 
-				avgMsElement.getChild(MassSpectrumFields.Spectrum.name());
+				avgMsElement.getChild(ObjectNames.Spectrum.name());
 		if(spectrumElement != null)
 			masSpectrum = new MassSpectrum(spectrumElement);		
 	}

@@ -28,7 +28,9 @@ import org.jdom2.Element;
 
 import edu.umich.med.mrc2.datoolbox.main.AdductManager;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
+import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
 import edu.umich.med.mrc2.datoolbox.project.store.ExtractedIonDataFields;
+import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
 import edu.umich.med.mrc2.datoolbox.utils.NumberArrayUtils;
 
 public class ExtractedIonData implements Serializable{
@@ -144,11 +146,11 @@ public class ExtractedIonData implements Serializable{
 	public Element getXmlElement() {
 		
 		Element extractedIonDataElement = 
-				new Element(ExtractedIonDataFields.XICData.name());
+				new Element(ObjectNames.XICData.name());
 		
 		if(name != null)
 			extractedIonDataElement.setAttribute(
-					ExtractedIonDataFields.Name.name(), name);
+					CommonFields.Name.name(), name);
 		
 		if(adduct != null)
 			extractedIonDataElement.setAttribute(
@@ -174,7 +176,7 @@ public class ExtractedIonData implements Serializable{
 	
 	public ExtractedIonData(Element xicElement) {
 		
-		name = xicElement.getAttributeValue(ExtractedIonDataFields.Name.name());		
+		name = xicElement.getAttributeValue(CommonFields.Name.name());		
 		String targetMass = 
 				xicElement.getAttributeValue(ExtractedIonDataFields.Target.name());
 		if(targetMass != null)

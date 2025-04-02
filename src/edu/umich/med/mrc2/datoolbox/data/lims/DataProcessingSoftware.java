@@ -23,10 +23,14 @@ package edu.umich.med.mrc2.datoolbox.data.lims;
 
 import java.io.Serializable;
 
+import org.jdom2.Document;
+import org.jdom2.Element;
+
 import edu.umich.med.mrc2.datoolbox.data.InstrumentPlatform;
 import edu.umich.med.mrc2.datoolbox.data.enums.SoftwareType;
+import edu.umich.med.mrc2.datoolbox.project.store.XmlStorable;
 
-public class DataProcessingSoftware implements Serializable, Comparable<DataProcessingSoftware>{
+public class DataProcessingSoftware implements Serializable, Comparable<DataProcessingSoftware>,XmlStorable{
 
 	/**
 	 * 
@@ -138,6 +142,12 @@ public class DataProcessingSoftware implements Serializable, Comparable<DataProc
 
 	public void setPlatform(InstrumentPlatform platform) {
 		this.platform = platform;
+	}
+
+	@Override
+	public Element getXmlElement(Document parentDocument) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

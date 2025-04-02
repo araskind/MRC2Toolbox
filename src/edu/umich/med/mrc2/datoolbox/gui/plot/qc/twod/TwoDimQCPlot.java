@@ -238,6 +238,7 @@ public class TwoDimQCPlot extends AbstractControlledDataPlot {
 		
 		String plotFileName = prefix + "_"
 				+ plotParameters.getDesignDescriptor()
+				+ "_" + FIOUtils.getTimestamp()
 				+ "." + format.getExtension();
 		String plotFileNameClean = FIOUtils.createSaveSafeName(plotFileName).replaceAll("\\s+", "_");
 		

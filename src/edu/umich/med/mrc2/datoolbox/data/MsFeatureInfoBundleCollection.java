@@ -44,7 +44,8 @@ import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
 import edu.umich.med.mrc2.datoolbox.data.lims.ObjectAnnotation;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
-import edu.umich.med.mrc2.datoolbox.project.store.FeatureCollectionFields;
+import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
+import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
 import edu.umich.med.mrc2.datoolbox.utils.ExperimentUtils;
 
 public class MsFeatureInfoBundleCollection implements Serializable {
@@ -296,21 +297,15 @@ public class MsFeatureInfoBundleCollection implements Serializable {
 	public Element getXmlElement() {
 		
 		Element msFeatureCollectionElement = 
-				new Element(FeatureCollectionFields.FeatureCollection.name());
-		msFeatureCollectionElement.setAttribute(
-				FeatureCollectionFields.Id.name(), id);
-		msFeatureCollectionElement.setAttribute(
-				FeatureCollectionFields.Name.name(), name);
-		msFeatureCollectionElement.setAttribute(
-				FeatureCollectionFields.Description.name(), description);
-		msFeatureCollectionElement.setAttribute(
-				FeatureCollectionFields.DateCreataed.name(), 
+				new Element(ObjectNames.FeatureCollection.name());
+		msFeatureCollectionElement.setAttribute(CommonFields.Id.name(), id);
+		msFeatureCollectionElement.setAttribute(CommonFields.Name.name(), name);
+		msFeatureCollectionElement.setAttribute(CommonFields.Description.name(), description);
+		msFeatureCollectionElement.setAttribute(CommonFields.DateCreated.name(), 
 				ExperimentUtils.dateTimeFormat.format(dateCreated));
-		msFeatureCollectionElement.setAttribute(
-				FeatureCollectionFields.DateModified.name(), 
+		msFeatureCollectionElement.setAttribute(CommonFields.LastModified.name(), 
 				ExperimentUtils.dateTimeFormat.format(lastModified));	
-		msFeatureCollectionElement.setAttribute(
-				FeatureCollectionFields.UserId.name(), owner.getId());
+		msFeatureCollectionElement.setAttribute(CommonFields.UserId.name(), owner.getId());
 		
 		//	TODO update feature ID list from database if necessary
 		
@@ -318,7 +313,7 @@ public class MsFeatureInfoBundleCollection implements Serializable {
 				map(f -> f.getMsFeature().getId()).
 				collect(Collectors.toSet());
 		msFeatureCollectionElement.addContent(       		
-        		new Element(FeatureCollectionFields.FeatureList.name()).
+        		new Element(CommonFields.FeatureList.name()).
         		setText(StringUtils.join(featureIds, ",")));
 		
 		return msFeatureCollectionElement;
@@ -327,27 +322,44 @@ public class MsFeatureInfoBundleCollection implements Serializable {
 	public MsFeatureInfoBundleCollection(Element xmlElement) {
 		
 		super();
-		this.id = xmlElement.getAttributeValue(FeatureCollectionFields.Id.name());
+		this.id = xmlElement.getAttributeValue(CommonFields.Id.name());
 		if(id == null)
 			this.id = DataPrefix.MSMS_FEATURE_COLLECTION.getName() + UUID.randomUUID().toString();
 		
-		this.name = xmlElement.getAttributeValue(FeatureCollectionFields.Name.name());
-		this.description = xmlElement.getAttributeValue(FeatureCollectionFields.Description.name());
-		try {
-			this.dateCreated = ExperimentUtils.dateTimeFormat.parse(
-					xmlElement.getAttributeValue(FeatureCollectionFields.DateCreataed.name()));
-		} catch (ParseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		this.name = xmlElement.getAttributeValue(CommonFields.Name.name());
+		this.description = xmlElement.getAttributeValue(CommonFields.Description.name());
+		
+		//	This is a temp fix for typo
+		String dateCreatedString = 
+				xmlElement.getAttributeValue(CommonFields.DateCreated.name());
+		if(dateCreatedString == null)
+			dateCreatedString = 
+				xmlElement.getAttributeValue("DateCreataed");
+		
+		if(dateCreatedString != null && !dateCreatedString.isBlank()) {
+			try {	
+				this.dateCreated = ExperimentUtils.dateTimeFormat.parse(dateCreatedString);
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
-		try {
-			this.lastModified = ExperimentUtils.dateTimeFormat.parse(
-					xmlElement.getAttributeValue(FeatureCollectionFields.DateModified.name()));
-		} catch (ParseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		if(this.dateCreated == null)
+			this.dateCreated = new Date();
+		
+		this.lastModified = this.dateCreated;
+		String lastModifiedString = 
+				xmlElement.getAttributeValue(CommonFields.LastModified.name());
+		if(lastModifiedString != null && !lastModifiedString.isBlank()) {
+			
+			try {
+				this.lastModified = ExperimentUtils.dateTimeFormat.parse(lastModifiedString);
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}		
-		String userId =  xmlElement.getAttributeValue(FeatureCollectionFields.UserId.name());
+		String userId =  xmlElement.getAttributeValue(CommonFields.UserId.name());
 		if(userId != null)
 			this.owner = IDTDataCache.getUserById(userId);
 		
@@ -355,7 +367,7 @@ public class MsFeatureInfoBundleCollection implements Serializable {
 				new MsFeatureInfoBundleComparator(SortProperty.Name));
 		
 		String featureIdIdList = 
-				xmlElement.getChild(FeatureCollectionFields.FeatureList.name()).getText();
+				xmlElement.getChild(CommonFields.FeatureList.name()).getText();
 		featureIds = new TreeSet<String>(Arrays.asList(featureIdIdList.split(",")));
 		annotations = new TreeSet<ObjectAnnotation>();
 	}

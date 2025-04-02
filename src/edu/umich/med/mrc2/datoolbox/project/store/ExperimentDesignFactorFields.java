@@ -22,12 +22,7 @@
 package edu.umich.med.mrc2.datoolbox.project.store;
 
 public enum ExperimentDesignFactorFields {
-
-	ExperimentDesignFactor,
-	Id,
-	Name,
-	Description,
-	Enabled,
+	
 	LevelSet,
 	;
 }

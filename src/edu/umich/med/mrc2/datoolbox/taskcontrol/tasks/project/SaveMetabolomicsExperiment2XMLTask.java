@@ -59,7 +59,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 import edu.umich.med.mrc2.datoolbox.utils.CompressionUtils;
 import edu.umich.med.mrc2.datoolbox.utils.ExperimentUtils;
 
-public class SaveStoredRawDataAnalysisExperimentTask extends AbstractTask implements TaskListener {
+public class SaveMetabolomicsExperiment2XMLTask extends AbstractTask implements TaskListener {
 	
 	private RawDataAnalysisExperiment experimentToSave;
 	private File xmlFile;
@@ -73,7 +73,7 @@ public class SaveStoredRawDataAnalysisExperimentTask extends AbstractTask implem
 	private Set<String>uniqueMSRTLibraryIds;
 	private Set<String>uniqueSampleIds;
 
-	public SaveStoredRawDataAnalysisExperimentTask(
+	public SaveMetabolomicsExperiment2XMLTask(
 			RawDataAnalysisExperiment experiment) {
 		super();
 		this.experimentToSave = experiment;
@@ -129,7 +129,7 @@ return;
 		
         Document document = new Document();
         Element experimentRoot = 
-        		new Element(ObjectNames.IDTrackerRawDataProject.name());
+        		new Element(ObjectNames.MetabolomicsExperiment.name());
 		experimentRoot.setAttribute("version", "1.0.0.0");
 		experimentRoot.setAttribute(CommonFields.Id.name(), 
 				experimentToSave.getId());
@@ -341,7 +341,7 @@ return;
 
 	@Override
 	public Task cloneTask() {
-		return new SaveStoredRawDataAnalysisExperimentTask(experimentToSave);
+		return new SaveMetabolomicsExperiment2XMLTask(experimentToSave);
 	}
 
 	public RawDataAnalysisExperiment getExperimentToSave() {
