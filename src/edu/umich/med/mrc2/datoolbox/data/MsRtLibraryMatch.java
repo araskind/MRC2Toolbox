@@ -32,6 +32,7 @@ import org.jdom2.Element;
 
 import edu.umich.med.mrc2.datoolbox.main.AdductManager;
 import edu.umich.med.mrc2.datoolbox.project.store.MsRtLibraryMatchFields;
+import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
 
 public class MsRtLibraryMatch implements Serializable {
 
@@ -190,7 +191,7 @@ public class MsRtLibraryMatch implements Serializable {
 	public Element getXmlElement() {
 		
 		Element refMsRtElement = 
-				new Element(MsRtLibraryMatchFields.RefMsRt.name());
+				new Element(ObjectNames.RefMsRt.name());
 		
 		if(libraryId != null)
 			refMsRtElement.setAttribute(

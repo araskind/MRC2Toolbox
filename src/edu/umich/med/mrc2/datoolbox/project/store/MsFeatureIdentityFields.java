@@ -23,9 +23,6 @@ package edu.umich.med.mrc2.datoolbox.project.store;
 
 public enum MsFeatureIdentityFields {
 
-	MSFID,
-	Id,
-	Name,
 	Source,
 	CID,
 	Conf,

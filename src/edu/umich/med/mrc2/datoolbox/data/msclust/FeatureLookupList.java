@@ -37,7 +37,6 @@ import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
-import edu.umich.med.mrc2.datoolbox.project.store.MinimalMSOneFeatureFields;
 import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
 import edu.umich.med.mrc2.datoolbox.utils.ExperimentUtils;
 
@@ -268,7 +267,7 @@ public class FeatureLookupList implements Comparable<FeatureLookupList>{
 			
 			List<Element> featureElementList = 
 					featureListElements.get(0).getChildren(
-							MinimalMSOneFeatureFields.MinimalMSOneFeature.name());
+							ObjectNames.MinimalMSOneFeature.name());
 			for(Element featureElement : featureElementList) {
 				
 				MinimalMSOneFeature newFeature = new MinimalMSOneFeature(featureElement);

@@ -23,6 +23,7 @@ package edu.umich.med.mrc2.datoolbox.utils.filter;
 
 import org.jdom2.Element;
 
+import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
 import edu.umich.med.mrc2.datoolbox.project.store.SmoothingFilterFields;
 
 /**
@@ -49,8 +50,8 @@ public abstract class Filter
 	public abstract boolean equals(Filter otherFilter);
 	
 	public Element getXmlElement() {
-		Element filterElement = 
-				new Element(SmoothingFilterFields.Filter.name());
+		
+		Element filterElement = new Element(ObjectNames.Filter.name());
 		filterElement.setAttribute(
 				SmoothingFilterFields.FilterCode.name(), getFilterClass().getCode());
 		

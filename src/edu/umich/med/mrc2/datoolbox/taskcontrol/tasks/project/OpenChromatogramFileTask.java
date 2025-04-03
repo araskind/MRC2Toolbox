@@ -33,7 +33,7 @@ import org.jdom2.input.SAXBuilder;
 
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureChromatogramBundle;
-import edu.umich.med.mrc2.datoolbox.project.store.MsFeatureChromatogramBundleFields;
+import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
@@ -62,8 +62,7 @@ public class OpenChromatogramFileTask extends AbstractTask {
 		} catch (Exception ex) {
 			ex.printStackTrace();
 			setStatus(TaskStatus.ERROR);
-return;
-
+			return;
 		}
 		setStatus(TaskStatus.FINISHED);
 	}
@@ -79,7 +78,7 @@ return;
 			Document doc = sax.build(chromatogramFile);
 			Element rootNode = doc.getRootElement();
 			List<Element> list = 
-					rootNode.getChildren(MsFeatureChromatogramBundleFields.FChrBundle.name());
+					rootNode.getChildren(ObjectNames.FChrBundle.name());
 			total = list.size();
 			processed = 0;
 			for (Element chromBundleElement : list) {

@@ -47,7 +47,6 @@ import edu.umich.med.mrc2.datoolbox.data.enums.SpectrumSource;
 import edu.umich.med.mrc2.datoolbox.main.AdductManager;
 import edu.umich.med.mrc2.datoolbox.project.store.MassSpectrumFields;
 import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
-import edu.umich.med.mrc2.datoolbox.project.store.TandemMassSpectrumFields;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 import edu.umich.med.mrc2.datoolbox.utils.NumberArrayUtils;
 
@@ -601,10 +600,10 @@ public class MassSpectrum implements Serializable {
 		if(!msmsElementList.isEmpty()) {
 			
 			Element msmsListElement = spectrumElement.getChildren(MassSpectrumFields.MsmsList.name()).get(0);
-			List<Element> msmsList = msmsListElement.getChildren(TandemMassSpectrumFields.MSMS.name());
+			List<Element> msmsList = msmsListElement.getChildren(ObjectNames.MSMS.name());
 			for(Element msmsElement : msmsList) {
 				
-				if(msmsElement.getName().equals(TandemMassSpectrumFields.MSMS.name()))
+				if(msmsElement.getName().equals(ObjectNames.MSMS.name()))
 					tandemSpectra.add(new TandemMassSpectrum(msmsElement));
 			}
 		}

@@ -37,8 +37,8 @@ import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.database.idt.OfflineExperimentLoadCache;
-import edu.umich.med.mrc2.datoolbox.project.store.MsFeatureFields;
 import edu.umich.med.mrc2.datoolbox.project.store.MsFeatureInfoBundleFields;
+import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
 
 public class MSFeatureInfoBundle implements Serializable {
 
@@ -279,7 +279,7 @@ public class MSFeatureInfoBundle implements Serializable {
 	public Element getXmlElement() {
 		
 		Element msFeatureInfoBundleElement = 
-				new Element(MsFeatureInfoBundleFields.MFIB.name());
+				new Element(ObjectNames.MFIB.name());
 		
 		if(acquisitionMethod != null)
 			msFeatureInfoBundleElement.setAttribute(
@@ -335,7 +335,7 @@ public class MSFeatureInfoBundle implements Serializable {
 	public MSFeatureInfoBundle(Element featureElement) {
 		
 		msFeature = new MsFeature(
-				featureElement.getChild(MsFeatureFields.MsFeature.name()));
+				featureElement.getChild(ObjectNames.MsFeature.name()));
 		
 		String acqMethodId = 
 				featureElement.getAttributeValue(MsFeatureInfoBundleFields.AcqMethod.name());

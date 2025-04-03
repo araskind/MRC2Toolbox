@@ -23,9 +23,6 @@ package edu.umich.med.mrc2.datoolbox.project.store;
 
 public enum MSMSSearchParameterSetFields {
 
-	MSMSSearchParameterSet,
-	Id,
-	Name,
 	MZErrorValue,
 	MassErrorType,
 	RTErrorValue,

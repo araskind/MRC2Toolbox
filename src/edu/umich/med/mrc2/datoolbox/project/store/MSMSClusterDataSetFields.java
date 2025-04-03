@@ -23,14 +23,7 @@ package edu.umich.med.mrc2.datoolbox.project.store;
 
 public enum MSMSClusterDataSetFields {
 
-	MSMSClusterDataSet,
-	Id,
-	Name,
 	DsType,
-	Description,
-	UserId,
-	DateCreated,
-	LastModified,
 	ClusterList
 	;
 }

@@ -23,7 +23,13 @@ package edu.umich.med.mrc2.datoolbox.data;
 
 import java.io.Serializable;
 
-public class MassAnalyzerType implements Serializable, Comparable<MassAnalyzerType>{
+import org.jdom2.Element;
+
+import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
+import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
+import edu.umich.med.mrc2.datoolbox.project.store.XmlStorable;
+
+public class MassAnalyzerType implements Serializable, Comparable<MassAnalyzerType>, XmlStorable{
 
 	/**
 	 * 
@@ -102,5 +108,27 @@ public class MassAnalyzerType implements Serializable, Comparable<MassAnalyzerTy
 	@Override
 	public int compareTo(MassAnalyzerType o) {
 		return this.id.compareTo(o.getId());
+	}
+
+	public MassAnalyzerType(Element massAnalyzerTypeElement) {
+		
+		super();
+		id = massAnalyzerTypeElement.getAttributeValue(
+				CommonFields.Id.name());
+		description = massAnalyzerTypeElement.getAttributeValue(
+				CommonFields.Description.name());
+	}
+
+	@Override
+	public Element getXmlElement() {
+		
+		Element massAnalyzerTypeElement = 
+				new Element(ObjectNames.MassAnalyzerType.name());
+			massAnalyzerTypeElement.setAttribute(
+				CommonFields.Id.name(), id);
+			massAnalyzerTypeElement.setAttribute(
+				CommonFields.Description.name(), description);
+			
+		return massAnalyzerTypeElement;
 	}
 }

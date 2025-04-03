@@ -41,7 +41,7 @@ import edu.umich.med.mrc2.datoolbox.data.enums.IntensityMeasure;
 import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
 import edu.umich.med.mrc2.datoolbox.data.enums.MsFeatureChromatogramExtractionTarget;
 import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
-import edu.umich.med.mrc2.datoolbox.project.store.XICDefinitionFields;
+import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
 
@@ -564,8 +564,7 @@ public class MSMSExtractionParameterSet implements Comparable<MSMSExtractionPara
 		
 //		TODO smoothing filter for MS1 and/or other MS1 stuff
 		
-		Element cdElement = parametersElement.getChild(
-				XICDefinitionFields.XICDefinition.name());
+		Element cdElement = parametersElement.getChild(ObjectNames.XICDefinition.name());
 		if(cdElement != null) {
 			try {
 				commonChromatogramDefinition = new ChromatogramDefinition(cdElement);

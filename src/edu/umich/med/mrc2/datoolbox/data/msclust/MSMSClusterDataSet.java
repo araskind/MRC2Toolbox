@@ -44,9 +44,8 @@ import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.MSMSClusterDataSetManager;
+import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
 import edu.umich.med.mrc2.datoolbox.project.store.MSMSClusterDataSetFields;
-import edu.umich.med.mrc2.datoolbox.project.store.MSMSClusteringParameterSetFields;
-import edu.umich.med.mrc2.datoolbox.project.store.MsFeatureInfoBundleClusterFields;
 import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
 import edu.umich.med.mrc2.datoolbox.utils.ExperimentUtils;
 
@@ -257,11 +256,9 @@ public class MSMSClusterDataSet implements IMSMSClusterDataSet {
 	public Element getXmlElement() {
 
 		Element msmsClusterDataSetElement = 
-				new Element(MSMSClusterDataSetFields.MSMSClusterDataSet.name());
-		msmsClusterDataSetElement.setAttribute(
-				MSMSClusterDataSetFields.Id.name(), id);	
-		msmsClusterDataSetElement.setAttribute(
-				MSMSClusterDataSetFields.Name.name(), name);
+				new Element(ObjectNames.MSMSClusterDataSet.name());
+		msmsClusterDataSetElement.setAttribute(CommonFields.Id.name(), id);	
+		msmsClusterDataSetElement.setAttribute(CommonFields.Name.name(), name);
 		String descString = description;
 		if(descString == null)
 			descString = "";
@@ -270,15 +267,11 @@ public class MSMSClusterDataSet implements IMSMSClusterDataSet {
 		msmsClusterDataSetElement.setAttribute(
 				MSMSClusterDataSetFields.DsType.name(), dsType.name());
 		
-		msmsClusterDataSetElement.setAttribute(
-				MSMSClusterDataSetFields.Description.name(), descString);
-		msmsClusterDataSetElement.setAttribute(
-				MSMSClusterDataSetFields.UserId.name(), createdBy.getId());	
-		msmsClusterDataSetElement.setAttribute(
-				MSMSClusterDataSetFields.DateCreated.name(), 
+		msmsClusterDataSetElement.setAttribute(CommonFields.Description.name(), descString);
+		msmsClusterDataSetElement.setAttribute(CommonFields.UserId.name(), createdBy.getId());	
+		msmsClusterDataSetElement.setAttribute(CommonFields.DateCreated.name(), 
 				ExperimentUtils.dateTimeFormat.format(dateCreated));
-		msmsClusterDataSetElement.setAttribute(
-				MSMSClusterDataSetFields.LastModified.name(), 
+		msmsClusterDataSetElement.setAttribute(CommonFields.LastModified.name(), 
 				ExperimentUtils.dateTimeFormat.format(lastModified));		
 
 		msmsClusterDataSetElement.addContent(parameters.getXmlElement());
@@ -300,35 +293,35 @@ public class MSMSClusterDataSet implements IMSMSClusterDataSet {
 	
 	public MSMSClusterDataSet(Element xmlElement) {
 		
-		this.id = xmlElement.getAttributeValue(MSMSClusterDataSetFields.Id.name());
+		this.id = xmlElement.getAttributeValue(CommonFields.Id.name());
 		if(id == null)
 			this.id = DataPrefix.MSMS_CLUSTER_DATA_SET.getName() + 
 					UUID.randomUUID().toString().substring(0, 12);
 		
-		this.name = xmlElement.getAttributeValue(MSMSClusterDataSetFields.Name.name());
-		this.description = xmlElement.getAttributeValue(MSMSClusterDataSetFields.Description.name());
+		this.name = xmlElement.getAttributeValue(CommonFields.Name.name());
+		this.description = xmlElement.getAttributeValue(CommonFields.Description.name());
 		try {
 			this.dateCreated = ExperimentUtils.dateTimeFormat.parse(
-					xmlElement.getAttributeValue(MSMSClusterDataSetFields.DateCreated.name()));
+					xmlElement.getAttributeValue(CommonFields.DateCreated.name()));
 		} catch (ParseException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		try {
 			this.lastModified = ExperimentUtils.dateTimeFormat.parse(
-					xmlElement.getAttributeValue(MSMSClusterDataSetFields.LastModified.name()));
+					xmlElement.getAttributeValue(CommonFields.LastModified.name()));
 		} catch (ParseException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}		
-		String userId =  xmlElement.getAttributeValue(MSMSClusterDataSetFields.UserId.name());
+		String userId =  xmlElement.getAttributeValue(CommonFields.UserId.name());
 		if(userId != null)
 			this.createdBy = IDTDataCache.getUserById(userId);
 		else
 			this.createdBy = MRC2ToolBoxCore.getIdTrackerUser();
 
 		parameters = new MSMSClusteringParameterSet(
-				xmlElement.getChild(MSMSClusteringParameterSetFields.MSMSClusteringParameterSet.name()));
+				xmlElement.getChild(ObjectNames.MSMSClusteringParameterSet.name()));
 		
 		Element lookupListElement = 
 				xmlElement.getChild(ObjectNames.FeatureLookupDataSet.name());
@@ -344,7 +337,7 @@ public class MSMSClusterDataSet implements IMSMSClusterDataSet {
 			
 			List<Element> clusterList = 
 					clusterListElements.get(0).getChildren(
-							MsFeatureInfoBundleClusterFields.MsFeatureInfoBundleCluster.name());
+							ObjectNames.MsFeatureInfoBundleCluster.name());
 			for(Element clusterElement : clusterList) {
 				
 				MsFeatureInfoBundleCluster newCluster = 

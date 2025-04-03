@@ -23,7 +23,13 @@ package edu.umich.med.mrc2.datoolbox.data;
 
 import java.io.Serializable;
 
-public class IonizationType implements Serializable, Comparable<IonizationType>{
+import org.jdom2.Element;
+
+import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
+import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
+import edu.umich.med.mrc2.datoolbox.project.store.XmlStorable;
+
+public class IonizationType implements Serializable, Comparable<IonizationType>, XmlStorable{
 
 	/**
 	 * 
@@ -102,5 +108,27 @@ public class IonizationType implements Serializable, Comparable<IonizationType>{
 	@Override
 	public int compareTo(IonizationType o) {
 		return this.id.compareTo(o.getId());
+	}
+	
+	public IonizationType(Element ionizationTypeElement) {
+		
+		super();
+		id = ionizationTypeElement.getAttributeValue(
+				CommonFields.Id.name());
+		description = ionizationTypeElement.getAttributeValue(
+				CommonFields.Description.name());
+	}
+
+	@Override
+	public Element getXmlElement() {
+		
+		Element ionizationTypeElement = 
+				new Element(ObjectNames.IonizationType.name());
+			ionizationTypeElement.setAttribute(
+				CommonFields.Id.name(), id);
+			ionizationTypeElement.setAttribute(
+				CommonFields.Description.name(), description);
+			
+		return ionizationTypeElement;
 	}
 }

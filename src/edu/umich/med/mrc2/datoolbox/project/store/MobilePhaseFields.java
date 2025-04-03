@@ -21,19 +21,10 @@
 
 package edu.umich.med.mrc2.datoolbox.project.store;
 
-public enum CommonFields {
+public enum MobilePhaseFields {
 
-	Id,
-	Name,
-	Description,
-	CreatedBy,
-	DateCreated,
-	LastModified,
-	Enabled,
-	UserId,
-	FeatureList,
-	MZ,
-	RT,
-	NULL,
+	SynonymList,
+	Syn,
+	starPcnt,
 	;
 }

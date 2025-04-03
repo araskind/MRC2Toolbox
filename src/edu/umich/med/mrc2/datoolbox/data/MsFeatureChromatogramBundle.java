@@ -33,7 +33,6 @@ import org.jdom2.Element;
 
 import edu.umich.med.mrc2.datoolbox.project.store.MsFeatureChromatogramBundleFields;
 import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
-import edu.umich.med.mrc2.datoolbox.project.store.XICDefinitionFields;
 import edu.umich.med.mrc2.datoolbox.utils.ChromatogramUtils;
 
 public class MsFeatureChromatogramBundle implements Serializable {
@@ -100,7 +99,7 @@ public class MsFeatureChromatogramBundle implements Serializable {
 	public Element getXmlElement(String featureId) {
 		
 		Element msFeatureChromatogramBundleElement = 
-				new Element(MsFeatureChromatogramBundleFields.FChrBundle.name());
+				new Element(ObjectNames.FChrBundle.name());
 		msFeatureChromatogramBundleElement.setAttribute(
 				MsFeatureChromatogramBundleFields.FID.name(), featureId);
 		msFeatureChromatogramBundleElement.addContent(
@@ -131,7 +130,7 @@ public class MsFeatureChromatogramBundle implements Serializable {
 		featureId = 
 				cbElement.getAttributeValue(MsFeatureChromatogramBundleFields.FID.name());
 		Element cdElement = 
-				cbElement.getChild(XICDefinitionFields.XICDefinition.name());		
+				cbElement.getChild(ObjectNames.XICDefinition.name());		
 		this.chromatogramDefinition = new ChromatogramDefinition(cdElement);
 		
 		chromatograms = new TreeMap<DataFile, Collection<ExtractedIonData>>();

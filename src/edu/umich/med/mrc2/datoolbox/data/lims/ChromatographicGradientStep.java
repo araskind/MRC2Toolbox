@@ -22,8 +22,15 @@
 package edu.umich.med.mrc2.datoolbox.data.lims;
 
 import java.io.Serializable;
+import java.util.List;
 
-public class ChromatographicGradientStep implements Serializable, Comparable<ChromatographicGradientStep>{
+import org.jdom2.Element;
+
+import edu.umich.med.mrc2.datoolbox.project.store.ChromatographicGradientStepFields;
+import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
+import edu.umich.med.mrc2.datoolbox.project.store.XmlStorable;
+
+public class ChromatographicGradientStep implements Serializable, Comparable<ChromatographicGradientStep>, XmlStorable{
 
 	/**
 	 * 
@@ -112,4 +119,57 @@ public class ChromatographicGradientStep implements Serializable, Comparable<Chr
 	public double[] getMobilePhaseStartingPercent() {
 		return mobilePhaseStartingPercent;
 	}
+	
+	public ChromatographicGradientStep(Element gradientStepElement) {
+		
+		this(0.0, 0.0);
+		
+		startTime = Double.parseDouble(gradientStepElement.getAttributeValue(
+				ChromatographicGradientStepFields.startTime.name()));
+		flowRate = Double.parseDouble(gradientStepElement.getAttributeValue(
+				ChromatographicGradientStepFields.flowRate.name()));
+		List<Element> mobilePhaseStartingPercentList = 
+				gradientStepElement.getChild(ChromatographicGradientStepFields.mobilePhaseStartingPercentList.name()).
+				getChildren(ChromatographicGradientStepFields.mpsp.name());
+		for(int i=0; i<mobilePhaseStartingPercentList.size(); i++) {
+			
+			Element mpspElement = mobilePhaseStartingPercentList.get(i);
+			if(mpspElement != null)
+				mobilePhaseStartingPercent[i] = Double.parseDouble(mpspElement.getAttributeValue(
+						ChromatographicGradientStepFields.spValue.name()));
+		}
+	}
+
+	@Override
+	public Element getXmlElement() {
+
+		Element gradientStepElement = 
+				new Element(ObjectNames.ChromatographicGradientStep.name());
+		gradientStepElement.setAttribute(
+				ChromatographicGradientStepFields.startTime.name(), String.format("%.f3", startTime));
+		gradientStepElement.setAttribute(
+				ChromatographicGradientStepFields.flowRate.name(), String.format("%.f3", flowRate));
+		Element mobilePhaseStartingPercentList = 
+				new Element(ChromatographicGradientStepFields.mobilePhaseStartingPercentList.name());
+		for(int i=0; i<4; i++) {
+			
+			Element mpspElement = new Element(ChromatographicGradientStepFields.mpsp.name());
+			mpspElement.setAttribute(
+					ChromatographicGradientStepFields.spValue.name(), 
+					String.format("%.f3", mobilePhaseStartingPercent[i]));
+			mobilePhaseStartingPercentList.addContent(mpspElement);
+		}
+		gradientStepElement.addContent(mobilePhaseStartingPercentList);
+
+		return gradientStepElement;
+	}
 }
+
+
+
+
+
+
+
+
+

@@ -27,7 +27,9 @@ import org.jdom2.Element;
 
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
+import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
 import edu.umich.med.mrc2.datoolbox.project.store.MSMSClusteringParameterSetFields;
+import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
 import edu.umich.med.mrc2.datoolbox.utils.MSMSClusteringUtils;
 
 public class MSMSClusteringParameterSet {
@@ -162,16 +164,14 @@ public class MSMSClusteringParameterSet {
 	public Element getXmlElement() {
 
 		Element msmsClusteringParameterSetElement = 
-				new Element(MSMSClusteringParameterSetFields.MSMSClusteringParameterSet.name());
-		msmsClusteringParameterSetElement.setAttribute(
-				MSMSClusteringParameterSetFields.Id.name(), id);	
+				new Element(ObjectNames.MSMSClusteringParameterSet.name());
+		msmsClusteringParameterSetElement.setAttribute(CommonFields.Id.name(), id);	
 
 		String nameString = name;
 		if(nameString == null)
 			nameString = "";
 		
-		msmsClusteringParameterSetElement.setAttribute(
-				MSMSClusteringParameterSetFields.Name.name(), nameString);		
+		msmsClusteringParameterSetElement.setAttribute(CommonFields.Name.name(), nameString);		
 		msmsClusteringParameterSetElement.setAttribute(
 				MSMSClusteringParameterSetFields.MZErrorValue.name(), 
 				Double.toString(mzErrorValue));	
@@ -192,8 +192,8 @@ public class MSMSClusteringParameterSet {
 	
 	public MSMSClusteringParameterSet(Element xmlElement) {
 				
-		id = xmlElement.getAttributeValue(MSMSClusteringParameterSetFields.Id.name());
-		name = xmlElement.getAttributeValue(MSMSClusteringParameterSetFields.Name.name());
+		id = xmlElement.getAttributeValue(CommonFields.Id.name());
+		name = xmlElement.getAttributeValue(CommonFields.Name.name());
 		if(name == null || name.isEmpty())
 			name = null;
 		

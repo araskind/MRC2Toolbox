@@ -47,19 +47,27 @@ public class RScriptTestClass {
 	
 	private static void testMetabCombinerAlignmentScript() {
 
-		File rWorkingDir = new File("Y:\\DataAnalysis\\_Reports\\EX01010 - EX01089 - EX01235 - EX01283 - EX01392 - Starr County Metabolomics I-V\\Unnamed\\MetabCombiner\\EX01010\\NEG");
-		File inputMap = new File("Y:\\DataAnalysis\\_Reports\\EX01010 - EX01089 - EX01235 - EX01283 - EX01392 - Starr County Metabolomics I-V\\Unnamed\\MetabCombiner\\EX01010\\NEG\\EX01010-RP-NEG-MC-inputMap.txt");
+		File rWorkingDir = new File(
+				"Y:\\DataAnalysis\\_Reports\\"
+				+ "EX01010 - EX01089 - EX01235 - EX01283 - EX01392 - Starr County Metabolomics I-V\\"
+				+ "Unnamed\\MetabCombiner\\EX01283\\POS\\NO_BATCH02\\");
+		
+		File inputMap = new File("Y:\\DataAnalysis\\_Reports\\"
+				+ "EX01010 - EX01089 - EX01235 - EX01283 - EX01392 - Starr County Metabolomics I-V\\"
+				+ "Unnamed\\MetabCombiner\\EX01283\\POS\\NO_BATCH02\\"
+				+ "EX01283-RP-POS-NOB2-MC-inputMap.txt");
 		RQCScriptGenerator.generateMultiBatchMetabCombinerAlignmentScriptScript(rWorkingDir, inputMap);
 	}
 
 	private static void createDataSummariesForEX01283rpPosExperiment() {
 		
 		File inputMapFile = 
-				new File("Y:\\DataAnalysis\\_Reports\\EX01283 - Starr County Metabolomics IV\\"
-						+ "A003 - Untargeted\\Documents\\POS\\PW\\EX01283_RP-POS-dataSummarization-inputMap.txt");
+				new File("Y:\\DataAnalysis\\_Reports\\"
+						+ "EX01010 - EX01089 - EX01235 - EX01283 - EX01392 - Starr County Metabolomics I-V"
+						+ "\\Unnamed\\MetabCombiner\\EX01010and1089\\NEG\\"
+						+ "EX01010-1089-RP-NEG-MC-inputMap.txt");
 		File dataDir = 
-				new File("Y:\\DataAnalysis\\_Reports\\EX01283 - Starr County Metabolomics IV\\"
-						+ "A003 - Untargeted\\Documents\\POS\\PW");
+				new File("Y:\\DataAnalysis\\_Reports\\EX01010 - EX01089 - EX01235 - EX01283 - EX01392 - Starr County Metabolomics I-V\\Unnamed\\MetabCombiner\\EX01010and1089\\NEG\\EX01010-1089-RP-NEG-MC-inputMap.txt");
 		RQCScriptGenerator.createMultyBatchDataSummarizationScript(inputMapFile, dataDir);
 	}
 	

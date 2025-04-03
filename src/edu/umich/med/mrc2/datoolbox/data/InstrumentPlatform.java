@@ -23,7 +23,13 @@ package edu.umich.med.mrc2.datoolbox.data;
 
 import java.io.Serializable;
 
-public class InstrumentPlatform implements Serializable, Comparable<InstrumentPlatform>{
+import org.jdom2.Element;
+
+import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
+import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
+import edu.umich.med.mrc2.datoolbox.project.store.XmlStorable;
+
+public class InstrumentPlatform implements Serializable, Comparable<InstrumentPlatform>, XmlStorable{
 
 	/**
 	 * 
@@ -102,5 +108,27 @@ public class InstrumentPlatform implements Serializable, Comparable<InstrumentPl
 	@Override
 	public int compareTo(InstrumentPlatform o) {
 		return this.id.compareTo(o.getId());
+	}
+	
+	public InstrumentPlatform(Element instrumentPlatformElement) {
+		
+		super();
+		id = instrumentPlatformElement.getAttributeValue(
+				CommonFields.Id.name());
+		description = instrumentPlatformElement.getAttributeValue(
+				CommonFields.Description.name());
+	}
+
+	@Override
+	public Element getXmlElement() {
+		
+		Element instrumentPlatformElement = 
+				new Element(ObjectNames.InstrumentPlatform.name());
+		instrumentPlatformElement.setAttribute(
+				CommonFields.Id.name(), id);
+		instrumentPlatformElement.setAttribute(
+				CommonFields.Description.name(), description);
+		
+		return instrumentPlatformElement;
 	}
 }

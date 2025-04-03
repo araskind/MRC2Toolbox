@@ -23,9 +23,11 @@ package edu.umich.med.mrc2.datoolbox.data.lims;
 
 import java.io.Serializable;
 
-import org.jdom2.Document;
 import org.jdom2.Element;
 
+import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
+import edu.umich.med.mrc2.datoolbox.project.store.ManufacturerFields;
+import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
 import edu.umich.med.mrc2.datoolbox.project.store.XmlStorable;
 
 public class Manufacturer implements Serializable, Comparable<Manufacturer>,XmlStorable{
@@ -122,11 +124,29 @@ public class Manufacturer implements Serializable, Comparable<Manufacturer>,XmlS
 	public String getId() {
 		return id;
 	}
+	
+	public Manufacturer(Element manufacturerElement) {
+		
+		super();
+		id = manufacturerElement.getAttributeValue(CommonFields.Id.name());
+		name = manufacturerElement.getAttributeValue(CommonFields.Name.name());
+		catalogWebAddress = manufacturerElement.getAttributeValue(
+				ManufacturerFields.CatalogWebAddress.name());
+	}
 
 	@Override
-	public Element getXmlElement(Document parentDocument) {
-		// TODO Auto-generated method stub
-		return null;
+	public Element getXmlElement() {
+		
+		Element manufacturerElement = 
+        		new Element(ObjectNames.Manufacturer.name());
+		manufacturerElement.setAttribute(CommonFields.Id.name(), id);
+		manufacturerElement.setAttribute(CommonFields.Name.name(), name);
+		
+		if(catalogWebAddress != null && !catalogWebAddress.isBlank())
+			manufacturerElement.setAttribute(
+					ManufacturerFields.CatalogWebAddress.name(), catalogWebAddress);
+		
+		return manufacturerElement;
 	}
 }
 

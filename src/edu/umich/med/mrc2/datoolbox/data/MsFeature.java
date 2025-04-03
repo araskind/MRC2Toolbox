@@ -52,8 +52,8 @@ import edu.umich.med.mrc2.datoolbox.gui.communication.MsFeatureEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.MsFeatureListener;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.msmsscore.MSMSScoreCalculator;
+import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
 import edu.umich.med.mrc2.datoolbox.project.store.MsFeatureFields;
-import edu.umich.med.mrc2.datoolbox.project.store.MsFeatureIdentityFields;
 import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
@@ -905,13 +905,14 @@ public class MsFeature implements AnnotatedObject, Serializable {
 	
 	public Element getXmlElement() {
 		
-		Element msFeatureElement = 
-				new Element(MsFeatureFields.MsFeature.name());
-		msFeatureElement.setAttribute(MsFeatureFields.Id.name(), id);	
-		msFeatureElement.setAttribute(MsFeatureFields.Name.name(), name);
-		msFeatureElement.setAttribute(MsFeatureFields.rt.name(), Double.toString(retentionTime));
+		Element msFeatureElement = new Element(ObjectNames.MsFeature.name());
+		msFeatureElement.setAttribute(CommonFields.Id.name(), id);	
+		msFeatureElement.setAttribute(CommonFields.Name.name(), name);
+		msFeatureElement.setAttribute(
+				MsFeatureFields.rt.name(), Double.toString(retentionTime));
 		if(rtRange != null)
-			msFeatureElement.setAttribute(MsFeatureFields.rtRange.name(), rtRange.getStorableString());
+			msFeatureElement.setAttribute(
+					MsFeatureFields.rtRange.name(), rtRange.getStorableString());
 		
 		if(polarity != null)
 			msFeatureElement.setAttribute(MsFeatureFields.pol.name(), polarity.getCode());
@@ -952,8 +953,8 @@ public class MsFeature implements AnnotatedObject, Serializable {
 //		createDefaultPrimaryIdentity();
 		this();
 
-		id = featureElement.getAttributeValue(MsFeatureFields.Id.name());
-		name = featureElement.getAttributeValue(MsFeatureFields.Name.name());
+		id = featureElement.getAttributeValue(CommonFields.Id.name());
+		name = featureElement.getAttributeValue(CommonFields.Name.name());
 		retentionTime = Double.parseDouble(
 				featureElement.getAttributeValue(MsFeatureFields.rt.name()));
 		String polCode = featureElement.getAttributeValue(MsFeatureFields.pol.name());
@@ -981,7 +982,7 @@ public class MsFeature implements AnnotatedObject, Serializable {
 			identifications.clear();
 			
 			List<Element> msfIdList = 
-					msfIdListElements.get(0).getChildren(MsFeatureIdentityFields.MSFID.name());
+					msfIdListElements.get(0).getChildren(ObjectNames.MSFID.name());
 			for(Element msfIdElement : msfIdList) {
 				
 				MsFeatureIdentity msfId = new MsFeatureIdentity(msfIdElement);

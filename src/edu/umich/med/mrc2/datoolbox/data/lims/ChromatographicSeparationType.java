@@ -23,7 +23,14 @@ package edu.umich.med.mrc2.datoolbox.data.lims;
 
 import java.io.Serializable;
 
-public class ChromatographicSeparationType implements Serializable, Comparable<ChromatographicSeparationType>{
+import org.jdom2.Element;
+
+import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
+import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
+import edu.umich.med.mrc2.datoolbox.project.store.XmlStorable;
+
+public class ChromatographicSeparationType implements Serializable, 
+	Comparable<ChromatographicSeparationType>, XmlStorable{
 
 	/**
 	 * 
@@ -104,6 +111,28 @@ public class ChromatographicSeparationType implements Serializable, Comparable<C
         hash = 53 * hash + (this.id != null ? this.id.hashCode() : 0);
         return hash;
     }
+    
+	public ChromatographicSeparationType(Element chromatographicSeparationTypeElement) {
+		
+		super();
+		id = chromatographicSeparationTypeElement.getAttributeValue(
+				CommonFields.Id.name());
+		description = chromatographicSeparationTypeElement.getAttributeValue(
+				CommonFields.Description.name());
+	}
+
+	@Override
+	public Element getXmlElement() {
+		
+		Element chromatographicSeparationTypeElement = 
+				new Element(ObjectNames.ChromatographicSeparationType.name());
+		chromatographicSeparationTypeElement.setAttribute(
+			CommonFields.Id.name(), id);
+		chromatographicSeparationTypeElement.setAttribute(
+			CommonFields.Description.name(), description);
+			
+		return chromatographicSeparationTypeElement;
+	}
 }
 
 

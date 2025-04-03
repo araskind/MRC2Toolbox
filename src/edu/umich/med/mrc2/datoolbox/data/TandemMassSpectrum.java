@@ -39,6 +39,8 @@ import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
 import edu.umich.med.mrc2.datoolbox.data.enums.SpectrumSource;
 import edu.umich.med.mrc2.datoolbox.data.lims.ObjectAnnotation;
+import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
+import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
 import edu.umich.med.mrc2.datoolbox.project.store.TandemMassSpectrumFields;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 import edu.umich.med.mrc2.datoolbox.utils.NumberArrayUtils;
@@ -547,10 +549,9 @@ public class TandemMassSpectrum implements AnnotatedObject, Serializable {
 	
 	public Element getXmlElement() {
 		
-		Element msmsElement = 
-				new Element(TandemMassSpectrumFields.MSMS.name());
+		Element msmsElement = new Element(ObjectNames.MSMS.name());
 		
-		msmsElement.setAttribute(TandemMassSpectrumFields.Id.name(), uniqueId);
+		msmsElement.setAttribute(CommonFields.Id.name(), uniqueId);
 		if(spectrumSource != null)
 			msmsElement.setAttribute(TandemMassSpectrumFields.Source.name(), spectrumSource.name());
 		
@@ -576,9 +577,7 @@ public class TandemMassSpectrum implements AnnotatedObject, Serializable {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			Element mzElement = 
-					new Element(TandemMassSpectrumFields.MZ.name()).
-					setText(mz);			
+			Element mzElement = new Element(CommonFields.MZ.name()).setText(mz);			
 			msmsElement.addContent(mzElement);
 			
 			double[]intensityValues = spectrum.stream().
@@ -670,7 +669,7 @@ public class TandemMassSpectrum implements AnnotatedObject, Serializable {
 		scanRtMap = new TreeMap<Integer,Double>();
 		
 		uniqueId = 
-				msmsElement.getAttributeValue(TandemMassSpectrumFields.Id.name());
+				msmsElement.getAttributeValue(CommonFields.Id.name());
 		String sourceString = 
 				msmsElement.getAttributeValue(TandemMassSpectrumFields.Source.name());
 		if(sourceString != null)
@@ -768,7 +767,7 @@ public class TandemMassSpectrum implements AnnotatedObject, Serializable {
 		double[] mzValues = null;
 		double[] intensityValues = null;
 		String mzText =  
-				msmsElement.getChild(TandemMassSpectrumFields.MZ.name()).getContent().get(0).getValue();
+				msmsElement.getChild(CommonFields.MZ.name()).getContent().get(0).getValue();
 		try {
 			mzValues = NumberArrayUtils.decodeNumberArray(mzText);
 		} catch (UnsupportedEncodingException e) {

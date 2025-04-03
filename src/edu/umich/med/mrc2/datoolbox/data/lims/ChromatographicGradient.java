@@ -22,13 +22,20 @@
 package edu.umich.med.mrc2.datoolbox.data.lims;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.UUID;
 
-import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
+import org.jdom2.Element;
 
-public class ChromatographicGradient implements Serializable {
+import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
+import edu.umich.med.mrc2.datoolbox.project.store.ChromatographicGradientFields;
+import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
+import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
+import edu.umich.med.mrc2.datoolbox.project.store.XmlStorable;
+
+public class ChromatographicGradient implements Serializable, XmlStorable {
 
 	/**
 	 * 
@@ -227,4 +234,105 @@ public class ChromatographicGradient implements Serializable {
         hash = 53 * hash + (this.id != null ? this.id.hashCode() : 0);
         return hash;
     }
+    
+    public ChromatographicGradient(Element chromatographicGradientElement) {
+    	
+    	this();
+    	id = chromatographicGradientElement.getAttributeValue(
+    			CommonFields.Id.name());
+    	name = chromatographicGradientElement.getAttributeValue(
+    			CommonFields.Name.name());
+    	description = chromatographicGradientElement.getAttributeValue(
+    			CommonFields.Description.name());
+    	
+    	columnCompartmentTemperature = Double.parseDouble(
+    			chromatographicGradientElement.getAttributeValue(
+    				ChromatographicGradientFields.ccTemp.name()));
+    	stopTime = Double.parseDouble(
+    			chromatographicGradientElement.getAttributeValue(
+    				ChromatographicGradientFields.stopTime.name()));
+    	
+		List<Element> stepList = 
+				chromatographicGradientElement.getChild(
+						ChromatographicGradientFields.StepList.name()).
+						getChildren(ObjectNames.ChromatographicGradientStep.name());
+		
+		for(Element stepElement : stepList)			
+			gradientSteps.add(new ChromatographicGradientStep(stepElement));
+		
+		List<Element> mobilePhaseList = 
+				chromatographicGradientElement.getChild(
+						ChromatographicGradientFields.MobPhaseList.name()).
+						getChildren(ObjectNames.MobilePhase.name());
+		for(int i=0; i<4; i++) {
+			
+			if(i >= mobilePhaseList.size()) {
+				mobilePhases[i] = null;
+				break;
+			}
+			Element mobilePhaseElement = mobilePhaseList.get(i);
+			if(mobilePhaseElement.getAttributeValue(
+					CommonFields.Id.name()).equals(CommonFields.NULL.name())){
+				mobilePhases[i] = null;
+			}
+			else {
+				mobilePhases[i] = new MobilePhase(mobilePhaseElement);
+			}
+		}		
+    }
+
+	@Override
+	public Element getXmlElement() {
+
+		Element chromatographicGradientElement = 
+				new Element(ObjectNames.ChromatographicGradient.name());
+		chromatographicGradientElement.setAttribute(CommonFields.Id.name(), id);
+		chromatographicGradientElement.setAttribute(CommonFields.Name.name(), name);
+		chromatographicGradientElement.setAttribute(CommonFields.Description.name(), description);
+		
+		chromatographicGradientElement.setAttribute(
+				ChromatographicGradientFields.ccTemp.name(), 
+				String.format("%.2f", columnCompartmentTemperature));
+		chromatographicGradientElement.setAttribute(
+				ChromatographicGradientFields.stopTime.name(), 
+				String.format("%.3f", stopTime));
+		
+		Element stepListElement = 
+				new Element(ChromatographicGradientFields.StepList.name());
+		for(ChromatographicGradientStep step : gradientSteps)			
+			stepListElement.addContent(step.getXmlElement());
+		
+		chromatographicGradientElement.addContent(stepListElement);	
+		
+		Element mobPhaseListElement = 
+				new Element(ChromatographicGradientFields.MobPhaseList.name());
+		
+		for(int i=0; i<4; i++) {
+			
+			if(mobilePhases[i] == null) {
+				
+				Element mobPhaseElement = 
+						new Element(ObjectNames.MobilePhase.name());
+				mobPhaseElement.setAttribute(
+						CommonFields.Id.name(), CommonFields.NULL.name());
+				mobPhaseListElement.addContent(mobPhaseElement);
+			}
+			else {
+				mobPhaseListElement.addContent(mobilePhases[i].getXmlElement());
+			}
+		}
+		chromatographicGradientElement.addContent(mobPhaseListElement);	
+
+		return chromatographicGradientElement;
+	}
 }
+
+
+
+
+
+
+
+
+
+

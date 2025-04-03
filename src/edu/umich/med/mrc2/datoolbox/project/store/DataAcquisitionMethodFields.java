@@ -21,19 +21,9 @@
 
 package edu.umich.med.mrc2.datoolbox.project.store;
 
-public enum CommonFields {
+public enum DataAcquisitionMethodFields {
 
-	Id,
-	Name,
-	Description,
-	CreatedBy,
-	DateCreated,
-	LastModified,
-	Enabled,
-	UserId,
-	FeatureList,
-	MZ,
-	RT,
-	NULL,
+	motrPacMsMode,
+	polarity,
 	;
 }

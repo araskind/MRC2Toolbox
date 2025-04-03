@@ -23,7 +23,6 @@ package edu.umich.med.mrc2.datoolbox.project.store;
 
 public enum MsFeatureInfoBundleFields {
 
-	MFIB,
 	AcqMethod,
 	DaMethod,
 	Exp,

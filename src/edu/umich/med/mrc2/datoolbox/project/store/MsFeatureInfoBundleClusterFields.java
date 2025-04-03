@@ -23,11 +23,6 @@ package edu.umich.med.mrc2.datoolbox.project.store;
 
 public enum MsFeatureInfoBundleClusterFields {
 
-	MsFeatureInfoBundleCluster,
-	Id,
-	Name,
-	MZ,
-	RT,
 	MedianArea,
 	IsLocked,
 	FeatureIdList,

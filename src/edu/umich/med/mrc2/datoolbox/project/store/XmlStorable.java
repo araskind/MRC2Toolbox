@@ -21,10 +21,9 @@
 
 package edu.umich.med.mrc2.datoolbox.project.store;
 
-import org.jdom2.Document;
 import org.jdom2.Element;
 
 public interface XmlStorable {
 
-	public Element getXmlElement(Document parentDocument);
+	public Element getXmlElement();
 }

@@ -22,13 +22,20 @@
 package edu.umich.med.mrc2.datoolbox.data.lims;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.UUID;
 
-import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
+import org.jdom2.Element;
 
-public class MobilePhase implements Serializable, Comparable<MobilePhase>{
+import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
+import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
+import edu.umich.med.mrc2.datoolbox.project.store.MobilePhaseFields;
+import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
+import edu.umich.med.mrc2.datoolbox.project.store.XmlStorable;
+
+public class MobilePhase implements Serializable, Comparable<MobilePhase>, XmlStorable{
 
 	/**
 	 * 
@@ -130,5 +137,48 @@ public class MobilePhase implements Serializable, Comparable<MobilePhase>{
 
 	public void setStartingPercentage(double startingPercentage) {
 		this.startingPercentage = startingPercentage;
+	}
+	
+	public MobilePhase(Element mobilePhaseElement) {
+		
+		super();
+		id = mobilePhaseElement.getAttributeValue(CommonFields.Id.name());
+		name = mobilePhaseElement.getAttributeValue(CommonFields.Name.name());
+		startingPercentage = Double.parseDouble(mobilePhaseElement.getAttributeValue(
+				MobilePhaseFields.starPcnt.name()));
+		
+		synonyms = new TreeSet<String>();
+		List<Element> synonymsListList = 
+				mobilePhaseElement.getChild(MobilePhaseFields.SynonymList.name()).
+				getChildren(MobilePhaseFields.Syn.name());
+		
+		for(Element synonymElement : synonymsListList)
+			synonyms.add(synonymElement.getText());	
+	}
+
+	@Override
+	public Element getXmlElement() {
+		
+		Element mobilePhaseElement = 
+			new Element(ObjectNames.MobilePhase.name());
+		mobilePhaseElement.setAttribute(
+			CommonFields.Id.name(), id);
+		mobilePhaseElement.setAttribute(
+			CommonFields.Name.name(), name);
+		
+		mobilePhaseElement.setAttribute(
+				MobilePhaseFields.starPcnt.name(), String.format("%.f3", startingPercentage));
+		
+		Element synonymsListList = 
+				new Element(MobilePhaseFields.SynonymList.name());
+		for(String synonym : synonyms) {
+			
+			Element mpspElement = new Element(MobilePhaseFields.Syn.name());
+			mpspElement.setText(synonym);
+			synonymsListList.addContent(mpspElement);
+		}
+		mobilePhaseElement.addContent(synonymsListList);
+
+		return mobilePhaseElement;
 	}
 }

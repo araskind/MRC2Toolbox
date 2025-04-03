@@ -62,7 +62,6 @@ import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisExperiment;
 import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
 import edu.umich.med.mrc2.datoolbox.project.store.IDTrackerProjectFields;
-import edu.umich.med.mrc2.datoolbox.project.store.MSMSClusterDataSetFields;
 import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
 import edu.umich.med.mrc2.datoolbox.rawdata.MSMSExtractionParameterSet;
 import edu.umich.med.mrc2.datoolbox.rawdata.MSMSExtractionParameters;
@@ -321,7 +320,7 @@ public class OpenStoredRawDataAnalysisExperimentTask extends AbstractTask implem
 				experimentElement.getChild(IDTrackerProjectFields.MSMSClusterDataSetList.name());
 		if(msmsClusterListElement != null) {
 			List<Element> msmsClusterDataSetList = msmsClusterListElement.
-					getChildren(MSMSClusterDataSetFields.MSMSClusterDataSet.name());
+					getChildren(ObjectNames.MSMSClusterDataSet.name());
 			for (Element mcds : msmsClusterDataSetList)
 				experiment.getMsmsClusterDataSets().add(new MSMSClusterDataSet(mcds));
 		}

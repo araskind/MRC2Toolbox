@@ -22,8 +22,7 @@
 package edu.umich.med.mrc2.datoolbox.project.store;
 
 public enum ReferenceMsMsLibraryMatchFields {
-
-	RefMsms,
+	
 	DbId,
 	Score,
 	FwdScore,

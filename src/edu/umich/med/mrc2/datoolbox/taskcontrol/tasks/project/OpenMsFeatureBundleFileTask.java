@@ -34,7 +34,7 @@ import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.IDTExperimentalSample;
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.project.store.DataFileFields;
-import edu.umich.med.mrc2.datoolbox.project.store.MsFeatureInfoBundleFields;
+import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
@@ -77,7 +77,7 @@ return;
 			Element rootNode = doc.getRootElement();
 			List<Element> list = 
 					rootNode.getChild(DataFileFields.FeatureList.name()).
-					getChildren(MsFeatureInfoBundleFields.MFIB.name());
+					getChildren(ObjectNames.MFIB.name());
 			taskDescription = "Extracting MS features for " + dataFile.getName();
 			total = list.size();
 			processed = 0;

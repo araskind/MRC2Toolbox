@@ -40,6 +40,8 @@ import edu.umich.med.mrc2.datoolbox.data.compare.AnalysisMethodComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.enums.AnnotatedObjectType;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
+import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
+import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
 import edu.umich.med.mrc2.datoolbox.project.store.SamplePreparationFields;
 import edu.umich.med.mrc2.datoolbox.utils.ExperimentUtils;
 
@@ -261,16 +263,13 @@ public class LIMSSamplePreparation implements
 	
 	public Element getXmlElement() {
 		
-		Element prepElement = 
-				new Element(SamplePreparationFields.SamplePrep.name());
+		Element prepElement = new Element(ObjectNames.SamplePrep.name());
 		
 		if(prepId != null)
-			prepElement.setAttribute(
-					SamplePreparationFields.Id.name(), prepId);	
+			prepElement.setAttribute(CommonFields.Id.name(), prepId);	
 		
 		if(name != null)
-			prepElement.setAttribute(
-					SamplePreparationFields.Name.name(), name);
+			prepElement.setAttribute(CommonFields.Name.name(), name);
 
 		if(prepDate == null)
 			prepDate = new Date();
@@ -318,10 +317,8 @@ public class LIMSSamplePreparation implements
 	
 	public LIMSSamplePreparation(Element prepElement) {
 		
-		prepId = prepElement.getAttributeValue(
-				SamplePreparationFields.Id.name());
-		name = prepElement.getAttributeValue(
-				SamplePreparationFields.Name.name());
+		prepId = prepElement.getAttributeValue(CommonFields.Id.name());
+		name = prepElement.getAttributeValue(CommonFields.Name.name());
 
 		protocols = new TreeSet<LIMSProtocol>();
 		prepItemMap = new TreeMap<String,String>();		

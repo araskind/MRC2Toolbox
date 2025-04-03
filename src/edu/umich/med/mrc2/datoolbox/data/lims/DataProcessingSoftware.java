@@ -23,14 +23,16 @@ package edu.umich.med.mrc2.datoolbox.data.lims;
 
 import java.io.Serializable;
 
-import org.jdom2.Document;
 import org.jdom2.Element;
 
 import edu.umich.med.mrc2.datoolbox.data.InstrumentPlatform;
 import edu.umich.med.mrc2.datoolbox.data.enums.SoftwareType;
+import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
+import edu.umich.med.mrc2.datoolbox.project.store.DataProcessingSoftwareFields;
+import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
 import edu.umich.med.mrc2.datoolbox.project.store.XmlStorable;
 
-public class DataProcessingSoftware implements Serializable, Comparable<DataProcessingSoftware>,XmlStorable{
+public class DataProcessingSoftware implements Serializable, Comparable<DataProcessingSoftware>, XmlStorable{
 
 	/**
 	 * 
@@ -144,10 +146,51 @@ public class DataProcessingSoftware implements Serializable, Comparable<DataProc
 		this.platform = platform;
 	}
 
-	@Override
-	public Element getXmlElement(Document parentDocument) {
-		// TODO Auto-generated method stub
-		return null;
+	public DataProcessingSoftware(Element dataProcessingSoftwareElement) {
+		
+		super();
+		id = dataProcessingSoftwareElement.getAttributeValue(
+				CommonFields.Id.name());
+		name = dataProcessingSoftwareElement.getAttributeValue(
+				CommonFields.Name.name());
+		description = dataProcessingSoftwareElement.getAttributeValue(
+				CommonFields.Description.name());
+		
+		String softwareTypeName = dataProcessingSoftwareElement.getAttributeValue(
+				DataProcessingSoftwareFields.SoftwareType.name());
+		if(softwareTypeName != null)
+			softwareType = SoftwareType.getOptionByName(softwareTypeName);
+		
+		Element vendorElement = dataProcessingSoftwareElement.getChild(
+				ObjectNames.Manufacturer.name());
+		if(vendorElement != null)
+			vendor = new Manufacturer(vendorElement);
+		
+		Element platformElement = dataProcessingSoftwareElement.getChild(
+				ObjectNames.InstrumentPlatform.name());
+		if(platformElement != null)
+			platform = new InstrumentPlatform(platformElement);
 	}
-
+			
+	@Override
+	public Element getXmlElement() {
+		
+		Element dataProcessingSoftwareElement = 
+				new Element(ObjectNames.DataProcessingSoftware.name());
+		dataProcessingSoftwareElement.setAttribute(
+				CommonFields.Id.name(), id);
+		dataProcessingSoftwareElement.setAttribute(
+				CommonFields.Name.name(), name);
+		dataProcessingSoftwareElement.setAttribute(
+				CommonFields.Description.name(), description);
+		dataProcessingSoftwareElement.setAttribute(
+				DataProcessingSoftwareFields.SoftwareType.name(), softwareType.name());
+		if(vendor != null)
+			dataProcessingSoftwareElement.addContent(vendor.getXmlElement());
+		
+		if(platform != null)
+			dataProcessingSoftwareElement.addContent(platform.getXmlElement());
+					
+		return dataProcessingSoftwareElement;
+	}
 }

@@ -23,9 +23,11 @@ package edu.umich.med.mrc2.datoolbox.data.lims;
 
 import java.io.Serializable;
 
-import org.jdom2.Document;
 import org.jdom2.Element;
 
+import edu.umich.med.mrc2.datoolbox.project.store.AnalysisMethodFields;
+import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
+import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
 import edu.umich.med.mrc2.datoolbox.project.store.XmlStorable;
 
 public class AnalysisMethod implements Serializable, Comparable<AnalysisMethod>, XmlStorable{
@@ -94,10 +96,31 @@ public class AnalysisMethod implements Serializable, Comparable<AnalysisMethod>,
 	public void setMd5(String md5) {
 		this.md5 = md5;
 	}
+	
+	public AnalysisMethod(Element analysisMethodElement) {
+		
+		super();
+		id = analysisMethodElement.getAttributeValue(CommonFields.Id.name());
+		name = analysisMethodElement.getAttributeValue(CommonFields.Name.name());
+		md5 = analysisMethodElement.getAttributeValue(AnalysisMethodFields.md5.name());
+		Element softwareElement = 
+				analysisMethodElement.getChild(ObjectNames.DataProcessingSoftware.name());
+		if(softwareElement != null)
+			software = new DataProcessingSoftware(softwareElement);
+	}
 
 	@Override
-	public Element getXmlElement(Document parentDocument) {
-		// TODO Auto-generated method stub
-		return null;
+	public Element getXmlElement() {
+
+		Element analysisMethodElement = new Element(ObjectNames.AnalysisMethod.name());
+		analysisMethodElement.setAttribute(CommonFields.Id.name(), id);
+		analysisMethodElement.setAttribute(CommonFields.Name.name(), name);
+		if(md5 != null)
+			analysisMethodElement.setAttribute(AnalysisMethodFields.md5.name(), md5);
+		
+		if(software != null)
+			analysisMethodElement.addContent(software.getXmlElement());
+
+		return analysisMethodElement;
 	}
 }

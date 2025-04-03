@@ -28,6 +28,7 @@ import org.jdom2.Element;
 import edu.umich.med.mrc2.datoolbox.data.enums.MSMSMatchType;
 import edu.umich.med.mrc2.datoolbox.data.enums.MSMSScoringParameter;
 import edu.umich.med.mrc2.datoolbox.database.idt.OfflineExperimentLoadCache;
+import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
 import edu.umich.med.mrc2.datoolbox.project.store.ReferenceMsMsLibraryMatchFields;
 
 public class ReferenceMsMsLibraryMatch implements Serializable {
@@ -396,8 +397,7 @@ public class ReferenceMsMsLibraryMatch implements Serializable {
 	
 	public Element getXmlElement() {
 
-		Element refMsmsElement = 
-				new Element(ReferenceMsMsLibraryMatchFields.RefMsms.name());
+		Element refMsmsElement = new Element(ObjectNames.RefMsms.name());
 		
 		if(matchedLibraryFeature != null)
 			refMsmsElement.setAttribute(

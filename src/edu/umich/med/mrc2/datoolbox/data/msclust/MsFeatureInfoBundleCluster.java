@@ -49,8 +49,9 @@ import edu.umich.med.mrc2.datoolbox.data.enums.MSMSMatchType;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.clustree.MajorClusterFeatureDefiningProperty;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.msmsscore.MSMSScoreCalculator;
-import edu.umich.med.mrc2.datoolbox.project.store.MsFeatureIdentityFields;
+import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
 import edu.umich.med.mrc2.datoolbox.project.store.MsFeatureInfoBundleClusterFields;
+import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
 import edu.umich.med.mrc2.datoolbox.utils.ExperimentUtils;
 import edu.umich.med.mrc2.datoolbox.utils.MSMSClusteringUtils;
 import edu.umich.med.mrc2.datoolbox.utils.MsFeatureStatsUtils;
@@ -320,15 +321,11 @@ public class MsFeatureInfoBundleCluster implements IMsFeatureInfoBundleCluster{
 	public Element getXmlElement() {
 
 		Element msmsClusterElement = 
-				new Element(MsFeatureInfoBundleClusterFields.MsFeatureInfoBundleCluster.name());
-		msmsClusterElement.setAttribute(
-				MsFeatureInfoBundleClusterFields.Id.name(), id);	
-//		msmsClusterElement.setAttribute(
-//				MsFeatureInfoBundleClusterFields.Name.name(), name);
-		msmsClusterElement.setAttribute(
-				MsFeatureInfoBundleClusterFields.MZ.name(), Double.toString(mz));
-		msmsClusterElement.setAttribute(
-				MsFeatureInfoBundleClusterFields.RT.name(), Double.toString(rt));
+				new Element(ObjectNames.MsFeatureInfoBundleCluster.name());
+		msmsClusterElement.setAttribute(CommonFields.Id.name(), id);	
+//		msmsClusterElement.setAttribute(CommonFields.Name.name(), name);
+		msmsClusterElement.setAttribute(CommonFields.MZ.name(), Double.toString(mz));
+		msmsClusterElement.setAttribute(CommonFields.RT.name(), Double.toString(rt));
 		msmsClusterElement.setAttribute(
 				MsFeatureInfoBundleClusterFields.MedianArea.name(), Double.toString(medianArea));
 		msmsClusterElement.setAttribute(
@@ -348,12 +345,12 @@ public class MsFeatureInfoBundleCluster implements IMsFeatureInfoBundleCluster{
 	
 	public MsFeatureInfoBundleCluster(Element clusterElement) {
 		
-		id = clusterElement.getAttributeValue(MsFeatureInfoBundleClusterFields.Id.name());
+		id = clusterElement.getAttributeValue(CommonFields.Id.name());
 		//	name = clusterElement.getAttributeValue(MsFeatureInfoBundleClusterFields.Name.name());
 		mz = Double.parseDouble(
-				clusterElement.getAttributeValue(MsFeatureInfoBundleClusterFields.MZ.name()));
+				clusterElement.getAttributeValue(CommonFields.MZ.name()));
 		rt = Double.parseDouble(
-				clusterElement.getAttributeValue(MsFeatureInfoBundleClusterFields.RT.name()));
+				clusterElement.getAttributeValue(CommonFields.RT.name()));
 		medianArea = Double.parseDouble(
 				clusterElement.getAttributeValue(MsFeatureInfoBundleClusterFields.MedianArea.name()));
 		locked = Boolean.parseBoolean(
@@ -365,7 +362,7 @@ public class MsFeatureInfoBundleCluster implements IMsFeatureInfoBundleCluster{
 						MsFeatureInfoBundleClusterFields.FeatureIdList.name()).getText();
 		featureIds.addAll(ExperimentUtils.getIdList(compoundIdList));
 		Element primaryIdElement = 
-				clusterElement.getChild(MsFeatureIdentityFields.MSFID.name());
+				clusterElement.getChild(ObjectNames.MSFID.name());
 		if(primaryIdElement != null)
 			primaryIdentity = new MsFeatureIdentity(primaryIdElement);
 	}

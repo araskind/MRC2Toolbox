@@ -41,7 +41,7 @@ import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
 import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
 import edu.umich.med.mrc2.datoolbox.gui.plot.lcms.chromatogram.ChromatogramPlotMode;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
-import edu.umich.med.mrc2.datoolbox.project.store.SmoothingFilterFields;
+import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
 import edu.umich.med.mrc2.datoolbox.project.store.XICDefinitionFields;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
@@ -317,7 +317,7 @@ public class ChromatogramDefinition  implements Serializable, Cloneable{
 	public Element getXmlElement() {
 		
 		Element chromatogramDefinitionElement = 
-				new Element(XICDefinitionFields.XICDefinition.name());
+				new Element(ObjectNames.XICDefinition.name());
 		chromatogramDefinitionElement.setAttribute(
 				XICDefinitionFields.Mode.name(), mode.name());
 		if(polarity != null)
@@ -435,7 +435,7 @@ public class ChromatogramDefinition  implements Serializable, Cloneable{
 		
 		doSmooth = Boolean.parseBoolean(
 				cdElement.getAttributeValue(XICDefinitionFields.Smooth.name()));
-		Element filterElement = cdElement.getChild(SmoothingFilterFields.Filter.name());
+		Element filterElement = cdElement.getChild(ObjectNames.Filter.name());
 		if(filterElement != null) {
 			try {
 				smoothingFilter = FilterFactory.getFilter(filterElement);

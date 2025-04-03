@@ -26,7 +26,6 @@ import java.util.ArrayList;
 import java.util.Date;
 
 import org.apache.commons.lang.StringUtils;
-import org.jdom2.Document;
 import org.jdom2.Element;
 
 import edu.umich.med.mrc2.datoolbox.data.Assay;
@@ -170,7 +169,8 @@ public class DataPipeline implements Serializable, Comparable<DataPipeline>, Xml
 		if(value == 0 && this.dataExtractionMethod != null) {
 			
 			if(o.getDataExtractionMethod() != null)
-				value = this.getDataExtractionMethod().getName().compareTo(o.getDataExtractionMethod().getName());
+				value = this.getDataExtractionMethod().getName().
+					compareTo(o.getDataExtractionMethod().getName());
 			else
 				return 1;
 		}
@@ -218,7 +218,7 @@ public class DataPipeline implements Serializable, Comparable<DataPipeline>, Xml
 	}
 
 	@Override
-	public Element getXmlElement(Document parentDocument) {
+	public Element getXmlElement() {
 		// TODO Auto-generated method stub
 		return null;
 	}

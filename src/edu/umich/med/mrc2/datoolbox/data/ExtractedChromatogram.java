@@ -31,7 +31,7 @@ import org.jdom2.Element;
 import edu.umich.med.mrc2.datoolbox.gui.plot.lcms.chromatogram.ChromatogramPlotMode;
 import edu.umich.med.mrc2.datoolbox.gui.utils.ColorUtils;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
-import edu.umich.med.mrc2.datoolbox.project.store.XICDefinitionFields;
+import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
 import edu.umich.med.mrc2.datoolbox.project.store.XICFields;
 import edu.umich.med.mrc2.datoolbox.utils.NumberArrayUtils;
 
@@ -140,8 +140,7 @@ public class ExtractedChromatogram implements Comparable<ExtractedChromatogram>,
 
 	public Element getXmlElement(DataFile dataFile) {
 
-		Element extractedChromatogramElement = 
-				new Element(XICFields.XIC.name());		
+		Element extractedChromatogramElement = new Element(ObjectNames.XIC.name());		
 		String time = "";
 		try {
 			time = NumberArrayUtils.encodeNumberArray(timeValues);
@@ -206,7 +205,7 @@ public class ExtractedChromatogram implements Comparable<ExtractedChromatogram>,
 			note = noteText;
 		
 		Element cdElement = 
-				xicElement.getChild(XICDefinitionFields.XICDefinition.name());		
+				xicElement.getChild(ObjectNames.XICDefinition.name());		
 		definition = new ChromatogramDefinition(cdElement);
 	}
 }

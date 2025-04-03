@@ -22,7 +22,7 @@
 package edu.umich.med.mrc2.datoolbox.project.store;
 
 public enum MsFeatureChromatogramBundleFields {
-	FChrBundle,
+
 	FID,
 	DF,
 	FName,

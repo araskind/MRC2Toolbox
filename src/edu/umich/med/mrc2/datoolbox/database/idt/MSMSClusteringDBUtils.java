@@ -22,6 +22,7 @@
 package edu.umich.med.mrc2.datoolbox.database.idt;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -66,6 +67,7 @@ import edu.umich.med.mrc2.datoolbox.main.FeatureLookupListManager;
 import edu.umich.med.mrc2.datoolbox.main.MSMSClusterDataSetManager;
 import edu.umich.med.mrc2.datoolbox.msmsscore.MSMSSearchParameterSet;
 import edu.umich.med.mrc2.datoolbox.project.store.MSMSClusteringParameterSetFields;
+import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
 import edu.umich.med.mrc2.datoolbox.utils.MSMSClusteringUtils;
 import edu.umich.med.mrc2.datoolbox.utils.SQLUtils;
 
@@ -776,7 +778,7 @@ public class MSMSClusteringDBUtils {
 		SAXBuilder sax = new SAXBuilder();
 		Document doc = null;
 		try {
-			doc = sax.build(IOUtils.toInputStream(xmlString));
+			doc = sax.build(IOUtils.toInputStream(xmlString, Charset.forName("UTF-8")));
 		} catch (JDOMException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -787,7 +789,7 @@ public class MSMSClusteringDBUtils {
 		}
 		Element rootElement = doc.getRootElement();
 		Element paramsElement = rootElement.getChild(
-				MSMSClusteringParameterSetFields.MSMSClusteringParameterSet.name());
+				ObjectNames.MSMSClusteringParameterSet.name());
 		if(paramsElement == null)
 			return null;
 		

@@ -22,13 +22,11 @@
 package edu.umich.med.mrc2.datoolbox.project.store;
 
 public enum TandemMassSpectrumFields {
-	MSMS,
-	Id,
+
 	Source,
 	Algo,
 	Depth,
 	Parent,
-	MZ,
 	Intensity,
 	FragV,
 	CID,

@@ -46,7 +46,6 @@ import edu.umich.med.mrc2.datoolbox.gui.utils.ColorUtils;
 import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
 import edu.umich.med.mrc2.datoolbox.project.store.DataFileFields;
 import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
-import edu.umich.med.mrc2.datoolbox.project.store.XICFields;
 import edu.umich.med.mrc2.datoolbox.utils.ExperimentUtils;
 
 public class DataFile implements Comparable<DataFile>, Serializable {
@@ -460,7 +459,7 @@ public class DataFile implements Comparable<DataFile>, Serializable {
 				fileElement.getChild(DataFileFields.XicList.name());
 		if(xicListElement != null) {
 			List<Element> xicElementList = 
-					xicListElement.getChildren(XICFields.XIC.name());
+					xicListElement.getChildren(ObjectNames.XIC.name());
 			for (Element xicElement : xicElementList) {
 				ExtractedChromatogram xic = 
 						new ExtractedChromatogram(xicElement, this);

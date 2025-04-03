@@ -23,7 +23,13 @@ package edu.umich.med.mrc2.datoolbox.data;
 
 import java.io.Serializable;
 
-public class MsType implements Serializable, Comparable<MsType>{
+import org.jdom2.Element;
+
+import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
+import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
+import edu.umich.med.mrc2.datoolbox.project.store.XmlStorable;
+
+public class MsType implements Serializable, Comparable<MsType>, XmlStorable{
 
 	/**
 	 * 
@@ -102,5 +108,27 @@ public class MsType implements Serializable, Comparable<MsType>{
 	@Override
 	public int compareTo(MsType o) {
 		return this.id.compareTo(o.getId());
+	}
+	
+	public MsType(Element msTypeElement) {
+		
+		super();
+		id = msTypeElement.getAttributeValue(
+				CommonFields.Id.name());
+		description = msTypeElement.getAttributeValue(
+				CommonFields.Description.name());
+	}
+
+	@Override
+	public Element getXmlElement() {
+		
+		Element msTypeElement = 
+				new Element(ObjectNames.MsType.name());
+		msTypeElement.setAttribute(
+			CommonFields.Id.name(), id);
+		msTypeElement.setAttribute(
+			CommonFields.Description.name(), description);
+			
+		return msTypeElement;
 	}
 }

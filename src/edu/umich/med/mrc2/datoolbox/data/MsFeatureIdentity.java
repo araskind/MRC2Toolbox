@@ -36,9 +36,9 @@ import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.database.idt.OfflineExperimentLoadCache;
 import edu.umich.med.mrc2.datoolbox.main.AdductManager;
+import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
 import edu.umich.med.mrc2.datoolbox.project.store.MsFeatureIdentityFields;
-import edu.umich.med.mrc2.datoolbox.project.store.MsRtLibraryMatchFields;
-import edu.umich.med.mrc2.datoolbox.project.store.ReferenceMsMsLibraryMatchFields;
+import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
 import edu.umich.med.mrc2.datoolbox.utils.ExperimentUtils;
 
 public class MsFeatureIdentity implements Serializable {
@@ -343,15 +343,15 @@ public class MsFeatureIdentity implements Serializable {
 	public Element getXmlElement() {
 		
 		Element msIdElement = 
-				new Element(MsFeatureIdentityFields.MSFID.name());
+				new Element(ObjectNames.MSFID.name());
 		
-		msIdElement.setAttribute(MsFeatureIdentityFields.Id.name(), uniqueId);
+		msIdElement.setAttribute(CommonFields.Id.name(), uniqueId);
 		if(compoundIdentity != null && compoundIdentity.getPrimaryDatabaseId() != null) 
 			msIdElement.setAttribute(MsFeatureIdentityFields.CID.name(), 
 					compoundIdentity.getPrimaryDatabaseId());
 		
 		if(compoundIdName != null)
-			msIdElement.setAttribute(MsFeatureIdentityFields.Name.name(), 
+			msIdElement.setAttribute(CommonFields.Name.name(), 
 					compoundIdName);
 		
 		if(idSource != null)
@@ -400,12 +400,12 @@ public class MsFeatureIdentity implements Serializable {
 	public MsFeatureIdentity(Element msfIdElement) {
 
 		uniqueId = 
-				msfIdElement.getAttributeValue(MsFeatureIdentityFields.Id.name());		
+				msfIdElement.getAttributeValue(CommonFields.Id.name());		
 		String cid = msfIdElement.getAttributeValue(MsFeatureIdentityFields.CID.name());
 		if(cid != null)
 			compoundIdentity = OfflineExperimentLoadCache.getCompoundIdentityByAccession(cid);
 		
-		compoundIdName = msfIdElement.getAttributeValue(MsFeatureIdentityFields.Name.name());	
+		compoundIdName = msfIdElement.getAttributeValue(CommonFields.Name.name());	
 		String idSourceString = 
 				msfIdElement.getAttributeValue(MsFeatureIdentityFields.Source.name());	
 		if(idSourceString != null)
@@ -427,17 +427,14 @@ public class MsFeatureIdentity implements Serializable {
 		qcStandard = Boolean.parseBoolean(
 				msfIdElement.getAttributeValue(MsFeatureIdentityFields.Qc.name()));
 
-		Element msmsMatch = 
-				msfIdElement.getChild(ReferenceMsMsLibraryMatchFields.RefMsms.name());	
+		Element msmsMatch = msfIdElement.getChild(ObjectNames.RefMsms.name());	
 		if(msmsMatch != null)
 			referenceMsMsLibraryMatch = 
 					new ReferenceMsMsLibraryMatch(msmsMatch);
 
-		Element msRtMatch = 
-				msfIdElement.getChild(MsRtLibraryMatchFields.RefMsRt.name());	
+		Element msRtMatch = msfIdElement.getChild(ObjectNames.RefMsRt.name());	
 		if(msRtMatch != null)
-			msRtLibraryMatch = 
-					new MsRtLibraryMatch(msRtMatch);
+			msRtLibraryMatch = new MsRtLibraryMatch(msRtMatch);
 		
 		String assignedOnString = 
 				msfIdElement.getAttributeValue(MsFeatureIdentityFields.AssignedOn.name());

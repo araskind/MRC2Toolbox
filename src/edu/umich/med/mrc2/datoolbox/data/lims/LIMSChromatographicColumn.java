@@ -23,7 +23,14 @@ package edu.umich.med.mrc2.datoolbox.data.lims;
 
 import java.io.Serializable;
 
-public class LIMSChromatographicColumn implements Serializable, Comparable<LIMSChromatographicColumn>{
+import org.jdom2.Element;
+
+import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
+import edu.umich.med.mrc2.datoolbox.project.store.LIMSChromatographicColumnFields;
+import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
+import edu.umich.med.mrc2.datoolbox.project.store.XmlStorable;
+
+public class LIMSChromatographicColumn implements Serializable, Comparable<LIMSChromatographicColumn>, XmlStorable{
 
 	/**
 	 * 
@@ -168,5 +175,50 @@ public class LIMSChromatographicColumn implements Serializable, Comparable<LIMSC
 	@Override
 	public String toString() {
 		return columnName;
+	}
+	
+	public LIMSChromatographicColumn(Element chromatographicColumnElement) {
+		
+		super();
+		columnId = chromatographicColumnElement.getAttributeValue(CommonFields.Id.name());
+		columnName = chromatographicColumnElement.getAttributeValue(CommonFields.Name.name());
+		catalogNumber = chromatographicColumnElement.getAttributeValue(
+				LIMSChromatographicColumnFields.catalogNumber.name());
+		chemistry = chromatographicColumnElement.getAttributeValue(
+				LIMSChromatographicColumnFields.chemistry.name());
+		
+		Element vendorElement = 
+				chromatographicColumnElement.getChild(ObjectNames.Manufacturer.name());
+		if(vendorElement != null)
+			manufacturer = new Manufacturer(vendorElement);
+		
+		Element separationTypeElement = 
+				chromatographicColumnElement.getChild(ObjectNames.ChromatographicSeparationType.name());
+		if(separationTypeElement != null)
+			separationType = new ChromatographicSeparationType(separationTypeElement);
+	}
+
+	@Override
+	public Element getXmlElement() {
+		
+		Element chromatographicColumnElement = 
+				new Element(ObjectNames.InstrumentPlatform.name());
+		chromatographicColumnElement.setAttribute(CommonFields.Id.name(), columnId);
+		chromatographicColumnElement.setAttribute(CommonFields.Name.name(), columnName);	
+		if(chemistry != null)
+			chromatographicColumnElement.setAttribute(
+				LIMSChromatographicColumnFields.chemistry.name(), chemistry);
+		
+		if(catalogNumber != null)
+			chromatographicColumnElement.setAttribute(
+				LIMSChromatographicColumnFields.catalogNumber.name(), catalogNumber);
+		
+		if(manufacturer != null)
+			chromatographicColumnElement.addContent(manufacturer.getXmlElement());
+		
+		if(separationType != null)
+			chromatographicColumnElement.addContent(separationType.getXmlElement());
+		
+		return chromatographicColumnElement;
 	}
 }

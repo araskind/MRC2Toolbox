@@ -23,11 +23,6 @@ package edu.umich.med.mrc2.datoolbox.project.store;
 
 public enum MinimalMSOneFeatureFields {
 
-	MinimalMSOneFeature,
-	Id,
-	Name,
-	MZ,
-	RT,
 	Rank,
 	FoldChange,
 	PValue,
