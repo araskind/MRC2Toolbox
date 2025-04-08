@@ -23,7 +23,13 @@ package edu.umich.med.mrc2.datoolbox.data.lims;
 
 import java.io.Serializable;
 
-public class LIMSOrganization implements Serializable, Comparable<LIMSOrganization>{
+import org.jdom2.Element;
+
+import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
+import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
+import edu.umich.med.mrc2.datoolbox.project.store.XmlStorable;
+
+public class LIMSOrganization implements Serializable, Comparable<LIMSOrganization>, XmlStorable{
 
 	/**
 	 * 
@@ -108,6 +114,24 @@ public class LIMSOrganization implements Serializable, Comparable<LIMSOrganizati
 
 	public void setAddress(String address) {
 		this.address = address;
+	}
+
+	public LIMSOrganization(Element limsOrganizationElement) {
+		
+		id = limsOrganizationElement.getAttributeValue(CommonFields.Id.name());
+		name = limsOrganizationElement.getAttributeValue(CommonFields.Name.name());
+		address = limsOrganizationElement.getAttributeValue(CommonFields.Address.name());
+	}
+	
+	@Override
+	public Element getXmlElement() {
+		
+		Element limsOrganizationElement = new Element(ObjectNames.LIMSOrganization.name());
+		limsOrganizationElement.setAttribute(CommonFields.Id.name(), id);
+		limsOrganizationElement.setAttribute(CommonFields.Name.name(), name);
+		limsOrganizationElement.setAttribute(CommonFields.Address.name(), address);
+		
+		return limsOrganizationElement;
 	}
 }
 

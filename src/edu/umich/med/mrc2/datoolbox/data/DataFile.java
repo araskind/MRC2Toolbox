@@ -239,12 +239,6 @@ public class DataFile implements Comparable<DataFile>, Serializable {
 		if ((this.acquisitionMethod == null) ? (other.getDataAcquisitionMethod() != null)
 				: !this.acquisitionMethod.equals(other.getDataAcquisitionMethod()))
 			return false;
-        
-//        if ((this.fullPath == null) ? (other.getFullPath() != null) : !this.fullPath.equals(other.getFullPath()))
-//            return false;
-//        
-//        if ((this.injectionTime == null) ? (other.getInjectionTime() != null) : !this.injectionTime.equals(other.getInjectionTime()))
-//            return false;
 
         return true;
     }
@@ -254,8 +248,6 @@ public class DataFile implements Comparable<DataFile>, Serializable {
 
         int hash = 3;
         hash = 53 * hash + (this.name != null ? this.name.hashCode() : 0) + 
-//        		(this.fullPath != null ? this.fullPath.hashCode() : 0) +
-//        		(this.injectionTime != null ? this.injectionTime.hashCode() : 0)
         		(this.acquisitionMethod != null ? this.acquisitionMethod.hashCode() : 0);
 
         return hash;
@@ -344,65 +336,6 @@ public class DataFile implements Comparable<DataFile>, Serializable {
 				injectionVolume);
 		return inj;
 	}
-
-	public Element getXmlElement() {
-		Element dataFileElement = 
-        		new Element(ObjectNames.DataFile.name());
-		dataFileElement.setAttribute(CommonFields.Name.name(), name);	
-		dataFileElement.setAttribute(DataFileFields.Path.name(), fullPath);	
-		
-		if(parentSample != null)
-			dataFileElement.setAttribute(
-					DataFileFields.Sample.name(), parentSample.getId());	
-		
-		if(acquisitionMethod != null)
-			dataFileElement.setAttribute(
-					DataFileFields.AcqMethod.name(), acquisitionMethod.getId());	
-		
-		if(injectionId != null)
-			dataFileElement.setAttribute(
-					DataFileFields.Injection.name(), injectionId);	
-		
-		if(prepItemId != null)
-			dataFileElement.setAttribute(
-					DataFileFields.PrepItem.name(), prepItemId);
-		
-		if(samplePosition != null)
-			dataFileElement.setAttribute(
-					DataFileFields.SamplePosition.name(), samplePosition);	
-		
-		if(injectionTime != null)
-			dataFileElement.setAttribute(DataFileFields.InjTimestamp.name(), 
-					ExperimentUtils.dateTimeFormat.format(injectionTime));
-		
-		if(injectionVolume > 0)
-			dataFileElement.setAttribute(DataFileFields.InjVol.name(), 
-					Double.toString(injectionVolume));
-		
-		if(color != null)
-			dataFileElement.setAttribute(DataFileFields.Color.name(), 
-					ColorUtils.rgb2hex(color));
-		
-		if(chromatograms != null && !chromatograms.isEmpty()) {
-			
-			Element xicListElement = new Element(
-					DataFileFields.XicList.name());			
-			for(ExtractedChromatogram xic : chromatograms)	
-				xicListElement.addContent(xic.getXmlElement(this));
-			
-			dataFileElement.addContent(xicListElement);
-		}
-		if(userSpectra != null && !userSpectra.isEmpty()) {
-			
-			Element userSpectraElement = new Element(
-					DataFileFields.AvgMsList.name());
-			for(AverageMassSpectrum avgMs : userSpectra)
-				userSpectraElement.addContent(avgMs.getXmlElement());
-			
-			dataFileElement.addContent(userSpectraElement);
-		}
-		return dataFileElement;
-	}
 	
 	public DataFile(Element fileElement) {
 		
@@ -478,6 +411,65 @@ public class DataFile implements Comparable<DataFile>, Serializable {
 				userSpectra.add(avgMs);
 			}
 		}
+	}
+
+	public Element getXmlElement() {
+		Element dataFileElement = 
+        		new Element(ObjectNames.DataFile.name());
+		dataFileElement.setAttribute(CommonFields.Name.name(), name);	
+		dataFileElement.setAttribute(DataFileFields.Path.name(), fullPath);	
+		
+		if(parentSample != null)
+			dataFileElement.setAttribute(
+					DataFileFields.Sample.name(), parentSample.getId());	
+		
+		if(acquisitionMethod != null)
+			dataFileElement.setAttribute(
+					DataFileFields.AcqMethod.name(), acquisitionMethod.getId());	
+		
+		if(injectionId != null)
+			dataFileElement.setAttribute(
+					DataFileFields.Injection.name(), injectionId);	
+		
+		if(prepItemId != null)
+			dataFileElement.setAttribute(
+					DataFileFields.PrepItem.name(), prepItemId);
+		
+		if(samplePosition != null)
+			dataFileElement.setAttribute(
+					DataFileFields.SamplePosition.name(), samplePosition);	
+		
+		if(injectionTime != null)
+			dataFileElement.setAttribute(DataFileFields.InjTimestamp.name(), 
+					ExperimentUtils.dateTimeFormat.format(injectionTime));
+		
+		if(injectionVolume > 0)
+			dataFileElement.setAttribute(DataFileFields.InjVol.name(), 
+					Double.toString(injectionVolume));
+		
+		if(color != null)
+			dataFileElement.setAttribute(DataFileFields.Color.name(), 
+					ColorUtils.rgb2hex(color));
+		
+		if(chromatograms != null && !chromatograms.isEmpty()) {
+			
+			Element xicListElement = new Element(
+					DataFileFields.XicList.name());			
+			for(ExtractedChromatogram xic : chromatograms)	
+				xicListElement.addContent(xic.getXmlElement(this));
+			
+			dataFileElement.addContent(xicListElement);
+		}
+		if(userSpectra != null && !userSpectra.isEmpty()) {
+			
+			Element userSpectraElement = new Element(
+					DataFileFields.AvgMsList.name());
+			for(AverageMassSpectrum avgMs : userSpectra)
+				userSpectraElement.addContent(avgMs.getXmlElement());
+			
+			dataFileElement.addContent(userSpectraElement);
+		}
+		return dataFileElement;
 	}
 }
 

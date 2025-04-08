@@ -22,7 +22,15 @@
 package edu.umich.med.mrc2.datoolbox.data.lims;
 
 import java.io.Serializable;
+import java.text.ParseException;
 import java.util.Date;
+
+import org.jdom2.Element;
+
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
+import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
+import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
+import edu.umich.med.mrc2.datoolbox.utils.ExperimentUtils;
 
 public class DataExtractionMethod extends AnalysisMethod implements Serializable {
 
@@ -108,4 +116,55 @@ public class DataExtractionMethod extends AnalysisMethod implements Serializable
 
         return true;
     }
+    
+	public DataExtractionMethod(Element dataExtractionMethodElement) {
+
+		super(dataExtractionMethodElement.getAttributeValue(CommonFields.Id.name()), 
+				dataExtractionMethodElement.getAttributeValue(CommonFields.Name.name()));
+		
+		description = dataExtractionMethodElement.getAttributeValue(
+				CommonFields.Description.name());
+		
+		String createdOnString = 
+				dataExtractionMethodElement.getAttributeValue(CommonFields.DateCreated.name());
+		if(createdOnString != null) {
+			try {
+				createdOn = ExperimentUtils.dateTimeFormat.parse(createdOnString);
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		String userId = 
+				dataExtractionMethodElement.getAttributeValue(CommonFields.UserId.name());
+		if(userId != null && !userId.isBlank())
+			createdBy = IDTDataCache.getUserById(userId);
+	}
+	
+	@Override
+	public Element getXmlElement() {
+		
+		Element dataExtractionMethodElement = super.getXmlElement();
+		dataExtractionMethodElement.setName(ObjectNames.DataExtractionMethod.name());
+		
+		dataExtractionMethodElement.setAttribute(
+				CommonFields.Description.name(), description);
+		dataExtractionMethodElement.setAttribute(CommonFields.DateCreated.name(), 
+				ExperimentUtils.dateTimeFormat.format(createdOn));
+		
+		if(createdBy != null)
+			dataExtractionMethodElement.setAttribute(
+					CommonFields.UserId.name(), createdBy.getId());
+		
+		return dataExtractionMethodElement;
+	}
 }
+
+
+
+
+
+
+
+
+

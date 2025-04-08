@@ -23,7 +23,15 @@ package edu.umich.med.mrc2.datoolbox.data.lims;
 
 import java.io.Serializable;
 
-public class LIMSClient implements Serializable, Comparable<LIMSClient>{
+import org.jdom2.Element;
+
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
+import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
+import edu.umich.med.mrc2.datoolbox.project.store.LIMSClientFields;
+import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
+import edu.umich.med.mrc2.datoolbox.project.store.XmlStorable;
+
+public class LIMSClient implements Serializable, Comparable<LIMSClient>, XmlStorable{
 
 	/**
 	 * 
@@ -156,4 +164,66 @@ public class LIMSClient implements Serializable, Comparable<LIMSClient>{
 	public int compareTo(LIMSClient o) {
 		return id.compareTo(o.getId());
 	}
+	
+	public LIMSClient(Element limsClientElement) {
+		
+		id = limsClientElement.getAttributeValue(CommonFields.Id.name());
+		department = limsClientElement.getAttributeValue(LIMSClientFields.Dept.name());
+		laboratory = limsClientElement.getAttributeValue(LIMSClientFields.Lab.name());
+		mailingAddress = limsClientElement.getAttributeValue(CommonFields.Address.name());
+		
+		String piId = 
+				limsClientElement.getAttributeValue(LIMSClientFields.PI.name());
+		if(piId != null && !piId.isBlank())
+			principalInvestigator = IDTDataCache.getUserById(piId);
+		
+		String cpId = 
+				limsClientElement.getAttributeValue(LIMSClientFields.Contact.name());
+		if(cpId != null && !cpId.isBlank())
+			contactPerson = IDTDataCache.getUserById(cpId);
+		
+		Element organizationElement = 
+				limsClientElement.getChild(ObjectNames.LIMSOrganization.name());
+		if(organizationElement != null)
+			organization = new LIMSOrganization(organizationElement);				
+	}
+
+	@Override
+	public Element getXmlElement() {
+		
+		Element limsClientElement = new Element(ObjectNames.LIMSClient.name());
+		
+		limsClientElement.setAttribute(CommonFields.Id.name(), id);
+		
+		if(department != null)
+			limsClientElement.setAttribute(LIMSClientFields.Dept.name(), department);
+		
+		if(laboratory != null)
+			limsClientElement.setAttribute(LIMSClientFields.Lab.name(), laboratory);
+		
+		if(mailingAddress != null)
+			limsClientElement.setAttribute(CommonFields.Address.name(), mailingAddress);
+		
+		if(principalInvestigator != null)
+			limsClientElement.setAttribute(LIMSClientFields.PI.name(), principalInvestigator.getId());
+		
+		if(contactPerson != null)
+			limsClientElement.setAttribute(LIMSClientFields.Contact.name(), contactPerson.getId());
+		
+		if(organization != null)
+			limsClientElement.addContent(organization.getXmlElement());
+			
+		return limsClientElement;
+	}
 }
+
+
+
+
+
+
+
+
+
+
+

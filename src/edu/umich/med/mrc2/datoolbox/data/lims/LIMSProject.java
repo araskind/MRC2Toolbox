@@ -22,11 +22,21 @@
 package edu.umich.med.mrc2.datoolbox.data.lims;
 
 import java.io.Serializable;
+import java.text.ParseException;
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
-public class LIMSProject implements Serializable, Comparable<LIMSProject>{
+import org.jdom2.Element;
+
+import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
+import edu.umich.med.mrc2.datoolbox.project.store.LIMSProjectFields;
+import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
+import edu.umich.med.mrc2.datoolbox.project.store.XmlStorable;
+import edu.umich.med.mrc2.datoolbox.utils.ExperimentUtils;
+
+public class LIMSProject implements Serializable, Comparable<LIMSProject>, XmlStorable{
 
 	/**
 	 * 
@@ -198,6 +208,72 @@ public class LIMSProject implements Serializable, Comparable<LIMSProject>{
 
 	public void setClient(LIMSClient client) {
 		this.client = client;
+	}
+	
+	public LIMSProject(Element limsProjectElement) {
+		
+		id = limsProjectElement.getAttributeValue(CommonFields.Id.name());
+		name = limsProjectElement.getAttributeValue(CommonFields.Name.name());
+		description = limsProjectElement.getAttributeValue(CommonFields.Description.name());
+		Element notesElement = limsProjectElement.getChild(LIMSProjectFields.Notes.name());
+		if(notesElement != null)
+			notes= notesElement.getText();
+		
+		Element clientElement = limsProjectElement.getChild(ObjectNames.LIMSClient.name());
+		if(clientElement != null)
+			client = new LIMSClient(clientElement);
+		
+		String dateCreatedString = limsProjectElement.getAttributeValue(CommonFields.DateCreated.name());
+		if(dateCreatedString != null) {
+			try {
+				startDate = ExperimentUtils.dateTimeFormat.parse(dateCreatedString);
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		experiments = new TreeSet<LIMSExperiment>();
+		List<Element>experimentList = 
+				limsProjectElement.getChild(LIMSProjectFields.ExperimentList.name()).
+				getChildren(ObjectNames.limsExperiment.name());
+		if(experimentList != null && !experimentList.isEmpty()) {
+			
+			for(Element experimentElement : experimentList)
+				experiments.add(new LIMSExperiment(experimentElement, null));
+		}		
+	}		
+
+	@Override
+	public Element getXmlElement() {
+		
+		Element limsProjectElement = new Element(ObjectNames.LIMSProject.name());
+		limsProjectElement.setAttribute(CommonFields.Id.name(), id);
+		limsProjectElement.setAttribute(CommonFields.Name.name(), name);
+		
+		if(description != null)
+			limsProjectElement.setAttribute(CommonFields.Description.name(), description);
+		
+		if(notes != null) {
+			Element notesElement = new Element(LIMSProjectFields.Notes.name());
+			notesElement.setText(notes);
+			limsProjectElement.addContent(notesElement);
+		}		
+		if(startDate != null)
+			limsProjectElement.setAttribute(CommonFields.DateCreated.name(), 
+					ExperimentUtils.dateTimeFormat.format(startDate));
+		
+		if(client != null)
+			limsProjectElement.addContent(client.getXmlElement());
+		
+		Element experimentListElement = new Element(LIMSProjectFields.ExperimentList.name());
+		if(experiments != null && !experiments.isEmpty()) {
+			
+			for(LIMSExperiment experiment : experiments)
+				experimentListElement.addContent(experiment.getXmlElement());
+		}
+		limsProjectElement.addContent(experimentListElement);	
+			
+		return limsProjectElement;
 	}
 }
 

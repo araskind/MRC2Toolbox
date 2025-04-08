@@ -23,7 +23,11 @@ package edu.umich.med.mrc2.datoolbox.data;
 
 import java.io.Serializable;
 
+import org.jdom2.Element;
+
 import edu.umich.med.mrc2.datoolbox.data.lims.AnalysisMethod;
+import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
+import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
 
 public class Assay extends AnalysisMethod implements Serializable {
 	
@@ -31,6 +35,7 @@ public class Assay extends AnalysisMethod implements Serializable {
 	 * 
 	 */
 	private static final long serialVersionUID = 3404652864873807417L;
+	
 	private String alternativeName;
 	private InstrumentPlatform instrumentPlatform;
 	
@@ -77,6 +82,30 @@ public class Assay extends AnalysisMethod implements Serializable {
 
 	public void setInstrumentPlatform(InstrumentPlatform instrumentPlatform) {
 		this.instrumentPlatform = instrumentPlatform;
+	}
+	
+	public Assay(Element assayElement) {
+		
+		super(assayElement);
+		Element ipElement = assayElement.getChild(ObjectNames.InstrumentPlatform.name());
+		if(ipElement != null)
+			instrumentPlatform = new InstrumentPlatform(ipElement);
+
+		alternativeName = assayElement.getAttributeValue(CommonFields.Description.name());
+	}
+
+	@Override
+	public Element getXmlElement() {
+
+		Element assayElement = super.getXmlElement();
+		assayElement.setName(ObjectNames.Assay.name());
+		if(instrumentPlatform != null)
+			assayElement.addContent(instrumentPlatform.getXmlElement());
+
+		if(alternativeName != null)
+			assayElement.setAttribute(CommonFields.Description.name(), alternativeName);
+			
+		return assayElement;
 	}
 }
 

@@ -35,9 +35,10 @@ import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisExperiment;
 import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
 import edu.umich.med.mrc2.datoolbox.project.store.LIMSExperimentFields;
 import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
+import edu.umich.med.mrc2.datoolbox.project.store.XmlStorable;
 import edu.umich.med.mrc2.datoolbox.utils.ExperimentUtils;
 
-public class LIMSExperiment implements Serializable, Comparable<LIMSExperiment>{
+public class LIMSExperiment implements Serializable, Comparable<LIMSExperiment>, XmlStorable{
 
 	/**
 	 * 
@@ -393,7 +394,7 @@ public class LIMSExperiment implements Serializable, Comparable<LIMSExperiment>{
 		//	ExperimentDesign
 		Element experimentDesignElement =
 				experimentElement.getChild(ObjectNames.ExperimentDesign.name());
-		if(experimentDesignElement != null)
+		if(experimentDesignElement != null )
 			design = new ExperimentDesign(
 					experimentDesignElement, parentProject);
 				

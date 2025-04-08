@@ -23,7 +23,13 @@ package edu.umich.med.mrc2.datoolbox.data.lims;
 
 import java.io.Serializable;
 
-public class SopCategory implements Serializable, Comparable<SopCategory>{
+import org.jdom2.Element;
+
+import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
+import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
+import edu.umich.med.mrc2.datoolbox.project.store.XmlStorable;
+
+public class SopCategory implements Serializable, Comparable<SopCategory>, XmlStorable{
 
 	/**
 	 * 
@@ -104,6 +110,21 @@ public class SopCategory implements Serializable, Comparable<SopCategory>{
 	 */
 	public void setDescription(String description) {
 		this.description = description;
+	}
+	
+	public SopCategory(Element sopCategoryElement) {
+		
+		categoryId = sopCategoryElement.getAttributeValue(CommonFields.Id.name());
+		description = sopCategoryElement.getAttributeValue(CommonFields.Description.name());
+	}
+
+	@Override
+	public Element getXmlElement() {
+		
+		Element sopCategoryElement = new Element(ObjectNames.SopCategory.name());
+		sopCategoryElement.setAttribute(CommonFields.Id.name(), categoryId);
+		sopCategoryElement.setAttribute(CommonFields.Description.name(), description);
+		return sopCategoryElement;
 	}
 }
 

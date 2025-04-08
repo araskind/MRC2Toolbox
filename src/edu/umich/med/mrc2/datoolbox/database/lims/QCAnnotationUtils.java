@@ -294,10 +294,10 @@ public class QCAnnotationUtils {
 			if(rs.getDate("LAST_EDITED_ON") != null)
 				lastModified = new Date(rs.getDate("LAST_EDITED_ON").getTime());
 
-			LIMSUser createdBy = LIMSDataCache.getUserById(rs.getString("CREATED_BY"));
+			LIMSUser createdBy = IDTDataCache.getUserById(rs.getString("CREATED_BY"));
 			LIMSUser lastModifiedBy = createdBy;
 			if(rs.getString("LAST_EDITED_BY") != null)
-				lastModifiedBy = LIMSDataCache.getUserById(rs.getString("LAST_EDITED_BY"));
+				lastModifiedBy = IDTDataCache.getUserById(rs.getString("LAST_EDITED_BY"));
 
 			LIMSInstrument limsInstrument = null;
 			if(rs.getString("INSTRUMENT_ID") != null)

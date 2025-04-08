@@ -30,6 +30,8 @@ import org.jdom2.Element;
 
 import edu.umich.med.mrc2.datoolbox.data.Assay;
 import edu.umich.med.mrc2.datoolbox.data.motrpac.MoTrPACAssay;
+import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
+import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
 import edu.umich.med.mrc2.datoolbox.project.store.XmlStorable;
 
 public class DataPipeline implements Serializable, Comparable<DataPipeline>, XmlStorable{
@@ -216,10 +218,66 @@ public class DataPipeline implements Serializable, Comparable<DataPipeline>, Xml
 	public void setAssay(Assay assay) {
 		this.assay = assay;
 	}
+	
+	public DataPipeline(Element dataPipelineElement) {
+		
+		this();
+		name = dataPipelineElement.getAttributeValue(
+				CommonFields.Name.name());
+		description = dataPipelineElement.getAttributeValue(
+				CommonFields.Description.name());
+		Element assayElement = dataPipelineElement.getChild(
+				ObjectNames.Assay.name());
+		if(assayElement != null)
+			assay = new Assay(assayElement);
+		
+		Element motrpacAssayElement = dataPipelineElement.getChild(
+				ObjectNames.MoTrPACAssay.name());
+		if(motrpacAssayElement != null)
+			motrpacAssay = new MoTrPACAssay(motrpacAssayElement);
+		
+		Element acquisitionMethodElement = dataPipelineElement.getChild(
+				ObjectNames.DataAcquisitionMethod.name());
+		if(acquisitionMethodElement != null)
+			acquisitionMethod = new DataAcquisitionMethod(acquisitionMethodElement);
+		
+		Element dataExtractionMethodElement = dataPipelineElement.getChild(
+				ObjectNames.DataExtractionMethod.name());
+		if(dataExtractionMethodElement != null)
+			dataExtractionMethod = new DataExtractionMethod(dataExtractionMethodElement);
+	}
 
 	@Override
 	public Element getXmlElement() {
-		// TODO Auto-generated method stub
-		return null;
+		
+		Element dataPipelineElement = new Element(ObjectNames.DataPipeline.name());
+		dataPipelineElement.setAttribute(CommonFields.Name.name(), name);
+		
+		if(description != null)
+			dataPipelineElement.setAttribute(CommonFields.Description.name(), description);
+		
+		if(assay != null)
+			dataPipelineElement.addContent(assay.getXmlElement());
+		
+		if(motrpacAssay != null)
+			dataPipelineElement.addContent(motrpacAssay.getXmlElement());
+		
+		if(acquisitionMethod != null)
+			dataPipelineElement.addContent(acquisitionMethod.getXmlElement());
+		
+		if(dataExtractionMethod != null)
+			dataPipelineElement.addContent(dataExtractionMethod.getXmlElement());
+
+		return dataPipelineElement;
 	}
 }
+
+
+
+
+
+
+
+
+
+

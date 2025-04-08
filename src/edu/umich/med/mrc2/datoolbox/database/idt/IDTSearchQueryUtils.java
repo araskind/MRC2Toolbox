@@ -32,7 +32,6 @@ import edu.umich.med.mrc2.datoolbox.data.IDTSearchQuery;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
-import edu.umich.med.mrc2.datoolbox.database.lims.LIMSDataCache;
 import edu.umich.med.mrc2.datoolbox.utils.SQLUtils;
 
 public class IDTSearchQueryUtils {
@@ -49,7 +48,7 @@ public class IDTSearchQueryUtils {
 		ResultSet rs = ps.executeQuery();			
 		while (rs.next()) {
 			
-			LIMSUser user = LIMSDataCache.getUserById(rs.getString("CREATED_BY"));
+			LIMSUser user = IDTDataCache.getUserById(rs.getString("CREATED_BY"));
 			IDTSearchQuery idtquery = new IDTSearchQuery(
 					rs.getString("QUERY_ID"),
 					rs.getString("DESCRIPTION"),

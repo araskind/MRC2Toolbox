@@ -21,20 +21,11 @@
 
 package edu.umich.med.mrc2.datoolbox.project.store;
 
-public enum CommonFields {
+public enum LIMSClientFields {
 
-	Id,
-	Name,	
-	Description,
-	CreatedBy,
-	DateCreated,
-	LastModified,
-	Enabled,
-	UserId,
-	FeatureList,
-	MZ,
-	RT,
-	Address,
-	NULL,
+	Dept,
+	Lab,
+	PI,
+	Contact,
 	;
 }

@@ -62,6 +62,7 @@ import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSProject;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSProtocol;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.database.lims.LIMSDataCache;
 import edu.umich.med.mrc2.datoolbox.database.lims.LIMSUtils;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
@@ -201,7 +202,7 @@ return;
 		limsExperiment = experiment.getLimsExperiment();
 		mrcOrganization = LIMSDataCache.getOrganizationById(
 				LIMSUtils.MRC2_IDT_ORGANIZATION_ID);
-		mrc2user = LIMSDataCache.getUserById(LIMSUtils.MRC2_ADMIN_ID);
+		mrc2user = IDTDataCache.getUserById(LIMSUtils.MRC2_ADMIN_ID);
 		activeSamples = design.getActiveSamplesForDesignSubsetAndDataPipeline(dataPipeline, experimentDesignSubset);
 		try {
 			subjects = LIMSUtils.getSubjectListForExperiment(limsExperiment.getId());

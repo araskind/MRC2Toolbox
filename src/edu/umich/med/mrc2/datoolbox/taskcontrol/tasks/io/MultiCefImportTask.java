@@ -22,32 +22,19 @@
 package edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Objects;
 import java.util.Set;
-import java.util.TreeMap;
+import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.ujmp.core.Matrix;
 import org.ujmp.core.calculation.Calculation.Ret;
 
@@ -55,31 +42,24 @@ import edu.umich.med.mrc2.datoolbox.data.CefImportFinalizationObjest;
 import edu.umich.med.mrc2.datoolbox.data.CefImportSettingsObject;
 import edu.umich.med.mrc2.datoolbox.data.CompoundLibrary;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
-import edu.umich.med.mrc2.datoolbox.data.LibraryMsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
-import edu.umich.med.mrc2.datoolbox.data.MsFeatureSet;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureStatisticalSummary;
 import edu.umich.med.mrc2.datoolbox.data.SampleDataResultObject;
-import edu.umich.med.mrc2.datoolbox.data.SimpleMsFeature;
 import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.enums.FeatureAlignmentType;
-import edu.umich.med.mrc2.datoolbox.data.enums.GlobalDefaults;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainWindow;
 import edu.umich.med.mrc2.datoolbox.gui.utils.InformationDialog;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
-import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
-import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskListener;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.library.CefLibraryImportTask;
-import edu.umich.med.mrc2.datoolbox.utils.ExperimentUtils;
 
 public class MultiCefImportTask extends AbstractTask implements TaskListener{
 
@@ -88,20 +68,16 @@ public class MultiCefImportTask extends AbstractTask implements TaskListener{
 	private DataPipeline dataPipeline;
 	private FeatureAlignmentType alignmentType;
 	private boolean fileLoadInitiated;
-	private HashMap<DataFile, HashSet<SimpleMsFeature>>featureData;
 	private CompoundLibrary library;
-	private TreeSet<String> unmatchedAdducts;
+	private SortedSet<String> unmatchedAdducts;
 	private Matrix featureMatrix;
 	private Matrix dataMatrix;
 	private boolean libraryParsed;
-	private DescriptiveStatistics descStats;
 	private Map<String,Integer>featureCoordinateMap;
 	private int fileCounter;
 	private Map<String, List<Double>>retentionMap;
 	private Map<String, List<Double>>mzMap;
 	private Map<String, List<Double>> peakWidthMap;
-	private HashMap<DataFile, HashSet<SimpleMsFeature>> featureDataPers;
-	private File cacheFile;
 	private File tmpCefDirectory;
 	private boolean removeAbnormalIsoPatterns;
 
@@ -118,7 +94,6 @@ public class MultiCefImportTask extends AbstractTask implements TaskListener{
 		this.alignmentType = alignmentType;
 		
 		fileLoadInitiated = false;
-		featureData = new HashMap<DataFile, HashSet<SimpleMsFeature>>();
 		unmatchedAdducts = new TreeSet<String>();
 		libraryParsed = false;
 		fileCounter = 0;
@@ -140,7 +115,6 @@ public class MultiCefImportTask extends AbstractTask implements TaskListener{
 		this.tmpCefDirectory = tmpCefDirectory;
 		
 		fileLoadInitiated = false;
-		featureData = new HashMap<DataFile, HashSet<SimpleMsFeature>>();
 		unmatchedAdducts = new TreeSet<String>();
 		libraryParsed = false;
 		fileCounter = 0;
@@ -244,248 +218,6 @@ public class MultiCefImportTask extends AbstractTask implements TaskListener{
 					new CefImportFinalizationTask(ciFinObj);
 			finalizationTask.addTaskListener(this);
 			MRC2ToolBoxCore.getTaskController().addTask(finalizationTask);
-//			try {
-//				finalizeDataParsing();
-//				addDataToExperiment();
-//				saveDataMatrixes();
-//				setStatus(TaskStatus.FINISHED);
-//			} catch (Exception e1) {
-//				e1.printStackTrace();
-//				setStatus(TaskStatus.ERROR);
-//			}
-		}
-	}
-	
-	private void addDataToExperiment() {
-		
-		DataAnalysisProject currentExperiment = 
-				MRC2ToolBoxCore.getActiveMetabolomicsExperiment();		
-		currentExperiment.addDataPipeline(dataPipeline);
-
-		//	Attach library
-		currentExperiment.setCompoundLibraryForDataPipeline(dataPipeline, library);
-
-		//	Attach data
-		currentExperiment.setDataMatrixForDataPipeline(dataPipeline, dataMatrix);
-		
-		currentExperiment.setFeaturesForDataPipeline(
-				dataPipeline, new HashSet<MsFeature>(library.getFeatures()));
-		currentExperiment.setDataFilesForAcquisitionMethod(
-				dataPipeline.getAcquisitionMethod(), getDataFiles());		
-		currentExperiment.addFeatureMatrixForDataPipeline(dataPipeline, featureMatrix);		
-
-		MsFeatureSet allFeatures = 
-				new MsFeatureSet(GlobalDefaults.ALL_FEATURES.getName(),	
-						currentExperiment.getMsFeaturesForDataPipeline(dataPipeline));
-		allFeatures.setActive(true);
-		allFeatures.setLocked(true);
-		currentExperiment.addFeatureSetForDataPipeline(allFeatures, dataPipeline);
-	}
-	
-	private void saveDataMatrixes() {
-		
-		DataAnalysisProject experimentToSave = 
-				MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
-		if (experimentToSave.getDataMatrixForDataPipeline(dataPipeline) != null) {
-
-			taskDescription = "Saving data matrix for  " + experimentToSave.getName() +
-					"(" + dataPipeline.getName() + ")";
-			processed = 50;			
-			ExperimentUtils.saveDataMatrixForPipeline(experimentToSave, dataPipeline);
-			
-			taskDescription = "Saving feature matrix for  " + experimentToSave.getName() +
-					"(" + dataPipeline.getName() + ")";
-			processed = 70;
-
-			ExperimentUtils.saveFeatureMatrixToFile(
-					featureMatrix,
-					experimentToSave, 
-					dataPipeline,
-					false);
-			
-			experimentToSave.setFeatureMatrixForDataPipeline(dataPipeline, null);
-			featureMatrix = null;
-			System.gc();
-		}		
-	}
-
-	private void removeEmptyFeatures() {
-
-		taskDescription = "Removing features with no data ...";
-		total = 100;
-		processed = 20;
-
-		List<LibraryMsFeature> featuresToRemove = library.getFeatures().stream().
-				filter(f -> (f.getStatsSummary().getSampleFrequency() == 0.0d)).
-				filter(f -> (f.getStatsSummary().getPooledFrequency() == 0.0d)).
-				filter(f -> (f.getStatsSummary().getMeanObservedRetention() == 0.0d)).
-				collect(Collectors.toList());
-
-		if(!featuresToRemove.isEmpty()) {
-
-			Matrix featureMatrix = dataMatrix.getMetaDataDimensionMatrix(0);
-
-			List<Long> rem = featuresToRemove.stream().
-					mapToLong(cf -> dataMatrix.getColumnForLabel(cf)).
-					boxed().collect(Collectors.toList());
-
-			processed = 50;
-
-			Matrix newDataMatrix = dataMatrix.deleteColumns(Ret.NEW, rem);
-			Matrix newFeatureMatrix = featureMatrix.deleteColumns(Ret.NEW, rem);
-			newDataMatrix.setMetaDataDimensionMatrix(0, newFeatureMatrix);
-			newDataMatrix.setMetaDataDimensionMatrix(1, dataMatrix.getMetaDataDimensionMatrix(1));
-			dataMatrix = newDataMatrix;
-
-			library.removeFeatures(featuresToRemove);
-		}
-		dataMatrix.replace(Ret.ORIG, 0.0, Double.NaN);
-		processed = 100;
-		setStatus(TaskStatus.FINISHED);
-	}
-
-	private void finalizeDataParsing() {
-
-		taskDescription = "Finalizing data";
-		total = library.getFeatures().size();
-		processed = 0;
-		try {
-			Thread.sleep(1000);
-		} catch (InterruptedException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-		//	Calculate RT stats 
-		Map<String, DescriptiveStatistics>rtStatsMap = new TreeMap<String, DescriptiveStatistics>();
-		for(Entry<String, List<Double>> rtCollection : retentionMap.entrySet()) {
-			
-			double[] rtValues = new double[0];
-			try {
-				rtValues = rtCollection.getValue().stream().
-						filter(rt -> Objects.nonNull(rt)).
-						mapToDouble(Double::doubleValue).toArray();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			rtStatsMap.put(rtCollection.getKey(), new DescriptiveStatistics(rtValues));
-		}	
-		//	Calculate M/Z stats
-		Map<String, DescriptiveStatistics>mzStatsMap = new TreeMap<String, DescriptiveStatistics>();
-		for(Entry<String, List<Double>> mzCollection : mzMap.entrySet()) {
-			
-			double[] mzValues = new double[0];
-			try {
-				mzValues = mzCollection.getValue().stream().
-						filter(mz -> Objects.nonNull(mz)).
-						mapToDouble(Double::doubleValue).toArray();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			mzStatsMap.put(mzCollection.getKey(), new DescriptiveStatistics(mzValues));
-		}
-		// Calculate peak width stats
-		Map<String, DescriptiveStatistics>peakWidthStatsMap = new TreeMap<String, DescriptiveStatistics>();
-		for(Entry<String, List<Double>> pwCollection : peakWidthMap.entrySet()) {
-			
-			double[] pwValues = new double[0];
-			try {
-				pwValues = pwCollection.getValue().stream().
-						filter(pw -> Objects.nonNull(pw)).
-						mapToDouble(Double::doubleValue).toArray();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			peakWidthStatsMap.put(pwCollection.getKey(), new DescriptiveStatistics(pwValues));
-		}
-		for(MsFeature feature : library.getFeatures()) {
-
-			MsFeatureStatisticalSummary ss = feature.getStatsSummary();			
-			ss.setRtStatistics(rtStatsMap.get(feature.getId()));
-			ss.setPeakWidthStatistics(peakWidthStatsMap.get(feature.getId()));
-			ss.setMzStatistics(mzStatsMap.get(feature.getId()));			
-			processed++;
-		}
-		if(removeAbnormalIsoPatterns) {
-			
-			Set<MsFeature>featuresWithAbnormalIsoPattern = 
-					new HashSet<MsFeature>();
-			for(MsFeature feature : library.getFeatures()) {
-				
-				if(feature.getStatsSummary() != null 
-						&& feature.getStatsSummary().getMzStatistics().getStandardDeviation() > 0.1d) {
-					featuresWithAbnormalIsoPattern.add(feature);
-				}
-				if(Math.abs(feature.getMonoisotopicMz() - feature.getBasePeakMz()) > 0.01)
-					featuresWithAbnormalIsoPattern.add(feature);
-			}
-			if(!featuresWithAbnormalIsoPattern.isEmpty())
-				removeFeaturesWithAbnormalIsoPattern(featuresWithAbnormalIsoPattern);			
-		}
-		//	TODO - deal with standard samples
-		//	Move "remove empty features" to a separate task to allow multipart imports
-		//	removeEmptyFeatures();
-		if(tmpCefDirectory != null && tmpCefDirectory.exists()) {
-			try {
-				FileUtils.deleteDirectory(tmpCefDirectory);
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-	}
-	
-	private void removeFeaturesWithAbnormalIsoPattern(Collection<MsFeature>featuresToRemove) {
-		
-		taskDescription = "Removing features with abnormal isotopic patterns";
-		
-		ArrayList<Long> rem = new ArrayList<Long>();
-		for (MsFeature cf : featuresToRemove)
-			rem.add(dataMatrix.getColumnForLabel(cf));
-
-		Matrix newFeatureMatrix = 
-				dataMatrix.getMetaDataDimensionMatrix(0).deleteColumns(Ret.NEW, rem);
-		Matrix newDataMatrix = dataMatrix.deleteColumns(Ret.NEW, rem);
-		newDataMatrix.setMetaDataDimensionMatrix(0, newFeatureMatrix);
-		newDataMatrix.setMetaDataDimensionMatrix(1, dataMatrix.getMetaDataDimensionMatrix(1));
-		dataMatrix = newDataMatrix;
-		
-		if(featureMatrix != null) {
-			
-			Matrix newMsFeatureLabelMatrix = 
-					featureMatrix.getMetaDataDimensionMatrix(0).deleteColumns(Ret.NEW, rem);			
-			Matrix newMsFeatureMatrix = featureMatrix.deleteColumns(Ret.NEW, rem);
-			newMsFeatureMatrix.setMetaDataDimensionMatrix(0, newMsFeatureLabelMatrix);
-			newMsFeatureMatrix.setMetaDataDimensionMatrix(1, featureMatrix.getMetaDataDimensionMatrix(1));
-			featureMatrix = newMsFeatureMatrix;
-		}
-		library.getFeatures().removeAll(featuresToRemove);
-		
-		//	TODO write log with removed features
-		ArrayList<String>removedFeaturesLog = new ArrayList<String>();
-		ArrayList<String>fLine = new ArrayList<String>();
-		removedFeaturesLog.add("The following features with abnormal isotopic patterns were removed:\n");
-		for (MsFeature cf : featuresToRemove) {
-			
-			fLine.clear();
-			fLine.add(cf.getId());
-			fLine.add(cf.getName());
-			fLine.add(MRC2ToolBoxConfiguration.getRtFormat().format(cf.getRetentionTime()));
-			fLine.add(MRC2ToolBoxConfiguration.getMzFormat().format(cf.getMonoisotopicMz()));
-			removedFeaturesLog.add(StringUtils.join(fLine, "\t"));
-		}
-		DataAnalysisProject currentExperiment = 
-				MRC2ToolBoxCore.getActiveMetabolomicsExperiment();	
-		
-		Path logPath = Paths.get(currentExperiment.getExportsDirectory().getAbsolutePath(), 
-				dataPipeline.getName() + "_featureRemovalLog.txt");
-		try {
-		    Files.write(logPath, 
-		    		removedFeaturesLog,
-		            StandardCharsets.UTF_8,
-		            StandardOpenOption.CREATE, 
-		            StandardOpenOption.TRUNCATE_EXISTING);
-		} catch (IOException e) {
-		    e.printStackTrace();
 		}
 	}
 
@@ -528,7 +260,6 @@ public class MultiCefImportTask extends AbstractTask implements TaskListener{
 
 	private boolean libraryCorrectlyParsed(CefLibraryImportTask lit) {
 
-		boolean libraryParsed = true;
 		library = lit.getParsedLibrary();
 
 		// Show unassigned features
@@ -542,7 +273,8 @@ public class MultiCefImportTask extends AbstractTask implements TaskListener{
 			@SuppressWarnings("unused")
 			InformationDialog id = new InformationDialog(
 					"Unmatched features",
-					"Not all features were matched to the library.\nBelow is the list of unmatched features.",
+					"Not all features were matched to the library.\n"
+					+ "Below is the list of unmatched features.",
 					StringUtils.join(flist, "\n"),
 					null);
 		}
@@ -552,7 +284,8 @@ public class MultiCefImportTask extends AbstractTask implements TaskListener{
 			@SuppressWarnings("unused")
 			InformationDialog id = new InformationDialog(
 					"Unmatched adducts",
-					"Not all adducts were matched to the database.\nBelow is the list of unmatched adducts.",
+					"Not all adducts were matched to the database.\n"
+					+ "Below is the list of unmatched adducts.",
 					StringUtils.join(lit.getUnmatchedAdducts(), "\n"),
 					null);
 		}
@@ -561,7 +294,7 @@ public class MultiCefImportTask extends AbstractTask implements TaskListener{
 			setStatus(TaskStatus.ERROR);
 			return false;
 		}
-		return libraryParsed;
+		return true;
 	}
 
 	private void initDataLoad() {
@@ -602,7 +335,7 @@ public class MultiCefImportTask extends AbstractTask implements TaskListener{
 	/**
 	 * @return the unmatchedAdducts
 	 */
-	public TreeSet<String> getUnmatchedAdducts() {
+	public SortedSet<String> getUnmatchedAdducts() {
 		return unmatchedAdducts;
 	}
 

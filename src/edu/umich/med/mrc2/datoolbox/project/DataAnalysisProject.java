@@ -65,7 +65,6 @@ public class DataAnalysisProject extends Experiment {
 	private static final long serialVersionUID = 618045235335401590L;
 
 	protected LIMSProject limsProject;
-	protected ProjectPreferences projectPreferences;
 	protected TreeSet<DataPipeline> dataPipelines;
 	protected DataPipeline activeDataPipeline;	
 	protected TreeMap<DataPipeline, CompoundLibrary> libraryMap;
@@ -118,7 +117,6 @@ public class DataAnalysisProject extends Experiment {
 		
 	protected void initNewProject() {
 
-		projectPreferences = new ProjectPreferences();
 		libraryMap = new TreeMap<DataPipeline, CompoundLibrary>();
 		duplicatesMap = new TreeMap<DataPipeline, Set<MsFeatureCluster>>();
 		clusterMap = new TreeMap<DataPipeline, Set<MsFeatureCluster>>();
@@ -179,8 +177,9 @@ public class DataAnalysisProject extends Experiment {
 			return;
 		}		
 		dataPipelines.add(pipeline);
-		String matrixFileName = DataPrefix.DATA_MATRIX.getName() + UUID.randomUUID().toString() + "." + 
-				MRC2ToolBoxConfiguration.DATA_MATRIX_EXTENSION;
+		String matrixFileName = DataPrefix.DATA_MATRIX.getName() 
+				+ UUID.randomUUID().toString() 
+				+ "." + MRC2ToolBoxConfiguration.DATA_MATRIX_EXTENSION;
 		dataMatrixFileMap.put(pipeline, matrixFileName);
 		statsCalculatedMap.put(pipeline, false);
 		featureSetMap.put(pipeline, new TreeSet<MsFeatureSet>());
@@ -194,8 +193,9 @@ public class DataAnalysisProject extends Experiment {
 		if(featureMatrixMap == null)
 			featureMatrixMap = new TreeMap<DataPipeline, Matrix>();
 		
-		String matrixFileName = DataPrefix.FEATURE_MATRIX.getName() + UUID.randomUUID().toString() + "." + 
-				MRC2ToolBoxConfiguration.DATA_MATRIX_EXTENSION;
+		String matrixFileName = DataPrefix.FEATURE_MATRIX.getName() 
+				+ UUID.randomUUID().toString() 
+				+ "." + MRC2ToolBoxConfiguration.DATA_MATRIX_EXTENSION;
 		featureMatrixFileMap.put(pipeline, matrixFileName);
 		featureMatrixMap.put(pipeline, featureMatrix);
 	}
@@ -266,8 +266,7 @@ public class DataAnalysisProject extends Experiment {
 	public boolean assayPresent(Assay assay) {
 		
 		return dataPipelines.stream().
-				filter(p -> p.getAssay().equals(assay)).
-				findFirst().isPresent();
+				anyMatch(p -> p.getAssay().equals(assay));
 	}
 
 	public void addFeatureSetForDataPipeline(			
@@ -281,20 +280,6 @@ public class DataAnalysisProject extends Experiment {
 	public void clearMetaDataMap() {
 		metaDataMap = new TreeMap<DataPipeline, Matrix[]>();
 	}
-
-//	public void createMetaDataMaps() {
-//		
-//		if(metaDataMap == null)
-//			metaDataMap = new TreeMap<DataPipeline, Matrix[]>();
-//			
-//		for (Entry<DataPipeline, Matrix> entry : dataMatrixMap.entrySet()) {
-//
-//			Matrix[] mdata = new Matrix[2];
-//			mdata[0] = entry.getValue().getMetaDataDimensionMatrix(0);
-//			mdata[1] = entry.getValue().getMetaDataDimensionMatrix(1);
-//			metaDataMap.put(entry.getKey(), mdata);
-//		}
-//	}
 
 	public void deleteDataFiles(Set<DataFile> filesToRemove) {
 
@@ -334,18 +319,16 @@ public class DataAnalysisProject extends Experiment {
 
 			for(ExperimentalSample sample : experimentDesign.getSamples()){
 
-				if(sample.getDesignCell().values().contains(level)){
+				if(sample.getDesignCell().values().contains(level) &&
+						sample.getDataFilesForMethod(acquisitionMethod) != null){
 
-					if(sample.getDataFilesForMethod(acquisitionMethod) != null){
+					for(DataFile df : sample.getDataFilesForMethod(acquisitionMethod)){
 
-						for(DataFile df : sample.getDataFilesForMethod(acquisitionMethod)){
-
-							if(df.isEnabled())
-								files.add(df);
-						}
+						if(df.isEnabled())
+							files.add(df);
 					}
 				}
-			}
+			}			
 		}
 		return files;
 	}
@@ -377,8 +360,6 @@ public class DataAnalysisProject extends Experiment {
 	
 		return methodFiles;
 	}
-	
-	//dataFiles .stream() hasDataForFileInPipeline(DataFile file, DataPipeline pipeline)
 
 	public MsFeatureSet getActiveFeatureSetForDataPipeline(DataPipeline pipeline) {
 
@@ -646,24 +627,21 @@ public class DataAnalysisProject extends Experiment {
 			DataPipeline pipeline, CompoundLibrary library) {
 		libraryMap.put(pipeline, library);
 	}
-
-	public void setDataFilesForAcquisitionMethod(
-			DataAcquisitionMethod acquisitionMethod, Collection<DataFile> fileSet) {
-				
-		dataFileMap.put(acquisitionMethod, new TreeSet<DataFile>(fileSet));
-	}
 	
 	public void addDataFilesForAcquisitionMethod(
 			DataAcquisitionMethod acquisitionMethod, Collection<DataFile> fileSet) {
 		
-		if(!dataFileMap.containsKey(acquisitionMethod))
-			dataFileMap.put(acquisitionMethod, new TreeSet<DataFile>());
+//		if(!dataFileMap.containsKey(acquisitionMethod))
+//			dataFileMap.put(acquisitionMethod, new TreeSet<DataFile>());
+		
+		dataFileMap.computeIfAbsent(acquisitionMethod, v -> new TreeSet<DataFile>());
 			
 		dataFileMap.get(acquisitionMethod).addAll(fileSet);
 	}
 
 	public void setDataMatrixForDataPipeline(
 			DataPipeline pipeline, Matrix dataMatrix) {
+		
 		dataMatrixMap.put(pipeline, dataMatrix);
 		
 		Matrix[] mdata = new Matrix[2];
@@ -847,10 +825,8 @@ public class DataAnalysisProject extends Experiment {
 
 		dataIntegrationSets.remove(theSet);
 
-		if(theSet.isActive()) {
-			if(!dataIntegrationSets.isEmpty())
-				dataIntegrationSets.iterator().next().setActive(true);
-		}
+		if(theSet.isActive() && !dataIntegrationSets.isEmpty())
+				dataIntegrationSets.iterator().next().setActive(true);		
 	}
 
 	public Set<MsFeatureClusterSet>getIntergratedFeatureSets(){

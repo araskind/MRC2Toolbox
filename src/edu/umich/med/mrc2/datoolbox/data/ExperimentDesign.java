@@ -724,7 +724,7 @@ public class ExperimentDesign implements ExperimentDesignFactorListener, Seriali
 		List<Element> sampleListElements = 
 				experimentDesignElement.getChild(
 						ExperimentDesignFields.SampleSet.name()).getChildren();
-		if(sampleListElements.size() > 0) {
+		if(!sampleListElements.isEmpty()) {
 			
 			for(Element sampleElement : sampleListElements) {
 				

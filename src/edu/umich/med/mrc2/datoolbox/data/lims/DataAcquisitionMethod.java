@@ -31,6 +31,7 @@ import edu.umich.med.mrc2.datoolbox.data.IonizationType;
 import edu.umich.med.mrc2.datoolbox.data.MassAnalyzerType;
 import edu.umich.med.mrc2.datoolbox.data.MsType;
 import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
 import edu.umich.med.mrc2.datoolbox.project.store.DataAcquisitionMethodFields;
 import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
@@ -253,7 +254,11 @@ public class DataAcquisitionMethod extends AnalysisMethod implements Serializabl
 				e.printStackTrace();
 			}
 		}
-		//	this.createdBy = null;	//	TODO
+		String userId = 
+				dataAcquisitionMethodElement.getAttributeValue(CommonFields.UserId.name());
+		if(userId != null && !userId.isBlank())
+			createdBy = IDTDataCache.getUserById(userId);
+		
 		Element ionizationTypeElement = 
 				dataAcquisitionMethodElement.getChild(ObjectNames.IonizationType.name());
 		if(ionizationTypeElement != null)
@@ -289,6 +294,8 @@ public class DataAcquisitionMethod extends AnalysisMethod implements Serializabl
 	public Element getXmlElement() {
 		
 		Element dataAcquisitionMethodElement = super.getXmlElement();
+		dataAcquisitionMethodElement.setName(ObjectNames.DataAcquisitionMethod.name());
+		
 		dataAcquisitionMethodElement.setAttribute(
 				CommonFields.Description.name(), description);
 		dataAcquisitionMethodElement.setAttribute(CommonFields.DateCreated.name(), 

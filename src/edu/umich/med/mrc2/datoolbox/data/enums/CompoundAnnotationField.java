@@ -95,6 +95,16 @@ public enum CompoundAnnotationField {
 		}
 		return null;
 	}
+	
+	public static CompoundAnnotationField getOptionByUIName(String uiName) {
+
+		for(CompoundAnnotationField source : CompoundAnnotationField.values()) {
+
+			if(source.getName().equals(uiName))
+				return source;
+		}
+		return null;
+	}
 }
 
 

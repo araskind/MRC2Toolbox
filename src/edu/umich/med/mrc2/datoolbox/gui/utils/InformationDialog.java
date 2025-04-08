@@ -26,7 +26,6 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -63,15 +62,8 @@ public class InformationDialog extends JDialog implements ActionListener {
 	private static final String CLOSE_COMMAND = "CLOSE";
 	private static final String COPY_COMMAND = "COPY";
 
-	private JPanel panel;
 	private JTextArea textArea;
-
 	private JLabel messageLabel;
-	private JScrollPane scroll;
-	private JLabel errorIconLabel;
-
-	private JButton closeButton;
-	private JButton copyErrorButton;
 	
 	public InformationDialog(
 			String title, 
@@ -80,7 +72,7 @@ public class InformationDialog extends JDialog implements ActionListener {
 			Component parent,
 			InfoDialogType dialogType) {
 
-		super((Frame) MRC2ToolBoxCore.getMainWindow(), title, true);
+		super(MRC2ToolBoxCore.getMainWindow(), title, true);
 
 		initGui(dialogType);
 
@@ -106,7 +98,7 @@ public class InformationDialog extends JDialog implements ActionListener {
 
 	public InformationDialog(String message, Throwable exception, Component parent) {
 
-		super((Frame) MRC2ToolBoxCore.getMainWindow(), "Error!", true);
+		super(MRC2ToolBoxCore.getMainWindow(), "Error!", true);
 
 		initGui(InfoDialogType.ERROR);
 
@@ -150,7 +142,7 @@ public class InformationDialog extends JDialog implements ActionListener {
 		setResizable(false);
 		getContentPane().setLayout(new BorderLayout(0, 0));
 
-		panel = new JPanel();
+		JPanel panel = new JPanel();
 		panel.setBorder(new EmptyBorder(20, 20, 20, 20));
 		getContentPane().add(panel, BorderLayout.CENTER);
 		GridBagLayout gbl_panel = new GridBagLayout();
@@ -170,7 +162,7 @@ public class InformationDialog extends JDialog implements ActionListener {
 		gbc_messageLabel.gridy = 0;
 		panel.add(messageLabel, gbc_messageLabel);
 
-		errorIconLabel = new JLabel("");
+		JLabel errorIconLabel = new JLabel("");
 		errorIconLabel.setMinimumSize(new Dimension(140, 140));
 		errorIconLabel.setSize(new Dimension(140, 140));
 
@@ -189,18 +181,15 @@ public class InformationDialog extends JDialog implements ActionListener {
 
 		textArea = new JTextArea();
 		textArea.setBorder(new LineBorder(new Color(0, 0, 0)));
-		scroll = new JScrollPane();
-		scroll.add(textArea);
-		scroll.setViewportView(textArea);
 		GridBagConstraints gbc_textArea = new GridBagConstraints();
 		gbc_textArea.gridwidth = 2;
 		gbc_textArea.insets = new Insets(0, 0, 5, 0);
 		gbc_textArea.fill = GridBagConstraints.BOTH;
 		gbc_textArea.gridx = 1;
 		gbc_textArea.gridy = 2;
-		panel.add(scroll, gbc_textArea);
+		panel.add(new JScrollPane(textArea), gbc_textArea);
 
-		copyErrorButton = new JButton("Copy to clipboard");
+		JButton copyErrorButton = new JButton("Copy to clipboard");
 		copyErrorButton.addActionListener(this);
 		copyErrorButton.setActionCommand(COPY_COMMAND);
 		GridBagConstraints gbc_copyErrorButton = new GridBagConstraints();
@@ -210,7 +199,7 @@ public class InformationDialog extends JDialog implements ActionListener {
 		gbc_copyErrorButton.gridy = 3;
 		panel.add(copyErrorButton, gbc_copyErrorButton);
 
-		closeButton = new JButton("Close");
+		JButton closeButton = new JButton("Close");
 		closeButton.addActionListener(this);
 		closeButton.setActionCommand(CLOSE_COMMAND);
 		GridBagConstraints gbc_closeButton = new GridBagConstraints();

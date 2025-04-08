@@ -37,6 +37,7 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -47,6 +48,7 @@ import org.ujmp.core.calculation.Calculation.Ret;
 import edu.umich.med.mrc2.datoolbox.data.CefImportFinalizationObjest;
 import edu.umich.med.mrc2.datoolbox.data.CompoundLibrary;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
+import edu.umich.med.mrc2.datoolbox.data.LibraryMsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureSet;
 import edu.umich.med.mrc2.datoolbox.data.enums.GlobalDefaults;
@@ -267,6 +269,40 @@ public class CefImportFinalizationTask extends AbstractTask {
 		}
 	}
 
+	private void removeEmptyFeatures() {
+
+		taskDescription = "Removing features with no data ...";
+		total = 100;
+		processed = 20;
+
+		List<LibraryMsFeature> featuresToRemove = library.getFeatures().stream().
+				filter(f -> (f.getStatsSummary().getSampleFrequency() == 0.0d)).
+				filter(f -> (f.getStatsSummary().getPooledFrequency() == 0.0d)).
+				filter(f -> (f.getStatsSummary().getMeanObservedRetention() == 0.0d)).
+				collect(Collectors.toList());
+
+		if(!featuresToRemove.isEmpty()) {
+
+			Matrix featureMatrix = dataMatrix.getMetaDataDimensionMatrix(0);
+
+			List<Long> rem = featuresToRemove.stream().
+					mapToLong(cf -> dataMatrix.getColumnForLabel(cf)).
+					boxed().collect(Collectors.toList());
+
+			processed = 50;
+
+			Matrix newDataMatrix = dataMatrix.deleteColumns(Ret.NEW, rem);
+			Matrix newFeatureMatrix = featureMatrix.deleteColumns(Ret.NEW, rem);
+			newDataMatrix.setMetaDataDimensionMatrix(0, newFeatureMatrix);
+			newDataMatrix.setMetaDataDimensionMatrix(1, dataMatrix.getMetaDataDimensionMatrix(1));
+			dataMatrix = newDataMatrix;
+
+			library.removeFeatures(featuresToRemove);
+		}
+		dataMatrix.replace(Ret.ORIG, 0.0, Double.NaN);
+		processed = 100;
+		setStatus(TaskStatus.FINISHED);
+	}
 	
 	private void addDataToExperiment() {
 		
@@ -282,7 +318,7 @@ public class CefImportFinalizationTask extends AbstractTask {
 		
 		currentExperiment.setFeaturesForDataPipeline(
 				dataPipeline, new HashSet<MsFeature>(library.getFeatures()));
-		currentExperiment.setDataFilesForAcquisitionMethod(
+		currentExperiment.addDataFilesForAcquisitionMethod(
 				dataPipeline.getAcquisitionMethod(), Arrays.asList(dataFiles));		
 		currentExperiment.addFeatureMatrixForDataPipeline(dataPipeline, featureMatrix);		
 

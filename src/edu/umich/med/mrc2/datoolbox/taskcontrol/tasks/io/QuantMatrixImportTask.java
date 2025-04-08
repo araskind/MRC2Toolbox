@@ -42,7 +42,6 @@ import edu.umich.med.mrc2.datoolbox.data.MassSpectrum;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureStatisticalSummary;
 import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureComparator;
-import edu.umich.med.mrc2.datoolbox.data.compare.SortDirection;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.enums.CompoundAnnotationField;
 import edu.umich.med.mrc2.datoolbox.data.enums.CompoundDatabaseEnum;
@@ -68,7 +67,7 @@ public class QuantMatrixImportTask extends AbstractTask {
 	private ArrayList<DataFile> dataFiles;
 	private Matrix dataMatrix;
 	private String sampleIdMask, sampleNameMask;
-	private Matcher regexMatcher;
+	//	private Matcher regexMatcher;
 	private Pattern sampleIdPattern, sampleNamePattern, offsetFeaturePattern;
 	private String[][] quantDataArray;
 	private ArrayList<Integer> sampleColumnIndex;
@@ -121,7 +120,7 @@ public class QuantMatrixImportTask extends AbstractTask {
 
 			e.printStackTrace();
 			setStatus(TaskStatus.ERROR);
-return;
+			return;
 
 		}
 		setStatus(TaskStatus.FINISHED);
@@ -152,7 +151,7 @@ return;
 	private void createFeatureRowMap() {
 
 		featureRowMap = new TreeMap<MsFeature, ArrayList<Integer>>(
-				new MsFeatureComparator(SortProperty.Name, SortDirection.ASC));
+				new MsFeatureComparator(SortProperty.Name));
 		HashMap<MsFeature, Integer> offsetMap = new HashMap<MsFeature, Integer>();
 
 		taskDescription = "Parsing MS feature data";
@@ -177,15 +176,10 @@ return;
 
 			if(compositeSpectrumColumn >= 0) {
 				MassSpectrum ms = MsUtils.parseMsString(
-						
-						
 						quantDataArray[i][compositeSpectrumColumn], MsStringType.MPP);
-
 				cf.setSpectrum(ms);
 			}
-			regexMatcher = offsetFeaturePattern.matcher(cf.getName());
-
-			if (regexMatcher.find())
+			if (offsetFeaturePattern.matcher(cf.getName()).find())
 				offsetMap.put(cf, i);
 			else {
 				ArrayList<Integer> rows = new ArrayList<Integer>();
@@ -204,11 +198,8 @@ return;
 
 				for (Entry<MsFeature, Integer> of : offsetMap.entrySet()) {
 
-					regexMatcher = offsetFeaturePattern.matcher(of.getKey().getName());
-
-					if (regexMatcher.find()) {
+					if (offsetFeaturePattern.matcher(of.getKey().getName()).find()) {
 						try {
-
 							featureRowMap.get(entry.getKey()).add(of.getValue());
 						} catch (Exception e) {
 							// TODO Auto-generated catch block
@@ -270,7 +261,6 @@ return;
 		}
 		String sampleId = "";
 		String sampleName = "";
-		boolean isSample;
 
 		if (quantDataArray != null) {
 
@@ -280,15 +270,7 @@ return;
 			for (int i = 0; i < header.length; i++) {
 
 				// Find positions of sample columns
-				isSample = true;
-				for (CompoundAnnotationField af : CompoundAnnotationField.values()) {
-
-					if (header[i].equals(af.getName())) {
-						isSample = false;
-						break;
-					}
-				}
-				if (isSample) {
+				if (CompoundAnnotationField.getOptionByUIName(header[i]) == null) {
 
 					sampleColumnIndex.add(i);
 					sampleId = "";
@@ -301,7 +283,7 @@ return;
 					dataFiles.add(df);
 
 					// Connect data files to samples if possible
-					regexMatcher = sampleIdPattern.matcher(df.getName());
+					Matcher regexMatcher = sampleIdPattern.matcher(df.getName());
 
 					if (regexMatcher.find())
 						sampleId = regexMatcher.group();
@@ -358,8 +340,6 @@ return;
 			}
 		} else {
 			setStatus(TaskStatus.ERROR);
-return;
-
 		}
 	}
 

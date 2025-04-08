@@ -71,7 +71,6 @@ import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.database.idt.AcquisitionMethodUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.ChromatographyDatabaseUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
-import edu.umich.med.mrc2.datoolbox.database.lims.LIMSDataCache;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
 import edu.umich.med.mrc2.datoolbox.utils.XmlUtils;
@@ -503,7 +502,7 @@ public class AgilentAcquisitionMethodBatchUtils {
 		Map<String,String> methodLocationMap = 
 				getMethodPropertyMap(methodLocationsMapFile);
 
-		LIMSUser user = LIMSDataCache.getUserById("U00077");
+		LIMSUser user = IDTDataCache.getUserById("U00077");
 		IonizationType ionizationType = 
 				IDTDataCache.getIonizationTypeById("ESI");
 		ChromatographicSeparationType chSepType = 

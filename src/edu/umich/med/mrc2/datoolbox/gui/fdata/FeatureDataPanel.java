@@ -1667,7 +1667,7 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 				dataPipeline, quantMatrixImportTask.getDataMatrix());
 		currentExperiment.setFeaturesForDataPipeline(dataPipeline, 
 				new HashSet<MsFeature>(quantMatrixImportTask.getFeatureList()));
-		currentExperiment.setDataFilesForAcquisitionMethod(dataPipeline.getAcquisitionMethod(), 
+		currentExperiment.addDataFilesForAcquisitionMethod(dataPipeline.getAcquisitionMethod(), 
 				quantMatrixImportTask.getDataFiles());
 
 		MsFeatureSet allFeatures = new MsFeatureSet(GlobalDefaults.ALL_FEATURES.getName(),

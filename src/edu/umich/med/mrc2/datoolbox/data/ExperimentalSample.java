@@ -499,7 +499,7 @@ public class ExperimentalSample implements Comparable<ExperimentalSample>, Seria
 			DataAcquisitionMethod method = 
 					IDTDataCache.getAcquisitionMethodById(daqMethodId);
 			String[] fileNames = dfmElement.getText().split(",");			
-			if(method != null && fileNames.length > 0) {
+			if(method != null && fileNames.length > 0 && parentProject != null) {
 				
 				TreeSet<DataFile>methodFiles = new TreeSet<DataFile>();
 				for(String fName : fileNames) {

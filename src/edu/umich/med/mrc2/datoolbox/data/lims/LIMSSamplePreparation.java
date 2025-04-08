@@ -43,10 +43,11 @@ import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
 import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
 import edu.umich.med.mrc2.datoolbox.project.store.SamplePreparationFields;
+import edu.umich.med.mrc2.datoolbox.project.store.XmlStorable;
 import edu.umich.med.mrc2.datoolbox.utils.ExperimentUtils;
 
 public class LIMSSamplePreparation implements 
-		Serializable, AnnotatedObject, Comparable<LIMSSamplePreparation>{
+		Serializable, AnnotatedObject, Comparable<LIMSSamplePreparation>, XmlStorable{
 
 	/**
 	 * 
