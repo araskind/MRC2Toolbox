@@ -43,6 +43,7 @@ import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.ujmp.core.Matrix;
 import org.ujmp.core.calculation.Calculation.Ret;
 
+import edu.umich.med.mrc2.datoolbox.data.CefImportSettingsObject;
 import edu.umich.med.mrc2.datoolbox.data.CompoundLibrary;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.LibraryMsFeature;
@@ -174,16 +175,19 @@ public class MultiCefDataAddTask extends AbstractTask implements TaskListener{
 		for(int i=0; i<addedDataFiles.length; i++) {
 
 			addedDataFiles[i].setDataAcquisitionMethod(acqMethod);
-			CefDataImportTask cdit = new CefDataImportTask(
-					addedDataFiles[i], 
-					addedDataFiles[i].getResultForDataExtractionMethod(daMethod),
-					i, 
-					featureMatrix, 
-					addedDataMatrix, 
-					featureCoordinateMap, 
-					retentionMap, 
-					mzMap,
-					peakWidthMap);
+			
+			CefImportSettingsObject ciso = new CefImportSettingsObject();
+			ciso.setDataFile(addedDataFiles[i]);
+			ciso.setResultsFile(addedDataFiles[i].getResultForDataExtractionMethod(daMethod));
+			ciso.setFileIndex(i);
+			ciso.setFeatureMatrix(featureMatrix);
+			ciso.setDataMatrix(addedDataMatrix);
+			ciso.setFeatureCoordinateMap(featureCoordinateMap);
+			ciso.setRetentionMap(retentionMap);
+			ciso.setMzMap(mzMap);
+			ciso.setPeakWidthMap(peakWidthMap);
+			
+			CefDataImportTask cdit = new CefDataImportTask(ciso);
 			cdit.addTaskListener(this);
 			MRC2ToolBoxCore.getTaskController().addTask(cdit);
 		}

@@ -25,10 +25,12 @@ import java.io.File;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeSet;
 
 import org.ujmp.core.Matrix;
 
+import edu.umich.med.mrc2.datoolbox.data.CefImportSettingsObject;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.ResultsFile;
@@ -39,6 +41,8 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.cef.CEFProcessingTask;
 
 public class CefDataImportTask extends CEFProcessingTask {
+	
+	private CefImportSettingsObject ciso;
 	
 	private DataFile dataFile;
 	private ResultsFile resultsFile;
@@ -52,47 +56,24 @@ public class CefDataImportTask extends CEFProcessingTask {
 	private Map<String, List<Double>> retentionMap;
 	private Map<String, List<Double>> mzMap;
 	private Map<String, List<Double>> peakWidthMap;
-	
-	public CefDataImportTask(
-			DataFile dataFile,
-			ResultsFile resultsFile,
-			int fileIndex,
-			Matrix featureMatrix,
-			Matrix dataMatrix,
-			Map<String, Integer> featureCoordinateMap,
-			Map<String, List<Double>> retentionMap,
-			Map<String, List<Double>> mzMap,
-			Map<String, List<Double>> peakWidthMap) {
 
-		this.dataFile = dataFile;
-		this.resultsFile = resultsFile;
-		this.fileIndex = fileIndex;
-		this.featureMatrix = featureMatrix;
-		this.dataMatrix = dataMatrix;
-		this.featureCoordinateMap = featureCoordinateMap;
-		this.retentionMap = retentionMap;
-		this.mzMap = mzMap;
-		this.peakWidthMap = peakWidthMap;
-
-		total = 100;
-		processed = 2;
-		taskDescription = "Importing MS data from " + dataFile.getName();
-		features = new HashSet<SimpleMsFeature>();
-		unmatchedAdducts = new TreeSet<String>();
+	public CefDataImportTask(CefImportSettingsObject ciso) {
+		
+		this.ciso = ciso;
+		this.dataFile = ciso.getDataFile();
+		this.resultsFile = ciso.getResultsFile();
+		this.fileIndex = ciso.getFileIndex();
+		this.featureMatrix = ciso.getFeatureMatrix();
+		this.dataMatrix = ciso.getDataMatrix();
+		this.featureCoordinateMap = ciso.getFeatureCoordinateMap();
+		this.retentionMap = ciso.getRetentionMap();
+		this.mzMap = ciso.getMzMap();
+		this.peakWidthMap = ciso.getPeakWidthMap();
 	}
 
 	@Override
 	public Task cloneTask() {
-		return new CefDataImportTask(
-				 dataFile,
-				 resultsFile,
-				 fileIndex,
-				 featureMatrix,
-				 dataMatrix,
-				 featureCoordinateMap,
-				 retentionMap,
-				 mzMap,
-				 peakWidthMap);
+		return new CefDataImportTask(ciso);
 	}
 
 	@Override
@@ -104,7 +85,12 @@ public class CefDataImportTask extends CEFProcessingTask {
 			return;
 		}
 		setStatus(TaskStatus.PROCESSING);
-		// Read CEF file
+		total = 100;
+		processed = 2;
+		taskDescription = "Importing MS data from " + dataFile.getName();
+		features = new HashSet<SimpleMsFeature>();
+		unmatchedAdducts = new TreeSet<String>();
+		
 		String cefPath = null;
 		if(resultsFile != null && resultsFile.getFullPath() != null)
 			cefPath = resultsFile.getFullPath();	
@@ -168,14 +154,12 @@ public class CefDataImportTask extends CEFProcessingTask {
 		return dataFile;
 	}
 
-	public HashSet<SimpleMsFeature> getFeatures() {
+	public Set<SimpleMsFeature> getFeatures() {
 		return features;
 	}
 
-	/**
-	 * @return the unmatchedAdducts
-	 */
-	public TreeSet<String> getUnmatchedAdducts() {
+	@Override
+	public Set<String> getUnmatchedAdducts() {
 		return unmatchedAdducts;
 	}
 

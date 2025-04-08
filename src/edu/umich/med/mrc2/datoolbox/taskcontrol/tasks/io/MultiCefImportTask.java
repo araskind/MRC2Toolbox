@@ -51,6 +51,8 @@ import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.ujmp.core.Matrix;
 import org.ujmp.core.calculation.Calculation.Ret;
 
+import edu.umich.med.mrc2.datoolbox.data.CefImportFinalizationObjest;
+import edu.umich.med.mrc2.datoolbox.data.CefImportSettingsObject;
 import edu.umich.med.mrc2.datoolbox.data.CompoundLibrary;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.LibraryMsFeature;
@@ -92,7 +94,6 @@ public class MultiCefImportTask extends AbstractTask implements TaskListener{
 	private Matrix featureMatrix;
 	private Matrix dataMatrix;
 	private boolean libraryParsed;
-	private boolean dataParsed;
 	private DescriptiveStatistics descStats;
 	private Map<String,Integer>featureCoordinateMap;
 	private int fileCounter;
@@ -103,7 +104,6 @@ public class MultiCefImportTask extends AbstractTask implements TaskListener{
 	private File cacheFile;
 	private File tmpCefDirectory;
 	private boolean removeAbnormalIsoPatterns;
-	private Collection<MsFeature>featuresWithAbnormalIsoPattern;
 
 	public MultiCefImportTask(
 			File libraryFile, 
@@ -121,7 +121,6 @@ public class MultiCefImportTask extends AbstractTask implements TaskListener{
 		featureData = new HashMap<DataFile, HashSet<SimpleMsFeature>>();
 		unmatchedAdducts = new TreeSet<String>();
 		libraryParsed = false;
-		dataParsed = false;
 		fileCounter = 0;
 	}
 
@@ -144,7 +143,6 @@ public class MultiCefImportTask extends AbstractTask implements TaskListener{
 		featureData = new HashMap<DataFile, HashSet<SimpleMsFeature>>();
 		unmatchedAdducts = new TreeSet<String>();
 		libraryParsed = false;
-		dataParsed = false;
 		fileCounter = 0;
 	}
 
@@ -180,7 +178,10 @@ public class MultiCefImportTask extends AbstractTask implements TaskListener{
 				finalizeLibraryImportTask((CefLibraryImportTask)e.getSource());
 			
 			if (e.getSource().getClass().equals(CefDataImportTask.class))
-				finalizeCefImportTask((CefDataImportTask)e.getSource());			
+				finalizeCefImportTask((CefDataImportTask)e.getSource());	
+			
+			if (e.getSource().getClass().equals(CefImportFinalizationTask.class))
+				setStatus(TaskStatus.FINISHED);
 		}
 	}
 	
@@ -189,6 +190,8 @@ public class MultiCefImportTask extends AbstractTask implements TaskListener{
 		libraryParsed = libraryCorrectlyParsed(lit);
 		if(libraryParsed) {
 
+			MRC2ToolBoxCore.getTaskController().getTaskQueue().removeTask(lit);
+			
 			//	Create array to align features
 			initDataMatrixes();
 
@@ -200,7 +203,6 @@ public class MultiCefImportTask extends AbstractTask implements TaskListener{
 		}
 		else {
 			setStatus(TaskStatus.ERROR);
-			return;
 		}
 	}
 	
@@ -222,20 +224,35 @@ public class MultiCefImportTask extends AbstractTask implements TaskListener{
 			MainWindow.hideProgressDialog();
 			return;
 		}
+		MRC2ToolBoxCore.getTaskController().getTaskQueue().removeTask(cdit);
 		//	Process
 		if(fileCounter == dataFiles.length) {
+			
+			CefImportFinalizationObjest ciFinObj = new CefImportFinalizationObjest();
+			ciFinObj.setDataFiles(dataFiles);
+			ciFinObj.setDataPipeline(dataPipeline);
+			ciFinObj.setLibrary(library);
+			ciFinObj.setFeatureMatrix(featureMatrix);
+			ciFinObj.setDataMatrix(dataMatrix);
+			ciFinObj.setRetentionMap(retentionMap);
+			ciFinObj.setMzMap(mzMap);
+			ciFinObj.setPeakWidthMap(peakWidthMap);
+			ciFinObj.setRemoveAbnormalIsoPatterns(removeAbnormalIsoPatterns);
+			ciFinObj.setTmpCefDirectory(tmpCefDirectory);
 
-			dataParsed = true;
-			try {
-				finalizeDataParsing();
-				addDataToExperiment();
-				saveDataMatrixes();
-				setStatus(TaskStatus.FINISHED);
-			} catch (Exception e1) {
-				e1.printStackTrace();
-				setStatus(TaskStatus.ERROR);
-				return;
-			}
+			CefImportFinalizationTask finalizationTask = 
+					new CefImportFinalizationTask(ciFinObj);
+			finalizationTask.addTaskListener(this);
+			MRC2ToolBoxCore.getTaskController().addTask(finalizationTask);
+//			try {
+//				finalizeDataParsing();
+//				addDataToExperiment();
+//				saveDataMatrixes();
+//				setStatus(TaskStatus.FINISHED);
+//			} catch (Exception e1) {
+//				e1.printStackTrace();
+//				setStatus(TaskStatus.ERROR);
+//			}
 		}
 	}
 	
@@ -390,7 +407,8 @@ public class MultiCefImportTask extends AbstractTask implements TaskListener{
 		}
 		if(removeAbnormalIsoPatterns) {
 			
-			featuresWithAbnormalIsoPattern = new HashSet<MsFeature>();
+			Set<MsFeature>featuresWithAbnormalIsoPattern = 
+					new HashSet<MsFeature>();
 			for(MsFeature feature : library.getFeatures()) {
 				
 				if(feature.getStatsSummary() != null 
@@ -556,17 +574,19 @@ public class MultiCefImportTask extends AbstractTask implements TaskListener{
 		for(int i=0; i<dataFiles.length; i++) {
 
 			dataFiles[i].setDataAcquisitionMethod(acqMethod);
-			CefDataImportTask cdit = new CefDataImportTask(
-					dataFiles[i],
-					dataFiles[i].getResultForDataExtractionMethod(daMethod),
-					i, 
-					featureMatrix, 
-					dataMatrix, 
-					featureCoordinateMap, 
-					retentionMap, 
-					mzMap,
-					peakWidthMap);
-
+			
+			CefImportSettingsObject ciso = new CefImportSettingsObject();
+			ciso.setDataFile(dataFiles[i]);
+			ciso.setResultsFile(dataFiles[i].getResultForDataExtractionMethod(daMethod));
+			ciso.setFileIndex(i);
+			ciso.setFeatureMatrix(featureMatrix);
+			ciso.setDataMatrix(dataMatrix);
+			ciso.setFeatureCoordinateMap(featureCoordinateMap);
+			ciso.setRetentionMap(retentionMap);
+			ciso.setMzMap(mzMap);
+			ciso.setPeakWidthMap(peakWidthMap);
+			
+			CefDataImportTask cdit = new CefDataImportTask(ciso);
 			cdit.addTaskListener(this);
 			MRC2ToolBoxCore.getTaskController().addTask(cdit);
 		}
