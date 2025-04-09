@@ -22,20 +22,29 @@
 package edu.umich.med.mrc2.datoolbox.gui.fdata.cleanup;
 
 import java.util.Collection;
+import java.util.List;
+import java.util.TreeSet;
+
+import org.jdom2.Element;
 
 import edu.umich.med.mrc2.datoolbox.data.ExperimentalSample;
+import edu.umich.med.mrc2.datoolbox.project.store.FeatureCleanupParameterFields;
+import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
+import edu.umich.med.mrc2.datoolbox.project.store.XmlStorable;
 
-public class FeatureCleanupParameters {
+public class FeatureCleanupParameters implements XmlStorable{
 
 	private boolean filterByPooledFrequency;
 	private int pooledFrequencyCutoff;
 	private Collection<ExperimentalSample> selectedPooledSamples;
+	
 	private boolean filterByMassDefect;
 	private double massDefectFilterRTCutoff;
 	private double mdFilterMassDefectValue;
+	
 	private boolean filterHighMassBelowRT;
 	private double highMassFilterRTCutoff;
-	private double highMassFilterMassValue;
+	private double highMassFilterMassValue;	
 	
 	public FeatureCleanupParameters(
 			boolean filterByPooledFrequency, 
@@ -134,6 +143,88 @@ public class FeatureCleanupParameters {
 
 	public void setHighMassFilterMassValue(double highMassFilterMassValue) {
 		this.highMassFilterMassValue = highMassFilterMassValue;
+	}
+	
+	public FeatureCleanupParameters(Element featureCleanupParametersElement) {
+		
+		filterByPooledFrequency = Boolean.parseBoolean(
+				featureCleanupParametersElement.getAttributeValue(
+						FeatureCleanupParameterFields.filterByPooledFrequency.name()));
+		String co = featureCleanupParametersElement.getAttributeValue(
+				FeatureCleanupParameterFields.pooledFrequencyCutoff.name());
+		pooledFrequencyCutoff = Integer.parseInt(
+				featureCleanupParametersElement.getAttributeValue(
+						FeatureCleanupParameterFields.pooledFrequencyCutoff.name()));
+		
+		selectedPooledSamples = new TreeSet<ExperimentalSample>();
+		List<Element>selectedPooledSamplesList = 
+				featureCleanupParametersElement.getChild(
+						FeatureCleanupParameterFields.selectedPooledSamples.name()).
+				getChildren(ObjectNames.ExperimentalSample.name());
+		for(Element sampleElement : selectedPooledSamplesList)
+			selectedPooledSamples.add(new ExperimentalSample(sampleElement, null, null));
+		
+		filterByMassDefect = Boolean.parseBoolean(
+				featureCleanupParametersElement.getAttributeValue(
+						FeatureCleanupParameterFields.filterByMassDefect.name()));
+		massDefectFilterRTCutoff = Double.parseDouble(
+				featureCleanupParametersElement.getAttributeValue(
+						FeatureCleanupParameterFields.massDefectFilterRTCutoff.name()));
+		mdFilterMassDefectValue = Double.parseDouble(
+				featureCleanupParametersElement.getAttributeValue(
+						FeatureCleanupParameterFields.mdFilterMassDefectValue.name()));
+		
+		filterHighMassBelowRT = Boolean.parseBoolean(
+				featureCleanupParametersElement.getAttributeValue(
+						FeatureCleanupParameterFields.filterHighMassBelowRT.name()));
+		highMassFilterRTCutoff = Double.parseDouble(
+				featureCleanupParametersElement.getAttributeValue(
+						FeatureCleanupParameterFields.highMassFilterRTCutoff.name()));
+		highMassFilterMassValue = Double.parseDouble(
+				featureCleanupParametersElement.getAttributeValue(
+						FeatureCleanupParameterFields.highMassFilterMassValue.name()));
+	}
+			
+	@Override
+	public Element getXmlElement() {
+		
+		Element featureCleanupParametersElement = 
+				new Element(ObjectNames.FeatureCleanupParameters.name());
+		
+		featureCleanupParametersElement.setAttribute(
+				FeatureCleanupParameterFields.filterByPooledFrequency.name(), 
+				Boolean.toString(filterByPooledFrequency));
+		featureCleanupParametersElement.setAttribute(
+				FeatureCleanupParameterFields.pooledFrequencyCutoff.name(), 
+				Integer.toString(pooledFrequencyCutoff));
+		Element selectedPooledSamplesElement = 
+				new Element(FeatureCleanupParameterFields.selectedPooledSamples.name());
+		for(ExperimentalSample ps : selectedPooledSamples)
+			selectedPooledSamplesElement.addContent(ps.getXmlElement());
+		
+		featureCleanupParametersElement.addContent(selectedPooledSamplesElement);
+		
+		featureCleanupParametersElement.setAttribute(
+				FeatureCleanupParameterFields.filterByMassDefect.name(), 
+				Boolean.toString(filterByMassDefect));
+		featureCleanupParametersElement.setAttribute(
+				FeatureCleanupParameterFields.massDefectFilterRTCutoff.name(), 
+				Double.toString(massDefectFilterRTCutoff));
+		featureCleanupParametersElement.setAttribute(
+				FeatureCleanupParameterFields.mdFilterMassDefectValue.name(), 
+				Double.toString(mdFilterMassDefectValue));
+		
+		featureCleanupParametersElement.setAttribute(
+				FeatureCleanupParameterFields.filterHighMassBelowRT.name(), 
+				Boolean.toString(filterHighMassBelowRT));
+		featureCleanupParametersElement.setAttribute(
+				FeatureCleanupParameterFields.highMassFilterRTCutoff.name(), 
+				Double.toString(highMassFilterRTCutoff));
+		featureCleanupParametersElement.setAttribute(
+				FeatureCleanupParameterFields.highMassFilterMassValue.name(), 
+				Double.toString(highMassFilterMassValue));
+		
+		return featureCleanupParametersElement;
 	}
 }
 

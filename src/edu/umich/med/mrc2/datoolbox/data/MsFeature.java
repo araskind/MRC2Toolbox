@@ -55,10 +55,11 @@ import edu.umich.med.mrc2.datoolbox.msmsscore.MSMSScoreCalculator;
 import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
 import edu.umich.med.mrc2.datoolbox.project.store.MsFeatureFields;
 import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
+import edu.umich.med.mrc2.datoolbox.project.store.XmlStorable;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
 
-public class MsFeature implements AnnotatedObject, Serializable {
+public class MsFeature implements AnnotatedObject, Serializable, XmlStorable {
 
 	protected static final long serialVersionUID = 1674860219322623509L;
 	protected String id;
@@ -449,19 +450,12 @@ public class MsFeature implements AnnotatedObject, Serializable {
 
 		if (defaultModification == null && newChemMod == null)
 			return;
-
-		if ((defaultModification == null && newChemMod != null) 
-				|| (defaultModification != null && newChemMod == null)) {
-
+		
+		if((newChemMod != null && !newChemMod.equals(defaultModification))
+				|| newChemMod == null) {
+			
 			defaultModification = newChemMod;
 			setStatus(ParameterSetStatus.CHANGED);
-			return;
-		}
-		if (!defaultModification.equals(newChemMod)) {
-
-			defaultModification = newChemMod;
-			setStatus(ParameterSetStatus.CHANGED);
-			return;
 		}
 	}
 
@@ -479,11 +473,10 @@ public class MsFeature implements AnnotatedObject, Serializable {
 
 	public Polarity getPolarity() {
 		
-		if(polarity == null || polarity.equals(Polarity.Neutral)) {
-			
-			if(spectrum != null && spectrum.getPrimaryAdduct() != null)
-				polarity = spectrum.getPrimaryAdduct().getPolarity();			
-		}		
+		if((polarity == null || polarity.equals(Polarity.Neutral)) && 
+				spectrum != null && spectrum.getPrimaryAdduct() != null)
+			polarity = spectrum.getPrimaryAdduct().getPolarity();			
+				
 		return polarity;
 	}
 	
@@ -583,32 +576,7 @@ public class MsFeature implements AnnotatedObject, Serializable {
 			primaryIdentity.setIdentityName(newName);
 			primaryIdentity.setConfidenceLevel(
 					CompoundIdentificationConfidence.UNKNOWN_ACCURATE_MASS_RT);
-		}		
-//		if(primaryIdentity != null 
-//				&& primaryIdentity.getIdentityName().equals(DEFAULT_ID_NAME) 
-//				&& spectrum != null) {
-//			
-//			if(spectrum.getExperimentalTandemSpectrum() != null 
-//					&& spectrum.getExperimentalTandemSpectrum().getParent() != null) {
-//				
-//				double rt  = spectrum.getExperimentalTandemSpectrum().getParentScanRetentionTime();
-//				String newName = DataPrefix.MS_LIBRARY_UNKNOWN_TARGET.getName() +
-//						MRC2ToolBoxConfiguration.defaultMzFormat.format(
-//								spectrum.getExperimentalTandemSpectrum().getParent().getMz()) + "_" + 
-//						MRC2ToolBoxConfiguration.defaultRtFormat.format(rt);
-//				primaryIdentity.setIdentityName(newName);
-//				primaryIdentity.setConfidenceLevel(
-//						CompoundIdentificationConfidence.UNKNOWN_MSMS_RT);
-//			}
-//			else {
-//				String newName = DataPrefix.MS_LIBRARY_UNKNOWN_TARGET.getName() +
-//						MRC2ToolBoxConfiguration.getMzFormat().format(getMonoisotopicMz()) + "_" + 
-//						MRC2ToolBoxConfiguration.getRtFormat().format(getRetentionTime());
-//				primaryIdentity.setIdentityName(newName);
-//				primaryIdentity.setConfidenceLevel(
-//						CompoundIdentificationConfidence.UNKNOWN_ACCURATE_MASS_RT);
-//			}
-//		}
+		}
 	}
 
 	public void setStatsSummary(MsFeatureStatisticalSummary statsSummary) {
@@ -894,7 +862,7 @@ public class MsFeature implements AnnotatedObject, Serializable {
 			return 0;
 		
 		List<MsFeatureIdentity> msmsHits = identifications.stream().
-				filter(id -> Objects.nonNull(id.getReferenceMsMsLibraryMatch())).
+				filter(fid -> Objects.nonNull(fid.getReferenceMsMsLibraryMatch())).
 				collect(Collectors.toList());
 		
 		if(msmsHits.isEmpty())
@@ -902,7 +870,125 @@ public class MsFeature implements AnnotatedObject, Serializable {
 		else
 			return msmsHits.size();
 	}
+
+	public void createDefaultPrimaryIdentity() {
+		
+		MsFeatureIdentity defaultId = new MsFeatureIdentity(
+				null, CompoundIdentificationConfidence.UNKNOWN_ACCURATE_MASS_RT);
+		defaultId.setIdentityName(DEFAULT_ID_NAME);
+		setPrimaryIdentity(defaultId);
+		if(spectrum == null)
+			return;
+		
+		if(spectrum.getExperimentalTandemSpectrum() != null 
+				&& spectrum.getExperimentalTandemSpectrum().getParent() != null) {
+			
+			double rt  = spectrum.getExperimentalTandemSpectrum().getParentScanRetentionTime();			
+			String newName = DataPrefix.MS_LIBRARY_UNKNOWN_TARGET.getName() +
+					MRC2ToolBoxConfiguration.defaultMzFormat.format(
+							spectrum.getExperimentalTandemSpectrum().getParent().getMz()) + "_" + 
+					MRC2ToolBoxConfiguration.defaultRtFormat.format(rt);
+			primaryIdentity.setIdentityName(newName);
+			primaryIdentity.setConfidenceLevel(
+					CompoundIdentificationConfidence.UNKNOWN_MSMS_RT);
+		}
+		else {
+			String newName = DataPrefix.MS_LIBRARY_UNKNOWN_TARGET.getName() +
+					MRC2ToolBoxConfiguration.getMzFormat().format(getMonoisotopicMz()) + "_" + 
+					MRC2ToolBoxConfiguration.getRtFormat().format(getRetentionTime());
+			primaryIdentity.setIdentityName(newName);
+			primaryIdentity.setConfidenceLevel(
+					CompoundIdentificationConfidence.UNKNOWN_ACCURATE_MASS_RT);
+		}
+	}
 	
+	private MsFeatureIdentity getDefaultPrimaryIdentity() {
+		
+		if(identifications == null || identifications.isEmpty())
+			return null;
+		
+		return identifications.stream().
+				filter(i -> Objects.isNull(i.getCompoundIdentity())).
+				findFirst().orElse(null);
+	}
+	
+	public void updateUnknownPrimaryIdentityBasedOnMSMS() {
+		
+		if(primaryIdentity == null) {
+			createDefaultPrimaryIdentity();
+		}
+		else {
+			if(primaryIdentity.getCompoundIdentity() == null && spectrum != null 
+					&& spectrum.getExperimentalTandemSpectrum() != null 
+					&& spectrum.getExperimentalTandemSpectrum().getParent() != null) {
+				
+				double rt  = spectrum.getExperimentalTandemSpectrum().getParentScanRetentionTime();	
+				if(rt == 0.0d)
+					rt = retentionTime;
+				
+				String newName = DataPrefix.MS_LIBRARY_UNKNOWN_TARGET.getName() +
+						MRC2ToolBoxConfiguration.defaultMzFormat.format(
+								spectrum.getExperimentalTandemSpectrum().getParent().getMz()) + "_" + 
+						MRC2ToolBoxConfiguration.defaultRtFormat.format(rt);
+				primaryIdentity.setIdentityName(newName);
+				primaryIdentity.setConfidenceLevel(
+						CompoundIdentificationConfidence.UNKNOWN_MSMS_RT);
+			}			
+		}
+	}
+	
+	public String getTargetId() {		
+		return targetId;
+	}
+
+	public void setTargetId(String targetId) {
+		this.targetId = targetId;
+	}
+	
+	public double getArea() {
+		return area;
+	}
+
+	public void setArea(double area) {
+		this.area = area;
+	}
+
+	public double getHeight() {
+		return height;
+	}
+
+	public void setHeight(double height) {
+		this.height = height;
+	}
+	
+	public double getAbsoluteMassDefectForPrimaryAdduct() {
+		
+		if(spectrum.getPrimaryAdduct() == null)
+			return 0.0d;
+		
+		double neutralMassValue = MsUtils.getNeutralMassForAdduct(
+				spectrum.getPrimaryAdductBasePeakMz(), spectrum.getPrimaryAdduct());
+		
+		return neutralMassValue % 1;
+	}
+	
+	public double getFractionalMassDefect() {
+		
+		if(spectrum.getPrimaryAdduct() == null)
+			return 0.0d;
+		
+		return spectrum.getPrimaryAdductBasePeakMz() % 1;
+	}
+	
+	public MsPoint getMSMSParentIon() {
+		
+		if(spectrum == null || spectrum.getExperimentalTandemSpectrum() == null)
+			return null;
+		
+		return spectrum.getExperimentalTandemSpectrum().getParent();
+	}
+		
+	@Override
 	public Element getXmlElement() {
 		
 		Element msFeatureElement = new Element(ObjectNames.MsFeature.name());
@@ -942,21 +1028,26 @@ public class MsFeature implements AnnotatedObject, Serializable {
 			msFeatureElement.setAttribute(
 					MsFeatureFields.QS.name(), Double.toString(qualityScore));
 		
+		msFeatureElement.setAttribute(
+				CommonFields.Enabled.name(), Boolean.toString(active));
+		
 		return msFeatureElement;
 	}
 
 	public MsFeature(Element featureElement) {
-		
-//		identifications = new HashSet<MsFeatureIdentity>();
-//		annotations = new TreeSet<ObjectAnnotation>();
-//		eventListeners = ConcurrentHashMap.newKeySet();
-//		createDefaultPrimaryIdentity();
+
 		this();
 
 		id = featureElement.getAttributeValue(CommonFields.Id.name());
 		name = featureElement.getAttributeValue(CommonFields.Name.name());
 		retentionTime = Double.parseDouble(
 				featureElement.getAttributeValue(MsFeatureFields.rt.name()));
+		
+		active = true;
+		if(featureElement.getAttributeValue(CommonFields.Enabled.name()) != null)
+			active = Boolean.parseBoolean(
+					featureElement.getAttributeValue(CommonFields.Enabled.name()));
+		
 		String polCode = featureElement.getAttributeValue(MsFeatureFields.pol.name());
 		if(polCode != null)
 			polarity = Polarity.getPolarityByCode(polCode);
@@ -1006,137 +1097,7 @@ public class MsFeature implements AnnotatedObject, Serializable {
 			else
 				idDisabled = false;
 		}
-	}
-	
-	public void createDefaultPrimaryIdentity() {
-		
-		MsFeatureIdentity defaultId = new MsFeatureIdentity(
-				null, CompoundIdentificationConfidence.UNKNOWN_ACCURATE_MASS_RT);
-		defaultId.setIdentityName(DEFAULT_ID_NAME);
-		setPrimaryIdentity(defaultId);
-		if(spectrum == null)
-			return;
-		
-		if(spectrum.getExperimentalTandemSpectrum() != null 
-				&& spectrum.getExperimentalTandemSpectrum().getParent() != null) {
-			
-			double rt  = spectrum.getExperimentalTandemSpectrum().getParentScanRetentionTime();			
-			String newName = DataPrefix.MS_LIBRARY_UNKNOWN_TARGET.getName() +
-					MRC2ToolBoxConfiguration.defaultMzFormat.format(
-							spectrum.getExperimentalTandemSpectrum().getParent().getMz()) + "_" + 
-					MRC2ToolBoxConfiguration.defaultRtFormat.format(rt);
-			primaryIdentity.setIdentityName(newName);
-			primaryIdentity.setConfidenceLevel(
-					CompoundIdentificationConfidence.UNKNOWN_MSMS_RT);
-		}
-		else {
-			String newName = DataPrefix.MS_LIBRARY_UNKNOWN_TARGET.getName() +
-					MRC2ToolBoxConfiguration.getMzFormat().format(getMonoisotopicMz()) + "_" + 
-					MRC2ToolBoxConfiguration.getRtFormat().format(getRetentionTime());
-			primaryIdentity.setIdentityName(newName);
-			primaryIdentity.setConfidenceLevel(
-					CompoundIdentificationConfidence.UNKNOWN_ACCURATE_MASS_RT);
-		}
-	}
-	
-	private MsFeatureIdentity getDefaultPrimaryIdentity() {
-		
-		if(identifications == null || identifications.isEmpty())
-			return null;
-		
-		return identifications.stream().
-				filter(i -> Objects.isNull(i.getCompoundIdentity())).
-				findFirst().orElse(null);
-	}
-	
-	public void updateUnknownPrimaryIdentityBasedOnMSMS() {
-		
-		if(primaryIdentity == null) {
-			createDefaultPrimaryIdentity();
-		}
-		else {
-			if(primaryIdentity.getCompoundIdentity() == null) {
-				
-				if(spectrum != null && spectrum.getExperimentalTandemSpectrum() != null 
-						&& spectrum.getExperimentalTandemSpectrum().getParent() != null) {
-					
-					double rt  = spectrum.getExperimentalTandemSpectrum().getParentScanRetentionTime();	
-					if(rt == 0.0d)
-						rt = retentionTime;
-					
-					String newName = DataPrefix.MS_LIBRARY_UNKNOWN_TARGET.getName() +
-							MRC2ToolBoxConfiguration.defaultMzFormat.format(
-									spectrum.getExperimentalTandemSpectrum().getParent().getMz()) + "_" + 
-							MRC2ToolBoxConfiguration.defaultRtFormat.format(rt);
-					primaryIdentity.setIdentityName(newName);
-					primaryIdentity.setConfidenceLevel(
-							CompoundIdentificationConfidence.UNKNOWN_MSMS_RT);
-				}
-			}
-		}
-	}
-	
-	public String getTargetId() {
-		
-//		String targetId = identifications.stream().
-//			filter(i -> i.getCompoundIdentity() != null).
-//			map(i -> i.getCompoundIdentity()).
-//			flatMap(c -> c.getDbIdMap().values().stream()).
-//			filter(id -> (id.startsWith(DataPrefix.MS_LIBRARY_TARGET.getName())
-//					|| id.startsWith(DataPrefix.MS_FEATURE.getName()))).
-//			findFirst().orElse(null);
-		
-		return targetId;
-	}
-
-	public void setTargetId(String targetId) {
-		this.targetId = targetId;
-	}
-	
-	public double getArea() {
-		return area;
-	}
-
-	public void setArea(double area) {
-		this.area = area;
-	}
-
-	public double getHeight() {
-		return height;
-	}
-
-	public void setHeight(double height) {
-		this.height = height;
-	}
-	
-	public double getAbsoluteMassDefectForPrimaryAdduct() {
-		
-		if(spectrum.getPrimaryAdduct() == null)
-			return 0.0d;
-		
-		double neutralMass = MsUtils.getNeutralMassForAdduct(
-				spectrum.getPrimaryAdductBasePeakMz(), spectrum.getPrimaryAdduct());
-		
-		//	return Math.abs(neutralMass - (double)Math.round(neutralMass));
-		
-		return neutralMass % 1;
-	}
-	
-	public double getFractionalMassDefect() {
-		
-		if(spectrum.getPrimaryAdduct() == null)
-			return 0.0d;
-		
-		return spectrum.getPrimaryAdductBasePeakMz() % 1;
-	}
-	
-	public MsPoint getMSMSParentIon() {
-		
-		if(spectrum == null || spectrum.getExperimentalTandemSpectrum() == null)
-			return null;
-		
-		return spectrum.getExperimentalTandemSpectrum().getParent();
-	}
+	}	
 }
 
 

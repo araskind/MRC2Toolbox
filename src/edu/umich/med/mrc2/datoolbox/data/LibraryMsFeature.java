@@ -22,11 +22,17 @@
 package edu.umich.med.mrc2.datoolbox.data;
 
 import java.io.Serializable;
+import java.text.ParseException;
 import java.util.Date;
 import java.util.UUID;
 
+import org.jdom2.Element;
+
 import edu.umich.med.mrc2.datoolbox.data.enums.AnnotatedObjectType;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
+import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
+import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
+import edu.umich.med.mrc2.datoolbox.utils.ExperimentUtils;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
 
 public class LibraryMsFeature extends MsFeature implements Serializable {
@@ -168,6 +174,49 @@ public class LibraryMsFeature extends MsFeature implements Serializable {
 	@Override
 	public AnnotatedObjectType getAnnotatedObjectType() {
 		return AnnotatedObjectType.MS_LIB_FEATURE;
+	}
+	
+	public LibraryMsFeature(Element libraryMsFeatureElement) {
+		
+		super(libraryMsFeatureElement);
+		
+		String dateCreatedString = 
+				libraryMsFeatureElement.getAttributeValue(CommonFields.DateCreated.name());
+		if(dateCreatedString != null) {
+			try {
+				dateCreated = ExperimentUtils.dateTimeFormat.parse(dateCreatedString);
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		String lastModifiedString = 
+				libraryMsFeatureElement.getAttributeValue(CommonFields.DateCreated.name());
+		if(lastModifiedString != null) {
+			try {
+				lastModified = ExperimentUtils.dateTimeFormat.parse(lastModifiedString);
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	@Override
+	public Element getXmlElement() {
+		
+		Element libraryMsFeatureElement = super.getXmlElement();
+		libraryMsFeatureElement.setName(ObjectNames.LibraryMsFeature.name());
+		
+		if(dateCreated != null)
+			libraryMsFeatureElement.setAttribute(CommonFields.DateCreated.name(), 
+					ExperimentUtils.dateTimeFormat.format(dateCreated));
+		
+		if(lastModified != null)
+			libraryMsFeatureElement.setAttribute(CommonFields.LastModified.name(), 
+					ExperimentUtils.dateTimeFormat.format(lastModified));
+		
+		return libraryMsFeatureElement;
 	}
 }
 

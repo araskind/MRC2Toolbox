@@ -680,7 +680,6 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 	    	super.done();
 	    	if(cleanMsFeatureSet.getFeatures().isEmpty()) {
 	    		MessageDialog.showWarningMsg("All features were removd by filtering!");
-	    		return;
 	    	}
 	    	else {
 	    		cleanMsFeatureSet.setProperty(

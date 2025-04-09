@@ -21,23 +21,16 @@
 
 package edu.umich.med.mrc2.datoolbox.project.store;
 
-public enum CommonFields {
+public enum FeatureCleanupParameterFields {
 
-	Id,
-	Name,	
-	Description,
-	CreatedBy,
-	DateCreated,
-	LastModified,
-	Enabled,
-	UserId,
-	FeatureList,
-	MZ,
-	RT,
-	Polarity,
-	Address,
-	Properties,
-	Property,
-	NULL,
+	filterByMassDefect,
+	filterByPooledFrequency,
+	filterHighMassBelowRT,
+	highMassFilterMassValue,
+	highMassFilterRTCutoff,
+	massDefectFilterRTCutoff,
+	mdFilterMassDefectValue,
+	pooledFrequencyCutoff,
+	selectedPooledSamples,
 	;
 }

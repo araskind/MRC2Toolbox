@@ -25,7 +25,10 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashSet;
 
+import org.jdom2.Element;
+
 import edu.umich.med.mrc2.datoolbox.data.enums.ParameterSetStatus;
+import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
 
 public class MsFeatureSet extends FeatureSet implements Serializable {
 
@@ -84,5 +87,21 @@ public class MsFeatureSet extends FeatureSet implements Serializable {
 
 		features.removeAll(featuresToRemove);
 		fireFeatureSetEvent(ParameterSetStatus.CHANGED);
+	}	
+
+	public MsFeatureSet(Element featureSetElement) {
+		
+		super(featureSetElement);
+		features = new HashSet<MsFeature>();
+	}
+	
+	@Override
+	public Element getXmlElement() {
+		
+		Element msFeatureSetElement = super.getXmlElement();
+		msFeatureSetElement.setName(ObjectNames.MsFeatureSet.name());
+		
+		
+		return msFeatureSetElement;
 	}
 }

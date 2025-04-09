@@ -22,6 +22,7 @@
 package edu.umich.med.mrc2.datoolbox.data;
 
 import java.io.Serializable;
+import java.text.ParseException;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
@@ -32,11 +33,17 @@ import java.util.TreeMap;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.jdom2.Element;
+
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
+import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
+import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
+import edu.umich.med.mrc2.datoolbox.project.store.XmlStorable;
+import edu.umich.med.mrc2.datoolbox.utils.ExperimentUtils;
 
-public class CompoundLibrary implements Serializable, Comparable<CompoundLibrary> {
+public class CompoundLibrary implements Serializable, Comparable<CompoundLibrary>, XmlStorable {
 
 	/**
 	 *
@@ -53,7 +60,6 @@ public class CompoundLibrary implements Serializable, Comparable<CompoundLibrary
 	private Polarity polarity;
 
 	private Collection<LibraryMsFeature> libraryFeatures;
-
 	
 	public CompoundLibrary(
 			String id, 
@@ -96,7 +102,7 @@ public class CompoundLibrary implements Serializable, Comparable<CompoundLibrary
 			DataPipeline dataPipeline) {
 		
 		this(libraryId, libraryName, libraryDescription, 
-				null, new Date(), new Date(), true, null);
+				dataPipeline, new Date(), new Date(), true, null);
 	}
 	
 	public CompoundLibrary(
@@ -156,7 +162,8 @@ public class CompoundLibrary implements Serializable, Comparable<CompoundLibrary
 	}
 
 	public Collection<LibraryMsFeature>getSortedFeatures(Comparator<MsFeature>sorter) {
-		return libraryFeatures.stream().sorted(sorter).collect(Collectors.toList());
+		return libraryFeatures.stream().
+				sorted(sorter).collect(Collectors.toList());
 	}
 
 	public DataPipeline getDataPipeline() {
@@ -169,12 +176,12 @@ public class CompoundLibrary implements Serializable, Comparable<CompoundLibrary
 	
 	public LibraryMsFeature getFeatureByName(String name) {
 		return libraryFeatures.stream().
-				filter(f -> f.getName().equals(name)).findFirst().get();
+				filter(f -> f.getName().equals(name)).findFirst().orElse(null);
 	}
 
 	public LibraryMsFeature getFeatureById(String targetId) {
 		return libraryFeatures.stream().
-				filter(f -> f.getId().equals(targetId)).findFirst().get();
+				filter(f -> f.getId().equals(targetId)).findFirst().orElse(null);
 	}
 
 	public Date getLastModified() {
@@ -268,4 +275,95 @@ public class CompoundLibrary implements Serializable, Comparable<CompoundLibrary
 	public void setLibraryId(String id) {
 		this.id = id;
 	}
+	
+	public CompoundLibrary(Element compoundLibraryElement){
+		
+		id = compoundLibraryElement.getAttributeValue(CommonFields.Id.name());
+		name = compoundLibraryElement.getAttributeValue(CommonFields.Name.name());
+		description = compoundLibraryElement.getAttributeValue(
+				CommonFields.Description.name());
+		
+		String dateCreatedString = 
+				compoundLibraryElement.getAttributeValue(CommonFields.DateCreated.name());
+		if(dateCreatedString != null) {
+			try {
+				dateCreated = ExperimentUtils.dateTimeFormat.parse(dateCreatedString);
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		String lastModifiedString = 
+				compoundLibraryElement.getAttributeValue(CommonFields.LastModified.name());
+		if(lastModifiedString != null) {
+			try {
+				lastModified = ExperimentUtils.dateTimeFormat.parse(lastModifiedString);
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		Element dataPipelineElement = 
+				compoundLibraryElement.getChild(ObjectNames.DataPipeline.name());
+		if(dataPipelineElement != null)
+			dataPipeline = new DataPipeline(dataPipelineElement);
+		
+		enabled = Boolean.parseBoolean(
+				compoundLibraryElement.getAttributeValue(CommonFields.Enabled.name()));
+		
+		String polarityCode = 
+				compoundLibraryElement.getAttributeValue(CommonFields.Polarity.name());
+		if(polarityCode != null)
+			polarity = Polarity.getPolarityByCode(polarityCode);		
+	}
+	
+	@Override
+	public Element getXmlElement() {
+		
+		Element compoundLibraryElement = 
+				new Element(ObjectNames.CompoundLibrary.name());
+		compoundLibraryElement.setAttribute(CommonFields.Id.name(), id);
+		compoundLibraryElement.setAttribute(CommonFields.Name.name(), name);
+		compoundLibraryElement.setAttribute(
+				CommonFields.Description.name(), description);
+		
+		if(dateCreated != null)
+			compoundLibraryElement.setAttribute(CommonFields.DateCreated.name(), 
+					ExperimentUtils.dateTimeFormat.format(dateCreated));
+		
+		if(lastModified != null)
+			compoundLibraryElement.setAttribute(CommonFields.LastModified.name(), 
+					ExperimentUtils.dateTimeFormat.format(lastModified));
+		
+		if(dataPipeline != null)
+			compoundLibraryElement.addContent(dataPipeline.getXmlElement());
+		
+		compoundLibraryElement.setAttribute(
+				CommonFields.Enabled.name(), Boolean.toString(enabled));
+		
+		if(polarity != null)
+			compoundLibraryElement.setAttribute(
+					CommonFields.Polarity.name(), polarity.getCode());
+		
+		Element featureListElement = new Element(CommonFields.FeatureList.name());
+		if(libraryFeatures != null && !libraryFeatures.isEmpty())			
+			libraryFeatures.stream().
+				forEach(lf -> featureListElement.addContent(lf.getXmlElement()));		
+		
+		compoundLibraryElement.addContent(featureListElement);
+		
+		return compoundLibraryElement;
+	}
 }
+
+
+
+
+
+
+
+
+
+
+
+

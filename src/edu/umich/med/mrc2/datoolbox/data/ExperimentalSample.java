@@ -399,7 +399,7 @@ public class ExperimentalSample implements Comparable<ExperimentalSample>, Seria
 					ExperimentalSampleFields.LimsSampleType.name(), limsSampleType);
 
 		sampleElement.setAttribute(
-				ExperimentalSampleFields.Enabled.name(), Boolean.toString(enabled));
+				CommonFields.Enabled.name(), Boolean.toString(enabled));
 		
 		sampleElement.setAttribute(
 				ExperimentalSampleFields.LockedReference.name(), Boolean.toString(lockedReference));
@@ -451,13 +451,14 @@ public class ExperimentalSample implements Comparable<ExperimentalSample>, Seria
 	public ExperimentalSample(
 			Element sampleElement, 
 			ExperimentDesign design,
-			RawDataAnalysisExperiment parentProject) {		
+			RawDataAnalysisExperiment parentProject) {	
+		
 		id = sampleElement.getAttributeValue(CommonFields.Id.name());
 		name = sampleElement.getAttributeValue(CommonFields.Name.name());
 		limsSampleType = 
 				sampleElement.getAttributeValue(ExperimentalSampleFields.LimsSampleType.name());
 		enabled = Boolean.parseBoolean(
-				sampleElement.getAttributeValue(ExperimentalSampleFields.Enabled.name()));
+				sampleElement.getAttributeValue(CommonFields.Enabled.name()));
 		lockedReference = Boolean.parseBoolean(
 				sampleElement.getAttributeValue(ExperimentalSampleFields.LockedReference.name()));
 		incloodeInPoolStats = Boolean.parseBoolean(
@@ -477,16 +478,20 @@ public class ExperimentalSample implements Comparable<ExperimentalSample>, Seria
 		designCell = new TreeMap<ExperimentDesignFactor, ExperimentDesignLevel>();
 		List<Element> designCellElements = 
 				sampleElement.getChild(ExperimentalSampleFields.DesignCell.name()).getChildren();
-		for(Element dcElement : designCellElements) {
-			String factorId = dcElement.getAttributeValue(ExperimentalSampleFields.DCFactorId.name());
-			String levelId = dcElement.getAttributeValue(ExperimentalSampleFields.DCLevelId.name());
-			ExperimentDesignFactor factor = design.getFactorById(factorId);
-			ExperimentDesignLevel level = null;
-			if(factor != null)
-				level = factor.getLevelById(levelId);
+		
+		if(design != null) {
 			
-			if(factor != null && level != null)
-				designCell.put(factor, level);
+			for(Element dcElement : designCellElements) {
+				String factorId = dcElement.getAttributeValue(ExperimentalSampleFields.DCFactorId.name());
+				String levelId = dcElement.getAttributeValue(ExperimentalSampleFields.DCLevelId.name());
+				ExperimentDesignFactor factor = design.getFactorById(factorId);
+				ExperimentDesignLevel level = null;
+				if(factor != null)
+					level = factor.getLevelById(levelId);
+				
+				if(factor != null && level != null)
+					designCell.put(factor, level);
+			}
 		}
 		dataFilesMap = new TreeMap<DataAcquisitionMethod, TreeSet<DataFile>>();
 		List<Element> dfMapElements = 

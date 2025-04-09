@@ -45,12 +45,14 @@ import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
 import edu.umich.med.mrc2.datoolbox.data.enums.SpectrumSource;
 import edu.umich.med.mrc2.datoolbox.main.AdductManager;
+import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
 import edu.umich.med.mrc2.datoolbox.project.store.MassSpectrumFields;
 import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
+import edu.umich.med.mrc2.datoolbox.project.store.XmlStorable;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 import edu.umich.med.mrc2.datoolbox.utils.NumberArrayUtils;
 
-public class MassSpectrum implements Serializable {
+public class MassSpectrum implements Serializable, XmlStorable {
 
 	/**
 	 *
@@ -493,6 +495,7 @@ public class MassSpectrum implements Serializable {
 		return msPoints.stream().mapToDouble(p -> p.getIntensity()).sum();
 	}
 
+	@Override
 	public Element getXmlElement() {
 		
 		Element spectrumElement = new Element(ObjectNames.Spectrum.name());
@@ -507,7 +510,7 @@ public class MassSpectrum implements Serializable {
 				e.printStackTrace();
 			}
 			Element mzElement = 
-					new Element(MassSpectrumFields.MZ.name()).setText(mz);			
+					new Element(CommonFields.MZ.name()).setText(mz);			
 			spectrumElement.addContent(mzElement);
 			double[]intensityValues = msPoints.stream().
 					mapToDouble(p -> Math.floor(p.getIntensity() * 100) / 100).toArray();
@@ -578,7 +581,7 @@ public class MassSpectrum implements Serializable {
 		double[] mzValues = null;
 		double[] intensityValues = null;
 		String mzText =  
-				spectrumElement.getChild(MassSpectrumFields.MZ.name()).getContent().get(0).getValue();
+				spectrumElement.getChild(CommonFields.MZ.name()).getContent().get(0).getValue();
 		try {
 			mzValues = NumberArrayUtils.decodeNumberArray(mzText);
 		} catch (UnsupportedEncodingException e) {
@@ -593,9 +596,11 @@ public class MassSpectrum implements Serializable {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		for(int i=0; i<mzValues.length; i++)
-			msPoints.add(new MsPoint(mzValues[i], intensityValues[i]));
-		
+		if(mzValues != null && intensityValues != null) {
+			
+			for(int i=0; i<mzValues.length; i++)
+				msPoints.add(new MsPoint(mzValues[i], intensityValues[i]));
+		}
 		List<Element>msmsElementList = spectrumElement.getChildren(MassSpectrumFields.MsmsList.name());
 		if(!msmsElementList.isEmpty()) {
 			

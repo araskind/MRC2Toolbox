@@ -42,6 +42,7 @@ import edu.umich.med.mrc2.datoolbox.data.lims.ObjectAnnotation;
 import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
 import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
 import edu.umich.med.mrc2.datoolbox.project.store.TandemMassSpectrumFields;
+import edu.umich.med.mrc2.datoolbox.project.store.XmlStorable;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 import edu.umich.med.mrc2.datoolbox.utils.NumberArrayUtils;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
@@ -50,7 +51,7 @@ import edu.umich.med.mrc2.datoolbox.utils.Range;
  * @author Sasha
  *
  */
-public class TandemMassSpectrum implements AnnotatedObject, Serializable {
+public class TandemMassSpectrum implements AnnotatedObject, Serializable, XmlStorable {
 
 	/**
 	 *
@@ -547,6 +548,7 @@ public class TandemMassSpectrum implements AnnotatedObject, Serializable {
 		this.parentIonIsMinorIsotope = parentIonIsMinorIsotope;
 	}
 	
+	@Override
 	public Element getXmlElement() {
 		
 		Element msmsElement = new Element(ObjectNames.MSMS.name());
@@ -603,7 +605,8 @@ public class TandemMassSpectrum implements AnnotatedObject, Serializable {
 					Double.toString(cidLevel));
 		
 		if(ionisationType != null)
-			msmsElement.setAttribute(TandemMassSpectrumFields.Ioniz.name(), ionisationType);
+			msmsElement.setAttribute(TandemMassSpectrumFields.Ioniz.name(), 
+					ionisationType);
 		
 		if(scanNumber > 0.0d)
 			msmsElement.setAttribute(TandemMassSpectrumFields.Scan.name(), 
@@ -618,16 +621,20 @@ public class TandemMassSpectrum implements AnnotatedObject, Serializable {
 					isolationWindow.getStorableString());
 		
 		if(polarity != null)
-			msmsElement.setAttribute(TandemMassSpectrumFields.Pol.name(), polarity.getCode());
+			msmsElement.setAttribute(TandemMassSpectrumFields.Pol.name(), 
+					polarity.getCode());
 		
 		if(description != null)
-			msmsElement.setAttribute(TandemMassSpectrumFields.Desc.name(), description);
+			msmsElement.setAttribute(TandemMassSpectrumFields.Desc.name(), 
+					description);
 		
 		if(annotatedObjectType != null)
-			msmsElement.setAttribute(TandemMassSpectrumFields.AOT.name(), annotatedObjectType.name());
+			msmsElement.setAttribute(TandemMassSpectrumFields.AOT.name(), 
+					annotatedObjectType.name());
 		
 		
-		msmsElement.setAttribute(TandemMassSpectrumFields.ParentIonPurity.name(), Double.toString(parentIonPurity));
+		msmsElement.setAttribute(TandemMassSpectrumFields.ParentIonPurity.name(), 
+				Double.toString(parentIonPurity));
 		
 		if(minorParentIons != null && !minorParentIons.isEmpty()) {			
 			List<String>mpList = minorParentIons.stream().
@@ -782,9 +789,11 @@ public class TandemMassSpectrum implements AnnotatedObject, Serializable {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		for(int i=0; i<mzValues.length; i++)
-			spectrum.add(new MsPoint(mzValues[i], intensityValues[i]));
-		
+		if(mzValues != null && intensityValues != null) {
+			
+			for(int i=0; i<mzValues.length; i++)
+				spectrum.add(new MsPoint(mzValues[i], intensityValues[i]));
+		}
 		setEntropy(MsUtils.calculateCleanedSpectrumEntropyNatLog(spectrum));
 	}
 

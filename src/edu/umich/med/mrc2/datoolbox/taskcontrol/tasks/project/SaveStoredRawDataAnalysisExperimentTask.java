@@ -248,8 +248,8 @@ return;
 		xmlFile = Paths.get(
 				experimentToSave.getUncompressedExperimentFilesDirectory().getAbsolutePath(), 
 				MRC2ToolBoxConfiguration.PROJECT_FILE_NAME).toFile();
-        try {
-            FileWriter writer = new FileWriter(xmlFile, false);
+		
+        try (FileWriter writer = new FileWriter(xmlFile, false)){
             XMLOutputter outputter = new XMLOutputter();
             outputter.setFormat(Format.getCompactFormat());
             outputter.output(document, writer);

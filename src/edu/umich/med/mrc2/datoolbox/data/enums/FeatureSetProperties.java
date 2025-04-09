@@ -21,18 +21,26 @@
 
 package edu.umich.med.mrc2.datoolbox.data.enums;
 
+import edu.umich.med.mrc2.datoolbox.gui.fdata.cleanup.FeatureCleanupParameters;
+
 public enum  FeatureSetProperties {
 
-	FILTERING_PARAMETERS("Filtering parameters");
+	FILTERING_PARAMETERS("Filtering parameters", FeatureCleanupParameters.class);
 
 	private final String uiName;
+	private final Class clazz;
 
-	FeatureSetProperties(String uiName) {
+	FeatureSetProperties(String uiName, Class clazz) {
 		this.uiName = uiName;
+		this.clazz = clazz;
 	}
 
 	public String getName() {
 		return uiName;
+	}
+	
+	public Class getClazz() {
+		return clazz;
 	}
 
 	@Override

@@ -46,25 +46,31 @@ public class ExperimentDesignLevel implements Comparable<ExperimentDesignLevel>,
 	public ExperimentDesignLevel(String levelName) {
 		super();
 		this.levelName = levelName;
-		parentFactor = null;
-		this.levelId = DataPrefix.EXPERIMENTAL_FACTOR_LEVEL.getName() + UUID.randomUUID().toString();
-		enabled = true;
+		this.parentFactor = null;
+		this.levelId = DataPrefix.EXPERIMENTAL_FACTOR_LEVEL.getName() 
+				+ UUID.randomUUID().toString();
+		this.enabled = true;
 	}
 
-	public ExperimentDesignLevel(String levelName, String levelId) {
+	public ExperimentDesignLevel(
+			String levelName, 
+			String levelId) {
 		super();
 		this.levelName = levelName;
-		parentFactor = null;
+		this.parentFactor = null;
 		this.levelId = levelId;
-		enabled = true;
+		this.enabled = true;
 	}
 
-	public ExperimentDesignLevel(String levelName, ExperimentDesignFactor parent) {
+	public ExperimentDesignLevel(
+			String levelName, 
+			ExperimentDesignFactor parent) {
 		super();
 		this.levelName = levelName;
-		parentFactor = parent;
-		this.levelId = DataPrefix.EXPERIMENTAL_FACTOR_LEVEL.getName() + UUID.randomUUID().toString();
-		enabled = true;
+		this.parentFactor = parent;
+		this.levelId = DataPrefix.EXPERIMENTAL_FACTOR_LEVEL.getName() 
+				+ UUID.randomUUID().toString();
+		this.enabled = true;
 	}
 
 	
@@ -166,13 +172,11 @@ public class ExperimentDesignLevel implements Comparable<ExperimentDesignLevel>,
             return false;
 
         //	If belong to same factor
-        if(this.parentFactor != null && other.getParentFactor() != null) {
+        if(this.parentFactor != null && other.getParentFactor() != null 
+        		&& this.parentFactor.equals(other.getParentFactor())) {
 
-        	if(this.parentFactor.equals(other.getParentFactor())) {
-
-                if ((this.levelName == null) ? (other.getName() != null) : !this.levelName.equals(other.getName()))
-                    return false;
-        	}
+            if ((this.levelName == null) ? (other.getName() != null) : !this.levelName.equals(other.getName()))
+                return false;      	
         }
         return true;
     }

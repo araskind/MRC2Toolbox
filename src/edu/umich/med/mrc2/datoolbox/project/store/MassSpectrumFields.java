@@ -24,7 +24,6 @@ package edu.umich.med.mrc2.datoolbox.project.store;
 public enum MassSpectrumFields {
 	
 	Algo,
-	MZ,
 	Intensity,
 	MsmsList,
 	AdductMap,

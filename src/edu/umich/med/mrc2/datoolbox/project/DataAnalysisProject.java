@@ -70,7 +70,7 @@ public class DataAnalysisProject extends Experiment {
 	protected TreeMap<DataPipeline, CompoundLibrary> libraryMap;
 	protected TreeMap<DataPipeline, Set<MsFeature>> featureMap;
 	protected TreeMap<DataPipeline, Matrix> dataMatrixMap;
-	protected TreeMap<DataPipeline, String> dataMatrixFileMap;	
+	protected TreeMap<DataPipeline, String> dataMatrixFileMap;
 	protected TreeMap<DataPipeline, Matrix> featureMatrixMap;
 	protected TreeMap<DataPipeline, String> featureMatrixFileMap;	
 	protected TreeMap<DataPipeline, Matrix> imputedDataMatrixMap;
@@ -631,11 +631,8 @@ public class DataAnalysisProject extends Experiment {
 	public void addDataFilesForAcquisitionMethod(
 			DataAcquisitionMethod acquisitionMethod, Collection<DataFile> fileSet) {
 		
-//		if(!dataFileMap.containsKey(acquisitionMethod))
-//			dataFileMap.put(acquisitionMethod, new TreeSet<DataFile>());
-		
-		dataFileMap.computeIfAbsent(acquisitionMethod, v -> new TreeSet<DataFile>());
-			
+		dataFileMap.computeIfAbsent(
+				acquisitionMethod, v -> new TreeSet<DataFile>());			
 		dataFileMap.get(acquisitionMethod).addAll(fileSet);
 	}
 

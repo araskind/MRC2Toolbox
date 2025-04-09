@@ -382,6 +382,10 @@ public class DataFile implements Comparable<DataFile>, Serializable {
 					OfflineExperimentLoadCache.getExperimentalSampleById(sampleId);
 		
 		enabled = true;
+		if(fileElement.getAttributeValue(CommonFields.Enabled.name()) != null)		
+			enabled = Boolean.parseBoolean(
+				fileElement.getAttributeValue(CommonFields.Enabled.name()));
+		
 		chromatograms = new ArrayList<ExtractedChromatogram>();
 		userSpectra = new ArrayList<AverageMassSpectrum>();		
 		resultFiles = new TreeMap<DataExtractionMethod,ResultsFile>();		
@@ -414,10 +418,14 @@ public class DataFile implements Comparable<DataFile>, Serializable {
 	}
 
 	public Element getXmlElement() {
+		
 		Element dataFileElement = 
         		new Element(ObjectNames.DataFile.name());
 		dataFileElement.setAttribute(CommonFields.Name.name(), name);	
 		dataFileElement.setAttribute(DataFileFields.Path.name(), fullPath);	
+		
+		dataFileElement.setAttribute(
+				CommonFields.Enabled.name(), Boolean.toString(enabled));
 		
 		if(parentSample != null)
 			dataFileElement.setAttribute(
