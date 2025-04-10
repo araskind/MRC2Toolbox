@@ -52,8 +52,9 @@ public class FIOUtils {
 		if (FilenameUtils.getExtension(f.getPath()).equals(newExtension))
 			return f;
 
-		String newFileName = FilenameUtils.getFullPath(f.getAbsolutePath()) + FilenameUtils.getBaseName(f.getName())
-				+ "." + newExtension;
+		String newFileName = 
+				FilenameUtils.getFullPath(f.getAbsolutePath()) 
+					+ FilenameUtils.getBaseName(f.getName()) + "." + newExtension;
 
 		return new File(newFileName);
 	}

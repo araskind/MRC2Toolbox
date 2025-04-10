@@ -61,7 +61,7 @@ import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.Experiment;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
 
-public class FeatureHeatchartSettingsPanel extends 
+public class FeatureHeatChartSettingsPanel extends 
 		JPanel implements ItemListener, ActionListener, BackedByPreferences, TableModelListener {
 
 	/**
@@ -97,7 +97,7 @@ public class FeatureHeatchartSettingsPanel extends
 	private Experiment experiment;
 	
 	@SuppressWarnings("unchecked")
-	public FeatureHeatchartSettingsPanel(
+	public FeatureHeatChartSettingsPanel(
 			ActionListener actListener, 
 			ItemListener externalItemListener) {
 		
@@ -577,7 +577,7 @@ public class FeatureHeatchartSettingsPanel extends
 	public MZRTPlotParameterObject getPlotParameters() {
 		
 		Set<ExperimentalSample>selectedSamples = 
-				experiment.getExperimentalSamplesBySampleTypes(
+				experiment.getExperimentDesign().getExperimentalSamplesBySampleTypes(
 						sampleGroupTable.getSelectedSamples(), true);
 		
 		MZRTPlotParameterObject params = new MZRTPlotParameterObject();

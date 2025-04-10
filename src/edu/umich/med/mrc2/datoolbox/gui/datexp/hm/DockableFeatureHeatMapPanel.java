@@ -59,7 +59,7 @@ public class DockableFeatureHeatMapPanel extends DefaultSingleCDockable implemen
 	private MsFeatureSet featureSet;
 	private JFHeatChart heatChart;
 	private FeatureHeatchartToolbar toolbar;
-	private FeatureHeatchartSettingsPanel chartSettingsPanel;
+	private FeatureHeatChartSettingsPanel chartSettingsPanel;
 	private FeatureHeatMapDataSet heatMapDataSet;
 	private MZRTPlotParameterObject lastUsedParameters;
 	private Matrix featureSubsetMatrix;
@@ -77,7 +77,7 @@ public class DockableFeatureHeatMapPanel extends DefaultSingleCDockable implemen
 		toolbar = new FeatureHeatchartToolbar(heatChart, this);
 		add(toolbar, BorderLayout.NORTH);
 		
-		chartSettingsPanel = new FeatureHeatchartSettingsPanel(this, this);
+		chartSettingsPanel = new FeatureHeatChartSettingsPanel(this, this);
 		add(chartSettingsPanel, BorderLayout.EAST);
 	}
 	

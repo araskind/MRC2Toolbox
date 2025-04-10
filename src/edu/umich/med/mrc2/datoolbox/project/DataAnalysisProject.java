@@ -56,6 +56,7 @@ import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSProject;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainWindow;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
+import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
 
 public class DataAnalysisProject extends Experiment {
 
@@ -91,8 +92,7 @@ public class DataAnalysisProject extends Experiment {
 
 		super(ProjectType.DATA_ANALYSIS, 
 				projectName, 
-				projectDescription, 
-				parentDirectory);
+				projectDescription);
 
 		createDirectoryStructureForNewExperiment(parentDirectory);
 		initNewProject();		
@@ -102,19 +102,10 @@ public class DataAnalysisProject extends Experiment {
 	protected void createDirectoryStructureForNewExperiment(File parentDirectory) {
 		
 		super.createDirectoryStructureForNewExperiment(parentDirectory);
-		experimentFile = 
-				Paths.get(experimentDirectory.getAbsolutePath(), name.replaceAll("\\W+", "-") + "."
-				+ MRC2ToolBoxConfiguration.EXPERIMENT_FILE_EXTENSION).toFile();
+		experimentFile = FIOUtils.changeExtension(
+				experimentFile, MRC2ToolBoxConfiguration.EXPERIMENT_FILE_EXTENSION);
 	}
-	
-	public void updateExperimentLocation(File newProjectFile) {
-		
-		experimentFile = newProjectFile;
-		experimentDirectory = newProjectFile.getParentFile();
-		exportsDirectory = Paths.get(experimentDirectory.getAbsolutePath(), 
-				MRC2ToolBoxConfiguration.DATA_EXPORT_DIRECTORY).toFile();	
-	}
-		
+
 	protected void initNewProject() {
 
 		libraryMap = new TreeMap<DataPipeline, CompoundLibrary>();
@@ -160,12 +151,6 @@ public class DataAnalysisProject extends Experiment {
 		featureMatrixMap = new TreeMap<DataPipeline, Matrix>();
 	}
 
-	public void setProjectFile(File newProjectFile) {
-		experimentFile = newProjectFile;
-		experimentDirectory = experimentFile.getParentFile();
-		exportsDirectory = getExportsDirectory();
-	}
-	
 	public void addDataPipeline(DataPipeline pipeline) {
 		
 		if(dataPipelines.contains(pipeline)) {
@@ -213,7 +198,7 @@ public class DataAnalysisProject extends Experiment {
 
 		// Delete data matrix and storage file
 		dataMatrixMap.remove(pipeline);
-		File dataMatrixFile = Paths.get(experimentDirectory.getAbsolutePath(), 
+		File dataMatrixFile = Paths.get(getExperimentDirectory().getAbsolutePath(), 
 				dataMatrixFileMap.get(pipeline)).toFile();
 		if (dataMatrixFile.exists())
 			dataMatrixFile.delete();
@@ -228,7 +213,7 @@ public class DataAnalysisProject extends Experiment {
 		
 		//	Delete feature matrix and storage file
 		featureMatrixMap.remove(pipeline);
-		File featureMatrixFile = Paths.get(experimentDirectory.getAbsolutePath(), 
+		File featureMatrixFile = Paths.get(getExperimentDirectory().getAbsolutePath(), 
 				featureMatrixFileMap.get(pipeline)).toFile();
 		if (featureMatrixFile.exists())
 			featureMatrixFile.delete();
@@ -848,16 +833,9 @@ public class DataAnalysisProject extends Experiment {
 	@Override
 	public Set<ExperimentalSample> getPooledSamples() {
 		
-		if(pooledSamples == null) {
-			
-			pooledSamples = new TreeSet<ExperimentalSample>();	
-			if(experimentDesign != null) {
-				
-				experimentDesign.getSamples().stream().
-					filter(s -> s.isIncloodeInPoolStats()).forEach(s -> pooledSamples.add(s));
-			}
-		}
-		return pooledSamples;
+		return experimentDesign.getSamples().stream().
+				filter(s -> s.isIncloodeInPoolStats()).
+				collect(Collectors.toCollection(TreeSet::new));
 	}
 	
 	public Matrix getDataMatrixForFeatureSetAndDesign(

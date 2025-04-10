@@ -668,6 +668,31 @@ public class ExperimentDesign implements ExperimentDesignFactorListener, Seriali
 				collect(Collectors.toList());
 	}
 	
+    public Set<ExperimentalSample>getExperimentalSamplesBySampleTypes(
+    		Collection<ExperimentalSample>sampleTypes, boolean enabledOnly){
+    	
+    	Set<ExperimentalSample>selectedSamples = new TreeSet<ExperimentalSample>();
+    	if(sampleTypes == null || sampleTypes.isEmpty() || sampleSet.isEmpty())
+    		return selectedSamples;
+
+    	for(ExperimentalSample type : sampleTypes) {
+    		
+    		if(type.equals(ReferenceSamplesManager.getGenericRegularSample()))
+    			selectedSamples.addAll(getRegularSamples());
+    		
+    		for(ExperimentalSample ref : getReferenceSamples()) {
+    			 if(ref.equals(type))
+    				 selectedSamples.add(ref);
+    		}
+    	}
+    	if(enabledOnly)
+    		selectedSamples.stream().
+    			filter(s -> s.isEnabled()).
+    			collect(Collectors.toCollection(TreeSet::new));
+    		
+    	return selectedSamples;
+    }
+	
 	public Element getXmlElement() {
 		
 		Element experimentDesignElement = 

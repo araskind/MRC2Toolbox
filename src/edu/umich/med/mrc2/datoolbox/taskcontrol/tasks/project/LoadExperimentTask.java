@@ -24,8 +24,8 @@ package edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.project;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -34,7 +34,6 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 
 import org.apache.commons.io.FilenameUtils;
@@ -206,14 +205,9 @@ public class LoadExperimentTask extends AbstractTask implements TaskListener{
 		}
 	}
 
-	private void loadExperimentFile() throws ZipException, IOException {
+	private void loadExperimentFile() {
 
 		taskDescription = "Unzipping and reading experiment file ...";
-		ZipFile zipFile;
-		ZipEntry zippedExperiment;
-		InputStream input;
-		BufferedReader br;
-
 		XStream experimentImport = new XStream(new StaxDriver());
 		/**
 		 * From
@@ -229,21 +223,28 @@ public class LoadExperimentTask extends AbstractTask implements TaskListener{
 		experimentImport.allowTypesByRegExp(new String[] { ".*" });
 		experimentImport.ignoreUnknownElements();
         
-		zipFile = new ZipFile(experimentFile);
+		try(ZipFile zipFile = new ZipFile(experimentFile)){
 
-		if (zipFile.entries().hasMoreElements()) {
+			if (zipFile.entries().hasMoreElements()) {
+	
+				ZipEntry zippedExperiment = zipFile.entries().nextElement();
 
-			zippedExperiment = zipFile.entries().nextElement();
-			input = zipFile.getInputStream(zippedExperiment);
-			br = new BufferedReader(new InputStreamReader(input, "UTF-8"));
-
-			newExperiment = (DataAnalysisProject) experimentImport.fromXML(br);
-			if(newExperiment.getProjectType() == null)	
-				newExperiment.setProjectType(ProjectType.DATA_ANALYSIS);
+				try(BufferedReader br = new BufferedReader(
+						new InputStreamReader(zipFile.getInputStream(zippedExperiment), StandardCharsets.UTF_8))){
+	
+					newExperiment = (DataAnalysisProject) experimentImport.fromXML(br);
+					if(newExperiment.getProjectType() == null)	
+						newExperiment.setProjectType(ProjectType.DATA_ANALYSIS);
 					
-			br.close();
-			input.close();
-			zipFile.close();
+					newExperiment.setExperimentFile(experimentFile);
+				}
+				catch(IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		catch(IOException e) {
+			e.printStackTrace();
 		}
 		processed = 50;
 	}

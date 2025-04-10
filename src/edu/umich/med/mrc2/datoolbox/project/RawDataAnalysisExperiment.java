@@ -24,6 +24,7 @@ package edu.umich.med.mrc2.datoolbox.project;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Date;
@@ -64,6 +65,7 @@ import edu.umich.med.mrc2.datoolbox.main.FeatureCollectionManager;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.rawdata.MSMSExtractionParameterSet;
+import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
 
 public class RawDataAnalysisExperiment extends Experiment {
 	
@@ -71,8 +73,6 @@ public class RawDataAnalysisExperiment extends Experiment {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	protected File rawDataDirectory;
-	protected File uncompressedExperimentFilesDirectory;
 	protected LIMSInstrument instrument;
 	protected Collection<DataFile>msmsDataFiles;
 	protected Collection<DataFile>msOneDataFiles;
@@ -97,8 +97,9 @@ public class RawDataAnalysisExperiment extends Experiment {
 			File parentDirectory,
 			LIMSUser createdBy) {
 
-		super(ProjectType.RAW_DATA_ANALYSIS, experimentName, 
-				experimentDescription, parentDirectory);
+		super(ProjectType.RAW_DATA_ANALYSIS, 
+				experimentName, 
+				experimentDescription);
 		createDirectoryStructureForNewExperiment(parentDirectory);
 		initFields();
 		this.createdBy = createdBy;
@@ -123,67 +124,33 @@ public class RawDataAnalysisExperiment extends Experiment {
 			Date lastModified) {
 		super(id, name, description, experimentFile, dateCreated, lastModified);
 		this.projectType = ProjectType.RAW_DATA_ANALYSIS;
-		setExperimentDirectories();
 		initFields();
-	}
-	
-	public void updateExperimentLocation(File newExperimentFile) {
-		
-		experimentFile = newExperimentFile;
-		experimentDirectory = newExperimentFile.getParentFile();
-		exportsDirectory = Paths.get(experimentDirectory.getAbsolutePath(), 
-				MRC2ToolBoxConfiguration.DATA_EXPORT_DIRECTORY).toFile();	
-		File newRawDataDirectory = Paths.get(experimentDirectory.getAbsolutePath(), 
-				MRC2ToolBoxConfiguration.RAW_DATA_DIRECTORY).toFile();
-		if(!newRawDataDirectory.equals(rawDataDirectory)) {
-			
-			for(DataFile df : getDataFiles()) {
-				
-				File rdf = new File(df.getFullPath());
-				if(rdf.getParentFile().equals(rawDataDirectory))
-					df.setFullPath(Paths.get(newRawDataDirectory.getAbsolutePath(), 
-							df.getName()).toString());
-			}
-			rawDataDirectory = newRawDataDirectory;
-		}
 	}
 	
 	@Override
 	protected void createDirectoryStructureForNewExperiment(File parentDirectory) {
 		
 		super.createDirectoryStructureForNewExperiment(parentDirectory);
-		experimentFile = 
-				Paths.get(experimentDirectory.getAbsolutePath(), name.replaceAll("\\W+", "-") + "."
-				+ MRC2ToolBoxConfiguration.RAW_DATA_EXPERIMENT_FILE_EXTENSION).toFile();	
-		rawDataDirectory = Paths.get(experimentDirectory.getAbsolutePath(), 
-				MRC2ToolBoxConfiguration.RAW_DATA_DIRECTORY).toFile();
-		uncompressedExperimentFilesDirectory = Paths.get(experimentDirectory.getAbsolutePath(), 
-				MRC2ToolBoxConfiguration.UNCOMPRESSED_EXPERIMENT_FILES_DIRECTORY).toFile();
+		experimentFile = FIOUtils.changeExtension(
+				experimentFile, MRC2ToolBoxConfiguration.RAW_DATA_EXPERIMENT_FILE_EXTENSION);
+
+		Path rawDataDirectoryPath = Paths.get(getExperimentDirectory().getAbsolutePath(), 
+				MRC2ToolBoxConfiguration.RAW_DATA_DIRECTORY);
 		try {
-			Files.createDirectories(Paths.get(rawDataDirectory.getAbsolutePath()));
+			Files.createDirectories(rawDataDirectoryPath);
 		} catch (IOException e) {
 			e.printStackTrace();
 			MessageDialog.showWarningMsg("Failed to create raw data directory");
-			return;
 		}
+		Path uncompressedExperimentFilesDirectoryPath = 
+				Paths.get(getExperimentDirectory().getAbsolutePath(), 
+						MRC2ToolBoxConfiguration.UNCOMPRESSED_EXPERIMENT_FILES_DIRECTORY);
 		try {
-			Files.createDirectories(Paths.get(uncompressedExperimentFilesDirectory.getAbsolutePath()));
+			Files.createDirectories(uncompressedExperimentFilesDirectoryPath);
 		} catch (IOException e) {
 			e.printStackTrace();
-			MessageDialog.showWarningMsg("Failed to create project files directory");
-			return;
+			MessageDialog.showWarningMsg("Failed to uncompressed experiment files directory");
 		}
-	}
-	
-	@Override
-	protected void setExperimentDirectories() {
-		
-		super.setExperimentDirectories();
-		
-		rawDataDirectory = Paths.get(experimentDirectory.getAbsolutePath(), 
-				MRC2ToolBoxConfiguration.RAW_DATA_DIRECTORY).toFile();
-		uncompressedExperimentFilesDirectory = Paths.get(experimentDirectory.getAbsolutePath(), 
-				MRC2ToolBoxConfiguration.UNCOMPRESSED_EXPERIMENT_FILES_DIRECTORY).toFile();
 	}
 
 	private void initFields() {
@@ -298,7 +265,9 @@ public class RawDataAnalysisExperiment extends Experiment {
 	}
 	
 	public File getRawDataDirectory() {
-		return rawDataDirectory;
+		
+		return Paths.get(getExperimentDirectory().getAbsolutePath(), 
+				MRC2ToolBoxConfiguration.RAW_DATA_DIRECTORY).toFile();
 	}
 
 	public Collection<DataFile> getMSMSDataFiles() {
@@ -363,7 +332,9 @@ public class RawDataAnalysisExperiment extends Experiment {
 	}
 
 	public File getUncompressedExperimentFilesDirectory() {
-		return uncompressedExperimentFilesDirectory;
+		
+		return  Paths.get(getExperimentDirectory().getAbsolutePath(), 
+				MRC2ToolBoxConfiguration.UNCOMPRESSED_EXPERIMENT_FILES_DIRECTORY).toFile();
 	}
 
 	public Map<String, MsFeatureChromatogramBundle> getChromatogramMap() {

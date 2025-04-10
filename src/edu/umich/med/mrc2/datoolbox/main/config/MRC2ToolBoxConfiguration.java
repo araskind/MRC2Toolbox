@@ -57,6 +57,7 @@ public class MRC2ToolBoxConfiguration {
 	public static final String ID_EXPERIMENT_FILE_EXTENSION = "idproject";
 	public static final String RAW_DATA_EXPERIMENT_FILE_EXTENSION = "rdproject";
 	public static final String DATA_MATRIX_EXTENSION = "dmat";
+	public static final String DATA_DIRECTORY = "Data";
 	public static final String DATA_EXPORT_DIRECTORY = "exports";
 	public static final String RAW_DATA_DIRECTORY = "RawData";
 	public static final String TAB_DATA_DELIMITER = "\t";

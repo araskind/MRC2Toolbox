@@ -25,23 +25,26 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collection;
 import java.util.Date;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.UUID;
-import java.util.stream.Collectors;
+
+import org.jdom2.Element;
 
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesign;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentalSample;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
-import edu.umich.med.mrc2.datoolbox.main.ReferenceSamplesManager;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
+import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
+import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
+import edu.umich.med.mrc2.datoolbox.project.store.XmlStorable;
+import edu.umich.med.mrc2.datoolbox.utils.ExperimentUtils;
 
-public abstract class Experiment implements Serializable{
+public abstract class Experiment implements Serializable, XmlStorable{
 
 	/**
 	 * 
@@ -52,29 +55,27 @@ public abstract class Experiment implements Serializable{
 	protected String id;
 	protected String name;
 	protected String description;
-	protected File experimentFile;	
-	protected File experimentDirectory;
-	protected File exportsDirectory;
-	protected Date dateCreated, lastModified;
+	protected File experimentFile;
+	protected Date dateCreated;
+	protected Date lastModified;
 	protected ExperimentDesign experimentDesign;
-	protected TreeSet<ExperimentalSample> pooledSamples;
 	protected LIMSUser createdBy;
 	protected LIMSExperiment limsExperiment;
 	
-	public Experiment(ProjectType projectType,
-					String name, 
-					String description, 
-					File parentDirectory) {
+	protected Experiment(
+			ProjectType projectType,
+			String name, 
+			String description) {
 		super();
 		this.projectType = projectType;
 		this.name = name;
 		this.description = description;		
 		this.id = UUID.randomUUID().toString();
-		dateCreated = new Date();
-		lastModified = new Date();
+		this.dateCreated = new Date();
+		this.lastModified = new Date();
 	}
 
-	public Experiment(
+	protected Experiment(
 			String id, 
 			String name,
 			String description, 
@@ -88,36 +89,40 @@ public abstract class Experiment implements Serializable{
 		this.experimentFile = experimentFile;
 		this.dateCreated = dateCreated;
 		this.lastModified = lastModified;
-		
-		experimentDirectory = experimentFile.getParentFile();
 	}
 	
 	protected void createDirectoryStructureForNewExperiment(File parentDirectory) {
 		
-		experimentDirectory = 
-				Paths.get(parentDirectory.getAbsolutePath(), name.replaceAll("\\W+", "-")).toFile();				
-		exportsDirectory = Paths.get(experimentDirectory.getAbsolutePath(), 
-				MRC2ToolBoxConfiguration.DATA_EXPORT_DIRECTORY).toFile();
+		Path experimentDirectoryPath = 
+				Paths.get(parentDirectory.getAbsolutePath(), name.replaceAll("\\W+", "-"));				
 		try {
-			Files.createDirectories(Paths.get(experimentDirectory.getAbsolutePath()));
+			Files.createDirectories(experimentDirectoryPath);
 		} catch (IOException e) {
 			e.printStackTrace();
 			MessageDialog.showWarningMsg("Failed to create project directory");
 			return;
 		}
+		Path exportsDirectoryPath = Paths.get(experimentDirectoryPath.toString(), 
+				MRC2ToolBoxConfiguration.DATA_EXPORT_DIRECTORY);
 		try {
-			Files.createDirectories(Paths.get(exportsDirectory.getAbsolutePath()));
+			Files.createDirectories(exportsDirectoryPath);
 		} catch (IOException e) {
 			e.printStackTrace();
 			MessageDialog.showWarningMsg("Failed to create exports directory");
 			return;
 		}
+		Path dataDirectoryPath = Paths.get(experimentDirectoryPath.toString(), 
+				MRC2ToolBoxConfiguration.DATA_DIRECTORY);
+		try {
+			Files.createDirectories(dataDirectoryPath);
+		} catch (IOException e) {
+			e.printStackTrace();
+			MessageDialog.showWarningMsg("Failed to create data directory");
+		}
 	}
-	
-	protected void setExperimentDirectories() {
 		
-		exportsDirectory = Paths.get(experimentDirectory.getAbsolutePath(), 
-				MRC2ToolBoxConfiguration.DATA_EXPORT_DIRECTORY).toFile();
+	public void updateExperimentLocation(File newExperimentFile) {		
+		experimentFile = newExperimentFile;
 	}
 
 	public String getId() {
@@ -153,19 +158,17 @@ public abstract class Experiment implements Serializable{
 	}
 
 	public File getExperimentDirectory() {
-		return experimentDirectory;
+		return experimentFile.getParentFile();
 	}
-
-	public void setExperimentDirectory(File experimentDirectory) {
-		this.experimentDirectory = experimentDirectory;
-	}
-
+	
 	public File getExportsDirectory() {
-		return exportsDirectory;
+		return Paths.get(experimentFile.getParentFile().getAbsolutePath(), 
+					MRC2ToolBoxConfiguration.DATA_EXPORT_DIRECTORY).toFile();
 	}
-
-	public void setExportsDirectory(File exportsDirectory) {
-		this.exportsDirectory = exportsDirectory;
+	
+	public File getDataDirectory() {
+		return Paths.get(experimentFile.getParentFile().getAbsolutePath(), 
+					MRC2ToolBoxConfiguration.DATA_DIRECTORY).toFile();
 	}
 
 	public Date getDateCreated() {
@@ -215,7 +218,27 @@ public abstract class Experiment implements Serializable{
 	public void setLimsExperiment(LIMSExperiment limsExperiment) {
 		this.limsExperiment = limsExperiment;
 	}
-	
+		
+    @Override
+    public boolean equals(Object obj) {
+
+		if (obj == this)
+			return true;
+
+        if (obj == null)
+            return false;
+
+        if (!Experiment.class.isAssignableFrom(obj.getClass()))
+            return false;
+
+        final Experiment other = (Experiment) obj;
+
+        if ((this.id == null) ? (other.getId() != null) : !this.id.equals(other.getId()))
+            return false;
+
+        return true;
+    }
+    
     @Override
     public int hashCode() {
 
@@ -224,32 +247,38 @@ public abstract class Experiment implements Serializable{
         return hash;
     } 
     
-    public Set<ExperimentalSample>getExperimentalSamplesBySampleTypes(
-    		Collection<ExperimentalSample>sampleTypes, boolean enabledOnly){
+    public Element getXmlElement() {
     	
-    	Set<ExperimentalSample>selectedSamples = new TreeSet<ExperimentalSample>();
-    	if(sampleTypes == null || sampleTypes.isEmpty())
-    		return selectedSamples;
+    	Element experimentElement = new Element(ObjectNames.Experiment.name());
+    	experimentElement.setAttribute(CommonFields.Id.name(), id);
     	
-    	if(experimentDesign == null ||experimentDesign.getSamples().isEmpty())
-    		return selectedSamples;
+    	Element nameElement = new Element(ObjectNames.Experiment.name());   	
+    	nameElement.setText(name);
+    	experimentElement.addContent(nameElement);
     	
-    	for(ExperimentalSample type : sampleTypes) {
-    		
-    		if(type.equals(ReferenceSamplesManager.getGenericRegularSample()))
-    			selectedSamples.addAll(experimentDesign.getRegularSamples());
-    		
-    		for(ExperimentalSample ref : experimentDesign.getReferenceSamples()) {
-    			 if(ref.equals(type))
-    				 selectedSamples.add(ref);
-    		}
-    	}
-    	if(enabledOnly)
-    		selectedSamples.stream().
-    			filter(s -> s.isEnabled()).
-    			collect(Collectors.toCollection(TreeSet::new));
-    		
-    	return selectedSamples;
+    	Element descriptionElement = new Element(CommonFields.Description.name());
+    	descriptionElement.setText(description);
+    	experimentElement.addContent(descriptionElement);
+    	
+    	if(dateCreated != null)
+    		experimentElement.setAttribute(CommonFields.DateCreated.name(), 
+    				ExperimentUtils.dateTimeFormat.format(dateCreated));
+    	
+    	if(lastModified != null)
+    		experimentElement.setAttribute(CommonFields.LastModified.name(), 
+    				ExperimentUtils.dateTimeFormat.format(lastModified));
+    	
+    	if(createdBy != null)
+    		experimentElement.setAttribute(
+    				CommonFields.UserId.name(),createdBy.getId());
+    	
+    	if(experimentDesign != null)
+    		experimentElement.addContent(experimentDesign.getXmlElement());
+    	
+    	if(limsExperiment != null)
+    		experimentElement.addContent(limsExperiment.getXmlElement());
+    	
+    	return experimentElement;
     }
 }
 

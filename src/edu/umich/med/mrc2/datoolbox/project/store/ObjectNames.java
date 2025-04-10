@@ -38,6 +38,7 @@ public enum ObjectNames {
 	DataFile,
 	DataPipeline,
 	DataProcessingSoftware,
+	Experiment,
 	ExperimentDesign,
 	ExperimentDesignFactor,
 	ExperimentDesignLevel,
