@@ -22,7 +22,6 @@
 package edu.umich.med.mrc2.datoolbox.data;
 
 import java.io.Serializable;
-import java.text.ParseException;
 import java.util.Date;
 import java.util.UUID;
 
@@ -32,7 +31,7 @@ import edu.umich.med.mrc2.datoolbox.data.enums.AnnotatedObjectType;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
 import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
-import edu.umich.med.mrc2.datoolbox.utils.ExperimentUtils;
+import edu.umich.med.mrc2.datoolbox.project.store.ProjectStoreUtils;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
 
 public class LibraryMsFeature extends MsFeature implements Serializable {
@@ -179,27 +178,10 @@ public class LibraryMsFeature extends MsFeature implements Serializable {
 	public LibraryMsFeature(Element libraryMsFeatureElement) {
 		
 		super(libraryMsFeatureElement);
-		
-		String dateCreatedString = 
-				libraryMsFeatureElement.getAttributeValue(CommonFields.DateCreated.name());
-		if(dateCreatedString != null) {
-			try {
-				dateCreated = ExperimentUtils.dateTimeFormat.parse(dateCreatedString);
-			} catch (ParseException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		String lastModifiedString = 
-				libraryMsFeatureElement.getAttributeValue(CommonFields.DateCreated.name());
-		if(lastModifiedString != null) {
-			try {
-				lastModified = ExperimentUtils.dateTimeFormat.parse(lastModifiedString);
-			} catch (ParseException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
+		dateCreated = ProjectStoreUtils.getDateFromAttribute(
+				libraryMsFeatureElement, CommonFields.DateCreated);
+		lastModified = ProjectStoreUtils.getDateFromAttribute(
+				libraryMsFeatureElement, CommonFields.LastModified);
 	}
 	
 	@Override
@@ -208,13 +190,10 @@ public class LibraryMsFeature extends MsFeature implements Serializable {
 		Element libraryMsFeatureElement = super.getXmlElement();
 		libraryMsFeatureElement.setName(ObjectNames.LibraryMsFeature.name());
 		
-		if(dateCreated != null)
-			libraryMsFeatureElement.setAttribute(CommonFields.DateCreated.name(), 
-					ExperimentUtils.dateTimeFormat.format(dateCreated));
-		
-		if(lastModified != null)
-			libraryMsFeatureElement.setAttribute(CommonFields.LastModified.name(), 
-					ExperimentUtils.dateTimeFormat.format(lastModified));
+		ProjectStoreUtils.setDateAttribute(
+				dateCreated, CommonFields.DateCreated, libraryMsFeatureElement);
+		ProjectStoreUtils.setDateAttribute(
+				lastModified, CommonFields.LastModified, libraryMsFeatureElement);
 		
 		return libraryMsFeatureElement;
 	}

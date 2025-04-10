@@ -51,13 +51,13 @@ import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisExperiment;
 import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
 import edu.umich.med.mrc2.datoolbox.project.store.IDTrackerProjectFields;
 import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
+import edu.umich.med.mrc2.datoolbox.project.store.ProjectStoreUtils;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskListener;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 import edu.umich.med.mrc2.datoolbox.utils.CompressionUtils;
-import edu.umich.med.mrc2.datoolbox.utils.ExperimentUtils;
 
 public class SaveStoredRawDataAnalysisExperimentTask extends AbstractTask implements TaskListener {
 	
@@ -131,16 +131,17 @@ return;
         Element experimentRoot = 
         		new Element(ObjectNames.IDTrackerRawDataProject.name());
 		experimentRoot.setAttribute("version", "1.0.0.0");
-		experimentRoot.setAttribute(CommonFields.Id.name(), 
-				experimentToSave.getId());
-		experimentRoot.setAttribute(CommonFields.Name.name(), 
-				experimentToSave.getName());
-		experimentRoot.setAttribute(CommonFields.Description.name(), 
-				experimentToSave.getDescription());
-		
-		if(experimentToSave.getCreatedBy() != null)
-			experimentRoot.setAttribute(CommonFields.UserId.name(), 
-					experimentToSave.getCreatedBy().getId());
+		experimentRoot.setAttribute(CommonFields.Id.name(), experimentToSave.getId());
+		ProjectStoreUtils.addTextElement(
+				experimentToSave.getName(), experimentRoot, CommonFields.Name);
+		ProjectStoreUtils.addDescriptionElement(
+				experimentToSave.getDescription(), experimentRoot);
+		ProjectStoreUtils.setUserIdAttribute(
+				experimentToSave.getCreatedBy(), experimentRoot);
+		ProjectStoreUtils.setDateAttribute(
+				experimentToSave.getDateCreated(), CommonFields.DateCreated, experimentRoot);
+		ProjectStoreUtils.setDateAttribute(
+				experimentToSave.getLastModified(), CommonFields.LastModified, experimentRoot);
 				
 		if(experimentToSave.getInstrument() != null)
 			experimentRoot.setAttribute(IDTrackerProjectFields.Instrument.name(), 
@@ -153,12 +154,7 @@ return;
 		experimentRoot.setAttribute(IDTrackerProjectFields.ProjectFile.name(), 
 				experimentToSave.getExperimentFile().getAbsolutePath());
 		experimentRoot.setAttribute(IDTrackerProjectFields.ProjectDir.name(), 
-				experimentToSave.getExperimentDirectory().getAbsolutePath());	
-		experimentRoot.setAttribute(CommonFields.DateCreated.name(), 
-				ExperimentUtils.dateTimeFormat.format(experimentToSave.getDateCreated()));
-		experimentRoot.setAttribute(CommonFields.LastModified.name(), 
-				ExperimentUtils.dateTimeFormat.format(experimentToSave.getLastModified()));
-        
+				experimentToSave.getExperimentDirectory().getAbsolutePath());
 		experimentRoot.addContent(       		
         		new Element(IDTrackerProjectFields.UniqueCIDList.name()).
         		setText(StringUtils.join(uniqueCompoundIds, ",")));

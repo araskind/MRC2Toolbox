@@ -33,6 +33,7 @@ import java.io.RandomAccessFile;
 import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
@@ -61,6 +62,8 @@ import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignSubset;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureSet;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
+import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
+import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.ReferenceSamplesManager;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
@@ -68,6 +71,7 @@ import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisExperiment;
 import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
 import edu.umich.med.mrc2.datoolbox.project.store.IDTrackerProjectFields;
 import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
+import edu.umich.med.mrc2.datoolbox.project.store.ProjectStoreUtils;
 
 public class ExperimentUtils {
 	
@@ -162,21 +166,26 @@ public class ExperimentUtils {
 	    Element experimentRoot = 
 	    		new Element(ObjectNames.IDTrackerRawDataProject.name());
 		experimentRoot.setAttribute("version", "1.0.0.0");
-		experimentRoot.setAttribute(CommonFields.Id.name(), 
-				experimentToSave.getId());
-		experimentRoot.setAttribute(CommonFields.Name.name(), 
-				experimentToSave.getName());
-		experimentRoot.setAttribute(CommonFields.Description.name(), 
-				experimentToSave.getDescription());
+		experimentRoot.setAttribute(CommonFields.Id.name(), experimentToSave.getId());
+		ProjectStoreUtils.addTextElement(
+				experimentToSave.getName(), experimentRoot, CommonFields.Name);
+		ProjectStoreUtils.addDescriptionElement(
+				experimentToSave.getDescription(), experimentRoot);		
+		ProjectStoreUtils.setDateAttribute(
+				experimentToSave.getDateCreated(), CommonFields.DateCreated, experimentRoot);
+		ProjectStoreUtils.setDateAttribute(
+				experimentToSave.getLastModified(), CommonFields.LastModified, experimentRoot);
+		
+		LIMSUser user = experimentToSave.getCreatedBy();
+		if(user == null)
+			user = MRC2ToolBoxCore.getIdTrackerUser();
+		
+		ProjectStoreUtils.setUserIdAttribute(user, experimentRoot);
+		
 		experimentRoot.setAttribute(IDTrackerProjectFields.ProjectFile.name(), 
 				experimentToSave.getExperimentFile().getAbsolutePath());
 		experimentRoot.setAttribute(IDTrackerProjectFields.ProjectDir.name(), 
 				experimentToSave.getExperimentDirectory().getAbsolutePath());	
-		experimentRoot.setAttribute(CommonFields.DateCreated.name(), 
-				ExperimentUtils.dateTimeFormat.format(experimentToSave.getDateCreated()));
-		experimentRoot.setAttribute(CommonFields.LastModified.name(), 
-				ExperimentUtils.dateTimeFormat.format(experimentToSave.getLastModified()));
-		
 		experimentRoot.addContent(       		
 				new Element(IDTrackerProjectFields.UniqueCIDList.name()).setText(""));
 		experimentRoot.addContent(       		
@@ -208,8 +217,7 @@ public class ExperimentUtils {
 		File xmlFile = Paths.get(
 				experimentToSave.getUncompressedExperimentFilesDirectory().getAbsolutePath(), 
 				MRC2ToolBoxConfiguration.PROJECT_FILE_NAME).toFile();
-		try {
-		    FileWriter writer = new FileWriter(xmlFile, false);
+		try (FileWriter writer = new FileWriter(xmlFile, false)){
 		    XMLOutputter outputter = new XMLOutputter();
 		    outputter.setFormat(Format.getCompactFormat());
 		    outputter.output(document, writer);
@@ -218,22 +226,18 @@ public class ExperimentUtils {
 		}
 		try {
 			CompressionUtils.zipFile(xmlFile, experimentToSave.getExperimentFile());
-		} catch (IOException e) {
+		} catch (IOException | ArchiveException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} catch (ArchiveException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		} 
 	}
 	
 	public static Collection<String>getIdList(String idListString){
 		
 		if(idListString == null || idListString.isEmpty())
-			return Arrays.asList(new String[0]);
-		else {
-			return Arrays.asList(idListString.split(","));
-		}
+			return new ArrayList<String>();
+		else 
+			return Arrays.asList(idListString.split(","));	
 	}
 	
 	public static Matrix readFeatureMatrix(			

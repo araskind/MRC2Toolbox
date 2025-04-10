@@ -41,8 +41,8 @@ import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
 import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
+import edu.umich.med.mrc2.datoolbox.project.store.ProjectStoreUtils;
 import edu.umich.med.mrc2.datoolbox.project.store.XmlStorable;
-import edu.umich.med.mrc2.datoolbox.utils.ExperimentUtils;
 
 public abstract class Experiment implements Serializable, XmlStorable{
 
@@ -90,7 +90,7 @@ public abstract class Experiment implements Serializable, XmlStorable{
 		this.dateCreated = dateCreated;
 		this.lastModified = lastModified;
 	}
-	
+
 	protected void createDirectoryStructureForNewExperiment(File parentDirectory) {
 		
 		Path experimentDirectoryPath = 
@@ -247,30 +247,44 @@ public abstract class Experiment implements Serializable, XmlStorable{
         return hash;
     } 
     
+	public Experiment(Element experimentElement) {
+		
+		super();
+		experimentElement.setAttribute(CommonFields.Id.name(), id);
+
+		name = ProjectStoreUtils.getTextFromElement(experimentElement, CommonFields.Name);
+		description = ProjectStoreUtils.getDescriptionFromElement(experimentElement);
+		
+		dateCreated = ProjectStoreUtils.getDateFromAttribute(
+				experimentElement, CommonFields.DateCreated);
+		lastModified = ProjectStoreUtils.getDateFromAttribute(
+				experimentElement, CommonFields.LastModified);		
+		createdBy = ProjectStoreUtils.getUserFromAttribute(experimentElement);
+		
+		Element designElement = experimentElement.getChild(
+				ObjectNames.ExperimentDesign.name());
+		if(designElement != null)
+			experimentDesign = new ExperimentDesign(designElement, null);
+		
+		Element limsExperimentElement = experimentElement.getChild(
+				ObjectNames.limsExperiment.name());
+		if(limsExperimentElement != null)
+			limsExperiment = new LIMSExperiment(limsExperimentElement, null);
+	}
+	
     public Element getXmlElement() {
     	
     	Element experimentElement = new Element(ObjectNames.Experiment.name());
     	experimentElement.setAttribute(CommonFields.Id.name(), id);
     	
-    	Element nameElement = new Element(ObjectNames.Experiment.name());   	
-    	nameElement.setText(name);
-    	experimentElement.addContent(nameElement);
+    	ProjectStoreUtils.addTextElement(name, experimentElement, CommonFields.Name);  	
+    	ProjectStoreUtils.addDescriptionElement(description, experimentElement);
     	
-    	Element descriptionElement = new Element(CommonFields.Description.name());
-    	descriptionElement.setText(description);
-    	experimentElement.addContent(descriptionElement);
-    	
-    	if(dateCreated != null)
-    		experimentElement.setAttribute(CommonFields.DateCreated.name(), 
-    				ExperimentUtils.dateTimeFormat.format(dateCreated));
-    	
-    	if(lastModified != null)
-    		experimentElement.setAttribute(CommonFields.LastModified.name(), 
-    				ExperimentUtils.dateTimeFormat.format(lastModified));
-    	
-    	if(createdBy != null)
-    		experimentElement.setAttribute(
-    				CommonFields.UserId.name(),createdBy.getId());
+    	ProjectStoreUtils.setDateAttribute(
+    			dateCreated, CommonFields.DateCreated, experimentElement);
+    	ProjectStoreUtils.setDateAttribute(
+    			lastModified, CommonFields.LastModified, experimentElement);  	
+    	ProjectStoreUtils.setUserIdAttribute(createdBy, experimentElement);
     	
     	if(experimentDesign != null)
     		experimentElement.addContent(experimentDesign.getXmlElement());

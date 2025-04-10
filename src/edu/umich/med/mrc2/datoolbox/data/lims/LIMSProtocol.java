@@ -22,17 +22,15 @@
 package edu.umich.med.mrc2.datoolbox.data.lims;
 
 import java.io.Serializable;
-import java.text.ParseException;
 import java.util.Date;
 
 import org.jdom2.Element;
 
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
 import edu.umich.med.mrc2.datoolbox.project.store.LIMSProtocolFields;
 import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
+import edu.umich.med.mrc2.datoolbox.project.store.ProjectStoreUtils;
 import edu.umich.med.mrc2.datoolbox.project.store.XmlStorable;
-import edu.umich.med.mrc2.datoolbox.utils.ExperimentUtils;
 
 public class LIMSProtocol implements Serializable, Comparable<LIMSProtocol>, XmlStorable{
 
@@ -235,27 +233,15 @@ public class LIMSProtocol implements Serializable, Comparable<LIMSProtocol>, Xml
 	public LIMSProtocol(Element limsProtocolElement) {
 		
 		super();
-		this.sopId = limsProtocolElement.getAttributeValue(CommonFields.Id.name());
-		this.sopGroup = limsProtocolElement.getAttributeValue(LIMSProtocolFields.SOPGroup.name());
-		this.sopName = limsProtocolElement.getAttributeValue(CommonFields.Name.name());
-		this.sopDescription = limsProtocolElement.getAttributeValue(CommonFields.Description.name());
-		this.sopVersion = limsProtocolElement.getAttributeValue(LIMSProtocolFields.SOPVersion.name());
+		sopId = limsProtocolElement.getAttributeValue(CommonFields.Id.name());
+		sopName = ProjectStoreUtils.getTextFromElement(limsProtocolElement, CommonFields.Name);
+		sopDescription = ProjectStoreUtils.getDescriptionFromElement(limsProtocolElement);
+		dateCrerated = ProjectStoreUtils.getDateFromAttribute(limsProtocolElement, CommonFields.DateCreated);	
+		createdBy = ProjectStoreUtils.getUserFromAttribute(limsProtocolElement);
+
+		sopGroup = limsProtocolElement.getAttributeValue(LIMSProtocolFields.SOPGroup.name());
+		sopVersion = limsProtocolElement.getAttributeValue(LIMSProtocolFields.SOPVersion.name());		
 		sopDetailLevel = limsProtocolElement.getAttributeValue(LIMSProtocolFields.SOPDetailLevel.name());
-		
-		String dateCreatedString = 
-				limsProtocolElement.getAttributeValue(CommonFields.DateCreated.name());
-		if(dateCreatedString != null) {
-			try {
-				dateCrerated = ExperimentUtils.dateTimeFormat.parse(dateCreatedString);
-			} catch (ParseException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}		
-		String userId = limsProtocolElement.getAttributeValue(CommonFields.UserId.name());
-		if(userId != null && !userId.isBlank())
-			createdBy = IDTDataCache.getUserById(userId);
-		
 		Element sopCategoryElement = limsProtocolElement.getChild(ObjectNames.SopCategory.name());
 		if(sopCategoryElement != null)
 			sopCategory = new SopCategory(sopCategoryElement);
@@ -266,16 +252,12 @@ public class LIMSProtocol implements Serializable, Comparable<LIMSProtocol>, Xml
 		
 		Element limsProtocolElement = new Element(ObjectNames.LIMSProtocol.name());
 		limsProtocolElement.setAttribute(CommonFields.Id.name(), sopId);
-		limsProtocolElement.setAttribute(CommonFields.Name.name(), sopName);
-		limsProtocolElement.setAttribute(CommonFields.Description.name(), sopDescription);
-		
-		if(createdBy != null)
-			limsProtocolElement.setAttribute(CommonFields.UserId.name(), createdBy.getId());
-		
-		if(dateCrerated != null)
-			limsProtocolElement.setAttribute(CommonFields.DateCreated.name(), 
-					ExperimentUtils.dateTimeFormat.format(dateCrerated));
-		
+		ProjectStoreUtils.addTextElement(sopName, limsProtocolElement, CommonFields.Name);
+		ProjectStoreUtils.addDescriptionElement(sopDescription, limsProtocolElement);
+		ProjectStoreUtils.setUserIdAttribute(createdBy, limsProtocolElement);
+		ProjectStoreUtils.setDateAttribute(
+				dateCrerated, CommonFields.DateCreated, limsProtocolElement);
+
 		if(sopGroup != null)
 			limsProtocolElement.setAttribute(LIMSProtocolFields.SOPGroup.name(), sopGroup);
 		

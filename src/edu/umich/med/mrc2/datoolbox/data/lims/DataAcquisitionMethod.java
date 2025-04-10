@@ -22,7 +22,6 @@
 package edu.umich.med.mrc2.datoolbox.data.lims;
 
 import java.io.Serializable;
-import java.text.ParseException;
 import java.util.Date;
 
 import org.jdom2.Element;
@@ -31,11 +30,10 @@ import edu.umich.med.mrc2.datoolbox.data.IonizationType;
 import edu.umich.med.mrc2.datoolbox.data.MassAnalyzerType;
 import edu.umich.med.mrc2.datoolbox.data.MsType;
 import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
 import edu.umich.med.mrc2.datoolbox.project.store.DataAcquisitionMethodFields;
 import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
-import edu.umich.med.mrc2.datoolbox.utils.ExperimentUtils;
+import edu.umich.med.mrc2.datoolbox.project.store.ProjectStoreUtils;
 
 public class DataAcquisitionMethod extends AnalysisMethod implements Serializable {
 
@@ -241,23 +239,17 @@ public class DataAcquisitionMethod extends AnalysisMethod implements Serializabl
 		super(dataAcquisitionMethodElement.getAttributeValue(CommonFields.Id.name()), 
 				dataAcquisitionMethodElement.getAttributeValue(CommonFields.Name.name()));
 		
+		//	TODO remove
 		description = dataAcquisitionMethodElement.getAttributeValue(
-				CommonFields.Description.name());
+				CommonFields.Description.name());	
+		if(description == null)
+			description = 
+				ProjectStoreUtils.getDescriptionFromElement(dataAcquisitionMethodElement);
 		
-		String createdOnString = 
-				dataAcquisitionMethodElement.getAttributeValue(CommonFields.DateCreated.name());
-		if(createdOnString != null) {
-			try {
-				createdOn = ExperimentUtils.dateTimeFormat.parse(createdOnString);
-			} catch (ParseException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		String userId = 
-				dataAcquisitionMethodElement.getAttributeValue(CommonFields.UserId.name());
-		if(userId != null && !userId.isBlank())
-			createdBy = IDTDataCache.getUserById(userId);
+		createdOn = ProjectStoreUtils.getDateFromAttribute(
+				dataAcquisitionMethodElement, CommonFields.DateCreated);
+		createdBy = ProjectStoreUtils.getUserFromAttribute(
+				dataAcquisitionMethodElement);
 		
 		Element ionizationTypeElement = 
 				dataAcquisitionMethodElement.getChild(ObjectNames.IonizationType.name());
@@ -295,11 +287,11 @@ public class DataAcquisitionMethod extends AnalysisMethod implements Serializabl
 		
 		Element dataAcquisitionMethodElement = super.getXmlElement();
 		dataAcquisitionMethodElement.setName(ObjectNames.DataAcquisitionMethod.name());
+		ProjectStoreUtils.addDescriptionElement(description, dataAcquisitionMethodElement);
+		ProjectStoreUtils.setUserIdAttribute(createdBy, dataAcquisitionMethodElement);
+		ProjectStoreUtils.setDateAttribute(
+				createdOn, CommonFields.DateCreated, dataAcquisitionMethodElement);
 		
-		dataAcquisitionMethodElement.setAttribute(
-				CommonFields.Description.name(), description);
-		dataAcquisitionMethodElement.setAttribute(CommonFields.DateCreated.name(), 
-				ExperimentUtils.dateTimeFormat.format(createdOn));
 		if(motrPacMsMode != null)
 			dataAcquisitionMethodElement.setAttribute(
 				DataAcquisitionMethodFields.motrPacMsMode.name(), motrPacMsMode);
@@ -307,10 +299,6 @@ public class DataAcquisitionMethod extends AnalysisMethod implements Serializabl
 		if(polarity != null)
 			dataAcquisitionMethodElement.setAttribute(
 					DataAcquisitionMethodFields.polarity.name(), polarity.getCode());
-		
-		if(createdBy != null)
-			dataAcquisitionMethodElement.setAttribute(
-					CommonFields.UserId.name(), createdBy.getId());
 		
 		if(ionizationType != null)
 			dataAcquisitionMethodElement.addContent(ionizationType.getXmlElement());

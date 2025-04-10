@@ -27,6 +27,7 @@ import org.jdom2.Element;
 
 import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
 import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
+import edu.umich.med.mrc2.datoolbox.project.store.ProjectStoreUtils;
 import edu.umich.med.mrc2.datoolbox.project.store.XmlStorable;
 
 public class SopCategory implements Serializable, Comparable<SopCategory>, XmlStorable{
@@ -116,6 +117,8 @@ public class SopCategory implements Serializable, Comparable<SopCategory>, XmlSt
 		
 		categoryId = sopCategoryElement.getAttributeValue(CommonFields.Id.name());
 		description = sopCategoryElement.getAttributeValue(CommonFields.Description.name());
+		if(description == null)
+			description = ProjectStoreUtils.getDescriptionFromElement(sopCategoryElement);
 	}
 
 	@Override
@@ -123,7 +126,7 @@ public class SopCategory implements Serializable, Comparable<SopCategory>, XmlSt
 		
 		Element sopCategoryElement = new Element(ObjectNames.SopCategory.name());
 		sopCategoryElement.setAttribute(CommonFields.Id.name(), categoryId);
-		sopCategoryElement.setAttribute(CommonFields.Description.name(), description);
+		ProjectStoreUtils.addDescriptionElement(description, sopCategoryElement);
 		return sopCategoryElement;
 	}
 }

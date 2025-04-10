@@ -30,6 +30,7 @@ import edu.umich.med.mrc2.datoolbox.data.enums.SoftwareType;
 import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
 import edu.umich.med.mrc2.datoolbox.project.store.DataProcessingSoftwareFields;
 import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
+import edu.umich.med.mrc2.datoolbox.project.store.ProjectStoreUtils;
 import edu.umich.med.mrc2.datoolbox.project.store.XmlStorable;
 
 public class DataProcessingSoftware implements Serializable, Comparable<DataProcessingSoftware>, XmlStorable{
@@ -151,10 +152,20 @@ public class DataProcessingSoftware implements Serializable, Comparable<DataProc
 		super();
 		id = dataProcessingSoftwareElement.getAttributeValue(
 				CommonFields.Id.name());
+		
+		//	TODO remove
 		name = dataProcessingSoftwareElement.getAttributeValue(
 				CommonFields.Name.name());
+		if(name == null)
+			name = ProjectStoreUtils.getTextFromElement(
+					dataProcessingSoftwareElement, CommonFields.Name);
+		
+		//	TODO remove
 		description = dataProcessingSoftwareElement.getAttributeValue(
 				CommonFields.Description.name());
+		if(description == null)
+			description = 
+				ProjectStoreUtils.getDescriptionFromElement(dataProcessingSoftwareElement);
 		
 		String softwareTypeName = dataProcessingSoftwareElement.getAttributeValue(
 				DataProcessingSoftwareFields.SoftwareType.name());
@@ -177,12 +188,12 @@ public class DataProcessingSoftware implements Serializable, Comparable<DataProc
 		
 		Element dataProcessingSoftwareElement = 
 				new Element(ObjectNames.DataProcessingSoftware.name());
-		dataProcessingSoftwareElement.setAttribute(
-				CommonFields.Id.name(), id);
-		dataProcessingSoftwareElement.setAttribute(
-				CommonFields.Name.name(), name);
-		dataProcessingSoftwareElement.setAttribute(
-				CommonFields.Description.name(), description);
+		dataProcessingSoftwareElement.setAttribute(CommonFields.Id.name(), id);
+		ProjectStoreUtils.addTextElement(
+				name, dataProcessingSoftwareElement, CommonFields.Name);
+		ProjectStoreUtils.addDescriptionElement(
+				description, dataProcessingSoftwareElement);
+		
 		dataProcessingSoftwareElement.setAttribute(
 				DataProcessingSoftwareFields.SoftwareType.name(), softwareType.name());
 		if(vendor != null)
@@ -194,3 +205,12 @@ public class DataProcessingSoftware implements Serializable, Comparable<DataProc
 		return dataProcessingSoftwareElement;
 	}
 }
+
+
+
+
+
+
+
+
+

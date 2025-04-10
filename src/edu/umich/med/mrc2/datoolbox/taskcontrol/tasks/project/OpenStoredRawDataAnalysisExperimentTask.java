@@ -48,6 +48,7 @@ import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundleCollection;
 import edu.umich.med.mrc2.datoolbox.data.MsMsLibraryFeature;
 import edu.umich.med.mrc2.datoolbox.data.lims.Injection;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
+import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
 import edu.umich.med.mrc2.datoolbox.data.msclust.IMSMSClusterDataSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.IMsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusterDataSet;
@@ -63,6 +64,7 @@ import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisExperiment;
 import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
 import edu.umich.med.mrc2.datoolbox.project.store.IDTrackerProjectFields;
 import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
+import edu.umich.med.mrc2.datoolbox.project.store.ProjectStoreUtils;
 import edu.umich.med.mrc2.datoolbox.rawdata.MSMSExtractionParameterSet;
 import edu.umich.med.mrc2.datoolbox.rawdata.MSMSExtractionParameters;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
@@ -205,16 +207,25 @@ public class OpenStoredRawDataAnalysisExperimentTask extends AbstractTask implem
 		Element experimentElement = doc.getRootElement();
 		
 		String id = experimentElement.getAttributeValue(CommonFields.Id.name()); 
-		String name = experimentElement.getAttributeValue(CommonFields.Name.name()); 
+		
+		//	TODO remove
+		String name = experimentElement.getAttributeValue(CommonFields.Name.name());
+		if(name == null)
+			name = ProjectStoreUtils.getTextFromElement(experimentElement, CommonFields.Name);
+		
 		String description = experimentElement.getAttributeValue(CommonFields.Description.name()); 
-		Date dateCreated = ExperimentUtils.dateTimeFormat.parse(
-				experimentElement.getAttributeValue(CommonFields.DateCreated.name()));
-		Date lastModified = dateCreated;
-		String lastModifiedString = 
-				experimentElement.getAttributeValue(CommonFields.LastModified.name());
-		if(lastModifiedString != null && !lastModifiedString.isBlank())
-			lastModified = ExperimentUtils.dateTimeFormat.parse(
-					experimentElement.getAttributeValue(CommonFields.LastModified.name())); 
+		if(description == null)
+			description = ProjectStoreUtils.getDescriptionFromElement(experimentElement);
+		
+		Date dateCreated = ProjectStoreUtils.getDateFromAttribute(
+				experimentElement, CommonFields.DateCreated);
+		Date lastModified = ProjectStoreUtils.getDateFromAttribute(
+				experimentElement, CommonFields.LastModified);
+		if(dateCreated == null)
+			dateCreated = new Date();
+		
+		if(lastModified == null)
+			lastModified = dateCreated;
 		
 		experiment = new RawDataAnalysisExperiment(
 				id, 
@@ -224,12 +235,11 @@ public class OpenStoredRawDataAnalysisExperimentTask extends AbstractTask implem
 				dateCreated, 
 				lastModified);
 		
-		String userId = experimentElement.getAttributeValue(CommonFields.UserId.name()); 
-		if(userId != null)
-			experiment.setCreatedBy(IDTDataCache.getUserById(userId)); 
-		
-		if(experiment.getCreatedBy() == null)
-			experiment.setCreatedBy(MRC2ToolBoxCore.getIdTrackerUser());
+		LIMSUser createdBy = ProjectStoreUtils.getUserFromAttribute(experimentElement);
+		if(createdBy == null)
+			createdBy = MRC2ToolBoxCore.getIdTrackerUser();
+
+		experiment.setCreatedBy(createdBy);
 		
 		String instrumentId = 
 				experimentElement.getAttributeValue(IDTrackerProjectFields.Instrument.name()); 
@@ -241,8 +251,7 @@ public class OpenStoredRawDataAnalysisExperimentTask extends AbstractTask implem
 		if(msmsParamsElement != null) {
 			MSMSExtractionParameterSet msmsParamSet = new MSMSExtractionParameterSet(msmsParamsElement);
 			experiment.setMsmsExtractionParameterSet(msmsParamSet);
-		}
-		
+		}		
 		String compoundIdList = 
 				experimentElement.getChild(IDTrackerProjectFields.UniqueCIDList.name()).getText();
 		uniqueCompoundIds.addAll(ExperimentUtils.getIdList(compoundIdList));

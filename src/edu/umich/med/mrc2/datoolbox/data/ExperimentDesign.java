@@ -737,7 +737,7 @@ public class ExperimentDesign implements ExperimentDesignFactorListener, Seriali
 		List<Element> factorListElements = 
 				experimentDesignElement.getChild(
 						ExperimentDesignFields.FactorSet.name()).getChildren();
-		if(factorListElements.size() > 0) {
+		if(!factorListElements.isEmpty()) {
 			
 			for(Element factorElement : factorListElements) {
 				
@@ -768,7 +768,7 @@ public class ExperimentDesign implements ExperimentDesignFactorListener, Seriali
 		List<Element> subsetListElements = 
 				experimentDesignElement.getChild(
 						ExperimentDesignFields.DesignSubsetList.name()).getChildren();
-		if(subsetListElements.size() > 0) {
+		if(!subsetListElements.isEmpty()) {
 			
 			for(Element subsetElement : subsetListElements) {
 				

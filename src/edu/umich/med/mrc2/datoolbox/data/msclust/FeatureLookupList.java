@@ -21,7 +21,6 @@
 
 package edu.umich.med.mrc2.datoolbox.data.msclust;
 
-import java.text.ParseException;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
@@ -34,11 +33,10 @@ import org.jdom2.Element;
 import edu.umich.med.mrc2.datoolbox.data.MinimalMSOneFeature;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
 import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
-import edu.umich.med.mrc2.datoolbox.utils.ExperimentUtils;
+import edu.umich.med.mrc2.datoolbox.project.store.ProjectStoreUtils;
 
 public class FeatureLookupList implements Comparable<FeatureLookupList>{
 
@@ -199,24 +197,17 @@ public class FeatureLookupList implements Comparable<FeatureLookupList>{
 
 		Element featureLookupDataSetElement = 
 				new Element(ObjectNames.FeatureLookupDataSet.name());
-		featureLookupDataSetElement.setAttribute(
-				CommonFields.Id.name(), id);	
-		featureLookupDataSetElement.setAttribute(
-				CommonFields.Name.name(), name);
-		String descString = description;
-		if(descString == null)
-			descString = "";
-		
-		featureLookupDataSetElement.setAttribute(
-				CommonFields.Description.name(), descString);
-		featureLookupDataSetElement.setAttribute(
-				CommonFields.CreatedBy.name(), createdBy.getId());	
-		featureLookupDataSetElement.setAttribute(
-				CommonFields.DateCreated.name(), 
-				ExperimentUtils.dateTimeFormat.format(dateCreated));
-		featureLookupDataSetElement.setAttribute(
-				CommonFields.LastModified.name(), 
-				ExperimentUtils.dateTimeFormat.format(lastModified));		
+		featureLookupDataSetElement.setAttribute(CommonFields.Id.name(), id);	
+		ProjectStoreUtils.addTextElement(
+				name, featureLookupDataSetElement, CommonFields.Name);
+		ProjectStoreUtils.addDescriptionElement(
+				description, featureLookupDataSetElement);
+		ProjectStoreUtils.setUserIdAttribute(
+				createdBy, featureLookupDataSetElement);
+		ProjectStoreUtils.setDateAttribute(
+				dateCreated, CommonFields.DateCreated, featureLookupDataSetElement);
+		ProjectStoreUtils.setDateAttribute(
+				lastModified, CommonFields.LastModified, featureLookupDataSetElement);	
 
         Element featureListElement = 
         		new Element(CommonFields.FeatureList.name());
@@ -232,32 +223,29 @@ public class FeatureLookupList implements Comparable<FeatureLookupList>{
 	
 	public FeatureLookupList(Element xmlElement) {
 				
-		this.id = xmlElement.getAttributeValue(CommonFields.Id.name());
+		id = xmlElement.getAttributeValue(CommonFields.Id.name());
 		if(id == null)
-			this.id = DataPrefix.LOOKUP_FEATURE_DATA_SET.getName() + 
+			id = DataPrefix.LOOKUP_FEATURE_DATA_SET.getName() + 
 				UUID.randomUUID().toString().substring(0, 6);
 		
-		this.name = xmlElement.getAttributeValue(CommonFields.Name.name());
-		this.description = xmlElement.getAttributeValue(CommonFields.Description.name());
-		try {
-			this.dateCreated = ExperimentUtils.dateTimeFormat.parse(
-					xmlElement.getAttributeValue(CommonFields.DateCreated.name()));
-		} catch (ParseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		try {
-			this.lastModified = ExperimentUtils.dateTimeFormat.parse(
-					xmlElement.getAttributeValue(CommonFields.LastModified.name()));
-		} catch (ParseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}		
-		String userId =  xmlElement.getAttributeValue(CommonFields.CreatedBy.name());
-		if(userId != null)
-			this.createdBy = IDTDataCache.getUserById(userId);
-		else
-			this.createdBy = MRC2ToolBoxCore.getIdTrackerUser();
+		//	TODO remove after all projects reformatted
+		name = xmlElement.getAttributeValue(CommonFields.Name.name());
+		if(name == null)
+			name = ProjectStoreUtils.getTextFromElement(xmlElement, CommonFields.Name);
+		
+		//	TODO remove after all projects reformatted
+		description = xmlElement.getAttributeValue(CommonFields.Description.name());
+		if(description == null)
+			description = ProjectStoreUtils.getDescriptionFromElement(xmlElement);
+		
+		dateCreated = ProjectStoreUtils.getDateFromAttribute(
+				xmlElement, CommonFields.DateCreated);
+		lastModified = ProjectStoreUtils.getDateFromAttribute(
+				xmlElement, CommonFields.LastModified);
+		
+		createdBy = ProjectStoreUtils.getUserFromAttribute(xmlElement);
+		if(createdBy == null)
+			createdBy = MRC2ToolBoxCore.getIdTrackerUser();
 		
 		features = new HashSet<MinimalMSOneFeature>();
 		
@@ -268,12 +256,9 @@ public class FeatureLookupList implements Comparable<FeatureLookupList>{
 			List<Element> featureElementList = 
 					featureListElements.get(0).getChildren(
 							ObjectNames.MinimalMSOneFeature.name());
-			for(Element featureElement : featureElementList) {
-				
-				MinimalMSOneFeature newFeature = new MinimalMSOneFeature(featureElement);
-				if(newFeature != null)
-					features.add(newFeature);
-			}
+			
+			for(Element featureElement : featureElementList) 
+				features.add(new MinimalMSOneFeature(featureElement));			
 		}
 	}
 	

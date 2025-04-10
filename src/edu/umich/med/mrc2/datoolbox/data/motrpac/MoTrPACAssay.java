@@ -28,6 +28,7 @@ import org.jdom2.Element;
 import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
 import edu.umich.med.mrc2.datoolbox.project.store.MoTrPACAssayFields;
 import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
+import edu.umich.med.mrc2.datoolbox.project.store.ProjectStoreUtils;
 import edu.umich.med.mrc2.datoolbox.project.store.XmlStorable;
 
 public class MoTrPACAssay implements Serializable, Comparable<MoTrPACAssay>, XmlStorable{
@@ -167,11 +168,11 @@ public class MoTrPACAssay implements Serializable, Comparable<MoTrPACAssay>, Xml
 	public MoTrPACAssay(Element moTrPACAssayElement) {
 		
 		super();
-		this.assayId = moTrPACAssayElement.getAttributeValue(CommonFields.Id.name());
-		this.code = moTrPACAssayElement.getAttributeValue(CommonFields.Name.name());
-		this.description = moTrPACAssayElement.getAttributeValue(CommonFields.Description.name());
-		this.polarity = moTrPACAssayElement.getAttributeValue(MoTrPACAssayFields.Polarity.name());
-		this.bucketCode = moTrPACAssayElement.getAttributeValue(MoTrPACAssayFields.BucketCode.name());
+		assayId = moTrPACAssayElement.getAttributeValue(CommonFields.Id.name());
+		code = moTrPACAssayElement.getAttributeValue(CommonFields.Name.name());
+		description = ProjectStoreUtils.getDescriptionFromElement(moTrPACAssayElement);
+		polarity = moTrPACAssayElement.getAttributeValue(MoTrPACAssayFields.Polarity.name());
+		bucketCode = moTrPACAssayElement.getAttributeValue(MoTrPACAssayFields.BucketCode.name());
 	}
 	
 	@Override
@@ -179,16 +180,11 @@ public class MoTrPACAssay implements Serializable, Comparable<MoTrPACAssay>, Xml
 
 		Element moTrPACAssayElement = 
 				new Element(ObjectNames.MoTrPACAssay.name());
-		moTrPACAssayElement.setAttribute(
-				CommonFields.Id.name(), assayId);
-		moTrPACAssayElement.setAttribute(
-				CommonFields.Name.name(), code);
-		moTrPACAssayElement.setAttribute(
-				CommonFields.Description.name(), description);
-		moTrPACAssayElement.setAttribute(
-				MoTrPACAssayFields.Polarity.name(), polarity);
-		moTrPACAssayElement.setAttribute(
-				MoTrPACAssayFields.BucketCode.name(), bucketCode);
+		moTrPACAssayElement.setAttribute(CommonFields.Id.name(), assayId);
+		moTrPACAssayElement.setAttribute(CommonFields.Name.name(), code);
+		ProjectStoreUtils.addDescriptionElement(description, moTrPACAssayElement);
+		moTrPACAssayElement.setAttribute(MoTrPACAssayFields.Polarity.name(), polarity);
+		moTrPACAssayElement.setAttribute(MoTrPACAssayFields.BucketCode.name(), bucketCode);
 		
 		return moTrPACAssayElement;
 	}	

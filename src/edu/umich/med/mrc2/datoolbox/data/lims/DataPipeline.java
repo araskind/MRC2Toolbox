@@ -32,6 +32,7 @@ import edu.umich.med.mrc2.datoolbox.data.Assay;
 import edu.umich.med.mrc2.datoolbox.data.motrpac.MoTrPACAssay;
 import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
 import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
+import edu.umich.med.mrc2.datoolbox.project.store.ProjectStoreUtils;
 import edu.umich.med.mrc2.datoolbox.project.store.XmlStorable;
 
 public class DataPipeline implements Serializable, Comparable<DataPipeline>, XmlStorable{
@@ -118,11 +119,11 @@ public class DataPipeline implements Serializable, Comparable<DataPipeline>, Xml
     @Override
     public boolean equals(Object obj) {
 
-		if (obj == this)
-			return true;
-
         if (obj == null)
             return false;
+        
+		if (obj == this)
+			return true;
 
         if (!DataPipeline.class.isAssignableFrom(obj.getClass()))
             return false;
@@ -224,8 +225,9 @@ public class DataPipeline implements Serializable, Comparable<DataPipeline>, Xml
 		this();
 		name = dataPipelineElement.getAttributeValue(
 				CommonFields.Name.name());
-		description = dataPipelineElement.getAttributeValue(
-				CommonFields.Description.name());
+
+		description = ProjectStoreUtils.getDescriptionFromElement(dataPipelineElement);
+		
 		Element assayElement = dataPipelineElement.getChild(
 				ObjectNames.Assay.name());
 		if(assayElement != null)
@@ -252,9 +254,7 @@ public class DataPipeline implements Serializable, Comparable<DataPipeline>, Xml
 		
 		Element dataPipelineElement = new Element(ObjectNames.DataPipeline.name());
 		dataPipelineElement.setAttribute(CommonFields.Name.name(), name);
-		
-		if(description != null)
-			dataPipelineElement.setAttribute(CommonFields.Description.name(), description);
+		ProjectStoreUtils.addDescriptionElement(description, dataPipelineElement);
 		
 		if(assay != null)
 			dataPipelineElement.addContent(assay.getXmlElement());

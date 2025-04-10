@@ -22,7 +22,6 @@
 package edu.umich.med.mrc2.datoolbox.data.lims;
 
 import java.io.Serializable;
-import java.text.ParseException;
 import java.util.Date;
 import java.util.Set;
 import java.util.TreeSet;
@@ -35,8 +34,8 @@ import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisExperiment;
 import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
 import edu.umich.med.mrc2.datoolbox.project.store.LIMSExperimentFields;
 import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
+import edu.umich.med.mrc2.datoolbox.project.store.ProjectStoreUtils;
 import edu.umich.med.mrc2.datoolbox.project.store.XmlStorable;
-import edu.umich.med.mrc2.datoolbox.utils.ExperimentUtils;
 
 public class LIMSExperiment implements Serializable, Comparable<LIMSExperiment>, XmlStorable{
 
@@ -322,14 +321,9 @@ public class LIMSExperiment implements Serializable, Comparable<LIMSExperiment>,
 		if(id != null)
 			experimentElement.setAttribute(CommonFields.Id.name(), id);	
 		
-		if(name != null)
-			experimentElement.setAttribute(CommonFields.Name.name(), name);
-		
-		if(description != null)
-			experimentElement.setAttribute(CommonFields.Description.name(), description);
-		
-		if(notes != null)
-			experimentElement.setAttribute(LIMSExperimentFields.Notes.name(), notes);
+		ProjectStoreUtils.addTextElement(name, experimentElement, CommonFields.Name);
+		ProjectStoreUtils.addDescriptionElement(description, experimentElement);
+		ProjectStoreUtils.addTextElement(notes, experimentElement, LIMSExperimentFields.Notes);
 		
 		if(project != null)
 			experimentElement.setAttribute(
@@ -338,11 +332,9 @@ public class LIMSExperiment implements Serializable, Comparable<LIMSExperiment>,
 		if(startDate == null)
 			startDate = new Date();
 		
-		experimentElement.setAttribute(CommonFields.DateCreated.name(), 
-				ExperimentUtils.dateTimeFormat.format(startDate));
-		
-		if(creator != null)
-			experimentElement.setAttribute(CommonFields.UserId.name(), creator.getId());
+		ProjectStoreUtils.setDateAttribute(
+				startDate, CommonFields.DateCreated, experimentElement);
+		ProjectStoreUtils.setUserIdAttribute(creator, experimentElement);
 		
 		//	ExperimentDesign
 		if(design != null) 
@@ -367,29 +359,21 @@ public class LIMSExperiment implements Serializable, Comparable<LIMSExperiment>,
 			RawDataAnalysisExperiment parentProject) {
 		
 		id = experimentElement.getAttributeValue(CommonFields.Id.name());
-		name = experimentElement.getAttributeValue(CommonFields.Name.name());
-		description = experimentElement.getAttributeValue(CommonFields.Description.name());
-		notes = experimentElement.getAttributeValue(LIMSExperimentFields.Notes.name());
+		name = ProjectStoreUtils.getTextFromElement(experimentElement, CommonFields.Name);
+		description = ProjectStoreUtils.getDescriptionFromElement(experimentElement);
+		notes = ProjectStoreUtils.getTextFromElement(experimentElement, LIMSExperimentFields.Notes);
+
 		String projectId = experimentElement.getAttributeValue(
 						LIMSExperimentFields.ProjectId.name());
 		if(projectId != null)
 			project = IDTDataCache.getProjectById(projectId);
 		
-		startDate = new Date();
-		String startDateString = 
-				experimentElement.getAttributeValue(CommonFields.DateCreated.name());
-		if(startDateString != null) {
-			try {
-				startDate = ExperimentUtils.dateTimeFormat.parse(startDateString);
-			} catch (ParseException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} 
-		}
-		String userId = 
-				experimentElement.getAttributeValue(CommonFields.UserId.name());
-		if(userId != null)
-			creator = IDTDataCache.getUserById(userId);
+		startDate = ProjectStoreUtils.getDateFromAttribute(
+				experimentElement, CommonFields.DateCreated);
+		if(startDate == null)
+			startDate = new Date();
+
+		creator = ProjectStoreUtils.getUserFromAttribute(experimentElement);
 		
 		//	ExperimentDesign
 		Element experimentDesignElement =

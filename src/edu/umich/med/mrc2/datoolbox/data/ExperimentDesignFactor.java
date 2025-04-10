@@ -38,6 +38,7 @@ import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignFactorList
 import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
 import edu.umich.med.mrc2.datoolbox.project.store.ExperimentDesignFactorFields;
 import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
+import edu.umich.med.mrc2.datoolbox.project.store.ProjectStoreUtils;
 
 public class ExperimentDesignFactor implements Comparable<ExperimentDesignFactor>, Serializable, Renamable {
 
@@ -254,9 +255,8 @@ public class ExperimentDesignFactor implements Comparable<ExperimentDesignFactor
 			experimentDesignFactorElement.setAttribute(
 					CommonFields.Name.name(), factorName);
 		
-		if(factorDescription != null)
-			experimentDesignFactorElement.setAttribute(
-					CommonFields.Description.name(), factorDescription);
+		ProjectStoreUtils.addDescriptionElement(
+				factorDescription, experimentDesignFactorElement);
 		
 		experimentDesignFactorElement.setAttribute(
 				CommonFields.Enabled.name(), Boolean.toString(enabled));
@@ -275,9 +275,17 @@ public class ExperimentDesignFactor implements Comparable<ExperimentDesignFactor
 	public ExperimentDesignFactor(Element experimentDesignFactorElement) {
 		super();
 		
-		factorId = experimentDesignFactorElement.getAttributeValue(CommonFields.Id.name());
-		factorName = experimentDesignFactorElement.getAttributeValue(CommonFields.Name.name());
-		factorDescription = experimentDesignFactorElement.getAttributeValue(CommonFields.Description.name());		
+		factorId = 
+				experimentDesignFactorElement.getAttributeValue(CommonFields.Id.name());
+		factorName = 
+				experimentDesignFactorElement.getAttributeValue(CommonFields.Name.name());
+		
+		//	TODO remove
+		factorDescription = 
+				experimentDesignFactorElement.getAttributeValue(CommonFields.Description.name());
+		if(factorDescription == null)
+			factorDescription = ProjectStoreUtils.getDescriptionFromElement(experimentDesignFactorElement);
+		
 		enabled = Boolean.parseBoolean(
 				experimentDesignFactorElement.getAttributeValue(CommonFields.Enabled.name()));
 		

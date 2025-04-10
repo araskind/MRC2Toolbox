@@ -23,7 +23,11 @@ package edu.umich.med.mrc2.datoolbox.data;
 
 import java.io.Serializable;
 
-public class ModificationBlock implements Serializable {
+import org.jdom2.Element;
+
+import edu.umich.med.mrc2.datoolbox.project.store.XmlStorable;
+
+public class ModificationBlock implements Serializable, XmlStorable {
 
 	/**
 	 * 
@@ -67,6 +71,12 @@ public class ModificationBlock implements Serializable {
 
 	public void setModification(Adduct modification) {
 		this.modification = modification;
+	}
+
+	@Override
+	public Element getXmlElement() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

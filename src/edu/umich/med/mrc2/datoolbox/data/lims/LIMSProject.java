@@ -22,7 +22,6 @@
 package edu.umich.med.mrc2.datoolbox.data.lims;
 
 import java.io.Serializable;
-import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -33,8 +32,8 @@ import org.jdom2.Element;
 import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
 import edu.umich.med.mrc2.datoolbox.project.store.LIMSProjectFields;
 import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
+import edu.umich.med.mrc2.datoolbox.project.store.ProjectStoreUtils;
 import edu.umich.med.mrc2.datoolbox.project.store.XmlStorable;
-import edu.umich.med.mrc2.datoolbox.utils.ExperimentUtils;
 
 public class LIMSProject implements Serializable, Comparable<LIMSProject>, XmlStorable{
 
@@ -213,25 +212,19 @@ public class LIMSProject implements Serializable, Comparable<LIMSProject>, XmlSt
 	public LIMSProject(Element limsProjectElement) {
 		
 		id = limsProjectElement.getAttributeValue(CommonFields.Id.name());
-		name = limsProjectElement.getAttributeValue(CommonFields.Name.name());
-		description = limsProjectElement.getAttributeValue(CommonFields.Description.name());
-		Element notesElement = limsProjectElement.getChild(LIMSProjectFields.Notes.name());
-		if(notesElement != null)
-			notes= notesElement.getText();
+		name = ProjectStoreUtils.getTextFromElement(
+				limsProjectElement, CommonFields.Name);
+		description = ProjectStoreUtils.getTextFromElement(
+				limsProjectElement, CommonFields.Description);
+		notes = ProjectStoreUtils.getTextFromElement(
+				limsProjectElement, LIMSProjectFields.Notes);
+		startDate = ProjectStoreUtils.getDateFromAttribute(
+				limsProjectElement, CommonFields.DateCreated);
 		
 		Element clientElement = limsProjectElement.getChild(ObjectNames.LIMSClient.name());
 		if(clientElement != null)
 			client = new LIMSClient(clientElement);
-		
-		String dateCreatedString = limsProjectElement.getAttributeValue(CommonFields.DateCreated.name());
-		if(dateCreatedString != null) {
-			try {
-				startDate = ExperimentUtils.dateTimeFormat.parse(dateCreatedString);
-			} catch (ParseException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
+
 		experiments = new TreeSet<LIMSExperiment>();
 		List<Element>experimentList = 
 				limsProjectElement.getChild(LIMSProjectFields.ExperimentList.name()).
@@ -248,24 +241,17 @@ public class LIMSProject implements Serializable, Comparable<LIMSProject>, XmlSt
 		
 		Element limsProjectElement = new Element(ObjectNames.LIMSProject.name());
 		limsProjectElement.setAttribute(CommonFields.Id.name(), id);
-		limsProjectElement.setAttribute(CommonFields.Name.name(), name);
-		
-		if(description != null)
-			limsProjectElement.setAttribute(CommonFields.Description.name(), description);
-		
-		if(notes != null) {
-			Element notesElement = new Element(LIMSProjectFields.Notes.name());
-			notesElement.setText(notes);
-			limsProjectElement.addContent(notesElement);
-		}		
-		if(startDate != null)
-			limsProjectElement.setAttribute(CommonFields.DateCreated.name(), 
-					ExperimentUtils.dateTimeFormat.format(startDate));
+		ProjectStoreUtils.addTextElement(name, limsProjectElement, CommonFields.Name);
+		ProjectStoreUtils.addDescriptionElement(description, limsProjectElement);
+		ProjectStoreUtils.addTextElement(notes, limsProjectElement, LIMSProjectFields.Notes);
+		ProjectStoreUtils.setDateAttribute(
+				startDate, CommonFields.DateCreated, limsProjectElement);
 		
 		if(client != null)
 			limsProjectElement.addContent(client.getXmlElement());
 		
-		Element experimentListElement = new Element(LIMSProjectFields.ExperimentList.name());
+		Element experimentListElement = 
+				new Element(LIMSProjectFields.ExperimentList.name());
 		if(experiments != null && !experiments.isEmpty()) {
 			
 			for(LIMSExperiment experiment : experiments)

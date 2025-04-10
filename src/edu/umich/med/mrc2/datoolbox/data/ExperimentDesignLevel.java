@@ -29,6 +29,7 @@ import org.jdom2.Element;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
 import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
+import edu.umich.med.mrc2.datoolbox.project.store.ProjectStoreUtils;
 
 public class ExperimentDesignLevel implements Comparable<ExperimentDesignLevel>, Serializable, Renamable {
 
@@ -204,8 +205,8 @@ public class ExperimentDesignLevel implements Comparable<ExperimentDesignLevel>,
 			experimentDesignLevelElement.setAttribute(
 					CommonFields.Name.name(), levelName);
 		
-		if(levelDescription != null)
-			experimentDesignLevelElement.setAttribute(CommonFields.Description.name(), levelDescription);
+		ProjectStoreUtils.addDescriptionElement(
+				levelDescription, experimentDesignLevelElement);
 		
 		experimentDesignLevelElement.setAttribute(
 				CommonFields.Enabled.name(), Boolean.toString(enabled));
@@ -218,7 +219,12 @@ public class ExperimentDesignLevel implements Comparable<ExperimentDesignLevel>,
 		super();		
 		levelId = experimentDesignLevelElement.getAttributeValue(CommonFields.Id.name());
 		levelName = experimentDesignLevelElement.getAttributeValue(CommonFields.Name.name());
-		levelDescription = experimentDesignLevelElement.getAttributeValue(CommonFields.Description.name());		
+		
+		//	TODO remove
+		levelDescription = experimentDesignLevelElement.getAttributeValue(CommonFields.Description.name());	
+		if(levelDescription == null)
+			levelDescription = ProjectStoreUtils.getDescriptionFromElement(experimentDesignLevelElement);
+		
 		enabled = Boolean.parseBoolean(
 				experimentDesignLevelElement.getAttributeValue(CommonFields.Enabled.name()));
 	}

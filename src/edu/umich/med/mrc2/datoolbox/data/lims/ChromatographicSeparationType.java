@@ -27,6 +27,7 @@ import org.jdom2.Element;
 
 import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
 import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
+import edu.umich.med.mrc2.datoolbox.project.store.ProjectStoreUtils;
 import edu.umich.med.mrc2.datoolbox.project.store.XmlStorable;
 
 public class ChromatographicSeparationType implements Serializable, 
@@ -117,8 +118,13 @@ public class ChromatographicSeparationType implements Serializable,
 		super();
 		id = chromatographicSeparationTypeElement.getAttributeValue(
 				CommonFields.Id.name());
+		
+		//	TODO remove
 		description = chromatographicSeparationTypeElement.getAttributeValue(
 				CommonFields.Description.name());
+		if(description == null)
+			description = 
+				ProjectStoreUtils.getDescriptionFromElement(chromatographicSeparationTypeElement);
 	}
 
 	@Override
@@ -126,10 +132,9 @@ public class ChromatographicSeparationType implements Serializable,
 		
 		Element chromatographicSeparationTypeElement = 
 				new Element(ObjectNames.ChromatographicSeparationType.name());
-		chromatographicSeparationTypeElement.setAttribute(
-			CommonFields.Id.name(), id);
-		chromatographicSeparationTypeElement.setAttribute(
-			CommonFields.Description.name(), description);
+		chromatographicSeparationTypeElement.setAttribute(CommonFields.Id.name(), id);
+		ProjectStoreUtils.addDescriptionElement(
+				description, chromatographicSeparationTypeElement);
 			
 		return chromatographicSeparationTypeElement;
 	}

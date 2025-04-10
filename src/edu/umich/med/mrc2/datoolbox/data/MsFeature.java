@@ -67,7 +67,8 @@ public class MsFeature implements AnnotatedObject, Serializable, XmlStorable {
 	protected String targetId;
 	protected MassSpectrum spectrum;
 	protected double retentionTime;
-	private double area, height;
+	protected double area;
+	protected double height;
 	protected double medianObservedRetentionTime = -1.0;
 	protected Range rtRange;
 	protected double neutralMass;	
@@ -1002,20 +1003,16 @@ public class MsFeature implements AnnotatedObject, Serializable, XmlStorable {
 		
 		if(polarity != null)
 			msFeatureElement.setAttribute(MsFeatureFields.pol.name(), polarity.getCode());
-		
-		//	Spectrum
+
 		if(spectrum != null) 
 			msFeatureElement.addContent(spectrum.getXmlElement());
 		
-		//	Identifications
 		if(primaryIdentity != null)
 			primaryIdentity.setPrimary(true);
 			
 		if(!identifications.isEmpty()) {
 			
-			Element cidListElement = 
-					new Element(MsFeatureFields.CIDs.name());					
-			
+			Element cidListElement = new Element(MsFeatureFields.CIDs.name());								
 			for(MsFeatureIdentity mscid : identifications)			
 				cidListElement.addContent(mscid.getXmlElement());	
 			
@@ -1030,6 +1027,9 @@ public class MsFeature implements AnnotatedObject, Serializable, XmlStorable {
 		
 		msFeatureElement.setAttribute(
 				CommonFields.Enabled.name(), Boolean.toString(active));
+		
+		if(binnerAnnotation != null)
+			msFeatureElement.addContent(binnerAnnotation.getXmlElement());
 		
 		return msFeatureElement;
 	}
@@ -1063,8 +1063,13 @@ public class MsFeature implements AnnotatedObject, Serializable, XmlStorable {
 				featureElement.getAttributeValue(MsFeatureFields.QS.name());
 		if(qsValue != null)
 			qualityScore = Double.parseDouble(qsValue);
+
+		parseIdentifications(featureElement);
+		parseBinnerAnnotation(featureElement);
+	}
+	
+	private void parseIdentifications(Element featureElement) {
 		
-		//	Identifications
 		List<Element> msfIdListElements = 
 				featureElement.getChildren(MsFeatureFields.CIDs.name());
 		if(!msfIdListElements.isEmpty()) {
@@ -1097,14 +1102,16 @@ public class MsFeature implements AnnotatedObject, Serializable, XmlStorable {
 			else
 				idDisabled = false;
 		}
-	}	
+	}
+	
+	private void parseBinnerAnnotation(Element featureElement) {
+		
+		Element binnerAnnoitationElement = 
+				featureElement.getChild(ObjectNames.BinnerAnnotation.name());
+		if(binnerAnnoitationElement != null)
+			binnerAnnotation = new BinnerAnnotation(binnerAnnoitationElement);
+	}
 }
-
-
-
-
-
-
 
 
 

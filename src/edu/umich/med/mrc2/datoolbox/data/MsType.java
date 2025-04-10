@@ -27,6 +27,7 @@ import org.jdom2.Element;
 
 import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
 import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
+import edu.umich.med.mrc2.datoolbox.project.store.ProjectStoreUtils;
 import edu.umich.med.mrc2.datoolbox.project.store.XmlStorable;
 
 public class MsType implements Serializable, Comparable<MsType>, XmlStorable{
@@ -115,8 +116,12 @@ public class MsType implements Serializable, Comparable<MsType>, XmlStorable{
 		super();
 		id = msTypeElement.getAttributeValue(
 				CommonFields.Id.name());
+		
+		//	TODO remove
 		description = msTypeElement.getAttributeValue(
 				CommonFields.Description.name());
+		if(description == null)
+			description = ProjectStoreUtils.getDescriptionFromElement(msTypeElement);
 	}
 
 	@Override
@@ -124,10 +129,8 @@ public class MsType implements Serializable, Comparable<MsType>, XmlStorable{
 		
 		Element msTypeElement = 
 				new Element(ObjectNames.MsType.name());
-		msTypeElement.setAttribute(
-			CommonFields.Id.name(), id);
-		msTypeElement.setAttribute(
-			CommonFields.Description.name(), description);
+		msTypeElement.setAttribute(CommonFields.Id.name(), id);
+		ProjectStoreUtils.addDescriptionElement(description, msTypeElement);
 			
 		return msTypeElement;
 	}

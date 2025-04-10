@@ -27,6 +27,7 @@ import org.jdom2.Element;
 
 import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
 import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
+import edu.umich.med.mrc2.datoolbox.project.store.ProjectStoreUtils;
 import edu.umich.med.mrc2.datoolbox.project.store.XmlStorable;
 
 public class MassAnalyzerType implements Serializable, Comparable<MassAnalyzerType>, XmlStorable{
@@ -113,10 +114,12 @@ public class MassAnalyzerType implements Serializable, Comparable<MassAnalyzerTy
 	public MassAnalyzerType(Element massAnalyzerTypeElement) {
 		
 		super();
-		id = massAnalyzerTypeElement.getAttributeValue(
-				CommonFields.Id.name());
+		id = massAnalyzerTypeElement.getAttributeValue(CommonFields.Id.name());
 		description = massAnalyzerTypeElement.getAttributeValue(
 				CommonFields.Description.name());
+		if(description == null)
+			description = 
+				ProjectStoreUtils.getDescriptionFromElement(massAnalyzerTypeElement);
 	}
 
 	@Override
@@ -124,10 +127,8 @@ public class MassAnalyzerType implements Serializable, Comparable<MassAnalyzerTy
 		
 		Element massAnalyzerTypeElement = 
 				new Element(ObjectNames.MassAnalyzerType.name());
-			massAnalyzerTypeElement.setAttribute(
-				CommonFields.Id.name(), id);
-			massAnalyzerTypeElement.setAttribute(
-				CommonFields.Description.name(), description);
+		massAnalyzerTypeElement.setAttribute(CommonFields.Id.name(), id);
+		ProjectStoreUtils.addDescriptionElement(description, massAnalyzerTypeElement);
 			
 		return massAnalyzerTypeElement;
 	}

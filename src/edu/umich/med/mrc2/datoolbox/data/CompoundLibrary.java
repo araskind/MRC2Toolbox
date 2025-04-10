@@ -22,7 +22,6 @@
 package edu.umich.med.mrc2.datoolbox.data;
 
 import java.io.Serializable;
-import java.text.ParseException;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
@@ -40,8 +39,8 @@ import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
 import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
+import edu.umich.med.mrc2.datoolbox.project.store.ProjectStoreUtils;
 import edu.umich.med.mrc2.datoolbox.project.store.XmlStorable;
-import edu.umich.med.mrc2.datoolbox.utils.ExperimentUtils;
 
 public class CompoundLibrary implements Serializable, Comparable<CompoundLibrary>, XmlStorable {
 
@@ -279,30 +278,22 @@ public class CompoundLibrary implements Serializable, Comparable<CompoundLibrary
 	public CompoundLibrary(Element compoundLibraryElement){
 		
 		id = compoundLibraryElement.getAttributeValue(CommonFields.Id.name());
+		
+		//	TODO remove
 		name = compoundLibraryElement.getAttributeValue(CommonFields.Name.name());
+		if(name == null)
+			name = ProjectStoreUtils.getTextFromElement(compoundLibraryElement, CommonFields.Name);
+		//	TODO remove
 		description = compoundLibraryElement.getAttributeValue(
 				CommonFields.Description.name());
+		if(description == null)
+			description = ProjectStoreUtils.getDescriptionFromElement(compoundLibraryElement);
 		
-		String dateCreatedString = 
-				compoundLibraryElement.getAttributeValue(CommonFields.DateCreated.name());
-		if(dateCreatedString != null) {
-			try {
-				dateCreated = ExperimentUtils.dateTimeFormat.parse(dateCreatedString);
-			} catch (ParseException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		String lastModifiedString = 
-				compoundLibraryElement.getAttributeValue(CommonFields.LastModified.name());
-		if(lastModifiedString != null) {
-			try {
-				lastModified = ExperimentUtils.dateTimeFormat.parse(lastModifiedString);
-			} catch (ParseException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
+		dateCreated = ProjectStoreUtils.getDateFromAttribute(
+				compoundLibraryElement, CommonFields.DateCreated);
+		lastModified = ProjectStoreUtils.getDateFromAttribute(
+				compoundLibraryElement, CommonFields.LastModified);
+
 		Element dataPipelineElement = 
 				compoundLibraryElement.getChild(ObjectNames.DataPipeline.name());
 		if(dataPipelineElement != null)
@@ -323,17 +314,12 @@ public class CompoundLibrary implements Serializable, Comparable<CompoundLibrary
 		Element compoundLibraryElement = 
 				new Element(ObjectNames.CompoundLibrary.name());
 		compoundLibraryElement.setAttribute(CommonFields.Id.name(), id);
-		compoundLibraryElement.setAttribute(CommonFields.Name.name(), name);
-		compoundLibraryElement.setAttribute(
-				CommonFields.Description.name(), description);
-		
-		if(dateCreated != null)
-			compoundLibraryElement.setAttribute(CommonFields.DateCreated.name(), 
-					ExperimentUtils.dateTimeFormat.format(dateCreated));
-		
-		if(lastModified != null)
-			compoundLibraryElement.setAttribute(CommonFields.LastModified.name(), 
-					ExperimentUtils.dateTimeFormat.format(lastModified));
+		ProjectStoreUtils.addTextElement(name, compoundLibraryElement, CommonFields.Name);
+		ProjectStoreUtils.addDescriptionElement(description, compoundLibraryElement);		
+		ProjectStoreUtils.setDateAttribute(
+				dateCreated, CommonFields.DateCreated, compoundLibraryElement);
+		ProjectStoreUtils.setDateAttribute(
+				lastModified, CommonFields.LastModified, compoundLibraryElement);
 		
 		if(dataPipeline != null)
 			compoundLibraryElement.addContent(dataPipeline.getXmlElement());

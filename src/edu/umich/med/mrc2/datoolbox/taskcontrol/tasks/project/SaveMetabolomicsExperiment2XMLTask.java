@@ -51,13 +51,13 @@ import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisExperiment;
 import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
 import edu.umich.med.mrc2.datoolbox.project.store.IDTrackerProjectFields;
 import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
+import edu.umich.med.mrc2.datoolbox.project.store.ProjectStoreUtils;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskListener;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 import edu.umich.med.mrc2.datoolbox.utils.CompressionUtils;
-import edu.umich.med.mrc2.datoolbox.utils.ExperimentUtils;
 
 public class SaveMetabolomicsExperiment2XMLTask extends AbstractTask implements TaskListener {
 	
@@ -94,8 +94,7 @@ public class SaveMetabolomicsExperiment2XMLTask extends AbstractTask implements 
 		} catch (Exception ex) {
 			ex.printStackTrace();
 			setStatus(TaskStatus.ERROR);
-return;
-
+			return;
 		}
 		if(fileFeatureCount == 0) {
 			//compressAndCleanup();
@@ -131,17 +130,18 @@ return;
         Element experimentRoot = 
         		new Element(ObjectNames.MetabolomicsExperiment.name());
 		experimentRoot.setAttribute("version", "1.0.0.0");
-		experimentRoot.setAttribute(CommonFields.Id.name(), 
-				experimentToSave.getId());
-		experimentRoot.setAttribute(CommonFields.Name.name(), 
-				experimentToSave.getName());
-		experimentRoot.setAttribute(CommonFields.Description.name(), 
-				experimentToSave.getDescription());
+		experimentRoot.setAttribute(CommonFields.Id.name(), experimentToSave.getId());
+		ProjectStoreUtils.addTextElement(
+				experimentToSave.getName(), experimentRoot, CommonFields.Name);
+		ProjectStoreUtils.addDescriptionElement(
+				experimentToSave.getDescription(), experimentRoot);
+		ProjectStoreUtils.setUserIdAttribute(
+				experimentToSave.getCreatedBy(), experimentRoot);
+		ProjectStoreUtils.setDateAttribute(
+				experimentToSave.getDateCreated(), CommonFields.DateCreated, experimentRoot);
+		ProjectStoreUtils.setDateAttribute(
+				experimentToSave.getLastModified(), CommonFields.LastModified, experimentRoot);
 		
-		if(experimentToSave.getCreatedBy() != null)
-			experimentRoot.setAttribute(CommonFields.UserId.name(), 
-					experimentToSave.getCreatedBy().getId());
-				
 		if(experimentToSave.getInstrument() != null)
 			experimentRoot.setAttribute(IDTrackerProjectFields.Instrument.name(), 
 					experimentToSave.getInstrument().getInstrumentId());
@@ -154,11 +154,6 @@ return;
 				experimentToSave.getExperimentFile().getAbsolutePath());
 		experimentRoot.setAttribute(IDTrackerProjectFields.ProjectDir.name(), 
 				experimentToSave.getExperimentDirectory().getAbsolutePath());	
-		experimentRoot.setAttribute(CommonFields.DateCreated.name(), 
-				ExperimentUtils.dateTimeFormat.format(experimentToSave.getDateCreated()));
-		experimentRoot.setAttribute(CommonFields.LastModified.name(), 
-				ExperimentUtils.dateTimeFormat.format(experimentToSave.getLastModified()));
-        
 		experimentRoot.addContent(       		
         		new Element(IDTrackerProjectFields.UniqueCIDList.name()).
         		setText(StringUtils.join(uniqueCompoundIds, ",")));
@@ -194,7 +189,7 @@ return;
         	msTwoFileListElement.addContent(ms2dataFile.getXmlElement());
 			Collection<MSFeatureInfoBundle>fileFeatures = 
 					experimentToSave.getMsFeaturesForDataFile(ms2dataFile);
-			if(fileFeatures.size() > 0) {
+			if(!fileFeatures.isEmpty()) {
 				SaveFileMsFeaturesTask task = 
 						new SaveFileMsFeaturesTask(
 								ms2dataFile, 
@@ -213,7 +208,7 @@ return;
         	msOneFileListElement.addContent(msOnedataFile.getXmlElement());
 			Collection<MSFeatureInfoBundle>fileFeatures = 
 					experimentToSave.getMsFeaturesForDataFile(msOnedataFile);
-			if(fileFeatures.size() > 0) {
+			if(!fileFeatures.isEmpty()) {
 				SaveFileMsFeaturesTask task = 
 						new SaveFileMsFeaturesTask(
 								msOnedataFile, 

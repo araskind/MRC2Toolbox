@@ -21,12 +21,10 @@
 
 package edu.umich.med.mrc2.datoolbox.data.msclust;
 
-import java.text.ParseException;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
@@ -35,12 +33,11 @@ import org.jdom2.Element;
 import edu.umich.med.mrc2.datoolbox.data.BinnerAnnotationCluster;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.project.store.BinnerAnnotationLookupDataSetFields;
 import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
 import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
-import edu.umich.med.mrc2.datoolbox.utils.ExperimentUtils;
+import edu.umich.med.mrc2.datoolbox.project.store.ProjectStoreUtils;
 
 public class BinnerAnnotationLookupDataSet implements Comparable<BinnerAnnotationLookupDataSet>{
 
@@ -201,20 +198,18 @@ public class BinnerAnnotationLookupDataSet implements Comparable<BinnerAnnotatio
 
 		Element binnerAnnotationLookupDataSetElement = 
 				new Element(ObjectNames.BinnerAnnotationLookupDataSet.name());
-		binnerAnnotationLookupDataSetElement.setAttribute(
-				CommonFields.Id.name(), id);	
-		binnerAnnotationLookupDataSetElement.setAttribute(
-				CommonFields.Name.name(), name);
-		binnerAnnotationLookupDataSetElement.setAttribute(
-				CommonFields.Description.name(), Objects.toString(description, ""));
-		binnerAnnotationLookupDataSetElement.setAttribute(
-				CommonFields.CreatedBy.name(), createdBy.getId());	
-		binnerAnnotationLookupDataSetElement.setAttribute(
-				CommonFields.DateCreated.name(), 
-				ExperimentUtils.dateTimeFormat.format(dateCreated));
-		binnerAnnotationLookupDataSetElement.setAttribute(
-				CommonFields.LastModified.name(), 
-				ExperimentUtils.dateTimeFormat.format(lastModified));		
+		binnerAnnotationLookupDataSetElement.setAttribute(CommonFields.Id.name(), id);	
+		ProjectStoreUtils.addTextElement(
+				name, binnerAnnotationLookupDataSetElement, CommonFields.Name);
+		ProjectStoreUtils.addDescriptionElement(
+				description, binnerAnnotationLookupDataSetElement);
+		
+		ProjectStoreUtils.setUserIdAttribute(
+				createdBy, binnerAnnotationLookupDataSetElement);
+		ProjectStoreUtils.setDateAttribute(
+				dateCreated, CommonFields.DateCreated, binnerAnnotationLookupDataSetElement);
+		ProjectStoreUtils.setDateAttribute(
+				lastModified, CommonFields.LastModified, binnerAnnotationLookupDataSetElement);
 
         Element bacListElement = 
         		new Element(BinnerAnnotationLookupDataSetFields.BAList.name());
@@ -234,28 +229,17 @@ public class BinnerAnnotationLookupDataSet implements Comparable<BinnerAnnotatio
 		if(id == null)
 			this.id = DataPrefix.LOOKUP_FEATURE_DATA_SET.getName() + 
 				UUID.randomUUID().toString().substring(0, 6);
-		
-		this.name = xmlElement.getAttributeValue(CommonFields.Name.name());
-		this.description = xmlElement.getAttributeValue(CommonFields.Description.name());
-		try {
-			this.dateCreated = ExperimentUtils.dateTimeFormat.parse(
-					xmlElement.getAttributeValue(CommonFields.DateCreated.name()));
-		} catch (ParseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		try {
-			this.lastModified = ExperimentUtils.dateTimeFormat.parse(
-					xmlElement.getAttributeValue(CommonFields.LastModified.name()));
-		} catch (ParseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}		
-		String userId =  xmlElement.getAttributeValue(CommonFields.CreatedBy.name());
-		if(userId != null)
-			this.createdBy = IDTDataCache.getUserById(userId);
-		else
-			this.createdBy = MRC2ToolBoxCore.getIdTrackerUser();
+
+		name = ProjectStoreUtils.getTextFromElement(xmlElement, CommonFields.Name);
+		description = ProjectStoreUtils.getDescriptionFromElement(xmlElement);
+		dateCreated = ProjectStoreUtils.getDateFromAttribute(
+				xmlElement, CommonFields.DateCreated);
+		lastModified = ProjectStoreUtils.getDateFromAttribute(
+				xmlElement, CommonFields.LastModified);
+	
+		createdBy = ProjectStoreUtils.getUserFromAttribute(xmlElement);
+		if(createdBy == null)
+			createdBy = MRC2ToolBoxCore.getIdTrackerUser();
 		
 		annotationClusters = new HashSet<BinnerAnnotationCluster>();
 		

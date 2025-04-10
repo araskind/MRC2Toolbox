@@ -33,6 +33,7 @@ import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.project.store.ChromatographicGradientFields;
 import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
 import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
+import edu.umich.med.mrc2.datoolbox.project.store.ProjectStoreUtils;
 import edu.umich.med.mrc2.datoolbox.project.store.XmlStorable;
 
 public class ChromatographicGradient implements Serializable, XmlStorable {
@@ -240,10 +241,20 @@ public class ChromatographicGradient implements Serializable, XmlStorable {
     	this();
     	id = chromatographicGradientElement.getAttributeValue(
     			CommonFields.Id.name());
+    	
+    	//	TODO remove
     	name = chromatographicGradientElement.getAttributeValue(
     			CommonFields.Name.name());
+    	if(name == null)
+    		name = ProjectStoreUtils.getTextFromElement(
+    				chromatographicGradientElement, CommonFields.Name);
+    	
+    	//	TODO remove
     	description = chromatographicGradientElement.getAttributeValue(
     			CommonFields.Description.name());
+    	if(description == null)
+    		description = 
+    			ProjectStoreUtils.getDescriptionFromElement(chromatographicGradientElement);
     	
     	columnCompartmentTemperature = Double.parseDouble(
     			chromatographicGradientElement.getAttributeValue(
@@ -287,8 +298,9 @@ public class ChromatographicGradient implements Serializable, XmlStorable {
 		Element chromatographicGradientElement = 
 				new Element(ObjectNames.ChromatographicGradient.name());
 		chromatographicGradientElement.setAttribute(CommonFields.Id.name(), id);
-		chromatographicGradientElement.setAttribute(CommonFields.Name.name(), name);
-		chromatographicGradientElement.setAttribute(CommonFields.Description.name(), description);
+		ProjectStoreUtils.addTextElement(
+				name, chromatographicGradientElement, CommonFields.Name);
+		ProjectStoreUtils.addDescriptionElement(description, chromatographicGradientElement);
 		
 		chromatographicGradientElement.setAttribute(
 				ChromatographicGradientFields.ccTemp.name(), 

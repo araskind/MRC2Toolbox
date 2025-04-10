@@ -27,6 +27,7 @@ import org.jdom2.Element;
 
 import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
 import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
+import edu.umich.med.mrc2.datoolbox.project.store.ProjectStoreUtils;
 import edu.umich.med.mrc2.datoolbox.project.store.XmlStorable;
 
 public class InstrumentPlatform implements Serializable, Comparable<InstrumentPlatform>, XmlStorable{
@@ -115,8 +116,13 @@ public class InstrumentPlatform implements Serializable, Comparable<InstrumentPl
 		super();
 		id = instrumentPlatformElement.getAttributeValue(
 				CommonFields.Id.name());
+		
+		//	TODO remove
 		description = instrumentPlatformElement.getAttributeValue(
 				CommonFields.Description.name());
+		if(description == null)
+			description = 
+				ProjectStoreUtils.getDescriptionFromElement(instrumentPlatformElement);
 	}
 
 	@Override
@@ -124,10 +130,8 @@ public class InstrumentPlatform implements Serializable, Comparable<InstrumentPl
 		
 		Element instrumentPlatformElement = 
 				new Element(ObjectNames.InstrumentPlatform.name());
-		instrumentPlatformElement.setAttribute(
-				CommonFields.Id.name(), id);
-		instrumentPlatformElement.setAttribute(
-				CommonFields.Description.name(), description);
+		instrumentPlatformElement.setAttribute(CommonFields.Id.name(), id);
+		ProjectStoreUtils.addDescriptionElement(description, instrumentPlatformElement);
 		
 		return instrumentPlatformElement;
 	}

@@ -38,6 +38,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.commons.math3.util.Precision;
+import org.jdom2.Element;
 import org.ujmp.core.Matrix;
 import org.ujmp.core.calculation.Calculation.Ret;
 
@@ -52,18 +53,18 @@ import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.msmsscore.MSMSScoreCalculator;
+import edu.umich.med.mrc2.datoolbox.project.store.XmlStorable;
 import edu.umich.med.mrc2.datoolbox.utils.ClusterUtils;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
 
-public class MsFeatureCluster implements Serializable {
+public class MsFeatureCluster implements Serializable, XmlStorable {
 
 	/**
 	 *
 	 */
 	private static final long serialVersionUID = -5100249593042159601L;
 
-	public static final double eps = 0.00001d;
 	private String clusterId;
 	private Map<DataPipeline, Collection<MsFeature>>clusterFeatures;
 	private Map<DataPipeline, DescriptiveStatistics>featureRTStatistics;	
@@ -523,7 +524,7 @@ public class MsFeatureCluster implements Serializable {
 		double newCid = cf.getSpectrum().getExperimentalTandemSpectrum().getCidLevel();
 		for(double cid : cidLevels) {
 			
-			if(Precision.equalsIncludingNaN(cid, newCid, eps))
+			if(Precision.equalsIncludingNaN(cid, newCid, Precision.EPSILON))
 				return true;
 		}				
 		return false;	
@@ -753,6 +754,12 @@ public class MsFeatureCluster implements Serializable {
 				stream().flatMapToDouble(s -> Arrays.stream(s.getValues())).
 				sorted().toArray();
 		return new Range(allRts[0], allRts[allRts.length - 1]);
+	}
+
+	@Override
+	public Element getXmlElement() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }
 
