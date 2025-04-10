@@ -129,6 +129,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.IDTrackerExperimentDat
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.project.LoadExperimentTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.project.OpenStoredRawDataAnalysisExperimentTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.project.SaveExperimentTask;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.project.SaveMetabolomicsProjectTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.project.SaveStoredRawDataAnalysisExperimentTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.rawdata.ExperimentRawDataFileOpenTask;
 import edu.umich.med.mrc2.datoolbox.utils.ExperimentUtils;
@@ -471,8 +472,14 @@ public class MainWindow extends JFrame
 	}
 
 	private void saveMetabolomicsExperimentInNewFormat() {
-		// TODO Auto-generated method stub
 		
+		if (currentExperiment == null)
+			return;
+		
+		SaveMetabolomicsProjectTask task = 
+				new SaveMetabolomicsProjectTask(currentExperiment);
+		task.addTaskListener(this);
+		MRC2ToolBoxCore.getTaskController().addTask(task);
 	}
 
 	private void goToExperimentFolder() {

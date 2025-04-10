@@ -247,7 +247,7 @@ public abstract class Experiment implements Serializable, XmlStorable{
         return hash;
     } 
     
-	public Experiment(Element experimentElement) {
+	protected Experiment(Element experimentElement) {
 		
 		super();
 		experimentElement.setAttribute(CommonFields.Id.name(), id);
@@ -272,6 +272,7 @@ public abstract class Experiment implements Serializable, XmlStorable{
 			limsExperiment = new LIMSExperiment(limsExperimentElement, null);
 	}
 	
+	@Override
     public Element getXmlElement() {
     	
     	Element experimentElement = new Element(ObjectNames.Experiment.name());

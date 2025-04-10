@@ -33,6 +33,7 @@ import java.util.TreeSet;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.jdom2.Element;
 import org.ujmp.core.Matrix;
 import org.ujmp.core.calculation.Calculation.Ret;
 
@@ -56,6 +57,8 @@ import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSProject;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainWindow;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
+import edu.umich.med.mrc2.datoolbox.project.store.MetabolomicsProjectFields;
+import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
 import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
 
 public class DataAnalysisProject extends Experiment {
@@ -65,7 +68,7 @@ public class DataAnalysisProject extends Experiment {
 	 */
 	private static final long serialVersionUID = 618045235335401590L;
 
-	protected LIMSProject limsProject;
+	protected LIMSProject limsProject;	//	TODO - get on the fly from LIMS experiment
 	protected TreeSet<DataPipeline> dataPipelines;
 	protected DataPipeline activeDataPipeline;	
 	protected TreeMap<DataPipeline, CompoundLibrary> libraryMap;
@@ -884,6 +887,38 @@ public class DataAnalysisProject extends Experiment {
 		subsetMatrix.setMetaDataDimensionMatrix(1, fileMetaData);
 		
 		return subsetMatrix;
+	}
+	
+	@Override
+    public Element getXmlElement() {
+    	
+    	Element metabolomicsProjectElement = super.getXmlElement();
+    	metabolomicsProjectElement.setName(ObjectNames.MetabolomicsProject.name());
+    	
+    	Element dataPipelineListElement = 
+    			new Element(MetabolomicsProjectFields.DataPipelineList.name());
+    	for(DataPipeline dp : dataPipelines)
+    		dataPipelineListElement.addContent(dp.getXmlElement());
+    	
+    	metabolomicsProjectElement.addContent(dataPipelineListElement);
+
+    	Element methodDataFileMapElement = 
+    			new Element(MetabolomicsProjectFields.MethodDataFileMap.name());
+    	for(DataPipeline dp : dataPipelines) {
+    		    		
+        	Element methodDataFileMapItemElement = 
+        			new Element(MetabolomicsProjectFields.MethodDataFileMapItem.name());
+        	methodDataFileMapItemElement.setAttribute(
+        			MetabolomicsProjectFields.DataPipelineId.name(), dp.getName());
+        	
+        	for(DataFile df : dataFileMap.get(dp.getAcquisitionMethod()))       		
+        		methodDataFileMapItemElement.addContent(df.getXmlElement());
+        	        	
+    		methodDataFileMapElement.addContent(methodDataFileMapItemElement);
+    	}
+    	metabolomicsProjectElement.addContent(methodDataFileMapElement);
+    	
+    	return metabolomicsProjectElement;
 	}
 }
 

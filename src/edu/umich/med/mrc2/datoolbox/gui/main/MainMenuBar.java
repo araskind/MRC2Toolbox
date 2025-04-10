@@ -187,7 +187,7 @@ public class MainMenuBar extends CommonMenuBar {
 			
 			saveAsXMLExperimentMenuItem = addItem(experimentMenu, 
 					MainActionCommands.SAVE_AS_XML_EXPERIMENT_COMMAND, saveXMLExperimentIcon);
-			saveAsXMLExperimentMenuItem.setEnabled(false);
+			//	saveAsXMLExperimentMenuItem.setEnabled(false);
 			
 			experimentMenu.addSeparator();
 		}

@@ -62,6 +62,7 @@ public enum ObjectNames {
 	LIMSProject,
 	LIMSProtocol,
 	LIMSSamplePreparation,
+	MetabolomicsProject,
 	MFIB,
 	MoTrPACAssay,
 	MSFID,	
