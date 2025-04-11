@@ -231,7 +231,7 @@ public class ConvertCefLibraryForRecursionTask extends CEFProcessingTask {
 			outputFile = new File(FilenameUtils.removeExtension(outputFile.getAbsolutePath()) + "."
 					+ MsLibraryFormat.CEF.getFileExtension());
 
-		XmlUtils.writeXMLDocumentToFile(exportedLibraryDocument, outputFile);
+		XmlUtils.writePrettyPrintXMLtoFile(exportedLibraryDocument, outputFile);
 	}
 	
 	

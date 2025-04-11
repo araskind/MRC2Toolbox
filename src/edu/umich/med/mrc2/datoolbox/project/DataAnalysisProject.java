@@ -30,7 +30,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.jdom2.Element;
@@ -57,6 +56,7 @@ import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSProject;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainWindow;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
+import edu.umich.med.mrc2.datoolbox.project.store.DataFileExtensions;
 import edu.umich.med.mrc2.datoolbox.project.store.MetabolomicsProjectFields;
 import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
 import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
@@ -106,7 +106,7 @@ public class DataAnalysisProject extends Experiment {
 		
 		super.createDirectoryStructureForNewExperiment(parentDirectory);
 		experimentFile = FIOUtils.changeExtension(
-				experimentFile, MRC2ToolBoxConfiguration.EXPERIMENT_FILE_EXTENSION);
+				experimentFile, DataFileExtensions.EXPERIMENT_FILE_EXTENSION.getExtension());
 	}
 
 	protected void initNewProject() {
@@ -166,8 +166,8 @@ public class DataAnalysisProject extends Experiment {
 		}		
 		dataPipelines.add(pipeline);
 		String matrixFileName = DataPrefix.DATA_MATRIX.getName() 
-				+ UUID.randomUUID().toString() 
-				+ "." + MRC2ToolBoxConfiguration.DATA_MATRIX_EXTENSION;
+				+ pipeline.getSaveSafeName()
+				+ "." + DataFileExtensions.DATA_MATRIX_EXTENSION.getExtension();
 		dataMatrixFileMap.put(pipeline, matrixFileName);
 		statsCalculatedMap.put(pipeline, false);
 		featureSetMap.put(pipeline, new TreeSet<MsFeatureSet>());
@@ -182,8 +182,8 @@ public class DataAnalysisProject extends Experiment {
 			featureMatrixMap = new TreeMap<DataPipeline, Matrix>();
 		
 		String matrixFileName = DataPrefix.FEATURE_MATRIX.getName() 
-				+ UUID.randomUUID().toString() 
-				+ "." + MRC2ToolBoxConfiguration.DATA_MATRIX_EXTENSION;
+				+ pipeline.getSaveSafeName() 
+				+ "." + DataFileExtensions.DATA_MATRIX_EXTENSION.getExtension();
 		featureMatrixFileMap.put(pipeline, matrixFileName);
 		featureMatrixMap.put(pipeline, featureMatrix);
 	}
@@ -201,11 +201,12 @@ public class DataAnalysisProject extends Experiment {
 
 		// Delete data matrix and storage file
 		dataMatrixMap.remove(pipeline);
-		File dataMatrixFile = Paths.get(getExperimentDirectory().getAbsolutePath(), 
+		File dataMatrixFile = Paths.get(getDataDirectory().getAbsolutePath(), 
 				dataMatrixFileMap.get(pipeline)).toFile();
-		if (dataMatrixFile.exists())
-			dataMatrixFile.delete();
-
+		if (dataMatrixFile.exists()) {
+			if(!dataMatrixFile.delete())
+				System.err.println("Unambel to delete data matrix for " + pipeline.getName());
+		}
 		dataMatrixFileMap.remove(pipeline);
 		
 		if(featureMatrixFileMap == null)
@@ -216,11 +217,12 @@ public class DataAnalysisProject extends Experiment {
 		
 		//	Delete feature matrix and storage file
 		featureMatrixMap.remove(pipeline);
-		File featureMatrixFile = Paths.get(getExperimentDirectory().getAbsolutePath(), 
+		File featureMatrixFile = Paths.get(getDataDirectory().getAbsolutePath(), 
 				featureMatrixFileMap.get(pipeline)).toFile();
-		if (featureMatrixFile.exists())
-			featureMatrixFile.delete();
-
+		if (featureMatrixFile.exists()) {
+			if(!featureMatrixFile.delete())
+				System.err.println("Unambel to delete feature matrix for " + pipeline.getName());
+		}
 		featureMatrixFileMap.remove(pipeline);
 		
 		//	Remove all data linked to acquisition method 
@@ -909,7 +911,7 @@ public class DataAnalysisProject extends Experiment {
         	Element methodDataFileMapItemElement = 
         			new Element(MetabolomicsProjectFields.MethodDataFileMapItem.name());
         	methodDataFileMapItemElement.setAttribute(
-        			MetabolomicsProjectFields.DataPipelineId.name(), dp.getName());
+        			MetabolomicsProjectFields.DataPipelineId.name(), dp.getSaveSafeName());
         	
         	for(DataFile df : dataFileMap.get(dp.getAcquisitionMethod()))       		
         		methodDataFileMapItemElement.addContent(df.getXmlElement());

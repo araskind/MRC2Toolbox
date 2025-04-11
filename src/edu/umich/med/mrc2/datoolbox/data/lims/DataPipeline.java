@@ -34,6 +34,7 @@ import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
 import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
 import edu.umich.med.mrc2.datoolbox.project.store.ProjectStoreUtils;
 import edu.umich.med.mrc2.datoolbox.project.store.XmlStorable;
+import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
 
 public class DataPipeline implements Serializable, Comparable<DataPipeline>, XmlStorable{
 
@@ -269,6 +270,10 @@ public class DataPipeline implements Serializable, Comparable<DataPipeline>, Xml
 			dataPipelineElement.addContent(dataExtractionMethod.getXmlElement());
 
 		return dataPipelineElement;
+	}
+	
+	public String getSaveSafeName() {
+		return FIOUtils.createSaveSafeName(name);
 	}
 }
 

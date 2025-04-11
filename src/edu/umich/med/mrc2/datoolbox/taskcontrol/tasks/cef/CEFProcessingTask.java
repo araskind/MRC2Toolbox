@@ -626,7 +626,7 @@ public abstract class CEFProcessingTask extends AbstractTask {
 			outputCefFile = new File(FilenameUtils.removeExtension(outputCefFile.getAbsolutePath()) + "."
 					+ MsLibraryFormat.CEF.getFileExtension());
 
-		XmlUtils.writeXMLDocumentToFile(exportedLibraryDocument, outputCefFile);
+		XmlUtils.writePrettyPrintXMLtoFile(exportedLibraryDocument, outputCefFile);
 	}
 	
 	protected Element createCefCompoundElement(

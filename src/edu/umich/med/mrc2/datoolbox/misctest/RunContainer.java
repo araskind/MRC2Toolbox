@@ -1535,7 +1535,7 @@ public class RunContainer {
 				    		Element elemCopy = (Element)recordElement.clone();
 				    		elemCopy.detach();				    		
 				    		document.addContent(elemCopy);
-				    		XmlUtils.writeXMLDocumentToFile(document, outputFile);
+				    		XmlUtils.writePrettyPrintXMLtoFile(document, outputFile);
 				    	}
 				    }
 			    }

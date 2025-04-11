@@ -22,20 +22,26 @@
 package edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.project;
 
 import java.io.File;
-import java.io.FileWriter;
+import java.nio.file.Paths;
+import java.util.Set;
 
 import org.jdom2.Document;
 import org.jdom2.Element;
-import org.jdom2.output.Format;
-import org.jdom2.output.XMLOutputter;
 
+import edu.umich.med.mrc2.datoolbox.data.MsFeature;
+import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
+import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
+import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
+import edu.umich.med.mrc2.datoolbox.project.store.DataFileExtensions;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskListener;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
+import edu.umich.med.mrc2.datoolbox.utils.ExperimentUtils;
 import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
+import edu.umich.med.mrc2.datoolbox.utils.XmlUtils;
 
 public class SaveMetabolomicsProjectTask extends AbstractTask implements TaskListener {
 
@@ -58,6 +64,7 @@ public class SaveMetabolomicsProjectTask extends AbstractTask implements TaskLis
 			setStatus(TaskStatus.ERROR);
 			return;
 		}
+		saveFeatures();
 		saveProjectToFile();
 		setStatus(TaskStatus.FINISHED);
 	}
@@ -72,19 +79,49 @@ public class SaveMetabolomicsProjectTask extends AbstractTask implements TaskLis
 
 		projectXmlDocument.setRootElement(experimentRoot);
 	}
+	
+	private void saveFeatures() {
+		
+		for(DataPipeline dp : projectToSave.getDataPipelines()) {
+			
+			File featureXmlFile = createFileForFeatureData(dp);
+			Document msFeatureDocument = new Document();
+			Element featureListElement =  
+					 new Element(CommonFields.FeatureList.name());
+			
+			Set<MsFeature> features = projectToSave.getMsFeaturesForDataPipeline(dp);
+			
+			taskDescription = "Writing features for " + dp.getName();
+			total = features.size();
+			processed = 0;
+			
+			for(MsFeature feature : features) {
+				featureListElement.addContent(feature.getXmlElement());
+				processed++;
+			}
+			msFeatureDocument.setRootElement(featureListElement);
+			
+			taskDescription = "Saving XML features file for " + dp.getName();
+			total = 100;
+			processed = 80;
+			ExperimentUtils.createDataDirectoryForProjectIfNotExists(projectToSave);
+			XmlUtils.writeCompactXMLtoFile(msFeatureDocument, featureXmlFile);
+		}		
+	}
+	
+	private File createFileForFeatureData(DataPipeline dp) {
+		
+		return Paths.get(projectToSave.getDataDirectory().getAbsolutePath(),
+				DataPrefix.MS_FEATURE.getName() + dp.getSaveSafeName() 
+				+ "." + DataFileExtensions.FEATURE_LIST_EXTENSION.getExtension()).toFile();
+	}
 
 	private void saveProjectToFile() {
 
 		File xmlFile = FIOUtils.changeExtension(
 				projectToSave.getExperimentFile(), "xml");
 
-		try (FileWriter writer = new FileWriter(xmlFile, false)) {
-			XMLOutputter outputter = new XMLOutputter();
-			outputter.setFormat(Format.getCompactFormat());
-			outputter.output(projectXmlDocument, writer);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		XmlUtils.writeCompactXMLtoFile(projectXmlDocument, xmlFile);
 	}
 
 	@Override

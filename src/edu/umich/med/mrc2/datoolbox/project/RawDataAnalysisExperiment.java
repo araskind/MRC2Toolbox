@@ -64,6 +64,7 @@ import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.main.FeatureCollectionManager;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
+import edu.umich.med.mrc2.datoolbox.project.store.DataFileExtensions;
 import edu.umich.med.mrc2.datoolbox.rawdata.MSMSExtractionParameterSet;
 import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
 
@@ -132,7 +133,8 @@ public class RawDataAnalysisExperiment extends Experiment {
 		
 		super.createDirectoryStructureForNewExperiment(parentDirectory);
 		experimentFile = FIOUtils.changeExtension(
-				experimentFile, MRC2ToolBoxConfiguration.RAW_DATA_EXPERIMENT_FILE_EXTENSION);
+				experimentFile, 
+				DataFileExtensions.RAW_DATA_EXPERIMENT_FILE_EXTENSION.getExtension());
 
 		Path rawDataDirectoryPath = Paths.get(getExperimentDirectory().getAbsolutePath(), 
 				MRC2ToolBoxConfiguration.RAW_DATA_DIRECTORY);

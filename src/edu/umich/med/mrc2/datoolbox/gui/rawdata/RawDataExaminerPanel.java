@@ -109,6 +109,7 @@ import edu.umich.med.mrc2.datoolbox.main.RawDataManager;
 import edu.umich.med.mrc2.datoolbox.main.RecentDataManager;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisExperiment;
+import edu.umich.med.mrc2.datoolbox.project.store.DataFileExtensions;
 import edu.umich.med.mrc2.datoolbox.rawdata.MSMSExtractionParameterSet;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
@@ -875,7 +876,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 		chooser.getActionMap().get("viewTypeDetails").actionPerformed(null);
 		FileNameExtensionFilter experimentFileFilter = 
 				new FileNameExtensionFilter("Raw data experiment files",
-				MRC2ToolBoxConfiguration.RAW_DATA_EXPERIMENT_FILE_EXTENSION);
+						DataFileExtensions.RAW_DATA_EXPERIMENT_FILE_EXTENSION.getExtension());
 		chooser.setFileFilter(experimentFileFilter);	
 		RawDataExperimentOpenComponent acc = 
 				new RawDataExperimentOpenComponent(chooser);
@@ -889,7 +890,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 			if(selectedFile.isDirectory()) {
 				List<Path> pfList = FIOUtils.findFilesByExtension(
 						Paths.get(selectedFile.getAbsolutePath()), 
-						MRC2ToolBoxConfiguration.RAW_DATA_EXPERIMENT_FILE_EXTENSION);
+						DataFileExtensions.RAW_DATA_EXPERIMENT_FILE_EXTENSION.getExtension());
 				if(pfList == null || pfList.isEmpty()) {
 					MessageDialog.showWarningMsg(selectedFile.getName() + 
 							" is not a valid experiment", chooser);

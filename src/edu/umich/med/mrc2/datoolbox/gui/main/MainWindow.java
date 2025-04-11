@@ -119,6 +119,7 @@ import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.project.Experiment;
 import edu.umich.med.mrc2.datoolbox.project.ProjectType;
 import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisExperiment;
+import edu.umich.med.mrc2.datoolbox.project.store.DataFileExtensions;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskControlListener;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
@@ -981,11 +982,11 @@ public class MainWindow extends JFrame
 		boolean loadResults = false;
 		if(experimentType.equals(ProjectType.DATA_ANALYSIS)) {
 			experimentFileFilter = new FileNameExtensionFilter("Raw data experiment files",
-					MRC2ToolBoxConfiguration.EXPERIMENT_FILE_EXTENSION);
+					DataFileExtensions.EXPERIMENT_FILE_EXTENSION.getExtension());
 		}
 		if(experimentType.equals(ProjectType.RAW_DATA_ANALYSIS)) {			
 			experimentFileFilter = new FileNameExtensionFilter("Raw data experiment files",
-					MRC2ToolBoxConfiguration.RAW_DATA_EXPERIMENT_FILE_EXTENSION);
+					DataFileExtensions.RAW_DATA_EXPERIMENT_FILE_EXTENSION.getExtension());
 			acc = new RawDataExperimentOpenComponent(chooser);
 			chooser.setAccessory(acc);
 			chooser.setSize(800, 640);
@@ -1000,7 +1001,7 @@ public class MainWindow extends JFrame
 				if(selectedFile.isDirectory()) {
 					List<Path> pfList = FIOUtils.findFilesByExtension(
 							Paths.get(selectedFile.getAbsolutePath()), 
-							MRC2ToolBoxConfiguration.EXPERIMENT_FILE_EXTENSION);
+							DataFileExtensions.EXPERIMENT_FILE_EXTENSION.getExtension());
 					if(pfList == null || pfList.isEmpty()) {
 						MessageDialog.showWarningMsg(selectedFile.getName() + 
 								" is not a valid metabolomics experiment", chooser);
@@ -1021,7 +1022,7 @@ public class MainWindow extends JFrame
 				if(selectedFile.isDirectory()) {
 					List<Path> pfList = FIOUtils.findFilesByExtension(
 							Paths.get(selectedFile.getAbsolutePath()), 
-							MRC2ToolBoxConfiguration.RAW_DATA_EXPERIMENT_FILE_EXTENSION);
+							DataFileExtensions.RAW_DATA_EXPERIMENT_FILE_EXTENSION.getExtension());
 					if(pfList == null || pfList.isEmpty()) {
 						MessageDialog.showWarningMsg(selectedFile.getName() + 
 								" is not a valid raw data analysis experiment", chooser);

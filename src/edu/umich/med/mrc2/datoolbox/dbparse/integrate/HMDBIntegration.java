@@ -310,7 +310,7 @@ public class HMDBIntegration {
 		if (errorElement == null) {
 			
 			File destinationFile = Paths.get(hmdbFolder,"IndividualXml", accession + ".xml").toFile();
-			XmlUtils.writeXMLDocumentToFile(xmlDocument, destinationFile);
+			XmlUtils.writePrettyPrintXMLtoFile(xmlDocument, destinationFile);
 			return true;
 		}
 		else

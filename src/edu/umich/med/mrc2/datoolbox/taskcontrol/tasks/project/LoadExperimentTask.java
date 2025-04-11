@@ -71,7 +71,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.library.LoadDatabaseLibrar
 public class LoadExperimentTask extends AbstractTask implements TaskListener{
 
 	private DataAnalysisProject newExperiment;
-	private File experimentDirectory, experimentFile;
+	private File experimentFile;
 	private boolean waitingForlibrariesToLoad;
 	private Set<String>libraryIds;
 	private int loadedLibsCount;
@@ -79,7 +79,6 @@ public class LoadExperimentTask extends AbstractTask implements TaskListener{
 	public LoadExperimentTask(File newExperimentFile) {
 
 		this.experimentFile = newExperimentFile;
-		experimentDirectory = experimentFile.getParentFile();
 	}
 	
 	@Override
@@ -94,7 +93,7 @@ public class LoadExperimentTask extends AbstractTask implements TaskListener{
 		newExperiment = null;
 		try {
 			loadExperimentFile();
-		} catch (Throwable e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 			setStatus(TaskStatus.ERROR);
 			return;
@@ -110,8 +109,13 @@ public class LoadExperimentTask extends AbstractTask implements TaskListener{
 				taskDescription = "Reading data matrix for " + dataPipeline.getName();
 				//	Data matrix
 				File dataMatrixFile = 
-						Paths.get(experimentDirectory.getAbsolutePath(), 
+						Paths.get(newExperiment.getDataDirectory().getAbsolutePath(), 
 							newExperiment.getDataMatrixFileNameForDataPipeline(dataPipeline)).toFile();
+				
+				//	TODO temp fix for current projects
+				if(dataMatrixFile == null || !dataMatrixFile.exists())
+					dataMatrixFile = Paths.get(newExperiment.getExperimentDirectory().getAbsolutePath(), 
+						newExperiment.getDataMatrixFileNameForDataPipeline(dataPipeline)).toFile();
 
 				Matrix dataMatrix = null;
 				if (dataMatrixFile.exists()) {
@@ -272,12 +276,9 @@ public class LoadExperimentTask extends AbstractTask implements TaskListener{
 					filter(s -> s.getSampleIdDeprecated().equals(sample.getId())).
 					findFirst().orElse(null);
 			
-			if(match != null) {
-				
-				if(!sample.getId().equals(match.getId())) {
-					sample.setId(match.getId());
-					sample.setName(match.getName());
-				}
+			if(match != null && !sample.getId().equals(match.getId())) {
+				sample.setId(match.getId());
+				sample.setName(match.getName());				
 			}
 		}
 	}	

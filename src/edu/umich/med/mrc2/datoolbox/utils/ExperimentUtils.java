@@ -30,6 +30,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.RandomAccessFile;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -63,6 +65,7 @@ import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureSet;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
+import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.ReferenceSamplesManager;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
@@ -253,29 +256,48 @@ public class ExperimentUtils {
 		if(readTemporary)
 			matrixFileName = FilenameUtils.getBaseName(matrixFileName) 
 					+ tmpSuffix + "." + FilenameUtils.getExtension(matrixFileName);
-				
-		File featureMatrixFile = 
-				Paths.get(currentExperiment.getExperimentDirectory().getAbsolutePath(), matrixFileName).toFile();
+		
+		File featureMatrixFile = Paths.get(currentExperiment.getDataDirectory().getAbsolutePath(), 
+				matrixFileName).toFile();
+		
+		if(featureMatrixFile == null || !featureMatrixFile.exists())
+			featureMatrixFile = Paths.get(currentExperiment.getExperimentDirectory().getAbsolutePath(), 
+					matrixFileName).toFile();
+		
 		if (!featureMatrixFile.exists())
 			return null;
 		
 		Matrix featureMatrix = null;
-		if (featureMatrixFile.exists()) {
-			try {
-				featureMatrix = Matrix.Factory.load(featureMatrixFile);
-			} catch (ClassNotFoundException | IOException e) {
-				e.printStackTrace();
-				return null;
-			}
-			if (featureMatrix != null) {
+		try {
+			featureMatrix = Matrix.Factory.load(featureMatrixFile);
+		} catch (ClassNotFoundException | IOException e) {
+			e.printStackTrace();
+			return null;
+		}
+		if (featureMatrix != null) {
 
-				featureMatrix.setMetaDataDimensionMatrix(0, 
-						currentExperiment.getMetaDataMatrixForDataPipeline(dataPipeline, 0));				
-				featureMatrix.setMetaDataDimensionMatrix(1, 
-						currentExperiment.getMetaDataMatrixForDataPipeline(dataPipeline, 1));
-			}
-		}		
+			featureMatrix.setMetaDataDimensionMatrix(0, 
+					currentExperiment.getMetaDataMatrixForDataPipeline(dataPipeline, 0));				
+			featureMatrix.setMetaDataDimensionMatrix(1, 
+					currentExperiment.getMetaDataMatrixForDataPipeline(dataPipeline, 1));
+		}				
 		return featureMatrix;
+	}
+		
+	public static void createDataDirectoryForProjectIfNotExists(DataAnalysisProject currentExperiment) {
+		
+		Path dataDirectoryPath = Paths.get(
+				currentExperiment.getExperimentDirectory().getAbsolutePath(), 
+				MRC2ToolBoxConfiguration.DATA_DIRECTORY);
+		if(dataDirectoryPath.toFile().exists())
+			return;
+		
+		try {
+			Files.createDirectories(dataDirectoryPath);
+		} catch (IOException e) {
+			e.printStackTrace();
+			MessageDialog.showWarningMsg("Failed to create data directory");
+		}
 	}
 	
 	public static void saveFeatureMatrixToFile(
@@ -283,6 +305,8 @@ public class ExperimentUtils {
 			DataAnalysisProject currentExperiment, 
 			DataPipeline dataPipeline,
 			boolean saveAsTemporary) {
+		
+		createDataDirectoryForProjectIfNotExists(currentExperiment);
 		
 		String featureMatrixFileName = 
 				currentExperiment.getFeatureMatrixFileNameForDataPipeline(dataPipeline);
@@ -294,7 +318,7 @@ public class ExperimentUtils {
 					+ tmpSuffix + "." + FilenameUtils.getExtension(featureMatrixFileName);
 		
 		File featureMatrixFile = 
-				Paths.get(currentExperiment.getExperimentDirectory().getAbsolutePath(), 
+				Paths.get(currentExperiment.getDataDirectory().getAbsolutePath(), 
 				featureMatrixFileName).toFile();
 		try {
 			Matrix featureMatrix = 
@@ -302,7 +326,6 @@ public class ExperimentUtils {
 			featureMatrix.save(featureMatrixFile);
 		} catch (IOException e) {
 			e.printStackTrace();
-			return;
 		}		
 	}
 	
@@ -310,7 +333,9 @@ public class ExperimentUtils {
 			DataAnalysisProject currentExperiment,
 			DataPipeline dataPipeline) {
 		
-		File dataMatrixFile = Paths.get(currentExperiment.getExperimentDirectory().getAbsolutePath(), 
+		createDataDirectoryForProjectIfNotExists(currentExperiment);
+		
+		File dataMatrixFile = Paths.get(currentExperiment.getDataDirectory().getAbsolutePath(), 
 				currentExperiment.getDataMatrixFileNameForDataPipeline(dataPipeline)).toFile();
 		try {
 			Matrix dataMatrix = Matrix.Factory
@@ -320,27 +345,38 @@ public class ExperimentUtils {
 
 		} catch (IOException e) {
 			e.printStackTrace();
-			return;
 		}
 	}
 	
-	//	Will replace existing primery feature matrix file for 
+	//	Will replace existing primary feature matrix file for 
 	//	pipeline with temporary if both files are present
 	public static void saveTemporaryFeatureMatrixFileAsPrimary(
 			DataAnalysisProject currentExperiment,
 			DataPipeline dataPipeline) {
+		
+		createDataDirectoryForProjectIfNotExists(currentExperiment);
 		
 		String featureMatrixFileName = 
 				currentExperiment.getFeatureMatrixFileNameForDataPipeline(dataPipeline);
 		if(featureMatrixFileName == null || featureMatrixFileName.isEmpty()) 
 			return;
 		
+		File featureMatrixFile = 
+				Paths.get(currentExperiment.getDataDirectory().getAbsolutePath(), 
+				featureMatrixFileName).toFile();
+		if(featureMatrixFile == null || !featureMatrixFile.exists())
+			featureMatrixFile = 
+				Paths.get(currentExperiment.getExperimentDirectory().getAbsolutePath(), 
+				featureMatrixFileName).toFile();
+		
 		String tmpFeatureMatrixFileName = FilenameUtils.getBaseName(featureMatrixFileName) 
 					+ tmpSuffix + "." + FilenameUtils.getExtension(featureMatrixFileName);		
-		File featureMatrixFile = 
-				Paths.get(currentExperiment.getExperimentDirectory().getAbsolutePath(), 
-				featureMatrixFileName).toFile();		
+		
 		File tmpFeatureMatrixFile = 
+				Paths.get(currentExperiment.getDataDirectory().getAbsolutePath(), 
+						tmpFeatureMatrixFileName).toFile();
+		if(tmpFeatureMatrixFile == null || !tmpFeatureMatrixFile.exists())
+			tmpFeatureMatrixFile = 
 				Paths.get(currentExperiment.getExperimentDirectory().getAbsolutePath(), 
 						tmpFeatureMatrixFileName).toFile();
 		
@@ -358,6 +394,8 @@ public class ExperimentUtils {
 			DataAnalysisProject currentExperiment,
 			DataPipeline dataPipeline) {
 		
+		createDataDirectoryForProjectIfNotExists(currentExperiment);
+		
 		String featureMatrixFileName = 
 				currentExperiment.getFeatureMatrixFileNameForDataPipeline(dataPipeline);
 		if(featureMatrixFileName == null || featureMatrixFileName.isEmpty()) 
@@ -366,8 +404,12 @@ public class ExperimentUtils {
 		String tmpFeatureMatrixFileName = FilenameUtils.getBaseName(featureMatrixFileName) 
 					+ tmpSuffix + "." + FilenameUtils.getExtension(featureMatrixFileName);			
 		File tmpFeatureMatrixFile = 
+				Paths.get(currentExperiment.getDataDirectory().getAbsolutePath(), 
+						tmpFeatureMatrixFileName).toFile();		
+		if(tmpFeatureMatrixFile == null || !tmpFeatureMatrixFile.exists())
+			tmpFeatureMatrixFile = 
 				Paths.get(currentExperiment.getExperimentDirectory().getAbsolutePath(), 
-						tmpFeatureMatrixFileName).toFile();
+					tmpFeatureMatrixFileName).toFile();		
 		
 		if(tmpFeatureMatrixFile.exists())
 			tmpFeatureMatrixFile.delete();			

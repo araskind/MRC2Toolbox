@@ -152,30 +152,37 @@ public class XmlUtils {
 		}
         return recordNumber;
 	}
+
+	public static void writePrettyPrintXMLtoFile(
+			Document xmlDocument, 
+			File xmlFile) {
+		writeXMLtoFile(xmlDocument, xmlFile, Format.getPrettyFormat(), false);
+	}
 	
-	public static void writeXMLDocumentToFile(Document xmlDocument, File destinationFile) {
+	public static void writeCompactXMLtoFile(
+			Document xmlDocument, 
+			File xmlFile) {
+		writeXMLtoFile(xmlDocument, xmlFile, Format.getCompactFormat(), false);
+	}
+	
+	/**
+	 * Format options Format.getCompactFormat(), Format.getPrettyFormat()
+	 * @param xmlDocument
+	 * @param xmlFile
+	 * @param outputFormat
+	 */
+	public static void writeXMLtoFile(
+			Document xmlDocument, 
+			File xmlFile, 
+			Format outputFormat,
+			boolean append) {
 		
-		XMLOutputter xmlOutputter = new XMLOutputter(Format.getPrettyFormat());
-		FileWriter fileWriter = null;
-		try {
-			fileWriter = new FileWriter(destinationFile);
-		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-	    try {
-			xmlOutputter.output(xmlDocument, fileWriter);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
+		try (FileWriter writer = new FileWriter(xmlFile, append)) {
+			XMLOutputter outputter = new XMLOutputter();
+			outputter.setFormat(outputFormat);
+			outputter.output(xmlDocument, writer);
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
-	    if(fileWriter != null) {
-			try {
-				fileWriter.close();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-	    }
 	}
 }
