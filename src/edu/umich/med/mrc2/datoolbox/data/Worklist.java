@@ -27,13 +27,19 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
+import org.jdom2.Element;
+
 import edu.umich.med.mrc2.datoolbox.data.enums.MoTrPACRawDataManifestFields;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSWorklistItem;
+import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
+import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
+import edu.umich.med.mrc2.datoolbox.project.store.XmlStorable;
 
-public class Worklist implements Serializable {
+public class Worklist implements Serializable, XmlStorable {
 
 	/**
 	 *
@@ -132,6 +138,29 @@ public class Worklist implements Serializable {
 					Integer.toString(injectionOrder));
 			injectionOrder++;
 		}
+	}
+	
+	public Worklist(Element worklistElement) {
+		super();
+		items = new HashSet<WorklistItem>();
+		List<Element>worklistItemElementList = 
+				worklistElement.getChild(CommonFields.ItemList.name()).
+				getChildren(ObjectNames.WorklistItem.name());
+		for(Element worklistItemElement : worklistItemElementList)
+			items.add(new WorklistItem(worklistItemElement));
+	}
+
+	@Override
+	public Element getXmlElement() {
+		
+		Element worklistElement = new Element(ObjectNames.Worklist.name());
+		Element itemListElement = new Element(CommonFields.ItemList.name());	
+		for(WorklistItem item : items)
+			itemListElement.addContent(item.getXmlElement());
+		
+		worklistElement.addContent(itemListElement);
+		
+		return worklistElement;
 	}
 }
 

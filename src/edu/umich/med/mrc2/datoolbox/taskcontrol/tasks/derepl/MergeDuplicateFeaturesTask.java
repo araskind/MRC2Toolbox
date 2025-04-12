@@ -319,14 +319,17 @@ public class MergeDuplicateFeaturesTask extends AbstractTask {
 		processed = 100;
 	}
 	
-	private void saveMsFeatureMatrix(Matrix msFeatureMatrix) {
+	private void saveMsFeatureMatrix(Matrix newMsFeatureMatrix) {
+		
+		if(newMsFeatureMatrix == null)
+			return;
 		
 		taskDescription = 
 				"Saving feature matrix for  " + currentExperiment.getName() +
 				"(" + currentExperiment.getName() + ")";
 		processed = 70;
 		ExperimentUtils.saveFeatureMatrixToFile(
-				msFeatureMatrix,
+				newMsFeatureMatrix,
 				currentExperiment, 
 				activeDataPipeline,
 				false);	//	TODO handle undo for duplicates removal
@@ -335,17 +338,6 @@ public class MergeDuplicateFeaturesTask extends AbstractTask {
 		System.gc();
 		processed = 100;				
 	}
-
-//	private void swapFeatureStats(MsFeature featureOne, MsFeature featureTwo) {
-//
-//		MsFeatureStatisticalSummary sumOne = 
-//				new MsFeatureStatisticalSummary(featureOne.getStatsSummary());
-//		MsFeatureStatisticalSummary sumTwo = 
-//				new MsFeatureStatisticalSummary(featureTwo.getStatsSummary());
-//
-//		featureOne.setStatsSummary(sumTwo);
-//		featureTwo.setStatsSummary(sumOne);
-//	}
 
 	@Override
 	public Task cloneTask() {

@@ -23,6 +23,7 @@ package edu.umich.med.mrc2.datoolbox.utils;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -30,6 +31,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.RandomAccessFile;
+import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -48,9 +50,8 @@ import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import org.apache.commons.io.FilenameUtils;
 import org.jdom2.Document;
 import org.jdom2.Element;
-import org.jdom2.output.Format;
-import org.jdom2.output.XMLOutputter;
 import org.ujmp.core.Matrix;
+import org.ujmp.core.export.exporter.DefaultMatrixWriterCSVExporter;
 
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.io.xml.StaxDriver;
@@ -216,17 +217,11 @@ public class ExperimentUtils {
 		experimentRoot.addContent(msOneFileListElement);        
 		document.setContent(experimentRoot);
 		
-		//	Save XML document
+		//	Save and zip XML document
 		File xmlFile = Paths.get(
 				experimentToSave.getUncompressedExperimentFilesDirectory().getAbsolutePath(), 
 				MRC2ToolBoxConfiguration.PROJECT_FILE_NAME).toFile();
-		try (FileWriter writer = new FileWriter(xmlFile, false)){
-		    XMLOutputter outputter = new XMLOutputter();
-		    outputter.setFormat(Format.getCompactFormat());
-		    outputter.output(document, writer);
-		} catch (Exception e) {
-		    e.printStackTrace();
-		}
+		XmlUtils.writeCompactXMLtoFile(document, xmlFile);
 		try {
 			CompressionUtils.zipFile(xmlFile, experimentToSave.getExperimentFile());
 		} catch (IOException | ArchiveException e) {
@@ -327,6 +322,29 @@ public class ExperimentUtils {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}		
+	}
+	
+	public static void saveDataMatrixForPipelineAsTabSeparated(
+			DataAnalysisProject currentExperiment,
+			DataPipeline dataPipeline) {
+		
+		createDataDirectoryForProjectIfNotExists(currentExperiment);
+		
+		File dataMatrixFile = Paths.get(currentExperiment.getDataDirectory().getAbsolutePath(), 
+				currentExperiment.getDataMatrixFileNameForDataPipeline(dataPipeline)).toFile();
+		Matrix dataMatrix = Matrix.Factory
+				.linkToArray(currentExperiment.getDataMatrixForDataPipeline(dataPipeline).
+						toDoubleArray());
+		
+		try(final Writer writer = new BufferedWriter(new FileWriter(dataMatrixFile));) {
+
+			DefaultMatrixWriterCSVExporter matrixExporter = 
+					new DefaultMatrixWriterCSVExporter(dataMatrix, writer);
+			matrixExporter.asDenseCSV();
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	public static void saveDataMatrixForPipeline(

@@ -31,7 +31,7 @@ public enum CommonFields {
 	LastModified,
 	Enabled,
 	UserId,
-	FeatureList,
+	msFeatureMatrix,
 	MZ,
 	RT,
 	Polarity,
@@ -39,5 +39,7 @@ public enum CommonFields {
 	Properties,
 	Property,
 	NULL,
+	FeatureList,
+	ItemList,
 	;
 }

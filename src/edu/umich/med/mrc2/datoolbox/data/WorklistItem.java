@@ -23,15 +23,25 @@ package edu.umich.med.mrc2.datoolbox.data;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
+import java.util.Map.Entry;
 import java.util.TreeMap;
 
-public class WorklistItem implements Comparable<WorklistItem>, Serializable {
+import org.jdom2.Element;
+
+import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
+import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
+import edu.umich.med.mrc2.datoolbox.project.store.ProjectStoreUtils;
+import edu.umich.med.mrc2.datoolbox.project.store.XmlStorable;
+
+public class WorklistItem implements Comparable<WorklistItem>, Serializable, XmlStorable {
 
 	/**
 	 *
 	 */
 	private static final long serialVersionUID = 5767562224759235903L;
 	protected DataFile dataFile;
+	protected String dataFileName;
 	protected TreeMap<String, String> properties;
 	protected Date timeStamp;
 
@@ -116,4 +126,60 @@ public class WorklistItem implements Comparable<WorklistItem>, Serializable {
 			
 		return result;	
 	}
+
+	public WorklistItem(Element worklistItemElement) {
+		
+		super();		
+		timeStamp = ProjectStoreUtils.getDateFromAttribute(
+				worklistItemElement, CommonFields.DateCreated);
+		dataFileName = worklistItemElement.getAttributeValue(ObjectNames.DataFile.name());
+		
+		properties = new TreeMap<String, String>();
+		List<Element>propertyElementList = 
+				worklistItemElement.getChild(CommonFields.Properties.name()).
+				getChildren(CommonFields.Property.name());
+		if(!propertyElementList.isEmpty()) {
+			
+			for(Element propertyElement : propertyElementList) {
+				properties.put(propertyElement.getAttributeValue(CommonFields.Id.name()), 
+						propertyElement.getAttributeValue(CommonFields.Name.name()));
+			}
+		}
+	}
+	
+	@Override
+	public Element getXmlElement() {
+		
+		Element worklistItemElement = new Element(ObjectNames.WorklistItem.name());
+		worklistItemElement.setAttribute(ObjectNames.DataFile.name(), dataFile.getName());
+		ProjectStoreUtils.setDateAttribute(
+				timeStamp, CommonFields.DateCreated, worklistItemElement);
+		Element propertyListElement = new Element(CommonFields.Properties.name());		
+		for(Entry<String, String>pair : properties.entrySet()) {
+			
+			Element propertyElement = new Element(CommonFields.Property.name());	
+			propertyElement.setAttribute(CommonFields.Id.name(), pair.getKey());
+			propertyElement.setAttribute(CommonFields.Name.name(), pair.getValue());
+			propertyListElement.addContent(propertyElement);
+		}
+		worklistItemElement.addContent(propertyListElement);
+		
+		return worklistItemElement;
+	}
+
+	public String getDataFileName() {
+		return dataFileName;
+	}
 }
+
+
+
+
+
+
+
+
+
+
+
+

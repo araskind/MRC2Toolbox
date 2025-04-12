@@ -84,6 +84,8 @@ public enum ObjectNames {
 	SamplePrep,
 	SopCategory,
 	Spectrum,
+	Worklist,
+	WorklistItem,
 	XIC,
 	XICData,
 	XICDefinition,
