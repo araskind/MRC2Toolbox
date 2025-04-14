@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.zip.DataFormatException;
 import java.util.zip.Deflater;
@@ -86,8 +87,10 @@ public class NumberArrayUtils {
         
         byte[] data = buffer.array();
         byte[] compressed = gzipCompress(data);
-        byte[] binArray = base64.encode(compressed);
-        return new String(binArray, "ASCII");
+        byte[] binArray = null;
+
+		binArray = new Base64().encode(compressed);
+        return new String(binArray, StandardCharsets.US_ASCII);
     }
     
     public static double[] decodeNumberArray(String encodedValues) throws UnsupportedEncodingException {

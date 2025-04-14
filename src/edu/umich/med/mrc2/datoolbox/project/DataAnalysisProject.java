@@ -23,6 +23,7 @@ package edu.umich.med.mrc2.datoolbox.project;
 
 import java.io.File;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -32,6 +33,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang.StringUtils;
 import org.jdom2.Element;
 import org.ujmp.core.Matrix;
 import org.ujmp.core.calculation.Calculation.Ret;
@@ -897,6 +899,13 @@ public class DataAnalysisProject extends Experiment {
     	Element metabolomicsProjectElement = super.getXmlElement();
     	metabolomicsProjectElement.setName(ObjectNames.MetabolomicsProject.name());
     	
+    	//	Remove LIMS design as redundant
+    	Element limsExperiemntElement = 
+    			metabolomicsProjectElement.getChild(ObjectNames.limsExperiment.name());
+    	if(limsExperiemntElement != null) 
+    		limsExperiemntElement.removeChild(ObjectNames.ExperimentDesign.name());
+    	
+    	//	Add data pipelines
     	Element dataPipelineListElement = 
     			new Element(MetabolomicsProjectFields.DataPipelineList.name());
     	for(DataPipeline dp : dataPipelines)
@@ -904,22 +913,6 @@ public class DataAnalysisProject extends Experiment {
     	
     	metabolomicsProjectElement.addContent(dataPipelineListElement);
 
-    	Element methodDataFileMapElement = 
-    			new Element(MetabolomicsProjectFields.MethodDataFileMap.name());
-    	for(DataPipeline dp : dataPipelines) {
-    		    		
-        	Element methodDataFileMapItemElement = 
-        			new Element(MetabolomicsProjectFields.MethodDataFileMapItem.name());
-        	methodDataFileMapItemElement.setAttribute(
-        			MetabolomicsProjectFields.DataPipelineId.name(), dp.getSaveSafeName());
-        	
-        	for(DataFile df : dataFileMap.get(dp.getAcquisitionMethod()))       		
-        		methodDataFileMapItemElement.addContent(df.getXmlElement());
-        	        	
-    		methodDataFileMapElement.addContent(methodDataFileMapItemElement);
-    	}
-    	metabolomicsProjectElement.addContent(methodDataFileMapElement);
-    	
     	return metabolomicsProjectElement;
 	}
 }

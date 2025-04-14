@@ -101,7 +101,7 @@ public class MsFeatureSet extends FeatureSet implements Serializable {
 		features = new HashSet<MsFeature>();
 		featureIdSet = new HashSet<String>();
 		Element featureListElement = 
-				featureSetElement.getChild(MetabolomicsProjectFields.FeatureIdList.name());
+				featureSetElement.getChild(MetabolomicsProjectFields.MSFeatureIdList.name());
 		if(featureListElement != null && !featureListElement.getText().isBlank()) {
 			
 			String[]idArray = featureListElement.getText().split(",");

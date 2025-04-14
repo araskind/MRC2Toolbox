@@ -31,11 +31,14 @@ public enum MetabolomicsProjectFields {
 	MsFeatureClusterId,
 	DataMatrixFileMap,
 	FeatureMatrixFileMap,
-	FeatureIdList,
+	MSFeatureIdMap,
+	MSFeatureIdList,
+	FileIdMap,
 	FileIdList,
 	MSFeatureMap,
 	CompoundLibraryMap,
 	MethodDataFileMap,
 	MethodDataFileMapItem,
+	WorklistMap,
 	;
 }

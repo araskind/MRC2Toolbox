@@ -23,22 +23,36 @@ package edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.project;
 
 import java.io.File;
 import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
+import org.apache.commons.lang.StringUtils;
 import org.jdom2.Document;
 import org.jdom2.Element;
+import org.ujmp.core.Matrix;
+import org.ujmp.core.calculation.Calculation.Ret;
 
+import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
+import edu.umich.med.mrc2.datoolbox.data.Worklist;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
+import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
+import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
 import edu.umich.med.mrc2.datoolbox.project.store.DataFileExtensions;
+import edu.umich.med.mrc2.datoolbox.project.store.MetabolomicsProjectFields;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskListener;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io.CefDataImportTask;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io.CefImportFinalizationTask;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.library.CefLibraryImportTask;
 import edu.umich.med.mrc2.datoolbox.utils.ExperimentUtils;
 import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
 import edu.umich.med.mrc2.datoolbox.utils.XmlUtils;
@@ -47,10 +61,13 @@ public class SaveMetabolomicsProjectTask extends AbstractTask implements TaskLis
 
 	private DataAnalysisProject projectToSave;
 	private Document projectXmlDocument;
+	private int numberOfSavedDataPipelines;
+
 		
 	public SaveMetabolomicsProjectTask(DataAnalysisProject projectToSave) {
 		super();
 		this.projectToSave = projectToSave;
+		numberOfSavedDataPipelines = 0;
 	}
 
 	@Override
@@ -64,9 +81,8 @@ public class SaveMetabolomicsProjectTask extends AbstractTask implements TaskLis
 			setStatus(TaskStatus.ERROR);
 			return;
 		}
-		saveFeatures();
 		saveProjectToFile();
-		setStatus(TaskStatus.FINISHED);
+		saveDataForPipelines();
 	}
 
 	private void createNewProjectDocument() {
@@ -76,46 +92,130 @@ public class SaveMetabolomicsProjectTask extends AbstractTask implements TaskLis
 		processed = 20;
 		projectXmlDocument = new Document();
 		Element experimentRoot = projectToSave.getXmlElement();
-
+		experimentRoot.addContent(addAcquisitionMethodDataFileMap());
+		experimentRoot.addContent(addOrderedFileNameMap());
+		experimentRoot.addContent(addOrderedMSFeatureIdMap());
+		experimentRoot.addContent(addWorklistMap());
 		projectXmlDocument.setRootElement(experimentRoot);
 	}
 	
-	private void saveFeatures() {
+	private Element addAcquisitionMethodDataFileMap() {
 		
-		for(DataPipeline dp : projectToSave.getDataPipelines()) {
-			
-			File featureXmlFile = createFileForFeatureData(dp);
-			Document msFeatureDocument = new Document();
-			Element featureListElement =  
-					 new Element(CommonFields.FeatureList.name());
-			
-			Set<MsFeature> features = projectToSave.getMsFeaturesForDataPipeline(dp);
-			
-			taskDescription = "Writing features for " + dp.getName();
-			total = features.size();
-			processed = 0;
-			
-			for(MsFeature feature : features) {
-				featureListElement.addContent(feature.getXmlElement());
-				processed++;
-			}
-			msFeatureDocument.setRootElement(featureListElement);
-			
-			taskDescription = "Saving XML features file for " + dp.getName();
-			total = 100;
-			processed = 80;
-			ExperimentUtils.createDataDirectoryForProjectIfNotExists(projectToSave);
-			XmlUtils.writeCompactXMLtoFile(msFeatureDocument, featureXmlFile);
-		}		
+    	Element methodDataFileMapElement = 
+    			new Element(MetabolomicsProjectFields.MethodDataFileMap.name());
+    	
+    	Set<DataAcquisitionMethod>acquisitionMethods = 
+    			projectToSave.getDataPipelines().stream().
+    			map(p -> p.getAcquisitionMethod()).collect(Collectors.toSet());
+    	
+    	for(DataAcquisitionMethod method : acquisitionMethods) {
+    		
+        	Element methodDataFileMapItemElement = 
+        			new Element(MetabolomicsProjectFields.MethodDataFileMapItem.name());
+        	methodDataFileMapItemElement.setAttribute(
+        			MetabolomicsProjectFields.DataAcquisitionMethodId.name(), method.getId());
+        	
+        	for(DataFile df : projectToSave.getDataFilesForAcquisitionMethod(method))     		
+        		methodDataFileMapItemElement.addContent(df.getXmlElement());
+        	        	
+    		methodDataFileMapElement.addContent(methodDataFileMapItemElement);
+    	}
+    	return methodDataFileMapElement;
 	}
 	
-	private File createFileForFeatureData(DataPipeline dp) {
+	private Element addOrderedFileNameMap() {
 		
-		return Paths.get(projectToSave.getDataDirectory().getAbsolutePath(),
-				DataPrefix.MS_FEATURE.getName() + dp.getSaveSafeName() 
-				+ "." + DataFileExtensions.FEATURE_LIST_EXTENSION.getExtension()).toFile();
+		taskDescription = "Adding filenae map ... ";
+		processed = 30;
+		
+    	Element fileMapElement = 
+    			new Element(MetabolomicsProjectFields.FileIdMap.name());
+    	
+    	for(DataPipeline dp : projectToSave.getDataPipelines()) {
+    		
+        	Element orderedFileListElement = 
+        			new Element(MetabolomicsProjectFields.FileIdList.name());
+        	orderedFileListElement.setAttribute(
+        			MetabolomicsProjectFields.DataPipelineId.name(), dp.getSaveSafeName());
+        	
+			//	Ordered file list from data matrix metadata
+			Matrix mdFile = projectToSave.getMetaDataMatrixForDataPipeline(dp, 1);
+			if(mdFile != null) {
+				
+				Object[][]fileMetaData =  mdFile.transpose(Ret.NEW).toObjectArray();
+				List<Object>dfList = Arrays.asList(fileMetaData[0]);
+				List<String> fileNameList = dfList.stream().
+						filter(DataFile.class::isInstance).
+						map(DataFile.class::cast).map(f -> f.getName()).
+						collect(Collectors.toList());
+				orderedFileListElement.setText(StringUtils.join(fileNameList, ","));
+				
+			} 
+			fileMapElement.addContent(orderedFileListElement);
+    	}
+    	return fileMapElement;
 	}
-
+	
+	private Element addOrderedMSFeatureIdMap() {
+		
+		taskDescription = "Adding feature ID map ... ";
+		processed = 40;
+		
+    	Element msFeatureMapElement = 
+    			new Element(MetabolomicsProjectFields.MSFeatureIdMap.name());
+    	
+    	for(DataPipeline dp : projectToSave.getDataPipelines()) {
+    		
+        	Element orderedFeatureListElement = 
+        			new Element(MetabolomicsProjectFields.MSFeatureIdList.name());
+        	orderedFeatureListElement.setAttribute(
+        			MetabolomicsProjectFields.DataPipelineId.name(), dp.getSaveSafeName());
+        	
+			//	Ordered file list from data matrix metadata
+			Matrix mdFeature = projectToSave.getMetaDataMatrixForDataPipeline(dp, 0);
+			if(mdFeature != null) {
+				
+				Object[][]featureMetaData =  mdFeature.toObjectArray();
+				List<Object>dfList = Arrays.asList(featureMetaData[0]);
+				List<String> featureIdList = dfList.stream().
+						filter(MsFeature.class::isInstance).
+						map(MsFeature.class::cast).map(f -> f.getId()).
+						collect(Collectors.toList());
+				orderedFeatureListElement.setText(StringUtils.join(featureIdList, ","));
+				
+			} 
+			msFeatureMapElement.addContent(orderedFeatureListElement);
+    	}
+    	return msFeatureMapElement;
+	}
+	
+	private Element addWorklistMap() {
+		
+		taskDescription = "Adding worklist map ... ";
+		processed = 40;
+		
+    	Element worklistMapElement = 
+    			new Element(MetabolomicsProjectFields.WorklistMap.name());
+    	
+    	Set<DataAcquisitionMethod>acquisitionMethods = 
+    			projectToSave.getDataPipelines().stream().
+    			map(p -> p.getAcquisitionMethod()).collect(Collectors.toSet());
+    	
+    	for(DataAcquisitionMethod method : acquisitionMethods) {
+    		
+    		Worklist wkl = projectToSave.getWorklistForDataAcquisitionMethod(method);
+    		if(wkl != null) {
+    			
+    			Element worklistElement = wkl.getXmlElement();
+    			worklistElement.setAttribute(
+    					MetabolomicsProjectFields.DataAcquisitionMethodId.name(), 
+    					method.getId());
+    			worklistMapElement.addContent(worklistElement);
+    		}
+    	}
+     	return worklistMapElement;   	
+	}
+	
 	private void saveProjectToFile() {
 
 		File xmlFile = FIOUtils.changeExtension(
@@ -124,14 +224,39 @@ public class SaveMetabolomicsProjectTask extends AbstractTask implements TaskLis
 		XmlUtils.writeCompactXMLtoFile(projectXmlDocument, xmlFile);
 	}
 
+	private void saveDataForPipelines() {
+		
+		for(DataPipeline dp : projectToSave.getDataPipelines()) {
+			
+			SavePipelineDataTask task = new SavePipelineDataTask(projectToSave, dp);
+			task.addTaskListener(this);
+			MRC2ToolBoxCore.getTaskController().addTask(task);
+		}
+	}
+
 	@Override
 	public void statusChanged(TaskEvent e) {
-		// TODO Auto-generated method stub
 
+		if (e.getStatus() == TaskStatus.FINISHED) {
+
+			((AbstractTask)e.getSource()).removeTaskListener(this);
+
+			if (e.getSource().getClass().equals(SavePipelineDataTask.class)) {
+				
+				MRC2ToolBoxCore.getTaskController().getTaskQueue().removeTask(e.getSource());
+				numberOfSavedDataPipelines++;
+				if(numberOfSavedDataPipelines == projectToSave.getDataPipelines().size())
+					setStatus(TaskStatus.FINISHED);				
+			}				
+		}
 	}
 
 	@Override
 	public Task cloneTask() {
 		return new SaveMetabolomicsProjectTask(projectToSave);
+	}
+
+	public DataAnalysisProject getProject() {
+		return projectToSave;
 	}
 }

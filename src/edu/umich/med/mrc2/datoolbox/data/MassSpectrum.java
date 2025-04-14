@@ -509,9 +509,16 @@ public class MassSpectrum implements Serializable, XmlStorable {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			Element mzElement = 
-					new Element(CommonFields.MZ.name()).setText(mz);			
-			spectrumElement.addContent(mzElement);
+			Element mzElement = null;
+			try {
+				mzElement = new Element(CommonFields.MZ.name()).setText(mz);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}	
+			if(mzElement != null)
+				spectrumElement.addContent(mzElement);
+			
 			double[]intensityValues = msPoints.stream().
 					mapToDouble(p -> Math.floor(p.getIntensity() * 100) / 100).toArray();
 			String intensity = "";

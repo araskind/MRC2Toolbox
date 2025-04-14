@@ -1471,6 +1471,9 @@ public class MainWindow extends JFrame
 			if (e.getSource().getClass().equals(SaveExperimentTask.class) )
 				finalizeExperimentSave(((SaveExperimentTask)e.getSource()).getExperimentToSave());
 			
+			if (e.getSource().getClass().equals(SaveMetabolomicsProjectTask.class) )
+				finalizeExperimentSave(((SaveMetabolomicsProjectTask)e.getSource()).getProject());
+			
 			if(e.getSource().getClass().equals(SaveStoredRawDataAnalysisExperimentTask.class))
 				finalizeExperimentSave(((SaveStoredRawDataAnalysisExperimentTask)e.getSource()).getExperimentToSave());
 							
