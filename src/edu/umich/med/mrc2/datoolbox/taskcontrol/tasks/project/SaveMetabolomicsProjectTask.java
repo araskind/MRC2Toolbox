@@ -226,6 +226,9 @@ public class SaveMetabolomicsProjectTask extends AbstractTask implements TaskLis
 
 	private void saveDataForPipelines() {
 		
+		//	TODO TMP fix for old projects
+		ExperimentUtils.moveCEFLibraryFilesToNewDefaultLocation(projectToSave);
+		
 		for(DataPipeline dp : projectToSave.getDataPipelines()) {
 			
 			SavePipelineDataTask task = new SavePipelineDataTask(projectToSave, dp);

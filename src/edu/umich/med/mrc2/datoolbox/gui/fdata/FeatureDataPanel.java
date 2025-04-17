@@ -1387,7 +1387,8 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 	public void setTableModelFromFeatureSet(
 			MsFeatureSet activeFeatureSetForMethod) {
 		
-		if(activeFeatureSetForMethod.equals(activeMsFeatureSet))
+		if(activeFeatureSetForMethod.equals(activeMsFeatureSet)
+				&& featureDataTable.getTable().getRowCount() == activeMsFeatureSet.getFeatures().size())
 			return;
 		
 		featureDataTable.clearTable();

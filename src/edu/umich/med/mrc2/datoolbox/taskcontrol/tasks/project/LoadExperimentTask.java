@@ -70,6 +70,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskListener;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.library.LoadDatabaseLibraryTask;
+import edu.umich.med.mrc2.datoolbox.utils.ExperimentUtils;
 
 public class LoadExperimentTask extends AbstractTask implements TaskListener{
 
@@ -108,36 +109,41 @@ public class LoadExperimentTask extends AbstractTask implements TaskListener{
 			newExperiment.recreateMatrixMaps();
 
 			for (DataPipeline dataPipeline : newExperiment.getDataPipelines()) {
-
-				taskDescription = "Reading data matrix for " + dataPipeline.getName();
-				//	Data matrix
-				File dataMatrixFile = 
-						Paths.get(newExperiment.getDataDirectory().getAbsolutePath(), 
-							newExperiment.getDataMatrixFileNameForDataPipeline(dataPipeline)).toFile();
 				
-				//	TODO temp fix for current projects
-				if(dataMatrixFile == null || !dataMatrixFile.exists())
-					dataMatrixFile = Paths.get(newExperiment.getExperimentDirectory().getAbsolutePath(), 
-						newExperiment.getDataMatrixFileNameForDataPipeline(dataPipeline)).toFile();
-
-				Matrix dataMatrix = null;
-				if (dataMatrixFile.exists()) {
-					try {
-						dataMatrix = Matrix.Factory.load(dataMatrixFile);
-					} catch (ClassNotFoundException | IOException e) {
-						e.printStackTrace();
-						setStatus(TaskStatus.ERROR);
-						return;
-					}
-					if (dataMatrix != null) {
-					
-						dataMatrix.setMetaDataDimensionMatrix(0, 
-								newExperiment.getMetaDataMatrixForDataPipeline(dataPipeline, 0));
-						dataMatrix.setMetaDataDimensionMatrix(1, 
-								newExperiment.getMetaDataMatrixForDataPipeline(dataPipeline, 1));
-						newExperiment.setDataMatrixForDataPipeline(dataPipeline, dataMatrix);
-					}
+				if(dataPipeline.equals(newExperiment.getActiveDataPipeline())) {
+					taskDescription = "Reading data matrix for " + dataPipeline.getName();
+					ExperimentUtils.loadDataMatrixForPipeline(newExperiment, dataPipeline);
 				}
+//
+//				
+//				//	Data matrix
+//				File dataMatrixFile = 
+//						Paths.get(newExperiment.getDataDirectory().getAbsolutePath(), 
+//							newExperiment.getDataMatrixFileNameForDataPipeline(dataPipeline)).toFile();
+//				
+//				//	TODO temp fix for current projects
+//				if(dataMatrixFile == null || !dataMatrixFile.exists())
+//					dataMatrixFile = Paths.get(newExperiment.getExperimentDirectory().getAbsolutePath(), 
+//						newExperiment.getDataMatrixFileNameForDataPipeline(dataPipeline)).toFile();
+//
+//				Matrix dataMatrix = null;
+//				if (dataMatrixFile.exists()) {
+//					try {
+//						dataMatrix = Matrix.Factory.load(dataMatrixFile);
+//					} catch (ClassNotFoundException | IOException e) {
+//						e.printStackTrace();
+//						setStatus(TaskStatus.ERROR);
+//						return;
+//					}
+//					if (dataMatrix != null) {
+//					
+//						dataMatrix.setMetaDataDimensionMatrix(0, 
+//								newExperiment.getMetaDataMatrixForDataPipeline(dataPipeline, 0));
+//						dataMatrix.setMetaDataDimensionMatrix(1, 
+//								newExperiment.getMetaDataMatrixForDataPipeline(dataPipeline, 1));
+//						newExperiment.setDataMatrixForDataPipeline(dataPipeline, dataMatrix);
+//					}
+//				}
 			}
 			newExperiment.restoreData();
 			updateFeatureIdentifications();

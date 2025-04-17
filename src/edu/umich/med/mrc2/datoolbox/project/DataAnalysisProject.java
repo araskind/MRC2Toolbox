@@ -27,6 +27,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
@@ -61,6 +62,7 @@ import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.store.DataFileExtensions;
 import edu.umich.med.mrc2.datoolbox.project.store.MetabolomicsProjectFields;
 import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
+import edu.umich.med.mrc2.datoolbox.utils.ExperimentUtils;
 import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
 
 public class DataAnalysisProject extends Experiment {
@@ -567,13 +569,13 @@ public class DataAnalysisProject extends Experiment {
 
 	public void restoreData() {
 
-		for (DataPipeline pipeline : dataPipelines) {
-
-			// Restore correlation matrix if clusters are present
-			if (clusterMap.get(pipeline) != null)
-				corrMatrixMap.put(pipeline, 
-						dataMatrixMap.get(pipeline).corrcoef(Ret.LINK, false, false));
-		}
+//		for (DataPipeline pipeline : dataPipelines) {
+//
+//			// Restore correlation matrix if clusters are present
+//			if (clusterMap.get(pipeline) != null)
+//				corrMatrixMap.put(pipeline, 
+//						dataMatrixMap.get(pipeline).corrcoef(Ret.LINK, false, false));
+//		}
 		for (DataPipeline pipeline : dataPipelines) {
 			
 			for(MsFeature feature : featureMap.get(pipeline)) {
@@ -593,7 +595,11 @@ public class DataAnalysisProject extends Experiment {
 	}
 
 	public void setActiveDataPipeline(DataPipeline activePipeline) {
+		
 		this.activeDataPipeline = activePipeline;
+		
+		if(dataMatrixMap.get(activeDataPipeline) == null)
+			ExperimentUtils.loadDataMatrixForPipeline(this, activeDataPipeline);
 	}
 
 	public void setActiveFeatureSetForDataPipeline(

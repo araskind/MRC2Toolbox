@@ -37,7 +37,7 @@ public enum AgilentSampleInfoFields {
 	METHOD_TYPE("Method Type"),
 	BALANCE_OVERRIDE("Balance Override"),
 	INJ_VOL("Inj Vol ("+ '\u03BC' + "l)"),
-	INJ_VOL_UTF8("Inj Vol (µl)"),
+	INJ_VOL_UTF8("Inj Vol (ï¿½l)"),
 	EQUILIB_TIME("Equilib Time (min)"),
 	DILUTION("Dilution"),
 	WT_VOL("Wt/Vol"),
@@ -52,7 +52,8 @@ public enum AgilentSampleInfoFields {
 	RUNCOMPLETEDFLAG("RunCompletedFlag"),
 	OPERATORNAME("OperatorName"),
 	INSTRUMENTNAME("InstrumentName"),
-	COMBINEDEXPORTOUTPUTFILE("CombinedExportOutputFile");
+	COMBINEDEXPORTOUTPUTFILE("CombinedExportOutputFile"),
+	PEAK_BINARY_FILE_SIZE("MSPeak.bin size");
 
 	private final String uiName;
 

@@ -24,6 +24,7 @@ package edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -187,6 +188,7 @@ public abstract class WorklistTask extends AbstractTask {
 			String timeString = null;
 			Date injectionTime = null;
 			File sampleInfoFile = Paths.get(df.getAbsolutePath(), "AcqData", "sample_info.xml").toFile();
+			File peakBinaryFile = Paths.get(df.getAbsolutePath(), "AcqData", "MSPeak.bin").toFile();
 			if (sampleInfoFile.exists()) {
 
 				Document sampleInfo = XmlUtils.readXmlFile(sampleInfoFile);
@@ -222,9 +224,14 @@ public abstract class WorklistTask extends AbstractTask {
 					for (Entry<String, String> entry : sampleData.entrySet())
 						newItem.setProperty(entry.getKey(), entry.getValue());
 
+					if(peakBinaryFile.exists()) {
+						long fileSize = Files.size(peakBinaryFile.toPath());
+						newItem.setProperty(
+								AgilentSampleInfoFields.PEAK_BINARY_FILE_SIZE.getName(), Long.toString(fileSize));
+					}						
 					worklist.addItem(newItem);
 				}
-			}
+			}			
 			processed++;
 		}
 	}

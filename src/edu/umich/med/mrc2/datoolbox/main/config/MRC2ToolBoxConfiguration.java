@@ -54,6 +54,7 @@ public class MRC2ToolBoxConfiguration {
 
 	//	Values not subject to change
 	public static final String DATA_DIRECTORY = "data";
+	public static final String LIBRARY_DIRECTORY = "libraries";
 	public static final String DATA_EXPORT_DIRECTORY = "exports";
 	public static final String RAW_DATA_DIRECTORY = "RawData";
 	public static final String TAB_DATA_DELIMITER = "\t";

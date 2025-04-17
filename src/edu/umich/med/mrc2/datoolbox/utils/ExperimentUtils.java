@@ -35,12 +35,14 @@ import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 
 import org.apache.commons.compress.archivers.ArchiveException;
 import org.apache.commons.compress.archivers.ArchiveStreamFactory;
@@ -76,8 +78,13 @@ import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
 import edu.umich.med.mrc2.datoolbox.project.store.IDTrackerProjectFields;
 import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
 import edu.umich.med.mrc2.datoolbox.project.store.ProjectStoreUtils;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 
 public class ExperimentUtils {
+	
+	private ExperimentUtils() {
+		
+	}
 	
 	public static final DateFormat dateTimeFormat = 
 			new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -279,11 +286,13 @@ public class ExperimentUtils {
 		return featureMatrix;
 	}
 		
-	public static void createDataDirectoryForProjectIfNotExists(DataAnalysisProject currentExperiment) {
+	public static void createDataDirectoryForProjectIfNotExists(
+			DataAnalysisProject currentExperiment) {
 		
 		Path dataDirectoryPath = Paths.get(
 				currentExperiment.getExperimentDirectory().getAbsolutePath(), 
-				MRC2ToolBoxConfiguration.DATA_DIRECTORY);
+				MRC2ToolBoxConfiguration.DATA_DIRECTORY, 
+				MRC2ToolBoxConfiguration.LIBRARY_DIRECTORY);
 		if(dataDirectoryPath.toFile().exists())
 			return;
 		
@@ -431,6 +440,138 @@ public class ExperimentUtils {
 		
 		if(tmpFeatureMatrixFile.exists())
 			tmpFeatureMatrixFile.delete();			
+	}
+
+	public static void moveFeatureMatrixFileToNewDefaultLocation(
+			DataAnalysisProject project, DataPipeline pipeline) {
+		
+		createDataDirectoryForProjectIfNotExists(project);
+		
+		String featureMatrixFileName = 
+				project.getFeatureMatrixFileNameForDataPipeline(pipeline);
+		if(featureMatrixFileName == null || featureMatrixFileName.isEmpty()) 
+			return;
+		
+		Path featureMatrixFileNewLocation = 
+				Paths.get(project.getDataDirectory().getAbsolutePath(), 
+				featureMatrixFileName);
+		Path featureMatrixFileOldLocation = 
+				Paths.get(project.getExperimentDirectory().getAbsolutePath(), 
+				featureMatrixFileName);
+		
+		if((featureMatrixFileNewLocation.toFile() == null 
+				|| !featureMatrixFileNewLocation.toFile().exists())
+				&& featureMatrixFileOldLocation.toFile().exists()) {
+			try {
+				Files.move(
+					featureMatrixFileOldLocation, 
+					featureMatrixFileNewLocation, 
+					StandardCopyOption.REPLACE_EXISTING);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}			
+		}
+		if(featureMatrixFileOldLocation.toFile().exists()) {
+			try {
+				Files.delete(featureMatrixFileOldLocation);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}
+
+	public static void moveDataMatrixFileToNewDefaultLocation(
+			DataAnalysisProject project, DataPipeline pipeline) {
+		
+		createDataDirectoryForProjectIfNotExists(project);
+		
+		String dataMatrixFileName = 
+				project.getDataMatrixFileNameForDataPipeline(pipeline);
+		if(dataMatrixFileName == null || dataMatrixFileName.isEmpty()) 
+			return;
+		
+		Path dataMatrixFileNewLocation = 
+				Paths.get(project.getDataDirectory().getAbsolutePath(), 
+				dataMatrixFileName);
+		Path dataMatrixFileOldLocation = 
+				Paths.get(project.getExperimentDirectory().getAbsolutePath(), 
+				dataMatrixFileName);
+		
+		if((dataMatrixFileNewLocation.toFile() == null 
+				|| !dataMatrixFileNewLocation.toFile().exists()) 
+				&& dataMatrixFileOldLocation.toFile().exists()) {				
+			try {
+				Files.move(
+					dataMatrixFileOldLocation, 
+					dataMatrixFileNewLocation, 
+					StandardCopyOption.REPLACE_EXISTING);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}		
+		}	
+		if(dataMatrixFileOldLocation.toFile().exists()) {
+			try {
+				Files.delete(dataMatrixFileOldLocation);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	public static void moveCEFLibraryFilesToNewDefaultLocation(DataAnalysisProject project) {
+		
+		List<Path>cefPathList = 
+				FIOUtils.findFilesByExtension(project.getExperimentDirectory().toPath(), "cef");
+		if(!cefPathList.isEmpty()) {
+			
+			for(Path cefPath : cefPathList) {
+				
+				Path newPath = Paths.get(
+						project.getLibraryDirectory().getAbsolutePath(), 
+						cefPath.toFile().getName());
+				try {
+					Files.move(cefPath, newPath, StandardCopyOption.REPLACE_EXISTING);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+	
+	public static void loadDataMatrixForPipeline(
+			DataAnalysisProject project, DataPipeline pipeline) {
+		
+		File dataMatrixFile = 
+				Paths.get(project.getDataDirectory().getAbsolutePath(), 
+						project.getDataMatrixFileNameForDataPipeline(pipeline)).toFile();
+		
+		//	TODO temp fix for current projects
+		if(dataMatrixFile == null || !dataMatrixFile.exists())
+			dataMatrixFile = Paths.get(project.getExperimentDirectory().getAbsolutePath(), 
+					project.getDataMatrixFileNameForDataPipeline(pipeline)).toFile();
+
+		Matrix dataMatrix = null;
+		if (dataMatrixFile.exists()) {
+			try {
+				dataMatrix = Matrix.Factory.load(dataMatrixFile);
+			} catch (ClassNotFoundException | IOException e) {
+				e.printStackTrace();
+				return;
+			}
+			if (dataMatrix != null) {
+			
+				dataMatrix.setMetaDataDimensionMatrix(0, 
+						project.getMetaDataMatrixForDataPipeline(pipeline, 0));
+				dataMatrix.setMetaDataDimensionMatrix(1, 
+						project.getMetaDataMatrixForDataPipeline(pipeline, 1));
+				project.setDataMatrixForDataPipeline(pipeline, dataMatrix);
+			}
+		}
 	}
 }
 

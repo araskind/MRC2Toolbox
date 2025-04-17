@@ -132,10 +132,18 @@ public class SavePipelineDataTask extends AbstractTask {
 		}
 		else {
 			//	If temporary matrix exists swap the original for it
-			ExperimentUtils.saveTemporaryFeatureMatrixFileAsPrimary(project,pipeline);
+			ExperimentUtils.saveTemporaryFeatureMatrixFileAsPrimary(project,pipeline);			
 		}
-		project.setFeatureMatrixForDataPipeline(pipeline, null);
+		project.setFeatureMatrixForDataPipeline(pipeline, null);	//	TODO is that necessary?
+		cleanupForNewProjectStructure();		
 		processed = 100;		
+	}
+	
+	//	Tmp fix to convert old project format to new one) 
+	private void cleanupForNewProjectStructure() {
+		
+		ExperimentUtils.moveDataMatrixFileToNewDefaultLocation(project,pipeline);
+		ExperimentUtils.moveFeatureMatrixFileToNewDefaultLocation(project,pipeline);
 	}
 
 	@Override

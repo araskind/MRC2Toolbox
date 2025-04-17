@@ -111,8 +111,9 @@ public abstract class Experiment implements Serializable, XmlStorable{
 			MessageDialog.showWarningMsg("Failed to create exports directory");
 			return;
 		}
+		// Also creates libraries directory inside
 		Path dataDirectoryPath = Paths.get(experimentDirectoryPath.toString(), 
-				MRC2ToolBoxConfiguration.DATA_DIRECTORY);
+				MRC2ToolBoxConfiguration.DATA_DIRECTORY, MRC2ToolBoxConfiguration.LIBRARY_DIRECTORY);
 		try {
 			Files.createDirectories(dataDirectoryPath);
 		} catch (IOException e) {
@@ -171,6 +172,12 @@ public abstract class Experiment implements Serializable, XmlStorable{
 					MRC2ToolBoxConfiguration.DATA_DIRECTORY).toFile();
 	}
 
+	public File getLibraryDirectory() {
+		return Paths.get(experimentFile.getParentFile().getAbsolutePath(), 
+					MRC2ToolBoxConfiguration.DATA_DIRECTORY,
+					MRC2ToolBoxConfiguration.LIBRARY_DIRECTORY).toFile();
+	}
+	
 	public Date getDateCreated() {
 		return dateCreated;
 	}
