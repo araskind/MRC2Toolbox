@@ -46,7 +46,7 @@ import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
 import edu.umich.med.mrc2.datoolbox.project.store.MSMSClusterDataSetFields;
 import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
 import edu.umich.med.mrc2.datoolbox.project.store.ProjectStoreUtils;
-import edu.umich.med.mrc2.datoolbox.utils.ExperimentUtils;
+import edu.umich.med.mrc2.datoolbox.utils.ProjectUtils;
 
 public class MSMSClusterDataSet implements IMSMSClusterDataSet {
 	
@@ -411,8 +411,8 @@ public class MSMSClusterDataSet implements IMSMSClusterDataSet {
 		
 		data += "<b># of clusters: </b>" + Integer.toString(
 				MSMSClusterDataSetManager.getMSMSClusterDataSetSize(this)) + "<br>";
-		data += "<b>Created on: </b>" + ExperimentUtils.dateTimeFormat.format(dateCreated) + "<br>";
-		data += "<b>Last modified on: </b>" + ExperimentUtils.dateTimeFormat.format(lastModified);		
+		data += "<b>Created on: </b>" + ProjectUtils.dateTimeFormat.format(dateCreated) + "<br>";
+		data += "<b>Last modified on: </b>" + ProjectUtils.dateTimeFormat.format(lastModified);		
 		return data;
 	}
 }

@@ -63,7 +63,7 @@ import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.store.DataFileExtensions;
 import edu.umich.med.mrc2.datoolbox.project.store.MetabolomicsProjectFields;
 import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
-import edu.umich.med.mrc2.datoolbox.utils.ExperimentUtils;
+import edu.umich.med.mrc2.datoolbox.utils.ProjectUtils;
 import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
 
 public class DataAnalysisProject extends Project {
@@ -594,7 +594,7 @@ public class DataAnalysisProject extends Project {
 		this.activeDataPipeline = activePipeline;
 		
 		if(dataMatrixMap.get(activeDataPipeline) == null)
-			ExperimentUtils.loadDataMatrixForPipeline(this, activeDataPipeline);
+			ProjectUtils.loadDataMatrixForPipeline(this, activeDataPipeline);
 	}
 
 	public void setActiveFeatureSetForDataPipeline(

@@ -58,7 +58,7 @@ import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.data.msclust.IMSMSClusterDataSet;
 import edu.umich.med.mrc2.datoolbox.project.Project;
 import edu.umich.med.mrc2.datoolbox.project.ProjectType;
-import edu.umich.med.mrc2.datoolbox.utils.ExperimentUtils;
+import edu.umich.med.mrc2.datoolbox.utils.ProjectUtils;
 
 public class RecentDataManager {
 	
@@ -117,7 +117,7 @@ public class RecentDataManager {
 		String featureCollectionIdListString = 
 				rootElement.getChild(RECENT_FEATURE_COLLECTION_ELEMENT).getText();
 		Collection<String> featureCollectionIdList = 
-				ExperimentUtils.getIdList(featureCollectionIdListString);
+				ProjectUtils.getIdList(featureCollectionIdListString);
 		for(String fcid : featureCollectionIdList) {
 			
 			MsFeatureInfoBundleCollection fc = 
@@ -128,7 +128,7 @@ public class RecentDataManager {
 		String clusterCollectionIdListString = 
 				rootElement.getChild(RECENT_CLUSTER_SET_ELEMENT).getText();
 		Collection<String> clusterCollectionIdList = 
-				ExperimentUtils.getIdList(clusterCollectionIdListString);
+				ProjectUtils.getIdList(clusterCollectionIdListString);
 		for(String ccid : clusterCollectionIdList) {
 			
 			IMSMSClusterDataSet cds = 

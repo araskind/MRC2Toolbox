@@ -59,7 +59,7 @@ import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
-import edu.umich.med.mrc2.datoolbox.utils.ExperimentUtils;
+import edu.umich.med.mrc2.datoolbox.utils.ProjectUtils;
 
 public class CefImportFinalizationTask extends AbstractTask {
 
@@ -96,8 +96,7 @@ public class CefImportFinalizationTask extends AbstractTask {
 
 		setStatus(TaskStatus.PROCESSING);
 		taskDescription = "Finalizing CEF import ...";
-
-
+		
 		calculateFeatureStatistics();
 			
 		if(removeAbnormalIsoPatterns)
@@ -339,13 +338,13 @@ public class CefImportFinalizationTask extends AbstractTask {
 			taskDescription = "Saving data matrix for  " + experimentToSave.getName() +
 					"(" + dataPipeline.getName() + ")";
 			processed = 50;			
-			ExperimentUtils.saveDataMatrixForPipeline(experimentToSave, dataPipeline);
+			ProjectUtils.saveDataMatrixForPipeline(experimentToSave, dataPipeline);
 			
 			taskDescription = "Saving feature matrix for  " + experimentToSave.getName() +
 					"(" + dataPipeline.getName() + ")";
 			processed = 70;
 
-			ExperimentUtils.saveFeatureMatrixToFile(
+			ProjectUtils.saveFeatureMatrixToFile(
 					featureMatrix,
 					experimentToSave, 
 					dataPipeline,

@@ -70,7 +70,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskListener;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.library.LoadDatabaseLibraryTask;
-import edu.umich.med.mrc2.datoolbox.utils.ExperimentUtils;
+import edu.umich.med.mrc2.datoolbox.utils.ProjectUtils;
 
 public class LoadExperimentTask extends AbstractTask implements TaskListener{
 
@@ -112,7 +112,7 @@ public class LoadExperimentTask extends AbstractTask implements TaskListener{
 				
 				if(dataPipeline.equals(newExperiment.getActiveDataPipeline())) {
 					taskDescription = "Reading data matrix for " + dataPipeline.getName();
-					ExperimentUtils.loadDataMatrixForPipeline(newExperiment, dataPipeline);
+					ProjectUtils.loadDataMatrixForPipeline(newExperiment, dataPipeline);
 				}
 //
 //				

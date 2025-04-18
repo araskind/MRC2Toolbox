@@ -81,7 +81,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 import edu.umich.med.mrc2.datoolbox.utils.DataExportUtils;
-import edu.umich.med.mrc2.datoolbox.utils.ExperimentUtils;
+import edu.umich.med.mrc2.datoolbox.utils.ProjectUtils;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 import edu.umich.med.mrc2.datoolbox.utils.WorklistUtils;
 
@@ -264,7 +264,7 @@ public class DataExportTask extends AbstractTask {
 
 		taskDescription = "Reading feature data matrix ...";
 		Matrix dataMatrix = 
-				ExperimentUtils.readFeatureMatrix(currentExperiment, dataPipeline, false);
+				ProjectUtils.readFeatureMatrix(currentExperiment, dataPipeline, false);
 		if(dataMatrix == null) {
 			errorMessage = "Unable to read feature data matrix file";
 			setStatus(TaskStatus.ERROR);
@@ -403,7 +403,7 @@ public class DataExportTask extends AbstractTask {
 		
 		taskDescription = "Reading feature data matrix ...";
 		Matrix dataMatrix = 
-				ExperimentUtils.readFeatureMatrix(currentExperiment, dataPipeline, false);
+				ProjectUtils.readFeatureMatrix(currentExperiment, dataPipeline, false);
 		if(dataMatrix == null) {
 			errorMessage = "Unable to read feature data matrix file";
 			setStatus(TaskStatus.ERROR);
@@ -526,7 +526,7 @@ public class DataExportTask extends AbstractTask {
 
 		taskDescription = "Reading feature data matrix ...";
 		Matrix dataMatrix = 
-				ExperimentUtils.readFeatureMatrix(currentExperiment, dataPipeline, false);
+				ProjectUtils.readFeatureMatrix(currentExperiment, dataPipeline, false);
 		if(dataMatrix == null) {
 			errorMessage = "Unable to read feature data matrix file";
 			setStatus(TaskStatus.ERROR);

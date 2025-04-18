@@ -25,7 +25,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
@@ -37,8 +39,11 @@ import org.jdom2.input.SAXBuilder;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesign;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
+import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
+import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
+import edu.umich.med.mrc2.datoolbox.project.ProjectType;
 import edu.umich.med.mrc2.datoolbox.project.store.MetabolomicsProjectFields;
 import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
@@ -46,15 +51,20 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskListener;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io.CefDataImportTask;
 
 public class OpenMetabolomicsProjectTask extends AbstractTask implements TaskListener {
 	
 	private File projectFile;
 	private DataAnalysisProject project;
+	private Map<DataPipeline,String[]>orderedDataFileNamesMap;
+	private Map<DataPipeline,String[]>orderedMSFeatureIdMap;
+	private int pipelineCount;
+	private int loadedPipelineCount;
 	
 	public OpenMetabolomicsProjectTask(File projectFile) {
 		super();
-		this.projectFile = projectFile;
+		this.projectFile = projectFile;		
 	}
 
 	@Override
@@ -68,9 +78,33 @@ public class OpenMetabolomicsProjectTask extends AbstractTask implements TaskLis
 			setStatus(TaskStatus.ERROR);
 			return;
 		}
-		setStatus(TaskStatus.FINISHED);
+		initPipelineDataLoad();
 	}
 	
+	private void initPipelineDataLoad() {
+		
+		pipelineCount = project.getDataPipelines().size();
+		if(pipelineCount == 0) {
+			setStatus(TaskStatus.FINISHED);
+			return;
+		}
+		pipelineCount = orderedDataFileNamesMap.size();
+		loadedPipelineCount = 0;
+		for(DataPipeline dp : project.getDataPipelines()) {
+			
+			if(orderedDataFileNamesMap.get(dp) != null 
+					&& orderedMSFeatureIdMap.get(dp) != null) {
+
+				LoadPipelineDataTask task = new LoadPipelineDataTask(
+						project, dp, 
+						orderedDataFileNamesMap.get(dp),
+						orderedMSFeatureIdMap.get(dp));
+				task.addTaskListener(this);
+				MRC2ToolBoxCore.getTaskController().addTask(task);
+			}
+		}
+	}
+
 	private void parseProjectFile() {
 		
 		taskDescription = "Parsing project file ...";
@@ -104,8 +138,79 @@ public class OpenMetabolomicsProjectTask extends AbstractTask implements TaskLis
 		}
 		project = new DataAnalysisProject(projectElement);
 		project.setProjectFile(projectFile);
+		project.setProjectType(ProjectType.DATA_ANALYSIS_NEW_FORMAT);
+		
+		//	That is necessary to correctly associate samples with data files in the design
 		parseAcquisitionMethodDataFileMap(projectElement);
+		
 		parseExperimentDesign(projectElement);
+		parseOrderedFileNameMap(projectElement);
+		parseOrderedMSFeatureIdMap(projectElement);
+		setActivePipeline(projectElement);
+	}
+	
+	private void setActivePipeline(Element projectElement) {
+		
+		DataPipeline activePipeline = null;
+		String activePipelineName = projectElement.getAttributeValue(
+				MetabolomicsProjectFields.ActiveDataPipeline.name());
+		
+		if(activePipelineName != null && !activePipelineName.isEmpty())
+			activePipeline = project.getDataPipelines().stream().
+					filter(p -> p.getSaveSafeName().equals(activePipelineName)).
+					findFirst().orElse(activePipeline);
+
+		if(activePipeline == null && !project.getDataPipelines().isEmpty())
+			activePipeline = project.getDataPipelines().iterator().next();
+		
+		if(activePipeline != null)
+			project.setActiveDataPipeline(activePipeline);
+	}
+	
+	private void parseOrderedFileNameMap(Element projectElement) {
+		
+		orderedDataFileNamesMap = new TreeMap<DataPipeline,String[]>();
+    	List<Element> orderedFileListElementList = 
+    			projectElement.getChild(MetabolomicsProjectFields.FileIdMap.name()).
+    			getChildren(MetabolomicsProjectFields.FileIdList.name());
+		
+    	for(Element orderedFileListElement : orderedFileListElementList) {
+    		
+    		String pipelineName = orderedFileListElement.getAttributeValue(
+    				MetabolomicsProjectFields.DataPipelineId.name());
+    		if(pipelineName != null && !pipelineName.isEmpty()) {
+    			
+    			DataPipeline dp = project.getDataPipelines().stream().
+    				filter(p -> p.getSaveSafeName().equals(pipelineName)).
+    				findFirst().orElse(null);
+    			
+    			String[]fileNames = orderedFileListElement.getText().split(",");
+    			orderedDataFileNamesMap.put(dp, fileNames);
+    		}
+    	}
+	}
+	
+	private void parseOrderedMSFeatureIdMap(Element projectElement) {
+		
+		orderedMSFeatureIdMap = new  TreeMap<DataPipeline,String[]>();
+    	List<Element> orderedMSFeatureIdElementList = 
+    			projectElement.getChild(MetabolomicsProjectFields.MSFeatureIdMap.name()).
+    			getChildren(MetabolomicsProjectFields.MSFeatureIdList.name());
+		
+    	for(Element orderedMSFeatureIdElement : orderedMSFeatureIdElementList) {
+    		
+    		String pipelineName = orderedMSFeatureIdElement.getAttributeValue(
+    				MetabolomicsProjectFields.DataPipelineId.name());
+    		if(pipelineName != null && !pipelineName.isEmpty()) {
+    			
+    			DataPipeline dp = project.getDataPipelines().stream().
+    				filter(p -> p.getSaveSafeName().equals(pipelineName)).
+    				findFirst().orElse(null);
+    			
+    			String[]featureIds = orderedMSFeatureIdElement.getText().split(",");
+    			orderedMSFeatureIdMap.put(dp, featureIds);
+    		}
+    	}
 	}
 	
 	private void parseAcquisitionMethodDataFileMap(Element projectElement) {
@@ -157,18 +262,33 @@ public class OpenMetabolomicsProjectTask extends AbstractTask implements TaskLis
 				ObjectNames.limsExperiment.name());
 		
 		LIMSExperiment limsExperiment = null;
-		if(limsExperimentElement != null)
+		if(limsExperimentElement != null) {
 			limsExperiment = new LIMSExperiment(limsExperimentElement, project);
+			project.setLimsExperiment(limsExperiment);
+		}
 	}
 	
 	@Override
 	public void statusChanged(TaskEvent e) {
-		// TODO Auto-generated method stub
 
+		if (e.getStatus() == TaskStatus.FINISHED) {
+
+			((AbstractTask)e.getSource()).removeTaskListener(this);
+			if (e.getSource().getClass().equals(LoadPipelineDataTask.class)) {
+				loadedPipelineCount++;
+				MRC2ToolBoxCore.getTaskController().getTaskQueue().removeTask((AbstractTask)e.getSource());
+				if(loadedPipelineCount == pipelineCount)
+					setStatus(TaskStatus.FINISHED);
+			}
+		}
 	}
 
 	@Override
 	public Task cloneTask() {
 		return new OpenMetabolomicsProjectTask(projectFile);
+	}
+
+	public DataAnalysisProject getProject() {
+		return project;
 	}
 }

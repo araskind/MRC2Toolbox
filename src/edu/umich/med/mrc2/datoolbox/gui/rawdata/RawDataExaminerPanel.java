@@ -125,8 +125,8 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.rawdata.MsMsfeatureBatchEx
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.rawdata.RawDataBatchCoversionTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.rawdata.RawDataFileOpenTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.rawdata.RawDataRepositoryIndexingTask;
-import edu.umich.med.mrc2.datoolbox.utils.ExperimentUtils;
 import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
+import edu.umich.med.mrc2.datoolbox.utils.ProjectUtils;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
 import edu.umich.med.mrc2.datoolbox.utils.RawDataUtils;
 import umich.ms.datatypes.LCMSData;
@@ -1424,7 +1424,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 		Collection<String> errors = task.getErrors();
 		if(!errors.isEmpty()) {
 			MessageDialog.showErrorMsg(StringUtils.join(errors, "\n"), this.getContentPane());
-			ExperimentUtils.saveExperimentFile(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment());
+			ProjectUtils.saveExperimentFile(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment());
 		}
 		MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment().updateExperimentLocation(
 				MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment().getExperimentFile());

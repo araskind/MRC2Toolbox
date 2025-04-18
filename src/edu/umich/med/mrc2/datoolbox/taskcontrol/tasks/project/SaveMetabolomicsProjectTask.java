@@ -31,6 +31,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jdom2.Document;
 import org.jdom2.Element;
@@ -59,7 +60,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io.CefDataImportTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io.CefImportFinalizationTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.library.CefLibraryImportTask;
-import edu.umich.med.mrc2.datoolbox.utils.ExperimentUtils;
+import edu.umich.med.mrc2.datoolbox.utils.ProjectUtils;
 import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
 import edu.umich.med.mrc2.datoolbox.utils.XmlUtils;
 
@@ -127,22 +128,33 @@ public class SaveMetabolomicsProjectTask extends AbstractTask implements TaskLis
 		total = 100;
 		processed = 20;
 		projectXmlDocument = new Document();
-		Element experimentRoot = projectToSave.getXmlElement();
-		experimentRoot.addContent(addAcquisitionMethodDataFileMap());
-		experimentRoot.addContent(addOrderedFileNameMap());
-		experimentRoot.addContent(addOrderedMSFeatureIdMap());
-		experimentRoot.addContent(addWorklistMap());
+		Element projectRoot = projectToSave.getXmlElement();
+		projectRoot.addContent(addAcquisitionMethodDataFileMap());
+		projectRoot.addContent(addOrderedFileNameMap());
+		projectRoot.addContent(addOrderedMSFeatureIdMap());
+		projectRoot.addContent(addWorklistMap());
 		
-		experimentRoot.addContent(       		
+		DataPipeline activePipeline = projectToSave.getActiveDataPipeline();
+		if(activePipeline == null && !projectToSave.getDataPipelines().isEmpty())
+			activePipeline = projectToSave.getDataPipelines().iterator().next();
+		
+		if(activePipeline != null)
+			projectRoot.setAttribute(MetabolomicsProjectFields.ActiveDataPipeline.name(), 
+					activePipeline.getSaveSafeName());
+		
+		projectRoot.addContent(       		
         		new Element(IDTrackerProjectFields.UniqueCIDList.name()).
         		setText(StringUtils.join(uniqueCompoundIds, ",")));
-		experimentRoot.addContent(       		
+		projectRoot.addContent(       		
         		new Element(IDTrackerProjectFields.UniqueMSRTLibIdList.name()).
         		setText(StringUtils.join(uniqueMSRTLibraryIds, ",")));
 		
-		projectXmlDocument.setRootElement(experimentRoot);
+		projectXmlDocument.setRootElement(projectRoot);
+		File projectFile = FIOUtils.changeExtension(projectToSave.getExperimentFile(), 
+				ProjectType.DATA_ANALYSIS_NEW_FORMAT.getExtension());
 		XmlUtils.writeCompactXMLtoFile(
-				projectXmlDocument, projectToSave.getExperimentFile());
+				projectXmlDocument, projectFile);
+		projectToSave.setProjectFile(projectFile);
 	}
 	
 	private Element addAcquisitionMethodDataFileMap() {
@@ -265,7 +277,7 @@ public class SaveMetabolomicsProjectTask extends AbstractTask implements TaskLis
 	private void saveDataForPipelines() {
 		
 		//	TODO TMP fix for old projects
-		ExperimentUtils.moveCEFLibraryFilesToNewDefaultLocation(projectToSave);
+		ProjectUtils.moveCEFLibraryFilesToNewDefaultLocation(projectToSave);
 		
 		for(DataPipeline dp : projectToSave.getDataPipelines()) {
 			

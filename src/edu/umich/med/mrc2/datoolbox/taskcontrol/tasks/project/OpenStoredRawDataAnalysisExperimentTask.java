@@ -72,7 +72,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskListener;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
-import edu.umich.med.mrc2.datoolbox.utils.ExperimentUtils;
+import edu.umich.med.mrc2.datoolbox.utils.ProjectUtils;
 
 public class OpenStoredRawDataAnalysisExperimentTask extends AbstractTask implements TaskListener {
 
@@ -254,19 +254,19 @@ public class OpenStoredRawDataAnalysisExperimentTask extends AbstractTask implem
 		}		
 		String compoundIdList = 
 				experimentElement.getChild(IDTrackerProjectFields.UniqueCIDList.name()).getText();
-		uniqueCompoundIds.addAll(ExperimentUtils.getIdList(compoundIdList));
+		uniqueCompoundIds.addAll(ProjectUtils.getIdList(compoundIdList));
 		
 		String msmsLibIdIdList = 
 				experimentElement.getChild(IDTrackerProjectFields.UniqueMSMSLibIdList.name()).getText();
-		uniqueMSMSLibraryIds.addAll(ExperimentUtils.getIdList(msmsLibIdIdList));
+		uniqueMSMSLibraryIds.addAll(ProjectUtils.getIdList(msmsLibIdIdList));
 
 		String msRtLibIdIdList = 
 				experimentElement.getChild(IDTrackerProjectFields.UniqueMSRTLibIdList.name()).getText();
-		uniqueMSRTLibraryIds.addAll(ExperimentUtils.getIdList(msRtLibIdIdList));
+		uniqueMSRTLibraryIds.addAll(ProjectUtils.getIdList(msRtLibIdIdList));
 
 		String sampleIdIdList = 
 				experimentElement.getChild(IDTrackerProjectFields.UniqueSampleIdList.name()).getText();
-		uniqueSampleIds.addAll(ExperimentUtils.getIdList(sampleIdIdList));
+		uniqueSampleIds.addAll(ProjectUtils.getIdList(sampleIdIdList));
 				
 		try {
 			populateDatabaseCacheData();

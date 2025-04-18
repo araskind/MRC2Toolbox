@@ -38,7 +38,7 @@ import edu.umich.med.mrc2.datoolbox.project.store.DataFileExtensions;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
-import edu.umich.med.mrc2.datoolbox.utils.ExperimentUtils;
+import edu.umich.med.mrc2.datoolbox.utils.ProjectUtils;
 import edu.umich.med.mrc2.datoolbox.utils.XmlUtils;
 
 public class SavePipelineDataTask extends AbstractTask {
@@ -100,7 +100,7 @@ public class SavePipelineDataTask extends AbstractTask {
 		taskDescription = "Saving XML features file for " + pipeline.getName();
 		total = 100;
 		processed = 80;
-		ExperimentUtils.createDataDirectoryForProjectIfNotExists(project);
+		ProjectUtils.createDataDirectoryForProjectIfNotExists(project);
 		XmlUtils.writeCompactXMLtoFile(msFeatureDocument, featureXmlFile);		
 	}
 	
@@ -113,7 +113,7 @@ public class SavePipelineDataTask extends AbstractTask {
 			taskDescription = "Saving data matrix for  " 
 					+ project.getName() + "(" + pipeline.getName() + ")";
 							
-			ExperimentUtils.saveDataMatrixForPipeline(project, pipeline);
+			ProjectUtils.saveDataMatrixForPipeline(project, pipeline);
 			processed++;
 		}
 		taskDescription = "Saving feature matrix for  " 
@@ -123,16 +123,16 @@ public class SavePipelineDataTask extends AbstractTask {
 			
 		//	If matrix is in memory 
 		if(msFeatureMatrix != null) {
-			ExperimentUtils.saveFeatureMatrixToFile(
+			ProjectUtils.saveFeatureMatrixToFile(
 					msFeatureMatrix,
 					project, 
 					pipeline,
 					false);
-			ExperimentUtils.deleteTemporaryFeatureMatrixFile(project,pipeline);
+			ProjectUtils.deleteTemporaryFeatureMatrixFile(project,pipeline);
 		}
 		else {
 			//	If temporary matrix exists swap the original for it
-			ExperimentUtils.saveTemporaryFeatureMatrixFileAsPrimary(project,pipeline);			
+			ProjectUtils.saveTemporaryFeatureMatrixFileAsPrimary(project,pipeline);			
 		}
 		project.setFeatureMatrixForDataPipeline(pipeline, null);	//	TODO is that necessary?
 		cleanupForNewProjectStructure();		
@@ -142,8 +142,8 @@ public class SavePipelineDataTask extends AbstractTask {
 	//	Tmp fix to convert old project format to new one) 
 	private void cleanupForNewProjectStructure() {
 		
-		ExperimentUtils.moveDataMatrixFileToNewDefaultLocation(project,pipeline);
-		ExperimentUtils.moveFeatureMatrixFileToNewDefaultLocation(project,pipeline);
+		ProjectUtils.moveDataMatrixFileToNewDefaultLocation(project,pipeline);
+		ProjectUtils.moveFeatureMatrixFileToNewDefaultLocation(project,pipeline);
 	}
 
 	@Override

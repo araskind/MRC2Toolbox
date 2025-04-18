@@ -136,7 +136,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.stats.ImputeMissingDataTas
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.stats.MzFrequencyAnalysisTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.stats.MzFrequencyType;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.stats.RemoveEmptyFeaturesTask;
-import edu.umich.med.mrc2.datoolbox.utils.ExperimentUtils;
+import edu.umich.med.mrc2.datoolbox.utils.ProjectUtils;
 import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
 import edu.umich.med.mrc2.datoolbox.utils.MetabolomicsProjectUtils;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
@@ -1185,7 +1185,7 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 		experimentPooledSampleManagerDialog.setVisible(true);
 	}
 	
-	private void recalculateDataStatsWithSelectedPools() {
+	public void recalculateDataStatsWithSelectedPools() {
 		
 		if(currentExperiment == null || activeDataPipeline == null)
 			return;
@@ -1198,7 +1198,7 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 		
 		// Check if design assigned to data files and pooled/sample are specified
 		// TODO If no pooled present and required, calculate for the whole set as samples
-		if (ExperimentUtils.designValidForStats(currentExperiment, activeDataPipeline, false)) {
+		if (ProjectUtils.designValidForStats(currentExperiment, activeDataPipeline, false)) {
 
 			CalculateStatisticsTask cst = 
 					new CalculateStatisticsTask(currentExperiment, activeDataPipeline);

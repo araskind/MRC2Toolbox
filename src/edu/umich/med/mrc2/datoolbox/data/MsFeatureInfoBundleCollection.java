@@ -46,7 +46,7 @@ import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
 import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
 import edu.umich.med.mrc2.datoolbox.project.store.ProjectStoreUtils;
-import edu.umich.med.mrc2.datoolbox.utils.ExperimentUtils;
+import edu.umich.med.mrc2.datoolbox.utils.ProjectUtils;
 
 public class MsFeatureInfoBundleCollection implements Serializable {
 
@@ -328,7 +328,7 @@ public class MsFeatureInfoBundleCollection implements Serializable {
 		String dateCreatedString = xmlElement.getAttributeValue("DateCreataed");
 		if(dateCreatedString != null && !dateCreatedString.isBlank()) {
 			try {	
-				this.dateCreated = ExperimentUtils.dateTimeFormat.parse(dateCreatedString);
+				this.dateCreated = ProjectUtils.dateTimeFormat.parse(dateCreatedString);
 			} catch (ParseException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -395,8 +395,8 @@ public class MsFeatureInfoBundleCollection implements Serializable {
 			data += "<b>Created by: </b>" + owner.getFullName() + "<br>";
 		
 		data += "<b># of features: </b>" + Integer.toString(collectionSize) + "<br>";
-		data += "<b>Created on: </b>" + ExperimentUtils.dateTimeFormat.format(dateCreated) + "<br>";
-		data += "<b>Last modified on: </b>" + ExperimentUtils.dateTimeFormat.format(lastModified);		
+		data += "<b>Created on: </b>" + ProjectUtils.dateTimeFormat.format(dateCreated) + "<br>";
+		data += "<b>Last modified on: </b>" + ProjectUtils.dateTimeFormat.format(lastModified);		
 		return data;
 	}
 }

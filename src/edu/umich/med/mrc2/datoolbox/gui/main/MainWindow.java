@@ -85,6 +85,7 @@ import edu.umich.med.mrc2.datoolbox.gui.adducts.AdductManagerFrame;
 import edu.umich.med.mrc2.datoolbox.gui.assay.AssayManagerDialog;
 import edu.umich.med.mrc2.datoolbox.gui.datexp.DataExplorerPlotFrame;
 import edu.umich.med.mrc2.datoolbox.gui.expsetup.ExperimentSetupDraw;
+import edu.umich.med.mrc2.datoolbox.gui.fdata.FeatureDataPanel;
 import edu.umich.med.mrc2.datoolbox.gui.filetools.FileToolsDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.IDTrackerLimsManagerPanel;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.organization.OrganizationManagerDialog;
@@ -135,7 +136,8 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.project.SaveExperimentTask
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.project.SaveMetabolomicsProjectTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.project.SaveStoredRawDataAnalysisExperimentTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.rawdata.ExperimentRawDataFileOpenTask;
-import edu.umich.med.mrc2.datoolbox.utils.ExperimentUtils;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.stats.CalculateStatisticsTask;
+import edu.umich.med.mrc2.datoolbox.utils.ProjectUtils;
 import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
 import edu.umich.med.mrc2.datoolbox.utils.TextUtils;
 
@@ -555,7 +557,7 @@ public class MainWindow extends JFrame
 		rawDataAnalysisExperimentSetupDialog.dispose();
 		
 		//	Save experiment file
-		ExperimentUtils.saveStorableRawDataAnalysisExperiment(newExperiment);
+		ProjectUtils.saveStorableRawDataAnalysisExperiment(newExperiment);
 		
 		//	Set experiment as active
 		MRC2ToolBoxCore.setActiveOfflineRawDataAnalysisExperiment(newExperiment);
@@ -1459,7 +1461,10 @@ public class MainWindow extends JFrame
 			// Load experiment
 			if (e.getSource().getClass().equals(LoadExperimentTask.class))
 				finalizeExperimentLoad((LoadExperimentTask) e.getSource());
-
+			
+			if (e.getSource().getClass().equals(OpenMetabolomicsProjectTask.class))
+				finalizeMetabolomicsProjectLoad((OpenMetabolomicsProjectTask) e.getSource());
+			
 			//	Save metabolomics experiment
 			if (e.getSource().getClass().equals(SaveExperimentTask.class) )
 				finalizeExperimentSave(((SaveExperimentTask)e.getSource()).getExperimentToSave());
@@ -1478,7 +1483,7 @@ public class MainWindow extends JFrame
 			hideProgressDialog();
 		}
 	}
-	
+
 	private void finalizeExperimentRawDataLoad(ExperimentRawDataFileOpenTask task) {
 		
 		MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
@@ -1531,6 +1536,22 @@ public class MainWindow extends JFrame
 		hideProgressDialog();
 		RecentDataManager.addExperiment(MRC2ToolBoxCore.getActiveMetabolomicsExperiment());
 		updateGuiWithRecentData();
+	}
+		
+	private void finalizeMetabolomicsProjectLoad(OpenMetabolomicsProjectTask task) {
+
+		MRC2ToolBoxCore.setActiveMetabolomicsExperiment(task.getProject());				
+		setGuiFromActiveExperiment();
+		MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
+		hideProgressDialog();
+		RecentDataManager.addExperiment(MRC2ToolBoxCore.getActiveMetabolomicsExperiment());
+		updateGuiWithRecentData();
+		
+		//	Recalc stats
+		CalculateStatisticsTask cst = 
+				new CalculateStatisticsTask(currentExperiment, activeDataPipeline);
+		cst.addTaskListener(((FeatureDataPanel) MRC2ToolBoxCore.getMainWindow().getPanel(PanelList.FEATURE_DATA)));
+		MRC2ToolBoxCore.getTaskController().addTask(cst);
 	}
 	
 	private void clearGuiAfterExperimentClosed() {

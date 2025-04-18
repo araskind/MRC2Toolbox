@@ -60,7 +60,7 @@ import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
-import edu.umich.med.mrc2.datoolbox.utils.ExperimentUtils;
+import edu.umich.med.mrc2.datoolbox.utils.ProjectUtils;
 
 public class SaveExperimentTask extends AbstractTask {
 
@@ -152,7 +152,7 @@ public class SaveExperimentTask extends AbstractTask {
 				taskDescription = "Saving data matrix for  " + experimentToSave.getName() +
 						"(" + dp.getName() + ")";
 								
-				ExperimentUtils.saveDataMatrixForPipeline(experimentToSave, dp);
+				ProjectUtils.saveDataMatrixForPipeline(experimentToSave, dp);
 				processed++;
 				
 				taskDescription = "Saving feature matrix for  " + experimentToSave.getName() +
@@ -161,16 +161,16 @@ public class SaveExperimentTask extends AbstractTask {
 				Matrix msFeatureMatrix = experimentToSave.getFeatureMatrixForDataPipeline(dp);
 				//	If matrix is in memory 
 				if(msFeatureMatrix != null) {
-					ExperimentUtils.saveFeatureMatrixToFile(
+					ProjectUtils.saveFeatureMatrixToFile(
 							msFeatureMatrix,
 							experimentToSave, 
 							dp,
 							false);
-					ExperimentUtils.deleteTemporaryFeatureMatrixFile(experimentToSave,dp);
+					ProjectUtils.deleteTemporaryFeatureMatrixFile(experimentToSave,dp);
 				}
 				else {
 					//	If temporary matrix exists swap the original for it
-					ExperimentUtils.saveTemporaryFeatureMatrixFileAsPrimary(experimentToSave,dp);
+					ProjectUtils.saveTemporaryFeatureMatrixFileAsPrimary(experimentToSave,dp);
 				}
 				experimentToSave.setFeatureMatrixForDataPipeline(dp, null);
 				msFeatureMatrix = null;

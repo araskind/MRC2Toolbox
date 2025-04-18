@@ -55,7 +55,7 @@ import edu.umich.med.mrc2.datoolbox.gui.utils.IndeterminateProgressDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.LongUpdateTask;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
-import edu.umich.med.mrc2.datoolbox.utils.ExperimentUtils;
+import edu.umich.med.mrc2.datoolbox.utils.ProjectUtils;
 
 public class MultiMSFeatureQCPlotFrame extends JFrame
 		implements ActionListener, BackedByPreferences, PersistentLayout, ItemListener {
@@ -191,7 +191,7 @@ public class MultiMSFeatureQCPlotFrame extends JFrame
 			
 			try {
 				featureDataMatrix = 
-						ExperimentUtils.readFeatureMatrix(currentExperiment, dataPipeline, false);
+						ProjectUtils.readFeatureMatrix(currentExperiment, dataPipeline, false);
 				if(featureDataMatrix == null) {
 					return null;
 				}

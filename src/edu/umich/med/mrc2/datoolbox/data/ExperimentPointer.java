@@ -33,7 +33,7 @@ import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.database.lims.LIMSDataCache;
 import edu.umich.med.mrc2.datoolbox.project.Project;
 import edu.umich.med.mrc2.datoolbox.project.ProjectType;
-import edu.umich.med.mrc2.datoolbox.utils.ExperimentUtils;
+import edu.umich.med.mrc2.datoolbox.utils.ProjectUtils;
 
 public class ExperimentPointer {
 
@@ -126,9 +126,9 @@ public class ExperimentPointer {
 					EXPERIMENT_FILE, experimentFile.getAbsolutePath());
 		
 		experimentPointerElement.setAttribute(DATE_CREATED,
-				ExperimentUtils.dateTimeFormat.format(dateCreated));
+				ProjectUtils.dateTimeFormat.format(dateCreated));
 		experimentPointerElement.setAttribute(LAST_MODIFIED,
-				ExperimentUtils.dateTimeFormat.format(lastModified));
+				ProjectUtils.dateTimeFormat.format(lastModified));
 		
 		if(limsExperiment != null && limsExperiment.getId() != null)
 			experimentPointerElement.setAttribute(LIMS_EXPERIMENT, limsExperiment.getId());
@@ -153,14 +153,14 @@ public class ExperimentPointer {
 			this.experimentFile = new File(expFilePath);
 		
 		try {
-			this.dateCreated = ExperimentUtils.dateTimeFormat.parse(
+			this.dateCreated = ProjectUtils.dateTimeFormat.parse(
 					pointerElement.getAttributeValue(DATE_CREATED));
 		} catch (ParseException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} 
 		try {
-			this.lastModified = ExperimentUtils.dateTimeFormat.parse(
+			this.lastModified = ProjectUtils.dateTimeFormat.parse(
 					pointerElement.getAttributeValue(LAST_MODIFIED));
 		} catch (ParseException e) {
 			// TODO Auto-generated catch block

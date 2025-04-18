@@ -41,7 +41,7 @@ import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
-import edu.umich.med.mrc2.datoolbox.utils.ExperimentUtils;
+import edu.umich.med.mrc2.datoolbox.utils.ProjectUtils;
 
 public class MergeDuplicateFeaturesTask extends AbstractTask {
 
@@ -312,10 +312,10 @@ public class MergeDuplicateFeaturesTask extends AbstractTask {
 		total = 100;
 		processed = 30;
 		msFeatureMatrix = 
-				ExperimentUtils.readFeatureMatrix(currentExperiment, activeDataPipeline, true);
+				ProjectUtils.readFeatureMatrix(currentExperiment, activeDataPipeline, true);
 		if(msFeatureMatrix == null)
 			msFeatureMatrix = 
-				ExperimentUtils.readFeatureMatrix(currentExperiment, activeDataPipeline, false);
+				ProjectUtils.readFeatureMatrix(currentExperiment, activeDataPipeline, false);
 		processed = 100;
 	}
 	
@@ -328,7 +328,7 @@ public class MergeDuplicateFeaturesTask extends AbstractTask {
 				"Saving feature matrix for  " + currentExperiment.getName() +
 				"(" + currentExperiment.getName() + ")";
 		processed = 70;
-		ExperimentUtils.saveFeatureMatrixToFile(
+		ProjectUtils.saveFeatureMatrixToFile(
 				newMsFeatureMatrix,
 				currentExperiment, 
 				activeDataPipeline,

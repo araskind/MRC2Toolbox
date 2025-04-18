@@ -41,7 +41,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskListener;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
-import edu.umich.med.mrc2.datoolbox.utils.ExperimentUtils;
+import edu.umich.med.mrc2.datoolbox.utils.ProjectUtils;
 
 public class MiltiCefPeakQualityImportTask extends AbstractTask implements TaskListener {
 
@@ -111,7 +111,7 @@ public class MiltiCefPeakQualityImportTask extends AbstractTask implements TaskL
 		
 		taskDescription = "Reading feature data matrix ...";
 		featureMatrix = 
-				ExperimentUtils.readFeatureMatrix(currentExperiment, dataPipeline, false);
+				ProjectUtils.readFeatureMatrix(currentExperiment, dataPipeline, false);
 		if(featureMatrix == null) {
 			errorMessage = "Unable to read feature data matrix file";
 			setStatus(TaskStatus.ERROR);
@@ -122,7 +122,7 @@ public class MiltiCefPeakQualityImportTask extends AbstractTask implements TaskL
 	private void saveFeatureMatrix() {
 		// TODO Auto-generated method stub
 		taskDescription = "Saving updated feature data matrix ...";
-		ExperimentUtils.saveFeatureMatrixToFile(
+		ProjectUtils.saveFeatureMatrixToFile(
 				featureMatrix,
 				currentExperiment, 
 				dataPipeline,

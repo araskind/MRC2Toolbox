@@ -46,7 +46,7 @@ import edu.umich.med.mrc2.datoolbox.gui.utils.ColorUtils;
 import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
 import edu.umich.med.mrc2.datoolbox.project.store.DataFileFields;
 import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
-import edu.umich.med.mrc2.datoolbox.utils.ExperimentUtils;
+import edu.umich.med.mrc2.datoolbox.utils.ProjectUtils;
 
 public class DataFile implements Comparable<DataFile>, Serializable {
 
@@ -361,7 +361,7 @@ public class DataFile implements Comparable<DataFile>, Serializable {
 				fileElement.getAttributeValue(DataFileFields.InjTimestamp.name());
 		if(injTime != null) {
 			try {
-				injectionTime = ExperimentUtils.dateTimeFormat.parse(injTime);
+				injectionTime = ProjectUtils.dateTimeFormat.parse(injTime);
 			} catch (ParseException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -449,7 +449,7 @@ public class DataFile implements Comparable<DataFile>, Serializable {
 		
 		if(injectionTime != null)
 			dataFileElement.setAttribute(DataFileFields.InjTimestamp.name(), 
-					ExperimentUtils.dateTimeFormat.format(injectionTime));
+					ProjectUtils.dateTimeFormat.format(injectionTime));
 		
 		if(injectionVolume > 0)
 			dataFileElement.setAttribute(DataFileFields.InjVol.name(), 

@@ -35,7 +35,7 @@ import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
-import edu.umich.med.mrc2.datoolbox.utils.ExperimentUtils;
+import edu.umich.med.mrc2.datoolbox.utils.ProjectUtils;
 
 public class RemoveEmptyFeaturesTask extends AbstractTask {
 
@@ -125,7 +125,7 @@ public class RemoveEmptyFeaturesTask extends AbstractTask {
 		total = 100;
 		processed = 50;
 		
-		ExperimentUtils.saveFeatureMatrixToFile(
+		ProjectUtils.saveFeatureMatrixToFile(
 				msFeatureMatrix,
 				currentExperiment, 
 				dataPipeline,

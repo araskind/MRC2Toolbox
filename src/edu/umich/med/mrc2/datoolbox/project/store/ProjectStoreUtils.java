@@ -30,7 +30,7 @@ import org.jdom2.Element;
 
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
-import edu.umich.med.mrc2.datoolbox.utils.ExperimentUtils;
+import edu.umich.med.mrc2.datoolbox.utils.ProjectUtils;
 
 public class ProjectStoreUtils {
 	
@@ -44,7 +44,7 @@ public class ProjectStoreUtils {
 	public static void setDateAttribute(Date date, CommonFields field, Element element) {
 		
 		if(date != null && dateFields.contains(field))
-			element.setAttribute(field.name(), ExperimentUtils.dateTimeFormat.format(date));
+			element.setAttribute(field.name(), ProjectUtils.dateTimeFormat.format(date));
 	}
 	
 	public static Date getDateFromAttribute(Element element, CommonFields field) {
@@ -54,11 +54,12 @@ public class ProjectStoreUtils {
 		
 		String dateString = element.getAttributeValue(field.name());
 		Date date = null;
-		if(dateString != null) {
+		if(dateString != null && !dateString.isEmpty()) {
 			try {
-				date = ExperimentUtils.dateTimeFormat.parse(dateString);
+				date = ProjectUtils.dateTimeFormat.parse(dateString);
 			} catch (ParseException e) {
 				// TODO Auto-generated catch block
+				System.out.println(dateString);
 				e.printStackTrace();
 			}
 		}
