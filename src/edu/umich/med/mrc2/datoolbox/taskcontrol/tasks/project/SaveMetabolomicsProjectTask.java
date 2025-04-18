@@ -23,9 +23,12 @@ package edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.project;
 
 import java.io.File;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
@@ -36,14 +39,17 @@ import org.ujmp.core.calculation.Calculation.Ret;
 
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
+import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
 import edu.umich.med.mrc2.datoolbox.data.Worklist;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
+import edu.umich.med.mrc2.datoolbox.project.ProjectType;
 import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
 import edu.umich.med.mrc2.datoolbox.project.store.DataFileExtensions;
+import edu.umich.med.mrc2.datoolbox.project.store.IDTrackerProjectFields;
 import edu.umich.med.mrc2.datoolbox.project.store.MetabolomicsProjectFields;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
@@ -62,7 +68,8 @@ public class SaveMetabolomicsProjectTask extends AbstractTask implements TaskLis
 	private DataAnalysisProject projectToSave;
 	private Document projectXmlDocument;
 	private int numberOfSavedDataPipelines;
-
+	private Set<String>uniqueCompoundIds;
+	private Set<String>uniqueMSRTLibraryIds;
 		
 	public SaveMetabolomicsProjectTask(DataAnalysisProject projectToSave) {
 		super();
@@ -74,6 +81,7 @@ public class SaveMetabolomicsProjectTask extends AbstractTask implements TaskLis
 	public void run() {
 
 		setStatus(TaskStatus.PROCESSING);
+		extractDatabaseReferences();
 		try {
 			createNewProjectDocument();
 		} catch (Exception ex) {
@@ -81,8 +89,36 @@ public class SaveMetabolomicsProjectTask extends AbstractTask implements TaskLis
 			setStatus(TaskStatus.ERROR);
 			return;
 		}
-		saveProjectToFile();
 		saveDataForPipelines();
+	}
+	
+	private void extractDatabaseReferences() {
+		taskDescription = "Collecting common database references ...";
+		processed = 10;	
+		List<MsFeatureIdentity> idList = new ArrayList<MsFeatureIdentity>();
+		for(DataPipeline dp : projectToSave.getDataPipelines()) {
+			
+			Set<MsFeature> dpFeatures = projectToSave.getMsFeaturesForDataPipeline(dp);
+			if(dpFeatures != null && ! dpFeatures.isEmpty()) {
+				
+				List<MsFeatureIdentity> dpIdList = dpFeatures.stream().
+					filter(p -> Objects.nonNull(p.getPrimaryIdentity())).
+					flatMap(p -> p.getIdentifications().stream()).
+					collect(Collectors.toList());
+				if(!dpIdList.isEmpty())
+					idList.addAll(dpIdList);
+			}			
+		}			
+		uniqueCompoundIds = idList.stream().
+				filter(i -> Objects.nonNull(i.getCompoundIdentity())).
+				filter(i -> Objects.nonNull(i.getCompoundIdentity().getPrimaryDatabaseId())).
+				map(i -> i.getCompoundIdentity().getPrimaryDatabaseId()).
+				collect(Collectors.toCollection(TreeSet::new));
+		
+		uniqueMSRTLibraryIds = idList.stream().
+				filter(i -> Objects.nonNull(i.getMsRtLibraryMatch())).
+				map(i -> i.getMsRtLibraryMatch().getLibraryTargetId()).
+				collect(Collectors.toCollection(TreeSet::new));
 	}
 
 	private void createNewProjectDocument() {
@@ -96,7 +132,17 @@ public class SaveMetabolomicsProjectTask extends AbstractTask implements TaskLis
 		experimentRoot.addContent(addOrderedFileNameMap());
 		experimentRoot.addContent(addOrderedMSFeatureIdMap());
 		experimentRoot.addContent(addWorklistMap());
+		
+		experimentRoot.addContent(       		
+        		new Element(IDTrackerProjectFields.UniqueCIDList.name()).
+        		setText(StringUtils.join(uniqueCompoundIds, ",")));
+		experimentRoot.addContent(       		
+        		new Element(IDTrackerProjectFields.UniqueMSRTLibIdList.name()).
+        		setText(StringUtils.join(uniqueMSRTLibraryIds, ",")));
+		
 		projectXmlDocument.setRootElement(experimentRoot);
+		XmlUtils.writeCompactXMLtoFile(
+				projectXmlDocument, projectToSave.getExperimentFile());
 	}
 	
 	private Element addAcquisitionMethodDataFileMap() {
@@ -214,14 +260,6 @@ public class SaveMetabolomicsProjectTask extends AbstractTask implements TaskLis
     		}
     	}
      	return worklistMapElement;   	
-	}
-	
-	private void saveProjectToFile() {
-
-		File xmlFile = FIOUtils.changeExtension(
-				projectToSave.getExperimentFile(), "xml");
-
-		XmlUtils.writeCompactXMLtoFile(projectXmlDocument, xmlFile);
 	}
 
 	private void saveDataForPipelines() {

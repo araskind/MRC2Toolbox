@@ -58,7 +58,7 @@ import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.SortedComboBoxModel;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
-import edu.umich.med.mrc2.datoolbox.project.Experiment;
+import edu.umich.med.mrc2.datoolbox.project.Project;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
 
 public class FeatureHeatChartSettingsPanel extends 
@@ -94,7 +94,7 @@ public class FeatureHeatChartSettingsPanel extends
 	private SampleGroupTable sampleGroupTable;
 	private JButton refreshPlotButton;
 	
-	private Experiment experiment;
+	private Project experiment;
 	
 	@SuppressWarnings("unchecked")
 	public FeatureHeatChartSettingsPanel(
@@ -412,7 +412,7 @@ public class FeatureHeatChartSettingsPanel extends
 			resetMZRTlimits();		
 	}
 	
-	public void loadSampleTypes(Experiment experiment) {
+	public void loadSampleTypes(Project experiment) {
 		
 		this.experiment = experiment;
 		sampleGroupTable.getModel().removeTableModelListener(this);

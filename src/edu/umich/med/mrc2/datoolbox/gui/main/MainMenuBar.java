@@ -183,7 +183,7 @@ public class MainMenuBar extends CommonMenuBar {
 			
 			openXMLExperimentMenuItem = addItem(experimentMenu, 
 					MainActionCommands.OPEN_METABOLOMICS_XML_EXPERIMENT_COMMAND, openXMLExperimentIcon);
-			openXMLExperimentMenuItem.setEnabled(false);
+			//	openXMLExperimentMenuItem.setEnabled(false);
 			
 			saveAsXMLExperimentMenuItem = addItem(experimentMenu, 
 					MainActionCommands.SAVE_AS_XML_EXPERIMENT_COMMAND, saveXMLExperimentIcon);

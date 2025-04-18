@@ -28,7 +28,8 @@ import java.util.Date;
 import org.jdom2.Element;
 
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
-import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisExperiment;
+import edu.umich.med.mrc2.datoolbox.project.Project;
+import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.project.store.IDTExperimentalSampleFields;
 import edu.umich.med.mrc2.datoolbox.utils.ExperimentUtils;
 
@@ -125,7 +126,7 @@ public class IDTExperimentalSample extends ExperimentalSample implements Seriali
 	public IDTExperimentalSample(			
 			Element sampleElement, 
 			ExperimentDesign design,
-			RawDataAnalysisExperiment parentProject) {
+			Project parentProject) {
 		super(sampleElement, design, parentProject);
 		
 		String stockSampleId = sampleElement.getAttributeValue(

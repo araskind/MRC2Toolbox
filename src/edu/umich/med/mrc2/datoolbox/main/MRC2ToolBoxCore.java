@@ -62,7 +62,7 @@ import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.main.config.FilePreferencesFactory;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
-import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisExperiment;
+import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.impl.TaskControllerImpl;
 import umich.ms.datatypes.LCMSData;
 
@@ -88,7 +88,7 @@ public final class MRC2ToolBoxCore {
 	private static MainWindow mainWindow;
 	private static TaskControllerImpl taskController;
 	private static DataAnalysisProject currentExperiment;
-	private static RawDataAnalysisExperiment activeOfflineRawDataAnalysisExperiment;	
+	private static RawDataAnalysisProject activeOfflineRawDataAnalysisExperiment;	
 	private static RenjinScriptEngine rScriptEngine;
 
 	private static LIMSUser idTrackerUser;
@@ -414,12 +414,12 @@ public final class MRC2ToolBoxCore {
 		msmsLibraryCache.clear();
 	}
 
-	public static RawDataAnalysisExperiment getActiveOfflineRawDataAnalysisExperiment() {
+	public static RawDataAnalysisProject getActiveOfflineRawDataAnalysisExperiment() {
 		return activeOfflineRawDataAnalysisExperiment;
 	}
 
 	public static void setActiveOfflineRawDataAnalysisExperiment(
-			RawDataAnalysisExperiment newRawDataAnalysisExperiment) {
+			RawDataAnalysisProject newRawDataAnalysisExperiment) {
 		activeOfflineRawDataAnalysisExperiment = newRawDataAnalysisExperiment;
 	}
 

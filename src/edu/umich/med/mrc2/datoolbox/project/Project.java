@@ -33,8 +33,10 @@ import java.util.UUID;
 
 import org.jdom2.Element;
 
+import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesign;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentalSample;
+import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
@@ -44,7 +46,7 @@ import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
 import edu.umich.med.mrc2.datoolbox.project.store.ProjectStoreUtils;
 import edu.umich.med.mrc2.datoolbox.project.store.XmlStorable;
 
-public abstract class Experiment implements Serializable, XmlStorable{
+public abstract class Project implements Serializable, XmlStorable{
 
 	/**
 	 * 
@@ -62,7 +64,7 @@ public abstract class Experiment implements Serializable, XmlStorable{
 	protected LIMSUser createdBy;
 	protected LIMSExperiment limsExperiment;
 	
-	protected Experiment(
+	protected Project(
 			ProjectType projectType,
 			String name, 
 			String description) {
@@ -75,7 +77,7 @@ public abstract class Experiment implements Serializable, XmlStorable{
 		this.lastModified = new Date();
 	}
 
-	protected Experiment(
+	protected Project(
 			String id, 
 			String name,
 			String description, 
@@ -94,14 +96,14 @@ public abstract class Experiment implements Serializable, XmlStorable{
 	protected void createDirectoryStructureForNewExperiment(File parentDirectory) {
 		
 		Path experimentDirectoryPath = 
-				Paths.get(parentDirectory.getAbsolutePath(), name.replaceAll("\\W+", "-"));				
+				Paths.get(parentDirectory.getAbsolutePath(), name.replaceAll("\\W+", "-"));
 		try {
 			Files.createDirectories(experimentDirectoryPath);
 		} catch (IOException e) {
 			e.printStackTrace();
 			MessageDialog.showWarningMsg("Failed to create project directory");
 			return;
-		}
+		}		
 		Path exportsDirectoryPath = Paths.get(experimentDirectoryPath.toString(), 
 				MRC2ToolBoxConfiguration.DATA_EXPORT_DIRECTORY);
 		try {
@@ -120,6 +122,10 @@ public abstract class Experiment implements Serializable, XmlStorable{
 			e.printStackTrace();
 			MessageDialog.showWarningMsg("Failed to create data directory");
 		}
+		String experimentFileName = 
+				experimentDirectoryPath.toFile().getName() + "." + projectType.getExtension();
+		experimentFile = 
+				Paths.get(experimentDirectoryPath.toString(), experimentFileName).toFile();
 	}
 		
 	public void updateExperimentLocation(File newExperimentFile) {		
@@ -154,7 +160,7 @@ public abstract class Experiment implements Serializable, XmlStorable{
 		return experimentFile;
 	}
 
-	public void setExperimentFile(File experimentFile) {
+	public void setProjectFile(File experimentFile) {
 		this.experimentFile = experimentFile;
 	}
 
@@ -225,6 +231,9 @@ public abstract class Experiment implements Serializable, XmlStorable{
 	public void setLimsExperiment(LIMSExperiment limsExperiment) {
 		this.limsExperiment = limsExperiment;
 	}
+	
+	public abstract DataFile getDataFileByNameAndMethod(
+			String name, DataAcquisitionMethod method);
 		
     @Override
     public boolean equals(Object obj) {
@@ -235,10 +244,10 @@ public abstract class Experiment implements Serializable, XmlStorable{
         if (obj == null)
             return false;
 
-        if (!Experiment.class.isAssignableFrom(obj.getClass()))
+        if (!Project.class.isAssignableFrom(obj.getClass()))
             return false;
 
-        final Experiment other = (Experiment) obj;
+        final Project other = (Project) obj;
 
         if ((this.id == null) ? (other.getId() != null) : !this.id.equals(other.getId()))
             return false;
@@ -254,29 +263,18 @@ public abstract class Experiment implements Serializable, XmlStorable{
         return hash;
     } 
     
-	protected Experiment(Element experimentElement) {
+	protected Project(Element projectElement) {
 		
 		super();
-		experimentElement.setAttribute(CommonFields.Id.name(), id);
-
-		name = ProjectStoreUtils.getTextFromElement(experimentElement, CommonFields.Name);
-		description = ProjectStoreUtils.getDescriptionFromElement(experimentElement);
+		id = projectElement.getAttributeValue(CommonFields.Id.name());
+		name = ProjectStoreUtils.getTextFromElement(projectElement, CommonFields.Name);
+		description = ProjectStoreUtils.getDescriptionFromElement(projectElement);
 		
 		dateCreated = ProjectStoreUtils.getDateFromAttribute(
-				experimentElement, CommonFields.DateCreated);
+				projectElement, CommonFields.DateCreated);
 		lastModified = ProjectStoreUtils.getDateFromAttribute(
-				experimentElement, CommonFields.LastModified);		
-		createdBy = ProjectStoreUtils.getUserFromAttribute(experimentElement);
-		
-		Element designElement = experimentElement.getChild(
-				ObjectNames.ExperimentDesign.name());
-		if(designElement != null)
-			experimentDesign = new ExperimentDesign(designElement, null);
-		
-		Element limsExperimentElement = experimentElement.getChild(
-				ObjectNames.limsExperiment.name());
-		if(limsExperimentElement != null)
-			limsExperiment = new LIMSExperiment(limsExperimentElement, null);
+				projectElement, CommonFields.LastModified);		
+		createdBy = ProjectStoreUtils.getUserFromAttribute(projectElement);
 	}
 	
 	@Override

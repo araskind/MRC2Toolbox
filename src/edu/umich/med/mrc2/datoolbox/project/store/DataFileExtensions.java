@@ -23,9 +23,6 @@ package edu.umich.med.mrc2.datoolbox.project.store;
 
 public enum DataFileExtensions {
 
-	EXPERIMENT_FILE_EXTENSION("caproject"),
-	ID_EXPERIMENT_FILE_EXTENSION("idproject"),
-	RAW_DATA_EXPERIMENT_FILE_EXTENSION("rdproject"),
 	DATA_MATRIX_EXTENSION("dmat"),
 	FEATURE_LIST_EXTENSION("flist"),
 	;

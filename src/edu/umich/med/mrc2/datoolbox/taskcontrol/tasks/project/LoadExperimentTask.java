@@ -249,7 +249,7 @@ public class LoadExperimentTask extends AbstractTask implements TaskListener{
 					if(newExperiment.getProjectType() == null)	
 						newExperiment.setProjectType(ProjectType.DATA_ANALYSIS);
 					
-					newExperiment.setExperimentFile(experimentFile);
+					newExperiment.setProjectFile(experimentFile);
 				}
 				catch(IOException e) {
 					e.printStackTrace();

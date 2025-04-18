@@ -96,7 +96,7 @@ public class NumberArrayUtils {
     public static double[] decodeNumberArray(String encodedValues) throws UnsupportedEncodingException {
     	
     	byte[] compressed = encodedValues.getBytes("ASCII");
-    	byte[]decoded = base64.decode(compressed); 	
+    	byte[]decoded = new Base64().decode(compressed); 	
     	byte[] uncompressed = gzipUncompress(decoded);   	
     	Number[]dataArray = convertData(uncompressed, Precision.FLOAT64BIT);
         return Arrays.asList(dataArray).stream().

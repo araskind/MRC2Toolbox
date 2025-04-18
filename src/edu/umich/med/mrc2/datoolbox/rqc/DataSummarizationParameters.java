@@ -26,7 +26,7 @@ public enum DataSummarizationParameters {
 	MEAN_VALUE("Mean", "meanVal"),
 	MEDIAN_VALUE("Median", "medianVal"),
 	SD("Standard deviation", "stDev"),
-	RSD("%RSD", "RSD"),
+	RSD("% RSD", "RSD"),
 	PERCENT_MISSING("% Missing", "pcmissing"),
 	//	Just for convenience
 	SAMPLE_TYPE("Sample type", "sample_type"),

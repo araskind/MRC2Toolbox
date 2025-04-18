@@ -73,7 +73,7 @@ import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.ReferenceSamplesManager;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
-import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisExperiment;
+import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
 import edu.umich.med.mrc2.datoolbox.project.store.IDTrackerProjectFields;
 import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
@@ -118,7 +118,7 @@ public class ExperimentUtils {
 	}
 	
 	public static void saveExperimentFile(
-			RawDataAnalysisExperiment experimentToSave) {
+			RawDataAnalysisProject experimentToSave) {
 		
 		experimentToSave.setLastModified(new Date());
 		try {
@@ -171,7 +171,7 @@ public class ExperimentUtils {
 	}
 	
 	public static void saveStorableRawDataAnalysisExperiment(
-			RawDataAnalysisExperiment experimentToSave) {
+			RawDataAnalysisProject experimentToSave) {
 		
 		Document document = new Document();
 	    Element experimentRoot = 

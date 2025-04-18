@@ -443,18 +443,18 @@ public class ExperimentDesignSubset implements Comparable<ExperimentDesignSubset
 			}
 		}	
 		List<Element> levelMapElements = 
-				designSubsetElement.getChild(
-						ExperimentDesignSubsetFields.LevelMap.name()).getChildren();
+				designSubsetElement.getChild(ExperimentDesignSubsetFields.LevelMap.name()).
+				getChildren(ExperimentDesignSubsetFields.LevelMapElement.name());
 			
 		for(Element lmElement : levelMapElements) {
 			
-			String fid = 
-					lmElement.getAttributeValue(ExperimentDesignSubsetFields.FactorKey.name());
+			String fid = lmElement.getAttributeValue(
+					ExperimentDesignSubsetFields.FactorKey.name());
 			if(fid != null) {
 				ExperimentDesignFactor factor = parentDesign.getFactorById(fid);
 				if(factor != null) {
 					
-					String[]levelStrings = lmElement.getText().split("|");
+					String[]levelStrings = lmElement.getText().split("\\|");
 					if(levelStrings.length > 0) {
 						
 						TreeMap<Integer, ExperimentDesignLevel>factorLevelMap = 

@@ -47,7 +47,8 @@ import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignFactorEven
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignFactorListener;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignListener;
 import edu.umich.med.mrc2.datoolbox.main.ReferenceSamplesManager;
-import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisExperiment;
+import edu.umich.med.mrc2.datoolbox.project.Project;
+import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.project.store.ExperimentDesignFields;
 import edu.umich.med.mrc2.datoolbox.project.store.IDTExperimentalSampleFields;
 import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
@@ -724,7 +725,7 @@ public class ExperimentDesign implements ExperimentDesignFactorListener, Seriali
 	
 	public ExperimentDesign(
 			Element experimentDesignElement, 
-			RawDataAnalysisExperiment parentProject) {
+			Project parentProject) {
 		
 		factorSet = new TreeSet<ExperimentDesignFactor>();
 		sampleSet = new TreeSet<ExperimentalSample>();
@@ -747,8 +748,8 @@ public class ExperimentDesign implements ExperimentDesignFactorListener, Seriali
 			}
 		}
 		List<Element> sampleListElements = 
-				experimentDesignElement.getChild(
-						ExperimentDesignFields.SampleSet.name()).getChildren();
+				experimentDesignElement.getChild(ExperimentDesignFields.SampleSet.name()).
+				getChildren(ObjectNames.ExperimentalSample.name());
 		if(!sampleListElements.isEmpty()) {
 			
 			for(Element sampleElement : sampleListElements) {

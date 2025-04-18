@@ -33,7 +33,7 @@ import org.jdom2.output.XMLOutputter;
 
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureChromatogramBundle;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
-import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisExperiment;
+import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.project.store.IDTrackerProjectFields;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
@@ -41,9 +41,9 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 
 public class SaveFeatureChromatogramsTask extends AbstractTask {
 	
-	private RawDataAnalysisExperiment experimentToSave;
+	private RawDataAnalysisProject experimentToSave;
 
-	public SaveFeatureChromatogramsTask(RawDataAnalysisExperiment experiment) {
+	public SaveFeatureChromatogramsTask(RawDataAnalysisProject experiment) {
 		super();
 		this.experimentToSave = experiment;
 	}

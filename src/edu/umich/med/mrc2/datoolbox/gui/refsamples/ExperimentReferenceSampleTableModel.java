@@ -33,7 +33,7 @@ import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTableModel;
 import edu.umich.med.mrc2.datoolbox.gui.tables.ColumnContext;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.ReferenceSamplesManager;
-import edu.umich.med.mrc2.datoolbox.project.Experiment;
+import edu.umich.med.mrc2.datoolbox.project.Project;
 
 public class ExperimentReferenceSampleTableModel extends BasicTableModel {
 
@@ -61,7 +61,7 @@ public class ExperimentReferenceSampleTableModel extends BasicTableModel {
 		};
 	}
 
-	public void loadReferenceSamples(Experiment experiment) {
+	public void loadReferenceSamples(Project experiment) {
 
 		setRowCount(0);
 		if(experiment.getExperimentDesign() == null 

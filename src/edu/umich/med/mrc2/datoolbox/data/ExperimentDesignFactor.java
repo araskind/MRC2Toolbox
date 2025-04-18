@@ -293,8 +293,8 @@ public class ExperimentDesignFactor implements Comparable<ExperimentDesignFactor
 		suppressEvents = false;
 		factorLevels = new TreeSet<ExperimentDesignLevel>();
 		List<Element> levelListElements = 
-				experimentDesignFactorElement.getChildren(
-						ExperimentDesignFactorFields.LevelSet.name());
+				experimentDesignFactorElement.getChild(ExperimentDesignFactorFields.LevelSet.name()).
+				getChildren(ObjectNames.ExperimentDesignLevel.name());
 		if(!levelListElements.isEmpty()) {
 			
 			for(Element levelElement : levelListElements) {

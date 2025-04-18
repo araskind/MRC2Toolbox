@@ -47,7 +47,7 @@ import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.data.msclust.IMSMSClusterDataSet;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
-import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisExperiment;
+import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
 import edu.umich.med.mrc2.datoolbox.project.store.IDTrackerProjectFields;
 import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
@@ -61,7 +61,7 @@ import edu.umich.med.mrc2.datoolbox.utils.CompressionUtils;
 
 public class SaveStoredRawDataAnalysisExperimentTask extends AbstractTask implements TaskListener {
 	
-	private RawDataAnalysisExperiment experimentToSave;
+	private RawDataAnalysisProject experimentToSave;
 	private File xmlFile;
 	private int fileFeatureCount;
 	private int processedFiles;
@@ -74,7 +74,7 @@ public class SaveStoredRawDataAnalysisExperimentTask extends AbstractTask implem
 	private Set<String>uniqueSampleIds;
 
 	public SaveStoredRawDataAnalysisExperimentTask(
-			RawDataAnalysisExperiment experiment) {
+			RawDataAnalysisProject experiment) {
 		super();
 		this.experimentToSave = experiment;
 	}
@@ -340,7 +340,7 @@ return;
 		return new SaveStoredRawDataAnalysisExperimentTask(experimentToSave);
 	}
 
-	public RawDataAnalysisExperiment getExperimentToSave() {
+	public RawDataAnalysisProject getExperimentToSave() {
 		return experimentToSave;
 	}
 }

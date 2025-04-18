@@ -30,7 +30,8 @@ import org.jdom2.Element;
 
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesign;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
-import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisExperiment;
+import edu.umich.med.mrc2.datoolbox.project.Project;
+import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
 import edu.umich.med.mrc2.datoolbox.project.store.LIMSExperimentFields;
 import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
@@ -356,7 +357,7 @@ public class LIMSExperiment implements Serializable, Comparable<LIMSExperiment>,
 	
 	public LIMSExperiment(
 			Element experimentElement, 
-			RawDataAnalysisExperiment parentProject) {
+			Project parentProject) {
 		
 		id = experimentElement.getAttributeValue(CommonFields.Id.name());
 		name = ProjectStoreUtils.getTextFromElement(experimentElement, CommonFields.Name);

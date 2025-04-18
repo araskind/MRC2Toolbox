@@ -197,12 +197,18 @@ public class MinimalMSOneFeature implements Serializable, Comparable<MinimalMSOn
 				featureElement.getAttributeValue(CommonFields.MZ.name()));
 		rt = Double.parseDouble(
 				featureElement.getAttributeValue(CommonFields.RT.name()));
-		rank = Double.parseDouble(
-				featureElement.getAttributeValue(MinimalMSOneFeatureFields.Rank.name()));
-		foldChange = Double.parseDouble(
-				featureElement.getAttributeValue(MinimalMSOneFeatureFields.FoldChange.name()));
-		pValue = Double.parseDouble(
-				featureElement.getAttributeValue(MinimalMSOneFeatureFields.PValue.name()));
+		
+		String rankString = featureElement.getAttributeValue(MinimalMSOneFeatureFields.Rank.name());
+		if(rankString != null && !rankString.isEmpty())
+			rank = Double.parseDouble(rankString);
+		
+		String foldChangeString = featureElement.getAttributeValue(MinimalMSOneFeatureFields.FoldChange.name());
+		if(foldChangeString != null && !foldChangeString.isEmpty())
+			foldChange = Double.parseDouble(foldChangeString);
+		
+		String pValueString = featureElement.getAttributeValue(MinimalMSOneFeatureFields.PValue.name());
+		if(pValueString != null && !pValueString.isEmpty())
+			pValue = Double.parseDouble(pValueString);
 	}
 
 	public String getSmiles() {

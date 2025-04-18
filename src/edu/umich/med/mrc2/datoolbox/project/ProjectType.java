@@ -23,9 +23,25 @@ package edu.umich.med.mrc2.datoolbox.project;
 
 public enum ProjectType {
 
-	DATA_ANALYSIS,
-	DATA_ANALYSIS_NEW_FORMAT,
-	ID_TRACKER_DATA_ANALYSIS,
-	RAW_DATA_ANALYSIS,
+	DATA_ANALYSIS("caproject", "Metabolomics project"),
+	DATA_ANALYSIS_NEW_FORMAT("caproject2", "Metabolomics project, new format"),
+	ID_TRACKER_DATA_ANALYSIS("idtproject", "Database stored compound identification project"),
+	RAW_DATA_ANALYSIS("rdproject", "Offline compound identification project"),
 	;
+	
+	private final String extension;
+	private final String description;
+
+	ProjectType(String extension, String description) {
+		this.extension = extension;
+		this.description = description;
+	}
+
+	public String getExtension() {
+		return extension;
+	}
+	
+	public String getDescription() {
+		return description;
+	}
 }

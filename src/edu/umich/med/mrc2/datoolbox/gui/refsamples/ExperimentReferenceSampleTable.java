@@ -34,7 +34,7 @@ import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.AutoChoices;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.TableFilterHeader;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.ExperimentalSampleRenderer;
-import edu.umich.med.mrc2.datoolbox.project.Experiment;
+import edu.umich.med.mrc2.datoolbox.project.Project;
 
 public class ExperimentReferenceSampleTable extends BasicTable {
 
@@ -60,7 +60,7 @@ public class ExperimentReferenceSampleTable extends BasicTable {
 		finalizeLayout();
 	}
 
-	public void loadReferenceSamples(Experiment experiment) {
+	public void loadReferenceSamples(Project experiment) {
 		
 		thf.setTable(null);
 		((ExperimentReferenceSampleTableModel)model).loadReferenceSamples(experiment);

@@ -56,7 +56,7 @@ import edu.umich.med.mrc2.datoolbox.data.ExperimentPointer;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundleCollection;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.data.msclust.IMSMSClusterDataSet;
-import edu.umich.med.mrc2.datoolbox.project.Experiment;
+import edu.umich.med.mrc2.datoolbox.project.Project;
 import edu.umich.med.mrc2.datoolbox.project.ProjectType;
 import edu.umich.med.mrc2.datoolbox.utils.ExperimentUtils;
 
@@ -202,7 +202,7 @@ public class RecentDataManager {
 		return recentExperimentsMap.get(type);
 	}
 	
-	public static void addExperiment(Experiment toAdd) {
+	public static void addExperiment(Project toAdd) {
 		
 		if(!recentExperimentsMap.containsKey(toAdd.getProjectType()))
 			recentExperimentsMap.put(toAdd.getProjectType(), new LinkedHashSet<ExperimentPointer>());

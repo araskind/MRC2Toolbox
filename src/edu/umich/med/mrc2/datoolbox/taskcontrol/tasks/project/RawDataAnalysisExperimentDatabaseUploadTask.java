@@ -45,7 +45,7 @@ import edu.umich.med.mrc2.datoolbox.database.idt.FeatureCollectionUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
-import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisExperiment;
+import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
@@ -55,7 +55,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.MSMSClusterTask;
 
 public class RawDataAnalysisExperimentDatabaseUploadTask extends MSMSClusterTask implements TaskListener {
 
-	private RawDataAnalysisExperiment experiment;
+	private RawDataAnalysisProject experiment;
 	private double msOneMZWindow;
 	private int processedFiles;
 	private Map<String,String>featureIdMap;
@@ -63,7 +63,7 @@ public class RawDataAnalysisExperimentDatabaseUploadTask extends MSMSClusterTask
 	private Map<String, MsFeatureChromatogramBundle> newChromatogramMap;
 	
 	public RawDataAnalysisExperimentDatabaseUploadTask(
-			RawDataAnalysisExperiment experiment,
+			RawDataAnalysisProject experiment,
 			double msOneMZWindow) {
 		super();
 		this.experiment = experiment;
@@ -292,7 +292,7 @@ public class RawDataAnalysisExperimentDatabaseUploadTask extends MSMSClusterTask
 				experiment, msOneMZWindow);
 	}
 
-	public RawDataAnalysisExperiment getExperiment() {
+	public RawDataAnalysisProject getExperiment() {
 		return experiment;
 	}
 

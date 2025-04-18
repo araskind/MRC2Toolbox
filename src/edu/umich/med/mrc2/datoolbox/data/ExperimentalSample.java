@@ -36,7 +36,8 @@ import edu.umich.med.mrc2.datoolbox.data.enums.MoTrPACQCSampleType;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.main.ReferenceSamplesManager;
-import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisExperiment;
+import edu.umich.med.mrc2.datoolbox.project.Project;
+import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
 import edu.umich.med.mrc2.datoolbox.project.store.ExperimentalSampleFields;
 import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
@@ -451,7 +452,7 @@ public class ExperimentalSample implements Comparable<ExperimentalSample>, Seria
 	public ExperimentalSample(
 			Element sampleElement, 
 			ExperimentDesign design,
-			RawDataAnalysisExperiment parentProject) {	
+			Project parentProject) {	
 		
 		id = sampleElement.getAttributeValue(CommonFields.Id.name());
 		name = sampleElement.getAttributeValue(CommonFields.Name.name());
@@ -509,9 +510,11 @@ public class ExperimentalSample implements Comparable<ExperimentalSample>, Seria
 				TreeSet<DataFile>methodFiles = new TreeSet<DataFile>();
 				for(String fName : fileNames) {
 					
-					DataFile df = parentProject.getDataFileByName(fName);
-					if(df != null)
+					DataFile df = parentProject.getDataFileByNameAndMethod(fName, method);
+					if(df != null) {
 						methodFiles.add(df);
+						df.setParentSample(this);
+					}
 				}
 				dataFilesMap.put(method, methodFiles);
 			}

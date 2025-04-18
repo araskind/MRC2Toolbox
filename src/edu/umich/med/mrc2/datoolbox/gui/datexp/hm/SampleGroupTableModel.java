@@ -32,7 +32,7 @@ import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTableModel;
 import edu.umich.med.mrc2.datoolbox.gui.tables.ColumnContext;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.ReferenceSamplesManager;
-import edu.umich.med.mrc2.datoolbox.project.Experiment;
+import edu.umich.med.mrc2.datoolbox.project.Project;
 
 public class SampleGroupTableModel extends BasicTableModel {
 
@@ -59,7 +59,7 @@ public class SampleGroupTableModel extends BasicTableModel {
 		};
 	}
 
-	public void loadSampleTypes(Experiment experiment) {
+	public void loadSampleTypes(Project experiment) {
 
 		setRowCount(0);
 		if(experiment == null || experiment.getExperimentDesign() == null 

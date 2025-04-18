@@ -48,7 +48,7 @@ import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
-import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisExperiment;
+import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.gui.LabeledProgressBar;
 
@@ -400,7 +400,7 @@ public class StatusBar extends JPanel implements
 		}
 	}
 	
-	public static void showRawDataAnalysisExperimentData(RawDataAnalysisExperiment experiment) {
+	public static void showRawDataAnalysisExperimentData(RawDataAnalysisProject experiment) {
 		
 		clearExperimentData();	
 		if(experiment != null) {

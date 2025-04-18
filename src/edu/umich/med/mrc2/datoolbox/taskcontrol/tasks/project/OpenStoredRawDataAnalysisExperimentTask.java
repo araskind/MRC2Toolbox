@@ -60,7 +60,7 @@ import edu.umich.med.mrc2.datoolbox.database.idt.MSMSLibraryUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.OfflineExperimentLoadCache;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
-import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisExperiment;
+import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
 import edu.umich.med.mrc2.datoolbox.project.store.IDTrackerProjectFields;
 import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
@@ -76,7 +76,7 @@ import edu.umich.med.mrc2.datoolbox.utils.ExperimentUtils;
 
 public class OpenStoredRawDataAnalysisExperimentTask extends AbstractTask implements TaskListener {
 
-	private RawDataAnalysisExperiment experiment;
+	private RawDataAnalysisProject experiment;
 	private File experimentFile;
 	private boolean loadResults;
 	private File xmlExperimentFileDir;
@@ -227,7 +227,7 @@ public class OpenStoredRawDataAnalysisExperimentTask extends AbstractTask implem
 		if(lastModified == null)
 			lastModified = dateCreated;
 		
-		experiment = new RawDataAnalysisExperiment(
+		experiment = new RawDataAnalysisProject(
 				id, 
 				name, 
 				description, 
@@ -519,7 +519,7 @@ public class OpenStoredRawDataAnalysisExperimentTask extends AbstractTask implem
 		return errors;
 	}
 	
-	public RawDataAnalysisExperiment getExperiment() {
+	public RawDataAnalysisProject getExperiment() {
 		return experiment;
 	}
 }

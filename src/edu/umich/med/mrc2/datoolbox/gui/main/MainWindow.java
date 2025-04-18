@@ -116,11 +116,12 @@ import edu.umich.med.mrc2.datoolbox.main.RecentDataManager;
 import edu.umich.med.mrc2.datoolbox.main.StartupConfiguration;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
-import edu.umich.med.mrc2.datoolbox.project.Experiment;
+import edu.umich.med.mrc2.datoolbox.project.Project;
 import edu.umich.med.mrc2.datoolbox.project.ProjectType;
-import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisExperiment;
+import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.project.store.DataFileExtensions;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskControlListener;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskListener;
@@ -128,6 +129,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.gui.TaskProgressPanel;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.IDTrackerExperimentDataFetchTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.project.LoadExperimentTask;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.project.OpenMetabolomicsProjectTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.project.OpenStoredRawDataAnalysisExperimentTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.project.SaveExperimentTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.project.SaveMetabolomicsProjectTask;
@@ -531,7 +533,7 @@ public class MainWindow extends JFrame
 		experimentBaseDirectory = 
 				new File(rawDataAnalysisExperimentSetupDialog.ExperimentLocationPath());	
 		savePreferences();
-		RawDataAnalysisExperiment newExperiment = new RawDataAnalysisExperiment(
+		RawDataAnalysisProject newExperiment = new RawDataAnalysisProject(
 				rawDataAnalysisExperimentSetupDialog.getExperimentName(), 
 				rawDataAnalysisExperimentSetupDialog.getExperimentDescription(), 
 				experimentBaseDirectory,
@@ -972,88 +974,79 @@ public class MainWindow extends JFrame
 		JFileChooser chooser = new ImprovedFileChooser();
 		chooser.setPreferredSize(new Dimension(800, 640));
 		chooser.setCurrentDirectory(experimentBaseDirectory);
-		chooser.setDialogTitle("Select experiment file");
+		chooser.setDialogTitle("Select project file");
 		chooser.setAcceptAllFileFilterUsed(false);
 		chooser.setMultiSelectionEnabled(false);
 		chooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
 		chooser.getActionMap().get("viewTypeDetails").actionPerformed(null);	
-		FileNameExtensionFilter experimentFileFilter = null;
-		RawDataExperimentOpenComponent acc = null;
-		boolean loadResults = false;
-		if(experimentType.equals(ProjectType.DATA_ANALYSIS)) {
-			experimentFileFilter = new FileNameExtensionFilter("Raw data experiment files",
-					DataFileExtensions.EXPERIMENT_FILE_EXTENSION.getExtension());
-		}
-		if(experimentType.equals(ProjectType.RAW_DATA_ANALYSIS)) {			
-			experimentFileFilter = new FileNameExtensionFilter("Raw data experiment files",
-					DataFileExtensions.RAW_DATA_EXPERIMENT_FILE_EXTENSION.getExtension());
-			acc = new RawDataExperimentOpenComponent(chooser);
-			chooser.setAccessory(acc);
-			chooser.setSize(800, 640);
-		}
+		FileNameExtensionFilter experimentFileFilter = 
+				new FileNameExtensionFilter(
+						experimentType.getDescription(), 
+						experimentType.getExtension());
 		chooser.setFileFilter(experimentFileFilter);
+		if(experimentType.equals(ProjectType.RAW_DATA_ANALYSIS))		
+			chooser.setAccessory(new RawDataExperimentOpenComponent(chooser));			
+
+		Task projectLoadTask = null;
+		if (chooser.showOpenDialog(this.getContentPane()) == JFileChooser.APPROVE_OPTION)			
+			projectLoadTask = constructProjectLoadTask(experimentType, chooser);
+		
+		if(projectLoadTask != null) {
+			
+			TaskListener taskListener = this;
+			if(experimentType.equals(ProjectType.RAW_DATA_ANALYSIS))
+				taskListener = getPanel(PanelList.RAW_DATA_EXAMINER);
+			
+			projectLoadTask.addTaskListener(taskListener);			
+			savePreferences();
+			MRC2ToolBoxCore.getTaskController().addTask(projectLoadTask);
+		}
+	}
+	
+	private Task constructProjectLoadTask(
+			ProjectType projectType, 
+			JFileChooser chooser) {
+		
+		Task projectLoadTask = null;
 		File experimentFile = null;
-		if (chooser.showOpenDialog(this.getContentPane()) == JFileChooser.APPROVE_OPTION) {
-			
-			File selectedFile = chooser.getSelectedFile();		
-			if(experimentType.equals(ProjectType.DATA_ANALYSIS)) {
-
-				if(selectedFile.isDirectory()) {
-					List<Path> pfList = FIOUtils.findFilesByExtension(
-							Paths.get(selectedFile.getAbsolutePath()), 
-							DataFileExtensions.EXPERIMENT_FILE_EXTENSION.getExtension());
-					if(pfList == null || pfList.isEmpty()) {
-						MessageDialog.showWarningMsg(selectedFile.getName() + 
-								" is not a valid metabolomics experiment", chooser);
-						return;
-					}
-					experimentFile = pfList.get(0).toFile();
-					experimentBaseDirectory = selectedFile.getParentFile();
-				}
-				else {
-					experimentFile = selectedFile;
-					experimentBaseDirectory = experimentFile.getParentFile().getParentFile();
-				}		
+		String extension = projectType.getExtension();
+		File selectedFile = chooser.getSelectedFile();	
+		
+		if(selectedFile.isDirectory()) {
+			List<Path> pfList = FIOUtils.findFilesByExtension(
+					Paths.get(selectedFile.getAbsolutePath()), extension);
+			if(pfList == null || pfList.isEmpty()) {
+				MessageDialog.showWarningMsg(selectedFile.getName() + 
+						" is not a valid " + projectType.getDescription(), chooser);
+				return null;
 			}
-			if(experimentType.equals(ProjectType.RAW_DATA_ANALYSIS)) {
+			experimentFile = pfList.get(0).toFile();
+			experimentBaseDirectory = selectedFile.getParentFile();
+		}
+		else {
+			experimentFile = selectedFile;
+			experimentBaseDirectory = experimentFile.getParentFile().getParentFile();
+		}
+		if(experimentFile != null) {
+			
+			if(projectType.equals(ProjectType.DATA_ANALYSIS))
+				projectLoadTask = new LoadExperimentTask(experimentFile);
+			
+			if(projectType.equals(ProjectType.DATA_ANALYSIS_NEW_FORMAT))
+				projectLoadTask = new OpenMetabolomicsProjectTask(experimentFile);
+			
+			if(projectType.equals(ProjectType.RAW_DATA_ANALYSIS)) {	
 				
-				loadResults = acc.loadResults();
-				
-				if(selectedFile.isDirectory()) {
-					List<Path> pfList = FIOUtils.findFilesByExtension(
-							Paths.get(selectedFile.getAbsolutePath()), 
-							DataFileExtensions.RAW_DATA_EXPERIMENT_FILE_EXTENSION.getExtension());
-					if(pfList == null || pfList.isEmpty()) {
-						MessageDialog.showWarningMsg(selectedFile.getName() + 
-								" is not a valid raw data analysis experiment", chooser);
-						return;
-					}
-					experimentFile = pfList.get(0).toFile();
-					experimentBaseDirectory = selectedFile.getParentFile();
-				}
-				else {
-					experimentFile = selectedFile;
-					experimentBaseDirectory = experimentFile.getParentFile().getParentFile();
-				}
+				boolean loadResults = true;
+				RawDataExperimentOpenComponent rdeoc = 
+						(RawDataExperimentOpenComponent)chooser.getAccessory();
+				if(rdeoc != null)
+					loadResults = rdeoc.loadResults();
+					
+				projectLoadTask = new OpenStoredRawDataAnalysisExperimentTask(experimentFile, loadResults);	
 			}
 		}
-		if (experimentFile == null || !experimentFile.exists())
-			return;
-
-		savePreferences();
-		if(experimentType.equals(ProjectType.DATA_ANALYSIS)) {
-
-			LoadExperimentTask ltp = new LoadExperimentTask(experimentFile);
-			ltp.addTaskListener(this);
-			MRC2ToolBoxCore.getTaskController().addTask(ltp);			
-		}
-		if(experimentType.equals(ProjectType.RAW_DATA_ANALYSIS)) {
-			
-			OpenStoredRawDataAnalysisExperimentTask ltp = 
-					new OpenStoredRawDataAnalysisExperimentTask(experimentFile, loadResults);
-			ltp.addTaskListener(getPanel(PanelList.RAW_DATA_EXAMINER));
-			MRC2ToolBoxCore.getTaskController().addTask(ltp);
-		}
+		return projectLoadTask;
 	}
 
 	private synchronized void initWindow() {
@@ -1497,7 +1490,7 @@ public class MainWindow extends JFrame
 		rawDataPanel.finalizeExperimentRawDataLoad(task);
 	}
 	
-	private void finalizeExperimentSave(Experiment experiment) {
+	private void finalizeExperimentSave(Project experiment) {
 		
 		MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
 		MainWindow.hideProgressDialog();

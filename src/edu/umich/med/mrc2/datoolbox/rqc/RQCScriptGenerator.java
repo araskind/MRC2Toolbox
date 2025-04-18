@@ -506,7 +506,8 @@ public class RQCScriptGenerator {
 	public static void createMultyBatchDataSummarizationScript(File inputMapFile, File dataDir) {
 
 		List<String>rscriptParts = new ArrayList<String>();
-		String workDirForR = dataDir.getAbsolutePath().replaceAll("\\\\", "/");
+		String workDirForR = inputMapFile.getParentFile().getAbsolutePath().replaceAll("\\\\", "/");
+		String dataPathPrefix = dataDir.getAbsolutePath().replaceAll("\\\\", "/") + "/";
 		String[][] inputData = DelimitedTextParser.parseTextFile(
 				inputMapFile, MRC2ToolBoxConfiguration.getTabDelimiter());
 		
@@ -567,7 +568,7 @@ public class RQCScriptGenerator {
 			
 			//	Read in design
 			rscriptParts.add("### Read common manifest file ####\n");
-			rscriptParts.add(designObject + ".in <- read.delim(\"" + 
+			rscriptParts.add(designObject + ".in <- read.delim(\"" + dataPathPrefix +
 					io.getField(SummaryInputColumns.MANIFEST) + "\", check.names=FALSE)");
 			rscriptParts.add(designObject + " <- as.data.frame(" + designObject + ".in[,2])");
 			rscriptParts.add("rownames(" + designObject + ") <- "+ designObject + ".in$`raw_file`");
@@ -577,27 +578,27 @@ public class RQCScriptGenerator {
 			
 			String summaryObject = createParameterSummaryBlock(
 					rscriptParts, dataLinePrefix, designObject,
-					nonRedundantFields, io, SummaryInputColumns.PEAK_AREAS, true);
+					nonRedundantFields, io, SummaryInputColumns.PEAK_AREAS, dataPathPrefix, true);
 			mergeComponentsMap.get(SummaryInputColumns.PEAK_AREAS).add(summaryObject);
 			
 			summaryObject = createParameterSummaryBlock(
 					rscriptParts, dataLinePrefix, designObject,
-					nonRedundantFields, io, SummaryInputColumns.PEAK_QUALITY, true);
+					nonRedundantFields, io, SummaryInputColumns.PEAK_QUALITY, dataPathPrefix, true);
 			mergeComponentsMap.get(SummaryInputColumns.PEAK_QUALITY).add(summaryObject);
 			
 			summaryObject = createParameterSummaryBlock(
 					rscriptParts, dataLinePrefix, designObject,
-					nonRedundantFields, io, SummaryInputColumns.MZ_VALUES, true);
+					nonRedundantFields, io, SummaryInputColumns.MZ_VALUES, dataPathPrefix, true);
 			mergeComponentsMap.get(SummaryInputColumns.MZ_VALUES).add(summaryObject);
 			
 			summaryObject = createParameterSummaryBlock(
 					rscriptParts, dataLinePrefix, designObject,
-					nonRedundantFields, io, SummaryInputColumns.RT_VALUES, true);
+					nonRedundantFields, io, SummaryInputColumns.RT_VALUES, dataPathPrefix, true);
 			mergeComponentsMap.get(SummaryInputColumns.RT_VALUES).add(summaryObject);
 			
 			summaryObject = createParameterSummaryBlock(
 					rscriptParts, dataLinePrefix, designObject,
-					nonRedundantFields, io, SummaryInputColumns.PEAK_WIDTH, true);
+					nonRedundantFields, io, SummaryInputColumns.PEAK_WIDTH, dataPathPrefix, true);
 			mergeComponentsMap.get(SummaryInputColumns.PEAK_WIDTH).add(summaryObject);
 		}
 		rscriptParts.add("\n# Combine and export summaries ####\n");
@@ -642,8 +643,9 @@ public class RQCScriptGenerator {
 			rscriptParts.add(combinedSummaryObject + 
 					" <- bind_rows(" + StringUtils.join(me.getValue(), ", ") + ")");
 			String summaryFileName = prefix + "_" + me.getKey().getRName() + "_summary_" + ts + ".txt";
+			
 			rscriptParts.add("write.table(" + combinedSummaryObject + ", file = \"" + 
-					summaryFileName + "\", quote = F, sep = \"\\t\", na = \"\", row.names = F)");
+					createSafeFileName(summaryFileName) + "\", quote = F, sep = \"\\t\", na = \"\", row.names = F)");
 			
 			//	Create condensed summary and graphics
 			rscriptParts.add(combinedSummaryObject + ".melt <- melt(" + combinedSummaryObject + ", "
@@ -665,7 +667,7 @@ public class RQCScriptGenerator {
 			
 			String condensedSummaryFileName = prefix + "_" + me.getKey().getRName() + "_condensed_summary_" + ts + ".txt";
 			rscriptParts.add("write.table(" + condensedSummaryObject + ", file = \"" + 
-					condensedSummaryFileName + "\", quote = F, sep = \"\\t\", na = \"\", row.names = F)");
+					createSafeFileName(condensedSummaryFileName) + "\", quote = F, sep = \"\\t\", na = \"\", row.names = F)");
 			
 			paramsToPlot.clear();
 			
@@ -833,7 +835,7 @@ public class RQCScriptGenerator {
 			}
 		}		
 		String rScriptFileName = "UntargetedDataSummarization-" + FIOUtils.getTimestamp() + ".R";
-		Path outputPath = Paths.get(dataDir.getAbsolutePath(), rScriptFileName);
+		Path outputPath = Paths.get(inputMapFile.getParentFile().getAbsolutePath(), rScriptFileName);
 		try {
 		    Files.write(outputPath, 
 		    		rscriptParts,
@@ -889,7 +891,7 @@ public class RQCScriptGenerator {
 			condensedBarChartString += " + ggtitle(\"" + plotTitle + "\")";
 			rscriptParts.add(condensedBarChartString);	
 			
-			String plotFileName = plotTitle.replaceAll("[\\\\/:*?\"<>|]", "_").replaceAll("\\s+", "_") + ".png";				
+			String plotFileName = createSafeFileName(plotTitle) + ".png";				
 			rscriptParts.add("ggsave(\"" + plotFileName + "\", plot = " + plotObject + ",  width = 14, height = 8.5)");
 			rscriptParts.add("###");
 		}		
@@ -927,7 +929,7 @@ public class RQCScriptGenerator {
 			densityPlotString += " + ggtitle(\"" + plotTitle + "\")";
 			rscriptParts.add(densityPlotString);	
 			
-			String plotFileName = plotTitle.replaceAll("[\\\\/:*?\"<>|]", "_").replaceAll("\\s+", "_") + ".png";				
+			String plotFileName = createSafeFileName(plotTitle) + ".png";				
 			rscriptParts.add("ggsave(\"" + plotFileName + "\", plot = " + plotObject + ",  width = 14, height = 8.5)");
 
 			//	Batch / Sample type ...
@@ -943,10 +945,14 @@ public class RQCScriptGenerator {
 			densityPlotString += " + ggtitle(\"" + plotTitle + "\")";
 			rscriptParts.add(densityPlotString);	
 			
-			plotFileName = plotTitle.replaceAll("[\\\\/:*?\"<>|]", "_").replaceAll("\\s+", "_") + ".png";				
+			plotFileName = createSafeFileName(plotTitle) + ".png";				
 			rscriptParts.add("ggsave(\"" + plotFileName + "\", plot = " + plotObject + "2,  width = 14, height = 8.5)");
 			rscriptParts.add("###");
 		}		
+	}
+	
+	private static String createSafeFileName(String inputFileName) {
+		return inputFileName.replaceAll("[\\\\/:*?\"<>|%]", "_").replaceAll("\\s+", "_");
 	}
 	
 	private static String createParameterSummaryBlock(
@@ -956,12 +962,13 @@ public class RQCScriptGenerator {
 			List<SummaryInputColumns>nonRedundantFields,
 			SummarizationDataInputObject io,
 			SummaryInputColumns fieldToSummarize,
+			String dataPathPrefix,
 			boolean removeExtraControls) {
 		
 		rscriptParts.add("\n### Summarize " + fieldToSummarize.getName() + " ####\n");
 				
 		String dataFieldObject = dataLinePrefix + "." + fieldToSummarize.getRName();
-		rscriptParts.add(dataFieldObject + ".in <- read.delim(\"" + 
+		rscriptParts.add(dataFieldObject + ".in <- read.delim(\"" + dataPathPrefix +
 				io.getField(fieldToSummarize) + "\", check.names=FALSE)");
 		rscriptParts.add(dataFieldObject + " <- " + dataFieldObject + ".in[,-c(1:9)]");
 		rscriptParts.add("rownames(" + dataFieldObject + ") <- " + dataFieldObject + ".in$`Feature name`");

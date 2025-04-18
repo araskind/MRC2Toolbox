@@ -34,6 +34,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
+import org.apache.commons.compress.utils.FileNameUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jdom2.Element;
 import org.ujmp.core.Matrix;
@@ -65,7 +66,7 @@ import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
 import edu.umich.med.mrc2.datoolbox.utils.ExperimentUtils;
 import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
 
-public class DataAnalysisProject extends Experiment {
+public class DataAnalysisProject extends Project {
 
 	/**
 	 *
@@ -102,18 +103,10 @@ public class DataAnalysisProject extends Experiment {
 				projectDescription);
 
 		createDirectoryStructureForNewExperiment(parentDirectory);
-		initNewProject();		
-	}
-	
-	@Override
-	protected void createDirectoryStructureForNewExperiment(File parentDirectory) {
-		
-		super.createDirectoryStructureForNewExperiment(parentDirectory);
-		experimentFile = FIOUtils.changeExtension(
-				experimentFile, DataFileExtensions.EXPERIMENT_FILE_EXTENSION.getExtension());
+		initProjectFields(true);
 	}
 
-	protected void initNewProject() {
+	protected void initProjectFields(boolean initDesign) {
 
 		libraryMap = new TreeMap<DataPipeline, CompoundLibrary>();
 		duplicatesMap = new TreeMap<DataPipeline, Set<MsFeatureCluster>>();
@@ -128,12 +121,14 @@ public class DataAnalysisProject extends Experiment {
 		featureMatrixFileMap = new TreeMap<DataPipeline, String>();
 		imputedDataMatrixMap = new TreeMap<DataPipeline, Matrix>();
 		corrMatrixMap = new TreeMap<DataPipeline, Matrix>();	
-		dataPipelines = new TreeSet<DataPipeline>();
-		activeDataPipeline = null;
-		experimentDesign = new ExperimentDesign();
+		dataPipelines = new TreeSet<DataPipeline>();				
 		featureSetMap = new TreeMap<DataPipeline, Set<MsFeatureSet>>();
 		dataIntegrationSets = new TreeSet<MsFeatureClusterSet>();
 		metaDataMap = new TreeMap<DataPipeline, Matrix[]>();
+		activeDataPipeline = null;
+		
+		if(initDesign)
+			experimentDesign = new ExperimentDesign();
 	}
 	
 	public Set<DataPipeline> getDataPipelines() {
@@ -842,6 +837,19 @@ public class DataAnalysisProject extends Experiment {
 		if(!dataIntegrationSets.contains(activeSet))
 			dataIntegrationSets.add(activeSet);
 	}
+	
+	public DataFile getDataFileByNameAndMethod(
+			String name, DataAcquisitionMethod method) {
+		Set<DataFile> filesForMethod = dataFileMap.get(method);
+		if(filesForMethod == null || filesForMethod.isEmpty())
+			return null;
+		else {
+			String baseName = FileNameUtils.getBaseName(name);
+			return filesForMethod.stream().
+					filter(f -> FileNameUtils.getBaseName(f.getName()).equals(baseName)).
+					findFirst().orElse(null);
+		}
+	}
 
 	@Override
 	public Set<ExperimentalSample> getPooledSamples() {
@@ -897,6 +905,27 @@ public class DataAnalysisProject extends Experiment {
 		subsetMatrix.setMetaDataDimensionMatrix(1, fileMetaData);
 		
 		return subsetMatrix;
+	}
+		
+	public DataAnalysisProject(Element projectElement) {
+		
+		super(projectElement);
+		initProjectFields(false);
+		List<Element>dataPipelineList = 
+				projectElement.getChild(MetabolomicsProjectFields.DataPipelineList.name()).
+				getChildren(ObjectNames.DataPipeline.name());
+		for(Element dpe : dataPipelineList) {
+			
+			DataPipeline dp = null;
+			try {
+				dp = new DataPipeline(dpe);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			if(dp != null)
+				addDataPipeline(dp);
+		}
 	}
 	
 	@Override

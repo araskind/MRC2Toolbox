@@ -61,7 +61,7 @@ import edu.umich.med.mrc2.datoolbox.gui.plot.stats.StatsPlotType;
 import edu.umich.med.mrc2.datoolbox.gui.plot.tooltip.FileStatsBoxAndWhiskerToolTipGenerator;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
-import edu.umich.med.mrc2.datoolbox.project.Experiment;
+import edu.umich.med.mrc2.datoolbox.project.Project;
 import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
 
 public class TwoDimQCPlot extends AbstractControlledDataPlot {
@@ -216,7 +216,7 @@ public class TwoDimQCPlot extends AbstractControlledDataPlot {
 	
 	private void saveQCplot(String command) {
 		
-		Experiment experiment = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
+		Project experiment = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
 		if(experiment == null)
 			experiment = MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment();
 		

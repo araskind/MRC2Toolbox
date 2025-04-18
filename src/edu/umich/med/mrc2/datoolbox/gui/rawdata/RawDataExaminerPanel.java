@@ -108,8 +108,8 @@ import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.RawDataManager;
 import edu.umich.med.mrc2.datoolbox.main.RecentDataManager;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
-import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisExperiment;
-import edu.umich.med.mrc2.datoolbox.project.store.DataFileExtensions;
+import edu.umich.med.mrc2.datoolbox.project.ProjectType;
+import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.rawdata.MSMSExtractionParameterSet;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
@@ -391,7 +391,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 	
 	private void importMS1DataFromCEFFile() {
 		
-		RawDataAnalysisExperiment activeExperiment = 
+		RawDataAnalysisProject activeExperiment = 
 				MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment();
 		if(activeExperiment == null)
 			return;
@@ -450,7 +450,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 
 	private void setExperimentDataUploadParameters() {
 		
-		RawDataAnalysisExperiment activeExperiment = 
+		RawDataAnalysisProject activeExperiment = 
 				MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment();
 		if(activeExperiment == null)
 			return;
@@ -572,7 +572,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 
 	private void showExperimentMetadataWizard() {
 		
-		RawDataAnalysisExperiment experiment = 
+		RawDataAnalysisProject experiment = 
 				MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment();
 		
 		if (experiment == null)
@@ -876,7 +876,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 		chooser.getActionMap().get("viewTypeDetails").actionPerformed(null);
 		FileNameExtensionFilter experimentFileFilter = 
 				new FileNameExtensionFilter("Raw data experiment files",
-						DataFileExtensions.RAW_DATA_EXPERIMENT_FILE_EXTENSION.getExtension());
+						ProjectType.RAW_DATA_ANALYSIS.getExtension());
 		chooser.setFileFilter(experimentFileFilter);	
 		RawDataExperimentOpenComponent acc = 
 				new RawDataExperimentOpenComponent(chooser);
@@ -890,7 +890,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 			if(selectedFile.isDirectory()) {
 				List<Path> pfList = FIOUtils.findFilesByExtension(
 						Paths.get(selectedFile.getAbsolutePath()), 
-						DataFileExtensions.RAW_DATA_EXPERIMENT_FILE_EXTENSION.getExtension());
+						ProjectType.RAW_DATA_ANALYSIS.getExtension());
 				if(pfList == null || pfList.isEmpty()) {
 					MessageDialog.showWarningMsg(selectedFile.getName() + 
 							" is not a valid experiment", chooser);
@@ -1286,7 +1286,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 	
 	private void finalizeImportMS1DataFromCEFTask(ImportMS1DataFromCEFTask task) {
 		
-		RawDataAnalysisExperiment experiment = 
+		RawDataAnalysisProject experiment = 
 				MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment();
 		
 		experiment.addMsFeaturesForDataFile(

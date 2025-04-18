@@ -36,7 +36,7 @@ import edu.umich.med.mrc2.datoolbox.gui.plot.lcms.chromatogram.ChromatogramPlotM
 import edu.umich.med.mrc2.datoolbox.gui.utils.ColorUtils;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.RawDataManager;
-import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisExperiment;
+import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
@@ -48,13 +48,13 @@ public class ExperimentRawDataFileOpenTask extends AbstractTask implements TaskL
 
 
 	private int ticCount;
-	private RawDataAnalysisExperiment experiment;
+	private RawDataAnalysisProject experiment;
 	private boolean copyFilesToExperiment;
 	private Collection<String>errors;
 	
 	
 	public ExperimentRawDataFileOpenTask(
-			RawDataAnalysisExperiment experiment,
+			RawDataAnalysisProject experiment,
 			boolean copyFilesToExperiment) {
 		super();
 		this.experiment = experiment;
@@ -173,7 +173,7 @@ public class ExperimentRawDataFileOpenTask extends AbstractTask implements TaskL
 				experiment, copyFilesToExperiment);
 	}
 
-	public RawDataAnalysisExperiment getExperiment(){
+	public RawDataAnalysisProject getExperiment(){
 		return experiment;
 	}
 

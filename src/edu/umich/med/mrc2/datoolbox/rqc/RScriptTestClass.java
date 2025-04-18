@@ -38,13 +38,50 @@ public class RScriptTestClass {
 		MRC2ToolBoxConfiguration.initConfiguration();
 
 		try {
-			testMetabCombinerAlignmentScript();
+			createDataSummariesForEX01496ionpNegExperiment();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
+
+	private static void createDataSummariesForEX01496ionpNegExperiment() {
+		
+		File inputMapFile = 
+				new File("Y:\\DataAnalysis\\_Reports\\EX01496 - Human EDTA Tranche 3 plasma X20001463K\\"
+						+ "A049 - Central carbon metabolism profiling\\Documents\\CO300-Pk1000\\_QC\\"
+						+ "EX01496_IONP-NEG-dataSummarization-inputMap.txt");
+		File dataDir = 
+				new File("Y:\\DataAnalysis\\_Reports\\EX01496 - Human EDTA Tranche 3 plasma X20001463K\\"
+						+ "A049 - Central carbon metabolism profiling\\Documents\\CO300-Pk1000");
+		RQCScriptGenerator.createMultyBatchDataSummarizationScript(inputMapFile, dataDir);
+	}
 	
+	private static void createDataSummariesForEX01496rpNegExperiment() {
+		
+		File inputMapFile = 
+				new File("Y:\\DataAnalysis\\_Reports\\EX01496 - Human EDTA Tranche 3 plasma X20001463K\\"
+						+ "A003 - Untargeted\\Documents\\NEG\\CO300-Pk1000\\_QC\\"
+						+ "EX01496_RP-NEG-dataSummarization-inputMap.txt");
+		File dataDir = 
+				new File("Y:\\DataAnalysis\\_Reports\\EX01496 - Human EDTA Tranche 3 plasma X20001463K\\"
+						+ "A003 - Untargeted\\Documents\\NEG\\CO300-Pk1000");
+		RQCScriptGenerator.createMultyBatchDataSummarizationScript(inputMapFile, dataDir);
+	}
+	
+	private static void createDataSummariesForEX01496rpPosExperiment() {
+		
+		File inputMapFile = 
+				new File("Y:\\DataAnalysis\\_Reports\\EX01496 - Human EDTA Tranche 3 plasma X20001463K\\"
+						+ "A003 - Untargeted\\Documents\\POS\\CO300-Pk1000\\"
+						+ "_QC\\EX01496_RP-POS-dataSummarization-inputMap.txt");
+		File dataDir = 
+				new File("Y:\\DataAnalysis\\_Reports\\EX01496 - Human EDTA Tranche 3 plasma X20001463K\\"
+						+ "A003 - Untargeted\\Documents\\POS\\CO300-Pk1000");
+		RQCScriptGenerator.createMultyBatchDataSummarizationScript(inputMapFile, dataDir);
+	}
+	//
+		
 	private static void testMetabCombinerAlignmentScript() {
 
 		File rWorkingDir = new File(
@@ -57,18 +94,6 @@ public class RScriptTestClass {
 				+ "Unnamed\\MetabCombiner\\EX01283\\POS\\NO_BATCH02\\"
 				+ "EX01283-RP-POS-NOB2-MC-inputMap.txt");
 		RQCScriptGenerator.generateMultiBatchMetabCombinerAlignmentScriptScript(rWorkingDir, inputMap);
-	}
-
-	private static void createDataSummariesForEX01283rpPosExperiment() {
-		
-		File inputMapFile = 
-				new File("Y:\\DataAnalysis\\_Reports\\"
-						+ "EX01010 - EX01089 - EX01235 - EX01283 - EX01392 - Starr County Metabolomics I-V"
-						+ "\\Unnamed\\MetabCombiner\\EX01010and1089\\NEG\\"
-						+ "EX01010-1089-RP-NEG-MC-inputMap.txt");
-		File dataDir = 
-				new File("Y:\\DataAnalysis\\_Reports\\EX01010 - EX01089 - EX01235 - EX01283 - EX01392 - Starr County Metabolomics I-V\\Unnamed\\MetabCombiner\\EX01010and1089\\NEG\\EX01010-1089-RP-NEG-MC-inputMap.txt");
-		RQCScriptGenerator.createMultyBatchDataSummarizationScript(inputMapFile, dataDir);
 	}
 	
 	private static void createDataSummariesForEX01426B6rpPosEMvoltageExperiment() {

@@ -31,7 +31,7 @@ import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.database.lims.LIMSDataCache;
-import edu.umich.med.mrc2.datoolbox.project.Experiment;
+import edu.umich.med.mrc2.datoolbox.project.Project;
 import edu.umich.med.mrc2.datoolbox.project.ProjectType;
 import edu.umich.med.mrc2.datoolbox.utils.ExperimentUtils;
 
@@ -58,7 +58,7 @@ public class ExperimentPointer {
 	protected LIMSUser createdBy;
 	protected LIMSExperiment limsExperiment;
 	
-	public ExperimentPointer(Experiment parent) {
+	public ExperimentPointer(Project parent) {
 		super();
 		this.projectType = parent.getProjectType();
 		this.id = parent.getId();
@@ -130,7 +130,7 @@ public class ExperimentPointer {
 		experimentPointerElement.setAttribute(LAST_MODIFIED,
 				ExperimentUtils.dateTimeFormat.format(lastModified));
 		
-		if(limsExperiment != null)
+		if(limsExperiment != null && limsExperiment.getId() != null)
 			experimentPointerElement.setAttribute(LIMS_EXPERIMENT, limsExperiment.getId());
 		
 		if(createdBy != null)

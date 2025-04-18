@@ -68,7 +68,7 @@ import edu.umich.med.mrc2.datoolbox.project.store.DataFileExtensions;
 import edu.umich.med.mrc2.datoolbox.rawdata.MSMSExtractionParameterSet;
 import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
 
-public class RawDataAnalysisExperiment extends Experiment {
+public class RawDataAnalysisProject extends Project {
 	
 	/**
 	 * 
@@ -92,7 +92,7 @@ public class RawDataAnalysisExperiment extends Experiment {
 	 * @param parentDirectory
 	 * @param createdBy
 	 */
-	public RawDataAnalysisExperiment(
+	public RawDataAnalysisProject(
 			String experimentName, 
 			String experimentDescription, 
 			File parentDirectory,
@@ -116,7 +116,7 @@ public class RawDataAnalysisExperiment extends Experiment {
 	 * @param dateCreated
 	 * @param lastModified
 	 */
-	public RawDataAnalysisExperiment(
+	public RawDataAnalysisProject(
 			String id, 
 			String name, 
 			String description, 
@@ -132,10 +132,7 @@ public class RawDataAnalysisExperiment extends Experiment {
 	protected void createDirectoryStructureForNewExperiment(File parentDirectory) {
 		
 		super.createDirectoryStructureForNewExperiment(parentDirectory);
-		experimentFile = FIOUtils.changeExtension(
-				experimentFile, 
-				DataFileExtensions.RAW_DATA_EXPERIMENT_FILE_EXTENSION.getExtension());
-
+		
 		Path rawDataDirectoryPath = Paths.get(getExperimentDirectory().getAbsolutePath(), 
 				MRC2ToolBoxConfiguration.RAW_DATA_DIRECTORY);
 		try {
@@ -292,6 +289,21 @@ public class RawDataAnalysisExperiment extends Experiment {
 				findFirst().orElse(null);
 	}
 	
+	public DataFile getDataFileByNameAndMethod(
+			String name, DataAcquisitionMethod method) {
+		
+		if(method == null)
+			return getDataFileByName(name);
+		else {
+			String baseName = FileNameUtils.getBaseName(name);
+			return getDataFiles().stream().
+					filter(f -> FileNameUtils.getBaseName(f.getName()).equals(baseName)).
+					filter(f -> Objects.nonNull(f.getDataAcquisitionMethod())).
+					filter(f -> f.getDataAcquisitionMethod().equals(method)).
+					findFirst().orElse(null);
+		}
+	}
+		
 	public Collection<ExperimentalSample> getExperimentalSamples() {
 		
 		Collection<ExperimentalSample>samples = new TreeSet<ExperimentalSample>();

@@ -53,7 +53,7 @@ import edu.umich.med.mrc2.datoolbox.database.idt.DatabaseIdentificationUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.IdFollowupUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.StandardAnnotationUtils;
-import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisExperiment;
+import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
@@ -65,7 +65,7 @@ public class RawDataAnalysisMSFeatureDatabaseUploadTask extends AbstractTask {
 	
 	private static final int BATCH_SIZE = 100;
 
-	private RawDataAnalysisExperiment experiment;
+	private RawDataAnalysisProject experiment;
 	private DataFile dataFile;
 	private double msOneMZWindow;
 	private Map<String,String>featureIdMap;
@@ -74,7 +74,7 @@ public class RawDataAnalysisMSFeatureDatabaseUploadTask extends AbstractTask {
 	private Map<String, MsFeatureChromatogramBundle> chromatogramMap;
 	
 	public RawDataAnalysisMSFeatureDatabaseUploadTask(
-			RawDataAnalysisExperiment experiment, 
+			RawDataAnalysisProject experiment, 
 			DataFile dataFile,
 			DataExtractionMethod deMethod,
 			double msOneMZWindow) {
