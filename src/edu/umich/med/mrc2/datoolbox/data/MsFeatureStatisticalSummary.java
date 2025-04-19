@@ -22,13 +22,21 @@
 package edu.umich.med.mrc2.datoolbox.data;
 
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
 
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+import org.jdom2.Element;
 
 import edu.umich.med.mrc2.datoolbox.data.enums.MSFeatureSetStatisticalParameters;
+import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
+import edu.umich.med.mrc2.datoolbox.project.store.MassSpectrumFields;
+import edu.umich.med.mrc2.datoolbox.project.store.MsFeatureStatisticalSummaryFields;
+import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
+import edu.umich.med.mrc2.datoolbox.project.store.XmlStorable;
+import edu.umich.med.mrc2.datoolbox.utils.NumberArrayUtils;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
 
-public class MsFeatureStatisticalSummary implements Serializable {
+public class MsFeatureStatisticalSummary implements Serializable, XmlStorable {
 
 	/**
 	 *
@@ -39,8 +47,8 @@ public class MsFeatureStatisticalSummary implements Serializable {
 	private double sampleMean, sampleMedian, sampleStDev, sampleFrequency;
 	private double totalMedian;
 	private DescriptiveStatistics rtStatistics;
-	private DescriptiveStatistics peakWidthStatistics;
 	private DescriptiveStatistics mzStatistics;
+	private DescriptiveStatistics peakWidthStatistics;
 
 	public MsFeatureStatisticalSummary(MsFeature cf) {
 		this.feature = cf;
@@ -312,10 +320,14 @@ public class MsFeatureStatisticalSummary implements Serializable {
 			case RT_RSD:
 				if(rtStatistics != null && rtStatistics.getMean() > 0)
 					return rtStatistics.getStandardDeviation() / rtStatistics.getMean() * 100.0d;
+				else 
+					return null;
 						
 			case MZ_RSD:
 				if(mzStatistics != null && mzStatistics.getMean() > 0)
 					return mzStatistics.getStandardDeviation() / mzStatistics.getMean() * 100.0d;
+				else 
+					return null;
 				
 			default:
 				break;
@@ -329,6 +341,129 @@ public class MsFeatureStatisticalSummary implements Serializable {
 
 	public void setPeakWidthStatistics(DescriptiveStatistics peakWidthStatistics) {
 		this.peakWidthStatistics = peakWidthStatistics;
+	}
+
+	public MsFeatureStatisticalSummary(
+			MsFeature cf, Element msfStatSummaryElement) {
+		this(cf);
+
+		
+		pooledMean = Double.parseDouble(msfStatSummaryElement.getAttributeValue(
+				MsFeatureStatisticalSummaryFields.pooledMean.name()));
+		pooledMedian = Double.parseDouble(msfStatSummaryElement.getAttributeValue(
+				MsFeatureStatisticalSummaryFields.pooledMedian.name()));
+		pooledStDev = Double.parseDouble(msfStatSummaryElement.getAttributeValue(
+				MsFeatureStatisticalSummaryFields.pooledStDev.name()));
+		pooledFrequency = Double.parseDouble(msfStatSummaryElement.getAttributeValue(
+				MsFeatureStatisticalSummaryFields.pooledFrequency.name()));
+		
+		sampleMean = Double.parseDouble(msfStatSummaryElement.getAttributeValue(
+				MsFeatureStatisticalSummaryFields.sampleMean.name()));
+		sampleMedian = Double.parseDouble(msfStatSummaryElement.getAttributeValue(
+				MsFeatureStatisticalSummaryFields.sampleMedian.name()));
+		sampleStDev = Double.parseDouble(msfStatSummaryElement.getAttributeValue(
+				MsFeatureStatisticalSummaryFields.sampleStDev.name()));
+		sampleFrequency = Double.parseDouble(msfStatSummaryElement.getAttributeValue(
+				MsFeatureStatisticalSummaryFields.sampleFrequency.name()));
+		
+		totalMedian = Double.parseDouble(msfStatSummaryElement.getAttributeValue(
+				MsFeatureStatisticalSummaryFields.totalMedian.name()));
+		
+		Element  rtValuesElement = msfStatSummaryElement.getChild(
+				MsFeatureStatisticalSummaryFields.rtStatistics.name());
+		if(rtValuesElement != null && !rtValuesElement.getText().isEmpty()) {
+			
+			double[] rtValues = null;
+			try {
+				rtValues = NumberArrayUtils.decodeNumberArray(rtValuesElement.getText());
+			} catch (UnsupportedEncodingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			if(rtValues != null)
+				rtStatistics = new DescriptiveStatistics(rtValues);
+		}
+		Element  mzValuesElement = msfStatSummaryElement.getChild(
+				MsFeatureStatisticalSummaryFields.mzStatistics.name());
+		if(mzValuesElement != null) {
+			
+			double[] mzValues = NumberArrayUtils.decodeValueString(mzValuesElement.getText());
+			if(mzValues != null)
+				mzStatistics = new DescriptiveStatistics(mzValues);
+		}
+		Element  pwValuesElement = msfStatSummaryElement.getChild(
+				MsFeatureStatisticalSummaryFields.pwStatistics.name());
+		if(pwValuesElement != null) {
+			
+			double[] pwValues = NumberArrayUtils.decodeValueString(pwValuesElement.getText());
+			if(pwValues != null)
+				peakWidthStatistics = new DescriptiveStatistics(pwValues);
+		}
+	}
+	
+	@Override
+	public Element getXmlElement() {
+		
+		Element msFeatureStatisticalSummaryElement = 
+				new Element(ObjectNames.MSFStatSummary.name());
+//		msFeatureStatisticalSummaryElement.setAttribute(
+//				CommonFields.Id.name(), feature.getId());
+		
+		msFeatureStatisticalSummaryElement.setAttribute(
+				MsFeatureStatisticalSummaryFields.pooledMean.name(),
+				Double.toString(pooledMean));
+		msFeatureStatisticalSummaryElement.setAttribute(
+				MsFeatureStatisticalSummaryFields.pooledMedian.name(), 
+				Double.toString(pooledMedian));
+		msFeatureStatisticalSummaryElement.setAttribute(
+				MsFeatureStatisticalSummaryFields.pooledStDev.name(), 
+				Double.toString(pooledStDev));
+		msFeatureStatisticalSummaryElement.setAttribute(
+				MsFeatureStatisticalSummaryFields.pooledFrequency.name(), 
+				Double.toString(pooledFrequency));
+		
+		msFeatureStatisticalSummaryElement.setAttribute(
+				MsFeatureStatisticalSummaryFields.sampleMean.name(),
+				Double.toString(sampleMean));
+		msFeatureStatisticalSummaryElement.setAttribute(
+				MsFeatureStatisticalSummaryFields.sampleMedian.name(), 
+				Double.toString(sampleMedian));
+		msFeatureStatisticalSummaryElement.setAttribute(
+				MsFeatureStatisticalSummaryFields.sampleStDev.name(), 
+				Double.toString(sampleStDev));
+		msFeatureStatisticalSummaryElement.setAttribute(
+				MsFeatureStatisticalSummaryFields.sampleFrequency.name(), 
+				Double.toString(sampleFrequency));
+		
+		msFeatureStatisticalSummaryElement.setAttribute(
+				MsFeatureStatisticalSummaryFields.totalMedian.name(), 
+				Double.toString(totalMedian));
+		
+		String rtValueString = NumberArrayUtils.encodeStatValues(rtStatistics);
+		if(rtValueString != null) {
+			
+			Element rtValuesElement = 
+					new Element(MsFeatureStatisticalSummaryFields.rtStatistics.name());
+			rtValuesElement.setText(rtValueString);
+			msFeatureStatisticalSummaryElement.addContent(rtValuesElement);
+		}
+		String mzValueString = NumberArrayUtils.encodeStatValues(mzStatistics);
+		if(mzValueString != null) {
+			
+			Element mzValuesElement = 
+					new Element(MsFeatureStatisticalSummaryFields.mzStatistics.name());
+			mzValuesElement.setText(mzValueString);
+			msFeatureStatisticalSummaryElement.addContent(mzValuesElement);
+		}
+		String pwValueString = NumberArrayUtils.encodeStatValues(mzStatistics);
+		if(pwValueString != null) {
+			
+			Element pwValuesElement = 
+					new Element(MsFeatureStatisticalSummaryFields.pwStatistics.name());
+			pwValuesElement.setText(pwValueString);
+			msFeatureStatisticalSummaryElement.addContent(pwValuesElement);
+		}
+		return msFeatureStatisticalSummaryElement;
 	}
 }
 

@@ -31,6 +31,7 @@ import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.input.SAXBuilder;
 import org.ujmp.core.Matrix;
+import org.ujmp.core.calculation.Calculation.Ret;
 
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.LibraryMsFeature;
@@ -135,7 +136,7 @@ public class LoadPipelineDataTask extends AbstractTask {
 					findFirst().orElse(null);
 			dataFileArray[i] = df;
 		}
-		return Matrix.Factory.linkToArray((Object[])dataFileArray);
+		return Matrix.Factory.linkToArray((Object[])dataFileArray).transpose(Ret.NEW);
 	}
 
 	private void readFeaturesFromFile() {

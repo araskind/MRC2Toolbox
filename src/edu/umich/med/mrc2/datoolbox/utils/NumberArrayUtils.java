@@ -39,6 +39,7 @@ import java.util.zip.GZIPOutputStream;
 import java.util.zip.Inflater;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 public class NumberArrayUtils {
 	
@@ -240,4 +241,44 @@ public class NumberArrayUtils {
         }
         return decompressedData;
     }
+    
+	public static String encodeStatValues(DescriptiveStatistics stats) {
+		
+		String valueString = null;
+		if(stats != null && stats.getN() > 0) {
+			
+			try {
+				valueString = encodeNumberArray(stats.getValues());
+			} catch (UnsupportedEncodingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		return valueString;
+	}
+	
+	public static double[] decodeValueString(String encodedValues) {
+		
+		if(encodedValues == null || encodedValues.isBlank())
+			return null;
+		
+		double[] values = null;
+		try {
+			values = NumberArrayUtils.decodeNumberArray(encodedValues);
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return values;
+	}
 }
+
+
+
+
+
+
+
+
+
+

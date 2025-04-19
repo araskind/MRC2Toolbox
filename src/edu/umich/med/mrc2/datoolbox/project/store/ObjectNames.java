@@ -65,6 +65,7 @@ public enum ObjectNames {
 	MetabolomicsProject,
 	MFIB,
 	MoTrPACAssay,
+	MSFStatSummary,
 	MSFID,	
 	MSMS,
 	MSMSClusterDataSet,

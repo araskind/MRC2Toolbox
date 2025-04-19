@@ -1546,12 +1546,6 @@ public class MainWindow extends JFrame
 		hideProgressDialog();
 		RecentDataManager.addExperiment(MRC2ToolBoxCore.getActiveMetabolomicsExperiment());
 		updateGuiWithRecentData();
-		
-		//	Recalc stats
-		CalculateStatisticsTask cst = 
-				new CalculateStatisticsTask(currentExperiment, activeDataPipeline);
-		cst.addTaskListener(((FeatureDataPanel) MRC2ToolBoxCore.getMainWindow().getPanel(PanelList.FEATURE_DATA)));
-		MRC2ToolBoxCore.getTaskController().addTask(cst);
 	}
 	
 	private void clearGuiAfterExperimentClosed() {

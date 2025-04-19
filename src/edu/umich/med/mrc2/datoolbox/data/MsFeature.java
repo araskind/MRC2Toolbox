@@ -1031,6 +1031,9 @@ public class MsFeature implements AnnotatedObject, Serializable, XmlStorable {
 		if(binnerAnnotation != null)
 			msFeatureElement.addContent(binnerAnnotation.getXmlElement());
 		
+		if(statsSummary != null)
+			msFeatureElement.addContent(statsSummary.getXmlElement());
+		
 		return msFeatureElement;
 	}
 
@@ -1066,6 +1069,14 @@ public class MsFeature implements AnnotatedObject, Serializable, XmlStorable {
 
 		parseIdentifications(featureElement);
 		parseBinnerAnnotation(featureElement);
+		
+		Element msFeatureStatisticalSummaryElement = 
+				featureElement.getChild(ObjectNames.MSFStatSummary.name());
+		if(msFeatureStatisticalSummaryElement != null) {
+			
+			statsSummary = new MsFeatureStatisticalSummary(
+					this, msFeatureStatisticalSummaryElement);
+		}
 	}
 	
 	private void parseIdentifications(Element featureElement) {
