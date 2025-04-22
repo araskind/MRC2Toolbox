@@ -32,6 +32,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.zip.DataFormatException;
 import java.util.zip.Deflater;
 import java.util.zip.GZIPInputStream;
@@ -40,6 +41,8 @@ import java.util.zip.Inflater;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+
+import edu.umich.med.mrc2.datoolbox.data.MsPoint;
 
 public class NumberArrayUtils {
 	
@@ -271,7 +274,44 @@ public class NumberArrayUtils {
 		}
 		return values;
 	}
+	
+	public static String encodeValues(double[]values) {
+		
+		String encoded = null;
+		try {
+			encoded = encodeNumberArray(values);
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return encoded;
+	}
+	
+	/**
+	 * Encode collection of MsPoints 
+	 * First element encodes MZ values, second - intensity values
+	 * @param msPoints
+	 * @return
+	 */
+	public static String[]encodeMsPoints(Collection<MsPoint>msPoints){
+		
+		String[]encoded = new String[2];
+//		double[]mzValues = msPoints.stream().
+//				mapToDouble(p -> Math.floor(p.getMz() * 1000000) / 1000000).toArray();
+		double[]mzValues = msPoints.stream().mapToDouble(p -> p.getMz()).toArray();
+		encoded[0] = NumberArrayUtils.encodeValues(mzValues);
+		
+		double[]intensityValues = msPoints.stream().
+				mapToDouble(p -> Math.floor(p.getIntensity() * 100) / 100).toArray();
+		encoded[1] =  NumberArrayUtils.encodeValues(intensityValues);
+		
+		return encoded;
+	}
 }
+
+
+
+
 
 
 

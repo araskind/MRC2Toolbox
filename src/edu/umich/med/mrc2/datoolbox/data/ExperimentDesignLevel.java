@@ -89,20 +89,7 @@ public class ExperimentDesignLevel implements Comparable<ExperimentDesignLevel>,
 
 	@Override
 	public int compareTo(ExperimentDesignLevel o) {
-
-		String thisLevelComparableName = "";
-		if(this.parentFactor != null)
-			thisLevelComparableName = this.parentFactor.getName() + levelName;
-		else
-			thisLevelComparableName = levelName;
-
-		String otherComparableName = "";
-		if(o.getParentFactor() != null)
-			otherComparableName = o.getParentFactor().getName() + o.getName();
-		else
-			otherComparableName = o.getName();
-
-		return thisLevelComparableName.compareTo(otherComparableName);
+		return levelName.compareTo(o.getName());
 	}
 
 	public String getLevelDescription() {

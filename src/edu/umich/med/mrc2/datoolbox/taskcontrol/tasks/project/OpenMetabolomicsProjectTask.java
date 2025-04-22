@@ -24,11 +24,11 @@ package edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.project;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import org.jdom2.Document;
@@ -38,6 +38,11 @@ import org.jdom2.input.SAXBuilder;
 
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesign;
+import edu.umich.med.mrc2.datoolbox.data.MsFeature;
+import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
+import edu.umich.med.mrc2.datoolbox.data.Worklist;
+import edu.umich.med.mrc2.datoolbox.data.WorklistItem;
+import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
@@ -51,7 +56,6 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskListener;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
-import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io.CefDataImportTask;
 
 public class OpenMetabolomicsProjectTask extends AbstractTask implements TaskListener {
 	
@@ -80,7 +84,7 @@ public class OpenMetabolomicsProjectTask extends AbstractTask implements TaskLis
 		}
 		initPipelineDataLoad();
 	}
-	
+
 	private void initPipelineDataLoad() {
 		
 		pipelineCount = project.getDataPipelines().size();
@@ -147,8 +151,72 @@ public class OpenMetabolomicsProjectTask extends AbstractTask implements TaskLis
 		parseOrderedFileNameMap(projectElement);
 		parseOrderedMSFeatureIdMap(projectElement);
 		setActivePipeline(projectElement);
+		recreateWorklists(projectElement);		
 	}
 	
+	private void updateFeatureIdentifications() {
+
+		taskDescription = "Processing identifications ... ";
+		Collection<MsFeatureIdentity>toRemove = new ArrayList<MsFeatureIdentity>();
+		for (DataPipeline dataPipeline : project.getDataPipelines()) {
+			
+			for(MsFeature feature : project.getMsFeaturesForDataPipeline(dataPipeline)) {
+				
+				toRemove.clear();
+				for(MsFeatureIdentity id : feature.getIdentifications()) {
+					
+					MsFeatureIdentity fbfId = null;
+					if(id.getCompoundIdentity() == null 
+							|| id.getCompoundIdentity().getPrimaryDatabaseId() == null)
+						continue;
+						
+					String dbId = id.getCompoundIdentity().getPrimaryDatabaseId();
+					if(dbId.startsWith(DataPrefix.MS_LIBRARY_TARGET.getName())
+							|| dbId.startsWith(DataPrefix.MS_LIBRARY_TARGET_OLD.getName())
+							|| dbId.startsWith(DataPrefix.MS_FEATURE.getName())) {
+						fbfId = id;
+					}
+					if(fbfId != null)
+						toRemove.add(fbfId);
+						
+				}
+				if(!toRemove.isEmpty()) {
+					
+					for(MsFeatureIdentity fbfId : toRemove)
+						feature.removeIdentity(fbfId);
+				}
+				if(feature.getPrimaryIdentity() == null && feature.getIdentifications().isEmpty())
+					feature.createDefaultPrimaryIdentity();
+			}
+		}
+	}
+	
+	private void recreateWorklists(Element projectElement) {
+
+    	Set<DataAcquisitionMethod>acquisitionMethods = 
+    			project.getDataPipelines().stream().
+    			map(p -> p.getAcquisitionMethod()).collect(Collectors.toSet());
+		List<Element>worklistMapElementList = 
+				projectElement.getChild(MetabolomicsProjectFields.WorklistMap.name()).
+				getChildren(ObjectNames.Worklist.name());
+		for(Element worklistMapElement : worklistMapElementList) {
+			
+			String methodId = worklistMapElement.getAttributeValue(
+					MetabolomicsProjectFields.DataAcquisitionMethodId.name());
+			DataAcquisitionMethod method = acquisitionMethods.stream().
+				filter(m -> m.getId().equals(methodId)).findFirst().orElse(null);
+			Worklist wkl = new Worklist(worklistMapElement);
+			for(WorklistItem item : wkl.getWorklistItems()) {
+				
+				DataFile df = project.getDataFilesForAcquisitionMethod(method).
+					stream().filter(f -> f.getName().equals(item.getDataFileName())).
+					findFirst().orElse(null);
+				item.setDataFile(df);
+			}
+			project.setWorklistForAcquisitionMethod(method, wkl);
+		}		
+	}
+		
 	private void setActivePipeline(Element projectElement) {
 		
 		DataPipeline activePipeline = null;
@@ -277,8 +345,10 @@ public class OpenMetabolomicsProjectTask extends AbstractTask implements TaskLis
 			if (e.getSource().getClass().equals(LoadPipelineDataTask.class)) {
 				loadedPipelineCount++;
 				MRC2ToolBoxCore.getTaskController().getTaskQueue().removeTask((AbstractTask)e.getSource());
-				if(loadedPipelineCount == pipelineCount)
+				if(loadedPipelineCount == pipelineCount) {
+					updateFeatureIdentifications();
 					setStatus(TaskStatus.FINISHED);
+				}
 			}
 		}
 	}

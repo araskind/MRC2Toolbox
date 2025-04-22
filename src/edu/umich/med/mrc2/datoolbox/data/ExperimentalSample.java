@@ -25,6 +25,7 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -37,7 +38,6 @@ import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.main.ReferenceSamplesManager;
 import edu.umich.med.mrc2.datoolbox.project.Project;
-import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
 import edu.umich.med.mrc2.datoolbox.project.store.ExperimentalSampleFields;
 import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
@@ -423,9 +423,9 @@ public class ExperimentalSample implements Comparable<ExperimentalSample>, Seria
 			Element designCellElement = 
 					new Element(ExperimentalSampleFields.DesignCellElement.name());
 			designCellElement.setAttribute(ExperimentalSampleFields.DCFactorId.name(), 
-					dce.getKey().getFactorId());
+					dce.getKey().getName());
 			designCellElement.setAttribute(ExperimentalSampleFields.DCLevelId.name(), 
-					dce.getValue().getLevelId());
+					dce.getValue().getName());
 			designCellContainerElement.addContent(designCellElement);
 		}
 		sampleElement.addContent(designCellContainerElement);
@@ -451,7 +451,7 @@ public class ExperimentalSample implements Comparable<ExperimentalSample>, Seria
 	
 	public ExperimentalSample(
 			Element sampleElement, 
-			ExperimentDesign design,
+			Set<ExperimentDesignFactor> factorSet,
 			Project parentProject) {	
 		
 		id = sampleElement.getAttributeValue(CommonFields.Id.name());
@@ -480,15 +480,17 @@ public class ExperimentalSample implements Comparable<ExperimentalSample>, Seria
 		List<Element> designCellElements = 
 				sampleElement.getChild(ExperimentalSampleFields.DesignCell.name()).getChildren();
 		
-		if(design != null) {
+		if(factorSet != null && !factorSet.isEmpty()) {
 			
 			for(Element dcElement : designCellElements) {
-				String factorId = dcElement.getAttributeValue(ExperimentalSampleFields.DCFactorId.name());
-				String levelId = dcElement.getAttributeValue(ExperimentalSampleFields.DCLevelId.name());
-				ExperimentDesignFactor factor = design.getFactorById(factorId);
+				String factorName = dcElement.getAttributeValue(ExperimentalSampleFields.DCFactorId.name());
+				String levelName = dcElement.getAttributeValue(ExperimentalSampleFields.DCLevelId.name());
+				ExperimentDesignFactor factor = factorSet.stream().
+						filter(f -> f.getName().equals(factorName)).
+						findFirst().orElse(null);
 				ExperimentDesignLevel level = null;
 				if(factor != null)
-					level = factor.getLevelById(levelId);
+					level = factor.getLevelByName(levelName);
 				
 				if(factor != null && level != null)
 					designCell.put(factor, level);

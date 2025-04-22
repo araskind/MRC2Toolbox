@@ -48,6 +48,7 @@ public class WorklistItem implements Comparable<WorklistItem>, Serializable, Xml
 	public WorklistItem(DataFile dataFile) {
 		super();
 		this.dataFile = dataFile;
+		this.dataFileName = dataFile.getName();
 		properties = new TreeMap<String, String>();
 	}
 
@@ -83,6 +84,7 @@ public class WorklistItem implements Comparable<WorklistItem>, Serializable, Xml
 	 */
 	public void setDataFile(DataFile dataFile) {
 		this.dataFile = dataFile;
+		this.dataFileName = dataFile.getName();
 	}
 	
    @Override

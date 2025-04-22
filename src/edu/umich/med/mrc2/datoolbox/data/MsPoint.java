@@ -23,6 +23,8 @@ package edu.umich.med.mrc2.datoolbox.data;
 
 import java.io.Serializable;
 
+import org.apache.commons.math3.util.Precision;
+
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 
 public class MsPoint implements Serializable {
@@ -145,10 +147,10 @@ public class MsPoint implements Serializable {
 
         final MsPoint other = (MsPoint) obj;
 
-        if (this.mz != other.getMz())
+        if (!Precision.equals(this.mz, other.getMz(), Precision.EPSILON))
             return false;
               
-        if (this.intensity != other.getIntensity())
+        if (!Precision.equals(this.intensity, other.getIntensity(), Precision.EPSILON))
             return false;
         
         if (this.scanNum != other.getScanNum())

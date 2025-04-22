@@ -163,7 +163,7 @@ public abstract class CEFProcessingTask extends AbstractTask {
 		feature.getIdentifications().clear();
 		feature.setPrimaryIdentity(null);
 		
-		feature.setNeutralMass(neutralMass);
+		//	feature.setNeutralMass(neutralMass);
 		if(location.getAttribute("a") != null)
 			feature.setArea(location.getAttribute("a").getDoubleValue());
 

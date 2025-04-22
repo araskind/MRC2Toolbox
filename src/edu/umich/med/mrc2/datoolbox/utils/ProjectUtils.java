@@ -80,7 +80,6 @@ import edu.umich.med.mrc2.datoolbox.project.store.DataFileExtensions;
 import edu.umich.med.mrc2.datoolbox.project.store.IDTrackerProjectFields;
 import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
 import edu.umich.med.mrc2.datoolbox.project.store.ProjectStoreUtils;
-import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 
 public class ProjectUtils {
 	

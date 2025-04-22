@@ -41,7 +41,6 @@ import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.enums.GlobalDefaults;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
-import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
 import edu.umich.med.mrc2.datoolbox.project.store.DataFileExtensions;
 import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
@@ -93,7 +92,7 @@ public class LoadPipelineDataTask extends AbstractTask {
 		}
 		setStatus(TaskStatus.FINISHED);
 	}
-	
+
 	private void createDataMatrix() {
 		
 		Matrix featureMetaDataMatrix = createFeatureMetaDataMatrix();

@@ -48,7 +48,6 @@ import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignFactorList
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignListener;
 import edu.umich.med.mrc2.datoolbox.main.ReferenceSamplesManager;
 import edu.umich.med.mrc2.datoolbox.project.Project;
-import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.project.store.ExperimentDesignFields;
 import edu.umich.med.mrc2.datoolbox.project.store.IDTExperimentalSampleFields;
 import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
@@ -732,6 +731,7 @@ public class ExperimentDesign implements ExperimentDesignFactorListener, Seriali
 		suppressEvents = false;
 		eventListeners = ConcurrentHashMap.newKeySet();
 		initCleanDesign();
+		ExperimentDesignFactor scFactor  = getSampleTypeFactor();
 		suppressEvents = false;
 		eventListeners = ConcurrentHashMap.newKeySet();
 		
@@ -742,11 +742,14 @@ public class ExperimentDesign implements ExperimentDesignFactorListener, Seriali
 			
 			for(Element factorElement : factorListElements) {
 				
-				ExperimentDesignFactor factor = 
-						new ExperimentDesignFactor(factorElement);
-				factorSet.add(factor);
+				ExperimentDesignFactor factor =  new ExperimentDesignFactor(factorElement);
+				if(factor.equals(scFactor) && !factor.getLevels().isEmpty())
+					factor.getLevels().stream().forEach(scFactor::addLevel);	//	TODO check this
+				else	
+					factorSet.add(factor);
 			}
 		}
+		updateCompleteDesignSubsets();
 		List<Element> sampleListElements = 
 				experimentDesignElement.getChild(ExperimentDesignFields.SampleSet.name()).
 				getChildren(ObjectNames.ExperimentalSample.name());
@@ -756,9 +759,9 @@ public class ExperimentDesign implements ExperimentDesignFactorListener, Seriali
 				
 				ExperimentalSample sample = null;
 				if(sampleElement.getAttributeValue(IDTExperimentalSampleFields.StockSampleId.name()) != null) 
-					sample = new IDTExperimentalSample(sampleElement, this, parentProject);
+					sample = new IDTExperimentalSample(sampleElement, factorSet, parentProject);
 				else 
-					sample = new ExperimentalSample(sampleElement, this, parentProject);
+					sample = new ExperimentalSample(sampleElement, factorSet, parentProject);
 				
 				sampleSet.add(sample);
 				

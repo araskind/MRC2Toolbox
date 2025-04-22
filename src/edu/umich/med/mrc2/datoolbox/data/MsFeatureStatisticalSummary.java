@@ -28,8 +28,6 @@ import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.jdom2.Element;
 
 import edu.umich.med.mrc2.datoolbox.data.enums.MSFeatureSetStatisticalParameters;
-import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
-import edu.umich.med.mrc2.datoolbox.project.store.MassSpectrumFields;
 import edu.umich.med.mrc2.datoolbox.project.store.MsFeatureStatisticalSummaryFields;
 import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
 import edu.umich.med.mrc2.datoolbox.project.store.XmlStorable;

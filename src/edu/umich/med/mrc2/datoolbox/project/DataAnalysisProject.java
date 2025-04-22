@@ -23,11 +23,9 @@ package edu.umich.med.mrc2.datoolbox.project;
 
 import java.io.File;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
@@ -35,7 +33,6 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import org.apache.commons.compress.utils.FileNameUtils;
-import org.apache.commons.lang.StringUtils;
 import org.jdom2.Element;
 import org.ujmp.core.Matrix;
 import org.ujmp.core.calculation.Calculation.Ret;
@@ -64,7 +61,6 @@ import edu.umich.med.mrc2.datoolbox.project.store.DataFileExtensions;
 import edu.umich.med.mrc2.datoolbox.project.store.MetabolomicsProjectFields;
 import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
 import edu.umich.med.mrc2.datoolbox.utils.ProjectUtils;
-import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
 
 public class DataAnalysisProject extends Project {
 

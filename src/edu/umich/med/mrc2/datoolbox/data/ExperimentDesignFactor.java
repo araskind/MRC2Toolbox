@@ -279,7 +279,7 @@ public class ExperimentDesignFactor implements Comparable<ExperimentDesignFactor
 				experimentDesignFactorElement.getAttributeValue(CommonFields.Id.name());
 		factorName = 
 				experimentDesignFactorElement.getAttributeValue(CommonFields.Name.name());
-		
+
 		//	TODO remove
 		factorDescription = 
 				experimentDesignFactorElement.getAttributeValue(CommonFields.Description.name());

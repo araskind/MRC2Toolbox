@@ -22,8 +22,8 @@
 package edu.umich.med.mrc2.datoolbox.data;
 
 import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -34,12 +34,9 @@ import java.util.TreeSet;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang.StringUtils;
 import org.jdom2.Element;
 
 import edu.umich.med.mrc2.datoolbox.data.compare.AdductComparator;
-import edu.umich.med.mrc2.datoolbox.data.compare.MsDataPointComparator;
-import edu.umich.med.mrc2.datoolbox.data.compare.SortDirection;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
@@ -192,8 +189,7 @@ public class MassSpectrum implements Serializable, XmlStorable {
 		for (Entry<Adduct, List<MsPoint>> entry : adductMap.entrySet()) {
 
 			List<MsPoint>sorted = entry.getValue().stream().
-				sorted(new MsDataPointComparator(SortProperty.MZ, SortDirection.ASC)).
-				collect(Collectors.toList());
+				sorted(MsUtils.mzSorter).collect(Collectors.toList());
 			entry.getValue().clear();
 			entry.getValue().addAll(sorted);
 		}
@@ -219,7 +215,8 @@ public class MassSpectrum implements Serializable, XmlStorable {
 			for (Entry<Adduct, List<MsPoint>> entry : adductMap.entrySet()) {
 
 				BasicIsotopicPattern bip = new BasicIsotopicPattern(entry.getValue().get(0));
-				entry.getValue().stream().skip(1).map(dp -> bip.addDataPoint(dp, Math.abs(entry.getKey().getCharge())));
+				entry.getValue().stream().skip(1).
+					forEach(dp -> bip.addDataPoint(dp, Math.abs(entry.getKey().getCharge())));
 				isoPatterns.add(bip);
 			}
 		}
@@ -261,7 +258,7 @@ public class MassSpectrum implements Serializable, XmlStorable {
 		if(!msPoints.isEmpty()) {
 
 			return msPoints.stream().
-					sorted(new MsDataPointComparator(SortProperty.Intensity, SortDirection.DESC)).
+					sorted(MsUtils.reverseIntensitySorter).
 					toArray(size -> new MsPoint[size])[0];
 		}
 		return basePeak;
@@ -500,58 +497,22 @@ public class MassSpectrum implements Serializable, XmlStorable {
 		
 		Element spectrumElement = new Element(ObjectNames.Spectrum.name());
 		if(msPoints != null && !msPoints.isEmpty()) {
-			double[]mzValues = msPoints.stream().
-					mapToDouble(p -> Math.floor(p.getMz() * 1000000) / 1000000).toArray();
-			String mz = "";
-			try {
-				mz = NumberArrayUtils.encodeNumberArray(mzValues);
-			} catch (UnsupportedEncodingException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			Element mzElement = null;
-			try {
-				mzElement = new Element(CommonFields.MZ.name()).setText(mz);
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}	
-			if(mzElement != null)
-				spectrumElement.addContent(mzElement);
 			
-			double[]intensityValues = msPoints.stream().
-					mapToDouble(p -> Math.floor(p.getIntensity() * 100) / 100).toArray();
-			String intensity = "";
-			try {
-				intensity = NumberArrayUtils.encodeNumberArray(intensityValues);
-			} catch (UnsupportedEncodingException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			String[]encoded = NumberArrayUtils.encodeMsPoints(msPoints);
+			if(encoded[0] != null && encoded[1] != null) {
+				
+				Element mzElement = new Element(CommonFields.MZ.name()).setText(encoded[0]);
+				spectrumElement.addContent(mzElement);
+				Element intensityElement = 
+						new Element(MassSpectrumFields.Intensity.name()).setText(encoded[1]);	
+				spectrumElement.addContent(intensityElement);
 			}
-			Element intensityElement = 
-					new Element(MassSpectrumFields.Intensity.name()).setText(intensity);			
-			spectrumElement.addContent(intensityElement);
 		}
 		if(detectionAlgorithm != null)
 			spectrumElement.setAttribute(MassSpectrumFields.Algo.name(), detectionAlgorithm);
 		
-		if(adductMap != null && !adductMap.isEmpty()) {
-			
-			Element adductMapElement = 
-					new Element(MassSpectrumFields.AdductMap.name());
-			for(Entry<Adduct, List<MsPoint>>am : adductMap.entrySet()) {
-				
-				Element amEntryElement = 
-						new Element(MassSpectrumFields.Adduct.name());
-				amEntryElement.setAttribute(MassSpectrumFields.AName.name(), am.getKey().getId());
-				List<String>mpList = am.getValue().stream().
-						map(p -> p.toString()).collect(Collectors.toList());
-				amEntryElement.setAttribute(
-						MassSpectrumFields.ASpec.name(), StringUtils.join(mpList, ";"));
-				adductMapElement.addContent(amEntryElement);
-			}	
-			spectrumElement.addContent(adductMapElement);
-		}
+		addAdductMapElement(spectrumElement);
+		
 		if(primaryAdduct != null)
 			spectrumElement.setAttribute(
 					MassSpectrumFields.PAdduct.name(), primaryAdduct.getId());
@@ -567,6 +528,29 @@ public class MassSpectrum implements Serializable, XmlStorable {
 			spectrumElement.addContent(msmsListElement);
 		}
 		return spectrumElement;
+	}
+	
+	private void addAdductMapElement(Element spectrumElement) {
+		
+		if(adductMap != null && !adductMap.isEmpty()) {
+			
+			Element adductMapElement = 
+					new Element(MassSpectrumFields.AdductMap.name());
+			for(Entry<Adduct, List<MsPoint>>am : adductMap.entrySet()) {
+				
+				Element amEntryElement = 
+						new Element(MassSpectrumFields.Adduct.name());
+				amEntryElement.setAttribute(MassSpectrumFields.AName.name(), am.getKey().getId());
+				String[]encodedAdduct = NumberArrayUtils.encodeMsPoints(am.getValue());
+				if(encodedAdduct[0] != null && encodedAdduct[1] != null) {
+					
+					amEntryElement.setAttribute(CommonFields.MZ.name(), encodedAdduct[0]);
+					amEntryElement.setAttribute(MassSpectrumFields.Intensity.name(), encodedAdduct[1]);
+					adductMapElement.addContent(amEntryElement);
+				}
+			}	
+			spectrumElement.addContent(adductMapElement);
+		}
 	}
 	
 	public MassSpectrum(Element spectrumElement) {
@@ -585,29 +569,20 @@ public class MassSpectrum implements Serializable, XmlStorable {
 		if(adductId != null)
 			primaryAdduct = AdductManager.getAdductById(adductId);
 		
-		double[] mzValues = null;
-		double[] intensityValues = null;
-		String mzText =  
-				spectrumElement.getChild(CommonFields.MZ.name()).getContent().get(0).getValue();
-		try {
-			mzValues = NumberArrayUtils.decodeNumberArray(mzText);
-		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		parseAdductMap(spectrumElement);
+		
+		String mzText = spectrumElement.getChild(CommonFields.MZ.name()).getText();
+		double[] mzValues = NumberArrayUtils.decodeValueString(mzText);
+		
 		String intensityText =  
-				spectrumElement.getChild(MassSpectrumFields.Intensity.name()).getContent().get(0).getValue();
-		try {
-			intensityValues = NumberArrayUtils.decodeNumberArray(intensityText);
-		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+				spectrumElement.getChild(MassSpectrumFields.Intensity.name()).getText();
+		double[] intensityValues = NumberArrayUtils.decodeValueString(intensityText);
+
 		if(mzValues != null && intensityValues != null) {
 			
 			for(int i=0; i<mzValues.length; i++)
 				msPoints.add(new MsPoint(mzValues[i], intensityValues[i]));
-		}
+		}		
 		List<Element>msmsElementList = spectrumElement.getChildren(MassSpectrumFields.MsmsList.name());
 		if(!msmsElementList.isEmpty()) {
 			
@@ -619,6 +594,40 @@ public class MassSpectrum implements Serializable, XmlStorable {
 					tandemSpectra.add(new TandemMassSpectrum(msmsElement));
 			}
 		}
+	}
+	
+	private void parseAdductMap(Element spectrumElement) {
+		
+		if(spectrumElement.getChild(MassSpectrumFields.AdductMap.name()) == null)
+			return;
+			
+		List<Element>adductElementList = 
+				spectrumElement.getChild(MassSpectrumFields.AdductMap.name()).
+				getChildren(MassSpectrumFields.Adduct.name());
+		for(Element adductElement : adductElementList) {
+			
+			String adductId = adductElement.getAttributeValue(MassSpectrumFields.AName.name());
+			if(adductId != null) {
+				Adduct adduct = AdductManager.getAdductById(adductId);
+				String mzString = adductElement.getAttributeValue(CommonFields.MZ.name());
+				String intensityString = adductElement.getAttributeValue(MassSpectrumFields.Intensity.name());
+				if(adduct != null && mzString != null && !mzString.isBlank() 
+						&& intensityString != null && !intensityString.isBlank()) {
+					
+					double[] mzValues = NumberArrayUtils.decodeValueString(mzString);
+					double[] intensityValues = NumberArrayUtils.decodeValueString(intensityString);
+					if(mzValues != null && intensityValues != null) {
+						
+						MsPoint[]adductPoints = new MsPoint[mzValues.length];
+						for(int i=0; i<mzValues.length; i++)
+							adductPoints[i] = new MsPoint(mzValues[i], intensityValues[i]);
+						
+						Arrays.sort(adductPoints, MsUtils.mzSorter);
+						adductMap.put(adduct, Arrays.asList(adductPoints));
+					}
+				}
+			}
+		}		
 	}
 }
 
