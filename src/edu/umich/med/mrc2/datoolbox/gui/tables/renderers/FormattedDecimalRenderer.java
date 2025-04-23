@@ -22,11 +22,12 @@
 package edu.umich.med.mrc2.datoolbox.gui.tables.renderers;
 
 import java.awt.Component;
-import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
+
+import edu.umich.med.mrc2.datoolbox.main.config.NumberFormatStore;
 
 public class FormattedDecimalRenderer extends DefaultTableCellRenderer {
 
@@ -35,10 +36,9 @@ public class FormattedDecimalRenderer extends DefaultTableCellRenderer {
 	 */
 	private static final long serialVersionUID = -1716045593159599309L;
 	protected NumberFormat doubleFormat;
+	protected NumberFormat sciFormatter;
 	protected boolean hideZeros;
 	protected boolean switchToScientificNotation;
-	
-	private static final DecimalFormat sciFormatter = new DecimalFormat("0.###E0");
 	
 	public FormattedDecimalRenderer(NumberFormat doubleFormat) {
 		this(doubleFormat, false, false);
@@ -53,6 +53,7 @@ public class FormattedDecimalRenderer extends DefaultTableCellRenderer {
 		this.doubleFormat = doubleFormat;
 		this.hideZeros = hideZeros;
 		this.switchToScientificNotation = switchToScientificNotation;
+		this.sciFormatter = NumberFormatStore.getDefaultScientificFormat();
 	}
 
 	@Override

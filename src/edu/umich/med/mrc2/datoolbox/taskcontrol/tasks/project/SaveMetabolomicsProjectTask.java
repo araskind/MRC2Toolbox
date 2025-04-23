@@ -83,7 +83,8 @@ public class SaveMetabolomicsProjectTask extends AbstractTask implements TaskLis
 			setStatus(TaskStatus.ERROR);
 			return;
 		}
-		saveDataForPipelines();
+		if(!projectToSave.getDataPipelines().isEmpty())
+			saveDataForPipelines();
 	}
 	
 	private void extractDatabaseReferences() {
@@ -122,6 +123,18 @@ public class SaveMetabolomicsProjectTask extends AbstractTask implements TaskLis
 		processed = 20;
 		projectXmlDocument = new Document();
 		Element projectRoot = projectToSave.getXmlElement();
+		if(projectToSave.getDataPipelines().isEmpty()) {
+			
+			projectXmlDocument.setRootElement(projectRoot);
+			File projectFile = FIOUtils.changeExtension(projectToSave.getExperimentFile(), 
+					ProjectType.DATA_ANALYSIS_NEW_FORMAT.getExtension());
+			
+			XmlUtils.writeCompactXMLtoFile(
+					projectXmlDocument, projectFile);
+			projectToSave.setProjectFile(projectFile);
+			setStatus(TaskStatus.FINISHED);
+			return;
+		}
 		projectRoot.addContent(addAcquisitionMethodDataFileMap());
 		projectRoot.addContent(addOrderedFileNameMap());
 		projectRoot.addContent(addOrderedMSFeatureIdMap());
@@ -293,6 +306,10 @@ public class SaveMetabolomicsProjectTask extends AbstractTask implements TaskLis
 
 	private void saveDataForPipelines() {
 		
+		if(projectToSave.getDataPipelines().isEmpty()) {
+			setStatus(TaskStatus.FINISHED);
+			return;
+		}
 		//	TODO TMP fix for old projects
 		ProjectUtils.moveCEFLibraryFilesToNewDefaultLocation(projectToSave);
 		

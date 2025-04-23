@@ -22,10 +22,12 @@
 package edu.umich.med.mrc2.datoolbox.data.lims;
 
 import java.io.Serializable;
+import java.text.NumberFormat;
 import java.util.List;
 
 import org.jdom2.Element;
 
+import edu.umich.med.mrc2.datoolbox.main.config.NumberFormatStore;
 import edu.umich.med.mrc2.datoolbox.project.store.ChromatographicGradientStepFields;
 import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
 import edu.umich.med.mrc2.datoolbox.project.store.XmlStorable;
@@ -142,13 +144,15 @@ public class ChromatographicGradientStep implements Serializable, Comparable<Chr
 
 	@Override
 	public Element getXmlElement() {
+		
+		NumberFormat formatter = NumberFormatStore.getDecimalFormatWithPrecision(3);
 
 		Element gradientStepElement = 
 				new Element(ObjectNames.ChromatographicGradientStep.name());
 		gradientStepElement.setAttribute(
-				ChromatographicGradientStepFields.startTime.name(), String.format("%.f3", startTime));
+				ChromatographicGradientStepFields.startTime.name(), formatter.format(startTime));
 		gradientStepElement.setAttribute(
-				ChromatographicGradientStepFields.flowRate.name(), String.format("%.f3", flowRate));
+				ChromatographicGradientStepFields.flowRate.name(), formatter.format(flowRate));
 		Element mobilePhaseStartingPercentList = 
 				new Element(ChromatographicGradientStepFields.mobilePhaseStartingPercentList.name());
 		for(int i=0; i<4; i++) {
@@ -156,7 +160,7 @@ public class ChromatographicGradientStep implements Serializable, Comparable<Chr
 			Element mpspElement = new Element(ChromatographicGradientStepFields.mpsp.name());
 			mpspElement.setAttribute(
 					ChromatographicGradientStepFields.spValue.name(), 
-					String.format("%.f3", mobilePhaseStartingPercent[i]));
+					formatter.format(mobilePhaseStartingPercent[i]));
 			mobilePhaseStartingPercentList.addContent(mpspElement);
 		}
 		gradientStepElement.addContent(mobilePhaseStartingPercentList);

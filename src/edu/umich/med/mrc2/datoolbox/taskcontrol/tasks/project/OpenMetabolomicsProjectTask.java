@@ -79,7 +79,10 @@ public class OpenMetabolomicsProjectTask extends AbstractTask implements TaskLis
 			setStatus(TaskStatus.ERROR);
 			return;
 		}
-		initPipelineDataLoad();
+		if(!project.getDataPipelines().isEmpty())
+			initPipelineDataLoad();
+		else
+			setStatus(TaskStatus.FINISHED);
 	}
 
 	private void initPipelineDataLoad() {
@@ -140,6 +143,11 @@ public class OpenMetabolomicsProjectTask extends AbstractTask implements TaskLis
 		project = new DataAnalysisProject(projectElement);
 		project.setProjectFile(projectFile);
 		project.setProjectType(ProjectType.DATA_ANALYSIS_NEW_FORMAT);
+		
+		if(project.getDataPipelines().isEmpty()) {
+			parseExperimentDesign(projectElement);
+			return;
+		}
 		
 		//	That is necessary to correctly associate samples with data files in the design
 		parseAcquisitionMethodDataFileMap(projectElement);

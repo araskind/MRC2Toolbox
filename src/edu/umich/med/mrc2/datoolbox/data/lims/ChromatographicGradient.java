@@ -30,6 +30,7 @@ import java.util.UUID;
 import org.jdom2.Element;
 
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
+import edu.umich.med.mrc2.datoolbox.main.config.NumberFormatStore;
 import edu.umich.med.mrc2.datoolbox.project.store.ChromatographicGradientFields;
 import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
 import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
@@ -304,10 +305,10 @@ public class ChromatographicGradient implements Serializable, XmlStorable {
 		
 		chromatographicGradientElement.setAttribute(
 				ChromatographicGradientFields.ccTemp.name(), 
-				String.format("%.2f", columnCompartmentTemperature));
+				NumberFormatStore.getDecimalFormatWithPrecision(2).format(columnCompartmentTemperature));
 		chromatographicGradientElement.setAttribute(
 				ChromatographicGradientFields.stopTime.name(), 
-				String.format("%.3f", stopTime));
+				NumberFormatStore.getDecimalFormatWithPrecision(3).format(stopTime));
 		
 		Element stepListElement = 
 				new Element(ChromatographicGradientFields.StepList.name());
