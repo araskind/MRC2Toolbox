@@ -24,7 +24,6 @@ package edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.project;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -38,11 +37,9 @@ import org.jdom2.input.SAXBuilder;
 
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesign;
-import edu.umich.med.mrc2.datoolbox.data.MsFeature;
-import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
+import edu.umich.med.mrc2.datoolbox.data.MsFeatureSet;
 import edu.umich.med.mrc2.datoolbox.data.Worklist;
 import edu.umich.med.mrc2.datoolbox.data.WorklistItem;
-import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
@@ -151,44 +148,40 @@ public class OpenMetabolomicsProjectTask extends AbstractTask implements TaskLis
 		parseOrderedFileNameMap(projectElement);
 		parseOrderedMSFeatureIdMap(projectElement);
 		setActivePipeline(projectElement);
-		recreateWorklists(projectElement);		
+		recreateWorklists(projectElement);
+		parseCustomFeatureSets(projectElement);
 	}
 	
-	private void updateFeatureIdentifications() {
+	private void parseCustomFeatureSets(Element projectElement) {
 
-		taskDescription = "Processing identifications ... ";
-		Collection<MsFeatureIdentity>toRemove = new ArrayList<MsFeatureIdentity>();
-		for (DataPipeline dataPipeline : project.getDataPipelines()) {
-			
-			for(MsFeature feature : project.getMsFeaturesForDataPipeline(dataPipeline)) {
-				
-				toRemove.clear();
-				for(MsFeatureIdentity id : feature.getIdentifications()) {
-					
-					MsFeatureIdentity fbfId = null;
-					if(id.getCompoundIdentity() == null 
-							|| id.getCompoundIdentity().getPrimaryDatabaseId() == null)
-						continue;
-						
-					String dbId = id.getCompoundIdentity().getPrimaryDatabaseId();
-					if(dbId.startsWith(DataPrefix.MS_LIBRARY_TARGET.getName())
-							|| dbId.startsWith(DataPrefix.MS_LIBRARY_TARGET_OLD.getName())
-							|| dbId.startsWith(DataPrefix.MS_FEATURE.getName())) {
-						fbfId = id;
-					}
-					if(fbfId != null)
-						toRemove.add(fbfId);
-						
-				}
-				if(!toRemove.isEmpty()) {
-					
-					for(MsFeatureIdentity fbfId : toRemove)
-						feature.removeIdentity(fbfId);
-				}
-				if(feature.getPrimaryIdentity() == null && feature.getIdentifications().isEmpty())
-					feature.createDefaultPrimaryIdentity();
-			}
-		}
+    	List<Element> cutomFeatureSetElementMap = 
+    			projectElement.getChild(MetabolomicsProjectFields.MSFeatureSetMap.name()).
+    			getChildren(MetabolomicsProjectFields.MSFeatureSetList.name());
+		
+    	for(Element cutomFeatureSetListElement : cutomFeatureSetElementMap) {
+    		
+    		List<Element> cutomFeatureSetList = 
+    				cutomFeatureSetListElement.getChildren(ObjectNames.MsFeatureSet.name());
+    		if(!cutomFeatureSetList.isEmpty()) {
+    			
+        		String pipelineName = cutomFeatureSetListElement.getAttributeValue(
+        				MetabolomicsProjectFields.DataPipelineId.name());
+        		if(pipelineName != null && !pipelineName.isEmpty()) {
+        			
+        			DataPipeline dp = project.getDataPipelines().stream().
+        				filter(p -> p.getSaveSafeName().equals(pipelineName)).
+        				findFirst().orElse(null);
+        			
+        			for(Element cutomFeatureSetElement : cutomFeatureSetList) {
+        				
+        				MsFeatureSet customSet = new MsFeatureSet(cutomFeatureSetElement);
+        				project.addFeatureSetForDataPipeline(customSet, dp);      				
+        				if(customSet.isActive())
+        					project.setActiveFeatureSetForDataPipeline(customSet, dp);
+        			}
+        		}
+    		}
+    	}
 	}
 	
 	private void recreateWorklists(Element projectElement) {
@@ -343,12 +336,12 @@ public class OpenMetabolomicsProjectTask extends AbstractTask implements TaskLis
 
 			((AbstractTask)e.getSource()).removeTaskListener(this);
 			if (e.getSource().getClass().equals(LoadPipelineDataTask.class)) {
+				
 				loadedPipelineCount++;
-				MRC2ToolBoxCore.getTaskController().getTaskQueue().removeTask((AbstractTask)e.getSource());
-				if(loadedPipelineCount == pipelineCount) {
-					updateFeatureIdentifications();
-					setStatus(TaskStatus.FINISHED);
-				}
+				
+				MRC2ToolBoxCore.getTaskController().getTaskQueue().removeTask(e.getSource());
+				if(loadedPipelineCount == pipelineCount)
+					setStatus(TaskStatus.FINISHED);				
 			}
 		}
 	}

@@ -57,7 +57,6 @@ import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSProject;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainWindow;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
-import edu.umich.med.mrc2.datoolbox.project.store.DataFileExtensions;
 import edu.umich.med.mrc2.datoolbox.project.store.MetabolomicsProjectFields;
 import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
 import edu.umich.med.mrc2.datoolbox.utils.ProjectUtils;
@@ -160,9 +159,8 @@ public class DataAnalysisProject extends Project {
 			return;
 		}		
 		dataPipelines.add(pipeline);
-		String matrixFileName = DataPrefix.DATA_MATRIX.getName() 
-				+ pipeline.getSaveSafeName()
-				+ "." + DataFileExtensions.DATA_MATRIX_EXTENSION.getExtension();
+		String matrixFileName = 
+				ProjectUtils.getNewDataMatrixFileNameForDataPipeline(pipeline);
 		dataMatrixFileMap.put(pipeline, matrixFileName);
 		statsCalculatedMap.put(pipeline, false);
 		featureSetMap.put(pipeline, new TreeSet<MsFeatureSet>());
@@ -176,9 +174,8 @@ public class DataAnalysisProject extends Project {
 		if(featureMatrixMap == null)
 			featureMatrixMap = new TreeMap<DataPipeline, Matrix>();
 		
-		String matrixFileName = DataPrefix.FEATURE_MATRIX.getName() 
-				+ pipeline.getSaveSafeName() 
-				+ "." + DataFileExtensions.DATA_MATRIX_EXTENSION.getExtension();
+		String matrixFileName = 
+				ProjectUtils.getNewFeatureMatrixFileNameForDataPipeline(pipeline);
 		featureMatrixFileMap.put(pipeline, matrixFileName);
 		featureMatrixMap.put(pipeline, featureMatrix);
 	}
@@ -549,6 +546,17 @@ public class DataAnalysisProject extends Project {
 		String dsName = GlobalDefaults.ALL_FEATURES.getName();
 		return featureSetMap.get(pipeline).stream().
 				filter(s -> s.getName().equals(dsName)).findFirst().orElse(null);
+	}
+	
+	public Set<MsFeatureSet> getCustomSetsForDataPipeline(DataPipeline pipeline) {
+		
+		Set<MsFeatureSet> dpfeatureSets = featureSetMap.get(pipeline);
+		MsFeatureSet dpAllFeatureSet = getAllFeaturesSetFordataPipeline(pipeline);
+		Set<MsFeatureSet> customSets = 
+				dpfeatureSets.stream().
+				filter(s -> !s.equals(dpAllFeatureSet)).
+				collect(Collectors.toSet());
+		return customSets;
 	}
 	
 	public void removeWorklistForMethod(DataAcquisitionMethod method) {

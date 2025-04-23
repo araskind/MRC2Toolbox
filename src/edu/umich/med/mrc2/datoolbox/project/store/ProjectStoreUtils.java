@@ -44,7 +44,7 @@ public class ProjectStoreUtils {
 	public static void setDateAttribute(Date date, CommonFields field, Element element) {
 		
 		if(date != null && dateFields.contains(field))
-			element.setAttribute(field.name(), ProjectUtils.dateTimeFormat.format(date));
+			element.setAttribute(field.name(), ProjectUtils.getDateFormat().format(date));
 	}
 	
 	public static Date getDateFromAttribute(Element element, CommonFields field) {
@@ -54,9 +54,9 @@ public class ProjectStoreUtils {
 		
 		String dateString = element.getAttributeValue(field.name());
 		Date date = null;
-		if(dateString != null && !dateString.isEmpty()) {
+		if(dateString != null && !dateString.isBlank()) {
 			try {
-				date = ProjectUtils.dateTimeFormat.parse(dateString);
+				date = ProjectUtils.getDateFormat().parse(dateString);
 			} catch (ParseException e) {
 				// TODO Auto-generated catch block
 				System.out.println(dateString);

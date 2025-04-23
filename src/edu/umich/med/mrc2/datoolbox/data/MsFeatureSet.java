@@ -33,7 +33,6 @@ import org.jdom2.Element;
 
 import edu.umich.med.mrc2.datoolbox.data.enums.ParameterSetStatus;
 import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
-import edu.umich.med.mrc2.datoolbox.project.store.MetabolomicsProjectFields;
 import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
 
 public class MsFeatureSet extends FeatureSet implements Serializable {
@@ -101,7 +100,7 @@ public class MsFeatureSet extends FeatureSet implements Serializable {
 		features = new HashSet<MsFeature>();
 		featureIdSet = new HashSet<String>();
 		Element featureListElement = 
-				featureSetElement.getChild(MetabolomicsProjectFields.MSFeatureIdList.name());
+				featureSetElement.getChild(CommonFields.FeatureList.name());
 		if(featureListElement != null && !featureListElement.getText().isBlank()) {
 			
 			String[]idArray = featureListElement.getText().split(",");

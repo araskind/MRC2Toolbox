@@ -39,6 +39,7 @@ import org.ujmp.core.calculation.Calculation.Ret;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
+import edu.umich.med.mrc2.datoolbox.data.MsFeatureSet;
 import edu.umich.med.mrc2.datoolbox.data.Worklist;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
@@ -125,6 +126,7 @@ public class SaveMetabolomicsProjectTask extends AbstractTask implements TaskLis
 		projectRoot.addContent(addOrderedFileNameMap());
 		projectRoot.addContent(addOrderedMSFeatureIdMap());
 		projectRoot.addContent(addWorklistMap());
+		projectRoot.addContent(addCustomFeatureSets());
 		
 		DataPipeline activePipeline = projectToSave.getActiveDataPipeline();
 		if(activePipeline == null && !projectToSave.getDataPipelines().isEmpty())
@@ -147,6 +149,29 @@ public class SaveMetabolomicsProjectTask extends AbstractTask implements TaskLis
 		XmlUtils.writeCompactXMLtoFile(
 				projectXmlDocument, projectFile);
 		projectToSave.setProjectFile(projectFile);
+	}
+	
+	private Element addCustomFeatureSets(){
+		
+		Element msFeatureSetMapElement = 
+				new Element(MetabolomicsProjectFields.MSFeatureSetMap.name());
+		
+		for(DataPipeline dp : projectToSave.getDataPipelines()) {
+			
+			Element msFeatureSetListElement = 
+					new Element(MetabolomicsProjectFields.MSFeatureSetList.name());
+			msFeatureSetListElement.setAttribute(
+					MetabolomicsProjectFields.DataPipelineId.name(), dp.getSaveSafeName());
+			Set<MsFeatureSet> customSets = 
+					projectToSave.getCustomSetsForDataPipeline(dp);
+			if(!customSets.isEmpty()) {
+				
+				for(MsFeatureSet cs : customSets)
+					msFeatureSetListElement.addContent(cs.getXmlElement());				
+			}			
+			msFeatureSetMapElement.addContent(msFeatureSetListElement);
+		}		
+		return msFeatureSetMapElement;
 	}
 	
 	private Element addAcquisitionMethodDataFileMap() {

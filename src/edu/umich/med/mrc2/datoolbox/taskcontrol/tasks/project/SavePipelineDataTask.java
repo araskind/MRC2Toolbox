@@ -71,7 +71,7 @@ public class SavePipelineDataTask extends AbstractTask {
 			ex.printStackTrace();
 			setStatus(TaskStatus.ERROR);
 			return;
-		}
+		}		
 		setStatus(TaskStatus.FINISHED);
 	}
 	
@@ -96,6 +96,10 @@ public class SavePipelineDataTask extends AbstractTask {
 			processed++;
 		}
 		msFeatureDocument.setRootElement(featureListElement);
+		
+		System.out.println("***********");
+		System.out.println(Integer.toString(processed) + " features converted for pipeline " + pipeline.getName());
+		System.out.println("***********");
 		
 		taskDescription = "Saving XML features file for " + pipeline.getName();
 		total = 100;

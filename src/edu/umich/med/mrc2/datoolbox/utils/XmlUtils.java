@@ -29,6 +29,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
@@ -177,7 +178,7 @@ public class XmlUtils {
 			Format outputFormat,
 			boolean append) {
 		
-		try (FileWriter writer = new FileWriter(xmlFile, append)) {
+		try (FileWriter writer = new FileWriter(xmlFile, StandardCharsets.UTF_8, append)) {
 			XMLOutputter outputter = new XMLOutputter();
 			outputter.setFormat(outputFormat);
 			outputter.output(xmlDocument, writer);

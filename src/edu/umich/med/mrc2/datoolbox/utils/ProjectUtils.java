@@ -87,9 +87,13 @@ public class ProjectUtils {
 		
 	}
 	
-	public static final DateFormat dateTimeFormat = 
-			new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	public static final String dateFormatString = "yyyy-MM-dd HH:mm:ss";
+	public static final DateFormat dateTimeFormat = new SimpleDateFormat(dateFormatString);
 	public static final String tmpSuffix = "_TMP";
+	
+	public static DateFormat getDateFormat() {
+		return new SimpleDateFormat(dateFormatString);
+	}
 
 	public static boolean designValidForStats(
 			DataAnalysisProject currentExperiment,
@@ -252,12 +256,10 @@ public class ProjectUtils {
 			DataPipeline dataPipeline,
 			boolean readTemporary) {
 		
-		String matrixFileName = getNewFeatureMatrixFileNameForDataPipeline(dataPipeline);
-		
-//		String matrixFileName = 
-//				currentExperiment.getFeatureMatrixFileNameForDataPipeline(dataPipeline);
-//		if(matrixFileName == null || matrixFileName.isEmpty())
-//			return null;
+		String matrixFileName = 
+				currentExperiment.getFeatureMatrixFileNameForDataPipeline(dataPipeline);
+		if(matrixFileName == null)
+			matrixFileName = getNewFeatureMatrixFileNameForDataPipeline(dataPipeline);
 		
 		if(readTemporary)
 			matrixFileName = FilenameUtils.getBaseName(matrixFileName) 
@@ -408,8 +410,8 @@ public class ProjectUtils {
 		
 		String featureMatrixFileName = 
 				currentExperiment.getFeatureMatrixFileNameForDataPipeline(dataPipeline);
-		if(featureMatrixFileName == null || featureMatrixFileName.isEmpty()) 
-			return;
+		if(featureMatrixFileName == null) 
+			featureMatrixFileName = getNewDataMatrixFileNameForDataPipeline(dataPipeline);
 		
 		File featureMatrixFile = 
 				Paths.get(currentExperiment.getDataDirectory().getAbsolutePath(), 
@@ -418,6 +420,9 @@ public class ProjectUtils {
 			featureMatrixFile = 
 				Paths.get(currentExperiment.getExperimentDirectory().getAbsolutePath(), 
 				featureMatrixFileName).toFile();
+		
+		if(!featureMatrixFile.exists())
+			return;
 		
 		String tmpFeatureMatrixFileName = FilenameUtils.getBaseName(featureMatrixFileName) 
 					+ tmpSuffix + "." + FilenameUtils.getExtension(featureMatrixFileName);		
@@ -448,9 +453,12 @@ public class ProjectUtils {
 		
 		String featureMatrixFileName = 
 				currentExperiment.getFeatureMatrixFileNameForDataPipeline(dataPipeline);
-		if(featureMatrixFileName == null || featureMatrixFileName.isEmpty()) 
-			return;
+		if(featureMatrixFileName == null) 
+			featureMatrixFileName = getNewDataMatrixFileNameForDataPipeline(dataPipeline);
 		
+		if(featureMatrixFileName == null) 
+			return;
+			
 		String tmpFeatureMatrixFileName = FilenameUtils.getBaseName(featureMatrixFileName) 
 					+ tmpSuffix + "." + FilenameUtils.getExtension(featureMatrixFileName);			
 		File tmpFeatureMatrixFile = 
@@ -472,7 +480,7 @@ public class ProjectUtils {
 		
 		String featureMatrixFileName = 
 				project.getFeatureMatrixFileNameForDataPipeline(pipeline);
-		if(featureMatrixFileName == null || featureMatrixFileName.isEmpty()) 
+		if(featureMatrixFileName == null) 
 			return;
 		
 		Path featureMatrixFileNewLocation = 

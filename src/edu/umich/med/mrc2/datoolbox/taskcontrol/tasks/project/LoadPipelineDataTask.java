@@ -23,9 +23,12 @@ package edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.project;
 
 import java.io.File;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.jdom2.Document;
 import org.jdom2.Element;
@@ -36,6 +39,7 @@ import org.ujmp.core.calculation.Calculation.Ret;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.LibraryMsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
+import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureSet;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.enums.GlobalDefaults;
@@ -168,6 +172,71 @@ public class LoadPipelineDataTask extends AbstractTask {
 			e.printStackTrace();
 		}
 		recreateDefaultDataSet(featureSet);
+		updateFeatureIdentifications();
+		populateCustomFeatureSets();
+	}
+	
+	private void populateCustomFeatureSets() {
+		
+		taskDescription = "Populating custom feature sets ... ";
+		Set<MsFeatureSet> customSets = 
+				project.getCustomSetsForDataPipeline(pipeline);
+		if(customSets.isEmpty())
+			return;
+		
+		Set<MsFeature> featureList = 
+				project.getMsFeaturesForDataPipeline(pipeline);
+		total = customSets.size();
+		processed = 0;
+		for(MsFeatureSet customSet : customSets) {
+			
+			Set<String>idSet = customSet.getFeatureIdSet();
+			List<MsFeature> filteredFeatureList = featureList.stream().
+				filter(f -> idSet.contains(f.getId())).
+				collect(Collectors.toList());
+			customSet.addFeatures(filteredFeatureList);	
+			
+			if(customSet.isActive()) {
+				project.getMsFeatureSetsForDataPipeline(pipeline).stream().
+					filter(s -> !s.equals(customSet)).forEach(s -> s.setActive(false));
+			}
+			processed++;
+		}		
+	}
+	
+	private void updateFeatureIdentifications() {
+
+		taskDescription = "Processing identifications ... ";
+		Collection<MsFeatureIdentity>toRemove = new ArrayList<MsFeatureIdentity>();
+		for(MsFeature feature : project.getMsFeaturesForDataPipeline(pipeline)) {
+			
+			toRemove.clear();
+			for(MsFeatureIdentity id : feature.getIdentifications()) {
+				
+				MsFeatureIdentity fbfId = null;
+				if(id.getCompoundIdentity() == null 
+						|| id.getCompoundIdentity().getPrimaryDatabaseId() == null)
+					continue;
+					
+				String dbId = id.getCompoundIdentity().getPrimaryDatabaseId();
+				if(dbId.startsWith(DataPrefix.MS_LIBRARY_TARGET.getName())
+						|| dbId.startsWith(DataPrefix.MS_LIBRARY_TARGET_OLD.getName())
+						|| dbId.startsWith(DataPrefix.MS_FEATURE.getName())) {
+					fbfId = id;
+				}
+				if(fbfId != null)
+					toRemove.add(fbfId);
+					
+			}
+			if(!toRemove.isEmpty()) {
+				
+				for(MsFeatureIdentity fbfId : toRemove)
+					feature.removeIdentity(fbfId);
+			}
+			if(feature.getPrimaryIdentity() == null && feature.getIdentifications().isEmpty())
+				feature.createDefaultPrimaryIdentity();
+		}
+		
 	}
 	
 	private void recreateDefaultDataSet(Set<MsFeature>featureSet) {

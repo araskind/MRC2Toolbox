@@ -764,18 +764,24 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 				|| exportType.equals(MainActionCommands.EXPORT_PEAK_WIDTH_STATISTICS_COMMAND)
 				|| exportType.equals(MainActionCommands.EXPORT_ALL_FEATURE_STATISTICS_COMMAND)) {
 			
-			if(currentExperiment.getFeatureMatrixFileNameForDataPipeline(activeDataPipeline) == null) {
+			String featureMatrixFileName = 
+					currentExperiment.getFeatureMatrixFileNameForDataPipeline(activeDataPipeline);
+			if(featureMatrixFileName == null)
+				featureMatrixFileName = 
+					ProjectUtils.getNewDataMatrixFileNameForDataPipeline(activeDataPipeline);
+			
+			if(featureMatrixFileName == null) {
 				MessageDialog.showWarningMsg(
 						"M/Z and RT data for features from individual samples not available", 
 						this.getContentPane());
 				return;
 			}
-			File featureMatrixFile = Paths.get(currentExperiment.getDataDirectory().getAbsolutePath(), 
-					currentExperiment.getFeatureMatrixFileNameForDataPipeline(activeDataPipeline)).toFile();
+			File featureMatrixFile = Paths.get(currentExperiment.getDataDirectory().getAbsolutePath(),
+					featureMatrixFileName).toFile();
 			
 			if(featureMatrixFile == null || !featureMatrixFile.exists())
 				featureMatrixFile = Paths.get(currentExperiment.getExperimentDirectory().getAbsolutePath(), 
-						currentExperiment.getFeatureMatrixFileNameForDataPipeline(activeDataPipeline)).toFile();
+						featureMatrixFileName).toFile();
 			
 			if (!featureMatrixFile.exists()) {
 				MessageDialog.showWarningMsg(

@@ -32,6 +32,8 @@ public enum MetabolomicsProjectFields {
 	MsFeatureClusterId,
 	MSFeatureIdMap,
 	MSFeatureIdList,
+	MSFeatureSetMap,
+	MSFeatureSetList,
 	FileIdMap,
 	FileIdList,
 	CompoundLibraryMap,
