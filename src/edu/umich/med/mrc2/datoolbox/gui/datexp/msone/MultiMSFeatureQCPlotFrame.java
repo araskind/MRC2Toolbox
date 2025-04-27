@@ -160,6 +160,9 @@ public class MultiMSFeatureQCPlotFrame extends JFrame
 	}
 
 	private void initDataMatrix() {
+		
+		if(!this.isVisible())
+			return;
 
 		FeatureMatrixLoadTask task = 
 				new FeatureMatrixLoadTask(currentExperiment, dataPipeline);
