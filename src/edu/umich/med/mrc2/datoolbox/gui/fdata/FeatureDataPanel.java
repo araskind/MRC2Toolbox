@@ -124,6 +124,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.derepl.FindDuplicateNamesTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.derepl.MergeDuplicateFeaturesTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io.DataExportTask;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io.ImportBinnerAnnotationsForUntargetedDataTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io.MiltiCefPeakQualityImportTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io.MultiCefDataAddTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io.MultiCefImportTask;
@@ -430,6 +431,9 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 			
 			if (command.equals(MainActionCommands.CLEAN_EMPTY_FEATURES_COMMAND.getName()))
 				cleanEmptyFeatures();
+			
+			if (command.equals(MainActionCommands.IMPORT_BINNER_ANNOTATIONS_COMMAND.getName()))
+				importBinnerAnnotations();
 			
 			if (command.equals(MainActionCommands.SHOW_FEATURE_FILTER_COMMAND.getName()))
 				showFeatureFilter();
@@ -1224,6 +1228,31 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 		task.addTaskListener(this);
 		MRC2ToolBoxCore.getTaskController().addTask(task);
 	}
+
+	private void importBinnerAnnotations() {
+
+		JnaFileChooser fc = new JnaFileChooser(currentExperiment.getDataDirectory());
+		fc.setMode(JnaFileChooser.Mode.Files);
+		fc.setMultiSelectionEnabled(false);
+		fc.addFilter("Excel files", "xlsx", "XLSX");
+		fc.setTitle("Import binner annotations from file:");
+		fc.setMultiSelectionEnabled(false);
+		fc.setOpenButtonText("Select Binner output file");
+
+		if (fc.showOpenDialog(SwingUtilities.getWindowAncestor(this.getContentPane()))) {
+
+			File binnerResultsFile = fc.getSelectedFile();
+			if(binnerResultsFile!= null) {
+				
+				ImportBinnerAnnotationsForUntargetedDataTask task = 
+						new ImportBinnerAnnotationsForUntargetedDataTask(
+								binnerResultsFile, currentExperiment, activeDataPipeline);
+
+				task.addTaskListener(this);
+				MRC2ToolBoxCore.getTaskController().addTask(task);
+			}
+		}	
+	}
 	
 	public synchronized void clearPanel() {
 
@@ -1623,6 +1652,9 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 			
 			if (e.getSource().getClass().equals(MiltiCefPeakQualityImportTask.class))
 				finalizePeakQualityImportTask((MiltiCefPeakQualityImportTask)e.getSource());
+			
+			if (e.getSource().getClass().equals(ImportBinnerAnnotationsForUntargetedDataTask.class))
+				finalizeBinnerAnnotationsImportTask((ImportBinnerAnnotationsForUntargetedDataTask)e.getSource());			
 		}
 		if (e.getStatus() == TaskStatus.CANCELED || e.getStatus() == TaskStatus.ERROR) {
 			MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
@@ -1630,6 +1662,13 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 		}
 	}
 	
+	private void finalizeBinnerAnnotationsImportTask(ImportBinnerAnnotationsForUntargetedDataTask source) {
+		// TODO Auto-generated method stub
+		MessageDialog.showInfoMsg(
+				"Binner Annotations Import finished.", 
+				this.getContentPane());
+	}
+
 	private void finalizePeakQualityImportTask(MiltiCefPeakQualityImportTask source) {
 		
 		MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();

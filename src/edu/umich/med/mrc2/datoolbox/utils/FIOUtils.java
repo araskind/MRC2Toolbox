@@ -24,6 +24,7 @@ package edu.umich.med.mrc2.datoolbox.utils;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -36,6 +37,7 @@ import java.util.stream.Stream;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang.StringUtils;
 
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureSet;
 import edu.umich.med.mrc2.datoolbox.data.enums.GlobalDefaults;
@@ -291,4 +293,36 @@ public class FIOUtils {
 	public static String createSaveSafeName(String fileName) {
 		return fileName.replaceAll("[\\\\/:*?\"<>|]", "");
 	}
+	
+	public static String readFileToString(File methodFile) {
+		
+		byte[] bytes = null;
+		try {
+		    bytes = Files.readAllBytes(methodFile.toPath());
+		} catch (IOException e) {
+		    // TODO Auto-generated catch block
+		    e.printStackTrace();
+		}
+		if(bytes == null)
+		    return null;		
+
+		String contents = new String(bytes, StandardCharsets.UTF_8);
+		
+		//	Remove null characters		
+		String contentsCleaned = StringUtils.remove(contents, '\u0000');
+		
+		return contentsCleaned;
+	}
 }
+
+
+
+
+
+
+
+
+
+
+
+

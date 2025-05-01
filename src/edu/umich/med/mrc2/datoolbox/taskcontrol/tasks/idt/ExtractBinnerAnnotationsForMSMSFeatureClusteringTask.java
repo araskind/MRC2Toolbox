@@ -78,19 +78,16 @@ public class ExtractBinnerAnnotationsForMSMSFeatureClusteringTask extends Binner
 				new TreeMap<Integer,BinnerAnnotationCluster>();
 		
 		for(BinnerAnnotation annotation : binnerAnnotations) {
+			
+			featureGroupMap.computeIfAbsent(
+					annotation.getMolIonNumber(), 
+					s -> new BinnerAnnotationCluster(annotation));
 
-			if(!featureGroupMap.containsKey(annotation.getMolIonNumber())){
-				
-				featureGroupMap.put(
-						annotation.getMolIonNumber(), new BinnerAnnotationCluster(annotation));
-			}
-			else {
-				featureGroupMap.get(annotation.getMolIonNumber()).
-					addUniqueAnnotation(annotation,
-										mergeMzWindow,
-										masErrorType, 
-										mergeRtWindow);
-			}
+			featureGroupMap.get(annotation.getMolIonNumber()).
+				addUniqueAnnotation(annotation,
+									mergeMzWindow,
+									masErrorType, 
+									mergeRtWindow);			
 		}		
 		binnerAnnotationClusters = featureGroupMap.values();
 	}

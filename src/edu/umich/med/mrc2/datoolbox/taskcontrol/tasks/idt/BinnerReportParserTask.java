@@ -24,7 +24,6 @@ package edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -70,51 +69,9 @@ public abstract class BinnerReportParserTask extends AbstractTask {
 	protected Collection<PostProcessorAnnotation> ppAnnotations;
 	protected Collection<BinnerAnnotation> binnerAnnotations;
 
-//	public BinnerReportParserTask(
-//			File inputFile, File postprocessorDataFile, LIMSExperiment experiment) {
-//
-//		super();
-//		this.binnerDataFile = inputFile;
-//		this.postprocessorDataFile = postprocessorDataFile;
-//		this.experiment = experiment;
-//
-//		clusterList = new HashSet<MsFeatureCluster>();
-//		taskDescription = "Parsing Binner report(s)";
-//		unassignedFeatures = new ArrayList<String>();
-//		clusteredFeatures = new TreeSet<MsFeature>(new MsFeatureComparator(SortProperty.Name));
-//	}
-
-//	@Override
-//	public void run() {
-//
-//		setStatus(TaskStatus.PROCESSING);
-//
-//		if(postprocessorDataFile != null) {
-//
-//			//	Post-processor contains all Binner annotations,
-//			//	no need to import Binner results separately
-//			try {
-//				importPostProcessorResults();
-//			} catch (IOException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
-//			setStatus(TaskStatus.FINISHED);
-//			return;
-//		}
-//		if(binnerDataFile != null) {
-//			try {
-//				importClusteringResults();
-//			} catch (IOException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}			
-//		}
-//		setStatus(TaskStatus.FINISHED);
-//	}
-
 	protected void parseBinnerResults() throws IOException {
 
+		binnerAnnotations = new HashSet<BinnerAnnotation>();
 		if (!binnerDataFile.exists() || !binnerDataFile.canRead()) {
 
 			MessageDialog.showErrorMsg("Can not read Binner results file!");
@@ -124,35 +81,56 @@ public abstract class BinnerReportParserTask extends AbstractTask {
 			taskDescription = "Parsing Binner output file ...";
 			total = 100;
 			processed = 20;
-			InputStream is = new FileInputStream(binnerDataFile);
-			Workbook workbook = StreamingReader.builder()
+			//	InputStream is = new FileInputStream(binnerDataFile);
+			List<Sheet> sheetsToParse = new ArrayList<Sheet>();
+			try(Workbook workbook = StreamingReader.builder()
 			        .rowCacheSize(100)    // number of rows to keep in memory (defaults to 10)
 			        .bufferSize(4096)     // buffer size to use when reading InputStream to file (defaults to 1024)
-			        .open(is);            // InputStream or File for XLSX file (required)
-
-			binnerAnnotations = null;
-			Sheet corrByClusterSheet = null;
-			for (Sheet sheet : workbook) {
-
-				if(sheet.getSheetName().equalsIgnoreCase(BinnerPageNames.CORRELATIONS_BY_CLUSTER_LOC.getName())) {
-					corrByClusterSheet = sheet;
-					break;
-				}
-			}	
-			if(corrByClusterSheet == null) {
+			        .open(new FileInputStream(binnerDataFile))){           // InputStream or File for XLSX file (required)
 				
-				MessageDialog.showErrorMsg("Worksheet \"" 
-						+ BinnerPageNames.CORRELATIONS_BY_CLUSTER_LOC.getName() + "not found");
-				setStatus(TaskStatus.FINISHED);
-				return;
+				for (Sheet sheet : workbook) {
+	
+					if(sheet.getSheetName().equalsIgnoreCase(BinnerPageNames.CORRELATIONS_BY_CLUSTER_LOC.getName())) {
+						sheetsToParse.add(sheet);
+						break;
+					}
+				}
+				if(sheetsToParse.isEmpty()) {
+					
+					for (Sheet sheet : workbook) {
+						
+						if(sheet.getSheetName().equalsIgnoreCase(BinnerPageNames.PRINCIPAL_IONS.getName())
+								|| sheet.getSheetName().equalsIgnoreCase(BinnerPageNames.DEGENERATE_FEATURES.getName()))
+							sheetsToParse.add(sheet);
+					}
+				}
+				if(sheetsToParse.isEmpty()) {
+					
+					MessageDialog.showErrorMsg("Worksheets not found:\n \"" 
+							+ BinnerPageNames.CORRELATIONS_BY_CLUSTER_LOC.getName() + "\n"
+							+ BinnerPageNames.PRINCIPAL_IONS.getName() + "\n"
+							+ BinnerPageNames.DEGENERATE_FEATURES.getName() + "\n");
+					setStatus(TaskStatus.FINISHED);
+					return;
+				}
+				for (Sheet sheet : sheetsToParse) {
+					
+					Collection<BinnerAnnotation>annotations = 
+							parseClusterCorrelationWorksheet(sheet);
+					if(annotations != null && !annotations.isEmpty())
+						binnerAnnotations.addAll(annotations);
+				}
 			}
-			binnerAnnotations = parseClusterCorrelationWorksheet(corrByClusterSheet);
+			catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 	}
 
 	protected Collection<BinnerAnnotation> parseClusterCorrelationWorksheet(Sheet sheet) {
 
-		taskDescription = "Parsing Binner output file ...";
+		taskDescription = "Parsing Binner output file, worksheet " + sheet.getSheetName();
 		total = sheet.getLastRowNum();
 		processed = 0;
 		Collection<BinnerAnnotation>annotations = new HashSet<BinnerAnnotation>();
@@ -177,7 +155,7 @@ public abstract class BinnerReportParserTask extends AbstractTask {
 			StringUtils.join(missingColumnNames, "\n"), 
 					MRC2ToolBoxCore.getMainWindow());
 			setStatus(TaskStatus.FINISHED);
-			return null;
+			return annotations;
 		}
 		for (Row r : sheet) {
 			processed++;
@@ -294,21 +272,23 @@ public abstract class BinnerReportParserTask extends AbstractTask {
 			taskDescription = "Parsing PostProcessor output file ...";
 			total = 100;
 			processed = 20;
-			InputStream is = new FileInputStream(postprocessorDataFile);
-			Workbook workbook = StreamingReader.builder()
-			        .rowCacheSize(100)    // number of rows to keep in memory (defaults to 10)
-			        .bufferSize(4096)     // buffer size to use when reading InputStream to file (defaults to 1024)
-			        .open(is);            // InputStream or File for XLSX file (required)
+			try (Workbook workbook = StreamingReader.builder()
+					.rowCacheSize(100) // number of rows to keep in memory (defaults to 10)
+					.bufferSize(4096) // buffer size to use when reading InputStream to file (defaults to 1024)
+					.open(new FileInputStream(postprocessorDataFile))) { // InputStream or File for XLSX file (required)
+				ppAnnotations = new ArrayList<PostProcessorAnnotation>();
+				for (Sheet sheet : workbook) {
 
-			ppAnnotations = new ArrayList<PostProcessorAnnotation>();
-			for (Sheet sheet : workbook) {
-
-				if(sheet.getSheetName().equalsIgnoreCase(BinnerPostProcessorPageNames.ALL_FEATURES.getName())
-						|| sheet.getSheetName().equalsIgnoreCase(BinnerPostProcessorPageNames.ISTD_AND_REDUNDANT.getName())) {
-					ppAnnotations.addAll(parsePostProcessorAnnotationsWorksheet(sheet));
+					if (sheet.getSheetName().equalsIgnoreCase(BinnerPostProcessorPageNames.ALL_FEATURES.getName())
+							|| sheet.getSheetName()
+									.equalsIgnoreCase(BinnerPostProcessorPageNames.ISTD_AND_REDUNDANT.getName())) {
+						ppAnnotations.addAll(parsePostProcessorAnnotationsWorksheet(sheet));
+					}
 				}
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
-			is.close();
 		}
 	}
 
@@ -325,7 +305,7 @@ public abstract class BinnerReportParserTask extends AbstractTask {
 
 			MessageDialog.showErrorMsg("PostProcessor column naming mismatch!", MRC2ToolBoxCore.getMainWindow());
 			setStatus(TaskStatus.FINISHED);
-			return null;
+			return annotations;
 		}
 		for (Row r : sheet) {
 			processed++;
