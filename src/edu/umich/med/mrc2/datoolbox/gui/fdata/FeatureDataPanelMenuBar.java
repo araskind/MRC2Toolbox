@@ -60,6 +60,8 @@ public class FeatureDataPanelMenuBar extends CommonMenuBar {
 	private static final Icon knownIcon = GuiUtils.getIcon("showKnowns", 24);
 	private static final Icon qcIcon = GuiUtils.getIcon("qc", 24);
 	private static final Icon unknownIcon = GuiUtils.getIcon("showUnknowns", 24);
+	private static final Icon filterBinnerIcon = GuiUtils.getIcon("filterBinner", 24);
+	private static final Icon primaryBinnerIcon = GuiUtils.getIcon("primaryBinner", 24);	
 	private static final Icon inClusterIcon = GuiUtils.getIcon("inCluster", 24);
 	private static final Icon notInClusterIcon = GuiUtils.getIcon("notInCluster", 24);
 	private static final Icon searchLibraryIcon = GuiUtils.getIcon("searchLibrary", 24);
@@ -75,6 +77,9 @@ public class FeatureDataPanelMenuBar extends CommonMenuBar {
 	private static final Icon exportResults4MPPIcon = GuiUtils.getIcon("export4MPP", 24);
 	private static final Icon exportResults4BinnerIcon = GuiUtils.getIcon("export4Binner", 24);
 	private static final Icon exportResults4RIcon = GuiUtils.getIcon("export4R", 24);	
+	
+	private static final Icon exportMetabCombinerIcon = GuiUtils.getIcon("exportMetabCombiner", 24);
+	
 	private static final Icon exportResultsIconSmall = GuiUtils.getIcon("export", 16);
 	private static final Icon exportExcelIcon = GuiUtils.getIcon("excel", 24);
 	private static final Icon exportMwTabIcon = GuiUtils.getIcon("mwTabReport", 24);
@@ -119,7 +124,9 @@ public class FeatureDataPanelMenuBar extends CommonMenuBar {
 		resetFilterMenuItem,
 		showOnlyKnownsMenuItem,
 		showOnlyUnknownsMenuItem,
-		showQcStandardsMenuItem,
+		showQcStandardsMenuItem,		
+		showBinnerAnnotatedMenuItem,
+		showPrimaryBinnerAnnotatedMenuItem,		
 		dataCleanupMenuItem;
 	
 	// Identification items
@@ -139,7 +146,8 @@ public class FeatureDataPanelMenuBar extends CommonMenuBar {
 		exportAllStatsMenuItem,
 		exportDialogMenuItem,
 		exportIntegratedReportMenuItem,
-		exportMWTabReportMenuItem;
+		exportMWTabReportMenuItem,
+		exportMetabCombinerMenuItem;
 		
 	// Utils items
 	private JMenuItem
@@ -230,6 +238,15 @@ public class FeatureDataPanelMenuBar extends CommonMenuBar {
 		
 		searchMenu.addSeparator();
 		
+		showBinnerAnnotatedMenuItem = addItem(searchMenu, 
+				MainActionCommands.SHOW_BINNER_ANNOTATED_FEATURES_COMMAND, 
+				filterBinnerIcon);
+		showPrimaryBinnerAnnotatedMenuItem = addItem(searchMenu, 
+				MainActionCommands.SHOW_PRIMARY_BINNER_ANNOTATED_FEATURES_COMMAND, 
+				primaryBinnerIcon);
+		
+		searchMenu.addSeparator();
+		
 		resetFilterMenuItem = addItem(searchMenu, 
 				MainActionCommands.RESET_FEATURE_FILTERS_COMMAND, 
 				resetFilterIcon);
@@ -277,16 +294,19 @@ public class FeatureDataPanelMenuBar extends CommonMenuBar {
 		exportForRAnalysisMenuItem = addItem(exportMenu, 
 				MainActionCommands.EXPORT_RESULTS_4R_COMMAND, 
 				exportResults4RIcon);
+		exportMetabCombinerMenuItem = addItem(exportMenu, 
+				MainActionCommands.EXPORT_RESULTS_4METAB_COMBINER_COMMAND, 
+				exportMetabCombinerIcon);
 		
 		exportMenu.addSeparator();
 		
-		exportMzRtStatsMenuItem = addItem(exportMenu, 
-				MainActionCommands.EXPORT_MZRT_STATISTICS_COMMAND, 
-				exportMzRtStatsIcon);
-		
-		exportPeakWidthStatsMenuItem = addItem(exportMenu, 
-				MainActionCommands.EXPORT_PEAK_WIDTH_STATISTICS_COMMAND, 
-				exportPeakWidthStatsIcon);
+//		exportMzRtStatsMenuItem = addItem(exportMenu, 
+//				MainActionCommands.EXPORT_MZRT_STATISTICS_COMMAND, 
+//				exportMzRtStatsIcon);
+//		
+//		exportPeakWidthStatsMenuItem = addItem(exportMenu, 
+//				MainActionCommands.EXPORT_PEAK_WIDTH_STATISTICS_COMMAND, 
+//				exportPeakWidthStatsIcon);
 		
 		exportAllStatsMenuItem = addItem(exportMenu, 
 				MainActionCommands.EXPORT_ALL_FEATURE_STATISTICS_COMMAND, 
@@ -307,9 +327,9 @@ public class FeatureDataPanelMenuBar extends CommonMenuBar {
 				MainActionCommands.EXPORT_RESULTS_TO_MWTAB_COMMAND, 
 				exportMwTabIcon);
 		
-		addItem(exportMenu, 
-				MainActionCommands.GET_DATA_MATRIX_FOR_FEATURE_SET_AND_DESIGN, 
-				null);
+//		addItem(exportMenu, 
+//				MainActionCommands.GET_DATA_MATRIX_FOR_FEATURE_SET_AND_DESIGN, 
+//				null);
 		
 		add(exportMenu);
 		

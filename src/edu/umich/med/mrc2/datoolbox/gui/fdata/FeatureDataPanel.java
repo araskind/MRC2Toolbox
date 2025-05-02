@@ -49,6 +49,7 @@ import javax.swing.event.ListSelectionListener;
 import org.apache.commons.lang3.StringUtils;
 import org.ujmp.core.Matrix;
 
+import edu.umich.med.mrc2.datoolbox.data.BinnerAnnotation;
 import edu.umich.med.mrc2.datoolbox.data.CompoundLibrary;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignSubset;
@@ -75,6 +76,7 @@ import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.database.idt.MSRTLibraryUtils;
 import edu.umich.med.mrc2.datoolbox.gui.annotation.DockableObjectAnnotationPanel;
+import edu.umich.med.mrc2.datoolbox.gui.binner.DockableBinnerAnnotationDetailsPanel;
 import edu.umich.med.mrc2.datoolbox.gui.clustertree.FilterTreeDialog;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignSubsetEvent;
@@ -154,6 +156,7 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 	private DockableMolStructurePanel molStructurePanel;
 	private DockableObjectAnnotationPanel featureAnnotationPanel;
 	private DockableCorrelationDataPanel correlationPanel;
+	private DockableBinnerAnnotationDetailsPanel binnerAnnotationDetailsPanel;
 	private DockableUniversalIdentificationResultsTable identificationsTable;
 	private LibrarySearchSetupDialog librarySearchSetupDialog;
 	private DatabaseSearchSetupDialog databaseSearchSetupDialog;
@@ -237,7 +240,7 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 				"FeatureDataPanelCorrelationDataPanel", "Feature correlation");
 		spectrumTable = new DockableMsTable(
 				"FeatureDataPanelDockableMsTableMS1", "MS1 table");
-		
+		binnerAnnotationDetailsPanel = new DockableBinnerAnnotationDetailsPanel();
 		identificationsTable = new DockableUniversalIdentificationResultsTable(
 				"FeatureDataPanelUniversalIdentificationResultsTable", "Identifications");
 		identificationsTable.getTable().getSelectionModel().addListSelectionListener(this);
@@ -252,7 +255,7 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 
 		grid.add(0, 0, 80, 30, featureDataTable);
 		grid.add(80, 0, 20, 30, molStructurePanel);
-		grid.add(0, 30, 100, 20, identificationsTable);
+		grid.add(0, 30, 100, 20, identificationsTable, binnerAnnotationDetailsPanel);
 		grid.add(0, 50, 50, 50, dataPlot, featureIntensitiesTable, correlationPanel);
 		grid.add(50, 50, 50, 50, spectrumPlot, spectrumTable, featureAnnotationPanel);
 		grid.select(0, 50, 50, 50, dataPlot);
@@ -452,6 +455,12 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 
 			if (command.equals(MainActionCommands.SHOW_QC_FEATURES_COMMAND.getName()))
 				showQcOnly();
+			
+			if (command.equals(MainActionCommands.SHOW_BINNER_ANNOTATED_FEATURES_COMMAND.getName()))
+				showBinnerAnnotated(false);
+			
+			if (command.equals(MainActionCommands.SHOW_PRIMARY_BINNER_ANNOTATED_FEATURES_COMMAND.getName()))
+				showBinnerAnnotated(true);
 
 			// Feature popup
 			if (command.equals(MainActionCommands.EDIT_FEATURE_METADATA_COMMAND.getName()))
@@ -536,21 +545,21 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 			if (command.equals(MainActionCommands.EXPORT_FEATURE_STATISTICS_COMMAND.getName()))
 				exportStatisticsForActiveFeatureSet();
 			
-			if (command.equals(MainActionCommands.GET_DATA_MATRIX_FOR_FEATURE_SET_AND_DESIGN.getName()))
-				createDataMatrixForActiveFeatureSet();
+//			if (command.equals(MainActionCommands.GET_DATA_MATRIX_FOR_FEATURE_SET_AND_DESIGN.getName()))
+//				createDataMatrixForActiveFeatureSet();
 		}	
 	}
 
-	private void createDataMatrixForActiveFeatureSet() {
-
-		if(activeMsFeatureSet == null)
-			return;
-				
-		Matrix fm = currentExperiment.getDataMatrixForFeatureSetAndDesign(
-				activeMsFeatureSet, 
-				currentExperiment.getExperimentDesign().getActiveDesignSubset(), 
-				activeDataPipeline);
-	}
+//	private void createDataMatrixForActiveFeatureSet() {
+//
+//		if(activeMsFeatureSet == null)
+//			return;
+//				
+//		Matrix fm = currentExperiment.getDataMatrixForFeatureSetAndDesign(
+//				activeMsFeatureSet, 
+//				currentExperiment.getExperimentDesign().getActiveDesignSubset(), 
+//				activeDataPipeline);
+//	}
 
 	private void setUpMSMSParentIonFrequencyAnalysis() {
 		
@@ -1270,6 +1279,7 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 		identificationsTable.clearTable();
 		molStructurePanel.clearPanel();
 		featureAnnotationPanel.clearPanel();
+		binnerAnnotationDetailsPanel.clearPanel();
 	}
 
 	private void editFeatureMetaData() {
@@ -1478,6 +1488,22 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 
 		setTableModelFromFeatureMap(Collections.singletonMap(activeDataPipeline, sorted));
 		activeFeatureFilter = FeatureFilter.QC_ONLY;
+	}
+	
+	private void showBinnerAnnotated(boolean primaryOnly) {
+		
+		clearPanel();
+		List<MsFeature> binnerAnnotated = 
+				currentExperiment.getActiveFeatureSetForDataPipeline(activeDataPipeline).
+				getFeatures().stream().filter(f -> Objects.nonNull(f.getBinnerAnnotation())).
+				collect(Collectors.toList());
+		if(primaryOnly)
+			binnerAnnotated = binnerAnnotated.stream().
+				filter(f -> f.getBinnerAnnotation().isPrimary()).
+				collect(Collectors.toList());
+			
+		setTableModelFromFeatureMap(Collections.singletonMap(activeDataPipeline, binnerAnnotated));
+		activeFeatureFilter = FeatureFilter.UNKNOWN_ONLY;		
 	}
 
 	@Override
@@ -1965,6 +1991,13 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 //				e.printStackTrace();
 //			}
 //		}
+		
+		Collection<BinnerAnnotation> binnerAnnotations = allSelected.stream().
+				filter(f -> Objects.nonNull(f.getBinnerAnnotation())).
+				map(f -> f.getBinnerAnnotation()).
+				collect(Collectors.toList());
+		binnerAnnotationDetailsPanel.setTableModelFromBinnerAnnotations(binnerAnnotations);
+				
 		showCompoundStructure(firstSelected.getPrimaryIdentity());
 		featureAnnotationPanel.loadFeatureData(firstSelected);
 		if (allSelected.size() > 1) {

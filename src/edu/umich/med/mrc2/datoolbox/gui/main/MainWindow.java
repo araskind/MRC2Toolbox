@@ -293,17 +293,20 @@ public class MainWindow extends JFrame
 			showReferenceSampleManagerDialog();
 
 		if (command.equals(MainActionCommands.EXPORT_RESULTS_COMMAND.getName()))
-			exportAnalysisResults();
+			exportAnalysisResults(null);
 
-		if (command.equals(MainActionCommands.EXPORT_RESULTS_4R_COMMAND.getName()))
-			exportAnalysisResults(MainActionCommands.EXPORT_RESULTS_4R_COMMAND);
+		if (DataExportDialog.getExportTypeByName(command) != null)
+			exportAnalysisResults(command);
 
-		if (command.equals(MainActionCommands.EXPORT_RESULTS_4MPP_COMMAND.getName()))
-			exportAnalysisResults(MainActionCommands.EXPORT_RESULTS_4MPP_COMMAND);
-
-		if (command.equals(MainActionCommands.EXPORT_RESULTS_4BINNER_COMMAND.getName()))
-			exportAnalysisResults(MainActionCommands.EXPORT_RESULTS_4BINNER_COMMAND);
-
+//		if (command.equals(MainActionCommands.EXPORT_RESULTS_4MPP_COMMAND.getName()))
+//			exportAnalysisResults(MainActionCommands.EXPORT_RESULTS_4MPP_COMMAND);
+//
+//		if (command.equals(MainActionCommands.EXPORT_RESULTS_4BINNER_COMMAND.getName()))
+//			exportAnalysisResults(MainActionCommands.EXPORT_RESULTS_4BINNER_COMMAND);
+//
+//		if (command.equals(MainActionCommands.EXPORT_RESULTS_4METAB_COMBINER_COMMAND.getName()))
+//			exportAnalysisResults(MainActionCommands.EXPORT_RESULTS_4METAB_COMBINER_COMMAND);
+		
 		if (command.equals(MainActionCommands.SHOW_RAWA_DATA_UPLOAD_PREP_DIALOG.getName()))
 			showRawDataUploadPrepDialog();
 
@@ -913,30 +916,30 @@ public class MainWindow extends JFrame
 				MRC2ToolBoxCore.shutDown();
 		}
 	}
-
-	private void exportAnalysisResults(MainActionCommands exportType) {
-
-		currentExperiment = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
-		if (currentExperiment == null || currentExperiment.getActiveDataPipeline() == null)
-			return;
-
-		exportDialog = new DataExportDialog();
-		exportDialog.setExportType(exportType);
-		exportDialog.setBaseDirectory(currentExperiment.getExportsDirectory());
-		String dsName = currentExperiment.getActiveFeatureSetForDataPipeline(
-				currentExperiment.getActiveDataPipeline()).getName();
-		exportDialog.setTitle("Export data for " + dsName);
-		exportDialog.setLocationRelativeTo(this);
-		exportDialog.setVisible(true);
-	}
-
-	private void exportAnalysisResults() {
-
+	
+	private void exportAnalysisResults(String command) {
+		
 		currentExperiment = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
 		if (currentExperiment == null || currentExperiment.getActiveDataPipeline() == null)
 			return;
 		
+		MainActionCommands exportType = null;
+		if(command != null) {
+			
+			exportType =  DataExportDialog.getExportTypeByName(command);
+			if(exportType == null) {
+				MessageDialog.showWarningMsg("Invalid export type.", this.getContentPane());
+				return;
+			}
+		}
 		exportDialog = new DataExportDialog();
+		if(exportType != null)
+			exportDialog.setExportType(exportType);
+		
+		exportDialog.setBaseDirectory(currentExperiment.getExportsDirectory());
+		String dsName = currentExperiment.getActiveFeatureSetForDataPipeline(
+				currentExperiment.getActiveDataPipeline()).getName();
+		exportDialog.setTitle("Export data for " + dsName);
 		exportDialog.setLocationRelativeTo(this);
 		exportDialog.setVisible(true);
 	}

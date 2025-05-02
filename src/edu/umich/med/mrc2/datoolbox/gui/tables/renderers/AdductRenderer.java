@@ -38,7 +38,6 @@ public class AdductRenderer extends DefaultTableCellRenderer {
 	private static final long serialVersionUID = -8120750009905302122L;
 
 	public AdductRenderer() {
-
 		super();
 	}
 

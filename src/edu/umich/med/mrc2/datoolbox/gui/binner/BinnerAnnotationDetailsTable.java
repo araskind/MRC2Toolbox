@@ -19,7 +19,9 @@
  *
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.gui.idworks.binner;
+package edu.umich.med.mrc2.datoolbox.gui.binner;
+
+import java.util.Collection;
 
 import javax.swing.ListSelectionModel;
 import javax.swing.table.TableRowSorter;
@@ -70,6 +72,14 @@ public class BinnerAnnotationDetailsTable extends BasicTable {
 			BinnerBasedMsFeatureInfoBundleCluster baCluster) {
 		thf.setTable(null);
 		model.setTableModelFromBinnerAnnotationCluster(baCluster);
+		thf.setTable(this);
+		tca.adjustColumns();
+	}
+	
+	public void setTableModelFromBinnerAnnotations(
+			Collection<BinnerAnnotation> annotations) {
+		thf.setTable(null);
+		model.setTableModelFromBinnerAnnotations(annotations);
 		thf.setTable(this);
 		tca.adjustColumns();
 	}

@@ -23,7 +23,10 @@ package edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Set;
 
+import edu.umich.med.mrc2.datoolbox.data.BinnerAnnotation;
+import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
@@ -60,10 +63,30 @@ public class ImportBinnerAnnotationsForUntargetedDataTask extends BinnerReportPa
 		if(binnerAnnotations == null || binnerAnnotations.isEmpty()) {
 			setStatus(TaskStatus.FINISHED);
 			return;
-		}		
+		}
+		attachBinnerAnnotationsToFeatures();
 		setStatus(TaskStatus.FINISHED);
 	}
 	
+	private void attachBinnerAnnotationsToFeatures() {
+
+		taskDescription = "Attaching Binner annotations to MS features ...";
+		total = binnerAnnotations.size();
+		processed = 0;
+		Set<MsFeature> features = 
+				currentExperiment.getMsFeaturesForDataPipeline(activeDataPipeline);
+		for(BinnerAnnotation ba : binnerAnnotations) {
+			
+			MsFeature target = features.stream().
+					filter(f -> f.getName().equals(ba.getFeatureName())).
+					findFirst().orElse(null);
+			if(target != null)
+				target.setBinnerAnnotation(ba);
+			
+			processed++;
+		}		
+	}
+
 	@Override
 	public Task cloneTask() {
 		

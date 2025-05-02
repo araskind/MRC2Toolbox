@@ -19,7 +19,7 @@
  *
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.gui.idworks.binner;
+package edu.umich.med.mrc2.datoolbox.gui.binner;
 
 import java.awt.event.ActionListener;
 

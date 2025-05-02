@@ -28,7 +28,10 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import org.jdom2.Element;
@@ -56,7 +59,7 @@ public class Worklist implements Serializable, XmlStorable {
 		items.add(newItem);
 	}
 
-	public HashMap<DataFile, Double> getTimeline() {
+	public Map<DataFile, Double> getTimeline() {
 
 		HashMap<DataFile, Double> timeLine = new HashMap<DataFile, Double>();
 		Date start = items.iterator().next().getTimeStamp();
@@ -78,12 +81,12 @@ public class Worklist implements Serializable, XmlStorable {
 		return items;
 	}
 
-	public Collection<WorklistItem> getTimeSortedWorklistItems() {
+	public SortedSet<WorklistItem> getTimeSortedWorklistItems() {
 
 		return items.stream().
 			sorted(Comparator.comparing(WorklistItem::getTimeStamp, 
 					Comparator.nullsLast(Comparator.naturalOrder()))).
-			collect(Collectors.toList());
+			collect(Collectors.toCollection(TreeSet::new));
 	}
 
 	public void appendWorklist(Worklist wlToAppend) {

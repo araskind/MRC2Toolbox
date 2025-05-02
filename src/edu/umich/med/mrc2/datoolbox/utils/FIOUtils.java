@@ -48,6 +48,13 @@ import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 
 public class FIOUtils {
+	
+	private FIOUtils() {
+		
+	}
+	
+	public static final String punctuationReplacementPattern = "\\p{Punct}+";
+	public static final String filePathSpecialCharsReplacementPattern = "[\\\\/:*?\"<>|]";
 
 	public static File changeExtension(File f, String newExtension) {
 
@@ -246,6 +253,9 @@ public class FIOUtils {
 		if (type.equals(MainActionCommands.EXPORT_RESULTS_4BINNER_COMMAND))
 			typeString = "_4BINNER_";
 
+		if (type.equals(MainActionCommands.EXPORT_RESULTS_4METAB_COMBINER_COMMAND))
+			typeString = "_4MetabCombiner_";
+		
 		if (type.equals(MainActionCommands.EXPORT_RESULTS_4METSCAPE_COMMAND))
 			typeString = "_4MetScape_";
 
@@ -291,7 +301,7 @@ public class FIOUtils {
 	}
 	
 	public static String createSaveSafeName(String fileName) {
-		return fileName.replaceAll("[\\\\/:*?\"<>|]", "");
+		return fileName.replaceAll(filePathSpecialCharsReplacementPattern, "");
 	}
 	
 	public static String readFileToString(File methodFile) {

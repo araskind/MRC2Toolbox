@@ -53,6 +53,7 @@ import edu.umich.med.mrc2.datoolbox.gui.tables.BasicFeatureTable;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.AutoChoices;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.TableFilterHeader;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.AdductRenderer;
+import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.BinnerAnnotationRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.CompoundIdentityDatabaseLinkRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.McMillanDeltaPercentColorRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.PieChartFrequencyRenderer;
@@ -99,6 +100,8 @@ public class FeatureDataTable extends BasicFeatureTable {
 			.setCellRenderer(chmodRenderer); // Compound form column
 		columnModel.getColumnById(FeatureDataTableModel.CHEM_MOD_LIBRARY_COLUMN)
 			.setCellRenderer(chmodRenderer); // Compound form column
+		columnModel.getColumnById(FeatureDataTableModel.BINNER_ANNOTATION_COLUMN)
+			.setCellRenderer(new BinnerAnnotationRenderer()); // Binner annotation column		
 		columnModel.getColumnById(FeatureDataTableModel.RETENTION_COLUMN)
 			.setCellRenderer(rtRenderer); // Retention time
 		columnModel.getColumnById(FeatureDataTableModel.RETENTION_OBSERVED_MEDIAN_COLUMN)

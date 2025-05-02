@@ -31,8 +31,9 @@ import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.project.store.BinnerAnnotationFields;
 import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
 import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
+import edu.umich.med.mrc2.datoolbox.project.store.XmlStorable;
 
-public class BinnerAnnotation implements Serializable, Comparable<BinnerAnnotation>{
+public class BinnerAnnotation implements Serializable, Comparable<BinnerAnnotation>, XmlStorable{
 
 	/**
 	 * 
@@ -88,7 +89,11 @@ public class BinnerAnnotation implements Serializable, Comparable<BinnerAnnotati
 	}
 	
 	public String getCleanAnnotation() {
-		return replaceMolIonNumber(annotation).
+		
+		if(annotation == null)
+			return null;
+		else
+			return replaceMolIonNumber(annotation).
 					replace("(duplicate)", "").trim();
 	}
 
@@ -309,45 +314,45 @@ public class BinnerAnnotation implements Serializable, Comparable<BinnerAnnotati
 		Element binnerAnnotationElement = 
 				new Element(ObjectNames.BinnerAnnotation.name());
 		
-		binnerAnnotationElement.setAttribute(
+			binnerAnnotationElement.setAttribute(
 				CommonFields.Id.name(), id);
-		binnerAnnotationElement.setAttribute(
+			binnerAnnotationElement.setAttribute(
 				BinnerAnnotationFields.FeatureName.name(), Objects.toString(featureName, ""));	
-		binnerAnnotationElement.setAttribute(
+			binnerAnnotationElement.setAttribute(
 				BinnerAnnotationFields.Annotation.name(), Objects.toString(annotation, ""));		
-		binnerAnnotationElement.setAttribute(
+			binnerAnnotationElement.setAttribute(
 				BinnerAnnotationFields.AdditionalGroupAnnotations.name(), Objects.toString(additionalGroupAnnotations, ""));
-		binnerAnnotationElement.setAttribute(
+			binnerAnnotationElement.setAttribute(
 				BinnerAnnotationFields.FurtherAnnotations.name(), Objects.toString(furtherAnnotations, ""));	
-		binnerAnnotationElement.setAttribute(
+			binnerAnnotationElement.setAttribute(
 				BinnerAnnotationFields.Derivations.name(),  Objects.toString(derivations, ""));
-		binnerAnnotationElement.setAttribute(
+			binnerAnnotationElement.setAttribute(
 				BinnerAnnotationFields.Isotopes.name(),  Objects.toString(isotopes, ""));
-		binnerAnnotationElement.setAttribute(
+			binnerAnnotationElement.setAttribute(
 				BinnerAnnotationFields.AdditionalIsotopes.name(),  Objects.toString(additionalIsotopes, ""));
-		binnerAnnotationElement.setAttribute(
+			binnerAnnotationElement.setAttribute(
 				BinnerAnnotationFields.MassError.name(), Double.toString(massError));
-		binnerAnnotationElement.setAttribute(
+			binnerAnnotationElement.setAttribute(
 				BinnerAnnotationFields.Rmd.name(), Double.toString(rmd));
-		binnerAnnotationElement.setAttribute(
+			binnerAnnotationElement.setAttribute(
 				BinnerAnnotationFields.MolIonNumber.name(), Integer.toString(molIonNumber));
-		binnerAnnotationElement.setAttribute(
+			binnerAnnotationElement.setAttribute(
 				BinnerAnnotationFields.ChargeCarrier.name(),  Objects.toString(chargeCarrier, ""));
-		binnerAnnotationElement.setAttribute(
+			binnerAnnotationElement.setAttribute(
 				BinnerAnnotationFields.AdditionalAdducts.name(),  Objects.toString(additionalAdducts, ""));		
-		binnerAnnotationElement.setAttribute(
+			binnerAnnotationElement.setAttribute(
 				BinnerAnnotationFields.BinNumber.name(), Integer.toString(binNumber));
-		binnerAnnotationElement.setAttribute(
+			binnerAnnotationElement.setAttribute(
 				BinnerAnnotationFields.CorrClusterNumber.name(), Integer.toString(corrClusterNumber));
-		binnerAnnotationElement.setAttribute(
+			binnerAnnotationElement.setAttribute(
 				BinnerAnnotationFields.RebinSubclusterNumber.name(), Integer.toString(rebinSubclusterNumber));
-		binnerAnnotationElement.setAttribute(
+			binnerAnnotationElement.setAttribute(
 				BinnerAnnotationFields.RtSubclusterNumber.name(), Integer.toString(rtSubclusterNumber));
-		binnerAnnotationElement.setAttribute(
-				BinnerAnnotationFields.RtSubclusterNumber.name(), Boolean.toString(isPrimary));		
-		binnerAnnotationElement.setAttribute(
+			binnerAnnotationElement.setAttribute(
+				BinnerAnnotationFields.IsPrimary.name(), Boolean.toString(isPrimary));		
+			binnerAnnotationElement.setAttribute(
 				BinnerAnnotationFields.BinnerMz.name(), Double.toString(binnerMz));
-		binnerAnnotationElement.setAttribute(
+			binnerAnnotationElement.setAttribute(
 				BinnerAnnotationFields.BinnerRt.name(), Double.toString(binnerRt));
 		
 		return binnerAnnotationElement;
@@ -380,8 +385,7 @@ public class BinnerAnnotation implements Serializable, Comparable<BinnerAnnotati
 		this.chargeCarrier = 
 				xmlElement.getAttributeValue(BinnerAnnotationFields.ChargeCarrier.name());
 		this.additionalAdducts = 
-				xmlElement.getAttributeValue(BinnerAnnotationFields.AdditionalAdducts.name());
-		
+				xmlElement.getAttributeValue(BinnerAnnotationFields.AdditionalAdducts.name());		
 		this.binNumber = Integer.parseInt(
 				xmlElement.getAttributeValue(BinnerAnnotationFields.BinNumber.name()));	
 		this.corrClusterNumber = Integer.parseInt(
@@ -395,8 +399,7 @@ public class BinnerAnnotation implements Serializable, Comparable<BinnerAnnotati
 		this.binnerMz = Double.parseDouble(
 				xmlElement.getAttributeValue(BinnerAnnotationFields.BinnerMz.name()));
 		this.binnerRt = Double.parseDouble(
-				xmlElement.getAttributeValue(BinnerAnnotationFields.BinnerRt.name()));
-		
+				xmlElement.getAttributeValue(BinnerAnnotationFields.BinnerRt.name()));		
 	}
 
 	public String getId() {

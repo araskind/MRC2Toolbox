@@ -102,13 +102,15 @@ public class DataExportDialog extends JDialog
 			MainActionCommands.EXPORT_RESULTS_4R_COMMAND,
 			MainActionCommands.EXPORT_RESULTS_4MPP_COMMAND,
 			MainActionCommands.EXPORT_RESULTS_4BINNER_COMMAND,
+			MainActionCommands.EXPORT_RESULTS_4METAB_COMBINER_COMMAND,
 			MainActionCommands.EXPORT_RESULTS_FOR_METABOLOMICS_WORKBENCH_COMMAND,
 			MainActionCommands.EXPORT_RESULTS_4METSCAPE_COMMAND,
 			MainActionCommands.EXPORT_DUPLICATES_COMMAND,
 			MainActionCommands.EXPORT_ALL_FEATURE_STATISTICS_COMMAND,
-			MainActionCommands.EXPORT_MZRT_STATISTICS_COMMAND,
-			MainActionCommands.EXPORT_PEAK_WIDTH_STATISTICS_COMMAND,
+//			MainActionCommands.EXPORT_MZRT_STATISTICS_COMMAND,
+//			MainActionCommands.EXPORT_PEAK_WIDTH_STATISTICS_COMMAND,
 		};
+	
 	private JComboBox exportTypeComboBox;
 	private JComboBox<MissingExportType> missingTypeComboBox;
 	private JComboBox namingComboBox;

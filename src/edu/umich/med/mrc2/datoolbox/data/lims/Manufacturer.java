@@ -25,6 +25,7 @@ import java.io.Serializable;
 
 import org.jdom2.Element;
 
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
 import edu.umich.med.mrc2.datoolbox.project.store.ManufacturerFields;
 import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
@@ -139,6 +140,11 @@ public class Manufacturer implements Serializable, Comparable<Manufacturer>,XmlS
 		
 		Element manufacturerElement = 
         		new Element(ObjectNames.Manufacturer.name());
+		if(id == null) {
+			Manufacturer mnf = IDTDataCache.getManufacturerByName(name);
+			if(mnf != null)
+				id = mnf.getId();
+		}
 		manufacturerElement.setAttribute(CommonFields.Id.name(), id);
 		manufacturerElement.setAttribute(CommonFields.Name.name(), name);
 		

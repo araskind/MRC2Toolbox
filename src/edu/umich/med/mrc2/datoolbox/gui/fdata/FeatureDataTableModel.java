@@ -30,6 +30,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import edu.umich.med.mrc2.datoolbox.data.Adduct;
+import edu.umich.med.mrc2.datoolbox.data.BinnerAnnotation;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureCluster;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
@@ -53,6 +54,7 @@ public class FeatureDataTableModel extends BasicTableModel {
 	public static final String AMBIGUITY_COLUMN = "Ambig.";
 	public static final String CHEM_MOD_OBSERVED_COLUMN = "Form (Obs)";
 	public static final String CHEM_MOD_LIBRARY_COLUMN = "Form (Lib)";
+	public static final String BINNER_ANNOTATION_COLUMN = "Binner";
 	public static final String REJECT_COLUMN = "Reject";
 	public static final String SCORE_COLUMN = "Score";
 	public static final String RETENTION_COLUMN = "RT lib";
@@ -89,6 +91,7 @@ public class FeatureDataTableModel extends BasicTableModel {
 //				new ColumnContext(QC_COLUMN, Boolean.class, false),
 				new ColumnContext(CHEM_MOD_OBSERVED_COLUMN, "Observed (or default) adduct", Adduct.class, false),
 				new ColumnContext(CHEM_MOD_LIBRARY_COLUMN, "Adduct based on library match", Adduct.class, false),
+				new ColumnContext(BINNER_ANNOTATION_COLUMN, "Binner annotation", BinnerAnnotation.class, false),
 				new ColumnContext(RETENTION_COLUMN, "Retention time from feature library", Double.class, false),
 				new ColumnContext(RETENTION_OBSERVED_MEDIAN_COLUMN, "Observed retention time (median for all samples)", Double.class, false),
 				new ColumnContext(RETENTION_RANGE_COLUMN, "Retention time range", Double.class, false),
@@ -139,9 +142,10 @@ public class FeatureDataTableModel extends BasicTableModel {
 					mcMillanDelta = cf.getSpectrum().getMcMillanCutoffPercentDelta();
 				}
 				if(cf.getPrimaryIdentity() != null) {
+					
 					compoundName = cf.getPrimaryIdentity().getIdentityName();
 					if(cf.getPrimaryIdentity().getMsRtLibraryMatch() != null)
-					chmodLibrary = cf.getPrimaryIdentity().getMsRtLibraryMatch().getTopAdductMatch().getLibraryMatch();
+						chmodLibrary = cf.getPrimaryIdentity().getMsRtLibraryMatch().getTopAdductMatch().getLibraryMatch();
 				}
 				boolean ambig = cf.getIdentifications().stream().
 						filter(i -> Objects.nonNull(i.getCompoundIdentity())).count() > 1;
@@ -154,6 +158,7 @@ public class FeatureDataTableModel extends BasicTableModel {
 						ambig,
 						chmodObserved,
 						chmodLibrary,
+						cf.getBinnerAnnotation(),
 						cf.getRetentionTime(),
 						cf.getStatsSummary().getMedianObservedRetention(),
 						cf.getStatsSummary().getRetentionRange().getSize(),
@@ -211,9 +216,10 @@ public class FeatureDataTableModel extends BasicTableModel {
 			chmodObserved = cf.getSpectrum().getPrimaryAdduct();
 		}
 		if(cf.getPrimaryIdentity() != null) {
+			
 			compoundName = cf.getPrimaryIdentity().getIdentityName();
 			if(cf.getPrimaryIdentity().getMsRtLibraryMatch() != null)
-			chmodLibrary = cf.getPrimaryIdentity().getMsRtLibraryMatch().getTopAdductMatch().getLibraryMatch();
+				chmodLibrary = cf.getPrimaryIdentity().getMsRtLibraryMatch().getTopAdductMatch().getLibraryMatch();
 		}
 		boolean ambig = cf.getIdentifications().size() > 1;
 
@@ -223,6 +229,7 @@ public class FeatureDataTableModel extends BasicTableModel {
 		setValueAt(ambig, row, getColumnIndex(AMBIGUITY_COLUMN));
 		setValueAt(chmodObserved, row, getColumnIndex(CHEM_MOD_OBSERVED_COLUMN));
 		setValueAt(chmodLibrary, row, getColumnIndex(CHEM_MOD_LIBRARY_COLUMN));
+		setValueAt(cf.getBinnerAnnotation(), row, getColumnIndex(BINNER_ANNOTATION_COLUMN));
 		setValueAt(cf.getRetentionTime(), row, getColumnIndex(RETENTION_COLUMN));
 		setValueAt(cf.getNeutralMass(), row, getColumnIndex(NEUTRAL_MASS_COLUMN));
 		setValueAt(bp, row, getColumnIndex(MONOISOTOPIC_PEAK_COLUMN));

@@ -19,9 +19,10 @@
  *
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.gui.idworks.binner;
+package edu.umich.med.mrc2.datoolbox.gui.binner;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import edu.umich.med.mrc2.datoolbox.data.BinnerAnnotation;
@@ -86,7 +87,7 @@ public class BinnerAnnotationDetailsTableModel extends BasicTableModel {
 
 			Object[] obj = {
 					ba.equals(bac.getPrimaryFeatureAnnotation()),
-					baCluster.getComponentMap().get(ba).size() > 0,
+					!baCluster.getComponentMap().get(ba).isEmpty(),
 					ba,
 					ba.getChargeCarrier(),
 					ba.getBinnerMz(),
@@ -105,4 +106,47 @@ public class BinnerAnnotationDetailsTableModel extends BasicTableModel {
 		if(!rowData.isEmpty())
 			addRows(rowData);
 	}
+	
+	public void setTableModelFromBinnerAnnotations(
+			Collection<BinnerAnnotation> annotations) {
+		
+		setRowCount(0);
+		if(annotations == null || annotations.isEmpty())
+			return;
+		
+		List<Object[]>rowData = new ArrayList<Object[]>();
+		for (BinnerAnnotation ba : annotations) {
+
+			Object[] obj = {
+					ba.isPrimary(),
+					true,
+					ba,
+					ba.getChargeCarrier(),
+					ba.getBinnerMz(),
+					ba.getBinnerRt(),
+					ba.getMassError(),
+					ba.getRmd(),
+					ba.getCleanAdditionalGroupAnnotations(),
+					ba.getCleanFurtherAnnotations(),
+					ba.getCleanDerivations(),
+					ba.getCleanIsotopes(),
+					ba.getCleanAdditionalIsotopes(),
+					ba.getCleanAdditionalAdducts()
+			};
+			rowData.add(obj);
+		}
+		if(!rowData.isEmpty())
+			addRows(rowData);
+	}
+	
 }
+
+
+
+
+
+
+
+
+
+

@@ -39,6 +39,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.TreeMap;
@@ -49,6 +50,7 @@ import org.apache.commons.compress.utils.FileNameUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.math3.util.Precision;
 import org.ujmp.core.Matrix;
 
 import edu.umich.med.mrc2.datoolbox.data.AdductMatch;
@@ -81,6 +83,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 import edu.umich.med.mrc2.datoolbox.utils.DataExportUtils;
+import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 import edu.umich.med.mrc2.datoolbox.utils.ProjectUtils;
 import edu.umich.med.mrc2.datoolbox.utils.WorklistUtils;
@@ -108,6 +111,8 @@ public class DataExportTask extends AbstractTask {
 	private TreeSet<ExperimentalSample>activeSamples;
 	private boolean exportManifest;
 	boolean replaceSpecialCharacters;
+	
+	private int metadataColumnCount;
 	
 	private static final NumberFormat rtFormat = MRC2ToolBoxConfiguration.getRtFormat();
 	private static final NumberFormat mzFormat = MRC2ToolBoxConfiguration.getMzFormat();
@@ -198,6 +203,16 @@ public class DataExportTask extends AbstractTask {
 				return;
 			}
 		}
+		if (exportType.equals(MainActionCommands.EXPORT_RESULTS_4METAB_COMBINER_COMMAND)) {
+			try {
+				writeMetabCombinerExportFile();
+				setStatus(TaskStatus.FINISHED);
+			} catch (Exception e) {
+				e.printStackTrace();
+				setStatus(TaskStatus.ERROR);
+				return;
+			}
+		}
 		if (exportType.equals(MainActionCommands.EXPORT_DUPLICATES_COMMAND)) {
 			try {
 				writeDuplicatesExportFile();
@@ -211,26 +226,6 @@ public class DataExportTask extends AbstractTask {
 		if (exportType.equals(MainActionCommands.EXPORT_RESULTS_FOR_METABOLOMICS_WORKBENCH_COMMAND)) {
 			try {
 				writeMetabolomicsWorkbenchExportFile();
-				setStatus(TaskStatus.FINISHED);
-			} catch (Exception e) {
-				e.printStackTrace();
-				setStatus(TaskStatus.ERROR);
-				return;
-			}
-		}
-		if (exportType.equals(MainActionCommands.EXPORT_MZRT_STATISTICS_COMMAND)) {
-			try {
-				writeMZRTDataExportFile();
-				setStatus(TaskStatus.FINISHED);
-			} catch (Exception e) {
-				e.printStackTrace();
-				setStatus(TaskStatus.ERROR);
-				return;
-			}
-		}
-		if (exportType.equals(MainActionCommands.EXPORT_PEAK_WIDTH_STATISTICS_COMMAND)) {
-			try {
-				writePeakWidthDataExportFile();
 				setStatus(TaskStatus.FINISHED);
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -260,269 +255,7 @@ public class DataExportTask extends AbstractTask {
 		}
 	}
 
-	private void writeMZRTDataExportFile() throws Exception {
-
-		taskDescription = "Reading feature data matrix ...";
-		Matrix dataMatrix = 
-				ProjectUtils.readFeatureMatrix(currentExperiment, dataPipeline, false);
-		if(dataMatrix == null) {
-			errorMessage = "Unable to read feature data matrix file";
-			setStatus(TaskStatus.ERROR);
-			return;
-		}
-		taskDescription = "Writing M/Z & RT data export files ...";
-		String parent = exportFile.getParentFile().getAbsolutePath();
-		String baseName = FileNameUtils.getBaseName(exportFile.getName());
-		
-		File mzExportFile = Paths.get(parent, baseName + "_MZ_VALUES.txt").toFile();
-		final Writer mzWriter = new BufferedWriter(new FileWriter(mzExportFile));
-		File rtExportFile = Paths.get(parent, baseName + "_RT_VALUES.txt").toFile();
-		final Writer rtWriter = new BufferedWriter(new FileWriter(rtExportFile));
-
-		// Create header
-		TreeMap<ExperimentalSample, TreeMap<DataPipeline, DataFile[]>>sampleFileMap
-			= DataExportUtils.createSampleFileMapForDataPipeline(
-					currentExperiment, experimentDesignSubset, dataPipeline, namingField);
-
-		String[] columnList =
-			DataExportUtils.createSampleColumnNameArrayForDataPipeline(
-					sampleFileMap, namingField, dataPipeline);
-
-		String[] header = new String[columnList.length + 9];
-		int columnCount = 0;
-		header[columnCount] = BinnerExportFields.FEATURE_NAME.getName();
-		header[++columnCount] = BinnerExportFields.METABOLITE_NAME.getName();
-		header[++columnCount] = BinnerExportFields.BINNER_NAME.getName();
-		header[++columnCount] = BinnerExportFields.NEUTRAL_MASS.getName();
-		header[++columnCount] = BinnerExportFields.BINNER_MZ.getName();
-		header[++columnCount] = BinnerExportFields.RT_EXPECTED.getName();
-		header[++columnCount] = BinnerExportFields.RT_OBSERVED.getName();
-		header[++columnCount] = BinnerExportFields.MZ.getName();
-		header[++columnCount] = BinnerExportFields.CHARGE.getName();
-
-		HashMap<DataFile, Integer> fileColumnMap = 
-				DataExportUtils.createFileColumnMap(sampleFileMap, columnCount);
-
-		if(replaceSpecialCharacters) {
-			for(String columnName : columnList)
-				header[++columnCount] = columnName.replaceAll("\\p{Punct}+", "-");
-		}
-		else {
-			for(String columnName : columnList)
-				header[++columnCount] = columnName;
-		}
-		mzWriter.append(StringUtils.join(header, columnSeparator));
-		mzWriter.append(lineSeparator);
-		rtWriter.append(StringUtils.join(header, columnSeparator));
-		rtWriter.append(lineSeparator);
-
-		MsFeature[] featureList = msFeatureSet4export.stream().
-				sorted(new MsFeatureComparator(SortProperty.RT)).toArray(size -> new MsFeature[size]);
-
-		long[] coordinates = new long[2];
-		total = featureList.length;
-		processed = 0;
-
-		for( MsFeature msf : featureList){
-
-			String[] mzLine = new String[header.length];
-			columnCount = 0;
-			//	String compoundName = msf.getName();
-			String compoundName = msf.getBicMetaboliteName();
-			if(msf.isIdentified()){
-
-				compoundName = msf.getPrimaryIdentity().getCompoundName();
-
-				if(msf.getPrimaryIdentity().getMsRtLibraryMatch() != null) {
-
-					AdductMatch tam = msf.getPrimaryIdentity().getMsRtLibraryMatch().getTopAdductMatch();
-					if(tam != null)
-						compoundName += " (" + tam.getLibraryMatch().getName() + ")";
-				}
-			}
-			double binnerMass =
-				MsUtils.calculateModifiedMz(msf.getNeutralMass(),
-						AdductManager.getDefaultAdductForPolarity(msf.getPolarity()));
-			if(msf.getSpectrum().getPrimaryAdduct() != null 
-					&& Math.abs(msf.getSpectrum().getPrimaryAdduct().getCharge()) == 1
-					&& msf.getSpectrum().getPrimaryAdduct().getOligomericState() > 1)
-				binnerMass =msf.getMonoisotopicMz();
-				
-			mzLine[columnCount] = msf.getName();
-			mzLine[++columnCount] = compoundName;
-			mzLine[++columnCount] = DataPrefix.MS_LIBRARY_UNKNOWN_TARGET.getName() + 
-									mzFormat.format(msf.getNeutralMass()) + "_" + 
-									rtFormat.format(msf.getRetentionTime());
-			mzLine[++columnCount] = mzFormat.format(msf.getNeutralMass());
-			mzLine[++columnCount] = mzFormat.format(binnerMass);
-			mzLine[++columnCount] = rtFormat.format(msf.getRetentionTime());
-			mzLine[++columnCount] = rtFormat.format(msf.getStatsSummary().getMedianObservedRetention());
-			mzLine[++columnCount] = mzFormat.format(msf.getMonoisotopicMz());
-			mzLine[++columnCount] = Integer.toString(msf.getCharge());
-
-			String[] rtLine = Arrays.copyOf(mzLine, mzLine.length);
-			
-			// Data
-			coordinates[1] = dataMatrix.getColumnForLabel(msf);
-			for (Entry<ExperimentalSample, TreeMap<DataPipeline, DataFile[]>> entry : sampleFileMap.entrySet()) {
-
-				for(DataFile df : entry.getValue().get(dataPipeline)) {
-
-					SimpleMsFeature value = null;
-					coordinates[0] = dataMatrix.getRowForLabel(df);
-					if(coordinates[0] >= 0) //	TODO find out why it happens - screwed up design cleanup?
-						value = (SimpleMsFeature)dataMatrix.getAsObject(coordinates);
-					else {
-						System.out.println(df.getName());
-					}
-					String mzString = "";
-					String rtString = "";
-					if(value != null) {
-						mzString = MRC2ToolBoxConfiguration.defaultMzFormat.format(
-								value.getObservedSpectrum().getMonoisotopicMz());
-						rtString = MRC2ToolBoxConfiguration.defaultRtFormat.format(
-								value.getRetentionTime());
-					}
-					mzLine[fileColumnMap.get(df)] = mzString;
-					rtLine[fileColumnMap.get(df)] = rtString;
-				}
-			}			
-			mzWriter.append(StringUtils.join(mzLine, columnSeparator));
-			mzWriter.append(lineSeparator);
-			rtWriter.append(StringUtils.join(rtLine, columnSeparator));
-			rtWriter.append(lineSeparator);
-			processed++;
-		}
-		mzWriter.flush();
-		mzWriter.close();			
-		rtWriter.flush();
-		rtWriter.close();	
-	}
-	
-	private void writePeakWidthDataExportFile() throws Exception {
-		
-		taskDescription = "Reading feature data matrix ...";
-		Matrix dataMatrix = 
-				ProjectUtils.readFeatureMatrix(currentExperiment, dataPipeline, false);
-		if(dataMatrix == null) {
-			errorMessage = "Unable to read feature data matrix file";
-			setStatus(TaskStatus.ERROR);
-			return;
-		}
-		taskDescription = "Writing Peak Width data export file ...";
-		final Writer pwWriter = new BufferedWriter(new FileWriter(exportFile));
-
-		// Create header
-		TreeMap<ExperimentalSample, TreeMap<DataPipeline, DataFile[]>>sampleFileMap
-			= DataExportUtils.createSampleFileMapForDataPipeline(
-					currentExperiment, experimentDesignSubset, dataPipeline, namingField);
-
-		String[] columnList =
-			DataExportUtils.createSampleColumnNameArrayForDataPipeline(
-					sampleFileMap, namingField, dataPipeline);
-
-		String[] header = new String[columnList.length + 9];
-		int columnCount = 0;
-		header[columnCount] = BinnerExportFields.FEATURE_NAME.getName();
-		header[++columnCount] = BinnerExportFields.METABOLITE_NAME.getName();
-		header[++columnCount] = BinnerExportFields.BINNER_NAME.getName();
-		header[++columnCount] = BinnerExportFields.NEUTRAL_MASS.getName();
-		header[++columnCount] = BinnerExportFields.BINNER_MZ.getName();
-		header[++columnCount] = BinnerExportFields.RT_EXPECTED.getName();
-		header[++columnCount] = BinnerExportFields.RT_OBSERVED.getName();
-		header[++columnCount] = BinnerExportFields.MZ.getName();
-		header[++columnCount] = BinnerExportFields.CHARGE.getName();
-
-		HashMap<DataFile, Integer> fileColumnMap = 
-				DataExportUtils.createFileColumnMap(sampleFileMap, columnCount);
-
-		if(replaceSpecialCharacters) {
-			for(String columnName : columnList)
-				header[++columnCount] = columnName.replaceAll("\\p{Punct}+", "-");
-		}
-		else {
-			for(String columnName : columnList)
-				header[++columnCount] = columnName;
-		}
-		pwWriter.append(StringUtils.join(header, columnSeparator));
-		pwWriter.append(lineSeparator);
-
-		MsFeature[] featureList = msFeatureSet4export.stream().
-				sorted(new MsFeatureComparator(SortProperty.RT)).toArray(size -> new MsFeature[size]);
-
-		long[] coordinates = new long[2];
-		total = featureList.length;
-		processed = 0;
-
-		for( MsFeature msf : featureList){
-
-			String[] mzLine = new String[header.length];
-			columnCount = 0;
-			//	String compoundName = msf.getName();
-			String compoundName = msf.getBicMetaboliteName();
-			if(msf.isIdentified()){
-
-				compoundName = msf.getPrimaryIdentity().getCompoundName();
-
-				if(msf.getPrimaryIdentity().getMsRtLibraryMatch() != null) {
-
-					AdductMatch tam = msf.getPrimaryIdentity().getMsRtLibraryMatch().getTopAdductMatch();
-					if(tam != null)
-						compoundName += " (" + tam.getLibraryMatch().getName() + ")";
-				}
-			}
-			double binnerMass =
-				MsUtils.calculateModifiedMz(msf.getNeutralMass(),
-						AdductManager.getDefaultAdductForPolarity(msf.getPolarity()));
-			if(msf.getSpectrum().getPrimaryAdduct() != null 
-					&& Math.abs(msf.getSpectrum().getPrimaryAdduct().getCharge()) == 1
-					&& msf.getSpectrum().getPrimaryAdduct().getOligomericState() > 1)
-				binnerMass =msf.getMonoisotopicMz();
-				
-			mzLine[columnCount] = msf.getName();
-			mzLine[++columnCount] = compoundName;
-			mzLine[++columnCount] = DataPrefix.MS_LIBRARY_UNKNOWN_TARGET.getName() + 
-									mzFormat.format(msf.getNeutralMass()) + "_" + 
-									rtFormat.format(msf.getRetentionTime());
-			mzLine[++columnCount] = mzFormat.format(msf.getNeutralMass());
-			mzLine[++columnCount] = mzFormat.format(binnerMass);
-			mzLine[++columnCount] = rtFormat.format(msf.getRetentionTime());
-			mzLine[++columnCount] = rtFormat.format(msf.getStatsSummary().getMedianObservedRetention());
-			mzLine[++columnCount] = mzFormat.format(msf.getMonoisotopicMz());
-			mzLine[++columnCount] = Integer.toString(msf.getCharge());
-
-			String[] rtLine = Arrays.copyOf(mzLine, mzLine.length);
-			
-			// Data
-			coordinates[1] = dataMatrix.getColumnForLabel(msf);
-			for (Entry<ExperimentalSample, TreeMap<DataPipeline, DataFile[]>> entry : sampleFileMap.entrySet()) {
-
-				for(DataFile df : entry.getValue().get(dataPipeline)) {
-
-					SimpleMsFeature value = null;
-					coordinates[0] = dataMatrix.getRowForLabel(df);
-					if(coordinates[0] >= 0) //	TODO find out why it happens - screwed up design cleanup?
-						value = (SimpleMsFeature)dataMatrix.getAsObject(coordinates);
-					else {
-						System.out.println(df.getName());
-					}
-					String pwString = "";
-					if(value != null && value.getRtRange() != null) {
-						pwString = MRC2ToolBoxConfiguration.defaultRtFormat.format(
-								value.getRtRange().getSize());
-					}
-					rtLine[fileColumnMap.get(df)] = pwString;
-				}
-			}			
-			pwWriter.append(StringUtils.join(rtLine, columnSeparator));
-			pwWriter.append(lineSeparator);
-			processed++;
-		}		
-		pwWriter.flush();
-		pwWriter.close();
-	}
-	
-	private void writeAllQCDataExportFiles() throws Exception {
+	private void writeAllQCDataExportFiles() {
 
 		taskDescription = "Reading feature data matrix ...";
 		Matrix dataMatrix = 
@@ -533,56 +266,29 @@ public class DataExportTask extends AbstractTask {
 			return;
 		}
 		taskDescription = "Writing M/Z, RT & peak width data export files ...";
+		
 		String parent = exportFile.getParentFile().getAbsolutePath();
 		String baseName = FileNameUtils.getBaseName(exportFile.getName());
 		
-		File mzExportFile = Paths.get(parent, baseName + "_MZ_VALUES.txt").toFile();
-		final Writer mzWriter = new BufferedWriter(new FileWriter(mzExportFile));
-		File rtExportFile = Paths.get(parent, baseName + "_RT_VALUES.txt").toFile();
-		final Writer rtWriter = new BufferedWriter(new FileWriter(rtExportFile));
-		File peakWidthExportFile = Paths.get(parent, baseName + "_PEAK_WIDTH_VALUES.txt").toFile();
-		final Writer pwWriter = new BufferedWriter(new FileWriter(peakWidthExportFile));
-		File peakQualityExportFile = Paths.get(parent, baseName + "_PEAK_QUALITY_VALUES.txt").toFile();
-		final Writer pqcWriter = new BufferedWriter(new FileWriter(peakQualityExportFile));
-		
-		// Create header
+		Collection<String>mzDataToExport = new ArrayList<String>();
+		Collection<String>rtDataToExport = new ArrayList<String>();
+		Collection<String>peakWidthDataToExport = new ArrayList<String>();
+		Collection<String>peakQualityDataToExport = new ArrayList<String>();
+
 		TreeMap<ExperimentalSample, TreeMap<DataPipeline, DataFile[]>>sampleFileMap
 			= DataExportUtils.createSampleFileMapForDataPipeline(
 					currentExperiment, experimentDesignSubset, dataPipeline, namingField);
 
-		String[] columnList =
-			DataExportUtils.createSampleColumnNameArrayForDataPipeline(
-					sampleFileMap, namingField, dataPipeline);
-
-		String[] header = new String[columnList.length + 9];
-		int columnCount = 0;
-		header[columnCount] = BinnerExportFields.FEATURE_NAME.getName();
-		header[++columnCount] = BinnerExportFields.METABOLITE_NAME.getName();
-		header[++columnCount] = BinnerExportFields.BINNER_NAME.getName();
-		header[++columnCount] = BinnerExportFields.NEUTRAL_MASS.getName();
-		header[++columnCount] = BinnerExportFields.BINNER_MZ.getName();
-		header[++columnCount] = BinnerExportFields.RT_EXPECTED.getName();
-		header[++columnCount] = BinnerExportFields.RT_OBSERVED.getName();
-		header[++columnCount] = BinnerExportFields.MZ.getName();
-		header[++columnCount] = BinnerExportFields.CHARGE.getName();
+		String[] header = createBinnerexportHeader(sampleFileMap);
+		String headerString = StringUtils.join(header, columnSeparator);
+		mzDataToExport.add(headerString);
+		rtDataToExport.add(headerString);
+		peakWidthDataToExport.add(headerString);
+		peakQualityDataToExport.add(headerString);
 
 		HashMap<DataFile, Integer> fileColumnMap = 
-				DataExportUtils.createFileColumnMap(sampleFileMap, columnCount);
-
-		if(replaceSpecialCharacters) {
-			for(String columnName : columnList)
-				header[++columnCount] = columnName.replaceAll("\\p{Punct}+", "-");
-		}
-		else {
-			for(String columnName : columnList)
-				header[++columnCount] = columnName;
-		}
-		String headerString = StringUtils.join(header, columnSeparator) + lineSeparator;
-		mzWriter.append(headerString);
-		rtWriter.append(headerString);
-		pwWriter.append(headerString);
-		pqcWriter.append(headerString);
-
+				DataExportUtils.createFileColumnMap(sampleFileMap, metadataColumnCount);
+		
 		MsFeature[] featureList = msFeatureSet4export.stream().
 				sorted(new MsFeatureComparator(SortProperty.RT)).toArray(size -> new MsFeature[size]);
 
@@ -593,45 +299,12 @@ public class DataExportTask extends AbstractTask {
 		for( MsFeature msf : featureList){
 
 			String[] mzLine = new String[header.length];
-			columnCount = 0;
-			//	String compoundName = msf.getName();
-			String compoundName = msf.getBicMetaboliteName();
-			if(msf.isIdentified()){
-
-				compoundName = msf.getPrimaryIdentity().getCompoundName();
-
-				if(msf.getPrimaryIdentity().getMsRtLibraryMatch() != null) {
-
-					AdductMatch tam = msf.getPrimaryIdentity().getMsRtLibraryMatch().getTopAdductMatch();
-					if(tam != null)
-						compoundName += " (" + tam.getLibraryMatch().getName() + ")";
-				}
-			}
-			double binnerMass =
-				MsUtils.calculateModifiedMz(msf.getNeutralMass(),
-						AdductManager.getDefaultAdductForPolarity(msf.getPolarity()));
-			if(msf.getSpectrum().getPrimaryAdduct() != null 
-					&& Math.abs(msf.getSpectrum().getPrimaryAdduct().getCharge()) == 1
-					&& msf.getSpectrum().getPrimaryAdduct().getOligomericState() > 1)
-				binnerMass =msf.getMonoisotopicMz();
-				
-			mzLine[columnCount] = msf.getName();
-			mzLine[++columnCount] = compoundName;
-			mzLine[++columnCount] = DataPrefix.MS_LIBRARY_UNKNOWN_TARGET.getName() + 
-									mzFormat.format(msf.getNeutralMass()) + "_" + 
-									rtFormat.format(msf.getRetentionTime());
-			mzLine[++columnCount] = mzFormat.format(msf.getNeutralMass());
-			mzLine[++columnCount] = mzFormat.format(binnerMass);
-			mzLine[++columnCount] = rtFormat.format(msf.getRetentionTime());
-			mzLine[++columnCount] = rtFormat.format(msf.getStatsSummary().getMedianObservedRetention());
-			mzLine[++columnCount] = mzFormat.format(msf.getMonoisotopicMz());
-			mzLine[++columnCount] = Integer.toString(msf.getCharge());
-
+			addBinnerMetadataForFeature(msf, mzLine);
+			
 			String[] rtLine = Arrays.copyOf(mzLine, mzLine.length);
 			String[] pwLine = Arrays.copyOf(mzLine, mzLine.length);
 			String[] qualLine = Arrays.copyOf(mzLine, mzLine.length);
-			
-			// Data
+
 			coordinates[1] = dataMatrix.getColumnForLabel(msf);
 			for (Entry<ExperimentalSample, TreeMap<DataPipeline, DataFile[]>> entry : sampleFileMap.entrySet()) {
 
@@ -665,28 +338,51 @@ public class DataExportTask extends AbstractTask {
 					pwLine[fileColumnMap.get(df)] = pwString;
 					qualLine[fileColumnMap.get(df)] = qualString;
 				}
-			}			
-			mzWriter.append(StringUtils.join(mzLine, columnSeparator));
-			mzWriter.append(lineSeparator);
-			rtWriter.append(StringUtils.join(rtLine, columnSeparator));
-			rtWriter.append(lineSeparator);
-			pwWriter.append(StringUtils.join(pwLine, columnSeparator));
-			pwWriter.append(lineSeparator);			
-			pqcWriter.append(StringUtils.join(qualLine, columnSeparator));
-			pqcWriter.append(lineSeparator);
-			
+			}	
+			mzDataToExport.add(StringUtils.join(mzLine, columnSeparator));
+			rtDataToExport.add(StringUtils.join(rtLine, columnSeparator));
+			peakWidthDataToExport.add(StringUtils.join(pwLine, columnSeparator));
+			peakQualityDataToExport.add(StringUtils.join(qualLine, columnSeparator));
 			processed++;
 		}
-		mzWriter.flush();
-		mzWriter.close();			
-		rtWriter.flush();
-		rtWriter.close();	
-		pwWriter.flush();
-		pwWriter.close();
-		pqcWriter.flush();
-		pqcWriter.close();
+		try {
+			Files.write(Paths.get(parent, baseName + "_MZ_VALUES.txt"), 
+					mzDataToExport, 
+					StandardCharsets.UTF_8,
+					StandardOpenOption.CREATE, 
+					StandardOpenOption.TRUNCATE_EXISTING);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		try {
+			Files.write(Paths.get(parent, baseName + "_RT_VALUES.txt"), 
+					rtDataToExport, 
+					StandardCharsets.UTF_8,
+					StandardOpenOption.CREATE, 
+					StandardOpenOption.TRUNCATE_EXISTING);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		try {
+			Files.write(Paths.get(parent, baseName + "_PEAK_WIDTH_VALUES.txt"), 
+					peakWidthDataToExport, 
+					StandardCharsets.UTF_8,
+					StandardOpenOption.CREATE, 
+					StandardOpenOption.TRUNCATE_EXISTING);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		try {
+			Files.write(Paths.get(parent, baseName + "_PEAK_QUALITY_VALUES.txt"), 
+					peakQualityDataToExport, 
+					StandardCharsets.UTF_8,
+					StandardOpenOption.CREATE, 
+					StandardOpenOption.TRUNCATE_EXISTING);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
-
+	
 	private void writeManifestFile() {
 		
 		String manifestString = WorklistUtils.createManifest(currentExperiment, dataPipeline);
@@ -707,10 +403,8 @@ public class DataExportTask extends AbstractTask {
 				currentExperiment.getWorklistForDataAcquisitionMethod(dataPipeline.getAcquisitionMethod());
 		if(worklist == null)
 			return;
-			
-		Date start =
-			worklist.getTimeSortedWorklistItems().stream().
-			findFirst().get().getTimeStamp();
+		
+		Date start = worklist.getTimeSortedWorklistItems().first().getTimeStamp();
 
 		// Find differences
 		for (WorklistItem item : worklist.getTimeSortedWorklistItems()) {
@@ -750,38 +444,105 @@ public class DataExportTask extends AbstractTask {
 		}
 	}
 
-	private void writeDuplicatesExportFile() throws Exception {
+	private void writeDuplicatesExportFile() throws IOException {
 
 		taskDescription = "Writing duplicate features data export file ...";
-		final Writer writer = new BufferedWriter(new FileWriter(exportFile));
+		try(Writer writer = new BufferedWriter(new FileWriter(exportFile))){
 
-		for (MsFeatureCluster fc : currentExperiment.getDuplicateClustersForDataPipeline(dataPipeline)) {
-
-			for (MsFeature feature : fc.getFeatures()) {
-
-				if (feature.equals(fc.getPrimaryFeature()))
-					writer.append(feature.getName());
-				else {
-					writer.append(columnSeparator);
-					writer.append(feature.getName());
+			for (MsFeatureCluster fc : currentExperiment.getDuplicateClustersForDataPipeline(dataPipeline)) {
+	
+				for (MsFeature feature : fc.getFeatures()) {
+	
+					if (feature.equals(fc.getPrimaryFeature()))
+						writer.append(feature.getName());
+					else {
+						writer.append(columnSeparator);
+						writer.append(feature.getName());
+					}
 				}
+				writer.append(lineSeparator);
 			}
-			writer.append(lineSeparator);
 		}
-		writer.flush();
-		writer.close();
+		catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	private void writeMPPexportFile() throws Exception {
 
 		taskDescription = "Writing data export file for MPP ...";
-		final Writer writer = new BufferedWriter(new FileWriter(exportFile));
-		final Matrix dataMatrix = currentExperiment.getDataMatrixForDataPipeline(dataPipeline);
-
-		// Create header
+		total = msFeatureSet4export.size();
+		processed = 0;
+		
 		TreeMap<ExperimentalSample, TreeMap<DataPipeline, DataFile[]>>sampleFileMap =
 				DataExportUtils.createSampleFileMapForDataPipeline(
 						currentExperiment, experimentDesignSubset, dataPipeline, namingField);
+		
+		ArrayList<String>output = new ArrayList<String>();
+		String[] header = createMPPexportHeader(sampleFileMap);
+		output.add(StringUtils.join(header, columnSeparator));
+
+		HashMap<DataFile, Integer> fileColumnMap =
+				DataExportUtils.createFileColumnMap(sampleFileMap, metadataColumnCount);
+		
+		final Matrix dataMatrix = currentExperiment.getDataMatrixForDataPipeline(dataPipeline);
+		MsFeature[] featureList = msFeatureSet4export.stream().
+				sorted(new MsFeatureComparator(SortProperty.RT)).toArray(size -> new MsFeature[size]);
+		
+		for( MsFeature msf : featureList){
+
+			String[] line = new String[header.length];
+			addMPPMetadataForFeature(msf, line);
+			addQuantDataForFeature(msf, dataMatrix, sampleFileMap, fileColumnMap, line);
+			output.add(StringUtils.join(line, columnSeparator));
+			processed++;
+		}
+		try {
+			Files.write(exportFile.toPath(), 
+					output, 
+					StandardCharsets.UTF_8,
+					StandardOpenOption.CREATE, 
+					StandardOpenOption.TRUNCATE_EXISTING);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private void addMPPMetadataForFeature(MsFeature msf, String[] line) {
+		
+		String formula = "";
+		String casId = "";
+		String compoundName = msf.getName();
+
+		if(msf.isIdentified()){
+
+			if(msf.getPrimaryIdentity().getCompoundIdentity().getFormula() != null)
+				formula = msf.getPrimaryIdentity().getCompoundIdentity().getFormula();
+
+			if(msf.getDatabaseId(CompoundDatabaseEnum.CAS) != null)
+				casId = msf.getDatabaseId(CompoundDatabaseEnum.CAS);
+
+			compoundName = msf.getPrimaryIdentity().getCompoundName();
+
+			if(msf.getPrimaryIdentity().getMsRtLibraryMatch() != null) {
+
+				AdductMatch tam = msf.getPrimaryIdentity().getMsRtLibraryMatch().getTopAdductMatch();
+				if(tam != null)
+					compoundName += " (" + tam.getLibraryMatch().getName() + ")";
+			}
+		}
+		int columnCount = 0;
+		line[columnCount] = msf.getName();
+		line[++columnCount] = compoundName;
+		line[++columnCount] = formula;
+		line[++columnCount] = casId;
+		line[++columnCount] = mzFormat.format(msf.getNeutralMass());
+		line[++columnCount] = rtFormat.format(msf.getRetentionTime());
+	}
+	
+	private String[]createMPPexportHeader(
+			TreeMap<ExperimentalSample, TreeMap<DataPipeline, DataFile[]>>sampleFileMap){
+		
 		String[] columnList =
 				DataExportUtils.createSampleColumnNameArrayForDataPipeline(
 						sampleFileMap, namingField, dataPipeline);
@@ -794,101 +555,137 @@ public class DataExportTask extends AbstractTask {
 		header[++columnCount] = MPPExportFields.CAS.getName();
 		header[++columnCount] = MPPExportFields.MASS.getName();
 		header[++columnCount] = MPPExportFields.RT.getName();
-
-		HashMap<DataFile, Integer> fileColumnMap =
-				DataExportUtils.createFileColumnMap(sampleFileMap, columnCount);
-
-		HashMap<DataFile, Long>matrixFileMap = new HashMap<DataFile, Long>();
-		fileColumnMap.keySet().stream().forEach(f -> matrixFileMap.put(f, dataMatrix.getRowForLabel(f)));
-
-		if(replaceSpecialCharacters) {
-			for(String columnName : columnList)
-				header[++columnCount] = columnName.replaceAll("\\p{Punct}+", "-");
-		}
-		else {
-			for(String columnName : columnList)
+		metadataColumnCount = columnCount;
+		
+		for(String columnName : columnList) {
+			
+			if(replaceSpecialCharacters)
+				header[++columnCount] = columnName.replaceAll(FIOUtils.punctuationReplacementPattern, "-");
+			else
 				header[++columnCount] = columnName;
 		}
-		writer.append(StringUtils.join(header, columnSeparator));
-		writer.append(lineSeparator);
-		long[] coordinates = new long[2];
-
-		total = msFeatureSet4export.size();
-		processed = 0;
-
-		for( MsFeature msf : msFeatureSet4export){
-
-			String[] line = new String[header.length];
-
-			//	Annotations
-			String formula = "";
-			String casId = "";
-			String compoundName = msf.getName();
-
-			if(msf.isIdentified()){
-
-				if(msf.getPrimaryIdentity().getCompoundIdentity().getFormula() != null)
-					formula = msf.getPrimaryIdentity().getCompoundIdentity().getFormula();
-
-				if(msf.getDatabaseId(CompoundDatabaseEnum.CAS) != null)
-					casId = msf.getDatabaseId(CompoundDatabaseEnum.CAS);
-
-				compoundName = msf.getPrimaryIdentity().getCompoundName();
-
-				if(msf.getPrimaryIdentity().getMsRtLibraryMatch() != null) {
-
-					AdductMatch tam = msf.getPrimaryIdentity().getMsRtLibraryMatch().getTopAdductMatch();
-					if(tam != null)
-						compoundName += " (" + tam.getLibraryMatch().getName() + ")";
-				}
-			}
-			columnCount = 0;
-			line[columnCount] = msf.getName();
-			line[++columnCount] = compoundName;
-			line[++columnCount] = formula;
-			line[++columnCount] = casId;
-			line[++columnCount] = mzFormat.format(msf.getNeutralMass());
-			line[++columnCount] = rtFormat.format(msf.getRetentionTime());
-
-			// Data
-			coordinates[1] = dataMatrix.getColumnForLabel(msf);
-			for (Entry<ExperimentalSample, TreeMap<DataPipeline, DataFile[]>> entry : sampleFileMap.entrySet()) {
-
-				for(DataFile df : entry.getValue().get(dataPipeline)) {
-
-					coordinates[0] = matrixFileMap.get(df);
-					double value = Math.round(dataMatrix.getAsDouble(coordinates));
-					String valueString = Double.toString(value).replaceAll("\n|\r|\\u000a|\\u000d|\t|\\u0009|\\u00ad", " ");
-
-					if (value == 0.0d)
-						valueString = exportMissingAs.equals(MissingExportType.AS_MISSING) ? "" : "0.0";
-
-					line[fileColumnMap.get(df)] = valueString;
-				}
-			}
-			processed++;
-			writer.append(StringUtils.join(line, columnSeparator));
-			writer.append(lineSeparator);
-		}
-		writer.flush();
-		writer.close();
+		return header;
 	}
 
-	private void writeBinnerExportFile() throws Exception {
+	private void writeBinnerExportFile() {
 
 		taskDescription = "Writing data export file for Binner ...";
-		final Writer writer = new BufferedWriter(new FileWriter(exportFile));
-		final Matrix dataMatrix = currentExperiment.getDataMatrixForDataPipeline(dataPipeline);
+		total = msFeatureSet4export.size();
+		processed = 0;
+		
+		TreeMap<ExperimentalSample, TreeMap<DataPipeline, DataFile[]>>sampleFileMap = 
+				DataExportUtils.createSampleFileMapForDataPipeline(
+						currentExperiment, experimentDesignSubset, dataPipeline, namingField);
+		
+		ArrayList<String>output = new ArrayList<String>();
+		
+		String[] header = createBinnerexportHeader(sampleFileMap);		
+		output.add(StringUtils.join(header, columnSeparator));	
 
-		// Create header
-		TreeMap<ExperimentalSample, TreeMap<DataPipeline, DataFile[]>>sampleFileMap
-			= DataExportUtils.createSampleFileMapForDataPipeline(
-					currentExperiment, experimentDesignSubset, dataPipeline, namingField);
+		HashMap<DataFile, Integer> fileColumnMap = 
+				DataExportUtils.createFileColumnMap(sampleFileMap, metadataColumnCount);
+
+		final Matrix dataMatrix = currentExperiment.getDataMatrixForDataPipeline(dataPipeline);
+		MsFeature[] featureList = msFeatureSet4export.stream().
+				sorted(new MsFeatureComparator(SortProperty.RT)).toArray(size -> new MsFeature[size]);
+
+		for( MsFeature msf : featureList){
+
+			String[] line = new String[header.length];
+			addBinnerMetadataForFeature(msf, line);
+			addQuantDataForFeature(msf, dataMatrix, sampleFileMap, fileColumnMap, line);
+			output.add(StringUtils.join(line, columnSeparator));
+			processed++;
+		}
+		try {
+			Files.write(exportFile.toPath(), 
+					output, 
+					StandardCharsets.UTF_8,
+					StandardOpenOption.CREATE, 
+					StandardOpenOption.TRUNCATE_EXISTING);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private void addBinnerMetadataForFeature(MsFeature msf, String[] line) {
+		
+		int columnCount = 0;
+		String compoundName = msf.getBicMetaboliteName();
+		
+		if(msf.isIdentified()){
+
+			compoundName = msf.getPrimaryIdentity().getCompoundName();
+			if(msf.getPrimaryIdentity().getMsRtLibraryMatch() != null) {
+
+				AdductMatch tam = msf.getPrimaryIdentity().getMsRtLibraryMatch().getTopAdductMatch();
+				if(tam != null)
+					compoundName += " (" + tam.getLibraryMatch().getName() + ")";
+			}
+		}
+		double binnerMass =
+			MsUtils.calculateModifiedMz(msf.getNeutralMass(),
+					AdductManager.getDefaultAdductForPolarity(msf.getPolarity()));
+		
+		//	TODO ?? This is for oligomers?
+		if(msf.getSpectrum().getPrimaryAdduct() != null 
+				&& Math.abs(msf.getSpectrum().getPrimaryAdduct().getCharge()) == 1
+				&& msf.getSpectrum().getPrimaryAdduct().getOligomericState() > 1)
+			binnerMass = msf.getMonoisotopicMz();
+			
+		line[columnCount] = msf.getName();
+		line[++columnCount] = compoundName;
+		line[++columnCount] = DataPrefix.MS_LIBRARY_UNKNOWN_TARGET.getName() + 
+								mzFormat.format(binnerMass) + "_" + 
+								rtFormat.format(msf.getRetentionTime());
+		line[++columnCount] = mzFormat.format(msf.getNeutralMass());
+		line[++columnCount] = mzFormat.format(binnerMass);
+		line[++columnCount] = rtFormat.format(msf.getRetentionTime());
+		line[++columnCount] = rtFormat.format(msf.getStatsSummary().getMedianObservedRetention());
+		line[++columnCount] = mzFormat.format(msf.getMonoisotopicMz());
+		line[++columnCount] = Integer.toString(msf.getCharge());
+	}
+	
+	private void addQuantDataForFeature(
+			MsFeature msf, 
+			Matrix dataMatrix, 
+			Map<ExperimentalSample, TreeMap<DataPipeline, DataFile[]>>sampleFileMap,
+			Map<DataFile, Integer> fileColumnMap,
+			String[] line) {
+		
+		long[] coordinates = new long[2];
+		coordinates[1] = dataMatrix.getColumnForLabel(msf);
+		for (Entry<ExperimentalSample, TreeMap<DataPipeline, DataFile[]>> entry : sampleFileMap.entrySet()) {
+
+			for(DataFile df : entry.getValue().get(dataPipeline)) {
+
+				double value = 0.0d;
+				coordinates[0] = dataMatrix.getRowForLabel(df);
+				if(coordinates[0] >= 0) //	TODO find out why it happens - screwed up design cleanup?
+					value = Math.round(dataMatrix.getAsDouble(coordinates));
+				else {
+					System.out.println(df.getName());
+				}
+				String valueString = Double.toString(value).replaceAll("\n|\r|\\u000a|\\u000d|\t|\\u0009|\\u00ad", " ");
+
+				if (Precision.equals(value, 0.0d, Precision.EPSILON)) {
+
+					valueString = "0.0";
+					if (exportMissingAs.equals(MissingExportType.AS_MISSING))
+						valueString = "";
+				}
+				line[fileColumnMap.get(df)] = valueString;
+			}
+		}
+	}
+
+	private String[]createBinnerexportHeader(
+			TreeMap<ExperimentalSample, TreeMap<DataPipeline, DataFile[]>>sampleFileMap){
 
 		String[] columnList =
 			DataExportUtils.createSampleColumnNameArrayForDataPipeline(
 					sampleFileMap, namingField, dataPipeline);
-
+	
 		String[] header = new String[columnList.length + 9];
 		int columnCount = 0;
 		header[columnCount] = BinnerExportFields.FEATURE_NAME.getName();
@@ -900,100 +697,21 @@ public class DataExportTask extends AbstractTask {
 		header[++columnCount] = BinnerExportFields.RT_OBSERVED.getName();
 		header[++columnCount] = BinnerExportFields.MZ.getName();
 		header[++columnCount] = BinnerExportFields.CHARGE.getName();
-
-		HashMap<DataFile, Integer> fileColumnMap = 
-				DataExportUtils.createFileColumnMap(sampleFileMap, columnCount);
-
-		if(replaceSpecialCharacters) {
-			for(String columnName : columnList)
-				header[++columnCount] = columnName.replaceAll("\\p{Punct}+", "-");
-		}
-		else {
-			for(String columnName : columnList)
+		metadataColumnCount = columnCount;
+		
+		for(String columnName : columnList) {
+			
+			if(replaceSpecialCharacters)
+				header[++columnCount] = 
+					columnName.replaceAll(FIOUtils.punctuationReplacementPattern, "-");
+			else
 				header[++columnCount] = columnName;
 		}
-		writer.append(StringUtils.join(header, columnSeparator));
-		writer.append(lineSeparator);
-
-		MsFeature[] featureList = msFeatureSet4export.stream().
-				sorted(new MsFeatureComparator(SortProperty.RT)).toArray(size -> new MsFeature[size]);
-
-		long[] coordinates = new long[2];
-		total = featureList.length;
-		processed = 0;
-
-		for( MsFeature msf : featureList){
-
-			String[] line = new String[header.length];
-			columnCount = 0;
-			//	String compoundName = msf.getName();
-			String compoundName = msf.getBicMetaboliteName();
-			if(msf.isIdentified()){
-
-				compoundName = msf.getPrimaryIdentity().getCompoundName();
-
-				if(msf.getPrimaryIdentity().getMsRtLibraryMatch() != null) {
-
-					AdductMatch tam = msf.getPrimaryIdentity().getMsRtLibraryMatch().getTopAdductMatch();
-					if(tam != null)
-						compoundName += " (" + tam.getLibraryMatch().getName() + ")";
-				}
-			}
-			double binnerMass =
-				MsUtils.calculateModifiedMz(msf.getNeutralMass(),
-						AdductManager.getDefaultAdductForPolarity(msf.getPolarity()));
-			
-			//	TODO ?? This is for oligomers?
-			if(msf.getSpectrum().getPrimaryAdduct() != null 
-					&& Math.abs(msf.getSpectrum().getPrimaryAdduct().getCharge()) == 1
-					&& msf.getSpectrum().getPrimaryAdduct().getOligomericState() > 1)
-				binnerMass = msf.getMonoisotopicMz();
-				
-			line[columnCount] = msf.getName();
-			line[++columnCount] = compoundName;
-			line[++columnCount] = DataPrefix.MS_LIBRARY_UNKNOWN_TARGET.getName() + 
-									mzFormat.format(binnerMass) + "_" + 
-									rtFormat.format(msf.getRetentionTime());
-			line[++columnCount] = mzFormat.format(msf.getNeutralMass());
-			line[++columnCount] = mzFormat.format(binnerMass);
-			line[++columnCount] = rtFormat.format(msf.getRetentionTime());
-			line[++columnCount] = rtFormat.format(msf.getStatsSummary().getMedianObservedRetention());
-			line[++columnCount] = mzFormat.format(msf.getMonoisotopicMz());
-			line[++columnCount] = Integer.toString(msf.getCharge());
-
-			// Data
-			coordinates[1] = dataMatrix.getColumnForLabel(msf);
-//			if(coordinates[1] == -1)	//	TODO find out why it happens
-//				continue;
-
-			for (Entry<ExperimentalSample, TreeMap<DataPipeline, DataFile[]>> entry : sampleFileMap.entrySet()) {
-
-				for(DataFile df : entry.getValue().get(dataPipeline)) {
-
-					double value = 0.0d;
-					coordinates[0] = dataMatrix.getRowForLabel(df);
-					if(coordinates[0] >= 0) //	TODO find out why it happens - screwed up design cleanup?
-						value = Math.round(dataMatrix.getAsDouble(coordinates));
-					else {
-						System.out.println(df.getName());
-					}
-					String valueString = Double.toString(value).replaceAll("\n|\r|\\u000a|\\u000d|\t|\\u0009|\\u00ad", " ");
-
-					if (value == 0.0d) {
-
-						valueString = "0.0";
-						if (exportMissingAs.equals(MissingExportType.AS_MISSING))
-							valueString = "";
-					}
-					line[fileColumnMap.get(df)] = valueString;
-				}
-			}
-			processed++;
-			writer.append(StringUtils.join(line, columnSeparator));
-			writer.append(lineSeparator);
-		}
-		writer.flush();
-		writer.close();
+		return header;
+	}
+	
+	private void writeMetabCombinerExportFile() {
+		
 	}
 	
 	private void writeFeatureQCDataExportFile() {

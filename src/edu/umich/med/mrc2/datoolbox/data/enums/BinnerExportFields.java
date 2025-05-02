@@ -24,11 +24,11 @@ package edu.umich.med.mrc2.datoolbox.data.enums;
 public enum BinnerExportFields {
 
 	FEATURE_NAME("Feature name"),
-	COMPOUND_NAME("Compound name"),
+	//	COMPOUND_NAME("Compound name"),
 	METABOLITE_NAME("Metabolite_name"),
 	BINNER_NAME("Binner name"),
 	NEUTRAL_MASS("Neutral mass"),
-	BINNER_MASS("Binner mass"),
+	//	BINNER_MASS("Binner mass"),
 	BINNER_MZ("Binner M/Z"),
 	RT_EXPECTED("RT expected"),
 	RT_OBSERVED("RT observed"),

@@ -19,9 +19,10 @@
  *
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.gui.idworks.binner;
+package edu.umich.med.mrc2.datoolbox.gui.binner;
 
 import java.awt.BorderLayout;
+import java.util.Collection;
 
 import javax.swing.Icon;
 import javax.swing.JScrollPane;
@@ -57,6 +58,11 @@ public class DockableBinnerAnnotationDetailsPanel extends DefaultSingleCDockable
 	public void setTableModelFromBinnerAnnotationCluster(
 			BinnerBasedMsFeatureInfoBundleCluster baCluster) {
 		binnerAnnotationDetailsTable.setTableModelFromBinnerAnnotationCluster(baCluster);
+	}
+	
+	public void setTableModelFromBinnerAnnotations(
+			Collection<BinnerAnnotation> annotations) {
+		binnerAnnotationDetailsTable.setTableModelFromBinnerAnnotations(annotations);
 	}
 
 	public BinnerAnnotation getSelectedBinnerAnnotation() {
