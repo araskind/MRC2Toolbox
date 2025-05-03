@@ -73,6 +73,7 @@ import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.enums.ExperimentDesignFields;
 import edu.umich.med.mrc2.datoolbox.data.enums.MPPExportFields;
 import edu.umich.med.mrc2.datoolbox.data.enums.MSFeatureSetStatisticalParameters;
+import edu.umich.med.mrc2.datoolbox.data.enums.MetabCombinerExportFields;
 import edu.umich.med.mrc2.datoolbox.data.enums.MissingExportType;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
@@ -94,7 +95,10 @@ public class DataExportTask extends AbstractTask {
 	 * Comment
 	 * */
 
-	private static final String lineSeparator = System.getProperty("line.separator");
+	private static final String lineSeparator = 
+			System.getProperty("line.separator");
+	private static final String doubleValueCleanupString = 
+			"\n|\r|\\u000a|\\u000d|\t|\\u0009|\\u00ad";
 	private File exportFile;
 	private MainActionCommands exportType;
 	private MissingExportType exportMissingAs;
@@ -279,7 +283,7 @@ public class DataExportTask extends AbstractTask {
 			= DataExportUtils.createSampleFileMapForDataPipeline(
 					currentExperiment, experimentDesignSubset, dataPipeline, namingField);
 
-		String[] header = createBinnerexportHeader(sampleFileMap);
+		String[] header = createBinnerExportHeader(sampleFileMap);
 		String headerString = StringUtils.join(header, columnSeparator);
 		mzDataToExport.add(headerString);
 		rtDataToExport.add(headerString);
@@ -333,10 +337,11 @@ public class DataExportTask extends AbstractTask {
 						if(value.getQualityScore() > 0)
 							qualString = MRC2ToolBoxConfiguration.getPpmFormat().format(value.getQualityScore());
 					}
-					mzLine[fileColumnMap.get(df)] = mzString;
-					rtLine[fileColumnMap.get(df)] = rtString;
-					pwLine[fileColumnMap.get(df)] = pwString;
-					qualLine[fileColumnMap.get(df)] = qualString;
+					int idx = fileColumnMap.get(df);
+					mzLine[idx] = mzString;
+					rtLine[idx] = rtString;
+					pwLine[idx] = pwString;
+					qualLine[idx] = qualString;
 				}
 			}	
 			mzDataToExport.add(StringUtils.join(mzLine, columnSeparator));
@@ -579,7 +584,7 @@ public class DataExportTask extends AbstractTask {
 		
 		ArrayList<String>output = new ArrayList<String>();
 		
-		String[] header = createBinnerexportHeader(sampleFileMap);		
+		String[] header = createBinnerExportHeader(sampleFileMap);		
 		output.add(StringUtils.join(header, columnSeparator));	
 
 		HashMap<DataFile, Integer> fileColumnMap = 
@@ -666,7 +671,7 @@ public class DataExportTask extends AbstractTask {
 				else {
 					System.out.println(df.getName());
 				}
-				String valueString = Double.toString(value).replaceAll("\n|\r|\\u000a|\\u000d|\t|\\u0009|\\u00ad", " ");
+				String valueString = Double.toString(value).replaceAll(doubleValueCleanupString, " ");
 
 				if (Precision.equals(value, 0.0d, Precision.EPSILON)) {
 
@@ -679,7 +684,7 @@ public class DataExportTask extends AbstractTask {
 		}
 	}
 
-	private String[]createBinnerexportHeader(
+	private String[]createBinnerExportHeader(
 			TreeMap<ExperimentalSample, TreeMap<DataPipeline, DataFile[]>>sampleFileMap){
 
 		String[] columnList =
@@ -712,6 +717,88 @@ public class DataExportTask extends AbstractTask {
 	
 	private void writeMetabCombinerExportFile() {
 		
+		taskDescription = "Writing data export file for MetabCombiner ...";
+		total = msFeatureSet4export.size();
+		processed = 0;
+		
+		TreeMap<ExperimentalSample, TreeMap<DataPipeline, DataFile[]>>sampleFileMap = 
+				DataExportUtils.createSampleFileMapForDataPipeline(
+						currentExperiment, experimentDesignSubset, dataPipeline, namingField);
+		
+		ArrayList<String>output = new ArrayList<String>();
+		
+		String[] header = createMetabCombinerExportHeader(sampleFileMap);		
+		output.add(StringUtils.join(header, columnSeparator));	
+
+		HashMap<DataFile, Integer> fileColumnMap = 
+				DataExportUtils.createFileColumnMap(sampleFileMap, metadataColumnCount);
+
+		final Matrix dataMatrix = currentExperiment.getDataMatrixForDataPipeline(dataPipeline);
+		MsFeature[] featureList = msFeatureSet4export.stream().
+				sorted(new MsFeatureComparator(SortProperty.RT)).toArray(size -> new MsFeature[size]);
+
+		for( MsFeature msf : featureList){
+
+			String[] line = new String[header.length];
+			addMetabCombinerMetadataForFeature(msf, line);
+			addQuantDataForFeature(msf, dataMatrix, sampleFileMap, fileColumnMap, line);
+			output.add(StringUtils.join(line, columnSeparator));
+			processed++;
+		}
+		try {
+			Files.write(exportFile.toPath(), 
+					output, 
+					StandardCharsets.UTF_8,
+					StandardOpenOption.CREATE, 
+					StandardOpenOption.TRUNCATE_EXISTING);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	private String[]createMetabCombinerExportHeader(
+			TreeMap<ExperimentalSample, TreeMap<DataPipeline, DataFile[]>>sampleFileMap){
+
+		String[] columnList =
+			DataExportUtils.createSampleColumnNameArrayForDataPipeline(
+					sampleFileMap, namingField, dataPipeline);
+	
+		String[] header = new String[columnList.length + 4];
+		int columnCount = 0;
+		header[columnCount] = MetabCombinerExportFields.id.name();
+		header[++columnCount] = MetabCombinerExportFields.mz.name();
+		header[++columnCount] = MetabCombinerExportFields.rt.name();
+		header[++columnCount] = MetabCombinerExportFields.adduct.name();
+		metadataColumnCount = columnCount;
+		
+		for(String columnName : columnList) {
+			
+			if(replaceSpecialCharacters)
+				header[++columnCount] = 
+					columnName.replaceAll(FIOUtils.punctuationReplacementPattern, "-");
+			else
+				header[++columnCount] = columnName;
+		}
+		return header;
+	}
+		
+	private void addMetabCombinerMetadataForFeature(MsFeature msf, String[] line) {
+		
+		int columnCount = 0;
+		line[columnCount] = msf.getName();
+		line[++columnCount] = mzFormat.format(msf.getMonoisotopicMz());
+		line[++columnCount] = rtFormat.format(msf.getStatsSummary().getMedianObservedRetention());
+		String adductName = "";
+		if(msf.getBinnerAnnotation() != null)
+			adductName = msf.getBinnerAnnotation().getCleanAnnotation();
+		
+		if((adductName == null || adductName.isBlank()) && msf.getSpectrum().getPrimaryAdduct() != null)
+			adductName = msf.getSpectrum().getPrimaryAdduct().getName();
+		
+		if(adductName == null)
+			adductName = "";
+		
+		line[++columnCount] = adductName;
 	}
 	
 	private void writeFeatureQCDataExportFile() {
@@ -861,7 +948,7 @@ public class DataExportTask extends AbstractTask {
 					}
 					else {
 						//	TODO This may throw some exceptions if clean string is not a proper double
-						String cleanValueString = Double.toString(value).replaceAll("\n|\r|\\u000a|\\u000d|\t|\\u0009|\\u00ad", " ");
+						String cleanValueString = Double.toString(value).replaceAll(doubleValueCleanupString, " ");
 						valueString = peakAreaFormat.format(Double.valueOf(cleanValueString));
 					}
 					line[fileColumnMap.get(df)] = valueString;
@@ -968,7 +1055,7 @@ public class DataExportTask extends AbstractTask {
 
 							coordinates[1] = matrixFeatureMap.get(msf);
 							double value = Math.round(dataMatrix.getAsDouble(coordinates));
-							String valueString = Double.toString(value).replaceAll("\n|\r|\\u000a|\\u000d|\t|\\u0009|\\u00ad", " ");
+							String valueString = Double.toString(value).replaceAll(doubleValueCleanupString, " ");
 
 							if (value == 0.0d)
 								valueString = exportMissingAs.equals(MissingExportType.AS_MISSING) ? "" : "0.0";
