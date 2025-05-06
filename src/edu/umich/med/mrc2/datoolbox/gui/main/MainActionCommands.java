@@ -165,6 +165,7 @@ public enum MainActionCommands {
 	LOAD_DATA_FROM_EXCEL_FILE_COMMAND("Load quantitative data from Excel file"),
 	IMPORT_DATA_FROM_EXCEL_WORKSHEET_COMMAND("Import quantitative data from Excel worksheet"),
 	IMPORT_BINNER_ANNOTATIONS_COMMAND("Import Binner annotations"),
+	CLEAR_BINNER_ANNOTATIONS_COMMAND("Clear Binner annotations"),
 	LOAD_LIBRARY_COMMAND("Load compound library"),
 	LOAD_WORKLIST_COMMAND("Load assay worklist"),
 	ADD_WORKLIST_COMMAND("Add assay worklist data"),

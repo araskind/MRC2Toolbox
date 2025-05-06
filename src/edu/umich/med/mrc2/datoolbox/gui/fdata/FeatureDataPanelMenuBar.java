@@ -48,6 +48,7 @@ public class FeatureDataPanelMenuBar extends CommonMenuBar {
 	private static final Icon loadPlainDataFileIconSmall = GuiUtils.getIcon("importTextfile", 16);
 	private static final Icon loadMultiFileIcon = GuiUtils.getIcon("importMultifile", 24);	
 	private static final Icon importFromBinnerIcon = GuiUtils.getIcon("importFromBinner", 24);
+	private static final Icon clearBinnerAnnotationsIcon = GuiUtils.getIcon("clearBinnerAnnotations", 24);
 	private static final Icon addMultiFileIcon = GuiUtils.getIcon("addMultifile", 24);
 	private static final Icon addPeakQualityDataIcon = GuiUtils.getIcon("addStandardSample", 24);	
 	private static final Icon loadFromExcelIcon = GuiUtils.getIcon("excelImport", 24);
@@ -110,7 +111,8 @@ public class FeatureDataPanelMenuBar extends CommonMenuBar {
 		loadFromTextMenuItem,
 		loadFromExcelMenuItem,
 		loadLibraryDataMenuItem,
-		importBinnerAnnotationsMenuItem;
+		importBinnerAnnotationsMenuItem,
+		clearBinnerAnnotationsMenuItem;
 
 	// Statistics items
 	private JMenuItem
@@ -198,6 +200,10 @@ public class FeatureDataPanelMenuBar extends CommonMenuBar {
 		importBinnerAnnotationsMenuItem = addItem(loadDataMenu,
 				MainActionCommands.IMPORT_BINNER_ANNOTATIONS_COMMAND, 
 				importFromBinnerIcon);
+		clearBinnerAnnotationsMenuItem = addItem(loadDataMenu,
+				MainActionCommands.CLEAR_BINNER_ANNOTATIONS_COMMAND, 
+				clearBinnerAnnotationsIcon);
+		
 		
 		add(loadDataMenu);
 

@@ -87,6 +87,9 @@ public class InformationDialog extends JDialog implements ActionListener {
 		setVisible(true);
 	}
 
+	/**
+	 * @wbp.parser.constructor
+	 */
 	public InformationDialog(
 			String title, 
 			String message, 

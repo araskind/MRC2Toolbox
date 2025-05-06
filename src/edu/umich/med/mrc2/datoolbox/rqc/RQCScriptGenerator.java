@@ -92,14 +92,15 @@ public class RQCScriptGenerator {
 			
 			String dataObject = dataObjectPrefix + ".data";
 			rscriptParts.add(dataObject + " <- read.delim(\"" + 
-					io.getField(SummaryInputColumns.PEAK_AREAS) + "\", check.names=FALSE)"
-							+ " %>% select(-any_of(c(" + columnListToExclude + ")))");
-			rscriptParts.add("names(" + dataObject + ")[names(" + dataObject + ") == \"" 
-					+ BinnerExportFields.FEATURE_NAME.getName() + "\"] <- \"feature\"");
-			rscriptParts.add("names(" + dataObject + ")[names(" + dataObject + ") == \"" 
-					+ BinnerExportFields.RT_OBSERVED.getName() + "\"] <- \"rt\"");
-			rscriptParts.add("names(" + dataObject + ")[names(" + dataObject + ") == \"" 
-					+ BinnerExportFields.MZ.getName() + "\"] <- \"mz\"");	
+					io.getField(SummaryInputColumns.PEAK_AREAS) + "\", check.names=FALSE)");
+			
+//							+ " %>% select(-any_of(c(" + columnListToExclude + ")))");
+//			rscriptParts.add("names(" + dataObject + ")[names(" + dataObject + ") == \"" 
+//					+ BinnerExportFields.FEATURE_NAME.getName() + "\"] <- \"feature\"");
+//			rscriptParts.add("names(" + dataObject + ")[names(" + dataObject + ") == \"" 
+//					+ BinnerExportFields.RT_OBSERVED.getName() + "\"] <- \"rt\"");
+//			rscriptParts.add("names(" + dataObject + ")[names(" + dataObject + ") == \"" 
+//					+ BinnerExportFields.MZ.getName() + "\"] <- \"mz\"");
 			
 			//	Write out clean data for final join and record in the data frame
 			String data4join = dataObjectPrefix + cleanDataFileSuffix;
@@ -108,13 +109,18 @@ public class RQCScriptGenerator {
 			rscriptParts.add("clean.data.map.df[nrow(clean.data.map.df) + 1,] "
 					+ "= list(data.set = \"" + dataObjectPrefix + "\", file.name = \"" + data4join + "\")"); 
 			
-			rscriptParts.add(dataObject + " <- " + dataObject  
-					+ " %>% select(feature, mz, rt, contains(\"CS00000MP\"))");			
+//			rscriptParts.add(dataObject + " <- " + dataObject  
+//					+ " %>% select(feature, mz, rt, contains(\"CS00000MP\"))");	
+			
 			rscriptParts.add(dataObject + " <- " + dataObject + "[!(" + dataObject + "$rt == \"NaN\"),]");
 			
 			String metabDataObject = dataObjectPrefix + ".metabData";
+//			rscriptParts.add(metabDataObject + " <- metabData(" + dataObject 
+//					+ ", id = \"feature\", measure = \"median\", zero = TRUE, duplicate = opts.duplicate())");
+			
 			rscriptParts.add(metabDataObject + " <- metabData(" + dataObject 
-					+ ", id = \"feature\", measure = \"median\", zero = TRUE, duplicate = opts.duplicate())");
+					+ ", samples = \"CS00000MP\", measure = \"median\", zero = TRUE, duplicate = opts.duplicate())");
+			
 			metabDataObjectMap.put(io, metabDataObject);
 			
 			String statsObject = dataObjectPrefix + ".stats";

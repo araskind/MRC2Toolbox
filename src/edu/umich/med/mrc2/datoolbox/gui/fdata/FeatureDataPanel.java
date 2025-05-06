@@ -438,6 +438,9 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 			if (command.equals(MainActionCommands.IMPORT_BINNER_ANNOTATIONS_COMMAND.getName()))
 				importBinnerAnnotations();
 			
+			if (command.equals(MainActionCommands.CLEAR_BINNER_ANNOTATIONS_COMMAND.getName()))
+				clearBinnerAnnotations();
+			
 			if (command.equals(MainActionCommands.SHOW_FEATURE_FILTER_COMMAND.getName()))
 				showFeatureFilter();
 				
@@ -1239,6 +1242,14 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 	}
 
 	private void importBinnerAnnotations() {
+		
+		if(hasBinnerAnnotations()) {
+			int res = MessageDialog.showChoiceWithWarningMsg(
+					"Do you want to clear existing Binner annotations?", 
+					this.getContentPane());
+			if(res != JOptionPane.YES_OPTION) 
+				return;
+		}
 
 		JnaFileChooser fc = new JnaFileChooser(currentExperiment.getDataDirectory());
 		fc.setMode(JnaFileChooser.Mode.Files);
@@ -1261,6 +1272,33 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 				MRC2ToolBoxCore.getTaskController().addTask(task);
 			}
 		}	
+	}
+	
+	private void clearBinnerAnnotations() {
+		
+		if(hasBinnerAnnotations()) {
+			int res = MessageDialog.showChoiceWithWarningMsg(
+					"Do you want to clear existing Binner annotations?", 
+					this.getContentPane());
+			if(res == JOptionPane.YES_OPTION) {
+				
+				currentExperiment.getMsFeaturesForDataPipeline(activeDataPipeline).
+					stream().forEach(f -> f.setBinnerAnnotation(null));
+				resetFeatureTable();
+			}
+		}
+	}
+	
+	private boolean hasBinnerAnnotations() {
+		
+		if(currentExperiment == null || activeDataPipeline == null)
+			return false;
+		
+		MsFeature annotatted = 
+				currentExperiment.getMsFeaturesForDataPipeline(activeDataPipeline).
+				stream().filter(f -> Objects.nonNull(f.getBinnerAnnotation())).
+				findFirst().orElse(null);
+		return (annotatted != null);
 	}
 	
 	public synchronized void clearPanel() {
@@ -1688,11 +1726,26 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 		}
 	}
 	
-	private void finalizeBinnerAnnotationsImportTask(ImportBinnerAnnotationsForUntargetedDataTask source) {
-		// TODO Auto-generated method stub
-		MessageDialog.showInfoMsg(
-				"Binner Annotations Import finished.", 
-				this.getContentPane());
+	private void finalizeBinnerAnnotationsImportTask(ImportBinnerAnnotationsForUntargetedDataTask task) {
+		
+		Collection<BinnerAnnotation>unassignedAnnotations = task.getUnassignedAnnotations();
+		if(unassignedAnnotations.isEmpty()) {
+			MessageDialog.showInfoMsg(
+					"Binner Annotations Import finished.", 
+					this.getContentPane());
+		}
+		else {
+			List<String>parts = unassignedAnnotations.stream().
+				map(a -> (a.getFeatureName() + "\t" + a.getAnnotation())).
+				collect(Collectors.toList());
+			String details = StringUtils.join(parts, "\n");
+			InformationDialog id = new InformationDialog(
+					"Unassigned Binner Annotations", 
+					"The following Binner annotations could not be matched to any of the features:", 
+					details, 
+					this.getContentPane());
+		}
+		resetFeatureTable();
 	}
 
 	private void finalizePeakQualityImportTask(MiltiCefPeakQualityImportTask source) {

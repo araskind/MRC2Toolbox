@@ -23,7 +23,11 @@ package edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Set;
+
+import org.apache.commons.collections4.CollectionUtils;
 
 import edu.umich.med.mrc2.datoolbox.data.BinnerAnnotation;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
@@ -37,6 +41,7 @@ public class ImportBinnerAnnotationsForUntargetedDataTask extends BinnerReportPa
 
 	private DataAnalysisProject currentExperiment;
 	private DataPipeline activeDataPipeline; 
+	private Collection<BinnerAnnotation> unassignedAnnotations;
 	
 	public ImportBinnerAnnotationsForUntargetedDataTask(
 			File binnerDataFile,
@@ -73,6 +78,9 @@ public class ImportBinnerAnnotationsForUntargetedDataTask extends BinnerReportPa
 		taskDescription = "Attaching Binner annotations to MS features ...";
 		total = binnerAnnotations.size();
 		processed = 0;
+		Collection<BinnerAnnotation> assignedAnnotations = new ArrayList<BinnerAnnotation>();
+		unassignedAnnotations = new ArrayList<BinnerAnnotation>();
+		//	unassignedAnnotations
 		Set<MsFeature> features = 
 				currentExperiment.getMsFeaturesForDataPipeline(activeDataPipeline);
 		for(BinnerAnnotation ba : binnerAnnotations) {
@@ -80,11 +88,20 @@ public class ImportBinnerAnnotationsForUntargetedDataTask extends BinnerReportPa
 			MsFeature target = features.stream().
 					filter(f -> f.getName().equals(ba.getFeatureName())).
 					findFirst().orElse(null);
-			if(target != null)
+			if(target != null) {
 				target.setBinnerAnnotation(ba);
-			
+				assignedAnnotations.add(ba);
+			}			
 			processed++;
-		}		
+		}
+		if(assignedAnnotations.isEmpty()) {
+			errorMessage = "No annotations matching to any of the features";
+			setStatus(TaskStatus.ERROR);
+			return;
+		}
+		if(binnerAnnotations.size() > assignedAnnotations.size())			
+			unassignedAnnotations = 
+					CollectionUtils.subtract(binnerAnnotations, assignedAnnotations);		
 	}
 
 	@Override
@@ -94,6 +111,10 @@ public class ImportBinnerAnnotationsForUntargetedDataTask extends BinnerReportPa
 				binnerDataFile,
 				currentExperiment,
 				activeDataPipeline);
+	}
+
+	public Collection<BinnerAnnotation> getUnassignedAnnotations() {
+		return unassignedAnnotations;
 	}
 }
 

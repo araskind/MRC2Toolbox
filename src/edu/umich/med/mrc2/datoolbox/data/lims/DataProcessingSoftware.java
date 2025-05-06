@@ -27,6 +27,7 @@ import org.jdom2.Element;
 
 import edu.umich.med.mrc2.datoolbox.data.InstrumentPlatform;
 import edu.umich.med.mrc2.datoolbox.data.enums.SoftwareType;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
 import edu.umich.med.mrc2.datoolbox.project.store.DataProcessingSoftwareFields;
 import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
@@ -194,8 +195,15 @@ public class DataProcessingSoftware implements Serializable, Comparable<DataProc
 		ProjectStoreUtils.addDescriptionElement(
 				description, dataProcessingSoftwareElement);
 		
-		dataProcessingSoftwareElement.setAttribute(
-				DataProcessingSoftwareFields.SoftwareType.name(), softwareType.name());
+		if(softwareType == null) {
+			DataProcessingSoftware dbSoft = IDTDataCache.getSoftwareById(id);
+			if(dbSoft != null)
+				softwareType = dbSoft.getSoftwareType();
+		}
+		if(softwareType != null) {
+			dataProcessingSoftwareElement.setAttribute(
+					DataProcessingSoftwareFields.SoftwareType.name(), softwareType.name());
+		}
 		if(vendor != null)
 			dataProcessingSoftwareElement.addContent(vendor.getXmlElement());
 		
