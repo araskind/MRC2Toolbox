@@ -56,7 +56,8 @@ public class DataFileSelectionPanel extends JPanel implements ValidatableForm{
 	public Collection<String> validateFormData() {
 
 		Collection<String>errors = new ArrayList<String>();
-		
+		if(getEnabledFiles().isEmpty())
+			errors.add("No data files selected");
 		
 		return errors;
 	}

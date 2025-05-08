@@ -45,5 +45,4 @@ public class AnnotationsSelectorPanel extends JPanel implements ValidatableForm{
 		
 		return errors;
 	}
-
 }
