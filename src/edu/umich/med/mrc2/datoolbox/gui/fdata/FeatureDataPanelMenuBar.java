@@ -77,10 +77,8 @@ public class FeatureDataPanelMenuBar extends CommonMenuBar {
 	private static final Icon exportResultsIcon = GuiUtils.getIcon("export", 24);
 	private static final Icon exportResults4MPPIcon = GuiUtils.getIcon("export4MPP", 24);
 	private static final Icon exportResults4BinnerIcon = GuiUtils.getIcon("export4Binner", 24);
-	private static final Icon exportResults4RIcon = GuiUtils.getIcon("export4R", 24);	
-	
-	private static final Icon exportMetabCombinerIcon = GuiUtils.getIcon("exportMetabCombiner", 24);
-	
+	private static final Icon exportResults4RIcon = GuiUtils.getIcon("export4R", 24);		
+	private static final Icon exportMetabCombinerIcon = GuiUtils.getIcon("exportMetabCombiner", 24);	
 	private static final Icon exportResultsIconSmall = GuiUtils.getIcon("export", 16);
 	private static final Icon exportExcelIcon = GuiUtils.getIcon("excel", 24);
 	private static final Icon exportMwTabIcon = GuiUtils.getIcon("mwTabReport", 24);
@@ -91,7 +89,10 @@ public class FeatureDataPanelMenuBar extends CommonMenuBar {
 	private static final Icon mzFrequencyIcon = GuiUtils.getIcon("mzFrequency", 24);
 	private static final Icon exportStatsIcon = GuiUtils.getIcon("exportStats", 24);
 	private static final Icon multiSpectraIcon = GuiUtils.getIcon("multiSpectra", 24);
-	private static final Icon exportAuxDataMatrixIcon = GuiUtils.getIcon("exportAuxDataMatrix", 24);
+	private static final Icon exportAuxDataMatrixIcon = GuiUtils.getIcon("exportAuxDataMatrix", 24);	
+	private static final Icon analysisIconSmall = GuiUtils.getIcon("script", 16);
+	private static final Icon binnerAnalysisIcon = GuiUtils.getIcon("setupBinnerAnnotations", 24);
+	
 
 	// Menus
 	private JMenu
@@ -136,7 +137,8 @@ public class FeatureDataPanelMenuBar extends CommonMenuBar {
 		searchLibraryMenuItem,
 		searchDatabaseMenuItem,
 		showMissingIdsMenuItem,
-		clearIdentificationsMenuItem;
+		clearIdentificationsMenuItem,
+		binnerAnalysisMenuItem;
 	
 	// Export items
 	private JMenuItem
@@ -194,16 +196,6 @@ public class FeatureDataPanelMenuBar extends CommonMenuBar {
 		loadFromExcelMenuItem = addItem(loadDataMenu,
 				MainActionCommands.LOAD_DATA_FROM_EXCEL_FILE_COMMAND, 
 				loadFromExcelIcon);
-		
-		loadDataMenu.addSeparator();
-		
-		importBinnerAnnotationsMenuItem = addItem(loadDataMenu,
-				MainActionCommands.IMPORT_BINNER_ANNOTATIONS_COMMAND, 
-				importFromBinnerIcon);
-		clearBinnerAnnotationsMenuItem = addItem(loadDataMenu,
-				MainActionCommands.CLEAR_BINNER_ANNOTATIONS_COMMAND, 
-				clearBinnerAnnotationsIcon);
-		
 		
 		add(loadDataMenu);
 
@@ -284,6 +276,18 @@ public class FeatureDataPanelMenuBar extends CommonMenuBar {
 		clearIdentificationsMenuItem = addItem(identificationMenu,
 				MainActionCommands.CLEAR_IDENTIFICATIONS_COMMAND, 
 				clearIdentificationsIcon);
+		
+		identificationMenu.addSeparator();
+		
+		binnerAnalysisMenuItem = addItem(identificationMenu,
+				MainActionCommands.BINNER_ANALYSIS_SETUP_COMMAND, 
+				binnerAnalysisIcon);		
+		importBinnerAnnotationsMenuItem = addItem(identificationMenu,
+				MainActionCommands.IMPORT_BINNER_ANNOTATIONS_COMMAND, 
+				importFromBinnerIcon);
+		clearBinnerAnnotationsMenuItem = addItem(identificationMenu,
+				MainActionCommands.CLEAR_BINNER_ANNOTATIONS_COMMAND, 
+				clearBinnerAnnotationsIcon);
 		
 		add(identificationMenu);
 		

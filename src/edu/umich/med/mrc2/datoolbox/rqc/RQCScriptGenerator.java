@@ -104,7 +104,7 @@ public class RQCScriptGenerator {
 			
 			//	Write out clean data for final join and record in the data frame
 			String data4join = dataObjectPrefix + cleanDataFileSuffix;
-			rscriptParts.add("write.table(" + dataObject + "[,-c(2,3)], "
+			rscriptParts.add("write.table(" + dataObject + "[,-c(2:4)], "
 					+ "file = \"" + data4join + "\", quote = F, sep = \"\\t\", na = \"\", row.names = FALSE)");
 			rscriptParts.add("clean.data.map.df[nrow(clean.data.map.df) + 1,] "
 					+ "= list(data.set = \"" + dataObjectPrefix + "\", file.name = \"" + data4join + "\")"); 
@@ -310,10 +310,10 @@ public class RQCScriptGenerator {
 				+ io2.getField(SummaryInputColumns.BATCH);
 		
 		String alignmentMetaDataObject = xPrefix + "." + yPrefix + "alignmentMetaData";
-		rscriptParts.add(alignmentMetaDataObject + " <- data.report %>% select(idx,mzx,rtx,idy,mzy,rty)");
-		rscriptParts.add("colnames(" + alignmentMetaDataObject + ") <- c(\""
-				+ xPrefix + "\", \"mz." + xPrefix + "\", \"rt." + xPrefix + "\",\"" 
-				+ yPrefix + "\", \"mz." + yPrefix + "\", \"rt." + yPrefix +"\")");
+		rscriptParts.add(alignmentMetaDataObject + " <- data.report %>% select(idx,mzx,rtx,adductx,idy,mzy,rty,adducty)");
+		rscriptParts.add("colnames(" + alignmentMetaDataObject + ") <- "
+				+ "c(\"" + xPrefix + "\", \"mz." + xPrefix + "\", \"rt." + xPrefix + "\", \"adductx." + xPrefix + "\", "
+				  + "\"" + yPrefix + "\", \"mz." + yPrefix + "\", \"rt." + yPrefix + "\", \"adducty." + yPrefix + "\")");
 		
 		//	Add line to summary data frame
 		rscriptParts.add("alignment.summary.df[nrow(alignment.summary.df) + 1,] "

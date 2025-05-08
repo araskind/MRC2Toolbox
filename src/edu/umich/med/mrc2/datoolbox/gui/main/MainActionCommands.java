@@ -164,8 +164,6 @@ public enum MainActionCommands {
 	LOAD_MSMS_DATA_FROM_MULTIFILES_COMMAND("Load MSMS data from multiple files"),
 	LOAD_DATA_FROM_EXCEL_FILE_COMMAND("Load quantitative data from Excel file"),
 	IMPORT_DATA_FROM_EXCEL_WORKSHEET_COMMAND("Import quantitative data from Excel worksheet"),
-	IMPORT_BINNER_ANNOTATIONS_COMMAND("Import Binner annotations"),
-	CLEAR_BINNER_ANNOTATIONS_COMMAND("Clear Binner annotations"),
 	LOAD_LIBRARY_COMMAND("Load compound library"),
 	LOAD_WORKLIST_COMMAND("Load assay worklist"),
 	ADD_WORKLIST_COMMAND("Add assay worklist data"),
@@ -1402,6 +1400,12 @@ public enum MainActionCommands {
 	CLEAR_RECENT_EXPERIMENTS_COMMAND("Clear recent experiments"),
 	CLEAR_RECENT_FEATURE_COLLECTIONS_COMMAND("Clear recent feature collections"),
 	CLEAR_RECENT_FEATURE_CLUSTER_DATA_SETS_COMMAND("Clear recent feature cluster data sets"),
+	
+	//	Binner
+	BINNER_ANALYSIS_SETUP_COMMAND("Setup Binner analysis"),
+	GENERATE_BINNER_ANNOTATIONS_COMMAND("Generate Binner annotations"),
+	IMPORT_BINNER_ANNOTATIONS_COMMAND("Import Binner annotations"),
+	CLEAR_BINNER_ANNOTATIONS_COMMAND("Clear Binner annotations"),
 	
 	//	Debug 
 	GET_DATA_MATRIX_FOR_FEATURE_SET_AND_DESIGN("Get matrix for feature subset"),

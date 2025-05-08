@@ -19,7 +19,7 @@
  *
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.gui.binner;
+package edu.umich.med.mrc2.datoolbox.gui.binner.display;
 
 import java.util.ArrayList;
 import java.util.Collection;

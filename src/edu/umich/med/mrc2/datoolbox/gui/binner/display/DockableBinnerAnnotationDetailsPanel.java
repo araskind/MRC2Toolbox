@@ -19,7 +19,7 @@
  *
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.gui.binner;
+package edu.umich.med.mrc2.datoolbox.gui.binner.display;
 
 import java.awt.BorderLayout;
 import java.util.Collection;

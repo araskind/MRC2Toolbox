@@ -116,7 +116,7 @@ import edu.umich.med.mrc2.datoolbox.database.idt.IdLevelUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.MSMSClusteringDBUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.StandardAnnotationUtils;
 import edu.umich.med.mrc2.datoolbox.gui.annotation.DockableObjectAnnotationPanel;
-import edu.umich.med.mrc2.datoolbox.gui.binner.DockableBinnerAnnotationDetailsPanel;
+import edu.umich.med.mrc2.datoolbox.gui.binner.display.DockableBinnerAnnotationDetailsPanel;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignSubsetEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.FeatureSetEvent;

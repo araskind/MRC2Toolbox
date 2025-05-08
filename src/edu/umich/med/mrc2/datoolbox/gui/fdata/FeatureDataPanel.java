@@ -76,7 +76,8 @@ import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.database.idt.MSRTLibraryUtils;
 import edu.umich.med.mrc2.datoolbox.gui.annotation.DockableObjectAnnotationPanel;
-import edu.umich.med.mrc2.datoolbox.gui.binner.DockableBinnerAnnotationDetailsPanel;
+import edu.umich.med.mrc2.datoolbox.gui.binner.control.BinnerProcessingSetupDialog;
+import edu.umich.med.mrc2.datoolbox.gui.binner.display.DockableBinnerAnnotationDetailsPanel;
 import edu.umich.med.mrc2.datoolbox.gui.clustertree.FilterTreeDialog;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignSubsetEvent;
@@ -186,6 +187,8 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 	private MzFrequencyAnalysisSetupDialog mzFrequencyAnalysisSetupDialog;
 	private ExperimentPooledSampleManagerDialog experimentPooledSampleManagerDialog;
 	private MultiMSFeatureQCPlotFrame multiSpectraPlotFrame;
+	
+	private BinnerProcessingSetupDialog binnerProcessingSetupDialog;
 
 	private static final Icon componentIcon = GuiUtils.getIcon("barChart", 16);
 	private static final Icon loadLibraryIcon = GuiUtils.getIcon("loadLibrary", 24);
@@ -434,6 +437,12 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 			
 			if (command.equals(MainActionCommands.CLEAN_EMPTY_FEATURES_COMMAND.getName()))
 				cleanEmptyFeatures();
+			
+			if (command.equals(MainActionCommands.BINNER_ANALYSIS_SETUP_COMMAND.getName()))
+				setupBinnerAnalysis();
+			
+			if (command.equals(MainActionCommands.GENERATE_BINNER_ANNOTATIONS_COMMAND.getName()))
+				runBinnerAnalysis();
 			
 			if (command.equals(MainActionCommands.IMPORT_BINNER_ANNOTATIONS_COMMAND.getName()))
 				importBinnerAnnotations();
@@ -1241,6 +1250,33 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 		MRC2ToolBoxCore.getTaskController().addTask(task);
 	}
 
+	private void setupBinnerAnalysis() {
+		
+		Set<DataFile> dataFiles = 
+				currentExperiment.getDataFilesForPipeline(activeDataPipeline, false);
+		if(dataFiles == null || dataFiles.isEmpty())
+			return;
+		
+		binnerProcessingSetupDialog = 
+				new BinnerProcessingSetupDialog(
+						currentExperiment, activeDataPipeline, this);
+		binnerProcessingSetupDialog.setLocationRelativeTo(this.getContentPane());
+		binnerProcessingSetupDialog.setVisible(true);
+	}
+	
+	private void runBinnerAnalysis() {
+		
+		Collection<String>errors = binnerProcessingSetupDialog.validateFormData();
+		if(!errors.isEmpty()){
+		    MessageDialog.showErrorMsg(
+		            StringUtils.join(errors, "\n"), binnerProcessingSetupDialog);
+		    return;
+		}
+		//	TODO ...
+		
+		binnerProcessingSetupDialog.dispose();
+	}
+	
 	private void importBinnerAnnotations() {
 		
 		if(hasBinnerAnnotations()) {

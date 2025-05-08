@@ -38,11 +38,22 @@ public class RScriptTestClass {
 		MRC2ToolBoxConfiguration.initConfiguration();
 
 		try {
-			createDataSummariesForEX01496ionpNegExperiment();
+			testMetabCombinerAlignmentScript();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+	
+	private static void testMetabCombinerAlignmentScript() {
+
+		File rWorkingDir = new File(
+				"Y:\\DataAnalysis\\_Reports\\EX01010 - EX01089 - EX01235 - EX01283 - EX01392 - Starr County Metabolomics I-V\\Unnamed\\MetabCombiner\\EX01010and1089\\POS\\_BINNER");
+		
+		File inputMap = new File(
+				"Y:\\DataAnalysis\\_Reports\\EX01010 - EX01089 - EX01235 - EX01283 - EX01392 - Starr County Metabolomics I-V\\Unnamed\\MetabCombiner\\EX01010and1089\\POS\\_BINNER\\EX01010-1089-RP-POS-withAdducts-MC-inputMap.txt");
+		
+		RQCScriptGenerator.generateMultiBatchMetabCombinerAlignmentScriptScript(rWorkingDir, inputMap);
 	}
 
 	private static void createDataSummariesForEX01496ionpNegExperiment() {
@@ -79,21 +90,6 @@ public class RScriptTestClass {
 				new File("Y:\\DataAnalysis\\_Reports\\EX01496 - Human EDTA Tranche 3 plasma X20001463K\\"
 						+ "A003 - Untargeted\\Documents\\POS\\CO300-Pk1000");
 		RQCScriptGenerator.createMultyBatchDataSummarizationScript(inputMapFile, dataDir);
-	}
-	//
-		
-	private static void testMetabCombinerAlignmentScript() {
-
-		File rWorkingDir = new File(
-				"Y:\\DataAnalysis\\_Reports\\"
-				+ "EX01010 - EX01089 - EX01235 - EX01283 - EX01392 - Starr County Metabolomics I-V\\"
-				+ "Unnamed\\MetabCombiner\\EX01283\\POS\\NO_BATCH02\\");
-		
-		File inputMap = new File("Y:\\DataAnalysis\\_Reports\\"
-				+ "EX01010 - EX01089 - EX01235 - EX01283 - EX01392 - Starr County Metabolomics I-V\\"
-				+ "Unnamed\\MetabCombiner\\EX01283\\POS\\NO_BATCH02\\"
-				+ "EX01283-RP-POS-NOB2-MC-inputMap.txt");
-		RQCScriptGenerator.generateMultiBatchMetabCombinerAlignmentScriptScript(rWorkingDir, inputMap);
 	}
 	
 	private static void createDataSummariesForEX01426B6rpPosEMvoltageExperiment() {

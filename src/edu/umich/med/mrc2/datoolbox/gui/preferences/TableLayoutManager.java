@@ -72,9 +72,14 @@ public class TableLayoutManager {
 					new Element(TableLayoutFields.TableLayout.name());
 			tableLayoutElement.setAttribute(
 					TableLayoutFields.TableId.name(), layoutEntry.getKey());
-			for(TableColumnState state : layoutEntry.getValue())				
-				tableLayoutElement.addContent(state.getXmlElement());		
-			
+			for(TableColumnState state : layoutEntry.getValue()) {
+				
+				if(state != null)
+					tableLayoutElement.addContent(state.getXmlElement());	
+				else {
+					System.err.println(layoutEntry.getKey() + " NO LAYOUT");
+				}
+			}			
 			tableLayoutsList.addContent(tableLayoutElement);
 		}
 		document.setContent(tableLayoutsList);	 
