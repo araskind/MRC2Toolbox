@@ -269,6 +269,14 @@ public class DataCleaningOptionsPanel extends JPanel implements ItemListener, Va
 				Double.toString(missingRemovalThreshold));
 	}
 	
+	public boolean treatZerosAsMisssing() {
+		return zeroAsMissingCheckBox.isSelected();
+	}
+	
+	public void setTreatZerosAsMisssing(boolean zeroAsMissing) {
+		zeroAsMissingCheckBox.setSelected(zeroAsMissing);
+	}
+	
 	public boolean logTransformData() {
 		return logTransformCheckBox.isSelected();
 	}
@@ -328,6 +336,18 @@ public class DataCleaningOptionsPanel extends JPanel implements ItemListener, Va
 		if(getMissingRemovalThreshold() <= 0.0d)
 			errors.add("Missing data removal threshold must be > 0");
 		
+		if(deisotopeData()) {
+			
+			if(getDeisotopingMassTolerance() <= 0.0d)
+				errors.add("Mass tolerance for deisotoping must be > 0");
+			
+			if(getDeisotopingRTtolerance() <= 0.0d)
+				errors.add("RT tolerance for deisotoping must be > 0");
+			
+			if(getDeisotopingCorrelationCutoff() < 0.0d 
+					|| getDeisotopingCorrelationCutoff() > 1.0d)
+				errors.add("Correlation cutoff for deisotoping must be between 0.0 and 1.0");
+		}
 		return errors;
 	}
 

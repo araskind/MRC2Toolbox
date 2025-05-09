@@ -44,6 +44,10 @@ public class NumberFormatStore {
 		return new DecimalFormat("#,###");
 	}
 	
+	public static NumberFormat getIntegerFormat() {
+		return new DecimalFormat("###");
+	}
+	
 	public static NumberFormat getDecimalFormatWithPrecision(int numDecimalPlaces) {
 		return new DecimalFormat("#." + "#".repeat(numDecimalPlaces));
 	}

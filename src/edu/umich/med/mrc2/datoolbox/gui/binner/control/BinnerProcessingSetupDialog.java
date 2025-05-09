@@ -100,7 +100,7 @@ public class BinnerProcessingSetupDialog extends JDialog
 		wrapperPanel.addTab("Feature grouping options", null, featureGroupingOptionsPanel);
 		
 		annotationsSelectorPanel = new AnnotationsSelectorPanel();
-		wrapperPanel.addTab("Annotations selector", null, annotationsSelectorPanel);
+		wrapperPanel.addTab("Annotations parameters", null, annotationsSelectorPanel);
 		
 		JPanel panel = new JPanel();
 		FlowLayout flowLayout = (FlowLayout) panel.getLayout();
@@ -137,27 +137,102 @@ public class BinnerProcessingSetupDialog extends JDialog
 		savePreferences();
 		super.dispose();
 	}
-
+	
 	@Override
-	public void loadPreferences(Preferences preferences) {
+	public void actionPerformed(ActionEvent e) {
 		// TODO Auto-generated method stub
 		
+	}
+
+	@Override
+	public void loadPreferences(Preferences prefs) {
+		
+	    preferences = prefs;
+	    
+	    //	Data cleaning
+	    dataCleaningOptionsPanel.setOutlierSDdeviation(
+	    		preferences.getDouble(BinnerParameters.DCOutlierStDevCutoff.name(), 
+	    				Double.parseDouble(BinnerParameters.DCOutlierStDevCutoff.getDefaultValue())));
+	    dataCleaningOptionsPanel.setMissingRemovalThreshold(
+	    		preferences.getDouble(BinnerParameters.DCMissingnessCutoff.name(), 
+	    				Double.parseDouble(BinnerParameters.DCMissingnessCutoff.getDefaultValue())));
+	    dataCleaningOptionsPanel.setTreatZerosAsMisssing(
+	    		preferences.getBoolean(BinnerParameters.DCZeroAsMissing.name(), 
+	    				Boolean.parseBoolean(BinnerParameters.DCZeroAsMissing.getDefaultValue())));
+	    dataCleaningOptionsPanel.setLogTransformData(
+	    		preferences.getBoolean(BinnerParameters.DCNormalize.name(), 
+	    				Boolean.parseBoolean(BinnerParameters.DCNormalize.getDefaultValue())));	    
+	    dataCleaningOptionsPanel.setDeisotopingMassTolerance(
+	    		preferences.getDouble(BinnerParameters.DCDeisotopeMassTolerance.name(), 
+	    				Double.parseDouble(BinnerParameters.DCDeisotopeMassTolerance.getDefaultValue())));
+	    dataCleaningOptionsPanel.setDeisotopingRTtolerance(
+	    		preferences.getDouble(BinnerParameters.DCDeisotopeRTTolearance.name(), 
+	    				Double.parseDouble(BinnerParameters.DCDeisotopeRTTolearance.getDefaultValue())));
+	    dataCleaningOptionsPanel.setDeisotopingCorrelationCutoff(
+	    		preferences.getDouble(BinnerParameters.DCDeisotopeCorrCutoff.name(), 
+	    				Double.parseDouble(BinnerParameters.DCDeisotopeCorrCutoff.getDefaultValue())));	    
+	    dataCleaningOptionsPanel.setDeisotopeMassDifferenceDistribution(
+	    		preferences.getBoolean(BinnerParameters.DCDeisotopeMassDiffDistribution.name(), 
+	    				Boolean.parseBoolean(BinnerParameters.DCDeisotopeMassDiffDistribution.getDefaultValue())));	    
+	    dataCleaningOptionsPanel.setDeisotopeData(
+	    		preferences.getBoolean(BinnerParameters.DCDeisotope.name(), 
+	    				Boolean.parseBoolean(BinnerParameters.DCDeisotope.getDefaultValue())));
+	    
+	    //	Feature grouping
+	    String corrFunctionName = preferences.get
+	    		(BinnerParameters.FGCorrFunction.name(), 
+    				CorrelationFunctionType.getOptionByName(
+    					BinnerParameters.FGCorrFunction.getDefaultValue()).name());
+	    featureGroupingOptionsPanel.setCorrelationFunctionType(
+	    		CorrelationFunctionType.getOptionByName(corrFunctionName));
+	    featureGroupingOptionsPanel.setRTgap(
+	    		preferences.getDouble(BinnerParameters.FGRTGap.name(), 
+	    				Double.parseDouble(BinnerParameters.FGRTGap.getDefaultValue())));	
+	    featureGroupingOptionsPanel.setMinSubclusterRTgap(
+	    		preferences.getDouble(BinnerParameters.FGMinRtGap.name(), 
+	    				Double.parseDouble(BinnerParameters.FGMinRtGap.getDefaultValue())));
+	    featureGroupingOptionsPanel.setMaxSubclusterRTgap(
+	    		preferences.getDouble(BinnerParameters.FGMaxRtGap.name(), 
+	    				Double.parseDouble(BinnerParameters.FGMaxRtGap.getDefaultValue())));
+	    String clusterGroupMethodName = preferences.get
+	    		(BinnerParameters.FGGroupingMethod.name(), 
+    				ClusterGroupingMethod.getOptionByName(
+    					BinnerParameters.FGGroupingMethod.getDefaultValue()).name());
+	    featureGroupingOptionsPanel.setClusterGroupingMethod(
+	    		ClusterGroupingMethod.getOptionByName(clusterGroupMethodName));	    
+	    featureGroupingOptionsPanel.setBinClusteringCutoff(
+	    		preferences.getInt(BinnerParameters.FGBinningCutoffValue.name(), 
+	    				Integer.parseInt(BinnerParameters.FGBinningCutoffValue.getDefaultValue())));    
+	    String binClusteringCutoffTypeMethodName = preferences.get
+	    		(BinnerParameters.FGBinningCutoffType.name(), 
+    				BinClusteringCutoffType.getOptionByName(
+    					BinnerParameters.FGBinningCutoffType.getDefaultValue()).name());
+	    featureGroupingOptionsPanel.setBinClusteringCutoffType(
+	    		BinClusteringCutoffType.getOptionByName(binClusteringCutoffTypeMethodName));
+	    
+	    featureGroupingOptionsPanel.setMaxBinSizeForAnalysis(
+	    		preferences.getInt(BinnerParameters.FGBinSizeLimitForAnalysis.name(), 
+	    				Integer.parseInt(BinnerParameters.FGBinSizeLimitForAnalysis.getDefaultValue()))); 
+	    featureGroupingOptionsPanel.setMaxBinSizeForOutput(
+	    		preferences.getInt(BinnerParameters.FGBinSizeLimitForOutput.name(), 
+	    				Integer.parseInt(BinnerParameters.FGBinSizeLimitForOutput.getDefaultValue()))); 
+	    
+	    featureGroupingOptionsPanel.setLimitMaxBinSizeForAnalysis(
+	    		preferences.getBoolean(BinnerParameters.FGBOverrideBinSizeLimitForAnalysis.name(), 
+	    				Boolean.parseBoolean(BinnerParameters.FGBOverrideBinSizeLimitForAnalysis.getDefaultValue())));
+	    featureGroupingOptionsPanel.setLimitMaxBinSizeForOutput(
+	    		preferences.getBoolean(BinnerParameters.FGBOverrideBinSizeLimitForOutput.name(), 
+	    				Boolean.parseBoolean(BinnerParameters.FGBOverrideBinSizeLimitForOutput.getDefaultValue())));
+	    
 	}
 
 	@Override
 	public void loadPreferences() {
-		// TODO Auto-generated method stub
-		
+		loadPreferences(Preferences.userNodeForPackage(this.getClass()));
 	}
 
 	@Override
 	public void savePreferences() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void actionPerformed(ActionEvent e) {
 		// TODO Auto-generated method stub
 		
 	}
