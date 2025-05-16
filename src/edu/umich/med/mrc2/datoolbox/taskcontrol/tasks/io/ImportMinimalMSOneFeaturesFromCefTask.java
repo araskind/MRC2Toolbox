@@ -60,7 +60,7 @@ public class ImportMinimalMSOneFeaturesFromCefTask  extends CEFProcessingTask {
 		if(dataFile.getFullPath() == null) {
 			errorMessage = "Path for CEF file not specified.";
 			setStatus(TaskStatus.ERROR);
-return;
+			return;
 
 		}
 		inputCefFile =  new File(dataFile.getFullPath());
@@ -69,7 +69,7 @@ return;
 		} catch (Exception e) {
 			e.printStackTrace();
 			setStatus(TaskStatus.ERROR);
-return;
+			return;
 
 		}
 		convertMsFeatureToMinimal();
@@ -90,7 +90,7 @@ return;
 		}
 	}
 
-	public DataFile getInputCefFile() {
+	public DataFile getDataFile() {
 		return dataFile;
 	}
 

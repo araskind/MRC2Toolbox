@@ -25,9 +25,6 @@ import java.io.File;
 import java.text.NumberFormat;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.UUID;
 
@@ -54,7 +51,6 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.cef.CEFProcessingTask;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
-import edu.umich.med.mrc2.datoolbox.utils.Range;
 import edu.umich.med.mrc2.datoolbox.utils.XmlUtils;
 import edu.umich.med.mrc2.datoolbox.utils.isopat.IsotopicPatternUtils;
 
@@ -126,13 +122,13 @@ public class ConvertCefLibraryForRecursionTask extends CEFProcessingTask {
 		NumberFormat mzFormat = MRC2ToolBoxConfiguration.getMzFormat();
 		
 		//	Debug only
-		Map<Range,Collection<LibraryMsFeature>>featuresByScore = 
-				new TreeMap<Range,Collection<LibraryMsFeature>>();
-		featuresByScore.put(new Range(-1.0d, 0.1d), new HashSet<LibraryMsFeature>());
-		featuresByScore.put(new Range(0.1d, 0.3d), new HashSet<LibraryMsFeature>());
-		featuresByScore.put(new Range(0.3d, 0.5d), new HashSet<LibraryMsFeature>());
-		featuresByScore.put(new Range(0.5d, 0.7d), new HashSet<LibraryMsFeature>());
-		featuresByScore.put(new Range(0.7d, 1.1d), new HashSet<LibraryMsFeature>());
+//		Map<Range,Collection<LibraryMsFeature>>featuresByScore = 
+//				new TreeMap<Range,Collection<LibraryMsFeature>>();
+//		featuresByScore.put(new Range(-1.0d, 0.1d), new HashSet<LibraryMsFeature>());
+//		featuresByScore.put(new Range(0.1d, 0.3d), new HashSet<LibraryMsFeature>());
+//		featuresByScore.put(new Range(0.3d, 0.5d), new HashSet<LibraryMsFeature>());
+//		featuresByScore.put(new Range(0.5d, 0.7d), new HashSet<LibraryMsFeature>());
+//		featuresByScore.put(new Range(0.7d, 1.1d), new HashSet<LibraryMsFeature>());
 		//	End debug
 		
 		for(LibraryMsFeature msf : libraryFeatureListForExport) {
@@ -160,11 +156,11 @@ public class ConvertCefLibraryForRecursionTask extends CEFProcessingTask {
 						MSMSScoreCalculator.DEFAULT_MS_REL_INT_NOISE_CUTOFF);
 				
 				//	Debug only
-				for(Entry<Range,Collection<LibraryMsFeature>>fEntry : featuresByScore.entrySet()) {
-					
-					if(fEntry.getKey().containsExcludingUpperBorder(score))
-						fEntry.getValue().add(msf);
-				}							
+//				for(Entry<Range,Collection<LibraryMsFeature>>fEntry : featuresByScore.entrySet()) {
+//					
+//					if(fEntry.getKey().containsExcludingUpperBorder(score))
+//						fEntry.getValue().add(msf);
+//				}							
 				//	End debug
 			}
 			filtered.add(msf);
@@ -172,7 +168,7 @@ public class ConvertCefLibraryForRecursionTask extends CEFProcessingTask {
 		}
 
 		//	Debug only
-		for(Entry<Range,Collection<LibraryMsFeature>>fEntry : featuresByScore.entrySet()) {
+//		for(Entry<Range,Collection<LibraryMsFeature>>fEntry : featuresByScore.entrySet()) {
 //			
 //			String outName = "featuresForScoreRange_" + 
 //					MRC2ToolBoxConfiguration.getPpmFormat().format(fEntry.getKey().getMin()) + "_" + 
@@ -185,7 +181,7 @@ public class ConvertCefLibraryForRecursionTask extends CEFProcessingTask {
 //				setStatus(TaskStatus.ERROR);
 //				return;
 //			}
-		}
+//		}
 		//	End debug
 		
 		libraryFeatureListForExport = filtered;

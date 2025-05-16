@@ -151,8 +151,9 @@ public class MultiCefImportTask extends AbstractTask implements TaskListener{
 			if (e.getSource().getClass().equals(CefLibraryImportTask.class) && !libraryParsed)
 				finalizeLibraryImportTask((CefLibraryImportTask)e.getSource());
 			
-			if (e.getSource().getClass().equals(CefDataImportTask.class))
+			if (e.getSource().getClass().equals(CefDataImportTask.class)) {
 				finalizeCefImportTask((CefDataImportTask)e.getSource());	
+			}
 			
 			if (e.getSource().getClass().equals(CefImportFinalizationTask.class))
 				setStatus(TaskStatus.FINISHED);
@@ -180,9 +181,12 @@ public class MultiCefImportTask extends AbstractTask implements TaskListener{
 		}
 	}
 	
-	private void finalizeCefImportTask(CefDataImportTask cdit) {
+	private synchronized void finalizeCefImportTask(CefDataImportTask cdit) {
 		
 		fileCounter++;
+		System.out.println("Imported file " + fileCounter + " out of " 
+				+ dataFiles.length + " -> " + cdit.getInputCefFile().getName());
+		MRC2ToolBoxCore.getTaskController().getTaskQueue().removeTask(cdit);
 		if(!cdit.getUnmatchedAdducts().isEmpty()) {
 
 			@SuppressWarnings("unused")
@@ -198,9 +202,21 @@ public class MultiCefImportTask extends AbstractTask implements TaskListener{
 			MainWindow.hideProgressDialog();
 			return;
 		}
-		MRC2ToolBoxCore.getTaskController().getTaskQueue().removeTask(cdit);
-		//	Process
+		try {
+			Thread.sleep(200);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		if(fileCounter == dataFiles.length) {
+			
+			try {
+				Thread.sleep(200);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			System.out.println("CEF impotr complete, starting data set assembly ...");
 			
 			CefImportFinalizationObjest ciFinObj = new CefImportFinalizationObjest();
 			ciFinObj.setDataFiles(dataFiles);
@@ -214,6 +230,12 @@ public class MultiCefImportTask extends AbstractTask implements TaskListener{
 			ciFinObj.setRemoveAbnormalIsoPatterns(removeAbnormalIsoPatterns);
 			ciFinObj.setTmpCefDirectory(tmpCefDirectory);
 
+			try {
+				Thread.sleep(200);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			CefImportFinalizationTask finalizationTask = 
 					new CefImportFinalizationTask(ciFinObj);
 			finalizationTask.addTaskListener(this);

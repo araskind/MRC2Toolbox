@@ -150,7 +150,7 @@ public class CefDataImportTask extends CEFProcessingTask {
 		}
 	}
 
-	public DataFile getInputCefFile() {
+	public DataFile getDataFile() {
 		return dataFile;
 	}
 

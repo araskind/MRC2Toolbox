@@ -787,4 +787,12 @@ public abstract class CEFProcessingTask extends AbstractTask {
 	public Set<String> getUnmatchedAdducts() {
 		return unmatchedAdducts;
 	}
+
+	public File getInputCefFile() {
+		return inputCefFile;
+	}
+
+	public File getOutputCefFile() {
+		return outputCefFile;
+	}
 }

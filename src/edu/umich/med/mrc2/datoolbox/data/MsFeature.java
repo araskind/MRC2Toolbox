@@ -107,7 +107,7 @@ public class MsFeature implements AnnotatedObject, Serializable, XmlStorable {
 		this.suggestedModification = null;
 		this.binnerAnnotation = null;
 		this.eventListeners = ConcurrentHashMap.newKeySet();
-		this.neutralMass = 0.0d;
+		this.neutralMass = -1.0d;
 		
 		createDefaultPrimaryIdentity();
 	}
@@ -650,7 +650,9 @@ public class MsFeature implements AnnotatedObject, Serializable, XmlStorable {
 		if(neutralMass > 0.0d)
 			return neutralMass;
 
-		if(primaryIdentity != null && primaryIdentity.getCompoundIdentity() != null)
+		if(primaryIdentity != null 
+				&& primaryIdentity.getCompoundIdentity() != null
+ 				&& primaryIdentity.getCompoundIdentity().getFormula() != null)
 			return primaryIdentity.getCompoundIdentity().getExactMass();
 
 		if (spectrum != null && spectrum.getPrimaryAdduct() != null) {

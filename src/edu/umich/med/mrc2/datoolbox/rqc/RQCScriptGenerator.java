@@ -231,6 +231,8 @@ public class RQCScriptGenerator {
 		rscriptParts.add("write.table(merged.data, file = \"MergedAlignedData.txt\", "
 				+ "quote = F, sep = \"\\t\", na = \"\", row.names = FALSE)");
 		
+		
+		
 		String rScriptFileName = "MetabCombinerMultiAlignment-" + FIOUtils.getTimestamp() + ".R";
 		Path outputPath = Paths.get(
 				rWorkingDir.getAbsolutePath(), rScriptFileName);
@@ -336,6 +338,11 @@ public class RQCScriptGenerator {
 		rscriptParts.add("rm(" + StringUtils.join(objectsToClear, ",") + ")");
 				
 		return firstDataSetMatchedFetureList;
+	}
+	
+	private static void createMetabCombinerAdductEvaluationBlock() {
+		
+		
 	}
 	
 	private static String createOutNameSuffix(			
