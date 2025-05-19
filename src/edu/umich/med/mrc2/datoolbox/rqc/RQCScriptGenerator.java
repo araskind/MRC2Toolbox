@@ -74,7 +74,8 @@ public class RQCScriptGenerator {
 		rscriptParts.add("setwd(\"" + workDirForR + "\")\n");
 		rscriptParts.add("library(metabCombiner)");
 		rscriptParts.add("library(reshape2)");
-		rscriptParts.add("library(dplyr)");		
+		rscriptParts.add("library(dplyr)");
+		rscriptParts.add("library(ggplot2)");
 		rscriptParts.add("## Read in the data for alignment ####\n");
 		rscriptParts.add("clean.data.map.df <- data.frame(data.set = character(), file.name = character())");
 		
@@ -195,7 +196,7 @@ public class RQCScriptGenerator {
 		rscriptParts.add("match.lengths <- sapply(overlap.list.collection, length)");
 		rscriptParts.add("primary.batch.name <- names(which.max(match.lengths))[[1]]");
 		
-		//	Join metadata and calculate median MZ/RT, create common feature names
+		//	Join metadata and calculate median MZ/RT, create common feature names, find most common annotation
 		rscriptParts.add("\n## Create cummulative metadata ####");
 		rscriptParts.add("meta.data.names.list <- as.vector("
 				+ "alignment.summary.df[alignment.summary.df$dsx == primary.batch.name,]$meta.data)");
@@ -207,9 +208,21 @@ public class RQCScriptGenerator {
 		rscriptParts.add("meta.data.joined <- meta.data.joined %>%  rowwise() "
 				+ "%>%  mutate(rtMedian = median(c_across(starts_with(\"rt\")), na.rm = T))");
 		rscriptParts.add("meta.data.joined <- meta.data.joined %>%  rowwise() "
-				+ "%>%  mutate(FeatureID = paste(\"UNK_\", mzMedian, \"_\", rtMedian, sep = \"\"))");
-		rscriptParts.add("write.table(meta.data.joined, file = \"CummulativeMetaData.txt\", "
+				+ "%>%  mutate(FeatureID = paste(\"UNK_\", mzMedian, \"_\", rtMedian, sep = \"\"))");		
+		rscriptParts.add("meta.data.joined[meta.data.joined == \"[M + H]\"] <- \"[M+H]+\"");
+		rscriptParts.add("meta.data.joined[meta.data.joined == \"[M - H]\"] <- \"[M-H]-\"");
+		rscriptParts.add("adduct.data <- meta.data.joined %>% select( contains(\"adduct\"))");
+		rscriptParts.add("adduct.data.copy <- adduct.data");
+		rscriptParts.add("adduct.data$max.frequency <- apply(adduct.data, 1, "
+				+ "function(x) max(tabulate(as.factor(x))) / sum(tabulate(as.factor(x))))");
+		rscriptParts.add("adduct.data$common.adduct <- apply(adduct.data.copy,1,function(x) names(which.max(table(x))))");
+		rscriptParts.add("data.out <- cbind(meta.data.joined, select(adduct.data, c(\"common.adduct\", \"max.frequency\")))");
+		rscriptParts.add("write.table(data.out, file = \"CummulativeMetaData.txt\", "
 				+ "quote = F, sep = \"\\t\", na = \"\", row.names = FALSE)");
+		rscriptParts.add("adduct.plot <- ggplot(data.out, aes(max.frequency)) "
+				+ "+ geom_bar(color=\"darkblue\", fill=\"lightblue\", alpha=0.5) "
+				+ "+ scale_x_binned(show.limits = T) + ggtitle(\"Adduct Reproducibility\")");
+		rscriptParts.add("ggsave(\"AdductReproducibility.png\", plot = adduct.plot,  width = 6, height = 6)");
 		
 		//	Join actual data using best batch and write out resulsts
 		rscriptParts.add("\n## Create merged aligned data ####");
