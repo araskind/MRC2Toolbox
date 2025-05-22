@@ -58,6 +58,7 @@ import javax.swing.border.TitledBorder;
 import edu.umich.med.mrc2.datoolbox.data.BinnerAdductList;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
+import edu.umich.med.mrc2.datoolbox.main.AdductManager;
 
 public class AnnotationListEditorDialog extends JDialog implements ActionListener {
 
@@ -69,6 +70,10 @@ public class AnnotationListEditorDialog extends JDialog implements ActionListene
 	private BinnerAdductList binnerAdductList;
 	private JTextField dataSetNameField;
 	private JTextArea descriptionTextArea;
+
+	private SimpleBinnerAnnotationsTable availableAnnotationsTable;
+
+	private SimpleBinnerAnnotationsTable usedAnnotationsTable;
 
 	public AnnotationListEditorDialog(
 			BinnerAdductList binnerAdductList,
@@ -143,7 +148,8 @@ public class AnnotationListEditorDialog extends JDialog implements ActionListene
 		gbl_panel_2.rowWeights = new double[]{1.0, Double.MIN_VALUE};
 		panel_2.setLayout(gbl_panel_2);
 		
-		JScrollPane scrollPane = new JScrollPane();
+		availableAnnotationsTable = new SimpleBinnerAnnotationsTable(false);
+		JScrollPane scrollPane = new JScrollPane(availableAnnotationsTable);
 		scrollPane.setBorder(new CompoundBorder(new TitledBorder(new EtchedBorder(
 				EtchedBorder.LOWERED, new Color(255, 255, 255), new Color(160, 160, 160)), 
 				"Available annotations", TitledBorder.LEADING, 
@@ -196,7 +202,8 @@ public class AnnotationListEditorDialog extends JDialog implements ActionListene
 		gbc_verticalStrut_1.gridy = 3;
 		panel_3.add(verticalStrut_1, gbc_verticalStrut_1);
 		
-		JScrollPane scrollPane_1 = new JScrollPane();
+		usedAnnotationsTable = new SimpleBinnerAnnotationsTable(true);
+		JScrollPane scrollPane_1 = new JScrollPane(usedAnnotationsTable);
 		scrollPane_1.setBorder(new CompoundBorder(new TitledBorder(new EtchedBorder(
 				EtchedBorder.LOWERED, new Color(255, 255, 255), new Color(160, 160, 160)), 
 				"Annotations in the list", TitledBorder.LEADING, 
@@ -240,6 +247,8 @@ public class AnnotationListEditorDialog extends JDialog implements ActionListene
 
 			setTitle("Add new Binner annotation list");
 			setIconImage(((ImageIcon) newListIcon).getImage());
+			availableAnnotationsTable.setTableModelFromBinnerAdductCollection(
+					AdductManager.getBinnerAdductList());
 		}
 		else {
 			setTitle("Edit Binner annotation list \"" + binnerAdductList.getName() + "\"");

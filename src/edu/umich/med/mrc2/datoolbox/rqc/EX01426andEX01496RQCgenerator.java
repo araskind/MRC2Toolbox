@@ -51,7 +51,7 @@ public class EX01426andEX01496RQCgenerator {
 			e.printStackTrace();
 		}
 		try {
-			//	generateSummaryQcScriptForEX01496rppos(true);
+			generateSummaryQcScriptForEX01496ionpneg(true);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
