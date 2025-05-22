@@ -24,6 +24,7 @@ package edu.umich.med.mrc2.datoolbox.database.idt;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Map.Entry;
@@ -32,6 +33,7 @@ import java.util.TreeSet;
 import edu.umich.med.mrc2.datoolbox.data.Adduct;
 import edu.umich.med.mrc2.datoolbox.data.AdductExchange;
 import edu.umich.med.mrc2.datoolbox.data.BinnerAdduct;
+import edu.umich.med.mrc2.datoolbox.data.BinnerAdductList;
 import edu.umich.med.mrc2.datoolbox.data.BinnerAnnotation;
 import edu.umich.med.mrc2.datoolbox.data.BinnerAnnotationCluster;
 import edu.umich.med.mrc2.datoolbox.data.BinnerNeutralMassDifference;
@@ -147,23 +149,6 @@ public class BinnerUtils {
 		ps.close();
 		ConnectionManager.releaseConnection(conn);
 	}
-	
-//	public static String getNextBinnerAdductId(Connection conn) throws Exception{
-//		
-//		String nextId = null;
-//		String query  =
-//				"SELECT '" + DataPrefix.BINNER_ANNOTATION.getName() + 
-//				"' || LPAD(BINNER_ANNOTATION_SEQ.NEXTVAL, 4, '0') AS NEXT_ID FROM DUAL";
-//		
-//		PreparedStatement ps = conn.prepareStatement(query);
-//		ResultSet rs = ps.executeQuery();
-//		while(rs.next()) {
-//			nextId = rs.getString("NEXT_ID");
-//		}
-//		rs.close();
-//		ps.close();
-//		return nextId;
-//	}
 	
 	public static void editBinnerAdduct(BinnerAdduct toEdit) throws Exception {
 
@@ -285,7 +270,7 @@ public class BinnerUtils {
 				"BINNER_MASS_DIFFERENCE_SEQ",
 				DataPrefix.BINNER_MASS_DIFFERENCE,
 				"0",
-				4);
+				3);
 		newDiff.setId(id);
 		
 		String query  =
@@ -637,6 +622,221 @@ public class BinnerUtils {
 		rs.close();
 		ps.close();
 	}
+
+	public static void addNewBinnerNeutralMassDifferenceAsAnnotation(BinnerNeutralMassDifference massDiff) {
+		
+		BinnerAdduct newAdduct = new BinnerAdduct(
+				null, 
+				massDiff.getBinnerName(),
+				0, 
+				1, 
+				null,
+				null, 
+				massDiff);
+		
+		try {
+			addNewBinnerAdduct(newAdduct);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	//	BinnerAdductList
+	public static void addNewBinnerAdductList(BinnerAdductList newList) throws Exception {
+		
+		Connection conn = ConnectionManager.getConnection();
+		String id = SQLUtils.getNextIdFromSequence(conn, 
+				"BINNER_ANNOTATION_LIST_SEQ",
+				DataPrefix.BINNER_ANNOTATION_LIST,
+				"0",
+				5);
+		newList.setId(id);
+		
+		String query  =
+				"INSERT INTO BINNER_ANNOTATION_LIST  " +
+				"(LIST_ID, LIST_NAME, DESCRIPTION, OWNER, DATE_CREATED, DATE_MODIFIED) " +
+				"VALUES(?, ?, ?, ?, ?, ?) ";
+		PreparedStatement ps = conn.prepareStatement(query);		
+
+		ps.setString(1, newList.getId());
+		ps.setString(2, newList.getName());
+		if(newList.getDescription() != null)
+			ps.setString(3, newList.getDescription());
+		else
+			ps.setNull(3, java.sql.Types.NULL);
+			
+		ps.setString(4, newList.getOwner().getId());
+		ps.setTimestamp(5, new java.sql.Timestamp(new Date().getTime()));
+		ps.setTimestamp(6, new java.sql.Timestamp(new Date().getTime()));
+		
+		ps.executeUpdate();
+		ps.close();
+		insertBinnerAdductListComponents(newList, conn);		
+		ConnectionManager.releaseConnection(conn);
+	}
+	
+	private static void insertBinnerAdductListComponents(BinnerAdductList baList, Connection conn) {
+		
+		String query  =
+				"INSERT INTO BINNER_ANNOTATION_LIST_COMPONENT  " +
+				"(LIST_ID, ANNOTATION_ID, TIER) " +
+				"VALUES(?, ?, ?) ";
+		try(PreparedStatement ps = conn.prepareStatement(query)){
+			ps.setString(1, baList.getId());
+			for(Entry<BinnerAdduct,Integer> ba : baList.getComponents().entrySet()) {
+				
+				ps.setString(2, ba.getKey().getId());
+				ps.setInt(3, ba.getValue());
+				ps.addBatch();
+			}
+			ps.executeBatch();
+		}
+		catch(SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public static void editBinnerAdductList(BinnerAdductList listToEdit) throws Exception {
+		
+		Connection conn = ConnectionManager.getConnection();		
+		String query  =
+				"UPDATE BINNER_ANNOTATION_LIST " +
+				"SET LIST_NAME = ?, DESCRIPTION = ?, OWNER = ?, " +
+				"DATE_CREATED = ?, DATE_MODIFIED = ? " +
+				"WHERE LIST_ID = ?";
+		PreparedStatement ps = conn.prepareStatement(query);		
+
+		ps.setString(1, listToEdit.getName());
+		if(listToEdit.getDescription() != null)
+			ps.setString(2, listToEdit.getDescription());
+		else
+			ps.setNull(2, java.sql.Types.NULL);
+			
+		ps.setString(3, listToEdit.getOwner().getId());
+		ps.setTimestamp(4, new java.sql.Timestamp(listToEdit.getDateCreated().getTime()));
+		ps.setTimestamp(5, new java.sql.Timestamp(new Date().getTime()));
+		ps.setString(6, listToEdit.getId());
+		
+		ps.executeUpdate();
+		ps.close();
+		
+		clearBinnerAdductListComponents(listToEdit, conn);
+		insertBinnerAdductListComponents(listToEdit, conn);		
+		ConnectionManager.releaseConnection(conn);
+	}
+		
+	private static void clearBinnerAdductListComponents(
+			BinnerAdductList baList, Connection conn)  {
+		
+		String query  =
+				"DELETE FROM BINNER_ANNOTATION_LIST_COMPONENT WHERE LIST_ID = ?";
+		try(PreparedStatement ps = conn.prepareStatement(query)){
+			ps.setString(1, baList.getId());
+			ps.executeUpdate();
+			ps.close();	
+		}
+		catch(SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public static void deleteBinnerAdductList(BinnerAdductList listToDelete) throws Exception {
+		
+		Connection conn = ConnectionManager.getConnection();	
+		String query  = "DELETE FROM BINNER_ANNOTATION_LIST WHERE LIST_ID = ?";
+		try(PreparedStatement ps = conn.prepareStatement(query)){		
+			ps.setString(1, listToDelete.getId());	
+			ps.executeUpdate();
+		}		
+		ConnectionManager.releaseConnection(conn);
+	}
+	
+	public static Collection<BinnerAdductList>
+			getBinnerAdductListCollection() throws Exception {
+
+		Connection conn = ConnectionManager.getConnection();
+		Collection<BinnerAdductList>dataSets = 
+				getBinnerAdductListCollection(conn);
+		ConnectionManager.releaseConnection(conn);	
+		return dataSets;
+	}
+		
+	public static Collection<BinnerAdductList>
+		getBinnerAdductListCollection(Connection conn) throws SQLException {
+		
+		Collection<BinnerAdductList>dataSets = new TreeSet<BinnerAdductList>();
+		String query = 
+				"SELECT LIST_ID, LIST_NAME, DESCRIPTION, OWNER, DATE_CREATED, DATE_MODIFIED "
+				+ "FROM BINNER_ANNOTATION_LIST ORDER BY 1";
+		PreparedStatement ps = conn.prepareStatement(query);
+		
+		ResultSet rs = ps.executeQuery();
+		while(rs.next()) {
+			BinnerAdductList ds = 
+					new BinnerAdductList(
+					rs.getString("LIST_ID"), 
+					rs.getString("LIST_NAME"), 
+					rs.getString("DESCRIPTION"), 
+					IDTDataCache.getUserById(rs.getString("OWNER")), 
+					new Date(rs.getTimestamp("DATE_CREATED").getTime()),
+					new Date(rs.getTimestamp("DATE_MODIFIED").getTime()));
+			populateBinnerAdductList(ds, conn);
+			dataSets.add(ds);
+		}
+		rs.close();
+		ps.close();
+		return dataSets;
+	}
+	
+	private static void populateBinnerAdductList(
+			BinnerAdductList baList, Connection conn) throws SQLException {
+		
+		String query = "SELECT ANNOTATION_ID, TIER "
+				+ "FROM BINNER_ANNOTATION_LIST_COMPONENT WHERE LIST_ID = ?";
+		
+		try(PreparedStatement ps = conn.prepareStatement(query)){
+			
+			ps.setString(1, baList.getId());
+			ResultSet rs = ps.executeQuery();
+			while(rs.next()) {
+				
+				BinnerAdduct bad = AdductManager.getBinnerAdductById(rs.getString("ANNOTATION_ID"));
+				int tier = rs.getInt("TIER");
+				if(bad != null)
+					baList.addComponent(bad, tier);
+			}
+			rs.close();
+		}
+
+	}	
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 

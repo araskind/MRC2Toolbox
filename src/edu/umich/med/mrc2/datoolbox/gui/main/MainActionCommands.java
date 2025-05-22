@@ -604,6 +604,13 @@ public enum MainActionCommands {
 	SAVE_BINNER_MASS_DIFFERENCE_COMMAND("Save Binner mass difference combination"),
 	NEW_COMPOSITE_MODIFICATION_FROM_MASS_DIFF_COMMAND("Create new composite modification from Binner mass difference"),
 	
+	//	Binner annotation list editor
+	OPEN_BINNER_ANNOTATION_LIST_COMMAND("Load Binner annotations list from database"),
+	NEW_BINNER_ANNOTATION_LIST_COMMAND("Create new Binner annotations list"),
+	EDIT_BINNER_ANNOTATION_LIST_COMMAND("Edit Binner annotations list"),
+	SAVE_BINNER_ANNOTATION_LIST_COMMAND("Save Binner annotations list"),
+	DELETE_BINNER_ANNOTATION_LIST_COMMAND("Delete Binner annotations list"),
+	
 	//	Database parser tool
 	SHOW_DATABASE_PARSER_COMMAND("Show database parser"),
 

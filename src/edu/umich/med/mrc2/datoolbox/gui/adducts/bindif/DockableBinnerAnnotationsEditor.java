@@ -74,7 +74,7 @@ public class DockableBinnerAnnotationsEditor
 	public static final String PREFS_NODE = "edu.umich.med.mrc2.datoolbox.gui.DockableBinnerAnnotationsEditor";
 	public static final String BASE_DIRECTORY = "BASE_DIRECTORY";
 	
-	private BinnerAnnotationsTable binnerAnnotationsTable;
+	private static BinnerAnnotationsTable binnerAnnotationsTable;
 	private JScrollPane adductScrollPane;
 	private BinnerAnnotationsEditorToolbar toolBar;
 	private BinnerNeutralMassDifferenceEditorDialog binnerNeutralMassDifferenceEditorDialog;
@@ -101,7 +101,7 @@ public class DockableBinnerAnnotationsEditor
 		activeAdduct = null;
 
 		baseDirectory = new File(MRC2ToolBoxCore.referenceDir);
-		binnerAnnotationsTable.setTableModelFromBinnerAdducttList(
+		binnerAnnotationsTable.setTableModelFromBinnerAdductCollection(
 				AdductManager.getBinnerAdductList());
 	}
 
@@ -232,7 +232,7 @@ public class DockableBinnerAnnotationsEditor
 				e.printStackTrace();
 			}
 			AdductManager.refreshBinnerAdductList();
-			binnerAnnotationsTable.setTableModelFromBinnerAdducttList(AdductManager.getBinnerAdductList());
+			binnerAnnotationsTable.setTableModelFromBinnerAdductCollection(AdductManager.getBinnerAdductList());
 			binnerAnnotationsTable.selectBinnerAdduct(editedAdduct);
 		}
 		else {	//	Edit existing Binner annotation
@@ -243,7 +243,7 @@ public class DockableBinnerAnnotationsEditor
 				e.printStackTrace();
 			}
 			AdductManager.refreshBinnerAdductList();
-			binnerAnnotationsTable.setTableModelFromBinnerAdducttList(AdductManager.getBinnerAdductList());
+			binnerAnnotationsTable.setTableModelFromBinnerAdductCollection(AdductManager.getBinnerAdductList());
 			binnerAnnotationsTable.selectBinnerAdduct(activeAdduct);
 		}
 		binnerAnnotationEditorDialog.dispose();
@@ -275,11 +275,11 @@ public class DockableBinnerAnnotationsEditor
 		binnerNeutralMassDifferenceManagerDialog.setVisible(true);
 	}
 	
-	private void refreshBinnerAdductList() {
+	public static void refreshBinnerAdductList() {
 		
 		AdductManager.refreshBinnerNeutralMassDifference();
 		AdductManager.refreshBinnerAdductList();
-		binnerAnnotationsTable.setTableModelFromBinnerAdducttList(
+		binnerAnnotationsTable.setTableModelFromBinnerAdductCollection(
 				AdductManager.getBinnerAdductList());
 	}
 

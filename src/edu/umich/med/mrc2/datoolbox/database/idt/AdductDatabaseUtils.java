@@ -106,6 +106,7 @@ public class AdductDatabaseUtils {
 				"0",
 				4);
 		newAdduct.setId(id);
+		
 		String query = 
 				"INSERT INTO ADDUCTS (ADDUCT_ID, ADDUCT_NAME, DESCRIPTION, "
 				+ "CHARGE, NMER, ADDED_GROUP, REMOVED_GROUP, "
@@ -251,6 +252,7 @@ public class AdductDatabaseUtils {
 				"0",
 				4);
 		newLoss.setId(id);
+		
 		String query = "INSERT INTO NEUTRAL_LOSSES (LOSS_ID, LOSS_NAME, DESCRIPTION, "
 				+ "ADDED_GROUP, REMOVED_GROUP, LOST_MASS, SMILES) "
 				+ "VALUES (?, ?, ?, ?, ?, ?, ?)";
@@ -370,6 +372,7 @@ public class AdductDatabaseUtils {
 				"0",
 				4);
 		newAdduct.setId(id);
+		
 		String query = "INSERT INTO NEUTRAL_ADDUCTS (REPEAT_ID, ADDUCT_NAME, DESCRIPTION, "
 				+ "ADDED_GROUP, ADDED_MASS, SMILES) VALUES (?, ?, ?, ?, ?, ?)";
 		PreparedStatement stmt = conn.prepareStatement(query);
@@ -762,6 +765,7 @@ public class AdductDatabaseUtils {
 				DataPrefix.ADDUCT_EXCHANGE,
 				"0",
 				4);
+		newExchange.setId(id);	
 		
 		String comingAdductId = null;
 		String leavingAdductId = null;

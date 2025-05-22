@@ -464,13 +464,13 @@ public class AdductManager {
 	}
 	
 	public static void addAdductExchange(AdductExchange newExchange) {
-
-		getAdductExchangeList().add(newExchange);
+		
 		try {
 			AdductDatabaseUtils.addNewAdductExchange(newExchange);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		getAdductExchangeList().add(newExchange);
 	}
 	
 	public static void updateAdductExchange(AdductExchange originalExchange, AdductExchange modifiedExchange) {

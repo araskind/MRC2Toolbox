@@ -24,6 +24,8 @@ package edu.umich.med.mrc2.datoolbox.gui.adducts.bindif;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import edu.umich.med.mrc2.datoolbox.data.BinnerAdduct;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTableModel;
@@ -69,6 +71,28 @@ public class BinnerAnnotationsTableModel extends BasicTableModel {
 				ad.getPolarity().name(),
 				ad.getCharge(),
 				ad.getTier(),
+				ad.getMass(),
+			};
+			rowData.add(obj);
+		}
+		if(!rowData.isEmpty())
+			addRows(rowData);
+	}
+
+	public void setTableModelFromBinnerAdductTierMap(Map<BinnerAdduct, Integer> tierMap) {
+
+		setRowCount(0);
+		List<Object[]>rowData = new ArrayList<Object[]>();
+				
+		for (Entry<BinnerAdduct,Integer> entry : tierMap.entrySet()) {
+
+			BinnerAdduct ad = entry.getKey();
+			Object[] obj = {
+				ad,
+				ad.getName(),
+				ad.getPolarity().name(),
+				ad.getCharge(),
+				entry.getValue(),
 				ad.getMass(),
 			};
 			rowData.add(obj);

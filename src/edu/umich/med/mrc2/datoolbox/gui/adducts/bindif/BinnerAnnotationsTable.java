@@ -22,6 +22,7 @@
 package edu.umich.med.mrc2.datoolbox.gui.adducts.bindif;
 
 import java.util.Collection;
+import java.util.Map;
 
 import javax.swing.ListSelectionModel;
 import javax.swing.table.TableRowSorter;
@@ -60,7 +61,7 @@ public class BinnerAnnotationsTable extends BasicTable {
 		finalizeLayout();
 	}
 
-	public void setTableModelFromBinnerAdducttList(Collection<BinnerAdduct> collection) {
+	public void setTableModelFromBinnerAdductCollection(Collection<BinnerAdduct> collection) {
 		thf.setTable(null);
 		((BinnerAnnotationsTableModel)model).setTableModelFromBinnerAdductList(collection);
 		thf.setTable(this);
@@ -98,5 +99,13 @@ public class BinnerAnnotationsTable extends BasicTable {
 				return;
 			}
 		}		
+	}
+
+	public void setTableModelFromBinnerAdductTierMap(Map<BinnerAdduct, Integer> tierMap) {
+		
+		thf.setTable(null);
+		((BinnerAnnotationsTableModel)model).setTableModelFromBinnerAdductTierMap(tierMap);
+		thf.setTable(this);
+		adjustColumns();
 	}
 }

@@ -231,10 +231,12 @@ public class BinnerNeutralMassDifferenceManagerDialog extends JDialog
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+			BinnerUtils.addNewBinnerNeutralMassDifferenceAsAnnotation(massDiff);
 			AdductManager.getBinnerNeutralMassDifferenceList().add(massDiff);
 			massDifferenceTable.setTableModelFromBinnerNeutralMassDifferenceList(
 					AdductManager.getBinnerNeutralMassDifferenceList());
 			massDifferenceTable.selectMassDifference(massDiff);
+			DockableBinnerAnnotationsEditor.refreshBinnerAdductList();
 		}
 		else {
 			BinnerNeutralMassDifference editedMassDiff = 
@@ -250,6 +252,7 @@ public class BinnerNeutralMassDifferenceManagerDialog extends JDialog
 			massDifferenceTable.setTableModelFromBinnerNeutralMassDifferenceList(
 					AdductManager.getBinnerNeutralMassDifferenceList());
 			massDifferenceTable.selectMassDifference(editedMassDiff);
+			DockableBinnerAnnotationsEditor.refreshBinnerAdductList();
 		}		
 		binnerNeutralMassDifferenceEditorDialog.dispose();
 	}

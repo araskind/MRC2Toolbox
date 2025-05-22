@@ -394,7 +394,7 @@ public class BinnerNeutralMassDifferenceEditorDialog extends JDialog
 					filter(d -> !d.getId().equalsIgnoreCase(currentId)).
 					filter(d -> (CollectionUtils.isEqualCollection(repeats, d.getNeutralAdducts())
 							&& CollectionUtils.isEqualCollection(losses, d.getNeutralLosses()))).
-					findFirst().orElse(null);;
+					findFirst().orElse(null);
 			
 			if(sameDiff != null)
 				errors.add("Anothe Binner mass difference with the same "
