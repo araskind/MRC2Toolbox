@@ -610,6 +610,8 @@ public enum MainActionCommands {
 	EDIT_BINNER_ANNOTATION_LIST_COMMAND("Edit Binner annotations list"),
 	SAVE_BINNER_ANNOTATION_LIST_COMMAND("Save Binner annotations list"),
 	DELETE_BINNER_ANNOTATION_LIST_COMMAND("Delete Binner annotations list"),
+	ADD_BINNER_ANNOTATION_TO_LIST_COMMAND("Add Binner annotation(s) to list"),
+	REMOVE_BINNER_ANNOTATION_FROM_LIST_COMMAND("Remove Binner annotation(s) from list"),
 	
 	//	Database parser tool
 	SHOW_DATABASE_PARSER_COMMAND("Show database parser"),

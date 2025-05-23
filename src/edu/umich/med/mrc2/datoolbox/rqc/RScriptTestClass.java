@@ -48,10 +48,10 @@ public class RScriptTestClass {
 	private static void testMetabCombinerAlignmentScript() {
 
 		File rWorkingDir = new File(
-				"Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\A003 - Untargeted\\Documents\\POS\\_4MetabCombiner\\CLEANED");
+				"Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\A003 - Untargeted\\Documents\\NEG\\_4MetabCombiner\\ALL");
 		
 		File inputMap = new File(
-				"Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\A003 - Untargeted\\Documents\\POS\\_4MetabCombiner\\CLEANED\\EX01190-RP-POS-CLEANED-withAdducts-MC-inputMap.txt");
+				"Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\A003 - Untargeted\\Documents\\NEG\\_4MetabCombiner\\ALL\\EX01190-RP-NEG-ALL-withAdducts-MC-inputMap.txt");
 		
 		RQCScriptGenerator.generateMultiBatchMetabCombinerAlignmentScriptScript(rWorkingDir, inputMap);
 	}

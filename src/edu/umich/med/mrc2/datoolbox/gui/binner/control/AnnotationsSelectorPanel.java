@@ -32,6 +32,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 
 import javax.swing.JCheckBox;
 import javax.swing.JFormattedTextField;
@@ -44,8 +45,11 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 
+import org.apache.commons.lang.StringUtils;
+
 import edu.umich.med.mrc2.datoolbox.data.BinnerAdductList;
 import edu.umich.med.mrc2.datoolbox.database.idt.BinnerUtils;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
 import edu.umich.med.mrc2.datoolbox.gui.adducts.bindif.BinnerAnnotationsTable;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
@@ -373,10 +377,48 @@ public class AnnotationsSelectorPanel extends JPanel implements ValidatableForm,
 	}
 	
 	private void saveAndReloadAnnotationList() {
-		// TODO Auto-generated method stub
-		
-		
-		
+
+		Collection<String>errors = annotationListEditorDialog.validateFormData();
+		if(!errors.isEmpty()){
+		    MessageDialog.showErrorMsg(
+		            StringUtils.join(errors, "\n"), annotationListEditorDialog);
+		    return;
+		}
+		//	New list
+		if(annotationListEditorDialog.getBinnerAdductList() == null) {
+			
+			BinnerAdductList newList = new BinnerAdductList(
+					null,
+					annotationListEditorDialog.getAnnotationListName(),
+					annotationListEditorDialog.getAnnotationListDescription(),
+					MRC2ToolBoxCore.getIdTrackerUser(), 
+					new Date(), 
+					new Date());
+			newList.addComponents(annotationListEditorDialog.getBinnerAdductTierMap());
+			
+			try {
+				BinnerUtils.addNewBinnerAdductList(newList);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			IDTDataCache.refreshBinnerAdductListCollection();
+			loadBinnerAdductList(newList);
+		}
+		else {	//	Edit existing list
+			BinnerAdductList toUpdate = annotationListEditorDialog.getBinnerAdductList();
+			toUpdate.setName(annotationListEditorDialog.getAnnotationListName());
+			toUpdate.setDescription(annotationListEditorDialog.getAnnotationListDescription());
+			toUpdate.replaceComponents(annotationListEditorDialog.getBinnerAdductTierMap());
+			try {
+				BinnerUtils.editBinnerAdductList(toUpdate);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			IDTDataCache.refreshBinnerAdductListCollection();
+			loadBinnerAdductList(toUpdate);
+		}
 		annotationListEditorDialog.dispose();
 	}
 	

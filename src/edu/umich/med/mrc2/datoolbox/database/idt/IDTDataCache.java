@@ -33,6 +33,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.io.FilenameUtils;
 
+import edu.umich.med.mrc2.datoolbox.data.BinnerAdductList;
 import edu.umich.med.mrc2.datoolbox.data.CompoundLibrary;
 import edu.umich.med.mrc2.datoolbox.data.IonizationType;
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureIdentificationFollowupStep;
@@ -152,6 +153,13 @@ public class IDTDataCache {
 			new TreeMap<String, Integer>();	
 	private static Collection<ChromatographicGradient>chromatographicGradientList = 
 			new HashSet<ChromatographicGradient>();	
+	private static Collection<BinnerAdductList>binnerAdductListCollection = 
+			new TreeSet<BinnerAdductList>();	
+	
+	public static void refreshBinnerAdductListCollection() {
+		binnerAdductListCollection.clear();
+		getBinnerAdductListCollection();
+	}
 	
 	public static void refreshChromatographicGradientList() {
 		chromatographicGradientList.clear();
@@ -597,6 +605,38 @@ public class IDTDataCache {
 			}
 		}		
 		return chromatographicGradientList;
+	}
+	
+	public static Collection<BinnerAdductList> getBinnerAdductListCollection() {
+		
+		if(binnerAdductListCollection == null)
+			binnerAdductListCollection = new TreeSet<BinnerAdductList>();	
+		
+		if(binnerAdductListCollection.isEmpty()) {
+			
+			try {
+				binnerAdductListCollection.addAll(
+						BinnerUtils.getBinnerAdductListCollection());
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}		
+		return binnerAdductListCollection;
+	}
+	
+	public static BinnerAdductList getBinnerAdductListById(String id) {
+		
+		return getBinnerAdductListCollection().
+				stream().filter(g -> g.getId().equals(id)).
+				findFirst().orElse(null);
+	}
+		
+	public static BinnerAdductList getBinnerAdductListByName(String name) {
+		
+		return getBinnerAdductListCollection().
+				stream().filter(g -> g.getName().equals(name)).
+				findFirst().orElse(null);
 	}
 	
 	public static ChromatographicGradient getChromatographicGradientById(String id) {

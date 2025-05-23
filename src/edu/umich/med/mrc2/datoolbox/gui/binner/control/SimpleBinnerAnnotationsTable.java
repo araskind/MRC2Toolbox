@@ -23,6 +23,9 @@ package edu.umich.med.mrc2.datoolbox.gui.binner.control;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 import javax.swing.ListSelectionModel;
 import javax.swing.table.TableRowSorter;
@@ -30,6 +33,7 @@ import javax.swing.table.TableRowSorter;
 import edu.umich.med.mrc2.datoolbox.data.BinnerAdduct;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
+import edu.umich.med.mrc2.datoolbox.gui.tables.editors.SpinnerEditor;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.AutoChoices;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.TableFilterHeader;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.BinnerAdductRenderer;
@@ -57,31 +61,29 @@ public class SimpleBinnerAnnotationsTable extends BasicTable {
 				ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 
 		setDefaultRenderer(BinnerAdduct.class, new BinnerAdductRenderer(SortProperty.Name));
-
+		setDefaultEditor(Integer.class, new SpinnerEditor(1, 2));
+		
 		columnModel.getColumnById(
 				SimpleBinnerAnnotationsTableModel.MASS_CORRECTION_COLUMN)
 				.setCellRenderer(mzRenderer);
-
 
 		thf = new TableFilterHeader(this, AutoChoices.ENABLED);
 		finalizeLayout();
 	}
 
+	public void setTableModelFromBinnerAdductTierMap(Map<BinnerAdduct, Integer> tierMap) {
+		
+		thf.setTable(null);
+		((SimpleBinnerAnnotationsTableModel)model).setTableModelFromBinnerAdductTierMap(tierMap);
+		thf.setTable(this);
+		adjustColumns();
+	}
+	
 	public void setTableModelFromBinnerAdductCollection(Collection<BinnerAdduct> collection) {
 		thf.setTable(null);
 		((SimpleBinnerAnnotationsTableModel)model).setTableModelFromBinnerAdductList(collection);
 		thf.setTable(this);
 		adjustColumns();
-	}
-	
-	public BinnerAdduct getSelectedBinnerAdduct() {
-		
-		int row = getSelectedRow();
-		if(row == -1)
-			return null;
-		
-		return (BinnerAdduct)getValueAt(
-				row, getColumnIndex(SimpleBinnerAnnotationsTableModel.BINNER_ADDUCT_COLUMN));		
 	}
 	
 	public void removeBinnerAdduct(BinnerAdduct adduct) {
@@ -106,12 +108,69 @@ public class SimpleBinnerAnnotationsTable extends BasicTable {
 			}
 		}		
 	}
-
-	public void setTableModelFromBinnerAdductTierMap(Map<BinnerAdduct, Integer> tierMap) {
+	
+	public Collection<BinnerAdduct> getSelectedBinnerAdducts() {
 		
-		thf.setTable(null);
-		((SimpleBinnerAnnotationsTableModel)model).setTableModelFromBinnerAdductTierMap(tierMap);
-		thf.setTable(this);
-		adjustColumns();
+		Set<BinnerAdduct> selected = new TreeSet<BinnerAdduct>();
+		int[]selectedRows = getSelectedRows();
+		if(selectedRows.length == 0)
+			return selected;
+		
+		int adductColIndex = model.getColumnIndex(SimpleBinnerAnnotationsTableModel.BINNER_ADDUCT_COLUMN);
+		for(int row : selectedRows) {
+
+			BinnerAdduct adduct = 
+					(BinnerAdduct)model.getValueAt(convertRowIndexToModel(row), adductColIndex);
+			selected.add(adduct);
+		}
+		return selected;		
+	}
+	
+	public Collection<BinnerAdduct> getAllBinnerAdducts(){
+		
+		Set<BinnerAdduct> all = new TreeSet<BinnerAdduct>();
+		int adductColIndex = model.getColumnIndex(SimpleBinnerAnnotationsTableModel.BINNER_ADDUCT_COLUMN);
+		for(int row=0; row<model.getRowCount(); row++)
+			all.add((BinnerAdduct)model.getValueAt(row, adductColIndex));
+		
+		return all;
+	}
+	
+	public Map<BinnerAdduct, Integer> getSelectedBinnerAdductTierMap(){
+		
+		Map<BinnerAdduct, Integer> tierMap = new TreeMap<BinnerAdduct, Integer>();
+		int[]selectedRows = getSelectedRows();
+		if(!showTier || selectedRows.length == 0)
+			return tierMap;
+		
+		int adductColIndex = model.getColumnIndex(SimpleBinnerAnnotationsTableModel.BINNER_ADDUCT_COLUMN);
+		int tierColIndex = model.getColumnIndex(SimpleBinnerAnnotationsTableModel.TIER_COLUMN);
+		for(int row : selectedRows) {
+			
+			int modelRow = convertRowIndexToModel(row);
+			BinnerAdduct adduct = (BinnerAdduct)model.getValueAt(modelRow, adductColIndex);
+			Integer tier = (Integer)model.getValueAt(modelRow, tierColIndex);
+			if(adduct != null)
+				tierMap.put(adduct, tier);
+		}
+		return tierMap;
+	}
+	
+	public Map<BinnerAdduct, Integer> getCompleteBinnerAdductTierMap(){
+		
+		Map<BinnerAdduct, Integer> tierMap = new TreeMap<BinnerAdduct, Integer>();
+		if(!showTier)
+			return tierMap;
+		
+		int adductColIndex = model.getColumnIndex(SimpleBinnerAnnotationsTableModel.BINNER_ADDUCT_COLUMN);
+		int tierColIndex = model.getColumnIndex(SimpleBinnerAnnotationsTableModel.TIER_COLUMN);
+		for(int row=0; row<model.getRowCount(); row++) {
+			
+			BinnerAdduct adduct = (BinnerAdduct)model.getValueAt(row, adductColIndex);
+			Integer tier = (Integer)model.getValueAt(row, tierColIndex);
+			if(adduct != null)
+				tierMap.put(adduct, tier);
+		}		
+		return tierMap;
 	}
 }

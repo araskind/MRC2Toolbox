@@ -31,6 +31,7 @@ import javax.swing.SpinnerNumberModel;
 
 public class SpinnerEditor extends DefaultCellEditor {
 	
+	private static final long serialVersionUID = 1L;
 	private JSpinner spinner;
 
 	public SpinnerEditor(int min, int max) {

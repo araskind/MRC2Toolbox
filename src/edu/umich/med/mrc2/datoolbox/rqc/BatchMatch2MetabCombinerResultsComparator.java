@@ -54,11 +54,27 @@ public class BatchMatch2MetabCombinerResultsComparator {
 		MRC2ToolBoxConfiguration.initConfiguration();
 
 		try {
-			compareEX01283RPPOSnoB2results();
+			compareEX01190RPPOSresults();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+	
+	private static void compareEX01190RPPOSresults() {
+		
+		File batchMatchFeatureData = new File(
+				"Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\A003 - Untargeted\\Documents\\POS\\"
+				+ "_4MetabCombiner\\CLEANED\\EX01190_RP_POS_BatchMatch_features.txt");
+		File metabCombinerFeatureData = new File(
+				"Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\A003 - Untargeted\\Documents\\POS\\"
+				+ "_4MetabCombiner\\CLEANED\\EX01190_RP_POS_HC_MetabCombiner_features.txt");		
+		File outputFile = new File(
+				"Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\A003 - Untargeted\\Documents\\POS\\"
+				+ "_4MetabCombiner\\CLEANED\\EX01190-RP-POS-HC-BatchMatch-to-MetabCombiner-feature-overlay.txt");
+		
+		compareBatchMatchToMetabCombinerResults(
+				batchMatchFeatureData, metabCombinerFeatureData, outputFile, 20.0d, 0.05d);
 	}
 	
 	private static void compareEX01283RPPOSnoB2results() {

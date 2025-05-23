@@ -32,6 +32,14 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.swing.Box;
 import javax.swing.Icon;
@@ -55,17 +63,22 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.border.SoftBevelBorder;
 import javax.swing.border.TitledBorder;
 
+import edu.umich.med.mrc2.datoolbox.data.BinnerAdduct;
 import edu.umich.med.mrc2.datoolbox.data.BinnerAdductList;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
+import edu.umich.med.mrc2.datoolbox.gui.utils.ValidatableForm;
 import edu.umich.med.mrc2.datoolbox.main.AdductManager;
 
-public class AnnotationListEditorDialog extends JDialog implements ActionListener {
+public class AnnotationListEditorDialog extends JDialog implements ActionListener, ValidatableForm {
 
 	private static final long serialVersionUID = 1L;
 	
 	private static final Icon newListIcon = GuiUtils.getIcon("newFeatureSubset", 24);
 	private static final Icon editListIcon = GuiUtils.getIcon("editCollection", 24);
+	private static final Icon addItemleIcon = GuiUtils.getIcon("add", 32);
+	private static final Icon removeItemIcon = GuiUtils.getIcon("delete", 32);
 	
 	private BinnerAdductList binnerAdductList;
 	private JTextField dataSetNameField;
@@ -182,19 +195,25 @@ public class AnnotationListEditorDialog extends JDialog implements ActionListene
 		gbc_verticalStrut.gridy = 0;
 		panel_3.add(verticalStrut, gbc_verticalStrut);
 		
-		JButton btnNewButton = new JButton("New button");
+		JButton addAnnotationsButton = new JButton(addItemleIcon);
+		addAnnotationsButton.setActionCommand(
+				MainActionCommands.ADD_BINNER_ANNOTATION_TO_LIST_COMMAND.getName());
+		addAnnotationsButton.addActionListener(this);
 		GridBagConstraints gbc_btnNewButton = new GridBagConstraints();
 		gbc_btnNewButton.insets = new Insets(0, 0, 5, 0);
 		gbc_btnNewButton.gridx = 0;
 		gbc_btnNewButton.gridy = 1;
-		panel_3.add(btnNewButton, gbc_btnNewButton);
+		panel_3.add(addAnnotationsButton, gbc_btnNewButton);
 		
-		JButton btnNewButton_1 = new JButton("New button");
+		JButton removeAnnotationsButton = new JButton(removeItemIcon);
+		removeAnnotationsButton.setActionCommand(
+				MainActionCommands.REMOVE_BINNER_ANNOTATION_FROM_LIST_COMMAND.getName());
+		removeAnnotationsButton.addActionListener(this);
 		GridBagConstraints gbc_btnNewButton_1 = new GridBagConstraints();
 		gbc_btnNewButton_1.insets = new Insets(0, 0, 5, 0);
 		gbc_btnNewButton_1.gridx = 0;
 		gbc_btnNewButton_1.gridy = 2;
-		panel_3.add(btnNewButton_1, gbc_btnNewButton_1);
+		panel_3.add(removeAnnotationsButton, gbc_btnNewButton_1);
 		
 		Component verticalStrut_1 = Box.createVerticalStrut(20);
 		GridBagConstraints gbc_verticalStrut_1 = new GridBagConstraints();
@@ -213,6 +232,23 @@ public class AnnotationListEditorDialog extends JDialog implements ActionListene
 		gbc_scrollPane_1.gridx = 2;
 		gbc_scrollPane_1.gridy = 0;
 		panel_2.add(scrollPane_1, gbc_scrollPane_1);
+		
+		availableAnnotationsTable.addMouseListener(
+				new MouseAdapter() {
+					public void mouseClicked(MouseEvent e) {
+						if (e.getClickCount() == 2) {
+							addAnnotationsButton.doClick();
+						}
+					}
+				});
+		usedAnnotationsTable.addMouseListener(
+				new MouseAdapter() {
+					public void mouseClicked(MouseEvent e) {
+						if (e.getClickCount() == 2) {
+							removeAnnotationsButton.doClick();
+						}
+					}
+				});
 		
 		JPanel panel = new JPanel();
 		FlowLayout flowLayout = (FlowLayout) panel.getLayout();
@@ -253,17 +289,103 @@ public class AnnotationListEditorDialog extends JDialog implements ActionListene
 		else {
 			setTitle("Edit Binner annotation list \"" + binnerAdductList.getName() + "\"");
 			setIconImage(((ImageIcon) editListIcon).getImage());
+			Set<BinnerAdduct> usedAnnotations = binnerAdductList.getComponents().keySet();
+			usedAnnotationsTable.setTableModelFromBinnerAdductTierMap(binnerAdductList.getComponents());
+			List<BinnerAdduct> availableAnnotations = 
+					AdductManager.getBinnerAdductList().stream().
+					filter(a -> !usedAnnotations.contains(a)).
+					collect(Collectors.toList());
+			availableAnnotationsTable.setTableModelFromBinnerAdductCollection(availableAnnotations);
 		}
 	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		// TODO Auto-generated method stub
 
+		String command = e.getActionCommand();
+		if(command.equals(MainActionCommands.ADD_BINNER_ANNOTATION_TO_LIST_COMMAND.getName()))
+			addSelectedAnnotationsToList();
+		
+		if(command.equals(MainActionCommands.REMOVE_BINNER_ANNOTATION_FROM_LIST_COMMAND.getName()))
+			removeSelectedAnnotationsFromList();		
+	}
+	
+	private void addSelectedAnnotationsToList() {
+
+		Collection<BinnerAdduct>toAdd = 
+				availableAnnotationsTable.getSelectedBinnerAdducts();
+		if(toAdd.isEmpty())
+			return;
+		
+		Collection<BinnerAdduct>allAvailable = availableAnnotationsTable.getAllBinnerAdducts();
+		Map<BinnerAdduct, Integer>listComponents = 
+				usedAnnotationsTable.getCompleteBinnerAdductTierMap();
+		for(BinnerAdduct ba : toAdd)
+			listComponents.put(ba, 1);
+			
+		allAvailable.removeAll(toAdd);
+		availableAnnotationsTable.setTableModelFromBinnerAdductCollection(allAvailable);	
+		usedAnnotationsTable.setTableModelFromBinnerAdductTierMap(listComponents);
 	}
 
+	private void removeSelectedAnnotationsFromList() {
+
+		Map<BinnerAdduct, Integer>toRemove = 
+				usedAnnotationsTable.getSelectedBinnerAdductTierMap();
+		if(toRemove.isEmpty())
+			return;
+		
+		Map<BinnerAdduct, Integer>completeMap = 
+				usedAnnotationsTable.getCompleteBinnerAdductTierMap();
+		toRemove.keySet().stream().forEach(k -> completeMap.remove(k));
+		usedAnnotationsTable.setTableModelFromBinnerAdductTierMap(completeMap);
+		
+		Collection<BinnerAdduct>allAvailable = availableAnnotationsTable.getAllBinnerAdducts();
+		allAvailable.addAll(toRemove.keySet());
+		availableAnnotationsTable.setTableModelFromBinnerAdductCollection(allAvailable);
+	}
+	
 	public BinnerAdductList getBinnerAdductList() {
 		return binnerAdductList;
+	}
+	
+	public Map<BinnerAdduct, Integer>getBinnerAdductTierMap(){
+		return usedAnnotationsTable.getCompleteBinnerAdductTierMap();
+	}
+	
+	public String getAnnotationListName() {
+		return dataSetNameField.getText().trim();
+	}
+	
+	public String getAnnotationListDescription() {
+		return descriptionTextArea.getText().trim();
+	}
+
+	@Override
+	public Collection<String> validateFormData() {
+
+	    Collection<String>errors = new ArrayList<String>();
+	    
+	    if(getBinnerAdductTierMap().isEmpty())
+	        errors.add("Annoitations list cannot be empty");
+	    
+	    String name = getAnnotationListName();
+	    if(name.isEmpty())
+	        errors.add("Annoitations list name cannot be empty");
+	    else {
+	    	//	Check if name is compatible
+	    	if(binnerAdductList == null 
+	    			&& IDTDataCache.getBinnerAdductListByName(name) != null) {	//	New list
+	    		errors.add("Annoitations list \"" + name + "\" already exists");
+	    	}
+	    	if(binnerAdductList != null) {
+	    		
+	    		BinnerAdductList other = IDTDataCache.getBinnerAdductListByName(name);
+	    		if(other != null && other.getId().equals(binnerAdductList.getId()))
+	    			errors.add("A different annoitations list \"" + name + "\" already exists");
+	    	}	    	
+	    }
+	    return errors;
 	}
 }
 

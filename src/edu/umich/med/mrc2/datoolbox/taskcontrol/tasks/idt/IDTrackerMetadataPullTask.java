@@ -48,7 +48,7 @@ public class IDTrackerMetadataPullTask extends AbstractTask {
 
 		taskDescription = "Retrieving data from database ...";
 		setStatus(TaskStatus.PROCESSING);
-		total = 120;
+		total = 150;
 		processed = 0;
 
 		try {
@@ -224,14 +224,17 @@ public class IDTrackerMetadataPullTask extends AbstractTask {
 			BinnerAnnotationDataSetManager.refreshBinnerAnnotationLookupDataSetList();
 			processed = processed + 3;
 			
+			taskDescription = "Refreshing Binner annotation lists ";
+			IDTDataCache.refreshBinnerAdductListCollection();
+			processed = processed + 3;
+			
 			setStatus(TaskStatus.FINISHED);
 		}
 		catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			setStatus(TaskStatus.ERROR);
-return;
-
+			return;
 		}
 		setStatus(TaskStatus.FINISHED);
 	}

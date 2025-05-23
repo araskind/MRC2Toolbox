@@ -27,7 +27,7 @@ import java.util.TreeMap;
 
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
 
-public class BinnerAdductList {
+public class BinnerAdductList implements Comparable<BinnerAdductList>{
 
 	private String id;
 	private String name;
@@ -111,7 +111,50 @@ public class BinnerAdductList {
 		components.put(newComponent, tier);
 	}
 	
+	public void addComponents(Map<BinnerAdduct,Integer>newComponents) {
+		components.putAll(newComponents);
+	}
+	
+	public void replaceComponents(Map<BinnerAdduct,Integer>newComponents) {
+		components.clear();
+		components.putAll(newComponents);
+	}
+	
 	public void removeComponent(BinnerAdduct toRemove) {
 		components.remove(toRemove);
 	}
+
+	@Override
+	public int compareTo(BinnerAdductList o) {
+		return this.name.compareToIgnoreCase(o.getName());
+	}
+	
+    @Override
+    public boolean equals(Object obj) {
+
+		if (obj == this)
+			return true;
+
+        if (obj == null)
+            return false;
+
+        if (!BinnerAdductList.class.isAssignableFrom(obj.getClass()))
+            return false;
+
+        final BinnerAdductList other = (BinnerAdductList) obj;
+
+        if ((this.name == null) ? (other.getName() != null) : !this.name.equals(other.getName()))
+            return false;
+        
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+
+        int hash = 3;
+        hash = 53 * hash + (this.name != null ? this.name.hashCode() : 0);
+
+        return hash;
+    }
 }
