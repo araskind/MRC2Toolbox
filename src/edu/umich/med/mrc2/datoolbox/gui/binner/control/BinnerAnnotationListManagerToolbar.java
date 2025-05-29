@@ -32,32 +32,46 @@ import edu.umich.med.mrc2.datoolbox.gui.utils.CommonToolbar;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 
-public class BinnerAnnotationSelectorToolbar extends CommonToolbar {
+public class BinnerAnnotationListManagerToolbar extends CommonToolbar {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	private static final Icon openManagerIcon = GuiUtils.getIcon("editLibrary", 24);
-	private static final Icon clearListIcon = GuiUtils.getIcon("clearWorklist", 24);
+	private static final Icon openListIcon = GuiUtils.getIcon("openCollection", 24);
+	private static final Icon newListIcon = GuiUtils.getIcon("newFeatureSubset", 24);
+	private static final Icon editListIcon = GuiUtils.getIcon("editCollection", 24);
+	private static final Icon deleteListIcon = GuiUtils.getIcon("deleteCollection", 24);
 
 	@SuppressWarnings("unused")
 	private JButton
-		openManagerButton,
-		clearListButton;
+		openListButton,
+		newListButton,
+		editListButton,
+		deleteListButton;
 
-	public BinnerAnnotationSelectorToolbar(ActionListener commandListener) {
+	public BinnerAnnotationListManagerToolbar(ActionListener commandListener) {
 		
 		super(commandListener);
 		
-		openManagerButton = GuiUtils.addButton(this, null, openManagerIcon, commandListener,
-				MainActionCommands.SHOW_BINNER_ANNOTATION_LIST_MANAGER_COMMAND.getName(),
-				MainActionCommands.SHOW_BINNER_ANNOTATION_LIST_MANAGER_COMMAND.getName(),
+		openListButton = GuiUtils.addButton(this, null, openListIcon, commandListener,
+				MainActionCommands.OPEN_BINNER_ANNOTATION_LIST_COMMAND.getName(),
+				MainActionCommands.OPEN_BINNER_ANNOTATION_LIST_COMMAND.getName(),
 				buttonDimension);
 
-		clearListButton = GuiUtils.addButton(this, null, clearListIcon, commandListener,
-				MainActionCommands.CLEAR_BINNER_ANNOTATION_LIST_COMMAND.getName(),
-				MainActionCommands.CLEAR_BINNER_ANNOTATION_LIST_COMMAND.getName(),
+		newListButton = GuiUtils.addButton(this, null, newListIcon, commandListener,
+				MainActionCommands.NEW_BINNER_ANNOTATION_LIST_COMMAND.getName(),
+				MainActionCommands.NEW_BINNER_ANNOTATION_LIST_COMMAND.getName(),
+				buttonDimension);
+		
+		editListButton = GuiUtils.addButton(this, null, editListIcon, commandListener,
+				MainActionCommands.EDIT_BINNER_ANNOTATION_LIST_COMMAND.getName(),
+				MainActionCommands.EDIT_BINNER_ANNOTATION_LIST_COMMAND.getName(),
+				buttonDimension);
+
+		deleteListButton = GuiUtils.addButton(this, null, deleteListIcon, commandListener,
+				MainActionCommands.DELETE_BINNER_ANNOTATION_LIST_COMMAND.getName(),
+				MainActionCommands.DELETE_BINNER_ANNOTATION_LIST_COMMAND.getName(),
 				buttonDimension);
 	}
 

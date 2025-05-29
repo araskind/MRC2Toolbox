@@ -19,7 +19,7 @@
  *
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.gui.idtlims.user;
+package edu.umich.med.mrc2.datoolbox.gui.binner.control;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -27,84 +27,65 @@ import java.util.Collection;
 import javax.swing.ListSelectionModel;
 import javax.swing.table.TableRowSorter;
 
-import edu.umich.med.mrc2.datoolbox.data.compare.LIMSExperimentComparator;
+import edu.umich.med.mrc2.datoolbox.data.BinnerAdductList;
 import edu.umich.med.mrc2.datoolbox.data.compare.LIMSUserComparator;
-import edu.umich.med.mrc2.datoolbox.data.compare.SortDirection;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.format.LIMSUserFormat;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.AutoChoices;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.TableFilterHeader;
+import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.BinnerAnnotationListRenderer;
+import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.WordWrapCellRenderer;
 
-public class UserTable extends BasicTable {
+public class BinnerAnnotationListsTable extends BasicTable {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 2959278423863597193L;
+	private static final long serialVersionUID = 1511489263877797538L;
+	
+	public BinnerAnnotationListsTable() {
 
-	public UserTable() {
 		super();
-		model = new UserTableModel();
+		model = new BinnerAnnotationListsTableModel();
 		setModel(model);
-		rowSorter = new TableRowSorter<UserTableModel>((UserTableModel)model);
+		
+		rowSorter = new TableRowSorter<BinnerAnnotationListsTableModel>(
+				(BinnerAnnotationListsTableModel)model);
 		setRowSorter(rowSorter);
-		rowSorter.setComparator(model.getColumnIndex(UserTableModel.USER_COLUMN),
-				new LIMSExperimentComparator(SortProperty.Name, SortDirection.DESC));
+		rowSorter.setComparator(model.getColumnIndex(BinnerAnnotationListsTableModel.OWNER_COLUMN),
+				new LIMSUserComparator(SortProperty.Name));
 		
 		getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		setRowHeight(80);
-		createInteractiveUserRenderer(Arrays.asList(UserTableModel.USER_COLUMN));
+		setDefaultRenderer(BinnerAdductList.class, new BinnerAnnotationListRenderer(SortProperty.Name));
+		createInteractiveUserRenderer(Arrays.asList(BinnerAnnotationListsTableModel.OWNER_COLUMN));
+		columnModel.getColumnById(BinnerAnnotationListsTableModel.DESCRIPTION_COLUMN)
+			.setCellRenderer(new WordWrapCellRenderer());
 
 		thf = new TableFilterHeader(this, AutoChoices.ENABLED);
 		thf.getParserModel().setFormat(LIMSUser.class, new LIMSUserFormat());
 		thf.getParserModel().setComparator(LIMSUser.class, new LIMSUserComparator(SortProperty.Name));
-
 		finalizeLayout();
 	}
 
-	public void setTableModelFromUserList(Collection<LIMSUser> users) {
+	public void setTableModelFromBinnerAdductCollection(Collection<BinnerAdductList> collection) {
+		
 		thf.setTable(null);
-		((UserTableModel)model).setTableModelFromUserList(users);
+		((BinnerAnnotationListsTableModel)model).setTableModelFromBinnerAdductListCollection(collection);
 		thf.setTable(this);
 		adjustColumns();
 	}
-
-	public LIMSUser getSelectedUser() {
-
-		int row = getSelectedRow();
-		if(row == -1)
-			return null;
-
-		return (LIMSUser) model.getValueAt(convertRowIndexToModel(row), 
-				model.getColumnIndex(UserTableModel.USER_COLUMN));
-	}
 	
-	public void selectUser(LIMSUser userToSelect) {
+	public BinnerAdductList getSelectedBinnerAdductList() {
 		
-		int userColumn = getColumnIndex(UserTableModel.USER_COLUMN);
-		//	TODO handle through model
-		if(userColumn == -1)
-			return;
-		
-		for(int i=0; i<getRowCount(); i++) {
-			LIMSUser user = (LIMSUser) getValueAt(i, userColumn);
-			if(userToSelect.equals(user)) {
-				setRowSelectionInterval(i, i);
-				scrollToSelected();
-				return;
-			}
+		int row = getSelectedRow();
+		if(row < 0)
+			return null;
+		else {
+			int column = model.getColumnIndex(BinnerAnnotationListsTableModel.NAME_COLUMN);
+			BinnerAdductList selected = (BinnerAdductList)model.getValueAt(convertRowIndexToModel(row), column);
+			return selected;
 		}
 	}
 }
-
-
-
-
-
-
-
-
-
-

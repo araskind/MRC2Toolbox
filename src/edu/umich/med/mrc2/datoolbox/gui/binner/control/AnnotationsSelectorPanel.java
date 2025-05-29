@@ -32,12 +32,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 
 import javax.swing.JCheckBox;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.border.CompoundBorder;
@@ -45,17 +43,10 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 
-import org.apache.commons.lang.StringUtils;
-
 import edu.umich.med.mrc2.datoolbox.data.BinnerAdductList;
-import edu.umich.med.mrc2.datoolbox.database.idt.BinnerUtils;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
 import edu.umich.med.mrc2.datoolbox.gui.adducts.bindif.BinnerAnnotationsTable;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
-import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.ValidatableForm;
-import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.main.config.NumberFormatStore;
 
@@ -74,7 +65,7 @@ public class AnnotationsSelectorPanel extends JPanel implements ValidatableForm,
 	private JLabel dateCreatedLabel;
 	private JLabel lastModifiedLabel;
 	private BinnerAdductList binnerAdductList;
-	private AnnotationListEditorDialog annotationListEditorDialog;
+	private AnnotationListManagerDialog annotationListManagerDialog;
 
 	public AnnotationsSelectorPanel() {
 		super(new BorderLayout(0, 0));
@@ -170,12 +161,10 @@ public class AnnotationsSelectorPanel extends JPanel implements ValidatableForm,
 		panel.add(varChargeCheckBox, gbc_varChargeCheckBox);
 		
 		JPanel tableWrap = new JPanel(new BorderLayout(0, 0));		
-		tableWrap.setBorder(new CompoundBorder(new TitledBorder(
-				new EtchedBorder(EtchedBorder.LOWERED, new Color(255, 255, 255), 
-						new Color(160, 160, 160)), "Available annotations list", 
-				TitledBorder.LEADING, TitledBorder.TOP, null, 
-				new Color(0, 0, 0)), new EmptyBorder(10, 0, 0, 0)));
-		
+		tableWrap.setBorder(new CompoundBorder(
+				new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED, new Color(255, 255, 255), 
+						new Color(160, 160, 160)), "Annotations", TitledBorder.LEADING, TitledBorder.TOP, 
+						null, new Color(0, 0, 0)), new EmptyBorder(10, 0, 0, 0)));
 		toolbar = new BinnerAnnotationSelectorToolbar(this);
 		tableWrap.add(toolbar, BorderLayout.NORTH);
 		
@@ -318,110 +307,29 @@ public class AnnotationsSelectorPanel extends JPanel implements ValidatableForm,
 	public void actionPerformed(ActionEvent e) {
 
 		String command = e.getActionCommand();
-		if(command.equals(MainActionCommands.OPEN_BINNER_ANNOTATION_LIST_COMMAND.getName())) 
-			showAnnotationListSelector();
+
+		if(command.equals(MainActionCommands.SHOW_BINNER_ANNOTATION_LIST_MANAGER_COMMAND.getName()))
+			showBinnerAnnotationListManager();
 		
-		if(command.equals(MainActionCommands.NEW_BINNER_ANNOTATION_LIST_COMMAND.getName()))
-			showAnnotationListEditor(null);
-		
-		if(command.equals(MainActionCommands.EDIT_BINNER_ANNOTATION_LIST_COMMAND.getName()) 
-				&& binnerAdductList != null)
-					showAnnotationListEditor(binnerAdductList);
-		
-		if(command.equals(MainActionCommands.SAVE_BINNER_ANNOTATION_LIST_COMMAND.getName()))
-			saveAndReloadAnnotationList();
-			
-		if(command.equals(MainActionCommands.DELETE_BINNER_ANNOTATION_LIST_COMMAND.getName()))
-			deleteActiveAnnotationList();		
+		if(command.equals(MainActionCommands.CLEAR_BINNER_ANNOTATION_LIST_COMMAND.getName()))
+			clearActiveAnnotationList();
 	}
 
-	private void deleteActiveAnnotationList() {
-
+	public void clearActiveAnnotationList() {
+		
 		if(binnerAdductList == null)
 			return;
 		
-		if(!IDTUtils.isSuperUser(this))
-			return;
-		
-		int res = MessageDialog.showChoiceWithWarningMsg(
-				"Are you sure you want to delete Binner "
-				+ "annotation list \"" + binnerAdductList.getName() +"\" ", this);
-		if(res == JOptionPane.YES_OPTION) {
-			
-			clearAnnotationList();
-			try {
-				BinnerUtils.deleteBinnerAdductList(binnerAdductList);
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
+		clearAnnotationList();
 	}
 
-	private void showAnnotationListSelector() {
+	private void showBinnerAnnotationListManager() {
 		// TODO Auto-generated method stub
-		
+		annotationListManagerDialog = new AnnotationListManagerDialog(this);
+		annotationListManagerDialog.setLocationRelativeTo(this);
+		annotationListManagerDialog.setVisible(true);
 	}
 
-	private void showAnnotationListEditor(BinnerAdductList binnerAdductList) {
-
-		if(binnerAdductList != null && !MRC2ToolBoxCore.getIdTrackerUser().equals(binnerAdductList.getOwner())) {
-			
-			MessageDialog.showWarningMsg("Binner annotation list \"" +
-					binnerAdductList.getName() + "\" may only be edited by its owner", this);
-			return;
-		}
-		annotationListEditorDialog = new AnnotationListEditorDialog(binnerAdductList, this);
-		annotationListEditorDialog.setLocationRelativeTo(this);
-		annotationListEditorDialog.setVisible(true);
-	}
-	
-	private void saveAndReloadAnnotationList() {
-
-		Collection<String>errors = annotationListEditorDialog.validateFormData();
-		if(!errors.isEmpty()){
-		    MessageDialog.showErrorMsg(
-		            StringUtils.join(errors, "\n"), annotationListEditorDialog);
-		    return;
-		}
-		//	New list
-		if(annotationListEditorDialog.getBinnerAdductList() == null) {
-			
-			BinnerAdductList newList = new BinnerAdductList(
-					null,
-					annotationListEditorDialog.getAnnotationListName(),
-					annotationListEditorDialog.getAnnotationListDescription(),
-					MRC2ToolBoxCore.getIdTrackerUser(), 
-					new Date(), 
-					new Date());
-			newList.addComponents(annotationListEditorDialog.getBinnerAdductTierMap());
-			
-			try {
-				BinnerUtils.addNewBinnerAdductList(newList);
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			IDTDataCache.refreshBinnerAdductListCollection();
-			loadBinnerAdductList(newList);
-		}
-		else {	//	Edit existing list
-			BinnerAdductList toUpdate = annotationListEditorDialog.getBinnerAdductList();
-			toUpdate.setName(annotationListEditorDialog.getAnnotationListName());
-			toUpdate.setDescription(annotationListEditorDialog.getAnnotationListDescription());
-			toUpdate.replaceComponents(annotationListEditorDialog.getBinnerAdductTierMap());
-			try {
-				BinnerUtils.editBinnerAdductList(toUpdate);
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			IDTDataCache.refreshBinnerAdductListCollection();
-			loadBinnerAdductList(toUpdate);
-		}
-		annotationListEditorDialog.dispose();
-	}
-	
 	public void loadBinnerAdductList(BinnerAdductList binnerAdductList) {
 		
 		this.binnerAdductList = binnerAdductList;

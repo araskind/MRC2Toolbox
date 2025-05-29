@@ -57,7 +57,7 @@ public class BinnerUtils {
 		Connection conn = ConnectionManager.getConnection();
 		String query  =
 			"SELECT ANNOTATION_ID, ANNOTATION_NAME, CHARGE, TIER, CHARGE_CARRIER_ID, "
-			+ "ADDUCT_EXCHANGE_ID, MASS_DIFF_ID FROM BINNER_ANNOTATIONS";
+			+ "ADDUCT_EXCHANGE_ID, MASS_DIFF_ID, MASS FROM BINNER_ANNOTATIONS";
 		PreparedStatement ps = conn.prepareStatement(query);		
 		ResultSet rs = ps.executeQuery();
 		while (rs.next()) {
@@ -93,8 +93,10 @@ public class BinnerUtils {
 						chargeCarrier,
 						exchange,
 						bmd);
-			
-			binAdductList.add(newAdduct);
+			if(newAdduct.getMass() == null)
+				newAdduct.setMass(rs.getDouble("MASS"));
+				
+			binAdductList.add(newAdduct);			
 		}
 		rs.close();
 		ps.close();

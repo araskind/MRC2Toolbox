@@ -41,7 +41,6 @@ import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.AutoChoices;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.TableFilterHeader;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.AnalysisMethodRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.IdTrackerOrganizationRenderer;
-import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.LIMSUserRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.WordWrapCellRenderer;
 
 public class OrganizationTable extends BasicTable {
@@ -50,7 +49,6 @@ public class OrganizationTable extends BasicTable {
 	 *
 	 */
 	private static final long serialVersionUID = -4961051611998862332L;
-	private LIMSUserRenderer userRenderer;
 
 	public OrganizationTable() {
 		super();

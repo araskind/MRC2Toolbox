@@ -38,7 +38,6 @@ import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.AutoChoices;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.TableFilterHeader;
-import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.LIMSUserRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.WordWrapCellRenderer;
 
 public class ProtocolTable extends BasicTable {
@@ -47,7 +46,6 @@ public class ProtocolTable extends BasicTable {
 	 *
 	 */
 	private static final long serialVersionUID = 5111265849253755884L;
-	private LIMSUserRenderer userRenderer;
 
 	public ProtocolTable() {
 		super();

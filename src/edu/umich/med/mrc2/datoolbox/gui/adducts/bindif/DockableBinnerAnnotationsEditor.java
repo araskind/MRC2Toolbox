@@ -74,7 +74,7 @@ public class DockableBinnerAnnotationsEditor
 	public static final String PREFS_NODE = "edu.umich.med.mrc2.datoolbox.gui.DockableBinnerAnnotationsEditor";
 	public static final String BASE_DIRECTORY = "BASE_DIRECTORY";
 	
-	private static BinnerAnnotationsTable binnerAnnotationsTable;
+	private static BinnerAnnotationsTable binnerAnnotationsTable = new BinnerAnnotationsTable();
 	private JScrollPane adductScrollPane;
 	private BinnerAnnotationsEditorToolbar toolBar;
 	private BinnerNeutralMassDifferenceEditorDialog binnerNeutralMassDifferenceEditorDialog;
@@ -92,7 +92,6 @@ public class DockableBinnerAnnotationsEditor
 		toolBar = new BinnerAnnotationsEditorToolbar(this);
 		add(toolBar, BorderLayout.NORTH);
 
-		binnerAnnotationsTable = new BinnerAnnotationsTable();
 		binnerAnnotationsTable.addTablePopupMenu(
 				new BinnerAnnotationsTablePopupMenu(this,binnerAnnotationsTable));
 				

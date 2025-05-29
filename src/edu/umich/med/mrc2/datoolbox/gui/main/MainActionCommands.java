@@ -605,10 +605,12 @@ public enum MainActionCommands {
 	NEW_COMPOSITE_MODIFICATION_FROM_MASS_DIFF_COMMAND("Create new composite modification from Binner mass difference"),
 	
 	//	Binner annotation list editor
+	SHOW_BINNER_ANNOTATION_LIST_MANAGER_COMMAND("Show Binner annotations list manager"),
 	OPEN_BINNER_ANNOTATION_LIST_COMMAND("Load Binner annotations list from database"),
 	NEW_BINNER_ANNOTATION_LIST_COMMAND("Create new Binner annotations list"),
 	EDIT_BINNER_ANNOTATION_LIST_COMMAND("Edit Binner annotations list"),
 	SAVE_BINNER_ANNOTATION_LIST_COMMAND("Save Binner annotations list"),
+	CLEAR_BINNER_ANNOTATION_LIST_COMMAND("Clear current Binner annotations list"),
 	DELETE_BINNER_ANNOTATION_LIST_COMMAND("Delete Binner annotations list"),
 	ADD_BINNER_ANNOTATION_TO_LIST_COMMAND("Add Binner annotation(s) to list"),
 	REMOVE_BINNER_ANNOTATION_FROM_LIST_COMMAND("Remove Binner annotation(s) from list"),

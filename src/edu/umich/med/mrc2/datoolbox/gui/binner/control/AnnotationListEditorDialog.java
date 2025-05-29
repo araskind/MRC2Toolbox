@@ -296,6 +296,9 @@ public class AnnotationListEditorDialog extends JDialog implements ActionListene
 					filter(a -> !usedAnnotations.contains(a)).
 					collect(Collectors.toList());
 			availableAnnotationsTable.setTableModelFromBinnerAdductCollection(availableAnnotations);
+			
+			dataSetNameField.setText(binnerAdductList.getName());
+			descriptionTextArea.setText(binnerAdductList.getDescription());
 		}
 	}
 
@@ -381,7 +384,7 @@ public class AnnotationListEditorDialog extends JDialog implements ActionListene
 	    	if(binnerAdductList != null) {
 	    		
 	    		BinnerAdductList other = IDTDataCache.getBinnerAdductListByName(name);
-	    		if(other != null && other.getId().equals(binnerAdductList.getId()))
+	    		if(other != null && !other.getId().equals(binnerAdductList.getId()))
 	    			errors.add("A different annoitations list \"" + name + "\" already exists");
 	    	}	    	
 	    }

@@ -129,6 +129,11 @@ public class BinnerAdductList implements Comparable<BinnerAdductList>{
 		return this.name.compareToIgnoreCase(o.getName());
 	}
 	
+	@Override
+	public String toString() {
+		return name;
+	}
+	
     @Override
     public boolean equals(Object obj) {
 

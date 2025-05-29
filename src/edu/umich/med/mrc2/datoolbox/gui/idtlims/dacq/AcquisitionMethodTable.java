@@ -43,7 +43,6 @@ import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.AutoChoices;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.TableFilterHeader;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.AnalysisMethodRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.ChromatographicColumnRenderer;
-import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.LIMSUserRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.WordWrapCellRenderer;
 
 public class AcquisitionMethodTable extends BasicTable {
@@ -52,7 +51,6 @@ public class AcquisitionMethodTable extends BasicTable {
 	 *
 	 */
 	private static final long serialVersionUID = -1405921543482090501L;
-	private LIMSUserRenderer userRenderer;
 
 	public AcquisitionMethodTable() {
 		super();

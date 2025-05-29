@@ -37,6 +37,7 @@ public class BinnerAdduct implements Serializable, Comparable<BinnerAdduct>{
 	private Adduct chargeCarrier;
 	private AdductExchange adductExchange;
 	private BinnerNeutralMassDifference binnerNeutralMassDifference;
+	private double mass;
 	
 	public BinnerAdduct(
 			String id, 
@@ -104,8 +105,12 @@ public class BinnerAdduct implements Serializable, Comparable<BinnerAdduct>{
 		if(adductExchange != null)
 			return adductExchange.getMassDifference();
 		
-		if(binnerNeutralMassDifference != null)
+		if(binnerNeutralMassDifference != null
+				&& Math.abs(binnerNeutralMassDifference.getMassCorrection()) > 0.0d)
 			return binnerNeutralMassDifference.getMassCorrection();
+		
+		if(mass > 0.0d)
+			return mass;
 		
 		return null;
 	}
@@ -189,6 +194,10 @@ public class BinnerAdduct implements Serializable, Comparable<BinnerAdduct>{
 	@Override
 	public int compareTo(BinnerAdduct o) {
 		return binnerName.compareTo(o.getBinnerName());
+	}
+
+	public void setMass(double mass) {
+		this.mass = mass;
 	}
 
 }
