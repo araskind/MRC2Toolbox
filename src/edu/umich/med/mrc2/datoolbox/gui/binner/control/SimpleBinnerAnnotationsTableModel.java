@@ -37,7 +37,8 @@ public class SimpleBinnerAnnotationsTableModel extends BasicTableModel {
 	 *
 	 */
 	private static final long serialVersionUID = 3265763908033362302L;
-
+	
+	public static final String ORDER_COLUMN = "##";
 	public static final String BINNER_ADDUCT_COLUMN = "Binner name";
 	public static final String STD_NAME_COLUMN = "Tracker name";
 	public static final String POLARITY_COLUMN = "Polarity";
@@ -54,7 +55,7 @@ public class SimpleBinnerAnnotationsTableModel extends BasicTableModel {
 		
 		if(showTier) {
 			columnArray = new ColumnContext[] {
-
+					new ColumnContext(ORDER_COLUMN, ORDER_COLUMN, Integer.class, false),
 					new ColumnContext(BINNER_ADDUCT_COLUMN, BINNER_ADDUCT_COLUMN, BinnerAdduct.class, false),
 					new ColumnContext(CHARGE_COLUMN, CHARGE_COLUMN, Integer.class, false),
 					new ColumnContext(MASS_CORRECTION_COLUMN, "Mass difference", Double.class, false),
@@ -63,7 +64,7 @@ public class SimpleBinnerAnnotationsTableModel extends BasicTableModel {
 		}
 		else {
 			columnArray = new ColumnContext[] {
-
+					new ColumnContext(ORDER_COLUMN, ORDER_COLUMN, Integer.class, false),
 					new ColumnContext(BINNER_ADDUCT_COLUMN, BINNER_ADDUCT_COLUMN, BinnerAdduct.class, false),
 					new ColumnContext(CHARGE_COLUMN, CHARGE_COLUMN, Integer.class, false),
 					new ColumnContext(MASS_CORRECTION_COLUMN, "Mass difference", Double.class, false),		
@@ -75,29 +76,33 @@ public class SimpleBinnerAnnotationsTableModel extends BasicTableModel {
 
 		setRowCount(0);
 		List<Object[]>rowData = new ArrayList<Object[]>();
-			
+		int counter = 1;
 		if(showTier) {
 			
 			for (BinnerAdduct ad : collection) {
 
 				Object[] obj = {
+					counter,
 					ad,
 					ad.getCharge(),				
 					ad.getMass(),
 					ad.getTier(),
 				};
 				rowData.add(obj);
+				counter++;
 			}
 		}
 		else {
 			for (BinnerAdduct ad : collection) {
 
 				Object[] obj = {
+					counter,
 					ad,
 					ad.getCharge(),
 					ad.getMass(),
 				};
 				rowData.add(obj);
+				counter++;
 			}
 		}
 		if(!rowData.isEmpty())
@@ -108,18 +113,21 @@ public class SimpleBinnerAnnotationsTableModel extends BasicTableModel {
 
 		setRowCount(0);
 		List<Object[]>rowData = new ArrayList<Object[]>();
+		int counter = 1;
 		if(showTier) {
 			
 			for (Entry<BinnerAdduct,Integer> entry : tierMap.entrySet()) {
 
 				BinnerAdduct ad = entry.getKey();
 				Object[] obj = {
+					counter,
 					ad,
 					ad.getCharge(),					
 					ad.getMass(),
 					entry.getValue(),
-				};
+				};				
 				rowData.add(obj);
+				counter++;
 			}
 		}
 		else {
@@ -127,11 +135,13 @@ public class SimpleBinnerAnnotationsTableModel extends BasicTableModel {
 
 				BinnerAdduct ad = entry.getKey();
 				Object[] obj = {
+					counter,
 					ad,
 					ad.getCharge(),
 					ad.getMass(),
 				};
 				rowData.add(obj);
+				counter++;
 			}
 		}
 		if(!rowData.isEmpty())

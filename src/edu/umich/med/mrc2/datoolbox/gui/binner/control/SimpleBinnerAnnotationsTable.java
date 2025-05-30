@@ -61,14 +61,27 @@ public class SimpleBinnerAnnotationsTable extends BasicTable {
 				ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 
 		setDefaultRenderer(BinnerAdduct.class, new BinnerAdductRenderer(SortProperty.Name));
-		setDefaultEditor(Integer.class, new SpinnerEditor(1, 2));
-		
+		setDefaultEditor(Integer.class, new SpinnerEditor(1, 2));		
 		columnModel.getColumnById(
 				SimpleBinnerAnnotationsTableModel.MASS_CORRECTION_COLUMN)
 				.setCellRenderer(mzRenderer);
+		
+		setExactColumnWidth(SimpleBinnerAnnotationsTableModel.ORDER_COLUMN, 40);
+		fixedWidthColumns.add(model.getColumnIndex(
+				SimpleBinnerAnnotationsTableModel.ORDER_COLUMN));
 
 		thf = new TableFilterHeader(this, AutoChoices.ENABLED);
 		finalizeLayout();
+	}
+	
+	@Override
+	public Object getValueAt(int row, int column) {
+		
+		if(convertColumnIndexToModel(column) == 
+				model.getColumnIndex(SimpleBinnerAnnotationsTableModel.ORDER_COLUMN))
+			return row+1;
+		else
+			return super.getValueAt(row, column);
 	}
 
 	public void setTableModelFromBinnerAdductTierMap(Map<BinnerAdduct, Integer> tierMap) {
@@ -92,6 +105,7 @@ public class SimpleBinnerAnnotationsTable extends BasicTable {
 		for(int i=0; i<model.getRowCount(); i++) {
 			if(adduct.equals(model.getValueAt(i, column))) {
 				model.removeRow(i);
+				adjustColumns();
 				return;
 			}
 		}		

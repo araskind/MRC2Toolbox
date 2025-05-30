@@ -100,7 +100,7 @@
 									<content delegate="SplitDockStationFactory">
 										<fullscreen-action>false</fullscreen-action>
 										<node nodeId="1601071207927" orientation="VERTICAL" divider="0.6277173913043478">
-											<leaf id="0" nodeId="1601071201438">
+											<leaf id="1" nodeId="1601071201438">
 												<placeholders>
 													<placeholder>dock.single.DockableSimpleModificationsTable</placeholder>
 												</placeholders>
@@ -114,7 +114,7 @@
 													</entry>
 												</placeholder-map>
 											</leaf>
-											<leaf id="1" nodeId="1601071207925">
+											<leaf id="0" nodeId="1601071207925">
 												<placeholders>
 													<placeholder>dock.single.SimpleModificationSelectorDialogFrameDockableMolStructurePanel</placeholder>
 												</placeholders>
@@ -130,20 +130,20 @@
 							</adjacent>
 							<children ignore="false">
 								<child>
-									<layout factory="predefined" placeholder="dock.single.DockableSimpleModificationsTable">
-										<replacement id="dockablesingle DockableSimpleModificationsTable"/>
+									<layout factory="predefined" placeholder="dock.single.SimpleModificationSelectorDialogFrameDockableMolStructurePanel">
+										<replacement id="dockablesingle SimpleModificationSelectorDialogFrameDockableMolStructurePanel"/>
 										<delegate id="delegate_ccontrol backup factory id">
-											<id>DockableSimpleModificationsTable</id>
+											<id>SimpleModificationSelectorDialogFrameDockableMolStructurePanel</id>
 											<area/>
 										</delegate>
 									</layout>
 									<children ignore="false"/>
 								</child>
 								<child>
-									<layout factory="predefined" placeholder="dock.single.SimpleModificationSelectorDialogFrameDockableMolStructurePanel">
-										<replacement id="dockablesingle SimpleModificationSelectorDialogFrameDockableMolStructurePanel"/>
+									<layout factory="predefined" placeholder="dock.single.DockableSimpleModificationsTable">
+										<replacement id="dockablesingle DockableSimpleModificationsTable"/>
 										<delegate id="delegate_ccontrol backup factory id">
-											<id>SimpleModificationSelectorDialogFrameDockableMolStructurePanel</id>
+											<id>DockableSimpleModificationsTable</id>
 											<area/>
 										</delegate>
 									</layout>
