@@ -29,7 +29,9 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Set;
 import java.util.prefs.Preferences;
+import java.util.stream.Collectors;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -44,6 +46,9 @@ import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
 
+import edu.umich.med.mrc2.datoolbox.data.BinnerAdductList;
+import edu.umich.med.mrc2.datoolbox.data.BinnerPreferencesObject;
+import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
@@ -142,6 +147,44 @@ public class BinnerProcessingSetupDialog extends JDialog
 	public void actionPerformed(ActionEvent e) {
 		// TODO Auto-generated method stub
 		
+	}	
+	
+	public void loadPreferencesFromObject(BinnerPreferencesObject bpo, boolean loadDataFiles) {
+
+		//	Input files
+		if(loadDataFiles && bpo.getInputFiles() != null)
+				dataFileSelectionPanel.setTableModelFromFileCollection(bpo.getInputFiles());		
+		
+	    //	Data cleaning
+	    dataCleaningOptionsPanel.setOutlierSDdeviation(bpo.getOutlierSDdeviation());
+	    dataCleaningOptionsPanel.setMissingRemovalThreshold(bpo.getMissingRemovalThreshold());
+	    dataCleaningOptionsPanel.setTreatZerosAsMisssing(bpo.isZeroAsMissing());
+	    dataCleaningOptionsPanel.setLogTransformData(bpo.isLogTransform());	    
+	    dataCleaningOptionsPanel.setDeisotopingMassTolerance(bpo.getDeisotopingMassTolerance());
+	    dataCleaningOptionsPanel.setDeisotopingRTtolerance(bpo.getDeisotopingRTtolerance());
+	    dataCleaningOptionsPanel.setDeisotopingCorrelationCutoff(bpo.getDeisotopingCorrCutoff());	    
+	    dataCleaningOptionsPanel.setDeisotopeMassDifferenceDistribution(bpo.isDeisoMassDiffDistr());	    
+	    dataCleaningOptionsPanel.setDeisotopeData(bpo.isDeisotope());
+	    
+	    //	Feature grouping
+	    featureGroupingOptionsPanel.setCorrelationFunctionType(bpo.getCorrelationFunctionType());
+	    featureGroupingOptionsPanel.setRTgap(bpo.getRtGap());	
+	    featureGroupingOptionsPanel.setMinSubclusterRTgap(bpo.getMinSubclusterRTgap());
+	    featureGroupingOptionsPanel.setMaxSubclusterRTgap(bpo.getMaxSubclusterRTgap());
+	    featureGroupingOptionsPanel.setClusterGroupingMethod(bpo.getClusterGroupingMethod());	    
+	    featureGroupingOptionsPanel.setBinClusteringCutoff(bpo.getBinClusteringCutoff());	    
+	    featureGroupingOptionsPanel.setBinClusteringCutoffType(bpo.getBinClusteringCutoffType());
+	    
+	    featureGroupingOptionsPanel.setBinSizeLimitForAnalysis(bpo.getBinSizeLimitForAnalysis()); 
+	    featureGroupingOptionsPanel.setBinSizeLimitForOutput(bpo.getBinSizeLimitForOutput()); 	    
+	    featureGroupingOptionsPanel.setLimitMaxBinSizeForAnalysis(bpo.isLimitBinSizeForAnalysis());
+	    featureGroupingOptionsPanel.setLimitMaxBinSizeForOutput(bpo.isLimitBinSizeForOutput());
+	    
+	    //	Annotations
+	    annotationsSelectorPanel.setAnnotationMassTolerance(bpo.getAnnotationMassTolerance());
+	    annotationsSelectorPanel.setAnnotationRTTolerance(bpo.getAnnotationRTTolerance());
+	    if(bpo.getAnnotationList() != null)
+	    	annotationsSelectorPanel.loadBinnerAdductList(bpo.getAnnotationList());
 	}
 
 	@Override
@@ -210,10 +253,10 @@ public class BinnerProcessingSetupDialog extends JDialog
 	    featureGroupingOptionsPanel.setBinClusteringCutoffType(
 	    		BinClusteringCutoffType.getOptionByName(binClusteringCutoffTypeMethodName));
 	    
-	    featureGroupingOptionsPanel.setMaxBinSizeForAnalysis(
+	    featureGroupingOptionsPanel.setBinSizeLimitForAnalysis(
 	    		preferences.getInt(BinnerParameters.FGBinSizeLimitForAnalysis.name(), 
 	    				Integer.parseInt(BinnerParameters.FGBinSizeLimitForAnalysis.getDefaultValue()))); 
-	    featureGroupingOptionsPanel.setMaxBinSizeForOutput(
+	    featureGroupingOptionsPanel.setBinSizeLimitForOutput(
 	    		preferences.getInt(BinnerParameters.FGBinSizeLimitForOutput.name(), 
 	    				Integer.parseInt(BinnerParameters.FGBinSizeLimitForOutput.getDefaultValue()))); 
 	    
@@ -224,6 +267,13 @@ public class BinnerProcessingSetupDialog extends JDialog
 	    		preferences.getBoolean(BinnerParameters.FGBOverrideBinSizeLimitForOutput.name(), 
 	    				Boolean.parseBoolean(BinnerParameters.FGBOverrideBinSizeLimitForOutput.getDefaultValue())));
 	    
+	    //	Annotations
+	    annotationsSelectorPanel.setAnnotationMassTolerance(
+	    		preferences.getDouble(BinnerParameters.ANMassTolerance.name(), 
+	    				Double.parseDouble(BinnerParameters.ANMassTolerance.getDefaultValue())));
+	    annotationsSelectorPanel.setAnnotationRTTolerance(
+	    		preferences.getDouble(BinnerParameters.ANRTTolerance.name(), 
+	    				Double.parseDouble(BinnerParameters.ANRTTolerance.getDefaultValue())));
 	}
 
 	@Override
@@ -233,17 +283,136 @@ public class BinnerProcessingSetupDialog extends JDialog
 
 	@Override
 	public void savePreferences() {
-		// TODO Auto-generated method stub
-		
+
+		 preferences = Preferences.userNodeForPackage(this.getClass());
+		 
+		 //	Data cleaning
+		 preferences.putDouble(
+				 BinnerParameters.DCOutlierStDevCutoff.name(), 
+				 dataCleaningOptionsPanel.getOutlierSDdeviation());
+		 preferences.putDouble(
+				 BinnerParameters.DCMissingnessCutoff.name(), 
+				 dataCleaningOptionsPanel.getMissingRemovalThreshold());
+		 preferences.putBoolean(
+				 BinnerParameters.DCZeroAsMissing.name(), 
+				 dataCleaningOptionsPanel.treatZerosAsMisssing());
+		 preferences.putBoolean(
+				 BinnerParameters.DCNormalize.name(), 
+				 dataCleaningOptionsPanel.logTransformData());
+		 preferences.putBoolean(
+				 BinnerParameters.DCDeisotope.name(), 
+				 dataCleaningOptionsPanel.deisotopeData()); 
+		 preferences.putDouble(
+				 BinnerParameters.DCDeisotopeMassTolerance.name(), 
+				 dataCleaningOptionsPanel.getDeisotopingMassTolerance());
+		 preferences.putDouble(
+				 BinnerParameters.DCDeisotopeRTTolearance.name(), 
+				 dataCleaningOptionsPanel.getDeisotopingRTtolerance());
+		 preferences.putDouble(
+				 BinnerParameters.DCDeisotopeCorrCutoff.name(), 
+				 dataCleaningOptionsPanel.getDeisotopingCorrelationCutoff());  
+		 preferences.putBoolean(
+				 BinnerParameters.DCDeisotopeMassDiffDistribution.name(), 
+				 dataCleaningOptionsPanel.deisotopeMassDifferenceDistribution()); 
+		    
+		 //	Feature grouping
+		 preferences.put(
+				 BinnerParameters.FGCorrFunction.name(), 
+				 featureGroupingOptionsPanel.getCorrelationFunctionType().name());
+		 preferences.putDouble(
+				 BinnerParameters.FGRTGap.name(), 
+				 featureGroupingOptionsPanel.getRTgap());
+		 preferences.putDouble(
+				 BinnerParameters.FGMinRtGap.name(), 
+				 featureGroupingOptionsPanel.getMinSubclusterRTgap());		 
+		 preferences.putDouble(
+				 BinnerParameters.FGMaxRtGap.name(), 
+				 featureGroupingOptionsPanel.getMaxSubclusterRTgap());	
+		 preferences.put(
+				 BinnerParameters.FGGroupingMethod.name(), 
+				 featureGroupingOptionsPanel.getClusterGroupingMethod().name());
+		 preferences.putInt(
+				 BinnerParameters.FGBinningCutoffValue.name(), 
+				 featureGroupingOptionsPanel.getBinClusteringCutoff());
+		 preferences.put(
+				 BinnerParameters.FGBinningCutoffType.name(), 
+				 featureGroupingOptionsPanel.getBinClusteringCutoffType().name());
+		 preferences.putInt(
+				 BinnerParameters.FGBinSizeLimitForAnalysis.name(), 
+				 featureGroupingOptionsPanel.getBinSizeLimitForAnalysis());
+		 preferences.putInt(
+				 BinnerParameters.FGBinSizeLimitForOutput.name(), 
+				 featureGroupingOptionsPanel.getBinSizeLimitForOutput());
+		 preferences.putBoolean(
+				 BinnerParameters.FGBOverrideBinSizeLimitForAnalysis.name(), 
+				 featureGroupingOptionsPanel.limitMaxBinSizeForAnalysis());
+		 preferences.putBoolean(
+				 BinnerParameters.FGBOverrideBinSizeLimitForOutput.name(), 
+				 featureGroupingOptionsPanel.limitMaxBinSizeForOutput());	    
+		    
+		    //	Annotations
+		 preferences.putDouble(
+				 BinnerParameters.ANMassTolerance.name(), 
+				 annotationsSelectorPanel.getAnnotationMassTolerance());
+		 preferences.putDouble(
+				 BinnerParameters.ANRTTolerance.name(), 
+				 annotationsSelectorPanel.getAnnotationRTTolerance());
 	}
 	
 	@Override
 	public Collection<String> validateFormData() {
 
 		Collection<String>errors = new ArrayList<String>();
-		
+		errors.addAll(dataFileSelectionPanel.validateFormData());
+		errors.addAll(dataCleaningOptionsPanel.validateFormData());
+		errors.addAll(featureGroupingOptionsPanel.validateFormData());
+		errors.addAll(annotationsSelectorPanel.validateFormData());
 		
 		return errors;
 	}
 
+	public BinnerPreferencesObject getBinnerPreferencesObject() {
+		
+		BinnerPreferencesObject bpo = new BinnerPreferencesObject(activeDataPipeline);
+		
+		//	Input data
+		bpo.getInputFiles().addAll(dataFileSelectionPanel.getEnabledFiles());		
+		Set<Polarity>polSet = bpo.getInputFiles().stream().
+				map(f -> f.getDataAcquisitionMethod().getPolarity()).
+				distinct().collect(Collectors.toSet());
+		bpo.setPolarity(polSet.iterator().next());
+		
+		//	Data cleaning
+		bpo.setOutlierSDdeviation(dataCleaningOptionsPanel.getOutlierSDdeviation());
+		bpo.setMissingRemovalThreshold(dataCleaningOptionsPanel.getMissingRemovalThreshold());
+		bpo.setLogTransform(dataCleaningOptionsPanel.logTransformData());
+		bpo.setZeroAsMissing(dataCleaningOptionsPanel.treatZerosAsMisssing());
+		bpo.setDeisotope(dataCleaningOptionsPanel.deisotopeData());
+		bpo.setDeisoMassDiffDistr(dataCleaningOptionsPanel.deisotopeMassDifferenceDistribution());
+		bpo.setDeisotopingMassTolerance(dataCleaningOptionsPanel.getDeisotopingMassTolerance());
+		bpo.setDeisotopingRTtolerance(dataCleaningOptionsPanel.getDeisotopingRTtolerance());
+		bpo.setDeisotopingCorrCutoff(dataCleaningOptionsPanel.getDeisotopingCorrelationCutoff());
+
+		//	Feature Grouping
+		bpo.setCorrelationFunctionType(featureGroupingOptionsPanel.getCorrelationFunctionType());
+		bpo.setRtGap(featureGroupingOptionsPanel.getRTgap());
+		bpo.setClusterGroupingMethod(featureGroupingOptionsPanel.getClusterGroupingMethod());
+		bpo.setMinSubclusterRTgap(featureGroupingOptionsPanel.getMinSubclusterRTgap());
+		bpo.setMaxSubclusterRTgap(featureGroupingOptionsPanel.getMaxSubclusterRTgap());
+		bpo.setBinClusteringCutoffType(featureGroupingOptionsPanel.getBinClusteringCutoffType());
+		bpo.setLimitBinSizeForAnalysis(featureGroupingOptionsPanel.limitMaxBinSizeForAnalysis());
+		bpo.setBinSizeLimitForAnalysis(featureGroupingOptionsPanel.getBinSizeLimitForAnalysis());
+		bpo.setLimitBinSizeForOutput(featureGroupingOptionsPanel.limitMaxBinSizeForOutput());
+		bpo.setBinSizeLimitForOutput(featureGroupingOptionsPanel.getBinSizeLimitForOutput());
+		bpo.setBinClusteringCutoff(featureGroupingOptionsPanel.getBinClusteringCutoff());
+
+		//	Annotation Parameters
+		bpo.setAnnotationList(annotationsSelectorPanel.getBinnerAdductList());
+		bpo.setAnnotationMassTolerance(annotationsSelectorPanel.getAnnotationMassTolerance());
+		bpo.setAnnotationRTTolerance(annotationsSelectorPanel.getAnnotationRTTolerance());
+		bpo.setUseNeutralMassForChargeCarrierAssignment(annotationsSelectorPanel.useNeutralMassForChargeCarrierAssignment());
+		bpo.setAllowVariableChargeWithoutIsotopeInformation(annotationsSelectorPanel.allowVariableChargeWithoutIsotopeInformation());
+		
+		return bpo;
+	}
 }

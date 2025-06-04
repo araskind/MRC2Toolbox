@@ -33,6 +33,7 @@ import javax.swing.table.TableRowSorter;
 import edu.umich.med.mrc2.datoolbox.data.BinnerAdduct;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
+import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTablePopupMenu;
 import edu.umich.med.mrc2.datoolbox.gui.tables.editors.SpinnerEditor;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.AutoChoices;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.TableFilterHeader;
@@ -69,6 +70,8 @@ public class SimpleBinnerAnnotationsTable extends BasicTable {
 		setExactColumnWidth(SimpleBinnerAnnotationsTableModel.ORDER_COLUMN, 40);
 		fixedWidthColumns.add(model.getColumnIndex(
 				SimpleBinnerAnnotationsTableModel.ORDER_COLUMN));
+		
+		addTablePopupMenu(new BasicTablePopupMenu(null, this, true));
 
 		thf = new TableFilterHeader(this, AutoChoices.ENABLED);
 		finalizeLayout();

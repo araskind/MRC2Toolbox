@@ -60,8 +60,7 @@ public class FeatureGroupingOptionsPanel extends JPanel implements ItemListener,
 	private JCheckBox limitBinSizeForAnalysisCheckBox;
 	private JFormattedTextField binSizeLimitForAnalysisField;
 	private JCheckBox limitBinSizeForOutputCheckBox;
-	private JFormattedTextField binSizeLimitForOutputField;
-	
+	private JFormattedTextField binSizeLimitForOutputField;	
 	private JSlider binClusteringCutoffValueSlider;
 	
 	public FeatureGroupingOptionsPanel() {
@@ -432,11 +431,11 @@ public class FeatureGroupingOptionsPanel extends JPanel implements ItemListener,
 		limitBinSizeForAnalysisCheckBox.setSelected(limit);
 	}
 		
-	public int getMaxBinSizeForAnalysis() {
+	public int getBinSizeLimitForAnalysis() {
 		return Integer.parseInt(binSizeLimitForAnalysisField.getText());
 	}
 	
-	public void setMaxBinSizeForAnalysis(int maxSize) {
+	public void setBinSizeLimitForAnalysis(int maxSize) {
 		binSizeLimitForAnalysisField.setText(Integer.toString(maxSize));
 	}
 	
@@ -448,11 +447,11 @@ public class FeatureGroupingOptionsPanel extends JPanel implements ItemListener,
 		limitBinSizeForOutputCheckBox.setSelected(limit);
 	}
 	
-	public int getMaxBinSizeForOutput() {
+	public int getBinSizeLimitForOutput() {
 		return Integer.parseInt(binSizeLimitForOutputField.getText());
 	}
 	
-	public void setMaxBinSizeForOutput(int maxSize) {
+	public void setBinSizeLimitForOutput(int maxSize) {
 		binSizeLimitForOutputField.setText(Integer.toString(maxSize));
 	}
 	

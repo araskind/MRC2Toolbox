@@ -201,6 +201,7 @@ public enum MainActionCommands {
 	DELETE_DATA_FILES_COMMAND("Delete data file(s)"),
 	ENABLE_SELECTED_SAMPLES_COMMAND("Enable selected samples"),
 	DISABLE_SELECTED_SAMPLES_COMMAND("Disable selected samples"),
+	DISABLE_REFERENCE_SAMPLES_COMMAND("Disable all reference samples"),
 	ENABLE_ALL_SAMPLES_COMMAND("Enable all shown samples"),
 	DISABLE_ALL_SAMPLES_COMMAND("Disable all shown samples"),
 	INVERT_ENABLED_SAMPLES_COMMAND("Invert enabled samples"),

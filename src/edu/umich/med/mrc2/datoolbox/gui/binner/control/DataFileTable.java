@@ -101,4 +101,18 @@ public class DataFileTable extends BasicTable {
 			
 		return files;		
 	}
+	
+	public Collection<DataFile> getAllFiles() {
+		
+		Collection<DataFile>files = new TreeSet<DataFile>();
+		int fileCol = model.getColumnIndex(DataFileTableModel.DATA_FILE_COLUMN);
+		for(int i=0; i<model.getRowCount(); i++)
+			files.add((DataFile)model.getValueAt(i, fileCol));
+			
+		return files;	
+	}
+	
+	public void changeStatusForDataFiles(Collection<DataFile>files, boolean setEnabled) {
+		((DataFileTableModel)model).changeStatusForDataFiles(files, setEnabled);
+	}
 }

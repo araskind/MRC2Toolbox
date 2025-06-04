@@ -50,6 +50,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.ujmp.core.Matrix;
 
 import edu.umich.med.mrc2.datoolbox.data.BinnerAnnotation;
+import edu.umich.med.mrc2.datoolbox.data.BinnerPreferencesObject;
 import edu.umich.med.mrc2.datoolbox.data.CompoundLibrary;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignSubset;
@@ -124,6 +125,7 @@ import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.derepl.BinnerProcessingTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.derepl.FindDuplicateNamesTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.derepl.MergeDuplicateFeaturesTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io.DataExportTask;
@@ -1272,8 +1274,10 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 		            StringUtils.join(errors, "\n"), binnerProcessingSetupDialog);
 		    return;
 		}
-		//	TODO ...
-		
+		BinnerPreferencesObject bpo = binnerProcessingSetupDialog.getBinnerPreferencesObject();
+		BinnerProcessingTask task = new BinnerProcessingTask(bpo);
+		task.addTaskListener(this);
+		MRC2ToolBoxCore.getTaskController().addTask(task);		
 		binnerProcessingSetupDialog.dispose();
 	}
 	
@@ -1754,7 +1758,10 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 				finalizePeakQualityImportTask((MiltiCefPeakQualityImportTask)e.getSource());
 			
 			if (e.getSource().getClass().equals(ImportBinnerAnnotationsForUntargetedDataTask.class))
-				finalizeBinnerAnnotationsImportTask((ImportBinnerAnnotationsForUntargetedDataTask)e.getSource());			
+				finalizeBinnerAnnotationsImportTask((ImportBinnerAnnotationsForUntargetedDataTask)e.getSource());		
+			
+			if (e.getSource().getClass().equals(BinnerProcessingTask.class))
+				finalizeBinnerProcessingTask((BinnerProcessingTask)e.getSource());			
 		}
 		if (e.getStatus() == TaskStatus.CANCELED || e.getStatus() == TaskStatus.ERROR) {
 			MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
@@ -1762,6 +1769,13 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 		}
 	}
 	
+	private void finalizeBinnerProcessingTask(BinnerProcessingTask task) {
+		// TODO Auto-generated method stub
+		MessageDialog.showInfoMsg(
+				"Binner Annotation finished.", 
+				this.getContentPane());
+	}
+
 	private void finalizeBinnerAnnotationsImportTask(ImportBinnerAnnotationsForUntargetedDataTask task) {
 		
 		Collection<BinnerAnnotation>unassignedAnnotations = task.getUnassignedAnnotations();

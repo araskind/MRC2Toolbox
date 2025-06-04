@@ -315,6 +315,18 @@ public final class BuildInformation {
 			<artifactId>ujmp-core</artifactId>
 			<version>0.3.0</version>
 		</dependency>
+		<!--
+		<dependency>
+		    <groupId>org.jdmp</groupId>
+		    <artifactId>jdmp-core</artifactId>
+		    <version>0.3.0</version>
+		</dependency>
+		<dependency>
+		    <groupId>org.jdmp</groupId>
+		    <artifactId>jdmp-weka</artifactId>
+		    <version>0.3.0</version>
+		</dependency>
+		-->
 		<dependency>
 			<groupId>org.jfree</groupId>
 			<artifactId>jfreechart</artifactId>

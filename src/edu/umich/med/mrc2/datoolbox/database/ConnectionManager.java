@@ -61,7 +61,7 @@ public class ConnectionManager {
 	public static Connection getTestConnection() throws Exception {
 		
 		if(MRC2ToolBoxConfiguration.getDatabaseType().equals(DatabseDialect.Oracle))
-		Class.forName("oracle.jdbc.driver.OracleDriver");
+			Class.forName("oracle.jdbc.driver.OracleDriver");
 	
 		if(MRC2ToolBoxConfiguration.getDatabaseType().equals(DatabseDialect.PostgreSQL))
 			Class.forName("org.postgresql.Driver");

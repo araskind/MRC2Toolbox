@@ -293,12 +293,48 @@ public class AnnotationsSelectorPanel extends JPanel implements ValidatableForm,
 		dateCreatedLabel.setText("");
 		lastModifiedLabel.setText("");
 	}
+	
+	public double getAnnotationMassTolerance() {
+		return Double.parseDouble(annotMassToleranceField.getText());
+	}
+
+	public void setAnnotationMassTolerance(double massTolerance) {
+		annotMassToleranceField.setText(Double.toString(massTolerance));
+	}
+	
+	public double getAnnotationRTTolerance() {
+		return Double.parseDouble(annotRTToleranceField.getText());
+	}
+	
+	public void setAnnotationRTTolerance(double rtTolerance) {
+		annotRTToleranceField.setText(Double.toString(rtTolerance));
+	}
+
+	public BinnerAdductList getBinnerAdductList() {
+		return binnerAdductList;
+	}
+	
+	public boolean useNeutralMassForChargeCarrierAssignment() {
+		return neutMasForChargeCarrierCheckBox.isSelected();
+	}
+	
+	public boolean allowVariableChargeWithoutIsotopeInformation() {
+		return varChargeCheckBox.isSelected();
+	}
 
 	@Override
 	public Collection<String> validateFormData() {
 
 		Collection<String>errors = new ArrayList<String>();
 		
+		if(getAnnotationMassTolerance() <= 0.0d)
+			errors.add("Annotation mass tolerance must be > 0");
+		
+		if(getAnnotationRTTolerance() <= 0.0d)
+			errors.add("Annotation RT tolerance must be > 0");
+		
+		if(binnerAdductList == null)
+			errors.add("Annotation list not specified");
 		
 		return errors;
 	}
@@ -332,8 +368,8 @@ public class AnnotationsSelectorPanel extends JPanel implements ValidatableForm,
 
 	public void loadBinnerAdductList(BinnerAdductList binnerAdductList) {
 		
-		this.binnerAdductList = binnerAdductList;
 		clearAnnotationList();
+		this.binnerAdductList = binnerAdductList;		
 		if(binnerAdductList == null)
 			return;
 		
@@ -346,9 +382,5 @@ public class AnnotationsSelectorPanel extends JPanel implements ValidatableForm,
 				MRC2ToolBoxConfiguration.getDateTimeFormat().format(binnerAdductList.getDateCreated()));
 		lastModifiedLabel.setText(
 				MRC2ToolBoxConfiguration.getDateTimeFormat().format(binnerAdductList.getLastModified()));		
-	}
-
-	public BinnerAdductList getBinnerAdductList() {
-		return binnerAdductList;
 	}
 }

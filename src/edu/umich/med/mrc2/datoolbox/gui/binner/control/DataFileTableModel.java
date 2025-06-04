@@ -63,6 +63,21 @@ public class DataFileTableModel extends BasicTableModel {
 		if(!rowData.isEmpty())
 			addRows(rowData);
 	}
+
+	public void changeStatusForDataFiles(Collection<DataFile> files, boolean setEnabled) {
+		
+		suppressEvents = true;
+		int dfColumnIndex = getColumnIndex(DATA_FILE_COLUMN);
+		int enabledColumnIndex = getColumnIndex(SELECTED_COLUMN);
+		for(int i=0; i<getRowCount(); i++) {
+			
+			DataFile df = (DataFile)getValueAt(i, dfColumnIndex);
+			if(files.contains(df))
+				setValueAt(setEnabled, i, enabledColumnIndex);
+		}
+		suppressEvents = false;
+		fireTableDataChanged();
+	}
 }
 
 

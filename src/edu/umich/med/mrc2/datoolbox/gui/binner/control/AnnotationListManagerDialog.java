@@ -99,7 +99,11 @@ public class AnnotationListManagerDialog extends JDialog implements ActionListen
 		FlowLayout flowLayout = (FlowLayout) panel.getLayout();
 		flowLayout.setAlignment(FlowLayout.RIGHT);
 		getContentPane().add(panel, BorderLayout.SOUTH);
-
+		JButton btnLoad = new JButton(MainActionCommands.OPEN_BINNER_ANNOTATION_LIST_COMMAND.getName());
+		btnLoad.setActionCommand(MainActionCommands.OPEN_BINNER_ANNOTATION_LIST_COMMAND.getName());
+		btnLoad.addActionListener(this);
+		panel.add(btnLoad);
+		
 		JButton btnCancel = new JButton("Cancel");
 		panel.add(btnCancel);
 		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);

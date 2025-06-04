@@ -42,7 +42,9 @@ public enum BinnerParameters {
 	FGBOverrideBinSizeLimitForAnalysis(Boolean.toString(false)),
 	FGBinSizeLimitForAnalysis("4000"),
 	FGBOverrideBinSizeLimitForOutput(Boolean.toString(false)),
-	FGBinSizeLimitForOutput("6000")
+	FGBinSizeLimitForOutput("6000"),
+	ANMassTolerance("0.005"),
+	ANRTTolerance("0.05"),
 	;
 	
 	private final String defaultValue;
