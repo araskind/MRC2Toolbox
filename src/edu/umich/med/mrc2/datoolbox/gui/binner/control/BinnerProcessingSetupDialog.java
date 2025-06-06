@@ -46,7 +46,6 @@ import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
 
-import edu.umich.med.mrc2.datoolbox.data.BinnerAdductList;
 import edu.umich.med.mrc2.datoolbox.data.BinnerPreferencesObject;
 import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
