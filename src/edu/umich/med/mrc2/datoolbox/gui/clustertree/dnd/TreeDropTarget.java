@@ -134,7 +134,7 @@ public class TreeDropTarget implements DropTargetListener {
 											project.getMsFeatureById(f.getId(), project.getActiveDataPipeline());
 									parentCluster.addFeature(realFeature, project.getActiveDataPipeline());
 								}
-								parentCluster.setClusterCorrMatrix(parentCluster.createClusterCorrelationMatrix(false));
+								parentCluster.setClusterCorrMatrix(parentCluster.createCorrelationMatrix(false));
 								assayClusters.remove(toMergeCluster);
 								targetTree.removeFeatureCluster(toMergeCluster);
 								targetTree.resortTree();
@@ -161,7 +161,7 @@ public class TreeDropTarget implements DropTargetListener {
 								}
 							}
 							parentCluster.addFeature(featureToMove, project.getActiveDataPipeline());
-							parentCluster.setClusterCorrMatrix(parentCluster.createClusterCorrelationMatrix(false));
+							parentCluster.setClusterCorrMatrix(parentCluster.createCorrelationMatrix(false));
 							targetTree.removeFeature(featureToMove);
 							targetTree.resortTree();
 							targetTree.expandCluster(parentCluster);

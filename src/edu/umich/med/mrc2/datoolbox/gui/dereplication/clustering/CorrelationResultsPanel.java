@@ -308,7 +308,7 @@ public class CorrelationResultsPanel extends ClusterDisplayPanel implements Char
 
 		if (command.equals(MainActionCommands.RECALCULATE_CORRRELATIONS_4CLUSTER_COMMAND.getName())) {
 
-			activeCluster.setClusterCorrMatrix(activeCluster.createClusterCorrelationMatrix(false));
+			activeCluster.setClusterCorrMatrix(activeCluster.createCorrelationMatrix(false));
 			showClusterData(activeCluster);
 		}
 	}
@@ -421,7 +421,7 @@ public class CorrelationResultsPanel extends ClusterDisplayPanel implements Char
 //					clusteringParametersDialog.filterMissing(), clusteringParametersDialog.getMaxMissingPercent(),
 //					clusteringParametersDialog.imputeMissing(), clusteringParametersDialog.getImputationMethod(),
 //					clusteringParametersDialog.getKnnClusterNumber(),
-//					clusteringParametersDialog.getCorrelationAlgoritmh(),
+//					clusteringParametersDialog.getCorrelationFunctionType(),
 //					clusteringParametersDialog.getCorrelationCutoff(), clusteringParametersDialog.getMaxClusterWidth(),
 //					clusteringParametersDialog.getWindowSlidingUnit(),
 //					clusteringParametersDialog.getFeatureNumberWindow(),
@@ -574,7 +574,7 @@ public class CorrelationResultsPanel extends ClusterDisplayPanel implements Char
 					newCluster.addFeature(f, dataPipeline);
 				});
 			});
-			newCluster.setClusterCorrMatrix(newCluster.createClusterCorrelationMatrix(false));
+			newCluster.setClusterCorrMatrix(newCluster.createCorrelationMatrix(false));
 			currentExperiment.getMsFeatureClustersForDataPipeline(activeDataPipeline).add(newCluster);
 			clusterTree.getModel().addObject(newCluster);
 			clusterTree.resortTree();

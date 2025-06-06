@@ -90,6 +90,25 @@ public class MsFeatureComparator extends ObjectCompatrator<MsFeature> {
 				else
 					return -result;
 				
+			case RTmedObserved:
+				
+				double rt1 = o1.getRetentionTime();				
+				if(o1.getMedianObservedRetention() > 0)
+					rt1 = o1.getMedianObservedRetention();
+				
+				double rt2 = o2.getRetentionTime();				
+				if(o2.getMedianObservedRetention() > 0)
+					rt2 = o2.getMedianObservedRetention();
+				
+				result = Double.compare(rt1, rt2);
+				if (result == 0)
+					result = o1.toString().compareTo(o2.toString());
+	
+				if (direction == SortDirection.ASC)
+					return result;
+				else
+					return -result;
+				
 			case msmsIntensity:
 				if(o1.getSpectrum() != null && o2.getSpectrum() != null 
 						&& o1.getSpectrum().getExperimentalTandemSpectrum() != null

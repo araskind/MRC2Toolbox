@@ -25,6 +25,7 @@ public enum CorrelationFunctionType {
 
 	PEARSON("Pearson correlation"),
 	SPEARMAN("Spearman's rank correlation"),
+	KENDALL("Kendall's rank correlation"),
 	;
 	
 	private final String uiName;

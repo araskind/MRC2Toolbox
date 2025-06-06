@@ -70,7 +70,7 @@ public class MsFeatureCluster implements Serializable, XmlStorable {
 	private Map<DataPipeline, DescriptiveStatistics>featureRTStatistics;	
 	private Map<DataPipeline, DescriptiveStatistics>featureMZStatistics;
 	private Collection<MsFeature>disabledFeatures;
-	private Matrix clusterCorrMatrix;
+	private Matrix correlationMatrix;
 	private Collection<ModificationBlock> chemicalModificationsMap;
 	private Map<MsFeature, Set<Adduct>> annotationMap;
 	private boolean locked;
@@ -85,7 +85,7 @@ public class MsFeatureCluster implements Serializable, XmlStorable {
 		featureRTStatistics = new TreeMap<DataPipeline, DescriptiveStatistics>();
 		featureMZStatistics = new TreeMap<DataPipeline, DescriptiveStatistics>();
 		chemicalModificationsMap = new HashSet<ModificationBlock>();
-		clusterCorrMatrix = null;
+		correlationMatrix = null;
 		primaryFeature = null;
 		locked = false;
 		disabledFeatures = new HashSet<MsFeature>();
@@ -150,16 +150,14 @@ public class MsFeatureCluster implements Serializable, XmlStorable {
 	public boolean containsNamedFeatures() {
 
 		return clusterFeatures.values().stream().
-				flatMap(c -> c.stream()).
-				filter(f -> f.isIdentified()).
-				findFirst().isPresent();
+				flatMap(c -> c.stream()).anyMatch(f -> f.isIdentified());
 	}
 
 	public boolean isSingleDataPipeline() {
 		return clusterFeatures.keySet().size() == 1;
 	}
 
-	public Matrix createClusterCorrelationMatrix(boolean activeOnly) {
+	public Matrix createCorrelationMatrix(boolean activeOnly) {
 
 		//	TODO this may change to accomodate comparison of different methods
 		if(clusterFeatures.isEmpty() || !isSingleDataPipeline())
@@ -220,7 +218,7 @@ public class MsFeatureCluster implements Serializable, XmlStorable {
 	}
 
 	public Matrix getClusterCorrMatrix() {
-		return clusterCorrMatrix;
+		return correlationMatrix;
 	}
 
 	public String getClusterId() {
@@ -229,13 +227,13 @@ public class MsFeatureCluster implements Serializable, XmlStorable {
 
 	public double getCorrelation(MsFeature compoundFeature, MsFeature compoundFeature2) {
 
-		long[] coordinate = new long[] { clusterCorrMatrix.getRowForLabel(compoundFeature),
-				clusterCorrMatrix.getRowForLabel(compoundFeature2) };
-		return clusterCorrMatrix.getAsDouble(coordinate);
+		long[] coordinate = new long[] { correlationMatrix.getRowForLabel(compoundFeature),
+				correlationMatrix.getRowForLabel(compoundFeature2) };
+		return correlationMatrix.getAsDouble(coordinate);
 	}
 
 	public Matrix getCorrMatrix() {
-		return clusterCorrMatrix;
+		return correlationMatrix;
 	}
 
 	public List<MsFeature> getFeatures() {
@@ -250,8 +248,8 @@ public class MsFeatureCluster implements Serializable, XmlStorable {
 	}
 
 	public Matrix getInverseCorrMatrix() {
-		return Matrix.Factory.fill(1, clusterCorrMatrix.getSize()).
-				minus(clusterCorrMatrix).replace(Ret.NEW, Double.NaN, 0.0d);
+		return Matrix.Factory.fill(1, correlationMatrix.getSize()).
+				minus(correlationMatrix).replace(Ret.NEW, Double.NaN, 0.0d);
 	}
 
 	public HashSet<Adduct> getModificationsForFeaturePair(MsFeature featureOne, MsFeature featureTwo) {
@@ -570,7 +568,7 @@ public class MsFeatureCluster implements Serializable, XmlStorable {
 	}
 
 	public void setClusterCorrMatrix(Matrix clusterCorrMatrix) {
-		this.clusterCorrMatrix = clusterCorrMatrix;
+		this.correlationMatrix = clusterCorrMatrix;
 	}
 
 	public void setLocked(boolean locked) {
@@ -742,6 +740,14 @@ public class MsFeatureCluster implements Serializable, XmlStorable {
 				maxScore = score;
 		}		
 		return maxScore;
+	}
+	
+	public Collection<MsFeature>getSortedFeturesForDataPipeline(
+			DataPipeline pipeline, SortProperty property){
+		
+		return clusterFeatures.get(pipeline).
+				stream().sorted(new MsFeatureComparator(property)).
+				collect(Collectors.toList());
 	}
 
 	public boolean hasChargeMismatch() {

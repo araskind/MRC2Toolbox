@@ -47,9 +47,9 @@ import edu.umich.med.mrc2.datoolbox.data.MsFeatureCluster;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureSet;
 import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
-import edu.umich.med.mrc2.datoolbox.data.enums.CorrelationAlgoritm;
 import edu.umich.med.mrc2.datoolbox.data.enums.SlidingWindowUnit;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
+import edu.umich.med.mrc2.datoolbox.gui.binner.control.CorrelationFunctionType;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
@@ -61,7 +61,7 @@ public class SlidingWindowClusteringTask extends AbstractTask {
 
 	private DataAnalysisProject currentExperiment;
 	private DataPipeline dataPipeline;
-	private CorrelationAlgoritm correlationAlgoritm;
+	private CorrelationFunctionType correlationAlgoritm;
 	private double maxClusterWidth;
 	private SlidingWindowUnit windowSlidingUnit;
 	private int featureNumberWindow;
@@ -92,7 +92,7 @@ public class SlidingWindowClusteringTask extends AbstractTask {
 			boolean imputeMissing,
 			ImputationMethod imputationMethod,
 			int knnClusterNumber,
-			CorrelationAlgoritm correlationAlgoritmh,
+			CorrelationFunctionType correlationAlgoritmh,
 			double correlationCutoff,
 			double maxClusterWidth,
 			SlidingWindowUnit windowSlidingUnit,
@@ -131,8 +131,7 @@ public class SlidingWindowClusteringTask extends AbstractTask {
 
 			e.printStackTrace();
 			setStatus(TaskStatus.ERROR);
-return;
-
+			return;
 		}
 		setStatus(TaskStatus.FINISHED);
 	}
@@ -257,13 +256,13 @@ return;
 		double[][] doubleMatrix = clusterMatrix.toDoubleArray();
 		Matrix corrMatrix = null;
 
-		if(correlationAlgoritm.equals(CorrelationAlgoritm.Pearson))
+		if(correlationAlgoritm.equals(CorrelationFunctionType.PEARSON))
 			corrMatrix = Matrix.Factory.linkToArray(pearson.computeCorrelationMatrix(doubleMatrix).getData());
 
-		if(correlationAlgoritm.equals(CorrelationAlgoritm.Spearman))
+		if(correlationAlgoritm.equals(CorrelationFunctionType.SPEARMAN))
 			corrMatrix = Matrix.Factory.linkToArray(spearman.computeCorrelationMatrix(doubleMatrix).getData());
 
-		if(correlationAlgoritm.equals(CorrelationAlgoritm.Kendall))
+		if(correlationAlgoritm.equals(CorrelationFunctionType.KENDALL))
 			corrMatrix = Matrix.Factory.linkToArray(kendall.computeCorrelationMatrix(doubleMatrix).getData());
 
 		if(corrMatrix != null) {

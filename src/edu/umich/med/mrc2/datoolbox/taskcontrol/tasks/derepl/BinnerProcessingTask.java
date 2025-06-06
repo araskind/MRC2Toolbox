@@ -28,10 +28,15 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.math3.stat.correlation.KendallsCorrelation;
+import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
+import org.apache.commons.math3.stat.correlation.SpearmansCorrelation;
 import org.ujmp.core.Matrix;
 import org.ujmp.core.calculation.Calculation.Ret;
 import org.ujmp.core.export.destination.DefaultMatrixFileExportDestination;
@@ -39,7 +44,12 @@ import org.ujmp.core.util.MathUtil;
 
 import edu.umich.med.mrc2.datoolbox.data.BinnerPreferencesObject;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
+import edu.umich.med.mrc2.datoolbox.data.MsFeatureCluster;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureSet;
+import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureComparator;
+import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
+import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
+import edu.umich.med.mrc2.datoolbox.gui.binner.control.CorrelationFunctionType;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
@@ -56,12 +66,20 @@ public class BinnerProcessingTask extends AbstractTask implements TaskListener {
 	
 	private BinnerPreferencesObject bpo;
 	private DataAnalysisProject currentExperiment;
+	private DataPipeline activeDataPipeline;
 	private Matrix preparedDataMatrix;
+	private Collection<MsFeature> cleanRTSortedFeatureSet;
+	private Collection<MsFeatureCluster> featureBins;
+	private Collection<MsFeatureCluster> featureClusters;
+	private PearsonsCorrelation pearson;
+	private SpearmansCorrelation spearman;
+	private KendallsCorrelation kendall;
 	
 	public BinnerProcessingTask(BinnerPreferencesObject bpo) {
 		super();
 		this.bpo = bpo;
 		currentExperiment = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
+		activeDataPipeline = bpo.getDataPipeline();
 	}
 
 	@Override
@@ -85,14 +103,104 @@ public class BinnerProcessingTask extends AbstractTask implements TaskListener {
 			return;
 
 		}
+		try {
+			createCorrelationMatrices();
+		} catch (Exception e) {
+
+			e.printStackTrace();
+			setStatus(TaskStatus.ERROR);
+			return;
+
+		}
 		setStatus(TaskStatus.FINISHED);
+	}
+
+	private void createCorrelationMatrices() {
+		
+		taskDescription = "Creating correlation matrices for bins ...";
+		total = featureBins.size();
+		processed = 0;
+		
+		pearson = new PearsonsCorrelation();
+		spearman = new SpearmansCorrelation();
+		kendall = new KendallsCorrelation();
+		
+		for(MsFeatureCluster bin : featureBins) {
+			
+			Collection<MsFeature>sorted = 
+					bin.getSortedFeturesForDataPipeline(activeDataPipeline, SortProperty.RTmedObserved);
+			MsFeature[]sortedFeatureArray = sorted.toArray(new MsFeature[sorted.size()]);
+			long[] columnIndex =
+					sorted.stream().
+					map(f -> preparedDataMatrix.getColumnForLabel(f)).
+					mapToLong(i -> i).
+					toArray();			
+			Matrix binDataMatrix = preparedDataMatrix.selectColumns(Ret.NEW, columnIndex);
+			double[][] doubleMatrix = binDataMatrix.toDoubleArray();
+			Matrix corrMatrix = null;
+			
+			if(bpo.getCorrelationFunctionType().equals(CorrelationFunctionType.PEARSON))
+				corrMatrix = Matrix.Factory.linkToArray(pearson.computeCorrelationMatrix(doubleMatrix).getData());
+
+			if(bpo.getCorrelationFunctionType().equals(CorrelationFunctionType.SPEARMAN))
+				corrMatrix = Matrix.Factory.linkToArray(spearman.computeCorrelationMatrix(doubleMatrix).getData());
+
+			if(bpo.getCorrelationFunctionType().equals(CorrelationFunctionType.KENDALL))
+				corrMatrix = Matrix.Factory.linkToArray(kendall.computeCorrelationMatrix(doubleMatrix).getData());
+
+			if(corrMatrix != null) {
+
+				corrMatrix.setMetaDataDimensionMatrix(0, Matrix.Factory.linkToArray((Object[])sortedFeatureArray));
+				corrMatrix.setMetaDataDimensionMatrix(1, Matrix.Factory.linkToArray((Object[])sortedFeatureArray).transpose(Ret.NEW));
+				bin.setClusterCorrMatrix(corrMatrix);
+			}			
+			processed++;
+		}
 	}
 
 	private void binFeaturesByRt() {
 		
 		taskDescription = "Creating RT-based bins ...";
-		total = 100;
-		processed = 0;	
+		total = cleanRTSortedFeatureSet.size();
+		processed = 0;
+		featureBins = new ArrayList<MsFeatureCluster>();
+		MsFeature[] featureArray = 
+				cleanRTSortedFeatureSet.toArray(new MsFeature[cleanRTSortedFeatureSet.size()]);
+
+		double rtGapForBinning = bpo.getRtGap();
+		MsFeatureCluster newCluster = new MsFeatureCluster();
+		newCluster.addFeature(featureArray[0], activeDataPipeline);
+		int maxClusterSize = Math.min(bpo.getBinSizeLimitForAnalysis(), bpo.getBinSizeLimitForOutput());
+
+		for (int i = 1; i < featureArray.length; i++) {
+
+			double rtGap = featureArray[i].getMedianObservedRetention()
+					- featureArray[i - 1].getMedianObservedRetention();
+			if (rtGap < rtGapForBinning) {
+				
+				newCluster.addFeature(featureArray[i], activeDataPipeline);
+				if(newCluster.getFeatures().size() > maxClusterSize) {
+					
+					errorMessage = 
+							"Some of the feature bins exceede the size limit set in the prefefernces;\n"
+							+ newCluster.getFeatures().size() + " vs allowed " + maxClusterSize;
+					setStatus(TaskStatus.ERROR);
+					return;
+				}
+			}
+			else {
+				if(newCluster.getFeatures().size() > 1)
+					featureBins.add(newCluster);
+				
+				newCluster = new MsFeatureCluster();
+				newCluster.addFeature(featureArray[i], activeDataPipeline);
+			}
+			processed++;
+		}
+		System.out.println("# of bins " + featureBins.size());
+//		for(MsFeatureCluster c : featureBins) {
+//			System.out.println("Bin size = " + c.getFeatures().size());
+//		}		
 	}
 
 	private Matrix filterInputData() {
@@ -103,11 +211,14 @@ public class BinnerProcessingTask extends AbstractTask implements TaskListener {
 		
 		//	Subset the data
 		MsFeatureSet activeFeatureSet = 
-				currentExperiment.getActiveFeatureSetForDataPipeline(bpo.getDataPipeline());
+				currentExperiment.getActiveFeatureSetForDataPipeline(activeDataPipeline);
 		Matrix dataMatrixForBinner = DataSetUtils.subsetDataMatrix(
-				currentExperiment.getDataMatrixForDataPipeline(bpo.getDataPipeline()), 
+				currentExperiment.getDataMatrixForDataPipeline(activeDataPipeline), 
 				activeFeatureSet.getFeatures(), 
 				bpo.getInputFiles());
+		
+		cleanRTSortedFeatureSet = 
+				new ArrayList<MsFeature>(activeFeatureSet.getFeatures());
 		
 		//	Convert zero values to missing
 		dataMatrixForBinner = dataMatrixForBinner.replace(Ret.NEW, Double.valueOf("0"), Double.NaN);
@@ -133,7 +244,7 @@ public class BinnerProcessingTask extends AbstractTask implements TaskListener {
 			dataMatrixForBinner = 
 					new Log1pTransform(true, dataMatrixForBinner).calc(Ret.NEW);
 			
-			writeMatrixToFile(dataMatrixForBinner, "log_transformed.txt", true);	
+			//	writeMatrixToFile(dataMatrixForBinner, "log_transformed.txt", true);	
 		}
 		return dataMatrixForBinner;
 	}
@@ -145,8 +256,9 @@ public class BinnerProcessingTask extends AbstractTask implements TaskListener {
 		Matrix missingnessMatrix  = dataMatrixForBinner.
 				countMissing(Ret.NEW, Matrix.ROW).
 				divide(dataMatrixForBinner.getRowCount() / 100.0d);
-//		Matrix featureMetadataMatrix = 
-//				dataMatrixForBinner.getMetaDataDimensionMatrix(0);
+		Matrix featureMetadataMatrix = 
+				dataMatrixForBinner.getMetaDataDimensionMatrix(0);
+		Collection<MsFeature>featuresToRemove = new ArrayList<MsFeature>();
 				
 		long[]coord = new long[] {0,0};
 		ArrayList<Long> toRemove = new ArrayList<Long>();
@@ -158,6 +270,8 @@ public class BinnerProcessingTask extends AbstractTask implements TaskListener {
 			double missingness = missingnessMatrix.getAsDouble(coord);
 			if(missingness > missingRemovalThreshold) {
 				toRemove.add(c);
+				MsFeature msf = (MsFeature)featureMetadataMatrix.getAsObject(coord);
+				featuresToRemove.add(msf);
 //				highMissingnessMap.put(
 //						(MsFeature)featureMetadataMatrix.getAsObject(coord), 
 //						missingness);
@@ -167,7 +281,16 @@ public class BinnerProcessingTask extends AbstractTask implements TaskListener {
 				dataMatrixForBinner.getMetaDataDimensionMatrix(0).deleteColumns(Ret.NEW, toRemove);			
 		Matrix newDataMatrixForBinner = dataMatrixForBinner.deleteColumns(Ret.NEW, toRemove);
 		newDataMatrixForBinner.setMetaDataDimensionMatrix(0, newMsFeatureLabelMatrix);
-		newDataMatrixForBinner.setMetaDataDimensionMatrix(1, dataMatrixForBinner.getMetaDataDimensionMatrix(1));		
+		newDataMatrixForBinner.setMetaDataDimensionMatrix(1, dataMatrixForBinner.getMetaDataDimensionMatrix(1));
+		
+		if(!featuresToRemove.isEmpty())
+			cleanRTSortedFeatureSet.removeAll(featuresToRemove);
+		
+		cleanRTSortedFeatureSet = 
+				cleanRTSortedFeatureSet.stream().
+				sorted(new MsFeatureComparator(SortProperty.RT)).
+				collect(Collectors.toList());
+		
 		return newDataMatrixForBinner;
 	}
 	

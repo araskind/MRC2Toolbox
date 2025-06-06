@@ -201,7 +201,7 @@ public class DataIntegratorPanel extends ClusterDisplayPanel {
 					newCluster.addFeature(cf, entry.getKey());
 				}
 			}
-			newCluster.setClusterCorrMatrix(newCluster.createClusterCorrelationMatrix(false));
+			newCluster.setClusterCorrMatrix(newCluster.createCorrelationMatrix(false));
 			integratedSet.addCluster(newCluster);
 			clusterTree.getModel().addObject(newCluster);
 			clusterTree.resortTree();

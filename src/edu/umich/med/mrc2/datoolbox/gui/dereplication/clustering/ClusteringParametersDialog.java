@@ -52,9 +52,9 @@ import javax.swing.border.EmptyBorder;
 
 import org.ujmp.core.doublematrix.calculation.general.missingvalues.Impute.ImputationMethod;
 
-import edu.umich.med.mrc2.datoolbox.data.enums.CorrelationAlgoritm;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataImputationType;
 import edu.umich.med.mrc2.datoolbox.data.enums.SlidingWindowUnit;
+import edu.umich.med.mrc2.datoolbox.gui.binner.control.CorrelationFunctionType;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
@@ -293,8 +293,9 @@ public class ClusteringParametersDialog extends JDialog implements BackedByPrefe
 		gbc_lblCorrelationAlgorithm.gridy = 0;
 		corrSetingsPanel.add(lblCorrelationAlgorithm, gbc_lblCorrelationAlgorithm);
 
-		corrAlgoComboBox = new JComboBox();
-		corrAlgoComboBox.setModel(new DefaultComboBoxModel<CorrelationAlgoritm>(CorrelationAlgoritm.values()));
+		corrAlgoComboBox = new JComboBox<CorrelationFunctionType>(
+				new DefaultComboBoxModel<CorrelationFunctionType>(
+						CorrelationFunctionType.values()));
 		GridBagConstraints gbc_corrAlgoComboBox = new GridBagConstraints();
 		gbc_corrAlgoComboBox.insets = new Insets(0, 0, 5, 5);
 		gbc_corrAlgoComboBox.fill = GridBagConstraints.HORIZONTAL;
@@ -389,9 +390,9 @@ public class ClusteringParametersDialog extends JDialog implements BackedByPrefe
 		corrSetingsPanel.add(timeWindowTextField, gbc_formattedTextField_2);
 	}
 
-	public CorrelationAlgoritm getCorrelationAlgoritmh() {
+	public CorrelationFunctionType getCorrelationFunctionType() {
 
-		return (CorrelationAlgoritm) corrAlgoComboBox.getSelectedItem();
+		return (CorrelationFunctionType) corrAlgoComboBox.getSelectedItem();
 	}
 
 	public double getCorrelationCutoff() {
@@ -484,7 +485,13 @@ public class ClusteringParametersDialog extends JDialog implements BackedByPrefe
 		kMeansNumSpinner.setValue(preferences.getInt(NUM_KNN_CLUSTERS, 3));
 
 //		Correlation
-		corrAlgoComboBox.setSelectedIndex(preferences.getInt(CORRELATION_ALGORITHM, 0));
+		CorrelationFunctionType cft = 
+				CorrelationFunctionType.getOptionByName(
+						preferences.get(CORRELATION_ALGORITHM, CorrelationFunctionType.PEARSON.name()));	
+		if(cft == null)
+			cft = CorrelationFunctionType.PEARSON;
+		
+		corrAlgoComboBox.setSelectedItem(cft);
 		double corrCutoff = preferences.getDouble(CORRELATION_CUTOFF, 0.5d);
 		corrCutoffTextField.setText(Double.toString(corrCutoff));
 		double maxClusterWidth = preferences.getDouble(MAX_CLUSTER_WIDTH, 20.0d);
@@ -511,7 +518,7 @@ public class ClusteringParametersDialog extends JDialog implements BackedByPrefe
 		preferences.putInt(NUM_KNN_CLUSTERS, getKnnClusterNumber());
 
 		//	Correlation
-		preferences.putInt(CORRELATION_ALGORITHM, corrAlgoComboBox.getSelectedIndex());
+		preferences.put(CORRELATION_ALGORITHM, getCorrelationFunctionType().name());
 		preferences.putDouble(CORRELATION_CUTOFF, getCorrelationCutoff());
 		preferences.putDouble(MAX_CLUSTER_WIDTH, getMaxClusterWidth());
 		preferences.putInt(WINDOW_SLIDING_UNIT, windowSlidingTypeComboBox.getSelectedIndex());

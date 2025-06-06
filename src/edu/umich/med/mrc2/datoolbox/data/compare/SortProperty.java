@@ -25,6 +25,7 @@ public enum SortProperty {
 
 	MZ("M/Z"),
 	RT("Retention time"),
+	RTmedObserved("Median observed RT"),
 	Intensity("Intensity"),
 	ID("ID"),
 	Height("Peak height"),
