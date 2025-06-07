@@ -49,6 +49,7 @@ import edu.umich.med.mrc2.datoolbox.data.MsFeatureSet;
 import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
+import edu.umich.med.mrc2.datoolbox.gui.binner.control.BinClusteringCutoffType;
 import edu.umich.med.mrc2.datoolbox.gui.binner.control.CorrelationFunctionType;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
@@ -112,7 +113,74 @@ public class BinnerProcessingTask extends AbstractTask implements TaskListener {
 			return;
 
 		}
+		try {
+			clusterFeatureBins();
+		} catch (Exception e) {
+
+			e.printStackTrace();
+			setStatus(TaskStatus.ERROR);
+			return;
+
+		}
 		setStatus(TaskStatus.FINISHED);
+	}
+
+	private void clusterFeatureBins() {
+
+		taskDescription = "Creating correlation matrices for bins ...";
+		total = featureBins.size();
+		processed = 0;
+		for(MsFeatureCluster bin : featureBins) {
+			
+			if(!mustCluster(bin)) {
+				
+				processed++;
+				continue;
+			}
+			
+			processed++;
+		}		
+	}
+	
+	private boolean mustCluster(MsFeatureCluster bin) {
+		
+		if(bpo.getBinClusteringCutoffType().equals(BinClusteringCutoffType.ALL))
+			return true;
+		
+		if(bpo.getBinClusteringCutoffType().equals(BinClusteringCutoffType.ABOVE_SCORE)
+				&& bin.getFeatures().size() > bpo.getBinClusteringCutoff())
+			return true;
+		
+		if(bpo.getBinClusteringCutoffType().equals(BinClusteringCutoffType.BELOW_SCORE)
+				&& mustClusterIfSizeBelowCutoff(bin))
+			return true;
+		
+		return false;
+	}
+	
+	private boolean mustClusterIfSizeBelowCutoff(MsFeatureCluster bin) {
+		
+		if(bin.getCorrMatrix() == null)
+			return false;
+		
+		double corrMean = bin.getCorrMatrix().getMeanValue();
+		double log2BinSize = Math.log(bin.getFeatures().size()) / Math.log(2);
+		double sqrtRTDiff = Math.sqrt(bin.getRtRange().getSize());
+		
+		double binScore = corrMean * corrMean / (sqrtRTDiff * log2BinSize);
+		if (corrMean < 0.0)
+			binScore = -binScore;
+		
+		if(binScore < bpo.getBinClusteringCutoff())
+			return true;
+		else
+			return false;
+	}
+	
+	private void clusterBinFeaturesOnCorrelations(MsFeatureCluster bin) {
+		
+		/**/
+		Matrix distanceMatrix = bin.getCorrMatrix().euklideanDistance(Ret.NEW, true);
 	}
 
 	private void createCorrelationMatrices() {
