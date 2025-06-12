@@ -29,20 +29,25 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.math3.ml.clustering.CentroidCluster;
+import org.apache.commons.math3.ml.clustering.KMeansPlusPlusClusterer;
 import org.apache.commons.math3.stat.correlation.KendallsCorrelation;
 import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
 import org.apache.commons.math3.stat.correlation.SpearmansCorrelation;
+import org.ujmp.core.BaseMatrix;
 import org.ujmp.core.Matrix;
 import org.ujmp.core.calculation.Calculation.Ret;
 import org.ujmp.core.export.destination.DefaultMatrixFileExportDestination;
 import org.ujmp.core.util.MathUtil;
 
 import edu.umich.med.mrc2.datoolbox.data.BinnerPreferencesObject;
+import edu.umich.med.mrc2.datoolbox.data.ClusterableFeatureData;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureCluster;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureSet;
@@ -102,7 +107,6 @@ public class BinnerProcessingTask extends AbstractTask implements TaskListener {
 			e.printStackTrace();
 			setStatus(TaskStatus.ERROR);
 			return;
-
 		}
 		try {
 			createCorrelationMatrices();
@@ -111,7 +115,6 @@ public class BinnerProcessingTask extends AbstractTask implements TaskListener {
 			e.printStackTrace();
 			setStatus(TaskStatus.ERROR);
 			return;
-
 		}
 		try {
 			clusterFeatureBins();
@@ -120,7 +123,6 @@ public class BinnerProcessingTask extends AbstractTask implements TaskListener {
 			e.printStackTrace();
 			setStatus(TaskStatus.ERROR);
 			return;
-
 		}
 		setStatus(TaskStatus.FINISHED);
 	}
@@ -204,6 +206,11 @@ public class BinnerProcessingTask extends AbstractTask implements TaskListener {
 					mapToLong(i -> i).
 					toArray();			
 			Matrix binDataMatrix = preparedDataMatrix.selectColumns(Ret.NEW, columnIndex);
+			
+			binDataMatrix.setMetaDataDimensionMatrix(0, Matrix.Factory.linkToArray((Object[])sortedFeatureArray));
+			binDataMatrix.setMetaDataDimensionMatrix(1, preparedDataMatrix.getMetaDataDimensionMatrix(1));
+			clusterFeatures(binDataMatrix);
+			
 			double[][] doubleMatrix = binDataMatrix.toDoubleArray();
 			Matrix corrMatrix = null;
 			
@@ -224,6 +231,28 @@ public class BinnerProcessingTask extends AbstractTask implements TaskListener {
 			}			
 			processed++;
 		}
+	}
+	
+	private void clusterFeatures(Matrix featureMatrix) {
+		
+		KMeansPlusPlusClusterer<ClusterableFeatureData> clusterer = 
+				new KMeansPlusPlusClusterer<ClusterableFeatureData>(3);
+		List<ClusterableFeatureData>dataToCluster = new ArrayList<ClusterableFeatureData>();
+		long[]coord = new long[] {0,0};
+		Matrix featureDataMatrix = featureMatrix.getMetaDataDimensionMatrix(0);
+		for(long i=0; i<featureDataMatrix.getColumnCount(); i++) {
+			
+			coord[1] = i;
+			MsFeature msf = (MsFeature)featureDataMatrix.getAsObject(coord);
+			double[] featureData = featureMatrix.selectColumns(Ret.LINK, i).transpose().toDoubleArray()[0];
+			dataToCluster.add(new ClusterableFeatureData(msf, featureData));
+		}
+		List<CentroidCluster<ClusterableFeatureData>> results = clusterer.cluster(dataToCluster);
+		for(CentroidCluster<ClusterableFeatureData>cc : results) {
+			
+			System.out.println(((ClusterableFeatureData)cc.getCenter()).getFeature().toString());
+		}
+		
 	}
 
 	private void binFeaturesByRt() {
@@ -322,7 +351,7 @@ public class BinnerProcessingTask extends AbstractTask implements TaskListener {
 			double missingRemovalThreshold) {
 
 		Matrix missingnessMatrix  = dataMatrixForBinner.
-				countMissing(Ret.NEW, Matrix.ROW).
+				countMissing(Ret.NEW, BaseMatrix.ROW).
 				divide(dataMatrixForBinner.getRowCount() / 100.0d);
 		Matrix featureMetadataMatrix = 
 				dataMatrixForBinner.getMetaDataDimensionMatrix(0);
@@ -364,7 +393,7 @@ public class BinnerProcessingTask extends AbstractTask implements TaskListener {
 	
 	private void convertOutliersToMissing(Matrix dataMatrixForBinner, double stDevMargin) {
 		
-		Matrix standardized = dataMatrixForBinner.standardize(Ret.NEW, Matrix.ROW);
+		Matrix standardized = dataMatrixForBinner.standardize(Ret.NEW, BaseMatrix.ROW);
 		for(long i=0; i<dataMatrixForBinner.getRowCount(); i++) {
 			
 			for(long j=0; j<dataMatrixForBinner.getColumnCount(); j++) {
@@ -384,7 +413,7 @@ public class BinnerProcessingTask extends AbstractTask implements TaskListener {
 		//	writeMatrixToFile(dataMatrixForBinner, "beforeImpute.txt");		
 
 		Matrix imputedMatrixForBinner = 
-				new ImputeMedian(Matrix.ROW, dataMatrixForBinner).calc(Ret.NEW);
+				new ImputeMedian(BaseMatrix.ROW, dataMatrixForBinner).calc(Ret.NEW);
 		
 		//	writeMatrixToFile(imputedMatrixForBinner, "afterImpute.txt");
 		

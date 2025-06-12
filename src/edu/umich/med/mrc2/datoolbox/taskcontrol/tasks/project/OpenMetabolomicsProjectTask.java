@@ -100,7 +100,8 @@ public class OpenMetabolomicsProjectTask extends AbstractTask implements TaskLis
 					&& orderedMSFeatureIdMap.get(dp) != null) {
 
 				LoadPipelineDataTask task = new LoadPipelineDataTask(
-						project, dp, 
+						project, 
+						dp, 
 						orderedDataFileNamesMap.get(dp),
 						orderedMSFeatureIdMap.get(dp));
 				task.addTaskListener(this);

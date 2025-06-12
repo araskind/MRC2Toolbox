@@ -26,7 +26,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.apache.commons.math4.legacy.stat.descriptive.DescriptiveStatistics;
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 public class IsotopePatternScorer {
 	

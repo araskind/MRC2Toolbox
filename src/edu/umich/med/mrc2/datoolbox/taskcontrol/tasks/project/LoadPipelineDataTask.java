@@ -144,7 +144,7 @@ public class LoadPipelineDataTask extends AbstractTask {
 
 	private void readFeaturesFromFile() {
 		
-		taskDescription = "Writing features for " + pipeline.getName();
+		taskDescription = "Reading features for " + pipeline.getName();
 		File featureXmlFile = 
 				Paths.get(project.getDataDirectory().getAbsolutePath(),
 				DataPrefix.MS_FEATURE.getName() + pipeline.getSaveSafeName() 

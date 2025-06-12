@@ -253,29 +253,15 @@ public final class BuildInformation {
 		    <version>1.2.6</version>
 		</dependency>
 		<dependency>
-		    <groupId>org.apache.commons.math4</groupId>
-		    <artifactId>commons-math4-core</artifactId>
-		    <version>4.0-beta1</version>
-		</dependency>
-		<dependency>
-		    <groupId>org.apache.commons.math4</groupId>
-		    <artifactId>commons-math4-legacy</artifactId>
-		    <version>4.0-beta1</version>
-		</dependency>
-		<dependency>
-		    <groupId>org.apache.commons.math4</groupId>
-		    <artifactId>commons-math4-legacy-core</artifactId>
-		    <version>4.0-beta1</version>
-		</dependency>
-		<dependency>
-		    <groupId>org.apache.commons.math4</groupId>
-		    <artifactId>commons-math4-legacy-exception</artifactId>
-		    <version>4.0-beta1</version>
-		</dependency>
-		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-math3</artifactId>
 			<version>3.6.1</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.apache.commons/commons-math4-legacy -->
+		<dependency>
+		    <groupId>org.apache.commons</groupId>
+		    <artifactId>commons-math4-legacy</artifactId>
+		    <version>4.0-beta1</version>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/org.apache.commons/commons-statistics-distribution -->
 		<dependency>
@@ -539,6 +525,7 @@ public final class BuildInformation {
 			<artifactId>jai_codec</artifactId>
 			<version>1.1.3</version>
 		</dependency>
+		<!--
 		<dependency>
 			<groupId>com.github.haifengl</groupId>
 			<artifactId>smile-core</artifactId>
@@ -549,6 +536,7 @@ public final class BuildInformation {
 			<artifactId>smile-plot</artifactId>
 			<version>2.6.0</version>
 		</dependency>
+		-->
 		<!-- https://mvnrepository.com/artifact/org.apache.commons/commons-jcs3-core -->
 		<dependency>
 			<groupId>org.apache.commons</groupId>
@@ -599,7 +587,7 @@ public final class BuildInformation {
 		    <artifactId>owl</artifactId>
 		    <version>1.02</version>
 		</dependency>
-<!---->
+		<!---->
 		<dependency>
 		  <groupId>ambit</groupId>
 		  <artifactId>ambit2-tautomers</artifactId>
@@ -654,5 +642,13 @@ public final class BuildInformation {
 		    <artifactId>orsonpdf</artifactId>
 		    <version>1.9.1</version>
 		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.apache.spark/spark-mllib 
+		<dependency>
+		    <groupId>org.apache.spark</groupId>
+		    <artifactId>spark-mllib_2.13</artifactId>
+		    <version>4.0.0</version>
+		    <scope>provided</scope>
+		</dependency>
+		-->
 	</dependencies>
 </project>
