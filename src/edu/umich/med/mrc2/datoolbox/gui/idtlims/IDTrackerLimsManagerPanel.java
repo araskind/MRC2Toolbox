@@ -941,12 +941,16 @@ public class IDTrackerLimsManagerPanel extends DockableMRC2ToolboxPanel implemen
 			if (e.getSource().getClass().equals(MSMSSearchResultsBatchPrescanTask.class))
 				finalizeCefPrescan((MSMSSearchResultsBatchPrescanTask) e.getSource());
 			
-			if (e.getSource().getClass().equals(IDTrackerMetadataPullTask.class)) {
-				refreshPanelData();
-				RecentDataManager.readDataFromFile();
-				MRC2ToolBoxCore.getMainWindow().updateGuiWithRecentData();
-			}
+			if (e.getSource().getClass().equals(IDTrackerMetadataPullTask.class))
+				finalizeIDTrackerMetadataPullTask((IDTrackerMetadataPullTask)e.getSource());
 		}
+	}
+	
+	private void finalizeIDTrackerMetadataPullTask(IDTrackerMetadataPullTask task) {
+		
+		refreshPanelData();
+		RecentDataManager.readDataFromFile();
+		MRC2ToolBoxCore.getMainWindow().updateGuiWithRecentData();
 	}
 
 	private void finalizeCefPrescan(MSMSSearchResultsBatchPrescanTask task) {

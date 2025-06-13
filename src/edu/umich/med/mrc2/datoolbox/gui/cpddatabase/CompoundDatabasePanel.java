@@ -891,6 +891,8 @@ public class CompoundDatabasePanel extends DockableMRC2ToolboxPanel implements L
 					"Errors and notes for compound data import from PubChem:",
 					StringUtils.join(importTask.getFetchLog(), "\n"),
 					addPubchemCompoundsDialog);
+			id.setLocationRelativeTo(this.getContentPane());
+			id.setVisible(true);
 		}
 		loadCompoundDataByReference(importTask.getImportedIds());
 //		if(!importTask.getImportedIds().isEmpty()) {

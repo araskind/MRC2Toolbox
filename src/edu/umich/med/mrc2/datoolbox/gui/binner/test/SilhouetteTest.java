@@ -55,6 +55,7 @@ import edu.umich.med.mrc2.datoolbox.data.ExperimentDesign;
 import edu.umich.med.mrc2.datoolbox.data.LibraryMsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureCluster;
+import edu.umich.med.mrc2.datoolbox.data.MsFeatureDataPoint;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureSet;
 import edu.umich.med.mrc2.datoolbox.data.Worklist;
 import edu.umich.med.mrc2.datoolbox.data.WorklistItem;
@@ -80,6 +81,9 @@ import edu.umich.med.mrc2.datoolbox.utils.DataSetUtils;
 import edu.umich.med.mrc2.datoolbox.utils.ProjectUtils;
 import edu.umich.med.mrc2.datoolbox.utils.ujmp.ImputeMedian;
 import edu.umich.med.mrc2.datoolbox.utils.ujmp.Log1pTransform;
+import jsat.SimpleDataSet;
+import jsat.classifiers.DataPoint;
+import jsat.clustering.HDBSCAN;
 
 public class SilhouetteTest {
 	
@@ -477,7 +481,8 @@ public class SilhouetteTest {
 			
 			binDataMatrix.setMetaDataDimensionMatrix(0, Matrix.Factory.linkToArray((Object[])sortedFeatureArray));
 			binDataMatrix.setMetaDataDimensionMatrix(1, preparedDataMatrix.getMetaDataDimensionMatrix(1));
-			clusterFeatures(binDataMatrix);
+			//	clusterFeatures(binDataMatrix);
+			opticsClusterFeatures(binDataMatrix);
 			
 //			double[][] doubleMatrix = binDataMatrix.toDoubleArray();
 //			Matrix corrMatrix = null;
@@ -497,6 +502,36 @@ public class SilhouetteTest {
 //				corrMatrix.setMetaDataDimensionMatrix(1, Matrix.Factory.linkToArray((Object[])sortedFeatureArray).transpose(Ret.NEW));
 //				bin.setClusterCorrMatrix(corrMatrix);
 //			}			
+		}
+	}
+	
+	private void opticsClusterFeatures(Matrix featureMatrix) {
+		
+		if(featureMatrix.getColumnCount() < 2)
+			return;
+		
+		//	ColumnMajorStore dataStore = new ColumnMajorStore(false);
+		List<DataPoint>dataList = new ArrayList<DataPoint>();
+		long[]coord = new long[] {0,0};
+		Matrix featureDataMatrix = featureMatrix.getMetaDataDimensionMatrix(0);
+		
+		//	System.err.println("\nClustering " + featureDataMatrix.getColumnCount() + " features:");
+		for(long i=0; i<featureDataMatrix.getColumnCount(); i++) {
+			
+			coord[1] = i;
+			MsFeature msf = (MsFeature)featureDataMatrix.getAsObject(coord);
+			double[] featureData = featureMatrix.selectColumns(Ret.LINK, i).transpose().toDoubleArray()[0];
+			dataList.add(new MsFeatureDataPoint(featureData, msf));
+		}
+		SimpleDataSet dataForClustering = new SimpleDataSet(dataList);
+		HDBSCAN clusterer = new HDBSCAN(2);
+		List<List<DataPoint>> generatedClusters = clusterer.cluster(dataForClustering);
+		int counter = 1;
+		for(List<DataPoint>cluster : generatedClusters) {
+			
+			System.err.println("\nCluster # " + counter);
+			System.out.println(cluster.size() + " features");			
+			counter++;
 		}
 	}
 	

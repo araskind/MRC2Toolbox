@@ -95,34 +95,42 @@ public class MsMsfeatureBatchExtractionTask extends AbstractTask implements Task
 			
 			((AbstractTask)e.getSource()).removeTaskListener(this);
 			
-			if (e.getSource().getClass().equals(MsMsfeatureExtractionTask.class)) {
-				MsMsfeatureExtractionTask task = (MsMsfeatureExtractionTask)e.getSource();
-				task.getMsFeatureInfoBundles().stream().
-					forEach(b -> b.setDataExtractionMethod(existingDeMethod));
+			if (e.getSource().getClass().equals(MsMsfeatureExtractionTask.class))
+				finalizeMsMsfeatureExtractionTask((MsMsfeatureExtractionTask)e.getSource());
 				
-				String injectionId = task.getRawDataFile().getInjectionId();
-				task.getMsFeatureInfoBundles().stream().
-					forEach(b -> b.setInjectionId(injectionId));
-				
-				msFeatureMap.put(task.getRawDataFile(), task.getMsFeatureInfoBundles());
-				MRC2ToolBoxCore.getTaskController().getTaskQueue().removeTask(task);
-				processed++;				
-				
-				if(processed == msmsDataFiles.size()) {
-					
-					initChromatogramExtraction();
-//					if(msOneDataFiles.size() > 0)
-//						initChromatogramExtraction();					
-//					else
-//						setStatus(TaskStatus.FINISHED);					
-				}
-			}
-			if (e.getSource().getClass().equals(MsFeatureChromatogramBatchExtractionTask.class)) {
-				MsFeatureChromatogramBatchExtractionTask task = 
-						(MsFeatureChromatogramBatchExtractionTask)e.getSource();
-				chromatogramMap = task.getChromatogramMap();
-				setStatus(TaskStatus.FINISHED);
-			}
+			if (e.getSource().getClass().equals(MsFeatureChromatogramBatchExtractionTask.class))
+				finalizeMsFeatureChromatogramBatchExtractionTask(
+						(MsFeatureChromatogramBatchExtractionTask)e.getSource());
+		}
+	}
+	
+	private synchronized void finalizeMsFeatureChromatogramBatchExtractionTask(
+			MsFeatureChromatogramBatchExtractionTask task) {
+		
+		chromatogramMap = task.getChromatogramMap();
+		setStatus(TaskStatus.FINISHED);
+	}
+	
+	private synchronized void finalizeMsMsfeatureExtractionTask(MsMsfeatureExtractionTask task) {
+		
+		task.getMsFeatureInfoBundles().stream().
+		forEach(b -> b.setDataExtractionMethod(existingDeMethod));
+	
+		String injectionId = task.getRawDataFile().getInjectionId();
+		task.getMsFeatureInfoBundles().stream().
+			forEach(b -> b.setInjectionId(injectionId));
+		
+		msFeatureMap.put(task.getRawDataFile(), task.getMsFeatureInfoBundles());
+		MRC2ToolBoxCore.getTaskController().getTaskQueue().removeTask(task);
+		processed++;				
+		
+		if(processed == msmsDataFiles.size()) {
+		
+			initChromatogramExtraction();
+			//		if(msOneDataFiles.size() > 0)
+			//			initChromatogramExtraction();					
+			//		else
+			//			setStatus(TaskStatus.FINISHED);					
 		}
 	}
 

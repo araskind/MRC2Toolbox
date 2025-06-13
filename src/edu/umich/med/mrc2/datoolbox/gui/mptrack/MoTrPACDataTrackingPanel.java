@@ -318,12 +318,17 @@ public class MoTrPACDataTrackingPanel extends DockableMRC2ToolboxPanel implement
 		if (e.getStatus() == TaskStatus.FINISHED) {
 
 			((AbstractTask) e.getSource()).removeTaskListener(this);
-			if(e.getSource().getClass().equals(MotrpacLimsDataPullTask.class)) {
-				refreshPanels();
-				limsDataLoaded = true;
-				studyManagerPanel.setLimsDataLoaded(true);
-			}
+			if(e.getSource().getClass().equals(MotrpacLimsDataPullTask.class))
+				finalizeMotrpacLimsDataPullTask((MotrpacLimsDataPullTask)e.getSource());			
 		}
+	}
+	
+	private void finalizeMotrpacLimsDataPullTask(MotrpacLimsDataPullTask task) {
+		
+		refreshPanels();
+		limsDataLoaded = true;
+		studyManagerPanel.setLimsDataLoaded(true);
+		
 	}
 
 	private void refreshPanels() {

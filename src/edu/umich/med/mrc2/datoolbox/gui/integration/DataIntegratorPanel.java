@@ -317,23 +317,24 @@ public class DataIntegratorPanel extends ClusterDisplayPanel {
 
 			((AbstractTask) e.getSource()).removeTaskListener(this);
 
-			if (e.getSource().getClass().equals(IdentifiedFeatureIntegrationTask.class)) {
-
-				IdentifiedFeatureIntegrationTask eTask = (IdentifiedFeatureIntegrationTask) e.getSource();
-
-				integratedSet = eTask.getIdClusterSet();
-				
-//				TODO find new place for this functionality?
-//				toolbar.updateGuiFromActiveSet(integratedSet);
-				// currentProject.addIntegratedFeatureClusterSet(integratedSet);
-
-				loadFeatureClusters(integratedSet.getClusters());
-				MRC2ToolBoxCore.getMainWindow().showPanel(PanelList.INTEGRATION);
-
-				if (integratedSet.getClusters().isEmpty())
-					MessageDialog.showInfoMsg("No identified feature clusters found using current settings");
-			}
+			if (e.getSource().getClass().equals(IdentifiedFeatureIntegrationTask.class))
+				finalizeIdentifiedFeatureIntegrationTask((IdentifiedFeatureIntegrationTask) e.getSource());
 		}
+	}
+	
+	private synchronized void finalizeIdentifiedFeatureIntegrationTask(IdentifiedFeatureIntegrationTask task) {
+		
+		integratedSet = task.getIdClusterSet();
+		
+//		TODO find new place for this functionality?
+//		toolbar.updateGuiFromActiveSet(integratedSet);
+		// currentProject.addIntegratedFeatureClusterSet(integratedSet);
+
+		loadFeatureClusters(integratedSet.getClusters());
+		MRC2ToolBoxCore.getMainWindow().showPanel(PanelList.INTEGRATION);
+
+		if (integratedSet.getClusters().isEmpty())
+			MessageDialog.showInfoMsg("No identified feature clusters found using current settings");
 	}
 
 	@Override

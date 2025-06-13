@@ -112,16 +112,17 @@ return;
 
 			((AbstractTask) e.getSource()).removeTaskListener(this);
 
-			if (e.getSource().getClass().equals(MsMsfeatureExtractionTask.class)) {
-
-				MsMsfeatureExtractionTask task = (MsMsfeatureExtractionTask)e.getSource();
-
-				processed++;
-
-				if(processed == total)
-					alignmsMsFeatures();
-			}
+			if (e.getSource().getClass().equals(MsMsfeatureExtractionTask.class))
+				finalizeMsMsfeatureExtractionTask((MsMsfeatureExtractionTask)e.getSource());
 		}
+	}
+	
+	private synchronized void finalizeMsMsfeatureExtractionTask(MsMsfeatureExtractionTask task) {
+		
+		processed++;
+
+		if(processed == total)
+			alignmsMsFeatures();
 	}
 
 	private void alignmsMsFeatures() {

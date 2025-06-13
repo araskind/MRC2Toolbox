@@ -461,6 +461,8 @@ public class DockableWorklistManagerPanel extends AbstractIDTrackerLimsPanel imp
 					"Some acquisition methods used for this experiment are not yet in the database.",
 					StringUtils.join(task.getMissingMethods(), "\n"),
 					this.getContentPane());
+			id.setLocationRelativeTo(this.getContentPane());
+			id.setVisible(true);
 			return;
 		}
 		if(task.getWorklist() == null) {

@@ -83,16 +83,19 @@ return;
 			
 			((AbstractTask)e.getSource()).removeTaskListener(this);
 			
-			if (e.getSource().getClass().equals(RawDataConversionTask.class)) {
-					
-				MRC2ToolBoxCore.getTaskController().getTaskQueue().removeTask((AbstractTask)e.getSource());
-				processed++;
-				if(processed == total) {
-//					taskDescription = "Re-indexing raw data repository ...";
-//					RawDataManager.indexRepository();
-					setStatus(TaskStatus.FINISHED);
-				}
-			}
+			if (e.getSource().getClass().equals(RawDataConversionTask.class))
+				 finalizeRawDataConversionTask((RawDataConversionTask)e.getSource());
+		}
+	}
+	
+	private synchronized void finalizeRawDataConversionTask(RawDataConversionTask task) {
+		
+		MRC2ToolBoxCore.getTaskController().getTaskQueue().removeTask(task);
+		processed++;
+		if(processed == total) {
+//			taskDescription = "Re-indexing raw data repository ...";
+//			RawDataManager.indexRepository();
+			setStatus(TaskStatus.FINISHED);
 		}
 	}
 }

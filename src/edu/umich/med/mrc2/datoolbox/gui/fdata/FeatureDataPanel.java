@@ -50,7 +50,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.ujmp.core.Matrix;
 
 import edu.umich.med.mrc2.datoolbox.data.BinnerAnnotation;
-import edu.umich.med.mrc2.datoolbox.data.BinnerPreferencesObject;
 import edu.umich.med.mrc2.datoolbox.data.CompoundLibrary;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignSubset;
@@ -77,7 +76,6 @@ import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.database.idt.MSRTLibraryUtils;
 import edu.umich.med.mrc2.datoolbox.gui.annotation.DockableObjectAnnotationPanel;
-import edu.umich.med.mrc2.datoolbox.gui.binner.control.BinnerProcessingSetupDialog;
 import edu.umich.med.mrc2.datoolbox.gui.binner.display.DockableBinnerAnnotationDetailsPanel;
 import edu.umich.med.mrc2.datoolbox.gui.clustertree.FilterTreeDialog;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignEvent;
@@ -125,7 +123,6 @@ import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
-import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.derepl.BinnerProcessingTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.derepl.FindDuplicateNamesTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.derepl.MergeDuplicateFeaturesTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io.DataExportTask;
@@ -189,8 +186,6 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 	private MzFrequencyAnalysisSetupDialog mzFrequencyAnalysisSetupDialog;
 	private ExperimentPooledSampleManagerDialog experimentPooledSampleManagerDialog;
 	private MultiMSFeatureQCPlotFrame multiSpectraPlotFrame;
-	
-	private BinnerProcessingSetupDialog binnerProcessingSetupDialog;
 
 	private static final Icon componentIcon = GuiUtils.getIcon("barChart", 16);
 	private static final Icon loadLibraryIcon = GuiUtils.getIcon("loadLibrary", 24);
@@ -439,12 +434,6 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 			
 			if (command.equals(MainActionCommands.CLEAN_EMPTY_FEATURES_COMMAND.getName()))
 				cleanEmptyFeatures();
-			
-			if (command.equals(MainActionCommands.BINNER_ANALYSIS_SETUP_COMMAND.getName()))
-				setupBinnerAnalysis();
-			
-			if (command.equals(MainActionCommands.GENERATE_BINNER_ANNOTATIONS_COMMAND.getName()))
-				runBinnerAnalysis();
 			
 			if (command.equals(MainActionCommands.IMPORT_BINNER_ANNOTATIONS_COMMAND.getName()))
 				importBinnerAnnotations();
@@ -1251,35 +1240,6 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 		task.addTaskListener(this);
 		MRC2ToolBoxCore.getTaskController().addTask(task);
 	}
-
-	private void setupBinnerAnalysis() {
-		
-		Set<DataFile> dataFiles = 
-				currentExperiment.getDataFilesForPipeline(activeDataPipeline, false);
-		if(dataFiles == null || dataFiles.isEmpty())
-			return;
-		
-		binnerProcessingSetupDialog = 
-				new BinnerProcessingSetupDialog(
-						currentExperiment, activeDataPipeline, this);
-		binnerProcessingSetupDialog.setLocationRelativeTo(this.getContentPane());
-		binnerProcessingSetupDialog.setVisible(true);
-	}
-	
-	private void runBinnerAnalysis() {
-		
-		Collection<String>errors = binnerProcessingSetupDialog.validateFormData();
-		if(!errors.isEmpty()){
-		    MessageDialog.showErrorMsg(
-		            StringUtils.join(errors, "\n"), binnerProcessingSetupDialog);
-		    return;
-		}
-		BinnerPreferencesObject bpo = binnerProcessingSetupDialog.getBinnerPreferencesObject();
-		BinnerProcessingTask task = new BinnerProcessingTask(bpo);
-		task.addTaskListener(this);
-		MRC2ToolBoxCore.getTaskController().addTask(task);		
-		binnerProcessingSetupDialog.dispose();
-	}
 	
 	private void importBinnerAnnotations() {
 		
@@ -1713,24 +1673,18 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 			if (e.getSource().getClass().equals(CalculateStatisticsTask.class))
 				updateStatisticsResults((CalculateStatisticsTask) e.getSource());
 
-			if (e.getSource().getClass().equals(ImputeMissingDataTask.class)) {
-
-				String mName = ((ImputeMissingDataTask) e.getSource()).getImputationMethod().getName();
-				MessageDialog.showInfoMsg("Data were imputed using " + mName + " method");
-			}
+			if (e.getSource().getClass().equals(ImputeMissingDataTask.class))
+				finalizeImputeMissingDataTask((ImputeMissingDataTask) e.getSource());
+			
 			if (e.getSource().getClass().equals(LibrarySearchTask.class))
 				reviewLibrarySearchResults((LibrarySearchTask) e.getSource());
 
 			if (e.getSource().getClass().equals(ClearIdentificationsTask.class))
 				resetFeatureTable();
 
-			if (e.getSource().getClass().equals(MergeDuplicateFeaturesTask.class)) {
-
-				setTableModelFromFeatureSet(
-						currentExperiment.getActiveFeatureSetForDataPipeline(activeDataPipeline));
-				MRC2ToolBoxCore.getMainWindow().getPreferencesDraw().
-					switchDataPipeline(currentExperiment, activeDataPipeline);
-			}
+			if (e.getSource().getClass().equals(MergeDuplicateFeaturesTask.class))
+				finalizeMergeDuplicateFeaturesTask((MergeDuplicateFeaturesTask)e.getSource());
+			
 			if (e.getSource().getClass().equals(LoadDatabaseLibraryTask.class))
 				finalizeDatabaseLibraryLoad((LoadDatabaseLibraryTask) e.getSource());
 		
@@ -1759,9 +1713,6 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 			
 			if (e.getSource().getClass().equals(ImportBinnerAnnotationsForUntargetedDataTask.class))
 				finalizeBinnerAnnotationsImportTask((ImportBinnerAnnotationsForUntargetedDataTask)e.getSource());		
-			
-			if (e.getSource().getClass().equals(BinnerProcessingTask.class))
-				finalizeBinnerProcessingTask((BinnerProcessingTask)e.getSource());			
 		}
 		if (e.getStatus() == TaskStatus.CANCELED || e.getStatus() == TaskStatus.ERROR) {
 			MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
@@ -1769,11 +1720,19 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 		}
 	}
 	
-	private void finalizeBinnerProcessingTask(BinnerProcessingTask task) {
-		// TODO Auto-generated method stub
-		MessageDialog.showInfoMsg(
-				"Binner Annotation finished.", 
-				this.getContentPane());
+	private void finalizeMergeDuplicateFeaturesTask(MergeDuplicateFeaturesTask task) {
+		
+		setTableModelFromFeatureSet(
+				currentExperiment.getActiveFeatureSetForDataPipeline(activeDataPipeline));
+		MRC2ToolBoxCore.getMainWindow().getPreferencesDraw().
+			switchDataPipeline(currentExperiment, activeDataPipeline);
+	}
+	
+	private void finalizeImputeMissingDataTask(ImputeMissingDataTask task) {
+		
+
+		String mName = task.getImputationMethod().getName();
+		MessageDialog.showInfoMsg("Data were imputed using " + mName + " method");
 	}
 
 	private void finalizeBinnerAnnotationsImportTask(ImportBinnerAnnotationsForUntargetedDataTask task) {
@@ -1794,6 +1753,8 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 					"The following Binner annotations could not be matched to any of the features:", 
 					details, 
 					this.getContentPane());
+			id.setLocationRelativeTo(this.getContentPane());
+			id.setVisible(true);
 		}
 		resetFeatureTable();
 	}
@@ -1831,11 +1792,13 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 		for(MsFeatureCluster cluster : task.getDuplicateNameList())		
 			dupNames.add(cluster.getPrimaryFeature().getName());
 
-		InformationDialog info = new InformationDialog(
+		InformationDialog id = new InformationDialog(
 				"Duplicate feature names", 
 				"Found the following duplicate feature names",
 				StringUtils.join(dupNames, "\n"),
 				this.getContentPane());
+		id.setLocationRelativeTo(this.getContentPane());
+		id.setVisible(true);
 	}
 	
 	private void finalizeQuantDataLoad(QuantMatrixImportTask quantMatrixImportTask) {

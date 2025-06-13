@@ -1088,7 +1088,8 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ItemList
 					StringUtils.join(errors, "\n"), 
 					this.getContentPane(),
 					InfoDialogType.ERROR);
-			return;
+			id.setLocationRelativeTo(this.getContentPane());
+			id.setVisible(true);
 		} else {
 			if(task.getLibrary() != null) {
 				

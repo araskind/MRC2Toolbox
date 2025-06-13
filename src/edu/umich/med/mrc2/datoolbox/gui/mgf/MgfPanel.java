@@ -196,20 +196,21 @@ public class MgfPanel extends DockableMRC2ToolboxPanel implements TreeSelectionL
 			((AbstractTask)e.getSource()).removeTaskListener(this);
 
 			// MgfImportTask
-			if (e.getSource().getClass().equals(MgfImportTask.class)) {
-
-				clearPanel();
-
-				MgfImportTask eTask = (MgfImportTask) e.getSource();
-
-				for (MsMsCluster cluster : eTask.getFeatureClusterss())
-					msMsTree.addFeatureClusterToTree(cluster);
-
-				msMsTree.expandClusterBranch();
-			}
+			if (e.getSource().getClass().equals(MgfImportTask.class))
+				finalizeMgfImportTask((MgfImportTask) e.getSource());
 		}
 		if (e.getStatus() == TaskStatus.ERROR || e.getStatus() == TaskStatus.CANCELED)
 			MainWindow.hideProgressDialog();
+	}
+	
+	private void finalizeMgfImportTask(MgfImportTask task) {
+		
+		clearPanel();
+
+		for (MsMsCluster cluster : task.getFeatureClusterss())
+			msMsTree.addFeatureClusterToTree(cluster);
+
+		msMsTree.expandClusterBranch();
 	}
 
 	@Override

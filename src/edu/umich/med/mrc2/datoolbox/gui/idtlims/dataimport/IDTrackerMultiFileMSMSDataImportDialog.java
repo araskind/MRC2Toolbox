@@ -349,36 +349,39 @@ public class IDTrackerMultiFileMSMSDataImportDialog extends JDialog
 		if (e.getStatus() == TaskStatus.FINISHED) {
 
 			((AbstractTask)e.getSource()).removeTaskListener(this);
-			if (e.getSource().getClass().equals(IDTCefMSMSPrescanOrImportTask.class)) {
-
-				IDTCefMSMSPrescanOrImportTask task = (IDTCefMSMSPrescanOrImportTask)e.getSource();
-				importLog.addAll(task.getImportLog());
-				processedFiles++;
-			}			
-			if(processedFiles == fileNumber) {
-
-				//	Write error log
-				String timestamp = MRC2ToolBoxConfiguration.getFileTimeStampFormat().format(new Date());
-				Path outputPath = Paths.get(baseDirectory.getAbsolutePath(),
-								"MSMS_DATA_IMPORT_LOG_" + timestamp + ".TXT");
-				
-				if(!importLog.isEmpty()) {
-
-				    try {
-						Files.write(outputPath, 
-								importLog, 
-								StandardCharsets.UTF_8,
-								StandardOpenOption.CREATE, 
-								StandardOpenOption.TRUNCATE_EXISTING);
-					} catch (IOException ex) {
-						ex.printStackTrace();
-					}
-				}
-				MessageDialog.showInfoMsg("Data import completed.\n"
-						+ "Error log saved to " + outputPath.toString(), this);
-				dispose();
-			}
+			if (e.getSource().getClass().equals(IDTCefMSMSPrescanOrImportTask.class))
+				finalizeIDTCefMSMSPrescanOrImportTask( (IDTCefMSMSPrescanOrImportTask)e.getSource());
 		}
+	}
+	
+	private synchronized void finalizeIDTCefMSMSPrescanOrImportTask(IDTCefMSMSPrescanOrImportTask task) {
+		
+		importLog.addAll(task.getImportLog());
+		processedFiles++;
+		
+		if(processedFiles == fileNumber) {
+
+			//	Write error log
+			String timestamp = MRC2ToolBoxConfiguration.getFileTimeStampFormat().format(new Date());
+			Path outputPath = Paths.get(baseDirectory.getAbsolutePath(),
+							"MSMS_DATA_IMPORT_LOG_" + timestamp + ".TXT");
+			
+			if(!importLog.isEmpty()) {
+
+			    try {
+					Files.write(outputPath, 
+							importLog, 
+							StandardCharsets.UTF_8,
+							StandardOpenOption.CREATE, 
+							StandardOpenOption.TRUNCATE_EXISTING);
+				} catch (IOException ex) {
+					ex.printStackTrace();
+				}
+			}
+			MessageDialog.showInfoMsg("Data import completed.\n"
+					+ "Error log saved to " + outputPath.toString(), this);
+			dispose();
+		}		
 	}
 
 //	public LIMSSamplePreparation getSamplePrep() {

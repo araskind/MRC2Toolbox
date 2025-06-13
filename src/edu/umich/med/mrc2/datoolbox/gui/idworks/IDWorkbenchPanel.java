@@ -3769,12 +3769,9 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 
 			((AbstractTask) e.getSource()).removeTaskListener(this);
 
-			if (e.getSource().getClass().equals(NISTMsSearchTask.class)) {
-
-				NISTMsSearchTask task  = (NISTMsSearchTask)e.getSource();
-				File results = task.getResultsFile();
-				MessageDialog.showInfoMsg("Results are in " + results.getAbsolutePath(), this.getContentPane());
-			}
+			if (e.getSource().getClass().equals(NISTMsSearchTask.class))
+				finalizeNISTMsSearchTask((NISTMsSearchTask)e.getSource());
+			
 			if (e.getSource().getClass().equals(IDTrackerExperimentDataFetchTask.class))
 				finalizeIdTrackerExperimentLoad((IDTrackerExperimentDataFetchTask)e.getSource());
 
@@ -3843,10 +3840,18 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			
 		}
 		if (e.getStatus() == TaskStatus.CANCELED || e.getStatus() == TaskStatus.ERROR) {
+			
 			((AbstractTask) e.getSource()).removeTaskListener(this);
 			MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
 			MainWindow.hideProgressDialog();
 		}
+	}
+	
+	private void finalizeNISTMsSearchTask(NISTMsSearchTask task) {
+		
+		File results = task.getResultsFile();
+		MessageDialog.showInfoMsg("Results are in " + 
+				results.getAbsolutePath(), this.getContentPane());		
 	}
 
 	private void finalizeSearchMSMSfeaturesByCompoundIdentifiersTask(

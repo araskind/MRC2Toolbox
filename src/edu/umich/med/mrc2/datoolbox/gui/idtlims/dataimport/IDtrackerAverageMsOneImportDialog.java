@@ -381,30 +381,33 @@ public class IDtrackerAverageMsOneImportDialog extends JDialog
 		if (e.getStatus() == TaskStatus.FINISHED) {
 
 			((AbstractTask)e.getSource()).removeTaskListener(this);
-			if (e.getSource().getClass().equals(ReferenceMS1ImportTask.class)) {
+			if (e.getSource().getClass().equals(ReferenceMS1ImportTask.class)) 
+				finalizeReferenceMS1ImportTask((ReferenceMS1ImportTask)e.getSource());
+		}
+	}
+	
+	private synchronized void finalizeReferenceMS1ImportTask(ReferenceMS1ImportTask task) {
+		
+		//	Write error log
+		String timestamp = MRC2ToolBoxConfiguration.getFileTimeStampFormat().format(new Date());
+		Path outputPath = Paths.get(baseDirectory.getAbsolutePath(),
+						"REFERENCE_MS1DATA_IMPORT_LOG_" + timestamp + ".TXT");
+		
+		if(!importLog.isEmpty()) {
 
-				//	Write error log
-				String timestamp = MRC2ToolBoxConfiguration.getFileTimeStampFormat().format(new Date());
-				Path outputPath = Paths.get(baseDirectory.getAbsolutePath(),
-								"REFERENCE_MS1DATA_IMPORT_LOG_" + timestamp + ".TXT");
-				
-				if(!importLog.isEmpty()) {
-
-				    try {
-						Files.write(outputPath, 
-								importLog, 
-								StandardCharsets.UTF_8,
-								StandardOpenOption.CREATE, 
-								StandardOpenOption.TRUNCATE_EXISTING);
-					} catch (IOException ex) {
-						ex.printStackTrace();
-					}
-				}
-				MessageDialog.showInfoMsg("Data import completed.\n"
-						+ "Error log saved to " + outputPath.toString(), this);
-				dispose();
+		    try {
+				Files.write(outputPath, 
+						importLog, 
+						StandardCharsets.UTF_8,
+						StandardOpenOption.CREATE, 
+						StandardOpenOption.TRUNCATE_EXISTING);
+			} catch (IOException ex) {
+				ex.printStackTrace();
 			}
 		}
+		MessageDialog.showInfoMsg("Data import completed.\n"
+				+ "Error log saved to " + outputPath.toString(), this);
+		dispose();
 	}
 
 	@Override

@@ -656,14 +656,19 @@ public class IDTrackerDataLoadWizard extends JDialog implements ActionListener, 
 
 			((AbstractTask)e.getSource()).removeTaskListener(this);
 			if (e.getSource().getClass().equals(IDTCefMSMSPrescanOrImportTask.class)) 
-				processedFiles++;
-			
-			if(processedFiles == fileNumber) {
-
-				MessageDialog.showInfoMsg("Data import for experiment \"" + 
-						newExperiment.getName() + "\" completed.", this);
-				dispose();
-			}
+				finalizeIDTCefMSMSPrescanOrImportTask((IDTCefMSMSPrescanOrImportTask)e.getSource());
+		}
+	}
+	
+	private synchronized void finalizeIDTCefMSMSPrescanOrImportTask(IDTCefMSMSPrescanOrImportTask task) {
+		
+		processedFiles++;
+		
+		if(processedFiles == fileNumber) {
+	
+			MessageDialog.showInfoMsg("Data import for experiment \"" + 
+					newExperiment.getName() + "\" completed.", this);
+			dispose();
 		}
 	}
 }

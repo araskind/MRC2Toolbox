@@ -654,27 +654,29 @@ return;
 
 			((AbstractTask) e.getSource()).removeTaskListener(this);
 
-			if (e.getSource().getClass().equals(PassatuttoDecoyGeneratorTask.class)) {
-				
-				processed++;
-				PassatuttoDecoyGeneratorTask task = (PassatuttoDecoyGeneratorTask)e.getSource();
-				List<Path> decoys = task.getDecoyList();
-				if(decoys == null || decoys.isEmpty()) {
+			if (e.getSource().getClass().equals(PassatuttoDecoyGeneratorTask.class))
+				finalizePassatuttoDecoyGeneratorTask((PassatuttoDecoyGeneratorTask)e.getSource());
+		}
+	}
+	
+	private synchronized void finalizePassatuttoDecoyGeneratorTask(PassatuttoDecoyGeneratorTask task) {
+		
+		processed++;
+		List<Path> decoys = task.getDecoyList();
+		if(decoys == null || decoys.isEmpty()) {
 
-					if(processed == featuresToExport.size()) {
-						setStatus(TaskStatus.FINISHED);
-						return;
-					}
-				}
-				MsMsLibraryFeature libFeature = task.getFeature();
-				for(Path p : decoys)
-					addSpectrumFromDecoyFile(p.toFile(), libFeature.getUniqueId());
-				
-				if(processed == featuresToExport.size()) {
-					setStatus(TaskStatus.FINISHED);
-					return;
-				}
+			if(processed == featuresToExport.size()) {
+				setStatus(TaskStatus.FINISHED);
+				return;
 			}
+		}
+		MsMsLibraryFeature libFeature = task.getFeature();
+		for(Path p : decoys)
+			addSpectrumFromDecoyFile(p.toFile(), libFeature.getUniqueId());
+		
+		if(processed == featuresToExport.size()) {
+			setStatus(TaskStatus.FINISHED);
+			return;
 		}
 	}
 

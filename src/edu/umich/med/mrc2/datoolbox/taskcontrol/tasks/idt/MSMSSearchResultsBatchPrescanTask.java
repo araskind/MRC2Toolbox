@@ -99,34 +99,36 @@ public class MSMSSearchResultsBatchPrescanTask extends AbstractTask implements T
 
 			((AbstractTask)e.getSource()).removeTaskListener(this);
 			
-			if (e.getSource().getClass().equals(IDTCefMSMSPrescanOrImportTask.class)) {
+			if (e.getSource().getClass().equals(IDTCefMSMSPrescanOrImportTask.class))
+				finalizeIDTCefMSMSPrescanOrImportTask((IDTCefMSMSPrescanOrImportTask)e.getSource());			
+		}
+	}
+	
+	private synchronized void finalizeIDTCefMSMSPrescanOrImportTask(
+			IDTCefMSMSPrescanOrImportTask task) {
+		extractPrescanData(task);
+		processed++;
+		if(processed == total) {
 
-				IDTCefMSMSPrescanOrImportTask task = (IDTCefMSMSPrescanOrImportTask)e.getSource();
-				extractPrescanData(task);
-				processed++;
-				if(processed == total) {
-
-					if(!idSpectrumMap.isEmpty()) {
-						
-						try {
-							uploadNewMetlinSpectra();
-						} catch (Exception e2) {
-							// TODO Auto-generated catch block
-							e2.printStackTrace();
-							setStatus(TaskStatus.ERROR);
-							return;
-						}
-					}
-					try {
-						createMissingCompoundsReport();
-						return;
-					} catch (Exception e1) {
-						e1.printStackTrace();
-						setStatus(TaskStatus.ERROR);
-						return;
-					}
+			if(!idSpectrumMap.isEmpty()) {
+				
+				try {
+					uploadNewMetlinSpectra();
+				} catch (Exception e2) {
+					// TODO Auto-generated catch block
+					e2.printStackTrace();
+					setStatus(TaskStatus.ERROR);
+					return;
 				}
-			}			
+			}
+			try {
+				createMissingCompoundsReport();
+				return;
+			} catch (Exception e1) {
+				e1.printStackTrace();
+				setStatus(TaskStatus.ERROR);
+				return;
+			}
 		}
 	}
 

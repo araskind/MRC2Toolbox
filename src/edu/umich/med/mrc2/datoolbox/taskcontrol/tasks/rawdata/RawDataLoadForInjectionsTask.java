@@ -144,12 +144,15 @@ return;
 
 			((AbstractTask)e.getSource()).removeTaskListener(this);
 
-			if (e.getSource().getClass().equals(ChromatogramExtractionTask.class)) {
-				
-				ticCount++;
-				if(ticCount == injectionIds.size())
-					setStatus(TaskStatus.FINISHED);
-			}
+			if (e.getSource().getClass().equals(ChromatogramExtractionTask.class))
+				finalizeChromatogramExtractionTask((ChromatogramExtractionTask)e.getSource());		
 		}		
+	}
+	
+	private synchronized void finalizeChromatogramExtractionTask(ChromatogramExtractionTask task) {
+		
+		ticCount++;
+		if(ticCount == injectionIds.size())
+			setStatus(TaskStatus.FINISHED);
 	}
 }

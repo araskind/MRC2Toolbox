@@ -135,23 +135,26 @@ public class MiltiCefPeakQualityImportTask extends AbstractTask implements TaskL
 		if (e.getStatus() == TaskStatus.FINISHED) {
 
 			((AbstractTask) e.getSource()).removeTaskListener(this);
-			if (e.getSource().getClass().equals(CefPeakQualityImportTask.class)) {
-				
-				processedCount++;
-				System.out.println(Integer.toString(processedCount) + " out of " + Integer.toString(taskCount));
-				if(taskCount == processedCount) {					
-					
-					System.out.println("**********\nSaving updated matrix ...");
-					saveFeatureMatrix();
-					System.out.println("Matrix saved");
-					setStatus(TaskStatus.FINISHED);
-					return;
-				}
-			}
+			if (e.getSource().getClass().equals(CefPeakQualityImportTask.class))
+				finalizeCefPeakQualityImportTask((CefPeakQualityImportTask)e.getSource());
 		}
 		if (e.getStatus() == TaskStatus.CANCELED || e.getStatus() == TaskStatus.ERROR) {
 			MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
 			MainWindow.hideProgressDialog();
+		}
+	}
+	
+	private synchronized void finalizeCefPeakQualityImportTask(CefPeakQualityImportTask task) {
+		
+		processedCount++;
+		System.out.println(Integer.toString(processedCount) + " out of " + Integer.toString(taskCount));
+		if(taskCount == processedCount) {					
+			
+			System.out.println("**********\nSaving updated matrix ...");
+			saveFeatureMatrix();
+			System.out.println("Matrix saved");
+			setStatus(TaskStatus.FINISHED);
+			return;
 		}
 	}
 

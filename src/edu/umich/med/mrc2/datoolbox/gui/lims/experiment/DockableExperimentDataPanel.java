@@ -194,16 +194,19 @@ public class DockableExperimentDataPanel  extends DefaultSingleCDockable
 
 			((AbstractTask) e.getSource()).removeTaskListener(this);
 
-			if (e.getSource().getClass().equals(ExperimentDesignPullTask.class)) {
-
-				ExperimentDesign design = ((ExperimentDesignPullTask)e.getSource()).getDesign();
-				if(design != null)
-					designEditorPanel.showExperimentDesign(design);
-
-				MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
-				MainWindow.hideProgressDialog();
-			}
+			if (e.getSource().getClass().equals(ExperimentDesignPullTask.class))
+				finalizeExperimentDesignPullTask((ExperimentDesignPullTask)e.getSource());
 		}
+	}
+	
+	private void finalizeExperimentDesignPullTask(ExperimentDesignPullTask task) {
+		
+		ExperimentDesign design = task.getDesign();
+		if(design != null)
+			designEditorPanel.showExperimentDesign(design);
+
+		MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
+		MainWindow.hideProgressDialog();
 	}
 
 	class TableUpdateTask extends LongUpdateTask {

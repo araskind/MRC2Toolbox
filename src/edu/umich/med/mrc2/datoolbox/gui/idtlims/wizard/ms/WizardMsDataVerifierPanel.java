@@ -325,25 +325,30 @@ public class WizardMsDataVerifierPanel extends IDTrackerDataLoadWizardPanel
 
 			((AbstractTask) e.getSource()).removeTaskListener(this);
 
-			if (e.getSource().getClass().equals(MSMSSearchResultsBatchPrescanTask.class)) {
-				
-				MSMSSearchResultsBatchPrescanTask task = (MSMSSearchResultsBatchPrescanTask)e.getSource();
-				missingIdentities = task.getMissingIdentities();
-				if(!task.getPrescanLog().isEmpty()) {
-					
-					InformationDialog id = new InformationDialog(
-							"Data prescan details", 
-							"Added / missing compounds information", 
-							StringUtils.join(task.getPrescanLog(), "\n"), 
-							this);
-				}
-				dataVerified = true;
-				MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
-				MainWindow.hideProgressDialog();
-			}
+			if (e.getSource().getClass().equals(MSMSSearchResultsBatchPrescanTask.class))			
+				finalizeMSMSSearchResultsBatchPrescanTask(
+						(MSMSSearchResultsBatchPrescanTask)e.getSource());			
 		}
 		if (e.getStatus() == TaskStatus.ERROR || e.getStatus() == TaskStatus.CANCELED)
 			MainWindow.hideProgressDialog();
+	}
+	
+	public synchronized void finalizeMSMSSearchResultsBatchPrescanTask(
+			MSMSSearchResultsBatchPrescanTask task) {
+		missingIdentities = task.getMissingIdentities();
+		if(!task.getPrescanLog().isEmpty()) {
+			
+			InformationDialog id = new InformationDialog(
+					"Data prescan details", 
+					"Added / missing compounds information", 
+					StringUtils.join(task.getPrescanLog(), "\n"), 
+					this);
+			id.setLocationRelativeTo(this);
+			id.setVisible(true);
+		}
+		dataVerified = true;
+		MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
+		MainWindow.hideProgressDialog();
 	}
 	
 	public Map<DataFile,DataExtractionMethod>getFileDaMethodMap(){

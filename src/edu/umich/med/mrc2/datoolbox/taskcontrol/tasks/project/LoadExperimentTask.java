@@ -303,23 +303,25 @@ public class LoadExperimentTask extends AbstractTask implements TaskListener{
 
 			((AbstractTask) e.getSource()).removeTaskListener(this);
 			
-			if (e.getSource().getClass().equals(LoadDatabaseLibraryTask.class)){
-				
-				CompoundLibrary library = 
-						((LoadDatabaseLibraryTask)e.getSource()).getLibrary();
-				
-				if(library != null)
-					MRC2ToolBoxCore.getActiveMsLibraries().add(library);
-				
-				loadedLibsCount = loadedLibsCount + 1;
+			if (e.getSource().getClass().equals(LoadDatabaseLibraryTask.class))
+				finalizeLoadDatabaseLibraryTask((LoadDatabaseLibraryTask)e.getSource());
+		}
+	}
+	
+	private synchronized void finalizeLoadDatabaseLibraryTask(LoadDatabaseLibraryTask task) {
+		
+		CompoundLibrary library = task.getLibrary();
+		
+		if(library != null)
+			MRC2ToolBoxCore.getActiveMsLibraries().add(library);
+		
+		loadedLibsCount++;
 
-				if (loadedLibsCount == libraryIds.size()) {
-					
-					((MsLibraryPanel)MRC2ToolBoxCore.getMainWindow().
-								getPanel(PanelList.MS_LIBRARY)).updateLibraryMenuAndLabel();
-					setStatus(TaskStatus.FINISHED);
-				}
-			}
+		if (loadedLibsCount == libraryIds.size()) {
+			
+			((MsLibraryPanel)MRC2ToolBoxCore.getMainWindow().
+						getPanel(PanelList.MS_LIBRARY)).updateLibraryMenuAndLabel();
+			setStatus(TaskStatus.FINISHED);
 		}
 	}
 }

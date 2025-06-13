@@ -265,13 +265,9 @@ public class METLIMSPanel extends DockableMRC2ToolboxPanel {
 
 			((AbstractTask) e.getSource()).removeTaskListener(this);
 
-			if (e.getSource().getClass().equals(LimsDataPullTask.class)) {
-
-				clearPanel();
-				experimentDataPanel.loadExperimentList(LIMSDataCache.getExperiments());				
-				RecentDataManager.readDataFromFile();
-				MRC2ToolBoxCore.getMainWindow().updateGuiWithRecentData();
-			}
+			if (e.getSource().getClass().equals(LimsDataPullTask.class))
+				finalizeLimsDataPullTask((LimsDataPullTask)e.getSource());
+				
 //			if(e.getSource().getClass().equals(MetLimsToMrc2limsDataTransferTask.class)) {
 //				refreshLimsData();
 //			}
@@ -279,6 +275,14 @@ public class METLIMSPanel extends DockableMRC2ToolboxPanel {
 				refreshLimsData();
 			}			
 		}
+	}
+	
+	private void finalizeLimsDataPullTask(LimsDataPullTask task) {
+		
+		clearPanel();
+		experimentDataPanel.loadExperimentList(LIMSDataCache.getExperiments());				
+		RecentDataManager.readDataFromFile();
+		MRC2ToolBoxCore.getMainWindow().updateGuiWithRecentData();
 	}
 
 	@Override

@@ -303,25 +303,30 @@ public class RawDataAnalysisExperimentDatabaseUploadTask extends MSMSClusterTask
 			
 			((AbstractTask)e.getSource()).removeTaskListener(this);
 			
-			if (e.getSource().getClass().equals(RawDataAnalysisMSFeatureDatabaseUploadTask.class)) {	
-				RawDataAnalysisMSFeatureDatabaseUploadTask task = 
-						(RawDataAnalysisMSFeatureDatabaseUploadTask)e.getSource();
-				featureIdMap.putAll(task.getFeatureIdMap());
-				newChromatogramMap.putAll(task.getChromatogramMap());
-				processedFiles++;
-			}
-			if(processedFiles == experiment.getMSMSDataFiles().size()) {
-					 
-				 experiment.getChromatogramMap().clear();
-				 experiment.getChromatogramMap().putAll(newChromatogramMap);
-				
-				if(!experiment.getEditableMsFeatureInfoBundleCollections().isEmpty() 
-						|| !experiment.getMsmsClusterDataSets().isEmpty())
-					uploadFeatureAndClusterCollections();
-				else
-					setStatus(TaskStatus.FINISHED);
-			}
+			if (e.getSource().getClass().equals(RawDataAnalysisMSFeatureDatabaseUploadTask.class))
+				 finalizeRawDataAnalysisMSFeatureDatabaseUploadTask(
+						 (RawDataAnalysisMSFeatureDatabaseUploadTask)e.getSource());
 		}		
+	}
+	
+	private synchronized void finalizeRawDataAnalysisMSFeatureDatabaseUploadTask(
+			RawDataAnalysisMSFeatureDatabaseUploadTask task) {
+		
+		featureIdMap.putAll(task.getFeatureIdMap());
+		newChromatogramMap.putAll(task.getChromatogramMap());
+		processedFiles++;
+		
+		if(processedFiles == experiment.getMSMSDataFiles().size()) {
+			 
+			 experiment.getChromatogramMap().clear();
+			 experiment.getChromatogramMap().putAll(newChromatogramMap);
+			
+			if(!experiment.getEditableMsFeatureInfoBundleCollections().isEmpty() 
+					|| !experiment.getMsmsClusterDataSets().isEmpty())
+				uploadFeatureAndClusterCollections();
+			else
+				setStatus(TaskStatus.FINISHED);
+		}
 	}
 
 	private void uploadFeatureAndClusterCollections() {

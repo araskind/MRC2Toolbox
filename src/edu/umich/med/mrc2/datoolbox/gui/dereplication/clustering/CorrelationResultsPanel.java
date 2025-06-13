@@ -42,6 +42,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.jfree.chart.ChartMouseEvent;
 import org.jfree.chart.ChartMouseListener;
 
+import edu.umich.med.mrc2.datoolbox.data.BinnerPreferencesObject;
+import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureCluster;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureSet;
@@ -51,6 +53,7 @@ import edu.umich.med.mrc2.datoolbox.data.enums.ParameterSetStatus;
 import edu.umich.med.mrc2.datoolbox.data.enums.PrimaryFeatureSelectionType;
 import edu.umich.med.mrc2.datoolbox.data.enums.SlidingWindowUnit;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
+import edu.umich.med.mrc2.datoolbox.gui.binner.control.BinnerProcessingSetupDialog;
 import edu.umich.med.mrc2.datoolbox.gui.clustertree.DockableClusterTree;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignSubsetEvent;
@@ -75,6 +78,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.derepl.AdductAssignmentTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.derepl.BinnerClustersImportTask;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.derepl.BinnerProcessingTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.derepl.ClusterCorrelationMatrixTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.derepl.FeatureClusteringTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.derepl.MassDifferenceAssignmentTask;
@@ -107,7 +111,8 @@ public class CorrelationResultsPanel extends ClusterDisplayPanel implements Char
 	private DockableMassDifferenceTable massDifferenceTable;
 	private DockableClusterFeatureSelectionTable clusterFeatureSelectionTable;
 	private MassDifferenceExplorerDialog mdExplorerDialog;
-	private BinnerDataImportDialog binnerDataImportDialog;
+	private BinnerDataImportDialog binnerDataImportDialog;	
+	private BinnerProcessingSetupDialog binnerProcessingSetupDialog;
 
 	public CorrelationResultsPanel() {
 
@@ -311,8 +316,42 @@ public class CorrelationResultsPanel extends ClusterDisplayPanel implements Char
 			activeCluster.setClusterCorrMatrix(activeCluster.createCorrelationMatrix(false));
 			showClusterData(activeCluster);
 		}
+		if (command.equals(MainActionCommands.BINNER_ANALYSIS_SETUP_COMMAND.getName()))
+			setupBinnerAnalysis();
+
+		if (command.equals(MainActionCommands.GENERATE_BINNER_ANNOTATIONS_COMMAND.getName()))
+			runBinnerAnalysis();
 	}
 
+	private void setupBinnerAnalysis() {
+
+		Set<DataFile> dataFiles = 
+			currentExperiment.getDataFilesForPipeline(activeDataPipeline, false);
+		if(dataFiles == null || dataFiles.isEmpty())
+			return;
+
+		binnerProcessingSetupDialog = 
+			new BinnerProcessingSetupDialog(
+					currentExperiment, activeDataPipeline, this);
+		binnerProcessingSetupDialog.setLocationRelativeTo(this.getContentPane());
+		binnerProcessingSetupDialog.setVisible(true);
+	}
+
+	private void runBinnerAnalysis() {
+
+		Collection<String>errors = binnerProcessingSetupDialog.validateFormData();
+		if(!errors.isEmpty()){
+			MessageDialog.showErrorMsg(
+					StringUtils.join(errors, "\n"), binnerProcessingSetupDialog);
+			return;
+			}
+		BinnerPreferencesObject bpo = binnerProcessingSetupDialog.getBinnerPreferencesObject();
+		BinnerProcessingTask task = new BinnerProcessingTask(bpo);
+		task.addTaskListener(this);
+		MRC2ToolBoxCore.getTaskController().addTask(task);
+		binnerProcessingSetupDialog.dispose();
+	}
+	
 	private void showBinnerResultsImportDialog() {
 		binnerDataImportDialog = new BinnerDataImportDialog(this);
 		binnerDataImportDialog.setLocationRelativeTo(this.getContentPane());
@@ -894,80 +933,102 @@ public class CorrelationResultsPanel extends ClusterDisplayPanel implements Char
 
 			((AbstractTask) e.getSource()).removeTaskListener(this);
 
-			// Correlation analysis
-			if (e.getSource().getClass().equals(FeatureClusteringTask.class)) {
-
-				FeatureClusteringTask eTask = (FeatureClusteringTask) e.getSource();
-
-				if (!eTask.getFeatureClusters().isEmpty()) {
-
-					clusteringMode = ClusteringMode.INTERNAL;
-					currentExperiment.setFeatureClustersForDataPipeline(activeDataPipeline, eTask.getFeatureClusters());
-					currentExperiment.setCorrelationMatrixForDataPipeline(activeDataPipeline, eTask.getCorrMatrix());
-					loadFeatureClusters(currentExperiment.getMsFeatureClustersForDataPipeline(activeDataPipeline));
-					MRC2ToolBoxCore.getMainWindow().showPanel(PanelList.CORRELATIONS);
-				} else {
-					MessageDialog.showInfoMsg("No correlation clusters found using current settings", this.getContentPane());
-				}
-			}
-			if (e.getSource().getClass().equals(SlidingWindowClusteringTask.class)) {
-
-				SlidingWindowClusteringTask eTask = (SlidingWindowClusteringTask) e.getSource();
-
-				if (!eTask.getFeatureClusters().isEmpty()) {
-
-					clusteringMode = ClusteringMode.INTERNAL;
-					currentExperiment.setFeatureClustersForDataPipeline(activeDataPipeline, eTask.getFeatureClusters());
-					loadFeatureClusters(currentExperiment.getMsFeatureClustersForDataPipeline(activeDataPipeline));
-					MRC2ToolBoxCore.getMainWindow().showPanel(PanelList.CORRELATIONS);
-				} else {
-					MessageDialog.showInfoMsg("No correlation clusters found using current settings", this.getContentPane());
-				}
-			}
+			if (e.getSource().getClass().equals(FeatureClusteringTask.class))
+				finalizeFeatureClusteringTask((FeatureClusteringTask) e.getSource());
 			
-			// Binner data import
-			if (e.getSource().getClass().equals(BinnerClustersImportTask.class)) {
-
-				BinnerClustersImportTask eTask = (BinnerClustersImportTask) e.getSource();
-
-				if (!eTask.getFeatureClusters().isEmpty()) {
-
-					clusteringMode = ClusteringMode.BINNER;
-					currentExperiment.setFeatureClustersForDataPipeline(activeDataPipeline, eTask.getFeatureClusters());
-					loadFeatureClusters(currentExperiment.getMsFeatureClustersForDataPipeline(activeDataPipeline));
-					MRC2ToolBoxCore.getMainWindow().showPanel(PanelList.CORRELATIONS);
-					MRC2ToolBoxCore.getMainWindow().getPreferencesDraw().switchDataPipeline(currentExperiment, activeDataPipeline);
-
-					if (!eTask.getUnassignedFeatures().isEmpty()) {
-
-						@SuppressWarnings("unused")
-						InformationDialog id = new InformationDialog(
-								"Unmatched features",
-								"Not all binned features were matched to the experiment features.\n"
-								+ "Below is the list of unmatched features.",
-								StringUtils.join(eTask.getUnassignedFeatures(), "\n"),
-								this.getContentPane());
-					}
-				} else {
-					MessageDialog.showInfoMsg("No correlation clusters found using current settings", this.getContentPane());
-				}
-			}
+			if (e.getSource().getClass().equals(SlidingWindowClusteringTask.class)) 
+				finalizeSlidingWindowClusteringTask((SlidingWindowClusteringTask)e.getSource());
+			
+			if (e.getSource().getClass().equals(BinnerClustersImportTask.class)) 
+				finalizeBinnerClustersImportTask((BinnerClustersImportTask)e.getSource());
+		
 			if (e.getSource().getClass().equals(MassDifferenceAssignmentTask.class)
-					|| e.getSource().getClass().equals(AdductAssignmentTask.class)) {
-
-				MessageDialog.showInfoMsg("Mass differences has been analyzed");
-				clearClusterDataPanel();
-				resortTree();
-			}
-			if (e.getSource().getClass().equals(ClusterCorrelationMatrixTask.class)) {
-
-				MessageDialog.showInfoMsg(
-						"Correlation matrixes for all clusters have been re-calculated", 
-						this.getContentPane());
-				clearClusterDataPanel();
-				resortTree();
-			}
+					|| e.getSource().getClass().equals(AdductAssignmentTask.class))
+				 finalizeMassDifferenceOrAdductAssignmentTask();
+		
+			if (e.getSource().getClass().equals(ClusterCorrelationMatrixTask.class))
+				finalizeClusterCorrelationMatrixTask();
+			
+			if (e.getSource().getClass().equals(BinnerProcessingTask.class))
+				finalizeBinnerProcessingTask((BinnerProcessingTask)e.getSource());
 		}
+	}
+	
+	private void finalizeClusterCorrelationMatrixTask() {
+		
+		MessageDialog.showInfoMsg(
+				"Correlation matrixes for all clusters have been re-calculated", 
+				this.getContentPane());
+		clearClusterDataPanel();
+		resortTree();
+	}
+	
+	private void finalizeMassDifferenceOrAdductAssignmentTask() {
+		
+		MessageDialog.showInfoMsg("Mass differences has been analyzed");
+		clearClusterDataPanel();
+		resortTree();
+	}
+	
+	private void finalizeFeatureClusteringTask(FeatureClusteringTask task) {
+		
+		if (!task.getFeatureClusters().isEmpty()) {
+
+			clusteringMode = ClusteringMode.INTERNAL;
+			currentExperiment.setFeatureClustersForDataPipeline(activeDataPipeline, task.getFeatureClusters());
+			currentExperiment.setCorrelationMatrixForDataPipeline(activeDataPipeline, task.getCorrMatrix());
+			loadFeatureClusters(currentExperiment.getMsFeatureClustersForDataPipeline(activeDataPipeline));
+			MRC2ToolBoxCore.getMainWindow().showPanel(PanelList.CORRELATIONS);
+		} else {
+			MessageDialog.showInfoMsg("No correlation clusters found using current settings", this.getContentPane());
+		}
+	}
+	
+	private void finalizeSlidingWindowClusteringTask(SlidingWindowClusteringTask task) {
+		
+		if (!task.getFeatureClusters().isEmpty()) {
+
+			clusteringMode = ClusteringMode.INTERNAL;
+			currentExperiment.setFeatureClustersForDataPipeline(activeDataPipeline, task.getFeatureClusters());
+			loadFeatureClusters(currentExperiment.getMsFeatureClustersForDataPipeline(activeDataPipeline));
+			MRC2ToolBoxCore.getMainWindow().showPanel(PanelList.CORRELATIONS);
+		} else {
+			MessageDialog.showInfoMsg("No correlation clusters found using current settings", this.getContentPane());
+		}
+	}
+	
+	private void finalizeBinnerClustersImportTask(BinnerClustersImportTask task) {
+
+		if (!task.getFeatureClusters().isEmpty()) {
+
+			clusteringMode = ClusteringMode.BINNER;
+			currentExperiment.setFeatureClustersForDataPipeline(activeDataPipeline, task.getFeatureClusters());
+			loadFeatureClusters(currentExperiment.getMsFeatureClustersForDataPipeline(activeDataPipeline));
+			MRC2ToolBoxCore.getMainWindow().showPanel(PanelList.CORRELATIONS);
+			MRC2ToolBoxCore.getMainWindow().getPreferencesDraw().switchDataPipeline(currentExperiment, activeDataPipeline);
+
+			if (!task.getUnassignedFeatures().isEmpty()) {
+
+				@SuppressWarnings("unused")
+				InformationDialog id = new InformationDialog(
+						"Unmatched features",
+						"Not all binned features were matched to the experiment features.\n"
+						+ "Below is the list of unmatched features.",
+						StringUtils.join(task.getUnassignedFeatures(), "\n"),
+						this.getContentPane());
+				id.setLocationRelativeTo(this.getContentPane());
+				id.setVisible(true);
+			}
+		} else {
+			MessageDialog.showInfoMsg("No correlation clusters found using current settings", this.getContentPane());
+		}
+	}
+	
+	private void finalizeBinnerProcessingTask(BinnerProcessingTask task) {
+		// TODO Auto-generated method stub
+		MessageDialog.showInfoMsg(
+				"Binner Annotation finished.", 
+				this.getContentPane());
 	}
 
 	@Override
@@ -1002,7 +1063,7 @@ public class CorrelationResultsPanel extends ClusterDisplayPanel implements Char
 		super.valueChanged(event);
 		showClusterData(activeCluster);
 
-		if (clusterTree.getSelectedFeatures().size() > 0)
+		if (!clusterTree.getSelectedFeatures().isEmpty())
 			selectFeatures(clusterTree.getSelectedFeatures());
 	}
 

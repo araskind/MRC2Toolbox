@@ -91,8 +91,6 @@ public class FeatureDataPanelMenuBar extends CommonMenuBar {
 	private static final Icon multiSpectraIcon = GuiUtils.getIcon("multiSpectra", 24);
 	private static final Icon exportAuxDataMatrixIcon = GuiUtils.getIcon("exportAuxDataMatrix", 24);	
 	private static final Icon analysisIconSmall = GuiUtils.getIcon("script", 16);
-	private static final Icon binnerAnalysisIcon = GuiUtils.getIcon("setupBinnerAnnotations", 24);
-	
 
 	// Menus
 	private JMenu
@@ -278,10 +276,7 @@ public class FeatureDataPanelMenuBar extends CommonMenuBar {
 				clearIdentificationsIcon);
 		
 		identificationMenu.addSeparator();
-		
-		binnerAnalysisMenuItem = addItem(identificationMenu,
-				MainActionCommands.BINNER_ANALYSIS_SETUP_COMMAND, 
-				binnerAnalysisIcon);		
+	
 		importBinnerAnnotationsMenuItem = addItem(identificationMenu,
 				MainActionCommands.IMPORT_BINNER_ANNOTATIONS_COMMAND, 
 				importFromBinnerIcon);

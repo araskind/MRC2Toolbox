@@ -367,20 +367,37 @@ public class PepserchResultsImportDialog extends JDialog
 
 			((AbstractTask) e.getSource()).removeTaskListener(this);
 
-			if (e.getSource().getClass().equals(NISTMsPepSearchDataUploadTask.class)) {
-				
-				NISTMsPepSearchDataUploadTask task = (NISTMsPepSearchDataUploadTask)e.getSource();				
-				File log = task.getLogFile();
-				List<String>lines = new ArrayList<String>();
-				try {
-					lines = Files.readAllLines(Paths.get(log.getAbsolutePath()));
-				} catch (IOException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-				for(String line : lines)
-					textArea.append(line + "\n");				
-			}
+			if (e.getSource().getClass().equals(NISTMsPepSearchDataUploadTask.class))			
+				finalizeNISTMsPepSearchDataUploadTask((NISTMsPepSearchDataUploadTask)e.getSource());				
 		}
 	}
+	
+	private void finalizeNISTMsPepSearchDataUploadTask(NISTMsPepSearchDataUploadTask task) {
+		
+		File log = task.getLogFile();
+		List<String>lines = new ArrayList<String>();
+		try {
+			lines = Files.readAllLines(Paths.get(log.getAbsolutePath()));
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		for(String line : lines)
+			textArea.append(line + "\n");	
+	}
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

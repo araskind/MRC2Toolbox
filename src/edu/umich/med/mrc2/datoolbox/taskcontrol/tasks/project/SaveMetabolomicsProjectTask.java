@@ -328,14 +328,17 @@ public class SaveMetabolomicsProjectTask extends AbstractTask implements TaskLis
 
 			((AbstractTask)e.getSource()).removeTaskListener(this);
 
-			if (e.getSource().getClass().equals(SavePipelineDataTask.class)) {
-				
-				MRC2ToolBoxCore.getTaskController().getTaskQueue().removeTask(e.getSource());
-				numberOfSavedDataPipelines++;
-				if(numberOfSavedDataPipelines == projectToSave.getDataPipelines().size())
-					setStatus(TaskStatus.FINISHED);				
-			}				
+			if (e.getSource().getClass().equals(SavePipelineDataTask.class))				
+				finalizeSavePipelineDataTask((SavePipelineDataTask)e.getSource());				
 		}
+	}
+	
+	private synchronized void finalizeSavePipelineDataTask(SavePipelineDataTask task) {
+		
+		MRC2ToolBoxCore.getTaskController().getTaskQueue().removeTask(task);
+		numberOfSavedDataPipelines++;
+		if(numberOfSavedDataPipelines == projectToSave.getDataPipelines().size())
+			setStatus(TaskStatus.FINISHED);
 	}
 
 	@Override

@@ -533,6 +533,7 @@ return;
 	public void statusChanged(TaskEvent e) {
 		
 		if (e.getStatus() == TaskStatus.ERROR) {
+			
 			if (e.getSource().getClass().equals(NISTMspepSearchOfflineTask.class)) {
 				messageLog.add(e.getSource().getErrorMessage());
 				setStatus(TaskStatus.ERROR);
@@ -542,16 +543,20 @@ return;
 		if (e.getStatus() == TaskStatus.FINISHED) {
 
 			((AbstractTask) e.getSource()).removeTaskListener(this);
-			if (e.getSource().getClass().equals(NISTMspepSearchOfflineTask.class)) {
-				try {
-					insertPepSearchParametersInDatabase();
-				} catch (Exception e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-				runFDRAnalysis();
-			}
+			if (e.getSource().getClass().equals(NISTMspepSearchOfflineTask.class))
+				finalizeNISTMspepSearchOfflineTask((NISTMspepSearchOfflineTask)e.getSource());
 		}
+	}
+	
+	private void finalizeNISTMspepSearchOfflineTask(NISTMspepSearchOfflineTask task) {
+		
+		try {
+			insertPepSearchParametersInDatabase();
+		} catch (Exception e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		runFDRAnalysis();		
 	}
 
 	private void insertPepSearchParametersInDatabase() {

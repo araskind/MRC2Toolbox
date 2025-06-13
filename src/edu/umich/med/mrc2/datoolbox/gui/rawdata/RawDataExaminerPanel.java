@@ -1304,7 +1304,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 		MainWindow.hideProgressDialog();
 	}
 
-	private void finalizeRawDataAnalysisExperimentDatabaseUploadTask(
+	private synchronized void finalizeRawDataAnalysisExperimentDatabaseUploadTask(
 			RawDataAnalysisExperimentDatabaseUploadTask task) {
 		
 		MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();

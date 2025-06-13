@@ -334,17 +334,20 @@ public class IDTrackerExperimentDesignEditorPanel extends JPanel
 
 			((AbstractTask) e.getSource()).removeTaskListener(this);
 
-			if (e.getSource().getClass().equals(IDTExperimentDesignPullTask.class)) {
-
-				expDesignTable.clearTable();
-				experimentDesign = ((IDTExperimentDesignPullTask)e.getSource()).getDesign();
-				if(experimentDesign != null)
-					populateDesignTable(experimentDesign);
-
-				MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
-				MainWindow.hideProgressDialog();
-			}
+			if (e.getSource().getClass().equals(IDTExperimentDesignPullTask.class))
+				finalizeIDTExperimentDesignPullTask((IDTExperimentDesignPullTask)e.getSource());			
 		}
+	}
+	
+	private void finalizeIDTExperimentDesignPullTask(IDTExperimentDesignPullTask task) {
+		
+		expDesignTable.clearTable();
+		experimentDesign = task.getDesign();
+		if(experimentDesign != null)
+			populateDesignTable(experimentDesign);
+
+		MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
+		MainWindow.hideProgressDialog();
 	}
 
 	protected void populateDesignTable(ExperimentDesign design) {

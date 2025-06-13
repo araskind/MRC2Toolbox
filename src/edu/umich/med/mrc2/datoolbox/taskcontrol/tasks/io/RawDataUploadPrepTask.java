@@ -210,34 +210,36 @@ return;
 
 			((AbstractTask) e.getSource()).removeTaskListener(this);
 
-			if (e.getSource().getClass().equals(CompressFolderTask.class)) {
+			if (e.getSource().getClass().equals(CompressFolderTask.class))
+				finalizeCompressFolderTask((CompressFolderTask)e.getSource());
+		}
+	}
+	
+	private synchronized void finalizeCompressFolderTask(CompressFolderTask task) {
+		
+		File destination = task.getDestinationFile();
+		if(destination.exists()) {
+			try {
+				String zipHash = DigestUtils.sha256Hex(
+						new FileInputStream(destination.getAbsolutePath()));
 
-				CompressFolderTask task = (CompressFolderTask)e.getSource();
-				File destination = task.getDestinationFile();
-				if(destination.exists()) {
-					try {
-						String zipHash = DigestUtils.sha256Hex(
-								new FileInputStream(destination.getAbsolutePath()));
+				fileHashMap.put(destination, zipHash);
+			} catch (FileNotFoundException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			fileSizeMap.put(destination, destination.length());
+			processed++;
 
-						fileHashMap.put(destination, zipHash);
-					} catch (FileNotFoundException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					} catch (IOException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
-					fileSizeMap.put(destination, destination.length());
-					processed++;
-
-					if(processed == total) {
-						try {
-							writeCheckSumFile();
-						} catch (IOException e1) {
-							// TODO Auto-generated catch block
-							e1.printStackTrace();
-						}
-					}
+			if(processed == total) {
+				try {
+					writeCheckSumFile();
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
 				}
 			}
 		}

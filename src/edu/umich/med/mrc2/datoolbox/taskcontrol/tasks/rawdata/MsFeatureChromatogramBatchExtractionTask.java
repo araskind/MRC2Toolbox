@@ -231,18 +231,22 @@ public class MsFeatureChromatogramBatchExtractionTask extends AbstractTask imple
 			
 			((AbstractTask)e.getSource()).removeTaskListener(this);
 			
-			if (e.getSource().getClass().equals(MsFeatureChromatogramExtractionTask.class)) {
-				MsFeatureChromatogramExtractionTask task = (MsFeatureChromatogramExtractionTask)e.getSource();
-				fileChromatogramMap.put(task.getRawDataFile(), task.getChromatogramMap());				
-				//	createMsFeatureChromatogramBundles(task);
-				MRC2ToolBoxCore.getTaskController().getTaskQueue().removeTask(task);
-				processedFilesCount++;
-				
-				if(processedFilesCount == rawDataFiles.size()) {
-					createMsFeatureChromatogramBundles();
-					setStatus(TaskStatus.FINISHED);
-				}
-			}
+			if (e.getSource().getClass().equals(MsFeatureChromatogramExtractionTask.class))
+				finalizeMsFeatureChromatogramExtractionTask((MsFeatureChromatogramExtractionTask)e.getSource());
+		}
+	}
+	
+	private synchronized void finalizeMsFeatureChromatogramExtractionTask(
+			MsFeatureChromatogramExtractionTask task) {
+		
+		fileChromatogramMap.put(task.getRawDataFile(), task.getChromatogramMap());				
+		//	createMsFeatureChromatogramBundles(task);
+		MRC2ToolBoxCore.getTaskController().getTaskQueue().removeTask(task);
+		processedFilesCount++;
+		
+		if(processedFilesCount == rawDataFiles.size()) {
+			createMsFeatureChromatogramBundles();
+			setStatus(TaskStatus.FINISHED);
 		}
 	}
 

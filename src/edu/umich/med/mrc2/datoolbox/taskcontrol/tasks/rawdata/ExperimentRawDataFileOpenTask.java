@@ -184,13 +184,16 @@ public class ExperimentRawDataFileOpenTask extends AbstractTask implements TaskL
 
 			((AbstractTask)e.getSource()).removeTaskListener(this);
 
-			if (e.getSource().getClass().equals(ChromatogramExtractionTask.class)) {
-				
-				ticCount++;
-				if(ticCount == experiment.getDataFiles().size())
-					setStatus(TaskStatus.FINISHED);
-			}
+			if (e.getSource().getClass().equals(ChromatogramExtractionTask.class))
+				finalizeChromatogramExtractionTask((ChromatogramExtractionTask)e.getSource());
 		}		
+	}
+	
+	private synchronized void finalizeChromatogramExtractionTask(ChromatogramExtractionTask task) {
+		
+		ticCount++;
+		if(ticCount == experiment.getDataFiles().size())
+			setStatus(TaskStatus.FINISHED);
 	}
 
 	public Collection<String> getErrors() {

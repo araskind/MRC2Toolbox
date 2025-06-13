@@ -298,15 +298,18 @@ public class RawDataUploadPrepDialog extends JDialog
 
 			((AbstractTask) e.getSource()).removeTaskListener(this);
 
-			if (e.getSource().getClass().equals(RawDataUploadPrepTask.class)) {
-
-				MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
-				MainWindow.hideProgressDialog();
-				MessageDialog.showInfoMsg("Data processing completed.", this);
-				savePreferences();
-				dispose();
-			}
+			if (e.getSource().getClass().equals(RawDataUploadPrepTask.class))
+				finalizeRawDataUploadPrepTask((RawDataUploadPrepTask)e.getSource());
 		}
+	}
+	
+	private void finalizeRawDataUploadPrepTask(RawDataUploadPrepTask task) {
+		
+		MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
+		MainWindow.hideProgressDialog();
+		MessageDialog.showInfoMsg("Data processing completed.", this);
+		savePreferences();
+		dispose();
 	}
 }
 

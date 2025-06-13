@@ -444,30 +444,39 @@ public class OpenStoredRawDataAnalysisExperimentTask extends AbstractTask implem
 			
 			((AbstractTask)e.getSource()).removeTaskListener(this);
 			
-			if (e.getSource().getClass().equals(OpenMsFeatureBundleFileTask.class)) {	
-				processedFiles++;
+			if (e.getSource().getClass().equals(OpenMsFeatureBundleFileTask.class))
+				finalizeOpenMsFeatureBundleFileTask((OpenMsFeatureBundleFileTask)e.getSource());
 				
-				OpenMsFeatureBundleFileTask task = (OpenMsFeatureBundleFileTask)e.getSource();
-				LIMSExperiment limsExperiment = experiment.getLimsExperiment();
-				if(limsExperiment != null)
-					task.getFeatures().stream().forEach(f -> f.setExperiment(limsExperiment));
-				
-				experiment.addMsFeaturesForDataFile(task.getDataFile(), task.getFeatures());
-				if(processedFiles == featureFileCount) {
-					populateFeatureCollections();
-					populateMSMSClusters();
-					featureReadCompleted = true;	
-				}
-			}	
-			if (e.getSource().getClass().equals(OpenChromatogramFileTask.class)) {
-				chromatogramReadCompleted = true;			
-				experiment.setChromatogramMap(
-						((OpenChromatogramFileTask)e.getSource()).getChromatogramMap());
-			}			
+			if (e.getSource().getClass().equals(OpenChromatogramFileTask.class))
+				finalizeOpenChromatogramFileTask((OpenChromatogramFileTask)e.getSource());
+						
 			if(featureReadCompleted && chromatogramReadCompleted)
 				cleanup();
 		}
 	}
+	
+	private synchronized void finalizeOpenMsFeatureBundleFileTask(OpenMsFeatureBundleFileTask task) {
+		
+		processedFiles++;
+
+		LIMSExperiment limsExperiment = experiment.getLimsExperiment();
+		if(limsExperiment != null)
+			task.getFeatures().stream().forEach(f -> f.setExperiment(limsExperiment));
+		
+		experiment.addMsFeaturesForDataFile(task.getDataFile(), task.getFeatures());
+		if(processedFiles == featureFileCount) {
+			populateFeatureCollections();
+			populateMSMSClusters();
+			featureReadCompleted = true;	
+		}
+	}
+	
+	private synchronized void finalizeOpenChromatogramFileTask(OpenChromatogramFileTask task) {
+		
+		chromatogramReadCompleted = true;			
+		experiment.setChromatogramMap(task.getChromatogramMap());
+	}
+	
 
 	private void populateFeatureCollections() {
 

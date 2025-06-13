@@ -216,18 +216,17 @@ public class MassDifferenceExplorerDialog extends JDialog implements ActionListe
 
 			((AbstractTask) e.getSource()).removeTaskListener(this);
 
-			if (e.getSource().getClass().equals(MassDifferenceExtractionTask.class)) {
-
-				MassDifferenceExtractionTask eTask = (MassDifferenceExtractionTask) e.getSource();
-
-				//	TODO
-				deltaMassPlot.showMzDifferenceDistribution(eTask.getMassDifferenceBins());
-				deltaMassTable.setModelFromBins(eTask.getMassDifferenceBins());
-				toFront();
-			}
+			if (e.getSource().getClass().equals(MassDifferenceExtractionTask.class))
+				finalizeMassDifferenceExtractionTask((MassDifferenceExtractionTask) e.getSource());			
 		}
 	}
-
+	
+	private void finalizeMassDifferenceExtractionTask(MassDifferenceExtractionTask task) {
+		
+		deltaMassPlot.showMzDifferenceDistribution(task.getMassDifferenceBins());
+		deltaMassTable.setModelFromBins(task.getMassDifferenceBins());
+		toFront();
+	}
 }
 
 

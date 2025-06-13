@@ -193,19 +193,21 @@ public class MultiCefDataAddTask extends AbstractTask implements TaskListener{
 		}
 	}
 
-	private void finalizeCefImportTask(CefDataImportTask cdit) {
+	private synchronized void finalizeCefImportTask(CefDataImportTask cdit) {
 		
 		fileCounter++;
 		if(!cdit.getUnmatchedAdducts().isEmpty()) {
 
-			@SuppressWarnings("unused")
+			//	TODO this needs change, handle in the calling panel
 			InformationDialog id = new InformationDialog(
 				"Unmatched adducts",
 				"Not all adducts were matched to the database.\n"
 				+ "Below is the list of unmatched adducts.",
 				StringUtils.join(unmatchedAdducts, "\n"),
 				null);
-
+			id.setLocationRelativeTo(MRC2ToolBoxCore.getMainWindow());
+			id.setVisible(true);
+			
 			setStatus(TaskStatus.ERROR);
 			MRC2ToolBoxCore.getTaskController().cancelAllTasks();
 			MainWindow.hideProgressDialog();
@@ -221,7 +223,6 @@ public class MultiCefDataAddTask extends AbstractTask implements TaskListener{
 			} catch (Exception e1) {
 				e1.printStackTrace();
 				setStatus(TaskStatus.ERROR);
-				return;
 			}
 		}
 	}

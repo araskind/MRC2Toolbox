@@ -486,9 +486,8 @@ public class DockableMSMSClusterDataSetsManager extends DefaultSingleCDockable i
 
 			((AbstractTask) e.getSource()).removeTaskListener(this);
 
-			if (e.getSource().getClass().equals(MSMSClusterDataSetUploadTask.class)) {
-				finalizeMSMSClusterDataSetUploadTask((MSMSClusterDataSetUploadTask)e.getSource());
-			}
+			if (e.getSource().getClass().equals(MSMSClusterDataSetUploadTask.class))
+				finalizeMSMSClusterDataSetUploadTask((MSMSClusterDataSetUploadTask)e.getSource());			
 		}
 	}
 

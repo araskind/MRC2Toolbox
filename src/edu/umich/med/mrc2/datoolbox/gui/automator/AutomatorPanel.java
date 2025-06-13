@@ -414,10 +414,13 @@ public class AutomatorPanel extends DockableMRC2ToolboxPanel implements TaskCont
 			
 			((AbstractTask)e.getSource()).removeTaskListener(this);
 			
-			if (e.getSource().getClass().equals(QualAutomationDataProcessingTask.class)){
-				MRC2ToolBoxCore.getTaskController().getTaskQueue().removeTask((AbstractTask)e.getSource());
-			}
+			if (e.getSource().getClass().equals(QualAutomationDataProcessingTask.class))
+				finalizeQualAutomationDataProcessingTask((QualAutomationDataProcessingTask)e.getSource());			
 		}		
+	}
+	
+	public synchronized void finalizeQualAutomationDataProcessingTask(QualAutomationDataProcessingTask task) {
+		MRC2ToolBoxCore.getTaskController().getTaskQueue().removeTask(task);
 	}
 
 	@Override

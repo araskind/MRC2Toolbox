@@ -324,10 +324,8 @@ public class LibraryManager extends JDialog implements ActionListener, TaskListe
 		if (e.getStatus() == TaskStatus.FINISHED) {
 
 			((AbstractTask)e.getSource()).removeTaskListener(this);
-			if(e.getSource().getClass().equals(DuplicateLibraryTask.class)) {
-
-				refreshLibraryListing();
-			}
+			if(e.getSource().getClass().equals(DuplicateLibraryTask.class))
+				refreshLibraryListing();		
 		}
 	}
 }

@@ -879,10 +879,20 @@ public class RDEMetadataWizard extends JDialog
 		if (e.getStatus() == TaskStatus.FINISHED) {
 
 			((AbstractTask)e.getSource()).removeTaskListener(this);
-			MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
-			MainWindow.hideProgressDialog();
-			dispose();
+			
+			if (e.getSource().getClass().equals(SaveStoredRawDataAnalysisExperimentTask.class))
+				finalizeSaveStoredRawDataAnalysisExperimentTask(
+						(SaveStoredRawDataAnalysisExperimentTask)e.getSource());
 		}
+	}
+	
+	private void finalizeSaveStoredRawDataAnalysisExperimentTask(
+			SaveStoredRawDataAnalysisExperimentTask task) {
+		
+		
+		MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
+		MainWindow.hideProgressDialog();
+		dispose();
 	}
 }
 

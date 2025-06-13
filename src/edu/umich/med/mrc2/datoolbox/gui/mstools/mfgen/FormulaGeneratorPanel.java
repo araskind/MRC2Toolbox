@@ -218,14 +218,17 @@ public class FormulaGeneratorPanel extends JPanel implements ActionListener, Tas
 
 			((AbstractTask)e.getSource()).removeTaskListener(this);
 
-			if(e.getSource().getClass().equals(FormulaGeneratorTask.class)){
-
-				IMolecularFormulaSet formulas = ((FormulaGeneratorTask)e.getSource()).getFormulas();
-				double mz = Double.parseDouble(mzTextField.getText());
-				Adduct ad = chModPanel.getSelectedModification();
-				formulaResultTable.getTable().setTableModelFromFormulaGeneratorResults(formulas, mz, ad);
-			}
+			if(e.getSource().getClass().equals(FormulaGeneratorTask.class))
+				finalizeFormulaGeneratorTask((FormulaGeneratorTask)e.getSource());
 		}
+	}
+	
+	private void finalizeFormulaGeneratorTask(FormulaGeneratorTask task) {
+		
+		IMolecularFormulaSet formulas = task.getFormulas();
+		double mz = Double.parseDouble(mzTextField.getText());
+		Adduct ad = chModPanel.getSelectedModification();
+		formulaResultTable.getTable().setTableModelFromFormulaGeneratorResults(formulas, mz, ad);
 	}
 
 	public ElementRule getElementLimits(){

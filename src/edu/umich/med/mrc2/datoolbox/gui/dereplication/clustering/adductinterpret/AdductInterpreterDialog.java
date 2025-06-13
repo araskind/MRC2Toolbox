@@ -523,19 +523,20 @@ public class AdductInterpreterDialog extends JDialog implements ActionListener, 
 
 			((AbstractTask)e.getSource()).removeTaskListener(this);
 
-			if (e.getSource().getClass().equals(AdductAssignmentTask.class)) {
-
-				AdductAssignmentTask task = (AdductAssignmentTask) e.getSource();
-				currentCluster = task.getClusterSet().iterator().next();
-
-				adductInterpreterTable.setTableModelFromFeatureCluster(
-						currentCluster,
-						selectedFeature,
-						selectedModification);
-			}
+			if (e.getSource().getClass().equals(AdductAssignmentTask.class))
+				finalizeAdductAssignmentTask((AdductAssignmentTask) e.getSource());
 		}
 		if (e.getStatus() == TaskStatus.ERROR || e.getStatus() == TaskStatus.CANCELED)
 			MainWindow.hideProgressDialog();
+	}
+	
+	private void finalizeAdductAssignmentTask(AdductAssignmentTask task) {
+
+		currentCluster = task.getClusterSet().iterator().next();
+		adductInterpreterTable.setTableModelFromFeatureCluster(
+				currentCluster,
+				selectedFeature,
+				selectedModification);
 	}
 }
 

@@ -104,17 +104,22 @@ return;
 
 	@Override
 	public void statusChanged(TaskEvent e) {
-		// TODO Auto-generated method stub
+		
 		if (e.getStatus() == TaskStatus.FINISHED) {
 			
 			((AbstractTask)e.getSource()).removeTaskListener(this);
 			
-			if (e.getSource().getClass().equals(MsFeatureChromatogramBatchExtractionTask.class)) {		
-				
-				chromMap = ((MsFeatureChromatogramBatchExtractionTask)e.getSource()).getChromatogramMap();
-				setStatus(TaskStatus.FINISHED);
-			}
+			if (e.getSource().getClass().equals(MsFeatureChromatogramBatchExtractionTask.class))				
+				finalizeMsFeatureChromatogramBatchExtractionTask(
+						(MsFeatureChromatogramBatchExtractionTask)e.getSource());		
 		}
+	}
+	
+	private synchronized void finalizeMsFeatureChromatogramBatchExtractionTask(
+			MsFeatureChromatogramBatchExtractionTask task) {
+		
+		chromMap = task.getChromatogramMap();
+		setStatus(TaskStatus.FINISHED);
 	}
 
 	public Collection<MSFeatureInfoBundle> getFeatureBundles() {

@@ -315,11 +315,9 @@ return;
 			
 			((AbstractTask)e.getSource()).removeTaskListener(this);
 			
-			if (e.getSource().getClass().equals(SaveFileMsFeaturesTask.class)) {	
-				processedFiles++;
-				if(processedFiles == fileFeatureCount)
-					featureSaveCompleted = true;
-			}
+			if (e.getSource().getClass().equals(SaveFileMsFeaturesTask.class))
+				finalizeSaveFileMsFeaturesTask((SaveFileMsFeaturesTask)e.getSource());
+			
 			if (e.getSource().getClass().equals(SaveFeatureChromatogramsTask.class))
 				chromatogramSaveCompleted = true;
 			
@@ -333,6 +331,13 @@ return;
 				}
 			}
 		}		
+	}
+	
+	private synchronized void finalizeSaveFileMsFeaturesTask(SaveFileMsFeaturesTask task) {
+		
+		processedFiles++;
+		if(processedFiles == fileFeatureCount)
+			featureSaveCompleted = true;
 	}
 
 	@Override

@@ -48,7 +48,6 @@ import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignSubsetEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.FeatureSetEvent;
 import edu.umich.med.mrc2.datoolbox.gui.dereplication.ClusterDisplayPanel;
-import edu.umich.med.mrc2.datoolbox.gui.fdata.FeatureDataPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.main.PanelList;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicFeatureTable;
@@ -370,17 +369,19 @@ public class DuplicatesPanel extends ClusterDisplayPanel {
 		for(MsFeatureCluster cluster : task.getDuplicateNameList())		
 			dupNames.add(cluster.getPrimaryFeature().getName());
 
-		InformationDialog info = new InformationDialog(
+		InformationDialog id = new InformationDialog(
 				"Duplicate feature names", 
 				"Found the following duplicate feature names",
 				StringUtils.join(dupNames, "\n"),
 				this.getContentPane());
+		id.setLocationRelativeTo(this.getContentPane());
+		id.setVisible(true);
 	}
 
 	private void showDuplicateFeatureClusters(FindDuplicateFeaturesTask fdt) {
 
 		Collection<MsFeatureCluster> duplicates = fdt.getDuplicateList();
-		if (duplicates.size() > 0) {
+		if (!duplicates.isEmpty()) {
 
 			currentExperiment.setDuplicateClustersForDataPipeline(activeDataPipeline, duplicates);
 			loadFeatureClusters(currentExperiment.getDuplicateClustersForDataPipeline(activeDataPipeline));
@@ -404,7 +405,7 @@ public class DuplicatesPanel extends ClusterDisplayPanel {
 		
 		CalculateStatisticsTask cst = 
 				new CalculateStatisticsTask(currentExperiment, activeDataPipeline);
-		cst.addTaskListener(((FeatureDataPanel) MRC2ToolBoxCore.getMainWindow().getPanel(PanelList.FEATURE_DATA)));
+		cst.addTaskListener((MRC2ToolBoxCore.getMainWindow().getPanel(PanelList.FEATURE_DATA)));
 		MRC2ToolBoxCore.getTaskController().addTask(cst);
 	}
 

@@ -64,6 +64,7 @@ import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.database.cpd.CompoundDatabaseUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.InformationDialog;
 import edu.umich.med.mrc2.datoolbox.main.AdductManager;
+import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
@@ -758,15 +759,16 @@ public abstract class CEFProcessingTask extends AbstractTask {
 				setStatus(TaskStatus.ERROR);
 				e.printStackTrace();
 			}
-			if(!unmatchedAdducts.isEmpty()){
+			if(!unmatchedAdducts.isEmpty()){	//	TODO this needs change, handle in the calling panel
 
-				@SuppressWarnings("unused")
 				InformationDialog id = new InformationDialog(
 						"Unmatched features",
 						"Not all adducts were matched to the database.\n"
 						+ "Below is the list of unmatched adducts.",
 						StringUtils.join(unmatchedAdducts, "\n"),
 						null);
+				id.setLocationRelativeTo(MRC2ToolBoxCore.getMainWindow());
+				id.setVisible(true);
 				setStatus(TaskStatus.ERROR);
 				return;
 			}

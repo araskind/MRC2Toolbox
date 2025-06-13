@@ -160,7 +160,7 @@ public class MultiCefImportTask extends AbstractTask implements TaskListener{
 		}
 	}
 	
-	private void finalizeLibraryImportTask(CefLibraryImportTask lit) {
+	private synchronized void finalizeLibraryImportTask(CefLibraryImportTask lit) {
 		
 		libraryParsed = libraryCorrectlyParsed(lit);
 		if(libraryParsed) {
@@ -189,14 +189,16 @@ public class MultiCefImportTask extends AbstractTask implements TaskListener{
 		MRC2ToolBoxCore.getTaskController().getTaskQueue().removeTask(cdit);
 		if(!cdit.getUnmatchedAdducts().isEmpty()) {
 
-			@SuppressWarnings("unused")
+			//	TODO this needs change, handle in the calling panel
 			InformationDialog id = new InformationDialog(
 				"Unmatched adducts",
 				"Not all adducts were matched to the database.\n"
 				+ "Below is the list of unmatched adducts.",
 				StringUtils.join(unmatchedAdducts, "\n"),
 				null);
-
+			id.setLocationRelativeTo(MRC2ToolBoxCore.getMainWindow());
+			id.setVisible(true);
+			
 			setStatus(TaskStatus.ERROR);
 			MRC2ToolBoxCore.getTaskController().cancelAllTasks();
 			MainWindow.hideProgressDialog();
@@ -292,13 +294,15 @@ public class MultiCefImportTask extends AbstractTask implements TaskListener{
 			for (MsFeature msf : lit.getUnassignedFeatures())
 				flist.add(msf.getName());
 
-			@SuppressWarnings("unused")
+			//	TODO this needs change, handle in the calling panel
 			InformationDialog id = new InformationDialog(
 					"Unmatched features",
 					"Not all features were matched to the library.\n"
 					+ "Below is the list of unmatched features.",
 					StringUtils.join(flist, "\n"),
 					null);
+			id.setLocationRelativeTo(MRC2ToolBoxCore.getMainWindow());
+			id.setVisible(true);
 		}
 		// Show unassigned adducts
 		if (!lit.getUnmatchedAdducts().isEmpty()) {

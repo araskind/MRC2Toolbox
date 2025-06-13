@@ -353,21 +353,23 @@ public class LibrarySearchTask  extends AbstractTask implements TaskListener{
 
 			((AbstractTask) e.getSource()).removeTaskListener(this);
 			
-			if (e.getSource().getClass().equals(LoadDatabaseLibraryTask.class)) {
-				
-				CompoundLibrary newLibrary = 
-						((LoadDatabaseLibraryTask)e.getSource()).getLibrary();				
-				MRC2ToolBoxCore.getActiveMsLibraries().add(newLibrary);
-				targetLibraries.add(newLibrary);
-				librariesToLoad.remove(newLibrary.getLibraryId());
-				if(librariesToLoad.isEmpty()) {
-					
-					librariesLoaded = true;
-					searchLibraries();
-					setStatus(TaskStatus.FINISHED);
-				}
-			}				
+			if (e.getSource().getClass().equals(LoadDatabaseLibraryTask.class))
+				finalizeLoadDatabaseLibraryTask((LoadDatabaseLibraryTask)e.getSource());				
 		}		
+	}
+	
+	private synchronized void finalizeLoadDatabaseLibraryTask(LoadDatabaseLibraryTask task) {
+		
+		CompoundLibrary newLibrary = task.getLibrary();				
+		MRC2ToolBoxCore.getActiveMsLibraries().add(newLibrary);
+		targetLibraries.add(newLibrary);
+		librariesToLoad.remove(newLibrary.getLibraryId());
+		if(librariesToLoad.isEmpty()) {
+			
+			librariesLoaded = true;
+			searchLibraries();
+			setStatus(TaskStatus.FINISHED);
+		}
 	}
 }
 

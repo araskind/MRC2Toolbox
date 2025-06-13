@@ -78,13 +78,7 @@ public class InformationDialog extends JDialog implements ActionListener {
 
 		messageLabel.setText(message);
 		textArea.setText(details);
-
-		if(parent == null)
-			setLocationRelativeTo(MRC2ToolBoxCore.getMainWindow());
-		else
-			setLocationRelativeTo(parent);
-
-		setVisible(true);
+		pack();
 	}
 
 	/**
@@ -111,13 +105,8 @@ public class InformationDialog extends JDialog implements ActionListener {
 		exception.printStackTrace(pw);
 		textArea.setText(sw.toString());
 		exception.printStackTrace();
-
-		if(parent == null)
-			setLocationRelativeTo(MRC2ToolBoxCore.getMainWindow());
-		else
-			setLocationRelativeTo(parent);
-
-		setVisible(true);
+		
+		pack();
 	}
 
 	@Override

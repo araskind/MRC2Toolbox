@@ -471,24 +471,26 @@ public class RDPMethodsPanel extends RDPMetadataWizardPanel
 			
 			((AbstractTask) e.getSource()).removeTaskListener(this);
 
-			if (e.getSource().getClass().equals(LIMSWorklistAcquisitiomMethodScanTask.class)) {
+			if (e.getSource().getClass().equals(LIMSWorklistAcquisitiomMethodScanTask.class))
+				finalizeLIMSWorklistAcquisitiomMethodScanTask((LIMSWorklistAcquisitiomMethodScanTask)e.getSource());
+		}
+	}
+	
+	private void finalizeLIMSWorklistAcquisitiomMethodScanTask(LIMSWorklistAcquisitiomMethodScanTask task) {
+		
+		TreeMap<String, File> nameToFileMap = task.getMethodNameToFileMap();			
+		TreeSet<String>methodNames = new TreeSet<String>(acquisitionMethodTable.getMethodNames());
+		methodNames.addAll(nameToFileMap.keySet());
+		acquisitionMethodTable.setTableModelFromAcquisitionMethodsNames(methodNames);			
+		dataAcquisitionMethods.addAll(acquisitionMethodTable.getAvailableDataAcquisitionMethods());
+		Collection<String>missingNames = acquisitionMethodTable.getMissingMethodNames();
+		if(!missingNames.isEmpty()) {
 
-				LIMSWorklistAcquisitiomMethodScanTask task  = (LIMSWorklistAcquisitiomMethodScanTask)e.getSource();
-				TreeMap<String, File> nameToFileMap = task.getMethodNameToFileMap();			
-				TreeSet<String>methodNames = new TreeSet<String>(acquisitionMethodTable.getMethodNames());
-				methodNames.addAll(nameToFileMap.keySet());
-				acquisitionMethodTable.setTableModelFromAcquisitionMethodsNames(methodNames);			
-				dataAcquisitionMethods.addAll(acquisitionMethodTable.getAvailableDataAcquisitionMethods());
-				Collection<String>missingNames = acquisitionMethodTable.getMissingMethodNames();
-				if(!missingNames.isEmpty()) {
-
-					for(String name : missingNames) {
-						
-						if(nameToFileMap.containsKey(name))
-							missingMethodNameToFileMap.put(name, nameToFileMap.get(name));
-					}				
-				}
-			}
+			for(String name : missingNames) {
+				
+				if(nameToFileMap.containsKey(name))
+					missingMethodNameToFileMap.put(name, nameToFileMap.get(name));
+			}				
 		}
 	}
 	

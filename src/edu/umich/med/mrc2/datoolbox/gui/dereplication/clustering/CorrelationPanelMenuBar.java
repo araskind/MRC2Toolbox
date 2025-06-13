@@ -60,6 +60,8 @@ public class CorrelationPanelMenuBar extends CommonMenuBar {
 	private static final Icon deltaAnnotationIcon = GuiUtils.getIcon("assignDeltas", 24);
 	private static final Icon batchAssignAnnotationsIcon = GuiUtils.getIcon("calculateAnnotation", 24);
 	private static final Icon recalculateCorrelationsIcon = GuiUtils.getIcon("recalculateCorrelations", 24);
+	private static final Icon binnerAnalysisIcon = GuiUtils.getIcon("setupBinnerAnnotations", 24);
+
 
 	// Menus
 	private JMenu
@@ -70,6 +72,7 @@ public class CorrelationPanelMenuBar extends CommonMenuBar {
 
 	// Clustering
 	private JMenuItem
+		binnerAnalysisMenuItem,
 		clusteringSetupMenuItem;
 
 	// Search
@@ -100,6 +103,10 @@ public class CorrelationPanelMenuBar extends CommonMenuBar {
 		//	Clustering
 		clusteringMenu = new JMenu("Clustering");
 		clusteringMenu.setIcon(clusteringIconSmall);
+		
+		binnerAnalysisMenuItem = addItem(clusteringMenu,
+				MainActionCommands.BINNER_ANALYSIS_SETUP_COMMAND, 
+				binnerAnalysisIcon);
 
 		clusteringSetupMenuItem = addItem(clusteringMenu, 
 				MainActionCommands.SHOW_CORRELATIONS_ANALYSIS_SETUP_COMMAND, 

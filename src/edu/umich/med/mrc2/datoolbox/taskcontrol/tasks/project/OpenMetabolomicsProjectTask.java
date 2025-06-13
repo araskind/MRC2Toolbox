@@ -344,15 +344,18 @@ public class OpenMetabolomicsProjectTask extends AbstractTask implements TaskLis
 		if (e.getStatus() == TaskStatus.FINISHED) {
 
 			((AbstractTask)e.getSource()).removeTaskListener(this);
-			if (e.getSource().getClass().equals(LoadPipelineDataTask.class)) {
-				
-				loadedPipelineCount++;
-				
-				MRC2ToolBoxCore.getTaskController().getTaskQueue().removeTask(e.getSource());
-				if(loadedPipelineCount == pipelineCount)
-					setStatus(TaskStatus.FINISHED);				
-			}
+			if (e.getSource().getClass().equals(LoadPipelineDataTask.class))
+				finalizeLoadPipelineDataTask((LoadPipelineDataTask)e.getSource());
 		}
+	}
+	
+	private synchronized void finalizeLoadPipelineDataTask(LoadPipelineDataTask task) {
+		
+		loadedPipelineCount++;
+		
+		MRC2ToolBoxCore.getTaskController().getTaskQueue().removeTask(task);
+		if(loadedPipelineCount == pipelineCount)
+			setStatus(TaskStatus.FINISHED);		
 	}
 
 	@Override
