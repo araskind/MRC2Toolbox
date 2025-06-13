@@ -642,6 +642,11 @@ public final class BuildInformation {
 		    <artifactId>orsonpdf</artifactId>
 		    <version>1.9.1</version>
 		</dependency>
+		<dependency>
+		    <groupId>com.edwardraff</groupId>
+		    <artifactId>JSAT</artifactId>
+		    <version>0.1.0-SNAPSHOT</version>
+		</dependency>
 		<!-- https://mvnrepository.com/artifact/org.apache.spark/spark-mllib 
 		<dependency>
 		    <groupId>org.apache.spark</groupId>

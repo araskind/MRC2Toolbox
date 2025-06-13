@@ -409,8 +409,10 @@ public class BinnerProcessingSetupDialog extends JDialog
 		bpo.setAnnotationList(annotationsSelectorPanel.getBinnerAdductList());
 		bpo.setAnnotationMassTolerance(annotationsSelectorPanel.getAnnotationMassTolerance());
 		bpo.setAnnotationRTTolerance(annotationsSelectorPanel.getAnnotationRTTolerance());
-		bpo.setUseNeutralMassForChargeCarrierAssignment(annotationsSelectorPanel.useNeutralMassForChargeCarrierAssignment());
-		bpo.setAllowVariableChargeWithoutIsotopeInformation(annotationsSelectorPanel.allowVariableChargeWithoutIsotopeInformation());
+		bpo.setUseNeutralMassForChargeCarrierAssignment(
+				annotationsSelectorPanel.useNeutralMassForChargeCarrierAssignment());
+		bpo.setAllowVariableChargeWithoutIsotopeInformation(
+				annotationsSelectorPanel.allowVariableChargeWithoutIsotopeInformation());
 		
 		return bpo;
 	}

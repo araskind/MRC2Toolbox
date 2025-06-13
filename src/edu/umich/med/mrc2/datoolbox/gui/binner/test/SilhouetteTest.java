@@ -25,6 +25,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -32,41 +33,75 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
+import org.apache.commons.math3.ml.clustering.CentroidCluster;
+import org.apache.commons.math3.ml.clustering.KMeansPlusPlusClusterer;
+import org.apache.commons.math3.stat.correlation.KendallsCorrelation;
+import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
+import org.apache.commons.math3.stat.correlation.SpearmansCorrelation;
+import org.apache.commons.math3.util.MathArrays;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
 import org.jdom2.input.SAXBuilder;
+import org.ujmp.core.BaseMatrix;
 import org.ujmp.core.Matrix;
 import org.ujmp.core.calculation.Calculation.Ret;
+import org.ujmp.core.util.MathUtil;
 
+import edu.umich.med.mrc2.datoolbox.data.BinnerPreferencesObject;
+import edu.umich.med.mrc2.datoolbox.data.ClusterableFeatureData;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesign;
 import edu.umich.med.mrc2.datoolbox.data.LibraryMsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
+import edu.umich.med.mrc2.datoolbox.data.MsFeatureCluster;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureSet;
 import edu.umich.med.mrc2.datoolbox.data.Worklist;
 import edu.umich.med.mrc2.datoolbox.data.WorklistItem;
+import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureComparator;
+import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.enums.GlobalDefaults;
+import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
+import edu.umich.med.mrc2.datoolbox.gui.binner.control.BinClusteringCutoffType;
+import edu.umich.med.mrc2.datoolbox.gui.binner.control.BinnerParameters;
+import edu.umich.med.mrc2.datoolbox.gui.binner.control.ClusterGroupingMethod;
+import edu.umich.med.mrc2.datoolbox.gui.binner.control.CorrelationFunctionType;
+import edu.umich.med.mrc2.datoolbox.main.ReferenceSamplesManager;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.project.ProjectType;
 import edu.umich.med.mrc2.datoolbox.project.store.DataFileExtensions;
 import edu.umich.med.mrc2.datoolbox.project.store.MetabolomicsProjectFields;
 import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
+import edu.umich.med.mrc2.datoolbox.utils.DataSetUtils;
 import edu.umich.med.mrc2.datoolbox.utils.ProjectUtils;
+import edu.umich.med.mrc2.datoolbox.utils.ujmp.ImputeMedian;
+import edu.umich.med.mrc2.datoolbox.utils.ujmp.Log1pTransform;
 
 public class SilhouetteTest {
 	
 	private File projectFile;
 	private String methodPrefix;
-	private DataAnalysisProject project;
+	
+	private BinnerPreferencesObject bpo;
+	private DataAnalysisProject currentExperiment;
+	private DataPipeline activeDataPipeline;
+	
 	private Map<DataPipeline,String[]>orderedDataFileNamesMap;
 	private Map<DataPipeline,String[]>orderedMSFeatureIdMap;
 	private String[]orderedDataFileNames;
-	private String[]orderedMSFeatureIds;
+	private String[]orderedMSFeatureIds;	
+	
+	private Matrix preparedDataMatrix;
+	private Collection<MsFeature> cleanRTSortedFeatureSet;
+	private Collection<MsFeatureCluster> featureBins;
+	private Collection<MsFeatureCluster> featureClusters;
+	private PearsonsCorrelation pearson;
+	private SpearmansCorrelation spearman;
+	private KendallsCorrelation kendall;
 
 	public SilhouetteTest(File projectFile, String methodPrefix) {
 		super();
@@ -98,11 +133,11 @@ public class SilhouetteTest {
 		if(projectElement == null)
 			return;
 		
-		project = new DataAnalysisProject(projectElement);
-		project.setProjectFile(projectFile);
-		project.setProjectType(ProjectType.DATA_ANALYSIS_NEW_FORMAT);
+		currentExperiment = new DataAnalysisProject(projectElement);
+		currentExperiment.setProjectFile(projectFile);
+		currentExperiment.setProjectType(ProjectType.DATA_ANALYSIS_NEW_FORMAT);
 		
-		if(project.getDataPipelines().isEmpty()) {
+		if(currentExperiment.getDataPipelines().isEmpty()) {
 			parseExperimentDesign(projectElement);
 			return;
 		}
@@ -113,22 +148,22 @@ public class SilhouetteTest {
 		parseOrderedMSFeatureIdMap(projectElement);
 		recreateWorklists(projectElement);
 				
-		DataPipeline pipeline = project.getDataPipelines().stream().
+		activeDataPipeline = currentExperiment.getDataPipelines().stream().
 			filter(p -> p.getSaveSafeName().equals(methodPrefix)).
 			findFirst().orElse(null);
 		
-		if(pipeline == null) {
+		if(activeDataPipeline == null) {
 			System.err.println("No pipeline for " + methodPrefix);
 			return;
 		}
-		readFeatureData(pipeline);
+		readFeatureData();
 	}
 	
-	private void readFeatureData(DataPipeline pipeline) {
+	private void readFeatureData() {
 		
 		File featureXmlFile = 
-				Paths.get(project.getDataDirectory().getAbsolutePath(),
-				DataPrefix.MS_FEATURE.getName() + pipeline.getSaveSafeName() 
+				Paths.get(currentExperiment.getDataDirectory().getAbsolutePath(),
+				DataPrefix.MS_FEATURE.getName() + activeDataPipeline.getSaveSafeName() 
 				+ "." + DataFileExtensions.FEATURE_LIST_EXTENSION.getExtension()).toFile();
 		
 		if(!featureXmlFile.exists())
@@ -148,38 +183,38 @@ public class SilhouetteTest {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		project.setFeaturesForDataPipeline(pipeline, featureSet);
+		currentExperiment.setFeaturesForDataPipeline(activeDataPipeline, featureSet);
 
 		MsFeatureSet allFeatures = 
 				new MsFeatureSet(GlobalDefaults.ALL_FEATURES.getName(),	
-						project.getMsFeaturesForDataPipeline(pipeline));
+						currentExperiment.getMsFeaturesForDataPipeline(activeDataPipeline));
 		allFeatures.setActive(true);
 		allFeatures.setLocked(true);
-		project.addFeatureSetForDataPipeline(allFeatures, pipeline);
-		createDataMatrix(pipeline);
+		currentExperiment.addFeatureSetForDataPipeline(allFeatures, activeDataPipeline);
+		createDataMatrix();
 	}
 	
-	private void createDataMatrix(DataPipeline pipeline) {
+	private void createDataMatrix() {
 		
-		orderedDataFileNames = orderedDataFileNamesMap.get(pipeline);
-		orderedMSFeatureIds = orderedMSFeatureIdMap.get(pipeline);
+		orderedDataFileNames = orderedDataFileNamesMap.get(activeDataPipeline);
+		orderedMSFeatureIds = orderedMSFeatureIdMap.get(activeDataPipeline);
 		
-		Matrix featureMetaDataMatrix = createFeatureMetaDataMatrix(pipeline);
-		Matrix dataFileMetaDataMatrix = createDataFileMetaDataMatrix(pipeline);
+		Matrix featureMetaDataMatrix = createFeatureMetaDataMatrix();
+		Matrix dataFileMetaDataMatrix = createDataFileMetaDataMatrix();
 		Matrix dataMatrix = ProjectUtils.loadDataMatrixForPipelineWitoutMetaData(
-				project, pipeline);
+				currentExperiment, activeDataPipeline);
 		if(dataMatrix != null) {
 			
 			dataMatrix.setMetaDataDimensionMatrix(0, featureMetaDataMatrix);
 			dataMatrix.setMetaDataDimensionMatrix(1, dataFileMetaDataMatrix);
-			project.setDataMatrixForDataPipeline(pipeline, dataMatrix);
+			currentExperiment.setDataMatrixForDataPipeline(activeDataPipeline, dataMatrix);
 		}
 	}
 	
-	private Matrix createFeatureMetaDataMatrix(DataPipeline pipeline) {
+	private Matrix createFeatureMetaDataMatrix() {
 		
 		MsFeature[]featureArray = new MsFeature[orderedMSFeatureIds.length];
-		Set<MsFeature>featureSet = project.getMsFeaturesForDataPipeline(pipeline);
+		Set<MsFeature>featureSet = currentExperiment.getMsFeaturesForDataPipeline(activeDataPipeline);
 		for(int i=0; i<orderedMSFeatureIds.length; i++) {
 			
 			String featureId = orderedMSFeatureIds[i];
@@ -191,11 +226,11 @@ public class SilhouetteTest {
 		return Matrix.Factory.linkToArray((Object[])featureArray);
 	}
 	
-	private Matrix createDataFileMetaDataMatrix(DataPipeline pipeline) {
+	private Matrix createDataFileMetaDataMatrix() {
 		
 		DataFile[]dataFileArray = new DataFile[orderedDataFileNames.length];
 		Set<DataFile>dataFileSet = 
-				project.getDataFilesForAcquisitionMethod(pipeline.getAcquisitionMethod());
+				currentExperiment.getDataFilesForAcquisitionMethod(activeDataPipeline.getAcquisitionMethod());
 		for(int i=0; i<orderedDataFileNames.length; i++) {
 			
 			String fileName = orderedDataFileNames[i];
@@ -214,27 +249,27 @@ public class SilhouetteTest {
 		
 		ExperimentDesign experimentDesign = null;
 		if(designElement != null)
-			experimentDesign  = new ExperimentDesign(designElement, project);
+			experimentDesign  = new ExperimentDesign(designElement, currentExperiment);
 		
 		if(experimentDesign != null)
-			project.setExperimentDesign(experimentDesign);
+			currentExperiment.setExperimentDesign(experimentDesign);
 		else
-			project.setExperimentDesign(new ExperimentDesign());
+			currentExperiment.setExperimentDesign(new ExperimentDesign());
 		
 		Element limsExperimentElement = projectElement.getChild(
 				ObjectNames.limsExperiment.name());
 		
 		LIMSExperiment limsExperiment = null;
 		if(limsExperimentElement != null) {
-			limsExperiment = new LIMSExperiment(limsExperimentElement, project);
-			project.setLimsExperiment(limsExperiment);
+			limsExperiment = new LIMSExperiment(limsExperimentElement, currentExperiment);
+			currentExperiment.setLimsExperiment(limsExperiment);
 		}
 	}
 
 	private void parseAcquisitionMethodDataFileMap(Element projectElement) {
 		
     	Set<DataAcquisitionMethod>acquisitionMethods = 
-    			project.getDataPipelines().stream().
+    			currentExperiment.getDataPipelines().stream().
     			map(p -> p.getAcquisitionMethod()).collect(Collectors.toSet());
     	
     	List<Element> methodDataFileMapElementList = 
@@ -256,7 +291,7 @@ public class SilhouetteTest {
     		for(Element dfElement : dataFileElementList)
     			dataFileList.add(new DataFile(dfElement));
     		   		
-    		project.addDataFilesForAcquisitionMethod(method, dataFileList);
+    		currentExperiment.addDataFilesForAcquisitionMethod(method, dataFileList);
     	}
 	}
 	
@@ -273,7 +308,7 @@ public class SilhouetteTest {
     				MetabolomicsProjectFields.DataPipelineId.name());
     		if(pipelineName != null && !pipelineName.isEmpty()) {
     			
-    			DataPipeline dp = project.getDataPipelines().stream().
+    			DataPipeline dp = currentExperiment.getDataPipelines().stream().
     				filter(p -> p.getSaveSafeName().equals(pipelineName)).
     				findFirst().orElse(null);
     			
@@ -296,7 +331,7 @@ public class SilhouetteTest {
     				MetabolomicsProjectFields.DataPipelineId.name());
     		if(pipelineName != null && !pipelineName.isEmpty()) {
     			
-    			DataPipeline dp = project.getDataPipelines().stream().
+    			DataPipeline dp = currentExperiment.getDataPipelines().stream().
     				filter(p -> p.getSaveSafeName().equals(pipelineName)).
     				findFirst().orElse(null);
     			
@@ -309,7 +344,7 @@ public class SilhouetteTest {
 	private void recreateWorklists(Element projectElement) {
 
     	Set<DataAcquisitionMethod>acquisitionMethods = 
-    			project.getDataPipelines().stream().
+    			currentExperiment.getDataPipelines().stream().
     			map(p -> p.getAcquisitionMethod()).collect(Collectors.toSet());
 		List<Element>worklistMapElementList = 
 				projectElement.getChild(MetabolomicsProjectFields.WorklistMap.name()).
@@ -323,20 +358,330 @@ public class SilhouetteTest {
 			Worklist wkl = new Worklist(worklistMapElement);
 			for(WorklistItem item : wkl.getWorklistItems()) {
 				
-				DataFile df = project.getDataFilesForAcquisitionMethod(method).
+				DataFile df = currentExperiment.getDataFilesForAcquisitionMethod(method).
 					stream().filter(f -> f.getName().equals(item.getDataFileName())).
 					findFirst().orElse(null);
 				item.setDataFile(df);
 			}
-			project.setWorklistForAcquisitionMethod(method, wkl);
+			currentExperiment.setWorklistForAcquisitionMethod(method, wkl);
 		}		
 	}
 	
-	private Matrix createTestMatrix() {
+	public void createDefaultBinnerPreferencesObject() {
 		
-		 //	return Matrix.Factory.rand(new long[] {30,100});
+		bpo = new BinnerPreferencesObject(activeDataPipeline);
+		//	Input data
+		Collection<DataFile>sf = currentExperiment.getDataFilesForPipeline(activeDataPipeline, false);
 		
-		return null;
+		Collection<DataFile>sampleFiles = currentExperiment.getDataFilesForPipeline(activeDataPipeline, false).stream().
+				filter(f -> f.getParentSample().hasLevel(ReferenceSamplesManager.sampleLevel)).
+				collect(Collectors.toList());
+		bpo.getInputFiles().addAll(sampleFiles);
+		Set<Polarity>polSet = bpo.getInputFiles().stream().
+				map(f -> f.getDataAcquisitionMethod().getPolarity()).
+				distinct().collect(Collectors.toSet());
+		bpo.setPolarity(polSet.iterator().next());
+	    
+	    //	Data cleaning
+		bpo.setOutlierSDdeviation(Double.parseDouble(
+				BinnerParameters.DCOutlierStDevCutoff.getDefaultValue()));		
+		bpo.setMissingRemovalThreshold(Double.parseDouble(
+				BinnerParameters.DCMissingnessCutoff.getDefaultValue()));		
+		bpo.setZeroAsMissing(Boolean.parseBoolean(
+				BinnerParameters.DCZeroAsMissing.getDefaultValue()));		
+		bpo.setLogTransform(Boolean.parseBoolean(
+				BinnerParameters.DCNormalize.getDefaultValue()));	    
+		bpo.setDeisotopingMassTolerance(Double.parseDouble(
+				BinnerParameters.DCDeisotopeMassTolerance.getDefaultValue()));
+		bpo.setDeisotopingRTtolerance(Double.parseDouble(
+				BinnerParameters.DCDeisotopeRTTolearance.getDefaultValue()));
+		bpo.setDeisotopingCorrCutoff(Double.parseDouble(
+				BinnerParameters.DCDeisotopeCorrCutoff.getDefaultValue()));	    
+	    bpo.setDeisoMassDiffDistr(Boolean.parseBoolean(
+	    		BinnerParameters.DCDeisotopeMassDiffDistribution.getDefaultValue()));	    
+	    bpo.setDeisotope(Boolean.parseBoolean(
+	    		BinnerParameters.DCDeisotope.getDefaultValue()));
+	    
+	    //	Feature grouping
+	    bpo.setCorrelationFunctionType(CorrelationFunctionType.getOptionByName(
+				BinnerParameters.FGCorrFunction.getDefaultValue()));
+	    bpo.setRtGap(Double.parseDouble(BinnerParameters.FGRTGap.getDefaultValue()));		    
+	    bpo.setMinSubclusterRTgap(Double.parseDouble(BinnerParameters.FGMinRtGap.getDefaultValue()));	    
+	    bpo.setMaxSubclusterRTgap(Double.parseDouble(BinnerParameters.FGMaxRtGap.getDefaultValue()));
+	    bpo.setClusterGroupingMethod(ClusterGroupingMethod.getOptionByName(
+				BinnerParameters.FGGroupingMethod.getDefaultValue()));
+	    bpo.setBinClusteringCutoff(Integer.parseInt(
+	    		BinnerParameters.FGBinningCutoffValue.getDefaultValue())); 
+	    bpo.setBinClusteringCutoffType(BinClusteringCutoffType.getOptionByName(
+				BinnerParameters.FGBinningCutoffType.getDefaultValue()));	    
+	    bpo.setBinSizeLimitForAnalysis(Integer.parseInt(
+	    		BinnerParameters.FGBinSizeLimitForAnalysis.getDefaultValue())); 
+	    bpo.setBinSizeLimitForOutput(Integer.parseInt(
+	    		BinnerParameters.FGBinSizeLimitForOutput.getDefaultValue())); 	    
+	    bpo.setLimitBinSizeForAnalysis(Boolean.parseBoolean(
+	    		BinnerParameters.FGBOverrideBinSizeLimitForAnalysis.getDefaultValue()));
+	    bpo.setLimitBinSizeForOutput(Boolean.parseBoolean(
+	    		BinnerParameters.FGBOverrideBinSizeLimitForOutput.getDefaultValue()));
+	    
+	    //	Annotations
+	    bpo.setAnnotationMassTolerance(Double.parseDouble(
+	    		BinnerParameters.ANMassTolerance.getDefaultValue()));
+	    bpo.setAnnotationRTTolerance(Double.parseDouble(
+	    		BinnerParameters.ANRTTolerance.getDefaultValue()));
 	}
+	
+	/*
+	 * Binning algo start
+	 * */
+	public void runBinner() {
 
+		try {
+			preparedDataMatrix = filterInputData();
+		} catch (Exception e) {
+			e.printStackTrace();		
+			return;
+		}
+		try {
+			binFeaturesByRt();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return;
+		}
+		try {
+			createCorrelationMatrices();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return;
+		}
+	}
+	
+	private void createCorrelationMatrices() {
+		
+		System.out.println("Creating correlation matrices for bins ...");
+		
+		pearson = new PearsonsCorrelation();
+		spearman = new SpearmansCorrelation();
+		kendall = new KendallsCorrelation();
+		
+		for(MsFeatureCluster bin : featureBins) {
+			
+			Collection<MsFeature>sorted = 
+					bin.getSortedFeturesForDataPipeline(activeDataPipeline, SortProperty.RTmedObserved);
+			MsFeature[]sortedFeatureArray = sorted.toArray(new MsFeature[sorted.size()]);
+			long[] columnIndex =
+					sorted.stream().
+					map(f -> preparedDataMatrix.getColumnForLabel(f)).
+					mapToLong(i -> i).
+					toArray();			
+			Matrix binDataMatrix = preparedDataMatrix.selectColumns(Ret.NEW, columnIndex);
+			
+			binDataMatrix.setMetaDataDimensionMatrix(0, Matrix.Factory.linkToArray((Object[])sortedFeatureArray));
+			binDataMatrix.setMetaDataDimensionMatrix(1, preparedDataMatrix.getMetaDataDimensionMatrix(1));
+			clusterFeatures(binDataMatrix);
+			
+//			double[][] doubleMatrix = binDataMatrix.toDoubleArray();
+//			Matrix corrMatrix = null;
+//			
+//			if(bpo.getCorrelationFunctionType().equals(CorrelationFunctionType.PEARSON))
+//				corrMatrix = Matrix.Factory.linkToArray(pearson.computeCorrelationMatrix(doubleMatrix).getData());
+//
+//			if(bpo.getCorrelationFunctionType().equals(CorrelationFunctionType.SPEARMAN))
+//				corrMatrix = Matrix.Factory.linkToArray(spearman.computeCorrelationMatrix(doubleMatrix).getData());
+//
+//			if(bpo.getCorrelationFunctionType().equals(CorrelationFunctionType.KENDALL))
+//				corrMatrix = Matrix.Factory.linkToArray(kendall.computeCorrelationMatrix(doubleMatrix).getData());
+//
+//			if(corrMatrix != null) {
+//
+//				corrMatrix.setMetaDataDimensionMatrix(0, Matrix.Factory.linkToArray((Object[])sortedFeatureArray));
+//				corrMatrix.setMetaDataDimensionMatrix(1, Matrix.Factory.linkToArray((Object[])sortedFeatureArray).transpose(Ret.NEW));
+//				bin.setClusterCorrMatrix(corrMatrix);
+//			}			
+		}
+	}
+	
+	private void clusterFeatures(Matrix featureMatrix) {
+		
+		KMeansPlusPlusClusterer<ClusterableFeatureData> clusterer = 
+				new KMeansPlusPlusClusterer<ClusterableFeatureData>(3);
+		List<ClusterableFeatureData>dataToCluster = new ArrayList<ClusterableFeatureData>();
+		long[]coord = new long[] {0,0};
+		Matrix featureDataMatrix = featureMatrix.getMetaDataDimensionMatrix(0);
+		
+		System.err.println("\nClustering " + featureDataMatrix.getColumnCount() + "features:");
+		for(long i=0; i<featureDataMatrix.getColumnCount(); i++) {
+			
+			coord[1] = i;
+			MsFeature msf = (MsFeature)featureDataMatrix.getAsObject(coord);
+			double[] featureData = featureMatrix.selectColumns(Ret.LINK, i).transpose().toDoubleArray()[0];
+			dataToCluster.add(new ClusterableFeatureData(msf, featureData));
+		}
+		if(dataToCluster.size() <=  3)
+			return;
+		
+		List<CentroidCluster<ClusterableFeatureData>> results = clusterer.cluster(dataToCluster);
+		//	Calculate silhuettes
+		for(CentroidCluster<ClusterableFeatureData>cc : results) {
+			
+			ClusterableFeatureData cf = findCenterFeature(cc);
+			System.out.println(cf.getFeature().toString());
+		}		
+	}
+	
+	private ClusterableFeatureData findCenterFeature(CentroidCluster<ClusterableFeatureData>cc) {
+		
+		double distance = Double.MAX_VALUE;
+		double[] centerPoint = cc.getCenter().getPoint();
+		ClusterableFeatureData fData = null;
+		
+		//	MathArrays.distance(a, b);
+		for(ClusterableFeatureData dp : cc.getPoints()) {
+			
+			double newDistance = MathArrays.distance(centerPoint, dp.getPoint());
+			if(newDistance < distance) {
+				fData = dp;
+				distance = newDistance;
+			}
+		}		
+		return fData;
+	}
+	
+	private void binFeaturesByRt() {
+		
+		System.out.println("Creating RT-based bins ...");
+		featureBins = new ArrayList<MsFeatureCluster>();
+		MsFeature[] featureArray = 
+				cleanRTSortedFeatureSet.toArray(new MsFeature[cleanRTSortedFeatureSet.size()]);
+
+		double rtGapForBinning = bpo.getRtGap();
+		MsFeatureCluster newCluster = new MsFeatureCluster();
+		newCluster.addFeature(featureArray[0], activeDataPipeline);
+		int maxClusterSize = Math.min(bpo.getBinSizeLimitForAnalysis(), bpo.getBinSizeLimitForOutput());
+
+		for (int i = 1; i < featureArray.length; i++) {
+
+			double rtGap = featureArray[i].getMedianObservedRetention()
+					- featureArray[i - 1].getMedianObservedRetention();
+			if (rtGap < rtGapForBinning) {
+				
+				newCluster.addFeature(featureArray[i], activeDataPipeline);
+				if(newCluster.getFeatures().size() > maxClusterSize) {
+					
+					System.err.println("Some of the feature bins exceede the size limit set in the prefefernces;\n"
+							+ newCluster.getFeatures().size() + " vs allowed " + maxClusterSize);
+					return;
+				}
+			}
+			else {
+				if(newCluster.getFeatures().size() > 1)
+					featureBins.add(newCluster);
+				
+				newCluster = new MsFeatureCluster();
+				newCluster.addFeature(featureArray[i], activeDataPipeline);
+			}
+
+		}
+		System.out.println("# of bins " + featureBins.size());		
+	}
+	
+	private Matrix filterInputData() {
+
+		//	Subset the data
+		MsFeatureSet activeFeatureSet = 
+				currentExperiment.getActiveFeatureSetForDataPipeline(activeDataPipeline);
+		Matrix dataMatrixForBinner = DataSetUtils.subsetDataMatrix(
+				currentExperiment.getDataMatrixForDataPipeline(activeDataPipeline), 
+				activeFeatureSet.getFeatures(), 
+				bpo.getInputFiles());
+		
+		cleanRTSortedFeatureSet = 
+				new ArrayList<MsFeature>(activeFeatureSet.getFeatures());
+		
+		//	Convert zero values to missing
+		dataMatrixForBinner = dataMatrixForBinner.replace(Ret.NEW, Double.valueOf("0"), Double.NaN);
+		
+		System.out.println("Removing features with high % of missing values ...");
+		dataMatrixForBinner = removeFeaturesMissingAboveThreshold(
+						dataMatrixForBinner, bpo.getMissingRemovalThreshold());
+		
+		System.out.println("Replacing outliers with missing values ...");
+		//	Find outlier values and set them as missing
+		convertOutliersToMissing(dataMatrixForBinner, bpo.getOutlierSDdeviation());
+		
+		System.out.println("Imputing missing values ...");
+		//	Impute missing data and log-transform if required
+		dataMatrixForBinner = imputeMissingData(dataMatrixForBinner);
+		if(bpo.isLogTransform()) {
+			
+			System.out.println("Log-transforming the data ...");
+			dataMatrixForBinner = 
+					new Log1pTransform(true, dataMatrixForBinner).calc(Ret.NEW);
+			
+			//	writeMatrixToFile(dataMatrixForBinner, "log_transformed.txt", true);	
+		}
+		return dataMatrixForBinner;
+	}
+	
+	private Matrix removeFeaturesMissingAboveThreshold(
+			Matrix dataMatrixForBinner, 
+			double missingRemovalThreshold) {
+
+		Matrix missingnessMatrix  = dataMatrixForBinner.
+				countMissing(Ret.NEW, BaseMatrix.ROW).
+				divide(dataMatrixForBinner.getRowCount() / 100.0d);
+		Matrix featureMetadataMatrix = 
+				dataMatrixForBinner.getMetaDataDimensionMatrix(0);
+		Collection<MsFeature>featuresToRemove = new ArrayList<MsFeature>();
+				
+		long[]coord = new long[] {0,0};
+		ArrayList<Long> toRemove = new ArrayList<Long>();
+		for(long c=0; c<missingnessMatrix.getColumnCount(); c++) {
+			
+			coord[1] = c;
+			double missingness = missingnessMatrix.getAsDouble(coord);
+			if(missingness > missingRemovalThreshold) {
+				toRemove.add(c);
+				MsFeature msf = (MsFeature)featureMetadataMatrix.getAsObject(coord);
+				featuresToRemove.add(msf);
+			}
+		}
+		Matrix newMsFeatureLabelMatrix = 
+				dataMatrixForBinner.getMetaDataDimensionMatrix(0).deleteColumns(Ret.NEW, toRemove);			
+		Matrix newDataMatrixForBinner = dataMatrixForBinner.deleteColumns(Ret.NEW, toRemove);
+		newDataMatrixForBinner.setMetaDataDimensionMatrix(0, newMsFeatureLabelMatrix);
+		newDataMatrixForBinner.setMetaDataDimensionMatrix(1, dataMatrixForBinner.getMetaDataDimensionMatrix(1));
+		
+		if(!featuresToRemove.isEmpty())
+			cleanRTSortedFeatureSet.removeAll(featuresToRemove);
+		
+		cleanRTSortedFeatureSet = 
+				cleanRTSortedFeatureSet.stream().
+				sorted(new MsFeatureComparator(SortProperty.RT)).
+				collect(Collectors.toList());
+		
+		return newDataMatrixForBinner;
+	}
+	
+	private void convertOutliersToMissing(Matrix dataMatrixForBinner, double stDevMargin) {
+		
+		Matrix standardized = dataMatrixForBinner.standardize(Ret.NEW, BaseMatrix.ROW);
+		for(long i=0; i<dataMatrixForBinner.getRowCount(); i++) {
+			
+			for(long j=0; j<dataMatrixForBinner.getColumnCount(); j++) {
+				
+				double value = standardized.getAsDouble(i,j);
+				if(!MathUtil.isNaNOrInfinite(value) && Math.abs(value) > stDevMargin)
+					dataMatrixForBinner.setAsDouble(Double.NaN, i,j);
+			}		
+		}		
+	}
+	
+	//	TODO start with median value, maybe add other options later
+	private Matrix imputeMissingData(Matrix dataMatrixForBinner) {
+
+		Matrix imputedMatrixForBinner = 
+				new ImputeMedian(BaseMatrix.ROW, dataMatrixForBinner).calc(Ret.NEW);
+		
+		return imputedMatrixForBinner;
+	}
 }

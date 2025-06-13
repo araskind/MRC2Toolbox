@@ -24,6 +24,7 @@ package edu.umich.med.mrc2.datoolbox.gui.binner.test;
 import java.io.File;
 
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
+import edu.umich.med.mrc2.datoolbox.main.ReferenceSamplesManager;
 import edu.umich.med.mrc2.datoolbox.main.config.FilePreferencesFactory;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 
@@ -38,12 +39,15 @@ public class RunClusteringTest {
 		System.setProperty(FilePreferencesFactory.SYSTEM_PROPERTY_FILE, 
 				MRC2ToolBoxCore.configDir + "MRC2ToolBoxPrefs.txt");
 		MRC2ToolBoxConfiguration.initConfiguration();
+		ReferenceSamplesManager.refreshReferenceSampleList();
 				
 		File projectFile = new File("Y:\\DataAnalysis\\MRC2ToolboxProjects\\_CORE_NF\\"
 				+ "_CONVERTED\\EX01496\\CO300-Pk1000\\EX01496-BATCH04\\EX01496-BATCH04.caproject2");
 		String methodPrefix = "RP-POS-BATCH04";
 		SilhouetteTest sTest = new SilhouetteTest(projectFile, methodPrefix);
 		sTest.parseProject();
+		sTest.createDefaultBinnerPreferencesObject();
+		sTest.runBinner();
 		
 		final long endTime = System.currentTimeMillis();
 		System.out.println("Total execution time: " + (endTime - startTime)/1000000.0d +" sec");
