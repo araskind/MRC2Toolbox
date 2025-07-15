@@ -56,6 +56,7 @@ public class MsLibraryPanelMenuBar extends CommonMenuBar {
 	private static final Icon importLibraryIcon = GuiUtils.getIcon("importFromXML", 24);
 	private static final Icon importLibraryIconSmall = GuiUtils.getIcon("importLibraryToDb", 16);
 	private static final Icon importPCDLLibraryIcon = GuiUtils.getIcon("importFromPCDL", 24);
+	private static final Icon newPCDLfromBaseIcon = GuiUtils.getIcon("newPCDLfromBase", 24);
 	private static final Icon prescanLibraryIcon = GuiUtils.getIcon("searchCompounds", 24);
 	private static final Icon exportLibraryIcon = GuiUtils.getIcon("exportLibrary", 24);
 	private static final Icon exportLibraryIconSmall = GuiUtils.getIcon("exportLibrary", 16);
@@ -100,6 +101,7 @@ public class MsLibraryPanelMenuBar extends CommonMenuBar {
 		prescanLibraryMenuItem,
 		importLibraryMenuItem,
 		importPCDLLibraryMenuItem,
+		newPCDLfromBaseMenuItem,
 		importRtDataMenuItem,
 		importDecoyMSMSLibrary;
 	
@@ -172,7 +174,11 @@ public class MsLibraryPanelMenuBar extends CommonMenuBar {
 		
 		importPCDLLibraryMenuItem = addItem(importMenu, 
 				MainActionCommands.SET_UP_PCDL_DATA_IMPORT_COMMAND, 
-				importPCDLLibraryIcon);		
+				importPCDLLibraryIcon);	
+		newPCDLfromBaseMenuItem = addItem(importMenu, 
+				MainActionCommands.NEW_PCDL_LIBRARY_FROM_PCDL_TEXT_FILE_SETUP_COMMAND, 
+				newPCDLfromBaseIcon);	
+		
 		importLibraryMenuItem = addItem(importMenu, 
 				MainActionCommands.IMPORT_COMPOUND_LIBRARY_COMMAND, 
 				importLibraryIcon);

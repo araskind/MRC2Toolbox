@@ -1751,8 +1751,7 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 			InformationDialog id = new InformationDialog(
 					"Unassigned Binner Annotations", 
 					"The following Binner annotations could not be matched to any of the features:", 
-					details, 
-					this.getContentPane());
+					details);
 			id.setLocationRelativeTo(this.getContentPane());
 			id.setVisible(true);
 		}
@@ -1795,8 +1794,7 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 		InformationDialog id = new InformationDialog(
 				"Duplicate feature names", 
 				"Found the following duplicate feature names",
-				StringUtils.join(dupNames, "\n"),
-				this.getContentPane());
+				StringUtils.join(dupNames, "\n"));
 		id.setLocationRelativeTo(this.getContentPane());
 		id.setVisible(true);
 	}

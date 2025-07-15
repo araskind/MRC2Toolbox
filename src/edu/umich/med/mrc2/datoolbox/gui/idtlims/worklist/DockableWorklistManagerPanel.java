@@ -459,8 +459,7 @@ public class DockableWorklistManagerPanel extends AbstractIDTrackerLimsPanel imp
 			InformationDialog id = new InformationDialog(
 					"Missing acquisition methods",
 					"Some acquisition methods used for this experiment are not yet in the database.",
-					StringUtils.join(task.getMissingMethods(), "\n"),
-					this.getContentPane());
+					StringUtils.join(task.getMissingMethods(), "\n"));
 			id.setLocationRelativeTo(this.getContentPane());
 			id.setVisible(true);
 			return;

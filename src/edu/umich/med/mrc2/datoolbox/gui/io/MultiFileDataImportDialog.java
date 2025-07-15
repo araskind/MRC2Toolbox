@@ -153,6 +153,7 @@ public class MultiFileDataImportDialog extends JDialog
 	
 	private JComboBox featureSubsetcomboBox;
 	private JCheckBox removeAbnormalIsoPatternsCheckBox;
+	private JCheckBox skipCompoundMatchingCheckbox;
 	
 	private DataFileSampleMatchPanel matchPanel;
 	private TaskListener dataLoadTaskListener;
@@ -165,6 +166,8 @@ public class MultiFileDataImportDialog extends JDialog
 	private DataAnalysisProject currentProject;
 	private AcquisitionMethodExtendedEditorDialog acquisitionMethodEditorDialog;
 	private DataExtractionMethodEditorDialog dataExtractionMethodEditorDialog;
+	
+	private boolean areDataFromProFinder;
 	
 	private static final Icon importMultifileIcon = GuiUtils.getIcon("importMultifile", 32);
 
@@ -181,6 +184,7 @@ public class MultiFileDataImportDialog extends JDialog
 		
 		this.dataLoadTaskListener = dataLoadTaskListener;
 		existingDataPipeline = null;
+		areDataFromProFinder = false;
 
 		JPanel main = new JPanel(new BorderLayout(0, 0));
 		main.setBorder(new EmptyBorder(10, 10, 10, 10));
@@ -288,6 +292,15 @@ public class MultiFileDataImportDialog extends JDialog
 		gbc_removeAbnormalIsoPatternsCheckBox.gridx = 1;
 		gbc_removeAbnormalIsoPatternsCheckBox.gridy = 1;
 		panel_1.add(removeAbnormalIsoPatternsCheckBox, gbc_removeAbnormalIsoPatternsCheckBox);
+		
+		skipCompoundMatchingCheckbox = new JCheckBox("Skip matching compounds  to database");
+		GridBagConstraints gbc_skipCompoundMatchingCheckbox = new GridBagConstraints();
+		gbc_skipCompoundMatchingCheckbox.gridwidth = 2;
+		gbc_skipCompoundMatchingCheckbox.anchor = GridBagConstraints.WEST;
+		gbc_skipCompoundMatchingCheckbox.insets = new Insets(0, 0, 5, 0);
+		gbc_skipCompoundMatchingCheckbox.gridx = 2;
+		gbc_skipCompoundMatchingCheckbox.gridy = 1;
+		panel_1.add(skipCompoundMatchingCheckbox, gbc_skipCompoundMatchingCheckbox);
 		GridBagConstraints gbc_panel = new GridBagConstraints();
 		gbc_panel.gridwidth = 4;
 		gbc_panel.insets = new Insets(0, 0, 5, 0);
@@ -468,47 +481,7 @@ public class MultiFileDataImportDialog extends JDialog
 		rsd.setLocationRelativeTo(this.getContentPane());
 		rsd.setVisible(true);
 	}
-	
-//	private void addSelectedDataFiles() {
-//		
-//		File[] dataFiles = chooser.getSelectedFiles();
-//		if(dataFiles.length == 0)
-//			return;
-//		
-//		if(pfaLoaded && !matchPanel.getSampleDataResultObjects(false).isEmpty()) {
-//			
-//			MessageDialog.showErrorMsg("You've selected ProFinder archive as data source.\n"
-//					+ "Adding individual CEF files to this data analysis pipeline is not supported.", 
-//					this);
-//			return;
-//		}		
-//		dataFileDirectory = dataFiles[0].getParentFile();
-//		savePreferences();
-//		//	Add data to existing pipeline
-//		if(existingDataPipeline != null) {
-//			addResultsToExistingPipeline(dataFiles);
-//			return;
-//		}
-//		//	Add extra data to new pipeline
-//		if(newDataPipeline != null) {
-//			addResultsToNewPipeline(newDataPipeline, dataFiles);
-//			return;
-//		}
-//		//	Create new pipeline and add data to it		
-//		newDataPipeline = dataPipelineDefinitionPanel.getDataPipeline();
-//		if(existingDataPipeline == null && MRC2ToolBoxCore.getCurrentProject().getDataPipelines().contains(newDataPipeline)) {
-//			MessageDialog.showErrorMsg("The experiment already contains data pipeline \n"
-//					+ "with selected combination of assay, data acquisition and data analysis methods.\n"
-//					+ "Please adjust you selection.\n"
-//					+ "If you want to replace the existing data\n"
-//					+ "please delete them first and then re-upload.", 
-//					this);
-//			newDataPipeline = null;
-//			return;
-//		}	
-//		addResultsToNewPipeline(newDataPipeline, dataFiles);		
-//	}
-	
+
 	private void addResultsToNewPipeline(DataPipeline pipeline, File[] dataFiles) {
 
 		DataAnalysisProject project = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
@@ -581,7 +554,7 @@ public class MultiFileDataImportDialog extends JDialog
 				}				
 				ResultsFile resultFile = new ResultsFile(fileBaseName, daMethod, new Date(), df);
 				resultFile.setFullPath(f.getAbsolutePath());
-				df.addResultFile(resultFile);					
+				//	df.addResultFile(resultFile);					
 				ExperimentalSample matchedSample = 
 						DataImportUtils.getSampleFromFileName(fileBaseName, project);
 				SampleDataResultObject sdro = 
@@ -632,7 +605,8 @@ public class MultiFileDataImportDialog extends JDialog
 			pfaTempDir = null;
 			Path pfaTempDirPath = null;
 			try {
-				pfaTempDirPath = Files.createDirectories(Paths.get(proFinderArchiveFile.getParentFile().getAbsolutePath(), 
+				pfaTempDirPath = Files.createDirectories(
+						Paths.get(proFinderArchiveFile.getParentFile().getAbsolutePath(), 
 						FilenameUtils.getBaseName(proFinderArchiveFile.getName() + 
 						"_" + FIOUtils.getTimestamp())));			
 			} catch (IOException e1) {
@@ -729,10 +703,8 @@ public class MultiFileDataImportDialog extends JDialog
 
 	private void importData() {
 		
-		if(existingDataPipeline == null && newDataPipeline == null)
-			return;
-
-		if(matchPanel.getSampleDataResultObjects(true).size() == 0)
+		if((existingDataPipeline == null && newDataPipeline == null) 
+				|| matchPanel.getSampleDataResultObjects(true).isEmpty())
 			return;
 		
 		Collection<String>errors = validateInputData();
@@ -761,6 +733,8 @@ public class MultiFileDataImportDialog extends JDialog
 					FeatureAlignmentType.ALIGN_TO_LIBRARY);
 			task.addTaskListener(dataLoadTaskListener);
 			MRC2ToolBoxCore.getTaskController().addTask(task);
+			dispose();
+			return;
 		}
 		if(newDataPipeline != null) {	
 			
@@ -769,12 +743,13 @@ public class MultiFileDataImportDialog extends JDialog
 					dataToImport, 
 					importPipeline, 
 					FeatureAlignmentType.ALIGN_TO_LIBRARY,
-					pfaTempDir);
+					pfaTempDir,
+					skipCompoundMatchingCheckbox.isSelected());
 			task.setRemoveAbnormalIsoPatterns(removeAbnormalIsoPatterns());
 			task.addTaskListener(dataLoadTaskListener);
 			MRC2ToolBoxCore.getTaskController().addTask(task);
+			dispose();
 		}		
-		dispose();
 	}
 	
 	private Collection<String>validateInputData(){
@@ -786,7 +761,7 @@ public class MultiFileDataImportDialog extends JDialog
 			
 			errors.addAll(dataPipelineDefinitionPanel.validatePipelineDefinition());
 
-			if(libraryFile == null)
+			if(libraryFile == null && areDataFromProFinder == false)
 				errors.add("Library file not specified.");
 	
 			if(!libraryFile.exists() || !libraryFile.canRead())
@@ -859,6 +834,7 @@ public class MultiFileDataImportDialog extends JDialog
 				return;
 			}	
 			addResultsToNewPipeline(newDataPipeline, dataFiles);
+			areDataFromProFinder = false;
 		}
 	}
 	
@@ -894,6 +870,7 @@ public class MultiFileDataImportDialog extends JDialog
 			dataFileDirectory = pfaFile.getParentFile();
 			savePreferences();	
 			
+			areDataFromProFinder = true;
 			ProFinderArchiveExtractionTask task = 
 					new ProFinderArchiveExtractionTask(pfaFile, newDataPipeline);
 			idp = new IndeterminateProgressDialog("Loading document preview ...", this, task);

@@ -80,6 +80,7 @@ public class MultiCefImportTask extends AbstractTask implements TaskListener{
 	private Map<String, List<Double>> peakWidthMap;
 	private File tmpCefDirectory;
 	private boolean removeAbnormalIsoPatterns;
+	private boolean skipCompoundMatching;
 
 	public MultiCefImportTask(
 			File libraryFile, 
@@ -92,6 +93,7 @@ public class MultiCefImportTask extends AbstractTask implements TaskListener{
 		this.dataFiles = dataFiles;
 		this.dataPipeline = dataPipeline;
 		this.alignmentType = alignmentType;
+		this.skipCompoundMatching = false;
 		
 		fileLoadInitiated = false;
 		unmatchedAdducts = new TreeSet<String>();
@@ -104,7 +106,8 @@ public class MultiCefImportTask extends AbstractTask implements TaskListener{
 			Set<SampleDataResultObject> dataToImport, 
 			DataPipeline dataPipeline,
 			FeatureAlignmentType alignmentType,
-			File tmpCefDirectory) {
+			File tmpCefDirectory,
+			boolean skipCompoundMatching) {
 		super();
 		this.libraryFile = libraryFile;
 		this.dataPipeline = dataPipeline;
@@ -113,6 +116,7 @@ public class MultiCefImportTask extends AbstractTask implements TaskListener{
 				map(s -> s.getDataFile()).
 				toArray(size -> new DataFile[size]);
 		this.tmpCefDirectory = tmpCefDirectory;
+		this.skipCompoundMatching = skipCompoundMatching;
 		
 		fileLoadInitiated = false;
 		unmatchedAdducts = new TreeSet<String>();
@@ -123,6 +127,11 @@ public class MultiCefImportTask extends AbstractTask implements TaskListener{
 	@Override
 	public void run() {
 
+		if(libraryFile == null) {
+			libraryParsed = true;
+			initDataLoad();
+			fileLoadInitiated = true;
+		}
 		setStatus(TaskStatus.PROCESSING);
 
 		//	Read library
@@ -332,7 +341,8 @@ public class MultiCefImportTask extends AbstractTask implements TaskListener{
 		DataExtractionMethod daMethod = dataPipeline.getDataExtractionMethod();
 		for(int i=0; i<dataFiles.length; i++) {
 
-			dataFiles[i].setDataAcquisitionMethod(acqMethod);
+			if(dataFiles[i].getDataAcquisitionMethod() == null)
+				dataFiles[i].setDataAcquisitionMethod(acqMethod);
 			
 			CefImportSettingsObject ciso = new CefImportSettingsObject();
 			ciso.setDataFile(dataFiles[i]);

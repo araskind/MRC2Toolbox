@@ -31,6 +31,7 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.io.File;
 import java.io.IOException;
+import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -58,9 +59,11 @@ import edu.umich.med.mrc2.datoolbox.data.Adduct;
 import edu.umich.med.mrc2.datoolbox.data.CompoundIdentity;
 import edu.umich.med.mrc2.datoolbox.data.CompoundLibrary;
 import edu.umich.med.mrc2.datoolbox.data.LibraryMsFeature;
+import edu.umich.med.mrc2.datoolbox.data.LibraryMsFeatureDbBundle;
 import edu.umich.med.mrc2.datoolbox.data.MassSpectrum;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsPoint;
+import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.database.idt.MSRTLibraryUtils;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignSubsetEvent;
@@ -72,14 +75,17 @@ import edu.umich.med.mrc2.datoolbox.gui.io.msms.ReferenceMSMSLibraryExportDialog
 import edu.umich.med.mrc2.datoolbox.gui.library.feditor.DockableLibraryFeatureEditorPanel;
 import edu.umich.med.mrc2.datoolbox.gui.library.manager.LibraryInfoDialog;
 import edu.umich.med.mrc2.datoolbox.gui.library.manager.LibraryManager;
+import edu.umich.med.mrc2.datoolbox.gui.library.manager.NewPCLDLfromBaseDialog;
 import edu.umich.med.mrc2.datoolbox.gui.library.upload.LibraryRtImportDialog;
 import edu.umich.med.mrc2.datoolbox.gui.main.DockableMRC2ToolboxPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.main.PanelList;
 import edu.umich.med.mrc2.datoolbox.gui.structure.DockableMolStructurePanel;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
+import edu.umich.med.mrc2.datoolbox.gui.utils.IndeterminateProgressDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.InfoDialogType;
 import edu.umich.med.mrc2.datoolbox.gui.utils.InformationDialog;
+import edu.umich.med.mrc2.datoolbox.gui.utils.LongUpdateTask;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
@@ -91,6 +97,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io.ReferenceMSMSLibraryExp
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.library.LibEditorImportTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.library.LoadDatabaseLibraryTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.library.PCDLTextLibraryImportTask;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.library.PCDLfromBaseLibraryTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.msms.DecoyLibraryGenerationTask;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 
@@ -108,6 +115,7 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ItemList
 	private boolean showFeaturePending = false;
 	private String pendingFeatureId = null;
 	private LibraryRtImportDialog libraryRtImportDialog;
+	private NewPCLDLfromBaseDialog newPCLDLfromBaseDialog;
 
 	private static final Icon componentIcon = GuiUtils.getIcon("editLibrary", 16);
 	private static final Icon libraryManagerIcon = GuiUtils.getIcon("libraryManager", 24);
@@ -122,6 +130,8 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ItemList
 	private static final Icon importRtIcon = GuiUtils.getIcon("importLibraryRtValues", 24);
 	private static final Icon libraryExportIcon = GuiUtils.getIcon("exportLibrary", 24);
 	private static final Icon libraryImportIcon = GuiUtils.getIcon("importLibraryToDb", 24);
+	
+	
 
 	private static final File layoutConfigFile = new File(
 			MRC2ToolBoxCore.configDir + "MsLibraryPanel.layout");
@@ -259,6 +269,12 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ItemList
 
 		if (command.equals(MainActionCommands.IMPORT_PCDL_COMPOUND_LIBRARY_COMMAND.getName()))
 			importPCDLLibrary();
+		
+		if (command.equals(MainActionCommands.NEW_PCDL_LIBRARY_FROM_PCDL_TEXT_FILE_SETUP_COMMAND.getName()))
+			setupNewPCDLfromBase();
+
+		if (command.equals(MainActionCommands.NEW_PCDL_LIBRARY_FROM_PCDL_TEXT_FILE_COMMAND.getName()))
+			createNewPCDLfromBase();
 
 		if (command.equals(MainActionCommands.IMPORT_COMPOUND_LIBRARY_COMMAND.getName()))
 			importLibrary();
@@ -410,6 +426,124 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ItemList
 			importLibraryFromFile(inputFile, adductList);
 			
 		libraryInfoDialog.dispose();
+	}
+	
+	private void setupNewPCDLfromBase() {
+	
+		GetBasePCDLTask task = new GetBasePCDLTask(MRC2ToolBoxConfiguration.BASE_PCDL_LIBRARY_ID);
+		IndeterminateProgressDialog idp = new IndeterminateProgressDialog(
+				"Loading basePCDL library ...", this.getContentPane(), task);
+		idp.setLocationRelativeTo(this.getContentPane());
+		idp.setVisible(true);
+	}
+
+	private void createNewPCDLfromBase() {
+		
+		Collection<String>errors = newPCLDLfromBaseDialog.validateLibraryData();
+		if(!errors.isEmpty()){
+		    MessageDialog.showErrorMsg(
+		            StringUtils.join(errors, "\n"), newPCLDLfromBaseDialog);
+		    return;
+		}	
+		CompoundLibrary basePCDLlibrary = newPCLDLfromBaseDialog.getBasePCDLlibrary();
+		CompoundLibrary newLlibrary = new CompoundLibrary(
+				newPCLDLfromBaseDialog.getLibraryName(),
+				newPCLDLfromBaseDialog.getLibraryDescription(),
+				newPCLDLfromBaseDialog.getPolarity());
+		File inputLibraryFile = newPCLDLfromBaseDialog.getInputLibraryFile();
+		Collection<Adduct> selectedAdducts = newPCLDLfromBaseDialog.getSelectedAdducts();	
+		PCDLfromBaseLibraryTask task = new PCDLfromBaseLibraryTask(
+				basePCDLlibrary, 
+				newLlibrary, 
+				inputLibraryFile,
+				selectedAdducts);
+		
+		task.addTaskListener(this);
+		MRC2ToolBoxCore.getTaskController().addTask(task);		
+		newPCLDLfromBaseDialog.dispose();
+	}
+	
+	class GetBasePCDLTask extends LongUpdateTask {
+		
+		private String basePCDLid;
+		private CompoundLibrary basePCDLlibrary;
+			
+		public GetBasePCDLTask(String basePCDLid) {
+			super();
+			this.basePCDLid = basePCDLid;
+		}
+
+		@Override
+		public Void doInBackground() {
+			
+			basePCDLlibrary = MRC2ToolBoxCore.getActiveMsLibraries().stream().
+					filter(l -> l.getLibraryId().equals(basePCDLid)).findFirst().orElse(null);
+			if(basePCDLlibrary == null) {
+				
+				try {
+					basePCDLlibrary = loadBasePCDLlibrary(basePCDLid);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				if(basePCDLlibrary != null)
+					MRC2ToolBoxCore.getActiveMsLibraries().add(basePCDLlibrary);
+			}
+			return null;
+		}
+		
+	    @Override
+	    public void done() {
+	    	
+	    	super.done();
+			newPCLDLfromBaseDialog = new NewPCLDLfromBaseDialog(MsLibraryPanel.this);
+			newPCLDLfromBaseDialog.setBasePCDLlibrary(basePCDLlibrary);
+			newPCLDLfromBaseDialog.setLocationRelativeTo(MsLibraryPanel.this.getContentPane());
+			newPCLDLfromBaseDialog.setVisible(true);
+
+	    }
+	    
+		private CompoundLibrary loadBasePCDLlibrary(String libraryId) {
+			
+			CompoundLibrary library = null;
+			try {
+				library = MSRTLibraryUtils.getLibrary(libraryId);
+			} catch (Exception e1) {
+				e1.printStackTrace();
+				return null;
+			}
+			if (library == null) 
+				return null;
+
+			try {
+				Connection conn = ConnectionManager.getConnection();
+				Collection<LibraryMsFeatureDbBundle>bundles =
+						MSRTLibraryUtils.createFeatureBundlesForLibrary(library.getLibraryId(), conn);
+
+				for(LibraryMsFeatureDbBundle fBundle : bundles) {
+
+					if(fBundle.getConmpoundDatabaseAccession() != null) {
+
+						LibraryMsFeature newTarget = fBundle.getFeature();
+						MSRTLibraryUtils.attachIdentity(
+								newTarget, fBundle.getConmpoundDatabaseAccession(), false, conn);
+
+						if(newTarget.getPrimaryIdentity() != null) {
+
+							newTarget.getPrimaryIdentity().setConfidenceLevel(fBundle.getIdConfidence());
+							library.addFeature(newTarget);
+						}
+					}
+				}
+				ConnectionManager.releaseConnection(conn);
+			}
+			catch (Exception e) {
+
+				e.printStackTrace();
+				return null;
+			}		
+			return library;
+		}
 	}
 
 	private void loadLibrarySelectedFromMenu(Object selectionEventSource) {
@@ -1055,7 +1189,35 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ItemList
 				finalizeReferenceMSMSLibraryExportTask((ReferenceMSMSLibraryExportTask)e.getSource());
 			
 			if (e.getSource().getClass().equals(PCDLTextLibraryImportTask.class)) 
-				finalizePCDLTextLibraryImportTask((PCDLTextLibraryImportTask)e.getSource());			
+				finalizePCDLTextLibraryImportTask((PCDLTextLibraryImportTask)e.getSource());	
+			
+			if (e.getSource().getClass().equals(PCDLfromBaseLibraryTask.class)) 
+				finalizePCDLfromBaseLibraryTask((PCDLfromBaseLibraryTask)e.getSource());
+		}
+	}
+
+	private void finalizePCDLfromBaseLibraryTask(PCDLfromBaseLibraryTask task) {
+		
+		if(!task.getUnmatchedFeatures().isEmpty()) {
+			
+			String details = "The following entries were not found in PCDL base library:\n";
+			List<String>missingEntries = task.getUnmatchedFeatures().stream().
+					map(f -> f.getName() + "\t" + f.getFormula()).sorted().
+					collect(Collectors.toList());
+			details += StringUtils.join(missingEntries, "\n");
+			InformationDialog errorDialog = new InformationDialog(
+					"Error creating new PCDL library from base", 
+					"Failed to create the new PCDL library from base PCDL list", 
+					details, 
+					InfoDialogType.ERROR);
+			errorDialog.setLocationRelativeTo(this.getContentPane());
+			errorDialog.setVisible(true);
+		}
+		else {
+			LoadDatabaseLibraryTask loadLibTask = 
+					new LoadDatabaseLibraryTask(task.getNewLlibrary().getLibraryId());
+			loadLibTask.addTaskListener(this);
+			MRC2ToolBoxCore.getTaskController().addTask(loadLibTask);
 		}
 	}
 
@@ -1085,8 +1247,7 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ItemList
 			InformationDialog id = new InformationDialog(
 					"Unmatched compounds", 
 					"Library data import failed", 
-					StringUtils.join(errors, "\n"), 
-					this.getContentPane(),
+					StringUtils.join(errors, "\n"),
 					InfoDialogType.ERROR);
 			id.setLocationRelativeTo(this.getContentPane());
 			id.setVisible(true);

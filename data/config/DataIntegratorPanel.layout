@@ -108,12 +108,12 @@
 											<node nodeId="1600213796236" orientation="VERTICAL" divider="0.5">
 												<node nodeId="1600213796238" orientation="VERTICAL" divider="0.6">
 													<node nodeId="1600213796240" orientation="HORIZONTAL" divider="0.8">
-														<leaf id="1" nodeId="1600213796242">
+														<leaf id="5" nodeId="1600213796242">
 															<placeholders>
 																<placeholder>dock.single.DockableDataIntegrationFeatureSelectionTable</placeholder>
 															</placeholders>
 														</leaf>
-														<leaf id="5" nodeId="1600213796244">
+														<leaf id="1" nodeId="1600213796244">
 															<placeholders>
 																<placeholder>dock.single.ClusterDisplayPanelDockableMolStructurePanel</placeholder>
 															</placeholders>
@@ -213,10 +213,10 @@
 									<children ignore="false"/>
 								</child>
 								<child>
-									<layout factory="predefined" placeholder="dock.single.DockableDataIntegrationFeatureSelectionTable">
-										<replacement id="dockablesingle DockableDataIntegrationFeatureSelectionTable"/>
+									<layout factory="predefined" placeholder="dock.single.ClusterDisplayPanelDockableMolStructurePanel">
+										<replacement id="dockablesingle ClusterDisplayPanelDockableMolStructurePanel"/>
 										<delegate id="delegate_ccontrol backup factory id">
-											<id>DockableDataIntegrationFeatureSelectionTable</id>
+											<id>ClusterDisplayPanelDockableMolStructurePanel</id>
 											<area/>
 										</delegate>
 									</layout>
@@ -399,10 +399,10 @@
 									<children ignore="false"/>
 								</child>
 								<child>
-									<layout factory="predefined" placeholder="dock.single.ClusterDisplayPanelDockableMolStructurePanel">
-										<replacement id="dockablesingle ClusterDisplayPanelDockableMolStructurePanel"/>
+									<layout factory="predefined" placeholder="dock.single.DockableDataIntegrationFeatureSelectionTable">
+										<replacement id="dockablesingle DockableDataIntegrationFeatureSelectionTable"/>
 										<delegate id="delegate_ccontrol backup factory id">
-											<id>ClusterDisplayPanelDockableMolStructurePanel</id>
+											<id>DockableDataIntegrationFeatureSelectionTable</id>
 											<area/>
 										</delegate>
 									</layout>

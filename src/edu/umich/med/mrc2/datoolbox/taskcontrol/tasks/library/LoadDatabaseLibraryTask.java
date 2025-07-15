@@ -63,7 +63,7 @@ public class LoadDatabaseLibraryTask extends AbstractTask {
 
 			e1.printStackTrace();
 			setStatus(TaskStatus.ERROR);
-return;
+			return;
 
 		}
 		total = 100;
@@ -105,8 +105,7 @@ return;
 
 				e.printStackTrace();
 				setStatus(TaskStatus.ERROR);
-return;
-
+				return;
 			}
 		}
 		setStatus(TaskStatus.FINISHED);

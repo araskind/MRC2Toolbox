@@ -341,8 +341,7 @@ public class WizardMsDataVerifierPanel extends IDTrackerDataLoadWizardPanel
 			InformationDialog id = new InformationDialog(
 					"Data prescan details", 
 					"Added / missing compounds information", 
-					StringUtils.join(task.getPrescanLog(), "\n"), 
-					this);
+					StringUtils.join(task.getPrescanLog(), "\n"));
 			id.setLocationRelativeTo(this);
 			id.setVisible(true);
 		}

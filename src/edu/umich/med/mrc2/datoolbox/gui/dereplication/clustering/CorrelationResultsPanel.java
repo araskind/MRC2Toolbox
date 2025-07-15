@@ -1014,8 +1014,7 @@ public class CorrelationResultsPanel extends ClusterDisplayPanel implements Char
 						"Unmatched features",
 						"Not all binned features were matched to the experiment features.\n"
 						+ "Below is the list of unmatched features.",
-						StringUtils.join(task.getUnassignedFeatures(), "\n"),
-						this.getContentPane());
+						StringUtils.join(task.getUnassignedFeatures(), "\n"));
 				id.setLocationRelativeTo(this.getContentPane());
 				id.setVisible(true);
 			}

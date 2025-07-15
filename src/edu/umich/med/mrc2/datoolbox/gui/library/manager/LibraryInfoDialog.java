@@ -24,6 +24,7 @@ package edu.umich.med.mrc2.datoolbox.gui.library.manager;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -78,20 +79,18 @@ public class LibraryInfoDialog extends JDialog
 	 *
 	 */
 	private static final long serialVersionUID = 7917036676205745402L;
-	private JTextField nameTextField;
-	private JTextArea libraryDescriptionTextArea;
-	private JButton cancelButton, saveButton;
-	private CompoundLibrary currentLibrary;
-
+	
 	private static final Icon newLibraryIcon = GuiUtils.getIcon("newLibrary", 32);
 	private static final Icon editLibInfoIcon = GuiUtils.getIcon("editLibrary", 32);
 	private static final Icon duplicateLibraryIcon = GuiUtils.getIcon("duplicateLibrary", 32);
-
 	
+	private JTextField nameTextField;
+	private JTextArea libraryDescriptionTextArea;
+	private JButton cancelButton, saveButton;
 	private JComboBox polarityComboBox;
 	private JTextField libFileTextField;
 	private JButton btnBrowse;
-	private File inputLibraryFile;
+	
 	
 	private static final String BROWSE = "BROWSE";
 	
@@ -110,6 +109,9 @@ public class LibraryInfoDialog extends JDialog
 	private JScrollPane adductScroll;
 	private JLabel idfLabel;
 	
+	private File inputLibraryFile;
+	private CompoundLibrary currentLibrary;
+	
 	public LibraryInfoDialog(ActionListener listener) {
 
 		super();
@@ -124,9 +126,9 @@ public class LibraryInfoDialog extends JDialog
 		getContentPane().add(panel, BorderLayout.CENTER);
 		GridBagLayout gbl_panel = new GridBagLayout();
 		gbl_panel.columnWidths = new int[]{0, 151, 166, 0, 0};
-		gbl_panel.rowHeights = new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+		gbl_panel.rowHeights = new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 		gbl_panel.columnWeights = new double[]{0.0, 1.0, 1.0, 1.0, Double.MIN_VALUE};
-		gbl_panel.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, Double.MIN_VALUE};
+		gbl_panel.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, Double.MIN_VALUE};
 		panel.setLayout(gbl_panel);
 
 		JLabel nameLabel = new JLabel("Name");
@@ -288,7 +290,7 @@ public class LibraryInfoDialog extends JDialog
 		clearRtCheckBox = new JCheckBox("Clear retention times");
 		GridBagConstraints gbc_clearRtCheckBox = new GridBagConstraints();
 		gbc_clearRtCheckBox.anchor = GridBagConstraints.WEST;
-		gbc_clearRtCheckBox.insets = new Insets(0, 0, 5, 5);
+		gbc_clearRtCheckBox.insets = new Insets(0, 0, 0, 5);
 		gbc_clearRtCheckBox.gridx = 1;
 		gbc_clearRtCheckBox.gridy = 9;
 		panel.add(clearRtCheckBox, gbc_clearRtCheckBox);
@@ -297,20 +299,19 @@ public class LibraryInfoDialog extends JDialog
 		clearAnnotationsCheckBox = new JCheckBox("Clear annotations");
 		GridBagConstraints gbc_clearAnnotationsCheckBox = new GridBagConstraints();
 		gbc_clearAnnotationsCheckBox.anchor = GridBagConstraints.WEST;
-		gbc_clearAnnotationsCheckBox.insets = new Insets(0, 0, 5, 5);
+		gbc_clearAnnotationsCheckBox.insets = new Insets(0, 0, 0, 5);
 		gbc_clearAnnotationsCheckBox.gridx = 2;
 		gbc_clearAnnotationsCheckBox.gridy = 9;
 		panel.add(clearAnnotationsCheckBox, gbc_clearAnnotationsCheckBox);
 		clearAnnotationsCheckBox.setVisible(false);
 
-		cancelButton = new JButton("Cancel");
-		GridBagConstraints gbc_cancelButton = new GridBagConstraints();
-		gbc_cancelButton.anchor = GridBagConstraints.WEST;
-		gbc_cancelButton.insets = new Insets(0, 0, 0, 5);
-		gbc_cancelButton.gridx = 1;
-		gbc_cancelButton.gridy = 10;
-		panel.add(cancelButton, gbc_cancelButton);
+		JPanel buttonPanel = new JPanel();
+		FlowLayout flowLayout = (FlowLayout) buttonPanel.getLayout();
+		flowLayout.setAlignment(FlowLayout.RIGHT);
+		getContentPane().add(buttonPanel, BorderLayout.SOUTH);
 
+		cancelButton = new JButton("Cancel");
+		buttonPanel.add(cancelButton);
 		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
 		ActionListener al = new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
@@ -318,19 +319,14 @@ public class LibraryInfoDialog extends JDialog
 			}
 		};
 		cancelButton.addActionListener(al);
-		
+
 		saveButton = new JButton("Save");
 		saveButton.addActionListener(listener);
-		GridBagConstraints gbc_saveButton = new GridBagConstraints();
-		gbc_saveButton.gridwidth = 2;
-		gbc_saveButton.fill = GridBagConstraints.HORIZONTAL;
-		gbc_saveButton.gridx = 2;
-		gbc_saveButton.gridy = 10;
-		panel.add(saveButton, gbc_saveButton);
-
+		buttonPanel.add(saveButton);
 		JRootPane rootPane = SwingUtilities.getRootPane(saveButton);
-		rootPane.setDefaultButton(saveButton);
 		rootPane.registerKeyboardAction(al, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
+		rootPane.setDefaultButton(saveButton);
+		
 		loadPreferences();
 		pack();
 	}

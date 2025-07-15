@@ -111,7 +111,7 @@ public class PCDLTextLibraryImportTask extends AbstractTask {
 			setStatus(TaskStatus.FINISHED);
 			return;
 		}
-		if(getUnmatchedIdList().size() == 0) {
+		if(getUnmatchedIdList().isEmpty()) {
 			
 			createLibraryFeatures();
 			try {
@@ -287,7 +287,8 @@ public class PCDLTextLibraryImportTask extends AbstractTask {
 			if(newTarget.getName().toUpperCase().contains("[ISTD]"))
 				mid.setQcStandard(true);
 			
-			library.addFeature(newTarget);
+			library.addFeature(newTarget);			
+			processed++;
 		}
 	}
 	

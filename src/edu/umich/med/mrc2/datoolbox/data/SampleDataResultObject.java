@@ -31,11 +31,16 @@ public class SampleDataResultObject {
 		this(null, null, null);
 	}
 	
-	public SampleDataResultObject(ExperimentalSample sample, DataFile dataFile) {
+	public SampleDataResultObject(
+			ExperimentalSample sample, 
+			DataFile dataFile) {
 		this(sample, dataFile, null);
 	}
 	
-	public SampleDataResultObject(ExperimentalSample sample, DataFile dataFile, ResultsFile resultFile) {
+	public SampleDataResultObject(
+			ExperimentalSample sample, 
+			DataFile dataFile, 
+			ResultsFile resultFile) {
 		super();
 		this.sample = sample;
 		this.dataFile = dataFile;

@@ -372,8 +372,7 @@ public class DuplicatesPanel extends ClusterDisplayPanel {
 		InformationDialog id = new InformationDialog(
 				"Duplicate feature names", 
 				"Found the following duplicate feature names",
-				StringUtils.join(dupNames, "\n"),
-				this.getContentPane());
+				StringUtils.join(dupNames, "\n"));
 		id.setLocationRelativeTo(this.getContentPane());
 		id.setVisible(true);
 	}

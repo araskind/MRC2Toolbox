@@ -691,6 +691,8 @@ public enum MainActionCommands {
 	IMPORT_COMPOUND_LIBRARY_COMMAND("Import CEF / Library editor data into active library"),
 	SET_UP_PCDL_DATA_IMPORT_COMMAND("Set up PCDL data import"),
 	IMPORT_PCDL_COMPOUND_LIBRARY_COMMAND("Import PCDL data into active library"),
+	NEW_PCDL_LIBRARY_FROM_PCDL_TEXT_FILE_SETUP_COMMAND("Generate new library from PCDL base and PCDL text export"),
+	NEW_PCDL_LIBRARY_FROM_PCDL_TEXT_FILE_COMMAND("Generate new PCDL"),
 	EXPORT_COMPOUND_LIBRARY_COMMAND("Export compound library"),
 	EXPORT_FILTERED_COMPOUND_LIBRARY_COMMAND("Export filtered compound library"),
 	NEW_LIBRARY_DIALOG_COMMAND("Show \"New Library\" dialog"),

@@ -23,7 +23,6 @@ package edu.umich.med.mrc2.datoolbox.gui.utils;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
@@ -69,13 +68,11 @@ public class InformationDialog extends JDialog implements ActionListener {
 			String title, 
 			String message, 
 			String details, 
-			Component parent,
 			InfoDialogType dialogType) {
 
 		super(MRC2ToolBoxCore.getMainWindow(), title, true);
 
 		initGui(dialogType);
-
 		messageLabel.setText(message);
 		textArea.setText(details);
 		pack();
@@ -87,13 +84,12 @@ public class InformationDialog extends JDialog implements ActionListener {
 	public InformationDialog(
 			String title, 
 			String message, 
-			String details, 
-			Component parent) {
+			String details) {
 
-		this(title, message, details, parent, InfoDialogType.INFO);
+		this(title, message, details, InfoDialogType.INFO);
 	}
 
-	public InformationDialog(String message, Throwable exception, Component parent) {
+	public InformationDialog(String message, Throwable exception) {
 
 		super(MRC2ToolBoxCore.getMainWindow(), "Error!", true);
 
