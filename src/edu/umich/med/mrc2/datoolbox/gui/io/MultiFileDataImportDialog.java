@@ -50,7 +50,6 @@ import java.util.TreeSet;
 import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
 
-import javax.swing.DefaultComboBoxModel;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -84,6 +83,7 @@ import edu.umich.med.mrc2.datoolbox.data.ResultsFile;
 import edu.umich.med.mrc2.datoolbox.data.SampleDataResultObject;
 import edu.umich.med.mrc2.datoolbox.data.compare.SampleDataResultObjectComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
+import edu.umich.med.mrc2.datoolbox.data.enums.DataTypeForImport;
 import edu.umich.med.mrc2.datoolbox.data.enums.FeatureAlignmentType;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
@@ -140,17 +140,9 @@ public class MultiFileDataImportDialog extends JDialog
 				pfaTempDir;
 	private CompoundLibrary currentLibrary;
 	private JTextField libraryTextField;
-//	private JButton cancelButton;
-//	private JButton importDataButton;
 	private MultiFileImportToolbar toolBar;
 	
-//	private JFileChooser chooser;
-//	private FileNameExtensionFilter txtFilter;
-//	private FileNameExtensionFilter xmlFilter;
-//	private FileNameExtensionFilter mgfFilter;
-//	private FileNameExtensionFilter pfaFilter;
-//	private String followupCommand;
-	
+	private JLabel libFileLabel;
 	private JComboBox featureSubsetcomboBox;
 	private JCheckBox removeAbnormalIsoPatternsCheckBox;
 	private JCheckBox skipCompoundMatchingCheckbox;
@@ -170,6 +162,8 @@ public class MultiFileDataImportDialog extends JDialog
 	private boolean areDataFromProFinder;
 	
 	private static final Icon importMultifileIcon = GuiUtils.getIcon("importMultifile", 32);
+	private JLabel dataFileLabel;
+	private JTextField dataFileTextField;
 
 	public MultiFileDataImportDialog(TaskListener dataLoadTaskListener) {
 
@@ -203,6 +197,7 @@ public class MultiFileDataImportDialog extends JDialog
 		gbl_panel_1.rowWeights = new double[]{0.0, 0.0, 1.0, 0.0, Double.MIN_VALUE};
 		panel_1.setLayout(gbl_panel_1);
 
+		/**
 		JLabel lblNewLabel = new JLabel("Features to align ");
 		GridBagConstraints gbc_lblNewLabel = new GridBagConstraints();
 		gbc_lblNewLabel.anchor = GridBagConstraints.EAST;
@@ -232,7 +227,8 @@ public class MultiFileDataImportDialog extends JDialog
 		gbc_lblNewLabel_1.gridx = 2;
 		gbc_lblNewLabel_1.gridy = 0;
 		panel_1.add(lblNewLabel_1, gbc_lblNewLabel_1);
-
+		*/
+		
 		JPanel panel_2 = new JPanel();
 		main.add(panel_2, BorderLayout.CENTER);
 		panel_2.setLayout(new BorderLayout(0, 0));
@@ -244,29 +240,47 @@ public class MultiFileDataImportDialog extends JDialog
 		libChooserPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		GridBagLayout gbl_libChooserPanel = new GridBagLayout();
 		gbl_libChooserPanel.columnWidths = new int[]{0, 0, 0};
-		gbl_libChooserPanel.rowHeights = new int[]{0, 0};
+		gbl_libChooserPanel.rowHeights = new int[]{0, 0, 0};
 		gbl_libChooserPanel.columnWeights = new double[]{0.0, 1.0, Double.MIN_VALUE};
-		gbl_libChooserPanel.rowWeights = new double[]{0.0, Double.MIN_VALUE};
+		gbl_libChooserPanel.rowWeights = new double[]{0.0, 0.0, Double.MIN_VALUE};
 		libChooserPanel.setLayout(gbl_libChooserPanel);
 
-		JLabel libFileLabel = new JLabel("Library: ");
+		libFileLabel = new JLabel("Library: ");
 		GridBagConstraints gbc_libFileLabel = new GridBagConstraints();
 		gbc_libFileLabel.anchor = GridBagConstraints.EAST;
-		gbc_libFileLabel.insets = new Insets(0, 0, 0, 5);
+		gbc_libFileLabel.insets = new Insets(0, 0, 5, 5);
 		gbc_libFileLabel.gridx = 0;
 		gbc_libFileLabel.gridy = 0;
 		libChooserPanel.add(libFileLabel, gbc_libFileLabel);
 
 		libraryTextField = new JTextField();
 		libraryTextField.setEditable(false);
-		GridBagConstraints gbc_textField = new GridBagConstraints();
-		gbc_textField.fill = GridBagConstraints.HORIZONTAL;
-		gbc_textField.gridx = 1;
-		gbc_textField.gridy = 0;
-		libChooserPanel.add(libraryTextField, gbc_textField);
+		GridBagConstraints gbc_libraryTextField = new GridBagConstraints();
+		gbc_libraryTextField.insets = new Insets(0, 0, 5, 0);
+		gbc_libraryTextField.fill = GridBagConstraints.HORIZONTAL;
+		gbc_libraryTextField.gridx = 1;
+		gbc_libraryTextField.gridy = 0;
+		libChooserPanel.add(libraryTextField, gbc_libraryTextField);
 		libraryTextField.setColumns(10);
 
 		panel_2.add(libChooserPanel, BorderLayout.NORTH);
+		
+		dataFileLabel = new JLabel("Data file: ");
+		GridBagConstraints gbc_dataFileLabel = new GridBagConstraints();
+		gbc_dataFileLabel.anchor = GridBagConstraints.EAST;
+		gbc_dataFileLabel.insets = new Insets(0, 0, 0, 5);
+		gbc_dataFileLabel.gridx = 0;
+		gbc_dataFileLabel.gridy = 1;
+		libChooserPanel.add(dataFileLabel, gbc_dataFileLabel);
+		
+		dataFileTextField = new JTextField();
+		dataFileTextField.setEditable(false);
+		GridBagConstraints gbc_dataFileTextField = new GridBagConstraints();
+		gbc_dataFileTextField.fill = GridBagConstraints.HORIZONTAL;
+		gbc_dataFileTextField.gridx = 1;
+		gbc_dataFileTextField.gridy = 1;
+		libChooserPanel.add(dataFileTextField, gbc_dataFileTextField);
+		dataFileTextField.setColumns(10);
 
 		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
 		ActionListener al = new ActionListener() {
@@ -926,10 +940,39 @@ public class MultiFileDataImportDialog extends JDialog
 	public void itemStateChanged(ItemEvent e) {
 
 		if(e.getStateChange() == ItemEvent.SELECTED) {
-
+			
+			if(e.getItem() instanceof DataTypeForImport)			
+				updateInterfaceForImportType((DataTypeForImport)e.getItem());			
 		}
 	}
 
+	private void updateInterfaceForImportType(DataTypeForImport importType) {
+		
+		if(importType.equals(DataTypeForImport.AGILENT_UNTARGETED))
+			updateInterfaceForAgilentUntargetedImport();
+		
+		if(importType.equals(DataTypeForImport.AGILENT_PROFINDER_TARGETED))
+			updateInterfaceForProFinderImport();
+		
+		if(importType.equals(DataTypeForImport.GENERIC_TARGETED))
+			updateInterfaceForGenericTargetedImport();	
+	}
+
+	private void updateInterfaceForAgilentUntargetedImport() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private void updateInterfaceForProFinderImport() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private void updateInterfaceForGenericTargetedImport() {
+		// TODO Auto-generated method stub
+		
+	}
+	
 	@Override
 	public void loadPreferences(Preferences prefs) {
 		preferences = prefs;

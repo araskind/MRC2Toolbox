@@ -73,18 +73,6 @@ public class PCDLfromBaseLibraryTask extends AbstractTask {
 			setStatus(TaskStatus.FINISHED);
 			return;
 		}
-		String newLibId = null;
-		try {
-			newLibId = MSRTLibraryUtils.createNewLibrary(newLlibrary);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		if(newLibId == null) {
-			errorMessage = "Failed to crete new library!";
-			setStatus(TaskStatus.ERROR);
-			return;
-		}
 		boolean dataValid = false;
 		try {
 			dataValid = parseTextLibrary();
@@ -100,6 +88,18 @@ public class PCDLfromBaseLibraryTask extends AbstractTask {
 		}
 		if(unmatchedFeatures.isEmpty()) {
 			
+			String newLibId = null;
+			try {
+				newLibId = MSRTLibraryUtils.createNewLibrary(newLlibrary);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			if(newLibId == null) {
+				errorMessage = "Failed to crete new library!";
+				setStatus(TaskStatus.ERROR);
+				return;
+			}			
 			try {
 				writeFeaturesToDatabase();
 			} catch (Exception e) {
@@ -110,7 +110,6 @@ public class PCDLfromBaseLibraryTask extends AbstractTask {
 			}
 		}
 		setStatus(TaskStatus.FINISHED);
-
 	}
 	
 	private boolean parseTextLibrary() {
@@ -122,7 +121,6 @@ public class PCDLfromBaseLibraryTask extends AbstractTask {
 		total = compoundDataArray.length -1;
 		processed = 0;
 		
-
 		boolean dataValid = createAndValidateFieldMap(compoundDataArray[0]);
 		if(!dataValid)
 			return false;

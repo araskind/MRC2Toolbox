@@ -74,7 +74,7 @@ public class NewPCLDLfromBaseDialog extends JDialog implements ActionListener, I
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	private static final Icon duplicateLibraryIcon = GuiUtils.getIcon("newPCDLfromBase", 32);
+	private static final Icon pcdlLibraryIcon = GuiUtils.getIcon("newPCDLfromBase", 32);
 
 	private JTextField nameTextField;
 	private JTextArea libraryDescriptionTextArea;
@@ -110,9 +110,9 @@ public class NewPCLDLfromBaseDialog extends JDialog implements ActionListener, I
 		getContentPane().add(panel, BorderLayout.CENTER);
 		GridBagLayout gbl_panel = new GridBagLayout();
 		gbl_panel.columnWidths = new int[]{0, 151, 166, 0, 0};
-		gbl_panel.rowHeights = new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+		gbl_panel.rowHeights = new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 		gbl_panel.columnWeights = new double[]{0.0, 1.0, 1.0, 1.0, Double.MIN_VALUE};
-		gbl_panel.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, Double.MIN_VALUE};
+		gbl_panel.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, Double.MIN_VALUE};
 		panel.setLayout(gbl_panel);
 		
 		JLabel lblNewLabel_1 = new JLabel("PCDL base");
@@ -127,7 +127,7 @@ public class NewPCLDLfromBaseDialog extends JDialog implements ActionListener, I
 		pcdlBaseNameField.setEditable(false);
 		GridBagConstraints gbc_pcdlBaseNameField = new GridBagConstraints();
 		gbc_pcdlBaseNameField.gridwidth = 3;
-		gbc_pcdlBaseNameField.insets = new Insets(0, 0, 5, 5);
+		gbc_pcdlBaseNameField.insets = new Insets(0, 0, 5, 0);
 		gbc_pcdlBaseNameField.fill = GridBagConstraints.HORIZONTAL;
 		gbc_pcdlBaseNameField.gridx = 1;
 		gbc_pcdlBaseNameField.gridy = 0;
@@ -152,12 +152,34 @@ public class NewPCLDLfromBaseDialog extends JDialog implements ActionListener, I
 		panel.add(nameTextField, gbc_nameTextField);
 		nameTextField.setColumns(10);
 		
+		JLabel lblDescription = new JLabel("Description");
+		GridBagConstraints gbc_lblDescription = new GridBagConstraints();
+		gbc_lblDescription.anchor = GridBagConstraints.NORTH;
+		gbc_lblDescription.insets = new Insets(0, 0, 5, 5);
+		gbc_lblDescription.gridx = 0;
+		gbc_lblDescription.gridy = 2;
+		panel.add(lblDescription, gbc_lblDescription);
+
+		libraryDescriptionTextArea = new JTextArea();
+		libraryDescriptionTextArea.setRows(3);
+		libraryDescriptionTextArea.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
+		libraryDescriptionTextArea.setLineWrap(true);
+		libraryDescriptionTextArea.setWrapStyleWord(true);
+		GridBagConstraints gbc_textArea = new GridBagConstraints();
+		gbc_textArea.gridheight = 2;
+		gbc_textArea.gridwidth = 3;
+		gbc_textArea.insets = new Insets(0, 0, 5, 0);
+		gbc_textArea.fill = GridBagConstraints.BOTH;
+		gbc_textArea.gridx = 1;
+		gbc_textArea.gridy = 2;
+		panel.add(libraryDescriptionTextArea, gbc_textArea);
+		
 		JLabel lblNewLabel = new JLabel("Polarity");
 		GridBagConstraints gbc_lblNewLabel = new GridBagConstraints();
 		gbc_lblNewLabel.anchor = GridBagConstraints.EAST;
 		gbc_lblNewLabel.insets = new Insets(0, 0, 5, 5);
 		gbc_lblNewLabel.gridx = 0;
-		gbc_lblNewLabel.gridy = 2;
+		gbc_lblNewLabel.gridy = 4;
 		panel.add(lblNewLabel, gbc_lblNewLabel);
 		
 		polarityComboBox = new JComboBox<Polarity>(
@@ -169,29 +191,8 @@ public class NewPCLDLfromBaseDialog extends JDialog implements ActionListener, I
 		gbc_polarityComboBox.insets = new Insets(0, 0, 5, 5);
 		gbc_polarityComboBox.fill = GridBagConstraints.HORIZONTAL;
 		gbc_polarityComboBox.gridx = 1;
-		gbc_polarityComboBox.gridy = 2;
+		gbc_polarityComboBox.gridy = 4;
 		panel.add(polarityComboBox, gbc_polarityComboBox);
-
-		JLabel lblDescription = new JLabel("Description");
-		GridBagConstraints gbc_lblDescription = new GridBagConstraints();
-		gbc_lblDescription.anchor = GridBagConstraints.NORTH;
-		gbc_lblDescription.insets = new Insets(0, 0, 5, 5);
-		gbc_lblDescription.gridx = 0;
-		gbc_lblDescription.gridy = 3;
-		panel.add(lblDescription, gbc_lblDescription);
-
-		libraryDescriptionTextArea = new JTextArea();
-		libraryDescriptionTextArea.setRows(3);
-		libraryDescriptionTextArea.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
-		libraryDescriptionTextArea.setLineWrap(true);
-		libraryDescriptionTextArea.setWrapStyleWord(true);
-		GridBagConstraints gbc_textArea = new GridBagConstraints();
-		gbc_textArea.gridwidth = 3;
-		gbc_textArea.insets = new Insets(0, 0, 5, 0);
-		gbc_textArea.fill = GridBagConstraints.BOTH;
-		gbc_textArea.gridx = 1;
-		gbc_textArea.gridy = 3;
-		panel.add(libraryDescriptionTextArea, gbc_textArea);
 		
 		idfLabel = new JLabel("Import data from file:");
 		GridBagConstraints gbc_idfLabel = new GridBagConstraints();
@@ -199,7 +200,7 @@ public class NewPCLDLfromBaseDialog extends JDialog implements ActionListener, I
 		gbc_idfLabel.gridwidth = 2;
 		gbc_idfLabel.insets = new Insets(0, 0, 5, 5);
 		gbc_idfLabel.gridx = 0;
-		gbc_idfLabel.gridy = 4;
+		gbc_idfLabel.gridy = 5;
 		panel.add(idfLabel, gbc_idfLabel);
 		
 		libFileTextField = new JTextField();
@@ -209,7 +210,7 @@ public class NewPCLDLfromBaseDialog extends JDialog implements ActionListener, I
 		gbc_libFileTextField.insets = new Insets(0, 0, 5, 5);
 		gbc_libFileTextField.fill = GridBagConstraints.HORIZONTAL;
 		gbc_libFileTextField.gridx = 0;
-		gbc_libFileTextField.gridy = 5;
+		gbc_libFileTextField.gridy = 6;
 		panel.add(libFileTextField, gbc_libFileTextField);
 		libFileTextField.setColumns(10);
 		
@@ -220,7 +221,7 @@ public class NewPCLDLfromBaseDialog extends JDialog implements ActionListener, I
 		gbc_btnNewButton.fill = GridBagConstraints.HORIZONTAL;
 		gbc_btnNewButton.insets = new Insets(0, 0, 5, 0);
 		gbc_btnNewButton.gridx = 3;
-		gbc_btnNewButton.gridy = 5;
+		gbc_btnNewButton.gridy = 6;
 		panel.add(btnBrowse, gbc_btnNewButton);
 		
 		createDefaultAdductsLabel = 
@@ -230,7 +231,7 @@ public class NewPCLDLfromBaseDialog extends JDialog implements ActionListener, I
 		gbc_createDefaultAdductsCheckBox.gridwidth = 3;
 		gbc_createDefaultAdductsCheckBox.insets = new Insets(0, 0, 5, 5);
 		gbc_createDefaultAdductsCheckBox.gridx = 0;
-		gbc_createDefaultAdductsCheckBox.gridy = 6;
+		gbc_createDefaultAdductsCheckBox.gridy = 7;
 		panel.add(createDefaultAdductsLabel, gbc_createDefaultAdductsCheckBox);
 		
 		adductSubsetLabel = new JLabel("Adduct subset ");
@@ -238,7 +239,7 @@ public class NewPCLDLfromBaseDialog extends JDialog implements ActionListener, I
 		gbc_lblNewLabel_2.insets = new Insets(0, 0, 5, 5);
 		gbc_lblNewLabel_2.anchor = GridBagConstraints.EAST;
 		gbc_lblNewLabel_2.gridx = 1;
-		gbc_lblNewLabel_2.gridy = 7;
+		gbc_lblNewLabel_2.gridy = 8;
 		panel.add(adductSubsetLabel, gbc_lblNewLabel_2);
 		
 		adductSubsetComboBox = new JComboBox<AdductSubset>(
@@ -253,7 +254,7 @@ public class NewPCLDLfromBaseDialog extends JDialog implements ActionListener, I
 		gbc_comboBox.insets = new Insets(0, 0, 5, 5);
 		gbc_comboBox.fill = GridBagConstraints.HORIZONTAL;
 		gbc_comboBox.gridx = 2;
-		gbc_comboBox.gridy = 7;
+		gbc_comboBox.gridy = 8;
 		panel.add(adductSubsetComboBox, gbc_comboBox);
 		
 		adductsTable = new AdductSelectionTable();
@@ -262,7 +263,7 @@ public class NewPCLDLfromBaseDialog extends JDialog implements ActionListener, I
 		gbc_scrollPane.gridwidth = 4;
 		gbc_scrollPane.fill = GridBagConstraints.BOTH;
 		gbc_scrollPane.gridx = 0;
-		gbc_scrollPane.gridy = 8;
+		gbc_scrollPane.gridy = 9;
 		panel.add(adductScroll, gbc_scrollPane);
 		
 		JPanel buttonPanel = new JPanel();

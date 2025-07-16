@@ -23,9 +23,12 @@ package edu.umich.med.mrc2.datoolbox.gui.io;
 
 import java.awt.Dimension;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemListener;
 
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.Icon;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
@@ -35,6 +38,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.text.DefaultFormatter;
 
+import edu.umich.med.mrc2.datoolbox.data.enums.DataTypeForImport;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.CommonToolbar;
@@ -49,19 +53,21 @@ public class MultiFileImportToolbar extends CommonToolbar {
 	 */
 	private static final long serialVersionUID = 3815759313572710153L;
 	
-	private static final Icon selectLibraryIcon = GuiUtils.getIcon("loadLibrary", 32);
-	private static final Icon addDataFilesIcon = GuiUtils.getIcon("addMultifile", 32);
-	private static final Icon loadPfaFileIcon = GuiUtils.getIcon("importFromProFinderPaf", 32);
-	private static final Icon removeDataFilesIcon = GuiUtils.getIcon("removeMultifile", 32);
-	private static final Icon clearDataIcon = GuiUtils.getIcon("clearWorklist", 32);
-	private static final Icon editReferenceSamplesIcon = GuiUtils.getIcon("standardSample", 32);
-	private static final Icon loadDesignIcon = GuiUtils.getIcon("loadDesign", 32);
-	private static final Icon addAcqMethodIcon = GuiUtils.getIcon("addDataAcquisitionMethod", 32);
-	private static final Icon addDextrMethodIcon = GuiUtils.getIcon("addDataProcessingMethod", 32);
+	private static final Icon selectLibraryIcon = GuiUtils.getIcon("loadLibrary", 24);
+	private static final Icon addDataFilesIcon = GuiUtils.getIcon("addMultifile", 24);
+	private static final Icon pcdlLibraryIcon = GuiUtils.getIcon("newPCDLfromBase", 24);
+	private static final Icon loadPfaFileIcon = GuiUtils.getIcon("importFromProFinderPaf", 24);
+	private static final Icon removeDataFilesIcon = GuiUtils.getIcon("removeMultifile", 24);
+	private static final Icon clearDataIcon = GuiUtils.getIcon("clearWorklist", 24);
+	private static final Icon editReferenceSamplesIcon = GuiUtils.getIcon("standardSample", 24);
+	private static final Icon loadDesignIcon = GuiUtils.getIcon("loadDesign", 24);
+	private static final Icon addAcqMethodIcon = GuiUtils.getIcon("addDataAcquisitionMethod", 24);
+	private static final Icon addDextrMethodIcon = GuiUtils.getIcon("addDataProcessingMethod", 24);
 	private JButton
 		dataAnalysisPipelineButton,
 		selectLibraryButton,
 		addDataFilesButton,
+		selectPCDLLibraryButton,
 		loadFromProFinderPfaButton,
 		removeDataFilesButton,
 		clearDataButton,
@@ -71,14 +77,27 @@ public class MultiFileImportToolbar extends CommonToolbar {
 		addDextrMethodButton;
 
 	private JSpinner taskNumberSpinner;
+	private JComboBox<DataTypeForImport>importTypeComboBox;
 
 	public MultiFileImportToolbar(ActionListener commandListener) {
 		
 		super(commandListener);
 
+		importTypeComboBox = new JComboBox<DataTypeForImport>(
+				new DefaultComboBoxModel<DataTypeForImport>(DataTypeForImport.values()));
+		importTypeComboBox.addItemListener((ItemListener)commandListener);
+		
+		add(importTypeComboBox);
+		
+		addSeparator(buttonDimension);
+		
 		selectLibraryButton = GuiUtils.addButton(this, null, selectLibraryIcon, commandListener,
 				MainActionCommands.SELECT_INPUT_LIBRARY_COMMAND.getName(),
 				MainActionCommands.SELECT_INPUT_LIBRARY_COMMAND.getName(), buttonDimension);
+		
+		selectPCDLLibraryButton = GuiUtils.addButton(this, null, pcdlLibraryIcon, commandListener,
+				MainActionCommands.SELECT_PCDL_LIBRARY_COMMAND.getName(),
+				MainActionCommands.SELECT_PCDL_LIBRARY_COMMAND.getName(), buttonDimension);
 
 		addSeparator(buttonDimension);
 
@@ -165,6 +184,10 @@ public class MultiFileImportToolbar extends CommonToolbar {
 		loadDesignButton.setEnabled(active);
 		addAcqMethodButton.setEnabled(active);
 		addDextrMethodButton.setEnabled(active);
+	}
+	
+	public DataTypeForImport getDataTypeForImport() {
+		return (DataTypeForImport)importTypeComboBox.getSelectedItem();
 	}
 }
 

@@ -185,6 +185,7 @@ public enum MainActionCommands {
 	DEFINE_DATA_PIPELINE_COMMAND("Define data pipeline"),
 	SAVE_DATA_PIPELINE_COMMAND("Save data pipeline definition"),
 	SELECT_INPUT_LIBRARY_COMMAND("Select input library"),
+	SELECT_PCDL_LIBRARY_COMMAND("Select PCDL library from database"),
 	ADD_DATA_FILES_COMMAND("Add data files"),
 	REMOVE_DATA_FILES_COMMAND("Remove data files"),
 	CLEAR_DATA_COMMAND("Clear all input data"),
