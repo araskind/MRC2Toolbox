@@ -25,37 +25,59 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 
 import edu.umich.med.mrc2.datoolbox.data.Adduct;
+import edu.umich.med.mrc2.datoolbox.data.CompoundLibrary;
+import edu.umich.med.mrc2.datoolbox.data.DataFile;
+import edu.umich.med.mrc2.datoolbox.data.LibraryMsFeature;
+import edu.umich.med.mrc2.datoolbox.data.SampleDataResultObject;
 import edu.umich.med.mrc2.datoolbox.data.enums.AgilentProFinderSimpleCSVexportColumns;
+import edu.umich.med.mrc2.datoolbox.data.enums.CompoundIdentificationConfidence;
+import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
+import edu.umich.med.mrc2.datoolbox.database.idt.BasePCDLutils;
+import edu.umich.med.mrc2.datoolbox.database.idt.MSRTLibraryUtils;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
-import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskListener;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 import edu.umich.med.mrc2.datoolbox.utils.DelimitedTextParser;
 
-public class ProFinderArchivePreprocessingTask extends AbstractTask implements TaskListener {
-	
-	private File proFinderArchiveFile;
+public class ProFinderArchivePreprocessingTask extends DataWithLibraryImportAbstractTask {
+
+	private Set<SampleDataResultObject> dataToImport;
 	private File proFinderSimpleCsvExportFile;
 	private Collection<Adduct>selectedAdducts;
 	private boolean isLibraryParsed;
 	private Map<AgilentProFinderSimpleCSVexportColumns, Integer>dataFieldMap;
+	private CompoundLibrary basePCDLlibrary;
+	private Map<String, Double> nameRetentionMap;
+	private Map<String, Double> unmatchedProFinderCompounds;
 
 	public ProFinderArchivePreprocessingTask(
-			File proFinderArchiveFile, 
-			File proFinderSimpleCsvExportFile,
-			Collection<Adduct>selectedAdducts) {
+			DataPipeline dataPipeline,
+			File pfaTempDir,
+			Set<SampleDataResultObject> dataToImport, 			
+			File proFinderSimpleCsvExportFile, 
+			Collection<Adduct> selectedAdducts) {
 		super();
-		this.proFinderArchiveFile = proFinderArchiveFile;
+		this.dataPipeline = dataPipeline;
+		this.dataToImport = dataToImport;
+		this.dataFiles = dataToImport.stream().
+				map(s -> s.getDataFile()).
+				toArray(size -> new DataFile[size]);
+		this.tmpCefDirectory = pfaTempDir;
 		this.proFinderSimpleCsvExportFile = proFinderSimpleCsvExportFile;
 		this.selectedAdducts = selectedAdducts;
+		removeAbnormalIsoPatterns = false;
 		isLibraryParsed = false;
 	}
 
@@ -67,23 +89,71 @@ public class ProFinderArchivePreprocessingTask extends AbstractTask implements T
 		total = 100;
 		processed = 2;
 		try {
-			parseAndMatchLibraryDataFromSimpleCsvExportFile();
+			isLibraryParsed = parseLibraryDataFromSimpleCsvExportFile();
 		} catch (Exception e) {
-			errorMessage = "";
 			e.printStackTrace();
 			setStatus(TaskStatus.ERROR);
 			return;
 		}
-		setStatus(TaskStatus.FINISHED);
+		if(isLibraryParsed) {
+			//	TODO
+			if(generateCompoundLibrary()) {
+				initDataMatrixes();
+				initDataLoad();
+			}
+			else {
+				errorMessage = listUnmatchedCompoundsAsError(unmatchedProFinderCompounds);
+				setStatus(TaskStatus.ERROR);
+			}
+		}
 	}
 
-	private boolean parseAndMatchLibraryDataFromSimpleCsvExportFile() {
+	private boolean generateCompoundLibrary() {
+
+		taskDescription = "Parsing library data ...";
+		total = nameRetentionMap.size();
+		processed = 0;
+		basePCDLlibrary = BasePCDLutils.getPCDLbaseLibrary();
+		library = new CompoundLibrary("ProFinder library for " + dataPipeline.getName()); 
+		unmatchedProFinderCompounds = new HashMap<String, Double>();
+		libFeatureNameIdMap = new HashMap<String, String>();
+		for(Entry<String,Double>mapEntry : nameRetentionMap.entrySet()) {
+			
+			LibraryMsFeature baseEntry = basePCDLlibrary.getFeatureByName(mapEntry.getKey());
+			if(baseEntry == null)
+				unmatchedProFinderCompounds.put(mapEntry.getKey(), mapEntry.getValue());
+			else {
+				LibraryMsFeature newLibFeature = new LibraryMsFeature(baseEntry);
+				newLibFeature.setRetentionTime(mapEntry.getValue());
+				MSRTLibraryUtils.generateMassSpectrumFromAdducts(newLibFeature, selectedAdducts);
+
+				newLibFeature.getPrimaryIdentity().setConfidenceLevel(
+						CompoundIdentificationConfidence.ACCURATE_MASS_RT);
+				library.addFeature(newLibFeature);
+				libFeatureNameIdMap.put(newLibFeature.getName(), newLibFeature.getId());
+			}
+			processed++;
+		}
+		return unmatchedProFinderCompounds.isEmpty();
+	}	
+
+	private String listUnmatchedCompoundsAsError(Map<String, Double> unmatchedProFinderCompounds2) {
+
+		String details = "The following entries were not found in PCDL base library:\n";
+		List<String>missingEntries = unmatchedProFinderCompounds2.entrySet().stream().
+				map(f -> f.getKey() + "\t" + Double.toString(f.getValue())).sorted().
+				collect(Collectors.toList());
+		details += StringUtils.join(missingEntries, "\n");
+		return details;
+	}
+
+	private boolean parseLibraryDataFromSimpleCsvExportFile() {
 		
 		taskDescription = "Parsing library data ...";
 		total = 100;
 		processed = 2;
 		
-		Map<String,Double>nameRetentionMap = new HashMap<String,Double>();
+		nameRetentionMap = new HashMap<String,Double>();
 		String[][] compoundDataArray = 
 				DelimitedTextParser.parseTextFile(proFinderSimpleCsvExportFile, ',');
 		
@@ -134,20 +204,33 @@ public class ProFinderArchivePreprocessingTask extends AbstractTask implements T
 			return false;
 		}		
 	}	
-	
+
 	@Override
 	public void statusChanged(TaskEvent e) {
-		// TODO Auto-generated method stub
 
+		if (e.getStatus() == TaskStatus.FINISHED) {
+
+			((AbstractTask)e.getSource()).removeTaskListener(this);
+			
+			if (e.getSource().getClass().equals(CefDataImportTask.class))
+				finalizeCefImportTask((CefDataImportTask)e.getSource());	
+					
+			if (e.getSource().getClass().equals(CefImportFinalizationTask.class))
+				setStatus(TaskStatus.FINISHED);
+		}
 	}
 
 	@Override
 	public Task cloneTask() {
 
 		return new ProFinderArchivePreprocessingTask(
-				proFinderArchiveFile, 
-				proFinderSimpleCsvExportFile,
+				dataPipeline,
+				tmpCefDirectory,
+				dataToImport, 			
+				proFinderSimpleCsvExportFile, 
 				selectedAdducts);
 	}
-	
 }
+
+
+

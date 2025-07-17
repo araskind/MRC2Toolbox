@@ -37,6 +37,7 @@ public class CefImportSettingsObject {
 	private Map<String, List<Double>> retentionMap;
 	private Map<String, List<Double>> mzMap;
 	private Map<String, List<Double>> peakWidthMap;
+	private Map<String, String> libFeatureNameIdMap;
 	
 	public CefImportSettingsObject() {
 		super();
@@ -114,5 +115,11 @@ public class CefImportSettingsObject {
 		this.peakWidthMap = peakWidthMap;
 	}
 	
-	
+	public Map<String, String> getLibFeatureNameIdMap() {
+		return libFeatureNameIdMap;
+	}
+
+	public void setLibFeatureNameIdMap(Map<String, String> libFeatureNameIdMap) {
+		this.libFeatureNameIdMap = libFeatureNameIdMap;
+	}
 }

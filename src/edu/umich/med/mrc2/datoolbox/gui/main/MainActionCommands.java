@@ -156,6 +156,7 @@ public enum MainActionCommands {
 	LOAD_DATA_COMMAND("Load quantitative data"),
 	LOAD_DATA_FROM_MULTIFILES_COMMAND("Load quantitative data from multiple files"),
 	LOAD_DATA_FROM_PROFINDER_PFA_COMMAND("Load quantitative data from ProFinder PFA file"),
+	SELECT_PROFINDER_SIMPLE_CSV_COMMAND("Select ProFinder simple CSV export file"),
 	ADD_DATA_FROM_MULTIFILES_COMMAND("Add quantitative data to active assay from multiple files"),
 	ADD_PEAK_QUALITY_DATA_FROM_MULTIFILES_COMMAND("Add peak quality data to active assay"),
 	START_PEAK_QUALITY_DATA_IMPORT_COMMAND("Start peak quality data import"),
@@ -1421,7 +1422,9 @@ public enum MainActionCommands {
 	GENERATE_BINNER_ANNOTATIONS_COMMAND("Generate Binner annotations"),
 	IMPORT_BINNER_ANNOTATIONS_COMMAND("Import Binner annotations"),
 	CLEAR_BINNER_ANNOTATIONS_COMMAND("Clear Binner annotations"),
-	
+		
+	SHOW_ADDUCT_SELECTOR("Show adduct selector"),
+	SELECT_ADDUCTS("Select adducts"),
 	//	Debug 
 	GET_DATA_MATRIX_FOR_FEATURE_SET_AND_DESIGN("Get matrix for feature subset"),
 	;

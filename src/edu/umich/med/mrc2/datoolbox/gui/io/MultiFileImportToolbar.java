@@ -56,6 +56,8 @@ public class MultiFileImportToolbar extends CommonToolbar {
 	private static final Icon selectLibraryIcon = GuiUtils.getIcon("loadLibrary", 24);
 	private static final Icon addDataFilesIcon = GuiUtils.getIcon("addMultifile", 24);
 	private static final Icon pcdlLibraryIcon = GuiUtils.getIcon("newPCDLfromBase", 24);
+	private static final Icon csvIcon = GuiUtils.getIcon("csv", 24);
+	private static final Icon adductIcon = GuiUtils.getIcon("editModification", 24);
 	private static final Icon loadPfaFileIcon = GuiUtils.getIcon("importFromProFinderPaf", 24);
 	private static final Icon removeDataFilesIcon = GuiUtils.getIcon("removeMultifile", 24);
 	private static final Icon clearDataIcon = GuiUtils.getIcon("clearWorklist", 24);
@@ -68,6 +70,8 @@ public class MultiFileImportToolbar extends CommonToolbar {
 		selectLibraryButton,
 		addDataFilesButton,
 		selectPCDLLibraryButton,
+		selectAdductsButton,
+		selectSimpleProFinderCSVButton,
 		loadFromProFinderPfaButton,
 		removeDataFilesButton,
 		clearDataButton,
@@ -86,7 +90,7 @@ public class MultiFileImportToolbar extends CommonToolbar {
 		importTypeComboBox = new JComboBox<DataTypeForImport>(
 				new DefaultComboBoxModel<DataTypeForImport>(DataTypeForImport.values()));
 		importTypeComboBox.addItemListener((ItemListener)commandListener);
-		
+		importTypeComboBox.setMaximumSize(new Dimension(300,80));
 		add(importTypeComboBox);
 		
 		addSeparator(buttonDimension);
@@ -95,9 +99,13 @@ public class MultiFileImportToolbar extends CommonToolbar {
 				MainActionCommands.SELECT_INPUT_LIBRARY_COMMAND.getName(),
 				MainActionCommands.SELECT_INPUT_LIBRARY_COMMAND.getName(), buttonDimension);
 		
-		selectPCDLLibraryButton = GuiUtils.addButton(this, null, pcdlLibraryIcon, commandListener,
-				MainActionCommands.SELECT_PCDL_LIBRARY_COMMAND.getName(),
-				MainActionCommands.SELECT_PCDL_LIBRARY_COMMAND.getName(), buttonDimension);
+		selectAdductsButton = GuiUtils.addButton(this, null, adductIcon, commandListener,
+				MainActionCommands.SHOW_ADDUCT_SELECTOR.getName(),
+				MainActionCommands.SHOW_ADDUCT_SELECTOR.getName(), buttonDimension);
+		
+//		selectPCDLLibraryButton = GuiUtils.addButton(this, null, pcdlLibraryIcon, commandListener,
+//				MainActionCommands.SELECT_PCDL_LIBRARY_COMMAND.getName(),
+//				MainActionCommands.SELECT_PCDL_LIBRARY_COMMAND.getName(), buttonDimension);
 
 		addSeparator(buttonDimension);
 
@@ -109,7 +117,14 @@ public class MultiFileImportToolbar extends CommonToolbar {
 				MainActionCommands.LOAD_DATA_FROM_PROFINDER_PFA_COMMAND.getName(),
 				MainActionCommands.LOAD_DATA_FROM_PROFINDER_PFA_COMMAND.getName(),
 				buttonDimension);
-
+		
+		selectSimpleProFinderCSVButton = GuiUtils.addButton(this, null, csvIcon, commandListener,
+				MainActionCommands.SELECT_PROFINDER_SIMPLE_CSV_COMMAND.getName(),
+				MainActionCommands.SELECT_PROFINDER_SIMPLE_CSV_COMMAND.getName(),
+				buttonDimension);
+		
+		addSeparator(buttonDimension);
+		
 		removeDataFilesButton = GuiUtils.addButton(this, null, removeDataFilesIcon, commandListener,
 				MainActionCommands.REMOVE_DATA_FILES_COMMAND.getName(),
 				MainActionCommands.REMOVE_DATA_FILES_COMMAND.getName(), buttonDimension);

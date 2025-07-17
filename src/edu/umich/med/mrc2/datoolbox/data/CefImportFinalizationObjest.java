@@ -38,7 +38,7 @@ public class CefImportFinalizationObjest {
 	private Matrix dataMatrix;
 	private Map<String, List<Double>>retentionMap;
 	private Map<String, List<Double>>mzMap;
-	private Map<String, List<Double>> peakWidthMap;
+	private Map<String, List<Double>> peakWidthMap;	
 	private boolean removeAbnormalIsoPatterns;
 	private File tmpCefDirectory;
 	

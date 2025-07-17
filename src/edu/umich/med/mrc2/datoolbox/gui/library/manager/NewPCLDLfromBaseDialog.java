@@ -29,8 +29,6 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.nio.file.Paths;
@@ -38,16 +36,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.prefs.Preferences;
 
-import javax.swing.DefaultComboBoxModel;
 import javax.swing.Icon;
 import javax.swing.JButton;
-import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRootPane;
-import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
@@ -55,20 +50,21 @@ import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
+import javax.swing.border.TitledBorder;
 
 import edu.umich.med.mrc2.datoolbox.data.Adduct;
 import edu.umich.med.mrc2.datoolbox.data.CompoundLibrary;
 import edu.umich.med.mrc2.datoolbox.data.enums.AdductSubset;
 import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
-import edu.umich.med.mrc2.datoolbox.gui.library.feditor.AdductSelectionTable;
+import edu.umich.med.mrc2.datoolbox.gui.adducts.adduct.AdductSelectorPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 
-public class NewPCLDLfromBaseDialog extends JDialog implements ActionListener, ItemListener, BackedByPreferences{
+public class NewPCLDLfromBaseDialog extends JDialog implements ActionListener, BackedByPreferences{
 
 	/**
 	 * 
@@ -78,7 +74,6 @@ public class NewPCLDLfromBaseDialog extends JDialog implements ActionListener, I
 
 	private JTextField nameTextField;
 	private JTextArea libraryDescriptionTextArea;
-	private JComboBox polarityComboBox;
 	private JTextField libFileTextField;
 		
 	private static final String BROWSE = "BROWSE";
@@ -87,15 +82,11 @@ public class NewPCLDLfromBaseDialog extends JDialog implements ActionListener, I
 	public static final String BASE_DIRECTORY = "BASE_DIRECTORY";
 	private File baseDirectory;
 	private JLabel createDefaultAdductsLabel;
-	private AdductSelectionTable adductsTable;
-	private JComboBox<AdductSubset> adductSubsetComboBox;
-	private JLabel adductSubsetLabel;
-	private JScrollPane adductScroll;
-	private JLabel idfLabel;
 	
 	private File inputLibraryFile;
 	private CompoundLibrary basePCDLlibrary;
 	private JTextField pcdlBaseNameField;
+	private AdductSelectorPanel adductSelectorPanel;
 
 	public NewPCLDLfromBaseDialog(ActionListener listener) {
 		super();
@@ -107,12 +98,12 @@ public class NewPCLDLfromBaseDialog extends JDialog implements ActionListener, I
 
 		JPanel panel = new JPanel();
 		panel.setBorder(new EmptyBorder(10, 10, 10, 10));
-		getContentPane().add(panel, BorderLayout.CENTER);
+		getContentPane().add(panel, BorderLayout.WEST);
 		GridBagLayout gbl_panel = new GridBagLayout();
 		gbl_panel.columnWidths = new int[]{0, 151, 166, 0, 0};
-		gbl_panel.rowHeights = new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-		gbl_panel.columnWeights = new double[]{0.0, 1.0, 1.0, 1.0, Double.MIN_VALUE};
-		gbl_panel.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, Double.MIN_VALUE};
+		gbl_panel.rowHeights = new int[]{0, 0, 0, 0, 0, 0, 0, 0};
+		gbl_panel.columnWeights = new double[]{1.0, 1.0, 1.0, 1.0, Double.MIN_VALUE};
+		gbl_panel.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, Double.MIN_VALUE};
 		panel.setLayout(gbl_panel);
 		
 		JLabel lblNewLabel_1 = new JLabel("PCDL base");
@@ -174,33 +165,13 @@ public class NewPCLDLfromBaseDialog extends JDialog implements ActionListener, I
 		gbc_textArea.gridy = 2;
 		panel.add(libraryDescriptionTextArea, gbc_textArea);
 		
-		JLabel lblNewLabel = new JLabel("Polarity");
-		GridBagConstraints gbc_lblNewLabel = new GridBagConstraints();
-		gbc_lblNewLabel.anchor = GridBagConstraints.EAST;
-		gbc_lblNewLabel.insets = new Insets(0, 0, 5, 5);
-		gbc_lblNewLabel.gridx = 0;
-		gbc_lblNewLabel.gridy = 4;
-		panel.add(lblNewLabel, gbc_lblNewLabel);
-		
-		polarityComboBox = new JComboBox<Polarity>(
-				new DefaultComboBoxModel<Polarity>(
-						new Polarity[] {Polarity.Positive, Polarity.Negative}));
-		polarityComboBox.setSelectedIndex(-1);
-		polarityComboBox.addItemListener(this);
-		GridBagConstraints gbc_polarityComboBox = new GridBagConstraints();
-		gbc_polarityComboBox.insets = new Insets(0, 0, 5, 5);
-		gbc_polarityComboBox.fill = GridBagConstraints.HORIZONTAL;
-		gbc_polarityComboBox.gridx = 1;
-		gbc_polarityComboBox.gridy = 4;
-		panel.add(polarityComboBox, gbc_polarityComboBox);
-		
-		idfLabel = new JLabel("Import data from file:");
+		JLabel idfLabel = new JLabel("Import data from file:");
 		GridBagConstraints gbc_idfLabel = new GridBagConstraints();
 		gbc_idfLabel.anchor = GridBagConstraints.WEST;
-		gbc_idfLabel.gridwidth = 2;
+		gbc_idfLabel.gridwidth = 3;
 		gbc_idfLabel.insets = new Insets(0, 0, 5, 5);
 		gbc_idfLabel.gridx = 0;
-		gbc_idfLabel.gridy = 5;
+		gbc_idfLabel.gridy = 4;
 		panel.add(idfLabel, gbc_idfLabel);
 		
 		libFileTextField = new JTextField();
@@ -210,7 +181,7 @@ public class NewPCLDLfromBaseDialog extends JDialog implements ActionListener, I
 		gbc_libFileTextField.insets = new Insets(0, 0, 5, 5);
 		gbc_libFileTextField.fill = GridBagConstraints.HORIZONTAL;
 		gbc_libFileTextField.gridx = 0;
-		gbc_libFileTextField.gridy = 6;
+		gbc_libFileTextField.gridy = 5;
 		panel.add(libFileTextField, gbc_libFileTextField);
 		libFileTextField.setColumns(10);
 		
@@ -221,50 +192,19 @@ public class NewPCLDLfromBaseDialog extends JDialog implements ActionListener, I
 		gbc_btnNewButton.fill = GridBagConstraints.HORIZONTAL;
 		gbc_btnNewButton.insets = new Insets(0, 0, 5, 0);
 		gbc_btnNewButton.gridx = 3;
-		gbc_btnNewButton.gridy = 6;
+		gbc_btnNewButton.gridy = 5;
 		panel.add(btnBrowse, gbc_btnNewButton);
 		
-		createDefaultAdductsLabel = 
-				new JLabel("Create selected adducts during import ");
-		GridBagConstraints gbc_createDefaultAdductsCheckBox = new GridBagConstraints();
-		gbc_createDefaultAdductsCheckBox.anchor = GridBagConstraints.WEST;
-		gbc_createDefaultAdductsCheckBox.gridwidth = 3;
-		gbc_createDefaultAdductsCheckBox.insets = new Insets(0, 0, 5, 5);
-		gbc_createDefaultAdductsCheckBox.gridx = 0;
-		gbc_createDefaultAdductsCheckBox.gridy = 7;
-		panel.add(createDefaultAdductsLabel, gbc_createDefaultAdductsCheckBox);
-		
-		adductSubsetLabel = new JLabel("Adduct subset ");
-		GridBagConstraints gbc_lblNewLabel_2 = new GridBagConstraints();
-		gbc_lblNewLabel_2.insets = new Insets(0, 0, 5, 5);
-		gbc_lblNewLabel_2.anchor = GridBagConstraints.EAST;
-		gbc_lblNewLabel_2.gridx = 1;
-		gbc_lblNewLabel_2.gridy = 8;
-		panel.add(adductSubsetLabel, gbc_lblNewLabel_2);
-		
-		adductSubsetComboBox = new JComboBox<AdductSubset>(
-				new DefaultComboBoxModel<AdductSubset>(
-						new AdductSubset[] {
-								AdductSubset.MOST_COMMON, 
-								AdductSubset.COMPLETE_LIST
-						}));
-		adductSubsetComboBox.setSelectedItem(AdductSubset.MOST_COMMON);
-		adductSubsetComboBox.addItemListener(this);
-		GridBagConstraints gbc_comboBox = new GridBagConstraints();
-		gbc_comboBox.insets = new Insets(0, 0, 5, 5);
-		gbc_comboBox.fill = GridBagConstraints.HORIZONTAL;
-		gbc_comboBox.gridx = 2;
-		gbc_comboBox.gridy = 8;
-		panel.add(adductSubsetComboBox, gbc_comboBox);
-		
-		adductsTable = new AdductSelectionTable();
-		adductScroll = new JScrollPane(adductsTable);
-		GridBagConstraints gbc_scrollPane = new GridBagConstraints();
-		gbc_scrollPane.gridwidth = 4;
-		gbc_scrollPane.fill = GridBagConstraints.BOTH;
-		gbc_scrollPane.gridx = 0;
-		gbc_scrollPane.gridy = 9;
-		panel.add(adductScroll, gbc_scrollPane);
+		adductSelectorPanel = new AdductSelectorPanel();
+		adductSelectorPanel.setBorder(new TitledBorder(null, "Generate adducts during import", 
+				TitledBorder.LEADING, TitledBorder.TOP, null, null));
+		GridBagConstraints gbc_adductSelectorPanel = new GridBagConstraints();
+		gbc_adductSelectorPanel.gridwidth = 4;
+		gbc_adductSelectorPanel.insets = new Insets(0, 0, 0, 5);
+		gbc_adductSelectorPanel.fill = GridBagConstraints.BOTH;
+		gbc_adductSelectorPanel.gridx = 0;
+		gbc_adductSelectorPanel.gridy = 6;
+		panel.add(adductSelectorPanel, gbc_adductSelectorPanel);
 		
 		JPanel buttonPanel = new JPanel();
 		FlowLayout flowLayout = (FlowLayout) buttonPanel.getLayout();
@@ -321,32 +261,10 @@ public class NewPCLDLfromBaseDialog extends JDialog implements ActionListener, I
 			inputLibraryFile = fc.getSelectedFile();
 			baseDirectory = inputLibraryFile.getParentFile();
 			libFileTextField.setText(inputLibraryFile.getAbsolutePath());
-			if(!inputLibraryFile.getName().toLowerCase().endsWith(".txt") 
-					&& !inputLibraryFile.getName().toLowerCase().endsWith(".tsv")) {
-				adductsTable.setEnabled(false);
-			}
-			else {
-				createDefaultAdductsLabel.setEnabled(true);
-				adductsTable.setEnabled(true);
-			}
 			savePreferences();
 		}					
 	}
 
-	@Override
-	public void itemStateChanged(ItemEvent e) {
-		// TODO Auto-generated method stub
-		if (e.getStateChange() == ItemEvent.SELECTED) {
-			
-			if((e.getItem() instanceof Polarity 
-					|| e.getItem() instanceof AdductSubset)) {
-
-				adductsTable.setTableModelFromAdductListForPolarityAndSubset(
-						getPolarity(), getAdductSubset());
-			}
-		}
-	}
-	
 	public String getLibraryDescription(){
 		return libraryDescriptionTextArea.getText().trim();
 	}
@@ -356,15 +274,15 @@ public class NewPCLDLfromBaseDialog extends JDialog implements ActionListener, I
 	}
 	
 	public Polarity getPolarity() {
-		return (Polarity)polarityComboBox.getSelectedItem();
+		return adductSelectorPanel.getPolarity();
 	}
 	
 	public AdductSubset getAdductSubset() {
-		return (AdductSubset) adductSubsetComboBox.getSelectedItem();
+		return adductSelectorPanel.getAdductSubset();
 	}
 	
 	public Collection<Adduct>getSelectedAdducts(){
-		return adductsTable.getSelectedAdducts();
+		return adductSelectorPanel.getSelectedAdducts();
 	}
 	
 	@Override

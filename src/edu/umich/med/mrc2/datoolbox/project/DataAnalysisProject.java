@@ -168,6 +168,9 @@ public class DataAnalysisProject extends Project {
 	
 	public void addFeatureMatrixForDataPipeline(DataPipeline pipeline, Matrix featureMatrix) {
 		
+		if(featureMatrix == null)
+			return;
+		
 		if(featureMatrixFileMap == null)
 			featureMatrixFileMap = new TreeMap<DataPipeline, String>();
 		

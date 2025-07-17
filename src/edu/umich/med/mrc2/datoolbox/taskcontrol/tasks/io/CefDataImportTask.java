@@ -25,8 +25,10 @@ import java.io.File;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import org.ujmp.core.Matrix;
 
@@ -56,7 +58,8 @@ public class CefDataImportTask extends CEFProcessingTask {
 	private Map<String, List<Double>> retentionMap;
 	private Map<String, List<Double>> mzMap;
 	private Map<String, List<Double>> peakWidthMap;
-
+	private Map<String, String> libFeatureNameIdMap;
+	
 	public CefDataImportTask(CefImportSettingsObject ciso) {
 		
 		this.ciso = ciso;
@@ -69,6 +72,7 @@ public class CefDataImportTask extends CEFProcessingTask {
 		this.retentionMap = ciso.getRetentionMap();
 		this.mzMap = ciso.getMzMap();
 		this.peakWidthMap = ciso.getPeakWidthMap();
+		this.libFeatureNameIdMap = ciso.getLibFeatureNameIdMap();
 	}
 
 	@Override
@@ -111,10 +115,36 @@ public class CefDataImportTask extends CEFProcessingTask {
 			setStatus(TaskStatus.ERROR);
 			return;
 		}
+		assignMissingTargetIds();
 		recordDataIntoFeatureMatrix();
 		setStatus(TaskStatus.FINISHED);
 	}
 
+	private void assignMissingTargetIds(){
+		
+		if(libFeatureNameIdMap == null || libFeatureNameIdMap.isEmpty())
+			return;
+		
+		List<MsFeature> featuresWithMissingTargetIds = 
+				inputFeatureList.stream().
+				filter(f -> Objects.isNull(f.getTargetId())).
+				collect(Collectors.toList());
+		if(featuresWithMissingTargetIds.isEmpty())
+			return;
+		
+		total = featuresWithMissingTargetIds.size();
+		processed = 0;
+		taskDescription = "Assigning target IDs for " + dataFile.getName();
+		for(MsFeature msf : featuresWithMissingTargetIds) {
+			
+			String idName = null;
+			if(msf.getPrimaryIdentity() != null && msf.getPrimaryIdentity().getCompoundName() != null)
+				idName = msf.getPrimaryIdentity().getCompoundName();
+			
+			msf.setTargetId(libFeatureNameIdMap.get(idName));			
+		}
+	}
+	
 	private void recordDataIntoFeatureMatrix() {
 
 		taskDescription = "Parsing CEF data file...";

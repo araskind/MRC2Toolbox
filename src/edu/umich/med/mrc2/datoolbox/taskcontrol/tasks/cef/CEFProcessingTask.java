@@ -161,6 +161,13 @@ public abstract class CEFProcessingTask extends AbstractTask {
 				MRC2ToolBoxConfiguration.getRtFormat().format(rt);
 		}
 		MsFeature feature = new MsFeature(name, rt);
+		//	In ProFinder export RT range is inside location element
+		if(location.getAttribute("rts") != null && location.getAttribute("rte") != null) {
+			double min = location.getAttribute("rts").getDoubleValue();
+			double max = location.getAttribute("rte").getDoubleValue();
+			if(min <= max) 
+				feature.setRtRange(new Range(min, max));
+		}
 		feature.getIdentifications().clear();
 		feature.setPrimaryIdentity(null);
 		

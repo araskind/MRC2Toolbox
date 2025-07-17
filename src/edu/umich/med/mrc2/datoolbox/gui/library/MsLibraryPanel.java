@@ -31,7 +31,6 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.io.File;
 import java.io.IOException;
-import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -59,11 +58,10 @@ import edu.umich.med.mrc2.datoolbox.data.Adduct;
 import edu.umich.med.mrc2.datoolbox.data.CompoundIdentity;
 import edu.umich.med.mrc2.datoolbox.data.CompoundLibrary;
 import edu.umich.med.mrc2.datoolbox.data.LibraryMsFeature;
-import edu.umich.med.mrc2.datoolbox.data.LibraryMsFeatureDbBundle;
 import edu.umich.med.mrc2.datoolbox.data.MassSpectrum;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsPoint;
-import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
+import edu.umich.med.mrc2.datoolbox.database.idt.BasePCDLutils;
 import edu.umich.med.mrc2.datoolbox.database.idt.MSRTLibraryUtils;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignSubsetEvent;
@@ -430,7 +428,7 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ItemList
 	
 	private void setupNewPCDLfromBase() {
 	
-		GetBasePCDLTask task = new GetBasePCDLTask(MRC2ToolBoxConfiguration.BASE_PCDL_LIBRARY_ID);
+		GetBasePCDLTask task = new GetBasePCDLTask();
 		IndeterminateProgressDialog idp = new IndeterminateProgressDialog(
 				"Loading basePCDL library ...", this.getContentPane(), task);
 		idp.setLocationRelativeTo(this.getContentPane());
@@ -464,31 +462,17 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ItemList
 	}
 	
 	class GetBasePCDLTask extends LongUpdateTask {
-		
-		private String basePCDLid;
+
 		private CompoundLibrary basePCDLlibrary;
 			
-		public GetBasePCDLTask(String basePCDLid) {
+		public GetBasePCDLTask() {
 			super();
-			this.basePCDLid = basePCDLid;
 		}
 
 		@Override
 		public Void doInBackground() {
 			
-			basePCDLlibrary = MRC2ToolBoxCore.getActiveMsLibraries().stream().
-					filter(l -> l.getLibraryId().equals(basePCDLid)).findFirst().orElse(null);
-			if(basePCDLlibrary == null) {
-				
-				try {
-					basePCDLlibrary = loadBasePCDLlibrary(basePCDLid);
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				if(basePCDLlibrary != null)
-					MRC2ToolBoxCore.getActiveMsLibraries().add(basePCDLlibrary);
-			}
+			basePCDLlibrary = BasePCDLutils.getPCDLbaseLibrary();			
 			return null;
 		}
 		
@@ -500,50 +484,7 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ItemList
 			newPCLDLfromBaseDialog.setBasePCDLlibrary(basePCDLlibrary);
 			newPCLDLfromBaseDialog.setLocationRelativeTo(MsLibraryPanel.this.getContentPane());
 			newPCLDLfromBaseDialog.setVisible(true);
-
 	    }
-	    
-		private CompoundLibrary loadBasePCDLlibrary(String libraryId) {
-			
-			CompoundLibrary library = null;
-			try {
-				library = MSRTLibraryUtils.getLibrary(libraryId);
-			} catch (Exception e1) {
-				e1.printStackTrace();
-				return null;
-			}
-			if (library == null) 
-				return null;
-
-			try {
-				Connection conn = ConnectionManager.getConnection();
-				Collection<LibraryMsFeatureDbBundle>bundles =
-						MSRTLibraryUtils.createFeatureBundlesForLibrary(library.getLibraryId(), conn);
-
-				for(LibraryMsFeatureDbBundle fBundle : bundles) {
-
-					if(fBundle.getConmpoundDatabaseAccession() != null) {
-
-						LibraryMsFeature newTarget = fBundle.getFeature();
-						MSRTLibraryUtils.attachIdentity(
-								newTarget, fBundle.getConmpoundDatabaseAccession(), false, conn);
-
-						if(newTarget.getPrimaryIdentity() != null) {
-
-							newTarget.getPrimaryIdentity().setConfidenceLevel(fBundle.getIdConfidence());
-							library.addFeature(newTarget);
-						}
-					}
-				}
-				ConnectionManager.releaseConnection(conn);
-			}
-			catch (Exception e) {
-
-				e.printStackTrace();
-				return null;
-			}		
-			return library;
-		}
 	}
 
 	private void loadLibrarySelectedFromMenu(Object selectionEventSource) {

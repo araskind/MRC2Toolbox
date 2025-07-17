@@ -130,6 +130,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io.ImportBinnerAnnotations
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io.MiltiCefPeakQualityImportTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io.MultiCefDataAddTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io.MultiCefImportTask;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io.ProFinderArchivePreprocessingTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io.QuantMatrixImportTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.library.ClearIdentificationsTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.library.LibrarySearchTask;
@@ -1712,7 +1713,11 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 				finalizePeakQualityImportTask((MiltiCefPeakQualityImportTask)e.getSource());
 			
 			if (e.getSource().getClass().equals(ImportBinnerAnnotationsForUntargetedDataTask.class))
-				finalizeBinnerAnnotationsImportTask((ImportBinnerAnnotationsForUntargetedDataTask)e.getSource());		
+				finalizeBinnerAnnotationsImportTask((ImportBinnerAnnotationsForUntargetedDataTask)e.getSource());	
+			
+			if (e.getSource().getClass().equals(ProFinderArchivePreprocessingTask.class))
+				finalizeProFinderArchivePreprocessingTask((ProFinderArchivePreprocessingTask)e.getSource());	
+			
 		}
 		if (e.getStatus() == TaskStatus.CANCELED || e.getStatus() == TaskStatus.ERROR) {
 			MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
@@ -1720,6 +1725,22 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 		}
 	}
 	
+	private void finalizeProFinderArchivePreprocessingTask(ProFinderArchivePreprocessingTask task) {
+
+		DataPipeline dataPipeline = task.getDataPipeline();
+		MRC2ToolBoxCore.getMainWindow().
+			switchDataPipeline(currentExperiment, dataPipeline);
+		MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
+		MainWindow.hideProgressDialog();
+
+		//	Rerun statistics
+		cleanEmtyFeatures = true;
+		CalculateStatisticsTask statsTask = 
+				new CalculateStatisticsTask(currentExperiment, activeDataPipeline);
+		statsTask.addTaskListener(this);
+		MRC2ToolBoxCore.getTaskController().addTask(statsTask);
+	}
+
 	private void finalizeMergeDuplicateFeaturesTask(MergeDuplicateFeaturesTask task) {
 		
 		setTableModelFromFeatureSet(

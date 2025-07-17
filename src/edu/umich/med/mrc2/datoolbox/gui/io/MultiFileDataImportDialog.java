@@ -76,6 +76,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import edu.umich.med.mrc2.datoolbox.data.Adduct;
 import edu.umich.med.mrc2.datoolbox.data.CompoundLibrary;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentalSample;
@@ -112,6 +113,7 @@ import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskListener;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io.MultiCefDataAddTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io.MultiCefImportTask;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io.ProFinderArchivePreprocessingTask;
 import edu.umich.med.mrc2.datoolbox.utils.DataImportUtils;
 import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
 
@@ -158,27 +160,27 @@ public class MultiFileDataImportDialog extends JDialog
 	private DataAnalysisProject currentProject;
 	private AcquisitionMethodExtendedEditorDialog acquisitionMethodEditorDialog;
 	private DataExtractionMethodEditorDialog dataExtractionMethodEditorDialog;
-	
-	private boolean areDataFromProFinder;
+	private AdductSelectionDialog adductSelectionDialog;
 	
 	private static final Icon importMultifileIcon = GuiUtils.getIcon("importMultifile", 32);
 	private JLabel dataFileLabel;
 	private JTextField dataFileTextField;
+
+	private Collection<Adduct> selectedAdducts;
 
 	public MultiFileDataImportDialog(TaskListener dataLoadTaskListener) {
 
 		super();
 		setTitle("Import data from multiple files");
 		setIconImage(((ImageIcon) importMultifileIcon).getImage());
-		setPreferredSize(new Dimension(800, 640));
+		setPreferredSize(new Dimension(1000, 800));
 		setModalityType(ModalityType.APPLICATION_MODAL);
-		setSize(new Dimension(800, 640));
+		setSize(new Dimension(1000, 800));
 		setResizable(true);
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		
 		this.dataLoadTaskListener = dataLoadTaskListener;
 		existingDataPipeline = null;
-		areDataFromProFinder = false;
 
 		JPanel main = new JPanel(new BorderLayout(0, 0));
 		main.setBorder(new EmptyBorder(10, 10, 10, 10));
@@ -196,38 +198,6 @@ public class MultiFileDataImportDialog extends JDialog
 		gbl_panel_1.columnWeights = new double[]{1.0, 0.0, 0.0, 1.0, Double.MIN_VALUE};
 		gbl_panel_1.rowWeights = new double[]{0.0, 0.0, 1.0, 0.0, Double.MIN_VALUE};
 		panel_1.setLayout(gbl_panel_1);
-
-		/**
-		JLabel lblNewLabel = new JLabel("Features to align ");
-		GridBagConstraints gbc_lblNewLabel = new GridBagConstraints();
-		gbc_lblNewLabel.anchor = GridBagConstraints.EAST;
-		gbc_lblNewLabel.insets = new Insets(0, 0, 5, 5);
-		gbc_lblNewLabel.gridx = 0;
-		gbc_lblNewLabel.gridy = 0;
-		panel_1.add(lblNewLabel, gbc_lblNewLabel);
-
-		featureSubsetcomboBox = new JComboBox<FeatureAlignmentType>(
-				new DefaultComboBoxModel<FeatureAlignmentType>(FeatureAlignmentType.values()));
-		featureSubsetcomboBox.setEnabled(false);
-		featureSubsetcomboBox.setPreferredSize(new Dimension(28, 25));
-		featureSubsetcomboBox.setMinimumSize(new Dimension(28, 25));
-		GridBagConstraints gbc_fscomboBox = new GridBagConstraints();
-		gbc_fscomboBox.insets = new Insets(0, 0, 5, 5);
-		gbc_fscomboBox.fill = GridBagConstraints.HORIZONTAL;
-		gbc_fscomboBox.gridx = 1;
-		gbc_fscomboBox.gridy = 0;
-		panel_1.add(featureSubsetcomboBox, gbc_fscomboBox);
-
-		JLabel lblNewLabel_1 = new JLabel("Only selected subset will be imported!");
-		lblNewLabel_1.setForeground(Color.RED);
-		GridBagConstraints gbc_lblNewLabel_1 = new GridBagConstraints();
-		gbc_lblNewLabel_1.anchor = GridBagConstraints.WEST;
-		gbc_lblNewLabel_1.gridwidth = 2;
-		gbc_lblNewLabel_1.insets = new Insets(0, 0, 5, 0);
-		gbc_lblNewLabel_1.gridx = 2;
-		gbc_lblNewLabel_1.gridy = 0;
-		panel_1.add(lblNewLabel_1, gbc_lblNewLabel_1);
-		*/
 		
 		JPanel panel_2 = new JPanel();
 		main.add(panel_2, BorderLayout.CENTER);
@@ -363,12 +333,21 @@ public class MultiFileDataImportDialog extends JDialog
 
 		if (command.equals(MainActionCommands.SELECT_INPUT_LIBRARY_COMMAND.getName()))
 			selectLibraryFile();
+		
+		if (command.equals(MainActionCommands.SHOW_ADDUCT_SELECTOR.getName()))
+			showAdductSelector();
+
+		if (command.equals(MainActionCommands.SELECT_ADDUCTS.getName()))
+			selectAdducts();
 
 		if (command.equals(MainActionCommands.ADD_DATA_FILES_COMMAND.getName()))
 			selectDataFiles();
 		
 		if (command.equals(MainActionCommands.LOAD_DATA_FROM_PROFINDER_PFA_COMMAND.getName()))
 			selectPfaFile();
+		
+		if (command.equals(MainActionCommands.SELECT_PROFINDER_SIMPLE_CSV_COMMAND.getName()))
+			selectProFinderSimpleCsvFile();
 
 		if (command.equals(MainActionCommands.REMOVE_DATA_FILES_COMMAND.getName()))
 			removeDataFiles();
@@ -401,6 +380,19 @@ public class MultiFileDataImportDialog extends JDialog
 		
 		if(command.equals(MainActionCommands.ADD_DATA_EXTRACTION_METHOD_COMMAND.getName()))
 			addDataExtractionMethod();
+	}
+
+	private void showAdductSelector() {
+	
+		adductSelectionDialog = new AdductSelectionDialog(this);
+		adductSelectionDialog.setLocationRelativeTo(this);
+		adductSelectionDialog.setVisible(true);
+	}
+
+	private void selectAdducts() {
+		
+		selectedAdducts = adductSelectionDialog.getSelectedAdducts();
+		adductSelectionDialog.dispose();
 	}
 	
 	private void showDataExtractionMethodEditor() {
@@ -579,29 +571,6 @@ public class MultiFileDataImportDialog extends JDialog
 		matchPanel.loadSampleDataResultObject(sampleDataResultObjects);
 	}
 	
-//	private void addResultsProFinderPfaFileToNewPipeline() {
-//		
-//		newDataPipeline = dataPipelineDefinitionPanel.getDataPipeline();
-//		if(newDataPipeline == null)
-//			return;
-//
-//		if(MRC2ToolBoxCore.getCurrentProject().getDataPipelines().contains(newDataPipeline)) {
-//			MessageDialog.showErrorMsg("The experiment already contains data pipeline \n"
-//					+ "with selected combination of assay, data acquisition and data analysis methods.\n"
-//					+ "Please adjust you selection.\n"
-//					+ "If you want to replace the existing data\n"
-//					+ "please delete them first and then re-upload.", 
-//					this);
-//			return;
-//		}
-//		File pfaFile = chooser.getSelectedFile();		
-//		ProFinderArchiveExtractionTask task = 
-//				new ProFinderArchiveExtractionTask(pfaFile, newDataPipeline);
-//		idp = new IndeterminateProgressDialog("Loading document preview ...", this, task);
-//		idp.setLocationRelativeTo(this.getContentPane());
-//		idp.setVisible(true);	
-//	}
-	
 	class ProFinderArchiveExtractionTask extends LongUpdateTask {
 
 	    private final File proFinderArchiveFile;
@@ -695,14 +664,6 @@ public class MultiFileDataImportDialog extends JDialog
         return cefFiles;
     }
 
-//	private void addSelectedLibraryFile() {
-//		
-//		libraryFile = chooser.getSelectedFile();
-//		libraryTextField.setText(libraryFile.getPath());
-//		baseLibraryDirectory = libraryFile.getParentFile();
-//		savePreferences();	
-//	}
-
 	public synchronized void clearPanel() {
 
 		libraryFile = null;
@@ -710,8 +671,7 @@ public class MultiFileDataImportDialog extends JDialog
 		libraryTextField.setText("");
 	}
 	
-	public boolean removeAbnormalIsoPatterns() {
-		
+	public boolean removeAbnormalIsoPatterns() {	
 		return removeAbnormalIsoPatternsCheckBox.isSelected();
 	}
 
@@ -738,7 +698,7 @@ public class MultiFileDataImportDialog extends JDialog
 			o.getDataFile().addResultFile(o.getResultFile());
 			if(!o.getSample().hasDataFile(o.getDataFile()))
 				o.getSample().addDataFile(o.getDataFile());
-		}	
+		}
 		if(existingDataPipeline != null) {
 
 			MultiCefDataAddTask task = new MultiCefDataAddTask(
@@ -752,36 +712,89 @@ public class MultiFileDataImportDialog extends JDialog
 		}
 		if(newDataPipeline != null) {	
 			
-			MultiCefImportTask task = new MultiCefImportTask(
-					libraryFile, 
-					dataToImport, 
-					importPipeline, 
-					FeatureAlignmentType.ALIGN_TO_LIBRARY,
-					pfaTempDir,
-					skipCompoundMatchingCheckbox.isSelected());
-			task.setRemoveAbnormalIsoPatterns(removeAbnormalIsoPatterns());
-			task.addTaskListener(dataLoadTaskListener);
-			MRC2ToolBoxCore.getTaskController().addTask(task);
+			DataTypeForImport dataTypeForImport = toolBar.getDataTypeForImport();
+			if(dataTypeForImport.equals(DataTypeForImport.AGILENT_UNTARGETED))
+				initiateUntargetedDataImport(dataToImport, importPipeline);
+			
+			if(dataTypeForImport.equals(DataTypeForImport.AGILENT_PROFINDER_TARGETED))
+				initiateProFinderDataImport(dataToImport, importPipeline);
+			
 			dispose();
 		}		
 	}
 	
+	private void initiateProFinderDataImport(
+			Set<SampleDataResultObject> dataToImport, 
+			DataPipeline importPipeline) {
+				
+		ProFinderArchivePreprocessingTask task = new ProFinderArchivePreprocessingTask(
+					importPipeline,
+					pfaTempDir,
+					dataToImport, 			
+					libraryFile, 
+					selectedAdducts);
+		task.addTaskListener(dataLoadTaskListener);
+		MRC2ToolBoxCore.getTaskController().addTask(task);
+	}
+	
+	private void initiateUntargetedDataImport(
+			Set<SampleDataResultObject> dataToImport, 
+			DataPipeline importPipeline) {
+		
+		MultiCefImportTask task = new MultiCefImportTask(
+				libraryFile, 
+				dataToImport, 
+				importPipeline, 
+				FeatureAlignmentType.ALIGN_TO_LIBRARY,
+				pfaTempDir,
+				skipCompoundMatchingCheckbox.isSelected());
+		task.setRemoveAbnormalIsoPatterns(removeAbnormalIsoPatterns());
+		task.addTaskListener(dataLoadTaskListener);
+		MRC2ToolBoxCore.getTaskController().addTask(task);
+	}
+	
 	private Collection<String>validateInputData(){
 		
-		ArrayList<String>errors = new ArrayList<String>();
-		
-		//	Validate new pipeline data
-		if(newDataPipeline != null) {
-			
+		Collection<String>errors = new ArrayList<String>();
+		if(newDataPipeline != null)
 			errors.addAll(dataPipelineDefinitionPanel.validatePipelineDefinition());
+		
+		DataTypeForImport dataTypeForImport = toolBar.getDataTypeForImport();
+		
+		if(dataTypeForImport.equals(DataTypeForImport.AGILENT_UNTARGETED))
+			validateInputDataForAgilentUntargetedImport(errors);
 
-			if(libraryFile == null && areDataFromProFinder == false)
-				errors.add("Library file not specified.");
+		if(dataTypeForImport.equals(DataTypeForImport.AGILENT_PROFINDER_TARGETED))
+			validateInputDataForAgilentProFinderImport(errors);
+		
+		return errors;
+	}
+
+	private void validateInputDataForAgilentProFinderImport(Collection<String>errors) {
+
+		checkForUnmatchedSamples(errors);
+		if(newDataPipeline != null)			
+			verifyLibraryFileIsPresent(errors);	
+		
+		if(selectedAdducts == null || selectedAdducts.isEmpty())
+			errors.add("Adduct list for the library construction is not selected");
+	}
+
+	private void validateInputDataForAgilentUntargetedImport(Collection<String>errors) {
+		
+		checkForUnmatchedSamples(errors);
+		if(newDataPipeline != null)			
+			verifyLibraryFileIsPresent(errors);	
+	}
 	
-			if(!libraryFile.exists() || !libraryFile.canRead())
-				errors.add("Can not read library file..");
-		}
-		//	Check if all files matched to samples
+	private void verifyLibraryFileIsPresent(Collection<String>errors) {
+		
+		if(libraryFile == null || !libraryFile.exists() || !libraryFile.canRead())
+			errors.add("Library file not specified or not readable");
+	}
+	
+	private void checkForUnmatchedSamples(Collection<String>errors){
+		
 		Set<SampleDataResultObject> objectsToImport = 			
 				matchPanel.getSampleDataResultObjects(true);
 		List<String> unmatched = 
@@ -793,8 +806,6 @@ public class MultiFileDataImportDialog extends JDialog
 		if(!unmatched.isEmpty())
 			errors.add("Not all files matched to samples:\n" +
 					StringUtils.join(unmatched, "\n"));
-		
-		return errors;
 	}
 
 	private void removeDataFiles() {	
@@ -848,7 +859,6 @@ public class MultiFileDataImportDialog extends JDialog
 				return;
 			}	
 			addResultsToNewPipeline(newDataPipeline, dataFiles);
-			areDataFromProFinder = false;
 		}
 	}
 	
@@ -883,8 +893,7 @@ public class MultiFileDataImportDialog extends JDialog
 			File pfaFile = fc.getSelectedFile();
 			dataFileDirectory = pfaFile.getParentFile();
 			savePreferences();	
-			
-			areDataFromProFinder = true;
+
 			ProFinderArchiveExtractionTask task = 
 					new ProFinderArchiveExtractionTask(pfaFile, newDataPipeline);
 			idp = new IndeterminateProgressDialog("Loading document preview ...", this, task);
@@ -902,6 +911,25 @@ public class MultiFileDataImportDialog extends JDialog
 		fc.setMode(JnaFileChooser.Mode.Files);
 		fc.addFilter("CEF files", "cef", "CEF");
 		fc.setTitle("Select library CEF file");
+		fc.setMultiSelectionEnabled(false);
+		if (fc.showOpenDialog(this)) {
+			
+			libraryFile = fc.getSelectedFile();
+			libraryTextField.setText(libraryFile.getPath());
+			baseLibraryDirectory = libraryFile.getParentFile();
+			savePreferences();	
+		}
+	}
+	
+	private void selectProFinderSimpleCsvFile() {
+		
+		if(existingDataPipeline != null)
+			return;
+		
+		JnaFileChooser fc = new JnaFileChooser(baseLibraryDirectory);
+		fc.setMode(JnaFileChooser.Mode.Files);
+		fc.addFilter("CSV files", "csv", "CSV");
+		fc.setTitle("Select ProFinder simple CSV export file");
 		fc.setMultiSelectionEnabled(false);
 		if (fc.showOpenDialog(this)) {
 			
