@@ -26,6 +26,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -293,7 +294,7 @@ public class CompoundLibrary implements Serializable, Comparable<CompoundLibrary
 				compoundLibraryElement, CommonFields.DateCreated);
 		lastModified = ProjectStoreUtils.getDateFromAttribute(
 				compoundLibraryElement, CommonFields.LastModified);
-
+		libraryFeatures = new HashSet<LibraryMsFeature>();
 		Element dataPipelineElement = 
 				compoundLibraryElement.getChild(ObjectNames.DataPipeline.name());
 		if(dataPipelineElement != null)
@@ -305,7 +306,20 @@ public class CompoundLibrary implements Serializable, Comparable<CompoundLibrary
 		String polarityCode = 
 				compoundLibraryElement.getAttributeValue(CommonFields.Polarity.name());
 		if(polarityCode != null)
-			polarity = Polarity.getPolarityByCode(polarityCode);		
+			polarity = Polarity.getPolarityByCode(polarityCode);
+		
+		Element featureListElement = 
+				compoundLibraryElement.getChild(CommonFields.FeatureList.name());
+		if(featureListElement != null) {
+			
+			List<Element>libFeatureElementList = 
+					featureListElement.getChildren(ObjectNames.LibraryMsFeature.name());
+			for(Element libFeatureElement : libFeatureElementList) {
+				
+				LibraryMsFeature libFeature = new LibraryMsFeature(libFeatureElement);
+				libraryFeatures.add(libFeature);
+			}
+		}	
 	}
 	
 	@Override

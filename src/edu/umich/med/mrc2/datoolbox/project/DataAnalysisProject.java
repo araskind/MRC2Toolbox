@@ -72,6 +72,7 @@ public class DataAnalysisProject extends Project {
 	protected TreeSet<DataPipeline> dataPipelines;
 	protected DataPipeline activeDataPipeline;	
 	protected TreeMap<DataPipeline, CompoundLibrary> libraryMap;
+	protected TreeMap<DataPipeline, CompoundLibrary> averagedFeatureMap;
 	protected TreeMap<DataPipeline, Set<MsFeature>> featureMap;
 	protected TreeMap<DataPipeline, Matrix> dataMatrixMap;
 	protected TreeMap<DataPipeline, String> dataMatrixFileMap;
@@ -104,6 +105,7 @@ public class DataAnalysisProject extends Project {
 	protected void initProjectFields(boolean initDesign) {
 
 		libraryMap = new TreeMap<DataPipeline, CompoundLibrary>();
+		averagedFeatureMap = new TreeMap<DataPipeline, CompoundLibrary>();
 		duplicatesMap = new TreeMap<DataPipeline, Set<MsFeatureCluster>>();
 		clusterMap = new TreeMap<DataPipeline, Set<MsFeatureCluster>>();
 		featureMap = new TreeMap<DataPipeline, Set<MsFeature>>();
@@ -187,6 +189,7 @@ public class DataAnalysisProject extends Project {
 
 		// Remove all objects related to data pipeline
 		libraryMap.remove(pipeline);
+		averagedFeatureMap.remove(pipeline);
 		featureMap.remove(pipeline);		
 		corrMatrixMap.remove(pipeline);
 		duplicatesMap.remove(pipeline);
@@ -361,7 +364,11 @@ public class DataAnalysisProject extends Project {
 	public CompoundLibrary getCompoundLibraryForDataPipeline(DataPipeline pipeline) {
 		return libraryMap.get(pipeline);
 	}
-
+	
+	public CompoundLibrary getAveragedFeatureLibraryForDataPipeline(DataPipeline pipeline) {
+		return averagedFeatureMap.get(pipeline);
+	}
+	
 	public Matrix getCorrelationMatrixForDataPipeline(DataPipeline pipeline) {
 		return corrMatrixMap.get(pipeline);
 	}
@@ -628,6 +635,14 @@ public class DataAnalysisProject extends Project {
 		libraryMap.put(pipeline, library);
 	}
 	
+	public void setAveragedFeatureLibraryForDataPipeline(
+			DataPipeline pipeline, CompoundLibrary library) {
+		
+		if(averagedFeatureMap == null)
+			averagedFeatureMap = new TreeMap<DataPipeline, CompoundLibrary>();
+		averagedFeatureMap.put(pipeline, library);
+	}
+	
 	public void addDataFilesForAcquisitionMethod(
 			DataAcquisitionMethod acquisitionMethod, Collection<DataFile> fileSet) {
 		
@@ -760,6 +775,9 @@ public class DataAnalysisProject extends Project {
 
 		CompoundLibrary lib = libraryMap.remove(oldPipeline);
 		libraryMap.put(newPipeline, lib);
+		
+		CompoundLibrary avgLib = averagedFeatureMap.remove(oldPipeline);
+		averagedFeatureMap.put(newPipeline, avgLib);
 
 		Set<MsFeature>features = featureMap.remove(oldPipeline);
 		featureMap.put(newPipeline, features);

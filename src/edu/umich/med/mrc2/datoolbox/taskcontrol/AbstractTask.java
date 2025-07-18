@@ -134,4 +134,14 @@ public abstract class AbstractTask implements Task {
 		this.status = newStatus;
 		this.fireTaskEvent();
 	}
+	
+	public final void reportErrorAndExit(Exception e) {
+		
+		e.printStackTrace();
+		errorMessage = e.getMessage();
+		if(e.getCause() != null && e.getCause().getMessage() != null)
+			errorMessage += "\n" + e.getCause().getMessage();
+		
+		setStatus(TaskStatus.ERROR);		
+	}
 }

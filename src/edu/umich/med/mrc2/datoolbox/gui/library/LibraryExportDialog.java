@@ -33,6 +33,7 @@ import java.awt.event.KeyEvent;
 import java.io.File;
 import java.nio.file.Paths;
 import java.util.Collection;
+import java.util.prefs.Preferences;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -56,10 +57,12 @@ import edu.umich.med.mrc2.datoolbox.data.LibraryMsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.enums.MsLibraryFormat;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
+import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
+import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskListener;
@@ -67,25 +70,27 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.library.LibraryExportTask;
 import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
 
-public class LibraryExportDialog extends JDialog implements ActionListener, TaskListener{
+public class LibraryExportDialog extends JDialog implements ActionListener, BackedByPreferences, TaskListener {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = -5710215500366663782L;
+	private static final long serialVersionUID = -5710215500366663782L;	
+	private static final Icon exportLibraryIcon = GuiUtils.getIcon("exportLibrary", 32);
+	
 	private File baseDirectory;
+	private File exportFile;
 	private JPanel panel;
 	private CompoundLibrary currentLibrary;
 	private Collection<LibraryMsFeature>targetSubset;
 	private Collection<MsFeature>featureSubset;
 	private JCheckBox combineAdductsCheckBox;
-
-	private static final Icon exportLibraryIcon = GuiUtils.getIcon("exportLibrary", 32);
-	private JLabel lblNewLabel;
+	
 	private JTextField exportFileTextField;
-	private JButton browseButton;
 	private String exportCommand;
 	
+	private Preferences preferences;
+	public static final String BASE_DIRECTORY = "BASE_DIRECTORY";	
 	private static final String BROWSE_COMMAND = "BROWSE";
 
 	public LibraryExportDialog(String exportCommand, CompoundLibrary currentLibrary) {
@@ -126,14 +131,15 @@ public class LibraryExportDialog extends JDialog implements ActionListener, Task
 		panel_1.setBorder(new EmptyBorder(10, 10, 10, 10));
 		panel.add(panel_1, BorderLayout.CENTER);
 		GridBagLayout gbl_panel_1 = new GridBagLayout();
-		gbl_panel_1.columnWidths = new int[]{495, 0, 0};
+		gbl_panel_1.columnWidths = new int[]{0, 182, 220, -167, 0};
 		gbl_panel_1.rowHeights = new int[]{0, 0, 0, 0, 0};
-		gbl_panel_1.columnWeights = new double[]{1.0, 1.0, Double.MIN_VALUE};
+		gbl_panel_1.columnWeights = new double[]{0.0, 0.0, 1.0, 1.0, Double.MIN_VALUE};
 		gbl_panel_1.rowWeights = new double[]{0.0, 0.0, 0.0, 1.0, Double.MIN_VALUE};
 		panel_1.setLayout(gbl_panel_1);
 		
-		lblNewLabel = new JLabel("Export file");
+		JLabel lblNewLabel = new JLabel("Export file");
 		GridBagConstraints gbc_lblNewLabel = new GridBagConstraints();
+		gbc_lblNewLabel.gridwidth = 3;
 		gbc_lblNewLabel.anchor = GridBagConstraints.WEST;
 		gbc_lblNewLabel.insets = new Insets(0, 0, 5, 5);
 		gbc_lblNewLabel.gridx = 0;
@@ -143,6 +149,7 @@ public class LibraryExportDialog extends JDialog implements ActionListener, Task
 		exportFileTextField = new JTextField();
 		exportFileTextField.setEditable(false);
 		GridBagConstraints gbc_exportFileTextField = new GridBagConstraints();
+		gbc_exportFileTextField.gridwidth = 3;
 		gbc_exportFileTextField.insets = new Insets(0, 0, 5, 5);
 		gbc_exportFileTextField.fill = GridBagConstraints.HORIZONTAL;
 		gbc_exportFileTextField.gridx = 0;
@@ -156,12 +163,13 @@ public class LibraryExportDialog extends JDialog implements ActionListener, Task
 		GridBagConstraints gbc_btnNewButton = new GridBagConstraints();
 		gbc_btnNewButton.fill = GridBagConstraints.HORIZONTAL;
 		gbc_btnNewButton.insets = new Insets(0, 0, 5, 0);
-		gbc_btnNewButton.gridx = 1;
+		gbc_btnNewButton.gridx = 3;
 		gbc_btnNewButton.gridy = 1;
 		panel_1.add(browseButton, gbc_btnNewButton);
 
 		combineAdductsCheckBox = new JCheckBox("Combine all adducts in a single library entry");
 		GridBagConstraints gbc_combineAdductsCheckBox = new GridBagConstraints();
+		gbc_combineAdductsCheckBox.gridwidth = 3;
 		gbc_combineAdductsCheckBox.anchor = GridBagConstraints.WEST;
 		gbc_combineAdductsCheckBox.insets = new Insets(0, 0, 5, 5);
 		gbc_combineAdductsCheckBox.gridx = 0;
@@ -190,7 +198,15 @@ public class LibraryExportDialog extends JDialog implements ActionListener, Task
 		JRootPane rootPane = SwingUtilities.getRootPane(btnSave);
 		rootPane.registerKeyboardAction(al, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 		rootPane.setDefaultButton(btnSave);
+		loadPreferences();
 		pack();
+	}
+	
+	@Override
+	public void dispose() {
+		
+		savePreferences();
+		super.dispose();
 	}
 
 	@Override
@@ -217,7 +233,7 @@ public class LibraryExportDialog extends JDialog implements ActionListener, Task
 		fc.setDefaultFileName(defaultFileName);	
 		if (fc.showSaveDialog(this)) {
 						
-			File exportFile  = fc.getSelectedFile();
+			exportFile  = fc.getSelectedFile();
 			String[] fileFilter  = fc.getSelectedFilter();
 			if(fileFilter != null) {
 				MsLibraryFormat libraryFormat = MsLibraryFormat.getFormatByDescription(fileFilter[0]);
@@ -228,17 +244,12 @@ public class LibraryExportDialog extends JDialog implements ActionListener, Task
 	}
 
 	private void exportLibrary() {
-		
-		String flePath = exportFileTextField.getText().trim();
-		if(flePath == null || flePath.isEmpty())
-			return;
-		
-		File selectedFile = Paths.get(flePath).toFile();
-		if(selectedFile == null)
+
+		if(exportFile == null)
 			return;
 		
 		String extension = 
-				FilenameUtils.getExtension(selectedFile.getName());
+				FilenameUtils.getExtension(exportFile.getName());
 		MsLibraryFormat libraryFormat = 
 				MsLibraryFormat.getFormatByExtension(extension);
 
@@ -248,7 +259,7 @@ public class LibraryExportDialog extends JDialog implements ActionListener, Task
 		}
 		LibraryExportTask let = new LibraryExportTask(
 					null,
-					selectedFile,				
+					exportFile,				
 					combineAdductsCheckBox.isSelected(),
 					currentLibrary,
 					targetSubset,
@@ -265,7 +276,7 @@ public class LibraryExportDialog extends JDialog implements ActionListener, Task
 	public void setTargetSubset(Collection<LibraryMsFeature> targetSubset) {
 		this.targetSubset = targetSubset;
 	}
-
+	
 	@Override
 	public void statusChanged(TaskEvent e) {
 
@@ -278,6 +289,35 @@ public class LibraryExportDialog extends JDialog implements ActionListener, Task
 				dispose();
 			}
 		}
+	}
+
+	@Override
+	public void loadPreferences(Preferences preferences) {
+		
+		this.preferences = preferences;
+		String baseDirPath = preferences.get(BASE_DIRECTORY, 
+						MRC2ToolBoxConfiguration.getDefaultExperimentsDirectory());
+		try {
+			baseDirectory = Paths.get(baseDirPath).toFile();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	@Override
+	public void loadPreferences() {
+		loadPreferences(Preferences.userNodeForPackage(this.getClass()));		
+	}
+
+	@Override
+	public void savePreferences() {
+
+		preferences = Preferences.userNodeForPackage(this.getClass());
+		preferences.put(BASE_DIRECTORY, baseDirectory.getAbsolutePath());
+	}
+
+	public File getExportFile() {
+		return exportFile;
 	}
 }
 

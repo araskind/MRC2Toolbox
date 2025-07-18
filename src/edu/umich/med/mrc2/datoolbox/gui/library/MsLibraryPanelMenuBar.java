@@ -103,7 +103,8 @@ public class MsLibraryPanelMenuBar extends CommonMenuBar {
 		importPCDLLibraryMenuItem,
 		newPCDLfromBaseMenuItem,
 		importRtDataMenuItem,
-		importDecoyMSMSLibrary;
+		importDecoyMSMSLibraryMenuItem,
+		importIDtrackerLibraryMenuItem;
 	
 	//	Export
 	private JMenuItem
@@ -128,10 +129,6 @@ public class MsLibraryPanelMenuBar extends CommonMenuBar {
 				libraryManagerIcon);
 		
 		manageMenu.addSeparator();
-		
-//		openLibraryMenuItem = addItem(manageMenu, 
-//				MainActionCommands.SHOW_LIBRARY_LIST_COMMAND, 
-//				openLibraryIcon);
 		
 		closeLibraryMenuItem = addItem(manageMenu, 
 				MainActionCommands.CLOSE_LIBRARY_COMMAND, 
@@ -177,8 +174,7 @@ public class MsLibraryPanelMenuBar extends CommonMenuBar {
 				importPCDLLibraryIcon);	
 		newPCDLfromBaseMenuItem = addItem(importMenu, 
 				MainActionCommands.NEW_PCDL_LIBRARY_FROM_PCDL_TEXT_FILE_SETUP_COMMAND, 
-				newPCDLfromBaseIcon);	
-		
+				newPCDLfromBaseIcon);			
 		importLibraryMenuItem = addItem(importMenu, 
 				MainActionCommands.IMPORT_COMPOUND_LIBRARY_COMMAND, 
 				importLibraryIcon);
@@ -186,12 +182,18 @@ public class MsLibraryPanelMenuBar extends CommonMenuBar {
 				MainActionCommands.IMPORT_LIBRARY_FEATURE_RT_DIALOG_COMMAND, 
 				importRtIcon);
 		
+//		importMenu.addSeparator();
+//		
+//		importIDtrackerLibraryMenuItem = addItem(importMenu, 
+//				MainActionCommands.IMPORT_IDTRACKER_LIBRARY_COMMAND, 
+//				importLibraryIcon);
+		
 		importMenu.addSeparator();
 		
-		importDecoyMSMSLibrary = addItem(importMenu, 
+		importDecoyMSMSLibraryMenuItem = addItem(importMenu, 
 				MainActionCommands.IMPORT_DECOY_REFERENCE_MSMS_LIBRARY_COMMAND, 
 				libraryImportIcon);	//	TODO create different icon
-		importDecoyMSMSLibrary.setEnabled(false);
+		importDecoyMSMSLibraryMenuItem.setEnabled(false);
 		
 		add(importMenu);
 		

@@ -21,7 +21,9 @@
 
 package edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.integration;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 
 import org.ujmp.core.Matrix;
@@ -30,12 +32,14 @@ import org.ujmp.core.calculation.Calculation.Ret;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.LibraryMsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
+import edu.umich.med.mrc2.datoolbox.data.SimpleMsFeature;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
+import edu.umich.med.mrc2.datoolbox.utils.MsFeatureStatsObject;
 import edu.umich.med.mrc2.datoolbox.utils.ProjectUtils;
 
 public class MsFeatureAveragingTask extends AbstractTask {
@@ -46,16 +50,13 @@ public class MsFeatureAveragingTask extends AbstractTask {
 	private DataAnalysisProject currentExperiment;
 	private Matrix featureDataMatrix;
 	
-	public MsFeatureAveragingTask(DataPipeline pipeline, Set<DataFile> dataFiles) {
+	public MsFeatureAveragingTask(
+			DataPipeline pipeline, 
+			Set<DataFile> dataFiles) {
 		super();
 		this.pipeline = pipeline;
 		this.dataFiles = dataFiles;
 		currentExperiment = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
-	}
-
-	public MsFeatureAveragingTask() {
-		super();
-		// TODO Auto-generated constructor stub
 	}
 
 	@Override
@@ -67,43 +68,79 @@ public class MsFeatureAveragingTask extends AbstractTask {
 			loadFeatureMatrix();
 		}
 		catch (Exception e) {
-			e.printStackTrace();
-			errorMessage = e.getMessage();
-			if(e.getCause() != null && e.getCause().getMessage() != null)
-				errorMessage += "\n" + e.getCause().getMessage();
-			
-			setStatus(TaskStatus.ERROR);
+			reportErrorAndExit(e);
+			return;
 		}
+		List<MsFeatureStatsObject>statObjectList = null;
 		try {
-			generateAverageFeatures();
-			setStatus(TaskStatus.FINISHED);
+			statObjectList = collectFeatureData();
 		}
 		catch (Exception e) {
-			e.printStackTrace();
-			errorMessage = e.getMessage();
-			if(e.getCause() != null && e.getCause().getMessage() != null)
-				errorMessage += "\n" + e.getCause().getMessage();
-			
-			setStatus(TaskStatus.ERROR);
+			reportErrorAndExit(e);
+			return;
 		}
+		if(!statObjectList.isEmpty()) {			
+			try {				
+				generateAverageFeatures(statObjectList);		
+			}
+			catch (Exception e) {
+				reportErrorAndExit(e);
+				return;
+			}
+		}
+		setStatus(TaskStatus.FINISHED);
 	}
 	
-	private void generateAverageFeatures() {
+	private List<MsFeatureStatsObject>collectFeatureData() {
 		
-		taskDescription = "Generating averaged features ...";
+		taskDescription = "Collecting feature data ...";
 		Matrix featureMatrix = featureDataMatrix.getMetaDataDimensionMatrix(0);
 		total = Math.toIntExact(featureMatrix.getColumnCount());
 		processed = 0;
 		
-		
+		List<MsFeatureStatsObject>statObjectList = new ArrayList<MsFeatureStatsObject>();
 		long[]coord = new long[] {0,0};
 		for(long i=0; i<featureMatrix.getColumnCount(); i++) {
 			
 			coord[1] = i;
-			MsFeature msf = (MsFeature)featureDataMatrix.getAsObject(coord);
+			MsFeature msf = (MsFeature)featureMatrix.getAsObject(coord);
+			MsFeatureStatsObject statObject = new MsFeatureStatsObject(msf);
 			Object[]selectedFeatureData = 
 					featureDataMatrix.selectColumns(Ret.LINK, i).transpose().toObjectArray()[0];
+			
+			for(int j=0; j<selectedFeatureData.length; j++) {
+				
+				SimpleMsFeature sFeature = (SimpleMsFeature)selectedFeatureData[j];
+				statObject.addRtValue(sFeature.getRetentionTime());
+				statObject.addRtRange(sFeature.getRtRange());
+				statObject.addSpectrum(sFeature.getObservedSpectrum());
+				processed++;
+			}
+		}
+		return statObjectList;
+	}
+	
+	private void generateAverageFeatures(List<MsFeatureStatsObject>statObjectList) {
+		
+		taskDescription = "Generating averaged features ...";
+		total = statObjectList.size();
+		processed = 0;
+		
+		for(MsFeatureStatsObject statObject : statObjectList) {
+
+			LibraryMsFeature newLibFeature = 
+					new LibraryMsFeature(statObject.getMsFeature());
+			newLibFeature.setRetentionTime(statObject.getMedianRt());
+			if(statObject.getMedianRtRange() != null)
+				newLibFeature.setRtRange(statObject.getMedianRtRange());
+			
+			if(statObject.getAverageScaledMassSpectrum() != null)
+				newLibFeature.setSpectrum(statObject.getAverageScaledMassSpectrum());
+			
+			averagedFeatures.add(newLibFeature);
+			processed++;
 		}		
+		averagedFeatures = new ArrayList<LibraryMsFeature>();
 	}
 	
 	private void loadFeatureMatrix() {

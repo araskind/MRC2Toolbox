@@ -61,6 +61,7 @@ import edu.umich.med.mrc2.datoolbox.data.LibraryMsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MassSpectrum;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsPoint;
+import edu.umich.med.mrc2.datoolbox.data.enums.MsLibraryFormat;
 import edu.umich.med.mrc2.datoolbox.database.idt.BasePCDLutils;
 import edu.umich.med.mrc2.datoolbox.database.idt.MSRTLibraryUtils;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignEvent;
@@ -92,6 +93,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io.ReferenceMSMSLibraryExportTask;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.library.IDTraclerLibraryImportTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.library.LibEditorImportTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.library.LoadDatabaseLibraryTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.library.PCDLTextLibraryImportTask;
@@ -276,6 +278,9 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ItemList
 
 		if (command.equals(MainActionCommands.IMPORT_COMPOUND_LIBRARY_COMMAND.getName()))
 			importLibrary();
+		
+		if (command.equals(MainActionCommands.IMPORT_IDTRACKER_LIBRARY_COMMAND.getName()))
+			importIDTrackerLibrary();
 		
 		if (command.equals(MainActionCommands.EXPORT_COMPOUND_LIBRARY_COMMAND.getName())
 				|| command.equals(MainActionCommands.EXPORT_FILTERED_COMPOUND_LIBRARY_COMMAND.getName()))
@@ -1025,6 +1030,23 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ItemList
 		clearPanel();
 		currentLibrary = null;
 	}
+	
+	private void importIDTrackerLibrary() {
+		
+		JnaFileChooser fc = new JnaFileChooser(baseDirectory);
+		fc.setMode(JnaFileChooser.Mode.Files);
+		fc.addFilter(MsLibraryFormat.IDTRACKER.getName(), MsLibraryFormat.IDTRACKER.getFileExtension());
+		fc.setTitle("Select library file to import");
+		fc.setMultiSelectionEnabled(false);
+		if (fc.showOpenDialog(SwingUtilities.getWindowAncestor(this.getContentPane())))			
+			importIdTrackerLibraryFromFile(fc.getSelectedFile());	
+	}
+
+	private void importIdTrackerLibraryFromFile(File selectedFile) {
+
+		IDTraclerLibraryImportTask task = new IDTraclerLibraryImportTask(selectedFile);
+		task.addTaskListener(this);
+		MRC2ToolBoxCore.getTaskController().addTask(task);	}
 
 	private void importLibrary() {
 
@@ -1036,7 +1058,7 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ItemList
 		}
 		JnaFileChooser fc = new JnaFileChooser(baseDirectory);
 		fc.setMode(JnaFileChooser.Mode.Files);
-		fc.addFilter("CEF files", "cef", "CEF");
+		fc.addFilter(MsLibraryFormat.CEF.getName(), MsLibraryFormat.CEF.getFileExtension());
 		fc.addFilter("Library Editor files", "xml", "XML");	
 		//	fc.addFilter("TAB-separated text files", "txt", "TXT", "tsv", "TSV");
 		fc.setTitle("Select library file to import");
@@ -1134,7 +1156,23 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ItemList
 			
 			if (e.getSource().getClass().equals(PCDLfromBaseLibraryTask.class)) 
 				finalizePCDLfromBaseLibraryTask((PCDLfromBaseLibraryTask)e.getSource());
+			
+			if (e.getSource().getClass().equals(IDTraclerLibraryImportTask.class)) 
+				finalizeIDTraclerLibraryImportTask((IDTraclerLibraryImportTask)e.getSource());
 		}
+	}
+
+	private void finalizeIDTraclerLibraryImportTask(IDTraclerLibraryImportTask task) {
+		// TODO Auto-generated method stub
+		//	MRC2ToolBoxCore.getActiveMsLibraries().add(task.getLibrary());
+		if(task.getLibrary() == null) {
+			MessageDialog.showErrorMsg(
+					"Failed to load IDTracker library export", 
+					this.getContentPane());
+			return;
+		}
+		reloadLibraryData(task.getLibrary());
+		showPendingFeature();
 	}
 
 	private void finalizePCDLfromBaseLibraryTask(PCDLfromBaseLibraryTask task) {

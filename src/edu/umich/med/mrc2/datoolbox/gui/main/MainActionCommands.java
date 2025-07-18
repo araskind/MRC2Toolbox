@@ -691,6 +691,7 @@ public enum MainActionCommands {
 	CLOSE_LIBRARY_COMMAND("Close active library"),
 	PRESCAN_LIBRARY_COMPOUNDS_COMMAND("Prescan library compounds for import"),
 	IMPORT_COMPOUND_LIBRARY_COMMAND("Import CEF / Library editor data into active library"),
+	IMPORT_IDTRACKER_LIBRARY_COMMAND("Import IDTracker library"),
 	SET_UP_PCDL_DATA_IMPORT_COMMAND("Set up PCDL data import"),
 	IMPORT_PCDL_COMPOUND_LIBRARY_COMMAND("Import PCDL data into active library"),
 	NEW_PCDL_LIBRARY_FROM_PCDL_TEXT_FILE_SETUP_COMMAND("Generate new library from PCDL base and PCDL text export"),

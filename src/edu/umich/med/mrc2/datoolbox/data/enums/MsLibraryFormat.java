@@ -25,6 +25,7 @@ public enum MsLibraryFormat {
 
 	CEF("Compound Exchange Format (XML)", "cef"),
 	MSP("NIST format", "msp"),
+	IDTRACKER("IDTracker XML format","idtlib"),
 	TSV("Tab-separated text", "txt"),
 	SIRIUS_MS("Sirius MS file", "ms"),
 	MGF("MGF file", "mgf"),

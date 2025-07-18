@@ -27,18 +27,21 @@ import java.util.List;
 import org.apache.commons.math3.stat.descriptive.rank.Percentile;
 
 import edu.umich.med.mrc2.datoolbox.data.MassSpectrum;
+import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
 
 public class MsFeatureStatsObject {
 
+	private MsFeature msFeature;
 	private Percentile median;
 	private List<Double>rtValues;
 	private List<Double>rtMinValues;
 	private List<Double>rtMaxValues;
 	private List<MassSpectrum>spectra;
 	
-	public MsFeatureStatsObject() {
+	public MsFeatureStatsObject(MsFeature msFeature) {
 		super();
+		this.msFeature = msFeature;
 		rtValues = new ArrayList<Double>();
 		rtMinValues = new ArrayList<Double>();
 		rtMaxValues = new ArrayList<Double>();
@@ -59,6 +62,10 @@ public class MsFeatureStatsObject {
 	}
 	
 	public void addRtRange(Range rtRange) {
+		
+		if(rtRange == null)
+			return;
+		
 		rtMinValues.add(rtRange.getMin());
 		rtMaxValues.add(rtRange.getMax());
 	}
@@ -94,5 +101,9 @@ public class MsFeatureStatsObject {
 	
 	public MassSpectrum getAverageScaledMassSpectrum() {		
 		return MsUtils.averageMassSpectraByAdduct(spectra, 0.1d, MassErrorType.Da);
+	}
+
+	public MsFeature getMsFeature() {
+		return msFeature;
 	}
 }
