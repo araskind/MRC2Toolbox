@@ -34,6 +34,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -1211,14 +1212,22 @@ public class MsUtils {
 			return null;
 	}
 	
-	public static MsPoint[] normalizeAndSortMsPattern(Collection<MsPoint>pattern, double max) {
+	public static Collection<MsPoint> normalizeAndSortMsPointsCollection(Collection<MsPoint>pattern) {
+		return normalizeAndSortMsPointsCollection(pattern, SPECTRUM_NORMALIZATION_BASE_INTENSITY);
+	}
+	
+	public static Collection<MsPoint> normalizeAndSortMsPointsCollection(MsPoint[] pattern) {
+		return normalizeAndSortMsPointsCollection(
+				Arrays.asList(pattern), SPECTRUM_NORMALIZATION_BASE_INTENSITY);
+	}
+	
+	public static Collection<MsPoint> normalizeAndSortMsPointsCollection(Collection<MsPoint>pattern, double max) {
 		
 		MsPoint basePeak = Collections.max(pattern, Comparator.comparing(MsPoint::getIntensity));
 		double maxIntensity  = basePeak.getIntensity();
 		return pattern.stream()
 				.map(dp -> new MsPoint(dp.getMz(), dp.getIntensity()/maxIntensity * max))
-				.sorted(MsUtils.mzSorter).
-				toArray(size -> new MsPoint[size]);
+				.sorted(MsUtils.mzSorter).collect(Collectors.toList());
 	}
 
 	public static MsPoint[] normalizeAndSortMsPattern(Collection<MsPoint>pattern) {
@@ -1228,6 +1237,16 @@ public class MsUtils {
 	public static MsPoint[] normalizeAndSortMsPattern(MsPoint[] pattern) {
 		return normalizeAndSortMsPattern(
 				Arrays.asList(pattern), SPECTRUM_NORMALIZATION_BASE_INTENSITY);
+	}
+	
+	public static MsPoint[] normalizeAndSortMsPattern(Collection<MsPoint>pattern, double max) {
+		
+		MsPoint basePeak = Collections.max(pattern, Comparator.comparing(MsPoint::getIntensity));
+		double maxIntensity  = basePeak.getIntensity();
+		return pattern.stream()
+				.map(dp -> new MsPoint(dp.getMz(), dp.getIntensity()/maxIntensity * max))
+				.sorted(MsUtils.mzSorter).
+				toArray(size -> new MsPoint[size]);
 	}
 	
 	public static Collection<Double> getMassDifferences(
@@ -1521,7 +1540,7 @@ public class MsUtils {
 				sorted(mzSorter).
 				collect(Collectors.toList());
 		 
-		 msBins.stream().forEach(b -> b = null); 		 
+		 //	msBins.stream().forEach(b -> b = null); 		 
 		 return avgSpectrum;
 	}
 	
@@ -1696,57 +1715,40 @@ public class MsUtils {
 		}		
 		return msString;
 	}
+	
+	public static MassSpectrum averageMassSpectraByAdduct(
+			Collection<MassSpectrum>inputSpectra,
+			double mzBinWidth,
+			MassErrorType errorType){
+		
+		MassSpectrum averagedSpectrum = new MassSpectrum();
+		Map<Adduct, List<MsPoint>>adductMsPointsMap = new TreeMap<Adduct, List<MsPoint>>();
+		for(MassSpectrum ms : inputSpectra) {
+			
+			for(Adduct adduct : ms.getAdducts()) {
+				
+				if(!adductMsPointsMap.containsKey(adduct))
+					adductMsPointsMap.put(adduct, new ArrayList<MsPoint>());
+				
+				Collection<MsPoint> adductMs = ms.getMsPointsForAdduct(adduct, true);
+				if(adductMs != null) 
+					adductMsPointsMap.get(adduct).addAll(adductMs);				
+			}
+		}
+		for(Entry<Adduct, List<MsPoint>>adductEntry : adductMsPointsMap.entrySet()) {
+			Collection<MsPoint> averageAdductSpectrum = 
+					averageMassSpectrum(adductEntry.getValue(), mzBinWidth, errorType);
+			
+			if(averageAdductSpectrum != null && !averageAdductSpectrum.isEmpty()) {
+				
+				Collection<MsPoint> averageNormalizedAdductSpectrum = 
+						normalizeAndSortMsPointsCollection(averageAdductSpectrum);
+				
+				averagedSpectrum.addSpectrumForAdduct(
+						adductEntry.getKey(), averageNormalizedAdductSpectrum);
+			}
+		}
+		return averagedSpectrum;
+	}
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

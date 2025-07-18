@@ -447,25 +447,6 @@ public abstract class CEFProcessingTask extends AbstractTask {
 				addDatabaseReferencesToCompoundIdentity(unkId, molElement);
 				msid = new MsFeatureIdentity(unkId, CompoundIdentificationConfidence.UNKNOWN_ACCURATE_MASS_RT);
 				msid.setIdSource(CompoundIdSource.UNKNOWN);
-				
-				//	Add FbF score
-				if(molElement.getChild("MatchScores") != null) {
-					
-					for(Element scoreElement : molElement.getChild("MatchScores").getChildren("Match")) {
-						
-						if(scoreElement.getAttributeValue("algo").equals("overall")) {
-							
-							double score = 0.0d;
-							try {
-								score = scoreElement.getAttribute("score").getDoubleValue();
-							} catch (DataConversionException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							}
-							msid.setScoreCarryOver(score);
-						}
-					}
-				}				
 			}
 			else {
 				CompoundIdentity cid = new CompoundIdentity(name, molecularFormula);
@@ -478,6 +459,24 @@ public abstract class CEFProcessingTask extends AbstractTask {
 				CompoundIdentity newId = attachCompoundIdsFromDatabase(cid, conn);
 				if (newId != null)
 					msid.setCompoundIdentity(newId);
+			}
+			//	Add overall match score if present
+			if(molElement.getChild("MatchScores") != null) {
+				
+				for(Element scoreElement : molElement.getChild("MatchScores").getChildren("Match")) {
+					
+					if(scoreElement.getAttributeValue("algo").equals("overall")) {
+						
+						double score = 0.0d;
+						try {
+							score = scoreElement.getAttribute("score").getDoubleValue();
+						} catch (DataConversionException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						msid.setScoreCarryOver(score);
+					}
+				}
 			}
 			attachAgilentMatchingMSMSspectrum(molElement, feature, msid);
 			if(msid != null && !identifications.contains(msid))

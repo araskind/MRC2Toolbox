@@ -104,7 +104,7 @@ public class DataFileSampleMatchTable extends BasicTable {
 		int sCol = model.getColumnIndex(DataFileSampleMatchTableModel.SAMPLE_COLUMN);
 		for(int i=0; i<model.getRowCount(); i++) {
 			
-			if(enabledOnly && !(Boolean)model.getValueAt(i, bCol))
+			if(enabledOnly && !(boolean)model.getValueAt(i, bCol))
 				continue;
 			
 			SampleDataResultObject o = (SampleDataResultObject)model.getValueAt(i, col);

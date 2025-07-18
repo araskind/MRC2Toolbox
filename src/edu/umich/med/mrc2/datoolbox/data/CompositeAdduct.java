@@ -40,7 +40,7 @@ import edu.umich.med.mrc2.datoolbox.data.enums.ModificationType;
 import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 
-public class CompositeAdduct implements Adduct, Comparable<CompositeAdduct>, Serializable {
+public class CompositeAdduct implements Adduct, Serializable {
 
 	/**
 	 * 
@@ -165,7 +165,7 @@ public class CompositeAdduct implements Adduct, Comparable<CompositeAdduct>, Ser
 	}
 
 	@Override
-	public int compareTo(CompositeAdduct o) {
+	public int compareTo(Adduct o) {
 		return getName().compareTo(o.getName());
 	}
 	

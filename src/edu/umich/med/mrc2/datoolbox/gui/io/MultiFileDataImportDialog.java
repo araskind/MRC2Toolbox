@@ -488,7 +488,7 @@ public class MultiFileDataImportDialog extends JDialog
 		rsd.setVisible(true);
 	}
 
-	private void addResultsToNewPipeline(DataPipeline pipeline, File[] dataFiles) {
+	private void addResultsToNewPipeline(DataPipeline pipeline, File[] resultFiles) {
 
 		DataAnalysisProject project = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
 		Set<SampleDataResultObject>sampleDataResultObjects = new TreeSet<SampleDataResultObject>(
@@ -500,24 +500,56 @@ public class MultiFileDataImportDialog extends JDialog
 		
 		DataAcquisitionMethod acqMethod = pipeline.getAcquisitionMethod();
 		DataExtractionMethod daMethod = pipeline.getDataExtractionMethod();
+		Set<DataFile> existingDataFiles = project.getDataFilesForAcquisitionMethod(acqMethod);
 		
-		for (File f : dataFiles) {
+		for (File f : resultFiles) {
 
+			SampleDataResultObject existingObject = null;
 			String fileBaseName = FilenameUtils.getBaseName(f.getName());
-			SampleDataResultObject existingObject = addedData.stream().
-					filter(s -> s.getDataFile().getName().equals(fileBaseName)).
+			DataFile inProject = null;
+			if(existingDataFiles != null && !existingDataFiles.isEmpty()) {
+				
+				final DataFile existingDataFile = existingDataFiles.stream().
+					filter(df -> df.getBaseName().equals(fileBaseName)).
 					findFirst().orElse(null);
+				
+				if(existingDataFile != null) {
+					
+					inProject = existingDataFile;
+					existingObject = addedData.stream().
+							filter(s -> s.getDataFile().equals(existingDataFile)).
+							findFirst().orElse(null);
+				}
+			}
 			if(existingObject == null) {
-				DataFile df = new DataFile(fileBaseName, acqMethod);
-				df.setFullPath(f.getAbsolutePath());
-				ResultsFile resultFile = new ResultsFile(fileBaseName, daMethod, new Date(), df);
-				resultFile.setFullPath(f.getAbsolutePath());
-				df.addResultFile(resultFile);					
-				ExperimentalSample matchedSample = 
-						DataImportUtils.getSampleFromFileName(fileBaseName, project);
-				SampleDataResultObject sdro = 
-						new SampleDataResultObject(matchedSample, df, resultFile);
-				sampleDataResultObjects.add(sdro);
+				
+				existingObject = addedData.stream().
+						filter(s -> s.getDataFile().getName().equals(fileBaseName)).
+						findFirst().orElse(null);
+			}
+			if(existingObject == null) {
+				
+				if(inProject != null) {
+					
+					ResultsFile resultFile = new ResultsFile(fileBaseName, daMethod, new Date(), inProject);
+					resultFile.setFullPath(f.getAbsolutePath());
+					SampleDataResultObject sdro = 
+							new SampleDataResultObject(
+									inProject.getParentSample(), inProject, resultFile);
+					sampleDataResultObjects.add(sdro);
+				}
+				else {	
+					DataFile df = new DataFile(fileBaseName, acqMethod);
+					df.setFullPath(f.getAbsolutePath());
+					ResultsFile resultFile = new ResultsFile(fileBaseName, daMethod, new Date(), df);
+					resultFile.setFullPath(f.getAbsolutePath());
+					//	df.addResultFile(resultFile);					
+					ExperimentalSample matchedSample = 
+							DataImportUtils.getSampleFromFileName(fileBaseName, project);
+					SampleDataResultObject sdro = 
+							new SampleDataResultObject(matchedSample, df, resultFile);
+					sampleDataResultObjects.add(sdro);
+				}
 			}
 		}
 		matchPanel.loadSampleDataResultObject(sampleDataResultObjects);
@@ -613,8 +645,8 @@ public class MultiFileDataImportDialog extends JDialog
 			}
 			if(cefFiles != null && !cefFiles.isEmpty()) {
 				
-				File[] dataFiles = cefFiles.toArray(new File[cefFiles.size()]);
-				addResultsToNewPipeline(pipeline, dataFiles);
+				File[] resultFiles = cefFiles.toArray(new File[cefFiles.size()]);
+				addResultsToNewPipeline(pipeline, resultFiles);
 				pfaLoaded = true;
 			}
 			else {

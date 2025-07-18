@@ -199,10 +199,9 @@ public class IDTMS1FeatureSearchTask extends AbstractTask {
 			applyAdditionalFilters();
 			setStatus(TaskStatus.FINISHED);
 		}
-		catch (Exception e) {
-			e.printStackTrace();
+		catch (Exception e) {		
+			e.printStackTrace();			
 			setStatus(TaskStatus.ERROR);
-			return;
 		}
 	}
 	

@@ -30,7 +30,7 @@ import edu.umich.med.mrc2.datoolbox.data.enums.ModificationType;
 import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
 import edu.umich.med.mrc2.datoolbox.utils.MolFormulaUtils;
 
-public class SimpleAdduct implements Adduct, Comparable<SimpleAdduct>, Serializable {
+public class SimpleAdduct implements Adduct, Serializable {
 
 	/**
 	 *
@@ -117,7 +117,7 @@ public class SimpleAdduct implements Adduct, Comparable<SimpleAdduct>, Serializa
 	}
 
 	@Override
-	public int compareTo(SimpleAdduct o) {
+	public int compareTo(Adduct o) {
 		return adductName.compareTo(o.getName());
 	}
 

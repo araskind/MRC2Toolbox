@@ -25,7 +25,7 @@ import edu.umich.med.mrc2.datoolbox.data.enums.AdductNotationType;
 import edu.umich.med.mrc2.datoolbox.data.enums.ModificationType;
 import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
 
-public interface Adduct {
+public interface Adduct extends Comparable<Adduct>{
 	
 	void setId(String id);
 	

@@ -338,15 +338,26 @@ public class MassSpectrum implements Serializable, XmlStorable {
 			collect(Collectors.toList());
 	}
 
-	public MsPoint[] getMsForAdduct(Adduct adduct, boolean scale) {
-
-		if(!scale)
-			return getMsForAdduct(adduct);
+	public Collection<MsPoint> getMsPointsForAdduct(Adduct adduct, boolean scale) {
 
 		if(adductMap.get(adduct) == null || adductMap.get(adduct).isEmpty())
 			return null;
+		
+		if(!scale)
+			return getMsPointsForAdduct(adduct);
+		else
+			return MsUtils.normalizeAndSortMsPointsCollection(adductMap.get(adduct));
+	}
+	
+	public MsPoint[] getMsForAdduct(Adduct adduct, boolean scale) {
 
-		return MsUtils.normalizeAndSortMsPattern(adductMap.get(adduct));
+		if(adductMap.get(adduct) == null || adductMap.get(adduct).isEmpty())
+			return null;
+		
+		if(!scale)
+			return getMsForAdduct(adduct);
+		else
+			return MsUtils.normalizeAndSortMsPattern(adductMap.get(adduct));
 	}
 	
 	public double getPrimaryAdductBasePeakMz() {

@@ -131,8 +131,7 @@ public class MultiMSFeatureQCPlotFrame extends JFrame
 		control.getContentArea().deploy(grid);
 		add(control.getContentArea(), BorderLayout.CENTER);
 		loadLayout(layoutConfigFile);
-		loadPreferences();
-		
+		loadPreferences();		
 	}
 	
 	public void clearData() {
@@ -192,11 +191,18 @@ public class MultiMSFeatureQCPlotFrame extends JFrame
 			if(currentExperiment == null || dataPipeline == null)
 				return null;
 			
+			featureDataMatrix = currentExperiment.getFeatureMatrixForDataPipeline(dataPipeline);
+			if(featureDataMatrix != null)
+				return null;
+			
 			try {
 				featureDataMatrix = 
 						ProjectUtils.readFeatureMatrix(currentExperiment, dataPipeline, false);
 				if(featureDataMatrix == null) {
 					return null;
+				}
+				else {
+					currentExperiment.setFeatureMatrixForDataPipeline(dataPipeline, featureDataMatrix);
 				}
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
@@ -290,8 +296,7 @@ public class MultiMSFeatureQCPlotFrame extends JFrame
 		rtVariationPlotPanel.loadFeatureData(activeFeature, fileFeatureMap);
 		mzVariationPlotPanel.loadFeatureData(activeFeature, fileFeatureMap);
 		featureQualityPlotPanel.loadFeatureData(activeFeature, fileFeatureMap);
-		multispectrumPlotPanel.loadFeatureData(activeFeature, fileFeatureMap);
-		
+		multispectrumPlotPanel.loadFeatureData(activeFeature, fileFeatureMap);	
 	}
 	
 	private Map<DataFile,SimpleMsFeature>createFileFeatureMap(MsFeature feature) {

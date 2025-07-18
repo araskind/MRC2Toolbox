@@ -1728,6 +1728,21 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 	private void finalizeProFinderArchivePreprocessingTask(ProFinderArchivePreprocessingTask task) {
 
 		DataPipeline dataPipeline = task.getDataPipeline();
+		List<DataFile> filesWithoutTimestamp = 
+				currentExperiment.getDataFilesForPipeline(dataPipeline, false).
+				stream().filter(f -> Objects.isNull(f.getInjectionTime())).
+				collect(Collectors.toList());
+		if(!filesWithoutTimestamp.isEmpty()) {
+			
+			String message = "The following data files have no injection time assigned:\n";
+			for(DataFile df : filesWithoutTimestamp)
+				message += df.getBaseName() + "\n";
+			
+			message += "\nMissing injection time will interfere with some types of data presentatioh,\n"
+					+ "Please add the missing data";
+			
+			MessageDialog.showWarningMsg(message, this.getContentPane());
+		}
 		MRC2ToolBoxCore.getMainWindow().
 			switchDataPipeline(currentExperiment, dataPipeline);
 		MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
