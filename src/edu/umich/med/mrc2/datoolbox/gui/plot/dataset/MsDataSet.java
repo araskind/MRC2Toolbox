@@ -286,8 +286,8 @@ public class MsDataSet extends AbstractXYDataset implements IntervalXYDataset {
 			if(ms == null || ms.length == 0)
 				continue;
 			
-			MsPoint[] msScaled = spectrum.getMsForAdduct(ad, true);
-			msSeries.put(featureCount, msScaled);			
+			//	MsPoint[] msScaled = spectrum.getMsForAdduct(ad, true);
+			msSeries.put(featureCount, spectrum.getMsForAdduct(ad));			
 			labels.put(featureCount, ad.getName());
 			allPoints.addAll(spectrum.getMsPoints());
 			featureCount++;

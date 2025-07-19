@@ -38,6 +38,7 @@ import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
+import edu.umich.med.mrc2.datoolbox.utils.DataSetUtils;
 import edu.umich.med.mrc2.datoolbox.utils.MsFeatureStatsObject;
 import edu.umich.med.mrc2.datoolbox.utils.ProjectUtils;
 
@@ -154,12 +155,17 @@ public class MsFeatureAveragingTask extends AbstractTask {
 		total = 100;
 		processed = 20;
 		
-		featureDataMatrix = currentExperiment.getFeatureMatrixForDataPipeline(pipeline);
-		if(featureDataMatrix == null){
-			featureDataMatrix = 
+		Matrix completeFeatureDataMatrix = 
+				currentExperiment.getFeatureMatrixForDataPipeline(pipeline);
+		if(completeFeatureDataMatrix == null){
+			completeFeatureDataMatrix = 
 					ProjectUtils.readFeatureMatrix(currentExperiment, pipeline, false);
-			currentExperiment.setFeatureMatrixForDataPipeline(pipeline, featureDataMatrix);
+			currentExperiment.setFeatureMatrixForDataPipeline(
+					pipeline, completeFeatureDataMatrix);
 		}
+		featureDataMatrix = DataSetUtils.subsetDataMatrixByDataFiles(
+					completeFeatureDataMatrix, dataFiles);
+		System.out.println("***");
 	}
 
 	public DataPipeline getPipeline() {

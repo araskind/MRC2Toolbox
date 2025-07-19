@@ -108,23 +108,54 @@ public class DataSetUtils {
 			Collection<DataFile>dataFiles) {
 		
 		Matrix featureMatrix = sourceMatrix.getMetaDataDimensionMatrix(0);
-		Collection<Long>featureCoordinates = 
-				features.stream().map(f -> sourceMatrix.getColumnForLabel(f)).
-				sorted().collect(Collectors.toList());
-		Matrix newFeatureMatrix = featureMatrix.selectColumns(Ret.NEW, featureCoordinates);
-		
+		Matrix newFeatureMatrix = featureMatrix;
 		Matrix fileMatrix = sourceMatrix.getMetaDataDimensionMatrix(1);
-		Collection<Long>fileCoordinates = dataFiles.stream().
-				map(file -> sourceMatrix.getRowForLabel(file)).
-				collect(Collectors.toList());
-		Matrix newFileMatrix = fileMatrix.selectRows(Ret.NEW, fileCoordinates);
+		Matrix newFileMatrix = fileMatrix;
+		Collection<Long>featureCoordinates = null;
+		Collection<Long>fileCoordinates = null;
+		if(features != null) {
+			
+			featureCoordinates = 
+					features.stream().map(f -> sourceMatrix.getColumnForLabel(f)).
+					sorted().collect(Collectors.toList());
+			newFeatureMatrix = featureMatrix.selectColumns(Ret.NEW, featureCoordinates);
+		}
+		if(dataFiles != null) {
+			
+			fileCoordinates = dataFiles.stream().
+					map(file -> sourceMatrix.getRowForLabel(file)).
+					collect(Collectors.toList());
+			newFileMatrix = fileMatrix.selectRows(Ret.NEW, fileCoordinates);
+		}
+		Matrix subset = null;
+		if(featureCoordinates != null && fileCoordinates != null)
+			subset = sourceMatrix.selectColumns(Ret.LINK, featureCoordinates).selectRows(Ret.NEW, fileCoordinates);
 		
-		Matrix subset = sourceMatrix.selectColumns(Ret.LINK, featureCoordinates).selectRows(Ret.NEW, fileCoordinates);
-		subset.setMetaDataDimensionMatrix(0, newFeatureMatrix);
-		subset.setMetaDataDimensionMatrix(1, newFileMatrix);
+		if(featureCoordinates == null && fileCoordinates != null)
+			subset = sourceMatrix.selectRows(Ret.NEW, fileCoordinates);
+		
+		if(featureCoordinates != null && fileCoordinates == null)
+			subset = sourceMatrix.selectColumns(Ret.LINK, featureCoordinates);
+		
+		if(subset != null) {
+			subset.setMetaDataDimensionMatrix(0, newFeatureMatrix);
+			subset.setMetaDataDimensionMatrix(1, newFileMatrix);
+		}
 		return subset;
 	}
-
+	
+	public static Matrix subsetDataMatrixByDataFiles(
+			Matrix sourceMatrix,
+			Collection<DataFile>dataFiles) {
+		return subsetDataMatrix(sourceMatrix, null, dataFiles);
+	}
+	
+	public static Matrix subsetDataMatrixByFeatures(
+			Matrix sourceMatrix,
+			Collection <MsFeature>features) {
+		return subsetDataMatrix(sourceMatrix, features, null);
+	}
+	
 	public static Matrix getFeatureSubsetMatrix(
 			Matrix source,
 			Collection<MsFeature>activeFeatures) {
