@@ -1716,6 +1716,23 @@ public class MsUtils {
 		return msString;
 	}
 	
+	public static Map<Adduct, Collection<MsPoint>>scaleAllAdductsToBasePeak(MassSpectrum inputSpectrum){
+		
+		Map<Adduct, Collection<MsPoint>>adductMsPointsMap = 
+				new TreeMap<Adduct, Collection<MsPoint>>();
+		double maxIntensity = inputSpectrum.getBasePeak().getIntensity();
+		for(Adduct adduct : inputSpectrum.getAdducts()) {
+			
+			List<MsPoint> normPoints = inputSpectrum.getMsPointsForAdduct(adduct).stream()
+				.map(dp -> new MsPoint(dp.getMz(), 
+						dp.getIntensity()/maxIntensity * SPECTRUM_NORMALIZATION_BASE_INTENSITY))
+				.sorted(mzSorter).collect(Collectors.toList());
+			if(!normPoints.isEmpty())
+				adductMsPointsMap.put(adduct, normPoints);
+		}
+		return adductMsPointsMap;
+	}
+	
 	public static MassSpectrum averageMassSpectraByAdduct(
 			Collection<MassSpectrum>inputSpectra,
 			double mzBinWidth,
@@ -1725,15 +1742,14 @@ public class MsUtils {
 		Map<Adduct, List<MsPoint>>adductMsPointsMap = new TreeMap<Adduct, List<MsPoint>>();
 		for(MassSpectrum ms : inputSpectra) {
 			
-			for(Adduct adduct : ms.getAdducts()) {
+			Map<Adduct, Collection<MsPoint>>normalizedToBase = scaleAllAdductsToBasePeak(ms);
+			for(Entry<Adduct, Collection<MsPoint>>normEntry : normalizedToBase.entrySet()) {
 				
-				if(!adductMsPointsMap.containsKey(adduct))
-					adductMsPointsMap.put(adduct, new ArrayList<MsPoint>());
+				if(!adductMsPointsMap.containsKey(normEntry.getKey()))
+					adductMsPointsMap.put(normEntry.getKey(), new ArrayList<MsPoint>());
 				
-				Collection<MsPoint> adductMs = ms.getMsPointsForAdduct(adduct, true);
-				if(adductMs != null) 
-					adductMsPointsMap.get(adduct).addAll(adductMs);				
-			}
+				adductMsPointsMap.get(normEntry.getKey()).addAll(normEntry.getValue());
+			}			
 		}
 		for(Entry<Adduct, List<MsPoint>>adductEntry : adductMsPointsMap.entrySet()) {
 			Collection<MsPoint> averageAdductSpectrum = 
@@ -1741,11 +1757,8 @@ public class MsUtils {
 			
 			if(averageAdductSpectrum != null && !averageAdductSpectrum.isEmpty()) {
 				
-				Collection<MsPoint> averageNormalizedAdductSpectrum = 
-						normalizeAndSortMsPointsCollection(averageAdductSpectrum);
-				
 				averagedSpectrum.addSpectrumForAdduct(
-						adductEntry.getKey(), averageNormalizedAdductSpectrum);
+						adductEntry.getKey(), averageAdductSpectrum);
 			}
 		}
 		return averagedSpectrum;
