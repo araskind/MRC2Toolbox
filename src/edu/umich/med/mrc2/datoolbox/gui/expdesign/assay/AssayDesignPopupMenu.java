@@ -38,9 +38,12 @@ public class AssayDesignPopupMenu extends JPopupMenu {
 	private static final long serialVersionUID = 702774401229793555L;
 
 	private static final Icon disableControlsIcon = GuiUtils.getIcon("deleteStandardSample", 24);
+	private static final Icon enableSelectedIcon = GuiUtils.getIcon("checkboxFull", 24);
+	private static final Icon disableSelectedIcon = GuiUtils.getIcon("checkboxEmpty", 24);
 	private static final Icon enableAllIcon = GuiUtils.getIcon("enableAll", 24);
 	private static final Icon disableAllIcon = GuiUtils.getIcon("disableAll", 24);
 	private static final Icon invertEnabledIcon = GuiUtils.getIcon("invertSelection", 24);
+	private static final Icon resetFilterIcon = GuiUtils.getIcon("resetFilter", 24);
 	
 	private JMenuItem disableControlsMenuItem;
 	private JMenuItem enableSelectedMenuItem;

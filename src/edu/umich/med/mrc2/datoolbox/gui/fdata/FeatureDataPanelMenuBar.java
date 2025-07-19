@@ -91,6 +91,7 @@ public class FeatureDataPanelMenuBar extends CommonMenuBar {
 	private static final Icon multiSpectraIcon = GuiUtils.getIcon("multiSpectra", 24);
 	private static final Icon exportAuxDataMatrixIcon = GuiUtils.getIcon("exportAuxDataMatrix", 24);	
 	private static final Icon analysisIconSmall = GuiUtils.getIcon("script", 16);
+	private static final Icon averageFeaturesIcon = GuiUtils.getIcon("avgSpectrum", 24);
 
 	// Menus
 	private JMenu
@@ -117,7 +118,8 @@ public class FeatureDataPanelMenuBar extends CommonMenuBar {
 	private JMenuItem
 		calculateStatisticsMenuItem,
 		mzFrequencyMenuItem,
-		exportFeatureStatsMenuItem;
+		exportFeatureStatsMenuItem,
+		averageFeaturesMenuItem;
 
 	// Search items
 	private JMenuItem
@@ -211,7 +213,13 @@ public class FeatureDataPanelMenuBar extends CommonMenuBar {
 		
 		exportFeatureStatsMenuItem = addItem(statsMenu, 
 				MainActionCommands.EXPORT_FEATURE_STATISTICS_COMMAND, 
-				exportStatsIcon); 
+				exportStatsIcon);
+		
+		statsMenu.addSeparator();
+		
+		averageFeaturesMenuItem = addItem(statsMenu, 
+				MainActionCommands.AVERAGE_FEATURES_LIBRARY_SETUP_COMMAND, 
+				averageFeaturesIcon);
 		
 		add(statsMenu);
 		

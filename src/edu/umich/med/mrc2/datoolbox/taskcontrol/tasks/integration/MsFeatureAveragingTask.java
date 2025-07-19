@@ -24,14 +24,13 @@ package edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.integration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
 import org.ujmp.core.Matrix;
 import org.ujmp.core.calculation.Calculation.Ret;
 
+import edu.umich.med.mrc2.datoolbox.data.CompoundLibrary;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.LibraryMsFeature;
-import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.SimpleMsFeature;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
@@ -45,14 +44,14 @@ import edu.umich.med.mrc2.datoolbox.utils.ProjectUtils;
 public class MsFeatureAveragingTask extends AbstractTask {
 
 	private DataPipeline pipeline;
-	private Set<DataFile>dataFiles;
-	private Collection<LibraryMsFeature>averagedFeatures;
+	private Collection<DataFile>dataFiles;
+	private CompoundLibrary averagedLibrary;
 	private DataAnalysisProject currentExperiment;
 	private Matrix featureDataMatrix;
 	
 	public MsFeatureAveragingTask(
 			DataPipeline pipeline, 
-			Set<DataFile> dataFiles) {
+			Collection<DataFile> dataFiles) {
 		super();
 		this.pipeline = pipeline;
 		this.dataFiles = dataFiles;
@@ -95,27 +94,31 @@ public class MsFeatureAveragingTask extends AbstractTask {
 		
 		taskDescription = "Collecting feature data ...";
 		Matrix featureMatrix = featureDataMatrix.getMetaDataDimensionMatrix(0);
-		total = Math.toIntExact(featureMatrix.getColumnCount());
+		Object[]featureArray = 
+				featureMatrix.selectRows(Ret.LINK, 0).toObjectArray()[0];
+		total = featureArray.length;
 		processed = 0;
 		
 		List<MsFeatureStatsObject>statObjectList = new ArrayList<MsFeatureStatsObject>();
-		long[]coord = new long[] {0,0};
-		for(long i=0; i<featureMatrix.getColumnCount(); i++) {
-			
-			coord[1] = i;
-			MsFeature msf = (MsFeature)featureMatrix.getAsObject(coord);
+		for(int i=0; i<featureArray.length; i++) {
+
+			LibraryMsFeature msf = (LibraryMsFeature)featureArray[i];
 			MsFeatureStatsObject statObject = new MsFeatureStatsObject(msf);
-			Object[]selectedFeatureData = 
-					featureDataMatrix.selectColumns(Ret.LINK, i).transpose().toObjectArray()[0];
+			Object[][]selectedFeatureData = 
+				featureDataMatrix.selectColumns(Ret.LINK, i).toObjectArray();
 			
 			for(int j=0; j<selectedFeatureData.length; j++) {
+
+				if(selectedFeatureData[j][0] == null)
+					continue;
 				
-				SimpleMsFeature sFeature = (SimpleMsFeature)selectedFeatureData[j];
+				SimpleMsFeature sFeature = (SimpleMsFeature)selectedFeatureData[j][0];
 				statObject.addRtValue(sFeature.getRetentionTime());
 				statObject.addRtRange(sFeature.getRtRange());
 				statObject.addSpectrum(sFeature.getObservedSpectrum());
-				processed++;
 			}
+			statObjectList.add(statObject);
+			processed++;			
 		}
 		return statObjectList;
 	}
@@ -125,6 +128,9 @@ public class MsFeatureAveragingTask extends AbstractTask {
 		taskDescription = "Generating averaged features ...";
 		total = statObjectList.size();
 		processed = 0;
+		
+		averagedLibrary = new CompoundLibrary("Averaged features for " + pipeline.getName());
+		averagedLibrary.setPolarity(pipeline.getAcquisitionMethod().getPolarity());
 		
 		for(MsFeatureStatsObject statObject : statObjectList) {
 
@@ -137,10 +143,9 @@ public class MsFeatureAveragingTask extends AbstractTask {
 			if(statObject.getAverageScaledMassSpectrum() != null)
 				newLibFeature.setSpectrum(statObject.getAverageScaledMassSpectrum());
 			
-			averagedFeatures.add(newLibFeature);
+			averagedLibrary.addFeature(newLibFeature);
 			processed++;
-		}		
-		averagedFeatures = new ArrayList<LibraryMsFeature>();
+		}				
 	}
 	
 	private void loadFeatureMatrix() {
@@ -150,11 +155,9 @@ public class MsFeatureAveragingTask extends AbstractTask {
 		processed = 20;
 		
 		featureDataMatrix = currentExperiment.getFeatureMatrixForDataPipeline(pipeline);
-		if(featureDataMatrix != null)
-			return;
-		else {
-			featureDataMatrix = ProjectUtils.readFeatureMatrix(
-					currentExperiment, pipeline, false);
+		if(featureDataMatrix == null){
+			featureDataMatrix = 
+					ProjectUtils.readFeatureMatrix(currentExperiment, pipeline, false);
 			currentExperiment.setFeatureMatrixForDataPipeline(pipeline, featureDataMatrix);
 		}
 	}
@@ -163,12 +166,12 @@ public class MsFeatureAveragingTask extends AbstractTask {
 		return pipeline;
 	}
 
-	public Set<DataFile> getDataFiles() {
+	public Collection<DataFile> getDataFiles() {
 		return dataFiles;
 	}
 
-	public Collection<LibraryMsFeature> getAveragedFeatures() {
-		return averagedFeatures;
+	public CompoundLibrary getAveragedFeaturesLibrary() {
+		return averagedLibrary;
 	}
 
 	@Override

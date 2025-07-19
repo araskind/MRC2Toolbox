@@ -93,8 +93,7 @@ public class AssayDesignPanel extends DockableMRC2ToolboxPanel{
 		menuActions.add(GuiUtils.setupButtonAction(
 				MainActionCommands.ENABLE_SELECTED_SAMPLES_COMMAND.getName(),
 				MainActionCommands.ENABLE_SELECTED_SAMPLES_COMMAND.getName(), 
-				enableSelectedIcon, this));
-		
+				enableSelectedIcon, this));		
 		menuActions.add(GuiUtils.setupButtonAction(
 				MainActionCommands.DISABLE_SELECTED_SAMPLES_COMMAND.getName(),
 				MainActionCommands.DISABLE_SELECTED_SAMPLES_COMMAND.getName(), 

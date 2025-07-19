@@ -100,6 +100,7 @@ import edu.umich.med.mrc2.datoolbox.gui.io.PeakQualityImportDialog;
 import edu.umich.med.mrc2.datoolbox.gui.io.excel.ExcelImportWizard;
 import edu.umich.med.mrc2.datoolbox.gui.io.mwtab.MWTabExportDialog;
 import edu.umich.med.mrc2.datoolbox.gui.io.txt.TextDataImportDialog;
+import edu.umich.med.mrc2.datoolbox.gui.library.MsLibraryPanel;
 import edu.umich.med.mrc2.datoolbox.gui.library.search.LibrarySearchSetupDialog;
 import edu.umich.med.mrc2.datoolbox.gui.main.DockableMRC2ToolboxPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
@@ -125,6 +126,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.derepl.FindDuplicateNamesTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.derepl.MergeDuplicateFeaturesTask;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.integration.MsFeatureAveragingTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io.DataExportTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io.ImportBinnerAnnotationsForUntargetedDataTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io.MiltiCefPeakQualityImportTask;
@@ -187,6 +189,7 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 	private MzFrequencyAnalysisSetupDialog mzFrequencyAnalysisSetupDialog;
 	private ExperimentPooledSampleManagerDialog experimentPooledSampleManagerDialog;
 	private MultiMSFeatureQCPlotFrame multiSpectraPlotFrame;
+	private FeatureAveragingSetupDialog featureAveragingSetupDialog;
 
 	private static final Icon componentIcon = GuiUtils.getIcon("barChart", 16);
 	private static final Icon loadLibraryIcon = GuiUtils.getIcon("loadLibrary", 24);
@@ -435,6 +438,12 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 			
 			if (command.equals(MainActionCommands.CLEAN_EMPTY_FEATURES_COMMAND.getName()))
 				cleanEmptyFeatures();
+			
+			if (command.equals(MainActionCommands.AVERAGE_FEATURES_LIBRARY_SETUP_COMMAND.getName()))
+				setupAverageFeaturesLibraryGeneration();
+			
+			if (command.equals(MainActionCommands.CREATE_AVERAGE_FEATURES_LIBRARY_COMMAND.getName()))
+				createAverageFeaturesLibrary();
 			
 			if (command.equals(MainActionCommands.IMPORT_BINNER_ANNOTATIONS_COMMAND.getName()))
 				importBinnerAnnotations();
@@ -1242,6 +1251,41 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 		MRC2ToolBoxCore.getTaskController().addTask(task);
 	}
 	
+	private void setupAverageFeaturesLibraryGeneration(){
+	
+		CompoundLibrary existing = 
+				currentExperiment.getAveragedFeatureLibraryForDataPipeline(activeDataPipeline);
+		if(existing != null) {
+			
+			int res = MessageDialog.showChoiceWithWarningMsg(
+					"The averaged feature library for the active data pipeline already exists.\n"
+					+ "Do you want to recalculate it?", 
+					this.getContentPane());
+			if(res != JOptionPane.YES_OPTION)
+				return;
+		}
+		featureAveragingSetupDialog = new FeatureAveragingSetupDialog(this);
+		featureAveragingSetupDialog.loadPipelineData(currentExperiment, activeDataPipeline);
+		featureAveragingSetupDialog.setLocationRelativeTo(this.getContentPane());
+		featureAveragingSetupDialog.setVisible(true);
+	}
+	
+	private void createAverageFeaturesLibrary(){
+		
+		Collection<DataFile> dataFiles = featureAveragingSetupDialog.getSelectedFiles();
+		if(dataFiles.isEmpty()) {
+			MessageDialog.showWarningMsg(
+					"No data files selected for feature averaging", 
+					featureAveragingSetupDialog);
+			return;
+		}
+		MsFeatureAveragingTask task = 
+				new MsFeatureAveragingTask(activeDataPipeline, dataFiles);
+		task.addTaskListener(this);		
+		MRC2ToolBoxCore.getTaskController().addTask(task);
+		featureAveragingSetupDialog.dispose();
+	}
+	
 	private void importBinnerAnnotations() {
 		
 		if(hasBinnerAnnotations()) {
@@ -1716,8 +1760,10 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 				finalizeBinnerAnnotationsImportTask((ImportBinnerAnnotationsForUntargetedDataTask)e.getSource());	
 			
 			if (e.getSource().getClass().equals(ProFinderArchivePreprocessingTask.class))
-				finalizeProFinderArchivePreprocessingTask((ProFinderArchivePreprocessingTask)e.getSource());	
+				finalizeProFinderArchivePreprocessingTask((ProFinderArchivePreprocessingTask)e.getSource());
 			
+			if (e.getSource().getClass().equals(MsFeatureAveragingTask.class))
+				finalizeMsFeatureAveragingTask((MsFeatureAveragingTask)e.getSource());			
 		}
 		if (e.getStatus() == TaskStatus.CANCELED || e.getStatus() == TaskStatus.ERROR) {
 			MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
@@ -1725,6 +1771,21 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 		}
 	}
 	
+	private void finalizeMsFeatureAveragingTask(MsFeatureAveragingTask task) {
+
+		CompoundLibrary averagedLibrary = task.getAveragedFeaturesLibrary();
+		if(averagedLibrary != null) {
+			currentExperiment.setAveragedFeatureLibraryForDataPipeline(
+					activeDataPipeline, averagedLibrary);
+			
+			MRC2ToolBoxCore.getMainWindow().showPanel(PanelList.MS_LIBRARY);
+			MsLibraryPanel libPanel = 
+					(MsLibraryPanel)MRC2ToolBoxCore.getMainWindow().getPanel(PanelList.MS_LIBRARY);
+			MRC2ToolBoxCore.getActiveMsLibraries().add(averagedLibrary);
+			libPanel.reloadLibraryData(averagedLibrary);
+		}
+	}
+
 	private void finalizeProFinderArchivePreprocessingTask(ProFinderArchivePreprocessingTask task) {
 
 		DataPipeline dataPipeline = task.getDataPipeline();

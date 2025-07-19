@@ -97,7 +97,7 @@ public class LibraryFeatureTableModel extends BasicTableModel {
 			MsFeatureIdentity identity = lf.getPrimaryIdentity();
 			String formula = "";
 			int innateCharge = 0;
-			if(identity != null) {
+			if(identity != null && identity.getCompoundIdentity() != null) {
 				formula = identity.getCompoundIdentity().getFormula();
 
 				String smiles = identity.getCompoundIdentity().getSmiles();

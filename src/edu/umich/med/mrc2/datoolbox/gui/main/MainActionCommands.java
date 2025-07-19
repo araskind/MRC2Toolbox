@@ -303,6 +303,8 @@ public enum MainActionCommands {
 	EXPORT_ALL_FEATURE_STATISTICS_COMMAND("Export all feature quality data for individual samples"),
 	SHOW_RAWA_DATA_UPLOAD_PREP_DIALOG("Prepare raw data for upload"),
 	EXPORT_FEATURE_STATISTICS_COMMAND("Export feature statistics for active feature set"),
+	AVERAGE_FEATURES_LIBRARY_SETUP_COMMAND("Create average features library"),
+	CREATE_AVERAGE_FEATURES_LIBRARY_COMMAND("Generate and show average features library"),
 	
 	//
 	COPY_SELECTED_MS1_ROWS_COMMAND("Copy selected MS1 features (TAB separated)"),
