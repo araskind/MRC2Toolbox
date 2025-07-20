@@ -445,6 +445,9 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 			if (command.equals(MainActionCommands.CREATE_AVERAGE_FEATURES_LIBRARY_COMMAND.getName()))
 				createAverageFeaturesLibrary();
 			
+			if (command.equals(MainActionCommands.OPEN_AVERAGE_FEATURES_LIBRARY_COMMAND.getName()))
+				loadAverageFeaturesLibrary();
+			
 			if (command.equals(MainActionCommands.IMPORT_BINNER_ANNOTATIONS_COMMAND.getName()))
 				importBinnerAnnotations();
 			
@@ -1285,6 +1288,29 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 		MRC2ToolBoxCore.getTaskController().addTask(task);
 		featureAveragingSetupDialog.dispose();
 	}
+	
+	private void loadAverageFeaturesLibrary(){
+		
+		CompoundLibrary averagedLibrary = 
+				currentExperiment.getAveragedFeatureLibraryForDataPipeline(activeDataPipeline);
+		if(averagedLibrary == null) {
+			MessageDialog.showWarningMsg(
+					"Averaged feature library not available for data pipeline \""
+					+ activeDataPipeline.getName() + "\"\n"
+					+ "Please run the feature averaging routine first.", this.getContentPane());
+			return;
+		}
+		MRC2ToolBoxCore.getMainWindow().showPanel(PanelList.MS_LIBRARY);
+		MsLibraryPanel libPanel = 
+				(MsLibraryPanel)MRC2ToolBoxCore.getMainWindow().getPanel(PanelList.MS_LIBRARY);
+		if(libPanel.getCurrentLibrary() != null 
+				&& libPanel.getCurrentLibrary().equals(averagedLibrary))
+			return;
+		else {
+			MRC2ToolBoxCore.getActiveMsLibraries().add(averagedLibrary);
+			libPanel.reloadLibraryData(averagedLibrary);
+		}
+	}	
 	
 	private void importBinnerAnnotations() {
 		

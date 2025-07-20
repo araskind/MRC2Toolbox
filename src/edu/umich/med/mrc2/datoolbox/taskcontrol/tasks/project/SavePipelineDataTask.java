@@ -29,6 +29,7 @@ import org.jdom2.Document;
 import org.jdom2.Element;
 import org.ujmp.core.Matrix;
 
+import edu.umich.med.mrc2.datoolbox.data.CompoundLibrary;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
@@ -61,15 +62,19 @@ public class SavePipelineDataTask extends AbstractTask {
 		try {
 			saveFeaturesForPipeline();
 		} catch (Exception ex) {
-			ex.printStackTrace();
-			setStatus(TaskStatus.ERROR);
+			reportErrorAndExit(ex);
 			return;
 		}
 		try {
+			saveAveragedFeatureLibraryForPipeline();
+		} catch (Exception ex) {
+			reportErrorAndExit(ex);
+			return;
+		} 
+		try {
 			saveDataMatrixesForPipeline();
 		} catch (Exception ex) {
-			ex.printStackTrace();
-			setStatus(TaskStatus.ERROR);
+			reportErrorAndExit(ex);
 			return;
 		}		
 		setStatus(TaskStatus.FINISHED);
@@ -97,15 +102,35 @@ public class SavePipelineDataTask extends AbstractTask {
 		}
 		msFeatureDocument.setRootElement(featureListElement);
 		
-		System.out.println("***********");
-		System.out.println(Integer.toString(processed) + " features converted for pipeline " + pipeline.getName());
-		System.out.println("***********");
+//		System.out.println("***********");
+//		System.out.println(Integer.toString(processed) + " features converted for pipeline " + pipeline.getName());
+//		System.out.println("***********");
 		
 		taskDescription = "Saving XML features file for " + pipeline.getName();
 		total = 100;
 		processed = 80;
 		ProjectUtils.createDataDirectoryForProjectIfNotExists(project);
 		XmlUtils.writeCompactXMLtoFile(msFeatureDocument, featureXmlFile);		
+	}
+	
+	private void saveAveragedFeatureLibraryForPipeline() {
+		
+		taskDescription = "Saving averaged feature library file for " + pipeline.getName();
+		total = 100;
+		processed = 80;
+		CompoundLibrary avgLib = project.getAveragedFeatureLibraryForDataPipeline(pipeline);
+		if(avgLib == null)
+			return;
+				
+		File avgLibXmlFile = 
+				Paths.get(project.getDataDirectory().getAbsolutePath(),
+				DataPrefix.AVERAGED_FEATURE_LIBRARY.getName() + pipeline.getSaveSafeName() 
+				+ "." + DataFileExtensions.AVERAGED_FEATURE_LIBRARY_EXTENSION.getExtension()).toFile();
+		Document avgFeatureLibDocument = new Document();
+		Element cpdLibElement =  avgLib.getXmlElement();
+		avgFeatureLibDocument.setRootElement(cpdLibElement);
+		ProjectUtils.createDataDirectoryForProjectIfNotExists(project);
+		XmlUtils.writeCompactXMLtoFile(avgFeatureLibDocument, avgLibXmlFile);		
 	}
 	
 	private void saveDataMatrixesForPipeline() {

@@ -36,6 +36,7 @@ import org.jdom2.input.SAXBuilder;
 import org.ujmp.core.Matrix;
 import org.ujmp.core.calculation.Calculation.Ret;
 
+import edu.umich.med.mrc2.datoolbox.data.CompoundLibrary;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.LibraryMsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
@@ -78,9 +79,13 @@ public class LoadPipelineDataTask extends AbstractTask {
 		try {
 			readFeaturesFromFile();
 		} catch (Exception ex) {
-			ex.printStackTrace();
-			setStatus(TaskStatus.ERROR);
+			reportErrorAndExit(ex);
 			return;
+		}
+		try {
+			loadAveragedFeatureLibraryForPipeline();
+		} catch (Exception ex) {
+			ex.printStackTrace();
 		}
 		if(project.getMsFeaturesForDataPipeline(pipeline) == null 
 				|| project.getMsFeaturesForDataPipeline(pipeline).isEmpty()) {
@@ -96,7 +101,38 @@ public class LoadPipelineDataTask extends AbstractTask {
 		}
 		setStatus(TaskStatus.FINISHED);
 	}
-
+	
+	private void loadAveragedFeatureLibraryForPipeline() {
+		
+		File avgLibXmlFile = 
+				Paths.get(project.getDataDirectory().getAbsolutePath(),
+					DataPrefix.AVERAGED_FEATURE_LIBRARY.getName() + pipeline.getSaveSafeName() 
+					+ "." + DataFileExtensions.AVERAGED_FEATURE_LIBRARY_EXTENSION.getExtension()).toFile();
+		
+		CompoundLibrary averagedFeatureLibrary = null;
+		if(avgLibXmlFile.exists() && avgLibXmlFile.canRead()) {
+			
+			SAXBuilder sax = new SAXBuilder();
+			Document doc = null;
+			try {			
+				doc = sax.build(avgLibXmlFile);
+			} catch (Exception e) {
+				reportErrorAndExit(e);
+			}
+			if(doc != null) {
+				
+				Element rootNode = doc.getRootElement();
+				try {
+					averagedFeatureLibrary = new CompoundLibrary(rootNode);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		if(averagedFeatureLibrary != null)
+			project.setAveragedFeatureLibraryForDataPipeline(pipeline, averagedFeatureLibrary);
+	}
+	
 	private void createDataMatrix() {
 		
 		Matrix featureMetaDataMatrix = createFeatureMetaDataMatrix();

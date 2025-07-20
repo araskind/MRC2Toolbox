@@ -582,17 +582,22 @@ public class MassSpectrum implements Serializable, XmlStorable {
 		
 		parseAdductMap(spectrumElement);
 		
-		String mzText = spectrumElement.getChild(CommonFields.MZ.name()).getText();
-		double[] mzValues = NumberArrayUtils.decodeValueString(mzText);
-		
-		String intensityText =  
-				spectrumElement.getChild(MassSpectrumFields.Intensity.name()).getText();
-		double[] intensityValues = NumberArrayUtils.decodeValueString(intensityText);
-
-		if(mzValues != null && intensityValues != null) {
+		Element mzElement = spectrumElement.getChild(CommonFields.MZ.name());
+		Element intensityElement = spectrumElement.getChild(MassSpectrumFields.Intensity.name());
+		if(mzElement != null && intensityElement != null) {
 			
-			for(int i=0; i<mzValues.length; i++)
-				msPoints.add(new MsPoint(mzValues[i], intensityValues[i]));
+			String mzText = spectrumElement.getChild(CommonFields.MZ.name()).getText();
+			double[] mzValues = NumberArrayUtils.decodeValueString(mzText);
+			
+			String intensityText =  
+					spectrumElement.getChild(MassSpectrumFields.Intensity.name()).getText();
+			double[] intensityValues = NumberArrayUtils.decodeValueString(intensityText);
+
+			if(mzValues != null && intensityValues != null) {
+				
+				for(int i=0; i<mzValues.length; i++)
+					msPoints.add(new MsPoint(mzValues[i], intensityValues[i]));
+			}
 		}		
 		List<Element>msmsElementList = spectrumElement.getChildren(MassSpectrumFields.MsmsList.name());
 		if(!msmsElementList.isEmpty()) {

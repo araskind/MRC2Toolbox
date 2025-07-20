@@ -305,6 +305,7 @@ public enum MainActionCommands {
 	EXPORT_FEATURE_STATISTICS_COMMAND("Export feature statistics for active feature set"),
 	AVERAGE_FEATURES_LIBRARY_SETUP_COMMAND("Create average features library"),
 	CREATE_AVERAGE_FEATURES_LIBRARY_COMMAND("Generate and show average features library"),
+	OPEN_AVERAGE_FEATURES_LIBRARY_COMMAND("Load average features library into MS library panel"),
 	
 	//
 	COPY_SELECTED_MS1_ROWS_COMMAND("Copy selected MS1 features (TAB separated)"),

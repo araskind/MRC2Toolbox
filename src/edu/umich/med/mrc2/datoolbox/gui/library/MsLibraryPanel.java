@@ -1493,4 +1493,8 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ItemList
 		// TODO Auto-generated method stub
 		
 	}
+
+	public CompoundLibrary getCurrentLibrary() {
+		return currentLibrary;
+	}
 }

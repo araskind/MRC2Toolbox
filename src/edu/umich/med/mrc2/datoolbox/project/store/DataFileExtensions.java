@@ -25,6 +25,7 @@ public enum DataFileExtensions {
 
 	DATA_MATRIX_EXTENSION("dmat"),
 	FEATURE_LIST_EXTENSION("flist"),
+	AVERAGED_FEATURE_LIBRARY_EXTENSION("avgfl"),
 	;
 	
 	private final String extension;
