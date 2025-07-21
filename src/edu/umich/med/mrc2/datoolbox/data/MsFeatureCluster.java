@@ -767,6 +767,34 @@ public class MsFeatureCluster implements Serializable, XmlStorable {
 		// TODO Auto-generated method stub
 		return null;
 	}
+	
+    @Override
+    public boolean equals(Object obj) {
+
+		if (obj == this)
+			return true;
+
+        if (obj == null)
+            return false;
+
+        if (!MsFeatureCluster.class.isAssignableFrom(obj.getClass()))
+            return false;
+
+        final MsFeatureCluster other = (MsFeatureCluster) obj;
+
+        if ((this.clusterId == null) ? (other.getClusterId() != null) : !this.clusterId.equals(other.getClusterId()))
+            return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+
+        int hash = 3;
+        hash = 53 * hash + (this.clusterId != null ? this.clusterId.hashCode() : 0);
+        return hash;
+    }
 }
 
 

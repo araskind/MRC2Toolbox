@@ -24,6 +24,7 @@ package edu.umich.med.mrc2.datoolbox.gui.integration;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import javax.swing.ListSelectionModel;
 import javax.swing.table.TableRowSorter;
 
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
@@ -45,6 +46,8 @@ public class DataPipelineSelectionTable extends BasicTable {
 		rowSorter = new TableRowSorter<DataPipelineSelectionTableModel>(
 				(DataPipelineSelectionTableModel)model);
 		setRowSorter(rowSorter);
+		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		columnModel.getColumnById(DataPipelineSelectionTableModel.SELECTED_COLUMN).setMaxWidth(80);
 		
 		getTableHeader().setReorderingAllowed(false);
 		finalizeLayout();
@@ -55,13 +58,31 @@ public class DataPipelineSelectionTable extends BasicTable {
 		adjustColumns();
 	}
 	
-	public Collection<DataPipeline>getSelectedDataPipelines(){
+	public void setTableModelFromDataPipelineCollection(Collection<DataPipeline>pipelines) {
+		((DataPipelineSelectionTableModel)model).setTableModelFromDataPipelineCollection(pipelines);
+		adjustColumns();
+	}
+	
+	public Collection<DataPipeline>getCheckedDataPipelines(){
 		
 		Collection<DataPipeline>selectedPipelines = new ArrayList<DataPipeline>();
 		int dpCol = model.getColumnIndex(DataPipelineSelectionTableModel.DATA_PIPELINE_COLUMN);
-		for(int i : getSelectedRows())			
-			selectedPipelines.add((DataPipeline)model.getValueAt(convertRowIndexToModel(i), dpCol));
-		
+		int checkedCol = model.getColumnIndex(DataPipelineSelectionTableModel.SELECTED_COLUMN);
+		for(int i=0; i<model.getRowCount(); i++) {	
+			if((boolean)model.getValueAt(i, checkedCol))
+				selectedPipelines.add((DataPipeline)model.getValueAt(i, dpCol));
+		}		
 		return selectedPipelines;
+	}
+
+	public DataPipeline getSelectedDataPipeline() {
+		
+		int row = getSelectedRow();
+		if(row == -1)
+			return null;
+		else {
+			return (DataPipeline)model.getValueAt(convertRowIndexToModel(row), 
+					model.getColumnIndex(DataPipelineSelectionTableModel.DATA_PIPELINE_COLUMN));
+		}
 	}
 }

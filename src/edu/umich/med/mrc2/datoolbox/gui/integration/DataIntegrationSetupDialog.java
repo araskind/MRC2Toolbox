@@ -156,7 +156,7 @@ public class DataIntegrationSetupDialog extends JDialog {
 	}
 	
 	public Collection<DataPipeline> getSelectedDataPipelines(){
-		return assaySelectionTable.getSelectedDataPipelines();
+		return assaySelectionTable.getCheckedDataPipelines();
 	}
 	
 	public String getDataSetName() {

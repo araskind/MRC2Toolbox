@@ -58,6 +58,7 @@ import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.integration.DataPipelineAlignmentTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.integration.IdentifiedFeatureIntegrationTask;
 
 public class DataIntegratorPanel extends ClusterDisplayPanel {
@@ -66,6 +67,7 @@ public class DataIntegratorPanel extends ClusterDisplayPanel {
 	private String dataSetName;
 	private MsFeatureClusterSet integratedSet;
 	private DockableDataIntegrationFeatureSelectionTable featureSelectionTable;
+	private DataSetAlignmentSetupDialog dataSetAlignmentSetupDialog;
 
 	private static final Icon componentIcon = GuiUtils.getIcon("createIntegration", 16);
 	private static final Icon collectIDDataIcon = GuiUtils.getIcon("createIntegration", 24);
@@ -182,6 +184,53 @@ public class DataIntegratorPanel extends ClusterDisplayPanel {
 
 		if (command.equals(MainActionCommands.REMOVE_SELECTED_FROM_CLUSTER_COMMAND.getName()))
 			removeSelectedFeaturesFromCluster();
+		
+		if (command.equals(MainActionCommands.DATA_SET_ALIGNMENT_SETUP_COMMAND.getName()))
+			setupDataSetAlignment();
+			
+		if (command.equals(MainActionCommands.DATA_SET_ALIGNMENT_RUN_COMMAND.getName()))
+			alignDataSets();
+	}
+	
+	private void setupDataSetAlignment() {;
+
+		if(currentExperiment == null || activeDataPipeline == null)
+			return;
+		
+		Collection<DataPipeline>pipelinesForAcqMethod = 
+				currentExperiment.getPipelinesForDataAcquisitionMethod(
+						activeDataPipeline.getAcquisitionMethod());
+		
+		if(pipelinesForAcqMethod.size() < 2) {
+			MessageDialog.showWarningMsg(
+					"You need at least 2 data pipleines\n"
+					+ "for the same data acquisition method\n"
+					+ "to align th data sets", this.getContentPane());
+			return;
+		}
+		dataSetAlignmentSetupDialog = 
+				new DataSetAlignmentSetupDialog(pipelinesForAcqMethod, this);
+		dataSetAlignmentSetupDialog.setLocationRelativeTo(this.getContentPane());
+		dataSetAlignmentSetupDialog.setVisible(true);
+	}
+	
+	private void alignDataSets() {
+		
+		Collection<String> errors = dataSetAlignmentSetupDialog.validateFormData();
+		if(!errors.isEmpty()){
+		    MessageDialog.showErrorMsg(
+		            StringUtils.join(errors, "\n"), dataSetAlignmentSetupDialog);
+		    return;
+		}
+		DataPipelineAlignmentTask task = new DataPipelineAlignmentTask(
+				currentExperiment,
+				dataSetAlignmentSetupDialog.getSelectedDataPipelines(), 
+				dataSetAlignmentSetupDialog.getMassWindow(),
+				dataSetAlignmentSetupDialog.getMassErrorType(), 
+				dataSetAlignmentSetupDialog.getRetentionWindow());
+		task.addTaskListener(this);
+		MRC2ToolBoxCore.getTaskController().addTask(task);
+		dataSetAlignmentSetupDialog.dispose();
 	}
 
 	private void createNewClusterFromSelectedFeatures() {
@@ -275,24 +324,6 @@ public class DataIntegratorPanel extends ClusterDisplayPanel {
 		}
 	}
 
-	/*
-	 * @Override public void clearClusterDataPanel() {
-	 *
-	 * Runnable swingCode = new Runnable() {
-	 *
-	 * public void run() {
-	 *
-	 * if(featureDataTable != null) featureDataTable.clearTable();
-	 *
-	 * featureDataPanel.clearPanel(); } }; try { if
-	 * (SwingUtilities.isEventDispatchThread()) swingCode.run(); else
-	 * SwingUtilities.invokeAndWait(swingCode); } catch (Exception e) {
-	 * e.printStackTrace(); }
-	 *
-	 * // if(featureDataTable != null) // featureDataTable.clearTable(); // //
-	 * featureDataPanel.clearPanel(); }
-	 */
-
 	private void acceptIntegratedCompoundList() {
 
 		currentExperiment = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
@@ -319,9 +350,16 @@ public class DataIntegratorPanel extends ClusterDisplayPanel {
 
 			if (e.getSource().getClass().equals(IdentifiedFeatureIntegrationTask.class))
 				finalizeIdentifiedFeatureIntegrationTask((IdentifiedFeatureIntegrationTask) e.getSource());
+			
+			if (e.getSource().getClass().equals(DataPipelineAlignmentTask.class))
+				finalizeDataPipelineAlignmentTask((DataPipelineAlignmentTask) e.getSource());	
 		}
 	}
 	
+	private void finalizeDataPipelineAlignmentTask(DataPipelineAlignmentTask task) {
+		loadFeatureClusters(task.getClusterList());
+	}
+
 	private synchronized void finalizeIdentifiedFeatureIntegrationTask(IdentifiedFeatureIntegrationTask task) {
 		
 		integratedSet = task.getIdClusterSet();

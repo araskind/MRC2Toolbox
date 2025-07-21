@@ -634,6 +634,10 @@ public class DataAnalysisProject extends Project {
 			DataPipeline pipeline, CompoundLibrary library) {
 		libraryMap.put(pipeline, library);
 	}
+
+	public TreeMap<DataPipeline, CompoundLibrary> getAveragedFeatureMap() {
+		return averagedFeatureMap;
+	}
 	
 	public void setAveragedFeatureLibraryForDataPipeline(
 			DataPipeline pipeline, CompoundLibrary library) {
@@ -975,6 +979,14 @@ public class DataAnalysisProject extends Project {
 
     	return metabolomicsProjectElement;
 	}
+	
+	public Collection<DataPipeline>getPipelinesForDataAcquisitionMethod(DataAcquisitionMethod method){
+		
+		return dataPipelines.stream().
+				filter(p -> p.getAcquisitionMethod().equals(method)).
+				collect(Collectors.toList());
+	}
+
 }
 
 

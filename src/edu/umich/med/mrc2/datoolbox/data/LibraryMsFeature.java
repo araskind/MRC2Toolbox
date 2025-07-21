@@ -30,6 +30,7 @@ import org.jdom2.Element;
 import edu.umich.med.mrc2.datoolbox.data.enums.AnnotatedObjectType;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
+import edu.umich.med.mrc2.datoolbox.project.store.MsFeatureFields;
 import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
 import edu.umich.med.mrc2.datoolbox.project.store.ProjectStoreUtils;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
@@ -41,6 +42,7 @@ public class LibraryMsFeature extends MsFeature implements Serializable {
 	 */
 	private static final long serialVersionUID = 4462209780734866111L;
 	private String libraryId;
+	private String parentFeatureId;
 	private Date dateCreated;
 	private Date lastModified;
 
@@ -62,6 +64,7 @@ public class LibraryMsFeature extends MsFeature implements Serializable {
 		super(source);
 		dateCreated = new Date();
 		lastModified = new Date();	
+		parentFeatureId = source.getId();
 		id = source.getTargetId();
 		
 		if(id == null)
@@ -181,7 +184,9 @@ public class LibraryMsFeature extends MsFeature implements Serializable {
 		dateCreated = ProjectStoreUtils.getDateFromAttribute(
 				libraryMsFeatureElement, CommonFields.DateCreated);
 		lastModified = ProjectStoreUtils.getDateFromAttribute(
-				libraryMsFeatureElement, CommonFields.LastModified);
+				libraryMsFeatureElement, CommonFields.LastModified);		
+		parentFeatureId  = libraryMsFeatureElement.getAttributeValue(
+				MsFeatureFields.ParentFeatureId.name());
 	}
 	
 	@Override
@@ -195,7 +200,15 @@ public class LibraryMsFeature extends MsFeature implements Serializable {
 		ProjectStoreUtils.setDateAttribute(
 				lastModified, CommonFields.LastModified, libraryMsFeatureElement);
 		
+		if(parentFeatureId != null)
+			libraryMsFeatureElement.setAttribute(
+					MsFeatureFields.ParentFeatureId.name(), parentFeatureId);
+		
 		return libraryMsFeatureElement;
+	}
+
+	public String getParentFeatureId() {
+		return parentFeatureId;
 	}
 }
 

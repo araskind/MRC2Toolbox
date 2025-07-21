@@ -62,7 +62,6 @@ public class CorrelationPanelMenuBar extends CommonMenuBar {
 	private static final Icon recalculateCorrelationsIcon = GuiUtils.getIcon("recalculateCorrelations", 24);
 	private static final Icon binnerAnalysisIcon = GuiUtils.getIcon("setupBinnerAnnotations", 24);
 
-
 	// Menus
 	private JMenu
 		clusteringMenu,

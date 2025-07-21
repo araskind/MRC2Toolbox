@@ -22,6 +22,7 @@
 package edu.umich.med.mrc2.datoolbox.gui.integration;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
@@ -48,14 +49,20 @@ public class DataPipelineSelectionTableModel extends BasicTableModel {
 	}
 
 	public void setTableModelFromExperiment(DataAnalysisProject currentProject) {
-
-		setRowCount(0);
+		
 		if(currentProject == null 
-				|| currentProject.getDataPipelines().isEmpty())
+				|| currentProject.getDataPipelines().isEmpty()) {
+			setRowCount(0);
 			return;
-
+		}
+		setTableModelFromDataPipelineCollection(currentProject.getDataPipelines());
+	}
+	
+	public void setTableModelFromDataPipelineCollection(Collection<DataPipeline>pipelines) {
+		
+		setRowCount(0);
 		List<Object[]>rowData = new ArrayList<Object[]>();
-		for (DataPipeline dp : currentProject.getDataPipelines()) {
+		for (DataPipeline dp : pipelines) {
 
 			Object[] obj = {
 					true,
@@ -67,3 +74,13 @@ public class DataPipelineSelectionTableModel extends BasicTableModel {
 			addRows(rowData);
 	}
 }
+
+
+
+
+
+
+
+
+
+

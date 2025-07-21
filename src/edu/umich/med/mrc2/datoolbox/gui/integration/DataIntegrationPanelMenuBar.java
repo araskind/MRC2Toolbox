@@ -46,13 +46,16 @@ public class DataIntegrationPanelMenuBar extends CommonMenuBar {
 	protected static final Icon resetFilterIcon = GuiUtils.getIcon("resetFilter", 24);
 	private static final Icon collectIDDataIcon = GuiUtils.getIcon("createIntegration", 24);
 	private static final Icon collectIDDataIconSmall = GuiUtils.getIcon("createIntegration", 16);
-
 	private static final Icon deleteDataSetIcon = GuiUtils.getIcon("deleteIntegration", 24);
 	private static final Icon acceptListIcon = GuiUtils.getIcon("acceptList", 24);
+	
+	private static final Icon dataSetAlignmentIconSmall = GuiUtils.getIcon("alignment", 16);	
+	private static final Icon dataSetAlignmentIcon = GuiUtils.getIcon("alignment", 24);
 
 	// Menus
 	private JMenu
 		integrationMenu,
+		alignmentMenu,
 		searchMenu;
 
 	// Integration items
@@ -60,6 +63,10 @@ public class DataIntegrationPanelMenuBar extends CommonMenuBar {
 		integrationSetupMenuItem,
 		acceptListMenuItem,
 		deleteIntegrationMenuItem;
+	
+	// Alignment items
+	private JMenuItem
+		dataSetAlignmentSetupMenuItem;
 	
 	// Search items
 	private JMenuItem
@@ -88,6 +95,14 @@ public class DataIntegrationPanelMenuBar extends CommonMenuBar {
 				deleteDataSetIcon);
 
 		add(integrationMenu);
+				
+		alignmentMenu = new JMenu("Data set alignment");
+		alignmentMenu.setIcon(dataSetAlignmentIconSmall);
+		dataSetAlignmentSetupMenuItem = addItem(alignmentMenu, 
+				MainActionCommands.DATA_SET_ALIGNMENT_SETUP_COMMAND, 
+				dataSetAlignmentIcon);
+		
+		add(alignmentMenu);
 
 		//	Search
 		searchMenu = new JMenu("Filter");

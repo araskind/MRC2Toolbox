@@ -1366,6 +1366,13 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ItemList
 
 	@Override
 	public void closeExperiment() {
+
+		for(CompoundLibrary lib : currentExperiment.getAveragedFeatureMap().values()) {
+			
+			MRC2ToolBoxCore.getActiveMsLibraries().remove(lib);
+			if(lib.equals(currentLibrary))
+				clearPanel();			
+		}
 		super.closeExperiment();
 		menuBar.updateMenuFromExperiment(null, null);
 	}

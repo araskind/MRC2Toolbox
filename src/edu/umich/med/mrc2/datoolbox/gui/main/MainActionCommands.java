@@ -306,6 +306,7 @@ public enum MainActionCommands {
 	AVERAGE_FEATURES_LIBRARY_SETUP_COMMAND("Create average features library"),
 	CREATE_AVERAGE_FEATURES_LIBRARY_COMMAND("Generate and show average features library"),
 	OPEN_AVERAGE_FEATURES_LIBRARY_COMMAND("Load average features library into MS library panel"),
+	DELETE_AVERAGE_FEATURES_LIBRARY_COMMAND("Delete average features library"),
 	
 	//
 	COPY_SELECTED_MS1_ROWS_COMMAND("Copy selected MS1 features (TAB separated)"),
@@ -410,6 +411,8 @@ public enum MainActionCommands {
 	CLEAR_IDENTIFIED_CPD_COMMAND("Clear data for identified compounds"),
 	DELETE_INTEGRATION_SET_COMMAND("Delete data integration set"),
 	ACCEPT_CLEAN_ID_LIST_COMMAND("Accept integrated list of identified compounds"),
+	DATA_SET_ALIGNMENT_SETUP_COMMAND("Setup data set alignment"),
+	DATA_SET_ALIGNMENT_RUN_COMMAND("Align data sets"),
 
 	// Sorting commands
 	SORT_BY_AREA_COMMAND("Sort by area (high to low)"),

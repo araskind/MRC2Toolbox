@@ -181,12 +181,10 @@ public class DuplicateFindDialog extends JDialog implements BackedByPreferences{
 	}
 
 	public double getMassWindow() {
-
 		return Double.parseDouble(massWidowTextField.getText());
 	}
 
 	public double getRetentionWindow() {
-
 		return Double.parseDouble(rtWindowTextField.getText());
 	}
 
@@ -213,10 +211,10 @@ public class DuplicateFindDialog extends JDialog implements BackedByPreferences{
 		preferences = Preferences.userNodeForPackage(this.getClass());
 
 		if(!massWidowTextField.getText().isEmpty())
-			preferences.putDouble(MASS_WINDOW_PPM, Double.parseDouble(massWidowTextField.getText()));
+			preferences.putDouble(MASS_WINDOW_PPM, getMassWindow());
 
 		if(!rtWindowTextField.getText().isEmpty())
-			preferences.putDouble(RT_WINDOW_MIN, Double.parseDouble(rtWindowTextField.getText()));
+			preferences.putDouble(RT_WINDOW_MIN, getRetentionWindow());
 	}
 
 	@Override

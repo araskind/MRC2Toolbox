@@ -156,13 +156,14 @@ public class MsFeature implements AnnotatedObject, Serializable, XmlStorable {
 		spectrum = source.getSpectrum();
 		polarity = source.getPolarity();
 		retentionTime = source.getRetentionTime();
-		rtRange = source.getRtRange();
+		rtRange = new Range(source.getRtRange());
 		neutralMass = source.getNeutralMass();
 		active = source.isActive();
 		qualityScore = source.getQualityScore();
-		identifications = 
-				new HashSet<MsFeatureIdentity>(source.getIdentifications());
-		primaryIdentity = source.getPrimaryIdentity();
+		identifications = new HashSet<MsFeatureIdentity>(source.getIdentifications());
+		source.getIdentifications().stream().
+			forEach(i -> identifications.add(new MsFeatureIdentity(i)));
+		primaryIdentity = new MsFeatureIdentity(source.getPrimaryIdentity());
 		annotatedObjectType = source.getAnnotatedObjectType();
 		annotations = 
 				new TreeSet<ObjectAnnotation>(source.getAnnotations());

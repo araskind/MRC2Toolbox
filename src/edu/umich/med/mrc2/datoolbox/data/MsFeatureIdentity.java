@@ -80,6 +80,20 @@ public class MsFeatureIdentity implements Serializable {
 		if(confidenceLevel.getLevel() > 4)
 			idSource = CompoundIdSource.UNKNOWN;
 	}
+	
+	public MsFeatureIdentity(MsFeatureIdentity other) {
+		
+		this(other.getCompoundIdentity(), other.getConfidenceLevel());
+		this.uniqueId = other.getUniqueId();
+		this.compoundIdName = other.getCompoundIdName();
+		this.idSource = other.getIdSource();
+		this.qcStandard = other.isQcStandard();
+		this.referenceMsMsLibraryMatch = other.getReferenceMsMsLibraryMatch();
+		this.msRtLibraryMatch = other.getMsRtLibraryMatch();
+		this.identificationLevel = other.getIdentificationLevel();
+		this.primaryAdduct = other.getPrimaryAdduct();
+	}
+	
 
 	public CompoundIdentity getCompoundIdentity() {
 		return compoundIdentity;
@@ -460,6 +474,10 @@ public class MsFeatureIdentity implements Serializable {
 				msfIdElement.getAttributeValue(MsFeatureIdentityFields.SCO.name());
 		if(scoreCarryOverString != null)
 			scoreCarryOver = Double.parseDouble(scoreCarryOverString);
+	}
+
+	public String getCompoundIdName() {
+		return compoundIdName;
 	}
 }
 

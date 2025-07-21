@@ -448,6 +448,9 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 			if (command.equals(MainActionCommands.OPEN_AVERAGE_FEATURES_LIBRARY_COMMAND.getName()))
 				loadAverageFeaturesLibrary();
 			
+			if (command.equals(MainActionCommands.DELETE_AVERAGE_FEATURES_LIBRARY_COMMAND.getName()))
+				deleteAverageFeaturesLibrary();
+			
 			if (command.equals(MainActionCommands.IMPORT_BINNER_ANNOTATIONS_COMMAND.getName()))
 				importBinnerAnnotations();
 			
@@ -1311,6 +1314,29 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 			libPanel.reloadLibraryData(averagedLibrary);
 		}
 	}	
+	
+	private void deleteAverageFeaturesLibrary() {
+		
+		CompoundLibrary averagedLibrary = 
+				currentExperiment.getAveragedFeatureLibraryForDataPipeline(activeDataPipeline);
+		if(averagedLibrary == null)
+			return;
+		
+		String message = "Do you want to delet averaged feature library "
+				+ "for data pipeline \"" + activeDataPipeline.getName() +"\"?";
+		int res = MessageDialog.showChoiceWithWarningMsg(message, this.getContentPane());
+		if(res == JOptionPane.YES_OPTION) {
+			
+			currentExperiment.getAveragedFeatureMap().remove(activeDataPipeline);
+			MRC2ToolBoxCore.getActiveMsLibraries().remove(averagedLibrary);
+			MsLibraryPanel libPanel = 
+					(MsLibraryPanel)MRC2ToolBoxCore.getMainWindow().getPanel(PanelList.MS_LIBRARY);
+			if(libPanel.getCurrentLibrary() != null 
+					&& libPanel.getCurrentLibrary().equals(averagedLibrary)) {
+				libPanel.clearPanel();
+			}
+		}		
+	}
 	
 	private void importBinnerAnnotations() {
 		

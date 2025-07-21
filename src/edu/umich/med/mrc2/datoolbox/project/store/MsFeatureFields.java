@@ -31,5 +31,6 @@ public enum MsFeatureFields {
 	CIDs,
 	QS,
 	IdDisabled,
+	ParentFeatureId,
 	;
 }
