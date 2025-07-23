@@ -865,10 +865,12 @@ public class MSRTLibraryUtils {
 				MsFeatureIdentity mid = new MsFeatureIdentity(identity,
 						CompoundIdentificationConfidence.ACCURATE_MASS_RT);
 				mid.setQcStandard(qcStandard);
+				mid.setIdentityName(newTarget.getName());
 				newTarget.setPrimaryIdentity(mid);
 				newTarget.setNeutralMass(identity.getExactMass());
+				newTarget.removeDefaultPrimaryIdentity();
 			}
-			else{
+			else{	
 				System.out.println(newTarget.getId() + " : " + cid);
 			}
 		}

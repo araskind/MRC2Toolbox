@@ -68,7 +68,8 @@ public class AdductSelectionTable extends BasicTable {
 		if(adductSubset.equals(AdductSubset.COMPLETE_LIST))
 			adducts = AdductManager.getAdductsForPolarity(polarity);
 		
-		if(adductSubset.equals(AdductSubset.SELECTED_ONLY))
+		if(adductSubset.equals(AdductSubset.SELECTED_ONLY)  
+				&& feature.getSpectrum() != null)
 			adducts = feature.getSpectrum().getAdducts();
 		
 		if(adductSubset.equals(AdductSubset.MOST_COMMON))			

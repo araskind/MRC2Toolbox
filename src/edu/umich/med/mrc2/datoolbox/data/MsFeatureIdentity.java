@@ -86,14 +86,16 @@ public class MsFeatureIdentity implements Serializable {
 		this(other.getCompoundIdentity(), other.getConfidenceLevel());
 		this.uniqueId = other.getUniqueId();
 		this.compoundIdName = other.getCompoundIdName();
+		if(compoundIdName == null && compoundIdentity != null)
+			compoundIdName = compoundIdentity.getCommonName();
+		
 		this.idSource = other.getIdSource();
 		this.qcStandard = other.isQcStandard();
 		this.referenceMsMsLibraryMatch = other.getReferenceMsMsLibraryMatch();
 		this.msRtLibraryMatch = other.getMsRtLibraryMatch();
 		this.identificationLevel = other.getIdentificationLevel();
 		this.primaryAdduct = other.getPrimaryAdduct();
-	}
-	
+	}	
 
 	public CompoundIdentity getCompoundIdentity() {
 		return compoundIdentity;

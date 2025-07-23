@@ -159,21 +159,21 @@ public class CefDataImportTask extends CEFProcessingTask {
 
 			SimpleMsFeature msf = new SimpleMsFeature(feature, dataPipeline);
 			msf.setRtRange(feature.getRtRange());
-			
-			if(featureCoordinateMap.get(msf.getLibraryTargetId()) != null) {
+			String targetId = msf.getLibraryTargetId();
+			if(featureCoordinateMap.get(targetId) != null) {
 
-				retentionMap.get(msf.getLibraryTargetId()).add(msf.getRetentionTime());
-				mzMap.get(msf.getLibraryTargetId()).add(msf.getObservedSpectrum().getMonoisotopicMz());
+				retentionMap.get(targetId).add(msf.getRetentionTime());
+				mzMap.get(targetId).add(msf.getObservedSpectrum().getMonoisotopicMz());
 				if(feature.getRtRange() != null)
-					peakWidthMap.get(msf.getLibraryTargetId()).add(feature.getRtRange().getSize());
+					peakWidthMap.get(targetId).add(feature.getRtRange().getSize());
 					
-				coordinates[1] = featureCoordinateMap.get(msf.getLibraryTargetId());
+				coordinates[1] = featureCoordinateMap.get(targetId);
 				featureMatrix.setAsObject(msf, coordinates);
 				dataMatrix.setAsDouble(msf.getArea(), coordinates);
 			}
 			else {
 				//	TODO handle library mismatches
-				System.out.println(msf.getName() + "(" + msf.getLibraryTargetId() + ") not in the library.");
+				System.out.println(msf.getName() + "(" + targetId + ") not in the library.");
 			}		
 			features.add(msf);
 			processed++;

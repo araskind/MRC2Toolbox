@@ -39,7 +39,7 @@ import edu.umich.med.mrc2.datoolbox.data.CefImportFinalizationObjest;
 import edu.umich.med.mrc2.datoolbox.data.CefImportSettingsObject;
 import edu.umich.med.mrc2.datoolbox.data.CompoundLibrary;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
-import edu.umich.med.mrc2.datoolbox.data.MsFeature;
+import edu.umich.med.mrc2.datoolbox.data.LibraryMsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureStatisticalSummary;
 import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
@@ -78,7 +78,7 @@ public abstract class DataWithLibraryImportAbstractTask extends AbstractTask imp
 		mzMap = new ConcurrentHashMap<String, List<Double>>();
 		peakWidthMap = new ConcurrentHashMap<String, List<Double>>();
 		AtomicInteger counter = new AtomicInteger(0);
-		MsFeature[] features =
+		LibraryMsFeature[] features =
 			library.getFeatures().stream().
 			sorted(new MsFeatureComparator(SortProperty.ID)).	//	Better sort by ID?
 			map(f -> {
@@ -89,7 +89,7 @@ public abstract class DataWithLibraryImportAbstractTask extends AbstractTask imp
 				mzMap.put(f.getId(), new CopyOnWriteArrayList<Double>());
 				return f;
 			}).
-			toArray(size -> new MsFeature[size]);
+			toArray(size -> new LibraryMsFeature[size]);
 
 		// Create feature matrix
 		Object[][] featureArray = new Object[dataFiles.length][features.length];

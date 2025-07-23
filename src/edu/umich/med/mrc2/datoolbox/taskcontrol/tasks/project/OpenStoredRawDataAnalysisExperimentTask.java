@@ -24,13 +24,11 @@ package edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.project;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
-import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 import java.util.TreeSet;
 
 import org.apache.commons.io.FileUtils;
@@ -40,24 +38,15 @@ import org.jdom2.Element;
 import org.jdom2.JDOMException;
 import org.jdom2.input.SAXBuilder;
 
-import edu.umich.med.mrc2.datoolbox.data.CompoundIdentity;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
-import edu.umich.med.mrc2.datoolbox.data.IDTExperimentalSample;
-import edu.umich.med.mrc2.datoolbox.data.LibraryMsFeatureDbBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundleCollection;
-import edu.umich.med.mrc2.datoolbox.data.MsMsLibraryFeature;
 import edu.umich.med.mrc2.datoolbox.data.lims.Injection;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
 import edu.umich.med.mrc2.datoolbox.data.msclust.IMSMSClusterDataSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.IMsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusterDataSet;
-import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
-import edu.umich.med.mrc2.datoolbox.database.cpd.CompoundDatabaseUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
-import edu.umich.med.mrc2.datoolbox.database.idt.MSMSLibraryUtils;
-import edu.umich.med.mrc2.datoolbox.database.idt.OfflineExperimentLoadCache;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisProject;
@@ -72,9 +61,8 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskListener;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
-import edu.umich.med.mrc2.datoolbox.utils.ProjectUtils;
 
-public class OpenStoredRawDataAnalysisExperimentTask extends AbstractTask implements TaskListener {
+public class OpenStoredRawDataAnalysisExperimentTask extends OpenStandaloneProjectAbstractTask implements TaskListener {
 
 	private RawDataAnalysisProject experiment;
 	private File experimentFile;
@@ -84,12 +72,7 @@ public class OpenStoredRawDataAnalysisExperimentTask extends AbstractTask implem
 	private int processedFiles;
 	private boolean featureReadCompleted;
 	private boolean chromatogramReadCompleted;
-	
-	private Set<String>uniqueCompoundIds;
-	private Set<String>uniqueMSMSLibraryIds;
-	private Set<String>uniqueMSRTLibraryIds;
-	private Set<String>uniqueSampleIds;
-	
+
 	private ArrayList<String>errors;
 	
 	public OpenStoredRawDataAnalysisExperimentTask(
@@ -252,22 +235,7 @@ public class OpenStoredRawDataAnalysisExperimentTask extends AbstractTask implem
 			MSMSExtractionParameterSet msmsParamSet = new MSMSExtractionParameterSet(msmsParamsElement);
 			experiment.setMsmsExtractionParameterSet(msmsParamSet);
 		}		
-		String compoundIdList = 
-				experimentElement.getChild(IDTrackerProjectFields.UniqueCIDList.name()).getText();
-		uniqueCompoundIds.addAll(ProjectUtils.getIdList(compoundIdList));
-		
-		String msmsLibIdIdList = 
-				experimentElement.getChild(IDTrackerProjectFields.UniqueMSMSLibIdList.name()).getText();
-		uniqueMSMSLibraryIds.addAll(ProjectUtils.getIdList(msmsLibIdIdList));
-
-		String msRtLibIdIdList = 
-				experimentElement.getChild(IDTrackerProjectFields.UniqueMSRTLibIdList.name()).getText();
-		uniqueMSRTLibraryIds.addAll(ProjectUtils.getIdList(msRtLibIdIdList));
-
-		String sampleIdIdList = 
-				experimentElement.getChild(IDTrackerProjectFields.UniqueSampleIdList.name()).getText();
-		uniqueSampleIds.addAll(ProjectUtils.getIdList(sampleIdIdList));
-				
+		collectIdsForRetrievalFromDatabase(experimentElement);				
 		try {
 			populateDatabaseCacheData();
 		} catch (Exception e) {
@@ -335,102 +303,6 @@ public class OpenStoredRawDataAnalysisExperimentTask extends AbstractTask implem
 		}
 	}
 	
-	private void populateDatabaseCacheData() throws Exception {
-		
-		OfflineExperimentLoadCache.reset();
-		Connection conn = ConnectionManager.getConnection();
-		if(!uniqueCompoundIds.isEmpty()) {
-			try {
-				getCompoundIdentities(conn);
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		if(!uniqueMSMSLibraryIds.isEmpty()) {
-			try {
-				getMSMSLibraryEntries(conn);
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		if(!uniqueMSRTLibraryIds.isEmpty()) {
-			try {
-				getMSRTLibraryEntries(conn);
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		if(!uniqueSampleIds.isEmpty()) {
-			try {
-				getExperimentalSamples(conn);
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		ConnectionManager.releaseConnection(conn);
-	}
-	
-	private void getCompoundIdentities(Connection conn) throws Exception {
-		
-		taskDescription = "Populating compound data cache ...";
-		total = uniqueCompoundIds.size();
-		processed = 0;
-		
-		for(String cid : uniqueCompoundIds) {
-			
-			CompoundIdentity compId = 
-					CompoundDatabaseUtils.getCompoundById(cid, conn);
-			if(compId != null)
-				OfflineExperimentLoadCache.addCompoundIdentity(compId);
-			
-			processed++;
-		}		
-	}
-
-	private void getMSMSLibraryEntries(Connection conn) throws Exception {
-		
-		taskDescription = "Populating MSMS library data cache ...";
-		total = uniqueMSMSLibraryIds.size();
-		processed = 0;		
-		for(String libId : uniqueMSMSLibraryIds) {
-			
-			MsMsLibraryFeature libFeature = 
-					MSMSLibraryUtils.getMsMsLibraryFeatureById(libId, conn);
-			if(libFeature != null)
-				OfflineExperimentLoadCache.addMsMsLibraryFeature(libFeature);
-			
-			processed++;
-		}	
-	}
-	
-	private void getMSRTLibraryEntries(Connection conn) throws Exception {
-		
-		// TODO Auto-generated method stub
-		taskDescription = "Populating MS-RT library data cache ...";
-		total = uniqueMSRTLibraryIds.size();
-		processed = 0;		
-		for(String libId : uniqueMSRTLibraryIds) {
-			
-			LibraryMsFeatureDbBundle bundle = null;	
-			if(bundle != null)
-				OfflineExperimentLoadCache.addLibraryMsFeatureDbBundle(bundle);
-			
-			processed++;
-		}
-	}
-	
-	private void getExperimentalSamples(Connection conn) throws Exception {
-
-		Collection<IDTExperimentalSample>samples = 
-				IDTUtils.getExperimentalSamples(uniqueSampleIds, conn);
-		
-		for(IDTExperimentalSample sample :samples)
-			OfflineExperimentLoadCache.addExperimentalSample(sample);		
-	}
 
 	@Override
 	public Task cloneTask() {

@@ -163,7 +163,10 @@ public class MsFeature implements AnnotatedObject, Serializable, XmlStorable {
 		identifications = new HashSet<MsFeatureIdentity>(source.getIdentifications());
 		source.getIdentifications().stream().
 			forEach(i -> identifications.add(new MsFeatureIdentity(i)));
-		primaryIdentity = new MsFeatureIdentity(source.getPrimaryIdentity());
+		for(MsFeatureIdentity msfid : identifications) {
+			if(msfid.equals(source.getPrimaryIdentity()))
+				setPrimaryIdentity(msfid);
+		}
 		annotatedObjectType = source.getAnnotatedObjectType();
 		annotations = 
 				new TreeSet<ObjectAnnotation>(source.getAnnotations());
@@ -326,21 +329,11 @@ public class MsFeature implements AnnotatedObject, Serializable, XmlStorable {
 
 		addIdentity(newIdentity);
 		identifications.stream().forEach(i -> i.setPrimary(false));
-		if(primaryIdentity == null) {
-
-			primaryIdentity = newIdentity;
-			primaryIdentity.setPrimary(true);			
-			setStatus(ParameterSetStatus.CHANGED);
-			return;
-		}
-		if(!primaryIdentity.equals(newIdentity)) {
-
-			primaryIdentity = newIdentity;
-			primaryIdentity.setPrimary(true);
-			setStatus(ParameterSetStatus.CHANGED);
-			return;
-		}
-		idDisabled = false;
+		primaryIdentity = newIdentity;
+		primaryIdentity.setPrimary(true);
+		primaryIdentity.setIdentityName(newIdentity.getCompoundIdName());
+		setStatus(ParameterSetStatus.CHANGED);
+		idDisabled = false;		
 	}
 
 	public MsFeatureIdentity getPrimaryIdentity() {
@@ -564,21 +557,8 @@ public class MsFeature implements AnnotatedObject, Serializable, XmlStorable {
 	public void setSpectrum(MassSpectrum spectrum) {
 		
 		this.spectrum = spectrum;
-		
-		if(spectrum.getExperimentalTandemSpectrum() != null) {
-			updateUnknownPrimaryIdentityBasedOnMSMS();
-		}
-		else {
-			if(primaryIdentity == null)
-				createDefaultPrimaryIdentity();
-			
-			String newName = DataPrefix.MS_LIBRARY_UNKNOWN_TARGET.getName() +
-					MRC2ToolBoxConfiguration.getMzFormat().format(getMonoisotopicMz()) + "_" + 
-					MRC2ToolBoxConfiguration.getRtFormat().format(getRetentionTime());
-			primaryIdentity.setIdentityName(newName);
-			primaryIdentity.setConfidenceLevel(
-					CompoundIdentificationConfidence.UNKNOWN_ACCURATE_MASS_RT);
-		}
+		if(primaryIdentity == null)
+			createDefaultPrimaryIdentity();
 	}
 
 	public void setStatsSummary(MsFeatureStatisticalSummary statsSummary) {
@@ -906,13 +886,23 @@ public class MsFeature implements AnnotatedObject, Serializable, XmlStorable {
 		}
 	}
 	
+	public void removeDefaultPrimaryIdentity() {
+		
+		//	Do not remove if it's the only one
+		if(identifications.size() == 1 
+				&& identifications.iterator().next().getIdentityName().equals(DEFAULT_ID_NAME))
+			return;
+		
+		removeIdentity(getDefaultPrimaryIdentity());
+	}
+	
 	private MsFeatureIdentity getDefaultPrimaryIdentity() {
 		
 		if(identifications == null || identifications.isEmpty())
 			return null;
 		
 		return identifications.stream().
-				filter(i -> Objects.isNull(i.getCompoundIdentity())).
+				filter(i -> i.getIdentityName().equals(DEFAULT_ID_NAME)).
 				findFirst().orElse(null);
 	}
 	

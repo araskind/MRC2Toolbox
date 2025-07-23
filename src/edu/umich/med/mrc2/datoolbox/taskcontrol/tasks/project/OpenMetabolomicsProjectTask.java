@@ -54,7 +54,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskListener;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 
-public class OpenMetabolomicsProjectTask extends AbstractTask implements TaskListener {
+public class OpenMetabolomicsProjectTask extends OpenStandaloneProjectAbstractTask implements TaskListener {
 	
 	private File projectFile;
 	private DataAnalysisProject project;
@@ -141,6 +141,7 @@ public class OpenMetabolomicsProjectTask extends AbstractTask implements TaskLis
 			setStatus(TaskStatus.ERROR);
 			return;
 		}
+		
 		project = new DataAnalysisProject(projectElement);
 		project.setProjectFile(projectFile);
 		project.setProjectType(ProjectType.DATA_ANALYSIS_NEW_FORMAT);
@@ -151,14 +152,22 @@ public class OpenMetabolomicsProjectTask extends AbstractTask implements TaskLis
 		}
 		
 		//	That is necessary to correctly associate samples with data files in the design
-		parseAcquisitionMethodDataFileMap(projectElement);
-		
+		parseAcquisitionMethodDataFileMap(projectElement);		
 		parseExperimentDesign(projectElement);
 		parseOrderedFileNameMap(projectElement);
 		parseOrderedMSFeatureIdMap(projectElement);
 		setActivePipeline(projectElement);
 		recreateWorklists(projectElement);
 		parseCustomFeatureSets(projectElement);
+		
+		collectIdsForRetrievalFromDatabase(projectElement);				
+		try {
+			populateDatabaseCacheData();
+		} catch (Exception e) {
+			e.printStackTrace();
+			setStatus(TaskStatus.ERROR);
+			return;		
+		}	
 	}
 	
 	private void parseCustomFeatureSets(Element projectElement) {
