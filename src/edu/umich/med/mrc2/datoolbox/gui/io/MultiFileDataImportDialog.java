@@ -54,7 +54,6 @@ import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
@@ -77,7 +76,6 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import edu.umich.med.mrc2.datoolbox.data.Adduct;
-import edu.umich.med.mrc2.datoolbox.data.CompoundLibrary;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentalSample;
 import edu.umich.med.mrc2.datoolbox.data.ResultsFile;
@@ -125,6 +123,9 @@ public class MultiFileDataImportDialog extends JDialog
 	 */
 	private static final long serialVersionUID = -1605053468969470610L;
 
+	private static final Icon importMultifileIcon = GuiUtils.getIcon("importMultifile", 32);
+	private static final Icon openIcon = GuiUtils.getIcon("open", 16);
+	//detailedCsv
 	private Preferences preferences;
 	public static final String PREFS_NODE = MultiFileDataImportDialog.class.getName();
 	public static final String BASE_LIBRARY_DIRECTORY = "BASE_LIBRARY_DIRECTORY";
@@ -137,15 +138,15 @@ public class MultiFileDataImportDialog extends JDialog
 	
 	private File baseLibraryDirectory, 
 				libraryFile, 
+				detailedProFinderFile,
 				dataFileDirectory, 
 				baseDesignDirectory,
 				pfaTempDir;
-	private CompoundLibrary currentLibrary;
-	private JTextField libraryTextField;
+
 	private MultiFileImportToolbar toolBar;
-	
-	private JLabel libFileLabel;
-	private JComboBox featureSubsetcomboBox;
+
+	private JTextField libraryTextField;
+	private JTextField detailedProFinderFileTextField;
 	private JCheckBox removeAbnormalIsoPatternsCheckBox;
 	private JCheckBox skipCompoundMatchingCheckbox;
 	
@@ -161,12 +162,10 @@ public class MultiFileDataImportDialog extends JDialog
 	private AcquisitionMethodExtendedEditorDialog acquisitionMethodEditorDialog;
 	private DataExtractionMethodEditorDialog dataExtractionMethodEditorDialog;
 	private AdductSelectionDialog adductSelectionDialog;
-	
-	private static final Icon importMultifileIcon = GuiUtils.getIcon("importMultifile", 32);
-	private JLabel dataFileLabel;
-	private JTextField dataFileTextField;
 
+	private JTextField dataFileTextField;
 	private Collection<Adduct> selectedAdducts;
+	
 
 	public MultiFileDataImportDialog(TaskListener dataLoadTaskListener) {
 
@@ -209,13 +208,13 @@ public class MultiFileDataImportDialog extends JDialog
 		JPanel libChooserPanel = new JPanel();
 		libChooserPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		GridBagLayout gbl_libChooserPanel = new GridBagLayout();
-		gbl_libChooserPanel.columnWidths = new int[]{0, 0, 0};
-		gbl_libChooserPanel.rowHeights = new int[]{0, 0, 0};
-		gbl_libChooserPanel.columnWeights = new double[]{0.0, 1.0, Double.MIN_VALUE};
-		gbl_libChooserPanel.rowWeights = new double[]{0.0, 0.0, Double.MIN_VALUE};
+		gbl_libChooserPanel.columnWidths = new int[]{0, 0, 0, 0};
+		gbl_libChooserPanel.rowHeights = new int[]{0, 0, 0, 0};
+		gbl_libChooserPanel.columnWeights = new double[]{0.0, 1.0, 0.0, Double.MIN_VALUE};
+		gbl_libChooserPanel.rowWeights = new double[]{0.0, 0.0, 0.0, Double.MIN_VALUE};
 		libChooserPanel.setLayout(gbl_libChooserPanel);
 
-		libFileLabel = new JLabel("Library: ");
+		JLabel libFileLabel = new JLabel("Library: ");
 		GridBagConstraints gbc_libFileLabel = new GridBagConstraints();
 		gbc_libFileLabel.anchor = GridBagConstraints.EAST;
 		gbc_libFileLabel.insets = new Insets(0, 0, 5, 5);
@@ -226,7 +225,7 @@ public class MultiFileDataImportDialog extends JDialog
 		libraryTextField = new JTextField();
 		libraryTextField.setEditable(false);
 		GridBagConstraints gbc_libraryTextField = new GridBagConstraints();
-		gbc_libraryTextField.insets = new Insets(0, 0, 5, 0);
+		gbc_libraryTextField.insets = new Insets(0, 0, 5, 5);
 		gbc_libraryTextField.fill = GridBagConstraints.HORIZONTAL;
 		gbc_libraryTextField.gridx = 1;
 		gbc_libraryTextField.gridy = 0;
@@ -235,23 +234,76 @@ public class MultiFileDataImportDialog extends JDialog
 
 		panel_2.add(libChooserPanel, BorderLayout.NORTH);
 		
-		dataFileLabel = new JLabel("Data file: ");
+		JButton btnNewButton = new JButton(openIcon);
+		btnNewButton.setActionCommand(
+				MainActionCommands.SELECT_INPUT_LIBRARY_COMMAND.getName());
+		btnNewButton.addActionListener(this);	
+		GridBagConstraints gbc_btnNewButton = new GridBagConstraints();
+		gbc_btnNewButton.fill = GridBagConstraints.BOTH;
+		gbc_btnNewButton.insets = new Insets(0, 0, 5, 0);
+		gbc_btnNewButton.gridx = 2;
+		gbc_btnNewButton.gridy = 0;
+		libChooserPanel.add(btnNewButton, gbc_btnNewButton);
+		
+		JLabel lblNewLabel = new JLabel("Detailed data: ");
+		GridBagConstraints gbc_lblNewLabel = new GridBagConstraints();
+		gbc_lblNewLabel.anchor = GridBagConstraints.EAST;
+		gbc_lblNewLabel.insets = new Insets(0, 0, 0, 5);
+		gbc_lblNewLabel.gridx = 0;
+		gbc_lblNewLabel.gridy = 1;
+		libChooserPanel.add(lblNewLabel, gbc_lblNewLabel);
+		
+		detailedProFinderFileTextField = new JTextField();
+		detailedProFinderFileTextField.setEditable(false);
+		GridBagConstraints gbc_detailedDataFileTextField = new GridBagConstraints();
+		gbc_detailedDataFileTextField.insets = new Insets(0, 0, 0, 5);
+		gbc_detailedDataFileTextField.fill = GridBagConstraints.HORIZONTAL;
+		gbc_detailedDataFileTextField.gridx = 1;
+		gbc_detailedDataFileTextField.gridy = 1;
+		libChooserPanel.add(detailedProFinderFileTextField, gbc_detailedDataFileTextField);
+		detailedProFinderFileTextField.setColumns(10);
+		
+		JButton btnNewButton_2 = new JButton(openIcon);
+		btnNewButton_2.setActionCommand(
+				MainActionCommands.SELECT_PROFINDER_DETAILED_CSV_COMMAND.getName());
+		btnNewButton_2.addActionListener(this);		
+		GridBagConstraints gbc_btnNewButton_2 = new GridBagConstraints();
+		gbc_btnNewButton_2.fill = GridBagConstraints.BOTH;
+		gbc_btnNewButton_2.gridx = 2;
+		gbc_btnNewButton_2.gridy = 1;
+		libChooserPanel.add(btnNewButton_2, gbc_btnNewButton_2);
+		
+		/*
+		JLabel dataFileLabel = new JLabel("Data file: ");
 		GridBagConstraints gbc_dataFileLabel = new GridBagConstraints();
 		gbc_dataFileLabel.anchor = GridBagConstraints.EAST;
-		gbc_dataFileLabel.insets = new Insets(0, 0, 0, 5);
+		gbc_dataFileLabel.insets = new Insets(0, 0, 5, 5);
 		gbc_dataFileLabel.gridx = 0;
-		gbc_dataFileLabel.gridy = 1;
+		gbc_dataFileLabel.gridy = 2;
 		libChooserPanel.add(dataFileLabel, gbc_dataFileLabel);
 		
 		dataFileTextField = new JTextField();
 		dataFileTextField.setEditable(false);
 		GridBagConstraints gbc_dataFileTextField = new GridBagConstraints();
+		gbc_dataFileTextField.insets = new Insets(0, 0, 5, 5);
 		gbc_dataFileTextField.fill = GridBagConstraints.HORIZONTAL;
 		gbc_dataFileTextField.gridx = 1;
-		gbc_dataFileTextField.gridy = 1;
+		gbc_dataFileTextField.gridy = 2;
 		libChooserPanel.add(dataFileTextField, gbc_dataFileTextField);
 		dataFileTextField.setColumns(10);
-
+		
+		JButton btnNewButton_1 = new JButton(openIcon);
+		btnNewButton_1.setActionCommand(
+				MainActionCommands.SELECT_INPUT_LIBRARY_COMMAND.getName());
+		btnNewButton_1.addActionListener(this);	
+		
+		GridBagConstraints gbc_btnNewButton_1 = new GridBagConstraints();
+		gbc_btnNewButton_1.insets = new Insets(0, 0, 5, 0);
+		gbc_btnNewButton_1.gridx = 2;
+		gbc_btnNewButton_1.gridy = 2;
+		libChooserPanel.add(btnNewButton_1, gbc_btnNewButton_1);
+		*/
+		
 		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
 		ActionListener al = new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
@@ -347,7 +399,10 @@ public class MultiFileDataImportDialog extends JDialog
 			selectPfaFile();
 		
 		if (command.equals(MainActionCommands.SELECT_PROFINDER_SIMPLE_CSV_COMMAND.getName()))
-			selectProFinderSimpleCsvFile();
+			selectProFinderCsvFile(false);
+		
+		if (command.equals(MainActionCommands.SELECT_PROFINDER_DETAILED_CSV_COMMAND.getName()))
+			selectProFinderCsvFile(true);
 
 		if (command.equals(MainActionCommands.REMOVE_DATA_FILES_COMMAND.getName()))
 			removeDataFiles();
@@ -764,6 +819,7 @@ public class MultiFileDataImportDialog extends JDialog
 					pfaTempDir,
 					dataToImport, 			
 					libraryFile, 
+					detailedProFinderFile,
 					selectedAdducts);
 		task.addTaskListener(dataLoadTaskListener);
 		MRC2ToolBoxCore.getTaskController().addTask(task);
@@ -953,7 +1009,7 @@ public class MultiFileDataImportDialog extends JDialog
 		}
 	}
 	
-	private void selectProFinderSimpleCsvFile() {
+	private void selectProFinderCsvFile(boolean detailed) {
 		
 		if(existingDataPipeline != null)
 			return;
@@ -961,13 +1017,24 @@ public class MultiFileDataImportDialog extends JDialog
 		JnaFileChooser fc = new JnaFileChooser(baseLibraryDirectory);
 		fc.setMode(JnaFileChooser.Mode.Files);
 		fc.addFilter("CSV files", "csv", "CSV");
-		fc.setTitle("Select ProFinder simple CSV export file");
+		if(detailed)
+			fc.setTitle("Select detailed ProFinder CSV export file");
+		else
+			fc.setTitle("Select simple ProFinder CSV export file");
+		
 		fc.setMultiSelectionEnabled(false);
 		if (fc.showOpenDialog(this)) {
 			
-			libraryFile = fc.getSelectedFile();
-			libraryTextField.setText(libraryFile.getPath());
-			baseLibraryDirectory = libraryFile.getParentFile();
+			if(detailed) {
+				detailedProFinderFile = fc.getSelectedFile();
+				detailedProFinderFileTextField.setText(detailedProFinderFile.getPath());
+				baseLibraryDirectory = detailedProFinderFile.getParentFile();
+			}
+			else {
+				libraryFile = fc.getSelectedFile();
+				libraryTextField.setText(libraryFile.getPath());
+				baseLibraryDirectory = libraryFile.getParentFile();
+			}
 			savePreferences();	
 		}
 	}

@@ -38,6 +38,9 @@ import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.WindowConstants;
 
+import org.jfree.chart.ChartMouseEvent;
+import org.jfree.chart.ChartMouseListener;
+import org.jfree.chart.entity.XYItemEntity;
 import org.ujmp.core.Matrix;
 
 import bibliothek.gui.dock.common.CControl;
@@ -49,6 +52,8 @@ import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.SimpleMsFeature;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.gui.main.PersistentLayout;
+import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.TimedScatterDataSet;
+import edu.umich.med.mrc2.datoolbox.gui.plot.tooltip.FileFeatureTooltipInputObject;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.IndeterminateProgressDialog;
@@ -58,7 +63,7 @@ import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.utils.ProjectUtils;
 
 public class MultiMSFeatureQCPlotFrame extends JFrame
-		implements ActionListener, BackedByPreferences, PersistentLayout, ItemListener {
+		implements ActionListener, BackedByPreferences, PersistentLayout, ItemListener, ChartMouseListener {
 
 	/**
 	 * 
@@ -109,14 +114,17 @@ public class MultiMSFeatureQCPlotFrame extends JFrame
 		rtVariationPlotPanel = new DockableDataVariationPlotPanel(LCMSPlotType.RT_AND_PEAK_WIDTH);
 		rtVariationPlotPanel.setCurrentExperiment(currentExperiment);
 		rtVariationPlotPanel.setDataPipeline(dataPipeline);
+		rtVariationPlotPanel.getPlotPanel().addChartMouseListener(this);
 		
 		mzVariationPlotPanel = new DockableDataVariationPlotPanel(LCMSPlotType.MZ);
 		mzVariationPlotPanel.setCurrentExperiment(currentExperiment);
 		mzVariationPlotPanel.setDataPipeline(dataPipeline);
+		mzVariationPlotPanel.getPlotPanel().addChartMouseListener(this);
 		
 		featureQualityPlotPanel = new DockableDataVariationPlotPanel(LCMSPlotType.FEATURE_QUALITY);
 		featureQualityPlotPanel.setCurrentExperiment(currentExperiment);
 		featureQualityPlotPanel.setDataPipeline(dataPipeline);
+		featureQualityPlotPanel.getPlotPanel().addChartMouseListener(this);
 		
 		multispectrumPlotPanel = new DockableMultispectraPlotPanel();
 		multispectrumPlotPanel.setCurrentExperiment(currentExperiment);
@@ -291,14 +299,44 @@ public class MultiMSFeatureQCPlotFrame extends JFrame
 
 	public void loadFeatureData(MsFeature feature) {
 
-		activeFeature = feature;
-		Map<DataFile,SimpleMsFeature>fileFeatureMap = createFileFeatureMap(activeFeature);
-		rtVariationPlotPanel.loadFeatureData(activeFeature, fileFeatureMap);
-		mzVariationPlotPanel.loadFeatureData(activeFeature, fileFeatureMap);
-		featureQualityPlotPanel.loadFeatureData(activeFeature, fileFeatureMap);
-		multispectrumPlotPanel.loadFeatureData(activeFeature, fileFeatureMap);	
+		LoadFeatureDataTask task = new LoadFeatureDataTask(feature);
+		IndeterminateProgressDialog idp = 
+				new IndeterminateProgressDialog(
+						"Loading feature data for " + feature.getName() 
+						+ "...", this.getContentPane(), task);
+		idp.setLocationRelativeTo(this);
+		idp.setVisible(true);	
 	}
 	
+	class LoadFeatureDataTask extends LongUpdateTask {
+		/*
+			* Main task. Executed in background thread.
+			*/
+		private MsFeature feature;
+
+		public LoadFeatureDataTask(MsFeature feature) {
+			this.feature = feature;
+		}
+
+		@Override
+		public Void doInBackground() {
+
+			try {
+				activeFeature = feature;
+				Map<DataFile,SimpleMsFeature>fileFeatureMap = createFileFeatureMap(activeFeature);
+				rtVariationPlotPanel.loadFeatureData(activeFeature, fileFeatureMap);
+				mzVariationPlotPanel.loadFeatureData(activeFeature, fileFeatureMap);
+				featureQualityPlotPanel.loadFeatureData(activeFeature, fileFeatureMap);
+				multispectrumPlotPanel.loadFeatureData(activeFeature, fileFeatureMap);	
+				
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			return null;
+		}
+	}
+
 	private Map<DataFile,SimpleMsFeature>createFileFeatureMap(MsFeature feature) {
 		
 		Map<DataFile,SimpleMsFeature>fileFeatureMap = new HashMap<DataFile,SimpleMsFeature>();
@@ -347,6 +385,32 @@ public class MultiMSFeatureQCPlotFrame extends JFrame
 		mzVariationPlotPanel.setDataPipeline(dataPipeline);
 		multispectrumPlotPanel.setDataPipeline(dataPipeline);
 		initDataMatrix();
+	}
+
+	@Override
+	public void chartMouseClicked(ChartMouseEvent event) {
+
+		if(event.getEntity() instanceof XYItemEntity) {
+			
+			XYItemEntity xyitem=(XYItemEntity) event.getEntity();
+			if(xyitem.getDataset() instanceof TimedScatterDataSet) {
+			
+				Object labelObject = ((TimedScatterDataSet)xyitem.getDataset()).
+						getLabelObjectForItem(xyitem.getSeriesIndex(), xyitem.getItem());
+				if(labelObject instanceof FileFeatureTooltipInputObject) {
+					DataFile df = ((FileFeatureTooltipInputObject)labelObject).getDataFile();
+					SimpleMsFeature smsf = ((FileFeatureTooltipInputObject)labelObject).getSimpleMsFeature();
+					if(df != null && smsf != null)
+						multispectrumPlotPanel.scrollToSelectedPlot(Map.entry(df, smsf));
+				}
+			}
+		}
+	}
+
+	@Override
+	public void chartMouseMoved(ChartMouseEvent event) {
+		// TODO Auto-generated method stub
+		
 	}
 }
 

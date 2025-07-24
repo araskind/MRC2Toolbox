@@ -26,5 +26,6 @@ public enum LCMSPlotType {
 	RT_AND_PEAK_WIDTH,
 	MZ,
 	FEATURE_QUALITY,
+	PEAK_AREA,
 	;
 }

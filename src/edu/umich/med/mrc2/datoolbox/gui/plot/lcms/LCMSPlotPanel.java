@@ -56,6 +56,8 @@ import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.chart.renderer.xy.XYSplineRenderer;
+import org.jfree.chart.title.TextTitle;
+import org.jfree.chart.title.Title;
 import org.jfree.chart.ui.Layer;
 import org.jfree.chart.ui.RectangleEdge;
 import org.jfree.chart.ui.RectangleInsets;
@@ -1065,6 +1067,13 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 
 	public void setHandleResetExternally(boolean handleResetExternally) {
 		this.handleResetExternally = handleResetExternally;
+	}
+	
+	public void changeSubtitleColor(int index, Color newColor) {
+		
+		Title st = getChart().getSubtitle(index);
+		if(st instanceof TextTitle)
+			((TextTitle)st).setPaint(newColor);
 	}
 }
 

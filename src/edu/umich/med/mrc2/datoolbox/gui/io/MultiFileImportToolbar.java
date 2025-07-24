@@ -57,6 +57,7 @@ public class MultiFileImportToolbar extends CommonToolbar {
 	private static final Icon addDataFilesIcon = GuiUtils.getIcon("addMultifile", 24);
 	private static final Icon pcdlLibraryIcon = GuiUtils.getIcon("newPCDLfromBase", 24);
 	private static final Icon csvIcon = GuiUtils.getIcon("csv", 24);
+	private static final Icon detailedCsvIcon = GuiUtils.getIcon("detailedCsv", 24);
 	private static final Icon adductIcon = GuiUtils.getIcon("editModification", 24);
 	private static final Icon loadPfaFileIcon = GuiUtils.getIcon("importFromProFinderPaf", 24);
 	private static final Icon removeDataFilesIcon = GuiUtils.getIcon("removeMultifile", 24);
@@ -72,6 +73,7 @@ public class MultiFileImportToolbar extends CommonToolbar {
 		selectPCDLLibraryButton,
 		selectAdductsButton,
 		selectSimpleProFinderCSVButton,
+		selectDetailedProFinderCSVButton,
 		loadFromProFinderPfaButton,
 		removeDataFilesButton,
 		clearDataButton,
@@ -121,6 +123,11 @@ public class MultiFileImportToolbar extends CommonToolbar {
 		selectSimpleProFinderCSVButton = GuiUtils.addButton(this, null, csvIcon, commandListener,
 				MainActionCommands.SELECT_PROFINDER_SIMPLE_CSV_COMMAND.getName(),
 				MainActionCommands.SELECT_PROFINDER_SIMPLE_CSV_COMMAND.getName(),
+				buttonDimension);
+		
+		selectDetailedProFinderCSVButton = GuiUtils.addButton(this, null, detailedCsvIcon, commandListener,
+				MainActionCommands.SELECT_PROFINDER_DETAILED_CSV_COMMAND.getName(),
+				MainActionCommands.SELECT_PROFINDER_DETAILED_CSV_COMMAND.getName(),
 				buttonDimension);
 		
 		addSeparator(buttonDimension);

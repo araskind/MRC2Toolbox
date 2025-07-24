@@ -60,7 +60,10 @@ public class DockableMultispectraPlotPanel extends DockableMSFeatureQCPlotPanel{
 		
 		String command = e.getActionCommand();
 	}
-
+	
+	public void scrollToSelectedPlot(Object plottedObject) {		
+		mspPlotPanel.scrollToSelectedPlot(plottedObject);
+	}
 	
 	protected void updatePlot() {
 		// TODO Auto-generated method stub

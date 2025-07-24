@@ -33,13 +33,11 @@ import edu.umich.med.mrc2.datoolbox.data.SimpleMsFeature;
 import edu.umich.med.mrc2.datoolbox.data.enums.FileSortingOrder;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.gui.datexp.msone.LCMSPlotType;
+import edu.umich.med.mrc2.datoolbox.gui.plot.tooltip.FileFeatureTooltipInputObject;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 
 public class TimedScatterDataSetWithCustomErrors extends TimedScatterDataSet implements DataSetWithCustomErrors{
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 	
 	//	Single series
@@ -64,30 +62,35 @@ public class TimedScatterDataSetWithCustomErrors extends TimedScatterDataSet imp
 				FileSortingOrder.TIMESTAMP,
 				currentExperiment.getExperimentDesign().getActiveDesignSubset());	
 		
+		int seriesCount = 1;
 		for( Entry<String, DataFile[]> smEntry : seriesMap.entrySet()){
 			
-			NamedTimeSeriesWithCustomErrors series = 
-					new NamedTimeSeriesWithCustomErrors(smEntry.getKey());
+			String seriesKey = smEntry.getKey();
+			ObjectMappedTimeSeriesWithCustomErrors series = 
+					new ObjectMappedTimeSeriesWithCustomErrors(seriesKey);
 			
 			for(DataFile df : smEntry.getValue()) {
 				
-				SimpleMsFeature msf = dataFileFeatureMap.get(df);
-				if(msf == null)
+				SimpleMsFeature smsf = dataFileFeatureMap.get(df);
+				if(smsf == null)
 					continue;
 				
-				String label = generateLabelForSimpleMsFeature(
-						df, msf, smEntry.getKey(), LCMSPlotType.RT_AND_PEAK_WIDTH);
-				double rtMin = msf.getRetentionTime();
-				double rtMax = msf.getRetentionTime();
-				if(msf.getRtRange() != null) {
-					rtMin = msf.getRtRange().getMin();
-					rtMax = msf.getRtRange().getMax();
+				FileFeatureTooltipInputObject fftio = 
+						new FileFeatureTooltipInputObject(
+								df, smsf, null, seriesKey, LCMSPlotType.RT_AND_PEAK_WIDTH);
+				
+				double rtMin = smsf.getRetentionTime();
+				double rtMax = smsf.getRetentionTime();
+				if(smsf.getRtRange() != null) {
+					rtMin = smsf.getRtRange().getMin();
+					rtMax = smsf.getRtRange().getMax();
 				}
 				series.add(df.getInjectionTime(), 
-						msf.getRetentionTime(), 
-						rtMin, rtMax, label);
+						smsf.getRetentionTime(), 
+						rtMin, rtMax, fftio);
 			}	
 			addSeries(series);
+			seriesCount++;
 		}	
 		combineSeriesStats();
 	}
@@ -98,7 +101,8 @@ public class TimedScatterDataSetWithCustomErrors extends TimedScatterDataSet imp
         Range result = null;
         while (getSeries().iterator().hasNext()) {
         	
-        	NamedTimeSeriesWithCustomErrors series = (NamedTimeSeriesWithCustomErrors) getSeries().iterator().next();
+        	ObjectMappedTimeSeriesWithCustomErrors series = 
+        			(ObjectMappedTimeSeriesWithCustomErrors) getSeries().iterator().next();
             Range r = new Range(series.getFullDataRange().getMin(), series.getFullDataRange().getMax());
             result = Range.combineIgnoringNaN(result, r);
         }
@@ -113,7 +117,8 @@ public class TimedScatterDataSetWithCustomErrors extends TimedScatterDataSet imp
         Range result = null;
         for (Object visibleSeriesKey : visibleSeriesKeys) {
             Comparable seriesKey = (Comparable) visibleSeriesKey;
-            NamedTimeSeriesWithCustomErrors series = (NamedTimeSeriesWithCustomErrors)getSeries(seriesKey);
+            ObjectMappedTimeSeriesWithCustomErrors series = 
+            		(ObjectMappedTimeSeriesWithCustomErrors)getSeries(seriesKey);
             Range r = series.findValueRange(xRange, this.getXPosition(), activeCalendar);
             result = Range.combineIgnoringNaN(result, r);
         }
@@ -128,7 +133,7 @@ public class TimedScatterDataSetWithCustomErrors extends TimedScatterDataSet imp
 	public double getLowerYBorder(int series, int item) {
 
 		Number[]borders = 
-				((NamedTimeSeriesWithCustomErrors)getSeries(series)).getBorders(item);
+				((ObjectMappedTimeSeriesWithCustomErrors)getSeries(series)).getBorders(item);
 		return (double) borders[0];
 	}
 
@@ -136,7 +141,7 @@ public class TimedScatterDataSetWithCustomErrors extends TimedScatterDataSet imp
 	public double getUpperYBorder(int series, int item) {
 
 		Number[]borders = 
-				((NamedTimeSeriesWithCustomErrors)getSeries(series)).getBorders(item);
+				((ObjectMappedTimeSeriesWithCustomErrors)getSeries(series)).getBorders(item);
 		return (double) borders[1];
 	}
 

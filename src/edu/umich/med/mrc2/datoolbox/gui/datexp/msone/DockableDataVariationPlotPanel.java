@@ -129,4 +129,8 @@ public class DockableDataVariationPlotPanel extends DockableMSFeatureQCPlotPanel
 			// TODO Auto-generated catch block
 		}
 	}
+
+	public FeaturePropertiesTimelinePlot getPlotPanel() {
+		return featurePropertiesTimelinePlot;
+	}
 }

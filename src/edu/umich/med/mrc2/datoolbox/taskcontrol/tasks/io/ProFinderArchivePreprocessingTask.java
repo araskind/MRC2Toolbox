@@ -61,12 +61,14 @@ public class ProFinderArchivePreprocessingTask extends DataWithLibraryImportAbst
 	private CompoundLibrary basePCDLlibrary;
 	private Map<String, Double> nameRetentionMap;
 	private Map<String, Double> unmatchedProFinderCompounds;
+	private File proFinderDetailedCsvExportFile;
 
 	public ProFinderArchivePreprocessingTask(
 			DataPipeline dataPipeline,
 			File pfaTempDir,
 			Set<SampleDataResultObject> dataToImport, 			
 			File proFinderSimpleCsvExportFile, 
+			File proFinderDetailedCsvExportFile, 
 			Collection<Adduct> selectedAdducts) {
 		super();
 		this.dataPipeline = dataPipeline;
@@ -78,6 +80,7 @@ public class ProFinderArchivePreprocessingTask extends DataWithLibraryImportAbst
 		this.proFinderSimpleCsvExportFile = proFinderSimpleCsvExportFile;
 		this.selectedAdducts = selectedAdducts;
 		removeAbnormalIsoPatterns = false;
+		this.proFinderDetailedCsvExportFile = proFinderDetailedCsvExportFile;
 		isLibraryParsed = false;
 	}
 
@@ -97,6 +100,9 @@ public class ProFinderArchivePreprocessingTask extends DataWithLibraryImportAbst
 		}
 		if(isLibraryParsed) {
 			//	TODO
+			if(proFinderDetailedCsvExportFile != null)
+				parseDetailedProFinderExportFile();
+			
 			if(generateCompoundLibrary()) {
 				initDataMatrixes();
 				initDataLoad();
@@ -106,6 +112,13 @@ public class ProFinderArchivePreprocessingTask extends DataWithLibraryImportAbst
 				setStatus(TaskStatus.ERROR);
 			}
 		}
+	}
+
+	private void parseDetailedProFinderExportFile() {
+		// TODO Auto-generated method stub
+		String[][] compoundDataArray = 
+				DelimitedTextParser.parseTextFile(proFinderSimpleCsvExportFile, ',');
+
 	}
 
 	private boolean generateCompoundLibrary() {
@@ -228,6 +241,7 @@ public class ProFinderArchivePreprocessingTask extends DataWithLibraryImportAbst
 				tmpCefDirectory,
 				dataToImport, 			
 				proFinderSimpleCsvExportFile, 
+				proFinderDetailedCsvExportFile,
 				selectedAdducts);
 	}
 }

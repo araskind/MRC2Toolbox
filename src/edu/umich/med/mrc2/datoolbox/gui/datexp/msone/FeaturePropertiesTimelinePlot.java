@@ -55,7 +55,7 @@ import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.TimedScatterDataSet;
 import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.TimedScatterDataSetWithCustomErrors;
 import edu.umich.med.mrc2.datoolbox.gui.plot.renderer.XYCustomErrorRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.plot.stats.DataPlotControlsPanel;
-import edu.umich.med.mrc2.datoolbox.gui.plot.tooltip.NamedTimeSeriesToolTipGenerator;
+import edu.umich.med.mrc2.datoolbox.gui.plot.tooltip.ObjectMappedTimeSeriesToolTipGenerator;
 import edu.umich.med.mrc2.datoolbox.gui.utils.ColorUtils;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
@@ -99,7 +99,7 @@ public class FeaturePropertiesTimelinePlot extends AbstractControlledDataPlot im
 		
 		setBasicPlotGui(dataPlot);
 		dataPlot.getRenderer().setDefaultToolTipGenerator(
-				new NamedTimeSeriesToolTipGenerator());
+				new ObjectMappedTimeSeriesToolTipGenerator());
 
 		chart = new JFreeChart(dataPlot);
 		chart.setBackgroundPaint(Color.white);

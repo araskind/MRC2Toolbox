@@ -33,6 +33,7 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -91,6 +92,7 @@ public class MultispectraPlotPanel extends JPanel
 	private int graphWidth;
 	private int graphHeight;
 	private boolean normalizeSpectra;
+	private JScrollPane plotScroll;
 	private GridBagLayout gbl_plotPanel;
 	
 	private Preferences prefs;
@@ -106,7 +108,7 @@ public class MultispectraPlotPanel extends JPanel
 		gbl_plotPanel = new GridBagLayout();
 		plotPanel.setLayout(gbl_plotPanel);
 		
-		objectPlotMap = new LinkedHashMap<Object,LCMSPlotPanel>();
+		objectPlotMap = new HashMap<Object,LCMSPlotPanel>();
 		
 		graphWidth = 120;
 		graphHeight = 200;
@@ -124,127 +126,24 @@ public class MultispectraPlotPanel extends JPanel
 		plotPanel = new JPanel();
 		plotPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
 		gbl_plotPanel = new GridBagLayout();
-		plotPanel.setLayout(gbl_plotPanel);		
-		add(new JScrollPane(plotPanel), BorderLayout.CENTER);
+		plotPanel.setLayout(gbl_plotPanel);	
+		plotScroll = new JScrollPane(plotPanel);
+		add(plotScroll, BorderLayout.CENTER);
 		revalidate();
 		repaint();
 	}
 	
-//	public void createSimpleMSFeatureSpectraPlot(
-//			MsFeature feature, 
-//			Map<DataFile, SimpleMsFeature> fileFeatureMap,
-//			FileSortingOrder sortingOrder,
-//			DataAnalysisProject currentExperiment,
-//			DataPipeline dataPipeline) {
-//		
-//		clearPanel();
-//		
-//		if (currentExperiment == null || currentExperiment.getExperimentDesign() == null 
-//				|| currentExperiment.getExperimentDesign().getSamples().isEmpty())
-//			return;
-//		
-//		TreeMap<DataFile, SimpleMsFeature> sortedFileFeatureMap = null;
-//		if(sortingOrder.equals(FileSortingOrder.NAME))
-//			sortedFileFeatureMap = new TreeMap<DataFile, SimpleMsFeature>(
-//					new DataFileComparator(SortProperty.Name));
-//		
-//		if(sortingOrder.equals(FileSortingOrder.TIMESTAMP))
-//			sortedFileFeatureMap = new TreeMap<DataFile, SimpleMsFeature>(
-//					new DataFileComparator(SortProperty.injectionTime));
-//		
-//		sortedFileFeatureMap.putAll(fileFeatureMap);
-//
-//		Map<DataFile,String>fileTypeMap = PlotDataSetUtils.mapFilesBySampleType(
-//				currentExperiment,
-//				dataPipeline,
-//				currentExperiment.getExperimentDesign().getActiveDesignSubset());
-//		if(fileTypeMap == null)
-//			return;
-//		
-//		Map<DataFile,Color>colorMap = createColorMap(fileTypeMap, currentExperiment);
-//		
-//		int numGraps = sortedFileFeatureMap.size();
-//		int numRows = 1;
-//		if(numGraps > numColumns)
-//			numRows = Math.floorDiv(numGraps, numColumns) + 1;
-//
-//		int count = 1;
-//		int width = graphWidth * numColumns;
-//		int height = graphHeight * numRows;
-//		plotPanel.setPreferredSize(new Dimension(width, height));
-//		
-//		int row = 0;
-//		int column = 0;
-//		
-//		LookupPaintScale qcLookupPaintScale =  ColorCodingUtils.createLookupPaintScale(
-//				new edu.umich.med.mrc2.datoolbox.utils.Range(0.0d, 100.0d), 
-//				ColorGradient.GREEN_RED, 
-//				ColorScale.LOGARITHMIC,
-//				10);
-//
-//		
-//		for(Entry<DataFile, SimpleMsFeature> ff : sortedFileFeatureMap.entrySet()) {
-//			
-//			if(count % numColumns != 0)
-//				row = Math.floorDiv(count, numColumns);
-//			else
-//				row = (int)((count / numColumns) - 1);
-//				
-//			column = count - 1 - row * numColumns;
-//			
-//			LCMSPlotPanel spectrumPlot = new LCMSPlotPanel(PlotType.SPECTRUM);
-//			((XYPlot)spectrumPlot.getChart().getPlot()).getRangeAxis().setLabel(null);
-//			spectrumPlot.setBorder(BorderFactory.createLineBorder(colorMap.get(ff.getKey()), 2));
-//			spectrumPlot.hideLegend();
-//			spectrumPlot.disableMouseInputs();
-//			
-//			TextTitle tt = new TextTitle(ff.getKey().getName(), 
-//					new java.awt.Font("SansSerif", java.awt.Font.PLAIN, 10));
-//			tt.setVerticalAlignment(VerticalAlignment.TOP);
-//			spectrumPlot.getChart().addSubtitle(tt);
-//			
-//			if(ff.getValue() != null) {
-//				
-//				MsDataSet ds = new MsDataSet();
-//				ds.createDataSetFromSimpleMsFeature(ff.getValue());
-//
-//				ds.setNormalized(normalizeSpectra);
-//				MassSpectrumRenderer msRenderer = spectrumPlot.getDefaultMsRenderer();
-//				for (int i = 0; i < ds.getSeriesCount(); i++)
-//					msRenderer.setSeriesPaint(i, MasterPlotPanel.getColor(i));
-//
-//				((XYPlot) spectrumPlot.getPlot()).setRenderer(0, msRenderer);
-//				((XYPlot) spectrumPlot.getPlot()).setDataset(0, ds);
-//				
-//				setPlotMargins(spectrumPlot, ds);
-//				
-//				if(ff.getValue().getQualityScore() > 0) {
-//					
-//					Color qp = (Color)qcLookupPaintScale.getPaint(
-//							100.0d - ff.getValue().getQualityScore());
-//					LockedXYTextAnnotation ta = createLockedAnnotation(
-//							"Score: " + MRC2ToolBoxConfiguration.getPpmFormat().format(
-//									ff.getValue().getQualityScore()), 
-//							qp, TextAnchor.TOP_LEFT);
-//					((XYPlot)spectrumPlot.getChart().getPlot()).addAnnotation(ta);
-//				}
-//			}
-//			objectPlotMap.put(ff, spectrumPlot);
-//			
-//			GridBagConstraints gbc_spectrumPlot = new GridBagConstraints();
-//			gbc_spectrumPlot.fill = GridBagConstraints.BOTH;
-//			gbc_spectrumPlot.insets = new Insets(0, 0, 5, 5);
-//			gbc_spectrumPlot.gridx = column;
-//			gbc_spectrumPlot.gridy = row;
-//			plotPanel.add(spectrumPlot, gbc_spectrumPlot);
-//			
-//			count++;
-//		}
-//		gbl_plotPanel.rowWeights = new double[numRows];
-//		Arrays.fill(gbl_plotPanel.rowWeights, 1.0d);
-//		gbl_plotPanel.columnWeights = new double[numColumns];
-//		Arrays.fill(gbl_plotPanel.columnWeights, 1.0d);		
-//	}
+	public void scrollToSelectedPlot(Object plottedObject) {
+		
+		LCMSPlotPanel singlePlotPanel = objectPlotMap.get(plottedObject);
+		if(singlePlotPanel != null) {
+			
+			objectPlotMap.values().stream().forEach(p -> p.changeSubtitleColor(1, Color.BLACK));
+			singlePlotPanel.changeSubtitleColor(1, Color.RED);
+			plotScroll.getVerticalScrollBar().setValue(singlePlotPanel.getLocation().y-20);
+			singlePlotPanel.requestFocus();
+		}
+	}
 	
 	private void setPlotMargins(LCMSPlotPanel spectrumPlot, MsDataSet msDataSet) {
 		
@@ -434,7 +333,7 @@ public class MultispectraPlotPanel extends JPanel
 			TextTitle tt = new TextTitle(ff.getKey().getName(), 
 					new java.awt.Font("SansSerif", java.awt.Font.PLAIN, 10));
 			tt.setVerticalAlignment(VerticalAlignment.TOP);
-			spectrumPlot.getChart().addSubtitle(tt);
+			spectrumPlot.getChart().addSubtitle(1, tt);
 			
 			if(ff.getValue() != null) {
 				
@@ -476,7 +375,9 @@ public class MultispectraPlotPanel extends JPanel
 		gbl_plotPanel.rowWeights = new double[numRows];
 		Arrays.fill(gbl_plotPanel.rowWeights, 1.0d);
 		gbl_plotPanel.columnWeights = new double[numColumns];
-		Arrays.fill(gbl_plotPanel.columnWeights, 1.0d);				
+		Arrays.fill(gbl_plotPanel.columnWeights, 1.0d);		
+		revalidate();
+		repaint();
 	}
 
 	public void restoreAllPlotsAutoBounds() {

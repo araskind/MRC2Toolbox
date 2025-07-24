@@ -40,6 +40,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import org.apache.commons.compress.utils.FileNameUtils;
+
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.FilePreferencesFactory;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
@@ -61,13 +63,22 @@ public class CoreDataBackupUtils {
 				MRC2ToolBoxCore.configDir + "MRC2ToolBoxPrefs.txt");
 		MRC2ToolBoxConfiguration.initConfiguration();
 		try {			
-			File reportsDir = new File("Y:\\DataAnalysis\\_Reports");
-			File logsDir = new File("E:\\DataAnalysis\\_BACKUP");			
-			compressAndDeleteCEFfiles(reportsDir, logsDir, 1392);			
+			File sourceDir = new File("K:\\DataAnalysis");
+			File destinationDir = new File("J:\\Metabolomics-BRCF\\Shared\\_Reports");
+			File batchFile = new File("E:\\DataAnalysis\\_BACKUP\\server2_to_corefs2_update_20250723.bat");
+			File unmatchedDirsList = new File("E:\\DataAnalysis\\_BACKUP\\server2_to_corefs2_update_unmatched_dirs_20250723.txt");
+			File copyLogDir = new File("F:\\DataAnalysis\\_COPY_LOGS");
+			createRoboCopyUpdateScript(
+					sourceDir, destinationDir, batchFile, unmatchedDirsList, copyLogDir);
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
+	
+//	File reportsDir = new File("Y:\\DataAnalysis\\_Reports");
+//	File logsDir = new File("E:\\DataAnalysis\\_BACKUP");			
+//	compressAndDeleteCEFfiles(reportsDir, logsDir, 1392);	
 	
 	private static void compressAndDeleteCEFfiles(File reportsDir, File logDir, int startExpId) {
 		
@@ -217,6 +228,80 @@ public class CoreDataBackupUtils {
 		} catch (IOException e) {
 			e.printStackTrace();
 		} 
+	}
+	
+	private static void createRoboCopyUpdateScript(
+			File sourceDir, 
+			File destinationDir, 
+			File batchFile,
+			File unmatchedDirsList,
+			File copyLogDir) {
+		
+		List<File>expDirs = new ArrayList<File>();
+		try {
+			expDirs = Files.list(Paths.get(sourceDir.getAbsolutePath()))
+			        .map(Path::toFile).filter(f -> f.getName().startsWith("EX"))
+			        .collect(Collectors.toList());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		List<File>dirsToUpdate = new ArrayList<File>();
+		try {
+			dirsToUpdate = Files.list(Paths.get(destinationDir.getAbsolutePath()))
+			        .map(Path::toFile).filter(f -> f.getName().startsWith("EX"))
+			        .collect(Collectors.toList());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		Map<File,File>matchingDirMap = new TreeMap<File,File>();
+		List<File>unmatchedDirs = new ArrayList<File>();		
+		for(File expDir : expDirs) {
+			
+			File dirMatch = dirsToUpdate.stream().
+					filter(d -> d.getName().equals(expDir.getName())).
+					findFirst().orElse(null);
+			if(dirMatch == null)
+				unmatchedDirs.add(expDir);
+			else
+				matchingDirMap.put(expDir, dirMatch);
+		}
+		List<String>commands = new ArrayList<String>();
+		for(Entry<File,File>fe : matchingDirMap.entrySet()) {
+			
+			Path copyLogPath = Paths.get(copyLogDir.getAbsolutePath(), 
+					FileNameUtils.getBaseName(fe.getKey().toPath()) + "-" + FIOUtils.getTimestamp() + ".log");
+			String command = "call RoboCopy.exe \"" + fe.getKey().getAbsolutePath() 
+					+ " \" \"" + fe.getValue().getAbsolutePath() + " \" /mir /fft /r:5 /w:0  /mt:20 /xx /xc /xn /xo  "
+					+ "/log+:\"" + copyLogPath.toString() + "\" "
+					+ "/nc /ns /np /ndl /nfl /tee";
+			commands.add(command);
+		}
+	    try {
+			Files.write(batchFile.toPath(), 
+					commands, 
+					StandardCharsets.UTF_8,
+					StandardOpenOption.CREATE, 
+					StandardOpenOption.TRUNCATE_EXISTING);
+		} catch (IOException e) {
+			e.printStackTrace();
+		} 
+	    if(!unmatchedDirs.isEmpty()) {
+	    	
+	    	 List<String>unmatchedNames = 
+	    			 unmatchedDirs.stream().map(f -> f.getAbsolutePath()).
+	    			 collect(Collectors.toList());
+	 	    try {
+				Files.write(unmatchedDirsList.toPath(), 
+						unmatchedNames, 
+						StandardCharsets.UTF_8,
+						StandardOpenOption.CREATE, 
+						StandardOpenOption.TRUNCATE_EXISTING);
+			} catch (IOException e) {
+				e.printStackTrace();
+			} 
+	    }   
 	}
 	
 	private static void createRMDIRScript() {
