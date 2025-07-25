@@ -37,7 +37,7 @@ import org.jfree.chart.plot.Plot;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.ValueMarker;
 import org.jfree.chart.plot.XYPlot;
-import org.jfree.chart.renderer.xy.XYItemRenderer;
+import org.jfree.chart.renderer.AbstractRenderer;
 import org.jfree.chart.ui.RectangleAnchor;
 import org.jfree.chart.ui.RectangleEdge;
 import org.jfree.chart.ui.RectangleInsets;
@@ -57,6 +57,7 @@ import edu.umich.med.mrc2.datoolbox.gui.plot.renderer.XYCustomErrorRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.plot.stats.DataPlotControlsPanel;
 import edu.umich.med.mrc2.datoolbox.gui.plot.tooltip.ObjectMappedTimeSeriesToolTipGenerator;
 import edu.umich.med.mrc2.datoolbox.gui.utils.ColorUtils;
+import edu.umich.med.mrc2.datoolbox.gui.utils.JFreeChartUtils;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 
@@ -70,6 +71,7 @@ public class FeaturePropertiesTimelinePlot extends AbstractControlledDataPlot im
 	protected MSQualityDataPlotParameterObject plotParameters;
 	protected XYPlot dataPlot;
 	protected LCMSPlotType plotType;
+	private final static double plotSymbolScale = 0.5d;
 	
 	public FeaturePropertiesTimelinePlot(LCMSPlotType plotType) {
 		super();
@@ -97,6 +99,7 @@ public class FeaturePropertiesTimelinePlot extends AbstractControlledDataPlot im
 		if(plotType.equals(LCMSPlotType.FEATURE_QUALITY))
 			initFeatureQualityPlot();
 		
+		scalePlotSymbols();
 		setBasicPlotGui(dataPlot);
 		dataPlot.getRenderer().setDefaultToolTipGenerator(
 				new ObjectMappedTimeSeriesToolTipGenerator());
@@ -158,6 +161,15 @@ public class FeaturePropertiesTimelinePlot extends AbstractControlledDataPlot im
 		peakWidtRenderer.setDrawXError(false);
 		dataPlot.setRenderer(peakWidtRenderer);	
 	}
+	
+	private void scalePlotSymbols() {
+		
+		AbstractRenderer plotRenderer = (AbstractRenderer) dataPlot.getRenderer();
+		for(int i=0; i<20; i++) {
+			plotRenderer.setSeriesPaint(i, ColorUtils.getColor(i));
+			JFreeChartUtils.resizeSymbolForRenderer(plotRenderer, i, 0.3d);
+		}	
+	}
 
 	private void setBasicPlotGui(Plot newPlot) {
 
@@ -189,62 +201,7 @@ public class FeaturePropertiesTimelinePlot extends AbstractControlledDataPlot im
 		dataPlot.clearAnnotations();
 		dataPlot.clearRangeMarkers();
 	}
-	
-//	public void showFeatureData(
-//			MsFeature feature,
-//			Map<DataFile, SimpleMsFeature> fileFeatureMap, 
-//			FileSortingOrder sortingOrder,
-//			ChartColorOption colorOption, 
-//			DataAnalysisProject currentExperiment, 
-//			DataPipeline dataPipeline) {
-//	
-//		removeAllDataSets();
-//		if(!sortingOrder.equals(FileSortingOrder.NAME) 
-//				&& !sortingOrder.equals(FileSortingOrder.TIMESTAMP))
-//			return;
-//		
-//		TreeMap<DataFile, SimpleMsFeature> sortedFileFeatureMap = null;
-//		if(sortingOrder.equals(FileSortingOrder.NAME)) {
-//			sortedFileFeatureMap = new TreeMap<DataFile, SimpleMsFeature>(
-//					new DataFileComparator(SortProperty.Name));
-//		}
-//		if(sortingOrder.equals(FileSortingOrder.TIMESTAMP)) {
-//			sortedFileFeatureMap = new TreeMap<DataFile, SimpleMsFeature>(
-//					new DataFileComparator(SortProperty.injectionTime));
-//			DateAxis dateAxis = new DateAxis("Timestamp");
-//			dateAxis.setDateFormatOverride(new SimpleDateFormat("MM/dd HH:mm"));
-//			
-//			if(dataPlot instanceof XYPlot)
-//				dataPlot.setDomainAxis(dateAxis);
-//		}
-//		if(sortedFileFeatureMap == null)
-//			return;
-//		
-//		sortedFileFeatureMap.putAll(fileFeatureMap);
-//		
-//		if(plotType.equals(LCMSPlotType.RT_AND_PEAK_WIDTH)) {
-//			
-//			createRtPeakWidthPlot(
-//					feature,
-//					sortedFileFeatureMap, 
-//					sortingOrder,
-//					colorOption, 
-//					currentExperiment, 
-//					dataPipeline);
-//		}
-//		if(plotType.equals(LCMSPlotType.MZ) || plotType.equals(LCMSPlotType.FEATURE_QUALITY)) {
-//			
-//			createFeatureSingleValueDataPlot(
-//					feature,
-//					sortedFileFeatureMap, 
-//					sortingOrder,
-//					colorOption, 
-//					currentExperiment, 
-//					dataPipeline,
-//					plotType);
-//		}
-//	}
-	
+
 	private void createFeatureSingleValueDataPlot(
 			MsFeature feature, 
 			TreeMap<DataFile, SimpleMsFeature> sortedFileFeatureMap,
@@ -265,10 +222,11 @@ public class FeaturePropertiesTimelinePlot extends AbstractControlledDataPlot im
 							dataPipeline,
 							dataType);
 			
-			XYItemRenderer mzRenderer = dataPlot.getRenderer();
-			for(int i=0; i<tsds.getSeriesCount(); i++)
-				mzRenderer.setSeriesPaint(i, ColorUtils.getColor(i));
-			
+//			AbstractRenderer mzRenderer = (AbstractRenderer) dataPlot.getRenderer();
+//			for(int i=0; i<tsds.getSeriesCount(); i++) {
+//				mzRenderer.setSeriesPaint(i, ColorUtils.getColor(i));
+//				JFreeChartUtils.resizeSymbolForRenderer(mzRenderer, i, 0.5);
+//			}		
 			dataPlot.setDataset(tsds);
 			
 			if(dataType.equals(LCMSPlotType.FEATURE_QUALITY) 
@@ -298,10 +256,11 @@ public class FeaturePropertiesTimelinePlot extends AbstractControlledDataPlot im
 					new TimedScatterDataSetWithCustomErrors(
 							feature, sortedFileFeatureMap, currentExperiment, dataPipeline);
 			
-			XYItemRenderer peakWidtRenderer = dataPlot.getRenderer();
-			for(int i=0; i<tsds.getSeriesCount(); i++)
-				peakWidtRenderer.setSeriesPaint(i, ColorUtils.getColor(i));
-			
+//			AbstractRenderer peakWidtRenderer = (AbstractRenderer)dataPlot.getRenderer();
+//			for(int i=0; i<tsds.getSeriesCount(); i++) {
+//				peakWidtRenderer.setSeriesPaint(i, ColorUtils.getColor(i));
+//				JFreeChartUtils.resizeSymbolForRenderer(peakWidtRenderer, i, 0.5);
+//			}			
 			dataPlot.setDataset(tsds);
 			addMedianToBottomRangeMarkers(tsds, dataPlot);
 		}
