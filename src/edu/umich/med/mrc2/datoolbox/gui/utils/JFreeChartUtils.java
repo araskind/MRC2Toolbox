@@ -29,6 +29,10 @@ import org.jfree.chart.renderer.AbstractRenderer;
 
 public class JFreeChartUtils {
 
+	private JFreeChartUtils() {
+		
+	}
+	
 	public static void resizeSymbolForRenderer(AbstractRenderer renderer, int series, double shapeMult) {
 		
 		Shape shape = renderer.getSeriesShape(series);

@@ -909,6 +909,12 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 		if (currentExperiment == null || activeDataPipeline == null)
 			return;
 		
+		if(multiSpectraPlotFrame != null 
+				&& multiSpectraPlotFrame.isVisible()) {
+			multiSpectraPlotFrame.toFront();
+			return;
+		}
+		
 		multiSpectraPlotFrame = new MultiMSFeatureQCPlotFrame(
 				currentExperiment,activeDataPipeline);
 		multiSpectraPlotFrame.setLocationRelativeTo(this.getContentPane());
