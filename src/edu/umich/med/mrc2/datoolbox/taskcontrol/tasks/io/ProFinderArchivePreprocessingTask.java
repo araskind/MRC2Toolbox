@@ -49,6 +49,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
+import edu.umich.med.mrc2.datoolbox.utils.AgilentProfinderDetailedExportParser;
 import edu.umich.med.mrc2.datoolbox.utils.DelimitedTextParser;
 
 public class ProFinderArchivePreprocessingTask extends DataWithLibraryImportAbstractTask {
@@ -115,10 +116,13 @@ public class ProFinderArchivePreprocessingTask extends DataWithLibraryImportAbst
 	}
 
 	private void parseDetailedProFinderExportFile() {
-		// TODO Auto-generated method stub
-		String[][] compoundDataArray = 
-				DelimitedTextParser.parseTextFile(proFinderSimpleCsvExportFile, ',');
-
+		
+		taskDescription = "Extracting RT data from detailed export ...";
+		total = 100;
+		processed = 40;
+		AgilentProfinderDetailedExportParser dataParser = 
+				new AgilentProfinderDetailedExportParser(proFinderDetailedCsvExportFile);
+		rtMatrix = dataParser.extractRTdata();
 	}
 
 	private boolean generateCompoundLibrary() {

@@ -61,6 +61,7 @@ public abstract class DataWithLibraryImportAbstractTask extends AbstractTask imp
 	protected CompoundLibrary library;
 	protected Matrix featureMatrix;
 	protected Matrix dataMatrix;
+	protected Matrix rtMatrix;
 	protected Map<String,Integer>featureCoordinateMap;
 	protected Map<String, List<Double>>retentionMap;
 	protected Map<String, List<Double>>mzMap;
@@ -169,6 +170,7 @@ public abstract class DataWithLibraryImportAbstractTask extends AbstractTask imp
 			ciFinObj.setLibrary(library);
 			ciFinObj.setFeatureMatrix(featureMatrix);
 			ciFinObj.setDataMatrix(dataMatrix);
+			ciFinObj.setRtMatrix(rtMatrix);
 			ciFinObj.setRetentionMap(retentionMap);
 			ciFinObj.setMzMap(mzMap);
 			ciFinObj.setPeakWidthMap(peakWidthMap);

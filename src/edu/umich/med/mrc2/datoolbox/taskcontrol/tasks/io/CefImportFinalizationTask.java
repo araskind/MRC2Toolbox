@@ -51,6 +51,7 @@ import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.LibraryMsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureSet;
+import edu.umich.med.mrc2.datoolbox.data.SimpleMsFeature;
 import edu.umich.med.mrc2.datoolbox.data.enums.GlobalDefaults;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
@@ -70,6 +71,7 @@ public class CefImportFinalizationTask extends AbstractTask {
 	private CompoundLibrary library;
 	private Matrix featureMatrix;
 	private Matrix dataMatrix;
+	private Matrix rtMatrix;
 	private Map<String, List<Double>>retentionMap;
 	private Map<String, List<Double>>mzMap;
 	private Map<String, List<Double>> peakWidthMap;
@@ -84,6 +86,7 @@ public class CefImportFinalizationTask extends AbstractTask {
 		this.library = ciFinObj.getLibrary();
 		this.featureMatrix = ciFinObj.getFeatureMatrix();
 		this.dataMatrix = ciFinObj.getDataMatrix();
+		this.rtMatrix = ciFinObj.getRtMatrix();
 		this.retentionMap = ciFinObj.getRetentionMap();
 		this.mzMap = ciFinObj.getMzMap();
 		this.peakWidthMap = ciFinObj.getPeakWidthMap();
@@ -98,6 +101,9 @@ public class CefImportFinalizationTask extends AbstractTask {
 		taskDescription = "Finalizing CEF import ...";
 		
 		calculateFeatureStatistics();
+		
+		if(rtMatrix != null)
+			updateRTvaluesForFeatures();
 			
 		if(removeAbnormalIsoPatterns)
 			removeFeaturesWithAbnormalIsoPattern();	
@@ -186,6 +192,55 @@ public class CefImportFinalizationTask extends AbstractTask {
 			f.getStatsSummary().setPeakWidthStatistics(peakWidthStatsMap.get(f.getId()));
 			f.getStatsSummary().setMzStatistics(mzStatsMap.get(f.getId()));
 		});
+	}
+	
+	private void updateRTvaluesForFeatures() {
+		
+		Map<String,Long>dataFileRowMap = new TreeMap<String,Long>();
+		for(int i=0; i<dataFiles.length; i++)
+			dataFileRowMap.put(dataFiles[i].getName(), (long)i);
+		
+		Map<Long,Long>fileToRTRowMap = new TreeMap<Long,Long>();
+		for(Entry<String,Long>ent : dataFileRowMap.entrySet()) {
+			
+			long dfCol = rtMatrix.getRowForLabel(ent.getKey());
+			if(dfCol >= 0)
+				fileToRTRowMap.put(ent.getValue(), dfCol);
+		}
+		Object[]featureArray = 
+				featureMatrix.getMetaDataDimensionMatrix(0).
+				selectRows(Ret.LINK, 0).toObjectArray()[0];
+		
+		Map<String,Long>featureColumnMap = new TreeMap<String,Long>();
+		for(int i=0; i<featureArray.length; i++)
+			featureColumnMap.put(((MsFeature)featureArray[i]).getName(), (long)i);
+		
+		Map<Long,Long>featureToRTColumnMap = new TreeMap<Long,Long>();		
+		for(Entry<String,Long>ent : featureColumnMap.entrySet()) {
+			
+			long rtCol = rtMatrix.getColumnForLabel(ent.getKey());
+			if(rtCol >= 0)
+				featureToRTColumnMap.put(ent.getValue(), rtCol);
+		}
+		long[]featureCoordinates = new long[2];
+		long[]rtCoordinates = new long[2];
+		
+		for(Entry<Long,Long>fileMapEntry : fileToRTRowMap.entrySet()) {
+			
+			for(Entry<Long,Long>featureMapEntry : featureToRTColumnMap.entrySet()) {
+				
+				featureCoordinates[0] = fileMapEntry.getKey();
+				featureCoordinates[1] = featureMapEntry.getKey();
+				rtCoordinates[0] = fileMapEntry.getValue();
+				rtCoordinates[1] = featureMapEntry.getValue();
+				
+				SimpleMsFeature sf = (SimpleMsFeature)featureMatrix.getAsObject(featureCoordinates);
+				double rt = rtMatrix.getAsDouble(rtCoordinates);
+				if(sf != null && rt > 0.0d)
+					sf.setRetentionTime(rt);
+			}
+		}		
+		System.out.println("***");
 	}
 	
 	private void removeTempDirectory() {

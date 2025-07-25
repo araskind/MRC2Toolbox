@@ -36,6 +36,7 @@ public class CefImportFinalizationObjest {
 	private CompoundLibrary library;
 	private Matrix featureMatrix;
 	private Matrix dataMatrix;
+	private Matrix rtMatrix;
 	private Map<String, List<Double>>retentionMap;
 	private Map<String, List<Double>>mzMap;
 	private Map<String, List<Double>> peakWidthMap;	
@@ -124,5 +125,13 @@ public class CefImportFinalizationObjest {
 
 	public void setTmpCefDirectory(File tmpCefDirectory) {
 		this.tmpCefDirectory = tmpCefDirectory;
+	}
+
+	public Matrix getRtMatrix() {
+		return rtMatrix;
+	}
+
+	public void setRtMatrix(Matrix rtMatrix) {
+		this.rtMatrix = rtMatrix;
 	}
 }
