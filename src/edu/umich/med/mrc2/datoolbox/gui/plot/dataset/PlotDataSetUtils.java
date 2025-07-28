@@ -70,15 +70,18 @@ public class PlotDataSetUtils {
 			Collection<DataFile>files,
 			DataScale scale){
 		
-		if(experiment == null || pipeline == null || feature == null || files.isEmpty())
-			return null;
-
 		Map<DataFile,Double>dataMap = new HashMap<DataFile,Double>();
+		if(experiment == null || pipeline == null || feature == null || files.isEmpty())
+			return dataMap;
+		
 		DataFile[] sampleFiles = files.toArray(new DataFile[files.size()]);
 		Matrix dataMatrix = experiment.getDataMatrixForDataPipeline(pipeline);
 
-		long[] coordinates = new long[2];
-		coordinates[1] = dataMatrix.getColumnForLabel(feature);
+		long[] coordinates = new long[2];		
+		coordinates[1] = DataSetUtils.getColumnForFeature(dataMatrix, feature, experiment, pipeline);
+		if(coordinates[1] == -1)
+			return dataMap;
+		
 		double[] fdata = new double[files.size()];
 		double[] scaledData = new double[files.size()];
 

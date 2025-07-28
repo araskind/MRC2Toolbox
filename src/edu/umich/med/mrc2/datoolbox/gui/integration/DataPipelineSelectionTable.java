@@ -23,6 +23,7 @@ package edu.umich.med.mrc2.datoolbox.gui.integration;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import javax.swing.ListSelectionModel;
 import javax.swing.table.TableRowSorter;
@@ -63,9 +64,9 @@ public class DataPipelineSelectionTable extends BasicTable {
 		adjustColumns();
 	}
 	
-	public Collection<DataPipeline>getCheckedDataPipelines(){
+	public List<DataPipeline>getCheckedDataPipelines(){
 		
-		Collection<DataPipeline>selectedPipelines = new ArrayList<DataPipeline>();
+		List<DataPipeline>selectedPipelines = new ArrayList<DataPipeline>();
 		int dpCol = model.getColumnIndex(DataPipelineSelectionTableModel.DATA_PIPELINE_COLUMN);
 		int checkedCol = model.getColumnIndex(DataPipelineSelectionTableModel.SELECTED_COLUMN);
 		for(int i=0; i<model.getRowCount(); i++) {	

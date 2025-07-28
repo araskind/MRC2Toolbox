@@ -132,6 +132,7 @@ public class VariableCategorySizeBarChartDataSet extends AbstractDataset impleme
 	
 	public VariableCategorySizeBarChartDataSet(
 			MsFeature feature, 
+			DataPipeline pipeline,
 			TwoDimFeatureDataPlotParameterObject plotParameters) {
 				
 		DataAnalysisProject experiment = 
@@ -140,7 +141,7 @@ public class VariableCategorySizeBarChartDataSet extends AbstractDataset impleme
 				|| experiment.getExperimentDesign() == null)
 			return;
 		
-		DataPipeline pipeline = experiment.getActiveDataPipeline();
+		//	DataPipeline pipeline = experiment.getActiveDataPipeline();
 		ExperimentDesignSubset activeDesign = 
 				experiment.getExperimentDesign().getActiveDesignSubset();
 		

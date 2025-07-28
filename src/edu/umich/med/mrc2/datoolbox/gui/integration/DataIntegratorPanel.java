@@ -224,7 +224,8 @@ public class DataIntegratorPanel extends ClusterDisplayPanel {
 		}
 		DataPipelineAlignmentTask task = new DataPipelineAlignmentTask(
 				currentExperiment,
-				dataSetAlignmentSetupDialog.getSelectedDataPipelines(), 
+				dataSetAlignmentSetupDialog.getSelectedDataPipelines().get(0), 
+				dataSetAlignmentSetupDialog.getSelectedDataPipelines().get(1), 
 				dataSetAlignmentSetupDialog.getMassWindow(),
 				dataSetAlignmentSetupDialog.getMassErrorType(), 
 				dataSetAlignmentSetupDialog.getRetentionWindow());

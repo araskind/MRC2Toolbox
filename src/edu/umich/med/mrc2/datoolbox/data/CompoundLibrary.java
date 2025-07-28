@@ -161,6 +161,10 @@ public class CompoundLibrary implements Serializable, Comparable<CompoundLibrary
 		return libraryFeatures;
 	}
 
+	public int getFeatureCount() {
+		return libraryFeatures.size();
+	}
+	
 	public Collection<LibraryMsFeature>getSortedFeatures(Comparator<MsFeature>sorter) {
 		return libraryFeatures.stream().
 				sorted(sorter).collect(Collectors.toList());

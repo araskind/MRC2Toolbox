@@ -493,7 +493,7 @@ public class MultiPanelDataPlot extends TwoDimQCPlot{
 
 				//	MsFeatureBarChartDataSet ds = new MsFeatureBarChartDataSet(msf, plotParameters);
 				VariableCategorySizeBarChartDataSet ds = 
-						new VariableCategorySizeBarChartDataSet(msf, plotParameters);
+						new VariableCategorySizeBarChartDataSet(msf, entry.getKey(), plotParameters);
 				VariableCategorySizeBarRenderer renderer = new VariableCategorySizeBarRenderer();
 		        renderer.setDefaultToolTipGenerator(
 		        		new StatsPlotDataFileToolTipGenerator(NumberFormat.getNumberInstance(), null));

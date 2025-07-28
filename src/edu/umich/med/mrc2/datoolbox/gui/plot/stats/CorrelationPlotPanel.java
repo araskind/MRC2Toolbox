@@ -54,6 +54,7 @@ import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.gui.plot.MasterPlotPanel;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
+import edu.umich.med.mrc2.datoolbox.utils.DataSetUtils;
 
 public class CorrelationPlotPanel extends MasterPlotPanel {
 
@@ -215,8 +216,19 @@ public class CorrelationPlotPanel extends MasterPlotPanel {
 
 		long[] coordinatesOne = new long[2];
 		long[] coordinatesTwo = new long[2];
-		coordinatesOne[1] = matrixOne.getColumnForLabel(fOne);
-		coordinatesTwo[1] = matrixTwo.getColumnForLabel(fTwo);
+		
+		coordinatesOne[1] = DataSetUtils.getColumnForFeature(
+				matrixOne, fOne, experiment, dataPipelineOne);
+		if(coordinatesOne[1] == -1)
+			return;
+		
+		coordinatesTwo[1] = DataSetUtils.getColumnForFeature(
+				matrixTwo, fTwo, experiment, dataPipelineTwo);
+		if(coordinatesTwo[1] == -1)
+			return;
+		
+//		coordinatesOne[1] = matrixOne.getColumnForLabel(fOne);
+//		coordinatesTwo[1] = matrixTwo.getColumnForLabel(fTwo);
 
 		TreeSet<ExperimentalSample> samples =
 				experiment.getExperimentDesign().getActiveSamplesForDesignSubset(
@@ -236,9 +248,14 @@ public class CorrelationPlotPanel extends MasterPlotPanel {
 
 					coordinatesOne[0] = matrixOne.getRowForLabel(filesOne[i]);
 					coordinatesTwo[0] = matrixTwo.getRowForLabel(filesTwo[i]);
-
-					double x = matrixOne.getAsDouble(coordinatesOne);
-					double y = matrixTwo.getAsDouble(coordinatesTwo);
+					double x = 0.0d;
+					double y = 0.0d;
+					
+					if(coordinatesOne[0] >=0)
+						x = matrixOne.getAsDouble(coordinatesOne);
+					
+					if(coordinatesTwo[0] >=0)
+						y = matrixTwo.getAsDouble(coordinatesTwo);
 
 					if(x > 0 && y > 0)
 						series.add(x, y);

@@ -22,16 +22,29 @@
 package edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.integration;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
+import java.util.TreeMap;
+import java.util.stream.Collectors;
 
+import edu.umich.med.mrc2.datoolbox.data.Adduct;
+import edu.umich.med.mrc2.datoolbox.data.CompoundLibrary;
+import edu.umich.med.mrc2.datoolbox.data.LibraryMsFeature;
+import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureCluster;
+import edu.umich.med.mrc2.datoolbox.data.MsFeatureStatisticalSummary;
 import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
+import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
+import edu.umich.med.mrc2.datoolbox.utils.Range;
 
 public class DataPipelineAlignmentTask extends AbstractTask {
 
@@ -41,29 +54,56 @@ public class DataPipelineAlignmentTask extends AbstractTask {
 	private MassErrorType massErrorType;
 	private double retentionWindow;
 	private Set<MsFeatureCluster> clusterList;
+	private CompoundLibrary referenceLib;
+	private DataPipeline referencePipeline;
+	private CompoundLibrary queryLib;
+	private DataPipeline queryPipeline;
 		
 	public DataPipelineAlignmentTask(
 			DataAnalysisProject currentExperiment,
-			Collection<DataPipeline> selectedPipelines, 
+			DataPipeline pipelineOne, 
+			DataPipeline pipelineTwo, 
 			double massWindow,
 			MassErrorType massErrorType, 
 			double retentionWindow) {
 		super();
 		this.currentExperiment = currentExperiment;
-		this.selectedPipelines = selectedPipelines;
 		this.massWindow = massWindow;
 		this.massErrorType = massErrorType;
 		this.retentionWindow = retentionWindow;
 		clusterList = new HashSet<MsFeatureCluster>();
+		setQueryAndReference(pipelineOne,pipelineTwo);
+	}
+	
+	private void setQueryAndReference(
+			DataPipeline pipelineOne, 
+			DataPipeline pipelineTwo) {
+		
+		referenceLib = currentExperiment.getAveragedFeatureLibraryForDataPipeline(pipelineOne);
+		referencePipeline = pipelineOne;
+		queryLib = currentExperiment.getAveragedFeatureLibraryForDataPipeline(pipelineTwo);
+		queryPipeline = pipelineTwo;
+		if(referenceLib.getFeatureCount() > queryLib.getFeatureCount()) {
+			
+			referenceLib = currentExperiment.getAveragedFeatureLibraryForDataPipeline(pipelineTwo);
+			referencePipeline = pipelineTwo;
+			queryLib = currentExperiment.getAveragedFeatureLibraryForDataPipeline(pipelineOne);
+			queryPipeline = pipelineOne;
+		}
 	}
 
 	@Override
 	public void run() {
 
-		taskDescription = "";
 		setStatus(TaskStatus.PROCESSING);
 		try {
-
+			copyStatisticalSummaries();
+		}
+		catch (Exception e) {
+			reportErrorAndExit(e);
+		}
+		try {
+			matchFeaturesFromSelectedPipelines();
 		}
 		catch (Exception e) {
 			reportErrorAndExit(e);
@@ -71,12 +111,100 @@ public class DataPipelineAlignmentTask extends AbstractTask {
 		setStatus(TaskStatus.FINISHED);
 	}
 	
+	private void copyStatisticalSummaries() {
+
+		Map<DataPipeline,CompoundLibrary>dpLibMap = 
+				new TreeMap<DataPipeline,CompoundLibrary>();
+		dpLibMap.put(referencePipeline, referenceLib);
+		dpLibMap.put(queryPipeline, queryLib);
+		for(Entry<DataPipeline,CompoundLibrary>dpLibMapEntry : dpLibMap.entrySet()) {
+			
+			Set<MsFeature> featuresWithStats = 
+					currentExperiment.getMsFeaturesForDataPipeline(dpLibMapEntry.getKey());
+			Map<String,MsFeatureStatisticalSummary>statsMap = 
+					new HashMap<String,MsFeatureStatisticalSummary>();
+			featuresWithStats.stream().
+				forEach(f -> statsMap.put(f.getId(), f.getStatsSummary()));
+			dpLibMapEntry.getValue().getFeatures().stream().
+				forEach(f -> f.setStatsSummary(statsMap.get(f.getParentFeatureId())));
+		}
+	}
+
+	private void matchFeaturesFromSelectedPipelines() {
+		
+		taskDescription = "Matching the features from selected data pipelines";
+		total = referenceLib.getFeatureCount();
+		processed = 0;
+
+		for(LibraryMsFeature refFeature : referenceLib.getFeatures()) {
+			
+			Set<LibraryMsFeature>matches = findMatchingFeaturesInQueryLibrary(refFeature);
+			if(!matches.isEmpty()) {
+				MsFeatureCluster newCluster = new MsFeatureCluster();
+				newCluster.addFeature(refFeature, referencePipeline);
+				for(LibraryMsFeature match : matches)
+					newCluster.addFeature(match, queryPipeline);
+				
+				clusterList.add(newCluster);
+			}	
+			processed++;
+		}	
+	}
+	
+	private Set<LibraryMsFeature> findMatchingFeaturesInQueryLibrary(LibraryMsFeature refFeature) {
+		
+		Set<LibraryMsFeature>matches = new HashSet<LibraryMsFeature>();
+		Range rtRange = new Range(
+				refFeature.getRetentionTime() - retentionWindow, 
+				refFeature.getRetentionTime() + retentionWindow);
+		List<LibraryMsFeature>matchedByRt= 
+				queryLib.getFeatures().stream().
+				filter(f -> rtRange.contains(f.getRetentionTime())).
+				collect(Collectors.toList());
+		if(matchedByRt.isEmpty())
+			return matches;
+		
+		Map<Adduct,Collection<LibraryMsFeature>>matchByAdduct = 
+				new TreeMap<Adduct,Collection<LibraryMsFeature>>();
+		for(Adduct refAdduct : refFeature.getSpectrum().getAdducts()) {
+			
+			int charge = refAdduct.getCharge();
+			double refMz = refFeature.getSpectrum().getMsForAdduct(refAdduct)[0].getMz();
+			Range mzRange = MsUtils.createMassRange(refMz, massWindow, massErrorType);
+			List<LibraryMsFeature>matchedByMz = matchedByRt.stream().
+				filter(f -> matchByAnyAdduct(f, mzRange, charge)).
+				collect(Collectors.toList());
+			if(!matchedByMz.isEmpty())
+				matchByAdduct.put(refAdduct,matchedByMz);			
+		}
+		//	TODO If both ref and match have more than one adduct 
+		//	check that corresponding adducts match
+		if(!matchByAdduct.isEmpty())
+			matches.addAll(matchByAdduct.values().stream().
+					flatMap(v -> v.stream()).distinct().
+					collect(Collectors.toList()));
+		
+		return matches;
+	}
+	
+	private boolean matchByAnyAdduct(LibraryMsFeature feature, Range mzRange, int charge) {
+		
+		for(Adduct adduct : feature.getSpectrum().getAdducts()) {
+			
+			if(adduct.getCharge() == charge 
+					&& mzRange.contains(feature.getSpectrum().getMsForAdduct(adduct)[0].getMz()))
+				return true;
+		}
+		return false;
+	}
+
 	@Override
 	public Task cloneTask() {
 
 		return new DataPipelineAlignmentTask(
 				currentExperiment, 
-				selectedPipelines, 
+				referencePipeline, 
+				queryPipeline,
 				massWindow, 
 				massErrorType, 
 				retentionWindow);
@@ -86,10 +214,6 @@ public class DataPipelineAlignmentTask extends AbstractTask {
 		return clusterList;
 	}
 }
-
-
-
-
 
 
 

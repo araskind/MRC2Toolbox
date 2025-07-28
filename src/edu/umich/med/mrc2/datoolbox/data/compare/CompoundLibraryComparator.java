@@ -58,6 +58,13 @@ public class CompoundLibraryComparator extends ObjectCompatrator<CompoundLibrary
 			if (direction == SortDirection.ASC)
 				return result;
 			else
+				return -result;//
+			
+		case featureCount:
+			result = Integer.compare(o1.getFeatureCount(), o2.getFeatureCount());
+			if (direction == SortDirection.ASC)
+				return result;
+			else
 				return -result;
 
 		default:

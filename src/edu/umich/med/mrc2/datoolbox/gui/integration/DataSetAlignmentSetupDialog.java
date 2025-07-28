@@ -34,6 +34,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.prefs.Preferences;
 
 import javax.swing.DefaultComboBoxModel;
@@ -306,7 +307,7 @@ public class DataSetAlignmentSetupDialog extends JDialog implements ActionListen
 
 	}
 	
-	public Collection<DataPipeline>getSelectedDataPipelines(){
+	public List<DataPipeline>getSelectedDataPipelines(){
 		return dataPipelineSelectionTable.getCheckedDataPipelines();
 	}
 	
@@ -335,7 +336,7 @@ public class DataSetAlignmentSetupDialog extends JDialog implements ActionListen
 		for(DataPipeline dp : selectedDataPipelines) {
 			
 			if(currentExperiment.getAveragedFeatureLibraryForDataPipeline(dp) == null) 
-				 errors.add("Averaged feature librar must be generated "
+				 errors.add("Averaged feature library must be generated "
 				 		+ "for data pipeline \"" + dp.getName() + "\"");			
 		}    
 	    if(getMassWindow() <= 0)

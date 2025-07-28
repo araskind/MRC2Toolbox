@@ -34,6 +34,7 @@ import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignFactor;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignSubset;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentalSample;
+import edu.umich.med.mrc2.datoolbox.data.LibraryMsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureSet;
 import edu.umich.med.mrc2.datoolbox.data.compare.DataFileComparator;
@@ -283,5 +284,26 @@ public class DataSetUtils {
 				experiment.getActiveDataPipeline(),
 				experiment.getExperimentDesign().getActiveDesignSubset(),
 				null);
+	}
+	
+	public static long getColumnForFeature(
+			Matrix dataMatrix, 
+			MsFeature feature, 
+			DataAnalysisProject experiment,
+			DataPipeline pipeline) {
+		
+		long column = dataMatrix.getColumnForLabel(feature);
+		if(column == -1 && feature instanceof LibraryMsFeature) {
+			String fid = ((LibraryMsFeature)feature).getParentFeatureId();
+			if(fid != null)
+				feature = experiment.getMsFeatureById(fid, pipeline);
+			
+			if(feature == null)
+				return -1;
+			else
+				return dataMatrix.getColumnForLabel(feature);
+		}
+		else
+			return column;
 	}
 }
