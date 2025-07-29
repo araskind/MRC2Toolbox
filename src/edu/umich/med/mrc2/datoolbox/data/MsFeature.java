@@ -91,7 +91,7 @@ public class MsFeature implements AnnotatedObject, Serializable, XmlStorable {
 	protected Set<MsFeatureListener> eventListeners;
 	protected boolean suppressEvents;
 	
-	public static final String DEFAULT_ID_NAME = "UNKNOWN";
+	//public static final String DEFAULT_ID_NAME = "UNKNOWN";
 
 	public MsFeature() {
 		super();
@@ -859,7 +859,7 @@ public class MsFeature implements AnnotatedObject, Serializable, XmlStorable {
 		
 		MsFeatureIdentity defaultId = new MsFeatureIdentity(
 				null, CompoundIdentificationConfidence.UNKNOWN_ACCURATE_MASS_RT);
-		defaultId.setIdentityName(DEFAULT_ID_NAME);
+		defaultId.setIdentityName(MsFeatureIdentity.DEFAULT_ID_NAME);
 		setPrimaryIdentity(defaultId);
 		if(spectrum == null)
 			return;
@@ -890,7 +890,7 @@ public class MsFeature implements AnnotatedObject, Serializable, XmlStorable {
 		
 		//	Do not remove if it's the only one
 		if(identifications.size() == 1 
-				&& identifications.iterator().next().getIdentityName().equals(DEFAULT_ID_NAME))
+				&& identifications.iterator().next().getIdentityName().equals(MsFeatureIdentity.DEFAULT_ID_NAME))
 			return;
 		
 		removeIdentity(getDefaultPrimaryIdentity());
@@ -902,7 +902,7 @@ public class MsFeature implements AnnotatedObject, Serializable, XmlStorable {
 			return null;
 		
 		return identifications.stream().
-				filter(i -> i.getIdentityName().equals(DEFAULT_ID_NAME)).
+				filter(i -> i.getIdentityName().equals(MsFeatureIdentity.DEFAULT_ID_NAME)).
 				findFirst().orElse(null);
 	}
 	

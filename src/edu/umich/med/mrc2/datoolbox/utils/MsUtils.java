@@ -1763,5 +1763,26 @@ public class MsUtils {
 		}
 		return averagedSpectrum;
 	}
+	
+	public static Collection<MsPoint> scaleMsPointCollection(
+			Collection<MsPoint>inputPoints, double multiplier) {
+		
+		Collection<MsPoint>normalized =
+				normalizeAndSortMsPointsCollection(inputPoints, 1.0);
+		Collection<MsPoint>output = new ArrayList<MsPoint>();
+		for(MsPoint p : normalized)
+			output.add(new MsPoint(p.getMz(), p.getIntensity() * multiplier));
+					
+		return output;
+	}
 }
+
+
+
+
+
+
+
+
+
 

@@ -23,6 +23,8 @@ package edu.umich.med.mrc2.datoolbox.utils;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -30,9 +32,13 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.ujmp.core.Matrix;
 import org.ujmp.core.calculation.Calculation.Ret;
 
+import edu.umich.med.mrc2.datoolbox.data.Adduct;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
+import edu.umich.med.mrc2.datoolbox.data.LibraryMsFeature;
+import edu.umich.med.mrc2.datoolbox.data.MassSpectrum;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureCluster;
+import edu.umich.med.mrc2.datoolbox.data.MsPoint;
 import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortDirection;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
@@ -102,4 +108,46 @@ public class ClusterUtils {
 		corrMatrix.setMetaDataDimensionMatrix(1, Matrix.Factory.linkToArray((Object[])sortedFeatures).transpose(Ret.NEW));
 		return corrMatrix;
 	}
+	
+	public static LibraryMsFeature mergeLibraryFeatures(Map<LibraryMsFeature,Adduct>featureAdductMap) {
+		
+		LibraryMsFeature merged = new LibraryMsFeature();
+		MassSpectrum spectrum = new MassSpectrum();
+		double rt = 0.0;
+		Range rtRange = null;
+		for(Entry<LibraryMsFeature,Adduct>mapEntry : featureAdductMap.entrySet()) {
+
+			Collection<MsPoint>scaledAdductPoints = MsUtils.scaleMsPointCollection(
+					mapEntry.getKey().getSpectrum().getMsPointsForAdduct(mapEntry.getValue()),
+					mapEntry.getKey().getStatsSummary().getSampleMedian());
+			spectrum.addSpectrumForAdduct(mapEntry.getValue(), scaledAdductPoints);
+			rt += mapEntry.getKey().getRetentionTime();
+			if(rtRange == null)
+				rtRange = mapEntry.getKey().getRtRange();
+			else
+				rtRange.extendRange(mapEntry.getKey().getRtRange());			
+		}
+		merged.setRetentionTime(rt);
+		merged.setRtRange(rtRange);
+		merged.createDefaultPrimaryIdentity();
+		//	TODO merge identities removing duplicate compounds with the same ID confidence and source
+		
+		
+		return merged;
+	}
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

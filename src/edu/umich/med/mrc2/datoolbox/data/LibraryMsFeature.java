@@ -23,6 +23,8 @@ package edu.umich.med.mrc2.datoolbox.data;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 import org.jdom2.Element;
@@ -45,6 +47,19 @@ public class LibraryMsFeature extends MsFeature implements Serializable {
 	private String parentFeatureId;
 	private Date dateCreated;
 	private Date lastModified;
+	private Set<String>parentIdSet;
+	
+	public LibraryMsFeature() {
+
+		super();
+		dateCreated = new Date();
+		lastModified = new Date();
+		id = DataPrefix.MS_LIBRARY_TARGET.getName() + UUID.randomUUID().toString();
+
+			//	TODO handle "copy annotations" to save them to the database as new and linked to the current feature
+//		for(ObjectAnnotation annotation : annotations)
+//			annotation.setUniqueId(DataPrefix.ANNOTATION.getName() + UUID.randomUUID().toString());
+	}
 
 	// Copy constructor to create new entry
 	public LibraryMsFeature(LibraryMsFeature source) {
@@ -209,6 +224,14 @@ public class LibraryMsFeature extends MsFeature implements Serializable {
 
 	public String getParentFeatureId() {
 		return parentFeatureId;
+	}
+
+	public Set<String> getParentIdSet() {
+		
+		if(parentIdSet == null)
+			parentIdSet = new HashSet<String>();
+		
+		return parentIdSet;
 	}
 }
 

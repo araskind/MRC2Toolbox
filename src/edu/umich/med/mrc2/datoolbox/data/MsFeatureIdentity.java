@@ -61,6 +61,7 @@ public class MsFeatureIdentity implements Serializable {
 	private MSFeatureIdentificationLevel identificationLevel;
 	private Adduct primaryAdduct;
 	private double scoreCarryOver;	//	this is a purely service field to carry over the score during parsing
+	public static final String DEFAULT_ID_NAME = "UNKNOWN";
 
 	public MsFeatureIdentity(
 			CompoundIdentity compoundIdentity,
@@ -197,9 +198,10 @@ public class MsFeatureIdentity implements Serializable {
 			return false;
 
         if (!MsFeatureIdentity.class.isAssignableFrom(cpdId.getClass()))
-            return false;
+            return false;        	
 
         MsFeatureIdentity other = (MsFeatureIdentity)cpdId;
+
         if ((this.uniqueId == null) ? (other.getUniqueId() != null) : !this.uniqueId.equals(other.getUniqueId()))
             return false;
 
