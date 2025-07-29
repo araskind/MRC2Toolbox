@@ -107,7 +107,7 @@ public class DataIntegratorToolbar extends ClusterDisplayToolbar {
 		acceptListButton.setEnabled(active);
 
 		if(project != null)
-			deleteDataSetButton.setEnabled(project.getActiveIntegratedFeatureSet() != null);
+			deleteDataSetButton.setEnabled(project.getActiveDataIntegrationSet() != null);
 	}
 
 	@Override
@@ -119,13 +119,14 @@ public class DataIntegratorToolbar extends ClusterDisplayToolbar {
 
 		if(project != null) {
 
-			activeSetcomboBox.setModel(new SortedComboBoxModel<MsFeatureClusterSet>(project.getIntergratedFeatureSets()));
+			activeSetcomboBox.setModel(new SortedComboBoxModel<MsFeatureClusterSet>(
+					project.getDataIntegrationSets()));
 			activeSetcomboBox.setEnabled(true);
 			collectIdentifiedCompoundDataButton.setEnabled(true);
 
 			if(integratedSet != null) {
 
-				if(project.getDataIntegrationClusterSets().contains(integratedSet)) {
+				if(project.getDataIntegrationSets().contains(integratedSet)) {
 					acceptListButton.setEnabled(false);
 				}
 				else {

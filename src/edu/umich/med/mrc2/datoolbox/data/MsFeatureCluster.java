@@ -79,8 +79,8 @@ public class MsFeatureCluster implements Serializable, XmlStorable {
 
 	public MsFeatureCluster() {
 
-		this.clusterId = 
-				DataPrefix.MS_FEATURE_CLUSTER.getName() + UUID.randomUUID().toString();
+		this.clusterId = DataPrefix.MS_FEATURE_CLUSTER.getName() 
+				+ UUID.randomUUID().toString();
 		clusterFeatures = new TreeMap<DataPipeline, Collection<MsFeature>>();
 		featureRTStatistics = new TreeMap<DataPipeline, DescriptiveStatistics>();
 		featureMZStatistics = new TreeMap<DataPipeline, DescriptiveStatistics>();

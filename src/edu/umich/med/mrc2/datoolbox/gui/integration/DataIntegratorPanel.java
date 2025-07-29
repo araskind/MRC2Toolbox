@@ -28,7 +28,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map.Entry;
-import java.util.Optional;
 
 import javax.swing.DefaultListSelectionModel;
 import javax.swing.Icon;
@@ -39,6 +38,7 @@ import javax.swing.event.TreeSelectionEvent;
 
 import org.apache.commons.lang3.StringUtils;
 
+import edu.umich.med.mrc2.datoolbox.data.DataPipelineAlignmentResults;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureCluster;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureClusterSet;
@@ -48,6 +48,8 @@ import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignSubsetEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.FeatureSetEvent;
 import edu.umich.med.mrc2.datoolbox.gui.dereplication.ClusterDisplayPanel;
+import edu.umich.med.mrc2.datoolbox.gui.integration.dpalign.DataSetAlignmentManager;
+import edu.umich.med.mrc2.datoolbox.gui.integration.dpalign.DataSetAlignmentSetupDialog;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.main.PanelList;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicFeatureTable;
@@ -63,18 +65,22 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.integration.IdentifiedFeat
 
 public class DataIntegratorPanel extends ClusterDisplayPanel {
 
-	private DataIntegrationSetupDialog dataIntegrationSetupDialog;
-	private String dataSetName;
-	private MsFeatureClusterSet integratedSet;
-	private DockableDataIntegrationFeatureSelectionTable featureSelectionTable;
-	private DataSetAlignmentSetupDialog dataSetAlignmentSetupDialog;
-
 	private static final Icon componentIcon = GuiUtils.getIcon("createIntegration", 16);
 	private static final Icon collectIDDataIcon = GuiUtils.getIcon("createIntegration", 24);
 	private static final Icon deleteDataSetIcon = GuiUtils.getIcon("deleteIntegration", 24);
 	private static final Icon acceptListIcon = GuiUtils.getIcon("acceptList", 24);
 
-	private static final File layoutConfigFile = new File(MRC2ToolBoxCore.configDir + "DataIntegratorPanel.layout");
+	private static final File layoutConfigFile = 
+			new File(MRC2ToolBoxCore.configDir + "DataIntegratorPanel.layout");
+	
+	private DataIntegrationSetupDialog dataIntegrationSetupDialog;
+	private String dataSetName;
+	private MsFeatureClusterSet integratedSet;
+	private DataPipelineAlignmentResults alignmentResults;
+	
+	private DockableDataIntegrationFeatureSelectionTable featureSelectionTable;
+	private DataSetAlignmentSetupDialog dataSetAlignmentSetupDialog;
+	private DataSetAlignmentManager dataSetAlignmentManager;
 
 	public DataIntegratorPanel() {
 
@@ -190,8 +196,42 @@ public class DataIntegratorPanel extends ClusterDisplayPanel {
 			
 		if (command.equals(MainActionCommands.DATA_SET_ALIGNMENT_RUN_COMMAND.getName()))
 			alignDataSets();
+		
+		if (command.equals(MainActionCommands.SHOW_DATA_PIPELINE_ALIGNMENT_MANAGER_COMMAND.getName()))
+			showDataAlignmentResultsManager();
+		if (command.equals(MainActionCommands.DELETE_DATA_PIPELINE_ALIGNMENT_RESULTS_COMMAND.getName()))
+			deleteSelectedDataAlignmentResults();
+		
+		if (command.equals(MainActionCommands.LOAD_DATA_PIPELINE_ALIGNMENT_RESULTS_COMMAND.getName()))
+			loadSelectedDataAlignmentResults();
 	}
 	
+	private void deleteSelectedDataAlignmentResults() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private void showDataAlignmentResultsManager() {
+		// TODO Auto-generated method stub
+		if(currentExperiment.getDataPipelineAlignmentResults().isEmpty())
+			return;
+		
+		dataSetAlignmentManager =
+				new DataSetAlignmentManager(this,currentExperiment);
+		dataSetAlignmentManager.setLocationRelativeTo(this.getContentPane());
+		dataSetAlignmentManager.setVisible(true);		
+	}
+
+	private void loadSelectedDataAlignmentResults() {
+		
+		DataPipelineAlignmentResults results = 
+				dataSetAlignmentManager.getSelectedDataPipelineAlignmentResults();
+		if(results != null) {
+			loadDataPipelineAlignmentResults(results);		
+			dataSetAlignmentManager.dispose();
+		}
+	}
+
 	private void setupDataSetAlignment() {;
 
 		if(currentExperiment == null || activeDataPipeline == null)
@@ -263,7 +303,7 @@ public class DataIntegratorPanel extends ClusterDisplayPanel {
 
 		if (integratedSet != null) {
 
-			MRC2ToolBoxCore.getActiveMetabolomicsExperiment().deleteIntegratedFeatureClusterSet(integratedSet);
+			MRC2ToolBoxCore.getActiveMetabolomicsExperiment().deleteDataIntegrationSet(integratedSet);
 			integratedSet = null;
 			clearPanel();
 			//	TODO find new place for this functionality?
@@ -287,18 +327,14 @@ public class DataIntegratorPanel extends ClusterDisplayPanel {
 		if (dataSetName.isEmpty())
 			warnings.add("Please define a name for the dataset!");
 
-		Optional<MsFeatureClusterSet> nm = 
-				MRC2ToolBoxCore.getActiveMetabolomicsExperiment().
-				getDataIntegrationClusterSets().stream()
-				.filter(s -> s.getName().equalsIgnoreCase(dataSetName)).
-				findFirst();
+		MsFeatureClusterSet nm = MRC2ToolBoxCore.getActiveMetabolomicsExperiment().
+					getDataIntegrationSets().stream().
+					filter(s -> s.getName().equalsIgnoreCase(dataSetName)).
+					findFirst().orElse(null);
 
-		if (nm.isPresent()) {
-
-			if (!nm.get().equals(integratedSet))
-				warnings.add("Integrated set with name \"" + 
-						dataSetName + "\" alredy exists!");
-		} else
+		if (nm != null && !nm.equals(integratedSet))
+				warnings.add("Integrated set with name \"" + dataSetName + "\" alredy exists!");
+		else
 			integratedSet = new MsFeatureClusterSet(dataSetName);
 
 		if (!warnings.isEmpty()) {
@@ -333,7 +369,7 @@ public class DataIntegratorPanel extends ClusterDisplayPanel {
 			MessageDialog.showErrorMsg("No identified compounds found.", this.getContentPane());
 
 		integratedSet.setActive(true);
-		currentExperiment.addIntegratedFeatureClusterSet(integratedSet);
+		currentExperiment.addDataIntegrationSet(integratedSet);
 //		TODO find new place for this functionality?
 //		toolbar.updateGuiFromActiveSet(integratedSet);
 		// MessageDialogue.showInfoMsg(dataSetName + " set as integrated identified data
@@ -358,7 +394,15 @@ public class DataIntegratorPanel extends ClusterDisplayPanel {
 	}
 	
 	private void finalizeDataPipelineAlignmentTask(DataPipelineAlignmentTask task) {
-		loadFeatureClusters(task.getClusterList());
+		
+		currentExperiment.addDataPipelineAlignmentResult(task.getAlignmentResults());
+		loadDataPipelineAlignmentResults(task.getAlignmentResults());
+	}
+	
+	public void loadDataPipelineAlignmentResults(DataPipelineAlignmentResults results) {
+		
+		alignmentResults = results;
+		loadFeatureClusters(alignmentResults.getClusters());
 	}
 
 	private synchronized void finalizeIdentifiedFeatureIntegrationTask(IdentifiedFeatureIntegrationTask task) {
@@ -409,23 +453,24 @@ public class DataIntegratorPanel extends ClusterDisplayPanel {
 	@Override
 	public void switchDataPipeline(DataAnalysisProject project, DataPipeline newDataPipeline) {
 
-		clearPanel();
-		super.switchDataPipeline(project, newDataPipeline);
-		super.clearClusterDataPanel();
-		
+		//	super.switchDataPipeline(project, newDataPipeline);
+		currentExperiment = project;
+		activeDataPipeline = newDataPipeline;
+		if (currentExperiment == null) {
+			clearPanel();
+			return;
+		}
 //		TODO find new place for this functionality?
 //		toolbar.updateGuiFromProjectAndDataPipeline(currentProject, activeDataPipeline);
-		if (currentExperiment != null) {
-
-			integratedSet = currentExperiment.getActiveIntegratedFeatureSet();
-			if (integratedSet != null) {
-				loadFeatureClusters(integratedSet.getClusters());
-//				TODO find new place for this functionality?
-//				toolbar.updateGuiFromActiveSet(integratedSet);
-			} else {
-				clearPanel();
-			}
-		} 
+//		TODO find new place for this functionality?
+//		toolbar.updateGuiFromActiveSet(integratedSet);
+		
+		if (integratedSet != null) 			
+			loadFeatureClusters(integratedSet.getClusters());
+		else if(alignmentResults != null) 
+			loadFeatureClusters(alignmentResults.getClusters());
+		else
+			clearPanel();
 	}	
 
 	@Override

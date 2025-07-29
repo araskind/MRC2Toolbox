@@ -51,6 +51,8 @@ public class DataIntegrationPanelMenuBar extends CommonMenuBar {
 	
 	private static final Icon dataSetAlignmentIconSmall = GuiUtils.getIcon("alignment", 16);	
 	private static final Icon dataSetAlignmentIcon = GuiUtils.getIcon("alignment", 24);
+	private static final Icon deleteDataSetAlignmentIcon = GuiUtils.getIcon("deleteAlignment", 24);
+	private static final Icon dataSetAlignmentManagerIcon = GuiUtils.getIcon("alignmentManager", 32);
 
 	// Menus
 	private JMenu
@@ -66,7 +68,9 @@ public class DataIntegrationPanelMenuBar extends CommonMenuBar {
 	
 	// Alignment items
 	private JMenuItem
-		dataSetAlignmentSetupMenuItem;
+		dataSetAlignmentSetupMenuItem,
+		deleteDataSetAlignmentMenuItem,
+		dataSetAlignmentManagerMenuItem;
 	
 	// Search items
 	private JMenuItem
@@ -100,7 +104,16 @@ public class DataIntegrationPanelMenuBar extends CommonMenuBar {
 		alignmentMenu.setIcon(dataSetAlignmentIconSmall);
 		dataSetAlignmentSetupMenuItem = addItem(alignmentMenu, 
 				MainActionCommands.DATA_SET_ALIGNMENT_SETUP_COMMAND, 
-				dataSetAlignmentIcon);
+				dataSetAlignmentIcon);		
+		deleteDataSetAlignmentMenuItem = addItem(alignmentMenu, 
+				MainActionCommands.DELETE_DATA_PIPELINE_ALIGNMENT_RESULTS_COMMAND, 
+				deleteDataSetAlignmentIcon);
+		
+		alignmentMenu.addSeparator();
+		
+		dataSetAlignmentManagerMenuItem = addItem(alignmentMenu, 
+				MainActionCommands.SHOW_DATA_PIPELINE_ALIGNMENT_MANAGER_COMMAND, 
+				dataSetAlignmentManagerIcon);
 		
 		add(alignmentMenu);
 

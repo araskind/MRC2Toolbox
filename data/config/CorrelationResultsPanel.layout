@@ -100,7 +100,7 @@
 									<content delegate="SplitDockStationFactory">
 										<fullscreen-action>false</fullscreen-action>
 										<node nodeId="1600213795362" orientation="HORIZONTAL" divider="0.2">
-											<leaf id="2" nodeId="1600213795364">
+											<leaf id="5" nodeId="1600213795364">
 												<placeholders>
 													<placeholder>dock.single.CorrelationResultsPanelDockableClusterTree</placeholder>
 												</placeholders>
@@ -138,7 +138,7 @@
 															</placeholders>
 														</leaf>
 													</node>
-													<leaf id="1" nodeId="1600213795375">
+													<leaf id="2" nodeId="1600213795375">
 														<placeholders>
 															<placeholder>dock.single.ClusterDisplayPanelDockableIdentificationResultsTable</placeholder>
 														</placeholders>
@@ -177,7 +177,7 @@
 															</entry>
 														</placeholder-map>
 													</leaf>
-													<leaf id="5" nodeId="1600213795391">
+													<leaf id="1" nodeId="1600213795391">
 														<placeholders>
 															<placeholder>dock.single.ClusterDisplayPanelDockableMsTableMS1</placeholder>
 															<placeholder>dock.single.ClusterDisplayPanelAnnotations</placeholder>
@@ -281,20 +281,93 @@
 									</children>
 								</child>
 								<child>
+									<layout factory="delegate_StackDockStationFactory">
+										<selected>2</selected>
+										<placeholders>
+											<version>0</version>
+											<format>dock.PlaceholderList</format>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.ClusterDisplayPanelDockableSpectumPlot</placeholder>
+												</key>
+												<item key="convert" type="b">true</item>
+												<item key="convert-keys" type="a">
+													<item type="s">index</item>
+													<item type="s">id</item>
+													<item type="s">placeholder</item>
+												</item>
+												<item key="dock.index" type="i">0</item>
+												<item key="dock.id" type="i">0</item>
+												<item key="dock.placeholder" type="s">dock.single.ClusterDisplayPanelDockableSpectumPlot</item>
+											</entry>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.ClusterDisplayPanelDockableMsTableMS1</placeholder>
+												</key>
+												<item key="convert" type="b">true</item>
+												<item key="convert-keys" type="a">
+													<item type="s">index</item>
+													<item type="s">id</item>
+													<item type="s">placeholder</item>
+												</item>
+												<item key="dock.index" type="i">1</item>
+												<item key="dock.id" type="i">1</item>
+												<item key="dock.placeholder" type="s">dock.single.ClusterDisplayPanelDockableMsTableMS1</item>
+											</entry>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.ClusterDisplayPanelAnnotations</placeholder>
+												</key>
+												<item key="convert" type="b">true</item>
+												<item key="convert-keys" type="a">
+													<item type="s">index</item>
+													<item type="s">id</item>
+													<item type="s">placeholder</item>
+												</item>
+												<item key="dock.index" type="i">2</item>
+												<item key="dock.id" type="i">2</item>
+												<item key="dock.placeholder" type="s">dock.single.ClusterDisplayPanelAnnotations</item>
+											</entry>
+										</placeholders>
+									</layout>
+									<children ignore="false">
+										<child>
+											<layout factory="predefined" placeholder="dock.single.ClusterDisplayPanelDockableSpectumPlot">
+												<replacement id="dockablesingle ClusterDisplayPanelDockableSpectumPlot"/>
+												<delegate id="delegate_ccontrol backup factory id">
+													<id>ClusterDisplayPanelDockableSpectumPlot</id>
+													<area/>
+												</delegate>
+											</layout>
+											<children ignore="false"/>
+										</child>
+										<child>
+											<layout factory="predefined" placeholder="dock.single.ClusterDisplayPanelDockableMsTableMS1">
+												<replacement id="dockablesingle ClusterDisplayPanelDockableMsTableMS1"/>
+												<delegate id="delegate_ccontrol backup factory id">
+													<id>ClusterDisplayPanelDockableMsTableMS1</id>
+													<area/>
+												</delegate>
+											</layout>
+											<children ignore="false"/>
+										</child>
+										<child>
+											<layout factory="predefined" placeholder="dock.single.ClusterDisplayPanelAnnotations">
+												<replacement id="dockablesingle ClusterDisplayPanelAnnotations"/>
+												<delegate id="delegate_ccontrol backup factory id">
+													<id>ClusterDisplayPanelAnnotations</id>
+													<area/>
+												</delegate>
+											</layout>
+											<children ignore="false"/>
+										</child>
+									</children>
+								</child>
+								<child>
 									<layout factory="predefined" placeholder="dock.single.ClusterDisplayPanelDockableIdentificationResultsTable">
 										<replacement id="dockablesingle ClusterDisplayPanelDockableIdentificationResultsTable"/>
 										<delegate id="delegate_ccontrol backup factory id">
 											<id>ClusterDisplayPanelDockableIdentificationResultsTable</id>
-											<area/>
-										</delegate>
-									</layout>
-									<children ignore="false"/>
-								</child>
-								<child>
-									<layout factory="predefined" placeholder="dock.single.CorrelationResultsPanelDockableClusterTree">
-										<replacement id="dockablesingle CorrelationResultsPanelDockableClusterTree"/>
-										<delegate id="delegate_ccontrol backup factory id">
-											<id>CorrelationResultsPanelDockableClusterTree</id>
 											<area/>
 										</delegate>
 									</layout>
@@ -394,87 +467,14 @@
 									</children>
 								</child>
 								<child>
-									<layout factory="delegate_StackDockStationFactory">
-										<selected>2</selected>
-										<placeholders>
-											<version>0</version>
-											<format>dock.PlaceholderList</format>
-											<entry>
-												<key shared="false">
-													<placeholder>dock.single.ClusterDisplayPanelDockableSpectumPlot</placeholder>
-												</key>
-												<item key="convert" type="b">true</item>
-												<item key="convert-keys" type="a">
-													<item type="s">index</item>
-													<item type="s">id</item>
-													<item type="s">placeholder</item>
-												</item>
-												<item key="dock.index" type="i">0</item>
-												<item key="dock.id" type="i">0</item>
-												<item key="dock.placeholder" type="s">dock.single.ClusterDisplayPanelDockableSpectumPlot</item>
-											</entry>
-											<entry>
-												<key shared="false">
-													<placeholder>dock.single.ClusterDisplayPanelDockableMsTableMS1</placeholder>
-												</key>
-												<item key="convert" type="b">true</item>
-												<item key="convert-keys" type="a">
-													<item type="s">index</item>
-													<item type="s">id</item>
-													<item type="s">placeholder</item>
-												</item>
-												<item key="dock.index" type="i">1</item>
-												<item key="dock.id" type="i">1</item>
-												<item key="dock.placeholder" type="s">dock.single.ClusterDisplayPanelDockableMsTableMS1</item>
-											</entry>
-											<entry>
-												<key shared="false">
-													<placeholder>dock.single.ClusterDisplayPanelAnnotations</placeholder>
-												</key>
-												<item key="convert" type="b">true</item>
-												<item key="convert-keys" type="a">
-													<item type="s">index</item>
-													<item type="s">id</item>
-													<item type="s">placeholder</item>
-												</item>
-												<item key="dock.index" type="i">2</item>
-												<item key="dock.id" type="i">2</item>
-												<item key="dock.placeholder" type="s">dock.single.ClusterDisplayPanelAnnotations</item>
-											</entry>
-										</placeholders>
+									<layout factory="predefined" placeholder="dock.single.CorrelationResultsPanelDockableClusterTree">
+										<replacement id="dockablesingle CorrelationResultsPanelDockableClusterTree"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>CorrelationResultsPanelDockableClusterTree</id>
+											<area/>
+										</delegate>
 									</layout>
-									<children ignore="false">
-										<child>
-											<layout factory="predefined" placeholder="dock.single.ClusterDisplayPanelDockableSpectumPlot">
-												<replacement id="dockablesingle ClusterDisplayPanelDockableSpectumPlot"/>
-												<delegate id="delegate_ccontrol backup factory id">
-													<id>ClusterDisplayPanelDockableSpectumPlot</id>
-													<area/>
-												</delegate>
-											</layout>
-											<children ignore="false"/>
-										</child>
-										<child>
-											<layout factory="predefined" placeholder="dock.single.ClusterDisplayPanelDockableMsTableMS1">
-												<replacement id="dockablesingle ClusterDisplayPanelDockableMsTableMS1"/>
-												<delegate id="delegate_ccontrol backup factory id">
-													<id>ClusterDisplayPanelDockableMsTableMS1</id>
-													<area/>
-												</delegate>
-											</layout>
-											<children ignore="false"/>
-										</child>
-										<child>
-											<layout factory="predefined" placeholder="dock.single.ClusterDisplayPanelAnnotations">
-												<replacement id="dockablesingle ClusterDisplayPanelAnnotations"/>
-												<delegate id="delegate_ccontrol backup factory id">
-													<id>ClusterDisplayPanelAnnotations</id>
-													<area/>
-												</delegate>
-											</layout>
-											<children ignore="false"/>
-										</child>
-									</children>
+									<children ignore="false"/>
 								</child>
 							</children>
 						</root>

@@ -19,7 +19,7 @@
  *
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.gui.integration;
+package edu.umich.med.mrc2.datoolbox.gui.integration.dpalign;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -382,29 +382,45 @@ public class DataSetAlignmentSetupDialog extends JDialog implements ActionListen
 	@Override
 	public void valueChanged(ListSelectionEvent e) {
 
-		if(!e.getValueIsAdjusting()) {
-			DataPipeline pl = dataPipelineSelectionTable.getSelectedDataPipeline();
-			if(pl == null)
-				return;
-			
-			if(pl.getAcquisitionMethod().getSoftware() == null) {
-				DataAcquisitionMethod dbMethod = 
-						IDTDataCache.getAcquisitionMethodById(pl.getAcquisitionMethod().getId());
-				if(dbMethod != null && dbMethod.getSoftware() != null)
-					pl.getAcquisitionMethod().setSoftware(dbMethod.getSoftware());
-			}
-			if(pl.getDataExtractionMethod().getSoftware() == null) {
-				DataExtractionMethod dbMethod = 
-						IDTDataCache.getDataExtractionMethodById(pl.getDataExtractionMethod().getId());
-				if(dbMethod != null && dbMethod.getSoftware() != null)
-					pl.getDataExtractionMethod().setSoftware(dbMethod.getSoftware());
-			}
-			acqMethodNameLabel.setText(pl.getAcquisitionMethod().getName() + 
-					" (" + pl.getAcquisitionMethod().getId() + ")");			
-			daMethodNameLabel.setText(pl.getDataExtractionMethod().getName() + 
-					" (" + pl.getDataExtractionMethod().getId() + ")");			
-			daSoftwareNameLabel.setText(
-					pl.getDataExtractionMethod().getSoftware().getName());
-		}	
+		if(!e.getValueIsAdjusting())
+			showDataForSelectedPipeline();		
+	}
+	
+	private void showDataForSelectedPipeline() {
+		
+		DataPipeline pl = dataPipelineSelectionTable.getSelectedDataPipeline();
+		if(pl == null)
+			return;
+		
+		if(pl.getAcquisitionMethod().getSoftware() == null) {
+			DataAcquisitionMethod dbMethod = 
+					IDTDataCache.getAcquisitionMethodById(pl.getAcquisitionMethod().getId());
+			if(dbMethod != null && dbMethod.getSoftware() != null)
+				pl.getAcquisitionMethod().setSoftware(dbMethod.getSoftware());
+		}
+		if(pl.getDataExtractionMethod().getSoftware() == null) {
+			DataExtractionMethod dbMethod = 
+					IDTDataCache.getDataExtractionMethodById(pl.getDataExtractionMethod().getId());
+			if(dbMethod != null && dbMethod.getSoftware() != null)
+				pl.getDataExtractionMethod().setSoftware(dbMethod.getSoftware());
+		}
+		acqMethodNameLabel.setText(pl.getAcquisitionMethod().getName() + 
+				" (" + pl.getAcquisitionMethod().getId() + ")");			
+		daMethodNameLabel.setText(pl.getDataExtractionMethod().getName() + 
+				" (" + pl.getDataExtractionMethod().getId() + ")");			
+		daSoftwareNameLabel.setText(
+				pl.getDataExtractionMethod().getSoftware().getName());
 	}
 }
+
+
+
+
+
+
+
+
+
+
+
+

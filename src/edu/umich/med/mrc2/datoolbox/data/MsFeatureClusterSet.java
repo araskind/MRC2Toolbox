@@ -23,31 +23,36 @@ package edu.umich.med.mrc2.datoolbox.data;
 
 import java.io.Serializable;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.UUID;
+
+import org.jdom2.Element;
 
 import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureClusterComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
+import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.enums.ParameterSetStatus;
+import edu.umich.med.mrc2.datoolbox.project.store.XmlStorable;
 
-public class MsFeatureClusterSet implements Comparable<MsFeatureClusterSet>, Serializable, Renamable{
-
-	/**
-	 *
-	 */
+public class MsFeatureClusterSet implements 
+		Comparable<MsFeatureClusterSet>, Serializable, Renamable, XmlStorable{
+	
 	private static final long serialVersionUID = 9196484589262614732L;
 
-	private Set<MsFeatureCluster> clusters;
-	private String clusterSetName;
-	private boolean active;
-	private boolean locked;
-	private ParameterSetStatus status;
-	private boolean nameIsValid;
+	protected String id;
+	protected Set<MsFeatureCluster> clusters;
+	protected String clusterSetName;
+	protected boolean active;
+	protected boolean locked;
+	protected ParameterSetStatus status;
+	protected boolean nameIsValid;
 
 	public MsFeatureClusterSet(String clusterSetName) {
 
 		super();
+		this.id = DataPrefix.MS_FEATURE_CLUSTER_SET.getName() 
+				+ UUID.randomUUID().toString();
 		this.clusterSetName = clusterSetName;
 		active = false;
 		clusters = new TreeSet<MsFeatureCluster>(
@@ -59,10 +64,7 @@ public class MsFeatureClusterSet implements Comparable<MsFeatureClusterSet>, Ser
 			String clusterSetName, 
 			Collection<MsFeatureCluster> clustersToAdd) {
 
-		super();
-		this.clusterSetName = clusterSetName;
-		active = false;
-		clusters = new HashSet<MsFeatureCluster>();
+		this(clusterSetName);
 		clusters.addAll(clustersToAdd);
 		status = ParameterSetStatus.CREATED;
 	}
@@ -112,14 +114,18 @@ public class MsFeatureClusterSet implements Comparable<MsFeatureClusterSet>, Ser
 	public void setName(String name) {
 		clusterSetName = name;
 	}
+	
 	@Override
 	public String getName() {
 		return clusterSetName;
 	}
 
+	public String getId() {
+		return id;
+	}
+	
 	@Override
 	public String toString() {
-
 		return clusterSetName;
 	}
 
@@ -160,4 +166,55 @@ public class MsFeatureClusterSet implements Comparable<MsFeatureClusterSet>, Ser
 	public Set<MsFeatureCluster> getClusters() {
 		return clusters;
 	}
+	
+    @Override
+    public boolean equals(Object obj) {
+
+		if (obj == this)
+			return true;
+
+        if (obj == null)
+            return false;
+
+        if (!MsFeatureClusterSet.class.isAssignableFrom(obj.getClass()))
+            return false;
+
+        final MsFeatureClusterSet other = (MsFeatureClusterSet) obj;
+
+        if ((this.id == null) ? (other.getId() != null) : !this.id.equals(other.getId()))
+            return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+
+        int hash = 3;
+        hash = 53 * hash + (this.id != null ? this.id.hashCode() : 0);
+        return hash;
+    }
+
+	@Override
+	public Element getXmlElement() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	public MsFeatureClusterSet(Element msFeatureClusterSetElement) {
+		// TODO Auto-generated method stub
+	}
 }
+
+
+
+
+
+
+
+
+
+
+
+
+

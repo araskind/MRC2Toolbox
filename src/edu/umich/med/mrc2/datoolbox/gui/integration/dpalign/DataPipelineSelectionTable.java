@@ -19,7 +19,7 @@
  *  
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.gui.integration;
+package edu.umich.med.mrc2.datoolbox.gui.integration.dpalign;
 
 import java.util.ArrayList;
 import java.util.Collection;

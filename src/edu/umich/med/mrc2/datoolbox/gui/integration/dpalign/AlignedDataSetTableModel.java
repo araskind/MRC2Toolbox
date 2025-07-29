@@ -19,53 +19,42 @@
  *  
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.gui.integration;
+package edu.umich.med.mrc2.datoolbox.gui.integration.dpalign;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
+import edu.umich.med.mrc2.datoolbox.data.DataPipelineAlignmentResults;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTableModel;
 import edu.umich.med.mrc2.datoolbox.gui.tables.ColumnContext;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 
-public class DataPipelineSelectionTableModel extends BasicTableModel {
+public class AlignedDataSetTableModel extends BasicTableModel {
 
-	/**
-	 *
-	 */
 	private static final long serialVersionUID = 8757581409205015995L;
 
-	public static final String SELECTED_COLUMN = "Selected";
-	public static final String DATA_PIPELINE_COLUMN = "Data pipeline";
+	public static final String DATA_SET_ALIGNMENT_COLUMN = "Aligned data set";
 
-	public DataPipelineSelectionTableModel() {
+	public AlignedDataSetTableModel() {
 		super();
 		columnArray = new ColumnContext[] {
-			new ColumnContext(SELECTED_COLUMN, SELECTED_COLUMN, Boolean.class, true),
-			new ColumnContext(DATA_PIPELINE_COLUMN, DATA_PIPELINE_COLUMN, DataPipeline.class, false),
+			new ColumnContext(DATA_SET_ALIGNMENT_COLUMN, DATA_SET_ALIGNMENT_COLUMN, DataPipeline.class, false),
 		};
 	}
 
 	public void setTableModelFromExperiment(DataAnalysisProject currentProject) {
 		
 		if(currentProject == null 
-				|| currentProject.getDataPipelines().isEmpty()) {
+				|| currentProject.getDataPipelineAlignmentResults().isEmpty()) {
 			setRowCount(0);
 			return;
 		}
-		setTableModelFromDataPipelineCollection(currentProject.getDataPipelines());
-	}
-	
-	public void setTableModelFromDataPipelineCollection(Collection<DataPipeline>pipelines) {
-		
 		setRowCount(0);
 		List<Object[]>rowData = new ArrayList<Object[]>();
-		for (DataPipeline dp : pipelines) {
+		for (DataPipelineAlignmentResults dp : currentProject.getDataPipelineAlignmentResults()) {
 
 			Object[] obj = {
-					true,
 					dp
 				};
 			rowData.add(obj);

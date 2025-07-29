@@ -40,6 +40,7 @@ import org.ujmp.core.calculation.Calculation.Ret;
 import edu.umich.med.mrc2.datoolbox.data.Assay;
 import edu.umich.med.mrc2.datoolbox.data.CompoundLibrary;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
+import edu.umich.med.mrc2.datoolbox.data.DataPipelineAlignmentResults;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesign;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignLevel;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignSubset;
@@ -88,6 +89,7 @@ public class DataAnalysisProject extends Project {
 	protected TreeMap<DataAcquisitionMethod, Set<DataFile>> dataFileMap;
 	protected TreeMap<DataAcquisitionMethod, Worklist> worklistMap;
 	protected Set<MsFeatureClusterSet>dataIntegrationSets;
+	protected Set<DataPipelineAlignmentResults>dataPipelineAlignments;
 	
 	public DataAnalysisProject(
 			String projectName, 
@@ -121,6 +123,7 @@ public class DataAnalysisProject extends Project {
 		dataPipelines = new TreeSet<DataPipeline>();				
 		featureSetMap = new TreeMap<DataPipeline, Set<MsFeatureSet>>();
 		dataIntegrationSets = new TreeSet<MsFeatureClusterSet>();
+		dataPipelineAlignments = new TreeSet<DataPipelineAlignmentResults>();
 		metaDataMap = new TreeMap<DataPipeline, Matrix[]>();
 		activeDataPipeline = null;
 		
@@ -732,14 +735,6 @@ public class DataAnalysisProject extends Project {
 //		}
 	}
 
-	public Set<MsFeatureClusterSet> getDataIntegrationClusterSets() {
-
-		if(dataIntegrationSets == null)
-			dataIntegrationSets = new TreeSet<MsFeatureClusterSet>();
-
-		return dataIntegrationSets;
-	}
-
 	public boolean allDataFilesForAcquisitionMethodEnabled(DataAcquisitionMethod method) {
 		
 		return experimentDesign.getSamples().stream().
@@ -832,36 +827,84 @@ public class DataAnalysisProject extends Project {
 				mapToInt(f -> f.getBatchNumber()).distinct().sorted().toArray();
 	}
 
-	public void addIntegratedFeatureClusterSet(MsFeatureClusterSet newSet) {
 
+	public Set<MsFeatureClusterSet>getDataIntegrationSets(){
+		
+		if(dataIntegrationSets == null)
+			dataIntegrationSets = new TreeSet<MsFeatureClusterSet>();
+
+		return dataIntegrationSets;
+	}
+	
+	public void addDataIntegrationSet(MsFeatureClusterSet newSet) {
+
+		getDataIntegrationSets();
 		if(newSet.isActive())
 			dataIntegrationSets.stream().forEach(s -> s.setActive(false));
 
 		dataIntegrationSets.add(newSet);
 	}
 
-	public void deleteIntegratedFeatureClusterSet(MsFeatureClusterSet theSet) {
+	public void deleteDataIntegrationSet(MsFeatureClusterSet theSet) {
 
+		getDataIntegrationSets();
 		dataIntegrationSets.remove(theSet);
 
 		if(theSet.isActive() && !dataIntegrationSets.isEmpty())
 				dataIntegrationSets.iterator().next().setActive(true);		
 	}
 
-	public Set<MsFeatureClusterSet>getIntergratedFeatureSets(){
-		return dataIntegrationSets;
+	public MsFeatureClusterSet getActiveDataIntegrationSet() {
+
+		return getDataIntegrationSets().stream().
+				filter(s -> s.isActive()).
+				findFirst().orElse(null);
+	}
+	
+	public Set<DataPipelineAlignmentResults>getDataPipelineAlignmentResults(){
+		
+		if(dataPipelineAlignments == null)
+			dataPipelineAlignments = new TreeSet<DataPipelineAlignmentResults>();
+
+		return dataPipelineAlignments;
 	}
 
-	public MsFeatureClusterSet getActiveIntegratedFeatureSet() {
+	public void addDataPipelineAlignmentResult(DataPipelineAlignmentResults newSet) {
 
-		return dataIntegrationSets.stream().
+		getDataPipelineAlignmentResults();
+		if(newSet.isActive())
+			dataPipelineAlignments.stream().forEach(s -> s.setActive(false));
+
+		dataPipelineAlignments.add(newSet);
+	}
+
+	public void deleteDataPipelineAlignmentResult(DataPipelineAlignmentResults theSet) {
+
+		getDataPipelineAlignmentResults();
+		dataPipelineAlignments.remove(theSet);
+
+		if(theSet.isActive() && !dataPipelineAlignments.isEmpty())
+				dataPipelineAlignments.iterator().next().setActive(true);		
+	}
+
+	public DataPipelineAlignmentResults getActiveDataPipelineAlignmentResult() {
+
+		return getDataPipelineAlignmentResults().stream().
 				filter(s -> s.isActive()).
 				findFirst().orElse(null);
 	}
 
-	public void setActiveIntegratedFeatureSet(MsFeatureClusterSet activeSet) {
+	public void setActiveDataPipelineAlignmentResult(DataPipelineAlignmentResults activeSet) {
 
-		dataIntegrationSets.stream().forEach(s -> s.setActive(false));
+		getDataPipelineAlignmentResults().stream().forEach(s -> s.setActive(false));
+		activeSet.setActive(true);
+		if(!dataPipelineAlignments.contains(activeSet))
+			dataPipelineAlignments.add(activeSet);
+	}
+
+	public void setActiveDataIntegrationSet(MsFeatureClusterSet activeSet) {
+
+		getDataIntegrationSets().stream().forEach(s -> s.setActive(false));
 		activeSet.setActive(true);
 		if(!dataIntegrationSets.contains(activeSet))
 			dataIntegrationSets.add(activeSet);

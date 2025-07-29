@@ -78,8 +78,12 @@ public class MsFeatureClusterComparator extends ObjectCompatrator<MsFeatureClust
 				return -result;
 
 		case pimaryId:
-			result = c1.getPrimaryIdentity().getCompoundName().compareTo(c2.getPrimaryIdentity().getCompoundName());
-
+			result = c1.toString().compareTo(c2.toString());
+			if(c1.getPrimaryIdentity().getCompoundName() != null
+					&& c2.getPrimaryIdentity().getCompoundName() != null) {
+				result = c1.getPrimaryIdentity().getCompoundName().compareTo(
+						c2.getPrimaryIdentity().getCompoundName());
+			}
 			if (direction == SortDirection.ASC)
 				return result;
 			else

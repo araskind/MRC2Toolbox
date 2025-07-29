@@ -414,6 +414,9 @@ public enum MainActionCommands {
 	ACCEPT_CLEAN_ID_LIST_COMMAND("Accept integrated list of identified compounds"),
 	DATA_SET_ALIGNMENT_SETUP_COMMAND("Setup data set alignment"),
 	DATA_SET_ALIGNMENT_RUN_COMMAND("Align data sets"),
+	SHOW_DATA_PIPELINE_ALIGNMENT_MANAGER_COMMAND("Show data alignment manager"),
+	LOAD_DATA_PIPELINE_ALIGNMENT_RESULTS_COMMAND("Load data alignment results"),
+	DELETE_DATA_PIPELINE_ALIGNMENT_RESULTS_COMMAND("Delete data alignment results"),
 
 	// Sorting commands
 	SORT_BY_AREA_COMMAND("Sort by area (high to low)"),
@@ -1433,6 +1436,7 @@ public enum MainActionCommands {
 		
 	SHOW_ADDUCT_SELECTOR("Show adduct selector"),
 	SELECT_ADDUCTS("Select adducts"),
+	
 	//	Debug 
 	GET_DATA_MATRIX_FOR_FEATURE_SET_AND_DESIGN("Get matrix for feature subset"),
 	;

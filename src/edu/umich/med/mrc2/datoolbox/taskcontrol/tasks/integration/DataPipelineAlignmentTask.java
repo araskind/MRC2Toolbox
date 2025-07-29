@@ -21,6 +21,7 @@
 
 package edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.integration;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -33,6 +34,8 @@ import java.util.stream.Collectors;
 
 import edu.umich.med.mrc2.datoolbox.data.Adduct;
 import edu.umich.med.mrc2.datoolbox.data.CompoundLibrary;
+import edu.umich.med.mrc2.datoolbox.data.DataPipelineAlignmentParametersObject;
+import edu.umich.med.mrc2.datoolbox.data.DataPipelineAlignmentResults;
 import edu.umich.med.mrc2.datoolbox.data.LibraryMsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureCluster;
@@ -49,7 +52,6 @@ import edu.umich.med.mrc2.datoolbox.utils.Range;
 public class DataPipelineAlignmentTask extends AbstractTask {
 
 	private DataAnalysisProject currentExperiment;
-	private Collection<DataPipeline>selectedPipelines;
 	private double massWindow;
 	private MassErrorType massErrorType;
 	private double retentionWindow;
@@ -58,6 +60,9 @@ public class DataPipelineAlignmentTask extends AbstractTask {
 	private DataPipeline referencePipeline;
 	private CompoundLibrary queryLib;
 	private DataPipeline queryPipeline;
+	private Collection<LibraryMsFeature>unmatchedReferenceFeatures;
+	private DataPipelineAlignmentParametersObject alignmentSettings;
+	private DataPipelineAlignmentResults alignmentResults;
 		
 	public DataPipelineAlignmentTask(
 			DataAnalysisProject currentExperiment,
@@ -73,6 +78,13 @@ public class DataPipelineAlignmentTask extends AbstractTask {
 		this.retentionWindow = retentionWindow;
 		clusterList = new HashSet<MsFeatureCluster>();
 		setQueryAndReference(pipelineOne,pipelineTwo);
+		
+		alignmentSettings = new DataPipelineAlignmentParametersObject(
+				referencePipeline, 
+				queryPipeline,
+				massWindow, 
+				massErrorType, 
+				retentionWindow);
 	}
 	
 	private void setQueryAndReference(
@@ -135,7 +147,7 @@ public class DataPipelineAlignmentTask extends AbstractTask {
 		taskDescription = "Matching the features from selected data pipelines";
 		total = referenceLib.getFeatureCount();
 		processed = 0;
-
+		unmatchedReferenceFeatures = new ArrayList<LibraryMsFeature>();
 		for(LibraryMsFeature refFeature : referenceLib.getFeatures()) {
 			
 			Set<LibraryMsFeature>matches = findMatchingFeaturesInQueryLibrary(refFeature);
@@ -146,9 +158,16 @@ public class DataPipelineAlignmentTask extends AbstractTask {
 					newCluster.addFeature(match, queryPipeline);
 				
 				clusterList.add(newCluster);
-			}	
+			}
+			else {
+				unmatchedReferenceFeatures.add(refFeature);
+			}
 			processed++;
 		}	
+		alignmentResults = new DataPipelineAlignmentResults(
+				alignmentSettings,
+				clusterList,
+				unmatchedReferenceFeatures);
 	}
 	
 	private Set<LibraryMsFeature> findMatchingFeaturesInQueryLibrary(LibraryMsFeature refFeature) {
@@ -210,8 +229,8 @@ public class DataPipelineAlignmentTask extends AbstractTask {
 				retentionWindow);
 	}
 
-	public Set<MsFeatureCluster> getClusterList() {
-		return clusterList;
+	public DataPipelineAlignmentResults getAlignmentResults() {
+		return alignmentResults;
 	}
 }
 
