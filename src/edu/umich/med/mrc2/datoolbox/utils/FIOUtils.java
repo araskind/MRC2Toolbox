@@ -323,6 +323,19 @@ public class FIOUtils {
 		
 		return contentsCleaned;
 	}
+	
+	public static void safeDeleteFile(Path pathToFile) {
+		
+		if(pathToFile.toFile().exists()) {
+			
+			try {
+				Files.delete(pathToFile);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}
 }
 
 

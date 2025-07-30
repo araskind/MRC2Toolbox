@@ -22,7 +22,6 @@
 package edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.project;
 
 import java.io.File;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -46,7 +45,6 @@ import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.enums.GlobalDefaults;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
-import edu.umich.med.mrc2.datoolbox.project.store.DataFileExtensions;
 import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
@@ -105,10 +103,7 @@ public class LoadPipelineDataTask extends AbstractTask {
 	private void loadAveragedFeatureLibraryForPipeline() {
 		
 		File avgLibXmlFile = 
-				Paths.get(project.getDataDirectory().getAbsolutePath(),
-					DataPrefix.AVERAGED_FEATURE_LIBRARY.getName() + pipeline.getSaveSafeName() 
-					+ "." + DataFileExtensions.AVERAGED_FEATURE_LIBRARY_EXTENSION.getExtension()).toFile();
-		
+				ProjectUtils.getAveragedFeaturesFilePath(project, pipeline).toFile();	
 		CompoundLibrary averagedFeatureLibrary = null;
 		if(avgLibXmlFile.exists() && avgLibXmlFile.canRead()) {
 			
@@ -182,9 +177,7 @@ public class LoadPipelineDataTask extends AbstractTask {
 		
 		taskDescription = "Reading features for " + pipeline.getName();
 		File featureXmlFile = 
-				Paths.get(project.getDataDirectory().getAbsolutePath(),
-				DataPrefix.MS_FEATURE.getName() + pipeline.getSaveSafeName() 
-				+ "." + DataFileExtensions.FEATURE_LIST_EXTENSION.getExtension()).toFile();
+				ProjectUtils.getFeaturesFilePath(project, pipeline).toFile();
 		if(!featureXmlFile.exists())
 			return;
 		

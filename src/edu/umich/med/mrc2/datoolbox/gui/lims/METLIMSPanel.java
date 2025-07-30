@@ -247,8 +247,7 @@ public class METLIMSPanel extends DockableMRC2ToolboxPanel {
 			return;
 		}
 		MRC2ToolBoxCore.getMainWindow().
-				showNewExperimentDialog(ProjectType.DATA_ANALYSIS, activeExperiment);
-		//	DATA_ANALYSIS_NEW_FORMAT
+				showNewExperimentDialog(ProjectType.DATA_ANALYSIS_NEW_FORMAT, activeExperiment);
 	}
 
 	public void refreshLimsData() {

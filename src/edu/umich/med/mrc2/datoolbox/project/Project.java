@@ -263,7 +263,7 @@ public abstract class Project implements Serializable, XmlStorable{
         return hash;
     } 
     
-	protected Project(Element projectElement) {
+	protected Project(Element projectElement, File experimentFile) {
 		
 		super();
 		id = projectElement.getAttributeValue(CommonFields.Id.name());
@@ -275,6 +275,7 @@ public abstract class Project implements Serializable, XmlStorable{
 		lastModified = ProjectStoreUtils.getDateFromAttribute(
 				projectElement, CommonFields.LastModified);		
 		createdBy = ProjectStoreUtils.getUserFromAttribute(projectElement);
+		this.experimentFile = experimentFile;
 	}
 	
 	@Override

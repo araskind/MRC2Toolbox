@@ -166,28 +166,26 @@ public class MainMenuBar extends CommonMenuBar {
 
 		if(BuildInformation.getStartupConfiguration().equals(StartupConfiguration.COMPLETE_TOOLBOX)) {
 
-			newExperimentMenuItem = addItem(experimentMenu, 
-					MainActionCommands.NEW_METABOLOMICS_EXPERIMENT_COMMAND, newExperimentIcon);
-			newExperimentMenuItem.setAccelerator(KeyStroke.getKeyStroke('N', MASK | InputEvent.SHIFT_DOWN_MASK));
-			
-			openExperimentMenuItem = addItem(experimentMenu, 
-					MainActionCommands.OPEN_METABOLOMICS_EXPERIMENT_COMMAND, openExperimentIcon);
-			openExperimentMenuItem.setAccelerator(KeyStroke.getKeyStroke('O', MASK | InputEvent.SHIFT_DOWN_MASK));
-			
-			experimentMenu.addSeparator();
-			
 			newXMLExperimentMenuItem = addItem(experimentMenu, 
 					MainActionCommands.NEW_METABOLOMICS_XML_EXPERIMENT_COMMAND, newXMLExperimentIcon);
-			newXMLExperimentMenuItem.setAccelerator(KeyStroke.getKeyStroke('M', MASK | InputEvent.SHIFT_DOWN_MASK));
-			newXMLExperimentMenuItem.setEnabled(false);
+			newXMLExperimentMenuItem.setAccelerator(KeyStroke.getKeyStroke('N', MASK | InputEvent.SHIFT_DOWN_MASK));
 			
 			openXMLExperimentMenuItem = addItem(experimentMenu, 
 					MainActionCommands.OPEN_METABOLOMICS_XML_EXPERIMENT_COMMAND, openXMLExperimentIcon);
-			//	openXMLExperimentMenuItem.setEnabled(false);
+			openXMLExperimentMenuItem.setAccelerator(KeyStroke.getKeyStroke('O', MASK | InputEvent.SHIFT_DOWN_MASK));
 			
 			saveAsXMLExperimentMenuItem = addItem(experimentMenu, 
 					MainActionCommands.SAVE_AS_XML_EXPERIMENT_COMMAND, saveXMLExperimentIcon);
-			//	saveAsXMLExperimentMenuItem.setEnabled(false);
+			
+			experimentMenu.addSeparator();
+			
+//			newExperimentMenuItem = addItem(experimentMenu, 
+//					MainActionCommands.NEW_METABOLOMICS_EXPERIMENT_COMMAND, newExperimentIcon);
+//			newExperimentMenuItem.setAccelerator(KeyStroke.getKeyStroke('N', MASK | InputEvent.SHIFT_DOWN_MASK));
+//			newExperimentMenuItem.setEnabled(false);
+			
+			openExperimentMenuItem = addItem(experimentMenu, 
+					MainActionCommands.OPEN_METABOLOMICS_EXPERIMENT_COMMAND, openExperimentIcon);
 			
 			experimentMenu.addSeparator();
 		}
@@ -210,13 +208,14 @@ public class MainMenuBar extends CommonMenuBar {
 		
 		experimentMenu.addSeparator();
 		
-		editIDExperimentMenuItem = addItem(experimentMenu, 
-				MainActionCommands.EDIT_RAW_DATA_EXPERIMENT_SETUP_COMMAND, editRdaExperimentIcon);		
-		editIDExperimentMenuItem.setEnabled(false);
+//		editIDExperimentMenuItem = addItem(experimentMenu, 
+//				MainActionCommands.EDIT_RAW_DATA_EXPERIMENT_SETUP_COMMAND, editRdaExperimentIcon);		
+//		editIDExperimentMenuItem.setEnabled(false);
 		
 		saveExperimentMenuItem = addItem(experimentMenu, 
 				MainActionCommands.SAVE_EXPERIMENT_COMMAND, saveExperimentIcon);
 		saveExperimentMenuItem.setAccelerator(KeyStroke.getKeyStroke('S', MASK));
+		saveExperimentMenuItem.setEnabled(false);
 		
 		saveExperimentAsMenuItem = addItem(experimentMenu, 
 				MainActionCommands.SAVE_EXPERIMENT_COPY_COMMAND, saveExperimentCopyIcon);

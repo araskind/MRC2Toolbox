@@ -22,7 +22,6 @@
 package edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.project;
 
 import java.io.File;
-import java.nio.file.Paths;
 import java.util.Set;
 
 import org.jdom2.Document;
@@ -31,11 +30,9 @@ import org.ujmp.core.Matrix;
 
 import edu.umich.med.mrc2.datoolbox.data.CompoundLibrary;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
-import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
-import edu.umich.med.mrc2.datoolbox.project.store.DataFileExtensions;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
@@ -83,9 +80,7 @@ public class SavePipelineDataTask extends AbstractTask {
 	private void saveFeaturesForPipeline() {
 		
 		File featureXmlFile = 
-				Paths.get(project.getDataDirectory().getAbsolutePath(),
-				DataPrefix.MS_FEATURE.getName() + pipeline.getSaveSafeName() 
-				+ "." + DataFileExtensions.FEATURE_LIST_EXTENSION.getExtension()).toFile();
+			ProjectUtils.getFeaturesFilePath(project,pipeline).toFile();
 		Document msFeatureDocument = new Document();
 		Element featureListElement =  
 				 new Element(CommonFields.FeatureList.name());
@@ -118,14 +113,13 @@ public class SavePipelineDataTask extends AbstractTask {
 		taskDescription = "Saving averaged feature library file for " + pipeline.getName();
 		total = 100;
 		processed = 80;
-		CompoundLibrary avgLib = project.getAveragedFeatureLibraryForDataPipeline(pipeline);
+		CompoundLibrary avgLib = 
+				project.getAveragedFeatureLibraryForDataPipeline(pipeline);
 		if(avgLib == null)
 			return;
 				
 		File avgLibXmlFile = 
-				Paths.get(project.getDataDirectory().getAbsolutePath(),
-				DataPrefix.AVERAGED_FEATURE_LIBRARY.getName() + pipeline.getSaveSafeName() 
-				+ "." + DataFileExtensions.AVERAGED_FEATURE_LIBRARY_EXTENSION.getExtension()).toFile();
+				ProjectUtils.getAveragedFeaturesFilePath(project,pipeline).toFile();
 		Document avgFeatureLibDocument = new Document();
 		Element cpdLibElement =  avgLib.getXmlElement();
 		avgFeatureLibDocument.setRootElement(cpdLibElement);

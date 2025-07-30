@@ -23,15 +23,12 @@ package edu.umich.med.mrc2.datoolbox.utils;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.RandomAccessFile;
-import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -53,7 +50,6 @@ import org.apache.commons.io.FilenameUtils;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.ujmp.core.Matrix;
-import org.ujmp.core.export.exporter.DefaultMatrixWriterCSVExporter;
 
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.io.xml.StaxDriver;
@@ -256,23 +252,9 @@ public class ProjectUtils {
 			DataPipeline dataPipeline,
 			boolean readTemporary) {
 		
-		String matrixFileName = 
-				currentExperiment.getFeatureMatrixFileNameForDataPipeline(dataPipeline);
-		if(matrixFileName == null)
-			matrixFileName = getNewFeatureMatrixFileNameForDataPipeline(dataPipeline);
-		
-		if(readTemporary)
-			matrixFileName = FilenameUtils.getBaseName(matrixFileName) 
-					+ tmpSuffix + "." + FilenameUtils.getExtension(matrixFileName);
-		
 		File featureMatrixFile = 
-				Paths.get(currentExperiment.getDataDirectory().getAbsolutePath(), 
-						matrixFileName).toFile();
-		
-		if(featureMatrixFile == null || !featureMatrixFile.exists())
-			featureMatrixFile = Paths.get(currentExperiment.getExperimentDirectory().getAbsolutePath(), 
-					matrixFileName).toFile();
-		
+				getFeatureMatrixFilePath(currentExperiment,dataPipeline, readTemporary).toFile();
+
 		if (!featureMatrixFile.exists())
 			return null;
 		
@@ -318,19 +300,9 @@ public class ProjectUtils {
 			boolean saveAsTemporary) {
 		
 		createDataDirectoryForProjectIfNotExists(currentExperiment);
-		
-		String featureMatrixFileName = 
-				getNewFeatureMatrixFileNameForDataPipeline(dataPipeline);
-		if(featureMatrixFileName == null || featureMatrixFileName.isEmpty()) 
-			return;
-		
-		if(saveAsTemporary)
-			featureMatrixFileName = FilenameUtils.getBaseName(featureMatrixFileName) 
-					+ tmpSuffix + "." + FilenameUtils.getExtension(featureMatrixFileName);
-		
+
 		File featureMatrixFile = 
-				Paths.get(currentExperiment.getDataDirectory().getAbsolutePath(), 
-				featureMatrixFileName).toFile();
+				getFeatureMatrixFilePath(currentExperiment, dataPipeline, saveAsTemporary).toFile();
 		try {
 			Matrix featureMatrix = 
 					Matrix.Factory.linkToArray(msFeatureMatrix.toObjectArray());
@@ -340,40 +312,16 @@ public class ProjectUtils {
 		}		
 	}
 	
-	public static void saveDataMatrixForPipelineAsTabSeparated(
-			DataAnalysisProject currentExperiment,
-			DataPipeline dataPipeline) {
-		
-		createDataDirectoryForProjectIfNotExists(currentExperiment);
-		
-		File dataMatrixFile = Paths.get(currentExperiment.getDataDirectory().getAbsolutePath(), 
-				currentExperiment.getDataMatrixFileNameForDataPipeline(dataPipeline)).toFile();
-		Matrix dataMatrix = Matrix.Factory
-				.linkToArray(currentExperiment.getDataMatrixForDataPipeline(dataPipeline).
-						toDoubleArray());
-		
-		try(final Writer writer = new BufferedWriter(new FileWriter(dataMatrixFile));) {
-
-			DefaultMatrixWriterCSVExporter matrixExporter = 
-					new DefaultMatrixWriterCSVExporter(dataMatrix, writer);
-			matrixExporter.asDenseCSV();
-
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-	
 	public static void saveDataMatrixForPipeline(
-			DataAnalysisProject currentExperiment,
-			DataPipeline dataPipeline) {
+			DataAnalysisProject project,
+			DataPipeline pipeline) {
 		
-		createDataDirectoryForProjectIfNotExists(currentExperiment);
+		createDataDirectoryForProjectIfNotExists(project);
 		
-		File dataMatrixFile = Paths.get(currentExperiment.getDataDirectory().getAbsolutePath(), 
-				getNewDataMatrixFileNameForDataPipeline(dataPipeline)).toFile();
+		File dataMatrixFile = getDataMatrixFilePath(project,pipeline,false).toFile();
 		try {
 			Matrix dataMatrix = Matrix.Factory
-					.linkToArray(currentExperiment.getDataMatrixForDataPipeline(dataPipeline).
+					.linkToArray(project.getDataMatrixForDataPipeline(pipeline).
 							toDoubleArray());
 			dataMatrix.save(dataMatrixFile);
 
@@ -381,24 +329,7 @@ public class ProjectUtils {
 			e.printStackTrace();
 		}
 	}
-	
-	public static String getNewDataMatrixFileNameForDataPipeline(DataPipeline dataPipeline) {
-		
-		String matrixFileName = DataPrefix.DATA_MATRIX.getName() 
-				+ dataPipeline.getSaveSafeName() +  "." 
-				+ DataFileExtensions.DATA_MATRIX_EXTENSION.getExtension();
-		
-		return matrixFileName;
-	}
-	
-	public static String getNewFeatureMatrixFileNameForDataPipeline(DataPipeline dataPipeline) {
-		
-		String matrixFileName = DataPrefix.FEATURE_MATRIX.getName() 
-				+ dataPipeline.getSaveSafeName() +  "." 
-				+ DataFileExtensions.DATA_MATRIX_EXTENSION.getExtension();
-		
-		return matrixFileName;
-	}
+
 	
 	//	Will replace existing primary feature matrix file for 
 	//	pipeline with temporary if both files are present
@@ -408,33 +339,11 @@ public class ProjectUtils {
 		
 		createDataDirectoryForProjectIfNotExists(currentExperiment);
 		
-		String featureMatrixFileName = 
-				currentExperiment.getFeatureMatrixFileNameForDataPipeline(dataPipeline);
-		if(featureMatrixFileName == null) 
-			featureMatrixFileName = getNewDataMatrixFileNameForDataPipeline(dataPipeline);
-		
 		File featureMatrixFile = 
-				Paths.get(currentExperiment.getDataDirectory().getAbsolutePath(), 
-				featureMatrixFileName).toFile();
-		if(featureMatrixFile == null || !featureMatrixFile.exists())
-			featureMatrixFile = 
-				Paths.get(currentExperiment.getExperimentDirectory().getAbsolutePath(), 
-				featureMatrixFileName).toFile();
-		
-		if(!featureMatrixFile.exists())
-			return;
-		
-		String tmpFeatureMatrixFileName = FilenameUtils.getBaseName(featureMatrixFileName) 
-					+ tmpSuffix + "." + FilenameUtils.getExtension(featureMatrixFileName);		
-		
+				getFeatureMatrixFilePath(currentExperiment, dataPipeline, false).toFile();
 		File tmpFeatureMatrixFile = 
-				Paths.get(currentExperiment.getDataDirectory().getAbsolutePath(), 
-						tmpFeatureMatrixFileName).toFile();
-		if(tmpFeatureMatrixFile == null || !tmpFeatureMatrixFile.exists())
-			tmpFeatureMatrixFile = 
-				Paths.get(currentExperiment.getExperimentDirectory().getAbsolutePath(), 
-						tmpFeatureMatrixFileName).toFile();
-		
+				getFeatureMatrixFilePath(currentExperiment, dataPipeline, true).toFile();
+				
 		if(featureMatrixFile.exists() && tmpFeatureMatrixFile.exists()) {
 			try {
 				FIOUtils.replaceFile(tmpFeatureMatrixFile, featureMatrixFile);
@@ -450,27 +359,10 @@ public class ProjectUtils {
 			DataPipeline dataPipeline) {
 		
 		createDataDirectoryForProjectIfNotExists(currentExperiment);
+		Path tmpFeatureMatrixFilePath = 
+				getFeatureMatrixFilePath(currentExperiment, dataPipeline, true);
 		
-		String featureMatrixFileName = 
-				currentExperiment.getFeatureMatrixFileNameForDataPipeline(dataPipeline);
-		if(featureMatrixFileName == null) 
-			featureMatrixFileName = getNewDataMatrixFileNameForDataPipeline(dataPipeline);
-		
-		if(featureMatrixFileName == null) 
-			return;
-			
-		String tmpFeatureMatrixFileName = FilenameUtils.getBaseName(featureMatrixFileName) 
-					+ tmpSuffix + "." + FilenameUtils.getExtension(featureMatrixFileName);			
-		File tmpFeatureMatrixFile = 
-				Paths.get(currentExperiment.getDataDirectory().getAbsolutePath(), 
-						tmpFeatureMatrixFileName).toFile();		
-		if(tmpFeatureMatrixFile == null || !tmpFeatureMatrixFile.exists())
-			tmpFeatureMatrixFile = 
-				Paths.get(currentExperiment.getExperimentDirectory().getAbsolutePath(), 
-					tmpFeatureMatrixFileName).toFile();		
-		
-		if(tmpFeatureMatrixFile.exists())
-			tmpFeatureMatrixFile.delete();			
+		FIOUtils.safeDeleteFile(tmpFeatureMatrixFilePath);
 	}
 
 	public static void moveFeatureMatrixFileToNewDefaultLocation(
@@ -484,8 +376,7 @@ public class ProjectUtils {
 			return;
 		
 		Path featureMatrixFileNewLocation = 
-				Paths.get(project.getDataDirectory().getAbsolutePath(), 
-				getNewFeatureMatrixFileNameForDataPipeline(pipeline));
+				getFeatureMatrixFilePath(project, pipeline, false);
 		Path featureMatrixFileOldLocation = 
 				Paths.get(project.getExperimentDirectory().getAbsolutePath(), 
 				featureMatrixFileName);
@@ -524,8 +415,7 @@ public class ProjectUtils {
 			return;
 		
 		Path dataMatrixFileNewLocation = 
-				Paths.get(project.getDataDirectory().getAbsolutePath(), 
-				getNewDataMatrixFileNameForDataPipeline(pipeline));
+				getDataMatrixFilePath(project, pipeline, false);
 		Path dataMatrixFileOldLocation = 
 				Paths.get(project.getExperimentDirectory().getAbsolutePath(), 
 				dataMatrixFileName);
@@ -578,9 +468,7 @@ public class ProjectUtils {
 	public static void loadDataMatrixForPipeline(
 			DataAnalysisProject project, DataPipeline pipeline) {
 		
-		File dataMatrixFile = 
-				Paths.get(project.getDataDirectory().getAbsolutePath(), 
-						getNewDataMatrixFileNameForDataPipeline(pipeline)).toFile();
+		File dataMatrixFile = getDataMatrixFilePath(project,pipeline,false).toFile();
 		
 		//	TODO temp fix for current projects
 		if(dataMatrixFile == null || !dataMatrixFile.exists())
@@ -609,15 +497,7 @@ public class ProjectUtils {
 	public static Matrix loadDataMatrixForPipelineWitoutMetaData(
 			DataAnalysisProject project, DataPipeline pipeline) {
 		
-		File dataMatrixFile = 
-				Paths.get(project.getDataDirectory().getAbsolutePath(), 
-						getNewDataMatrixFileNameForDataPipeline(pipeline)).toFile();
-		
-		//	TODO temp fix for current projects
-		if(dataMatrixFile == null || !dataMatrixFile.exists())
-			dataMatrixFile = Paths.get(project.getExperimentDirectory().getAbsolutePath(), 
-					project.getDataMatrixFileNameForDataPipeline(pipeline)).toFile();
-
+		File dataMatrixFile = getDataMatrixFilePath(project,pipeline,false).toFile();
 		Matrix dataMatrix = null;
 		if (dataMatrixFile.exists()) {
 			try {
@@ -628,6 +508,59 @@ public class ProjectUtils {
 			}
 		}
 		return dataMatrix;
+	}
+
+	public static Path getFeaturesFilePath(
+			DataAnalysisProject project, 
+			DataPipeline pipeline) {
+		Path featureXmlFilePath = 
+				Paths.get(project.getDataDirectory().getAbsolutePath(),
+				DataPrefix.MS_FEATURE.getName() + pipeline.getSaveSafeName() 
+				+ "." + DataFileExtensions.FEATURE_LIST_EXTENSION.getExtension());
+		return featureXmlFilePath;
+	}
+	
+	public static Path getAveragedFeaturesFilePath(
+			DataAnalysisProject project, 
+			DataPipeline pipeline) {
+		Path featureXmlFilePath = 
+				Paths.get(project.getDataDirectory().getAbsolutePath(),
+				DataPrefix.AVERAGED_FEATURE_LIBRARY.getName() + pipeline.getSaveSafeName() 
+				+ "." + DataFileExtensions.AVERAGED_FEATURE_LIBRARY_EXTENSION.getExtension());
+		return featureXmlFilePath;
+	}
+	
+	public static Path getDataMatrixFilePath(
+			DataAnalysisProject project, 
+			DataPipeline pipeline,
+			boolean isTemporary) {
+		
+		String temporaryFlag = "";
+		if(isTemporary)
+			 temporaryFlag = tmpSuffix;
+		
+		Path dataMatrixFilePath = 
+				Paths.get(project.getDataDirectory().getAbsolutePath(),
+				DataPrefix.DATA_MATRIX.getName() + pipeline.getSaveSafeName() 
+				+ temporaryFlag + "." + DataFileExtensions.DATA_MATRIX_EXTENSION.getExtension());
+		return dataMatrixFilePath;
+	}
+	
+	public static Path getFeatureMatrixFilePath(
+			DataAnalysisProject project, 
+			DataPipeline pipeline,
+			boolean isTemporary) {
+		
+		String temporaryFlag = "";
+		if(isTemporary)
+			 temporaryFlag = tmpSuffix;
+		
+		Path featureMatrixFilePath = 
+				Paths.get(project.getDataDirectory().getAbsolutePath(), 
+				DataPrefix.FEATURE_MATRIX.getName() + pipeline.getSaveSafeName() 
+				+ temporaryFlag +  "." + DataFileExtensions.DATA_MATRIX_EXTENSION.getExtension());
+		
+		return featureMatrixFilePath;
 	}
 }
 

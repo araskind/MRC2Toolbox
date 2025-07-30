@@ -22,6 +22,7 @@
 package edu.umich.med.mrc2.datoolbox.project;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.HashSet;
@@ -60,6 +61,7 @@ import edu.umich.med.mrc2.datoolbox.gui.main.MainWindow;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.store.MetabolomicsProjectFields;
 import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
+import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
 import edu.umich.med.mrc2.datoolbox.utils.ProjectUtils;
 
 public class DataAnalysisProject extends Project {
@@ -165,7 +167,8 @@ public class DataAnalysisProject extends Project {
 		}		
 		dataPipelines.add(pipeline);
 		String matrixFileName = 
-				ProjectUtils.getNewDataMatrixFileNameForDataPipeline(pipeline);
+				ProjectUtils.getDataMatrixFilePath(this,pipeline,false).
+				getFileName().toString();
 		dataMatrixFileMap.put(pipeline, matrixFileName);
 		statsCalculatedMap.put(pipeline, false);
 		featureSetMap.put(pipeline, new TreeSet<MsFeatureSet>());
@@ -183,7 +186,8 @@ public class DataAnalysisProject extends Project {
 			featureMatrixMap = new TreeMap<DataPipeline, Matrix>();
 		
 		String matrixFileName = 
-				ProjectUtils.getNewFeatureMatrixFileNameForDataPipeline(pipeline);
+				ProjectUtils.getFeatureMatrixFilePath(this,pipeline,false).
+				getFileName().toString();
 		featureMatrixFileMap.put(pipeline, matrixFileName);
 		featureMatrixMap.put(pipeline, featureMatrix);
 	}
@@ -193,21 +197,21 @@ public class DataAnalysisProject extends Project {
 		// Remove all objects related to data pipeline
 		libraryMap.remove(pipeline);
 		averagedFeatureMap.remove(pipeline);
-		featureMap.remove(pipeline);		
+		featureMap.remove(pipeline);	
+		imputedDataMatrixMap.remove(pipeline);
 		corrMatrixMap.remove(pipeline);
 		duplicatesMap.remove(pipeline);
 		clusterMap.remove(pipeline);	
 		statsCalculatedMap.remove(pipeline);
-		corrMatrixMap.remove(pipeline);		
-
+		metaDataMap.remove(pipeline);
+		featureSetMap.remove(pipeline);
+		
+		
 		// Delete data matrix and storage file
 		dataMatrixMap.remove(pipeline);
-		File dataMatrixFile = Paths.get(getDataDirectory().getAbsolutePath(), 
-				dataMatrixFileMap.get(pipeline)).toFile();
-		if (dataMatrixFile.exists()) {
-			if(!dataMatrixFile.delete())
-				System.err.println("Unambel to delete data matrix for " + pipeline.getName());
-		}
+		Path dataMatrixFilePath = Paths.get(getDataDirectory().getAbsolutePath(), 
+						dataMatrixFileMap.get(pipeline));
+		FIOUtils.safeDeleteFile(dataMatrixFilePath);
 		dataMatrixFileMap.remove(pipeline);
 		
 		if(featureMatrixFileMap == null)
@@ -218,19 +222,18 @@ public class DataAnalysisProject extends Project {
 		
 		//	Delete feature matrix and storage file
 		featureMatrixMap.remove(pipeline);
-		File featureMatrixFile = Paths.get(getDataDirectory().getAbsolutePath(), 
-				featureMatrixFileMap.get(pipeline)).toFile();
-		if (featureMatrixFile.exists()) {
-			if(!featureMatrixFile.delete())
-				System.err.println("Unambel to delete feature matrix for " + pipeline.getName());
-		}
+		Path featureMatrixFilePath = Paths.get(getDataDirectory().getAbsolutePath(), 
+						featureMatrixFileMap.get(pipeline));
+		FIOUtils.safeDeleteFile(featureMatrixFilePath);
 		featureMatrixFileMap.remove(pipeline);
 		
 		//	Remove all data linked to acquisition method 
 		//	if it is not part of another data pipeline
 		DataAcquisitionMethod acqMethod = pipeline.getAcquisitionMethod();
-		DataPipeline anotherPipeline = dataPipelines.stream().filter(p -> !p.equals(pipeline)).
-				filter(p -> p.getAcquisitionMethod().equals(acqMethod)).findFirst().orElse(null);
+		DataPipeline anotherPipeline = 
+				dataPipelines.stream().filter(p -> !p.equals(pipeline)).
+				filter(p -> p.getAcquisitionMethod().equals(acqMethod)).
+				findFirst().orElse(null);
 		
 		if(anotherPipeline == null) {
 			
@@ -241,7 +244,15 @@ public class DataAnalysisProject extends Project {
 				forEach(s -> filesToRemove.stream().forEach(f -> s.removeDataFile(f)));
 
 			worklistMap.remove(acqMethod);
+			dataFileMap.remove(acqMethod);
 		}
+		//	Remove "Feature data" file
+		Path featureXmlFilePath = ProjectUtils.getFeaturesFilePath(this, pipeline);
+		FIOUtils.safeDeleteFile(featureXmlFilePath);
+		
+		//	Remove data integration and alignment sets if they include data for the pipeline
+		
+		
 		dataPipelines.remove(pipeline);
 		
 		// Load data for another method or clear GUI
@@ -405,17 +416,17 @@ public class DataAnalysisProject extends Project {
 	public String getFeatureMatrixFileNameForDataPipeline(DataPipeline pipeline) {
 		
 		if(featureMatrixFileMap == null)
-			return null;
-		else
-			return featureMatrixFileMap.get(pipeline);
+			featureMatrixFileMap = new TreeMap<DataPipeline, String>();
+		
+		return featureMatrixFileMap.get(pipeline);
 	}
 	
 	public Matrix getFeatureMatrixForDataPipeline(DataPipeline pipeline) {
 		
 		if(featureMatrixMap == null)
-			return null;
-		else
-			return featureMatrixMap.get(pipeline);
+			featureMatrixMap = new TreeMap<DataPipeline, Matrix>();
+		
+		return featureMatrixMap.get(pipeline);
 	}
 
 	public Set<MsFeatureCluster> getDuplicateClustersForDataPipeline(DataPipeline pipeline) {
@@ -979,9 +990,9 @@ public class DataAnalysisProject extends Project {
 		return subsetMatrix;
 	}
 		
-	public DataAnalysisProject(Element projectElement) {
+	public DataAnalysisProject(Element projectElement, File projectFile) {
 		
-		super(projectElement);
+		super(projectElement, projectFile);
 		initProjectFields(false);
 		List<Element>dataPipelineList = 
 				projectElement.getChild(MetabolomicsProjectFields.DataPipelineList.name()).

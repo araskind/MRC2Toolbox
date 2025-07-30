@@ -23,7 +23,6 @@ package edu.umich.med.mrc2.datoolbox.gui.binner.test;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -61,7 +60,6 @@ import edu.umich.med.mrc2.datoolbox.data.Worklist;
 import edu.umich.med.mrc2.datoolbox.data.WorklistItem;
 import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
-import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.enums.GlobalDefaults;
 import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
@@ -74,7 +72,6 @@ import edu.umich.med.mrc2.datoolbox.gui.binner.control.CorrelationFunctionType;
 import edu.umich.med.mrc2.datoolbox.main.ReferenceSamplesManager;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.project.ProjectType;
-import edu.umich.med.mrc2.datoolbox.project.store.DataFileExtensions;
 import edu.umich.med.mrc2.datoolbox.project.store.MetabolomicsProjectFields;
 import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
 import edu.umich.med.mrc2.datoolbox.utils.DataSetUtils;
@@ -137,8 +134,7 @@ public class SilhouetteTest {
 		if(projectElement == null)
 			return;
 		
-		currentExperiment = new DataAnalysisProject(projectElement);
-		currentExperiment.setProjectFile(projectFile);
+		currentExperiment = new DataAnalysisProject(projectElement, projectFile);
 		currentExperiment.setProjectType(ProjectType.DATA_ANALYSIS_NEW_FORMAT);
 		
 		if(currentExperiment.getDataPipelines().isEmpty()) {
@@ -166,10 +162,8 @@ public class SilhouetteTest {
 	private void readFeatureData() {
 		
 		File featureXmlFile = 
-				Paths.get(currentExperiment.getDataDirectory().getAbsolutePath(),
-				DataPrefix.MS_FEATURE.getName() + activeDataPipeline.getSaveSafeName() 
-				+ "." + DataFileExtensions.FEATURE_LIST_EXTENSION.getExtension()).toFile();
-		
+				ProjectUtils.getFeaturesFilePath(
+						currentExperiment, activeDataPipeline).toFile();		
 		if(!featureXmlFile.exists())
 			return;
 		

@@ -820,7 +820,6 @@ public class MainWindow extends JFrame
 						activeExperimentType, 
 						null);			
 				saveExperiment();
-				return;
 			}
 			else {
 				clearGuiAfterExperimentClosed();
@@ -865,7 +864,8 @@ public class MainWindow extends JFrame
 
 	public static void displayErrorMessage(String title, String msg) {
 
-		assert msg != null;
+		if(msg == null || msg.isBlank())
+			return;
 
 		String wrappedMsg;
 		if (msg.contains("\n"))
@@ -1368,15 +1368,34 @@ public class MainWindow extends JFrame
 	}
 	
 	private void createNewMetabolomicsExperimentInXMLFormat(
-			File projectParentFolder, 
-			String projectName,
-			String projectDescription, 
+			File parentDirectory, 
+			String experimentName,
+			String experimentDescription, 
 			LIMSExperiment limsExperiment) {
-		// TODO Auto-generated method stub
-		
+
+		createNewMetabolomicsExperiment(
+				parentDirectory, 
+				experimentName,
+				experimentDescription, 
+				limsExperiment);
+		saveMetabolomicsExperimentInNewFormat();
 	}
 
 	private void createNewMetabolomicsExperimentInLegacyFormat(
+			File parentDirectory, 
+			String experimentName,
+			String experimentDescription, 
+			LIMSExperiment limsExperiment) {
+		
+		createNewMetabolomicsExperiment(
+				parentDirectory, 
+				experimentName,
+				experimentDescription, 
+				limsExperiment);
+		saveExperiment();
+	}
+	
+	private void createNewMetabolomicsExperiment(
 			File parentDirectory, 
 			String experimentName,
 			String experimentDescription, 
@@ -1411,9 +1430,7 @@ public class MainWindow extends JFrame
 
 		experimentSwitchController = 
 				new ExperimentSwitchController(false, null, false, ProjectType.DATA_ANALYSIS, null);
-		SaveExperimentTask spt = new SaveExperimentTask(currentExperiment);
-		spt.addTaskListener(MRC2ToolBoxCore.getMainWindow());
-		MRC2ToolBoxCore.getTaskController().addTask(spt);
+		
 	}
 	
 	public void showPanel(PanelList panelType) {
