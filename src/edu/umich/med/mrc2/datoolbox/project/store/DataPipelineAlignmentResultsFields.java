@@ -21,25 +21,8 @@
 
 package edu.umich.med.mrc2.datoolbox.project.store;
 
-public enum MetabolomicsProjectFields {
+public enum DataPipelineAlignmentResultsFields {
 
-	DataPipelineList,
-	DataPipelineId,
-	ActiveDataPipeline,
-	DataAcquisitionMethodId,
-	DataFileId,
-	MSFeatureId,
-	MsFeatureClusterId,
-	MSFeatureIdMap,
-	MSFeatureIdList,
-	MSFeatureSetMap,
-	MSFeatureSetList,
-	FileIdMap,
-	FileIdList,
-	CompoundLibraryMap,
-	MethodDataFileMap,
-	MethodDataFileMapItem,
-	WorklistMap,
-	DataPipelineAlignmentResultSet,
+	unmatchedReferenceFeatures,
 	;
 }

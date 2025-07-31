@@ -21,10 +21,16 @@
 
 package edu.umich.med.mrc2.datoolbox.data;
 
+import org.jdom2.Element;
+
 import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
+import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
+import edu.umich.med.mrc2.datoolbox.project.store.DataPipelineAlignmentParametersObjectFields;
+import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
+import edu.umich.med.mrc2.datoolbox.project.store.XmlStorable;
 
-public class DataPipelineAlignmentParametersObject {
+public class DataPipelineAlignmentParametersObject implements XmlStorable{
 
 	private DataPipeline referencePipeline;
 	private DataPipeline queryPipeline;	
@@ -70,6 +76,55 @@ public class DataPipelineAlignmentParametersObject {
 		return referencePipeline.getName() 
 				+ " aligned to " + queryPipeline.getName();
 	}
+
+	@Override
+	public Element getXmlElement() {
+
+		Element dataPipelineAlignmentParametersObjectElement = 
+				new Element(ObjectNames.DataPipelineAlignmentParametersObject.name());
+		dataPipelineAlignmentParametersObjectElement.setAttribute(
+				DataPipelineAlignmentParametersObjectFields.referencePipeline.name(), 
+				referencePipeline.getName());
+		dataPipelineAlignmentParametersObjectElement.setAttribute(
+				DataPipelineAlignmentParametersObjectFields.queryPipeline.name(), 
+				queryPipeline.getName());
+		dataPipelineAlignmentParametersObjectElement.setAttribute(
+				DataPipelineAlignmentParametersObjectFields.massWindow.name(), 
+				Double.toString(massWindow));
+		dataPipelineAlignmentParametersObjectElement.setAttribute(
+				DataPipelineAlignmentParametersObjectFields.massErrorType.name(), 
+				massErrorType.name());
+		dataPipelineAlignmentParametersObjectElement.setAttribute(
+				DataPipelineAlignmentParametersObjectFields.retentionWindow.name(), 
+				Double.toString(retentionWindow));
+		
+		return dataPipelineAlignmentParametersObjectElement;
+	}
+	
+	public DataPipelineAlignmentParametersObject(
+			Element dataPipelineAlignmentParametersObjectElement, 
+			DataAnalysisProject project) {
+		
+		String refPipelineName = dataPipelineAlignmentParametersObjectElement.getAttributeValue(
+				DataPipelineAlignmentParametersObjectFields.referencePipeline.name());
+		referencePipeline = project.getDataPipelineByName(refPipelineName);
+		
+		String queryPipelineName = dataPipelineAlignmentParametersObjectElement.getAttributeValue(
+				DataPipelineAlignmentParametersObjectFields.queryPipeline.name());
+		queryPipeline = project.getDataPipelineByName(queryPipelineName);
+		
+		massWindow = Double.parseDouble(
+				dataPipelineAlignmentParametersObjectElement.getAttributeValue(
+						DataPipelineAlignmentParametersObjectFields.massWindow.name()));
+		
+		massErrorType = MassErrorType.getTypeByName(
+				dataPipelineAlignmentParametersObjectElement.getAttributeValue(
+						DataPipelineAlignmentParametersObjectFields.massErrorType.name()));
+		
+		retentionWindow = Double.parseDouble(
+				dataPipelineAlignmentParametersObjectElement.getAttributeValue(
+						DataPipelineAlignmentParametersObjectFields.retentionWindow.name()));
+	}			
 }
 
 

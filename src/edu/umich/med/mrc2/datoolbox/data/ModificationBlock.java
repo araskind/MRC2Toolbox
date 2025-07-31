@@ -25,6 +25,10 @@ import java.io.Serializable;
 
 import org.jdom2.Element;
 
+import edu.umich.med.mrc2.datoolbox.main.AdductManager;
+import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
+import edu.umich.med.mrc2.datoolbox.project.store.ModificationBlockFields;
+import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
 import edu.umich.med.mrc2.datoolbox.project.store.XmlStorable;
 
 public class ModificationBlock implements Serializable, XmlStorable {
@@ -75,8 +79,45 @@ public class ModificationBlock implements Serializable, XmlStorable {
 
 	@Override
 	public Element getXmlElement() {
-		// TODO Auto-generated method stub
-		return null;
+		
+		Element modificationBlockElement = 
+				new Element(ObjectNames.ModificationBlock.name());
+		modificationBlockElement.setAttribute(
+				ModificationBlockFields.featureOne.name(), featureOne.getId());
+		modificationBlockElement.setAttribute(
+				ModificationBlockFields.featureTwo.name(), featureTwo.getId());
+		modificationBlockElement.setAttribute(
+				ModificationBlockFields.modification.name(), modification.getId());
+		
+		return modificationBlockElement;
 	}
-
+	
+	public ModificationBlock(Element modificationBlockElement, DataAnalysisProject project) {
+		
+		String featureOneId = modificationBlockElement.getAttributeValue(
+				ModificationBlockFields.featureOne.name());
+		featureOne = project.getMsFeatureById(featureOneId);
+		
+		String featureTwoId = modificationBlockElement.getAttributeValue(
+				ModificationBlockFields.featureTwo.name());
+		featureTwo = project.getMsFeatureById(featureTwoId);
+		
+		String adductId = modificationBlockElement.getAttributeValue(
+				ModificationBlockFields.modification.name());
+		modification = AdductManager.getAdductById(adductId);
+	}
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+

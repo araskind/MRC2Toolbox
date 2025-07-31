@@ -30,6 +30,7 @@ public enum CommonFields {
 	DateCreated,
 	LastModified,
 	Enabled,
+	Locked,
 	UserId,
 	msFeatureMatrix,
 	MZ,

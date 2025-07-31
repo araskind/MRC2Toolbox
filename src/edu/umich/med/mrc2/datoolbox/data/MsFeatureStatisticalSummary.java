@@ -453,7 +453,7 @@ public class MsFeatureStatisticalSummary implements Serializable, XmlStorable {
 			mzValuesElement.setText(mzValueString);
 			msFeatureStatisticalSummaryElement.addContent(mzValuesElement);
 		}
-		String pwValueString = NumberArrayUtils.encodeStatValues(mzStatistics);
+		String pwValueString = NumberArrayUtils.encodeStatValues(peakWidthStatistics);
 		if(pwValueString != null) {
 			
 			Element pwValuesElement = 

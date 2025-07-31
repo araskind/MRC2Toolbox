@@ -136,6 +136,12 @@ public class DataAnalysisProject extends Project {
 	public Set<DataPipeline> getDataPipelines() {
 		return dataPipelines;
 	}
+	
+	public DataPipeline getDataPipelineByName(String dpName) {
+		return dataPipelines.stream().
+				filter(dp -> dp.getName().equals(dpName)).
+				findFirst().orElse(null);
+	}
 
 	public LIMSProject getLimsProject() {
 		return limsProject;
@@ -436,6 +442,13 @@ public class DataAnalysisProject extends Project {
 	public MsFeature getMsFeatureById(String id, DataPipeline pipeline) {
 
 		return featureMap.get(pipeline).stream().
+				filter(f -> f.getId().equals(id)).
+				findFirst().orElse(null);
+	}
+	
+	public MsFeature getMsFeatureById(String id) {
+
+		return featureMap.values().stream().flatMap(v -> v.stream()).
 				filter(f -> f.getId().equals(id)).
 				findFirst().orElse(null);
 	}

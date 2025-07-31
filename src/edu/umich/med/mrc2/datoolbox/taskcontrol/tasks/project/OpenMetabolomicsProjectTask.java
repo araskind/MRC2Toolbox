@@ -36,6 +36,7 @@ import org.jdom2.JDOMException;
 import org.jdom2.input.SAXBuilder;
 
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
+import edu.umich.med.mrc2.datoolbox.data.DataPipelineAlignmentResults;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesign;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureSet;
 import edu.umich.med.mrc2.datoolbox.data.Worklist;
@@ -62,6 +63,7 @@ public class OpenMetabolomicsProjectTask extends OpenStandaloneProjectAbstractTa
 	private Map<DataPipeline,String[]>orderedMSFeatureIdMap;
 	private int pipelineCount;
 	private int loadedPipelineCount;
+	private Element projectXMLElement;
 	
 	public OpenMetabolomicsProjectTask(File projectFile) {
 		super();
@@ -71,11 +73,16 @@ public class OpenMetabolomicsProjectTask extends OpenStandaloneProjectAbstractTa
 	@Override
 	public void run() {
 
+		projectXMLElement = null;
 		setStatus(TaskStatus.PROCESSING);
 		try {
-			parseProjectFile();
+			projectXMLElement = parseProjectFile();
 		} catch (Exception ex) {
-			ex.printStackTrace();
+			reportErrorAndExit(ex);
+			return;
+		}
+		if(projectXMLElement == null) {
+			errorMessage = "Failed to parse project file";
 			setStatus(TaskStatus.ERROR);
 			return;
 		}
@@ -110,7 +117,7 @@ public class OpenMetabolomicsProjectTask extends OpenStandaloneProjectAbstractTa
 		}
 	}
 
-	private void parseProjectFile() {
+	private Element parseProjectFile() {
 		
 		taskDescription = "Parsing project file ...";
 		total = 100;
@@ -128,7 +135,7 @@ public class OpenMetabolomicsProjectTask extends OpenStandaloneProjectAbstractTa
 			e1.printStackTrace();
 			errorMessage = e1.getMessage();
 			setStatus(TaskStatus.ERROR);
-			return;						
+			return null;						
 		}
 		Element projectElement = null;
 		try {
@@ -139,14 +146,14 @@ public class OpenMetabolomicsProjectTask extends OpenStandaloneProjectAbstractTa
 		}
 		if(projectElement == null) {
 			setStatus(TaskStatus.ERROR);
-			return;
+			return null;
 		}
 		
 		project = new DataAnalysisProject(projectElement, projectFile);
 		project.setProjectType(ProjectType.DATA_ANALYSIS_NEW_FORMAT);		
 		if(project.getDataPipelines().isEmpty()) {
 			parseExperimentDesign(projectElement);
-			return;
+			return null;
 		}		
 		//	That is necessary to correctly associate samples with data files in the design
 		parseAcquisitionMethodDataFileMap(projectElement);		
@@ -163,8 +170,9 @@ public class OpenMetabolomicsProjectTask extends OpenStandaloneProjectAbstractTa
 		} catch (Exception e) {
 			e.printStackTrace();
 			setStatus(TaskStatus.ERROR);
-			return;		
-		}	
+			return null;		
+		}
+		return projectElement;
 	}
 	
 	private void parseCustomFeatureSets(Element projectElement) {
@@ -360,8 +368,38 @@ public class OpenMetabolomicsProjectTask extends OpenStandaloneProjectAbstractTa
 		loadedPipelineCount++;
 		
 		MRC2ToolBoxCore.getTaskController().getTaskQueue().removeTask(task);
-		if(loadedPipelineCount == pipelineCount)
-			setStatus(TaskStatus.FINISHED);		
+		if(loadedPipelineCount == pipelineCount) {
+			
+			loadDataPipelineAlignmentResults();
+			setStatus(TaskStatus.FINISHED);	
+		}
+	}
+
+	private void loadDataPipelineAlignmentResults() {
+
+		Element dparsElement = 
+				projectXMLElement.getChild(
+						MetabolomicsProjectFields.DataPipelineAlignmentResultSet.name());
+		if(dparsElement == null)
+			return;
+		
+		List<Element>dpaElementList = 
+				dparsElement.getChildren(ObjectNames.DataPipelineAlignmentResults.name());
+		if(dpaElementList.isEmpty())
+			return;
+		
+		for(Element dpaElement : dpaElementList) {
+			
+			DataPipelineAlignmentResults dpaRes = null;
+			try {
+				dpaRes = new DataPipelineAlignmentResults(dpaElement,project);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			if(dpaRes != null)
+				project.addDataPipelineAlignmentResult(dpaRes);
+		}
 	}
 
 	@Override

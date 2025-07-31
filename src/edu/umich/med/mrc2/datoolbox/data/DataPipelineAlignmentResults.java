@@ -21,8 +21,19 @@
 
 package edu.umich.med.mrc2.datoolbox.data;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang.StringUtils;
+import org.jdom2.Element;
+
+import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
+import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
+import edu.umich.med.mrc2.datoolbox.project.store.DataPipelineAlignmentResultsFields;
+import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
 
 public class DataPipelineAlignmentResults extends MsFeatureClusterSet {
 
@@ -34,9 +45,8 @@ public class DataPipelineAlignmentResults extends MsFeatureClusterSet {
 			DataPipelineAlignmentParametersObject alignmentSettings,
 			Set<MsFeatureCluster> clusterList, 
 			Collection<LibraryMsFeature> unmatchedReferenceFeatures) {
-		super(alignmentSettings.getName());
+		super(alignmentSettings.getName(), clusterList);
 		this.alignmentSettings = alignmentSettings;
-		this.clusters = clusterList;
 		this.unmatchedReferenceFeatures = unmatchedReferenceFeatures;
 	}
 
@@ -47,4 +57,63 @@ public class DataPipelineAlignmentResults extends MsFeatureClusterSet {
 	public Collection<LibraryMsFeature> getUnmatchedReferenceFeatures() {
 		return unmatchedReferenceFeatures;
 	}
+	
+	@Override
+	public Element getXmlElement() {
+		
+		Element dataPipelineAlignmentResults = super.getXmlElement();
+		dataPipelineAlignmentResults.setName(ObjectNames.DataPipelineAlignmentResults.name());
+		
+		dataPipelineAlignmentResults.addContent(alignmentSettings.getXmlElement());
+		Element unmatchedReferenceFeaturesElement = 
+				new Element(DataPipelineAlignmentResultsFields.unmatchedReferenceFeatures.name());
+		unmatchedReferenceFeaturesElement.setAttribute(ObjectNames.DataPipeline.name(), 
+				alignmentSettings.getReferencePipeline().getName());
+		List<String>unmatchedIds = unmatchedReferenceFeatures.stream().
+				map(f -> f.getId()).collect(Collectors.toList());
+		unmatchedReferenceFeaturesElement.setText(StringUtils.join(unmatchedIds, ","));
+		dataPipelineAlignmentResults.addContent(unmatchedReferenceFeaturesElement);
+
+		return dataPipelineAlignmentResults;
+	}
+	
+	public DataPipelineAlignmentResults(
+			Element dataPipelineAlignmentResults, 
+			DataAnalysisProject project) {
+		super(dataPipelineAlignmentResults, project);
+		
+		Element alignmentSettingsElement = 
+				dataPipelineAlignmentResults.getChild(
+						ObjectNames.DataPipelineAlignmentParametersObject.name());
+		alignmentSettings = 
+				new DataPipelineAlignmentParametersObject(alignmentSettingsElement, project);
+		Element unmatchedFeaturesElement = dataPipelineAlignmentResults.getChild(
+				DataPipelineAlignmentResultsFields.unmatchedReferenceFeatures.name());
+		unmatchedReferenceFeatures = new ArrayList<LibraryMsFeature>();
+		String[]unmatchedFeatureIds = unmatchedFeaturesElement.getText().split(",");
+		if(unmatchedFeatureIds.length > 0) {
+			String piplineName = 
+					unmatchedFeaturesElement.getAttributeValue(ObjectNames.DataPipeline.name());
+			DataPipeline dp = project.getDataPipelineByName(piplineName);
+			if(dp != null) {
+				
+				CompoundLibrary avgLib = project.getAveragedFeatureLibraryForDataPipeline(dp);
+				if(avgLib != null) {
+					for(String fid : unmatchedFeatureIds) {
+						LibraryMsFeature feature =  avgLib.getFeatureById(fid);
+						if(feature != null)
+							unmatchedReferenceFeatures.add(feature);
+					}
+				}
+			}
+		}
+	}
 }
+
+
+
+
+
+
+
+

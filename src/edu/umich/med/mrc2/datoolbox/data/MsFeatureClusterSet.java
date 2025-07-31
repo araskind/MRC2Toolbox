@@ -23,6 +23,7 @@ package edu.umich.med.mrc2.datoolbox.data;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.UUID;
@@ -33,6 +34,9 @@ import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureClusterComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.enums.ParameterSetStatus;
+import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
+import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
+import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
 import edu.umich.med.mrc2.datoolbox.project.store.XmlStorable;
 
 public class MsFeatureClusterSet implements 
@@ -197,12 +201,36 @@ public class MsFeatureClusterSet implements
 
 	@Override
 	public Element getXmlElement() {
-		// TODO Auto-generated method stub
-		return null;
+		
+		Element msFeatureClusterSetElement = 
+				new Element(ObjectNames.MsFeatureClusterSet.name());
+		msFeatureClusterSetElement.setAttribute(CommonFields.Id.name(), id);
+		msFeatureClusterSetElement.setAttribute(CommonFields.Name.name(), clusterSetName);
+		msFeatureClusterSetElement.setAttribute(
+				CommonFields.Enabled.name(), Boolean.toString(active));
+		msFeatureClusterSetElement.setAttribute(
+				CommonFields.Locked.name(), Boolean.toString(locked));
+		Element clusterListElement = new Element(CommonFields.ItemList.name());
+		for(MsFeatureCluster cluster : clusters)
+			clusterListElement.addContent(cluster.getXmlElement());
+		
+		msFeatureClusterSetElement.addContent(clusterListElement);
+		return msFeatureClusterSetElement;
 	}
 	
-	public MsFeatureClusterSet(Element msFeatureClusterSetElement) {
-		// TODO Auto-generated method stub
+	public MsFeatureClusterSet(Element msFeatureClusterSetElement, DataAnalysisProject project) {
+		
+		this(msFeatureClusterSetElement.getAttributeValue(CommonFields.Name.name()));
+		id = msFeatureClusterSetElement.getAttributeValue(CommonFields.Id.name());
+		active = Boolean.parseBoolean(
+				msFeatureClusterSetElement.getAttributeValue(CommonFields.Enabled.name()));
+		locked = Boolean.parseBoolean(
+				msFeatureClusterSetElement.getAttributeValue(CommonFields.Locked.name()));
+		List<Element>clusterElementList = 
+				msFeatureClusterSetElement.getChild(CommonFields.ItemList.name()).
+				getChildren(ObjectNames.MsFeatureCluster.name());
+		for(Element clusterElement : clusterElementList)
+			clusters.add(new MsFeatureCluster(clusterElement, project));
 	}
 }
 

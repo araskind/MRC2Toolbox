@@ -37,6 +37,7 @@ import org.ujmp.core.Matrix;
 import org.ujmp.core.calculation.Calculation.Ret;
 
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
+import edu.umich.med.mrc2.datoolbox.data.DataPipelineAlignmentResults;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureSet;
@@ -140,6 +141,7 @@ public class SaveMetabolomicsProjectTask extends AbstractTask implements TaskLis
 		projectRoot.addContent(addOrderedMSFeatureIdMap());
 		projectRoot.addContent(addWorklistMap());
 		projectRoot.addContent(addCustomFeatureSets());
+		projectRoot.addContent(addDataPipelineAlignmentResults());
 		
 		DataPipeline activePipeline = projectToSave.getActiveDataPipeline();
 		if(activePipeline == null && !projectToSave.getDataPipelines().isEmpty())
@@ -162,6 +164,17 @@ public class SaveMetabolomicsProjectTask extends AbstractTask implements TaskLis
 		XmlUtils.writeCompactXMLtoFile(
 				projectXmlDocument, projectFile);
 		projectToSave.setProjectFile(projectFile);
+	}
+	
+	private Element addDataPipelineAlignmentResults() {
+		
+		Element dataPipelineAlignmentResultSetElement = 
+				new Element(MetabolomicsProjectFields.DataPipelineAlignmentResultSet.name());
+		
+		for(DataPipelineAlignmentResults dpaResult : projectToSave.getDataPipelineAlignmentResults())
+			dataPipelineAlignmentResultSetElement.addContent(dpaResult.getXmlElement());
+		
+		return dataPipelineAlignmentResultSetElement;
 	}
 	
 	private Element addCustomFeatureSets(){

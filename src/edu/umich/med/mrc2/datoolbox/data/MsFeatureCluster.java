@@ -32,9 +32,11 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.commons.math3.util.Precision;
@@ -50,9 +52,14 @@ import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
 import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
 import edu.umich.med.mrc2.datoolbox.data.enums.SpectrumSource;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
+import edu.umich.med.mrc2.datoolbox.main.AdductManager;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.msmsscore.MSMSScoreCalculator;
+import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
+import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
+import edu.umich.med.mrc2.datoolbox.project.store.MsFeatureClusterFields;
+import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
 import edu.umich.med.mrc2.datoolbox.project.store.XmlStorable;
 import edu.umich.med.mrc2.datoolbox.utils.ClusterUtils;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
@@ -604,7 +611,7 @@ public class MsFeatureCluster implements Serializable, XmlStorable {
 	public MsFeatureIdentity getPrimaryIdentity() {
 
 		if(primaryFeature == null)
-			primaryFeature = ClusterUtils.getMostIntensiveFeature(getFeatures());;
+			primaryFeature = ClusterUtils.getMostIntensiveFeature(getFeatures());
 		
 		return primaryFeature.getPrimaryIdentity();
 	}
@@ -762,12 +769,6 @@ public class MsFeatureCluster implements Serializable, XmlStorable {
 		return new Range(allRts[0], allRts[allRts.length - 1]);
 	}
 
-	@Override
-	public Element getXmlElement() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-	
     @Override
     public boolean equals(Object obj) {
 
@@ -795,7 +796,165 @@ public class MsFeatureCluster implements Serializable, XmlStorable {
         hash = 53 * hash + (this.clusterId != null ? this.clusterId.hashCode() : 0);
         return hash;
     }
+    
+    public MsFeature getFeatureById(String id) {
+    	
+    	return clusterFeatures.values().stream().
+				flatMap(v -> v.stream()).filter(f -> f.getId().equals(id)).
+				findFirst().orElse(null);
+    }
+    
+	@Override
+	public Element getXmlElement() {
+		
+		Element msFeatureClusterElement = 
+				new Element(ObjectNames.MsFeatureCluster.name());
+		msFeatureClusterElement.setAttribute(CommonFields.Id.name(), clusterId);
+		msFeatureClusterElement.setAttribute(
+				CommonFields.Locked.name(), Boolean.toString(locked));
+		msFeatureClusterElement.setAttribute(
+				MsFeatureClusterFields.chargeMismatch.name(), Boolean.toString(chargeMismatch));
+		if(primaryFeature != null)
+			msFeatureClusterElement.setAttribute(
+					MsFeatureClusterFields.primaryFeature.name(), primaryFeature.getId());
+		
+		Element clusterFeaturesMapElement = 
+				new Element(MsFeatureClusterFields.clusterFeaturesMap.name());
+		for(Entry<DataPipeline, Collection<MsFeature>>mapEntry : clusterFeatures.entrySet()) {
+			
+			Element dpElement = new Element(ObjectNames.DataPipeline.name());
+			dpElement.setAttribute(CommonFields.Name.name(), mapEntry.getKey().getName());
+			List<String>featureIdList = mapEntry.getValue().stream().
+					map(f -> f.getId()).collect(Collectors.toList());
+			dpElement.setText(StringUtils.join(featureIdList, ","));	
+			clusterFeaturesMapElement.addContent(dpElement);
+		}
+		msFeatureClusterElement.addContent(clusterFeaturesMapElement);
+		
+		if(!disabledFeatures.isEmpty()) {
+			
+			Element disabledElement = 
+					new Element(MsFeatureClusterFields.disabledFeatures.name());
+			
+			List<String>featureIdList = disabledFeatures.stream().
+					map(f -> f.getId()).collect(Collectors.toList());
+			disabledElement.setText(StringUtils.join(featureIdList, ","));	
+			msFeatureClusterElement.addContent(disabledElement);
+		}
+		if(chemicalModificationsMap != null && !chemicalModificationsMap.isEmpty()) {
+			
+			Element chemicalModificationsMapElement = 
+					new Element(MsFeatureClusterFields.chemicalModificationsMap.name());
+			for(ModificationBlock mb : chemicalModificationsMap)
+				chemicalModificationsMapElement.addContent(mb.getXmlElement());
+			
+			msFeatureClusterElement.addContent(chemicalModificationsMapElement);
+		}
+		if(annotationMap != null && !annotationMap.isEmpty()) {
+			
+			Element annotationMapElement = 
+					new Element(MsFeatureClusterFields.annotationMap.name());
+			for(Entry<MsFeature, Set<Adduct>>mapEntry : annotationMap.entrySet()) {
+				
+				Element annotationMapEntryElement = 
+						new Element(MsFeatureClusterFields.annotationMapEntry.name());
+				annotationMapEntryElement.setAttribute(CommonFields.Id.name(), mapEntry.getKey().getId());
+				List<String>adductList = mapEntry.getValue().stream().
+						map(Adduct::getId).collect(Collectors.toList());
+				annotationMapEntryElement.setText(StringUtils.join(adductList, ","));									
+				annotationMapElement.addContent(annotationMapEntryElement);
+			}		
+			msFeatureClusterElement.addContent(annotationMapElement);
+		}		
+		return msFeatureClusterElement;
+	}
+	
+	public MsFeatureCluster(Element msFeatureClusterElement, DataAnalysisProject project) {
+		this();
+		clusterId = msFeatureClusterElement.getAttributeValue(CommonFields.Id.name());
+		locked = Boolean.parseBoolean(
+				msFeatureClusterElement.getAttributeValue(CommonFields.Locked.name()));
+		chargeMismatch = Boolean.parseBoolean(
+				msFeatureClusterElement.getAttributeValue(MsFeatureClusterFields.chargeMismatch.name()));
+		
+		//	Recreate feature map
+		List<Element>dataPipelineElementList = 
+				msFeatureClusterElement.getChild(MsFeatureClusterFields.clusterFeaturesMap.name()).
+				getChildren(ObjectNames.DataPipeline.name());
+		for(Element dpElement : dataPipelineElementList) {
+			
+			String pipelineName = dpElement.getAttributeValue(CommonFields.Name.name());
+			DataPipeline dp = project.getDataPipelineByName(pipelineName);
+			if(dp != null) {
+				CompoundLibrary avgLib = project.getAveragedFeatureLibraryForDataPipeline(dp);
+				if(avgLib != null) {
+					
+					String[]featureIds = dpElement.getText().split(",");
+					for(String id : featureIds) {
+						MsFeature feature = avgLib.getFeatureById(id);
+						if(feature != null)
+							addFeature(feature, dp);
+					}
+				}
+			}
+		}		
+		//	Set primary feature
+		String primaryId = msFeatureClusterElement.getAttributeValue(
+				MsFeatureClusterFields.primaryFeature.name());
+		if(primaryId != null)
+			primaryFeature = getFeatureById(primaryId);
+		
+		//	Set diasabled features
+		Element disabledElement = msFeatureClusterElement.getChild(
+				MsFeatureClusterFields.disabledFeatures.name());
+		if(disabledElement != null) {
+			String[]featureIds = disabledElement.getText().split(",");
+			for(String id : featureIds) {
+				MsFeature df = getFeatureById(id);
+				if(df != null)
+					disabledFeatures.add(df);
+			}
+		}	
+		//	Recreate chemical modifications map
+		Element chemicalModificationsMapElement = msFeatureClusterElement.getChild(
+				MsFeatureClusterFields.chemicalModificationsMap.name());
+		if(chemicalModificationsMapElement != null) {
+			 List<Element>modificationBlockElementList = 
+					 chemicalModificationsMapElement.getChildren(ObjectNames.ModificationBlock.name());
+			 for(Element modificationBlockElement : modificationBlockElementList)
+				 chemicalModificationsMap.add(new ModificationBlock(modificationBlockElement, project));
+		}
+		//	Recreate annotations map
+		Element annotationMapElement = 
+				msFeatureClusterElement.getChild(MsFeatureClusterFields.annotationMap.name());
+		if(annotationMapElement != null) {
+			
+			List<Element>annotationMapEntryElementList = 
+					annotationMapElement.getChildren(MsFeatureClusterFields.annotationMapEntry.name());
+			for(Element annotationMapEntryElement : annotationMapEntryElementList) {
+				
+				String id = annotationMapEntryElement.getAttributeValue(CommonFields.Id.name());				
+				MsFeature feature = getFeatureById(id);
+				Set<Adduct>fAdducts = new TreeSet<Adduct>();
+				String[]adductIds = annotationMapEntryElement.getText().split(",");
+				for(String adductId : adductIds) {
+					Adduct adduct = AdductManager.getAdductById(adductId);
+					if(adduct != null)
+						fAdducts.add(adduct);
+				}
+				if(feature != null && !fAdducts.isEmpty())
+					annotationMap.put(feature, fAdducts);
+			}
+		}		
+	}
 }
+
+
+
+
+
+
+
 
 
 

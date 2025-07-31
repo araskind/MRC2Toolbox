@@ -52,7 +52,7 @@ public class DataIntegrationPanelMenuBar extends CommonMenuBar {
 	private static final Icon dataSetAlignmentIconSmall = GuiUtils.getIcon("alignment", 16);	
 	private static final Icon dataSetAlignmentIcon = GuiUtils.getIcon("alignment", 24);
 	private static final Icon deleteDataSetAlignmentIcon = GuiUtils.getIcon("deleteAlignment", 24);
-	private static final Icon dataSetAlignmentManagerIcon = GuiUtils.getIcon("alignmentManager", 32);
+	private static final Icon dataSetAlignmentManagerIcon = GuiUtils.getIcon("alignmentManager", 24);
 
 	// Menus
 	private JMenu
