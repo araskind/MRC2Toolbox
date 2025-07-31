@@ -207,8 +207,35 @@ public class DataIntegratorPanel extends ClusterDisplayPanel {
 	}
 	
 	private void deleteSelectedDataAlignmentResults() {
-		// TODO Auto-generated method stub
 		
+		DataPipelineAlignmentResults results = null;
+		if(dataSetAlignmentManager.isVisible() 
+				&& dataSetAlignmentManager.getSelectedDataPipelineAlignmentResults() != null) {
+			results = dataSetAlignmentManager.getSelectedDataPipelineAlignmentResults();
+			int res = MessageDialog.showChoiceWithWarningMsg(
+					"Do you want to delete selected data set alignment?", this.getContentPane());
+			if(res == JOptionPane.YES_OPTION) {
+				deleteDataAlignmentResultsFromProject(results);
+				dataSetAlignmentManager.dispose();
+				return;
+			}			
+		}
+		if(!dataSetAlignmentManager.isVisible() && alignmentResults != null) {
+			
+			int res = MessageDialog.showChoiceWithWarningMsg(
+					"Do you want to delete currently displayed data set alignment?", 
+					this.getContentPane());
+			if(res == JOptionPane.YES_OPTION)
+				deleteDataAlignmentResultsFromProject(alignmentResults);
+		}
+	}
+	
+	private void deleteDataAlignmentResultsFromProject(DataPipelineAlignmentResults results) {
+		currentExperiment.deleteDataPipelineAlignmentResult(results);
+		if(results.equals(alignmentResults)) {
+			clearPanel();
+			alignmentResults = null;
+		}
 	}
 
 	private void showDataAlignmentResultsManager() {
@@ -268,7 +295,8 @@ public class DataIntegratorPanel extends ClusterDisplayPanel {
 				dataSetAlignmentSetupDialog.getSelectedDataPipelines().get(1), 
 				dataSetAlignmentSetupDialog.getMassWindow(),
 				dataSetAlignmentSetupDialog.getMassErrorType(), 
-				dataSetAlignmentSetupDialog.getRetentionWindow());
+				dataSetAlignmentSetupDialog.getRetentionWindow(),
+				dataSetAlignmentSetupDialog.excludeUndetected());
 		task.addTaskListener(this);
 		MRC2ToolBoxCore.getTaskController().addTask(task);
 		dataSetAlignmentSetupDialog.dispose();

@@ -37,19 +37,22 @@ public class DataPipelineAlignmentParametersObject implements XmlStorable{
 	private double massWindow;
 	private MassErrorType massErrorType;
 	private double retentionWindow;
+	private boolean excludeUndetected;
 	
 	public DataPipelineAlignmentParametersObject(
 			DataPipeline referencePipeline, 
 			DataPipeline queryPipeline,
 			double massWindow, 
 			MassErrorType massErrorType, 
-			double retentionWindow) {
+			double retentionWindow,
+			boolean excludeUndetected) {
 		super();
 		this.referencePipeline = referencePipeline;
 		this.queryPipeline = queryPipeline;
 		this.massWindow = massWindow;
 		this.massErrorType = massErrorType;
 		this.retentionWindow = retentionWindow;
+		this.excludeUndetected = excludeUndetected;
 	}
 
 	public DataPipeline getReferencePipeline() {
@@ -97,6 +100,9 @@ public class DataPipelineAlignmentParametersObject implements XmlStorable{
 		dataPipelineAlignmentParametersObjectElement.setAttribute(
 				DataPipelineAlignmentParametersObjectFields.retentionWindow.name(), 
 				Double.toString(retentionWindow));
+		dataPipelineAlignmentParametersObjectElement.setAttribute(
+				DataPipelineAlignmentParametersObjectFields.excludeUndetected.name(), 
+				Boolean.toString(excludeUndetected));
 		
 		return dataPipelineAlignmentParametersObjectElement;
 	}
@@ -124,6 +130,14 @@ public class DataPipelineAlignmentParametersObject implements XmlStorable{
 		retentionWindow = Double.parseDouble(
 				dataPipelineAlignmentParametersObjectElement.getAttributeValue(
 						DataPipelineAlignmentParametersObjectFields.retentionWindow.name()));
+		
+		excludeUndetected = Boolean.parseBoolean(
+				dataPipelineAlignmentParametersObjectElement.getAttributeValue(
+						DataPipelineAlignmentParametersObjectFields.excludeUndetected.name()));
+	}
+
+	public boolean isExcludeUndetected() {
+		return excludeUndetected;
 	}			
 }
 

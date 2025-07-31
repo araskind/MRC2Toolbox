@@ -28,6 +28,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
@@ -55,6 +56,7 @@ public class DataPipelineAlignmentTask extends AbstractTask {
 	private double massWindow;
 	private MassErrorType massErrorType;
 	private double retentionWindow;
+	private boolean excludeUndetected;
 	private Set<MsFeatureCluster> clusterList;
 	private CompoundLibrary referenceLib;
 	private DataPipeline referencePipeline;
@@ -70,12 +72,14 @@ public class DataPipelineAlignmentTask extends AbstractTask {
 			DataPipeline pipelineTwo, 
 			double massWindow,
 			MassErrorType massErrorType, 
-			double retentionWindow) {
+			double retentionWindow,
+			boolean excludeUndetected) {
 		super();
 		this.currentExperiment = currentExperiment;
 		this.massWindow = massWindow;
 		this.massErrorType = massErrorType;
 		this.retentionWindow = retentionWindow;
+		this.excludeUndetected = excludeUndetected;
 		clusterList = new HashSet<MsFeatureCluster>();
 		setQueryAndReference(pipelineOne,pipelineTwo);
 		
@@ -84,7 +88,8 @@ public class DataPipelineAlignmentTask extends AbstractTask {
 				queryPipeline,
 				massWindow, 
 				massErrorType, 
-				retentionWindow);
+				retentionWindow,
+				excludeUndetected);
 	}
 	
 	private void setQueryAndReference(
@@ -148,6 +153,10 @@ public class DataPipelineAlignmentTask extends AbstractTask {
 		total = referenceLib.getFeatureCount();
 		processed = 0;
 		unmatchedReferenceFeatures = new ArrayList<LibraryMsFeature>();
+		Collection<LibraryMsFeature> referenceFeatures = referenceLib.getFeatures();
+		if(excludeUndetected) {
+			referenceFeatures = removeUndetectedReferenceFeatures(referenceFeatures);
+		}
 		for(LibraryMsFeature refFeature : referenceLib.getFeatures()) {
 			
 			Set<LibraryMsFeature>matches = findMatchingFeaturesInQueryLibrary(refFeature);
@@ -170,6 +179,15 @@ public class DataPipelineAlignmentTask extends AbstractTask {
 				unmatchedReferenceFeatures);
 	}
 	
+	private Collection<LibraryMsFeature> removeUndetectedReferenceFeatures(
+			Collection<LibraryMsFeature> referenceFeatures) {
+
+		return referenceFeatures.stream().
+			filter(f -> Objects.nonNull(f.getStatsSummary())).
+			filter(f -> (f.getStatsSummary().getSampleMedian() > 0.0
+					|| f.getStatsSummary().getPooledMedian() > 0.0)).collect(Collectors.toList());
+	}
+
 	private Set<LibraryMsFeature> findMatchingFeaturesInQueryLibrary(LibraryMsFeature refFeature) {
 		
 		Set<LibraryMsFeature>matches = new HashSet<LibraryMsFeature>();
@@ -226,7 +244,8 @@ public class DataPipelineAlignmentTask extends AbstractTask {
 				queryPipeline,
 				massWindow, 
 				massErrorType, 
-				retentionWindow);
+				retentionWindow,
+				excludeUndetected);
 	}
 
 	public DataPipelineAlignmentResults getAlignmentResults() {

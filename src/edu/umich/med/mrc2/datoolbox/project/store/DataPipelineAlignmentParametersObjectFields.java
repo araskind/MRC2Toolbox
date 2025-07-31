@@ -28,5 +28,6 @@ public enum DataPipelineAlignmentParametersObjectFields {
 	massWindow,
 	massErrorType,
 	retentionWindow,
+	excludeUndetected,
 	;
 }

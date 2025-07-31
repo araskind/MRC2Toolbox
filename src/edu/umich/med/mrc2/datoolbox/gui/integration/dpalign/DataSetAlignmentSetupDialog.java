@@ -41,6 +41,7 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
@@ -86,10 +87,12 @@ public class DataSetAlignmentSetupDialog extends JDialog implements ActionListen
 	public static final String MASS_WINDOW = "MASS_WINDOW";
 	public static final String MASS_ERROR_TYPE = "MASS_ERROR_TYPE";
 	public static final String RT_WINDOW_MIN = "RT_WINDOW_MIN";
+	public static final String EXCLUDE_UNDETECTED = "EXCLUDE_UNDETECTED";
 	
 	private JComboBox<MassErrorType> massErrorTypeComboBox;
 	private JFormattedTextField massErrorField;
 	private JFormattedTextField rtErrorField;
+	private JCheckBox excludeUndetectedCheckBox;
 	
 	public DataSetAlignmentSetupDialog(
 			Collection<DataPipeline>pipelines, 
@@ -205,14 +208,14 @@ public class DataSetAlignmentSetupDialog extends JDialog implements ActionListen
 		dataPanel.add(panel, gbc_panel);
 		GridBagLayout gbl_panel = new GridBagLayout();
 		gbl_panel.columnWidths = new int[]{0, 0, 0, 0, 0, 0, 0};
-		gbl_panel.rowHeights = new int[]{0, 0};
+		gbl_panel.rowHeights = new int[]{0, 0, 0};
 		gbl_panel.columnWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
-		gbl_panel.rowWeights = new double[]{0.0, Double.MIN_VALUE};
+		gbl_panel.rowWeights = new double[]{0.0, 0.0, Double.MIN_VALUE};
 		panel.setLayout(gbl_panel);
 		
 		JLabel lblNewLabel_3 = new JLabel("Mass eror");
 		GridBagConstraints gbc_lblNewLabel_3 = new GridBagConstraints();
-		gbc_lblNewLabel_3.insets = new Insets(0, 0, 0, 5);
+		gbc_lblNewLabel_3.insets = new Insets(0, 0, 5, 5);
 		gbc_lblNewLabel_3.anchor = GridBagConstraints.EAST;
 		gbc_lblNewLabel_3.gridx = 0;
 		gbc_lblNewLabel_3.gridy = 0;
@@ -223,7 +226,7 @@ public class DataSetAlignmentSetupDialog extends JDialog implements ActionListen
 		massErrorField.setPreferredSize(new Dimension(80, 20));
 		massErrorField.setColumns(10);
 		GridBagConstraints gbc_massErrorField = new GridBagConstraints();
-		gbc_massErrorField.insets = new Insets(0, 0, 0, 5);
+		gbc_massErrorField.insets = new Insets(0, 0, 5, 5);
 		gbc_massErrorField.fill = GridBagConstraints.HORIZONTAL;
 		gbc_massErrorField.gridx = 1;
 		gbc_massErrorField.gridy = 0;
@@ -234,7 +237,7 @@ public class DataSetAlignmentSetupDialog extends JDialog implements ActionListen
 		massErrorTypeComboBox.setPreferredSize(new Dimension(80, 22));
 		massErrorTypeComboBox.setMinimumSize(new Dimension(80, 22));
 		GridBagConstraints gbc_comboBox = new GridBagConstraints();
-		gbc_comboBox.insets = new Insets(0, 0, 0, 5);
+		gbc_comboBox.insets = new Insets(0, 0, 5, 5);
 		gbc_comboBox.fill = GridBagConstraints.HORIZONTAL;
 		gbc_comboBox.gridx = 2;
 		gbc_comboBox.gridy = 0;
@@ -242,7 +245,7 @@ public class DataSetAlignmentSetupDialog extends JDialog implements ActionListen
 		
 		JLabel lblNewLabel_4 = new JLabel("RT error");
 		GridBagConstraints gbc_lblNewLabel_4 = new GridBagConstraints();
-		gbc_lblNewLabel_4.insets = new Insets(0, 0, 0, 5);
+		gbc_lblNewLabel_4.insets = new Insets(0, 0, 5, 5);
 		gbc_lblNewLabel_4.anchor = GridBagConstraints.EAST;
 		gbc_lblNewLabel_4.gridx = 3;
 		gbc_lblNewLabel_4.gridy = 0;
@@ -253,7 +256,7 @@ public class DataSetAlignmentSetupDialog extends JDialog implements ActionListen
 		rtErrorField.setMinimumSize(new Dimension(80, 20));
 		rtErrorField.setPreferredSize(new Dimension(80, 20));
 		GridBagConstraints gbc_rtErrorField = new GridBagConstraints();
-		gbc_rtErrorField.insets = new Insets(0, 0, 0, 5);
+		gbc_rtErrorField.insets = new Insets(0, 0, 5, 5);
 		gbc_rtErrorField.fill = GridBagConstraints.HORIZONTAL;
 		gbc_rtErrorField.gridx = 4;
 		gbc_rtErrorField.gridy = 0;
@@ -261,10 +264,21 @@ public class DataSetAlignmentSetupDialog extends JDialog implements ActionListen
 		
 		JLabel lblNewLabel_5 = new JLabel("min");
 		GridBagConstraints gbc_lblNewLabel_5 = new GridBagConstraints();
+		gbc_lblNewLabel_5.insets = new Insets(0, 0, 5, 0);
 		gbc_lblNewLabel_5.anchor = GridBagConstraints.WEST;
 		gbc_lblNewLabel_5.gridx = 5;
 		gbc_lblNewLabel_5.gridy = 0;
 		panel.add(lblNewLabel_5, gbc_lblNewLabel_5);
+		
+		excludeUndetectedCheckBox = 
+				new JCheckBox("Exclude features not detected in samples and pools");
+		GridBagConstraints gbc_excludeUndetectedCheckBox = new GridBagConstraints();
+		gbc_excludeUndetectedCheckBox.anchor = GridBagConstraints.WEST;
+		gbc_excludeUndetectedCheckBox.gridwidth = 6;
+		gbc_excludeUndetectedCheckBox.insets = new Insets(0, 0, 0, 5);
+		gbc_excludeUndetectedCheckBox.gridx = 0;
+		gbc_excludeUndetectedCheckBox.gridy = 1;
+		panel.add(excludeUndetectedCheckBox, gbc_excludeUndetectedCheckBox);
 
 		JPanel buttonPanel = new JPanel();
 		FlowLayout flowLayout = (FlowLayout) buttonPanel.getLayout();
@@ -323,6 +337,10 @@ public class DataSetAlignmentSetupDialog extends JDialog implements ActionListen
 		return Double.parseDouble(rtErrorField.getText());
 	}
 	
+	public boolean excludeUndetected() {
+		return excludeUndetectedCheckBox.isSelected();
+	}
+	
 	public Collection<String>validateFormData(){
 	    
 	    Collection<String>errors = new ArrayList<String>();
@@ -363,6 +381,9 @@ public class DataSetAlignmentSetupDialog extends JDialog implements ActionListen
 		massErrorTypeComboBox.setSelectedItem(massErrorType);
 		double rtWindow = preferences.getDouble(RT_WINDOW_MIN, 0.05d);
 		rtErrorField.setText(Double.toString(rtWindow));
+		
+		excludeUndetectedCheckBox.setSelected(
+				preferences.getBoolean(EXCLUDE_UNDETECTED, true));
 	}
 
 	@Override
@@ -377,6 +398,7 @@ public class DataSetAlignmentSetupDialog extends JDialog implements ActionListen
 		preferences.putDouble(MASS_WINDOW, getMassWindow());		
 		preferences.put(MASS_ERROR_TYPE, getMassErrorType().name());
 		preferences.putDouble(RT_WINDOW_MIN, getRetentionWindow());
+		preferences.putBoolean(EXCLUDE_UNDETECTED, excludeUndetected());
 	}
 
 	@Override
