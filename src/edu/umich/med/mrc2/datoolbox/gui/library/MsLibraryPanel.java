@@ -661,7 +661,7 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ItemList
 		// Dry run to find unmatched compounds
 		Map<LibraryMsFeature,Double>rtMap = new HashMap<LibraryMsFeature,Double>();
 		ArrayList<Integer>unmatched = new ArrayList<Integer>();
-		Map<Integer,Collection<? extends MsFeature>>ambiguous = new TreeMap<Integer,Collection<? extends MsFeature>>();
+		Map<Integer,Collection<MsFeature>>ambiguous = new TreeMap<Integer,Collection<MsFeature>>();
 		Collection<LibraryMsFeature> libFeatures = currentLibrary.getFeatures();
 		List<MsFeature> matches;
 
@@ -744,7 +744,7 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ItemList
 		rtMap.forEach((k,v) -> System.out.println(k.getName() + " ~ " + MRC2ToolBoxConfiguration.getRtFormat().format(v)));
 
 		System.out.println("********************************\nMatched ambiguous\n********************************");
-		for (Entry<Integer, Collection<? extends MsFeature>> entry : ambiguous.entrySet()) {
+		for (Entry<Integer, Collection<MsFeature>> entry : ambiguous.entrySet()) {
 
 			System.out.println(StringUtils.join(inputData[entry.getKey()], MRC2ToolBoxConfiguration.getTabDelimiter()));
 			for(MsFeature f : entry.getValue())

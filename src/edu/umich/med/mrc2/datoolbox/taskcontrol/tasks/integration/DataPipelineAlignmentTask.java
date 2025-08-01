@@ -173,6 +173,13 @@ public class DataPipelineAlignmentTask extends AbstractTask {
 			}
 			processed++;
 		}	
+		taskDescription = "Calcilating correlations within clusters ...";
+		total = clusterList.size();
+		processed = 0;
+		for(MsFeatureCluster cluster : clusterList) {
+			cluster.createCorrelationMatrix(false);
+			processed++;
+		}
 		alignmentResults = new DataPipelineAlignmentResults(
 				alignmentSettings,
 				clusterList,

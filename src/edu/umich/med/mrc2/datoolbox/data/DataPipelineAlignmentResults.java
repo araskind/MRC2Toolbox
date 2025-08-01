@@ -58,6 +58,11 @@ public class DataPipelineAlignmentResults extends MsFeatureClusterSet {
 		return unmatchedReferenceFeatures;
 	}
 	
+	public Collection<MsFeature> getUnmatchedReferenceFeaturesAsMsFetures() {
+		return unmatchedReferenceFeatures.stream().
+				map(MsFeature.class::cast).collect(Collectors.toList());
+	}
+	
 	@Override
 	public Element getXmlElement() {
 		

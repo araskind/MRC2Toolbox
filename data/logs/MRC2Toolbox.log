@@ -1,14 +1,16 @@
-2025-08-01 10:59:56 INFO  Statring the program
-2025-08-01 10:59:57 INFO  HikariPool-1 - Starting...
-2025-08-01 10:59:57 INFO  HikariPool-1 - Added connection oracle.jdbc.driver.T4CConnection@604f2bd2
-2025-08-01 10:59:57 INFO  HikariPool-1 - Start completed.
-2025-08-01 10:59:59 WARN  http://www.oracle.com/xml/jaxp/properties/entityExpansionLimit not supported by parser type org.apache.xerces.jaxp.SAXParserImpl, error message: Property 'http://www.oracle.com/xml/jaxp/properties/entityExpansionLimit' is not recognized.
-2025-08-01 10:59:59 WARN  entityExpansionLimit not supported by parser type org.apache.xerces.jaxp.SAXParserImpl, error message: Property 'entityExpansionLimit' is not recognized.
-2025-08-01 11:00:00 WARN  http://www.oracle.com/xml/jaxp/properties/entityExpansionLimit not supported by parser type org.apache.xerces.jaxp.SAXParserImpl, error message: Property 'http://www.oracle.com/xml/jaxp/properties/entityExpansionLimit' is not recognized.
-2025-08-01 11:00:00 WARN  entityExpansionLimit not supported by parser type org.apache.xerces.jaxp.SAXParserImpl, error message: Property 'entityExpansionLimit' is not recognized.
-2025-08-01 11:00:00 WARN  LINE: 14486 accepting bad xref with spaces:XX:<new dbxref>  LINE:
+2025-08-01 17:46:16 INFO  Statring the program
+2025-08-01 17:46:17 INFO  HikariPool-1 - Starting...
+2025-08-01 17:46:17 INFO  HikariPool-1 - Added connection oracle.jdbc.driver.T4CConnection@663411de
+2025-08-01 17:46:17 INFO  HikariPool-1 - Start completed.
+2025-08-01 17:46:19 WARN  http://www.oracle.com/xml/jaxp/properties/entityExpansionLimit not supported by parser type org.apache.xerces.jaxp.SAXParserImpl, error message: Property 'http://www.oracle.com/xml/jaxp/properties/entityExpansionLimit' is not recognized.
+2025-08-01 17:46:19 WARN  entityExpansionLimit not supported by parser type org.apache.xerces.jaxp.SAXParserImpl, error message: Property 'entityExpansionLimit' is not recognized.
+2025-08-01 17:46:19 WARN  http://www.oracle.com/xml/jaxp/properties/entityExpansionLimit not supported by parser type org.apache.xerces.jaxp.SAXParserImpl, error message: Property 'http://www.oracle.com/xml/jaxp/properties/entityExpansionLimit' is not recognized.
+2025-08-01 17:46:19 WARN  entityExpansionLimit not supported by parser type org.apache.xerces.jaxp.SAXParserImpl, error message: Property 'entityExpansionLimit' is not recognized.
+2025-08-01 17:46:20 WARN  LINE: 14486 accepting bad xref with spaces:XX:<new dbxref>  LINE:
 synonym: "Ginkgolides and Bilobalides" RELATED LIPIDMAPS_TERM [LIPIDMAPS:PR010454, XX:<new dbxref>]
-2025-08-01 11:00:00 WARN  LINE: 19074 accepting bad xref with spaces:XX:<new dbxref>  LINE:
+2025-08-01 17:46:20 WARN  LINE: 19074 accepting bad xref with spaces:XX:<new dbxref>  LINE:
 def: "Beta-lactam antibiotics that differ from penicillins in having the thiazolidine sulfur atom replaced by carbon, the sulfur then becoming the first atom in the side chain." [XX:<new dbxref>]
-2025-08-01 11:00:00 WARN  LINE: 43030 accepting bad xref with spaces:CHEBI:organic thiophosphate  LINE:
+2025-08-01 17:46:20 WARN  LINE: 43030 accepting bad xref with spaces:CHEBI:organic thiophosphate  LINE:
 synonym: "organic thiophosphate" BROAD ChEBI_TERM [CHEBI:organic thiophosphate]
+2025-08-01 17:55:04 INFO  HikariPool-1 - Shutdown initiated...
+2025-08-01 17:55:04 INFO  HikariPool-1 - Shutdown completed.

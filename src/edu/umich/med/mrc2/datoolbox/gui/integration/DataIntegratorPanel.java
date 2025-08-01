@@ -27,6 +27,8 @@ import java.awt.event.ItemEvent;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import javax.swing.DefaultListSelectionModel;
@@ -39,9 +41,11 @@ import javax.swing.event.TreeSelectionEvent;
 import org.apache.commons.lang3.StringUtils;
 
 import edu.umich.med.mrc2.datoolbox.data.DataPipelineAlignmentResults;
+import edu.umich.med.mrc2.datoolbox.data.LibraryMsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureCluster;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureClusterSet;
+import edu.umich.med.mrc2.datoolbox.data.MsFeatureSet;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.gui.clustertree.DockableClusterTree;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignEvent;
@@ -79,8 +83,12 @@ public class DataIntegratorPanel extends ClusterDisplayPanel {
 	private DataPipelineAlignmentResults alignmentResults;
 	
 	private DockableDataIntegrationFeatureSelectionTable featureSelectionTable;
+	private DockableAlignedDataSetSummaryPanel alignedDataSetSummaryPanel;
 	private DataSetAlignmentSetupDialog dataSetAlignmentSetupDialog;
 	private DataSetAlignmentManager dataSetAlignmentManager;
+	
+	public static final String DATA_INTEGRATOR_FEATURE_SET = "DATA_INTEGRATOR_FEATURE_SET";
+	private MsFeatureSet activeMsFeatureSet;
 
 	public DataIntegratorPanel() {
 
@@ -88,6 +96,8 @@ public class DataIntegratorPanel extends ClusterDisplayPanel {
 
 		featureSelectionTable = new DockableDataIntegrationFeatureSelectionTable(this);
 		featureDataTable = featureSelectionTable.getTable();
+		alignedDataSetSummaryPanel = new DockableAlignedDataSetSummaryPanel(this);
+		
 		dataIntegrationSetupDialog = new DataIntegrationSetupDialog(this);
 
 		createPanelLayout();
@@ -95,6 +105,7 @@ public class DataIntegratorPanel extends ClusterDisplayPanel {
 		initActions();
 		loadLayout(layoutConfigFile);
 		populatePanelsMenu();
+		activeMsFeatureSet = new MsFeatureSet(DATA_INTEGRATOR_FEATURE_SET);
 	}
 
 	@Override
@@ -105,7 +116,7 @@ public class DataIntegratorPanel extends ClusterDisplayPanel {
 		clusterTree = new DockableClusterTree("DataIntegratorPanelDockableClusterTree", "Feature clusters", this, this);
 		clusterTree.getTree().setFeaturePopupMenu(new IntegrationFeaturePopupMenu(this));
 
-		grid.add(0, 0, 80, 30, featureSelectionTable);
+		grid.add(0, 0, 80, 30, featureSelectionTable, alignedDataSetSummaryPanel);
 		grid.add(80, 0, 20, 30, molStructurePanel);
 		grid.add(0, 30, 100, 20, idTable);
 		grid.add(0, 50, 50, 50, dataPlot, featureIntensitiesTable, correlationPanel);
@@ -204,6 +215,28 @@ public class DataIntegratorPanel extends ClusterDisplayPanel {
 		
 		if (command.equals(MainActionCommands.LOAD_DATA_PIPELINE_ALIGNMENT_RESULTS_COMMAND.getName()))
 			loadSelectedDataAlignmentResults();
+		
+		if (command.equals(MainActionCommands.SHOW_UNMATCHED_FEATURES_FROM_REFERENCE_DATASET_COMMAND.getName()))
+			showUnmatchedFeaturesFromRefLibInAlignedDataSet();
+	}
+	
+	private void showUnmatchedFeaturesFromRefLibInAlignedDataSet() {
+		
+		if(alignmentResults == null)
+			return;
+
+		Collection<LibraryMsFeature> unmatchedFeatures = 
+				alignmentResults.getUnmatchedReferenceFeatures();
+		if(unmatchedFeatures.isEmpty()) {
+			MessageDialog.showWarningMsg("No unmatched features found", this.getContentPane());
+			return;
+		}
+		Map<DataPipeline,Collection<MsFeature>>unmatchedMap = 
+				new HashMap<DataPipeline,Collection<MsFeature>>();
+		unmatchedMap.put(
+				alignmentResults.getAlignmentSettings().getReferencePipeline(), 
+				alignmentResults.getUnmatchedReferenceFeaturesAsMsFetures());
+		alignedDataSetSummaryPanel.setTableModelFromFeatureMap(unmatchedMap);
 	}
 	
 	private void deleteSelectedDataAlignmentResults() {
@@ -591,5 +624,9 @@ public class DataIntegratorPanel extends ClusterDisplayPanel {
 	public void updateGuiWithRecentData() {
 		// TODO Auto-generated method stub
 		
+	}
+
+	public MsFeatureSet getActiveMsFeatureSet() {
+		return activeMsFeatureSet;
 	}
 }

@@ -144,7 +144,7 @@ public class ClusterVisFrame extends JFrame implements ActionListener, ItemListe
 
 	public void createDendrogramm() {
 
-		Matrix mms = currentCluster.getCorrMatrix().getMetaDataDimensionMatrix(0);
+		Matrix mms = currentCluster.getClusterCorrMatrix().getMetaDataDimensionMatrix(0);
 		String[] names = new String[(int) mms.getColumnCount()];
 		Object[] features = new Object[(int) mms.getColumnCount()];
 		long[] coordinates = new long[2];

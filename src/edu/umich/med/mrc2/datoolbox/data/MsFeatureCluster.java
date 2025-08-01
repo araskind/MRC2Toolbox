@@ -241,8 +241,12 @@ public class MsFeatureCluster implements Serializable, XmlStorable {
 		return correlationMatrix.getAsDouble(coordinate);
 	}
 
-	public Matrix getCorrMatrix() {
-		return correlationMatrix;
+	public double getMinimalCorrelation() {
+		
+		if(correlationMatrix == null)
+			return 0.0d;
+		else
+			return correlationMatrix.getMinValue();
 	}
 
 	public List<MsFeature> getFeatures() {

@@ -417,6 +417,8 @@ public enum MainActionCommands {
 	SHOW_DATA_PIPELINE_ALIGNMENT_MANAGER_COMMAND("Show data alignment manager"),
 	LOAD_DATA_PIPELINE_ALIGNMENT_RESULTS_COMMAND("Load data alignment results"),
 	DELETE_DATA_PIPELINE_ALIGNMENT_RESULTS_COMMAND("Delete data alignment results"),
+	
+	SHOW_UNMATCHED_FEATURES_FROM_REFERENCE_DATASET_COMMAND("Show unmatched features from reference dataset"),
 
 	// Sorting commands
 	SORT_BY_AREA_COMMAND("Sort by area (high to low)"),

@@ -53,7 +53,8 @@ public class DataIntegrationPanelMenuBar extends CommonMenuBar {
 	private static final Icon dataSetAlignmentIcon = GuiUtils.getIcon("alignment", 24);
 	private static final Icon deleteDataSetAlignmentIcon = GuiUtils.getIcon("deleteAlignment", 24);
 	private static final Icon dataSetAlignmentManagerIcon = GuiUtils.getIcon("alignmentManager", 24);
-
+	private static final Icon showUnmatchedIcon = GuiUtils.getIcon("showUnknowns", 24);
+	
 	// Menus
 	private JMenu
 		integrationMenu,
@@ -70,7 +71,8 @@ public class DataIntegrationPanelMenuBar extends CommonMenuBar {
 	private JMenuItem
 		dataSetAlignmentSetupMenuItem,
 		deleteDataSetAlignmentMenuItem,
-		dataSetAlignmentManagerMenuItem;
+		dataSetAlignmentManagerMenuItem,
+		showUnmatchedFromReferenceMenuItem;
 	
 	// Search items
 	private JMenuItem
@@ -115,6 +117,12 @@ public class DataIntegrationPanelMenuBar extends CommonMenuBar {
 				MainActionCommands.SHOW_DATA_PIPELINE_ALIGNMENT_MANAGER_COMMAND, 
 				dataSetAlignmentManagerIcon);
 		
+		alignmentMenu.addSeparator();
+		
+		showUnmatchedFromReferenceMenuItem = addItem(alignmentMenu, 
+				MainActionCommands.SHOW_UNMATCHED_FEATURES_FROM_REFERENCE_DATASET_COMMAND, 
+				showUnmatchedIcon);
+			
 		add(alignmentMenu);
 
 		//	Search
