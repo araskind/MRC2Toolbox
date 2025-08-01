@@ -92,8 +92,8 @@ public class DataIntegrationFeatureSelectionTable extends FeatureSelectionTable 
 		columnModel.getColumnById(DataIntegrationFeatureSelectionTableModel.SAMPLE_FREQUENCY_COLUMN)
 				.setCellRenderer(pieChartFrequencyRenderer);
 		
-		columnModel.getColumnById(DataIntegrationFeatureSelectionTableModel.ID_COLUMN).setWidth(50);
-		columnModel.getColumnById(DataIntegrationFeatureSelectionTableModel.MERGE_COLUMN).setWidth(50);
+		columnModel.getColumnById(DataIntegrationFeatureSelectionTableModel.ID_COLUMN).setMaxWidth(50);
+		columnModel.getColumnById(DataIntegrationFeatureSelectionTableModel.MERGE_COLUMN).setMaxWidth(80);
 		fixedWidthColumns.add(model.getColumnIndex(DataIntegrationFeatureSelectionTableModel.ID_COLUMN));
 		fixedWidthColumns.add(model.getColumnIndex(DataIntegrationFeatureSelectionTableModel.MERGE_COLUMN));
 
@@ -121,7 +121,8 @@ public class DataIntegrationFeatureSelectionTable extends FeatureSelectionTable 
 			if (col == getColumnIndex(DataIntegrationFeatureSelectionTableModel.MERGE_COLUMN)) {
 
 				boolean included = (boolean) getValueAt(row, col);
-				activeCluster.setFeatureEnabled(selectedFeature, included);
+				//activeCluster.setFeatureEnabled(selectedFeature, included);
+				activeCluster.markFeatureForMerging(selectedFeature, included);
 				model.removeTableModelListener(modelListener);
 				((DataIntegrationFeatureSelectionTableModel)model).reloadData();
 				model.addTableModelListener(modelListener);

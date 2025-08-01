@@ -177,9 +177,11 @@ public abstract class ClusterDisplayPanel extends DockableMRC2ToolboxPanel
 
 	public void clearClusterDataPanel() {
 
-		if(featureDataTable != null)
+		if(featureDataTable != null) {
+			featureDataTable.getSelectionModel().removeListSelectionListener(this);
 			featureDataTable.clearTable();
-
+			featureDataTable.getSelectionModel().addListSelectionListener(this);
+		}
 		dataPlot.clearPlotPanel();
 		correlationPanel.clearPanel();
 		featureIntensitiesTable.clearTable();
@@ -197,7 +199,9 @@ public abstract class ClusterDisplayPanel extends DockableMRC2ToolboxPanel
 
 			public void run() {
 				clearClusterDataPanel();
+				clusterTree.getTree().removeTreeSelectionListener(ClusterDisplayPanel.this);
 				clusterTree.resetTree();
+				clusterTree.getTree().addTreeSelectionListener(ClusterDisplayPanel.this);
 				//	toolbar.updateGuiFromActiveSet(null);
 			}
 		};

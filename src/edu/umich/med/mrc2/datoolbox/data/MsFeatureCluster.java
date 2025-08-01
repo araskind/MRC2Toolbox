@@ -77,6 +77,7 @@ public class MsFeatureCluster implements Serializable, XmlStorable {
 	private Map<DataPipeline, DescriptiveStatistics>featureRTStatistics;	
 	private Map<DataPipeline, DescriptiveStatistics>featureMZStatistics;
 	private Collection<MsFeature>disabledFeatures;
+	private Collection<MsFeature>markedForMerge;
 	private Matrix correlationMatrix;
 	private Collection<ModificationBlock> chemicalModificationsMap;
 	private Map<MsFeature, Set<Adduct>> annotationMap;
@@ -96,6 +97,7 @@ public class MsFeatureCluster implements Serializable, XmlStorable {
 		primaryFeature = null;
 		locked = false;
 		disabledFeatures = new HashSet<MsFeature>();
+		markedForMerge = new HashSet<MsFeature>();
 	}
 
 	public void addFeature(MsFeature cf, DataPipeline pipeline) {
@@ -841,6 +843,16 @@ public class MsFeatureCluster implements Serializable, XmlStorable {
 			disabledElement.setText(StringUtils.join(featureIdList, ","));	
 			msFeatureClusterElement.addContent(disabledElement);
 		}
+		if(!markedForMerge.isEmpty()) {
+			
+			Element markedForMergeElement = 
+					new Element(MsFeatureClusterFields.markedForMerge.name());
+			
+			List<String>featureIdList = markedForMerge.stream().
+					map(f -> f.getId()).collect(Collectors.toList());
+			markedForMergeElement.setText(StringUtils.join(featureIdList, ","));	
+			msFeatureClusterElement.addContent(markedForMergeElement);
+		}		
 		if(chemicalModificationsMap != null && !chemicalModificationsMap.isEmpty()) {
 			
 			Element chemicalModificationsMapElement = 
@@ -904,7 +916,7 @@ public class MsFeatureCluster implements Serializable, XmlStorable {
 		if(primaryId != null)
 			primaryFeature = getFeatureById(primaryId);
 		
-		//	Set diasabled features
+		//	Set disabled features
 		Element disabledElement = msFeatureClusterElement.getChild(
 				MsFeatureClusterFields.disabledFeatures.name());
 		if(disabledElement != null) {
@@ -914,7 +926,18 @@ public class MsFeatureCluster implements Serializable, XmlStorable {
 				if(df != null)
 					disabledFeatures.add(df);
 			}
-		}	
+		}
+		//	Set "marked for merge" features markedForMerge
+		Element markedForMergeElement = msFeatureClusterElement.getChild(
+				MsFeatureClusterFields.markedForMerge.name());
+		if(markedForMergeElement != null) {
+			String[]featureIds = markedForMergeElement.getText().split(",");
+			for(String id : featureIds) {
+				MsFeature df = getFeatureById(id);
+				if(df != null)
+					markedForMerge.add(df);
+			}
+		}
 		//	Recreate chemical modifications map
 		Element chemicalModificationsMapElement = msFeatureClusterElement.getChild(
 				MsFeatureClusterFields.chemicalModificationsMap.name());
@@ -946,6 +969,22 @@ public class MsFeatureCluster implements Serializable, XmlStorable {
 					annotationMap.put(feature, fAdducts);
 			}
 		}		
+	}
+
+	public Collection<MsFeature> getMarkedForMerge() {
+		return markedForMerge;
+	}
+	
+	public void markFeatureForMerging(MsFeature msf, boolean mark) {
+		
+		if(mark)
+			markedForMerge.add(msf);
+		else
+			markedForMerge.remove(msf);
+	}
+	
+	public boolean isFeatureMarkedForMerging(MsFeature msf) {
+		return markedForMerge.contains(msf);
 	}
 }
 

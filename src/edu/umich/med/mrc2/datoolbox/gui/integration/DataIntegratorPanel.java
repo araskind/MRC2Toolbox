@@ -474,7 +474,7 @@ public class DataIntegratorPanel extends ClusterDisplayPanel {
 		super.valueChanged(e);
 		showClusterData(activeCluster);
 
-		if (clusterTree.getSelectedFeatures().size() > 0)
+		if (!clusterTree.getSelectedFeatures().isEmpty())
 			selectFeatures(clusterTree.getSelectedFeatures());
 	}
 
@@ -508,12 +508,9 @@ public class DataIntegratorPanel extends ClusterDisplayPanel {
 
 	@Override
 	public void closeExperiment() {
-		// TODO Auto-generated method stub
-
-		super.closeExperiment();
+		
 		clearPanel();
-//		TODO find new place for this functionality?
-//		toolbar.updateGuiFromProjectAndDataPipeline(null, null);
+		super.closeExperiment();
 	}
 
 	@Override

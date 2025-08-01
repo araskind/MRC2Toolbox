@@ -62,6 +62,7 @@ public class DockableClusterTree extends DefaultSingleCDockable implements Actio
 
 		clusterTree = new ClusterTree(featurePopupListener);
 		clusterTree.addTreeSelectionListener(tsl);
+		clusterTree.setTransferHandler(null); //	Disable DnD
 		add(new JScrollPane(clusterTree));
 		initButtons(this, featurePopupListener);
 	}

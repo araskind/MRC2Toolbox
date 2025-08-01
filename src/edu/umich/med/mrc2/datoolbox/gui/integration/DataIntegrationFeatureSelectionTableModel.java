@@ -118,22 +118,23 @@ public class DataIntegrationFeatureSelectionTableModel extends BasicTableModel {
 					}
 				}
 				Object[] obj = {
-					cf.equals(currentCluster.getPrimaryFeature()),
-					entry.getValue(),
-					cf,
-					compoundName,
-					chmodLibrary,
-					entry.getKey(),
-					cf.getQualityScore() / 100.0d,
-					cf.getRetentionTime(),
-					cf.getMonoisotopicMz(),
-					cf.getAbsoluteObservedCharge(),
-					cf.getStatsSummary().getPooledMean(),
-					cf.getStatsSummary().getPooledRsd(),
-					cf.getStatsSummary().getPooledFrequency(),
-					cf.getStatsSummary().getSampleMean(),
-					cf.getStatsSummary().getSampleRsd(),
-					cf.getStatsSummary().getSampleFrequency()
+						cf.equals(currentCluster.getPrimaryFeature()), //ID_COLUMN
+						featureCluster.isFeatureMarkedForMerging(cf) , //MERGE_COLUMN
+						cf, 										//FEATURE_COLUMN
+						compoundName, 								//COMPOUND_NAME_COLUMN
+						chmodLibrary, 								//CHEM_MOD_LIBRARY_COLUMN
+						entry.getKey(), 							//DATA_PIPELINE_COLUMN
+						cf.getQualityScore() / 100.0d, 				//SCORE_COLUMN
+						cf.getRetentionTime(), 						//RETENTION_COLUMN
+						cf.getMonoisotopicMz(), 					//BASE_PEAK_COLUMN
+						cf.getAbsoluteObservedCharge(), 			//CHARGE_COLUMN
+						cf.getStatsSummary().getPooledMean(), 		//POOLED_MEAN_COLUMN
+						cf.getStatsSummary().getPooledRsd(), 		//POOLED_RSD_COLUMN
+						cf.getStatsSummary().getPooledFrequency(), 	//POOLED_FREQUENCY_COLUMN
+						cf.getStatsSummary().getSampleMean(), 		//SAMPLE_MEAN_COLUMN
+						cf.getStatsSummary().getSampleRsd(), 		//SAMPLE_RSD_COLUMN
+						cf.getStatsSummary().getSampleFrequency() 	//SAMPLE_FREQUENCY_COLUMN
+
 				};
 				rowData.add(obj);
 			}

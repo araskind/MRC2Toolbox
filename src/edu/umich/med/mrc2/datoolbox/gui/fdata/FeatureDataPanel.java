@@ -2122,14 +2122,6 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 	@Override
 	public void valueChanged(ListSelectionEvent e) {
 
-		//	TODO handle identification table selection separately from feature table
-//		if (event.getSource() instanceof DefaultListSelectionModel 
-//				&& !event.getValueIsAdjusting()) {
-//
-//			clearFeatureData();
-//			switchSelectedFeatures();
-//		}
-		
 		if(e.getValueIsAdjusting() || e.getSource() == null)
 			return;
 

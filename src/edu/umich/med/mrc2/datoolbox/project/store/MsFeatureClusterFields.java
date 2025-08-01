@@ -25,6 +25,7 @@ public enum MsFeatureClusterFields {
 
 	clusterFeaturesMap,
 	disabledFeatures,
+	markedForMerge,
 	chemicalModificationsMap,
 	annotationMap,
 	annotationMapEntry,
