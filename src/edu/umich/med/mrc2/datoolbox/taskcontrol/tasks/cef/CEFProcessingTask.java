@@ -372,8 +372,15 @@ public abstract class CEFProcessingTask extends AbstractTask {
 
 		Map<Adduct,Collection<MsPoint>>cmMap = 
 				new TreeMap<Adduct,Collection<MsPoint>>();
-		List<Element> peaks = spectrumElement.getChild("MSPeaks").getChildren("p");
-
+		List<Element> peaks = new ArrayList<Element>();
+		if(spectrumElement.getChild("MSPeaks") == null)	
+			return cmMap;
+		else
+			peaks = spectrumElement.getChild("MSPeaks").getChildren("p");
+		
+		if(peaks.isEmpty())
+			return cmMap;
+		
 		//	Check if no adducts are specified
 		if(peaks.get(0).getAttribute("s") == null 
 				|| peaks.get(0).getAttributeValue("s").isEmpty()) {

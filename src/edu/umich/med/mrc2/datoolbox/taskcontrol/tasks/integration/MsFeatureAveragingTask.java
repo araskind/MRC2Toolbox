@@ -31,6 +31,7 @@ import org.ujmp.core.calculation.Calculation.Ret;
 import edu.umich.med.mrc2.datoolbox.data.CompoundLibrary;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.LibraryMsFeature;
+import edu.umich.med.mrc2.datoolbox.data.MassSpectrum;
 import edu.umich.med.mrc2.datoolbox.data.SimpleMsFeature;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
@@ -141,10 +142,11 @@ public class MsFeatureAveragingTask extends AbstractTask {
 			if(statObject.getMedianRtRange() != null)
 				newLibFeature.setRtRange(statObject.getMedianRtRange());
 			
-			if(statObject.getAverageScaledMassSpectrum() != null)
-				newLibFeature.setSpectrum(statObject.getAverageScaledMassSpectrum());
-			
-			averagedLibrary.addFeature(newLibFeature);
+			MassSpectrum avgSpectrum = statObject.getAverageScaledMassSpectrum();
+			if(avgSpectrum != null && avgSpectrum.getBasePeak() != null) {			
+				newLibFeature.setSpectrum(avgSpectrum);		
+				averagedLibrary.addFeature(newLibFeature);
+			}
 			processed++;
 		}				
 	}

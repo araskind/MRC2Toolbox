@@ -124,8 +124,8 @@
 									<root>true</root>
 									<content delegate="SplitDockStationFactory">
 										<fullscreen-action>false</fullscreen-action>
-										<node nodeId="1697239277915" orientation="VERTICAL" divider="0.5238095238095238">
-											<node nodeId="1697239315478" orientation="VERTICAL" divider="0.7447698744769876">
+										<node nodeId="1697239277915" orientation="VERTICAL" divider="0.6027531956735497">
+											<node nodeId="1697239315478" orientation="VERTICAL" divider="0.6546644844517184">
 												<leaf id="0" nodeId="1600213792571">
 													<placeholders>
 														<placeholder>dock.single.FeatureDataPanelDockableFeatureDataTable</placeholder>

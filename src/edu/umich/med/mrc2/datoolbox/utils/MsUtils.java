@@ -1742,6 +1742,9 @@ public class MsUtils {
 		Map<Adduct, List<MsPoint>>adductMsPointsMap = new TreeMap<Adduct, List<MsPoint>>();
 		for(MassSpectrum ms : inputSpectra) {
 			
+			if(ms == null || ms.getBasePeak() == null)
+				continue;
+			
 			Map<Adduct, Collection<MsPoint>>normalizedToBase = scaleAllAdductsToBasePeak(ms);
 			for(Entry<Adduct, Collection<MsPoint>>normEntry : normalizedToBase.entrySet()) {
 				

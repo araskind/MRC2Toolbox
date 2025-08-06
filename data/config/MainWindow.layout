@@ -42,19 +42,6 @@
 												<key shared="false">
 													<placeholder>dock.single.ExperimentSetupDraw</placeholder>
 												</key>
-												<item key="convert" type="b">true</item>
-												<item key="convert-keys" type="a">
-													<item type="s">size</item>
-													<item type="s">index</item>
-													<item type="s">id</item>
-													<item type="s">placeholder</item>
-													<item type="s">hold</item>
-												</item>
-												<item key="dock.size" type="i">400</item>
-												<item key="dock.index" type="i">0</item>
-												<item key="dock.id" type="i">0</item>
-												<item key="dock.placeholder" type="s">dock.single.ExperimentSetupDraw</item>
-												<item key="dock.hold" type="b">false</item>
 											</entry>
 										</placeholders>
 									</content>
@@ -65,18 +52,7 @@
 									<type>dock.CContentArea.minimize</type>
 								</layout>
 							</adjacent>
-							<children ignore="false">
-								<child>
-									<layout factory="predefined" placeholder="dock.single.ExperimentSetupDraw">
-										<replacement id="dockablesingle ExperimentSetupDraw"/>
-										<delegate id="delegate_ccontrol backup factory id">
-											<id>ExperimentSetupDraw</id>
-											<area/>
-										</delegate>
-									</layout>
-									<children ignore="false"/>
-								</child>
-							</children>
+							<children ignore="false"/>
 						</root>
 						<root name="ccontrol south">
 							<layout factory="predefined">
@@ -254,147 +230,141 @@
 									<root>true</root>
 									<content delegate="SplitDockStationFactory">
 										<fullscreen-action>false</fullscreen-action>
-										<node nodeId="1753117790111" orientation="VERTICAL" divider="0.5">
-											<leaf id="-1" nodeId="1753117790109">
+										<node nodeId="1672779742083" orientation="HORIZONTAL" divider="0.27824709609292503">
+											<leaf id="-1" nodeId="1672779742081">
 												<placeholders>
-													<placeholder>dock.single.DataIntegratorPanelClusterDisplayPanel</placeholder>
+													<placeholder>dock.single.ProjectSetupDraw</placeholder>
 												</placeholders>
 											</leaf>
-											<node nodeId="1672779742083" orientation="HORIZONTAL" divider="0.27824709609292503">
-												<leaf id="-1" nodeId="1672779742081">
+											<node nodeId="1676064563113" orientation="HORIZONTAL" divider="0.22447058823529412">
+												<leaf id="1" nodeId="1676064552084">
 													<placeholders>
-														<placeholder>dock.single.ProjectSetupDraw</placeholder>
+														<placeholder>dock.single.ExperimentSetupDraw</placeholder>
 													</placeholders>
 												</leaf>
-												<node nodeId="1676064563113" orientation="HORIZONTAL" divider="0.22447058823529412">
-													<leaf id="-1" nodeId="1676064552084">
-														<placeholders>
-															<placeholder>dock.single.ExperimentSetupDraw</placeholder>
-														</placeholders>
-													</leaf>
-													<leaf id="0" nodeId="1672779039466">
-														<placeholders>
-															<placeholder>dock.single.CompoundDatabasePanel</placeholder>
-															<placeholder>dock.single.MgfPanel</placeholder>
-															<placeholder>dock.single.CompoundCollectionsPanel</placeholder>
-															<placeholder>dock.single.RawDataExaminerPanel</placeholder>
-															<placeholder>dock.single.CorrelationResultsPanelClusterDisplayPanel</placeholder>
-															<placeholder>dock.single.WorklistPanel</placeholder>
-															<placeholder>dock.single.ExperimentDesignPanel</placeholder>
-															<placeholder>dock.single.IDWorkbenchPanel</placeholder>
-															<placeholder>dock.single.DuplicatesPanelClusterDisplayPanel</placeholder>
-															<placeholder>dock.single.LabNoteBookPanel</placeholder>
-															<placeholder>dock.single.AutomatorPanel</placeholder>
-															<placeholder>dock.single.QCPanel</placeholder>
-															<placeholder>dock.single.IDTrackerLimsManagerPanel</placeholder>
-															<placeholder>dock.single.MoTrPACDataTrackingPanel</placeholder>
-															<placeholder>dock.single.MsLibraryPanel</placeholder>
-															<placeholder>dock.single.FeatureDataPanel</placeholder>
-															<placeholder>dock.single.METLIMSPanel</placeholder>
-														</placeholders>
-														<placeholder-map>
-															<version>0</version>
-															<format>dock.PlaceholderList</format>
-															<entry>
-																<key shared="false">
-																	<placeholder>dock.single.ExperimentDesignPanel</placeholder>
-																</key>
-																<item key="convert" type="b">true</item>
-																<item key="convert-keys" type="a"/>
-															</entry>
-															<entry>
-																<key shared="false">
-																	<placeholder>dock.single.FeatureDataPanel</placeholder>
-																</key>
-																<item key="convert" type="b">true</item>
-																<item key="convert-keys" type="a"/>
-															</entry>
-															<entry>
-																<key shared="false">
-																	<placeholder>dock.single.WorklistPanel</placeholder>
-																</key>
-																<item key="convert" type="b">true</item>
-																<item key="convert-keys" type="a"/>
-															</entry>
-															<entry>
-																<key shared="false">
-																	<placeholder>dock.single.QCPanel</placeholder>
-																</key>
-																<item key="convert" type="b">true</item>
-																<item key="convert-keys" type="a"/>
-															</entry>
-															<entry>
-																<key shared="false">
-																	<placeholder>dock.single.DuplicatesPanelClusterDisplayPanel</placeholder>
-																</key>
-																<item key="convert" type="b">true</item>
-																<item key="convert-keys" type="a"/>
-															</entry>
-															<entry>
-																<key shared="false">
-																	<placeholder>dock.single.MsLibraryPanel</placeholder>
-																</key>
-																<item key="convert" type="b">true</item>
-																<item key="convert-keys" type="a"/>
-															</entry>
-															<entry>
-																<key shared="false">
-																	<placeholder>dock.single.CompoundDatabasePanel</placeholder>
-																</key>
-																<item key="convert" type="b">true</item>
-																<item key="convert-keys" type="a"/>
-															</entry>
-															<entry>
-																<key shared="false">
-																	<placeholder>dock.single.IDWorkbenchPanel</placeholder>
-																</key>
-																<item key="convert" type="b">true</item>
-																<item key="convert-keys" type="a"/>
-															</entry>
-															<entry>
-																<key shared="false">
-																	<placeholder>dock.single.IDTrackerLimsManagerPanel</placeholder>
-																</key>
-																<item key="convert" type="b">true</item>
-																<item key="convert-keys" type="a"/>
-															</entry>
-															<entry>
-																<key shared="false">
-																	<placeholder>dock.single.CompoundCollectionsPanel</placeholder>
-																</key>
-															</entry>
-															<entry>
-																<key shared="false">
-																	<placeholder>dock.single.MgfPanel</placeholder>
-																</key>
-															</entry>
-															<entry>
-																<key shared="false">
-																	<placeholder>dock.single.LabNoteBookPanel</placeholder>
-																</key>
-															</entry>
-															<entry>
-																<key shared="false">
-																	<placeholder>dock.single.MoTrPACDataTrackingPanel</placeholder>
-																</key>
-															</entry>
-															<entry>
-																<key shared="false">
-																	<placeholder>dock.single.METLIMSPanel</placeholder>
-																</key>
-																<item key="convert" type="b">true</item>
-																<item key="convert-keys" type="a"/>
-															</entry>
-															<entry>
-																<key shared="false">
-																	<placeholder>dock.single.RawDataExaminerPanel</placeholder>
-																</key>
-																<item key="convert" type="b">true</item>
-																<item key="convert-keys" type="a"/>
-															</entry>
-														</placeholder-map>
-													</leaf>
-												</node>
+												<leaf id="0" nodeId="1672779039466">
+													<placeholders>
+														<placeholder>dock.single.CompoundDatabasePanel</placeholder>
+														<placeholder>dock.single.MgfPanel</placeholder>
+														<placeholder>dock.single.CompoundCollectionsPanel</placeholder>
+														<placeholder>dock.single.DataIntegratorPanelClusterDisplayPanel</placeholder>
+														<placeholder>dock.single.RawDataExaminerPanel</placeholder>
+														<placeholder>dock.single.CorrelationResultsPanelClusterDisplayPanel</placeholder>
+														<placeholder>dock.single.WorklistPanel</placeholder>
+														<placeholder>dock.single.ExperimentDesignPanel</placeholder>
+														<placeholder>dock.single.IDWorkbenchPanel</placeholder>
+														<placeholder>dock.single.DuplicatesPanelClusterDisplayPanel</placeholder>
+														<placeholder>dock.single.LabNoteBookPanel</placeholder>
+														<placeholder>dock.single.AutomatorPanel</placeholder>
+														<placeholder>dock.single.QCPanel</placeholder>
+														<placeholder>dock.single.IDTrackerLimsManagerPanel</placeholder>
+														<placeholder>dock.single.MoTrPACDataTrackingPanel</placeholder>
+														<placeholder>dock.single.MsLibraryPanel</placeholder>
+														<placeholder>dock.single.FeatureDataPanel</placeholder>
+														<placeholder>dock.single.METLIMSPanel</placeholder>
+													</placeholders>
+													<placeholder-map>
+														<version>0</version>
+														<format>dock.PlaceholderList</format>
+														<entry>
+															<key shared="false">
+																<placeholder>dock.single.ExperimentDesignPanel</placeholder>
+															</key>
+															<item key="convert" type="b">true</item>
+															<item key="convert-keys" type="a"/>
+														</entry>
+														<entry>
+															<key shared="false">
+																<placeholder>dock.single.FeatureDataPanel</placeholder>
+															</key>
+															<item key="convert" type="b">true</item>
+															<item key="convert-keys" type="a"/>
+														</entry>
+														<entry>
+															<key shared="false">
+																<placeholder>dock.single.WorklistPanel</placeholder>
+															</key>
+															<item key="convert" type="b">true</item>
+															<item key="convert-keys" type="a"/>
+														</entry>
+														<entry>
+															<key shared="false">
+																<placeholder>dock.single.QCPanel</placeholder>
+															</key>
+															<item key="convert" type="b">true</item>
+															<item key="convert-keys" type="a"/>
+														</entry>
+														<entry>
+															<key shared="false">
+																<placeholder>dock.single.DuplicatesPanelClusterDisplayPanel</placeholder>
+															</key>
+															<item key="convert" type="b">true</item>
+															<item key="convert-keys" type="a"/>
+														</entry>
+														<entry>
+															<key shared="false">
+																<placeholder>dock.single.MsLibraryPanel</placeholder>
+															</key>
+															<item key="convert" type="b">true</item>
+															<item key="convert-keys" type="a"/>
+														</entry>
+														<entry>
+															<key shared="false">
+																<placeholder>dock.single.CompoundDatabasePanel</placeholder>
+															</key>
+															<item key="convert" type="b">true</item>
+															<item key="convert-keys" type="a"/>
+														</entry>
+														<entry>
+															<key shared="false">
+																<placeholder>dock.single.IDWorkbenchPanel</placeholder>
+															</key>
+															<item key="convert" type="b">true</item>
+															<item key="convert-keys" type="a"/>
+														</entry>
+														<entry>
+															<key shared="false">
+																<placeholder>dock.single.IDTrackerLimsManagerPanel</placeholder>
+															</key>
+															<item key="convert" type="b">true</item>
+															<item key="convert-keys" type="a"/>
+														</entry>
+														<entry>
+															<key shared="false">
+																<placeholder>dock.single.CompoundCollectionsPanel</placeholder>
+															</key>
+														</entry>
+														<entry>
+															<key shared="false">
+																<placeholder>dock.single.MgfPanel</placeholder>
+															</key>
+														</entry>
+														<entry>
+															<key shared="false">
+																<placeholder>dock.single.LabNoteBookPanel</placeholder>
+															</key>
+														</entry>
+														<entry>
+															<key shared="false">
+																<placeholder>dock.single.MoTrPACDataTrackingPanel</placeholder>
+															</key>
+														</entry>
+														<entry>
+															<key shared="false">
+																<placeholder>dock.single.METLIMSPanel</placeholder>
+															</key>
+															<item key="convert" type="b">true</item>
+															<item key="convert-keys" type="a"/>
+														</entry>
+														<entry>
+															<key shared="false">
+																<placeholder>dock.single.RawDataExaminerPanel</placeholder>
+															</key>
+															<item key="convert" type="b">true</item>
+															<item key="convert-keys" type="a"/>
+														</entry>
+													</placeholder-map>
+												</leaf>
 											</node>
 										</node>
 									</content>
@@ -408,7 +378,7 @@
 							<children ignore="false">
 								<child>
 									<layout factory="delegate_StackDockStationFactory">
-										<selected>3</selected>
+										<selected>1</selected>
 										<placeholders>
 											<version>0</version>
 											<format>dock.PlaceholderList</format>
@@ -735,6 +705,16 @@
 										</child>
 									</children>
 								</child>
+								<child>
+									<layout factory="predefined" placeholder="dock.single.ExperimentSetupDraw">
+										<replacement id="dockablesingle ExperimentSetupDraw"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>ExperimentSetupDraw</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
+								</child>
 							</children>
 						</root>
 						<root name="ccontrol west">
@@ -950,12 +930,12 @@
 											<placeholder>dock.single.QCPanel</placeholder>
 											<backup-path>
 												<node location="RIGHT" size="0.7217529039070749" id="1672779742083"/>
-												<node location="RIGHT" size="0.71682398667407" id="1676064563113"/>
+												<node location="RIGHT" size="0.7755294117647059" id="1676064563113"/>
 												<leaf id="1672779039466"/>
 											</backup-path>
 										</property>
 										<property factory="StackDockPropertyFactory">
-											<index>3</index>
+											<index>4</index>
 											<placeholder>dock.single.QCPanel</placeholder>
 										</property>
 									</location>
@@ -994,12 +974,12 @@
 											<placeholder>dock.single.IDWorkbenchPanel</placeholder>
 											<backup-path>
 												<node location="RIGHT" size="0.7217529039070749" id="1672779742083"/>
-												<node location="RIGHT" size="0.71682398667407" id="1676064563113"/>
+												<node location="RIGHT" size="0.7755294117647059" id="1676064563113"/>
 												<leaf id="1672779039466"/>
 											</backup-path>
 										</property>
 										<property factory="StackDockPropertyFactory">
-											<index>7</index>
+											<index>8</index>
 											<placeholder>dock.single.IDWorkbenchPanel</placeholder>
 										</property>
 									</location>
@@ -1129,8 +1109,9 @@
 										<property factory="SplitDockPlaceholderProperty">
 											<placeholder>dock.single.WorklistPanel</placeholder>
 											<backup-path>
+												<node location="BOTTOM" size="0.5" id="1753117790111"/>
 												<node location="RIGHT" size="0.7217529039070749" id="1672779742083"/>
-												<node location="RIGHT" size="0.71682398667407" id="1676064563113"/>
+												<node location="RIGHT" size="0.7755294117647059" id="1676064563113"/>
 												<leaf id="1672779039466"/>
 											</backup-path>
 										</property>
@@ -1174,12 +1155,12 @@
 											<placeholder>dock.single.RawDataExaminerPanel</placeholder>
 											<backup-path>
 												<node location="RIGHT" size="0.7217529039070749" id="1672779742083"/>
-												<node location="RIGHT" size="0.71682398667407" id="1676064563113"/>
+												<node location="RIGHT" size="0.7755294117647059" id="1676064563113"/>
 												<leaf id="1672779039466"/>
 											</backup-path>
 										</property>
 										<property factory="StackDockPropertyFactory">
-											<index>10</index>
+											<index>11</index>
 											<placeholder>dock.single.RawDataExaminerPanel</placeholder>
 										</property>
 									</location>
@@ -1218,12 +1199,12 @@
 											<placeholder>dock.single.CompoundDatabasePanel</placeholder>
 											<backup-path>
 												<node location="RIGHT" size="0.7217529039070749" id="1672779742083"/>
-												<node location="RIGHT" size="0.71682398667407" id="1676064563113"/>
+												<node location="RIGHT" size="0.7755294117647059" id="1676064563113"/>
 												<leaf id="1672779039466"/>
 											</backup-path>
 										</property>
 										<property factory="StackDockPropertyFactory">
-											<index>6</index>
+											<index>7</index>
 											<placeholder>dock.single.CompoundDatabasePanel</placeholder>
 										</property>
 									</location>
@@ -1251,10 +1232,10 @@
 								</property>
 							</properties>
 						</entry>
-						<entry id="single ExperimentSetupDraw" current="dock.mode.minimized">
+						<entry id="single ExperimentSetupDraw" current="dock.mode.normal">
 							<history>
-								<mode>dock.mode.normal</mode>
 								<mode>dock.mode.minimized</mode>
+								<mode>dock.mode.normal</mode>
 							</history>
 							<properties>
 								<property id="dock.mode.minimized">
@@ -1278,7 +1259,6 @@
 										<property factory="SplitDockPlaceholderProperty">
 											<placeholder>dock.single.ExperimentSetupDraw</placeholder>
 											<backup-path>
-												<node location="BOTTOM" size="0.5" id="1753117790111"/>
 												<node location="RIGHT" size="0.7217529039070749" id="1672779742083"/>
 												<node location="LEFT" size="0.22447058823529412" id="1676064563113"/>
 												<leaf id="1676064552084"/>
@@ -1319,8 +1299,9 @@
 										<property factory="SplitDockPlaceholderProperty">
 											<placeholder>dock.single.FeatureDataPanel</placeholder>
 											<backup-path>
+												<node location="BOTTOM" size="0.5" id="1753117790111"/>
 												<node location="RIGHT" size="0.7217529039070749" id="1672779742083"/>
-												<node location="RIGHT" size="0.71682398667407" id="1676064563113"/>
+												<node location="RIGHT" size="0.7755294117647059" id="1676064563113"/>
 												<leaf id="1672779039466"/>
 											</backup-path>
 										</property>
@@ -1364,12 +1345,12 @@
 											<placeholder>dock.single.METLIMSPanel</placeholder>
 											<backup-path>
 												<node location="RIGHT" size="0.7217529039070749" id="1672779742083"/>
-												<node location="RIGHT" size="0.71682398667407" id="1676064563113"/>
+												<node location="RIGHT" size="0.7755294117647059" id="1676064563113"/>
 												<leaf id="1672779039466"/>
 											</backup-path>
 										</property>
 										<property factory="StackDockPropertyFactory">
-											<index>9</index>
+											<index>10</index>
 											<placeholder>dock.single.METLIMSPanel</placeholder>
 										</property>
 									</location>
@@ -1407,8 +1388,9 @@
 										<property factory="SplitDockPlaceholderProperty">
 											<placeholder>dock.single.ExperimentDesignPanel</placeholder>
 											<backup-path>
+												<node location="BOTTOM" size="0.5" id="1753117790111"/>
 												<node location="RIGHT" size="0.7217529039070749" id="1672779742083"/>
-												<node location="RIGHT" size="0.71682398667407" id="1676064563113"/>
+												<node location="RIGHT" size="0.7755294117647059" id="1676064563113"/>
 												<leaf id="1672779039466"/>
 											</backup-path>
 										</property>
@@ -1452,12 +1434,12 @@
 											<placeholder>dock.single.DuplicatesPanelClusterDisplayPanel</placeholder>
 											<backup-path>
 												<node location="RIGHT" size="0.7217529039070749" id="1672779742083"/>
-												<node location="RIGHT" size="0.71682398667407" id="1676064563113"/>
+												<node location="RIGHT" size="0.7755294117647059" id="1676064563113"/>
 												<leaf id="1672779039466"/>
 											</backup-path>
 										</property>
 										<property factory="StackDockPropertyFactory">
-											<index>4</index>
+											<index>5</index>
 											<placeholder>dock.single.DuplicatesPanelClusterDisplayPanel</placeholder>
 										</property>
 									</location>
@@ -1477,9 +1459,14 @@
 										<property factory="SplitDockPlaceholderProperty">
 											<placeholder>dock.single.DataIntegratorPanelClusterDisplayPanel</placeholder>
 											<backup-path>
-												<node location="TOP" size="0.5" id="1753117790111"/>
-												<leaf id="1753117790109"/>
+												<node location="RIGHT" size="0.7217529039070749" id="1672779742083"/>
+												<node location="RIGHT" size="0.7755294117647059" id="1676064563113"/>
+												<leaf id="1672779039466"/>
 											</backup-path>
+										</property>
+										<property factory="StackDockPropertyFactory">
+											<index>3</index>
+											<placeholder>dock.single.DataIntegratorPanelClusterDisplayPanel</placeholder>
 										</property>
 									</location>
 								</property>
@@ -1517,12 +1504,12 @@
 											<placeholder>dock.single.MsLibraryPanel</placeholder>
 											<backup-path>
 												<node location="RIGHT" size="0.7217529039070749" id="1672779742083"/>
-												<node location="RIGHT" size="0.71682398667407" id="1676064563113"/>
+												<node location="RIGHT" size="0.7755294117647059" id="1676064563113"/>
 												<leaf id="1672779039466"/>
 											</backup-path>
 										</property>
 										<property factory="StackDockPropertyFactory">
-											<index>5</index>
+											<index>6</index>
 											<placeholder>dock.single.MsLibraryPanel</placeholder>
 										</property>
 									</location>
@@ -1586,12 +1573,12 @@
 											<placeholder>dock.single.IDTrackerLimsManagerPanel</placeholder>
 											<backup-path>
 												<node location="RIGHT" size="0.7217529039070749" id="1672779742083"/>
-												<node location="RIGHT" size="0.71682398667407" id="1676064563113"/>
+												<node location="RIGHT" size="0.7755294117647059" id="1676064563113"/>
 												<leaf id="1672779039466"/>
 											</backup-path>
 										</property>
 										<property factory="StackDockPropertyFactory">
-											<index>8</index>
+											<index>9</index>
 											<placeholder>dock.single.IDTrackerLimsManagerPanel</placeholder>
 										</property>
 									</location>
