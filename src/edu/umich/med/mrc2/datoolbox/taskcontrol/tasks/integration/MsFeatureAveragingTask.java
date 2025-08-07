@@ -24,7 +24,10 @@ package edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.integration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
+import org.apache.commons.math3.util.Precision;
 import org.ujmp.core.Matrix;
 import org.ujmp.core.calculation.Calculation.Ret;
 
@@ -32,6 +35,7 @@ import edu.umich.med.mrc2.datoolbox.data.CompoundLibrary;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.LibraryMsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MassSpectrum;
+import edu.umich.med.mrc2.datoolbox.data.MsFeatureStatisticalSummary;
 import edu.umich.med.mrc2.datoolbox.data.SimpleMsFeature;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
@@ -50,6 +54,8 @@ public class MsFeatureAveragingTask extends AbstractTask {
 	private CompoundLibrary averagedLibrary;
 	private DataAnalysisProject currentExperiment;
 	private Matrix featureDataMatrix;
+	private double maxArea;
+	private List<MsFeatureStatsObject>statObjectList;
 	
 	public MsFeatureAveragingTask(
 			DataPipeline pipeline, 
@@ -72,7 +78,6 @@ public class MsFeatureAveragingTask extends AbstractTask {
 			reportErrorAndExit(e);
 			return;
 		}
-		List<MsFeatureStatsObject>statObjectList = null;
 		try {
 			statObjectList = collectFeatureData();
 		}
@@ -80,7 +85,8 @@ public class MsFeatureAveragingTask extends AbstractTask {
 			reportErrorAndExit(e);
 			return;
 		}
-		if(!statObjectList.isEmpty()) {			
+		if(!statObjectList.isEmpty()) {
+			findMaxMedianArea();
 			try {				
 				generateAverageFeatures(statObjectList);		
 			}
@@ -125,6 +131,21 @@ public class MsFeatureAveragingTask extends AbstractTask {
 		return statObjectList;
 	}
 	
+	private void findMaxMedianArea() {
+		
+		maxArea = 0.0d;				
+		List<MsFeatureStatisticalSummary> statSummaryList = statObjectList.stream().
+			filter(o -> Objects.nonNull(o.getMsFeature().getStatsSummary())).
+			map(o -> o.getMsFeature().getStatsSummary()).
+			collect(Collectors.toList());
+		for(MsFeatureStatisticalSummary statSummary : statSummaryList) {
+			
+			double fArea = getFeatureMedianArea(statSummary);
+			if(maxArea < fArea)
+				maxArea = fArea;
+		}			
+	} 
+	
 	private void generateAverageFeatures(List<MsFeatureStatsObject>statObjectList) {
 		
 		taskDescription = "Generating averaged features ...";
@@ -142,13 +163,40 @@ public class MsFeatureAveragingTask extends AbstractTask {
 			if(statObject.getMedianRtRange() != null)
 				newLibFeature.setRtRange(statObject.getMedianRtRange());
 			
-			MassSpectrum avgSpectrum = statObject.getAverageScaledMassSpectrum();
+			double scaleFactor = getFeatureMedianArea(
+					statObject.getMsFeature().getStatsSummary()) / maxArea * 1000000.0d;
+
+			if(Precision.equals(scaleFactor, Precision.EPSILON))
+				scaleFactor = 0.01;
+			
+			MassSpectrum avgSpectrum = statObject.getAverageScaledMassSpectrum(scaleFactor);
 			if(avgSpectrum != null && avgSpectrum.getBasePeak() != null) {			
 				newLibFeature.setSpectrum(avgSpectrum);		
 				averagedLibrary.addFeature(newLibFeature);
 			}
 			processed++;
 		}				
+	}
+	
+	private double getFeatureMedianArea(MsFeatureStatisticalSummary statSummary) {
+		
+		if(statSummary == null)
+			return 0.0;
+		
+		int valueCount = 0;
+		double avg = 0.0;
+		if(statSummary.getPooledMedian() != Double.NaN && statSummary.getPooledMedian() > 0.0d) {				
+			avg += statSummary.getPooledMedian();
+			valueCount++;
+		}
+		if(statSummary.getSampleMedian() != Double.NaN && statSummary.getSampleMedian() > 0.0d) {				
+			avg += statSummary.getSampleMedian();
+			valueCount++;
+		}
+		if(avg > 0 && valueCount > 0) 
+			return avg / (double)valueCount;
+		else
+			return 0.0d;
 	}
 	
 	private void loadFeatureMatrix() {

@@ -99,8 +99,9 @@ public class MsFeatureStatsObject {
 			return null;		
 	}
 	
-	public MassSpectrum getAverageScaledMassSpectrum() {		
-		return MsUtils.averageMassSpectraByAdduct(spectra, 0.1d, MassErrorType.Da);
+	public MassSpectrum getAverageScaledMassSpectrum(double scaleFactor) {		
+		return MsUtils.averageMassSpectraByAdduct(
+				spectra, 0.1d, MassErrorType.Da, scaleFactor);
 	}
 
 	public MsFeature getMsFeature() {

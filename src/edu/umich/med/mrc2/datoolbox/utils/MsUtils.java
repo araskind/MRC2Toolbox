@@ -1737,6 +1737,14 @@ public class MsUtils {
 			Collection<MassSpectrum>inputSpectra,
 			double mzBinWidth,
 			MassErrorType errorType){
+		return averageMassSpectraByAdduct(inputSpectra, mzBinWidth, errorType, 1.0d);
+	}
+	
+	public static MassSpectrum averageMassSpectraByAdduct(
+			Collection<MassSpectrum>inputSpectra,
+			double mzBinWidth,
+			MassErrorType errorType,
+			double scaleFactor){
 		
 		MassSpectrum averagedSpectrum = new MassSpectrum();
 		Map<Adduct, List<MsPoint>>adductMsPointsMap = new TreeMap<Adduct, List<MsPoint>>();
@@ -1755,13 +1763,16 @@ public class MsUtils {
 			}			
 		}
 		for(Entry<Adduct, List<MsPoint>>adductEntry : adductMsPointsMap.entrySet()) {
+			
 			Collection<MsPoint> averageAdductSpectrum = 
 					averageMassSpectrum(adductEntry.getValue(), mzBinWidth, errorType);
 			
 			if(averageAdductSpectrum != null && !averageAdductSpectrum.isEmpty()) {
 				
+				Collection<MsPoint>scaledSpectrum = 
+						scaleMsPointCollection(averageAdductSpectrum, scaleFactor);
 				averagedSpectrum.addSpectrumForAdduct(
-						adductEntry.getKey(), averageAdductSpectrum);
+						adductEntry.getKey(), scaledSpectrum);
 			}
 		}
 		return averagedSpectrum;
