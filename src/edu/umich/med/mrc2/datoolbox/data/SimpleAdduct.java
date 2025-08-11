@@ -345,6 +345,10 @@ public class SimpleAdduct implements Adduct, Serializable {
 
 	@Override
 	public String getNotationForType(AdductNotationType notationType) {
+		
+		if(notations == null)
+			notations = new TreeMap<AdductNotationType,String>();
+		
 		return notations.get(notationType);
 	}
 }

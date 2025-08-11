@@ -717,6 +717,10 @@ public abstract class CEFProcessingTask extends AbstractTask {
 
 		Element msPeaks = new Element("MSPeaks");
 		if(adduct != null){
+			
+			//	TODO remove notations from Adduct objects and handle them through Adduct manager
+			if(adduct.getNotationForType(AdductNotationType.CEF) == null)
+				adduct = AdductManager.getAdductById(adduct.getId());
 
 			String charge = Integer.toString(adduct.getCharge());
 			MsPoint[] adductMs = lt.getSpectrum().getMsForAdduct(adduct);
@@ -732,7 +736,12 @@ public abstract class CEFProcessingTask extends AbstractTask {
 				if(i>0)
 					aname = aname + "+" + i;
 
-				peak.setAttribute("s", aname);
+				try {
+					peak.setAttribute("s", aname);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 				msPeaks.addContent(peak);
 			}
 		}
