@@ -1115,6 +1115,14 @@ public class MsFeature implements AnnotatedObject, Serializable, XmlStorable {
 		if(binnerAnnoitationElement != null)
 			binnerAnnotation = new BinnerAnnotation(binnerAnnoitationElement);
 	}
+	
+	public void setAreaFromMsOneSpectrum() {
+		
+		if(spectrum == null || spectrum.getMsPoints().isEmpty())
+			return;
+		
+		area = spectrum.getMsPoints().stream().mapToDouble(MsPoint::getIntensity).sum();
+	}
 }
 
 
