@@ -61,7 +61,7 @@ public class SubsetFeaturesTable extends BasicTable {
 		cfRenderer = new MsFeatureRenderer(SortProperty.Name);
 		columnModel.getColumnById(SubsetFeaturesTableModel.MS_FEATURE_COLUMN)
 				.setCellRenderer(cfRenderer);
-		columnModel.getColumnById(SubsetFeaturesTableModel.ORDER_COLUMN).setWidth(50);
+		columnModel.getColumnById(SubsetFeaturesTableModel.ORDER_COLUMN).setMaxWidth(50);
 		fixedWidthColumns.add(
 				columnModel.getColumnIndex(SubsetFeaturesTableModel.ORDER_COLUMN));
 		thf = new TableFilterHeader(this, AutoChoices.ENABLED);
@@ -121,6 +121,16 @@ public class SubsetFeaturesTable extends BasicTable {
 			features.add((MsFeature)model.getValueAt(convertRowIndexToModel(i), col));
 		
 		return features;	
+	}
+	
+	@Override
+	public Object getValueAt(int row, int column) {
+		
+		if(convertColumnIndexToModel(column) == 
+				model.getColumnIndex(SubsetFeaturesTableModel.ORDER_COLUMN))
+			return row+1;
+		else
+			return super.getValueAt(row, column);
 	}
 }
 

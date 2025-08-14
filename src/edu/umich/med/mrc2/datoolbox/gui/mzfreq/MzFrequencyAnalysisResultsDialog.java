@@ -52,7 +52,9 @@ import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundleCollection;
 import edu.umich.med.mrc2.datoolbox.data.MzFrequencyObject;
 import edu.umich.med.mrc2.datoolbox.data.StandardFeatureAnnotation;
+import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
+import edu.umich.med.mrc2.datoolbox.gui.fdata.FeatureDataPanel;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.IDWorkbenchPanel;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.idfus.MultipleFeaturesFollowupStepAssignmentDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.stan.MultipleFeaturesStandardAnnotationAssignmentDialog;
@@ -67,6 +69,7 @@ import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
 import edu.umich.med.mrc2.datoolbox.main.FeatureCollectionManager;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
+import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 
 public class MzFrequencyAnalysisResultsDialog extends JFrame implements BackedByPreferences, ActionListener{
 	
@@ -245,8 +248,31 @@ public class MzFrequencyAnalysisResultsDialog extends JFrame implements BackedBy
 			((IDWorkbenchPanel)parentPanel).
 					createNewMsmsFeatureCollectionFromSelectedFeatures(bundles);
 		}
+		if(parentPanel instanceof FeatureDataPanel) {
+			
+    		createFeatureSubsetForMetabolomicsExperiment(selectedFeatures);
+		}
 	}
 	
+	private void createFeatureSubsetForMetabolomicsExperiment(Collection<MsFeature> selectedFeatures) {
+		
+		if(selectedFeatures == null || selectedFeatures.isEmpty())
+			return;
+		
+		DataAnalysisProject experiment = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
+		if(experiment == null)
+			return;
+		
+		DataPipeline pipeline = experiment.getActiveDataPipeline();
+		if(pipeline == null)
+			return;
+		
+		AddFeatureSubsetDialog addFeatureSubsetDialog = 
+				new AddFeatureSubsetDialog(experiment, pipeline, selectedFeatures);
+		addFeatureSubsetDialog.setLocationRelativeTo(this);
+		addFeatureSubsetDialog.setVisible(true);
+	}
+
 	private void addSelectedToExistingFeatureCollection() {
 
 		Collection<MsFeature>selectedFeatures = table.getMsFeaturesForSelectedLines();

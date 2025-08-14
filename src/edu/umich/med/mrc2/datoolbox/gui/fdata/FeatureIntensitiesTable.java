@@ -118,4 +118,14 @@ public class FeatureIntensitiesTable extends BasicTable {
 			rowSorter.sort();
 		}
 	}
+	
+	@Override
+	public Object getValueAt(int row, int column) {
+		
+		if(convertColumnIndexToModel(column) == 
+				model.getColumnIndex(FeatureIntensitiesTableModel.ORDER_COLUMN))
+			return row+1;
+		else
+			return super.getValueAt(row, column);
+	}
 }

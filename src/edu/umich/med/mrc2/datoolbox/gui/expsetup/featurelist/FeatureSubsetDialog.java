@@ -380,6 +380,7 @@ public class FeatureSubsetDialog extends JDialog implements ItemListener, Action
 		return errors;
 	}
 
+	
 	@Override
 	public void itemStateChanged(ItemEvent e) {
 		
