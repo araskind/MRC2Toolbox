@@ -50,7 +50,7 @@ public class DesignSubsetTableModel extends BasicTableModel {
 	public void setModelFromProject(DataAnalysisProject currentProject) {
 
 		setRowCount(0);
-		if(currentProject != null) 
+		if(currentProject == null || currentProject.getExperimentDesign() == null) 
 			return;
 		
 		List<Object[]>rowData = new ArrayList<Object[]>();

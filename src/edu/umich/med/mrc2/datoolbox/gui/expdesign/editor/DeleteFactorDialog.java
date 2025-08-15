@@ -42,8 +42,10 @@ import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
+import edu.umich.med.mrc2.datoolbox.data.ExperimentDesign;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignFactor;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignSubset;
+import edu.umich.med.mrc2.datoolbox.data.enums.ParameterSetStatus;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
@@ -125,27 +127,29 @@ public class DeleteFactorDialog extends JDialog implements ActionListener {
 
 		String command = event.getActionCommand();
 
-		if (command.equals(MainActionCommands.DELETE_FACTOR_COMMAND.getName())) {
+		if (command.equals(MainActionCommands.DELETE_FACTOR_COMMAND.getName()))
+			 deleteSelectedFactor();		
+	}
+	
+	private void deleteSelectedFactor() {
+		
+		if(factorDeleteTable.getSelectedFactors().isEmpty())
+			return;
+		
+		int approve = MessageDialog.showChoiceWithWarningMsg(
+				"Delete selected factor(s) from the experiment design?\n"
+				+ "(NO UNDO!)", this);
+		
+		if (approve == JOptionPane.YES_OPTION) {
+			
+			ExperimentDesign design = 
+					MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExperimentDesign();
+			for(ExperimentDesignFactor factor : factorDeleteTable.getSelectedFactors())
+				design.deleteFactor(factor,false);
+			
+			design.fireExperimentDesignEvent(ParameterSetStatus.CHANGED);
 
-			if(factorDeleteTable.getSelectedFactors().size() > 0) {
-
-				int approve = MessageDialog.showChoiceWithWarningMsg(
-						"Delete selected factor(s) from the experiment design?\n"
-						+ "(NO UNDO!)", this);
-
-				if (approve == JOptionPane.YES_OPTION) {
-
-					for(ExperimentDesignFactor factor : factorDeleteTable.getSelectedFactors())
-						MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExperimentDesign().removeFactor(factor);
-
-					ExperimentDesignSubset completeDesign =
-							MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExperimentDesign().getCompleteDesignSubset();
-					factorDeleteTable.setTableModelFromDesignSubset(completeDesign);
-				}
-			}
-			else {
-				MessageDialog.showWarningMsg("No factors selected", this);
-			}
+			factorDeleteTable.setTableModelFromDesignSubset(design.getCompleteDesignSubset());
 		}
 	}
 }

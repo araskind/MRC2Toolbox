@@ -201,7 +201,7 @@ public class DesignSubsetPanel extends DockableMRC2ToolboxPanel implements Table
 		}
 		ExperimentDesignSubset newSubset = new ExperimentDesignSubset(subsetName);
 		for(ExperimentDesignLevel newLevel : selectedLevels)
-			newSubset.addLevel(newLevel);
+			newSubset.addLevel(newLevel,false);
 
 		design.addDesignSubset(newSubset);
 		design.setActiveDesignSubset(newSubset);
@@ -231,13 +231,14 @@ public class DesignSubsetPanel extends DockableMRC2ToolboxPanel implements Table
 
 				ExperimentDesignSubset copySubset = new ExperimentDesignSubset(selectedSubset.getName() + " copy");
 				for(ExperimentDesignLevel level : selectedSubset.getDesignMap())
-					copySubset.addLevel(level);
+					copySubset.addLevel(level,false);
 
 				Collection<Renamable>allSets = new TreeSet<Renamable>();
 				allSets.addAll(currentExperiment.getExperimentDesign().getDesignSubsets());
 
 				RenameDialog rnd = new RenameDialog("Name new design subset", copySubset, allSets);
-
+				rnd.setLocationRelativeTo(this.getContentPane());
+				rnd.setVisible(true);
 				if(copySubset.nameIsValid()) {
 
 					currentExperiment.getExperimentDesign().addDesignSubset(copySubset);
@@ -286,12 +287,12 @@ public class DesignSubsetPanel extends DockableMRC2ToolboxPanel implements Table
 					Collection<Renamable>allSets = new TreeSet<Renamable>();
 					allSets.addAll(currentExperiment.getExperimentDesign().getDesignSubsets());
 					RenameDialog rnd = new RenameDialog("Rename design subset", selectedSubset, allSets);
-
+					rnd.setLocationRelativeTo(this.getContentPane());
+					rnd.setVisible(true);
 					if(selectedSubset.nameIsValid()) {
 
 						fireExpDesignSetEvent(selectedSubset, ParameterSetStatus.CHANGED);
 						switchDataPipeline(currentExperiment, activeDataPipeline);
-						return;
 					}
 				}
 			}
@@ -358,7 +359,7 @@ public class DesignSubsetPanel extends DockableMRC2ToolboxPanel implements Table
 	@Override
 	public void tableChanged(TableModelEvent e) {
 		// TODO Auto-generated method stub
-		System.out.println();
+		//	System.out.println();
 	}
 
 	private void unlinkFromFeatureDataPanel() {
@@ -398,18 +399,14 @@ public class DesignSubsetPanel extends DockableMRC2ToolboxPanel implements Table
 
 		clearPanel();
 		super.switchDataPipeline(project, newPipeline);
-		activeSet = null;
+		if(currentExperiment ==  null)
+			return;
+			
+		activeSet = currentExperiment.getExperimentDesign().getActiveDesignSubset();
 		designSubsetTable.setModelFromProject(currentExperiment);
 		scrollPane.setPreferredSize(designSubsetTable.getPreferredScrollableViewportSize());
-		if(currentExperiment !=  null) {
-
-			activeSet = currentExperiment.getExperimentDesign().getActiveDesignSubset();
-			if(activeSet != null) {
-
-				designSubsetTable.selectActiveSubset();
-				toolbar.setToolbarState(activeSet);
-			}
-		}
+		designSubsetTable.selectActiveSubset();
+		toolbar.setToolbarState(activeSet);
 	}
 
 	@Override

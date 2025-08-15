@@ -161,11 +161,12 @@ public class ExperimentDesignFactor implements Comparable<ExperimentDesignFactor
 		return enabled;
 	}
 
-	public void removeLevel(ExperimentDesignLevel level2remove) {
+	public void removeLevel(ExperimentDesignLevel level2remove, boolean notifyListeners) {
 
 		factorLevels.remove(level2remove);
 		level2remove.setParentFactor(null);
-		fireExperimentDesignFactorEvent(ParameterSetStatus.REMOVED);
+		if(notifyListeners)
+			fireExperimentDesignFactorEvent(ParameterSetStatus.REMOVED);
 	}
 
 	public void setEnabled(boolean enabled) {

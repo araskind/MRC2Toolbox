@@ -93,11 +93,13 @@ public class ExperimentDesignSubset implements Comparable<ExperimentDesignSubset
 		}
 	}
 
-	public void addLevel(ExperimentDesignLevel newLevel) {
+	public void addLevel(ExperimentDesignLevel newLevel, boolean notifyListeners) {
 
 		if(newLevel == null)
 			return;
 
+		suppressEvents = true;
+		
 		//	Update factor map
 		if(orderedFactorMap == null)
 			orderedFactorMap = new TreeMap<Integer, ExperimentDesignFactor>();
@@ -125,8 +127,10 @@ public class ExperimentDesignSubset implements Comparable<ExperimentDesignSubset
 			int next = orderedLevelMap.get(newLevel.getParentFactor()).navigableKeySet().last() + 1;
 			orderedLevelMap.get(newLevel.getParentFactor()).put(next, newLevel);
 		}
-		status = ParameterSetStatus.CHANGED;
-		fireExpDesignSetEvent();
+		suppressEvents = false;
+		
+		if(notifyListeners)
+			setStatus(ParameterSetStatus.CHANGED);
 	}
 
 	public Map<ExperimentDesignFactor, ExperimentDesignLevel[]>getOrderedDesign(){
@@ -153,8 +157,7 @@ public class ExperimentDesignSubset implements Comparable<ExperimentDesignSubset
 			for(int i=0; i<factorsInNewOrder.length; i++)
 				orderedFactorMap.put(i, factorsInNewOrder[i]);
 
-			status = ParameterSetStatus.CHANGED;
-			fireExpDesignSetEvent();
+			setStatus(ParameterSetStatus.CHANGED);
 		}
 	}
 
@@ -170,8 +173,7 @@ public class ExperimentDesignSubset implements Comparable<ExperimentDesignSubset
 			for(int i=0; i<levelsInNewOrder.length; i++)
 				levelMap.put(i, levelsInNewOrder[i]);
 
-			status = ParameterSetStatus.CHANGED;
-			fireExpDesignSetEvent();
+			setStatus(ParameterSetStatus.CHANGED);
 		}
 	}
 
@@ -253,7 +255,7 @@ public class ExperimentDesignSubset implements Comparable<ExperimentDesignSubset
 		eventListeners = ConcurrentHashMap.newKeySet();
 	}
 
-	public void removeLevel(ExperimentDesignLevel levelToRemove) {
+	public void removeLevel(ExperimentDesignLevel levelToRemove, boolean notifyListeners) {
 
 		if(!orderedFactorMap.values().contains(levelToRemove.getParentFactor()))
 			return;
@@ -270,8 +272,8 @@ public class ExperimentDesignSubset implements Comparable<ExperimentDesignSubset
 		for(int i=0; i<newLevels.size(); i++)
 			orderedLevelMap.get(levelToRemove.getParentFactor()).put(i, newLevels.get(i));
 
-		status = ParameterSetStatus.CHANGED;
-		fireExpDesignSetEvent();
+		if(notifyListeners)
+			setStatus(ParameterSetStatus.CHANGED);
 	}
 
 	public void removeListener(ExperimentDesignSubsetListener listener) {
@@ -292,7 +294,7 @@ public class ExperimentDesignSubset implements Comparable<ExperimentDesignSubset
 
 	public final void setStatus(ParameterSetStatus newStatus) {
 
-		if (newStatus.equals(status)) {
+		if (!newStatus.equals(status)) {
 
 			this.status = newStatus;
 			this.fireExpDesignSetEvent();
@@ -311,22 +313,22 @@ public class ExperimentDesignSubset implements Comparable<ExperimentDesignSubset
 		return subsetName;
 	}
 
-	public void addFactor(ExperimentDesignFactor selectedFactor) {
+	public void addFactor(ExperimentDesignFactor selectedFactor, boolean notifyListeners) {
 
 		suppressEvents = true;
-		selectedFactor.getLevels().forEach(l -> addLevel(l));
-		suppressEvents = false;
-		status = ParameterSetStatus.CHANGED;
-		fireExpDesignSetEvent();
+		selectedFactor.getLevels().forEach(l -> addLevel(l, notifyListeners));
+		suppressEvents = false;		
+		if(notifyListeners)
+			setStatus(ParameterSetStatus.CHANGED);
 	}
 
-	public void removeFactor(ExperimentDesignFactor selectedFactor) {
+	public void removeFactor(ExperimentDesignFactor selectedFactor, boolean notifyListeners) {
 
 		suppressEvents = true;
 
 		//	Remove all levels
 		for(ExperimentDesignLevel newLevel : selectedFactor.getLevels())
-			removeLevel(newLevel);
+			removeLevel(newLevel, notifyListeners);
 
 		//	Remove and re-order factors
 		ArrayList<ExperimentDesignFactor>newFactors = new ArrayList<ExperimentDesignFactor>();
@@ -342,8 +344,8 @@ public class ExperimentDesignSubset implements Comparable<ExperimentDesignSubset
 		orderedLevelMap.remove(selectedFactor);
 
 		suppressEvents = false;
-		status = ParameterSetStatus.CHANGED;
-		fireExpDesignSetEvent();
+		if(notifyListeners)
+			setStatus(ParameterSetStatus.CHANGED);
 	}
 
 	public boolean nameIsValid() {
@@ -385,7 +387,7 @@ public class ExperimentDesignSubset implements Comparable<ExperimentDesignSubset
 					Integer.toString(fme.getKey()));
 			factorMapElement.setAttribute(
 					ExperimentDesignSubsetFields.Fid.name(), 
-					fme.getValue().getFactorId());
+					fme.getValue().getName());
 			factorMapContainerElement.addContent(factorMapElement);
 		}
 		subsetElement.addContent(factorMapContainerElement);
@@ -398,10 +400,10 @@ public class ExperimentDesignSubset implements Comparable<ExperimentDesignSubset
 					new Element(ExperimentDesignSubsetFields.LevelMapElement.name());
 			levelMapElement.setAttribute(
 					ExperimentDesignSubsetFields.FactorKey.name(), 
-					ole.getKey().getFactorId());
+					ole.getKey().getName());
 			ArrayList<String>orderedLevels = new ArrayList<String>();
 			for(Entry<Integer, ExperimentDesignLevel>le : ole.getValue().entrySet())
-				orderedLevels.add(Integer.toString(le.getKey()) + "," + le.getValue().getLevelId());
+				orderedLevels.add(Integer.toString(le.getKey()) + "," + le.getValue().getName());
 			
 			levelMapElement.setText(StringUtils.join(orderedLevels, "|"));
 			levelMapContainerElement.addContent(levelMapElement);
@@ -434,10 +436,10 @@ public class ExperimentDesignSubset implements Comparable<ExperimentDesignSubset
 			
 			Integer fPosition = Integer.parseInt(
 					fmElement.getAttributeValue(ExperimentDesignSubsetFields.FOrder.name()));
-			String fid = 
+			String factorName = 
 					fmElement.getAttributeValue(ExperimentDesignSubsetFields.Fid.name());			
-			if(fid != null) {
-				ExperimentDesignFactor factor = parentDesign.getFactorById(fid);
+			if(factorName != null) {
+				ExperimentDesignFactor factor = parentDesign.getFactorByName(factorName);
 				if(factor != null)
 					orderedFactorMap.put(fPosition, factor);
 			}
@@ -448,10 +450,10 @@ public class ExperimentDesignSubset implements Comparable<ExperimentDesignSubset
 			
 		for(Element lmElement : levelMapElements) {
 			
-			String fid = lmElement.getAttributeValue(
+			String factorName = lmElement.getAttributeValue(
 					ExperimentDesignSubsetFields.FactorKey.name());
-			if(fid != null) {
-				ExperimentDesignFactor factor = parentDesign.getFactorById(fid);
+			if(factorName != null) {
+				ExperimentDesignFactor factor = parentDesign.getFactorByName(factorName);
 				if(factor != null) {
 					
 					String[]levelStrings = lmElement.getText().split("\\|");
@@ -462,7 +464,7 @@ public class ExperimentDesignSubset implements Comparable<ExperimentDesignSubset
 						for(String ls : levelStrings) {
 							String[]parts = ls.split(",");
 							Integer order = Integer.parseInt(parts[0]);
-							ExperimentDesignLevel l = factor.getLevelById(parts[1]);
+							ExperimentDesignLevel l = factor.getLevelByName(parts[1]);
 							if(l != null)
 								factorLevelMap.put(order, l);
 						}
@@ -471,6 +473,10 @@ public class ExperimentDesignSubset implements Comparable<ExperimentDesignSubset
 				}
 			}
 		}
+	}
+
+	public TreeMap<ExperimentDesignFactor, TreeMap<Integer, ExperimentDesignLevel>> getOrderedLevelMap() {
+		return orderedLevelMap;
 	}
 }
 

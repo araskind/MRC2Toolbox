@@ -74,7 +74,7 @@ public class DesignSubsetTable extends BasicTable {
 				.setCellEditor(radioEditor);
 		columnModel.getColumnById(DesignSubsetTableModel.DESIGN_SUBSET_COLUMN)
 				.setCellRenderer(edsRenderer);
-		columnModel.getColumnById(DesignSubsetTableModel.ACTIVE_COLUMN).setWidth(50);
+		columnModel.getColumnById(DesignSubsetTableModel.ACTIVE_COLUMN).setMaxWidth(50);
 		fixedWidthColumns.add(model.getColumnIndex(DesignSubsetTableModel.ACTIVE_COLUMN));
 		finalizeLayout();
 	}
@@ -105,9 +105,7 @@ public class DesignSubsetTable extends BasicTable {
 	}
 
 	public void setModelFromProject(DataAnalysisProject currentProject) {
-
-		((DesignSubsetTableModel)model).setModelFromProject(currentProject);
-		columnModel.getColumnById(DesignSubsetTableModel.ACTIVE_COLUMN).setWidth(50);
+		((DesignSubsetTableModel)model).setModelFromProject(currentProject);		
 	}
 
 	public void selectActiveSubset() {

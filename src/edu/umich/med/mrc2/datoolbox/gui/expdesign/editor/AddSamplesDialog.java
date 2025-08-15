@@ -266,9 +266,7 @@ public class AddSamplesDialog extends JDialog implements BackedByPreferences, Ac
 		}
 		if(errors.isEmpty()) {
 
-			design.setSuppressEvents(true);
-			samplesToAdd.stream().forEach(s -> design.addSample(s));
-			design.setSuppressEvents(false);
+			samplesToAdd.stream().forEach(s -> design.addSample(s,false));
 			design.fireExperimentDesignEvent(ParameterSetStatus.CHANGED);
 		}
 		return errors;

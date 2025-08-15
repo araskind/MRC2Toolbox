@@ -28,6 +28,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
@@ -68,6 +69,9 @@ public class ExperimentDesign implements ExperimentDesignFactorListener, Seriali
 	protected Set<ExperimentDesignListener> eventListeners;
 	protected boolean suppressEvents;
 	
+	public static final String UNLOCKED_SUBSET_NAME = 
+			GlobalDefaults.ALL_SAMPLES.getName() + GlobalDefaults.UNLOCKED_SUFFIX;
+	
 	public ExperimentDesign() {
 
 		super();
@@ -92,29 +96,25 @@ public class ExperimentDesign implements ExperimentDesignFactorListener, Seriali
 		//	Create new "All levels" set and unlocked copy
 		ExperimentDesignSubset allLevels = 
 				new ExperimentDesignSubset(GlobalDefaults.ALL_SAMPLES.getName());
-		factorSet.stream().forEach(f -> allLevels.addFactor(f));
+		factorSet.stream().forEach(f -> allLevels.addFactor(f,false));
 		allLevels.setLocked(true);
 		allLevels.setActive(false);
 		designSubsets.add(allLevels);
-		updateCompleteDesignSubsets();
+		updateCompleteDesignSubsets(false);
 	}
 
-	public void updateCompleteDesignSubsets() {
+	public void updateCompleteDesignSubsets(boolean notifyListeners) {
 
-		String unlockedSetName = 
-				GlobalDefaults.ALL_SAMPLES.getName() + GlobalDefaults.UNLOCKED_SUFFIX;
-		ExperimentDesignSubset allLevelsUnlocked = 
-				designSubsets.stream().
-				filter(s -> s.getName().equals(unlockedSetName)).
-				findFirst().orElse(null);
+		ExperimentDesignSubset allLevelsUnlocked = getCompleteUnlockedDesignSubset();
 
 		if(allLevelsUnlocked == null) { 
-			allLevelsUnlocked = new ExperimentDesignSubset(unlockedSetName);
+			allLevelsUnlocked = new ExperimentDesignSubset(UNLOCKED_SUBSET_NAME);
 			designSubsets.add(allLevelsUnlocked);
 		}
 		allLevelsUnlocked.copyDesignSubset(getCompleteDesignSubset());
-		allLevelsUnlocked.setLocked(false);		
-		setActiveDesignSubset(allLevelsUnlocked);
+		allLevelsUnlocked.setLocked(false);	
+		if(notifyListeners)
+			setActiveDesignSubset(allLevelsUnlocked);
 	}
 
 	public boolean isEmpty() {
@@ -135,53 +135,58 @@ public class ExperimentDesign implements ExperimentDesignFactorListener, Seriali
 		fireExperimentDesignEvent(ParameterSetStatus.CHANGED);
 	}
 
-	public void addFactor(ExperimentDesignFactor newFactor) {
+	public void addFactor(
+			ExperimentDesignFactor newFactor, 
+			boolean notifyListeners) {
 
 		factorSet.add(newFactor);
 		newFactor.addListener(this);
-		getCompleteDesignSubset().addFactor(newFactor);
-		updateCompleteDesignSubsets();
-		fireExperimentDesignEvent(ParameterSetStatus.CHANGED);
+		getCompleteDesignSubset().addFactor(newFactor, notifyListeners);
+		updateCompleteDesignSubsets(notifyListeners);
 	}
 
-	public void addLevel(ExperimentDesignLevel newLevel, ExperimentDesignFactor parentFactor) {
+	public void addLevel(
+			ExperimentDesignLevel newLevel, 
+			ExperimentDesignFactor parentFactor,
+			boolean notifyListeners) {
 
 		parentFactor.setSuppressEvents(true);
 		parentFactor.addLevel(newLevel);
 		parentFactor.setSuppressEvents(false);
-		getCompleteDesignSubset().addLevel(newLevel);
-		updateCompleteDesignSubsets();
-		fireExperimentDesignEvent(ParameterSetStatus.CHANGED);
+		getCompleteDesignSubset().addLevel(newLevel, notifyListeners);
+		updateCompleteDesignSubsets(notifyListeners);
 	}
 
 	// TODO	This is a quick fix for handling reference samples
 	public void replaceSampleTypeFactor(ExperimentDesignFactor newSampleTypeFactor) {
 
-		if(!newSampleTypeFactor.getName().equals(StandardFactors.SAMPLE_CONTROL_TYPE.getName()))
-			return;
-
 		if(sampleTypeFactor == null)
 			sampleTypeFactor = new ExperimentDesignFactor(StandardFactors.SAMPLE_CONTROL_TYPE.getName());
+		
+		if(!newSampleTypeFactor.equals(sampleTypeFactor))
+			return;
 
 		factorSet.remove(sampleTypeFactor);
 		sampleTypeFactor = newSampleTypeFactor;
 		factorSet.add(sampleTypeFactor);
-		updateCompleteDesignSubsets();
+		updateCompleteDesignSubsets(false);
 	}
 
-	public void addSample(ExperimentalSample newSample) {
+	public void addSample(ExperimentalSample newSample, boolean notifyListeners) {
 
 		sampleSet.add(newSample);
-		fireExperimentDesignEvent(ParameterSetStatus.CHANGED);
+		if(notifyListeners)
+			fireExperimentDesignEvent(ParameterSetStatus.CHANGED);
 	}
 
-	public void addSamples(Collection<? extends ExperimentalSample> newSamples) {
+	public void addSamples(Collection<? extends ExperimentalSample> newSamples, boolean notifyListeners) {
 
 		sampleSet.addAll(newSamples);
-		fireExperimentDesignEvent(ParameterSetStatus.CHANGED);
+		if(notifyListeners)
+			fireExperimentDesignEvent(ParameterSetStatus.CHANGED);
 	}
 
-	public void addReferenceSamples(Collection<? extends ExperimentalSample> samples2add) {
+	public void addReferenceSamples(Collection<? extends ExperimentalSample> samples2add, boolean notifyListeners) {
 
 		setSuppressEvents(true);
 		for(ExperimentalSample rs : samples2add) {
@@ -189,13 +194,12 @@ public class ExperimentDesign implements ExperimentDesignFactorListener, Seriali
 			ExperimentDesignLevel sampleTypeLevel = rs.getDesignCell().get(sampleTypeFactor);
 			if(sampleTypeLevel != null) {
 				sampleTypeFactor.addLevel(sampleTypeLevel);
-				getCompleteDesignSubset().addLevel(sampleTypeLevel);
+				getCompleteDesignSubset().addLevel(sampleTypeLevel, notifyListeners);
 			}
 		}
-		addSamples(samples2add);
-		updateCompleteDesignSubsets();
+		addSamples(samples2add, notifyListeners);
+		updateCompleteDesignSubsets(notifyListeners);
 		setSuppressEvents(false);
-		setSuppressEvents(true);
 	}
 
 	public void appendDesign(ExperimentDesign extraDesign) {
@@ -220,11 +224,11 @@ public class ExperimentDesign implements ExperimentDesignFactorListener, Seriali
 			//	Update design subsets
 			designSubsets.remove(getCompleteDesignSubset());
 			ExperimentDesignSubset allLevels = new ExperimentDesignSubset(GlobalDefaults.ALL_SAMPLES.getName());
-			factorSet.stream().forEach(f -> allLevels.addFactor(f));
+			factorSet.stream().forEach(f -> allLevels.addFactor(f, false));
 			allLevels.setLocked(true);
 			allLevels.setActive(false);
 			designSubsets.add(allLevels);
-			updateCompleteDesignSubsets();
+			updateCompleteDesignSubsets(false);
 		}
 		// Add samples
 		for (ExperimentalSample newSample : extraDesign.getSamples()) {
@@ -244,21 +248,6 @@ public class ExperimentDesign implements ExperimentDesignFactorListener, Seriali
 				}
 			}
 		}
-		//	Update global design subset
-/*		for (ExperimentDesignSubset set : designSubsets) {
-
-			if (set.getName().equals(GlobalDefaults.ALL_SAMPLES.getName())) {
-
-				TreeSet<ExperimentDesignLevel> presentLevels = set.getDesignMap();
-				List<ExperimentDesignLevel> allLevels =
-						factorSet.stream().flatMap(f -> f.getLevels().stream()).collect(Collectors.toList());
-				for(ExperimentDesignLevel l : allLevels) {
-
-					if(!presentLevels.contains(l))
-						set.addLevel(l);
-				}
-			}
-		}*/
 		setSuppressEvents(false);
 		fireExperimentDesignEvent(ParameterSetStatus.CHANGED);
 	}
@@ -302,7 +291,7 @@ public class ExperimentDesign implements ExperimentDesignFactorListener, Seriali
 		return sampleSet;
 	}
 
-	public void removeFactor(ExperimentDesignFactor factor2remove) {
+	public void deleteFactor(ExperimentDesignFactor factor2remove, boolean notifyListeners) {
 
 		factor2remove.removeListener(this);
 
@@ -310,21 +299,23 @@ public class ExperimentDesign implements ExperimentDesignFactorListener, Seriali
 			sample.getDesignCell().remove(factor2remove);
 
 		factorSet.remove(factor2remove);
-		designSubsets.stream().forEach(s -> s.removeFactor(factor2remove));
-		fireExperimentDesignEvent(ParameterSetStatus.CHANGED);
+		designSubsets.stream().forEach(s -> s.removeFactor(factor2remove, false));
+		
+		if(notifyListeners)
+			fireExperimentDesignEvent(ParameterSetStatus.CHANGED);
 	}
 
-	public void removeLevel(ExperimentDesignLevel level2remove) {
+	public void removeLevel(ExperimentDesignLevel level2remove, boolean notifyListeners) {
 
 		if(level2remove.getParentFactor() == null)
 			return;
 
 		sampleSet.stream().forEach(s -> s.getDesignCell().remove(level2remove.getParentFactor()));
-		level2remove.getParentFactor().setSuppressEvents(true);
-		level2remove.getParentFactor().removeLevel(level2remove);
-		level2remove.getParentFactor().setSuppressEvents(false);
-		designSubsets.stream().forEach(s -> s.removeLevel(level2remove));
-		fireExperimentDesignEvent(ParameterSetStatus.CHANGED);
+		level2remove.getParentFactor().removeLevel(level2remove, false);
+		designSubsets.stream().forEach(s -> s.removeLevel(level2remove, false));
+		
+		if(notifyListeners)
+			fireExperimentDesignEvent(ParameterSetStatus.CHANGED);
 	}
 
 	public void fireExperimentDesignEvent() {
@@ -359,10 +350,13 @@ public class ExperimentDesign implements ExperimentDesignFactorListener, Seriali
 			fireExperimentDesignEvent(ParameterSetStatus.CHANGED);
 	}
 
-	public void removeSamples(Collection<? extends ExperimentalSample> samples2remove) {
+	public void removeSamples(
+			Collection<? extends ExperimentalSample> samples2remove, 
+			boolean notifyListeners) {
 
 		sampleSet.removeAll(samples2remove);
-		fireExperimentDesignEvent(ParameterSetStatus.CHANGED);
+		if(notifyListeners)
+			fireExperimentDesignEvent(ParameterSetStatus.CHANGED);
 	}
 
 	public void removeReferenceSamples(Collection<? extends ExperimentalSample> samples2remove) {
@@ -371,17 +365,17 @@ public class ExperimentDesign implements ExperimentDesignFactorListener, Seriali
 		for(ExperimentalSample rs : samples2remove) {
 
 			ExperimentDesignLevel sampleTypeLevel = rs.getDesignCell().get(sampleTypeFactor);
-			ExperimentalSample otherSample = 
-					sampleSet.stream().filter(s -> s.getDesignCell().get(sampleTypeFactor).equals(sampleTypeLevel)).
+			ExperimentalSample otherSample = sampleSet.stream().
+					filter(s -> s.getDesignCell().get(sampleTypeFactor).equals(sampleTypeLevel)).
 					filter(s -> !s.equals(rs)).findFirst().orElse(null);
 
 			if(otherSample == null && sampleTypeLevel != null) {
-				sampleTypeFactor.removeLevel(sampleTypeLevel);
-				getCompleteDesignSubset().removeLevel(sampleTypeLevel);
+				sampleTypeFactor.removeLevel(sampleTypeLevel,false);
+				getCompleteDesignSubset().removeLevel(sampleTypeLevel,false);
 			}
 		}
-		removeSamples(samples2remove);
-		updateCompleteDesignSubsets();
+		removeSamples(samples2remove,false);
+		updateCompleteDesignSubsets(false);
 		setSuppressEvents(false);
 		fireExperimentDesignEvent(ParameterSetStatus.CHANGED);
 	}
@@ -506,9 +500,14 @@ public class ExperimentDesign implements ExperimentDesignFactorListener, Seriali
 	}
 
 	public ExperimentDesignSubset getActiveDesignSubset() {
-		return designSubsets.stream().
+		ExperimentDesignSubset activeSubset = designSubsets.stream().
 				filter(s -> s.isActive()).
 				findFirst().orElse(null);
+		if(activeSubset == null) {
+			activeSubset = getCompleteUnlockedDesignSubset();
+			activeSubset.setActive(true);
+		}		
+		return activeSubset;
 	}
 
 	public void removeDesignSubset(ExperimentDesignSubset subset) {
@@ -544,7 +543,7 @@ public class ExperimentDesign implements ExperimentDesignFactorListener, Seriali
 		setSuppressEvents(true);
 		clearDesign();
 		newDesign.getSamples().stream().forEach(s -> s.clearDataFileAssignment());
-		newDesign.getFactors().stream().forEach(f -> addFactor(f));
+		newDesign.getFactors().stream().forEach(f -> addFactor(f, false));
 		for(ExperimentalSample sample : newDesign.getSamples()) {
 
 			ExperimentalSample refSample = ReferenceSamplesManager.getReferenceSampleById(sample.getId());
@@ -586,34 +585,51 @@ public class ExperimentDesign implements ExperimentDesignFactorListener, Seriali
 
 	public ExperimentDesignSubset getCompleteDesignSubset() {
 		return designSubsets.stream().
-				filter(s -> s.getName().equals(GlobalDefaults.ALL_SAMPLES.getName())).findFirst().get();
+				filter(s -> s.getName().equals(GlobalDefaults.ALL_SAMPLES.getName())).
+				findFirst().orElse(null);
+	}
+	
+	public ExperimentDesignSubset getCompleteUnlockedDesignSubset() {
+
+		return designSubsets.stream().
+				filter(s -> s.getName().equals(UNLOCKED_SUBSET_NAME)).
+				findFirst().orElse(null);
 	}
 
 	@Override
 	public void factorStatusChanged(ExperimentDesignFactorEvent e) {
 
-		ExperimentDesignFactor changedFactor = (ExperimentDesignFactor)e.getSource();
-		Collection<ExperimentDesignLevel> existingLevels = getCompleteDesignSubset().getLevelsForFactor(changedFactor);
+		ExperimentDesignFactor changedFactor = e.getSource();
+		Collection<ExperimentDesignLevel> existingLevels = 
+				getCompleteDesignSubset().getLevelsForFactor(changedFactor);
 
+		boolean changed = false;
 		if(e.getStatus().equals(ParameterSetStatus.REMOVED) && existingLevels != null) {
 
 			Set<ExperimentDesignLevel> levelsToremove =
-					existingLevels.stream().filter(l -> !changedFactor.getLevels().contains(l)).collect(Collectors.toSet());
+					existingLevels.stream().
+					filter(l -> !changedFactor.getLevels().contains(l)).
+					collect(Collectors.toSet());
 
-			if(!levelsToremove.isEmpty())
-				levelsToremove.forEach(l -> removeLevel(l));
+			if(!levelsToremove.isEmpty()) {
+				levelsToremove.forEach(l -> removeLevel(l,false));
+				changed = true;
+			}
 		}
 		if(e.getStatus().equals(ParameterSetStatus.ADDED) && existingLevels != null) {
 
-
 			Set<ExperimentDesignLevel> levelsToAdd =
-					changedFactor.getLevels().stream().filter(l -> !existingLevels.contains(l)).collect(Collectors.toSet());
+					changedFactor.getLevels().stream().
+					filter(l -> !existingLevels.contains(l)).
+					collect(Collectors.toSet());
 
 			if(!levelsToAdd.isEmpty()) {
-				levelsToAdd.forEach(l -> getCompleteDesignSubset().addLevel(l));
-				fireExperimentDesignEvent(ParameterSetStatus.CHANGED);
+				levelsToAdd.forEach(l -> getCompleteDesignSubset().addLevel(l,false));
+				changed = true;
 			}
 		}
+		if(changed == true)
+			fireExperimentDesignEvent(ParameterSetStatus.CHANGED);
 	}
 
 	public int getTotalLevels() {
@@ -732,8 +748,6 @@ public class ExperimentDesign implements ExperimentDesignFactorListener, Seriali
 		eventListeners = ConcurrentHashMap.newKeySet();
 		initCleanDesign();
 		ExperimentDesignFactor scFactor  = getSampleTypeFactor();
-		suppressEvents = false;
-		eventListeners = ConcurrentHashMap.newKeySet();
 		
 		List<Element> factorListElements = 
 				experimentDesignElement.getChild(
@@ -749,7 +763,7 @@ public class ExperimentDesign implements ExperimentDesignFactorListener, Seriali
 					factorSet.add(factor);
 			}
 		}
-		updateCompleteDesignSubsets();
+		updateCompleteDesignSubsets(false);
 		List<Element> sampleListElements = 
 				experimentDesignElement.getChild(ExperimentDesignFields.SampleSet.name()).
 				getChildren(ObjectNames.ExperimentalSample.name());
@@ -781,6 +795,31 @@ public class ExperimentDesign implements ExperimentDesignFactorListener, Seriali
 				designSubsets.add(subset);
 			}
 		}
+		 verifyAndUpdateDefaultDesignSubsets();		
+	}
+	
+	//	This is a temporary fix for projects in the new format with wrong design XML
+	private void verifyAndUpdateDefaultDesignSubsets() {
+		
+		ExperimentDesignSubset defaultAllLocked = getCompleteDesignSubset();
+		for(ExperimentDesignFactor factor : factorSet) {
+			
+			TreeMap<Integer, ExperimentDesignLevel> levelMap = 
+					defaultAllLocked.getOrderedLevelMap().get(factor);
+			if(levelMap == null)
+				defaultAllLocked.addFactor(factor,false);
+			else {
+				int lastKey = levelMap.lastKey();
+				for(ExperimentDesignLevel level : factor.getLevels()) {
+					
+					if(!levelMap.values().contains(level)) {
+						lastKey++;
+						levelMap.put(lastKey, level);
+					}
+				}
+			}
+		}
+		updateCompleteDesignSubsets(false);
 	}
 
 	public ExperimentDesign(ExperimentDesign experimentDesign) {

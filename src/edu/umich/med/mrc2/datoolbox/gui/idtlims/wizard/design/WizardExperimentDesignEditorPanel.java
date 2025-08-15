@@ -73,7 +73,7 @@ public class WizardExperimentDesignEditorPanel extends IDTrackerExperimentDesign
 			String count = Integer.toString(experiment.getExperimentDesign().getSamples().size() + 1);
 			String tmpId = DataPrefix.ID_SAMPLE.getName() + StringUtils.leftPad(count, 4, '0');
 			sample = new IDTExperimentalSample(tmpId, sampleName, sampleDescription, new Date(), stockSample);
-			experiment.getExperimentDesign().addSample(sample);
+			experiment.getExperimentDesign().addSample(sample,false);
 		}
 		else {
 			sample.setName(sampleName);
@@ -139,7 +139,7 @@ public class WizardExperimentDesignEditorPanel extends IDTrackerExperimentDesign
 		if(MessageDialog.showChoiceWithWarningMsg(yesNoQuestion, this) == JOptionPane.NO_OPTION)
 			return;
 
-		experiment.getExperimentDesign().removeSamples(selectedSamples);
+		experiment.getExperimentDesign().removeSamples(selectedSamples,false);
 		reloadDesign();
 	}
 }

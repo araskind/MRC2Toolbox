@@ -310,7 +310,7 @@ public class MSAlignTestFrame extends JFrame implements WindowListener, ActionLi
 				map(f -> f.getRetentionTime()).mapToDouble(Double::doubleValue).toArray();
 		queryRtArray = ArrayUtils.insert(0, queryRtArray, 0.0d);
 		
-		LoessInterpolator interpolator = new LoessInterpolator();
+		LoessInterpolator interpolator = new LoessInterpolator(0.4d, 1);
 		PolynomialSplineFunction loesFit = interpolator.interpolate(refRtArray, queryRtArray);
 				
 		for(Entry<MsFeature,MsFeature>anchor : alignmentProcessor.getAnchorMap().entrySet()) {
@@ -318,12 +318,18 @@ public class MSAlignTestFrame extends JFrame implements WindowListener, ActionLi
 			double refRt  = anchor.getKey().getRetentionTime();
 			double queryRt  = anchor.getValue().getRetentionTime();
 			double rtDiff = refRt - queryRt;
-			double fittedDiff = refRt - loesFit.value(queryRt);
+			double fittedDiff = queryRt - loesFit.value(refRt);
+			
+//			System.out.println(
+//					"RT1 = " + MRC2ToolBoxConfiguration.getRtFormat().format(anchor.getKey().getRetentionTime()) 
+//					+ "\tDelta = " + MRC2ToolBoxConfiguration.getRtFormat().format(rtDiff)
+//					+ "\tFitted = " + MRC2ToolBoxConfiguration.getRtFormat().format(fittedDiff)
+//					);
 			
 			System.out.println(
-					"RT1 = " + MRC2ToolBoxConfiguration.getRtFormat().format(anchor.getKey().getRetentionTime()) 
-					+ "\tDelta = " + MRC2ToolBoxConfiguration.getRtFormat().format(rtDiff)
-					+ "\tFitted = " + MRC2ToolBoxConfiguration.getRtFormat().format(fittedDiff)
+					MRC2ToolBoxConfiguration.getRtFormat().format(anchor.getKey().getRetentionTime()) 
+					+ "\t" + MRC2ToolBoxConfiguration.getRtFormat().format(rtDiff)
+					+ "\t" + MRC2ToolBoxConfiguration.getRtFormat().format(fittedDiff)
 					);
 		}		
 	}

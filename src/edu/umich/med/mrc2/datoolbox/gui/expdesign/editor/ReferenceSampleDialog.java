@@ -349,7 +349,7 @@ public class ReferenceSampleDialog extends JDialog implements ActionListener{
 			experimentDesign.removeReferenceSamples(samplesToRemove);
 		
 		if(!samplesToAdd.isEmpty())
-			experimentDesign.addReferenceSamples(samplesToAdd);
+			experimentDesign.addReferenceSamples(samplesToAdd,false);
 		
 		Collection<DataFile> projectFiles = currentProject.getAllDataFiles();
 		for(ExperimentalSample sample : experimentDesign.getSamples()) {

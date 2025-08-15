@@ -817,7 +817,7 @@ public class RDEMetadataWizard extends JDialog
 			//	If samples were inferred from existing sample prep, 
 			//	remove them when removing the prep
 			if(!samples.isEmpty())
-				newExperiment.getExperimentDesign().removeSamples(samples);
+				newExperiment.getExperimentDesign().removeSamples(samples,false);
 			
 			newExperiment.getSamplePreps().remove(prep);
 			for(RDPMetadataDefinitionStage panelType : RDPMetadataDefinitionStage.values()) {
@@ -836,7 +836,7 @@ public class RDEMetadataWizard extends JDialog
 			
 			if(!samples.isEmpty()) {
 				newExperiment.getExperimentDesign().getSamples().clear();
-				newExperiment.getExperimentDesign().addSamples(samples);
+				newExperiment.getExperimentDesign().addSamples(samples,false);
 			}			
 			//	TODO this will need a different handling if multiple preps are present
 			newExperiment.getSamplePreps().clear();

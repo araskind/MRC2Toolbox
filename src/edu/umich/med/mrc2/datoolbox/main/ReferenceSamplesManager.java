@@ -153,7 +153,7 @@ public class ReferenceSamplesManager {
 		referenceSamples.remove(refSample);
 		ExperimentDesignLevel refLevel = scFactor.getLevelByName(refSample.getName());
 		if(refLevel != null)
-			scFactor.removeLevel(refLevel);
+			scFactor.removeLevel(refLevel,false);
 
 		Connection conn = ConnectionManager.getConnection();
 		String query = "DELETE FROM REFERENCE_SAMPLE WHERE LIMS_ID = ?";

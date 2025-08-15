@@ -77,10 +77,10 @@ public class LevelEditorTable extends BasicTable {
 				model.getColumnIndex(LevelEditorTableModel.ACTIVE_COLUMN));
 
 		if(isEnabled)
-			activeDesignSubset.addLevel(selectedLevel);
+			activeDesignSubset.addLevel(selectedLevel,true);
 		else {
 			if(activeDesignSubset.getOrderedDesign().get(activeFactor).length > 1)
-				activeDesignSubset.removeLevel(selectedLevel);
+				activeDesignSubset.removeLevel(selectedLevel,true);
 			else {
 				model.setValueAt(true, row,
 						model.getColumnIndex(LevelEditorTableModel.ACTIVE_COLUMN));

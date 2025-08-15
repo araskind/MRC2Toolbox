@@ -368,14 +368,14 @@ public class IDTUtils {
 					rs.getString("USER_DESCRIPTION"),
 					new Date(rs.getDate("DATE_CREATED").getTime()),
 					ss);
-			design.addSample(sample);
+			design.addSample(sample,false);
 		}
 		rs.close();
 		ps.close();
 		ConnectionManager.releaseConnection(conn);
 		
 		// Add sample/control type
-		design.addFactor(ReferenceSamplesManager.getSampleControlTypeFactor());
+		design.addFactor(ReferenceSamplesManager.getSampleControlTypeFactor(),false);
 		design.getSamples().forEach(s -> s.addDesignLevel(ReferenceSamplesManager.sampleLevel));
 		return design;
 	}

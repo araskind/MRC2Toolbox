@@ -263,7 +263,7 @@ public class DataSetUtils {
 
 		ExperimentDesignSubset samplesOnly = 
 				new ExperimentDesignSubset(GlobalDefaults.SAMPLES_ONLY.getName());
-		samplesOnly.addLevel(ReferenceSamplesManager.sampleLevel);
+		samplesOnly.addLevel(ReferenceSamplesManager.sampleLevel,false);
 		return samplesOnly;
 	}
 	

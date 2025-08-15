@@ -159,7 +159,7 @@ public class IDTrackerExperimentDesignEditorPanel extends JPanel
 				String count = Integer.toString(experiment.getExperimentDesign().getSamples().size() + 1);
 				String tmpId = DataPrefix.ID_SAMPLE.getName() + StringUtils.leftPad(count, 4, '0');
 				sample = new IDTExperimentalSample(tmpId, sampleName, sampleDescription, new Date(), stockSample);
-				experiment.getExperimentDesign().addSample(sample);
+				experiment.getExperimentDesign().addSample(sample,false);
 			}
 			else {
 				sample.setName(sampleName);
@@ -175,7 +175,7 @@ public class IDTrackerExperimentDesignEditorPanel extends JPanel
 					if(experiment.getExperimentDesign() == null)
 						experiment.setDesign(new ExperimentDesign());
 					
-					experiment.getExperimentDesign().addSample(sample);
+					experiment.getExperimentDesign().addSample(sample,false);
 				}
 				catch (Exception e) {
 					e.printStackTrace();
@@ -227,7 +227,7 @@ public class IDTrackerExperimentDesignEditorPanel extends JPanel
 					return;
 				
 			if(experiment.getExperimentDesign() != null)
-				experiment.getExperimentDesign().removeSamples(selectedSamples);
+				experiment.getExperimentDesign().removeSamples(selectedSamples,false);
 			
 			reloadDesign();
 		}
@@ -255,7 +255,7 @@ public class IDTrackerExperimentDesignEditorPanel extends JPanel
 			e.printStackTrace();
 		}
 		if(experiment.getExperimentDesign() != null)
-			experiment.getExperimentDesign().removeSamples(selectedSamples);
+			experiment.getExperimentDesign().removeSamples(selectedSamples,false);
 		
 		reloadDesign();
 	}

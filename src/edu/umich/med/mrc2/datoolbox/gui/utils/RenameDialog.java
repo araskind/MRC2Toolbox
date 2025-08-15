@@ -126,11 +126,8 @@ public class RenameDialog extends JDialog implements ActionListener {
 		
 		JRootPane rootPane = SwingUtilities.getRootPane(saveButton);
 		rootPane.registerKeyboardAction(al, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
-		rootPane.setDefaultButton(saveButton);
-		
+		rootPane.setDefaultButton(saveButton);		
 		pack();
-		setLocationRelativeTo(MRC2ToolBoxCore.getMainWindow());
-		setVisible(true);
 	}
 
 	@Override

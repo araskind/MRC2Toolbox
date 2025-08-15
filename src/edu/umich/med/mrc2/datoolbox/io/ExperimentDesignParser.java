@@ -79,7 +79,7 @@ public class ExperimentDesignParser {
 				if (isFactor) {
 
 					ExperimentDesignFactor newFactor = new ExperimentDesignFactor(header[i]);
-					experimentDesign.addFactor(newFactor);
+					experimentDesign.addFactor(newFactor,false);
 					factorMap.put(newFactor, i);
 				}
 				if (header[i].equals(ExperimentDesignFields.SAMPLE_NAME.getName()))
@@ -129,7 +129,7 @@ public class ExperimentDesignParser {
 				//	User-specified factors
 				String[] line = designData[i];
 				factorMap.forEach((k,v) -> es.addDesignLevel(k.getLevelByName(line[v].trim())));
-				experimentDesign.addSample(es);
+				experimentDesign.addSample(es,false);
 			}
 		}
 		return experimentDesign;

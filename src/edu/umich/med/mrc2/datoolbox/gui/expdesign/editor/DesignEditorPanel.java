@@ -43,6 +43,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesign;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentalSample;
+import edu.umich.med.mrc2.datoolbox.data.enums.ParameterSetStatus;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignSubsetEvent;
@@ -272,42 +273,39 @@ public class DesignEditorPanel extends DockableMRC2ToolboxPanel {
 	private void deleteSamples() {
 
 		Collection<ExperimentalSample> toDelete = expDesignTable.getSelectedSamples();
+		if(toDelete.isEmpty()) 
+			return;
 
-		if(!toDelete.isEmpty()) {
-
-			String yesNoQuestion = "Do you want to delete selected samples?";
-			if(MessageDialog.showChoiceWithWarningMsg(yesNoQuestion , this.getContentPane()) == JOptionPane.YES_OPTION) {
-				experimentDesign.setSuppressEvents(false);
-				experimentDesign.removeSamples(toDelete);
-			}
-		}
+		if(MessageDialog.showChoiceWithWarningMsg(
+				"Do you want to delete selected samples?", 
+				this.getContentPane()) == JOptionPane.YES_OPTION) {
+			
+			experimentDesign.removeSamples(toDelete,false);
+			experimentDesign.fireExperimentDesignEvent(ParameterSetStatus.CHANGED);
+		}	
 	}
 
 	private void deleteFactor() {
 
-		if (MRC2ToolBoxCore.getActiveMetabolomicsExperiment() != null) {
-
-			if (MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExperimentDesign().getCompleteDesignSubset() != null) {
+		if (MRC2ToolBoxCore.getActiveMetabolomicsExperiment() != null 
+				&& MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExperimentDesign().getCompleteDesignSubset() != null) {
 
 				DeleteFactorDialog ddf = new DeleteFactorDialog();
 				ddf.setLocationRelativeTo(this.getContentPane());
 				ddf.setVisible(true);
-			}
-		}
+		}	
 	}
 
 	private void editFactor() {
 
-		if (MRC2ToolBoxCore.getActiveMetabolomicsExperiment() != null) {
-
-			if (MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExperimentDesign().getCompleteDesignSubset() != null) {
+		if (MRC2ToolBoxCore.getActiveMetabolomicsExperiment() != null 
+				&& MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExperimentDesign().getCompleteDesignSubset() != null) {
 
 				EditFactorDialog edf =
 					new EditFactorDialog(MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExperimentDesign().getFactors().first());
 				edf.setLocationRelativeTo(this.getContentPane());
 				edf.setVisible(true);
-			}
-		}
+		}		
 	}
 
 	private void addFactor() {

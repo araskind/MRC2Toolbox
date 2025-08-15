@@ -257,7 +257,7 @@ public class LIMSUtils {
 					rs.getString("FACTOR_ID"));
 
 			factor.setSuppressEvents(true);
-			design.addFactor(factor);
+			design.addFactor(factor,false);
 		}
 		rs.close();
 
@@ -311,7 +311,7 @@ public class LIMSUtils {
 			ExperimentalSample sample = new ExperimentalSample(sid, rs.getString("SAMPLE_NAME"));
 			sample.setLimsSampleType(rs.getString("SAMPLE_TYPE"));
 			bioMaterialTypes.add(rs.getString("SAMPLE_TYPE"));
-			design.addSample(sample);
+			design.addSample(sample,false);
 			sampleSubjectMap.put(sid, subid);
 		}
 		rs.close();
@@ -341,7 +341,7 @@ public class LIMSUtils {
 
 		// Add sample/control type
 		//	TODO - all LIMS samples are regular samples now. If this changes this code has to be modified
-		design.addFactor(ReferenceSamplesManager.getSampleControlTypeFactor());
+		design.addFactor(ReferenceSamplesManager.getSampleControlTypeFactor(),false);
 		design.getSamples().forEach(s -> s.addDesignLevel(ReferenceSamplesManager.sampleLevel));
 
 		//	Add biological material type as factor
@@ -349,7 +349,7 @@ public class LIMSUtils {
 
 			ExperimentDesignFactor bioMaterialFactor = new ExperimentDesignFactor(StandardFactors.BIOLOGICAL_MATERIAL.getName());
 			bioMaterialTypes.stream().forEach(t -> bioMaterialFactor.addLevel(new ExperimentDesignLevel(t)));
-			design.addFactor(bioMaterialFactor);
+			design.addFactor(bioMaterialFactor,false);
 			design.getSamples().stream().forEach(s -> s.addDesignLevel(design.getLevelByName(s.getLimsSampleType())));
 		}
 		//	Get subjects data
@@ -388,7 +388,7 @@ public class LIMSUtils {
 
 			ExperimentDesignFactor subjectFactor = 
 					new ExperimentDesignFactor(StandardFactors.SUBJECT.getName());
-			design.addFactor(subjectFactor);
+			design.addFactor(subjectFactor,false);
 			subjects.forEach(s -> subjectFactor.addLevel(new ExperimentDesignLevel(s.getSubjectId())));
 			design.getSamples().stream().forEach(s -> s.addDesignLevel(design.getLevelByName(sampleSubjectMap.get(s.getId()))));
 		}
@@ -396,7 +396,7 @@ public class LIMSUtils {
 		if(species.size() > 1) {
 
 			ExperimentDesignFactor speciesFactor = new ExperimentDesignFactor(StandardFactors.SPECIES.getName());
-			design.addFactor(speciesFactor);
+			design.addFactor(speciesFactor,false);
 			species.forEach(s -> speciesFactor.addLevel(new ExperimentDesignLevel(s)));
 			for (Map.Entry<String, String> entry : sampleSubjectMap.entrySet()) {
 

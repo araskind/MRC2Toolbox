@@ -210,14 +210,16 @@ public class DataAnalysisProject extends Project {
 		clusterMap.remove(pipeline);	
 		statsCalculatedMap.remove(pipeline);
 		metaDataMap.remove(pipeline);
-		featureSetMap.remove(pipeline);
-		
+		featureSetMap.remove(pipeline);		
 		
 		// Delete data matrix and storage file
 		dataMatrixMap.remove(pipeline);
-		Path dataMatrixFilePath = Paths.get(getDataDirectory().getAbsolutePath(), 
-						dataMatrixFileMap.get(pipeline));
-		FIOUtils.safeDeleteFile(dataMatrixFilePath);
+		if(dataMatrixFileMap.get(pipeline) != null) {
+			
+			Path dataMatrixFilePath = Paths.get(getDataDirectory().getAbsolutePath(), 
+					dataMatrixFileMap.get(pipeline));
+			FIOUtils.safeDeleteFile(dataMatrixFilePath);	
+		}
 		dataMatrixFileMap.remove(pipeline);
 		
 		if(featureMatrixFileMap == null)
@@ -228,9 +230,12 @@ public class DataAnalysisProject extends Project {
 		
 		//	Delete feature matrix and storage file
 		featureMatrixMap.remove(pipeline);
-		Path featureMatrixFilePath = Paths.get(getDataDirectory().getAbsolutePath(), 
-						featureMatrixFileMap.get(pipeline));
-		FIOUtils.safeDeleteFile(featureMatrixFilePath);
+		if(featureMatrixFileMap.get(pipeline) != null) {
+			
+			Path featureMatrixFilePath = Paths.get(getDataDirectory().getAbsolutePath(), 
+					featureMatrixFileMap.get(pipeline));
+			FIOUtils.safeDeleteFile(featureMatrixFilePath);
+		}
 		featureMatrixFileMap.remove(pipeline);
 		
 		//	Remove all data linked to acquisition method 
@@ -256,8 +261,7 @@ public class DataAnalysisProject extends Project {
 		Path featureXmlFilePath = ProjectUtils.getFeaturesFilePath(this, pipeline);
 		FIOUtils.safeDeleteFile(featureXmlFilePath);
 		
-		//	Remove data integration and alignment sets if they include data for the pipeline
-		
+		//	Remove data integration and alignment sets if they include data for the pipeline		
 		
 		dataPipelines.remove(pipeline);
 		

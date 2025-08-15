@@ -320,18 +320,18 @@ public class EditFactorDialog extends JDialog implements ActionListener, ItemLis
 					.filter(f -> !levelsTable.getLevels().contains(f)).collect(Collectors.toSet());
 
 			if(!levelsToRemove.isEmpty())
-				levelsToRemove.forEach(l -> experimentDesign.removeLevel(l));
+				levelsToRemove.forEach(l -> experimentDesign.removeLevel(l, false));
 
 			Set<ExperimentDesignLevel> levelsToAdd = levelsTable.getLevels().stream()
 					.filter(l -> !activeFactor.getLevels().contains(l)).collect(Collectors.toSet());
 
 			if(!levelsToAdd.isEmpty())
-				levelsToRemove.forEach(l -> experimentDesign.addLevel(l, activeFactor));
+				levelsToRemove.forEach(l -> experimentDesign.addLevel(l, activeFactor, false));
 		}
 		else {
 			//	Add new factor
 			levelsTable.getLevels().stream().forEach(l -> activeFactor.addLevel(l));
-			experimentDesign.addFactor(activeFactor);
+			experimentDesign.addFactor(activeFactor,false);
 		}
 		experimentDesign.setSuppressEvents(false);
 		experimentDesign.fireExperimentDesignEvent(ParameterSetStatus.CHANGED);
