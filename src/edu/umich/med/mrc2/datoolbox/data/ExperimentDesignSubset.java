@@ -150,31 +150,31 @@ public class ExperimentDesignSubset implements Comparable<ExperimentDesignSubset
 	//	TODO for now rely on GUI to pass the expected set of factors
 	public void reorderFactors(ExperimentDesignFactor[] factorsInNewOrder) {
 
-		if(factorsInNewOrder.length > 0) {
+		if(factorsInNewOrder.length == 0) 
+			return;
+		
+		orderedFactorMap.clear();
+		for(int i=0; i<factorsInNewOrder.length; i++)
+			orderedFactorMap.put(i, factorsInNewOrder[i]);
 
-			orderedFactorMap.clear();
-
-			for(int i=0; i<factorsInNewOrder.length; i++)
-				orderedFactorMap.put(i, factorsInNewOrder[i]);
-
-			setStatus(ParameterSetStatus.CHANGED);
-		}
+		setStatus(ParameterSetStatus.CHANGED);	
 	}
 
 	//	TODO for now rely on GUI to pass the expected set of levels
 	public void reorderLevels(ExperimentDesignLevel[] levelsInNewOrder) {
 
-		if(levelsInNewOrder.length > 0) {
+		if(levelsInNewOrder.length == 0)
+			return;
+		
+		TreeMap<Integer, ExperimentDesignLevel> levelMap = 
+				new TreeMap<Integer, ExperimentDesignLevel>();
 
-			ExperimentDesignFactor factor = levelsInNewOrder[0].getParentFactor();
-			TreeMap<Integer, ExperimentDesignLevel> levelMap = orderedLevelMap.get(factor);
-			levelMap.clear();
+		for(int i=0; i<levelsInNewOrder.length; i++)
+			levelMap.put(i, levelsInNewOrder[i]);
 
-			for(int i=0; i<levelsInNewOrder.length; i++)
-				levelMap.put(i, levelsInNewOrder[i]);
-
-			setStatus(ParameterSetStatus.CHANGED);
-		}
+		ExperimentDesignFactor factor = levelsInNewOrder[0].getParentFactor();
+		orderedLevelMap.put(factor, levelMap);		
+		setStatus(ParameterSetStatus.CHANGED);		
 	}
 
 	public Set<ExperimentDesignSubsetListener> getEventListeners() {

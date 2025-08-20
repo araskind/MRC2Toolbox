@@ -246,7 +246,7 @@ public class FeatureSubsetPanel extends DockableMRC2ToolboxPanel {
 		DataAnalysisProject currentProject = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
 		String libraryName =
 				currentProject.getName() + "_" +
-				currentProject.getActiveDataPipeline().getCode() + "_" +
+				currentProject.getActiveDataPipeline().getSaveSafeName() + "_" +
 				setToExport.getName();
 
 		CompoundLibrary currentLibrary = new CompoundLibrary(libraryName);
@@ -254,6 +254,7 @@ public class FeatureSubsetPanel extends DockableMRC2ToolboxPanel {
 				new LibraryExportDialog(
 						MainActionCommands.EXPORT_FEATURE_SUBSET_COMMAND.getName(),
 						currentLibrary);
+		libraryExportDialog.setDestinationDirectory(currentProject.getExportsDirectory());
 		libraryExportDialog.setFeatureSubset(setToExport.getFeatures());
 		libraryExportDialog.setLocationRelativeTo(MRC2ToolBoxCore.getMainWindow());
 		libraryExportDialog.setVisible(true);

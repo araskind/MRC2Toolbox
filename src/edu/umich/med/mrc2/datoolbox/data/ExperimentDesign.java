@@ -795,7 +795,8 @@ public class ExperimentDesign implements ExperimentDesignFactorListener, Seriali
 				designSubsets.add(subset);
 			}
 		}
-		 verifyAndUpdateDefaultDesignSubsets();		
+		//	TODO remove after re-saving all the projects
+		verifyAndUpdateDefaultDesignSubsets();		
 	}
 	
 	//	This is a temporary fix for projects in the new format with wrong design XML

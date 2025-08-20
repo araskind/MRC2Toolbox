@@ -99,7 +99,7 @@
 									<root>true</root>
 									<content delegate="SplitDockStationFactory">
 										<fullscreen-action>false</fullscreen-action>
-										<node nodeId="1676064404309" orientation="VERTICAL" divider="0.5061837455830389">
+										<node nodeId="1676064404309" orientation="VERTICAL" divider="0.4463276836158192">
 											<leaf id="1" nodeId="1676064404566">
 												<placeholders>
 													<placeholder>dock.single.DockableLIMSDataPanel</placeholder>
@@ -342,7 +342,7 @@
 										<property factory="SplitDockPlaceholderProperty">
 											<placeholder>dock.single.ProjectDetailsPanel</placeholder>
 											<backup-path>
-												<node location="TOP" size="0.6666666666666666" id="1676064404309"/>
+												<node location="TOP" size="0.4689265536723164" id="1676064404309"/>
 												<leaf id="1676064404566"/>
 											</backup-path>
 										</property>
@@ -392,7 +392,7 @@
 										<property factory="SplitDockPlaceholderProperty">
 											<placeholder>dock.single.DockableLIMSDataPanel</placeholder>
 											<backup-path>
-												<node location="TOP" size="0.6666666666666666" id="1676064404309"/>
+												<node location="TOP" size="0.4689265536723164" id="1676064404309"/>
 												<leaf id="1676064404566"/>
 											</backup-path>
 										</property>

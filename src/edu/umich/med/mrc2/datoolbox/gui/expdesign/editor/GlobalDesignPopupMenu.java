@@ -25,12 +25,13 @@ import java.awt.event.ActionListener;
 
 import javax.swing.Icon;
 import javax.swing.JMenuItem;
-import javax.swing.JPopupMenu;
 
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
+import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
+import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTablePopupMenu;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 
-public class GlobalDesignPopupMenu extends JPopupMenu {
+public class GlobalDesignPopupMenu extends BasicTablePopupMenu {
 
 	/**
 	 *
@@ -47,9 +48,9 @@ public class GlobalDesignPopupMenu extends JPopupMenu {
 	private JMenuItem invertSelectedMenuItem;
 	private JMenuItem assignLevelsMenuItem;
 
-	public GlobalDesignPopupMenu(ActionListener listener) {
+	public GlobalDesignPopupMenu(ActionListener listener, BasicTable copyListener) {
 
-		super();
+		super(listener, copyListener);
 
 		enableSelectedMenuItem = GuiUtils.addMenuItem(this,
 				MainActionCommands.ENABLE_SELECTED_SAMPLES_COMMAND.getName(), listener,
@@ -73,5 +74,7 @@ public class GlobalDesignPopupMenu extends JPopupMenu {
 				MainActionCommands.EDIT_DESIGN_FOR_SELECTED_SAMPLES_COMMAND.getName(), listener,
 				MainActionCommands.EDIT_DESIGN_FOR_SELECTED_SAMPLES_COMMAND.getName());
 		assignLevelsMenuItem.setIcon(assignLevelIcon);
+		
+		addCopyBlock();
 	}
 }

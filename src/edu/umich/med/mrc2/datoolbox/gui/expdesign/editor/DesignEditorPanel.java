@@ -98,7 +98,7 @@ public class DesignEditorPanel extends DockableMRC2ToolboxPanel {
 		getContentPane().add(menuBar, BorderLayout.NORTH);
 
 		expDesignTable = new ExperimentDesignTable();
-		expDesignTable.addTablePopupMenu(new GlobalDesignPopupMenu(this));
+		expDesignTable.addTablePopupMenu(new GlobalDesignPopupMenu(this, expDesignTable));
 		expDesignTable.setTablePopupEnabled(false);
 		designScrollPane = new JScrollPane(expDesignTable);
 		designScrollPane.setPreferredSize(expDesignTable.getPreferredScrollableViewportSize());
@@ -324,11 +324,18 @@ public class DesignEditorPanel extends DockableMRC2ToolboxPanel {
 			return;
 
 		JnaFileChooser fc = new JnaFileChooser(baseDirectory);
+		String namePrefix = "";
+		if(MRC2ToolBoxCore.getActiveMetabolomicsExperiment() != null) {
+			fc.setCurrentDirectory(
+				MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExportsDirectory().getAbsolutePath());
+			namePrefix = MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getName() + "_";
+		}
+			
 		fc.setMode(JnaFileChooser.Mode.Files);
 		fc.addFilter("Text files", "txt", "TXT");
 		fc.setTitle("Save experiment design to file:");
 		fc.setMultiSelectionEnabled(false);
-		String defaultFileName = "Experiment_design_" + 
+		String defaultFileName = namePrefix + "Experiment_design_" + 
 				MRC2ToolBoxConfiguration.getFileTimeStampFormat().format(new Date()) + ".txt";
 		fc.setDefaultFileName(defaultFileName);
 		

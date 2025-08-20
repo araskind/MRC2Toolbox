@@ -76,7 +76,7 @@ public class AssayDesignPanel extends DockableMRC2ToolboxPanel{
 		add(menuBar, BorderLayout.NORTH);
 
 		assayDesignTable = new AssayDesignTable();
-		assayDesignTable.addTablePopupMenu(new AssayDesignPopupMenu(this));
+		assayDesignTable.addTablePopupMenu(new AssayDesignPopupMenu(this, assayDesignTable));
 		assayDesignTable.setTablePopupEnabled(false);
 		JScrollPane designScrollPane = new JScrollPane(assayDesignTable);
 		add(designScrollPane, BorderLayout.CENTER);

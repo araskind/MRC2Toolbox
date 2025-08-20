@@ -53,7 +53,7 @@ public class DataFileSelectionPanel extends JPanel implements ActionListener, Va
 		toolbar = new DataFileSelectionToolbar(this);
 		add(toolbar, BorderLayout.NORTH);
 		dataFileTable = new DataFileTable();
-		dataFileTable.addTablePopupMenu(new AssayDesignPopupMenu(this));	
+		dataFileTable.addTablePopupMenu(new AssayDesignPopupMenu(this, dataFileTable));	
 		add(new JScrollPane(dataFileTable), BorderLayout.CENTER);
 	}	
 

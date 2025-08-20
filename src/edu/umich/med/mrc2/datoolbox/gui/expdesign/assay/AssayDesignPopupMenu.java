@@ -25,12 +25,13 @@ import java.awt.event.ActionListener;
 
 import javax.swing.Icon;
 import javax.swing.JMenuItem;
-import javax.swing.JPopupMenu;
 
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
+import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
+import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTablePopupMenu;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 
-public class AssayDesignPopupMenu extends JPopupMenu {
+public class AssayDesignPopupMenu extends BasicTablePopupMenu {
 
 	/**
 	 *
@@ -50,9 +51,10 @@ public class AssayDesignPopupMenu extends JPopupMenu {
 	private JMenuItem disableSelectedMenuItem;
 	private JMenuItem invertSelectedMenuItem;
 	
-	public AssayDesignPopupMenu(ActionListener listener) {
+	public AssayDesignPopupMenu(ActionListener listener, BasicTable copyListener) {
 
-		super();
+		super(listener, copyListener);
+		
 		disableControlsMenuItem = GuiUtils.addMenuItem(this,
 				MainActionCommands.DISABLE_REFERENCE_SAMPLES_COMMAND.getName(), listener,
 				MainActionCommands.DISABLE_REFERENCE_SAMPLES_COMMAND.getName());
@@ -73,5 +75,7 @@ public class AssayDesignPopupMenu extends JPopupMenu {
 				MainActionCommands.INVERT_ENABLED_SAMPLES_COMMAND.getName(), listener,
 				MainActionCommands.INVERT_ENABLED_SAMPLES_COMMAND.getName());
 		invertSelectedMenuItem.setIcon(invertEnabledIcon);
+		
+		addCopyBlock();
 	}
 }

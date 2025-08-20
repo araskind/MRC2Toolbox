@@ -79,6 +79,7 @@ public class LibraryExportDialog extends JDialog implements ActionListener, Back
 	private static final Icon exportLibraryIcon = GuiUtils.getIcon("exportLibrary", 32);
 	
 	private File baseDirectory;
+	private File destinationDirectory;
 	private File exportFile;
 	private JPanel panel;
 	private CompoundLibrary currentLibrary;
@@ -198,6 +199,8 @@ public class LibraryExportDialog extends JDialog implements ActionListener, Back
 		JRootPane rootPane = SwingUtilities.getRootPane(btnSave);
 		rootPane.registerKeyboardAction(al, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 		rootPane.setDefaultButton(btnSave);
+		
+		destinationDirectory = null;
 		loadPreferences();
 		pack();
 	}
@@ -222,6 +225,9 @@ public class LibraryExportDialog extends JDialog implements ActionListener, Back
 	private void setExportFile() {
 		
 		JnaFileChooser fc = new JnaFileChooser(baseDirectory);
+		if(destinationDirectory != null)
+			fc.setCurrentDirectory(destinationDirectory.getAbsolutePath());		
+		
 		fc.setMode(JnaFileChooser.Mode.Files);
 		for(MsLibraryFormat f : MsLibraryFormat.values())
 			fc.addFilter(f.getName(), f.getFileExtension());
@@ -318,6 +324,10 @@ public class LibraryExportDialog extends JDialog implements ActionListener, Back
 
 	public File getExportFile() {
 		return exportFile;
+	}
+
+	public void setDestinationDirectory(File destinationDirectory) {
+		this.destinationDirectory = destinationDirectory;
 	}
 }
 

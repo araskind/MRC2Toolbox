@@ -830,9 +830,11 @@ public class MainWindow extends JFrame
 	public void saveExperiment() {
 		
 		if(currentExperiment != null) {
-			SaveExperimentTask spt = new SaveExperimentTask(currentExperiment);
-			spt.addTaskListener(this);
-			MRC2ToolBoxCore.getTaskController().addTask(spt);
+			
+			saveMetabolomicsExperimentInNewFormat();
+//			SaveExperimentTask spt = new SaveExperimentTask(currentExperiment);
+//			spt.addTaskListener(this);
+//			MRC2ToolBoxCore.getTaskController().addTask(spt);
 		}
 		if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() != null) {
 			
