@@ -30,12 +30,14 @@ import org.jdom2.Element;
 
 import edu.umich.med.mrc2.datoolbox.data.CompoundIdentity;
 import edu.umich.med.mrc2.datoolbox.data.IDTExperimentalSample;
+import edu.umich.med.mrc2.datoolbox.data.LibraryMsFeature;
 import edu.umich.med.mrc2.datoolbox.data.LibraryMsFeatureDbBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsMsLibraryFeature;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.database.cpd.CompoundDatabaseUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.MSMSLibraryUtils;
+import edu.umich.med.mrc2.datoolbox.database.idt.MSRTLibraryUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.OfflineExperimentLoadCache;
 import edu.umich.med.mrc2.datoolbox.project.store.IDTrackerProjectFields;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
@@ -150,17 +152,33 @@ public abstract class OpenStandaloneProjectAbstractTask extends AbstractTask {
 	}
 	
 	protected void getMSRTLibraryEntries(Connection conn) throws Exception {
-		
-		// TODO Auto-generated method stub
+
 		taskDescription = "Populating MS-RT library data cache ...";
 		total = uniqueMSRTLibraryIds.size();
 		processed = 0;		
-		for(String libId : uniqueMSRTLibraryIds) {
+
+		for(String targetId : uniqueMSRTLibraryIds) {
 			
-			LibraryMsFeatureDbBundle bundle = null;	
-			if(bundle != null)
-				OfflineExperimentLoadCache.addLibraryMsFeatureDbBundle(bundle);
-			
+			LibraryMsFeatureDbBundle fBundle =  
+					MSRTLibraryUtils.createFeatureBundleForFeature(targetId, conn);
+			if(fBundle != null) {
+
+				LibraryMsFeature newTarget = fBundle.getFeature();
+
+				//	Add identity
+				if(fBundle.getConmpoundDatabaseAccession() != null)
+					MSRTLibraryUtils.attachIdentity(
+							newTarget, fBundle.getConmpoundDatabaseAccession(), fBundle.isQcStandard(), conn);
+
+				// Attach spectrum
+				MSRTLibraryUtils.attachMassSpectrum(newTarget, conn);
+
+
+				//	Attach annotations
+				MSRTLibraryUtils.attachAnnotations(newTarget, conn);
+				
+				OfflineExperimentLoadCache.addLibraryMsFeatureDbBundle(fBundle);
+			}			
 			processed++;
 		}
 	}

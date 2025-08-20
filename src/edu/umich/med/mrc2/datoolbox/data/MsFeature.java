@@ -1086,13 +1086,18 @@ public class MsFeature implements AnnotatedObject, Serializable, XmlStorable {
 			for(Element msfIdElement : msfIdList) {
 				
 				MsFeatureIdentity msfId = new MsFeatureIdentity(msfIdElement);
-				if(spectrum != null && spectrum.getExperimentalTandemSpectrum() != null 
-						&& msfId.getReferenceMsMsLibraryMatch() != null) {
+				if(spectrum != null) {
 					
-					msfId.getReferenceMsMsLibraryMatch().setEntropyBasedScore(
-							MSMSScoreCalculator.calculateDefaultEntropyMatchScore(
-									spectrum.getExperimentalTandemSpectrum(), 
-									msfId.getReferenceMsMsLibraryMatch()));
+					if(spectrum.getExperimentalTandemSpectrum() != null) { 
+						
+						msfId.getReferenceMsMsLibraryMatch().setEntropyBasedScore(
+								MSMSScoreCalculator.calculateDefaultEntropyMatchScore(
+										spectrum.getExperimentalTandemSpectrum(), 
+										msfId.getReferenceMsMsLibraryMatch()));
+					}				
+					if(msfId.getReferenceMsMsLibraryMatch() != null) {
+						
+					}
 				}
 				if(msfId.isPrimary())
 					setPrimaryIdentity(msfId);

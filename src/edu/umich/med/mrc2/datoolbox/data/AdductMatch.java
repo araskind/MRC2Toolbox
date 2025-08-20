@@ -34,7 +34,10 @@ public class AdductMatch implements Serializable, Comparable<AdductMatch> {
 	double dotProductScore;
 	double entropyScore;
 
-	public AdductMatch(Adduct libraryMatch, Adduct unknownMatch, double dotProductScore) {
+	public AdductMatch(
+			Adduct libraryMatch, 
+			Adduct unknownMatch, 
+			double dotProductScore) {
 		super();
 		this.libraryMatch = libraryMatch;
 		this.unknownMatch = unknownMatch;

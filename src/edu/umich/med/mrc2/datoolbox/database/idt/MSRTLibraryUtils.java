@@ -302,10 +302,9 @@ public class MSRTLibraryUtils {
 		for(String targetId : targetIds) {
 			ps.setString(1, targetId);
 			rs = ps.executeQuery();
-			while(rs.next()) {
+			while(rs.next())
 				libIds.add(rs.getString("LIBRARY_ID"));
-				break;
-			}
+
 			rs.close();
 		}
 		ps.close();

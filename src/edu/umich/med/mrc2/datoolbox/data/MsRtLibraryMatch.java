@@ -107,8 +107,8 @@ public class MsRtLibraryMatch implements Serializable {
 			return 0.0;
 		else
 			return adductScoreMap.stream().
-					map(s -> s.getDotProductScore()).
-					reduce(Double::max).get();
+					mapToDouble(s -> s.getDotProductScore()).
+					max().getAsDouble();
 	}
 
 	public AdductMatch getTopAdductMatch() {
@@ -262,7 +262,7 @@ public class MsRtLibraryMatch implements Serializable {
 			String[]adductList = adductScoreMapString.split("@");
 			for(String adductListElement : adductList) {
 				
-				String[]parts = adductListElement.split("|");
+				String[]parts = adductListElement.split("\\|");
 				if(parts.length == 4) {
 					
 					Adduct libMatch = AdductManager.getAdductById(parts[0]);
@@ -279,7 +279,7 @@ public class MsRtLibraryMatch implements Serializable {
 			}
 		}
 		Element spectrumElement = msRtMatchElement.getChild(
-				MsRtLibraryMatchFields.TGSpectrum.name());
+				ObjectNames.Spectrum.name());
 		if(spectrumElement != null)
 			librarySpectrum = new MassSpectrum(spectrumElement);
 	}
