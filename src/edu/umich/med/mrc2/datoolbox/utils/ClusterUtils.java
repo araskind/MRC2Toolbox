@@ -38,7 +38,6 @@ import edu.umich.med.mrc2.datoolbox.data.LibraryMsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MassSpectrum;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureCluster;
-import edu.umich.med.mrc2.datoolbox.data.MsPoint;
 import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortDirection;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
@@ -117,21 +116,27 @@ public class ClusterUtils {
 		Range rtRange = null;
 		for(Entry<LibraryMsFeature,Adduct>mapEntry : featureAdductMap.entrySet()) {
 
-			Collection<MsPoint>scaledAdductPoints = MsUtils.scaleMsPointCollection(
-					mapEntry.getKey().getSpectrum().getMsPointsForAdduct(mapEntry.getValue()),
-					mapEntry.getKey().getStatsSummary().getSampleMedian());
-			spectrum.addSpectrumForAdduct(mapEntry.getValue(), scaledAdductPoints);
-			rt += mapEntry.getKey().getRetentionTime();
+			LibraryMsFeature lf = mapEntry.getKey();
+			Adduct ad = mapEntry.getValue();
+			
+//			Collection<MsPoint>scaledAdductPoints = MsUtils.scaleMsPointCollection(
+//					mapEntry.getKey().getSpectrum().getMsPointsForAdduct(mapEntry.getValue()),
+//					mapEntry.getKey().getStatsSummary().getSampleMedian());
+			spectrum.addSpectrumForAdduct(ad, lf.getSpectrum().getMsPointsForAdduct(ad));
+			rt += lf.getRetentionTime();
 			if(rtRange == null)
 				rtRange = mapEntry.getKey().getRtRange();
 			else
-				rtRange.extendRange(mapEntry.getKey().getRtRange());			
+				rtRange.extendRange(mapEntry.getKey().getRtRange());
+			
+			merged.getParentIdSet().add(lf.getId());
 		}
+		rt = rt / featureAdductMap.size();
 		merged.setRetentionTime(rt);
 		merged.setRtRange(rtRange);
 		merged.createDefaultPrimaryIdentity();
+	
 		//	TODO merge identities removing duplicate compounds with the same ID confidence and source
-		
 		
 		return merged;
 	}

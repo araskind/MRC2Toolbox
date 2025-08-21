@@ -39,6 +39,7 @@ import edu.umich.med.mrc2.datoolbox.data.compare.SortDirection;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.gui.tables.FeatureSelectionTable;
+import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 
 public class DataIntegrationFeatureSelectionTable extends FeatureSelectionTable {
 
@@ -103,30 +104,51 @@ public class DataIntegrationFeatureSelectionTable extends FeatureSelectionTable 
 	private class DataIntegrationFeatureSelectionTableModelListener implements TableModelListener {
 
 		public void tableChanged(TableModelEvent e) {
+			
+			if(activeCluster == null)
+				return;
 
-			int row = convertRowIndexToView(e.getFirstRow());
-			int col = convertColumnIndexToView(e.getColumn());
-			int featureCol = getColumnIndex(DataIntegrationFeatureSelectionTableModel.FEATURE_COLUMN);
-			MsFeature selectedFeature = (MsFeature) getValueAt(row, featureCol);
+			int row = e.getFirstRow();
+			int col = e.getColumn();
+			int featureCol = model.getColumnIndex(DataIntegrationFeatureSelectionTableModel.FEATURE_COLUMN);
+			MsFeature selectedFeature = (MsFeature) model.getValueAt(row, featureCol);
+			int pipelineColumn = model.getColumnIndex(DataIntegrationFeatureSelectionTableModel.DATA_PIPELINE_COLUMN);
+			DataPipeline dataPipeline = (DataPipeline) model.getValueAt(row, pipelineColumn);
+			
 			if (col == getColumnIndex(DataIntegrationFeatureSelectionTableModel.ID_COLUMN)) {
 
 				boolean isPrimary = (boolean) getValueAt(row, col);
 				if(isPrimary)
 					activeCluster.setPrimaryFeature(selectedFeature);
-
-				model.removeTableModelListener(modelListener);
-				((DataIntegrationFeatureSelectionTableModel)model).reloadData();
-				model.addTableModelListener(modelListener);
 			}
 			if (col == getColumnIndex(DataIntegrationFeatureSelectionTableModel.MERGE_COLUMN)) {
 
 				boolean included = (boolean) getValueAt(row, col);
-				//activeCluster.setFeatureEnabled(selectedFeature, included);
-				activeCluster.markFeatureForMerging(selectedFeature, included);
-				model.removeTableModelListener(modelListener);
-				((DataIntegrationFeatureSelectionTableModel)model).reloadData();
-				model.addTableModelListener(modelListener);
+				if(included && !activeCluster.getMarkedForMerge().isEmpty() && !pipelineMatches(dataPipeline)) {
+						
+						String message = "Only the features from the same data pipeline may be merged.";
+						MessageDialog.showWarningMsg(
+								message, DataIntegrationFeatureSelectionTable.this);
+						model.removeTableModelListener(modelListener);
+						((DataIntegrationFeatureSelectionTableModel)model).reloadData();
+						model.addTableModelListener(modelListener);
+						return;
+				}
+				else {
+					activeCluster.setFeatureEnabled(selectedFeature, included);
+					activeCluster.markFeatureForMerging(selectedFeature, included);
+				}
 			}
+			model.removeTableModelListener(modelListener);
+			((DataIntegrationFeatureSelectionTableModel)model).reloadData();
+			model.addTableModelListener(modelListener);
+		}
+		
+		private boolean pipelineMatches(DataPipeline dataPipeline) {
+			
+			MsFeature firstMarked = activeCluster.getMarkedForMerge().iterator().next();
+			DataPipeline markedPipeline = activeCluster.getDataPipelineForFeature(firstMarked);
+			return dataPipeline.equals(markedPipeline);
 		}
 	}
 
@@ -208,8 +230,7 @@ public class DataIntegrationFeatureSelectionTable extends FeatureSelectionTable 
 			
 			MsFeature rowFeature = (MsFeature) getValueAt(i, fcol);
 			DataPipeline dp = (DataPipeline) getValueAt(i, dpcol);
-			if(!featureMap.containsKey(dp))
-				featureMap.put(dp, new TreeSet<MsFeature>(new MsFeatureComparator(SortProperty.Name)));
+			featureMap.computeIfAbsent(dp, v -> new TreeSet<MsFeature>(new MsFeatureComparator(SortProperty.Name)));
 
 			featureMap.get(dp).add(rowFeature);
 		}

@@ -42,7 +42,7 @@ public class DataIntegrationFeatureSelectionTableModel extends BasicTableModel {
 	private static final long serialVersionUID = -6269307946325720427L;
 
 	public static final String ID_COLUMN = "ID";
-	public static final String MERGE_COLUMN = "Sum";
+	public static final String MERGE_COLUMN = "Merge";
 	public static final String FEATURE_COLUMN = "Name";
 	public static final String COMPOUND_NAME_COLUMN = "Identification";
 	public static final String CHEM_MOD_LIBRARY_COLUMN = "Form (Lib)";
@@ -111,11 +111,8 @@ public class DataIntegrationFeatureSelectionTableModel extends BasicTableModel {
 				if(cf.getPrimaryIdentity() != null) {
 					compoundName = cf.getPrimaryIdentity().getCompoundName();
 					MsRtLibraryMatch msRtMatch = cf.getPrimaryIdentity().getMsRtLibraryMatch();
-					if(msRtMatch != null) {
-
-						if(msRtMatch.getTopAdductMatch() !=null)
-							chmodLibrary = msRtMatch.getTopAdductMatch().getLibraryMatch();
-					}
+					if(msRtMatch != null && msRtMatch.getTopAdductMatch() !=null)
+							chmodLibrary = msRtMatch.getTopAdductMatch().getLibraryMatch();					
 				}
 				Object[] obj = {
 						cf.equals(currentCluster.getPrimaryFeature()), //ID_COLUMN

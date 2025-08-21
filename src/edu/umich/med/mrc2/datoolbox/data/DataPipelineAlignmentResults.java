@@ -43,9 +43,9 @@ public class DataPipelineAlignmentResults extends MsFeatureClusterSet {
 	
 	public DataPipelineAlignmentResults(
 			DataPipelineAlignmentParametersObject alignmentSettings,
-			Set<MsFeatureCluster> clusterList, 
+			Set<MsFeatureCluster> clusterSet, 
 			Collection<LibraryMsFeature> unmatchedReferenceFeatures) {
-		super(alignmentSettings.getName(), clusterList);
+		super(alignmentSettings.getName(), clusterSet);
 		this.alignmentSettings = alignmentSettings;
 		this.unmatchedReferenceFeatures = unmatchedReferenceFeatures;
 	}

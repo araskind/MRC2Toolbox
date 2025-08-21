@@ -79,7 +79,7 @@ public class MsFeatureAveragingTask extends AbstractTask {
 			return;
 		}
 		try {
-			statObjectList = collectFeatureData();
+			collectFeatureData();
 		}
 		catch (Exception e) {
 			reportErrorAndExit(e);
@@ -88,7 +88,7 @@ public class MsFeatureAveragingTask extends AbstractTask {
 		if(!statObjectList.isEmpty()) {
 			findMaxMedianArea();
 			try {				
-				generateAverageFeatures(statObjectList);		
+				generateAverageFeatures();		
 			}
 			catch (Exception e) {
 				reportErrorAndExit(e);
@@ -98,7 +98,7 @@ public class MsFeatureAveragingTask extends AbstractTask {
 		setStatus(TaskStatus.FINISHED);
 	}
 	
-	private List<MsFeatureStatsObject>collectFeatureData() {
+	private void collectFeatureData() {
 		
 		taskDescription = "Collecting feature data ...";
 		Matrix featureMatrix = featureDataMatrix.getMetaDataDimensionMatrix(0);
@@ -107,7 +107,7 @@ public class MsFeatureAveragingTask extends AbstractTask {
 		total = featureArray.length;
 		processed = 0;
 		
-		List<MsFeatureStatsObject>statObjectList = new ArrayList<MsFeatureStatsObject>();
+		statObjectList = new ArrayList<MsFeatureStatsObject>();
 		for(int i=0; i<featureArray.length; i++) {
 
 			LibraryMsFeature msf = (LibraryMsFeature)featureArray[i];
@@ -128,7 +128,6 @@ public class MsFeatureAveragingTask extends AbstractTask {
 			statObjectList.add(statObject);
 			processed++;			
 		}
-		return statObjectList;
 	}
 	
 	private void findMaxMedianArea() {
@@ -146,7 +145,7 @@ public class MsFeatureAveragingTask extends AbstractTask {
 		}			
 	} 
 	
-	private void generateAverageFeatures(List<MsFeatureStatsObject>statObjectList) {
+	private void generateAverageFeatures() {
 		
 		taskDescription = "Generating averaged features ...";
 		total = statObjectList.size();
