@@ -419,7 +419,8 @@ public enum MainActionCommands {
 	DELETE_DATA_PIPELINE_ALIGNMENT_RESULTS_COMMAND("Delete data alignment results"),
 	
 	SHOW_UNMATCHED_FEATURES_FROM_REFERENCE_DATASET_COMMAND("Show unmatched features from reference dataset"),
-
+	MERGE_DATA_FOR_MARKED_FEATURES_COMMAND("Merge data for marked features"),
+	
 	// Sorting commands
 	SORT_BY_AREA_COMMAND("Sort by area (high to low)"),
 	SORT_BY_MZ_COMMAND(	"Sort by base peak m/z"),

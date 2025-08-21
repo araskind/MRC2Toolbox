@@ -54,7 +54,8 @@ public class DataIntegrationPanelMenuBar extends CommonMenuBar {
 	private static final Icon deleteDataSetAlignmentIcon = GuiUtils.getIcon("deleteAlignment", 24);
 	private static final Icon dataSetAlignmentManagerIcon = GuiUtils.getIcon("alignmentManager", 24);
 	private static final Icon showUnmatchedIcon = GuiUtils.getIcon("showUnknowns", 24);
-	
+	private static final Icon mergeIcon = GuiUtils.getIcon("merge", 24);
+		
 	// Menus
 	private JMenu
 		integrationMenu,
@@ -72,7 +73,8 @@ public class DataIntegrationPanelMenuBar extends CommonMenuBar {
 		dataSetAlignmentSetupMenuItem,
 		deleteDataSetAlignmentMenuItem,
 		dataSetAlignmentManagerMenuItem,
-		showUnmatchedFromReferenceMenuItem;
+		showUnmatchedFromReferenceMenuItem,
+		mergeSelectedFeaturesMenuItem;
 	
 	// Search items
 	private JMenuItem
@@ -122,6 +124,12 @@ public class DataIntegrationPanelMenuBar extends CommonMenuBar {
 		showUnmatchedFromReferenceMenuItem = addItem(alignmentMenu, 
 				MainActionCommands.SHOW_UNMATCHED_FEATURES_FROM_REFERENCE_DATASET_COMMAND, 
 				showUnmatchedIcon);
+		
+		alignmentMenu.addSeparator();
+		
+		mergeSelectedFeaturesMenuItem = addItem(alignmentMenu, 
+				MainActionCommands.MERGE_DATA_FOR_MARKED_FEATURES_COMMAND, 
+				mergeIcon);
 			
 		add(alignmentMenu);
 

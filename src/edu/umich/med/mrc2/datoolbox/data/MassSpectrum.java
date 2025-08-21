@@ -23,11 +23,11 @@ package edu.umich.med.mrc2.datoolbox.data;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.NavigableSet;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -56,8 +56,8 @@ public class MassSpectrum implements Serializable, XmlStorable {
 	 */
 	private static final long serialVersionUID = 8329755008254129461L;
 
-	private TreeMap<Adduct, List<MsPoint>> adductMap;
-	private TreeMap<String, List<MsPoint>> patternMap;
+	private TreeMap<Adduct, NavigableSet<MsPoint>> adductMap;
+	private TreeMap<String, NavigableSet<MsPoint>> patternMap;
 	private Set<MsPoint> msPoints;
 	private Adduct primaryAdduct;
 	private Set<TandemMassSpectrum>tandemSpectra;
@@ -69,10 +69,11 @@ public class MassSpectrum implements Serializable, XmlStorable {
 
 		super();
 		msPoints = new TreeSet<MsPoint>(MsUtils.mzSorter);
-		adductMap = new TreeMap<Adduct, List<MsPoint>>(new AdductComparator(SortProperty.Name));
+		adductMap = new TreeMap<Adduct, 
+				NavigableSet<MsPoint>>(new AdductComparator(SortProperty.Name));
 		primaryAdduct = null;
 		tandemSpectra = new HashSet<TandemMassSpectrum>();
-		patternMap = new TreeMap<String, List<MsPoint>>();
+		patternMap = new TreeMap<String, NavigableSet<MsPoint>>();
 	}
 
 	public void addDataPoint(double mz, double intensity, String adductType, double rt) {
@@ -101,10 +102,8 @@ public class MassSpectrum implements Serializable, XmlStorable {
 
 	public void addSpectrumForAdduct(Adduct adduct, Collection<MsPoint>dataPoints){
 
-		List<MsPoint>sorted = dataPoints.stream().
-				distinct().
-				sorted(MsUtils.mzSorter).
-				collect(Collectors.toList());
+		NavigableSet<MsPoint>sorted = new TreeSet<MsPoint>(MsUtils.mzSorter);
+		sorted.addAll(dataPoints);
 		adductMap.put(adduct, sorted);
 		msPoints.addAll(dataPoints);
 		findPrimaryAdduct();
@@ -113,7 +112,7 @@ public class MassSpectrum implements Serializable, XmlStorable {
 	private void findPrimaryAdduct() {
 		
 		double maxIntensity = 0.0d;
-		for (Entry<Adduct, List<MsPoint>> entry : adductMap.entrySet()) {
+		for (Entry<Adduct, NavigableSet<MsPoint>> entry : adductMap.entrySet()) {
 
 			if(entry.getValue() == null || entry.getValue().isEmpty())
 				continue;
@@ -129,25 +128,14 @@ public class MassSpectrum implements Serializable, XmlStorable {
 			}
 		}
 	}	
-	
-	public void silentlyAddSpectrumForAdduct(Adduct adduct, Collection<MsPoint>dataPoints){
-		
-		List<MsPoint>sorted = dataPoints.stream().
-				distinct().
-				sorted(MsUtils.mzSorter).
-				collect(Collectors.toList());
-		adductMap.put(adduct, sorted);
-		findPrimaryAdduct();
-	}
 
 	public void addSpectrumForPattern(Collection<MsPoint>dataPoints){
 
-		List<MsPoint>sorted = dataPoints.stream().
-				distinct().
-				sorted(MsUtils.mzSorter).
-				collect(Collectors.toList());
+		NavigableSet<MsPoint>sorted = new TreeSet<MsPoint>(MsUtils.mzSorter);
+		sorted.addAll(dataPoints);
 
-		String key = DataPrefix.MS_PATTERN.getName() + UUID.randomUUID().toString().substring(0, 10);
+		String key = DataPrefix.MS_PATTERN.getName() 
+				+ UUID.randomUUID().toString().substring(0, 10);
 		patternMap.put(key, sorted);
 		msPoints.addAll(dataPoints);
 	}
@@ -164,13 +152,12 @@ public class MassSpectrum implements Serializable, XmlStorable {
 
 			Adduct mod = null;
 			if(dp.getAdductType() != null)
-				mod = AdductManager.getAdductByCefNotation(dp.getAdductType().replaceAll("\\+[0-9]+$", ""));
+				mod = AdductManager.getAdductByCefNotation(
+						dp.getAdductType().replaceAll("\\+[0-9]+$", ""));
 			
 			if (mod != null) {
 
-				if (!adductMap.containsKey(mod))
-					adductMap.put(mod, new ArrayList<MsPoint>());
-
+				adductMap.computeIfAbsent(mod, v -> new TreeSet<MsPoint>(MsUtils.mzSorter));
 				adductMap.get(mod).add(dp);
 				if (dp.getIntensity() > maxIntensity) {
 
@@ -184,14 +171,6 @@ public class MassSpectrum implements Serializable, XmlStorable {
 				if(dp.getAdductType() != null)
 					unmatchedAdducts.add(dp.getAdductType());
 			}
-		}
-		// Sort points for each adduct
-		for (Entry<Adduct, List<MsPoint>> entry : adductMap.entrySet()) {
-
-			List<MsPoint>sorted = entry.getValue().stream().
-				sorted(MsUtils.mzSorter).collect(Collectors.toList());
-			entry.getValue().clear();
-			entry.getValue().addAll(sorted);
 		}
 		return unmatchedAdducts;
 	}
@@ -212,9 +191,9 @@ public class MassSpectrum implements Serializable, XmlStorable {
 
 		if(!adductMap.isEmpty()){
 
-			for (Entry<Adduct, List<MsPoint>> entry : adductMap.entrySet()) {
+			for (Entry<Adduct, NavigableSet<MsPoint>> entry : adductMap.entrySet()) {
 
-				BasicIsotopicPattern bip = new BasicIsotopicPattern(entry.getValue().get(0));
+				BasicIsotopicPattern bip = new BasicIsotopicPattern(entry.getValue().first());
 				entry.getValue().stream().skip(1).
 					forEach(dp -> bip.addDataPoint(dp, Math.abs(entry.getKey().getCharge())));
 				isoPatterns.add(bip);
@@ -317,15 +296,21 @@ public class MassSpectrum implements Serializable, XmlStorable {
 
 		return miMz;
 	}
+	
+	public double getMonoisotopicMzForAdduct(Adduct adduct) {
+		
+		if(adductMap.get(adduct) == null || adductMap.get(adduct).isEmpty())
+			return 0.0d;
+		
+		return adductMap.get(adduct).first().getMz();
+	}
 
 	public MsPoint[] getMsForAdduct(Adduct adduct) {
 
 		if(adductMap.get(adduct) == null || adductMap.get(adduct).isEmpty())
 			return null;
 
-		return adductMap.get(adduct).stream().
-			sorted(MsUtils.mzSorter).
-			toArray(size -> new MsPoint[size]);
+		return adductMap.get(adduct).toArray(size -> new MsPoint[size]);
 	}
 	
 	public Collection<MsPoint> getMsPointsForAdduct(Adduct adduct) {
@@ -445,11 +430,11 @@ public class MassSpectrum implements Serializable, XmlStorable {
 				findFirst().orElse(null);
 	}
 
-	public TreeMap<String, List<MsPoint>> getPatternMap() {
+	public TreeMap<String, NavigableSet<MsPoint>> getPatternMap() {
 		return patternMap;
 	}
 
-	public List<MsPoint>getPattern(String patternKey){
+	public NavigableSet<MsPoint>getPattern(String patternKey){
 
 		if(patternMap.containsKey(patternKey))
 			return patternMap.get(patternKey);
@@ -457,7 +442,7 @@ public class MassSpectrum implements Serializable, XmlStorable {
 			return null;
 	}
 
-	public List<MsPoint> removePattern(String patternKey){
+	public NavigableSet<MsPoint> removePattern(String patternKey){
 
 		if(patternMap.containsKey(patternKey))
 			return patternMap.remove(patternKey);
@@ -547,7 +532,7 @@ public class MassSpectrum implements Serializable, XmlStorable {
 			
 			Element adductMapElement = 
 					new Element(MassSpectrumFields.AdductMap.name());
-			for(Entry<Adduct, List<MsPoint>>am : adductMap.entrySet()) {
+			for(Entry<Adduct, NavigableSet<MsPoint>>am : adductMap.entrySet()) {
 				
 				Element amEntryElement = 
 						new Element(MassSpectrumFields.Adduct.name());
@@ -568,10 +553,10 @@ public class MassSpectrum implements Serializable, XmlStorable {
 		
 		msPoints = new TreeSet<MsPoint>(MsUtils.mzSorter);
 		adductMap = new TreeMap<Adduct, 
-				List<MsPoint>>(new AdductComparator(SortProperty.Name));
+				NavigableSet<MsPoint>>(new AdductComparator(SortProperty.Name));
 		primaryAdduct = null;
 		tandemSpectra = new HashSet<TandemMassSpectrum>();
-		patternMap = new TreeMap<String, List<MsPoint>>();	
+		patternMap = new TreeMap<String, NavigableSet<MsPoint>>();	
 		detectionAlgorithm = 
 				spectrumElement.getAttributeValue(MassSpectrumFields.Algo.name());
 
@@ -634,12 +619,11 @@ public class MassSpectrum implements Serializable, XmlStorable {
 					double[] intensityValues = NumberArrayUtils.decodeValueString(intensityString);
 					if(mzValues != null && intensityValues != null) {
 						
-						MsPoint[]adductPoints = new MsPoint[mzValues.length];
+						NavigableSet<MsPoint>adductPoints = new TreeSet<MsPoint>(MsUtils.mzSorter);
 						for(int i=0; i<mzValues.length; i++)
-							adductPoints[i] = new MsPoint(mzValues[i], intensityValues[i]);
-						
-						Arrays.sort(adductPoints, MsUtils.mzSorter);
-						adductMap.put(adduct, Arrays.asList(adductPoints));
+							adductPoints.add(new MsPoint(mzValues[i], intensityValues[i]));
+
+						adductMap.put(adduct, adductPoints);
 					}
 				}
 			}

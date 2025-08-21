@@ -28,8 +28,10 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 import javax.swing.DefaultListSelectionModel;
 import javax.swing.Icon;
@@ -64,6 +66,7 @@ import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.integration.CreateMergedFeaturesTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.integration.DataPipelineAlignmentTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.integration.IdentifiedFeatureIntegrationTask;
 
@@ -218,6 +221,33 @@ public class DataIntegratorPanel extends ClusterDisplayPanel {
 		
 		if (command.equals(MainActionCommands.SHOW_UNMATCHED_FEATURES_FROM_REFERENCE_DATASET_COMMAND.getName()))
 			showUnmatchedFeaturesFromRefLibInAlignedDataSet();
+		
+		if (command.equals(MainActionCommands.MERGE_DATA_FOR_MARKED_FEATURES_COMMAND.getName()))
+			mergeDataForMarkedFeatures();
+	}
+	
+	private void mergeDataForMarkedFeatures() {
+		
+		if(alignmentResults == null)
+			return;
+		
+		List<MsFeatureCluster> clustersWithMergeInput =  
+				alignmentResults.getClusters().stream().
+					filter(c -> c.getMarkedForMerge().size() > 1).
+					collect(Collectors.toList());
+		if(clustersWithMergeInput.isEmpty()) {
+			MessageDialog.showWarningMsg(
+					"None of the clusters contain multiple features marked for merging", 
+					this.getContentPane());
+			return;
+		}		
+		CreateMergedFeaturesTask task = new CreateMergedFeaturesTask(
+				currentExperiment, 
+				alignmentResults.getClusters(),
+				alignmentResults.getAlignmentSettings().getMassWindow(), 
+				alignmentResults.getAlignmentSettings().getMassErrorType());
+		task.addTaskListener(this);
+		MRC2ToolBoxCore.getTaskController().addTask(task);
 	}
 	
 	private void showUnmatchedFeaturesFromRefLibInAlignedDataSet() {
@@ -450,10 +480,18 @@ public class DataIntegratorPanel extends ClusterDisplayPanel {
 				finalizeIdentifiedFeatureIntegrationTask((IdentifiedFeatureIntegrationTask) e.getSource());
 			
 			if (e.getSource().getClass().equals(DataPipelineAlignmentTask.class))
-				finalizeDataPipelineAlignmentTask((DataPipelineAlignmentTask) e.getSource());	
+				finalizeDataPipelineAlignmentTask((DataPipelineAlignmentTask) e.getSource());
+			
+			if (e.getSource().getClass().equals(CreateMergedFeaturesTask.class))
+				finalizeCreateMergedFeaturesTask((CreateMergedFeaturesTask) e.getSource());
 		}
 	}
 	
+	private void finalizeCreateMergedFeaturesTask(CreateMergedFeaturesTask source) {
+		// TODO Auto-generated method stub
+		
+	}
+
 	private void finalizeDataPipelineAlignmentTask(DataPipelineAlignmentTask task) {
 		
 		currentExperiment.addDataPipelineAlignmentResult(task.getAlignmentResults());

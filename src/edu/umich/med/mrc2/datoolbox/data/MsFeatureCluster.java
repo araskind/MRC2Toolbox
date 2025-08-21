@@ -762,6 +762,10 @@ public class MsFeatureCluster implements Serializable, XmlStorable {
 				stream().sorted(new MsFeatureComparator(property)).
 				collect(Collectors.toList());
 	}
+	
+	public Collection<MsFeature>getFeturesForDataPipeline(DataPipeline pipeline){		
+		return clusterFeatures.get(pipeline);
+	}
 
 	public boolean hasChargeMismatch() {
 		return chargeMismatch;
@@ -989,6 +993,14 @@ public class MsFeatureCluster implements Serializable, XmlStorable {
 	
 	public boolean isFeatureMarkedForMerging(MsFeature msf) {
 		return markedForMerge.contains(msf);
+	}
+	
+	public DataPipeline getMergeDataPipeline() {
+		
+		if(markedForMerge == null || markedForMerge.isEmpty())
+			return null;
+		
+		return getDataPipelineForFeature(markedForMerge.iterator().next());
 	}
 }
 

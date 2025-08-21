@@ -233,6 +233,10 @@ public class LibraryMsFeature extends MsFeature implements Serializable {
 		
 		return parentIdSet;
 	}
+	
+	public boolean isMerged() {
+		return getParentIdSet().size() > 1;
+	}
 }
 
 
