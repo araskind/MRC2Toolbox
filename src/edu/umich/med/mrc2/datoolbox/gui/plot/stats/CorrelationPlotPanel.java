@@ -35,7 +35,7 @@ import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.annotations.XYTextAnnotation;
 import org.jfree.chart.plot.DatasetRenderingOrder;
-import org.jfree.chart.renderer.xy.XYDotRenderer;
+import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.chart.ui.RectangleInsets;
 import org.jfree.data.function.LineFunction2D;
@@ -52,6 +52,8 @@ import edu.umich.med.mrc2.datoolbox.data.ExperimentalSample;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.gui.plot.MasterPlotPanel;
+import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.NamedXYSeries;
+import edu.umich.med.mrc2.datoolbox.gui.plot.tooltip.NamedXYSeriesToolTipGenerator;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.utils.DataSetUtils;
@@ -65,7 +67,7 @@ public class CorrelationPlotPanel extends MasterPlotPanel {
 	private XYSeriesCollection inputData;
 	private XYDataset dataset;
 	private XYLineAndShapeRenderer regressionRenderer;
-	private XYDotRenderer dataRenderer;
+	private XYLineAndShapeRenderer dataRenderer;
 	private final NumberFormat corrFormat = new DecimalFormat("#.##");
 	private PearsonsCorrelation pc;
 
@@ -76,11 +78,10 @@ public class CorrelationPlotPanel extends MasterPlotPanel {
 		initPlot();
 		initTitles();
 
-		dataRenderer = new XYDotRenderer();
+		dataRenderer = new XYLineAndShapeRenderer(false, true);
 		dataRenderer.setDefaultShape(new Ellipse2D.Float(100.0f, 100.0f, 100.0f, 100.0f));
-		dataRenderer.setDotWidth(10);
-		dataRenderer.setDotHeight(10);
-		dataRenderer.setSeriesPaint(0, Color.MAGENTA);
+		dataRenderer.setDefaultFillPaint(Color.MAGENTA);
+		dataRenderer.setDefaultToolTipGenerator(new NamedXYSeriesToolTipGenerator());
 		plot.setRenderer(0, dataRenderer);
 		regressionRenderer = new XYLineAndShapeRenderer(true, false);
 		regressionRenderer.setSeriesPaint(0, Color.BLUE);
@@ -163,7 +164,7 @@ public class CorrelationPlotPanel extends MasterPlotPanel {
 
 		removeAllDataSets();
 		inputData = new XYSeriesCollection();
-		XYSeries series = new XYSeries("Data");
+		NamedXYSeries series = new NamedXYSeries("Data");
 		Matrix datamatrix = MRC2ToolBoxCore.getActiveMetabolomicsExperiment().
 				getDataMatrixForDataPipeline(dataPipeline);
 
@@ -186,7 +187,7 @@ public class CorrelationPlotPanel extends MasterPlotPanel {
 				double y = datamatrix.getAsDouble(coordinatesTwo);
 
 				if(x > 0 && y > 0)
-					series.add(x, y);
+					series.add(x, y, file.getName());
 			}
 		}
 		inputData.addSeries(series);
@@ -194,7 +195,6 @@ public class CorrelationPlotPanel extends MasterPlotPanel {
 		plot.getDomainAxis().setLabel(fOne.getName());
 		plot.getRangeAxis().setLabel(fTwo.getName());
 		drawRegressionLine();
-		chart.removeLegend();
 	}
 
 	public void showMultiAssayCorrelationPlot(
@@ -206,9 +206,9 @@ public class CorrelationPlotPanel extends MasterPlotPanel {
 		removeAllDataSets();
 		if(fOne == null || fTwo == null)
 			return;
-
+		
 		inputData = new XYSeriesCollection();
-		XYSeries series = new XYSeries("Data");
+		NamedXYSeries series = new NamedXYSeries("Data");
 		DataAnalysisProject experiment = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
 
 		Matrix matrixOne = experiment.getDataMatrixForDataPipeline(dataPipelineOne);
@@ -226,14 +226,12 @@ public class CorrelationPlotPanel extends MasterPlotPanel {
 				matrixTwo, fTwo, experiment, dataPipelineTwo);
 		if(coordinatesTwo[1] == -1)
 			return;
-		
-//		coordinatesOne[1] = matrixOne.getColumnForLabel(fOne);
-//		coordinatesTwo[1] = matrixTwo.getColumnForLabel(fTwo);
 
 		TreeSet<ExperimentalSample> samples =
 				experiment.getExperimentDesign().getActiveSamplesForDesignSubset(
 						experiment.getExperimentDesign().getActiveDesignSubset());
-		DataFile[] filesOne, filesTwo;
+		DataFile[] filesOne;
+		DataFile[] filesTwo;
 
 		for(ExperimentalSample sample : samples) {
 
@@ -250,6 +248,8 @@ public class CorrelationPlotPanel extends MasterPlotPanel {
 					coordinatesTwo[0] = matrixTwo.getRowForLabel(filesTwo[i]);
 					double x = 0.0d;
 					double y = 0.0d;
+					String label = createDataFilePointLabel(
+							filesOne[i], dataPipelineOne,filesTwo[i], dataPipelineTwo);
 					
 					if(coordinatesOne[0] >=0)
 						x = matrixOne.getAsDouble(coordinatesOne);
@@ -258,7 +258,7 @@ public class CorrelationPlotPanel extends MasterPlotPanel {
 						y = matrixTwo.getAsDouble(coordinatesTwo);
 
 					if(x > 0 && y > 0)
-						series.add(x, y);
+						series.add(x, y, label);
 				}
 			}
 		}
@@ -267,7 +267,25 @@ public class CorrelationPlotPanel extends MasterPlotPanel {
 		plot.getDomainAxis().setLabel(fOne.getName());
 		plot.getRangeAxis().setLabel(fTwo.getName());
 		drawRegressionLine();
-		chart.removeLegend();
+	}
+	
+	private String createDataFilePointLabel(
+			DataFile fOne, 
+			DataPipeline dataPipelineOne,
+			DataFile fTwo,
+			DataPipeline dataPipelineTwo) {
+		String label = "<HTML>";
+		if(dataPipelineOne.equals(dataPipelineTwo)) {
+			
+			label += dataPipelineOne.getName() + "<BR>";
+			if(fOne.equals(fTwo))
+				label += fOne.getName();
+		}
+		else {
+			label += dataPipelineOne.getName() + ": " + fOne.getName() + "<BR>";
+			label += dataPipelineTwo.getName() + ": " + fTwo.getName();
+		}
+		return label;
 	}
 
 	public RealMatrix getDataMatrix(){
@@ -300,7 +318,8 @@ public class CorrelationPlotPanel extends MasterPlotPanel {
 	@Override
 	protected void initChart() {
 
-		chart = ChartFactory.createScatterPlot("Correlation", "", "", null);
+		chart = ChartFactory.createScatterPlot("Correlation", "", "", null,
+                PlotOrientation.VERTICAL, false, true, false);
 		chart.setBackgroundPaint(Color.white);
 		setChart(chart);
 	}

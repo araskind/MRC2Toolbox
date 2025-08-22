@@ -105,6 +105,16 @@ public class CuratedDatabaseCompoundTable extends BasicTable {
 		thf.getParserModel().setComparator(MsFeatureIdentity.class, new MsFeatureIdentityComparator(SortProperty.ID));
 		finalizeLayout();
 	}
+	
+	@Override
+	public Object getValueAt(int row, int column) {
+		
+		if(convertColumnIndexToModel(column) == 
+				model.getColumnIndex(CuratedDatabaseCompoundTableModel.ORDER_COLUMN))
+			return row+1;
+		else
+			return super.getValueAt(row, column);
+	}
 
 	public void addCompoundPopupListener(ActionListener listener) {
 

@@ -104,6 +104,16 @@ public class AssayDesignTable extends BasicTable {
 		model.addTableModelListener(modelListener);
 		setTablePopupEnabled(model.getRowCount() > 0);
 	}
+	
+	@Override
+	public Object getValueAt(int row, int column) {
+		
+		if(convertColumnIndexToModel(column) == 
+				model.getColumnIndex(AssayDesignTableModel.ORDER_COLUMN))
+			return row+1;
+		else
+			return super.getValueAt(row, column);
+	}
 
 	public Collection<DataFile> getDataFiles(boolean selectedOnly) {
 

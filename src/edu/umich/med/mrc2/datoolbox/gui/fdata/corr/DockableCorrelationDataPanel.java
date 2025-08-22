@@ -176,20 +176,17 @@ public class DockableCorrelationDataPanel extends DefaultSingleCDockable {
 		spearmanValueLabelLabel.setText("");
 		kendallValueLabelLabel.setText("");
 		RealMatrix data = corrPlot.getDataMatrix();
-		if (data != null) {
+		if (data != null && data.getColumnDimension() > 1 && data.getRowDimension() > 1) {
 
-			if (data.getColumnDimension() > 1 && data.getRowDimension() > 1) {
-
-				PearsonsCorrelation pearson = new PearsonsCorrelation();
-				SpearmansCorrelation spearman = new SpearmansCorrelation();
-				KendallsCorrelation kendall = new KendallsCorrelation();
-				pearsonValueLabel.setText(
-						corrFormat.format(pearson.correlation(data.getColumn(0), data.getColumn(1))));
-				spearmanValueLabelLabel
-						.setText(corrFormat.format(spearman.correlation(data.getColumn(0), data.getColumn(1))));
-				kendallValueLabelLabel
-						.setText(corrFormat.format(kendall.correlation(data.getColumn(0), data.getColumn(1))));
-			}
+			PearsonsCorrelation pearson = new PearsonsCorrelation();
+			SpearmansCorrelation spearman = new SpearmansCorrelation();
+			KendallsCorrelation kendall = new KendallsCorrelation();
+			pearsonValueLabel.setText(
+					corrFormat.format(pearson.correlation(data.getColumn(0), data.getColumn(1))));
+			spearmanValueLabelLabel
+					.setText(corrFormat.format(spearman.correlation(data.getColumn(0), data.getColumn(1))));
+			kendallValueLabelLabel
+					.setText(corrFormat.format(kendall.correlation(data.getColumn(0), data.getColumn(1))));		
 		}
 	}
 }

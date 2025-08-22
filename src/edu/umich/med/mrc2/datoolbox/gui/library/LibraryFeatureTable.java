@@ -141,6 +141,16 @@ public class LibraryFeatureTable extends BasicTable {
 		adjustColumns();
 	}
 
+	@Override
+	public Object getValueAt(int row, int column) {
+		
+		if(convertColumnIndexToModel(column) == 
+				model.getColumnIndex(LibraryFeatureTableModel.ORDER_COLUMN))
+			return row+1;
+		else
+			return super.getValueAt(row, column);
+	}
+	
 	public int getFeatureRow(LibraryMsFeature feature) {
 
 		int fCol = model.getColumnIndex(LibraryFeatureTableModel.FEATURE_COLUMN);
