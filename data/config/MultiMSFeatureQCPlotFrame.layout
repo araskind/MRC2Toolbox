@@ -100,7 +100,7 @@
 									<content delegate="SplitDockStationFactory">
 										<fullscreen-action>false</fullscreen-action>
 										<node nodeId="1737487741016" orientation="VERTICAL" divider="0.5323868677905945">
-											<leaf id="1" nodeId="1737487741014">
+											<leaf id="0" nodeId="1737487741014">
 												<placeholders>
 													<placeholder>dock.single.DockableDataVariationPlotPanelMZ</placeholder>
 													<placeholder>dock.single.DockableMultispectrumPlotPanel</placeholder>
@@ -110,7 +110,7 @@
 													<format>dock.PlaceholderList</format>
 												</placeholder-map>
 											</leaf>
-											<leaf id="0" nodeId="1737414690337">
+											<leaf id="1" nodeId="1737414690337">
 												<placeholders>
 													<placeholder>dock.single.DockableDataVariationPlotPanelFEATURE_QUALITY</placeholder>
 													<placeholder>dock.single.DockableDataVariationPlotPanelRT_AND_PEAK_WIDTH</placeholder>
@@ -130,6 +130,16 @@
 								</layout>
 							</adjacent>
 							<children ignore="false">
+								<child>
+									<layout factory="predefined" placeholder="dock.single.DockableMultispectrumPlotPanel">
+										<replacement id="dockablesingle DockableMultispectrumPlotPanel"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>DockableMultispectrumPlotPanel</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
+								</child>
 								<child>
 									<layout factory="delegate_StackDockStationFactory">
 										<selected>0</selected>
@@ -217,16 +227,6 @@
 											<children ignore="false"/>
 										</child>
 									</children>
-								</child>
-								<child>
-									<layout factory="predefined" placeholder="dock.single.DockableMultispectrumPlotPanel">
-										<replacement id="dockablesingle DockableMultispectrumPlotPanel"/>
-										<delegate id="delegate_ccontrol backup factory id">
-											<id>DockableMultispectrumPlotPanel</id>
-											<area/>
-										</delegate>
-									</layout>
-									<children ignore="false"/>
 								</child>
 							</children>
 						</root>

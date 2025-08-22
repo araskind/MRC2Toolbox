@@ -125,7 +125,9 @@ public class MsFeatureAveragingTask extends AbstractTask {
 				statObject.addRtRange(sFeature.getRtRange());
 				statObject.addSpectrum(sFeature.getObservedSpectrum());
 			}
-			statObjectList.add(statObject);
+			if(!statObject.isEmpty())
+				statObjectList.add(statObject);
+			
 			processed++;			
 		}
 	}

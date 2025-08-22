@@ -107,4 +107,8 @@ public class MsFeatureStatsObject {
 	public MsFeature getMsFeature() {
 		return msFeature;
 	}
+	
+	public boolean isEmpty() {
+		return spectra.isEmpty();
+	}
 }

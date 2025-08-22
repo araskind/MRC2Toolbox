@@ -1716,21 +1716,37 @@ public class MsUtils {
 		return msString;
 	}
 	
-	public static Map<Adduct, Collection<MsPoint>>scaleAllAdductsToBasePeak(MassSpectrum inputSpectrum){
+	public static Map<Adduct, Collection<MsPoint>>normalizeAllAdductsToBasePeak(MassSpectrum inputSpectrum){
 		
+		double normValue = inputSpectrum.getBasePeak().getIntensity();
 		Map<Adduct, Collection<MsPoint>>adductMsPointsMap = 
 				new TreeMap<Adduct, Collection<MsPoint>>();
-		double maxIntensity = inputSpectrum.getBasePeak().getIntensity();
 		for(Adduct adduct : inputSpectrum.getAdducts()) {
 			
 			List<MsPoint> normPoints = inputSpectrum.getMsPointsForAdduct(adduct).stream()
 				.map(dp -> new MsPoint(dp.getMz(), 
-						dp.getIntensity()/maxIntensity * SPECTRUM_NORMALIZATION_BASE_INTENSITY))
+						dp.getIntensity()/normValue * SPECTRUM_NORMALIZATION_BASE_INTENSITY))
 				.sorted(mzSorter).collect(Collectors.toList());
 			if(!normPoints.isEmpty())
 				adductMsPointsMap.put(adduct, normPoints);
 		}
 		return adductMsPointsMap;
+	}
+	
+	public static MassSpectrum scaleSpectrumToMaxValue(MassSpectrum inputSpectrum, double maxValue){
+		
+		MassSpectrum scaled = new MassSpectrum(inputSpectrum, false);
+		
+		Map<Adduct, Collection<MsPoint>>normToBasePeak = normalizeAllAdductsToBasePeak(inputSpectrum);
+		double scaleFactor = maxValue / SPECTRUM_NORMALIZATION_BASE_INTENSITY;
+		for(Entry<Adduct, Collection<MsPoint>>normEntry : normToBasePeak.entrySet()) {
+			
+			List<MsPoint> scaledAdductPoints = normEntry.getValue().stream().
+					map(p -> new MsPoint(p.getMz(), p.getIntensity() * scaleFactor)).
+					collect(Collectors.toList());
+			scaled.addSpectrumForAdduct(normEntry.getKey(), scaledAdductPoints);
+		}
+		return scaled;
 	}
 	
 	public static MassSpectrum averageMassSpectraByAdduct(
@@ -1753,12 +1769,10 @@ public class MsUtils {
 			if(ms == null || ms.getBasePeak() == null)
 				continue;
 			
-			Map<Adduct, Collection<MsPoint>>normalizedToBase = scaleAllAdductsToBasePeak(ms);
+			Map<Adduct, Collection<MsPoint>>normalizedToBase = normalizeAllAdductsToBasePeak(ms);
 			for(Entry<Adduct, Collection<MsPoint>>normEntry : normalizedToBase.entrySet()) {
 				
-				if(!adductMsPointsMap.containsKey(normEntry.getKey()))
-					adductMsPointsMap.put(normEntry.getKey(), new ArrayList<MsPoint>());
-				
+				adductMsPointsMap.computeIfAbsent(normEntry.getKey(), v -> new ArrayList<MsPoint>());
 				adductMsPointsMap.get(normEntry.getKey()).addAll(normEntry.getValue());
 			}			
 		}
@@ -1769,13 +1783,11 @@ public class MsUtils {
 			
 			if(averageAdductSpectrum != null && !averageAdductSpectrum.isEmpty()) {
 				
-				Collection<MsPoint>scaledSpectrum = 
-						scaleMsPointCollection(averageAdductSpectrum, scaleFactor);
 				averagedSpectrum.addSpectrumForAdduct(
-						adductEntry.getKey(), scaledSpectrum);
+						adductEntry.getKey(), averageAdductSpectrum);			
 			}
 		}
-		return averagedSpectrum;
+		return scaleSpectrumToMaxValue(averagedSpectrum, scaleFactor);
 	}
 	
 	public static Collection<MsPoint> scaleMsPointCollection(

@@ -75,6 +75,20 @@ public class MassSpectrum implements Serializable, XmlStorable {
 		tandemSpectra = new HashSet<TandemMassSpectrum>();
 		patternMap = new TreeMap<String, NavigableSet<MsPoint>>();
 	}
+	
+	public MassSpectrum(MassSpectrum other, boolean copyMSone) {
+		
+		this();
+		if(copyMSone) {
+			
+			for(Adduct ad : other.getAdducts())
+				 addSpectrumForAdduct(ad, other.getMsPointsForAdduct(ad));
+			
+			primaryAdduct = other.getPrimaryAdduct();
+		}
+		tandemSpectra.addAll(other.getTandemSpectra());
+		patternMap.putAll(other.getPatternMap());		
+	}
 
 	public void addDataPoint(double mz, double intensity, String adductType, double rt) {
 
