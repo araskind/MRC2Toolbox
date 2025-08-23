@@ -63,6 +63,7 @@ import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.VariableCategorySizeBarChar
 import edu.umich.med.mrc2.datoolbox.gui.plot.qc.twod.TwoDimQCPlot;
 import edu.umich.med.mrc2.datoolbox.gui.plot.renderer.category.VariableCategorySizeBarRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.plot.renderer.category.VariableCategorySizeCategoryAxis;
+import edu.umich.med.mrc2.datoolbox.gui.plot.tooltip.NamedXYSeriesToolTipGenerator;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
@@ -85,6 +86,9 @@ public class MultiPanelDataPlot extends TwoDimQCPlot{
 	protected Map<DataPipeline, Collection<MsFeature>> plottedFeaturesMap;
 	protected TwoDimFeatureDataPlotParameterObject plotParameters;
 
+	private XYLineAndShapeRenderer defaultScatterRenderer;
+	private XYLineAndShapeRenderer defaultLineRenderer;
+
 	public MultiPanelDataPlot() {
 
 		super();
@@ -94,6 +98,13 @@ public class MultiPanelDataPlot extends TwoDimQCPlot{
 		initLegend(RectangleEdge.BOTTOM, legendVisible);
 		plottedFeaturesMap = 
 				new TreeMap<DataPipeline, Collection<MsFeature>>();
+		
+		defaultScatterRenderer = new XYLineAndShapeRenderer(false, true);
+		defaultScatterRenderer.setDefaultToolTipGenerator(
+				new NamedXYSeriesToolTipGenerator());
+		defaultLineRenderer = new XYLineAndShapeRenderer(true, false);
+		defaultLineRenderer.setDefaultToolTipGenerator(
+				new NamedXYSeriesToolTipGenerator());
 	}
 
 	@Override
@@ -181,7 +192,7 @@ public class MultiPanelDataPlot extends TwoDimQCPlot{
 				true, // generate tooltips?
 				false // generate URLs?
 		).getPlot();
-
+		newPlot.setRenderer(defaultScatterRenderer);
 		setBasicPlotGui(newPlot);
 
 		return newPlot;
@@ -199,7 +210,7 @@ public class MultiPanelDataPlot extends TwoDimQCPlot{
 				true, // generate tooltips?
 				false // generate URLs?
 		).getPlot();
-
+		newPlot.setRenderer(defaultLineRenderer);
 		setBasicPlotGui(newPlot);
 
 		return newPlot;

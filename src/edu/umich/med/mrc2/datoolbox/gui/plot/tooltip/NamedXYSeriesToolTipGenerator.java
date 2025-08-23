@@ -22,11 +22,14 @@
 package edu.umich.med.mrc2.datoolbox.gui.plot.tooltip;
 
 import org.jfree.chart.labels.XYToolTipGenerator;
+import org.jfree.data.time.TimeSeries;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
 import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.NamedXYSeries;
+import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.ObjectMappedTimeSeries;
+import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.TimedScatterDataSet;
 
 public class NamedXYSeriesToolTipGenerator implements XYToolTipGenerator {
 
@@ -40,6 +43,17 @@ public class NamedXYSeriesToolTipGenerator implements XYToolTipGenerator {
 			if(dataSeries instanceof NamedXYSeries)
 				toolTip = ((NamedXYSeries)dataSeries).getLabel(item);
 		}
+		if(dataset instanceof TimedScatterDataSet) {
+						
+			TimeSeries dataSeries = ((TimedScatterDataSet)dataset).getSeries(series);
+			if(dataSeries instanceof ObjectMappedTimeSeries) {
+				
+				Object labelObject = ((ObjectMappedTimeSeries)dataSeries).getLabelObject(item);
+				if(labelObject instanceof	FileFeatureTooltipInputObject) 						
+					return TooltipUtils.generateLabelForFeature(
+						(FileFeatureTooltipInputObject)labelObject);
+			}			
+		}		
 		return toolTip;
 	}
 }
