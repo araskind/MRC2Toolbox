@@ -210,13 +210,10 @@ public class AlignmentProcessor {
 			Collection<MsFeature>allFeatures, 
 			Range rtRange, 
 			long number){
-		
-		List<MsFeature>topFeatures = 
-				allFeatures.stream().filter(f -> rtRange.contains(f.getRetentionTime())).
-					sorted(revIntensitySorter).limit(number).sorted(rtSorter).
-					collect(Collectors.toList());
-		
-		return topFeatures;
+
+		return allFeatures.stream().filter(f -> rtRange.contains(f.getRetentionTime())).
+				sorted(revIntensitySorter).limit(number).sorted(rtSorter).
+				collect(Collectors.toList());
 	}
 	
 	private Range getCompleteRtRange(Collection<MsFeature>featureList) {

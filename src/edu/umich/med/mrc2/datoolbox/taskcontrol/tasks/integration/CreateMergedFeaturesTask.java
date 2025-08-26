@@ -25,7 +25,10 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.NavigableMap;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
@@ -105,7 +108,7 @@ public class CreateMergedFeaturesTask extends AbstractTask {
 				collect(Collectors.toList());
 		total = clustersWithMergeInput.size();
 		processed = 0;
-		mergedFeaturesMap = new HashMap<MsFeatureCluster,LibraryMsFeature>();
+		mergedFeaturesMap = new HashMap<>();
 		for(MsFeatureCluster cluster : clustersWithMergeInput) {
 			
 			LibraryMsFeature merged = mergeMarkedFeatures(cluster);
@@ -119,7 +122,7 @@ public class CreateMergedFeaturesTask extends AbstractTask {
 	private LibraryMsFeature mergeMarkedFeatures(MsFeatureCluster cluster) {
 
 		LibraryMsFeature merged = new LibraryMsFeature();
-		MassSpectrum spectrum = new MassSpectrum();
+		MassSpectrum spectrum = null;
 		double rt = 0.0;
 		Range rtRange = null;
 		for(MsFeature f : cluster.getMarkedForMerge()) {
@@ -135,28 +138,84 @@ public class CreateMergedFeaturesTask extends AbstractTask {
 		merged.setRtRange(rtRange);
 
 		DataPipeline mergeDp = cluster.getMergeDataPipeline();
+		RangeBucket mzRangeBucketComplete = 
+				createMZRangeBucket(cluster.getFeturesForDataPipeline(mergeDp));
+		MsFeature adductRef = getAdductReferenceFeature(
+				cluster, mzRangeBucketComplete.getRangeSet().size());
+		if(adductRef == null) {
+			System.err.println("Can not assign adducts to unknown features in cluster " + cluster.toString());
+			return null;
+		}	
 		RangeBucket mzRangeBucket = 
-				createMZRangeBucket(cluster.getMarkedForMerge());
+				createMZRangeBucket(cluster.getMarkedForMerge());	
+		NavigableMap<Adduct,Collection<MsFeature>>adductFeatureMap = 
+				mapFeaturesToAdductsByMZ(mzRangeBucket, adductRef, cluster.getMarkedForMerge());
+		
 		if(mzRangeBucket.getRangeSet().size() == 1) {
 			
-			Collection<MsPoint>adductPoints = new TreeSet<MsPoint>(MsUtils.mzSorter);
-			cluster.getMarkedForMerge().stream().
-				forEach(f -> adductPoints.addAll(f.getSpectrum().getMsPoints()));
-			Collection<MsPoint> averagedSpectrum = 
-					MsUtils.averageMassSpectrum(adductPoints, massWindow, massErrorType);
-			Adduct ad = cluster.getMarkedForMerge().stream().
-				map(f -> f.getSpectrum().getPrimaryAdduct()).
-				findFirst().orElse(null);
-			spectrum.addSpectrumForAdduct(ad, averagedSpectrum);
-			merged.setSpectrum(spectrum);
+			Adduct adduct = adductFeatureMap.firstKey();
+			Collection<MsPoint> averagedPoints = mergeSpectraForSingleAdduct(cluster.getMarkedForMerge());
+			spectrum = new MassSpectrum();
+			spectrum.addSpectrumForAdduct(adduct, averagedPoints);
+
 		}
-		if(mzRangeBucket.getRangeSet().size() > 1) {
+		if(mzRangeBucket.getRangeSet().size() > 1) {		
+
+			spectrum = new MassSpectrum();
+			for(Entry<Adduct,Collection<MsFeature>>afEntry : adductFeatureMap.entrySet()) {
+				
+				if(afEntry.getValue().size() == 1) {
+
+					spectrum.addSpectrumForAdduct(afEntry.getKey(), 
+							afEntry.getValue().iterator().next().getSpectrum().getMsPoints());
+				}
+				if(afEntry.getValue().size() > 1) {
+					Collection<MsPoint> averagedPoints = mergeSpectraForSingleAdduct(afEntry.getValue());
+					spectrum.addSpectrumForAdduct(afEntry.getKey(), averagedPoints);
+				}
+			}
+		}
+		if(spectrum != null && !spectrum.getAdducts().isEmpty()) {
+			merged.setSpectrum(spectrum);
+			return merged;
+		}
+		else
+			return null;
+	}
+	
+	private NavigableMap<Adduct,Collection<MsFeature>>mapFeaturesToAdductsByMZ(
+			RangeBucket mzRangeBucket, 
+			MsFeature adductRef, 
+			Collection<MsFeature>featuresToMap){
+		
+		NavigableMap<Adduct,Collection<MsFeature>>adductFeatureMap = new TreeMap<>();
+		for(Range mzRange : mzRangeBucket.getRangeSet()) {
 			
-			RangeBucket mzRangeBucketComplete = 
-					createMZRangeBucket(cluster.getFeturesForDataPipeline(mergeDp));
-			
+			Adduct ad = adductRef.getSpectrum().getAdductInMzRage(mzRange);
+			List<MsFeature> featuresInRange = featuresToMap.stream().
+					filter(f -> mzRange.contains(f.getSpectrum().getMonoisotopicMz())).
+					collect(Collectors.toList());
+			if(ad != null && !featuresInRange.isEmpty())
+				adductFeatureMap.put(ad, featuresInRange);
 		}		
-		return merged;
+		return adductFeatureMap;	
+	}
+	
+	private Collection<MsPoint> mergeSpectraForSingleAdduct(Collection<MsFeature>featuresToMerge) {
+
+		Collection<MsPoint>adductPoints = new TreeSet<>(MsUtils.mzSorter);
+		featuresToMerge.stream().
+			forEach(f -> adductPoints.addAll(f.getSpectrum().getMsPoints()));
+		return MsUtils.averageMassSpectrum(adductPoints, massWindow, massErrorType);
+	}
+	
+	//	TODO This code is for the cases when feature not intended for merge has more tha one adduct
+	//	Specifically, ProFinder output can be used to assign adducts to unknowns
+	private MsFeature getAdductReferenceFeature(MsFeatureCluster cluster, int adductCount) {
+		
+		return cluster.getFeatures().stream().
+				filter(f -> f.getSpectrum().getAdducts().size() == adductCount).
+				findFirst().orElse(null);
 	}
 	
 	private RangeBucket createMZRangeBucket(Collection<MsFeature>features) {

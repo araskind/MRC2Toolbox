@@ -115,15 +115,15 @@ public class DataIntegrationFeatureSelectionTable extends FeatureSelectionTable 
 			int pipelineColumn = model.getColumnIndex(DataIntegrationFeatureSelectionTableModel.DATA_PIPELINE_COLUMN);
 			DataPipeline dataPipeline = (DataPipeline) model.getValueAt(row, pipelineColumn);
 			
-			if (col == getColumnIndex(DataIntegrationFeatureSelectionTableModel.ID_COLUMN)) {
+			if (col == model.getColumnIndex(DataIntegrationFeatureSelectionTableModel.ID_COLUMN)) {
 
 				boolean isPrimary = (boolean) getValueAt(row, col);
 				if(isPrimary)
 					activeCluster.setPrimaryFeature(selectedFeature);
 			}
-			if (col == getColumnIndex(DataIntegrationFeatureSelectionTableModel.MERGE_COLUMN)) {
+			if (col == model.getColumnIndex(DataIntegrationFeatureSelectionTableModel.MERGE_COLUMN)) {
 
-				boolean included = (boolean) getValueAt(row, col);
+				boolean included = (boolean) model.getValueAt(row, col);
 				if(included && !activeCluster.getMarkedForMerge().isEmpty() && !pipelineMatches(dataPipeline)) {
 						
 						String message = "Only the features from the same data pipeline may be merged.";

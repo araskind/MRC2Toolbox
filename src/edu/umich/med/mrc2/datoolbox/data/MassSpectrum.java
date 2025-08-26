@@ -48,6 +48,7 @@ import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
 import edu.umich.med.mrc2.datoolbox.project.store.XmlStorable;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 import edu.umich.med.mrc2.datoolbox.utils.NumberArrayUtils;
+import edu.umich.med.mrc2.datoolbox.utils.Range;
 
 public class MassSpectrum implements Serializable, XmlStorable {
 
@@ -642,6 +643,16 @@ public class MassSpectrum implements Serializable, XmlStorable {
 				}
 			}
 		}		
+	}
+	
+	public Adduct getAdductInMzRage(Range mzRage) {
+		
+		for(Adduct ad : adductMap.keySet()) {
+			
+			if(mzRage.contains(getMonoisotopicMzForAdduct(ad)))
+				return ad;
+		}
+		return null;
 	}
 }
 

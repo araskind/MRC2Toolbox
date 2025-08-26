@@ -37,7 +37,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.prefs.Preferences;
 
 import javax.swing.JButton;
@@ -63,6 +62,7 @@ import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
+import edu.umich.med.mrc2.datoolbox.utils.filter.MovingAverageFilter;
 
 public class MSAlignTestFrame extends JFrame implements WindowListener, ActionListener, BackedByPreferences {
 
@@ -310,28 +310,47 @@ public class MSAlignTestFrame extends JFrame implements WindowListener, ActionLi
 				map(f -> f.getRetentionTime()).mapToDouble(Double::doubleValue).toArray();
 		queryRtArray = ArrayUtils.insert(0, queryRtArray, 0.0d);
 		
+		double maxRt =
+				Math.max(refRtArray[refRtArray.length - 1], queryRtArray[queryRtArray.length - 1]) * 1.05d;
+		refRtArray = ArrayUtils.insert(refRtArray.length, refRtArray, maxRt);
+		queryRtArray = ArrayUtils.insert(queryRtArray.length, queryRtArray, maxRt);
+		MovingAverageFilter filter = new MovingAverageFilter(5);
+		double[]queryRtArrayFiltered = filter.filter(refRtArray, queryRtArray);
+		
 		LoessInterpolator interpolator = new LoessInterpolator(0.4d, 1);
-		PolynomialSplineFunction loesFit = interpolator.interpolate(refRtArray, queryRtArray);
-				
-		for(Entry<MsFeature,MsFeature>anchor : alignmentProcessor.getAnchorMap().entrySet()) {
+		//	PolynomialSplineFunction loesFit = interpolator.interpolate(refRtArray, queryRtArray);
+		PolynomialSplineFunction loesFit = interpolator.interpolate(queryRtArrayFiltered, refRtArray);
+		
+		for(int i=0; i<refRtArray.length; i++) {
 			
-			double refRt  = anchor.getKey().getRetentionTime();
-			double queryRt  = anchor.getValue().getRetentionTime();
-			double rtDiff = refRt - queryRt;
-			double fittedDiff = queryRt - loesFit.value(refRt);
-			
-//			System.out.println(
-//					"RT1 = " + MRC2ToolBoxConfiguration.getRtFormat().format(anchor.getKey().getRetentionTime()) 
-//					+ "\tDelta = " + MRC2ToolBoxConfiguration.getRtFormat().format(rtDiff)
-//					+ "\tFitted = " + MRC2ToolBoxConfiguration.getRtFormat().format(fittedDiff)
-//					);
-			
+			double deltaOrig = refRtArray[i] - queryRtArray[i];
+			double deltaFitted = refRtArray[i] - loesFit.value(queryRtArrayFiltered[i]);
 			System.out.println(
-					MRC2ToolBoxConfiguration.getRtFormat().format(anchor.getKey().getRetentionTime()) 
-					+ "\t" + MRC2ToolBoxConfiguration.getRtFormat().format(rtDiff)
-					+ "\t" + MRC2ToolBoxConfiguration.getRtFormat().format(fittedDiff)
+					MRC2ToolBoxConfiguration.getRtFormat().format(refRtArray[i]) 
+					+ "\t" + MRC2ToolBoxConfiguration.getRtFormat().format(queryRtArray[i])
+					+ "\t" + MRC2ToolBoxConfiguration.getRtFormat().format(queryRtArrayFiltered[i])
+					+ "\t" + MRC2ToolBoxConfiguration.getRtFormat().format(loesFit.value(queryRtArrayFiltered[i]))
+					+ "\t" + MRC2ToolBoxConfiguration.getRtFormat().format(Math.abs(deltaOrig))
+					+ "\t" + MRC2ToolBoxConfiguration.getRtFormat().format(Math.abs(deltaFitted))
 					);
-		}		
+		}
+//		for(Entry<MsFeature,MsFeature>anchor : alignmentProcessor.getAnchorMap().entrySet()) {
+//			
+//			double refRt  = anchor.getKey().getRetentionTime();
+//			double queryRt  = anchor.getValue().getRetentionTime();
+//			double fitted = loesFit.value(queryRt);
+//			//	double rtDiff = fitted - queryRt;
+//			//double fittedDiff = refRt - loesFit.value(queryRt);
+//			
+//			System.out.println(
+//					MRC2ToolBoxConfiguration.getRtFormat().format(refRt) 
+//					+ "\t" + MRC2ToolBoxConfiguration.getRtFormat().format(queryRt)
+//					+ "\t" + MRC2ToolBoxConfiguration.getRtFormat().format(queryRt)
+//					+ "\t" + MRC2ToolBoxConfiguration.getRtFormat().format(refRt - queryRt)
+//					+ "\t" + MRC2ToolBoxConfiguration.getRtFormat().format(fitted)
+//					+ "\t" + MRC2ToolBoxConfiguration.getRtFormat().format(queryRt - fitted)
+//					);
+//		}		
 	}
 	
 	private int getNumberOfRTIntervals() {

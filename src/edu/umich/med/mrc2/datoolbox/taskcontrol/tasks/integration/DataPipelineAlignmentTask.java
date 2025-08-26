@@ -80,7 +80,7 @@ public class DataPipelineAlignmentTask extends AbstractTask {
 		this.massErrorType = massErrorType;
 		this.retentionWindow = retentionWindow;
 		this.excludeUndetected = excludeUndetected;
-		clusterList = new HashSet<MsFeatureCluster>();
+		clusterList = new HashSet<>();
 		setQueryAndReference(pipelineOne,pipelineTwo);
 		
 		alignmentSettings = new DataPipelineAlignmentParametersObject(
@@ -100,15 +100,52 @@ public class DataPipelineAlignmentTask extends AbstractTask {
 		referencePipeline = pipelineOne;
 		queryLib = currentExperiment.getAveragedFeatureLibraryForDataPipeline(pipelineTwo);
 		queryPipeline = pipelineTwo;
-		if(referenceLib.getFeatureCount() > queryLib.getFeatureCount()) {
-			
+		
+		int comparison = compareReferenceMaxAdductCountToQuery(referenceLib, queryLib);
+		if(comparison == 0)
+			comparison = compareReferenceIDcountToQuery(referenceLib, queryLib);
+		
+		if(comparison == 0)
+			comparison = Integer.compare(queryLib.getFeatureCount(), referenceLib.getFeatureCount());
+		
+		if(comparison < 0) {
 			referenceLib = currentExperiment.getAveragedFeatureLibraryForDataPipeline(pipelineTwo);
 			referencePipeline = pipelineTwo;
 			queryLib = currentExperiment.getAveragedFeatureLibraryForDataPipeline(pipelineOne);
 			queryPipeline = pipelineOne;
 		}
 	}
-
+	
+	/**
+	 * @param referenceLib
+	 * @param queryLib
+	 * @return < 0 if Max adduct count per feature in reference is lower than in query
+	 */
+	private int compareReferenceMaxAdductCountToQuery(
+			CompoundLibrary referenceLib, CompoundLibrary queryLib) {
+		int maxAdductsRef = referenceLib.getFeatures().
+				stream().mapToInt(f -> f.getSpectrum().getAdducts().size()).max().orElse(1);
+		int maxAdductsQuery = queryLib.getFeatures().
+				stream().mapToInt(f -> f.getSpectrum().getAdducts().size()).max().orElse(1);
+		
+		return Integer.compare(maxAdductsRef, maxAdductsQuery);
+	}
+	
+	/**
+	 * @param referenceLib
+	 * @param queryLib
+	 * @return < 0 if number of identified features in reference is lower than in query
+	 */
+	private int compareReferenceIDcountToQuery(
+			CompoundLibrary referenceLib, CompoundLibrary queryLib) {
+		
+		long refIDcount = referenceLib.getFeatures().
+				stream().filter(f -> f.isIdentified()).count();
+		long queryIDcount = queryLib.getFeatures().
+				stream().filter(f -> f.isIdentified()).count();
+		return Long.compare(refIDcount, queryIDcount);
+	}
+		
 	@Override
 	public void run() {
 
@@ -130,16 +167,14 @@ public class DataPipelineAlignmentTask extends AbstractTask {
 	
 	private void copyStatisticalSummaries() {
 
-		Map<DataPipeline,CompoundLibrary>dpLibMap = 
-				new TreeMap<DataPipeline,CompoundLibrary>();
+		Map<DataPipeline,CompoundLibrary>dpLibMap = new TreeMap<>();
 		dpLibMap.put(referencePipeline, referenceLib);
 		dpLibMap.put(queryPipeline, queryLib);
 		for(Entry<DataPipeline,CompoundLibrary>dpLibMapEntry : dpLibMap.entrySet()) {
 			
 			Set<MsFeature> featuresWithStats = 
 					currentExperiment.getMsFeaturesForDataPipeline(dpLibMapEntry.getKey());
-			Map<String,MsFeatureStatisticalSummary>statsMap = 
-					new HashMap<String,MsFeatureStatisticalSummary>();
+			Map<String,MsFeatureStatisticalSummary>statsMap = new HashMap<>();
 			featuresWithStats.stream().
 				forEach(f -> statsMap.put(f.getId(), f.getStatsSummary()));
 			dpLibMapEntry.getValue().getFeatures().stream().
@@ -152,12 +187,12 @@ public class DataPipelineAlignmentTask extends AbstractTask {
 		taskDescription = "Matching the features from selected data pipelines";
 		total = referenceLib.getFeatureCount();
 		processed = 0;
-		unmatchedReferenceFeatures = new ArrayList<LibraryMsFeature>();
+		unmatchedReferenceFeatures = new ArrayList<>();
 		Collection<LibraryMsFeature> referenceFeatures = referenceLib.getFeatures();
-		if(excludeUndetected) {
+		if(excludeUndetected)
 			referenceFeatures = removeUndetectedReferenceFeatures(referenceFeatures);
-		}
-		for(LibraryMsFeature refFeature : referenceLib.getFeatures()) {
+		
+		for(LibraryMsFeature refFeature : referenceFeatures) {
 			
 			Set<LibraryMsFeature>matches = findMatchingFeaturesInQueryLibrary(refFeature);
 			if(!matches.isEmpty()) {
@@ -197,7 +232,7 @@ public class DataPipelineAlignmentTask extends AbstractTask {
 
 	private Set<LibraryMsFeature> findMatchingFeaturesInQueryLibrary(LibraryMsFeature refFeature) {
 		
-		Set<LibraryMsFeature>matches = new HashSet<LibraryMsFeature>();
+		Set<LibraryMsFeature>matches = new HashSet<>();
 		Range rtRange = new Range(
 				refFeature.getRetentionTime() - retentionWindow, 
 				refFeature.getRetentionTime() + retentionWindow);
@@ -208,8 +243,7 @@ public class DataPipelineAlignmentTask extends AbstractTask {
 		if(matchedByRt.isEmpty())
 			return matches;
 		
-		Map<Adduct,Collection<LibraryMsFeature>>matchByAdduct = 
-				new TreeMap<Adduct,Collection<LibraryMsFeature>>();
+		Map<Adduct,Collection<LibraryMsFeature>>matchByAdduct = new TreeMap<>();
 		for(Adduct refAdduct : refFeature.getSpectrum().getAdducts()) {
 			
 			int charge = refAdduct.getCharge();
