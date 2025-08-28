@@ -89,21 +89,21 @@ public class MsFeatureCluster implements Serializable, XmlStorable {
 
 		this.clusterId = DataPrefix.MS_FEATURE_CLUSTER.getName() 
 				+ UUID.randomUUID().toString();
-		clusterFeatures = new TreeMap<DataPipeline, Collection<MsFeature>>();
-		featureRTStatistics = new TreeMap<DataPipeline, DescriptiveStatistics>();
-		featureMZStatistics = new TreeMap<DataPipeline, DescriptiveStatistics>();
-		chemicalModificationsMap = new HashSet<ModificationBlock>();
+		clusterFeatures = new TreeMap<>();
+		featureRTStatistics = new TreeMap<>();
+		featureMZStatistics = new TreeMap<>();
+		chemicalModificationsMap = new HashSet<>();
 		correlationMatrix = null;
 		primaryFeature = null;
 		locked = false;
-		disabledFeatures = new HashSet<MsFeature>();
-		markedForMerge = new HashSet<MsFeature>();
+		disabledFeatures = new HashSet<>();
+		markedForMerge = new HashSet<>();
 	}
 
 	public void addFeature(MsFeature cf, DataPipeline pipeline) {
 		
 		if(!clusterFeatures.containsKey(pipeline)) {
-			clusterFeatures.put(pipeline, new HashSet<MsFeature>());
+			clusterFeatures.put(pipeline, new HashSet<>());
 			featureRTStatistics.put(pipeline, new DescriptiveStatistics());
 			featureMZStatistics.put(pipeline, new DescriptiveStatistics());
 		}		
@@ -1001,6 +1001,14 @@ public class MsFeatureCluster implements Serializable, XmlStorable {
 			return null;
 		
 		return getDataPipelineForFeature(markedForMerge.iterator().next());
+	}
+	
+	public Collection<LibraryMsFeature>getMergedFeaturesForDataPipeline(DataPipeline pipeline){
+		
+		return clusterFeatures.get(pipeline).stream().
+			filter(LibraryMsFeature.class::isInstance).
+			map(LibraryMsFeature.class::cast).
+			filter(f -> f.isMerged()).collect(Collectors.toList());
 	}
 }
 

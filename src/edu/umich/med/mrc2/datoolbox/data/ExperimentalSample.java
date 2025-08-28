@@ -25,6 +25,8 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.NavigableMap;
+import java.util.NavigableSet;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -55,8 +57,8 @@ public class ExperimentalSample implements Comparable<ExperimentalSample>, Seria
 	protected boolean enabled;
 	protected String sampleIdDeprecated;
 	protected String sampleNameDeprecated;
-	protected TreeMap<ExperimentDesignFactor, ExperimentDesignLevel> designCell;
-	protected TreeMap<DataAcquisitionMethod, TreeSet<DataFile>> dataFilesMap;
+	protected NavigableMap<ExperimentDesignFactor, ExperimentDesignLevel> designCell;
+	protected NavigableMap<DataAcquisitionMethod, NavigableSet<DataFile>> dataFilesMap;
 	protected int batchNumber;
 	protected boolean nameIsValid;
 	protected boolean lockedReference = false;
@@ -67,11 +69,11 @@ public class ExperimentalSample implements Comparable<ExperimentalSample>, Seria
 
 		id = sampleId2;
 		name = sampleName2;
-		designCell = new TreeMap<ExperimentDesignFactor, ExperimentDesignLevel>();
+		designCell = new TreeMap<>();
 		designCell.put(
 				ReferenceSamplesManager.getSampleControlTypeFactor(),
 				ReferenceSamplesManager.sampleLevel);
-		dataFilesMap = new TreeMap<DataAcquisitionMethod, TreeSet<DataFile>>();
+		dataFilesMap = new TreeMap<>();
 		enabled = true;
 		batchNumber = 1;
 		incloodeInPoolStats = false;
@@ -81,9 +83,9 @@ public class ExperimentalSample implements Comparable<ExperimentalSample>, Seria
 		
 		id = sample.getId();
 		name = sample.getName();
-		designCell = new TreeMap<ExperimentDesignFactor, ExperimentDesignLevel>();
+		designCell = new TreeMap<>();
 		designCell.putAll(sample.getDesignCell());
-		dataFilesMap = new TreeMap<DataAcquisitionMethod, TreeSet<DataFile>>();
+		dataFilesMap = new TreeMap<>();
 		dataFilesMap.putAll(sample.getDataFilesMap());
 		enabled = sample.isEnabled();
 		batchNumber = sample.getBatchNumber();
@@ -93,9 +95,7 @@ public class ExperimentalSample implements Comparable<ExperimentalSample>, Seria
 	public void addDataFile(DataFile newDataFile) {
 
 		DataAcquisitionMethod fileMethod = newDataFile.getDataAcquisitionMethod();
-		if (!dataFilesMap.containsKey(fileMethod))
-			dataFilesMap.put(fileMethod, new TreeSet<DataFile>());
-
+		dataFilesMap.computeIfAbsent(fileMethod, v -> new TreeSet<DataFile>());
 		dataFilesMap.get(fileMethod).add(newDataFile);
 		newDataFile.setParentSample(this);
 	}
@@ -120,28 +120,28 @@ public class ExperimentalSample implements Comparable<ExperimentalSample>, Seria
 		return dataFilesMap.values().toArray(new DataFile[dataFilesMap.size()]);
 	}
 
-	public TreeSet<DataFile> getDataFilesForMethod(DataAcquisitionMethod method) {
+	public NavigableSet<DataFile> getDataFilesForMethod(DataAcquisitionMethod method) {
 
 		if(dataFilesMap.get(method) == null)
-			return new TreeSet<DataFile>();
+			return new TreeSet<>();
 		else
 			return dataFilesMap.get(method);
 	}
 
 	public DataFile[] getDataFileArrayForMethod(DataAcquisitionMethod method) {
 
-		TreeSet<DataFile> methodFiles = dataFilesMap.get(method);
+		NavigableSet<DataFile> methodFiles = dataFilesMap.get(method);
 		if(methodFiles == null)
 			return new DataFile[0];
 		else
 			return methodFiles.toArray(new DataFile[methodFiles.size()]);
 	}
 
-	public TreeMap<DataAcquisitionMethod, TreeSet<DataFile>> getDataFilesMap() {
+	public NavigableMap<DataAcquisitionMethod, NavigableSet<DataFile>> getDataFilesMap() {
 		return dataFilesMap;
 	}
 
-	public TreeMap<ExperimentDesignFactor, ExperimentDesignLevel> getDesignCell() {
+	public NavigableMap<ExperimentDesignFactor, ExperimentDesignLevel> getDesignCell() {
 		return designCell;
 	}
 
@@ -240,7 +240,7 @@ public class ExperimentalSample implements Comparable<ExperimentalSample>, Seria
 	}
 
 	//	This method will not replace data for existing factors, only add new ones
-	public void appendDesign(TreeMap<ExperimentDesignFactor, ExperimentDesignLevel> designCell2) {
+	public void appendDesign(NavigableMap<ExperimentDesignFactor, ExperimentDesignLevel> designCell2) {
 
 		for (Entry<ExperimentDesignFactor, ExperimentDesignLevel> entry : designCell2.entrySet()) {
 
@@ -262,7 +262,7 @@ public class ExperimentalSample implements Comparable<ExperimentalSample>, Seria
 	public void replaceDataAcquisitionMethod(
 			DataAcquisitionMethod oldMethod, 
 			DataAcquisitionMethod newMethod) {
-		TreeSet<DataFile> files = dataFilesMap.remove(oldMethod);
+		NavigableSet<DataFile> files = dataFilesMap.remove(oldMethod);
 		dataFilesMap.put(newMethod, files);
 	}
 
@@ -433,7 +433,7 @@ public class ExperimentalSample implements Comparable<ExperimentalSample>, Seria
 //		protected TreeMap<DataAcquisitionMethod, TreeSet<DataFile>> dataFilesMap;
 		Element dataFileMapContainerElement = 
 				new Element(ExperimentalSampleFields.DataFileMap.name());
-		for(Entry<DataAcquisitionMethod, TreeSet<DataFile>> dfme : dataFilesMap.entrySet()) {
+		for(Entry<DataAcquisitionMethod, NavigableSet<DataFile>> dfme : dataFilesMap.entrySet()) {
 			
 			Element dataFileMapElement = 
 					new Element(ExperimentalSampleFields.DataFileMapElement.name());
@@ -476,7 +476,7 @@ public class ExperimentalSample implements Comparable<ExperimentalSample>, Seria
 			moTrPACQCSampleType = MoTrPACQCSampleType.valueOf(
 					sampleElement.getAttributeValue(ExperimentalSampleFields.MoTrPACQCSampleType.name()));
 		
-		designCell = new TreeMap<ExperimentDesignFactor, ExperimentDesignLevel>();
+		designCell = new TreeMap<>();
 		List<Element> designCellElements = 
 				sampleElement.getChild(ExperimentalSampleFields.DesignCell.name()).getChildren();
 		
@@ -496,7 +496,7 @@ public class ExperimentalSample implements Comparable<ExperimentalSample>, Seria
 					designCell.put(factor, level);
 			}
 		}
-		dataFilesMap = new TreeMap<DataAcquisitionMethod, TreeSet<DataFile>>();
+		dataFilesMap = new TreeMap<>();
 		List<Element> dfMapElements = 
 				sampleElement.getChild(ExperimentalSampleFields.DataFileMap.name()).getChildren();
 		
@@ -509,7 +509,7 @@ public class ExperimentalSample implements Comparable<ExperimentalSample>, Seria
 			String[] fileNames = dfmElement.getText().split(",");			
 			if(method != null && fileNames.length > 0 && parentProject != null) {
 				
-				TreeSet<DataFile>methodFiles = new TreeSet<DataFile>();
+				NavigableSet<DataFile>methodFiles = new TreeSet<>();
 				for(String fName : fileNames) {
 					
 					DataFile df = parentProject.getDataFileByNameAndMethod(fName, method);

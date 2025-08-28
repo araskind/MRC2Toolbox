@@ -23,7 +23,7 @@ package edu.umich.med.mrc2.datoolbox.gui.plot.tooltip;
 
 import java.text.SimpleDateFormat;
 import java.util.Map.Entry;
-import java.util.TreeMap;
+import java.util.NavigableMap;
 
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignFactor;
@@ -60,7 +60,7 @@ public class TooltipUtils {
 			if (feature != null)
 				addDataFromMsFeature(stringBuilder, feature, plotValueType);
 		}
-		TreeMap<ExperimentDesignFactor, ExperimentDesignLevel> desCell = null;
+		NavigableMap<ExperimentDesignFactor, ExperimentDesignLevel> desCell = null;
 		if (df.getParentSample() != null) {
 			desCell = df.getParentSample().getDesignCell();
 			stringBuilder.append("<HR><B>Sample: </B>");

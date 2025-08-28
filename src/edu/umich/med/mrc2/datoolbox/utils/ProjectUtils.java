@@ -67,7 +67,6 @@ import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
-import edu.umich.med.mrc2.datoolbox.main.ReferenceSamplesManager;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisProject;
@@ -86,38 +85,12 @@ public class ProjectUtils {
 	public static final String dateFormatString = "yyyy-MM-dd HH:mm:ss";
 	public static final DateFormat dateTimeFormat = new SimpleDateFormat(dateFormatString);
 	public static final String tmpSuffix = "_TMP";
+	public static final String mergedSuffix = "_MERGED";
 	
 	public static DateFormat getDateFormat() {
 		return new SimpleDateFormat(dateFormatString);
 	}
 
-	public static boolean designValidForStats(
-			DataAnalysisProject currentExperiment,
-			DataPipeline activePipeline,
-			boolean requirePooled) {
-
-		int pooledCount = 0;
-		int sampleCount = 0;
-
-		//	TODO deal with by-batch stats
-		for (DataFile df : currentExperiment.getDataFilesForAcquisitionMethod(
-				activePipeline.getAcquisitionMethod())) {
-
-			if(df.getParentSample().hasLevel(ReferenceSamplesManager.masterPoolLevel))
-				pooledCount++;
-
-			if(df.getParentSample().hasLevel(ReferenceSamplesManager.sampleLevel))
-				sampleCount++;
-		}
-		if (requirePooled && pooledCount == 0)
-			return false;
-
-		if (sampleCount > 0)
-			return true;
-
-		return false;
-	}
-	
 	public static void saveExperimentFile(
 			RawDataAnalysisProject experimentToSave) {
 		
@@ -513,21 +486,17 @@ public class ProjectUtils {
 	public static Path getFeaturesFilePath(
 			DataAnalysisProject project, 
 			DataPipeline pipeline) {
-		Path featureXmlFilePath = 
-				Paths.get(project.getDataDirectory().getAbsolutePath(),
+		return Paths.get(project.getDataDirectory().getAbsolutePath(),
 				DataPrefix.MS_FEATURE.getName() + pipeline.getSaveSafeName() 
 				+ "." + DataFileExtensions.FEATURE_LIST_EXTENSION.getExtension());
-		return featureXmlFilePath;
 	}
 	
 	public static Path getAveragedFeaturesFilePath(
 			DataAnalysisProject project, 
 			DataPipeline pipeline) {
-		Path featureXmlFilePath = 
-				Paths.get(project.getDataDirectory().getAbsolutePath(),
+		return Paths.get(project.getDataDirectory().getAbsolutePath(),
 				DataPrefix.AVERAGED_FEATURE_LIBRARY.getName() + pipeline.getSaveSafeName() 
-				+ "." + DataFileExtensions.AVERAGED_FEATURE_LIBRARY_EXTENSION.getExtension());
-		return featureXmlFilePath;
+				+ "." + DataFileExtensions.AVERAGED_FEATURE_LIBRARY_EXTENSION.getExtension());		
 	}
 	
 	public static Path getDataMatrixFilePath(
@@ -539,11 +508,18 @@ public class ProjectUtils {
 		if(isTemporary)
 			 temporaryFlag = tmpSuffix;
 		
-		Path dataMatrixFilePath = 
-				Paths.get(project.getDataDirectory().getAbsolutePath(),
+		return Paths.get(project.getDataDirectory().getAbsolutePath(),
 				DataPrefix.DATA_MATRIX.getName() + pipeline.getSaveSafeName() 
 				+ temporaryFlag + "." + DataFileExtensions.DATA_MATRIX_EXTENSION.getExtension());
-		return dataMatrixFilePath;
+	}
+	
+	public static Path getMergedDataMatrixFilePath(
+			DataAnalysisProject project, 
+			DataPipeline pipeline) {
+		
+		return Paths.get(project.getDataDirectory().getAbsolutePath(),
+				DataPrefix.DATA_MATRIX.getName() + pipeline.getSaveSafeName() 
+				+ mergedSuffix + "." + DataFileExtensions.DATA_MATRIX_EXTENSION.getExtension());
 	}
 	
 	public static Path getFeatureMatrixFilePath(
@@ -555,12 +531,9 @@ public class ProjectUtils {
 		if(isTemporary)
 			 temporaryFlag = tmpSuffix;
 		
-		Path featureMatrixFilePath = 
-				Paths.get(project.getDataDirectory().getAbsolutePath(), 
+		return Paths.get(project.getDataDirectory().getAbsolutePath(), 
 				DataPrefix.FEATURE_MATRIX.getName() + pipeline.getSaveSafeName() 
 				+ temporaryFlag +  "." + DataFileExtensions.DATA_MATRIX_EXTENSION.getExtension());
-		
-		return featureMatrixFilePath;
 	}
 }
 

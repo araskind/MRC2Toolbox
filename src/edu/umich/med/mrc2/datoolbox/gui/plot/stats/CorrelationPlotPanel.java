@@ -27,7 +27,6 @@ import java.awt.Font;
 import java.awt.geom.Ellipse2D;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.util.TreeSet;
 
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.RealMatrix;
@@ -45,18 +44,13 @@ import org.jfree.data.xy.XYDataItem;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
-import org.ujmp.core.Matrix;
 
-import edu.umich.med.mrc2.datoolbox.data.DataFile;
-import edu.umich.med.mrc2.datoolbox.data.ExperimentalSample;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.gui.plot.MasterPlotPanel;
-import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.NamedXYSeries;
+import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.FeatureCorrelationPlotDataSet;
 import edu.umich.med.mrc2.datoolbox.gui.plot.tooltip.NamedXYSeriesToolTipGenerator;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
-import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
-import edu.umich.med.mrc2.datoolbox.utils.DataSetUtils;
 
 public class CorrelationPlotPanel extends MasterPlotPanel {
 
@@ -65,7 +59,7 @@ public class CorrelationPlotPanel extends MasterPlotPanel {
 	 */
 	private static final long serialVersionUID = 5294133151768346173L;
 	private XYSeriesCollection inputData;
-	private XYDataset dataset;
+	private XYDataset regressionLineDataSet;
 	private XYLineAndShapeRenderer regressionRenderer;
 	private XYLineAndShapeRenderer dataRenderer;
 	private final NumberFormat corrFormat = new DecimalFormat("#.##");
@@ -107,25 +101,28 @@ public class CorrelationPlotPanel extends MasterPlotPanel {
 	 */
 	private void drawRegressionLine() {
 
-		if(inputData.getItemCount(0) > 1) {
+		if(inputData.getItemCount(0) <= 1)
+			return;
 
-			double regressionParameters[] = Regression.getOLSRegression(inputData, 0);
+		double[] regressionParameters = Regression.getOLSRegression(inputData, 0);
 
-			// Prepare a line function using the found parameters
-			LineFunction2D linefunction2d = new LineFunction2D(regressionParameters[0], regressionParameters[1]);
+		// Prepare a line function using the found parameters
+		LineFunction2D linefunction2d = 
+				new LineFunction2D(regressionParameters[0], regressionParameters[1]);
 
-			// Creates a dataset by taking sample values from the line function
-			dataset = DatasetUtils.sampleFunction2D(linefunction2d, inputData.getSeries(0).getMinX(),
-					inputData.getSeries(0).getMaxX(), 100, "Fitted Regression Line");
+		// Creates a dataset by taking sample values from the line function
+		regressionLineDataSet = DatasetUtils.sampleFunction2D(linefunction2d, inputData.getSeries(0).getMinX(),
+				inputData.getSeries(0).getMaxX(), 100, "Fitted Regression Line");
 
-			plot.setDataset(1, dataset);
+		plot.setDataset(1, regressionLineDataSet);
 
-			double corr = computeCorrelation(inputData.getSeries(0));
-			double xPos = inputData.getSeries(0).getMinX() + (inputData.getSeries(0).getMaxX() - inputData.getSeries(0).getMinX())/8.0d;
-			XYTextAnnotation ta = new XYTextAnnotation("Corr " + corrFormat.format(corr), xPos, inputData.getSeries(0).getMaxY());
-			ta.setFont(new Font("SansSerif", Font.BOLD, 12));
-			plot.addAnnotation(ta);
-		}
+		double corr = computeCorrelation(inputData.getSeries(0));
+		double xPos = inputData.getSeries(0).getMinX() + 
+				(inputData.getSeries(0).getMaxX() - inputData.getSeries(0).getMinX()) / 8.0d;
+		XYTextAnnotation ta = new XYTextAnnotation("Corr " + corrFormat.format(corr), 
+				xPos, inputData.getSeries(0).getMaxY());
+		ta.setFont(new Font("SansSerif", Font.BOLD, 12));
+		plot.addAnnotation(ta);		
 	}
 
 	private double computeCorrelation(XYSeries series) {
@@ -157,46 +154,6 @@ public class CorrelationPlotPanel extends MasterPlotPanel {
 		plot.setDomainPannable(true);
 	}
 
-	public void showCorrelationPlot(
-			MsFeature fOne, 
-			MsFeature fTwo,
-			DataPipeline dataPipeline) {
-
-		removeAllDataSets();
-		inputData = new XYSeriesCollection();
-		NamedXYSeries series = new NamedXYSeries("Data");
-		Matrix datamatrix = MRC2ToolBoxCore.getActiveMetabolomicsExperiment().
-				getDataMatrixForDataPipeline(dataPipeline);
-
-		long[] coordinatesOne = new long[2];
-		long[] coordinatesTwo = new long[2];
-		coordinatesOne[1] = datamatrix.getColumnForLabel(fOne);
-		coordinatesTwo[1] = datamatrix.getColumnForLabel(fTwo);
-
-		//	TODO Temporary fix until design subsets properly implemented
-		for(DataFile file : MRC2ToolBoxCore.getActiveMetabolomicsExperiment().
-				getDataFilesForAcquisitionMethod(dataPipeline.getAcquisitionMethod())) {
-
-			if(file.isEnabled()) {
-
-				long i = datamatrix.getRowForLabel(file);
-
-				coordinatesOne[0] = i;
-				coordinatesTwo[0] = i;
-				double x = datamatrix.getAsDouble(coordinatesOne);
-				double y = datamatrix.getAsDouble(coordinatesTwo);
-
-				if(x > 0 && y > 0)
-					series.add(x, y, file.getName());
-			}
-		}
-		inputData.addSeries(series);
-		plot.setDataset(0, inputData);
-		plot.getDomainAxis().setLabel(fOne.getName());
-		plot.getRangeAxis().setLabel(fTwo.getName());
-		drawRegressionLine();
-	}
-
 	public void showMultiAssayCorrelationPlot(
 			MsFeature fOne, 
 			DataPipeline dataPipelineOne,
@@ -207,85 +164,13 @@ public class CorrelationPlotPanel extends MasterPlotPanel {
 		if(fOne == null || fTwo == null)
 			return;
 		
-		inputData = new XYSeriesCollection();
-		NamedXYSeries series = new NamedXYSeries("Data");
-		DataAnalysisProject experiment = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
+		inputData = new FeatureCorrelationPlotDataSet(fOne, dataPipelineOne,
+				fTwo, dataPipelineTwo, MRC2ToolBoxCore.getActiveMetabolomicsExperiment());
 
-		Matrix matrixOne = experiment.getDataMatrixForDataPipeline(dataPipelineOne);
-		Matrix matrixTwo = experiment.getDataMatrixForDataPipeline(dataPipelineTwo);
-
-		long[] coordinatesOne = new long[2];
-		long[] coordinatesTwo = new long[2];
-		
-		coordinatesOne[1] = DataSetUtils.getColumnForFeature(
-				matrixOne, fOne, experiment, dataPipelineOne);
-		if(coordinatesOne[1] == -1)
-			return;
-		
-		coordinatesTwo[1] = DataSetUtils.getColumnForFeature(
-				matrixTwo, fTwo, experiment, dataPipelineTwo);
-		if(coordinatesTwo[1] == -1)
-			return;
-
-		TreeSet<ExperimentalSample> samples =
-				experiment.getExperimentDesign().getActiveSamplesForDesignSubset(
-						experiment.getExperimentDesign().getActiveDesignSubset());
-		DataFile[] filesOne;
-		DataFile[] filesTwo;
-
-		for(ExperimentalSample sample : samples) {
-
-			filesOne = sample.getDataFileArrayForMethod(dataPipelineOne.getAcquisitionMethod());
-			filesTwo = sample.getDataFileArrayForMethod(dataPipelineTwo.getAcquisitionMethod());
-
-			int count = Math.min(filesOne.length, filesTwo.length);
-
-			for(int i=0; i<count; i++) {
-
-				if(filesOne[i].isEnabled() && filesTwo[i].isEnabled()) {
-
-					coordinatesOne[0] = matrixOne.getRowForLabel(filesOne[i]);
-					coordinatesTwo[0] = matrixTwo.getRowForLabel(filesTwo[i]);
-					double x = 0.0d;
-					double y = 0.0d;
-					String label = createDataFilePointLabel(
-							filesOne[i], dataPipelineOne,filesTwo[i], dataPipelineTwo);
-					
-					if(coordinatesOne[0] >=0)
-						x = matrixOne.getAsDouble(coordinatesOne);
-					
-					if(coordinatesTwo[0] >=0)
-						y = matrixTwo.getAsDouble(coordinatesTwo);
-
-					if(x > 0 && y > 0)
-						series.add(x, y, label);
-				}
-			}
-		}
-		inputData.addSeries(series);
 		plot.setDataset(0, inputData);
 		plot.getDomainAxis().setLabel(fOne.getName());
 		plot.getRangeAxis().setLabel(fTwo.getName());
 		drawRegressionLine();
-	}
-	
-	private String createDataFilePointLabel(
-			DataFile fOne, 
-			DataPipeline dataPipelineOne,
-			DataFile fTwo,
-			DataPipeline dataPipelineTwo) {
-		String label = "<HTML>";
-		if(dataPipelineOne.equals(dataPipelineTwo)) {
-			
-			label += dataPipelineOne.getName() + "<BR>";
-			if(fOne.equals(fTwo))
-				label += fOne.getName();
-		}
-		else {
-			label += dataPipelineOne.getName() + ": " + fOne.getName() + "<BR>";
-			label += dataPipelineTwo.getName() + ": " + fTwo.getName();
-		}
-		return label;
 	}
 
 	public RealMatrix getDataMatrix(){

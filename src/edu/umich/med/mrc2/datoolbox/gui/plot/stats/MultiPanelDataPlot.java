@@ -64,6 +64,7 @@ import edu.umich.med.mrc2.datoolbox.gui.plot.qc.twod.TwoDimQCPlot;
 import edu.umich.med.mrc2.datoolbox.gui.plot.renderer.category.VariableCategorySizeBarRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.plot.renderer.category.VariableCategorySizeCategoryAxis;
 import edu.umich.med.mrc2.datoolbox.gui.plot.tooltip.NamedXYSeriesToolTipGenerator;
+import edu.umich.med.mrc2.datoolbox.gui.plot.tooltip.StatsPlotDataFileToolTipGenerator;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;

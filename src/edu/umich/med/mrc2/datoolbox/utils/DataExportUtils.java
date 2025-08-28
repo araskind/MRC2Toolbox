@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map.Entry;
+import java.util.NavigableSet;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -57,22 +58,22 @@ public class DataExportUtils {
 			sampleComparator = 
 				new ExperimentalSampleComparator(SortProperty.Name, SortDirection.ASC);
 
-		TreeMap<ExperimentalSample, TreeMap<DataPipeline, TreeSet<DataFile>>> sampleFileMap =
-				new TreeMap<ExperimentalSample, TreeMap<DataPipeline, TreeSet<DataFile>>>();
+		TreeMap<ExperimentalSample, TreeMap<DataPipeline, TreeSet<DataFile>>> sampleFileMap = 
+				new TreeMap<>();
 		TreeSet<ExperimentalSample> activeSamples =
 				currentExperiment.getExperimentDesign().getActiveSamplesForDesignSubset(design);
 
 		for (ExperimentalSample s : activeSamples) {
 
 			if (sampleFileMap.get(s) == null)
-				sampleFileMap.put(s, new TreeMap<DataPipeline, TreeSet<DataFile>>());
+				sampleFileMap.put(s, new TreeMap<>());
 
 			for (DataPipeline m : dataPipelines) {
 
 				if (sampleFileMap.get(s).get(m) == null)
-					sampleFileMap.get(s).put(m, new TreeSet<DataFile>());
+					sampleFileMap.get(s).put(m, new TreeSet<>());
 				
-				TreeSet<DataFile> sampleFiles = s.getDataFilesForMethod(m.getAcquisitionMethod());
+				NavigableSet<DataFile> sampleFiles = s.getDataFilesForMethod(m.getAcquisitionMethod());
 				if (sampleFiles != null) {
 					
 					sampleFileMap.get(s).get(m).addAll(
@@ -82,10 +83,10 @@ public class DataExportUtils {
 			}
 		}
 		TreeMap<ExperimentalSample, TreeMap<DataPipeline, DataFile[]>> arrayMap =
-				new TreeMap<ExperimentalSample, TreeMap<DataPipeline, DataFile[]>>(sampleComparator);
+				new TreeMap<>(sampleComparator);
 		for (Entry<ExperimentalSample, TreeMap<DataPipeline, TreeSet<DataFile>>> entry : sampleFileMap.entrySet()) {
 
-			arrayMap.put(entry.getKey(), new TreeMap<DataPipeline, DataFile[]>());
+			arrayMap.put(entry.getKey(), new TreeMap<>());
 
 			for (Entry<DataPipeline, TreeSet<DataFile>> fam : entry.getValue().entrySet())
 				arrayMap.get(entry.getKey()).put(fam.getKey(),
@@ -107,24 +108,24 @@ public class DataExportUtils {
 			sampleComparator = new ExperimentalSampleComparator(SortProperty.Name);
 
 		TreeMap<ExperimentalSample, TreeMap<DataPipeline, TreeSet<DataFile>>> sampleFileMap =
-				new TreeMap<ExperimentalSample, TreeMap<DataPipeline, TreeSet<DataFile>>>();
+				new TreeMap<>();
 		TreeSet<ExperimentalSample> activeSamples =
 				currentExperiment.getExperimentDesign().getActiveSamplesForDesignSubset(designSubset);
-		HashSet<DataPipeline> pipelines = new HashSet<DataPipeline>();
+		HashSet<DataPipeline> pipelines = new HashSet<>();
 		pipelines.add(pipeline);
 
 		for (ExperimentalSample s : activeSamples) {
 
 			if (sampleFileMap.get(s) == null)
-				sampleFileMap.put(s, new TreeMap<DataPipeline, TreeSet<DataFile>>());
+				sampleFileMap.put(s, new TreeMap<>());
 		
 
 			for (DataPipeline m : pipelines) {
 
 				if (sampleFileMap.get(s).get(m) == null)
-					sampleFileMap.get(s).put(m, new TreeSet<DataFile>());
+					sampleFileMap.get(s).put(m, new TreeSet<>());
 
-				TreeSet<DataFile> sampleFiles = s.getDataFilesForMethod(m.getAcquisitionMethod());
+				NavigableSet<DataFile> sampleFiles = s.getDataFilesForMethod(m.getAcquisitionMethod());
 				if (sampleFiles != null) {
 					
 					sampleFileMap.get(s).get(m).addAll(
@@ -134,10 +135,10 @@ public class DataExportUtils {
 			}
 		}
 		TreeMap<ExperimentalSample, TreeMap<DataPipeline, DataFile[]>> arrayMap =
-				new TreeMap<ExperimentalSample, TreeMap<DataPipeline, DataFile[]>>(sampleComparator);
+				new TreeMap<>(sampleComparator);
 		for (Entry<ExperimentalSample, TreeMap<DataPipeline, TreeSet<DataFile>>> entry : sampleFileMap.entrySet()) {
 
-			arrayMap.put(entry.getKey(), new TreeMap<DataPipeline, DataFile[]>());
+			arrayMap.put(entry.getKey(), new TreeMap<>());
 
 			for (Entry<DataPipeline, TreeSet<DataFile>> fam : entry.getValue().entrySet())
 				arrayMap.get(entry.getKey()).put(fam.getKey(),
@@ -151,7 +152,7 @@ public class DataExportUtils {
 			TreeMap<DataPipeline, DataFile[]>> sampleFileMap, 
 			int startColumn) {
 
-		HashMap<DataFile, Integer> fileColumnMap = new HashMap<DataFile, Integer>();
+		HashMap<DataFile, Integer> fileColumnMap = new HashMap<>();
 		int columnCount = startColumn;
 
 		for (Entry<ExperimentalSample, TreeMap<DataPipeline, DataFile[]>> entry : sampleFileMap.entrySet()) {
@@ -235,7 +236,7 @@ public class DataExportUtils {
 			DataExportFields exportFieldNaming, 
 			DataPipeline activePipeline) {
 
-		ArrayList<String> columnList = new ArrayList<String>();
+		ArrayList<String> columnList = new ArrayList<>();
 		for (Entry<ExperimentalSample, TreeMap<DataPipeline, DataFile[]>> entry : sampleFileMap.entrySet()) {
 
 			int maxReps = 0;

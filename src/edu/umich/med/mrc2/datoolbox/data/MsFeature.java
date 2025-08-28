@@ -864,11 +864,12 @@ public class MsFeature implements AnnotatedObject, Serializable, XmlStorable {
 		if(spectrum == null)
 			return;
 		
+		String newName = "";
 		if(spectrum.getExperimentalTandemSpectrum() != null 
 				&& spectrum.getExperimentalTandemSpectrum().getParent() != null) {
 			
 			double rt  = spectrum.getExperimentalTandemSpectrum().getParentScanRetentionTime();			
-			String newName = DataPrefix.MS_LIBRARY_UNKNOWN_TARGET.getName() +
+			newName = DataPrefix.MS_LIBRARY_UNKNOWN_TARGET.getName() +
 					MRC2ToolBoxConfiguration.defaultMzFormat.format(
 							spectrum.getExperimentalTandemSpectrum().getParent().getMz()) + "_" + 
 					MRC2ToolBoxConfiguration.defaultRtFormat.format(rt);
@@ -877,13 +878,15 @@ public class MsFeature implements AnnotatedObject, Serializable, XmlStorable {
 					CompoundIdentificationConfidence.UNKNOWN_MSMS_RT);
 		}
 		else {
-			String newName = DataPrefix.MS_LIBRARY_UNKNOWN_TARGET.getName() +
+			newName = DataPrefix.MS_LIBRARY_UNKNOWN_TARGET.getName() +
 					MRC2ToolBoxConfiguration.getMzFormat().format(getMonoisotopicMz()) + "_" + 
 					MRC2ToolBoxConfiguration.getRtFormat().format(getRetentionTime());
 			primaryIdentity.setIdentityName(newName);
 			primaryIdentity.setConfidenceLevel(
 					CompoundIdentificationConfidence.UNKNOWN_ACCURATE_MASS_RT);
 		}
+		if(name == null || name.isBlank())
+			name = newName;
 	}
 	
 	public void removeDefaultPrimaryIdentity() {

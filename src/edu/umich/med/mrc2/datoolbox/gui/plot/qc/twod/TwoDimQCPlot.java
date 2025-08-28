@@ -56,9 +56,9 @@ import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.VariableCategorySizeBarChar
 import edu.umich.med.mrc2.datoolbox.gui.plot.renderer.category.VariableCategorySizeBarRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.plot.renderer.category.VariableCategorySizeCategoryAxis;
 import edu.umich.med.mrc2.datoolbox.gui.plot.stats.DataPlotControlsPanel;
-import edu.umich.med.mrc2.datoolbox.gui.plot.stats.StatsPlotDataFileToolTipGenerator;
 import edu.umich.med.mrc2.datoolbox.gui.plot.stats.StatsPlotType;
 import edu.umich.med.mrc2.datoolbox.gui.plot.tooltip.FileStatsBoxAndWhiskerToolTipGenerator;
+import edu.umich.med.mrc2.datoolbox.gui.plot.tooltip.StatsPlotDataFileToolTipGenerator;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.project.Project;

@@ -23,6 +23,7 @@ package edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.stats;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -48,9 +49,9 @@ public class CalculateStatisticsTask extends AbstractTask {
 
 	private DataPipeline dataPipeline;
 	private DataAnalysisProject currentExperiment;
+	private ExperimentDesignSubset activeDesignSubset;
 	private DescriptiveStatistics sampleDescriptiveStatistics;
 	private DescriptiveStatistics pooledDescriptiveStatistics;
-	private ExperimentDesignSubset activeDesignSubset;
 	private DescriptiveStatistics totalDescriptiveStatistics;
 
 	public CalculateStatisticsTask(
@@ -98,34 +99,23 @@ public class CalculateStatisticsTask extends AbstractTask {
 		setStatus(TaskStatus.FINISHED);
 	}
 
-	//	TODO add by-batch/global options
 	private void calculateStatistics() {
 
 		sampleDescriptiveStatistics = new DescriptiveStatistics();
 		pooledDescriptiveStatistics = new DescriptiveStatistics();
 		totalDescriptiveStatistics = new DescriptiveStatistics();
 
-		TreeSet<DataFile> pooledFiles = new TreeSet<DataFile>();
-		TreeSet<DataFile> sampleFiles = new TreeSet<DataFile>();
+		TreeSet<DataFile> pooledFiles = new TreeSet<>();
+		TreeSet<DataFile> sampleFiles = new TreeSet<>();
+		HashMap<DataFile,Long>fileCoordinates = new HashMap<>();
+		Matrix assayData = currentExperiment.getDataMatrixForDataPipeline(dataPipeline);		
+		populateDataMaps(pooledFiles, sampleFiles, fileCoordinates, assayData);
+
+		long[] dataCoordinates = new long[2];
 		Set<DataFile>dataFiles =
 				currentExperiment.getActiveDataFilesForDesignAndAcquisitionMethod(
 						activeDesignSubset, dataPipeline.getAcquisitionMethod());
-		HashMap<DataFile,Long>fileCoordinates = new HashMap<DataFile,Long>();
-		Matrix assayData = currentExperiment.getDataMatrixForDataPipeline(dataPipeline);
-		long[] dataCoordinates = new long[2];
-		
-		Set<ExperimentalSample> pooledSamples = currentExperiment.getPooledSamples();
 
-		for (DataFile df : dataFiles) {
-			
-			if(pooledSamples.contains(df.getParentSample()) && df.isEnabled())
-				pooledFiles.add(df);
-
-			if(df.getParentSample().hasLevel(ReferenceSamplesManager.sampleLevel) && df.isEnabled())
-				sampleFiles.add(df);
-
-			fileCoordinates.put(df, assayData.getRowForLabel(df));
-		}
 		for (MsFeature cf : currentExperiment.getActiveFeatureSetForDataPipeline(dataPipeline).getFeatures()) {
 
 			sampleDescriptiveStatistics.clear();
@@ -151,30 +141,61 @@ public class CalculateStatisticsTask extends AbstractTask {
 					totalDescriptiveStatistics.addValue(value);
 				}
 			}
-			MsFeatureStatisticalSummary statSummary = cf.getStatsSummary();
-			if(statSummary == null) {
-				statSummary = new MsFeatureStatisticalSummary(cf);
-				cf.setStatsSummary(statSummary);
-			}
-			if (pooledFiles.size() > 0) {
-
-				statSummary.setPooledMean(pooledDescriptiveStatistics.getMean());
-				statSummary.setPooledMedian(pooledDescriptiveStatistics.getPercentile(50.0d));
-				statSummary.setPooledStDev(pooledDescriptiveStatistics.getStandardDeviation());
-				statSummary.setPooledFrequency((double) pooledDescriptiveStatistics.getN() / (double)pooledFiles.size());
-			}
-			if (sampleFiles.size() > 0) {
-
-				statSummary.setSampleMean(sampleDescriptiveStatistics.getMean());
-				statSummary.setSampleMedian(sampleDescriptiveStatistics.getPercentile(50.0d));
-				statSummary.setSampleStDev(sampleDescriptiveStatistics.getStandardDeviation());
-				statSummary.setSampleFrequency((double) sampleDescriptiveStatistics.getN() / (double)sampleFiles.size());
-			}
-			statSummary.setTotalMedian(totalDescriptiveStatistics.getPercentile(50.0d));
+			createAndPopulateFeatureStatisticalSummary(cf, pooledFiles, sampleFiles);
 			processed++;
 		}
 	}
+	
+	private void createAndPopulateFeatureStatisticalSummary(
+			MsFeature cf,
+			Set<DataFile> pooledFiles,
+			Set<DataFile> sampleFiles) {
+		
+		MsFeatureStatisticalSummary statSummary = cf.getStatsSummary();
+		if(statSummary == null) {
+			statSummary = new MsFeatureStatisticalSummary(cf);
+			cf.setStatsSummary(statSummary);
+		}
+		if (!pooledFiles.isEmpty()) {
 
+			statSummary.setPooledMean(pooledDescriptiveStatistics.getMean());
+			statSummary.setPooledMedian(pooledDescriptiveStatistics.getPercentile(50.0d));
+			statSummary.setPooledStDev(pooledDescriptiveStatistics.getStandardDeviation());
+			statSummary.setPooledFrequency((double) pooledDescriptiveStatistics.getN() / (double)pooledFiles.size());
+		}
+		if (!sampleFiles.isEmpty()) {
+
+			statSummary.setSampleMean(sampleDescriptiveStatistics.getMean());
+			statSummary.setSampleMedian(sampleDescriptiveStatistics.getPercentile(50.0d));
+			statSummary.setSampleStDev(sampleDescriptiveStatistics.getStandardDeviation());
+			statSummary.setSampleFrequency((double) sampleDescriptiveStatistics.getN() / (double)sampleFiles.size());
+		}
+		statSummary.setTotalMedian(totalDescriptiveStatistics.getPercentile(50.0d));
+	}
+
+	private void populateDataMaps(
+			Set<DataFile> pooledFiles,
+			Set<DataFile> sampleFiles,
+			Map<DataFile,Long>fileCoordinates,
+			Matrix assayData) {
+		
+		Set<ExperimentalSample> pooledSamples = currentExperiment.getPooledSamples();
+		Set<DataFile>dataFiles =
+				currentExperiment.getActiveDataFilesForDesignAndAcquisitionMethod(
+						activeDesignSubset, dataPipeline.getAcquisitionMethod());
+		for (DataFile df : dataFiles) {
+			
+			if(pooledSamples.contains(df.getParentSample()) && df.isEnabled())
+				pooledFiles.add(df);
+
+			if(df.getParentSample().hasLevel(ReferenceSamplesManager.sampleLevel) && df.isEnabled())
+				sampleFiles.add(df);
+
+			fileCoordinates.put(df, assayData.getRowForLabel(df));
+		}
+	}
+	
+	
 	@Override
 	public Task cloneTask() {
 		return new CalculateStatisticsTask(

@@ -429,7 +429,7 @@ public class ExperimentDesign implements ExperimentDesignFactorListener, Seriali
 	public Collection<ExperimentalSample>getSamplesForDesignSubset(
 			ExperimentDesignSubset subset, boolean enabledOnly){
 
-		Collection<ExperimentalSample>subsetSamples = new HashSet<ExperimentalSample>();
+		Collection<ExperimentalSample>subsetSamples = new HashSet<>();
 		TreeSet<ExperimentDesignLevel> levels = subset.getDesignMap();
 		for(ExperimentalSample s : sampleSet) {
 

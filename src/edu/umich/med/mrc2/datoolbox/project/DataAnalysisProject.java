@@ -78,6 +78,7 @@ public class DataAnalysisProject extends Project {
 	protected TreeMap<DataPipeline, CompoundLibrary> averagedFeatureMap;
 	protected TreeMap<DataPipeline, Set<MsFeature>> featureMap;
 	protected TreeMap<DataPipeline, Matrix> dataMatrixMap;
+	protected TreeMap<DataPipeline, Matrix> mergedDataMatrixMap;
 	protected TreeMap<DataPipeline, String> dataMatrixFileMap;
 	protected TreeMap<DataPipeline, Matrix> featureMatrixMap;
 	protected TreeMap<DataPipeline, String> featureMatrixFileMap;	
@@ -108,25 +109,26 @@ public class DataAnalysisProject extends Project {
 
 	protected void initProjectFields(boolean initDesign) {
 
-		libraryMap = new TreeMap<DataPipeline, CompoundLibrary>();
-		averagedFeatureMap = new TreeMap<DataPipeline, CompoundLibrary>();
-		duplicatesMap = new TreeMap<DataPipeline, Set<MsFeatureCluster>>();
-		clusterMap = new TreeMap<DataPipeline, Set<MsFeatureCluster>>();
-		featureMap = new TreeMap<DataPipeline, Set<MsFeature>>();
-		worklistMap = new TreeMap<DataAcquisitionMethod, Worklist>();
-		dataFileMap = new TreeMap<DataAcquisitionMethod, Set<DataFile>>();
-		statsCalculatedMap = new TreeMap<DataPipeline, Boolean>();
-		dataMatrixMap = new TreeMap<DataPipeline, Matrix>();
-		dataMatrixFileMap = new TreeMap<DataPipeline, String>();
-		featureMatrixMap = new TreeMap<DataPipeline, Matrix>();
-		featureMatrixFileMap = new TreeMap<DataPipeline, String>();
-		imputedDataMatrixMap = new TreeMap<DataPipeline, Matrix>();
-		corrMatrixMap = new TreeMap<DataPipeline, Matrix>();	
-		dataPipelines = new TreeSet<DataPipeline>();				
-		featureSetMap = new TreeMap<DataPipeline, Set<MsFeatureSet>>();
-		dataIntegrationSets = new TreeSet<MsFeatureClusterSet>();
-		dataPipelineAlignments = new TreeSet<DataPipelineAlignmentResults>();
-		metaDataMap = new TreeMap<DataPipeline, Matrix[]>();
+		libraryMap = new TreeMap<>();
+		averagedFeatureMap = new TreeMap<>();
+		duplicatesMap = new TreeMap<>();
+		clusterMap = new TreeMap<>();
+		featureMap = new TreeMap<>();
+		worklistMap = new TreeMap<>();
+		dataFileMap = new TreeMap<>();
+		statsCalculatedMap = new TreeMap<>();
+		dataMatrixMap = new TreeMap<>();
+		mergedDataMatrixMap = new TreeMap<>();
+		dataMatrixFileMap = new TreeMap<>();
+		featureMatrixMap = new TreeMap<>();
+		featureMatrixFileMap = new TreeMap<>();
+		imputedDataMatrixMap = new TreeMap<>();
+		corrMatrixMap = new TreeMap<>();	
+		dataPipelines = new TreeSet<>();				
+		featureSetMap = new TreeMap<>();
+		dataIntegrationSets = new TreeSet<>();
+		dataPipelineAlignments = new TreeSet<>();
+		metaDataMap = new TreeMap<>();
 		activeDataPipeline = null;
 		
 		if(initDesign)
@@ -156,9 +158,10 @@ public class DataAnalysisProject extends Project {
 	}
 
 	public void recreateMatrixMaps() {
-		dataMatrixMap = new TreeMap<DataPipeline, Matrix>();
-		corrMatrixMap = new TreeMap<DataPipeline, Matrix>();
-		featureMatrixMap = new TreeMap<DataPipeline, Matrix>();
+		dataMatrixMap = new TreeMap<>();
+		mergedDataMatrixMap = new TreeMap<>();
+		corrMatrixMap = new TreeMap<>();
+		featureMatrixMap = new TreeMap<>();
 	}
 
 	public void addDataPipeline(DataPipeline pipeline) {
@@ -177,7 +180,7 @@ public class DataAnalysisProject extends Project {
 				getFileName().toString();
 		dataMatrixFileMap.put(pipeline, matrixFileName);
 		statsCalculatedMap.put(pipeline, false);
-		featureSetMap.put(pipeline, new TreeSet<MsFeatureSet>());
+		featureSetMap.put(pipeline, new TreeSet<>());
 	}
 	
 	public void addFeatureMatrixForDataPipeline(DataPipeline pipeline, Matrix featureMatrix) {
@@ -186,10 +189,10 @@ public class DataAnalysisProject extends Project {
 			return;
 		
 		if(featureMatrixFileMap == null)
-			featureMatrixFileMap = new TreeMap<DataPipeline, String>();
+			featureMatrixFileMap = new TreeMap<>();
 		
 		if(featureMatrixMap == null)
-			featureMatrixMap = new TreeMap<DataPipeline, Matrix>();
+			featureMatrixMap = new TreeMap<>();
 		
 		String matrixFileName = 
 				ProjectUtils.getFeatureMatrixFilePath(this,pipeline,false).
@@ -222,11 +225,16 @@ public class DataAnalysisProject extends Project {
 		}
 		dataMatrixFileMap.remove(pipeline);
 		
+		mergedDataMatrixMap.remove(pipeline);
+		Path mergedDataMatrixFilePath = 
+				ProjectUtils.getMergedDataMatrixFilePath(this, pipeline);
+		FIOUtils.safeDeleteFile(mergedDataMatrixFilePath);
+		
 		if(featureMatrixFileMap == null)
-			featureMatrixFileMap = new TreeMap<DataPipeline, String>();
+			featureMatrixFileMap = new TreeMap<>();
 		
 		if(featureMatrixMap == null)
-			featureMatrixMap = new TreeMap<DataPipeline, Matrix>();
+			featureMatrixMap = new TreeMap<>();
 		
 		//	Delete feature matrix and storage file
 		featureMatrixMap.remove(pipeline);
@@ -400,14 +408,11 @@ public class DataAnalysisProject extends Project {
 	public Set<DataFile> getDataFilesForAcquisitionMethod(
 			DataAcquisitionMethod acquisitionMethod) {
 
-		if(acquisitionMethod == null)
-			return null;
-		
-		if(dataFileMap.get(acquisitionMethod) == null)
+		if(acquisitionMethod == null || dataFileMap.get(acquisitionMethod) == null)
 			return null;
 
 		return dataFileMap.get(acquisitionMethod).
-				stream().sorted().collect(Collectors.toSet());
+				stream().collect(Collectors.toCollection(TreeSet::new));
 	}
 
 	 public Collection<DataFile> getAllDataFiles(){
@@ -423,10 +428,14 @@ public class DataAnalysisProject extends Project {
 		return dataMatrixMap.get(pipeline);
 	}
 	
+	public Matrix getMergedDataMatrixForDataPipeline(DataPipeline pipeline) {
+		return mergedDataMatrixMap.get(pipeline);
+	}
+	
 	public String getFeatureMatrixFileNameForDataPipeline(DataPipeline pipeline) {
 		
 		if(featureMatrixFileMap == null)
-			featureMatrixFileMap = new TreeMap<DataPipeline, String>();
+			featureMatrixFileMap = new TreeMap<>();
 		
 		return featureMatrixFileMap.get(pipeline);
 	}
@@ -434,7 +443,7 @@ public class DataAnalysisProject extends Project {
 	public Matrix getFeatureMatrixForDataPipeline(DataPipeline pipeline) {
 		
 		if(featureMatrixMap == null)
-			featureMatrixMap = new TreeMap<DataPipeline, Matrix>();
+			featureMatrixMap = new TreeMap<>();
 		
 		return featureMatrixMap.get(pipeline);
 	}
@@ -696,6 +705,11 @@ public class DataAnalysisProject extends Project {
 		mdata[1] = dataMatrix.getMetaDataDimensionMatrix(1);
 		metaDataMap.put(pipeline, mdata);
 	}
+	
+	public void setMergedDataMatrixForDataPipeline(
+			DataPipeline pipeline, Matrix dataMatrix) {
+		mergedDataMatrixMap.put(pipeline, dataMatrix);
+	}	
 	
 	public void setFeatureMatrixForDataPipeline(
 			DataPipeline pipeline, Matrix featureMatrix) {	

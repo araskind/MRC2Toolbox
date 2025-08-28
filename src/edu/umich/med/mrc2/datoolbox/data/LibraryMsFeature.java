@@ -229,7 +229,7 @@ public class LibraryMsFeature extends MsFeature implements Serializable {
 	public Set<String> getParentIdSet() {
 		
 		if(parentIdSet == null)
-			parentIdSet = new HashSet<String>();
+			parentIdSet = new HashSet<>();
 		
 		return parentIdSet;
 	}

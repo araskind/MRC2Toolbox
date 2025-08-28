@@ -141,6 +141,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.stats.ImputeMissingDataTas
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.stats.MzFrequencyAnalysisTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.stats.MzFrequencyType;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.stats.RemoveEmptyFeaturesTask;
+import edu.umich.med.mrc2.datoolbox.utils.DataSetUtils;
 import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
 import edu.umich.med.mrc2.datoolbox.utils.MetabolomicsProjectUtils;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
@@ -1226,7 +1227,7 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 		
 		// Check if design assigned to data files and pooled/sample are specified
 		// TODO If no pooled present and required, calculate for the whole set as samples
-		if (ProjectUtils.designValidForStats(currentExperiment, activeDataPipeline, false)) {
+		if (DataSetUtils.designValidForStats(currentExperiment, activeDataPipeline, false)) {
 
 			CalculateStatisticsTask cst = 
 					new CalculateStatisticsTask(currentExperiment, activeDataPipeline);
