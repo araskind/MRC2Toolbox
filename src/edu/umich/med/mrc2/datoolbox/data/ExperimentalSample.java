@@ -37,6 +37,7 @@ import org.jdom2.Element;
 
 import edu.umich.med.mrc2.datoolbox.data.enums.MoTrPACQCSampleType;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
+import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.main.ReferenceSamplesManager;
 import edu.umich.med.mrc2.datoolbox.project.Project;
@@ -126,6 +127,23 @@ public class ExperimentalSample implements Comparable<ExperimentalSample>, Seria
 			return new TreeSet<>();
 		else
 			return dataFilesMap.get(method);
+	}
+	
+	public NavigableSet<DataFile> getDataFilesForPipeline(
+			DataPipeline pipeline, boolean enabledOnly) {
+
+		NavigableSet<DataFile> allFiles = dataFilesMap.get(pipeline.getAcquisitionMethod());
+		if(allFiles == null)
+			return new TreeSet<>();
+		else {
+			if(enabledOnly) {
+				return allFiles.stream().
+						filter(f -> f.isEnabled()).
+						collect(Collectors.toCollection(TreeSet::new));
+			}
+			else
+				return allFiles;
+		}			
 	}
 
 	public DataFile[] getDataFileArrayForMethod(DataAcquisitionMethod method) {

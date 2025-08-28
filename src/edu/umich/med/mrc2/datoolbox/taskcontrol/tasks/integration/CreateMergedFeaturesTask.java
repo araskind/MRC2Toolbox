@@ -53,6 +53,7 @@ import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
+import edu.umich.med.mrc2.datoolbox.utils.ClusterUtils;
 import edu.umich.med.mrc2.datoolbox.utils.DataSetUtils;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
@@ -63,8 +64,7 @@ public class CreateMergedFeaturesTask extends AbstractTask {
 	private Set<MsFeatureCluster> clusterSet;
 	private double massWindow;
 	private MassErrorType massErrorType;
-	
-	private Matrix completeDataMatrix;
+
 	private Matrix combinedDataMatrix;
 	private Matrix mergedFeaturesDataMatrix;
 	
@@ -105,6 +105,12 @@ public class CreateMergedFeaturesTask extends AbstractTask {
 		}
 		try {
 			calculateCombinedFeaturesStats();
+		}
+		catch (Exception e) {
+			reportErrorAndExit(e);
+		}
+		try {
+			calculateCorrelationMatricesForClusters();
 		}
 		catch (Exception e) {
 			reportErrorAndExit(e);
@@ -254,20 +260,30 @@ public class CreateMergedFeaturesTask extends AbstractTask {
 		taskDescription = "Creating data matrix for merged features";
 		total = 100;
 		processed = 0;
-		DataPipeline mergePipeline = mergedFeaturesMap.keySet().iterator().next().getMergeDataPipeline();
+		DataPipeline mergePipeline = 
+				mergedFeaturesMap.keySet().iterator().next().getMergeDataPipeline();
 		Set<String> parentFeatureIds = mergedFeaturesMap.values().stream().
 				flatMap(f -> f.getParentIdSet().stream()).collect(Collectors.toSet());
-		List<MsFeature>parentFeatures = currentExperiment.getMsFeaturesForDataPipeline(mergePipeline).stream().
-				filter(f -> parentFeatureIds.contains(f.getId())).collect(Collectors.toList());
-				
+		List<MsFeature>parentFeatures = 
+				currentExperiment.getMsFeaturesForDataPipeline(mergePipeline).stream().
+					filter(f -> parentFeatureIds.contains(f.getId())).collect(Collectors.toList());				
+		Set<DataFile>activeFiles = 
+				DataSetUtils.getActiveFilesForPipelineAndDesignSubset(
+						currentExperiment, mergePipeline,
+						currentExperiment.getExperimentDesign().getActiveDesignSubset(), null);		
 		Matrix completeDataMatrix = currentExperiment.getDataMatrixForDataPipeline(mergePipeline);
-		combinedDataMatrix = DataSetUtils.getFeatureSubsetMatrix(completeDataMatrix, parentFeatures);
+		combinedDataMatrix = DataSetUtils.subsetDataMatrix(completeDataMatrix,parentFeatures,activeFiles);
 		processed = 100;
 	}
 	
 	private void calculateCombinedFeaturesStats() {
 
-		DataPipeline mergePipeline = mergedFeaturesMap.keySet().iterator().next().getMergeDataPipeline();	
+		taskDescription = "Calculating statistics for combined features";
+		total = mergedFeaturesMap.size();
+		processed = 0;
+		
+		DataPipeline mergePipeline = 
+				mergedFeaturesMap.keySet().iterator().next().getMergeDataPipeline();	
 		TreeSet<DataFile> pooledFiles = new TreeSet<>();
 		TreeSet<DataFile> sampleFiles = new TreeSet<>();		
 		populateDataMaps(pooledFiles, sampleFiles, mergePipeline);
@@ -326,6 +342,7 @@ public class CreateMergedFeaturesTask extends AbstractTask {
 				}
 			}
 			createAndPopulateFeatureStatisticalSummary(mfe.getValue(), pooledFiles, sampleFiles);
+			processed++;
 		}
 		currentExperiment.setMergedDataMatrixForDataPipeline(mergePipeline, mergedFeaturesDataMatrix);
 	}
@@ -392,6 +409,26 @@ public class CreateMergedFeaturesTask extends AbstractTask {
 			if(df.getParentSample().hasLevel(ReferenceSamplesManager.sampleLevel) && df.isEnabled())
 				sampleFiles.add(df);
 		}
+	}
+	
+	private void calculateCorrelationMatricesForClusters() {
+		
+		taskDescription = "Calculating statistics for combined features";
+		total = mergedFeaturesMap.size();
+		processed = 0;
+		DataPipeline mergePipeline = mergedFeaturesMap.keySet().iterator().next().getMergeDataPipeline();
+		for(Entry<MsFeatureCluster, LibraryMsFeature> mfe : mergedFeaturesMap.entrySet()) {
+			
+			mfe.getKey().addFeature(mfe.getValue(), mergePipeline);
+			ClusterUtils.createClusterCorrelationMatrixForMultiplePipelines(
+					mfe.getKey(), currentExperiment, isCanceled());
+			
+			processed++;
+		}
+	}
+	
+	public Collection<MsFeatureCluster>getUpdatedFeatureClusters(){
+		return mergedFeaturesMap.keySet();
 	}
 
 	@Override

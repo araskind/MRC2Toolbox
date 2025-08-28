@@ -92,7 +92,7 @@ public class ClusterUtils {
 				collect(Collectors.toList());
 		long[] columnIndex =
 				sorted.stream().
-				map(f -> dataMatrix.getColumnForLabel(f)).
+				map(dataMatrix::getColumnForLabel).
 				mapToLong(i -> i).
 				toArray();
 
@@ -113,8 +113,7 @@ public class ClusterUtils {
 		corrMatrix.setMetaDataDimensionMatrix(1, Matrix.Factory.linkToArray((Object[])sortedFeatures).transpose(Ret.NEW));
 		return corrMatrix;
 	}
-	
-	//	TODO make sure "enabledOnly" is enforced through every step
+
 	public static Matrix createClusterCorrelationMatrixForMultiplePipelines(
 			MsFeatureCluster fcluster,
 			DataAnalysisProject experiment,
@@ -122,11 +121,14 @@ public class ClusterUtils {
 		
 		Set<DataPipeline> pipelines = fcluster.getFeatureMap().keySet();
 		Set<ExperimentalSample>commonSamples = 
-				DataSetUtils.getCommonSamplesForDataPipelines(experiment, pipelines, enabledOnly);
+				DataSetUtils.getCommonSamplesForDataPipelines(
+						experiment, pipelines, enabledOnly);
 		Set<ExperimentalSample>commonSamplesClean = 
-				selectSamplesWithSameCountOfDataFilesForEachPipeline(commonSamples, pipelines);
+				selectSamplesWithSameCountOfDataFilesForEachPipeline(commonSamples, pipelines, enabledOnly);
 		List<Long>rowList = new ArrayList<>();
 		List<Long>mergedRowList = new ArrayList<>();
+		Matrix combinedMatrix = null;
+		List<MsFeature>featureListForMetaData = new ArrayList<>();
 		for(Entry<DataPipeline, Collection<MsFeature>> cfe : fcluster.getFeatureMap().entrySet()) {
 			
 			rowList.clear();
@@ -134,7 +136,7 @@ public class ClusterUtils {
 			
 			Matrix dataMatrix = experiment.getDataMatrixForDataPipeline(cfe.getKey());
 			commonSamplesClean.stream().
-				flatMap(s -> s.getDataFilesForMethod(cfe.getKey().getAcquisitionMethod()).stream()).
+				flatMap(s -> s.getDataFilesForPipeline(cfe.getKey(), enabledOnly).stream()).
 				forEach(f -> rowList.add(dataMatrix.getRowForLabel(f)));
 			
 			Collection<MsFeature>allFeatures = cfe.getValue();
@@ -144,40 +146,62 @@ public class ClusterUtils {
 			Matrix mergedMatrixForPipeline = null;
 			if(!mergedFeatures.isEmpty()) {
 				
+				featureListForMetaData.addAll(mergedFeatures);
 				allFeatures.removeAll(mergedFeatures);				
 				Matrix mergedDataMatrix = experiment.getMergedDataMatrixForDataPipeline(cfe.getKey());
 				long[] mergedColumnIndex = mergedFeatures.stream().
-						map(f -> mergedDataMatrix.getColumnForLabel(f)).
+						map(mergedDataMatrix::getColumnForLabel).
 						mapToLong(i -> i).toArray();
 				commonSamplesClean.stream().
-					flatMap(s -> s.getDataFilesForMethod(cfe.getKey().getAcquisitionMethod()).stream()).
+					flatMap(s -> s.getDataFilesForPipeline(cfe.getKey(), enabledOnly).stream()).
 					forEach(f -> mergedRowList.add(mergedDataMatrix.getRowForLabel(f)));
 				long[] mergedRowIndex = ArrayUtils.toPrimitive(mergedRowList.toArray(new Long[mergedRowList.size()]));
 				mergedMatrixForPipeline = mergedDataMatrix.select(
 						Ret.LINK, mergedRowIndex, mergedColumnIndex).replace(Ret.NEW, 0.0d, Double.NaN);
 			}
-			long[] columnIndex = allFeatures.stream().
-					map(f -> dataMatrix.getColumnForLabel(f)).
-					mapToLong(i -> i).toArray();
-			commonSamplesClean.stream().
-				flatMap(s -> s.getDataFilesForMethod(cfe.getKey().getAcquisitionMethod()).stream()).
-				forEach(f -> rowList.add(dataMatrix.getRowForLabel(f)));
+			featureListForMetaData.addAll(allFeatures);
+			List<Long>columnIndexList = new ArrayList<>();
+			
+			//	If features are averaged
+			List<LibraryMsFeature> derivedFeatures = allFeatures.stream().
+					filter(LibraryMsFeature.class::isInstance).
+					map(LibraryMsFeature.class::cast).
+					filter(f -> Objects.nonNull(f.getParentFeatureId())).
+					collect(Collectors.toList());
+			for(MsFeature f : allFeatures) {
+				
+				if(derivedFeatures.contains(f)) {
+					
+					MsFeature parent =  experiment.getMsFeatureById(((LibraryMsFeature)f).getParentFeatureId(), cfe.getKey());
+					columnIndexList.add(dataMatrix.getColumnForLabel(parent));
+				}
+				else {
+					columnIndexList.add(dataMatrix.getColumnForLabel(f));
+				}
+			}
+			long[] columnIndex = columnIndexList.stream().mapToLong(d -> d).toArray(); 
 			long[] rowIndex = ArrayUtils.toPrimitive(rowList.toArray(new Long[rowList.size()]));
 			Matrix matrixForPipeline = dataMatrix.select(
 					Ret.LINK, rowIndex, columnIndex).replace(Ret.NEW, 0.0d, Double.NaN);
-			if(mergedMatrixForPipeline != null) {
-				
-			}
-
+			if(combinedMatrix == null)
+				combinedMatrix = matrixForPipeline;
+			else
+				combinedMatrix =  combinedMatrix.appendHorizontally(Ret.NEW, matrixForPipeline);
+			
+			if(mergedMatrixForPipeline != null)
+				combinedMatrix =  combinedMatrix.appendHorizontally(Ret.NEW, mergedMatrixForPipeline);
 		}
-		
-		
-		return null;
+		MsFeature[]featureArray = featureListForMetaData.toArray(new MsFeature[featureListForMetaData.size()]);
+		Matrix corrMatrix = combinedMatrix.corrcoef(Ret.LINK, true, false).replace(Ret.NEW, Double.NaN, 0.0d);
+		corrMatrix.setMetaDataDimensionMatrix(0, Matrix.Factory.linkToArray((Object[])featureArray));
+		corrMatrix.setMetaDataDimensionMatrix(1, Matrix.Factory.linkToArray((Object[])featureArray).transpose(Ret.NEW));
+		return corrMatrix;
 	}
 	
 	public static Set<ExperimentalSample>selectSamplesWithSameCountOfDataFilesForEachPipeline(
 			Set<ExperimentalSample>allSamples,
-			Set<DataPipeline> pipelines){
+			Set<DataPipeline> pipelines, 
+			boolean enabledOnly){
 		
 		Set<ExperimentalSample>commonSamplesClean = new TreeSet<>();
 		Set<Integer>fileCounts = new TreeSet<>();
@@ -185,8 +209,8 @@ public class ClusterUtils {
 			
 			fileCounts.clear();
 			pipelines.stream().
-				filter(p -> !s.getDataFilesForMethod(p.getAcquisitionMethod()).isEmpty()).
-				forEach(p -> fileCounts.add(s.getDataFilesForMethod(p.getAcquisitionMethod()).size()));
+				filter(p -> !s.getDataFilesForPipeline(p, enabledOnly).isEmpty()).
+				forEach(p -> fileCounts.add(s.getDataFilesForPipeline(p, enabledOnly).size()));
 			if(fileCounts.size() == 1)
 				commonSamplesClean.add(s);
 		}		
