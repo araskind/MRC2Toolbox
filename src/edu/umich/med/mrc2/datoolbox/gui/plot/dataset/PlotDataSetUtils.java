@@ -35,8 +35,6 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.math3.stat.StatUtils;
-import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.ujmp.core.Matrix;
 
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
@@ -44,6 +42,7 @@ import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignFactor;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignLevel;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignSubset;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentalSample;
+import edu.umich.med.mrc2.datoolbox.data.LibraryMsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.compare.DataFileComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.ObjectCompatrator;
@@ -62,6 +61,8 @@ import edu.umich.med.mrc2.datoolbox.utils.DataSetUtils;
 import edu.umich.med.mrc2.datoolbox.utils.NormalizationUtils;
 
 public class PlotDataSetUtils {
+	
+	private PlotDataSetUtils() {}
 
 	public static Map<DataFile,Double>getScaledPeakAreasForFeature(
 			DataAnalysisProject experiment,
@@ -70,68 +71,36 @@ public class PlotDataSetUtils {
 			Collection<DataFile>files,
 			DataScale scale){
 		
-		Map<DataFile,Double>dataMap = new HashMap<DataFile,Double>();
-		if(experiment == null || pipeline == null || feature == null || files.isEmpty())
+		
+		Map<DataFile,Double>dataMap = new HashMap<>();
+		if(experiment == null || pipeline == null 
+				|| feature == null || files.isEmpty())
 			return dataMap;
 		
 		DataFile[] sampleFiles = files.toArray(new DataFile[files.size()]);
-		Matrix dataMatrix = experiment.getDataMatrixForDataPipeline(pipeline);
-
-		long[] coordinates = new long[2];		
-		coordinates[1] = DataSetUtils.getColumnForFeature(dataMatrix, feature, experiment, pipeline);
-		if(coordinates[1] == -1)
-			return dataMap;
-		
+		long[] coordinates = new long[2];
+		Matrix dataMatrix = null;
+		if(feature instanceof LibraryMsFeature && ((LibraryMsFeature)feature).isMerged()) {
+			dataMatrix = experiment.getMergedDataMatrixForDataPipeline(pipeline);
+			coordinates[1] = dataMatrix.getColumnForLabel(feature);
+			if(coordinates[1] == -1)
+				return dataMap;
+		}
+		else {
+			dataMatrix = experiment.getDataMatrixForDataPipeline(pipeline);
+			coordinates[1] = DataSetUtils.getColumnForFeature(
+					dataMatrix, feature, experiment, pipeline);
+			if(coordinates[1] == -1)
+				return dataMap;
+		}
 		double[] fdata = new double[files.size()];
-		double[] scaledData = new double[files.size()];
-
 		for (int i = 0; i < sampleFiles.length; i++) {
 
 			coordinates[0] = dataMatrix.getRowForLabel(sampleFiles[i]);
 			if(coordinates[0] >= 0)
 				fdata[i] = dataMatrix.getAsDouble(coordinates);
 		}
-		if (scale.equals(DataScale.RAW))
-			scaledData = fdata;
-
-		if (scale.equals(DataScale.LN)) {
-
-			for (int i = 0; i < fdata.length; i++) {
-
-				double ln = Math.log(fdata[i]);
-
-				if (Double.isFinite(ln))
-					scaledData[i] = ln;
-				else
-					scaledData[i] = 0.01d;
-			}
-		}
-		if (scale.equals(DataScale.LOG10)) {
-
-			for (int i = 0; i < fdata.length; i++) {
-
-				double ln = Math.log10(fdata[i]);
-
-				if (Double.isFinite(ln))
-					scaledData[i] = ln;
-				else
-					scaledData[i] = 0.01d;
-			}
-		}
-		if (scale.equals(DataScale.SQRT)) {
-			
-			for (int i = 0; i < fdata.length; i++)
-				scaledData[i] = Math.sqrt(fdata[i]);
-		}
-		if (scale.equals(DataScale.RANGE))
-			scaledData = rangeScale(fdata, 0.0d, 100.0d);
-
-		if (scale.equals(DataScale.ZSCORE))
-			scaledData = StatUtils.normalize(fdata);
-		
-		if (scale.equals(DataScale.PARETO))
-			scaledData = NormalizationUtils.paretoScale(fdata);
-		
+		double[] scaledData = NormalizationUtils.scaleData(fdata, scale);
 		for(int i=0; i<scaledData.length; i++) {
 
 			if(fdata[i] > 0)
@@ -189,11 +158,8 @@ public class PlotDataSetUtils {
 				|| experiment.getExperimentDesign().getSamples().isEmpty())
 			return null;
 
-		Map<String, DataFile[]> dataFileMap = 
-				new LinkedHashMap<String, DataFile[]>();
-
+		Map<String, DataFile[]> dataFileMap = new LinkedHashMap<>();
 		if(groupingType.equals(PlotDataGrouping.IGNORE_DESIGN)) {
-
 			return mapSeriesIgnoreDesign(experiment, pipeline, sortingOrder, activeDesign);
 		}
 		else {
@@ -203,15 +169,13 @@ public class PlotDataSetUtils {
 			Set<Set<ExperimentDesignLevel>>seriesSet =
 					createExpLevelSeries(activeDesign, groupingType, category, subCategory);
 
-			Map<String, TreeSet<DataFile>> dataFileMapInterm = 
-					new LinkedHashMap<String, TreeSet<DataFile>>();
-
+			Map<String, TreeSet<DataFile>> dataFileMapInterm =  new LinkedHashMap<>();
 			for(Set<ExperimentDesignLevel>levelSet : seriesSet) {
 
 				List<String> labList = levelSet.stream().
 						map(l -> l.getName()).collect(Collectors.toList());
 				String seriesLabel = StringUtils.join(labList, "\n");
-				dataFileMapInterm.put(seriesLabel, new TreeSet<DataFile>());
+				dataFileMapInterm.put(seriesLabel, new TreeSet<>());
 
 				for(ExperimentalSample s : samples) {
 
@@ -241,10 +205,8 @@ public class PlotDataSetUtils {
 			ExperimentDesignFactor category,
 			ExperimentDesignFactor subCategory){
 
-		Set<Set<ExperimentDesignLevel>>seriesSet = 
-				new LinkedHashSet<Set<ExperimentDesignLevel>>();
-		Set<Set<ExperimentDesignLevel>>filteredSeriesSet = 
-				new LinkedHashSet<Set<ExperimentDesignLevel>>();
+		Set<Set<ExperimentDesignLevel>>seriesSet = new LinkedHashSet<>();
+		Set<Set<ExperimentDesignLevel>>filteredSeriesSet = new LinkedHashSet<>();
 
 		if(groupingType.equals(PlotDataGrouping.EACH_FACTOR)) {
 
@@ -285,22 +247,19 @@ public class PlotDataSetUtils {
 
 			for(ExperimentDesignLevel l : activeDesign.getOrderedDesign().get(factorToAdd)) {
 
-				Set<ExperimentDesignLevel>levelSet = 
-						new LinkedHashSet<ExperimentDesignLevel>();
+				Set<ExperimentDesignLevel>levelSet = new LinkedHashSet<>();
 				levelSet.add(l);
 				seriesSet.add(levelSet);
 			}
 		}
 		else {
-			Set<Set<ExperimentDesignLevel>>seriesSetUpdated = 
-					new LinkedHashSet<Set<ExperimentDesignLevel>>();
+			Set<Set<ExperimentDesignLevel>>seriesSetUpdated = new LinkedHashSet<>();
 
 			for(ExperimentDesignLevel l : activeDesign.getOrderedDesign().get(factorToAdd)) {
 
 				for(Set<ExperimentDesignLevel>levelSet : seriesSet) {
 
-					Set<ExperimentDesignLevel>newLset = 
-							new LinkedHashSet<ExperimentDesignLevel>(levelSet);
+					Set<ExperimentDesignLevel>newLset = new LinkedHashSet<>(levelSet);
 					newLset.add(l);
 					seriesSetUpdated.add(newLset);
 				}
@@ -331,18 +290,17 @@ public class PlotDataSetUtils {
 		if(samples.isEmpty())
 			return null;
 		
-		Map<String, DataFile[]> dataFileMap = new LinkedHashMap<String, DataFile[]>();
+		Map<String, DataFile[]> dataFileMap = new LinkedHashMap<>();
 
 		if(sortingOrder.equals(FileSortingOrder.SAMPLE_ID) || 
 				sortingOrder.equals(FileSortingOrder.SAMPLE_NAME)) {
 
-			LinkedHashMap<ExperimentalSample, ArrayList<DataFile>>sfMap = 
-					new LinkedHashMap<ExperimentalSample, ArrayList<DataFile>>();
+			LinkedHashMap<ExperimentalSample, ArrayList<DataFile>>sfMap = new LinkedHashMap<>();
 
 			for(DataFile df : sorted) {
 
 				if(!sfMap.containsKey(df.getParentSample()))
-					sfMap.put(df.getParentSample(), new ArrayList<DataFile>());
+					sfMap.put(df.getParentSample(), new ArrayList<>());
 
 				sfMap.get(df.getParentSample()).add(df);
 			}
@@ -376,7 +334,7 @@ public class PlotDataSetUtils {
 				experiment.getExperimentDesign().getActiveSamplesForDesignSubset(activeDesign);
 		DataAcquisitionMethod acqMethod = pipeline.getAcquisitionMethod();
 		ObjectCompatrator<DataFile>sorter = new DataFileComparator(sortingOrder);
-		Map<String, DataFile[]> dataFileMap = new LinkedHashMap<String, DataFile[]>();
+		Map<String, DataFile[]> dataFileMap = new LinkedHashMap<>();
 		for(ExperimentDesignLevel l : sampleTypes) {
 
 			Set<ExperimentalSample> samplesOfType = 
@@ -412,7 +370,7 @@ public class PlotDataSetUtils {
 				experiment.getExperimentDesign().getActiveSamplesForDesignSubset(activeDesign);
 		DataAcquisitionMethod acqMethod = pipeline.getAcquisitionMethod();
 		
-		final Map<DataFile, String> fileTypeMap =  new HashMap<DataFile,String>();
+		final Map<DataFile, String> fileTypeMap =  new HashMap<>();
 		for(ExperimentDesignLevel l : sampleTypes) {
 
 			Set<ExperimentalSample> samplesOfType = 
@@ -432,23 +390,6 @@ public class PlotDataSetUtils {
 		return fileTypeMap;
 	}
 
-	public static double[] rangeScale(double[] input, double min, double max) throws IllegalArgumentException {
-
-		if (min >= max)
-			throw new IllegalArgumentException("Max value should be larger than min value!");
-
-		double[] output = new double[input.length];
-		double range = max - min;
-
-		DescriptiveStatistics stats = new DescriptiveStatistics(input);
-		double minRaw = stats.getMin();
-		double rangeRaw = stats.getMax() - minRaw;
-
-		for (int i = 0; i < input.length; i++)
-			output[i] = range * (input[i] - minRaw) / rangeRaw + min;
-
-		return output;
-	}
 	
 	public static NumberFormat getNumberFormatForDataSetQcField (DataSetQcField field) {
 		

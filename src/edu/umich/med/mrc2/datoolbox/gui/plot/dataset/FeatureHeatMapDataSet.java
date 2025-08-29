@@ -149,7 +149,7 @@ public class FeatureHeatMapDataSet extends DefaultXYZDataset implements RangeInf
 		data = filteredDataMatrix.toDoubleArray();
 		dataScale = params.getDataScale();
 		if(!dataScale.isDirectCalculation())
-			data = NormalizationUtils.scaleData(data, dataScale, true);
+			data = NormalizationUtils.scale2Ddata(data, dataScale, true);
 				
 		rowLabels = new String[(int) filteredDataMatrix.getRowCount()];
 		columnLabels = new String[(int) filteredDataMatrix.getColumnCount()];	

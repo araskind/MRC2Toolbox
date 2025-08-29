@@ -24,6 +24,7 @@ package edu.umich.med.mrc2.datoolbox.utils;
 import java.util.Arrays;
 
 import org.apache.commons.math3.linear.MatrixUtils;
+import org.apache.commons.math3.stat.StatUtils;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 import edu.umich.med.mrc2.datoolbox.data.enums.DataScale;
@@ -97,7 +98,7 @@ public class NormalizationUtils {
         return standardizedSample;
     }
 
-	public static double[][] scaleData(
+	public static double[][] scale2Ddata(
 			double[][] data, 
 			DataScale dataScale, 
 			boolean byColumn) {
@@ -130,6 +131,68 @@ public class NormalizationUtils {
 		
 		return scaledData;
 	}
+	
+	public static double[] scaleData(
+			double[] data, 
+			DataScale scale) {
+		
+		double[] scaledData = new double[data.length];
+		
+		if (scale.equals(DataScale.RAW))
+			return data;
+		
+		if (scale.equals(DataScale.LN)) {
+
+			for (int i = 0; i < data.length; i++) {
+				double ln = Math.log(data[i]);
+				scaledData[i] = Double.isFinite(ln) ?  ln : 0.001d;
+			}
+		}
+		if (scale.equals(DataScale.LOG10)) {
+
+			for (int i = 0; i < data.length; i++) {
+				double ln = Math.log10(data[i]);
+				scaledData[i] = Double.isFinite(ln) ?  ln : 0.001d;
+			}
+		}
+		if (scale.equals(DataScale.SQRT)) {
+			
+			for (int i = 0; i < data.length; i++)
+				scaledData[i] = Math.sqrt(data[i]);
+		}
+		if (scale.equals(DataScale.ZSCORE))
+			scaledData = StatUtils.normalize(data);
+		
+		if (scale.equals(DataScale.PARETO))
+			scaledData = paretoScale(data);
+		
+		if (scale.equals(DataScale.RANGE))
+			scaledData = rangeScale(data, 0.0d, 100.0d);
+		
+		return scaledData;
+	}	
+
+	public static double[] rangeScale(
+			double[] input, 
+			double min, 
+			double max) throws IllegalArgumentException {
+
+		if (min >= max)
+			throw new IllegalArgumentException("Max value should be larger than min value!");
+
+		double[] output = new double[input.length];
+		double range = max - min;
+
+		DescriptiveStatistics stats = new DescriptiveStatistics(input);
+		double minRaw = stats.getMin();
+		double rangeRaw = stats.getMax() - minRaw;
+
+		for (int i = 0; i < input.length; i++)
+			output[i] = range * (input[i] - minRaw) / rangeRaw + min;
+
+		return output;
+	}
+			
 	
 	public static Range getDataRangeFrom1Darray(double[]array) {
 		
