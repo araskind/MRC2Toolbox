@@ -221,7 +221,7 @@ public class BinnerClustersImportTask extends AbstractTask {
 			}
 			if (newCluster.getFeatures().size() > 0) {
 
-				newCluster.setClusterCorrMatrix(ClusterUtils.createClusterCorrelationMatrix(newCluster, false));
+				newCluster.setCorrelationMatrix(ClusterUtils.createClusterCorrelationMatrix(newCluster, false));
 				clusterList.add(newCluster);
 			}
 			processed++;
@@ -521,7 +521,7 @@ public class BinnerClustersImportTask extends AbstractTask {
 			}
 			if (newCluster.getFeatures().size() > 0) {
 
-				newCluster.setClusterCorrMatrix(ClusterUtils.createClusterCorrelationMatrix(newCluster, false));
+				newCluster.setCorrelationMatrix(ClusterUtils.createClusterCorrelationMatrix(newCluster, false));
 				clusterList.add(newCluster);
 			}
 			processed++;

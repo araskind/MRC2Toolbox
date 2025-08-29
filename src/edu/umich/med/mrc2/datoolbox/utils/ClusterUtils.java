@@ -23,6 +23,7 @@ package edu.umich.med.mrc2.datoolbox.utils;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -114,7 +115,7 @@ public class ClusterUtils {
 		return corrMatrix;
 	}
 
-	public static Matrix createClusterCorrelationMatrixForMultiplePipelines(
+	public static void createClusterCorrelationMatrixForMultiplePipelines(
 			MsFeatureCluster fcluster,
 			DataAnalysisProject experiment,
 			boolean enabledOnly) {
@@ -139,7 +140,7 @@ public class ClusterUtils {
 				flatMap(s -> s.getDataFilesForPipeline(cfe.getKey(), enabledOnly).stream()).
 				forEach(f -> rowList.add(dataMatrix.getRowForLabel(f)));
 			
-			Collection<MsFeature>allFeatures = cfe.getValue();
+			Collection<MsFeature>allFeatures = new HashSet<>(cfe.getValue());
 			//	Collect merged feature data
 			Collection<LibraryMsFeature>mergedFeatures = 
 					fcluster.getMergedFeaturesForDataPipeline(cfe.getKey());
@@ -195,7 +196,7 @@ public class ClusterUtils {
 		Matrix corrMatrix = combinedMatrix.corrcoef(Ret.LINK, true, false).replace(Ret.NEW, Double.NaN, 0.0d);
 		corrMatrix.setMetaDataDimensionMatrix(0, Matrix.Factory.linkToArray((Object[])featureArray));
 		corrMatrix.setMetaDataDimensionMatrix(1, Matrix.Factory.linkToArray((Object[])featureArray).transpose(Ret.NEW));
-		return corrMatrix;
+		fcluster.setCorrelationMatrix(corrMatrix);
 	}
 	
 	public static Set<ExperimentalSample>selectSamplesWithSameCountOfDataFilesForEachPipeline(
@@ -227,10 +228,6 @@ public class ClusterUtils {
 
 			LibraryMsFeature lf = mapEntry.getKey();
 			Adduct ad = mapEntry.getValue();
-			
-//			Collection<MsPoint>scaledAdductPoints = MsUtils.scaleMsPointCollection(
-//					mapEntry.getKey().getSpectrum().getMsPointsForAdduct(mapEntry.getValue()),
-//					mapEntry.getKey().getStatsSummary().getSampleMedian());
 			spectrum.addSpectrumForAdduct(ad, lf.getSpectrum().getMsPointsForAdduct(ad));
 			rt += lf.getRetentionTime();
 			if(rtRange == null)

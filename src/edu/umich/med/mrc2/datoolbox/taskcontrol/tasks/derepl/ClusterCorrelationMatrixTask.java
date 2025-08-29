@@ -60,7 +60,7 @@ public class ClusterCorrelationMatrixTask extends AbstractTask {
 			total = clusters.size();
 			processed = 0;			
 			for(MsFeatureCluster cluster : clusters) {			
-				cluster.setClusterCorrMatrix(cluster.createCorrelationMatrix(false));
+				cluster.setCorrelationMatrix(cluster.createCorrelationMatrix(false));
 				processed++;
 			}
 			setStatus(TaskStatus.FINISHED);	

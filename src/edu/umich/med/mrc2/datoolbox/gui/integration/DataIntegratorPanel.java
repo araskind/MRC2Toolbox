@@ -382,7 +382,7 @@ public class DataIntegratorPanel extends ClusterDisplayPanel {
 					newCluster.addFeature(cf, entry.getKey());
 				}
 			}
-			newCluster.setClusterCorrMatrix(newCluster.createCorrelationMatrix(false));
+			newCluster.setCorrelationMatrix(newCluster.createCorrelationMatrix(false));
 			integratedSet.addCluster(newCluster);
 			clusterTree.getModel().addObject(newCluster);
 			clusterTree.resortTree();
@@ -487,9 +487,20 @@ public class DataIntegratorPanel extends ClusterDisplayPanel {
 		}
 	}
 	
-	private void finalizeCreateMergedFeaturesTask(CreateMergedFeaturesTask source) {
-		// TODO Auto-generated method stub
-		
+	private void finalizeCreateMergedFeaturesTask(CreateMergedFeaturesTask task) {
+
+		Collection<MsFeatureCluster> updated = task.getUpdatedFeatureClusters();
+		if(!updated.isEmpty()) {
+			
+			System.out.println("******\n");
+			for(MsFeatureCluster c : updated)
+				System.out.println(c.toString());
+			
+			loadFeatureClusters(alignmentResults.getClusters());
+		}
+		else {
+			MessageDialog.showWarningMsg("No features merged", this.getContentPane());
+		}
 	}
 
 	private void finalizeDataPipelineAlignmentTask(DataPipelineAlignmentTask task) {

@@ -28,6 +28,7 @@ import java.awt.Font;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
 
+import edu.umich.med.mrc2.datoolbox.data.LibraryMsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 
@@ -66,6 +67,10 @@ public class MsFeatureRenderer extends DefaultTableCellRenderer {
 			if(msf.isQcStandard()) {
 				setFont(new Font("Default", Font.BOLD, fontSize));
 				setForeground(Color.RED);
+			}
+			else if(msf instanceof LibraryMsFeature && ((LibraryMsFeature)msf).isMerged()) {
+				setFont(new Font("Default", Font.BOLD, fontSize));
+				setForeground(Color.BLUE);
 			}
 			else {
 				setFont(new Font("Default", Font.PLAIN, fontSize));

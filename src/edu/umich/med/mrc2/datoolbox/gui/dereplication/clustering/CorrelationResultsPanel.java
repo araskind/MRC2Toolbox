@@ -313,7 +313,7 @@ public class CorrelationResultsPanel extends ClusterDisplayPanel implements Char
 
 		if (command.equals(MainActionCommands.RECALCULATE_CORRRELATIONS_4CLUSTER_COMMAND.getName())) {
 
-			activeCluster.setClusterCorrMatrix(activeCluster.createCorrelationMatrix(false));
+			activeCluster.setCorrelationMatrix(activeCluster.createCorrelationMatrix(false));
 			showClusterData(activeCluster);
 		}
 		if (command.equals(MainActionCommands.BINNER_ANALYSIS_SETUP_COMMAND.getName()))
@@ -613,7 +613,7 @@ public class CorrelationResultsPanel extends ClusterDisplayPanel implements Char
 					newCluster.addFeature(f, dataPipeline);
 				});
 			});
-			newCluster.setClusterCorrMatrix(newCluster.createCorrelationMatrix(false));
+			newCluster.setCorrelationMatrix(newCluster.createCorrelationMatrix(false));
 			currentExperiment.getMsFeatureClustersForDataPipeline(activeDataPipeline).add(newCluster);
 			clusterTree.getModel().addObject(newCluster);
 			clusterTree.resortTree();

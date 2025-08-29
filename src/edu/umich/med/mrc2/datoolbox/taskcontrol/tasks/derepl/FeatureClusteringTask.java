@@ -87,7 +87,7 @@ public class FeatureClusteringTask extends AbstractTask {
 
 		for (MsFeatureCluster fc : clusterList) {
 
-			fc.setClusterCorrMatrix(fc.createCorrelationMatrix(false));
+			fc.setCorrelationMatrix(fc.createCorrelationMatrix(false));
 			AnalysisUtils.findTopScoringFeature(fc.getFeatures(), areaWeight, frequencyWeight);
 			processed++;
 		}

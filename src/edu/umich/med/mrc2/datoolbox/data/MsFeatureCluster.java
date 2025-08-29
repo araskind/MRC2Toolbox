@@ -226,7 +226,7 @@ public class MsFeatureCluster implements Serializable, XmlStorable {
 		return chemicalModificationsMap;
 	}
 
-	public Matrix getClusterCorrMatrix() {
+	public Matrix getCorrelationMatrix() {
 		return correlationMatrix;
 	}
 
@@ -580,7 +580,7 @@ public class MsFeatureCluster implements Serializable, XmlStorable {
 		this.annotationMap = annotationMap;
 	}
 
-	public void setClusterCorrMatrix(Matrix clusterCorrMatrix) {
+	public void setCorrelationMatrix(Matrix clusterCorrMatrix) {
 		this.correlationMatrix = clusterCorrMatrix;
 	}
 

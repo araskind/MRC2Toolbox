@@ -162,10 +162,10 @@ public class BinnerProcessingTask extends AbstractTask implements TaskListener {
 	
 	private boolean mustClusterIfSizeBelowCutoff(MsFeatureCluster bin) {
 		
-		if(bin.getClusterCorrMatrix() == null)
+		if(bin.getCorrelationMatrix() == null)
 			return false;
 		
-		double corrMean = bin.getClusterCorrMatrix().getMeanValue();
+		double corrMean = bin.getCorrelationMatrix().getMeanValue();
 		double log2BinSize = Math.log(bin.getFeatures().size()) / Math.log(2);
 		double sqrtRTDiff = Math.sqrt(bin.getRtRange().getSize());
 		
@@ -182,7 +182,7 @@ public class BinnerProcessingTask extends AbstractTask implements TaskListener {
 	private void clusterBinFeaturesOnCorrelations(MsFeatureCluster bin) {
 		
 		/**/
-		Matrix distanceMatrix = bin.getClusterCorrMatrix().euklideanDistance(Ret.NEW, true);
+		Matrix distanceMatrix = bin.getCorrelationMatrix().euklideanDistance(Ret.NEW, true);
 	}
 
 	private void createCorrelationMatrices() {
@@ -227,7 +227,7 @@ public class BinnerProcessingTask extends AbstractTask implements TaskListener {
 
 				corrMatrix.setMetaDataDimensionMatrix(0, Matrix.Factory.linkToArray((Object[])sortedFeatureArray));
 				corrMatrix.setMetaDataDimensionMatrix(1, Matrix.Factory.linkToArray((Object[])sortedFeatureArray).transpose(Ret.NEW));
-				bin.setClusterCorrMatrix(corrMatrix);
+				bin.setCorrelationMatrix(corrMatrix);
 			}			
 			processed++;
 		}

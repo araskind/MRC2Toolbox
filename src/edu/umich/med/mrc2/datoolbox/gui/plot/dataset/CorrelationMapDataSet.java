@@ -45,7 +45,7 @@ public class CorrelationMapDataSet extends DefaultXYZDataset implements IHeatMap
 
 		super();
 		this.cluster = cluster;
-		this.corrMatrix = cluster.getClusterCorrMatrix();
+		this.corrMatrix = cluster.getCorrelationMatrix();
 		addCorrelationData();
 	}
 

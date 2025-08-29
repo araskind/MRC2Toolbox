@@ -28,6 +28,7 @@ import org.ujmp.core.Matrix;
 
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentalSample;
+import edu.umich.med.mrc2.datoolbox.data.LibraryMsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
@@ -49,25 +50,38 @@ public class FeatureCorrelationPlotDataSet extends XYSeriesCollection {
 		super();
 		
 		NamedXYSeries series = new NamedXYSeries("Data");
-		
-		//		Get data matrices for merged features if necessary
-		
-		Matrix matrixOne = experiment.getDataMatrixForDataPipeline(dataPipelineOne);
-		Matrix matrixTwo = experiment.getDataMatrixForDataPipeline(dataPipelineTwo);
-
 		long[] coordinatesOne = new long[2];
 		long[] coordinatesTwo = new long[2];
 		
-		coordinatesOne[1] = DataSetUtils.getColumnForFeature(
-				matrixOne, fOne, experiment, dataPipelineOne);
-		if(coordinatesOne[1] == -1)
-			return;
-		
-		coordinatesTwo[1] = DataSetUtils.getColumnForFeature(
-				matrixTwo, fTwo, experiment, dataPipelineTwo);
-		if(coordinatesTwo[1] == -1)
-			return;
-
+		//		Get data matrices for merged features if necessary
+		Matrix matrixOne = null;
+		if(fOne instanceof LibraryMsFeature && ((LibraryMsFeature)fOne).isMerged()) {
+			matrixOne = experiment.getMergedDataMatrixForDataPipeline(dataPipelineOne);
+			coordinatesOne[1] = matrixOne.getColumnForLabel(fOne);
+			if (coordinatesOne[1] == -1)
+				return;
+		}
+		else {
+			matrixOne = experiment.getDataMatrixForDataPipeline(dataPipelineOne);
+			coordinatesOne[1] = DataSetUtils.getColumnForFeature(
+					matrixOne, fOne, experiment, dataPipelineOne);
+			if(coordinatesOne[1] == -1)
+				return;
+		}
+		Matrix matrixTwo = null;
+		if(fTwo instanceof LibraryMsFeature && ((LibraryMsFeature)fTwo).isMerged()) {
+			matrixTwo = experiment.getMergedDataMatrixForDataPipeline(dataPipelineTwo);
+			coordinatesTwo[1] = matrixTwo.getColumnForLabel(fTwo);
+			if (coordinatesTwo[1] == -1)
+				return;
+		}
+		else {
+			matrixTwo = experiment.getDataMatrixForDataPipeline(dataPipelineTwo);
+			coordinatesTwo[1] = DataSetUtils.getColumnForFeature(
+					matrixTwo, fTwo, experiment, dataPipelineTwo);
+			if(coordinatesTwo[1] == -1)
+				return;
+		}
 		TreeSet<ExperimentalSample> samples =
 				experiment.getExperimentDesign().getActiveSamplesForDesignSubset(
 						experiment.getExperimentDesign().getActiveDesignSubset());

@@ -419,10 +419,10 @@ public class CreateMergedFeaturesTask extends AbstractTask {
 		DataPipeline mergePipeline = mergedFeaturesMap.keySet().iterator().next().getMergeDataPipeline();
 		for(Entry<MsFeatureCluster, LibraryMsFeature> mfe : mergedFeaturesMap.entrySet()) {
 			
-			mfe.getKey().addFeature(mfe.getValue(), mergePipeline);
+			MsFeatureCluster current = mfe.getKey();
+			current.addFeature(mfe.getValue(), mergePipeline);
 			ClusterUtils.createClusterCorrelationMatrixForMultiplePipelines(
-					mfe.getKey(), currentExperiment, isCanceled());
-			
+					current, currentExperiment, isCanceled());
 			processed++;
 		}
 	}
