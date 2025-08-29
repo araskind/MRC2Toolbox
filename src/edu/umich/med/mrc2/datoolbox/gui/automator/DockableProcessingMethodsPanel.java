@@ -27,8 +27,8 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.TreeSet;
 import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
@@ -39,8 +39,6 @@ import javax.swing.JLabel;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
-import org.apache.commons.lang.StringUtils;
-
 import bibliothek.gui.dock.common.DefaultSingleCDockable;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
@@ -49,6 +47,7 @@ import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
+import edu.umich.med.mrc2.datoolbox.utils.TextUtils;
 
 public class DockableProcessingMethodsPanel extends DefaultSingleCDockable 
 		implements ActionListener, BackedByPreferences {
@@ -56,7 +55,7 @@ public class DockableProcessingMethodsPanel extends DefaultSingleCDockable
 	private JTextField posMethodTextField;
 	private JTextField negMethodTextField;
 	private File methodsBaseDirectory;
-	private Collection<File>recentFiles;
+	private Set<File>recentFiles;
 	private RecentFilesDialog recentFilesDialog;
 
 	public static final String METHODS_DIR = "defaultProcessingMethodsDirectory";
@@ -154,7 +153,7 @@ public class DockableProcessingMethodsPanel extends DefaultSingleCDockable
 		gbc_negMethodBrowseButton.gridy = 2;
 		add(browseForNegMethodButton, gbc_negMethodBrowseButton);
 
-		recentFiles = new TreeSet<File>();
+		recentFiles = new TreeSet<>();
 		loadPreferences();		
 	}
 
@@ -296,8 +295,10 @@ public class DockableProcessingMethodsPanel extends DefaultSingleCDockable
 		prefs.put(METHODS_DIR, methodsBaseDirectory.getAbsolutePath());
 		
 		List<String>recentMethodPaths = 
-				recentFiles.stream().map(f -> f.getAbsolutePath()).collect(Collectors.toList());
-		prefs.put(RECENT_METHODS, StringUtils.join(recentMethodPaths, "|"));
+				recentFiles.stream().map(File::getAbsolutePath).collect(Collectors.toList());		
+		String recentMethodssString = 
+				TextUtils.trimAndJoinStringCollectionForPreferences(recentMethodPaths, "|");		 	
+		prefs.put(RECENT_METHODS, recentMethodssString);
 	}
 }
 

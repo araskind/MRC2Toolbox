@@ -490,17 +490,10 @@ public class DataIntegratorPanel extends ClusterDisplayPanel {
 	private void finalizeCreateMergedFeaturesTask(CreateMergedFeaturesTask task) {
 
 		Collection<MsFeatureCluster> updated = task.getUpdatedFeatureClusters();
-		if(!updated.isEmpty()) {
-			
-			System.out.println("******\n");
-			for(MsFeatureCluster c : updated)
-				System.out.println(c.toString());
-			
-			loadFeatureClusters(alignmentResults.getClusters());
-		}
-		else {
-			MessageDialog.showWarningMsg("No features merged", this.getContentPane());
-		}
+		if(!updated.isEmpty())
+			loadFeatureClusters(alignmentResults.getClusters());		
+		else 
+			MessageDialog.showWarningMsg("No features merged", this.getContentPane());		
 	}
 
 	private void finalizeDataPipelineAlignmentTask(DataPipelineAlignmentTask task) {

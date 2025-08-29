@@ -62,7 +62,7 @@ public class CorrelationPlotPanel extends MasterPlotPanel {
 	private XYDataset regressionLineDataSet;
 	private XYLineAndShapeRenderer regressionRenderer;
 	private XYLineAndShapeRenderer dataRenderer;
-	private final NumberFormat corrFormat = new DecimalFormat("#.##");
+	private final NumberFormat corrFormat = new DecimalFormat("0.000");
 	private PearsonsCorrelation pc;
 
 	public CorrelationPlotPanel() {

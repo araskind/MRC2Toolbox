@@ -33,6 +33,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
 
 public class TextUtils {
@@ -216,6 +217,27 @@ public class TextUtils {
 			return threeDigitsFormatter.format(numValue);
 	}
 	
+	public static String trimAndJoinStringCollectionForPreferences(Collection<String>parts, String joinString) {
+		
+		StringBuilder sb = new StringBuilder();
+		int charCount = 0;
+		int joinLength = joinString.length();
+		boolean dataAdded = false;
+		
+		for(String part : parts) {
+			
+			charCount += part.length() + joinLength;
+			if(charCount < Preferences.MAX_VALUE_LENGTH) {
+				
+				if(dataAdded)
+					sb.append(joinString);
+				
+				sb.append(part);
+				dataAdded = true;
+			}			
+		}		
+		return sb.toString();
+	}	
 }
 
 

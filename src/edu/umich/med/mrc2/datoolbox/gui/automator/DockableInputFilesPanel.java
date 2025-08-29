@@ -29,8 +29,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
-import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.TreeSet;
 import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
@@ -41,8 +41,6 @@ import javax.swing.JLabel;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
-import org.apache.commons.lang.StringUtils;
-
 import bibliothek.gui.dock.common.DefaultSingleCDockable;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
@@ -50,6 +48,7 @@ import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
+import edu.umich.med.mrc2.datoolbox.utils.TextUtils;
 
 public class DockableInputFilesPanel extends DefaultSingleCDockable 
 		implements ActionListener, BackedByPreferences {
@@ -60,7 +59,7 @@ public class DockableInputFilesPanel extends DefaultSingleCDockable
 	private JTextField negativeModeFolderTextField;
 	private File positiveModeBaseDirectory;
 	private File negativeModeBaseDirectory;
-	private Collection<File>recentFiles;
+	private Set<File>recentFiles;
 	private RecentFilesDialog recentFilesDialog;
 	
 	public static final String POSITIVE_MODE_BASE_DIR = "positiveModeBaseDirectory";
@@ -178,7 +177,7 @@ public class DockableInputFilesPanel extends DefaultSingleCDockable
 		gbc_negModeButton.gridy = 2;
 		add(browseForNegFolderButton, gbc_negModeButton);
 
-		recentFiles = new TreeSet<File>();
+		recentFiles = new TreeSet<>();
 		loadPreferences();
 	}
 
@@ -249,7 +248,9 @@ public class DockableInputFilesPanel extends DefaultSingleCDockable
 			negativeModeFolderTextField.setText(dataFolder.getAbsolutePath());
 			negativeModeBaseDirectory = dataFolder.getParentFile();
 		}	
-		recentFiles.add(dataFolder);		
+		if(!recentFiles.contains(dataFolder))
+			recentFiles.add(dataFolder);	
+		
 		savePreferences();
 		recentFilesDialog.dispose();
 	}
@@ -329,9 +330,9 @@ public class DockableInputFilesPanel extends DefaultSingleCDockable
 			String[] dataFoldersLocations = recentDataFolderString.split("\\|");
 			for(String location : dataFoldersLocations) {
 				
-				File methodFile = FIOUtils.getFileForLocation(location);			
-				if(methodFile != null && methodFile.isDirectory() && methodFile.getName().endsWith(".m"))
-					recentFiles.add(methodFile);
+				File recentFolder = FIOUtils.getFileForLocation(location);			
+				if(recentFolder != null && recentFolder.exists() && recentFolder.isDirectory())
+					recentFiles.add(recentFolder);
 			}
 		}		
 		File negativeMethodDataFolder = FIOUtils.getFileForLocation(preferences.get(NEGATIVE_MODE_SOURCE_DIR, ""));
@@ -371,8 +372,11 @@ public class DockableInputFilesPanel extends DefaultSingleCDockable
 		
 		prefs.put(NEGATIVE_MODE_BASE_DIR, negativeModeBaseDirectoryPath);
 		
-		List<String>recentMethodPaths = 
-				recentFiles.stream().map(f -> f.getAbsolutePath()).collect(Collectors.toList());
-		prefs.put(RECENT_DATA_FOLDERS, StringUtils.join(recentMethodPaths, "|"));
+		List<String>recentFoldersPaths = 
+				recentFiles.stream().map(File::getAbsolutePath).collect(Collectors.toList());
+		
+		String recentFoldersString = 
+				TextUtils.trimAndJoinStringCollectionForPreferences(recentFoldersPaths, "|");		 
+		prefs.put(RECENT_DATA_FOLDERS, recentFoldersString);
 	}
 }

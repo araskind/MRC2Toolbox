@@ -102,7 +102,7 @@ public class MultiPanelDataPlotToolbar extends PlotToolbar implements ActionList
 //						StatsPlotType.BOXPLOT_BY_FEATURE,
 //						StatsPlotType.BOXPLOT_BY_GROUP,						
 						}));	//	TODO fix boxplot
-		plotTypeComboBox.setSelectedItem(StatsPlotType.BARCHART);
+		plotTypeComboBox.setSelectedItem(StatsPlotType.LINES);
 		plotTypeComboBox.addItemListener(itemListener);
 		plotTypeComboBox.setMaximumSize(new Dimension(120, 26));
 		

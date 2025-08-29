@@ -48,22 +48,20 @@ import edu.umich.med.mrc2.datoolbox.gui.utils.VerticalFlowLayout;
 
 public class DockableCorrelationDataPanel extends DefaultSingleCDockable {
 
-	/**
-	 *
-	 */
 	private static final long serialVersionUID = -5960866035813998187L;
-
+	
+	private static final Icon componentIcon = GuiUtils.getIcon("correlation", 16);
+	private static final DecimalFormat corrFormat = new DecimalFormat("0.000");
+	
 	private CorrelationPlotPanel corrPlot;
 	private CorrelationPlotToolbar corrPlotToolbar;
-	private JLabel lblCorrelationValues;
-	private JLabel lblPearson;
 	private JLabel pearsonValueLabel;
-	private JLabel lblSpearman;
-	private JLabel lblKendall;
 	private JLabel spearmanValueLabelLabel;
 	private JLabel kendallValueLabelLabel;
-	private static final DecimalFormat corrFormat = new DecimalFormat("#.##");
-	private static final Icon componentIcon = GuiUtils.getIcon("correlation", 16);
+		
+	private PearsonsCorrelation pearson;
+	private SpearmansCorrelation spearman;
+	private KendallsCorrelation kendall;
 
 	public DockableCorrelationDataPanel(String id, String title) {
 
@@ -78,6 +76,8 @@ public class DockableCorrelationDataPanel extends DefaultSingleCDockable {
 		JPanel labelsPanel = new JPanel();
 		labelsPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
 		wrapper.add(labelsPanel);
+		
+		Font labelFont = new Font("Tahoma", Font.BOLD, 12);
 
 		GridBagLayout gbl_panel = new GridBagLayout();
 		gbl_panel.columnWidths = new int[] { 0, 0, 0 };
@@ -86,8 +86,8 @@ public class DockableCorrelationDataPanel extends DefaultSingleCDockable {
 		gbl_panel.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
 		labelsPanel.setLayout(gbl_panel);
 
-		lblCorrelationValues = new JLabel("Correlation values");
-		lblCorrelationValues.setFont(new Font("Tahoma", Font.BOLD, 12));
+		JLabel lblCorrelationValues = new JLabel("Correlation values");
+		lblCorrelationValues.setFont(labelFont);
 		GridBagConstraints gbc_lblCorrelationValues = new GridBagConstraints();
 		gbc_lblCorrelationValues.fill = GridBagConstraints.BOTH;
 		gbc_lblCorrelationValues.insets = new Insets(0, 0, 5, 5);
@@ -95,7 +95,7 @@ public class DockableCorrelationDataPanel extends DefaultSingleCDockable {
 		gbc_lblCorrelationValues.gridy = 0;
 		labelsPanel.add(lblCorrelationValues, gbc_lblCorrelationValues);
 
-		lblPearson = new JLabel("Pearson: ");
+		JLabel lblPearson = new JLabel("Pearson: ");
 		GridBagConstraints gbc_lblPearson = new GridBagConstraints();
 		gbc_lblPearson.fill = GridBagConstraints.BOTH;
 		gbc_lblPearson.insets = new Insets(0, 0, 5, 5);
@@ -104,7 +104,7 @@ public class DockableCorrelationDataPanel extends DefaultSingleCDockable {
 		labelsPanel.add(lblPearson, gbc_lblPearson);
 
 		pearsonValueLabel = new JLabel("");
-		pearsonValueLabel.setFont(new Font("Tahoma", Font.BOLD, 12));
+		pearsonValueLabel.setFont(labelFont);
 		GridBagConstraints gbc_pearsonValueLabel = new GridBagConstraints();
 		gbc_pearsonValueLabel.fill = GridBagConstraints.BOTH;
 		gbc_pearsonValueLabel.insets = new Insets(0, 0, 5, 0);
@@ -112,7 +112,7 @@ public class DockableCorrelationDataPanel extends DefaultSingleCDockable {
 		gbc_pearsonValueLabel.gridy = 1;
 		labelsPanel.add(pearsonValueLabel, gbc_pearsonValueLabel);
 
-		lblSpearman = new JLabel("Spearman: ");
+		JLabel lblSpearman = new JLabel("Spearman: ");
 		GridBagConstraints gbc_lblSpearman = new GridBagConstraints();
 		gbc_lblSpearman.fill = GridBagConstraints.BOTH;
 		gbc_lblSpearman.insets = new Insets(0, 0, 5, 5);
@@ -121,7 +121,7 @@ public class DockableCorrelationDataPanel extends DefaultSingleCDockable {
 		labelsPanel.add(lblSpearman, gbc_lblSpearman);
 
 		spearmanValueLabelLabel = new JLabel("");
-		spearmanValueLabelLabel.setFont(new Font("Tahoma", Font.BOLD, 12));
+		spearmanValueLabelLabel.setFont(labelFont);
 		GridBagConstraints gbc_spearmanValueLabelLabel = new GridBagConstraints();
 		gbc_spearmanValueLabelLabel.fill = GridBagConstraints.BOTH;
 		gbc_spearmanValueLabelLabel.insets = new Insets(0, 0, 5, 0);
@@ -129,7 +129,7 @@ public class DockableCorrelationDataPanel extends DefaultSingleCDockable {
 		gbc_spearmanValueLabelLabel.gridy = 2;
 		labelsPanel.add(spearmanValueLabelLabel, gbc_spearmanValueLabelLabel);
 
-		lblKendall = new JLabel("\tKendall: ");
+		JLabel lblKendall = new JLabel("Kendall: ");
 		GridBagConstraints gbc_lblKendall = new GridBagConstraints();
 		gbc_lblKendall.fill = GridBagConstraints.BOTH;
 		gbc_lblKendall.insets = new Insets(0, 0, 0, 5);
@@ -138,7 +138,7 @@ public class DockableCorrelationDataPanel extends DefaultSingleCDockable {
 		labelsPanel.add(lblKendall, gbc_lblKendall);
 
 		kendallValueLabelLabel = new JLabel("");
-		kendallValueLabelLabel.setFont(new Font("Tahoma", Font.BOLD, 12));
+		kendallValueLabelLabel.setFont(labelFont);
 		GridBagConstraints gbc_kendallValueLabelLabel = new GridBagConstraints();
 		gbc_kendallValueLabelLabel.fill = GridBagConstraints.BOTH;
 		gbc_kendallValueLabelLabel.gridx = 1;
@@ -150,6 +150,10 @@ public class DockableCorrelationDataPanel extends DefaultSingleCDockable {
 		wrapper.add(corrPlot);
 
 		add(corrPlotToolbar, BorderLayout.NORTH);
+		
+		pearson = new PearsonsCorrelation();
+		spearman = new SpearmansCorrelation();
+		kendall = new KendallsCorrelation();
 	}
 
 	public synchronized void clearPanel() {
@@ -178,9 +182,6 @@ public class DockableCorrelationDataPanel extends DefaultSingleCDockable {
 		RealMatrix data = corrPlot.getDataMatrix();
 		if (data != null && data.getColumnDimension() > 1 && data.getRowDimension() > 1) {
 
-			PearsonsCorrelation pearson = new PearsonsCorrelation();
-			SpearmansCorrelation spearman = new SpearmansCorrelation();
-			KendallsCorrelation kendall = new KendallsCorrelation();
 			pearsonValueLabel.setText(
 					corrFormat.format(pearson.correlation(data.getColumn(0), data.getColumn(1))));
 			spearmanValueLabelLabel
