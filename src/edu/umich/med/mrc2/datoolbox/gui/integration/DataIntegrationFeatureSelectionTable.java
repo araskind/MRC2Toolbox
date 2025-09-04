@@ -32,6 +32,7 @@ import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.TableRowSorter;
 
+import edu.umich.med.mrc2.datoolbox.data.LibraryMsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureCluster;
 import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureComparator;
@@ -124,9 +125,14 @@ public class DataIntegrationFeatureSelectionTable extends FeatureSelectionTable 
 			if (col == model.getColumnIndex(DataIntegrationFeatureSelectionTableModel.MERGE_COLUMN)) {
 
 				boolean included = (boolean) model.getValueAt(row, col);
-				if(included && !activeCluster.getMarkedForMerge().isEmpty() && !pipelineMatches(dataPipeline)) {
+	
+				if(included && ((!activeCluster.getMarkedForMerge().isEmpty() 
+						&& !pipelineMatches(dataPipeline)) 
+						|| (selectedFeature instanceof LibraryMsFeature 
+								&& ((LibraryMsFeature)selectedFeature).isMerged()))) {
 						
-						String message = "Only the features from the same data pipeline may be merged.";
+						String message = "Only individual features from the same"
+								+ " data pipeline may be merged.";
 						MessageDialog.showWarningMsg(
 								message, DataIntegrationFeatureSelectionTable.this);
 						model.removeTableModelListener(modelListener);
