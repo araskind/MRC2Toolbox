@@ -71,7 +71,6 @@ public class PlotDataSetUtils {
 			Collection<DataFile>files,
 			DataScale scale){
 		
-		
 		Map<DataFile,Double>dataMap = new HashMap<>();
 		if(experiment == null || pipeline == null 
 				|| feature == null || files.isEmpty())
@@ -81,7 +80,11 @@ public class PlotDataSetUtils {
 		long[] coordinates = new long[2];
 		Matrix dataMatrix = null;
 		if(feature instanceof LibraryMsFeature && ((LibraryMsFeature)feature).isMerged()) {
-			dataMatrix = experiment.getMergedDataMatrixForDataPipeline(pipeline);
+						
+			dataMatrix = getActiveMergedDataMatrixFromProjecr(experiment);			
+			if(dataMatrix == null)
+				return dataMap;
+			
 			coordinates[1] = dataMatrix.getColumnForLabel(feature);
 			if(coordinates[1] == -1)
 				return dataMap;
@@ -111,6 +114,14 @@ public class PlotDataSetUtils {
 		return dataMap;
 	}
 	
+	public static Matrix getActiveMergedDataMatrixFromProjecr(DataAnalysisProject experiment) {
+		
+		if(experiment.getActiveDataIntegrationSet() == null)
+			return null;
+		else
+			return experiment.getActiveDataIntegrationSet().getMergedDataMatrix();
+	}
+	
 	public static Map<String, DataFile[]> createSeriesFileMapForActiveData(
 			TwoDimDataPlotParameterObject plotParameters){
 		
@@ -124,6 +135,19 @@ public class PlotDataSetUtils {
 				experiment.getActiveDataPipeline(),
 				plotParameters.getSortingOrder(),
 				activeDesign,
+				plotParameters.getGroupingType(),
+				plotParameters.getCategory(),
+				plotParameters.getSubCategory());
+	}
+	
+	public static Map<String, DataFile[]> createSeriesFileMap(
+			TwoDimDataPlotParameterObject plotParameters){
+		
+		return createSeriesFileMap(
+				plotParameters.getExperiment(),
+				plotParameters.getPipeline(),
+				plotParameters.getSortingOrder(),
+				plotParameters.getActiveDesign(),
 				plotParameters.getGroupingType(),
 				plotParameters.getCategory(),
 				plotParameters.getSubCategory());

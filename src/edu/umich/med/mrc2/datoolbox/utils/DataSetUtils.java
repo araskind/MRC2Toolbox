@@ -43,6 +43,7 @@ import edu.umich.med.mrc2.datoolbox.data.enums.FileSortingOrder;
 import edu.umich.med.mrc2.datoolbox.data.enums.GlobalDefaults;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
+import edu.umich.med.mrc2.datoolbox.gui.plot.TwoDimDataPlotParameterObject;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.ReferenceSamplesManager;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
@@ -151,6 +152,15 @@ public class DataSetUtils {
 		subset.setMetaDataDimensionMatrix(0, newFeatureMatrix);
 		subset.setMetaDataDimensionMatrix(1, source.getMetaDataDimensionMatrix(1));
 		return subset;
+	}
+	
+	public static Set<DataFile> getActiveFilesForPipelineAndDesignSubset(
+			TwoDimDataPlotParameterObject plotParameters){
+		return getActiveFilesForPipelineAndDesignSubset(
+				plotParameters.getExperiment(),
+				plotParameters.getPipeline(),
+				plotParameters.getActiveDesign(),
+				plotParameters.getSortingOrder());
 	}
 	
 	public static Set<DataFile> getActiveFilesForPipelineAndDesignSubset(

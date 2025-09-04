@@ -40,7 +40,7 @@ public class DataPipelineAlignmentResults extends MsFeatureClusterSet {
 	private static final long serialVersionUID = -3271646008576341113L;
 	private DataPipelineAlignmentParametersObject alignmentSettings;
 	private Collection<LibraryMsFeature>unmatchedReferenceFeatures;
-	
+
 	public DataPipelineAlignmentResults(
 			DataPipelineAlignmentParametersObject alignmentSettings,
 			Set<MsFeatureCluster> clusterSet, 
@@ -61,6 +61,15 @@ public class DataPipelineAlignmentResults extends MsFeatureClusterSet {
 	public Collection<MsFeature> getUnmatchedReferenceFeaturesAsMsFetures() {
 		return unmatchedReferenceFeatures.stream().
 				map(MsFeature.class::cast).collect(Collectors.toList());
+	}
+	
+	public boolean includesPipeline(DataPipeline dp) {
+		
+		if(alignmentSettings.getReferencePipeline().equals(dp) 
+				|| alignmentSettings.getQueryPipeline().equals(dp))
+			return true;
+		else
+			return false;
 	}
 	
 	@Override
@@ -94,7 +103,7 @@ public class DataPipelineAlignmentResults extends MsFeatureClusterSet {
 				new DataPipelineAlignmentParametersObject(alignmentSettingsElement, project);
 		Element unmatchedFeaturesElement = dataPipelineAlignmentResults.getChild(
 				DataPipelineAlignmentResultsFields.unmatchedReferenceFeatures.name());
-		unmatchedReferenceFeatures = new ArrayList<LibraryMsFeature>();
+		unmatchedReferenceFeatures = new ArrayList<>();
 		String[]unmatchedFeatureIds = unmatchedFeaturesElement.getText().split(",");
 		if(unmatchedFeatureIds.length > 0) {
 			String piplineName = 

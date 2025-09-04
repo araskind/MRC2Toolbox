@@ -58,6 +58,7 @@ import com.thoughtworks.xstream.security.NullPermission;
 import com.thoughtworks.xstream.security.PrimitiveTypePermission;
 
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
+import edu.umich.med.mrc2.datoolbox.data.DataPipelineAlignmentResults;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesign;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignSubset;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
@@ -289,6 +290,9 @@ public class ProjectUtils {
 			DataAnalysisProject project,
 			DataPipeline pipeline) {
 		
+		if(project.getDataMatrixForDataPipeline(pipeline) == null)
+			return;
+		
 		createDataDirectoryForProjectIfNotExists(project);
 		
 		File dataMatrixFile = getDataMatrixFilePath(project,pipeline,false).toFile();
@@ -303,6 +307,30 @@ public class ProjectUtils {
 		}
 	}
 
+	public static void saveMergedDataMatrixForPipeline(
+			DataAnalysisProject project,
+			DataPipeline pipeline,
+			String dataSetId) {
+		
+		DataPipelineAlignmentResults dpResult = 
+				project.getDataPipelineAlignmentResults().stream().
+				filter(r -> r.getId().equals(dataSetId)).findFirst().orElse(null);
+		if(dpResult == null || dpResult.getMergedDataMatrix() == null)
+			return;
+
+		createDataDirectoryForProjectIfNotExists(project);
+		
+		File dataMatrixFile = 
+				getMergedDataMatrixFilePath(project,pipeline,dataSetId).toFile();
+		try {
+			Matrix dataMatrix = Matrix.Factory
+					.linkToArray(dpResult.getMergedDataMatrix().toDoubleArray());
+			dataMatrix.save(dataMatrixFile);
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 	
 	//	Will replace existing primary feature matrix file for 
 	//	pipeline with temporary if both files are present
@@ -490,6 +518,20 @@ public class ProjectUtils {
 				DataPrefix.MS_FEATURE.getName() + pipeline.getSaveSafeName() 
 				+ "." + DataFileExtensions.FEATURE_LIST_EXTENSION.getExtension());
 	}
+		
+	public static Path getFeatureMatrixFilePath(
+			DataAnalysisProject project, 
+			DataPipeline pipeline,
+			boolean isTemporary) {
+		
+		String temporaryFlag = "";
+		if(isTemporary)
+			 temporaryFlag = tmpSuffix;
+		
+		return Paths.get(project.getDataDirectory().getAbsolutePath(), 
+				DataPrefix.FEATURE_MATRIX.getName() + pipeline.getSaveSafeName() 
+				+ temporaryFlag +  "." + DataFileExtensions.DATA_MATRIX_EXTENSION.getExtension());
+	}
 	
 	public static Path getAveragedFeaturesFilePath(
 			DataAnalysisProject project, 
@@ -511,29 +553,27 @@ public class ProjectUtils {
 		return Paths.get(project.getDataDirectory().getAbsolutePath(),
 				DataPrefix.DATA_MATRIX.getName() + pipeline.getSaveSafeName() 
 				+ temporaryFlag + "." + DataFileExtensions.DATA_MATRIX_EXTENSION.getExtension());
+	}	
+	
+	public static Path getMergedFeaturesFilePath(
+			DataAnalysisProject project, 
+			DataPipeline pipeline,
+			String dataSetId) {
+		return Paths.get(project.getDataDirectory().getAbsolutePath(),
+				DataPrefix.MERGED_FEATURE_LIBRARY.getName() + pipeline.getSaveSafeName() 
+				+ "_" + dataSetId
+				+ "." + DataFileExtensions.AVERAGED_FEATURE_LIBRARY_EXTENSION.getExtension());		
 	}
 	
 	public static Path getMergedDataMatrixFilePath(
 			DataAnalysisProject project, 
-			DataPipeline pipeline) {
+			DataPipeline pipeline,
+			String dataSetId) {
 		
 		return Paths.get(project.getDataDirectory().getAbsolutePath(),
 				DataPrefix.DATA_MATRIX.getName() + pipeline.getSaveSafeName() 
-				+ mergedSuffix + "." + DataFileExtensions.DATA_MATRIX_EXTENSION.getExtension());
-	}
-	
-	public static Path getFeatureMatrixFilePath(
-			DataAnalysisProject project, 
-			DataPipeline pipeline,
-			boolean isTemporary) {
-		
-		String temporaryFlag = "";
-		if(isTemporary)
-			 temporaryFlag = tmpSuffix;
-		
-		return Paths.get(project.getDataDirectory().getAbsolutePath(), 
-				DataPrefix.FEATURE_MATRIX.getName() + pipeline.getSaveSafeName() 
-				+ temporaryFlag +  "." + DataFileExtensions.DATA_MATRIX_EXTENSION.getExtension());
+				+ mergedSuffix + "_" + dataSetId 
+				+ "." + DataFileExtensions.DATA_MATRIX_EXTENSION.getExtension());
 	}
 }
 

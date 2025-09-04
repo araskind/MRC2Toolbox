@@ -97,6 +97,13 @@ public class LoadPipelineDataTask extends AbstractTask {
 			setStatus(TaskStatus.ERROR);
 			return;
 		}
+		try {
+			loadMergedDataSet();
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			setStatus(TaskStatus.ERROR);
+			return;
+		}
 		setStatus(TaskStatus.FINISHED);
 	}
 	
@@ -126,6 +133,23 @@ public class LoadPipelineDataTask extends AbstractTask {
 		}
 		if(averagedFeatureLibrary != null)
 			project.setAveragedFeatureLibraryForDataPipeline(pipeline, averagedFeatureLibrary);
+	}
+	
+	private void loadMergedDataSet() {
+		
+		Set<String>dpIlignmentIdSet = 
+				project.getDataPipelineAlignmentResults().stream().
+				map(r -> r.getId()).collect(Collectors.toSet());
+		if(dpIlignmentIdSet.isEmpty())
+			return;
+		
+		for(String dpId : dpIlignmentIdSet) {
+			
+			File mergedLibXmlFile = 
+					ProjectUtils.getMergedFeaturesFilePath(project,pipeline, dpId).toFile();
+			File dataMatrixFile = 
+					ProjectUtils.getMergedDataMatrixFilePath(project,pipeline, dpId).toFile();
+		}
 	}
 	
 	private void createDataMatrix() {
@@ -181,7 +205,7 @@ public class LoadPipelineDataTask extends AbstractTask {
 		if(!featureXmlFile.exists())
 			return;
 		
-		Set<MsFeature>featureSet = new HashSet<MsFeature>();
+		Set<MsFeature>featureSet = new HashSet<>();
 		try {
 			SAXBuilder sax = new SAXBuilder();
 			Document doc = sax.build(featureXmlFile);

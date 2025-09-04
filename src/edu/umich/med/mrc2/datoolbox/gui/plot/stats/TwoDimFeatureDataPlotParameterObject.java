@@ -25,6 +25,7 @@ import java.util.Collection;
 import java.util.Map;
 
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignFactor;
+import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignSubset;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.compare.ChartColorOption;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataScale;
@@ -32,23 +33,54 @@ import edu.umich.med.mrc2.datoolbox.data.enums.FileSortingOrder;
 import edu.umich.med.mrc2.datoolbox.data.enums.PlotDataGrouping;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.gui.plot.TwoDimDataPlotParameterObject;
+import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 
 public class TwoDimFeatureDataPlotParameterObject extends TwoDimDataPlotParameterObject {
 
 	private Map<DataPipeline, Collection<MsFeature>> featuresMap;
 	
 	public TwoDimFeatureDataPlotParameterObject(
-			Map<DataPipeline, Collection<MsFeature>> featuresMap,
-			FileSortingOrder sortingOrder, 
-			DataScale dataScale,
-			ChartColorOption chartColorOption,
+			Map<DataPipeline, Collection<MsFeature>>featuresMap,
+			DataAnalysisProject experiment, 
+			DataPipeline pipeline,
+			ExperimentDesignSubset activeDesign, 
+			ExperimentDesignFactor category,
+			ExperimentDesignFactor subCategory,
 			PlotDataGrouping groupingType, 
+			FileSortingOrder sortingOrder, 
+			DataScale dataScale, 
+			StatsPlotType statPlotType,
+			ChartColorOption chartColorOption) {
+		super(experiment, 
+				pipeline, 
+				activeDesign, 
+				category, 
+				subCategory, 
+				groupingType, 
+				sortingOrder, 
+				dataScale, 
+				statPlotType, 
+				chartColorOption);
+		
+		this.featuresMap = featuresMap;
+	}			
+	
+	public TwoDimFeatureDataPlotParameterObject(
+			Map<DataPipeline, Collection<MsFeature>> featuresMap,
 			ExperimentDesignFactor category, 
 			ExperimentDesignFactor subCategory,
-			StatsPlotType statPlotType) {
-		super(sortingOrder, dataScale, chartColorOption, 
-				groupingType, category, subCategory, statPlotType);
-
+			PlotDataGrouping groupingType, 
+			FileSortingOrder sortingOrder, 
+			DataScale dataScale,
+			StatsPlotType statPlotType,
+			ChartColorOption chartColorOption) {
+		super(category, 
+				subCategory, 
+				groupingType, 
+				sortingOrder, 
+				dataScale, 
+				statPlotType, 
+				chartColorOption);
 		this.featuresMap = featuresMap;
 	}
 

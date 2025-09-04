@@ -253,7 +253,7 @@ public class OpenMetabolomicsProjectTask extends OpenStandaloneProjectAbstractTa
 	
 	private void parseOrderedFileNameMap(Element projectElement) {
 		
-		orderedDataFileNamesMap = new TreeMap<DataPipeline,String[]>();
+		orderedDataFileNamesMap = new TreeMap<>();
     	List<Element> orderedFileListElementList = 
     			projectElement.getChild(MetabolomicsProjectFields.FileIdMap.name()).
     			getChildren(MetabolomicsProjectFields.FileIdList.name());

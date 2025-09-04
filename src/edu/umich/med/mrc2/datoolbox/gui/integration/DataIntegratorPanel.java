@@ -243,7 +243,7 @@ public class DataIntegratorPanel extends ClusterDisplayPanel {
 		}		
 		CreateMergedFeaturesTask task = new CreateMergedFeaturesTask(
 				currentExperiment, 
-				alignmentResults.getClusters(),
+				alignmentResults,
 				alignmentResults.getAlignmentSettings().getMassWindow(), 
 				alignmentResults.getAlignmentSettings().getMassErrorType());
 		task.addTaskListener(this);
@@ -498,8 +498,10 @@ public class DataIntegratorPanel extends ClusterDisplayPanel {
 
 	private void finalizeDataPipelineAlignmentTask(DataPipelineAlignmentTask task) {
 		
-		currentExperiment.addDataPipelineAlignmentResult(task.getAlignmentResults());
-		loadDataPipelineAlignmentResults(task.getAlignmentResults());
+		DataPipelineAlignmentResults res = task.getAlignmentResults();
+		res.setActive(true);
+		currentExperiment.addDataPipelineAlignmentResult(res);
+		loadDataPipelineAlignmentResults(res);
 	}
 	
 	public void loadDataPipelineAlignmentResults(DataPipelineAlignmentResults results) {

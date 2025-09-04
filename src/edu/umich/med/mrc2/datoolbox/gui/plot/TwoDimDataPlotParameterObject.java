@@ -22,14 +22,21 @@
 package edu.umich.med.mrc2.datoolbox.gui.plot;
 
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignFactor;
+import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignSubset;
 import edu.umich.med.mrc2.datoolbox.data.compare.ChartColorOption;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataScale;
 import edu.umich.med.mrc2.datoolbox.data.enums.FileSortingOrder;
 import edu.umich.med.mrc2.datoolbox.data.enums.PlotDataGrouping;
+import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.gui.plot.stats.StatsPlotType;
+import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
+import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 
 public class TwoDimDataPlotParameterObject {
 
+	protected DataAnalysisProject experiment;
+	protected DataPipeline pipeline;
+	protected ExperimentDesignSubset activeDesign;
 	protected FileSortingOrder sortingOrder; 
 	protected ChartColorOption chartColorOption;
 	protected PlotDataGrouping groupingType;
@@ -37,27 +44,60 @@ public class TwoDimDataPlotParameterObject {
 	protected ExperimentDesignFactor category;
 	protected ExperimentDesignFactor subCategory;
 	protected StatsPlotType statPlotType;
-	
-	public TwoDimDataPlotParameterObject(
-			FileSortingOrder sortingOrder, 
-			DataScale dataScale,
-			ChartColorOption chartColorOption,
-			PlotDataGrouping groupingType, 
-			ExperimentDesignFactor category, 
-			ExperimentDesignFactor subCategory,
-			StatsPlotType statPlotType) {
+		
+	public TwoDimDataPlotParameterObject() {
 		super();
-		this.sortingOrder = sortingOrder;
-		this.dataScale = dataScale;
-		this.chartColorOption = chartColorOption;
-		this.groupingType = groupingType;
+	}
+
+	public TwoDimDataPlotParameterObject(
+			DataAnalysisProject experiment, 
+			DataPipeline pipeline,
+			ExperimentDesignSubset activeDesign,
+			ExperimentDesignFactor category,
+			ExperimentDesignFactor subCategory, 
+			PlotDataGrouping groupingType, 
+			FileSortingOrder sortingOrder, 
+			DataScale dataScale, 
+			StatsPlotType statPlotType,		
+			ChartColorOption chartColorOption) {
+		super();
+		this.experiment = experiment;
+		this.pipeline = pipeline;
+		this.activeDesign = activeDesign;
 		this.category = category;
 		this.subCategory = subCategory;
+		this.groupingType = groupingType;
+		this.sortingOrder = sortingOrder;
+		this.dataScale = dataScale;
+		this.statPlotType = statPlotType;
+		this.chartColorOption = chartColorOption;
+
 		if(this.groupingType.equals(PlotDataGrouping.TWO_FACTORS)
 				&& this.subCategory == null)
 			this.groupingType = PlotDataGrouping.ONE_FACTOR;
+	}
+	
+	public TwoDimDataPlotParameterObject(
+			ExperimentDesignFactor category, 
+			ExperimentDesignFactor subCategory,
+			PlotDataGrouping groupingType, 
+			FileSortingOrder sortingOrder, 
+			DataScale dataScale,
+			StatsPlotType statPlotType,
+			ChartColorOption chartColorOption) {
 		
-		this.statPlotType = statPlotType;
+		this.experiment = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
+		if(experiment != null) {
+			this.pipeline = experiment.getActiveDataPipeline();
+			this.activeDesign = experiment.getExperimentDesign().getActiveDesignSubset();
+		}
+		this.category = category; 
+		this.subCategory = subCategory; 
+		this.groupingType = groupingType; 
+		this.sortingOrder = sortingOrder; 
+		this.dataScale = dataScale; 
+		this.statPlotType = statPlotType; 
+		this.chartColorOption = chartColorOption;
 	}
 
 	public FileSortingOrder getSortingOrder() {
@@ -107,6 +147,18 @@ public class TwoDimDataPlotParameterObject {
 		descriptor += "_orderedBy_" + sortingOrder.getName();
 		
 		return descriptor;
+	}
+
+	public DataAnalysisProject getExperiment() {
+		return experiment;
+	}
+
+	public DataPipeline getPipeline() {
+		return pipeline;
+	}
+
+	public ExperimentDesignSubset getActiveDesign() {
+		return activeDesign;
 	}
 }
 

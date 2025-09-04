@@ -33,11 +33,10 @@ import org.jfree.data.xy.XYSeriesCollection;
 
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.DoubleValueBin;
-import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignSubset;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentalSample;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
-import edu.umich.med.mrc2.datoolbox.data.enums.DataScale;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
+import edu.umich.med.mrc2.datoolbox.gui.plot.stats.TwoDimFeatureDataPlotParameterObject;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 
@@ -50,20 +49,17 @@ public class ScatterDataSet extends XYSeriesCollection {
 	private MsFeature[] featuresToPlot;
 	private DataAnalysisProject experiment;
 
-	public ScatterDataSet(
-			Map<DataPipeline,Collection<MsFeature>> selectedFeaturesMap,
-			ExperimentDesignSubset activeDesign, 
-			DataScale dataScale) {
+	public ScatterDataSet(TwoDimFeatureDataPlotParameterObject plotParameters) {
 
 		super();
 		experiment = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
-		featuresToPlot = selectedFeaturesMap.values().stream().
+		featuresToPlot = plotParameters.getFeaturesMap().values().stream().
 				flatMap(c -> c.stream()).toArray(size -> new MsFeature[size]);
 		Collection<ExperimentalSample> samples = 
-				experiment.getExperimentDesign().getSamplesForDesignSubset(activeDesign, true);
+				experiment.getExperimentDesign().getSamplesForDesignSubset(plotParameters.getActiveDesign(), true);
 		
 		int seriesCount = 1;
-		for (Entry<DataPipeline, Collection<MsFeature>> entry : selectedFeaturesMap.entrySet()) {
+		for (Entry<DataPipeline, Collection<MsFeature>> entry : plotParameters.getFeaturesMap().entrySet()) {
 			
 			for(MsFeature msf : entry.getValue()) {
 
@@ -73,7 +69,8 @@ public class ScatterDataSet extends XYSeriesCollection {
 						collect(Collectors.toCollection(LinkedHashSet::new));
 
 				Map<DataFile, Double> dataMap = 
-						PlotDataSetUtils.getScaledPeakAreasForFeature(experiment, msf, entry.getKey(), files, dataScale);
+						PlotDataSetUtils.getScaledPeakAreasForFeature(
+								experiment, msf, entry.getKey(), files, plotParameters.getDataScale());
 				NamedXYSeries series = new NamedXYSeries(Integer.toString(seriesCount) + " - " + msf.getName());
 				int counter = 1;
 				for(DataFile df : files) {

@@ -24,6 +24,7 @@ package edu.umich.med.mrc2.datoolbox.project;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -78,7 +79,6 @@ public class DataAnalysisProject extends Project {
 	protected TreeMap<DataPipeline, CompoundLibrary> averagedFeatureMap;
 	protected TreeMap<DataPipeline, Set<MsFeature>> featureMap;
 	protected TreeMap<DataPipeline, Matrix> dataMatrixMap;
-	protected TreeMap<DataPipeline, Matrix> mergedDataMatrixMap;
 	protected TreeMap<DataPipeline, String> dataMatrixFileMap;
 	protected TreeMap<DataPipeline, Matrix> featureMatrixMap;
 	protected TreeMap<DataPipeline, String> featureMatrixFileMap;	
@@ -92,7 +92,6 @@ public class DataAnalysisProject extends Project {
 	protected TreeMap<DataAcquisitionMethod, Set<DataFile>> dataFileMap;
 	protected TreeMap<DataAcquisitionMethod, Worklist> worklistMap;
 	protected Set<MsFeatureClusterSet>dataIntegrationSets;
-	protected Set<DataPipelineAlignmentResults>dataPipelineAlignments;
 	
 	public DataAnalysisProject(
 			String projectName, 
@@ -118,7 +117,6 @@ public class DataAnalysisProject extends Project {
 		dataFileMap = new TreeMap<>();
 		statsCalculatedMap = new TreeMap<>();
 		dataMatrixMap = new TreeMap<>();
-		mergedDataMatrixMap = new TreeMap<>();
 		dataMatrixFileMap = new TreeMap<>();
 		featureMatrixMap = new TreeMap<>();
 		featureMatrixFileMap = new TreeMap<>();
@@ -127,7 +125,6 @@ public class DataAnalysisProject extends Project {
 		dataPipelines = new TreeSet<>();				
 		featureSetMap = new TreeMap<>();
 		dataIntegrationSets = new TreeSet<>();
-		dataPipelineAlignments = new TreeSet<>();
 		metaDataMap = new TreeMap<>();
 		activeDataPipeline = null;
 		
@@ -159,7 +156,6 @@ public class DataAnalysisProject extends Project {
 
 	public void recreateMatrixMaps() {
 		dataMatrixMap = new TreeMap<>();
-		mergedDataMatrixMap = new TreeMap<>();
 		corrMatrixMap = new TreeMap<>();
 		featureMatrixMap = new TreeMap<>();
 	}
@@ -215,39 +211,25 @@ public class DataAnalysisProject extends Project {
 		metaDataMap.remove(pipeline);
 		featureSetMap.remove(pipeline);		
 		
-		// Delete data matrix and storage file
-		dataMatrixMap.remove(pipeline);
-		if(dataMatrixFileMap.get(pipeline) != null) {
-			
-			Path dataMatrixFilePath = Paths.get(getDataDirectory().getAbsolutePath(), 
-					dataMatrixFileMap.get(pipeline));
-			FIOUtils.safeDeleteFile(dataMatrixFilePath);	
+		deleteFeaturesAndDataMatricesForPipeline(pipeline);
+		deleteAlignmentAndMergeResultsForDataPipeline(pipeline);
+		removeAcquisitionMethodForPipeline(pipeline);	
+		
+		dataPipelines.remove(pipeline);
+		
+		// Load data for another method or clear GUI
+		if (pipeline.equals(activeDataPipeline)) {
+
+			if (dataPipelines.isEmpty()) 
+				activeDataPipeline = null;
+			else 
+				activeDataPipeline = dataPipelines.iterator().next();
 		}
-		dataMatrixFileMap.remove(pipeline);
+		//	Init project save
+	}
+	
+	private void removeAcquisitionMethodForPipeline(DataPipeline pipeline) {
 		
-		mergedDataMatrixMap.remove(pipeline);
-		Path mergedDataMatrixFilePath = 
-				ProjectUtils.getMergedDataMatrixFilePath(this, pipeline);
-		FIOUtils.safeDeleteFile(mergedDataMatrixFilePath);
-		
-		if(featureMatrixFileMap == null)
-			featureMatrixFileMap = new TreeMap<>();
-		
-		if(featureMatrixMap == null)
-			featureMatrixMap = new TreeMap<>();
-		
-		//	Delete feature matrix and storage file
-		featureMatrixMap.remove(pipeline);
-		if(featureMatrixFileMap.get(pipeline) != null) {
-			
-			Path featureMatrixFilePath = Paths.get(getDataDirectory().getAbsolutePath(), 
-					featureMatrixFileMap.get(pipeline));
-			FIOUtils.safeDeleteFile(featureMatrixFilePath);
-		}
-		featureMatrixFileMap.remove(pipeline);
-		
-		//	Remove all data linked to acquisition method 
-		//	if it is not part of another data pipeline
 		DataAcquisitionMethod acqMethod = pipeline.getAcquisitionMethod();
 		DataPipeline anotherPipeline = 
 				dataPipelines.stream().filter(p -> !p.equals(pipeline)).
@@ -265,22 +247,59 @@ public class DataAnalysisProject extends Project {
 			worklistMap.remove(acqMethod);
 			dataFileMap.remove(acqMethod);
 		}
-		//	Remove "Feature data" file
+	}
+	
+	private void deleteFeaturesAndDataMatricesForPipeline(DataPipeline pipeline) {
+		
 		Path featureXmlFilePath = ProjectUtils.getFeaturesFilePath(this, pipeline);
 		FIOUtils.safeDeleteFile(featureXmlFilePath);
 		
-		//	Remove data integration and alignment sets if they include data for the pipeline		
-		
-		dataPipelines.remove(pipeline);
-		
-		// Load data for another method or clear GUI
-		if (pipeline.equals(activeDataPipeline)) {
-
-			if (dataPipelines.isEmpty()) 
-				activeDataPipeline = null;
-			else 
-				activeDataPipeline = dataPipelines.iterator().next();
+		dataMatrixMap.remove(pipeline);
+		if(dataMatrixFileMap.get(pipeline) != null) {
+			
+			Path dataMatrixFilePath = Paths.get(getDataDirectory().getAbsolutePath(), 
+					dataMatrixFileMap.get(pipeline));
+			FIOUtils.safeDeleteFile(dataMatrixFilePath);	
 		}
+		dataMatrixFileMap.remove(pipeline);	
+		
+		if(featureMatrixFileMap == null)
+			featureMatrixFileMap = new TreeMap<>();
+		
+		if(featureMatrixMap == null)
+			featureMatrixMap = new TreeMap<>();
+		
+		//	Delete feature matrix and storage file
+		featureMatrixMap.remove(pipeline);
+		if(featureMatrixFileMap.get(pipeline) != null) {
+			
+			Path featureMatrixFilePath = Paths.get(getDataDirectory().getAbsolutePath(), 
+					featureMatrixFileMap.get(pipeline));
+			FIOUtils.safeDeleteFile(featureMatrixFilePath);
+		}
+		featureMatrixFileMap.remove(pipeline);
+	}
+	
+	private void deleteAlignmentAndMergeResultsForDataPipeline(DataPipeline pipeline) {
+		
+		List<DataPipelineAlignmentResults>resultsToRemove = new ArrayList<>();
+		for(DataPipelineAlignmentResults dpRes : getDataPipelineAlignmentResults()) {
+			
+			if(dpRes.includesPipeline(pipeline)) {
+				
+				resultsToRemove.add(dpRes);
+				
+				Path mergedDataMatrixFilePath = 
+						ProjectUtils.getMergedDataMatrixFilePath(this, pipeline, dpRes.getId());
+				FIOUtils.safeDeleteFile(mergedDataMatrixFilePath);
+								
+				Path mergedFeaturesFilePath = 
+						ProjectUtils.getMergedFeaturesFilePath(this, pipeline, dpRes.getId());
+				FIOUtils.safeDeleteFile(mergedFeaturesFilePath);
+			}
+		}
+		if(!resultsToRemove.isEmpty())
+			 getDataPipelineAlignmentResults().removeAll(resultsToRemove);
 	}
 
 	public boolean assayPresent(Assay assay) {
@@ -298,7 +317,7 @@ public class DataAnalysisProject extends Project {
 	}
 
 	public void clearMetaDataMap() {
-		metaDataMap = new TreeMap<DataPipeline, Matrix[]>();
+		metaDataMap = new TreeMap<>();
 	}
 
 	public void deleteDataFiles(Set<DataFile> filesToRemove) {
@@ -427,11 +446,7 @@ public class DataAnalysisProject extends Project {
 	public Matrix getDataMatrixForDataPipeline(DataPipeline pipeline) {
 		return dataMatrixMap.get(pipeline);
 	}
-	
-	public Matrix getMergedDataMatrixForDataPipeline(DataPipeline pipeline) {
-		return mergedDataMatrixMap.get(pipeline);
-	}
-	
+
 	public String getFeatureMatrixFileNameForDataPipeline(DataPipeline pipeline) {
 		
 		if(featureMatrixFileMap == null)
@@ -528,7 +543,7 @@ public class DataAnalysisProject extends Project {
 	public Matrix getImputedDataMatrixForDataPipeline(DataPipeline pipeline) {
 
 		if(imputedDataMatrixMap == null)
-			imputedDataMatrixMap = new TreeMap<DataPipeline, Matrix>();
+			imputedDataMatrixMap = new TreeMap<>();
 
 		return imputedDataMatrixMap.get(pipeline);
 	}
@@ -557,11 +572,10 @@ public class DataAnalysisProject extends Project {
 
 		if (clusterMap.get(pipeline) == null)
 			return false;
-
-		if (!clusterMap.get(pipeline).isEmpty())
+		else if (!clusterMap.get(pipeline).isEmpty())
 			return true;
-
-		return false;
+		else
+			return false;
 	}
 
 	public boolean dataPipelineHasData(DataPipeline pipeline) {
@@ -683,7 +697,8 @@ public class DataAnalysisProject extends Project {
 			DataPipeline pipeline, CompoundLibrary library) {
 		
 		if(averagedFeatureMap == null)
-			averagedFeatureMap = new TreeMap<DataPipeline, CompoundLibrary>();
+			averagedFeatureMap = new TreeMap<>();
+		
 		averagedFeatureMap.put(pipeline, library);
 	}
 	
@@ -706,16 +721,11 @@ public class DataAnalysisProject extends Project {
 		metaDataMap.put(pipeline, mdata);
 	}
 	
-	public void setMergedDataMatrixForDataPipeline(
-			DataPipeline pipeline, Matrix dataMatrix) {
-		mergedDataMatrixMap.put(pipeline, dataMatrix);
-	}	
-	
 	public void setFeatureMatrixForDataPipeline(
 			DataPipeline pipeline, Matrix featureMatrix) {	
 		
 		if(featureMatrixMap == null)
-			featureMatrixMap = new TreeMap<DataPipeline, Matrix>();
+			featureMatrixMap = new TreeMap<>();
 		
 		featureMatrixMap.put(pipeline, featureMatrix);
 	}
@@ -727,7 +737,7 @@ public class DataAnalysisProject extends Project {
 	
 	public void setDuplicateClustersForDataPipeline(
 			DataPipeline pipeline, Collection<MsFeatureCluster> clusterSet) {
-		duplicatesMap.put(pipeline, new HashSet<MsFeatureCluster>(clusterSet));
+		duplicatesMap.put(pipeline, new HashSet<>(clusterSet));
 	}
 	public void setFeatureClustersForDataPipeline(
 			DataPipeline pipeline, Set<MsFeatureCluster> clusterSet) {
@@ -743,7 +753,7 @@ public class DataAnalysisProject extends Project {
 			DataPipeline pipeline, Matrix dataMatrix) {
 
 		if(imputedDataMatrixMap == null)
-			imputedDataMatrixMap = new TreeMap<DataPipeline, Matrix>();
+			imputedDataMatrixMap = new TreeMap<>();
 
 		imputedDataMatrixMap.put(pipeline, dataMatrix);
 	}
@@ -905,28 +915,30 @@ public class DataAnalysisProject extends Project {
 	
 	public Set<DataPipelineAlignmentResults>getDataPipelineAlignmentResults(){
 		
-		if(dataPipelineAlignments == null)
-			dataPipelineAlignments = new TreeSet<DataPipelineAlignmentResults>();
+		if(dataIntegrationSets == null)
+			dataIntegrationSets = new TreeSet<>();
 
-		return dataPipelineAlignments;
+		return dataIntegrationSets.stream().filter(DataPipelineAlignmentResults.class::isInstance).
+				map(DataPipelineAlignmentResults.class::cast).collect(Collectors.toSet());
 	}
 
 	public void addDataPipelineAlignmentResult(DataPipelineAlignmentResults newSet) {
 
-		getDataPipelineAlignmentResults();
-		if(newSet.isActive())
-			dataPipelineAlignments.stream().forEach(s -> s.setActive(false));
+		Set<DataPipelineAlignmentResults>dpaResSet = getDataPipelineAlignmentResults();
+		if(!dpaResSet.isEmpty() && newSet.isActive())
+			dpaResSet.stream().forEach(s -> s.setActive(false));
 
-		dataPipelineAlignments.add(newSet);
+		dataIntegrationSets.add(newSet);
 	}
 
 	public void deleteDataPipelineAlignmentResult(DataPipelineAlignmentResults theSet) {
 
-		getDataPipelineAlignmentResults();
-		dataPipelineAlignments.remove(theSet);
+		getDataIntegrationSets();
+		dataIntegrationSets.remove(theSet);
+		Set<DataPipelineAlignmentResults>dpaResSet = getDataPipelineAlignmentResults();
 
-		if(theSet.isActive() && !dataPipelineAlignments.isEmpty())
-				dataPipelineAlignments.iterator().next().setActive(true);		
+		if(theSet.isActive() && !dpaResSet.isEmpty())
+			dpaResSet.iterator().next().setActive(true);		
 	}
 
 	public DataPipelineAlignmentResults getActiveDataPipelineAlignmentResult() {
@@ -940,8 +952,8 @@ public class DataAnalysisProject extends Project {
 
 		getDataPipelineAlignmentResults().stream().forEach(s -> s.setActive(false));
 		activeSet.setActive(true);
-		if(!dataPipelineAlignments.contains(activeSet))
-			dataPipelineAlignments.add(activeSet);
+		if(!dataIntegrationSets.contains(activeSet))
+			dataIntegrationSets.add(activeSet);
 	}
 
 	public void setActiveDataIntegrationSet(MsFeatureClusterSet activeSet) {

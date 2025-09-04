@@ -22,11 +22,13 @@
 package edu.umich.med.mrc2.datoolbox.data;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
+import org.apache.commons.lang3.StringUtils;
 import org.jdom2.Element;
 
 import edu.umich.med.mrc2.datoolbox.data.enums.AnnotatedObjectType;
@@ -202,6 +204,13 @@ public class LibraryMsFeature extends MsFeature implements Serializable {
 				libraryMsFeatureElement, CommonFields.LastModified);		
 		parentFeatureId  = libraryMsFeatureElement.getAttributeValue(
 				MsFeatureFields.ParentFeatureId.name());
+		
+		Element parentIdSetElement = 
+				libraryMsFeatureElement.getChild(MsFeatureFields.ParentIdSet.name());
+		if(parentIdSetElement != null) {
+			String[]parentIds = parentIdSetElement.getText().split(",");
+			 getParentIdSet().addAll(Arrays.asList(parentIds));
+		}
 	}
 	
 	@Override
@@ -219,6 +228,11 @@ public class LibraryMsFeature extends MsFeature implements Serializable {
 			libraryMsFeatureElement.setAttribute(
 					MsFeatureFields.ParentFeatureId.name(), parentFeatureId);
 		
+		if(!getParentIdSet().isEmpty()) {
+			Element parentIdSetElement = new Element(MsFeatureFields.ParentIdSet.name());
+			parentIdSetElement.setText(StringUtils.join(parentIdSet, ','));
+			libraryMsFeatureElement.addContent(parentIdSetElement);
+		}		
 		return libraryMsFeatureElement;
 	}
 

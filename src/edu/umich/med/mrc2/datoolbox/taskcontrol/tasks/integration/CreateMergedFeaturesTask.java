@@ -38,6 +38,7 @@ import org.ujmp.core.calculation.Calculation.Ret;
 
 import edu.umich.med.mrc2.datoolbox.data.Adduct;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
+import edu.umich.med.mrc2.datoolbox.data.DataPipelineAlignmentResults;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentalSample;
 import edu.umich.med.mrc2.datoolbox.data.LibraryMsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MassSpectrum;
@@ -61,7 +62,7 @@ import edu.umich.med.mrc2.datoolbox.utils.Range;
 public class CreateMergedFeaturesTask extends AbstractTask {
 	
 	private DataAnalysisProject currentExperiment;
-	private Set<MsFeatureCluster> clusterSet;
+	private DataPipelineAlignmentResults alignmentResults;
 	private double massWindow;
 	private MassErrorType massErrorType;
 
@@ -76,12 +77,12 @@ public class CreateMergedFeaturesTask extends AbstractTask {
 
 	public CreateMergedFeaturesTask(
 			DataAnalysisProject currentExperiment, 
-			Set<MsFeatureCluster> clusterSet,
+			DataPipelineAlignmentResults alignmentResults,
 			double massWindow, 
 			MassErrorType massErrorType) {
 		super();
 		this.currentExperiment = currentExperiment;
-		this.clusterSet = clusterSet;
+		this.alignmentResults = alignmentResults;
 		this.massWindow = massWindow;
 		this.massErrorType = massErrorType;
 	}
@@ -122,7 +123,7 @@ public class CreateMergedFeaturesTask extends AbstractTask {
 
 		taskDescription = "Merging marked features";
 		List<MsFeatureCluster> clustersWithMergeInput =  
-				clusterSet.stream().
+				alignmentResults.getClusters().stream().
 				filter(c -> c.getMarkedForMerge().size() > 1).
 				collect(Collectors.toList());
 		total = clustersWithMergeInput.size();
@@ -344,7 +345,8 @@ public class CreateMergedFeaturesTask extends AbstractTask {
 			createAndPopulateFeatureStatisticalSummary(mfe.getValue(), pooledFiles, sampleFiles);
 			processed++;
 		}
-		currentExperiment.setMergedDataMatrixForDataPipeline(mergePipeline, mergedFeaturesDataMatrix);
+		currentExperiment.setActiveDataPipelineAlignmentResult(alignmentResults);
+		alignmentResults.setMergedDataMatrix(mergedFeaturesDataMatrix);
 	}
 	
 	private void initMergedFeaturesDataMatrix(Set<DataFile>dataFiles) {
@@ -422,7 +424,7 @@ public class CreateMergedFeaturesTask extends AbstractTask {
 			MsFeatureCluster current = mfe.getKey();
 			current.addFeature(mfe.getValue(), mergePipeline);
 			ClusterUtils.createClusterCorrelationMatrixForMultiplePipelines(
-					current, currentExperiment, isCanceled());
+					current, currentExperiment, mergedFeaturesDataMatrix, false);
 			processed++;
 		}
 	}
@@ -434,6 +436,10 @@ public class CreateMergedFeaturesTask extends AbstractTask {
 	@Override
 	public Task cloneTask() {
 		return new CreateMergedFeaturesTask(
-				currentExperiment, clusterSet, massWindow, massErrorType);
+				currentExperiment, alignmentResults, massWindow, massErrorType);
+	}
+
+	public DataPipelineAlignmentResults getAlignmentResults() {
+		return alignmentResults;
 	}
 }

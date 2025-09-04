@@ -115,7 +115,8 @@ public class TwoDimQCPlot extends AbstractControlledDataPlot {
 			MessageDialog.showWarningMsg("Option not supported for QC barchart plot", this);
 			return;
 		}
- 		VariableCategorySizeBarChartDataSet ds = new VariableCategorySizeBarChartDataSet(plotParameters);		
+ 		VariableCategorySizeBarChartDataSet ds = 
+ 				new VariableCategorySizeBarChartDataSet(plotParameters);		
 		VariableCategorySizeBarRenderer renderer = new VariableCategorySizeBarRenderer();
 		
 		NumberFormat dataFormat = 
@@ -154,13 +155,13 @@ public class TwoDimQCPlot extends AbstractControlledDataPlot {
 				new TwoDqcPlotParameterObject(
 					dataSetStats,
 					toolbar.getStatParameter(),
-					toolbar.getSortingOrder(), 
-					toolbar.getDataScale(),
-					toolbar.getChartColorOption(),
-					dataPlotControlsPanel.getDataGroupingType(), 
 					dataPlotControlsPanel.getCategory(), 
 					dataPlotControlsPanel.getSububCategory(),
-					plotType);	
+					dataPlotControlsPanel.getDataGroupingType(), 
+					toolbar.getSortingOrder(), 
+					toolbar.getDataScale(),
+					plotType,
+					toolbar.getChartColorOption());	
 	}
 	
 	@Override

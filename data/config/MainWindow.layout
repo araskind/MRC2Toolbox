@@ -278,6 +278,7 @@
 														<placeholder>dock.single.IDWorkbenchPanel</placeholder>
 														<placeholder>dock.single.DuplicatesPanelClusterDisplayPanel</placeholder>
 														<placeholder>dock.single.LabNoteBookPanel</placeholder>
+														<placeholder>dock.single.AutomatorPanel</placeholder>
 														<placeholder>dock.single.QCPanel</placeholder>
 														<placeholder>dock.single.IDTrackerLimsManagerPanel</placeholder>
 														<placeholder>dock.single.MoTrPACDataTrackingPanel</placeholder>
@@ -400,7 +401,7 @@
 							<children ignore="false">
 								<child>
 									<layout factory="delegate_StackDockStationFactory">
-										<selected>13</selected>
+										<selected>3</selected>
 										<placeholders>
 											<version>0</version>
 											<format>dock.PlaceholderList</format>
@@ -610,15 +611,6 @@
 												<key shared="false">
 													<placeholder>dock.single.AutomatorPanel</placeholder>
 												</key>
-												<item key="convert" type="b">true</item>
-												<item key="convert-keys" type="a">
-													<item type="s">index</item>
-													<item type="s">id</item>
-													<item type="s">placeholder</item>
-												</item>
-												<item key="dock.index" type="i">13</item>
-												<item key="dock.id" type="i">13</item>
-												<item key="dock.placeholder" type="s">dock.single.AutomatorPanel</item>
 											</entry>
 										</placeholders>
 									</layout>
@@ -753,16 +745,6 @@
 											</layout>
 											<children ignore="false"/>
 										</child>
-										<child>
-											<layout factory="predefined" placeholder="dock.single.AutomatorPanel">
-												<replacement id="dockablesingle AutomatorPanel"/>
-												<delegate id="delegate_ccontrol backup factory id">
-													<id>AutomatorPanel</id>
-													<area/>
-												</delegate>
-											</layout>
-											<children ignore="false"/>
-										</child>
 									</children>
 								</child>
 							</children>
@@ -808,6 +790,32 @@
 									<replacement id="dockablesingle MgfPanel"/>
 									<delegate id="delegate_ccontrol backup factory id">
 										<id>MgfPanel</id>
+										<area/>
+									</delegate>
+								</layout>
+								<children ignore="false"/>
+							</layout>
+						</child>
+						<child key="single AutomatorPanel" root="ccontrol center" location="true">
+							<location>
+								<property factory="SplitDockPlaceholderProperty">
+									<placeholder>dock.single.AutomatorPanel</placeholder>
+									<backup-path>
+										<node location="RIGHT" size="0.7217529039070749" id="1672779742083"/>
+										<node location="RIGHT" size="0.7755294117647059" id="1676064563113"/>
+										<leaf id="1672779039466"/>
+									</backup-path>
+								</property>
+								<property factory="StackDockPropertyFactory">
+									<index>13</index>
+									<placeholder>dock.single.AutomatorPanel</placeholder>
+								</property>
+							</location>
+							<layout>
+								<layout factory="predefined" placeholder="dock.single.AutomatorPanel">
+									<replacement id="dockablesingle AutomatorPanel"/>
+									<delegate id="delegate_ccontrol backup factory id">
+										<id>AutomatorPanel</id>
 										<area/>
 									</delegate>
 								</layout>
@@ -988,7 +996,7 @@
 							<history/>
 							<properties/>
 						</entry>
-						<entry id="single AutomatorPanel" current="dock.mode.normal">
+						<entry id="single AutomatorPanel">
 							<history>
 								<mode>dock.mode.minimized</mode>
 								<mode>dock.mode.normal</mode>

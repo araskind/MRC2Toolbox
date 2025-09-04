@@ -279,11 +279,11 @@ public abstract class DockableMSFeatureQCPlotPanel extends DefaultSingleCDockabl
 		plotParametersObject = new MSQualityDataPlotParameterObject(
 				activeFeature,
 				activeFileFeatureMap,
-				sortingOrder, 
-				chartColorOption, 
-				dataPlotControlsPanel.getDataGroupingType(), 
 				dataPlotControlsPanel.getCategory(),
-				dataPlotControlsPanel.getSububCategory());
+				dataPlotControlsPanel.getSububCategory(),
+				dataPlotControlsPanel.getDataGroupingType(), 
+				sortingOrder, 
+				chartColorOption);
 	}
 	
 	protected abstract void updatePlot();

@@ -28,7 +28,6 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -80,7 +79,7 @@ public class CompoundLibrary implements Serializable, Comparable<CompoundLibrary
 		this.enabled = enabled;
 		this.polarity = polarity;
 		
-		libraryFeatures = new HashSet<LibraryMsFeature>();
+		libraryFeatures = new HashSet<>();
 	}
 
 	public CompoundLibrary(
@@ -132,13 +131,13 @@ public class CompoundLibrary implements Serializable, Comparable<CompoundLibrary
 		libraryFeatures.add(newFeature);
 	}
 
-	public void addFeatures(Set<LibraryMsFeature> newFeatures) {
+	public void addFeatures(Collection<LibraryMsFeature> newFeatures) {
 			libraryFeatures.addAll(newFeatures);
 	}
 
 	public Map<String, MsFeature>getNameMap(){
 
-		Map<String, MsFeature>idMap = new TreeMap<String, MsFeature>();
+		Map<String, MsFeature>idMap = new TreeMap<>();
 		libraryFeatures.stream().forEach(f -> idMap.put(f.getName(), f));
 		return idMap;
 	}
@@ -298,7 +297,7 @@ public class CompoundLibrary implements Serializable, Comparable<CompoundLibrary
 				compoundLibraryElement, CommonFields.DateCreated);
 		lastModified = ProjectStoreUtils.getDateFromAttribute(
 				compoundLibraryElement, CommonFields.LastModified);
-		libraryFeatures = new HashSet<LibraryMsFeature>();
+		libraryFeatures = new HashSet<>();
 		Element dataPipelineElement = 
 				compoundLibraryElement.getChild(ObjectNames.DataPipeline.name());
 		if(dataPipelineElement != null)

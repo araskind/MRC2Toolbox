@@ -29,6 +29,7 @@ import java.util.TreeSet;
 import java.util.UUID;
 
 import org.jdom2.Element;
+import org.ujmp.core.Matrix;
 
 import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureClusterComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
@@ -51,6 +52,7 @@ public class MsFeatureClusterSet implements
 	protected boolean locked;
 	protected ParameterSetStatus status;
 	protected boolean nameIsValid;
+	protected Matrix mergedDataMatrix;
 
 	public MsFeatureClusterSet(String clusterSetName) {
 
@@ -59,7 +61,7 @@ public class MsFeatureClusterSet implements
 				+ UUID.randomUUID().toString();
 		this.clusterSetName = clusterSetName;
 		active = false;
-		clusters = new TreeSet<MsFeatureCluster>(
+		clusters = new TreeSet<>(
 				new MsFeatureClusterComparator(SortProperty.pimaryId));
 		status = ParameterSetStatus.CREATED;
 	}
@@ -171,6 +173,14 @@ public class MsFeatureClusterSet implements
 		return clusters;
 	}
 	
+	public Matrix getMergedDataMatrix() {
+		return mergedDataMatrix;
+	}
+
+	public void setMergedDataMatrix(Matrix mergedDataMatrix) {
+		this.mergedDataMatrix = mergedDataMatrix;
+	}
+	
     @Override
     public boolean equals(Object obj) {
 
@@ -185,7 +195,7 @@ public class MsFeatureClusterSet implements
 
         final MsFeatureClusterSet other = (MsFeatureClusterSet) obj;
 
-        if ((this.id == null) ? (other.getId() != null) : !this.id.equals(other.getId()))
+        if((this.id == null) ? (other.getId() != null) : !this.id.equals(other.getId()))
             return false;
 
         return true;

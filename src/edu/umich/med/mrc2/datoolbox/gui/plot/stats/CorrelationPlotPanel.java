@@ -164,8 +164,10 @@ public class CorrelationPlotPanel extends MasterPlotPanel {
 		if(fOne == null || fTwo == null)
 			return;
 		
-		inputData = new FeatureCorrelationPlotDataSet(fOne, dataPipelineOne,
-				fTwo, dataPipelineTwo, MRC2ToolBoxCore.getActiveMetabolomicsExperiment());
+		inputData = new FeatureCorrelationPlotDataSet(
+				fOne, dataPipelineOne,
+				fTwo, dataPipelineTwo, 
+				MRC2ToolBoxCore.getActiveMetabolomicsExperiment());
 
 		plot.setDataset(0, inputData);
 		plot.getDomainAxis().setLabel(fOne.getName());

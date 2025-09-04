@@ -41,15 +41,21 @@ public class TwoDqcPlotParameterObject extends TwoDimDataPlotParameterObject{
 	public TwoDqcPlotParameterObject(
 			Collection<DataFileStatisticalSummary> dataSetStats,
 			DataSetQcField statsField,
-			FileSortingOrder sortingOrder, 
-			DataScale dataScale,
-			ChartColorOption chartColorOption,
-			PlotDataGrouping groupingType, 
 			ExperimentDesignFactor category, 
 			ExperimentDesignFactor subCategory,
-			StatsPlotType statPlotType) {
-		super(sortingOrder, dataScale, chartColorOption, 
-				groupingType, category, subCategory, statPlotType);
+			PlotDataGrouping groupingType, 
+			FileSortingOrder sortingOrder, 
+			DataScale dataScale,
+			StatsPlotType statPlotType,
+			ChartColorOption chartColorOption) {
+		
+		super(category, 
+				subCategory, 
+				groupingType, 
+				sortingOrder, 
+				dataScale, 
+				statPlotType, 
+				chartColorOption);
 		this.dataSetStats = dataSetStats;
 		this.statsField = statsField;
 	}
@@ -71,12 +77,8 @@ public class TwoDqcPlotParameterObject extends TwoDimDataPlotParameterObject{
 	}
 	
 	@Override
-	public String getDesignDescriptor() {
-		
-		String descriptor = statsField.getName() 
-				+ "_" + super.getDesignDescriptor();
-				
-		return descriptor;
+	public String getDesignDescriptor() {				
+		return statsField.getName() + "_" + super.getDesignDescriptor();
 	}
 }
 

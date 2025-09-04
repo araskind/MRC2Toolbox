@@ -56,7 +56,11 @@ public class FeatureCorrelationPlotDataSet extends XYSeriesCollection {
 		//		Get data matrices for merged features if necessary
 		Matrix matrixOne = null;
 		if(fOne instanceof LibraryMsFeature && ((LibraryMsFeature)fOne).isMerged()) {
-			matrixOne = experiment.getMergedDataMatrixForDataPipeline(dataPipelineOne);
+			
+			matrixOne = PlotDataSetUtils.getActiveMergedDataMatrixFromProjecr(experiment);
+			if(matrixOne == null)
+				return;
+			
 			coordinatesOne[1] = matrixOne.getColumnForLabel(fOne);
 			if (coordinatesOne[1] == -1)
 				return;
@@ -70,7 +74,11 @@ public class FeatureCorrelationPlotDataSet extends XYSeriesCollection {
 		}
 		Matrix matrixTwo = null;
 		if(fTwo instanceof LibraryMsFeature && ((LibraryMsFeature)fTwo).isMerged()) {
-			matrixTwo = experiment.getMergedDataMatrixForDataPipeline(dataPipelineTwo);
+			
+			matrixTwo = PlotDataSetUtils.getActiveMergedDataMatrixFromProjecr(experiment);
+			if(matrixTwo == null)
+				return;
+			
 			coordinatesTwo[1] = matrixTwo.getColumnForLabel(fTwo);
 			if (coordinatesTwo[1] == -1)
 				return;

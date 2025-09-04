@@ -185,24 +185,17 @@ public class CefLibraryImportTask extends CEFProcessingTask {
 		}
 	}
 
-	//	TODO create separate folder for libraries in the project and copy library there
 	private void copyLibraryFileToExperiment() {
+		
+		if(inputCefFile == null ||!inputCefFile.exists())
+			return;
 
-		if (inputCefFile.exists()) {
-
-			File libFile = new File(currentExperiment.getExperimentDirectory() + 
-					File.separator + inputCefFile.getName());
-
-			if (!libFile.exists()) {
-
-				try {
-					FileUtils.copyFileToDirectory(
-							inputCefFile, currentExperiment.getExperimentDirectory());
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-		}
+		try {
+			FileUtils.copyFileToDirectory(
+					inputCefFile, currentExperiment.getDataDirectory());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}		
 	}
 
 	private void collectUnassignedFeatures() {

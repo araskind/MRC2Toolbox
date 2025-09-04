@@ -118,6 +118,7 @@ public class ClusterUtils {
 	public static void createClusterCorrelationMatrixForMultiplePipelines(
 			MsFeatureCluster fcluster,
 			DataAnalysisProject experiment,
+			Matrix mergedDataMatrix,
 			boolean enabledOnly) {
 		
 		Set<DataPipeline> pipelines = fcluster.getFeatureMap().keySet();
@@ -145,11 +146,10 @@ public class ClusterUtils {
 			Collection<LibraryMsFeature>mergedFeatures = 
 					fcluster.getMergedFeaturesForDataPipeline(cfe.getKey());
 			Matrix mergedMatrixForPipeline = null;
-			if(!mergedFeatures.isEmpty()) {
+			if(!mergedFeatures.isEmpty() && mergedDataMatrix != null) {
 				
 				featureListForMetaData.addAll(mergedFeatures);
 				allFeatures.removeAll(mergedFeatures);				
-				Matrix mergedDataMatrix = experiment.getMergedDataMatrixForDataPipeline(cfe.getKey());
 				long[] mergedColumnIndex = mergedFeatures.stream().
 						map(mergedDataMatrix::getColumnForLabel).
 						mapToLong(i -> i).toArray();
