@@ -889,6 +889,7 @@ public class MsFeatureCluster implements Serializable, XmlStorable {
 		return msFeatureClusterElement;
 	}
 	
+	//	TODO handle merged features by adding them to averaged library for pipeline!
 	public MsFeatureCluster(Element msFeatureClusterElement, DataAnalysisProject project) {
 		this();
 		clusterId = msFeatureClusterElement.getAttributeValue(CommonFields.Id.name());

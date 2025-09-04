@@ -99,13 +99,13 @@ public class CreateMergedFeaturesTask extends AbstractTask {
 			reportErrorAndExit(e);
 		}
 		try {
-			createMatricesForCombinedFeatures();
+			subsetDataMatrixForCombinedFeatures();
 		}
 		catch (Exception e) {
 			reportErrorAndExit(e);
 		}
 		try {
-			calculateCombinedFeaturesStats();
+			calculateCombinedFeaturesStatsAndPopulateMergedDataMatrix();
 		}
 		catch (Exception e) {
 			reportErrorAndExit(e);
@@ -256,7 +256,7 @@ public class CreateMergedFeaturesTask extends AbstractTask {
 		return mzRangeBucket;
 	}
 	
-	private void createMatricesForCombinedFeatures() {
+	private void subsetDataMatrixForCombinedFeatures() {
 		
 		taskDescription = "Creating data matrix for merged features";
 		total = 100;
@@ -277,14 +277,18 @@ public class CreateMergedFeaturesTask extends AbstractTask {
 		processed = 100;
 	}
 	
-	private void calculateCombinedFeaturesStats() {
+	private void calculateCombinedFeaturesStatsAndPopulateMergedDataMatrix() {
 
 		taskDescription = "Calculating statistics for combined features";
 		total = mergedFeaturesMap.size();
 		processed = 0;
 		
 		DataPipeline mergePipeline = 
-				mergedFeaturesMap.keySet().iterator().next().getMergeDataPipeline();	
+				mergedFeaturesMap.keySet().iterator().next().getMergeDataPipeline();
+		currentExperiment.
+			getAveragedFeatureLibraryForDataPipeline(mergePipeline).
+			addFeatures(mergedFeaturesMap.values());
+		
 		TreeSet<DataFile> pooledFiles = new TreeSet<>();
 		TreeSet<DataFile> sampleFiles = new TreeSet<>();		
 		populateDataMaps(pooledFiles, sampleFiles, mergePipeline);

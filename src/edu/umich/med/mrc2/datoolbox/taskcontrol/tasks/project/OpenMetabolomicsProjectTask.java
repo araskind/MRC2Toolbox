@@ -424,6 +424,27 @@ public class OpenMetabolomicsProjectTask extends OpenStandaloneProjectAbstractTa
 				project.addDataIntegrationSet(dpaRes);			
 		}		
 	}
+		
+	private void parseDataPipelineAlignmentElements(Element dataIntegrationSetsListElement) {
+		
+		List<Element>dpaElementList = 
+				dataIntegrationSetsListElement.getChildren(ObjectNames.DataPipelineAlignmentResults.name());
+		if(dpaElementList.isEmpty())
+			return;
+			
+		for(Element dpaElement : dpaElementList) {
+			
+			DataPipelineAlignmentResults dpaRes = null;
+			try {
+				dpaRes = new DataPipelineAlignmentResults(dpaElement,project);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			if(dpaRes != null)
+				project.addDataPipelineAlignmentResult(dpaRes);
+		}		
+	}
 	
 	private void attachMergedDataToIntegratedSets() {
 		
@@ -490,27 +511,6 @@ public class OpenMetabolomicsProjectTask extends OpenStandaloneProjectAbstractTa
 				mergedDataMatrix.setMetaDataDimensionMatrix(1, dataFileMetaDataMatrix);
 				dis.setMergedDataMatrix(mergedDataMatrix);
 			}
-		}		
-	}
-	
-	private void parseDataPipelineAlignmentElements(Element dataIntegrationSetsListElement) {
-		
-		List<Element>dpaElementList = 
-				dataIntegrationSetsListElement.getChildren(ObjectNames.DataPipelineAlignmentResults.name());
-		if(dpaElementList.isEmpty())
-			return;
-			
-		for(Element dpaElement : dpaElementList) {
-			
-			DataPipelineAlignmentResults dpaRes = null;
-			try {
-				dpaRes = new DataPipelineAlignmentResults(dpaElement,project);
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			if(dpaRes != null)
-				project.addDataPipelineAlignmentResult(dpaRes);
 		}		
 	}
 
