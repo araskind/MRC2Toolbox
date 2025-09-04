@@ -40,6 +40,6 @@ public enum MetabolomicsProjectFields {
 	MethodDataFileMap,
 	MethodDataFileMapItem,
 	WorklistMap,
-	DataPipelineAlignmentResultSet,
+	DataIntegrationSetsList,
 	;
 }

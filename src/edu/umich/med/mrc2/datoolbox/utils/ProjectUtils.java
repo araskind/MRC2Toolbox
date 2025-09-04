@@ -37,9 +37,10 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.compress.archivers.ArchiveException;
 import org.apache.commons.compress.archivers.ArchiveStreamFactory;
@@ -47,9 +48,11 @@ import org.apache.commons.compress.archivers.zip.Zip64Mode;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang.StringUtils;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.ujmp.core.Matrix;
+import org.ujmp.core.calculation.Calculation.Ret;
 
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.io.xml.StaxDriver;
@@ -57,11 +60,13 @@ import com.thoughtworks.xstream.security.NoTypePermission;
 import com.thoughtworks.xstream.security.NullPermission;
 import com.thoughtworks.xstream.security.PrimitiveTypePermission;
 
+import edu.umich.med.mrc2.datoolbox.data.CompoundLibrary;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
-import edu.umich.med.mrc2.datoolbox.data.DataPipelineAlignmentResults;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesign;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignSubset;
+import edu.umich.med.mrc2.datoolbox.data.LibraryMsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
+import edu.umich.med.mrc2.datoolbox.data.MsFeatureClusterSet;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureSet;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
@@ -74,6 +79,7 @@ import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
 import edu.umich.med.mrc2.datoolbox.project.store.DataFileExtensions;
 import edu.umich.med.mrc2.datoolbox.project.store.IDTrackerProjectFields;
+import edu.umich.med.mrc2.datoolbox.project.store.MetabolomicsProjectFields;
 import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
 import edu.umich.med.mrc2.datoolbox.project.store.ProjectStoreUtils;
 
@@ -212,10 +218,10 @@ public class ProjectUtils {
 		} 
 	}
 	
-	public static Collection<String>getIdList(String idListString){
+	public static List<String>getIdList(String idListString){
 		
 		if(idListString == null || idListString.isEmpty())
-			return new ArrayList<String>();
+			return new ArrayList<>();
 		else 
 			return Arrays.asList(idListString.split(","));	
 	}
@@ -307,13 +313,12 @@ public class ProjectUtils {
 		}
 	}
 
-	public static void saveMergedDataMatrixForPipeline(
+	public static void saveMergedDataMatrixForDataIntegrationSet(
 			DataAnalysisProject project,
-			DataPipeline pipeline,
 			String dataSetId) {
 		
-		DataPipelineAlignmentResults dpResult = 
-				project.getDataPipelineAlignmentResults().stream().
+		MsFeatureClusterSet dpResult = 
+				project.getDataIntegrationSets().stream().
 				filter(r -> r.getId().equals(dataSetId)).findFirst().orElse(null);
 		if(dpResult == null || dpResult.getMergedDataMatrix() == null)
 			return;
@@ -321,7 +326,7 @@ public class ProjectUtils {
 		createDataDirectoryForProjectIfNotExists(project);
 		
 		File dataMatrixFile = 
-				getMergedDataMatrixFilePath(project,pipeline,dataSetId).toFile();
+				getMergedDataMatrixFilePath(project,dataSetId).toFile();
 		try {
 			Matrix dataMatrix = Matrix.Factory
 					.linkToArray(dpResult.getMergedDataMatrix().toDoubleArray());
@@ -330,6 +335,63 @@ public class ProjectUtils {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public static void saveMergedFeatureLibraryForDataIntegrationSet(
+			MsFeatureClusterSet dataIntegrationSet,
+			DataAnalysisProject project) {
+		
+		Matrix mergedDataMatrix = dataIntegrationSet.getMergedDataMatrix();
+		if(mergedDataMatrix == null)
+			return;
+				
+		Matrix mdFeature = mergedDataMatrix.getMetaDataDimensionMatrix(0);
+		Matrix mdFile = mergedDataMatrix.getMetaDataDimensionMatrix(1);
+		if(mdFeature == null || mdFile == null)
+			return;
+			
+		Object[][]featureMetaData =  mdFeature.toObjectArray();
+		List<LibraryMsFeature> mergedFeatures =  
+				Arrays.asList(featureMetaData[0]).stream().
+				filter(LibraryMsFeature.class::isInstance).
+				map(LibraryMsFeature.class::cast).
+				collect(Collectors.toList());
+		if(mergedFeatures.isEmpty())
+			return;
+
+		Object[][]fileMetaData =  mdFile.transpose(Ret.NEW).toObjectArray();
+		List<String> fileNameList = 
+				Arrays.asList(fileMetaData[0]).stream().
+				filter(DataFile.class::isInstance).
+				map(DataFile.class::cast).map(f -> f.getName()).
+				collect(Collectors.toList());	
+		if(fileNameList.isEmpty())
+			return;
+			
+		CompoundLibrary mergedLibrary = 
+				new CompoundLibrary("Merged features for " + dataIntegrationSet.getName());
+		mergedLibrary.addFeatures(mergedFeatures);
+		
+		File mergedLibXmlFile = 
+				ProjectUtils.getMergedFeaturesFilePath(project, dataIntegrationSet.getId()).toFile();
+		Document mergedFeatureLibDocument = new Document();
+		Element root = new Element(ObjectNames.DataPipelineAlignmentResults.name());
+		mergedFeatureLibDocument.setRootElement(root);
+    	Element orderedFileListElement = 
+    			new Element(MetabolomicsProjectFields.FileIdList.name());
+		orderedFileListElement.setText(StringUtils.join(fileNameList, ","));
+		root.addContent(orderedFileListElement);
+		
+		List<String>featureIdList = mergedFeatures.stream().
+				map(f -> f.getId()).collect(Collectors.toList());	
+		Element orderedFeatureListElement = 
+    			new Element(MetabolomicsProjectFields.MSFeatureIdList.name());
+		orderedFeatureListElement.setText(StringUtils.join(featureIdList, ","));
+		root.addContent(orderedFeatureListElement);			
+		
+		root.addContent(mergedLibrary.getXmlElement());			
+		ProjectUtils.createDataDirectoryForProjectIfNotExists(project);
+		XmlUtils.writeCompactXMLtoFile(mergedFeatureLibDocument, mergedLibXmlFile);						
 	}
 	
 	//	Will replace existing primary feature matrix file for 
@@ -510,7 +572,79 @@ public class ProjectUtils {
 		}
 		return dataMatrix;
 	}
+	
+	public static Matrix createDataFileMetaDataMatrix(
+			String[]orderedDataFileNames, Set<DataFile>dataFileSet) {
+		
+		DataFile[]dataFileArray = new DataFile[orderedDataFileNames.length];
+		for(int i=0; i<orderedDataFileNames.length; i++) {
+			
+			String fileName = orderedDataFileNames[i];
+			DataFile df = dataFileSet.stream().
+					filter(f -> f.getName().equals(fileName)).
+					findFirst().orElse(null);
+			dataFileArray[i] = df;
+		}
+		return Matrix.Factory.linkToArray((Object[])dataFileArray).transpose(Ret.NEW);
+	}
+		
+	public static Matrix createDataFileMetaDataMatrix(
+			List<String>orderedDataFileNames, Set<DataFile>dataFileSet) {
+		
+		String[]orderedDataFileNamesArray = 
+				orderedDataFileNames.toArray(new String[orderedDataFileNames.size()]);
 
+		return createDataFileMetaDataMatrix(orderedDataFileNamesArray, dataFileSet);
+	}
+	
+	public static Matrix createFeatureMetaDataMatrix(
+			String[]orderedMSFeatureIds, Set<MsFeature>featureSet) {
+		
+		MsFeature[]featureArray = new MsFeature[orderedMSFeatureIds.length];
+		for(int i=0; i<orderedMSFeatureIds.length; i++) {
+			
+			String featureId = orderedMSFeatureIds[i];
+			MsFeature feature = featureSet.stream().
+					filter(f -> f.getId().equals(featureId)).
+					findFirst().orElse(null);
+			featureArray[i] = feature;
+		}
+		return Matrix.Factory.linkToArray((Object[])featureArray);
+	}
+	
+	public static Matrix createFeatureMetaDataMatrix(
+			List<String>orderedMSFeatureIds, Set<MsFeature>featureSet) {
+		
+		String[]orderedMSFeatureIdsArray = 
+				orderedMSFeatureIds.toArray(new String[orderedMSFeatureIds.size()]);
+
+		return createFeatureMetaDataMatrix(orderedMSFeatureIdsArray, featureSet);
+	}
+
+	public static Matrix createLibraryFeatureMetaDataMatrix(
+			String[]orderedMSFeatureIds, Set<LibraryMsFeature>featureSet) {
+		
+		LibraryMsFeature[]featureArray = new LibraryMsFeature[orderedMSFeatureIds.length];
+		for(int i=0; i<orderedMSFeatureIds.length; i++) {
+			
+			String featureId = orderedMSFeatureIds[i];
+			LibraryMsFeature feature = featureSet.stream().
+					filter(f -> f.getId().equals(featureId)).
+					findFirst().orElse(null);
+			featureArray[i] = feature;
+		}
+		return Matrix.Factory.linkToArray((Object[])featureArray);
+	}
+	
+	public static Matrix createLibraryFeatureMetaDataMatrix(
+			List<String>orderedMSFeatureIds, Set<LibraryMsFeature>featureSet) {
+		
+		String[]orderedMSFeatureIdsArray = 
+				orderedMSFeatureIds.toArray(new String[orderedMSFeatureIds.size()]);
+
+		return createLibraryFeatureMetaDataMatrix(orderedMSFeatureIdsArray, featureSet);
+	}
+	
 	public static Path getFeaturesFilePath(
 			DataAnalysisProject project, 
 			DataPipeline pipeline) {
@@ -557,22 +691,18 @@ public class ProjectUtils {
 	
 	public static Path getMergedFeaturesFilePath(
 			DataAnalysisProject project, 
-			DataPipeline pipeline,
 			String dataSetId) {
 		return Paths.get(project.getDataDirectory().getAbsolutePath(),
-				DataPrefix.MERGED_FEATURE_LIBRARY.getName() + pipeline.getSaveSafeName() 
-				+ "_" + dataSetId
+				DataPrefix.MERGED_FEATURE_LIBRARY.getName() + "_" + dataSetId
 				+ "." + DataFileExtensions.AVERAGED_FEATURE_LIBRARY_EXTENSION.getExtension());		
 	}
 	
 	public static Path getMergedDataMatrixFilePath(
 			DataAnalysisProject project, 
-			DataPipeline pipeline,
 			String dataSetId) {
 		
 		return Paths.get(project.getDataDirectory().getAbsolutePath(),
-				DataPrefix.DATA_MATRIX.getName() + pipeline.getSaveSafeName() 
-				+ mergedSuffix + "_" + dataSetId 
+				DataPrefix.DATA_MATRIX.getName() + mergedSuffix + "_" + dataSetId 
 				+ "." + DataFileExtensions.DATA_MATRIX_EXTENSION.getExtension());
 	}
 }

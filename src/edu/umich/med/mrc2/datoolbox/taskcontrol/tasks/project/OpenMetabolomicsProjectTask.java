@@ -23,6 +23,7 @@ package edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.project;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -34,10 +35,13 @@ import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
 import org.jdom2.input.SAXBuilder;
+import org.ujmp.core.Matrix;
 
+import edu.umich.med.mrc2.datoolbox.data.CompoundLibrary;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.DataPipelineAlignmentResults;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesign;
+import edu.umich.med.mrc2.datoolbox.data.MsFeatureClusterSet;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureSet;
 import edu.umich.med.mrc2.datoolbox.data.Worklist;
 import edu.umich.med.mrc2.datoolbox.data.WorklistItem;
@@ -54,6 +58,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskListener;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
+import edu.umich.med.mrc2.datoolbox.utils.ProjectUtils;
 
 public class OpenMetabolomicsProjectTask extends OpenStandaloneProjectAbstractTask implements TaskListener {
 	
@@ -276,7 +281,7 @@ public class OpenMetabolomicsProjectTask extends OpenStandaloneProjectAbstractTa
 	
 	private void parseOrderedMSFeatureIdMap(Element projectElement) {
 		
-		orderedMSFeatureIdMap = new  TreeMap<DataPipeline,String[]>();
+		orderedMSFeatureIdMap = new  TreeMap<>();
     	List<Element> orderedMSFeatureIdElementList = 
     			projectElement.getChild(MetabolomicsProjectFields.MSFeatureIdMap.name()).
     			getChildren(MetabolomicsProjectFields.MSFeatureIdList.name());
@@ -370,24 +375,131 @@ public class OpenMetabolomicsProjectTask extends OpenStandaloneProjectAbstractTa
 		MRC2ToolBoxCore.getTaskController().getTaskQueue().removeTask(task);
 		if(loadedPipelineCount == pipelineCount) {
 			
-			loadDataPipelineAlignmentResults();
+			loadDataIntegrationResults();
 			setStatus(TaskStatus.FINISHED);	
 		}
 	}
 
-	private void loadDataPipelineAlignmentResults() {
+	private void loadDataIntegrationResults() {
+		
+		taskDescription = "Parsing data integration results ...";
+		total = 100;
+		processed = 50;
 
-		Element dparsElement = 
+		Element dataIntegrationSetsListElement = 
 				projectXMLElement.getChild(
-						MetabolomicsProjectFields.DataPipelineAlignmentResultSet.name());
-		if(dparsElement == null)
-			return;
+						MetabolomicsProjectFields.DataIntegrationSetsList.name());
+		if(dataIntegrationSetsListElement == null) {
+			
+			//	Debug only fix
+			dataIntegrationSetsListElement = 
+					projectXMLElement.getChild("DataPipelineAlignmentResultSet");
+			
+			if(dataIntegrationSetsListElement == null)
+				return;
+		}		
+		parseDataIntegrationSetElements(dataIntegrationSetsListElement);
+		parseDataPipelineAlignmentElements(dataIntegrationSetsListElement);
+		attachMergedDataToIntegratedSets();
+		processed = 70;
+	}
+	
+	private void parseDataIntegrationSetElements(Element dataIntegrationSetsListElement) {
 		
 		List<Element>dpaElementList = 
-				dparsElement.getChildren(ObjectNames.DataPipelineAlignmentResults.name());
+				dataIntegrationSetsListElement.getChildren(ObjectNames.MsFeatureClusterSet.name());
 		if(dpaElementList.isEmpty())
 			return;
+			
+		for(Element dpaElement : dpaElementList) {
+			
+			MsFeatureClusterSet dpaRes = null;
+			try {
+				dpaRes = new MsFeatureClusterSet(dpaElement,project);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			if(dpaRes != null)
+				project.addDataIntegrationSet(dpaRes);			
+		}		
+	}
+	
+	private void attachMergedDataToIntegratedSets() {
 		
+		for(MsFeatureClusterSet dis : project.getDataIntegrationSets()) {
+			
+			Path mergedFeaturesFilePath = 
+					ProjectUtils.getMergedFeaturesFilePath(project, dis.getId());
+			Path mergedDataMatrixFilePath = 
+					ProjectUtils.getMergedDataMatrixFilePath(project, dis.getId());
+			if(!mergedFeaturesFilePath.toFile().exists() || !mergedDataMatrixFilePath.toFile().exists())
+				continue;
+			
+			SAXBuilder sax = new SAXBuilder();
+			Document doc = null;
+			CompoundLibrary mergedFeatureLibrary = null;
+			List<String>orderedFileNames = new ArrayList<>();
+			List<String>orderedFeatureIds = new ArrayList<>();
+			
+			try {			
+				doc = sax.build(mergedFeaturesFilePath.toFile());
+			} catch (Exception e) {
+				reportErrorAndExit(e);
+			}
+			if(doc != null) {
+				
+				Element rootNode = doc.getRootElement();
+				
+				Element compoundLibraryElement = 
+						rootNode.getChild(ObjectNames.CompoundLibrary.name());
+				try {
+					mergedFeatureLibrary = new CompoundLibrary(compoundLibraryElement);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				
+				Element orderedFileListElement =  
+						rootNode.getChild(MetabolomicsProjectFields.FileIdList.name());
+				if(orderedFileListElement != null)
+					orderedFileNames = ProjectUtils.getIdList(orderedFileListElement.getText());
+								
+				Element orderedFeatureListElement =  
+						rootNode.getChild(MetabolomicsProjectFields.MSFeatureIdList.name());
+				if(orderedFeatureListElement != null)
+					orderedFeatureIds = ProjectUtils.getIdList(orderedFeatureListElement.getText());
+			}
+			Matrix mergedDataMatrix = null;
+			try {
+				mergedDataMatrix = Matrix.Factory.load(mergedDataMatrixFilePath.toFile());
+			} catch (ClassNotFoundException | IOException e) {
+				e.printStackTrace();
+				return;
+			}
+			if(mergedDataMatrix != null && mergedFeatureLibrary != null
+					&& !orderedFileNames.isEmpty() && !orderedFeatureIds.isEmpty()) {
+				
+				Matrix featureMetaDataMatrix = 
+						ProjectUtils.createLibraryFeatureMetaDataMatrix(orderedFeatureIds,
+								mergedFeatureLibrary.getFeatures());
+				Matrix dataFileMetaDataMatrix = 
+						ProjectUtils.createDataFileMetaDataMatrix(orderedFileNames,
+						project.getAllDataFiles());
+						
+				mergedDataMatrix.setMetaDataDimensionMatrix(0, featureMetaDataMatrix);
+				mergedDataMatrix.setMetaDataDimensionMatrix(1, dataFileMetaDataMatrix);
+				dis.setMergedDataMatrix(mergedDataMatrix);
+			}
+		}		
+	}
+	
+	private void parseDataPipelineAlignmentElements(Element dataIntegrationSetsListElement) {
+		
+		List<Element>dpaElementList = 
+				dataIntegrationSetsListElement.getChildren(ObjectNames.DataPipelineAlignmentResults.name());
+		if(dpaElementList.isEmpty())
+			return;
+			
 		for(Element dpaElement : dpaElementList) {
 			
 			DataPipelineAlignmentResults dpaRes = null;
@@ -399,7 +511,7 @@ public class OpenMetabolomicsProjectTask extends OpenStandaloneProjectAbstractTa
 			}
 			if(dpaRes != null)
 				project.addDataPipelineAlignmentResult(dpaRes);
-		}
+		}		
 	}
 
 	@Override

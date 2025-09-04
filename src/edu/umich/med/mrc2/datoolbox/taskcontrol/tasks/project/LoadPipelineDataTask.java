@@ -33,10 +33,8 @@ import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.input.SAXBuilder;
 import org.ujmp.core.Matrix;
-import org.ujmp.core.calculation.Calculation.Ret;
 
 import edu.umich.med.mrc2.datoolbox.data.CompoundLibrary;
-import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.LibraryMsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
@@ -97,13 +95,13 @@ public class LoadPipelineDataTask extends AbstractTask {
 			setStatus(TaskStatus.ERROR);
 			return;
 		}
-		try {
-			loadMergedDataSet();
-		} catch (Exception ex) {
-			ex.printStackTrace();
-			setStatus(TaskStatus.ERROR);
-			return;
-		}
+//		try {
+//			loadMergedDataSet();
+//		} catch (Exception ex) {
+//			ex.printStackTrace();
+//			setStatus(TaskStatus.ERROR);
+//			return;
+//		}
 		setStatus(TaskStatus.FINISHED);
 	}
 	
@@ -134,69 +132,26 @@ public class LoadPipelineDataTask extends AbstractTask {
 		if(averagedFeatureLibrary != null)
 			project.setAveragedFeatureLibraryForDataPipeline(pipeline, averagedFeatureLibrary);
 	}
-	
-	private void loadMergedDataSet() {
-		
-		Set<String>dpIlignmentIdSet = 
-				project.getDataPipelineAlignmentResults().stream().
-				map(r -> r.getId()).collect(Collectors.toSet());
-		if(dpIlignmentIdSet.isEmpty())
-			return;
-		
-		for(String dpId : dpIlignmentIdSet) {
-			
-			File mergedLibXmlFile = 
-					ProjectUtils.getMergedFeaturesFilePath(project,pipeline, dpId).toFile();
-			File dataMatrixFile = 
-					ProjectUtils.getMergedDataMatrixFilePath(project,pipeline, dpId).toFile();
-		}
-	}
-	
+
 	private void createDataMatrix() {
 		
-		Matrix featureMetaDataMatrix = createFeatureMetaDataMatrix();
-		Matrix dataFileMetaDataMatrix = createDataFileMetaDataMatrix();
-		Matrix dataMatrix = ProjectUtils.loadDataMatrixForPipelineWitoutMetaData(
-				project, pipeline);
-		if(dataMatrix != null) {
+		Matrix dataMatrix = 
+				ProjectUtils.loadDataMatrixForPipelineWitoutMetaData(project, pipeline);
+		if(dataMatrix == null)
+			return;
 			
-			dataMatrix.setMetaDataDimensionMatrix(0, featureMetaDataMatrix);
-			dataMatrix.setMetaDataDimensionMatrix(1, dataFileMetaDataMatrix);
-			project.setDataMatrixForDataPipeline(pipeline, dataMatrix);
-		}
+		Matrix featureMetaDataMatrix = 
+				ProjectUtils.createFeatureMetaDataMatrix(orderedMSFeatureIds,
+						project.getMsFeaturesForDataPipeline(pipeline));
+		Matrix dataFileMetaDataMatrix = 
+				ProjectUtils.createDataFileMetaDataMatrix(orderedDataFileNames,
+				project.getDataFilesForAcquisitionMethod(pipeline.getAcquisitionMethod()));
+				
+		dataMatrix.setMetaDataDimensionMatrix(0, featureMetaDataMatrix);
+		dataMatrix.setMetaDataDimensionMatrix(1, dataFileMetaDataMatrix);
+		project.setDataMatrixForDataPipeline(pipeline, dataMatrix);		
 	}
 	
-	private Matrix createFeatureMetaDataMatrix() {
-		
-		MsFeature[]featureArray = new MsFeature[orderedMSFeatureIds.length];
-		Set<MsFeature>featureSet = project.getMsFeaturesForDataPipeline(pipeline);
-		for(int i=0; i<orderedMSFeatureIds.length; i++) {
-			
-			String featureId = orderedMSFeatureIds[i];
-			MsFeature feature = featureSet.stream().
-					filter(f -> f.getId().equals(featureId)).
-					findFirst().orElse(null);
-			featureArray[i] = feature;
-		}
-		return Matrix.Factory.linkToArray((Object[])featureArray);
-	}
-	
-	private Matrix createDataFileMetaDataMatrix() {
-		
-		DataFile[]dataFileArray = new DataFile[orderedDataFileNames.length];
-		Set<DataFile>dataFileSet = 
-				project.getDataFilesForAcquisitionMethod(pipeline.getAcquisitionMethod());
-		for(int i=0; i<orderedDataFileNames.length; i++) {
-			
-			String fileName = orderedDataFileNames[i];
-			DataFile df = dataFileSet.stream().
-					filter(f -> f.getName().equals(fileName)).
-					findFirst().orElse(null);
-			dataFileArray[i] = df;
-		}
-		return Matrix.Factory.linkToArray((Object[])dataFileArray).transpose(Ret.NEW);
-	}
-
 	private void readFeaturesFromFile() {
 		
 		taskDescription = "Reading features for " + pipeline.getName();

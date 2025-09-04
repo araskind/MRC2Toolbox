@@ -107,7 +107,7 @@
 											</leaf>
 											<node nodeId="1625777775420" orientation="VERTICAL" divider="0.25">
 												<node nodeId="1625777789474" orientation="HORIZONTAL" divider="0.6322541233964569">
-													<leaf id="2" nodeId="1625776299521">
+													<leaf id="3" nodeId="1625776299521">
 														<placeholders>
 															<placeholder>dock.single.DockableMoTrPACStudyManagerPanel</placeholder>
 														</placeholders>
@@ -129,7 +129,7 @@
 												</node>
 												<node nodeId="1625777784726" orientation="VERTICAL" divider="0.4933749025720967">
 													<node nodeId="1625777793657" orientation="HORIZONTAL" divider="0.7690897984117288">
-														<leaf id="3" nodeId="1625777775418">
+														<leaf id="1" nodeId="1625777775418">
 															<placeholders>
 																<placeholder>dock.single.DockableExperimentListingTable</placeholder>
 															</placeholders>
@@ -143,7 +143,7 @@
 																</entry>
 															</placeholder-map>
 														</leaf>
-														<leaf id="1" nodeId="1625777793655">
+														<leaf id="2" nodeId="1625777793655">
 															<placeholders>
 																<placeholder>dock.single.DockableMoTrPACTissueCodeListingPanel</placeholder>
 															</placeholders>
@@ -177,6 +177,16 @@
 									<children ignore="false"/>
 								</child>
 								<child>
+									<layout factory="predefined" placeholder="dock.single.DockableExperimentListingTable">
+										<replacement id="dockablesingle DockableExperimentListingTable"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>DockableExperimentListingTable</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
+								</child>
+								<child>
 									<layout factory="predefined" placeholder="dock.single.DockableMoTrPACTissueCodeListingPanel">
 										<replacement id="dockablesingle DockableMoTrPACTissueCodeListingPanel"/>
 										<delegate id="delegate_ccontrol backup factory id">
@@ -191,16 +201,6 @@
 										<replacement id="dockablesingle DockableMoTrPACStudyManagerPanel"/>
 										<delegate id="delegate_ccontrol backup factory id">
 											<id>DockableMoTrPACStudyManagerPanel</id>
-											<area/>
-										</delegate>
-									</layout>
-									<children ignore="false"/>
-								</child>
-								<child>
-									<layout factory="predefined" placeholder="dock.single.DockableExperimentListingTable">
-										<replacement id="dockablesingle DockableExperimentListingTable"/>
-										<delegate id="delegate_ccontrol backup factory id">
-											<id>DockableExperimentListingTable</id>
 											<area/>
 										</delegate>
 									</layout>

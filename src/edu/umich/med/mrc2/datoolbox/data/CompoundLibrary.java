@@ -28,6 +28,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -58,7 +59,7 @@ public class CompoundLibrary implements Serializable, Comparable<CompoundLibrary
 	private boolean enabled;
 	private Polarity polarity;
 
-	private Collection<LibraryMsFeature> libraryFeatures;
+	private Set<LibraryMsFeature> libraryFeatures;
 	
 	public CompoundLibrary(
 			String id, 
@@ -156,7 +157,7 @@ public class CompoundLibrary implements Serializable, Comparable<CompoundLibrary
 		return name.compareToIgnoreCase(o.getLibraryName());
 	}
 
-	public Collection<LibraryMsFeature>getFeatures() {
+	public Set<LibraryMsFeature>getFeatures() {
 		return libraryFeatures;
 	}
 
@@ -164,7 +165,7 @@ public class CompoundLibrary implements Serializable, Comparable<CompoundLibrary
 		return libraryFeatures.size();
 	}
 	
-	public Collection<LibraryMsFeature>getSortedFeatures(Comparator<MsFeature>sorter) {
+	public List<LibraryMsFeature>getSortedFeatures(Comparator<MsFeature>sorter) {
 		return libraryFeatures.stream().
 				sorted(sorter).collect(Collectors.toList());
 	}

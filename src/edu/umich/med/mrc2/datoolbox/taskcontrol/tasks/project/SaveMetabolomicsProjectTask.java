@@ -37,8 +37,8 @@ import org.ujmp.core.Matrix;
 import org.ujmp.core.calculation.Calculation.Ret;
 
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
-import edu.umich.med.mrc2.datoolbox.data.DataPipelineAlignmentResults;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
+import edu.umich.med.mrc2.datoolbox.data.MsFeatureClusterSet;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureSet;
 import edu.umich.med.mrc2.datoolbox.data.Worklist;
@@ -141,7 +141,7 @@ public class SaveMetabolomicsProjectTask extends AbstractTask implements TaskLis
 		projectRoot.addContent(addOrderedMSFeatureIdMap());
 		projectRoot.addContent(addWorklistMap());
 		projectRoot.addContent(addCustomFeatureSets());
-		projectRoot.addContent(addDataPipelineAlignmentResults());
+		projectRoot.addContent(addDataIntegrationSets());
 		
 		DataPipeline activePipeline = projectToSave.getActiveDataPipeline();
 		if(activePipeline == null && !projectToSave.getDataPipelines().isEmpty())
@@ -166,15 +166,30 @@ public class SaveMetabolomicsProjectTask extends AbstractTask implements TaskLis
 		projectToSave.setProjectFile(projectFile);
 	}
 	
-	private Element addDataPipelineAlignmentResults() {
+	private Element addDataIntegrationSets() {
+
+		Element dataIntegrationSetsListElement = 
+				new Element(MetabolomicsProjectFields.DataIntegrationSetsList.name());
 		
-		Element dataPipelineAlignmentResultSetElement = 
-				new Element(MetabolomicsProjectFields.DataPipelineAlignmentResultSet.name());
-		
-		for(DataPipelineAlignmentResults dpaResult : projectToSave.getDataPipelineAlignmentResults())
-			dataPipelineAlignmentResultSetElement.addContent(dpaResult.getXmlElement());
-		
-		return dataPipelineAlignmentResultSetElement;
+		taskDescription = "Saving data integration results ... ";
+		total = projectToSave.getDataIntegrationSets().size();
+		for(MsFeatureClusterSet dpaResult : projectToSave.getDataIntegrationSets()) {
+			
+			dataIntegrationSetsListElement.addContent(dpaResult.getXmlElement());
+			
+			//	Save merged feature matrix and library
+			if(dpaResult.getMergedDataMatrix() != null)	{	
+				
+				ProjectUtils.saveMergedDataMatrixForDataIntegrationSet(projectToSave, dpaResult.getId());
+				ProjectUtils.saveMergedFeatureLibraryForDataIntegrationSet(dpaResult,projectToSave);
+				
+			}
+			processed++;
+		}	
+		taskDescription = "Creating project XML file ... ";
+		total = 100;
+		processed = 20;
+		return dataIntegrationSetsListElement;
 	}
 	
 	private Element addCustomFeatureSets(){

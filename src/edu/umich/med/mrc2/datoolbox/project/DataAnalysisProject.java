@@ -290,11 +290,11 @@ public class DataAnalysisProject extends Project {
 				resultsToRemove.add(dpRes);
 				
 				Path mergedDataMatrixFilePath = 
-						ProjectUtils.getMergedDataMatrixFilePath(this, pipeline, dpRes.getId());
+						ProjectUtils.getMergedDataMatrixFilePath(this, dpRes.getId());
 				FIOUtils.safeDeleteFile(mergedDataMatrixFilePath);
 								
 				Path mergedFeaturesFilePath = 
-						ProjectUtils.getMergedFeaturesFilePath(this, pipeline, dpRes.getId());
+						ProjectUtils.getMergedFeaturesFilePath(this, dpRes.getId());
 				FIOUtils.safeDeleteFile(mergedFeaturesFilePath);
 			}
 		}
@@ -434,9 +434,9 @@ public class DataAnalysisProject extends Project {
 				stream().collect(Collectors.toCollection(TreeSet::new));
 	}
 
-	 public Collection<DataFile> getAllDataFiles(){
+	 public Set<DataFile> getAllDataFiles(){
 		 return dataFileMap.values().stream().
-				 flatMap(s -> s.stream()).collect(Collectors.toList());
+				 flatMap(s -> s.stream()).collect(Collectors.toCollection(TreeSet::new));
 	 }
 
 	public String getDataMatrixFileNameForDataPipeline(DataPipeline pipeline) {
