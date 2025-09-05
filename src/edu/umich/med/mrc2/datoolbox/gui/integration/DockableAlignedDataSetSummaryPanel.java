@@ -31,13 +31,13 @@ import bibliothek.gui.dock.common.DefaultSingleCDockable;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureCluster;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
-import edu.umich.med.mrc2.datoolbox.gui.integration.dpalign.AlignedDataSetFeatureTable;
+import edu.umich.med.mrc2.datoolbox.gui.integration.dpalign.AlignedDataSetSummaryTable;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 
 public class DockableAlignedDataSetSummaryPanel extends DefaultSingleCDockable {
 
 	private static final Icon componentIcon = GuiUtils.getIcon("dataSetAlignmentManagerIcon", 16);
-	private AlignedDataSetFeatureTable alignedDataSetFeatureTable;
+	private AlignedDataSetSummaryTable alignedDataSetSummaryTable;
 	
 	public DockableAlignedDataSetSummaryPanel(DataIntegratorPanel parentPanel) {
 		
@@ -45,33 +45,33 @@ public class DockableAlignedDataSetSummaryPanel extends DefaultSingleCDockable {
 				componentIcon, "Aligned data set summary", null, Permissions.MIN_MAX_STACK);
 		setCloseable(false);
 		
-		alignedDataSetFeatureTable = new AlignedDataSetFeatureTable();
-		add(new JScrollPane(alignedDataSetFeatureTable));
+		alignedDataSetSummaryTable = new AlignedDataSetSummaryTable();
+		add(new JScrollPane(alignedDataSetSummaryTable));
 
-		alignedDataSetFeatureTable.getSelectionModel().addListSelectionListener(parentPanel);
+		alignedDataSetSummaryTable.getSelectionModel().addListSelectionListener(parentPanel);
 	}
 	
 	public int getFeatureRow(MsFeature feature) {
-		return alignedDataSetFeatureTable.getFeatureRow(feature);
+		return alignedDataSetSummaryTable.getFeatureRow(feature);
 	}
 
 	public void setTableModelFromFeatureMap(Map<DataPipeline,Collection<MsFeature>> featureMap) {
-		alignedDataSetFeatureTable.setTableModelFromFeatureMap(featureMap);
+		//	alignedDataSetSummaryTable.setTableModelFromFeatureMap(featureMap);
 	}
 
 	public void setTableModelFromFeatureCluster(MsFeatureCluster featureCluster) {
-		alignedDataSetFeatureTable.setTableModelFromFeatureCluster(featureCluster);
+		alignedDataSetSummaryTable.setTableModelFromFeatureCluster(featureCluster);
 	}
 
 	public Collection<MsFeature> getSelectedFeatures() {
-		return alignedDataSetFeatureTable. getSelectedFeatures();
+		return alignedDataSetSummaryTable. getSelectedFeatures();
 	}
 
 	public MsFeature getSelectedFeature() {
-		return alignedDataSetFeatureTable. getSelectedFeature();
+		return alignedDataSetSummaryTable. getSelectedFeature();
 	}
 
 	public Map<DataPipeline, Collection<MsFeature>> getSelectedFeaturesMap() {
-		return alignedDataSetFeatureTable.getSelectedFeaturesMap();
+		return alignedDataSetSummaryTable.getSelectedFeaturesMap();
 	}
 }

@@ -43,6 +43,7 @@ public class DataIntegrationFeatureSelectionTableModel extends BasicTableModel {
 
 	public static final String ID_COLUMN = "ID";
 	public static final String MERGE_COLUMN = "Merge";
+	public static final String TOP_MATCH_COLUMN = "Top match";
 	public static final String FEATURE_COLUMN = "Name";
 	public static final String COMPOUND_NAME_COLUMN = "Identification";
 	public static final String CHEM_MOD_LIBRARY_COLUMN = "Form (Lib)";
@@ -66,6 +67,7 @@ public class DataIntegrationFeatureSelectionTableModel extends BasicTableModel {
 		columnArray = new ColumnContext[] {
 			new ColumnContext(ID_COLUMN, "Primary feature", Boolean.class, true),
 			new ColumnContext(MERGE_COLUMN, "Sum areas", Boolean.class, true),
+			new ColumnContext(TOP_MATCH_COLUMN, "Top match to primary feature", Boolean.class, true),
 			new ColumnContext(FEATURE_COLUMN, "Feature name", MsFeature.class, false),
 			new ColumnContext(COMPOUND_NAME_COLUMN, "Compound name", String.class, false),
 			new ColumnContext(CHEM_MOD_LIBRARY_COLUMN, "Adduct (based on library /FbF assignment)", Adduct.class, false),
@@ -117,6 +119,7 @@ public class DataIntegrationFeatureSelectionTableModel extends BasicTableModel {
 				Object[] obj = {
 						cf.equals(currentCluster.getPrimaryFeature()), //ID_COLUMN
 						featureCluster.isFeatureMarkedForMerging(cf) , //MERGE_COLUMN
+						false, 										//TOP_MATCH_COLUMN TODO - auto-populate and update cluster code and table model listener to handle changes
 						cf, 										//FEATURE_COLUMN
 						compoundName, 								//COMPOUND_NAME_COLUMN
 						chmodLibrary, 								//CHEM_MOD_LIBRARY_COLUMN
