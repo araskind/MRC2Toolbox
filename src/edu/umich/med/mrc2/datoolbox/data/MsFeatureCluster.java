@@ -84,6 +84,7 @@ public class MsFeatureCluster implements Serializable, XmlStorable {
 	private boolean locked;
 	private boolean chargeMismatch;
 	private MsFeature primaryFeature;
+	private MsFeature topMatchFeature;
 
 	public MsFeatureCluster() {
 
@@ -296,6 +297,10 @@ public class MsFeatureCluster implements Serializable, XmlStorable {
 
 	public MsFeature getPrimaryFeature() {
 		return primaryFeature;
+	}
+	
+	public MsFeature getTopMatchFeature() {
+		return topMatchFeature;
 	}
 
 	public Range getRtRange(DataPipeline pipeline) {
@@ -591,10 +596,18 @@ public class MsFeatureCluster implements Serializable, XmlStorable {
 
 	public void setPrimaryFeature(MsFeature cf) {
 		
-		if(!containsFeature(cf))
+		if(cf != null && !containsFeature(cf))
 			throw new IllegalArgumentException("Feature not in cluster!");
 
 		primaryFeature = cf;
+	}	
+
+	public void setTopMatchFeature(MsFeature topMatchFeature) {
+		
+		if(topMatchFeature != null && !containsFeature(topMatchFeature))
+			throw new IllegalArgumentException("Feature not in cluster!");
+	
+		this.topMatchFeature = topMatchFeature;
 	}
 
 	@Override
@@ -828,6 +841,10 @@ public class MsFeatureCluster implements Serializable, XmlStorable {
 			msFeatureClusterElement.setAttribute(
 					MsFeatureClusterFields.primaryFeature.name(), primaryFeature.getId());
 		
+		if(topMatchFeature != null)
+			msFeatureClusterElement.setAttribute(
+					MsFeatureClusterFields.topMatchFeature.name(), topMatchFeature.getId());
+		
 		Element clusterFeaturesMapElement = 
 				new Element(MsFeatureClusterFields.clusterFeaturesMap.name());
 		for(Entry<DataPipeline, Collection<MsFeature>>mapEntry : clusterFeatures.entrySet()) {
@@ -924,6 +941,11 @@ public class MsFeatureCluster implements Serializable, XmlStorable {
 				MsFeatureClusterFields.primaryFeature.name());
 		if(primaryId != null)
 			primaryFeature = getFeatureById(primaryId);
+		
+		String topMatchId = msFeatureClusterElement.getAttributeValue(
+				MsFeatureClusterFields.topMatchFeature.name());
+		if(topMatchId != null)
+			topMatchFeature = getFeatureById(topMatchId);
 		
 		//	Set disabled features
 		Element disabledElement = msFeatureClusterElement.getChild(

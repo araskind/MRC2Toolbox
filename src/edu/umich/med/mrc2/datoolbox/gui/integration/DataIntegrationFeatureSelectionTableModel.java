@@ -119,7 +119,7 @@ public class DataIntegrationFeatureSelectionTableModel extends BasicTableModel {
 				Object[] obj = {
 						cf.equals(currentCluster.getPrimaryFeature()), //ID_COLUMN
 						featureCluster.isFeatureMarkedForMerging(cf) , //MERGE_COLUMN
-						false, 										//TOP_MATCH_COLUMN TODO - auto-populate and update cluster code and table model listener to handle changes
+						cf.equals(currentCluster.getTopMatchFeature()),	//TOP_MATCH_COLUMN
 						cf, 										//FEATURE_COLUMN
 						compoundName, 								//COMPOUND_NAME_COLUMN
 						chmodLibrary, 								//CHEM_MOD_LIBRARY_COLUMN

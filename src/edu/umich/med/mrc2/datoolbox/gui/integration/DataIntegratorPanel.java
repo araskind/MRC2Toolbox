@@ -185,17 +185,14 @@ public class DataIntegratorPanel extends ClusterDisplayPanel {
 			dataIntegrationSetupDialog.setVisible(true);
 		}
 
-		if (command.equals(MainActionCommands.FILTER_CLUSTERS_COMMAND.getName())) {
+		if (command.equals(MainActionCommands.FILTER_CLUSTERS_COMMAND.getName())  
+				&& integratedSet != null)
+			filterClusterTree(integratedSet.getClusters());
 
-			if (integratedSet != null)
-				filterClusterTree(integratedSet.getClusters());
-		}
-
-		if (command.equals(MainActionCommands.RESET_FILTER_CLUSTERS_COMMAND.getName())) {
-
-			if (integratedSet != null)
-				resetClusterTreeFilter(integratedSet.getClusters());
-		}
+		if (command.equals(MainActionCommands.RESET_FILTER_CLUSTERS_COMMAND.getName()) 
+				&& integratedSet != null)
+			resetClusterTreeFilter(integratedSet.getClusters());
+		
 		if (command.equals(MainActionCommands.ACCEPT_CLEAN_ID_LIST_COMMAND.getName()))
 			acceptIntegratedCompoundList();
 
@@ -224,6 +221,29 @@ public class DataIntegratorPanel extends ClusterDisplayPanel {
 		
 		if (command.equals(MainActionCommands.MERGE_DATA_FOR_MARKED_FEATURES_COMMAND.getName()))
 			mergeDataForMarkedFeatures();
+		
+		if (command.equals(MainActionCommands.SHOW_DATASET_ALIGNMENT_SUMMARY_COMMAND.getName()))
+			showDatasetAlignmentSummary();
+		
+		if (command.equals(MainActionCommands.EXPORT_DATASET_ALIGNMENT_SUMMARY_COMMAND.getName()))
+			exportDatasetAlignmentSummary();
+		
+	}
+	
+	private void showDatasetAlignmentSummary() {
+		
+		if(alignmentResults == null)
+			return;
+		
+		//	TODO
+	}
+	
+	private void exportDatasetAlignmentSummary() {
+		
+		if(alignmentResults == null)
+			return;
+		
+		//	TODO
 	}
 	
 	private void mergeDataForMarkedFeatures() {

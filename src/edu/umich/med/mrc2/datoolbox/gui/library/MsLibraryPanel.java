@@ -1097,23 +1097,45 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ItemList
 	}
 
 	public void reloadLibraryData(CompoundLibrary selectedLibrary) {
-		
+
 		if(!MRC2ToolBoxCore.getActiveMsLibraries().contains(selectedLibrary)) {
 			
 			LoadDatabaseLibraryTask ldbltask = 
 					new LoadDatabaseLibraryTask(selectedLibrary.getLibraryId());
 			ldbltask.addTaskListener(this);
 			MRC2ToolBoxCore.getTaskController().addTask(ldbltask);	
-			return;
 		}
-		libraryFeatureTable.getTable().getSelectionModel().removeListSelectionListener(this);
-		clearPanel();
-		currentLibrary = selectedLibrary;
-		((MsLibraryPanelMenuBar)menuBar).updateLibraryList(
-				currentLibrary, MRC2ToolBoxCore.getActiveMsLibraries());
-		libraryFeatureTable.getTable().setTableModelFromCompoundLibrary(currentLibrary);
-		libraryFeatureTable.getTable().getSelectionModel().addListSelectionListener(this);
-		libraryFeatureEditorPanel.setAndLockFeaturePolarity(currentLibrary.getPolarity());
+		else {
+			ReloadActiveLibraryTask task = new ReloadActiveLibraryTask(selectedLibrary);
+			IndeterminateProgressDialog idp = new IndeterminateProgressDialog(
+					"Loading library ...", this.getContentPane(), task);
+			idp.setLocationRelativeTo(this.getContentPane());
+			idp.setVisible(true);
+		}
+	}
+	
+	class ReloadActiveLibraryTask extends LongUpdateTask {
+		
+		private CompoundLibrary selectedLibrary;
+		
+		public ReloadActiveLibraryTask(CompoundLibrary selectedLibrary) {
+			super();
+			this.selectedLibrary = selectedLibrary;
+		}
+
+		@Override
+		public Void doInBackground() {
+			
+			libraryFeatureTable.getTable().getSelectionModel().removeListSelectionListener(MsLibraryPanel.this);
+			clearPanel();
+			currentLibrary = selectedLibrary;
+			((MsLibraryPanelMenuBar)menuBar).updateLibraryList(
+					currentLibrary, MRC2ToolBoxCore.getActiveMsLibraries());
+			libraryFeatureTable.getTable().setTableModelFromCompoundLibrary(currentLibrary);
+			libraryFeatureTable.getTable().getSelectionModel().addListSelectionListener(MsLibraryPanel.this);
+			libraryFeatureEditorPanel.setAndLockFeaturePolarity(currentLibrary.getPolarity());		
+			return null;
+		}		
 	}
 
 	public void openLibraryFromDatabase(CompoundLibrary selectedLibrary) {

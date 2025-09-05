@@ -55,6 +55,8 @@ public class DataIntegrationPanelMenuBar extends CommonMenuBar {
 	private static final Icon dataSetAlignmentManagerIcon = GuiUtils.getIcon("processingMethod", 24);
 	private static final Icon showUnmatchedIcon = GuiUtils.getIcon("showUnknowns", 24);
 	private static final Icon mergeIcon = GuiUtils.getIcon("merge", 24);
+	private static final Icon showSummaryIcon = GuiUtils.getIcon("calcStats", 24);
+	private static final Icon exportSummaryIcon = GuiUtils.getIcon("extractList", 24);
 		
 	// Menus
 	private JMenu
@@ -74,6 +76,8 @@ public class DataIntegrationPanelMenuBar extends CommonMenuBar {
 		deleteDataSetAlignmentMenuItem,
 		dataSetAlignmentManagerMenuItem,
 		showUnmatchedFromReferenceMenuItem,
+		showAlignmentSummaryMenuItem,
+		exportAlignmentSummaryMenuItem,
 		mergeSelectedFeaturesMenuItem;
 	
 	// Search items
@@ -106,14 +110,6 @@ public class DataIntegrationPanelMenuBar extends CommonMenuBar {
 				
 		alignmentMenu = new JMenu("Data set alignment");
 		alignmentMenu.setIcon(dataSetAlignmentIconSmall);
-		dataSetAlignmentSetupMenuItem = addItem(alignmentMenu, 
-				MainActionCommands.DATA_SET_ALIGNMENT_SETUP_COMMAND, 
-				dataSetAlignmentIcon);		
-		deleteDataSetAlignmentMenuItem = addItem(alignmentMenu, 
-				MainActionCommands.DELETE_DATA_PIPELINE_ALIGNMENT_RESULTS_COMMAND, 
-				deleteDataSetAlignmentIcon);
-		
-		alignmentMenu.addSeparator();
 		
 		dataSetAlignmentManagerMenuItem = addItem(alignmentMenu, 
 				MainActionCommands.SHOW_DATA_PIPELINE_ALIGNMENT_MANAGER_COMMAND, 
@@ -121,15 +117,27 @@ public class DataIntegrationPanelMenuBar extends CommonMenuBar {
 		
 		alignmentMenu.addSeparator();
 		
-		showUnmatchedFromReferenceMenuItem = addItem(alignmentMenu, 
-				MainActionCommands.SHOW_UNMATCHED_FEATURES_FROM_REFERENCE_DATASET_COMMAND, 
-				showUnmatchedIcon);
-		
-		alignmentMenu.addSeparator();
-		
+		dataSetAlignmentSetupMenuItem = addItem(alignmentMenu, 
+				MainActionCommands.DATA_SET_ALIGNMENT_SETUP_COMMAND, 
+				dataSetAlignmentIcon);	
 		mergeSelectedFeaturesMenuItem = addItem(alignmentMenu, 
 				MainActionCommands.MERGE_DATA_FOR_MARKED_FEATURES_COMMAND, 
 				mergeIcon);
+		
+		alignmentMenu.addSeparator();
+		
+		deleteDataSetAlignmentMenuItem = addItem(alignmentMenu, 
+				MainActionCommands.DELETE_DATA_PIPELINE_ALIGNMENT_RESULTS_COMMAND, 
+				deleteDataSetAlignmentIcon);
+		
+		alignmentMenu.addSeparator();
+		
+		showAlignmentSummaryMenuItem = addItem(alignmentMenu, 
+				MainActionCommands.SHOW_DATASET_ALIGNMENT_SUMMARY_COMMAND, 
+				showSummaryIcon);
+		exportAlignmentSummaryMenuItem = addItem(alignmentMenu, 
+				MainActionCommands.EXPORT_DATASET_ALIGNMENT_SUMMARY_COMMAND, 
+				exportSummaryIcon);
 			
 		add(alignmentMenu);
 

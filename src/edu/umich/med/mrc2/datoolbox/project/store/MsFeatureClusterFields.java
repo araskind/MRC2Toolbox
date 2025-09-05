@@ -31,5 +31,6 @@ public enum MsFeatureClusterFields {
 	annotationMapEntry,
 	chargeMismatch,
 	primaryFeature,
+	topMatchFeature,
 	;
 }

@@ -73,6 +73,10 @@ public class DataIntegrationFeatureSelectionTable extends FeatureSelectionTable 
 				.setCellRenderer(radioRenderer);
 		columnModel.getColumnById(DataIntegrationFeatureSelectionTableModel.ID_COLUMN)
 				.setCellEditor(radioEditor);
+		columnModel.getColumnById(DataIntegrationFeatureSelectionTableModel.TOP_MATCH_COLUMN)
+			.setCellRenderer(radioRenderer);
+		columnModel.getColumnById(DataIntegrationFeatureSelectionTableModel.TOP_MATCH_COLUMN)
+			.setCellEditor(radioEditor);		
 		columnModel.getColumnById(DataIntegrationFeatureSelectionTableModel.FEATURE_COLUMN)
 				.setCellRenderer(cfRenderer);
 		columnModel.getColumnById(DataIntegrationFeatureSelectionTableModel.SCORE_COLUMN)
@@ -96,8 +100,13 @@ public class DataIntegrationFeatureSelectionTable extends FeatureSelectionTable 
 		
 		columnModel.getColumnById(DataIntegrationFeatureSelectionTableModel.ID_COLUMN).setMaxWidth(50);
 		columnModel.getColumnById(DataIntegrationFeatureSelectionTableModel.MERGE_COLUMN).setMaxWidth(80);
+		columnModel.getColumnById(DataIntegrationFeatureSelectionTableModel.TOP_MATCH_COLUMN).setMaxWidth(80);
+		columnModel.getColumnById(DataIntegrationFeatureSelectionTableModel.ID_COLUMN).setMinWidth(30);
+		columnModel.getColumnById(DataIntegrationFeatureSelectionTableModel.MERGE_COLUMN).setMinWidth(50);
+		columnModel.getColumnById(DataIntegrationFeatureSelectionTableModel.TOP_MATCH_COLUMN).setMinWidth(50);
 		fixedWidthColumns.add(model.getColumnIndex(DataIntegrationFeatureSelectionTableModel.ID_COLUMN));
 		fixedWidthColumns.add(model.getColumnIndex(DataIntegrationFeatureSelectionTableModel.MERGE_COLUMN));
+		fixedWidthColumns.add(model.getColumnIndex(DataIntegrationFeatureSelectionTableModel.TOP_MATCH_COLUMN));
 
 		finalizeLayout();
 	}
@@ -135,9 +144,7 @@ public class DataIntegrationFeatureSelectionTable extends FeatureSelectionTable 
 								+ " data pipeline may be merged.";
 						MessageDialog.showWarningMsg(
 								message, DataIntegrationFeatureSelectionTable.this);
-						model.removeTableModelListener(modelListener);
-						((DataIntegrationFeatureSelectionTableModel)model).reloadData();
-						model.addTableModelListener(modelListener);
+						reloadData();
 						return;
 				}
 				else {
@@ -145,9 +152,27 @@ public class DataIntegrationFeatureSelectionTable extends FeatureSelectionTable 
 					activeCluster.markFeatureForMerging(selectedFeature, included);
 				}
 			}
-			model.removeTableModelListener(modelListener);
-			((DataIntegrationFeatureSelectionTableModel)model).reloadData();
-			model.addTableModelListener(modelListener);
+			if (col == model.getColumnIndex(DataIntegrationFeatureSelectionTableModel.TOP_MATCH_COLUMN)) {
+				
+				boolean isTopMatch = (boolean)  model.getValueAt(row, col);
+				if(selectedFeature.equals(activeCluster.getPrimaryFeature())){
+					
+					if(isTopMatch) {
+						String message = "Top match must be other than primary feature.";
+						MessageDialog.showWarningMsg(
+								message, DataIntegrationFeatureSelectionTable.this);
+						reloadData();
+						return;
+					}
+				}
+				else {
+					if(isTopMatch)
+						activeCluster.setTopMatchFeature(selectedFeature);
+					else
+						activeCluster.setTopMatchFeature(null);
+				}				
+			}
+			reloadData();
 		}
 		
 		private boolean pipelineMatches(DataPipeline dataPipeline) {
@@ -156,6 +181,12 @@ public class DataIntegrationFeatureSelectionTable extends FeatureSelectionTable 
 			DataPipeline markedPipeline = activeCluster.getDataPipelineForFeature(firstMarked);
 			return dataPipeline.equals(markedPipeline);
 		}
+	}
+	
+	private void reloadData() {
+		model.removeTableModelListener(modelListener);
+		((DataIntegrationFeatureSelectionTableModel)model).reloadData();
+		model.addTableModelListener(modelListener);
 	}
 
 	@Override
