@@ -28,6 +28,8 @@ import javax.swing.Icon;
 import javax.swing.JScrollPane;
 
 import bibliothek.gui.dock.common.DefaultSingleCDockable;
+import edu.umich.med.mrc2.datoolbox.data.CompoundLibrary;
+import edu.umich.med.mrc2.datoolbox.data.DataPipelineAlignmentResults;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureCluster;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
@@ -73,5 +75,11 @@ public class DockableAlignedDataSetSummaryPanel extends DefaultSingleCDockable {
 
 	public Map<DataPipeline, Collection<MsFeature>> getSelectedFeaturesMap() {
 		return alignedDataSetSummaryTable.getSelectedFeaturesMap();
+	}
+
+	public void generateAlignmentSummary(
+			DataPipelineAlignmentResults alignmentResults, CompoundLibrary avgLib) {
+		alignedDataSetSummaryTable.setTableModelFromAlignmentResults(alignmentResults, avgLib);
+		
 	}
 }

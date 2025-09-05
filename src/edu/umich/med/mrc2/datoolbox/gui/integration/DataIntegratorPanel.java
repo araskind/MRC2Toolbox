@@ -42,6 +42,7 @@ import javax.swing.event.TreeSelectionEvent;
 
 import org.apache.commons.lang3.StringUtils;
 
+import edu.umich.med.mrc2.datoolbox.data.CompoundLibrary;
 import edu.umich.med.mrc2.datoolbox.data.DataPipelineAlignmentResults;
 import edu.umich.med.mrc2.datoolbox.data.LibraryMsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
@@ -60,6 +61,8 @@ import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.main.PanelList;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicFeatureTable;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
+import edu.umich.med.mrc2.datoolbox.gui.utils.IndeterminateProgressDialog;
+import edu.umich.med.mrc2.datoolbox.gui.utils.LongUpdateTask;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
@@ -223,21 +226,66 @@ public class DataIntegratorPanel extends ClusterDisplayPanel {
 			mergeDataForMarkedFeatures();
 		
 		if (command.equals(MainActionCommands.SHOW_DATASET_ALIGNMENT_SUMMARY_COMMAND.getName()))
-			showDatasetAlignmentSummary();
+			showDatasetAlignmentSummary(false);
 		
 		if (command.equals(MainActionCommands.EXPORT_DATASET_ALIGNMENT_SUMMARY_COMMAND.getName()))
-			exportDatasetAlignmentSummary();
-		
+			showDatasetAlignmentSummary(true);	
 	}
 	
-	private void showDatasetAlignmentSummary() {
+	private void showDatasetAlignmentSummary(boolean export) {
 		
 		if(alignmentResults == null)
 			return;
 		
-		//	TODO
+		DatasetAlignmentSummaryTask task = new DatasetAlignmentSummaryTask(export);
+		IndeterminateProgressDialog idp = 
+				new IndeterminateProgressDialog(
+						"Generating alignment summary ...", this.getContentPane(), task);
+		idp.setLocationRelativeTo(this.getContentPane());
+		idp.setVisible(true);
+	}
+
+	class DatasetAlignmentSummaryTask extends LongUpdateTask {
+
+		private boolean export;
+		
+		public DatasetAlignmentSummaryTask(boolean export) {
+			this.export = export;
+		}
+
+		@Override
+		public Void doInBackground() {
+
+			if(export) {
+				try {
+					exportDatasetAlignmentSummary();
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			else {
+				try {
+					generateAlignmentSummary();
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			return null;
+		}
 	}
 	
+	private void generateAlignmentSummary() {
+		
+		if(alignmentResults == null)
+			return;
+		
+		control.getController().setFocusedDockable(alignedDataSetSummaryPanel.intern(), true);
+		CompoundLibrary avgLib = currentExperiment.getAveragedFeatureLibraryForDataPipeline(activeDataPipeline);
+		alignedDataSetSummaryPanel.generateAlignmentSummary(alignmentResults, avgLib);
+	}
+		
 	private void exportDatasetAlignmentSummary() {
 		
 		if(alignmentResults == null)

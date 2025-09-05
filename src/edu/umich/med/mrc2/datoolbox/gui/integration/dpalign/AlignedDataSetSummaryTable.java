@@ -29,6 +29,8 @@ import java.util.TreeMap;
 import javax.swing.ListSelectionModel;
 import javax.swing.table.TableRowSorter;
 
+import edu.umich.med.mrc2.datoolbox.data.CompoundLibrary;
+import edu.umich.med.mrc2.datoolbox.data.DataPipelineAlignmentResults;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureCluster;
 import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureComparator;
@@ -78,6 +80,16 @@ public class AlignedDataSetSummaryTable extends FeatureSelectionTable {
 //				.setCellRenderer(pieChartFrequencyRenderer);
 
 		finalizeLayout();
+	}
+	
+	@Override
+	public Object getValueAt(int row, int column) {
+		
+		if(convertColumnIndexToModel(column) == 
+				model.getColumnIndex(AlignedDataSetSummaryTableModel.ORDER_COLUMN))
+			return row+1;
+		else
+			return super.getValueAt(row, column);
 	}
 
 	@Override
@@ -133,5 +145,10 @@ public class AlignedDataSetSummaryTable extends FeatureSelectionTable {
 	public int getFeatureRow(MsFeature f) {
 		// TODO Auto-generated method stub
 		return 0;
+	}
+
+	public void setTableModelFromAlignmentResults(
+			DataPipelineAlignmentResults alignmentResults, CompoundLibrary avgLib) {
+		((AlignedDataSetSummaryTableModel)model).setTableModelFromAlignmentResults(alignmentResults, avgLib);
 	}
 }
