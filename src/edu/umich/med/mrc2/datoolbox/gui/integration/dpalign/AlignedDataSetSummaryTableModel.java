@@ -35,6 +35,7 @@ import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTableModel;
 import edu.umich.med.mrc2.datoolbox.gui.tables.ColumnContext;
+import edu.umich.med.mrc2.datoolbox.utils.NormalizationUtils;
 
 public class AlignedDataSetSummaryTableModel extends BasicTableModel {
 
@@ -147,9 +148,23 @@ public class AlignedDataSetSummaryTableModel extends BasicTableModel {
 		if(cluster != null) {
 			topMatch = (LibraryMsFeature)cluster.getTopMatchFeature();
 			if(topMatch != null) {
+				
 				merged = topMatch.isMerged();				
-				correlation = cluster.getCorrelation(refLibFeature, topMatch);
+				//	correlation = cluster.getCorrelation(refLibFeature, topMatch);
 				pipeline = params.getQueryPipeline();
+				
+				rsdDifferencePooled = NormalizationUtils.calculateRelativeChange(
+						topMatch.getStatsSummary().getPooledRsd(), refLibFeature.getStatsSummary().getPooledRsd());
+				rsdDifferenceSample = NormalizationUtils.calculateRelativeChange(
+						topMatch.getStatsSummary().getSampleRsd(), refLibFeature.getStatsSummary().getSampleRsd());				
+				areaDifferencePooled = NormalizationUtils.calculateRelativeChange(
+						topMatch.getStatsSummary().getPooledMedian(), refLibFeature.getStatsSummary().getPooledMedian());
+				areaDifferenceSample = NormalizationUtils.calculateRelativeChange(
+						topMatch.getStatsSummary().getSampleMedian(), refLibFeature.getStatsSummary().getSampleMedian());
+				missingDifferencePooled = NormalizationUtils.calculateRelativeChange(
+						topMatch.getStatsSummary().getPooledMissingness(), refLibFeature.getStatsSummary().getPooledMissingness());
+				missingDifferenceSample = NormalizationUtils.calculateRelativeChange(
+						topMatch.getStatsSummary().getSampleMissingness(), refLibFeature.getStatsSummary().getSampleMissingness());
 			}
 		}
 		return new Object[]{

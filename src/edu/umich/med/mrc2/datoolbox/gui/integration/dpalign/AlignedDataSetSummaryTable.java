@@ -21,6 +21,7 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.integration.dpalign;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
@@ -29,14 +30,23 @@ import java.util.TreeMap;
 import javax.swing.ListSelectionModel;
 import javax.swing.table.TableRowSorter;
 
+import edu.umich.med.mrc2.datoolbox.data.CompoundIdentity;
 import edu.umich.med.mrc2.datoolbox.data.CompoundLibrary;
 import edu.umich.med.mrc2.datoolbox.data.DataPipelineAlignmentResults;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureCluster;
+import edu.umich.med.mrc2.datoolbox.data.compare.CompoundIdentityComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
+import edu.umich.med.mrc2.datoolbox.data.enums.CompoundIdentityField;
+import edu.umich.med.mrc2.datoolbox.data.format.CompoundIdentityFormat;
+import edu.umich.med.mrc2.datoolbox.data.format.MsFeatureFormat;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.gui.tables.FeatureSelectionTable;
+import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.AutoChoices;
+import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.TableFilterHeader;
+import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.FormattedDecimalRenderer;
+import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.IdentityWordWrapCellRenderer;
 
 public class AlignedDataSetSummaryTable extends FeatureSelectionTable {
 
@@ -52,32 +62,56 @@ public class AlignedDataSetSummaryTable extends FeatureSelectionTable {
 		featureSorter = new TableRowSorter<AlignedDataSetSummaryTableModel>(
 				(AlignedDataSetSummaryTableModel)model);
 		setRowSorter(featureSorter);
-		featureSorter.setComparator(model.getColumnIndex(AlignedDataSetSummaryTableModel.REFERENCE_FEATURE_COLUMN),
+		featureSorter.setComparator(model.getColumnIndex(
+				AlignedDataSetSummaryTableModel.REFERENCE_FEATURE_COLUMN),
 				new MsFeatureComparator(SortProperty.Name));
 
 		putClientProperty("terminateEditOnFocusLost", Boolean.TRUE);
 		setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 
-//		columnModel.getColumnById(AlignedDataSetFeatureTableModel.FEATURE_COLUMN)
-//				.setCellRenderer(cfRenderer);
-//		columnModel.getColumnById(AlignedDataSetFeatureTableModel.SCORE_COLUMN)
-//				.setCellRenderer(percentRenderer);
-//		columnModel.getColumnById(AlignedDataSetFeatureTableModel.RETENTION_COLUMN)
-//				.setCellRenderer(rtRenderer);
-//		columnModel.getColumnById(AlignedDataSetFeatureTableModel.BASE_PEAK_COLUMN)
-//				.setCellRenderer(mzRenderer);
-//		columnModel.getColumnById(AlignedDataSetFeatureTableModel.POOLED_MEAN_COLUMN)
-//				.setCellRenderer(pooledMeanRenderer);
-//		columnModel.getColumnById(AlignedDataSetFeatureTableModel.POOLED_RSD_COLUMN)
-//				.setCellRenderer(percentRenderer);
-//		columnModel.getColumnById(AlignedDataSetFeatureTableModel.POOLED_FREQUENCY_COLUMN)
-//				.setCellRenderer(pieChartFrequencyRenderer);
-//		columnModel.getColumnById(AlignedDataSetFeatureTableModel.SAMPLE_MEAN_COLUMN)
-//				.setCellRenderer(sampleMeanRenderer);
-//		columnModel.getColumnById(AlignedDataSetFeatureTableModel.SAMPLE_RSD_COLUMN)
-//				.setCellRenderer(percentRenderer);
-//		columnModel.getColumnById(AlignedDataSetFeatureTableModel.SAMPLE_FREQUENCY_COLUMN)
-//				.setCellRenderer(pieChartFrequencyRenderer);
+		columnModel.getColumnById(AlignedDataSetSummaryTableModel.FOUND_COLUMN)
+				.setCellRenderer(radioRenderer);
+		columnModel.getColumnById(AlignedDataSetSummaryTableModel.REFERENCE_FEATURE_COLUMN)
+				.setCellRenderer(cfRenderer);
+		columnModel.getColumnById(AlignedDataSetSummaryTableModel.COMPOUND_NAME_COLUMN)
+				.setCellRenderer(new IdentityWordWrapCellRenderer(CompoundIdentityField.NAME));
+		columnModel.getColumnById(AlignedDataSetSummaryTableModel.TOP_MATCH_COLUMN)
+				.setCellRenderer(cfRenderer);		
+		columnModel.getColumnById(AlignedDataSetSummaryTableModel.MERGED_COLUMN)
+				.setCellRenderer(radioRenderer);		
+		columnModel.getColumnById(AlignedDataSetSummaryTableModel.CORRELATION_COLUMN)
+				.setCellRenderer(new FormattedDecimalRenderer(new DecimalFormat("##.###"), true));
+		
+		columnModel.getColumnById(AlignedDataSetSummaryTableModel.POOLED_RSD_DIFFERENCE_COLUMN)
+				.setCellRenderer(percentRenderer);
+		columnModel.getColumnById(AlignedDataSetSummaryTableModel.SAMPLE_RSD_DIFFERENCE_COLUMN)
+				.setCellRenderer(percentRenderer);
+		columnModel.getColumnById(AlignedDataSetSummaryTableModel.POOLED_AREA_DIFFERENCE_COLUMN)
+				.setCellRenderer(percentRenderer);
+		columnModel.getColumnById(AlignedDataSetSummaryTableModel.SAMPLE_AREA_DIFFERENCE_COLUMN)
+				.setCellRenderer(percentRenderer);
+		columnModel.getColumnById(AlignedDataSetSummaryTableModel.POOLED_MISSING_DIFFERENCE_COLUMN)
+				.setCellRenderer(percentRenderer);
+		columnModel.getColumnById(AlignedDataSetSummaryTableModel.SAMPLE_MISSING_DIFFERENCE_COLUMN)
+				.setCellRenderer(percentRenderer);
+		columnModel.getColumnById(AlignedDataSetSummaryTableModel.BASE_PEAK_COLUMN)
+				.setCellRenderer(mzRenderer);
+		
+		columnModel.getColumnById(AlignedDataSetSummaryTableModel.ORDER_COLUMN).setMaxWidth(50);
+		columnModel.getColumnById(AlignedDataSetSummaryTableModel.FOUND_COLUMN).setMaxWidth(50);
+		columnModel.getColumnById(AlignedDataSetSummaryTableModel.MERGED_COLUMN).setMaxWidth(50);
+		fixedWidthColumns.add(model.getColumnIndex(AlignedDataSetSummaryTableModel.ORDER_COLUMN));
+		fixedWidthColumns.add(model.getColumnIndex(AlignedDataSetSummaryTableModel.FOUND_COLUMN));
+		fixedWidthColumns.add(model.getColumnIndex(AlignedDataSetSummaryTableModel.MERGED_COLUMN));
+		
+		thf = new TableFilterHeader(this, AutoChoices.ENABLED);
+		thf.getParserModel().setFormat(MsFeature.class, new MsFeatureFormat(SortProperty.Name));
+		thf.getParserModel().setComparator(MsFeature.class, new MsFeatureComparator(SortProperty.Name));
+		
+		thf.getParserModel().setFormat(CompoundIdentity.class, 
+				new CompoundIdentityFormat(CompoundIdentityField.NAME));
+		thf.getParserModel().setComparator(CompoundIdentity.class, 
+				new CompoundIdentityComparator(SortProperty.Name));
 
 		finalizeLayout();
 	}
@@ -91,12 +125,20 @@ public class AlignedDataSetSummaryTable extends FeatureSelectionTable {
 		else
 			return super.getValueAt(row, column);
 	}
+	
+	public void setTableModelFromAlignmentResults(
+			DataPipelineAlignmentResults alignmentResults, CompoundLibrary avgLib) {
+		thf.setTable(null);
+		((AlignedDataSetSummaryTableModel)model).setTableModelFromAlignmentResults(alignmentResults, avgLib);
+		thf.setTable(this);
+		adjustColumns();
+	}
 
 	@Override
 	public Collection<MsFeature> getSelectedFeatures() {
 
 		ArrayList<MsFeature> selected = new ArrayList<>();
-//		int col = getColumnModel().getColumnIndex(AlignedDataSetFeatureTableModel.FEATURE_COLUMN);
+//		int col = getColumnModel().getColumnIndex(AlignedDataSetSummaryTableModel.FEATURE_COLUMN);
 //
 //		for (int i : getSelectedRows()) {
 //
@@ -110,7 +152,7 @@ public class AlignedDataSetSummaryTable extends FeatureSelectionTable {
 	public MsFeature getSelectedFeature() {
 
 		MsFeature selected = null;
-//		int col = getColumnModel().getColumnIndex(AlignedDataSetFeatureTableModel.FEATURE_COLUMN);
+//		int col = getColumnModel().getColumnIndex(AlignedDataSetSummaryTableModel.FEATURE_COLUMN);
 //		int row = getSelectedRow();
 //
 //		if(row > -1)
@@ -123,8 +165,8 @@ public class AlignedDataSetSummaryTable extends FeatureSelectionTable {
 	public Map<DataPipeline, Collection<MsFeature>> getSelectedFeaturesMap() {
 
 		Map<DataPipeline, Collection<MsFeature>>featureMap = new TreeMap<>();
-//		int fcol = model.getColumnIndex(AlignedDataSetFeatureTableModel.FEATURE_COLUMN);
-//		int dpcol = model.getColumnIndex(AlignedDataSetFeatureTableModel.DATA_PIPELINE_COLUMN);
+//		int fcol = model.getColumnIndex(AlignedDataSetSummaryTableModel.FEATURE_COLUMN);
+//		int dpcol = model.getColumnIndex(AlignedDataSetSummaryTableModel.DATA_PIPELINE_COLUMN);
 //		for (int i : getSelectedRows()) {
 //			
 //			MsFeature rowFeature = (MsFeature) getValueAt(i, fcol);
@@ -145,10 +187,5 @@ public class AlignedDataSetSummaryTable extends FeatureSelectionTable {
 	public int getFeatureRow(MsFeature f) {
 		// TODO Auto-generated method stub
 		return 0;
-	}
-
-	public void setTableModelFromAlignmentResults(
-			DataPipelineAlignmentResults alignmentResults, CompoundLibrary avgLib) {
-		((AlignedDataSetSummaryTableModel)model).setTableModelFromAlignmentResults(alignmentResults, avgLib);
 	}
 }

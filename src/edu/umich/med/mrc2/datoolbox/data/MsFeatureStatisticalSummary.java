@@ -81,6 +81,10 @@ public class MsFeatureStatisticalSummary implements Serializable, XmlStorable {
 	public double getPooledFrequency() {
 		return pooledFrequency;
 	}
+	
+	public double getPooledMissingness() {
+		return 1.0d - pooledFrequency;
+	}
 
 	public double getPooledMean() {
 		return pooledMean;
@@ -106,6 +110,10 @@ public class MsFeatureStatisticalSummary implements Serializable, XmlStorable {
 
 	public double getSampleFrequency() {
 		return sampleFrequency;
+	}
+	
+	public double getSampleMissingness() {
+		return 1.0d - sampleFrequency;
 	}
 
 	public double getSampleMean() {

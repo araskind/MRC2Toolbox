@@ -282,7 +282,8 @@ public class DataIntegratorPanel extends ClusterDisplayPanel {
 			return;
 		
 		control.getController().setFocusedDockable(alignedDataSetSummaryPanel.intern(), true);
-		CompoundLibrary avgLib = currentExperiment.getAveragedFeatureLibraryForDataPipeline(activeDataPipeline);
+		CompoundLibrary avgLib = currentExperiment.getAveragedFeatureLibraryForDataPipeline(
+				alignmentResults.getAlignmentSettings().getReferencePipeline());
 		alignedDataSetSummaryPanel.generateAlignmentSummary(alignmentResults, avgLib);
 	}
 		
@@ -645,6 +646,12 @@ public class DataIntegratorPanel extends ClusterDisplayPanel {
 		else
 			clearPanel();
 	}	
+	
+	@Override
+	public synchronized void clearPanel() {
+		super.clearPanel();
+		alignedDataSetSummaryPanel.clearPanel();
+	}
 
 	@Override
 	public void reloadDesign() {

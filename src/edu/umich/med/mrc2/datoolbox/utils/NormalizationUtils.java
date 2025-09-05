@@ -228,4 +228,16 @@ public class NormalizationUtils {
         }
         return new Range(min, max);
 	}
+	
+	public static double calculateRelativeChange(double valueOne, double valueTwo) {
+		
+		double divisor = valueOne;
+		if(valueOne == 0.0d)
+			divisor = valueTwo;
+		
+		if(divisor == 0.0d)
+			return 0.0d;
+		else
+			return (valueOne - valueTwo) / divisor;
+	}
 }

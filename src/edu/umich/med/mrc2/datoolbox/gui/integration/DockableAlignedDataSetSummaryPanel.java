@@ -82,4 +82,8 @@ public class DockableAlignedDataSetSummaryPanel extends DefaultSingleCDockable {
 		alignedDataSetSummaryTable.setTableModelFromAlignmentResults(alignmentResults, avgLib);
 		
 	}
+	
+	public void clearPanel() {
+		alignedDataSetSummaryTable.clearTable();
+	}
 }
