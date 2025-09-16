@@ -105,6 +105,7 @@ import edu.umich.med.mrc2.datoolbox.gui.main.DockableMRC2ToolboxPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainWindow;
 import edu.umich.med.mrc2.datoolbox.gui.main.PanelList;
+import edu.umich.med.mrc2.datoolbox.gui.mzdelta.MZDeltaAnalysisDialog;
 import edu.umich.med.mrc2.datoolbox.gui.mzfreq.MzFrequencyAnalysisResultsDialog;
 import edu.umich.med.mrc2.datoolbox.gui.mzfreq.MzFrequencyAnalysisSetupDialog;
 import edu.umich.med.mrc2.datoolbox.gui.plot.lcms.spectrum.DockableSpectumPlot;
@@ -190,6 +191,7 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 	private ExperimentPooledSampleManagerDialog experimentPooledSampleManagerDialog;
 	private MultiMSFeatureQCPlotFrame multiSpectraPlotFrame;
 	private FeatureAveragingSetupDialog featureAveragingSetupDialog;
+	private MZDeltaAnalysisDialog mzDeltaAnalysisDialog;
 
 	private static final Icon componentIcon = GuiUtils.getIcon("barChart", 16);
 	private static final Icon loadLibraryIcon = GuiUtils.getIcon("loadLibrary", 24);
@@ -564,11 +566,37 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 			if (command.equals(MainActionCommands.EXPORT_FEATURE_STATISTICS_COMMAND.getName()))
 				exportStatisticsForActiveFeatureSet();
 			
+			if (command.equals(MainActionCommands.SET_UP_MZ_DIFFERENCE_ANALYSIS_COMMAND.getName()))
+				setUpMZDifferenceAnalysis();
+					
+			if (command.equals(MainActionCommands.RUN_MZ_DIFFERENCE_ANALYSIS_COMMAND.getName()))
+				runMZDifferenceAnalysis();
+
 //			if (command.equals(MainActionCommands.GET_DATA_MATRIX_FOR_FEATURE_SET_AND_DESIGN.getName()))
 //				createDataMatrixForActiveFeatureSet();
 		}	
 	}
 
+	private void setUpMZDifferenceAnalysis() {
+		// TODO Auto-generated method stub
+		
+		mzDeltaAnalysisDialog = new MZDeltaAnalysisDialog(this);
+		mzDeltaAnalysisDialog.setLocationRelativeTo(this.getContentPane());
+		mzDeltaAnalysisDialog.setVisible(true);
+	}
+
+	private void runMZDifferenceAnalysis() {
+		// TODO Auto-generated method stub
+		Collection<String>errors = mzDeltaAnalysisDialog.validateFormData();
+		if(!errors.isEmpty()){
+		    MessageDialog.showErrorMsg(
+		            StringUtils.join(errors, "\n"), mzDeltaAnalysisDialog);
+		    return;
+		}
+		
+		mzDeltaAnalysisDialog.dispose();
+	}
+	
 //	private void createDataMatrixForActiveFeatureSet() {
 //
 //		if(activeMsFeatureSet == null)

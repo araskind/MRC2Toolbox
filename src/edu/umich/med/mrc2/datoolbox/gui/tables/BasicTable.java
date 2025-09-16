@@ -276,7 +276,7 @@ public class BasicTable extends JTable implements ActionListener{
 		try {
 			returnComp = super.prepareRenderer(renderer, row, column);
 		} catch (Exception e) {
-			//e.printStackTrace();
+			e.printStackTrace();
 		}
 		if (returnComp != null) {
 

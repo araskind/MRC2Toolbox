@@ -1409,10 +1409,14 @@ public enum MainActionCommands {
 	ADD_TAUTOMER_AS_NEW_COMPOUND_COMMAND("Add selected tautomer as new compound"),
 	REPLACE_PRIMARY_COMPOUND_WITH_TAUTOMER_COMMAND("Replace primary compound with selected tautomer"),
 	
-	//	M/Z frequency
+	//	M/Z frequency and difference
 	SET_UP_MZ_FREQUENCY_ANALYSIS_COMMAND("Set up M/Z frequency analysis"),
 	RUN_MZ_FREQUENCY_ANALYSIS_COMMAND("Run M/Z frequency analysis"),
 	SAVE_MZ_FREQUENCY_ANALYSIS_RESULTS_COMMAND("Save M/Z frequency analysis results"),
+	SET_UP_MZ_DIFFERENCE_ANALYSIS_COMMAND("Set up M/Z difference analysis"),
+	RUN_MZ_DIFFERENCE_ANALYSIS_COMMAND("Run M/Z difference analysis"),
+	SAVE_MZ_DIFFERENCE_ANALYSIS_RESULTS_COMMAND("Save M/Z difference analysis results"),
+	
 	
 	SHOW_MULTISPECTRA_DISPLAY_COMMAND("Show multispectra display dialog"),
 	

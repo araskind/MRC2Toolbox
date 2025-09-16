@@ -94,6 +94,7 @@ public class FeatureDataPanelMenuBar extends CommonMenuBar {
 	private static final Icon averageFeaturesIcon = GuiUtils.getIcon("avgSpectrum", 24);
 	private static final Icon openAvgFeatureLibraryIcon = GuiUtils.getIcon("openAvgFeatureLibrary", 24);
 	private static final Icon deleteAvgFeatureLibraryIcon = GuiUtils.getIcon("deleteLibrary", 24);
+	private static final Icon extractDeltasIcon = GuiUtils.getIcon("extractDeltas", 24);
 	
 
 	// Menus
@@ -121,6 +122,7 @@ public class FeatureDataPanelMenuBar extends CommonMenuBar {
 	private JMenuItem
 		calculateStatisticsMenuItem,
 		mzFrequencyMenuItem,
+		mzDifferenceMenuItem,
 		exportFeatureStatsMenuItem,
 		averageFeaturesMenuItem,
 		openAverageFeatureLibraryMenuItem,
@@ -215,6 +217,10 @@ public class FeatureDataPanelMenuBar extends CommonMenuBar {
 		mzFrequencyMenuItem = addItem(statsMenu, 
 				MainActionCommands.SET_UP_MZ_FREQUENCY_ANALYSIS_COMMAND, 
 				mzFrequencyIcon);
+		
+		mzDifferenceMenuItem = addItem(statsMenu, 
+				MainActionCommands.SET_UP_MZ_DIFFERENCE_ANALYSIS_COMMAND, 
+				extractDeltasIcon);
 		
 		exportFeatureStatsMenuItem = addItem(statsMenu, 
 				MainActionCommands.EXPORT_FEATURE_STATISTICS_COMMAND, 
