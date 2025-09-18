@@ -50,9 +50,9 @@ public class AgilentBatchFileRenamer {
 	public static void main(String[] args) {
 		
 		File sourceDirectory = 
-				new File("E:\\_Downloads\\_2_rename\\EX01542-NEG-20250912");
+				new File("E:\\_Downloads\\_2_rename\\EX01526");
 		File renameMapFile = new File(
-				"E:\\_Downloads\\_2_rename\\EX01542-NEG-20250912\\rename_map.txt");
+				"E:\\_Downloads\\_2_rename\\EX01526\\rename_map.txt");
 		batchDFileRename(sourceDirectory, renameMapFile);
 	}	
 	
@@ -69,7 +69,7 @@ public class AgilentBatchFileRenamer {
 
 		String[][] renameMapping = DelimitedTextParser.parseTextFile(
 				renameMapFile, MRC2ToolBoxConfiguration.getTabDelimiter());
-		Map<String,String>fileNameMap = new TreeMap<String,String>();
+		Map<String,String>fileNameMap = new TreeMap<>();
 		for(int i=0; i<renameMapping.length; i++)
 			fileNameMap.put(renameMapping[i][0], renameMapping[i][1]);
 			
@@ -83,7 +83,7 @@ public class AgilentBatchFileRenamer {
 			String newName = ddf.getAbsolutePath().replace(ddf.getName(), newFileName);
 			boolean sInfoRenamed = false;
 			try {
-				sInfoRenamed = renameDFileInSampleInfo(ddf, ddf.getName(), newName);
+				sInfoRenamed = renameDFileInSampleInfo(ddf, newName);
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -103,7 +103,7 @@ public class AgilentBatchFileRenamer {
 	}
 	
 	private static boolean renameDFileInSampleInfo(
-			File inputDFile, String oldName, String newName) throws Exception {
+			File inputDFile, String newName) throws Exception {
 
 		File sampleInfoFile = 
 				Paths.get(inputDFile.getAbsolutePath(), "AcqData", "sample_info.xml").toFile();

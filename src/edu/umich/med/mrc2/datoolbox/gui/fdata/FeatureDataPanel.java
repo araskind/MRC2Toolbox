@@ -106,6 +106,7 @@ import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainWindow;
 import edu.umich.med.mrc2.datoolbox.gui.main.PanelList;
 import edu.umich.med.mrc2.datoolbox.gui.mzdelta.MZDeltaAnalysisDialog;
+import edu.umich.med.mrc2.datoolbox.gui.mzdelta.MZDeltaAnalysisParametersObject;
 import edu.umich.med.mrc2.datoolbox.gui.mzfreq.MzFrequencyAnalysisResultsDialog;
 import edu.umich.med.mrc2.datoolbox.gui.mzfreq.MzFrequencyAnalysisSetupDialog;
 import edu.umich.med.mrc2.datoolbox.gui.plot.lcms.spectrum.DockableSpectumPlot;
@@ -592,7 +593,19 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 		    MessageDialog.showErrorMsg(
 		            StringUtils.join(errors, "\n"), mzDeltaAnalysisDialog);
 		    return;
-		}
+		}	
+		MZDeltaAnalysisParametersObject analysisParameters = new MZDeltaAnalysisParametersObject(
+				currentExperiment, 
+				activeDataPipeline,
+				currentExperiment.getActiveFeatureSetForDataPipeline(activeDataPipeline), 
+				mzDeltaAnalysisDialog.getAnchorMassSet(),
+				mzDeltaAnalysisDialog.getAnchorMassError(),
+				mzDeltaAnalysisDialog.getAnchorMassErrorType(), 
+				mzDeltaAnalysisDialog.getAnchorRTError(), 
+				mzDeltaAnalysisDialog.getRTSeriesMassSet(),
+				mzDeltaAnalysisDialog.getRTSeriesMassError(), 
+				mzDeltaAnalysisDialog.getRTSeriesMassErrorType(),
+				mzDeltaAnalysisDialog.getRTSeriesMinStep());
 		
 		mzDeltaAnalysisDialog.dispose();
 	}

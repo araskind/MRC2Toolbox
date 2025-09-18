@@ -75,7 +75,7 @@ public class ManufacturerWebPageLinkRenderer  extends DefaultTableCellRenderer
 			return this;
 		}
 		String linkLabel = vendor.getCatalogWebAddress();
-		if(!linkLabel.isEmpty()) {
+		if(linkLabel != null && !linkLabel.isEmpty()) {
 			
 			String urlString = linkLabel;
 			if(!urlString.startsWith("http"))

@@ -19,27 +19,42 @@
  *
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.gui.mzdelta;
+package edu.umich.med.mrc2.datoolbox.gui.tables;
 
-import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTableModel;
-import edu.umich.med.mrc2.datoolbox.gui.tables.ColumnContext;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
-public class MassDifferenceTableModel extends BasicTableModel {
+public class DoubleValueTableModel extends BasicTableModel {
 	
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	public static final String MZ_DIFF_COLUMN = "MZ difference";
+	public static final String VALUE_COLUMN = "Value";
 
-	public MassDifferenceTableModel() {
+	public DoubleValueTableModel() {
 		super();
 		columnArray = new ColumnContext[] {
-			new ColumnContext(MZ_DIFF_COLUMN, MZ_DIFF_COLUMN, Double.class, true),
+			new ColumnContext(VALUE_COLUMN, VALUE_COLUMN, Double.class, true),
 		};
 	}
 	
 	public void addNewRow() {		
 		addRow(new Object[] {null});
+	}
+
+	public void setTableModelFromValues(Collection<Double> values) {
+		
+		setRowCount(0);
+		if(values == null || values.isEmpty())
+			return;
+		
+		List<Object[]>rowData = new ArrayList<Object[]>();
+		for(Double d : values)
+			rowData.add(new Object[] {d});
+		
+		if(!rowData.isEmpty())
+			addRows(rowData);		
 	}
 }
