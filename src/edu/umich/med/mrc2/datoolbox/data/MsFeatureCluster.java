@@ -352,6 +352,26 @@ public class MsFeatureCluster implements Serializable, XmlStorable {
 		return false;
 	}
 	
+	public boolean matchesOnRt(
+			MsFeature cf, 
+			DataPipeline pipeline,
+			double rtWindow) {
+		if(clusterFeatures.get(pipeline) == null 
+				|| clusterFeatures.get(pipeline).isEmpty())
+			return false;
+		
+		double avgRt = featureRTStatistics.get(pipeline).getPercentile(50.0d);
+		Range refRtRange = new Range(avgRt - rtWindow, avgRt + rtWindow);
+		double frt = cf.getRetentionTime();
+		if(cf.getStatsSummary() != null)
+			frt = cf.getStatsSummary().getMedianObservedRetention();
+		
+		if(!refRtRange.contains(frt))
+			return false;
+		else
+			return true;
+	}
+	
 	public boolean matches(
 			MsFeature cf, 
 			DataPipeline pipeline,

@@ -31,6 +31,7 @@ import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.compress.utils.FileNameUtils;
 import org.jdom2.Document;
 import org.jdom2.Element;
 
@@ -41,12 +42,45 @@ public class MFESummarizer {
 
 	public static void main(String[] args) {
 
-		File mfeDir = new File("Y:\\DataAnalysis\\_Reports\\EX01526 - Human EDTA Tranche 4 plasma H20001805E\\A003 - Untargeted\\MFE\\POS\\CO300PK1000\\BATCH02");
+//		File mfeDir = new File("Y:\\DataAnalysis\\_Reports\\EX01526 - Human EDTA Tranche 4 plasma H20001805E\\"
+//				+ "A003 - Untargeted\\MFE\\POS\\CO300PK1000\\BATCH02");
+		
+		File rootDir = new File("Y:\\DataAnalysis\\_Reports\\EX01496 - Human EDTA Tranche 3 plasma X20001463K\\"
+				+ "A049 - Central carbon metabolism profiling\\MFE\\NEG");
+		String cefFolderMask = "CO900-Pk3000";
+		File outputFile = new File("Y:\\DataAnalysis\\_Reports\\EX01496 - Human EDTA Tranche 3 plasma X20001463K\\"
+				+ "A049 - Central carbon metabolism profiling\\MFE\\NEG\\EX01496-IONP-NEG-MFE-HC-counts.txt");
 		try {
-			readMFEfeatureCounts(mfeDir);
+			readMFEfeatureCountsFromMultipleDirectories(rootDir, cefFolderMask, outputFile);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		}
+	}
+	
+	private static void readMFEfeatureCountsFromMultipleDirectories(
+			File rootDir,
+			String cefFolderMask,
+			File outputFile) throws Exception{
+		List<Path>cefDirList =  FIOUtils.findDirectoriesByName(rootDir.toPath(), cefFolderMask);
+		List<String>featureCountsMap = new ArrayList<>();
+		for(Path cefDir : cefDirList) {
+			
+			List<Path>cefPathList = FIOUtils.findFilesByExtension(cefDir, "cef");
+			for(Path cefPath : cefPathList) {
+				
+				int featureCount = getCefFeatureCount(cefPath);
+				featureCountsMap.add(FileNameUtils.getBaseName(cefPath) + "\t" + featureCount);
+			}
+		}
+		try {
+		    Files.write(outputFile.toPath(), 
+		    		featureCountsMap,
+		            StandardCharsets.UTF_8,
+		            StandardOpenOption.CREATE, 
+		            StandardOpenOption.TRUNCATE_EXISTING);
+		} catch (IOException e) {
+		    e.printStackTrace();
 		}
 	}
 	
@@ -57,7 +91,7 @@ public class MFESummarizer {
 		for(Path cefPath : cefPathList) {
 			
 			int featureCount = getCefFeatureCount(cefPath);
-			featureCountsMap.add(cefPath.getFileName().toString() + "\t" + featureCount);
+			featureCountsMap.add(FileNameUtils.getBaseName(cefPath) + "\t" + featureCount);
 		}
 		Path outputPath = Paths.get(mfeDir.toString(), "FeatureCounts.txt");
 		try {

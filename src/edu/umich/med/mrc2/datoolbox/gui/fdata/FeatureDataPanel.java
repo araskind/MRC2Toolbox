@@ -140,6 +140,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.library.LibrarySearchTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.library.LoadDatabaseLibraryTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.stats.CalculateStatisticsTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.stats.ImputeMissingDataTask;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.stats.MZDeltaAnalysisTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.stats.MzFrequencyAnalysisTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.stats.MzFrequencyType;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.stats.RemoveEmptyFeaturesTask;
@@ -606,8 +607,10 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 				mzDeltaAnalysisDialog.getRTSeriesMassError(), 
 				mzDeltaAnalysisDialog.getRTSeriesMassErrorType(),
 				mzDeltaAnalysisDialog.getRTSeriesMinStep());
-		
 		mzDeltaAnalysisDialog.dispose();
+		MZDeltaAnalysisTask task = new MZDeltaAnalysisTask(analysisParameters);
+		task.addTaskListener(this);
+		MRC2ToolBoxCore.getTaskController().addTask(task);		
 	}
 	
 //	private void createDataMatrixForActiveFeatureSet() {
@@ -1847,7 +1850,10 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 				finalizeProFinderArchivePreprocessingTask((ProFinderArchivePreprocessingTask)e.getSource());
 			
 			if (e.getSource().getClass().equals(MsFeatureAveragingTask.class))
-				finalizeMsFeatureAveragingTask((MsFeatureAveragingTask)e.getSource());			
+				finalizeMsFeatureAveragingTask((MsFeatureAveragingTask)e.getSource());		
+			
+			if (e.getSource().getClass().equals(MZDeltaAnalysisTask.class))
+				finalizeMZDeltaAnalysisTask((MZDeltaAnalysisTask)e.getSource());	
 		}
 		if (e.getStatus() == TaskStatus.CANCELED || e.getStatus() == TaskStatus.ERROR) {
 			MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
@@ -1855,6 +1861,11 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 		}
 	}
 	
+	private void finalizeMZDeltaAnalysisTask(MZDeltaAnalysisTask source) {
+		// TODO Auto-generated method stub
+		
+	}
+
 	private void finalizeMsFeatureAveragingTask(MsFeatureAveragingTask task) {
 
 		CompoundLibrary averagedLibrary = task.getAveragedFeaturesLibrary();
