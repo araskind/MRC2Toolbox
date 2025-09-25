@@ -207,11 +207,17 @@ public abstract class CEFProcessingTask extends AbstractTask {
 				if(dbId.startsWith(DataPrefix.MS_LIBRARY_TARGET.getName())
 						&& !dbId.startsWith(DataPrefix.MS_FEATURE.getName())
 						&& !dbId.startsWith(DataPrefix.MS_LIBRARY_TARGET_OLD.getName())) {
-					
+	
 					feature.clearIdentification();
 					feature.getPrimaryIdentity().setScoreCarryOver(id.getScoreCarryOver());
 					feature.setTargetId(dbId);
-				}					
+				}
+				//	TMP for old data
+//				if(feature.getTargetId() == null) {	
+//					feature.clearIdentification();
+//					feature.getPrimaryIdentity().setScoreCarryOver(id.getScoreCarryOver());
+//					feature.setTargetId(dbId);
+//				}	
 			}	
 			feature.setTopScoreIdAsDefault();
 		}

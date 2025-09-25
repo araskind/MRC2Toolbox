@@ -231,9 +231,9 @@ public class WorklistUtils {
 		for(WorklistItem item : items) {
 			
 			DataFile df = item.getDataFile();		
-			ExperimentalSample sample = design.getSampleByDataFile(df);
+			ExperimentalSample sample = design.getSampleByDataFile(df);			
 			if(!sampleFileMap.containsKey(sample))
-				sampleFileMap.put(sample, new ArrayList<DataFile>());
+				sampleFileMap.put(sample, new ArrayList<>());
 			
 			sampleFileMap.get(sample).add(df);
 		}
@@ -270,7 +270,7 @@ public class WorklistUtils {
 		for(WorklistItem item : worklist.getTimeSortedWorklistItems()) {
 			
 			DataFile df = item.getDataFile();		
-			ExperimentalSample sample = design.getSampleByDataFile(df);
+			ExperimentalSample sample = design.getSampleByDataFile(df);		
 			if(sample.getSampleType().equals(ReferenceSamplesManager.sampleLevel))
 				fileMotrPacSampleTypeMap.put(df,"Sample");
 			else {				

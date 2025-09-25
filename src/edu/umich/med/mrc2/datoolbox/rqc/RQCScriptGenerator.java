@@ -50,7 +50,15 @@ import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
 public class RQCScriptGenerator {
 	
 	public static void generateMultiBatchMetabCombinerAlignmentScriptScript(
-			File rWorkingDir,File inputMap) {
+			File rWorkingDir,
+			File inputMap) {
+		generateMultiBatchMetabCombinerAlignmentScriptScript(rWorkingDir, inputMap, 0);
+	}
+	
+	public static void generateMultiBatchMetabCombinerAlignmentScriptScript(
+			File rWorkingDir,
+			File inputMap,
+			int numMissingBatchesAllowed) {
 		
 		//	List<String>qcSummaryNames = new ArrayList<String>();
 		List<String>rscriptParts = new ArrayList<String>();
@@ -138,10 +146,10 @@ public class RQCScriptGenerator {
 				"\", quote = F, sep = \"\\t\", na = \"\", row.names = FALSE)");
 			
 		//	Align all to all and save results
-		Map<String,String>matchListMap = new TreeMap<String,String>();
-		ArrayList<String>listParts = new ArrayList<String>();
-		Map<SummarizationDataInputObject,String>overlapObjectMap = 
-				new HashMap<SummarizationDataInputObject,String>();
+		Map<String,String>matchListMap = new TreeMap<>();
+		ArrayList<String>listParts = new ArrayList<>();
+		Map<SummarizationDataInputObject,String>overlapObjectMap = new HashMap<>();
+		Map<SummarizationDataInputObject,String>unionObjectMap = new HashMap<>();
 		
 		//	Create data frame to keep track of alignment results
 		rscriptParts.add("alignment.summary.df <- data.frame(dsx = character(), "
@@ -175,8 +183,12 @@ public class RQCScriptGenerator {
 			rscriptParts.add(firstDataSet 
 					+ ".overlap <- Reduce(intersect, match.list.collection)");	
 			overlapObjectMap.put(io, firstDataSet + ".overlap");
+			rscriptParts.add(firstDataSet 
+					+ ".union <- Reduce(union, match.list.collection)");	
+			unionObjectMap.put(io, firstDataSet + ".union");
 			rscriptParts.add("rm(match.list.collection)");			
 		}
+		//	Overlap of features from master batch
 		listParts.clear();
 		String overlapsListString = "overlap.list.collection <- list(";
 		for(Entry<SummarizationDataInputObject,String>ent : overlapObjectMap.entrySet()) {
@@ -222,7 +234,7 @@ public class RQCScriptGenerator {
 		rscriptParts.add("adduct.plot <- ggplot(data.out, aes(max.frequency)) "
 				+ "+ geom_bar(color=\"darkblue\", fill=\"lightblue\", alpha=0.5) "
 				+ "+ scale_x_binned(show.limits = T) + ggtitle(\"Adduct Reproducibility\")");
-		rscriptParts.add("ggsave(\"AdductReproducibility.png\", plot = adduct.plot,  width = 6, height = 6)");
+		rscriptParts.add("ggsave(\"AdductReproducibility.pdf\", plot = adduct.plot,  width = 6, height = 6, device = \"pdf\")");
 		
 		//	Join actual data using best batch and write out resulsts
 		rscriptParts.add("\n## Create merged aligned data ####");
@@ -244,7 +256,82 @@ public class RQCScriptGenerator {
 		rscriptParts.add("write.table(merged.data, file = \"MergedAlignedData.txt\", "
 				+ "quote = F, sep = \"\\t\", na = \"\", row.names = FALSE)");
 		
-		
+		/*
+		 *	Data with missing batches allowed		
+		 */
+		if(numMissingBatchesAllowed > 0) {
+			
+			rscriptParts.add("\n## Create cummulative metadata for extended alignment (with missing batches allowed) ####\n");
+			// Union of features from master batch
+			listParts.clear();
+			String unionsListString = "union.list.collection <- list(";
+			for(Entry<SummarizationDataInputObject,String>ent : unionObjectMap.entrySet()) {
+				
+				String key = ent.getKey().getField(SummaryInputColumns.EXPERIMENT) + "." 
+						+ ent.getKey().getField(SummaryInputColumns.BATCH);
+				listParts.add("\"" + key + "\" = " + ent.getValue());
+			}
+			unionsListString += StringUtils.join(listParts, ",") + ")\n";
+			rscriptParts.add(unionsListString);
+			rscriptParts.add("match.lengths.union <- sapply(union.list.collection, length)");
+			rscriptParts.add("primary.batch.name.union <- names(which.max(match.lengths.union))[[1]]");
+			
+			rscriptParts.add("meta.data.names.union.list <- as.vector("
+					+ "alignment.summary.df[alignment.summary.df$dsx == primary.batch.name.union,]$meta.data)");
+			rscriptParts.add("meta.data.union.list <- mget(meta.data.names.union.list)");
+			rscriptParts.add("meta.data.union.joined <- Reduce(full_join, meta.data.union.list)");
+			rscriptParts.add("meta.data.union.joined.mz <- select(meta.data.union.joined, 1, contains(\"mz\"))");
+			rscriptParts.add("meta.data.union.joined.mz$na_count <- apply(meta.data.union.joined.mz, 1, function(x) sum(is.na(x)))");
+			
+			String missingBatchedCutoff = Integer.toString(numMissingBatchesAllowed + 1);
+			rscriptParts.add("meta.data.union.joined <- meta.data.union.joined.mz %>% select(1, \"na_count\") "
+					+ "%>% filter(na_count < " + missingBatchedCutoff + ") %>% left_join(meta.data.union.joined)");
+			rscriptParts.add("");
+			rscriptParts.add("meta.data.union.joined <- meta.data.union.joined %>%  rowwise() %>%  "
+					+ "mutate(mzMedian = median(c_across(starts_with(\"mz\")), na.rm = T))");
+			rscriptParts.add("meta.data.union.joined <- meta.data.union.joined %>%  rowwise() %>%  "
+					+ "mutate(rtMedian = median(c_across(starts_with(\"rt\")), na.rm = T))");
+			rscriptParts.add("meta.data.union.joined <- meta.data.union.joined %>%  rowwise() %>%  "
+					+ "mutate(FeatureID = paste(\"UNK_\", mzMedian, \"_\", rtMedian, sep = \"\"))");
+			rscriptParts.add("meta.data.union.joined[meta.data.union.joined == \"[M + H]\"] <- \"[M+H]+\"");
+			rscriptParts.add("meta.data.union.joined[meta.data.union.joined == \"[M - H]\"] <- \"[M-H]-\"");
+			rscriptParts.add("adduct.data.union <- meta.data.union.joined %>% select( contains(\"adduct\"))");
+			rscriptParts.add("adduct.data.union.copy <- adduct.data.union");
+			rscriptParts.add("adduct.data.union$max.frequency <- apply(adduct.data.union, 1, "
+					+ "function(x) max(tabulate(as.factor(x))) / sum(tabulate(as.factor(x))))");
+			rscriptParts.add("adduct.data.union$common.adduct <- apply(adduct.data.union.copy,1,"
+					+ "function(x) names(which.max(table(x))))");
+			rscriptParts.add("data.out.union <- cbind(meta.data.union.joined, select(adduct.data.union, "
+					+ "c(\"common.adduct\", \"max.frequency\")))");
+			rscriptParts.add("write.table(data.out.union, file = \"CummulativeMetaDataEFS.txt\", "
+					+ "quote = F, sep = \"\\t\", na = \"\", row.names = FALSE)");
+			rscriptParts.add("adduct.plot.union <- ggplot(data.out.union, aes(max.frequency)) "
+					+ "+ geom_bar(color=\"darkblue\", fill=\"lightblue\", alpha=0.5) + scale_x_binned(show.limits = T) "
+					+ "+ ggtitle(\"Adduct Reproducibility (extended feature set)\")");
+			rscriptParts.add("ggsave(\"AdductReproducibilityEFS.pdf\", plot = adduct.plot.union,  "
+					+ "width = 6, height = 6, device = \"pdf\")");
+			rscriptParts.add("");
+			rscriptParts.add("## Create merged aligned data for extended alignment (with missing batches allowed) ####");
+			rscriptParts.add("secondary.batch.list.union <- as.vector("
+					+ "alignment.summary.df[alignment.summary.df$dsx == primary.batch.name.union,]$dsy)");
+			rscriptParts.add("meta.data.union <- meta.data.union.joined %>% "
+					+ "select(all_of(c(\"FeatureID\",\"mzMedian\",\"rtMedian\",\"na_count\","
+					+ "primary.batch.name.union,secondary.batch.list.union)))");
+			rscriptParts.add("merged.data.union <- read.delim(paste(primary.batch.name.union, "
+					+ "\"-cleanData.txt\", sep = \"\"), check.names=FALSE)");
+			rscriptParts.add("colnames(merged.data.union)[1] <- primary.batch.name.union");
+			rscriptParts.add("merged.data.union <- left_join(meta.data.union, merged.data.union, by = primary.batch.name.union)");
+			rscriptParts.add("for(sec.batch.name in  secondary.batch.list.union){");
+			rscriptParts.add("  sec.batch.data <- read.delim(paste(sec.batch.name, \"-cleanData.txt\", sep = \"\"), check.names=FALSE)");
+			rscriptParts.add("  colnames(sec.batch.data)[1] <- sec.batch.name");
+			rscriptParts.add("  merged.data.union <- left_join(merged.data.union, sec.batch.data, by = sec.batch.name)");
+			rscriptParts.add("}");
+			rscriptParts.add("columns.to.remove.from.merged.data.union <- names(overlap.list.collection)");
+			rscriptParts.add("merged.data.union <- merged.data.union %>% select(-any_of(columns.to.remove.from.merged.data.union))");
+			rscriptParts.add("write.table(merged.data.union, file = \"MergedAlignedDataEFS.txt\", "
+					+ "quote = F, sep = \"\\t\", na = \"\", row.names = FALSE)");
+		}
+
 		
 		String rScriptFileName = "MetabCombinerMultiAlignment-" + FIOUtils.getTimestamp() + ".R";
 		Path outputPath = Paths.get(

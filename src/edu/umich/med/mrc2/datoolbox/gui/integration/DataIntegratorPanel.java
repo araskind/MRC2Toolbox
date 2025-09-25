@@ -57,6 +57,7 @@ import edu.umich.med.mrc2.datoolbox.gui.communication.FeatureSetEvent;
 import edu.umich.med.mrc2.datoolbox.gui.dereplication.ClusterDisplayPanel;
 import edu.umich.med.mrc2.datoolbox.gui.integration.dpalign.DataSetAlignmentManager;
 import edu.umich.med.mrc2.datoolbox.gui.integration.dpalign.DataSetAlignmentSetupDialog;
+import edu.umich.med.mrc2.datoolbox.gui.integration.mcr.MetabCombinerScriptDialog;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.main.PanelList;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicFeatureTable;
@@ -230,8 +231,18 @@ public class DataIntegratorPanel extends ClusterDisplayPanel {
 		
 		if (command.equals(MainActionCommands.EXPORT_DATASET_ALIGNMENT_SUMMARY_COMMAND.getName()))
 			showDatasetAlignmentSummary(true);	
+		
+		if (command.equals(MainActionCommands.GENERATE_METAB_COMBINER_SCRIPT_COMMAND.getName()))
+			showMetabCombinerScriptDialog();	
 	}
 	
+	private void showMetabCombinerScriptDialog() {
+
+		MetabCombinerScriptDialog metabCombinerScriptDialog = new MetabCombinerScriptDialog();
+		metabCombinerScriptDialog.setLocationRelativeTo(this.getContentPane());
+		metabCombinerScriptDialog.setVisible(true);
+	}
+
 	private void showDatasetAlignmentSummary(boolean export) {
 		
 		if(alignmentResults == null)

@@ -316,6 +316,11 @@ public class DataSetUtils {
 		//	TODO deal with by-batch stats
 		for (DataFile df : currentExperiment.getDataFilesForAcquisitionMethod(
 				activePipeline.getAcquisitionMethod())) {
+			
+			if(df.getParentSample() == null) {
+				System.out.println(df.getName());
+				continue;
+			}
 
 			if(df.getParentSample().hasLevel(ReferenceSamplesManager.masterPoolLevel))
 				pooledCount++;

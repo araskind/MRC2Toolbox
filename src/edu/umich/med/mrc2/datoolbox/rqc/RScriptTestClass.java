@@ -38,20 +38,35 @@ public class RScriptTestClass {
 		MRC2ToolBoxConfiguration.initConfiguration();
 
 		try {
-			testMetabCombinerAlignmentScript();
+			runEX01242RPNEGMultialignment();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 	
+	private static void runEX01242RPNEGMultialignment() {
+		
+		File rWorkingDir = new File(
+				"Y:\\DataAnalysis\\_Reports\\EX01242 - preCovid adipose Shipment W20000044X\\"
+				+ "A049 - Central carbon metabolism profiling\\Documents\\4MetabCombinner");
+		
+		File inputMap = new File(
+				"Y:\\DataAnalysis\\_Reports\\EX01242 - preCovid adipose Shipment W20000044X\\"
+				+ "A049 - Central carbon metabolism profiling\\Documents\\4MetabCombinner\\EX01242-IONP-NEG-withAdducts-MC-inputMap.txt");
+		
+		RQCScriptGenerator.generateMultiBatchMetabCombinerAlignmentScriptScript(rWorkingDir, inputMap, 2);
+	}
+	
 	private static void testMetabCombinerAlignmentScript() {
 
 		File rWorkingDir = new File(
-				"Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\A049 - Central carbon metabolism profiling\\Documents\\_4MetabCombiner\\CLEANED");
+				"Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\A049 - Central carbon metabolism profiling\\"
+				+ "Documents\\_4MetabCombiner\\CLEANED");
 		
 		File inputMap = new File(
-				"Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\A049 - Central carbon metabolism profiling\\Documents\\_4MetabCombiner\\CLEANED\\EX01190-IONP-NEG-CLEANED-withAdducts-MC-inputMap.txt");
+				"Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\A049 - Central carbon metabolism profiling\\"
+				+ "Documents\\_4MetabCombiner\\CLEANED\\EX01190-IONP-NEG-CLEANED-withAdducts-MC-inputMap.txt");
 		
 		RQCScriptGenerator.generateMultiBatchMetabCombinerAlignmentScriptScript(rWorkingDir, inputMap);
 	}

@@ -54,11 +54,59 @@ public class BatchMatch2MetabCombinerResultsComparator {
 		MRC2ToolBoxConfiguration.initConfiguration();
 
 		try {
-			compareEX01190RPPOSresults();
+			compareEX01094RPPOSresults();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+	
+	private static void compareEX01094RPPOSresults() {
+
+		File batchMatchFeatureData = new File(
+				"Y:\\DataAnalysis\\_Reports\\EX01242 - preCovid adipose Shipment W20000044X\\"
+				+ "A049 - Central carbon metabolism profiling\\Documents\\4MetabCombinner\\EX01242-IONP-NEG-BM-aligned-data.txt");
+		File metabCombinerFeatureData = new File(
+				"Y:\\DataAnalysis\\_Reports\\EX01242 - preCovid adipose Shipment W20000044X\\"
+				+ "A049 - Central carbon metabolism profiling\\Documents\\4MetabCombinner\\EX01242-IONP-NEG-MC-aligned-data.txt");	
+		File outputFile = new File(
+				"Y:\\DataAnalysis\\_Reports\\EX01242 - preCovid adipose Shipment W20000044X\\"
+				+ "A049 - Central carbon metabolism profiling\\Documents\\4MetabCombinner\\EX01242-IONP-NEG-BatchMatch-to-MetabCombiner-feature-overlay.txt");
+		
+		compareBatchMatchToMetabCombinerResults(
+				batchMatchFeatureData, metabCombinerFeatureData, outputFile, 20.0d, 0.05d);
+	}
+	
+	private static void compareEX01190IONPNEGresults() {
+
+		File batchMatchFeatureData = new File(
+				"Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\A049 - Central carbon metabolism profiling\\Report\\Final-IP-Neg\\"
+				+ "Unnamed\\EX01190-IONP-NEG-BM-aligned-data.txt");
+		File metabCombinerFeatureData = new File(
+				"Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\A049 - Central carbon metabolism profiling\\"
+				+ "Report\\Final-IP-Neg\\Unnamed\\EX01190-IONP-NEG-MC-aligned-data.txt");	
+		File outputFile = new File(
+				"Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\A049 - Central carbon metabolism profiling\\Report\\"
+				+ "Final-IP-Neg\\Unnamed\\EX01190-IONP-NEG-BatchMatch-to-MetabCombiner-feature-overlay.txt");
+		
+		compareBatchMatchToMetabCombinerResults(
+				batchMatchFeatureData, metabCombinerFeatureData, outputFile, 20.0d, 0.05d);
+	}	
+	
+	private static void compareEX01190RPNEGresults() {
+		
+		File batchMatchFeatureData = new File(
+				"Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\A003 - Untargeted\\Documents\\NEG\\"
+				+ "_4MetabCombiner\\ALL\\EX01190_RP_NEG_BatchMatch_features.txt");
+		File metabCombinerFeatureData = new File(
+				"Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\A003 - Untargeted\\Documents\\NEG\\"
+				+ "_4MetabCombiner\\ALL\\EX01190_RP_NEG_MetabCombiner_features.txt");
+		File outputFile = new File(
+				"Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\A003 - Untargeted\\Documents\\NEG\\"
+				+ "_4MetabCombiner\\ALL\\EX01190-RP-NEG-BatchMatch-to-MetabCombiner-feature-overlay.txt");
+		
+		compareBatchMatchToMetabCombinerResults(
+				batchMatchFeatureData, metabCombinerFeatureData, outputFile, 20.0d, 0.05d);
 	}
 	
 	private static void compareEX01190RPPOSresults() {

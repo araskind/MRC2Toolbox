@@ -158,7 +158,7 @@ public class OpenMetabolomicsProjectTask extends OpenStandaloneProjectAbstractTa
 		project.setProjectType(ProjectType.DATA_ANALYSIS_NEW_FORMAT);		
 		if(project.getDataPipelines().isEmpty()) {
 			parseExperimentDesign(projectElement);
-			return null;
+			return projectElement;
 		}		
 		//	That is necessary to correctly associate samples with data files in the design
 		parseAcquisitionMethodDataFileMap(projectElement);		

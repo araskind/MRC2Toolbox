@@ -57,6 +57,7 @@ public class DataIntegrationPanelMenuBar extends CommonMenuBar {
 	private static final Icon mergeIcon = GuiUtils.getIcon("merge", 24);
 	private static final Icon showSummaryIcon = GuiUtils.getIcon("calcStats", 24);
 	private static final Icon exportSummaryIcon = GuiUtils.getIcon("extractList", 24);
+	private static final Icon generateMetabCombinerScriptIcon = GuiUtils.getIcon("rScriptMC", 24);
 		
 	// Menus
 	private JMenu
@@ -78,7 +79,8 @@ public class DataIntegrationPanelMenuBar extends CommonMenuBar {
 		showUnmatchedFromReferenceMenuItem,
 		showAlignmentSummaryMenuItem,
 		exportAlignmentSummaryMenuItem,
-		mergeSelectedFeaturesMenuItem;
+		mergeSelectedFeaturesMenuItem,
+		generateMetabCombinerScriptMenuItem;
 	
 	// Search items
 	private JMenuItem
@@ -138,6 +140,12 @@ public class DataIntegrationPanelMenuBar extends CommonMenuBar {
 		exportAlignmentSummaryMenuItem = addItem(alignmentMenu, 
 				MainActionCommands.EXPORT_DATASET_ALIGNMENT_SUMMARY_COMMAND, 
 				exportSummaryIcon);
+		
+		alignmentMenu.addSeparator();
+		
+		generateMetabCombinerScriptMenuItem = addItem(alignmentMenu, 
+				MainActionCommands.GENERATE_METAB_COMBINER_SCRIPT_COMMAND, 
+				generateMetabCombinerScriptIcon);
 			
 		add(alignmentMenu);
 

@@ -156,6 +156,9 @@ public class CefDataImportTask extends CEFProcessingTask {
 		coordinates[0] = fileIndex;
 		
 		for(MsFeature feature : inputFeatureList) {
+			
+			if(feature.getTargetId() == null)
+				System.out.println(feature.getName() + " not in the library?");
 
 			SimpleMsFeature msf = new SimpleMsFeature(feature, dataPipeline);
 			msf.setRtRange(feature.getRtRange());
