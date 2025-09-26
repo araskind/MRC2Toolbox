@@ -32,9 +32,6 @@ import edu.umich.med.mrc2.datoolbox.gui.tables.ColumnContext;
 
 public class MinimalDataFileListingTableModel extends BasicTableModel {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = -707103850490099320L;
 	public static final String DATA_FILE_COLUMN = "Data file";
 

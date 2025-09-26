@@ -82,7 +82,7 @@ public class MinimalDataFileListingTable extends BasicTable {
 	
 	public Collection<File>getSelectedFiles(){
 		
-		Collection<File>selected = new ArrayList<File>();
+		Collection<File>selected = new ArrayList<>();
 		if(getSelectedRowCount() == 0)
 			return selected;
 		
@@ -95,7 +95,7 @@ public class MinimalDataFileListingTable extends BasicTable {
 	
 	public Collection<File>getAllFiles(){
 		
-		Collection<File>files = new ArrayList<File>();
+		Collection<File>files = new ArrayList<>();
 		int fileColumn = model.getColumnIndex(MinimalDataFileListingTableModel.DATA_FILE_COLUMN);
 		for(int i=0; i<model.getRowCount(); i++)
 			files.add((File)model.getValueAt(i,fileColumn));

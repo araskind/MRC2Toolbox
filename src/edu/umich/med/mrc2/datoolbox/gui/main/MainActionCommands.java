@@ -423,6 +423,8 @@ public enum MainActionCommands {
 	MERGE_DATA_FOR_MARKED_FEATURES_COMMAND("Merge data for marked features"),
 	EXPORT_DATASET_ALIGNMENT_SUMMARY_COMMAND("Export dataset alignment summary"),
 	GENERATE_METAB_COMBINER_SCRIPT_COMMAND("Generate MetabCombiner script"),
+	SELECT_METAB_COMBINER_INPUT_FILES_COMMAND("Select MetabCombiner input files"),
+	CLEAR_METAB_COMBINER_INPUT_FILES_COMMAND("Clear MetabCombiner input files"),
 	
 	// Sorting commands
 	SORT_BY_AREA_COMMAND("Sort by area (high to low)"),
