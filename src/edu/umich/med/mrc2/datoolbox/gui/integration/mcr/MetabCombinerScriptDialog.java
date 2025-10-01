@@ -38,6 +38,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.prefs.Preferences;
 
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -73,6 +74,7 @@ import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
+import edu.umich.med.mrc2.datoolbox.utils.Range;
 
 public class MetabCombinerScriptDialog extends JDialog implements ActionListener, BackedByPreferences {
 
@@ -84,6 +86,32 @@ public class MetabCombinerScriptDialog extends JDialog implements ActionListener
 	private static final Icon dialogIcon = GuiUtils.getIcon("rScriptMC", 32);
 	private Preferences preferences;
 	public static final String WORK_DIRECTORY = "WORK_DIRECTORY";
+	public static final String ALIGNMENT_RT_RANGE = "ALIGNMENT_RT_RANGE";
+	public static final String MAX_MISSING_PERCENT = "MAX_MISSING_PERCENT";
+	public static final String PEAK_ABUNDANCE_MEASURE = "PEAK_ABUNDANCE_MEASURE";
+	public static final String BIN_GAP = "BIN_GAP";
+	public static final String DATA_SET_RT_ORDER_FLAG = "DATA_SET_RT_ORDER_FLAG";
+	public static final String IMPUTE_MISSING = "IMPUTE_MISSING";
+	public static final String ANCHOR_MZ_TOLERANCE = "ANCHOR_MZ_TOLERANCE";
+	public static final String ANCHOR_AREA_QUANTILE_TOLERANCE = "ANCHOR_AREA_QUANTILE_TOLERANCE";
+	public static final String ANCHOR_RT_QUANTILE_TOLERANCE = "ANCHOR_RT_QUANTILE_TOLERANCE";
+	public static final String PRIMARY_DATASET_ANCHOR_RT_EXCLUSION_WINDOW = "PRIMARY_DATASET_ANCHOR_RT_EXCLUSION_WINDOW";
+	public static final String SECONDARY_DATASET_ANCHOR_RT_EXCLUSION_WINDOW = "SECONDARY_DATASET_ANCHOR_RT_EXCLUSION_WINDOW";
+	public static final String SCORING_MZ_WEIGHT = "SCORING_MZ_WEIGHT";
+	public static final String SCORING_RT_WEIGHT = "SCORING_RT_WEIGHT";
+	public static final String SCORING_ABUNDANCE_WEIGHT = "SCORING_ABUNDANCE_WEIGHT";	
+	public static final String MAX_MISSING_BATCH_COUNT = "MAX_MISSING_BATCH_COUNT";
+	public static final String USE_PPM_FOR_SCORING_MZ = "USE_PPM_FOR_SCORING_MZ";
+	public static final String RT_FITTING_MODEL_TYPE = "RT_FITTING_MODEL_TYPE";
+	public static final String USE_ADDUCTS_TO_ADJUST_SCORE = "USE_ADDUCTS_TO_ADJUST_SCORE";
+	public static final String MINIMAL_ALIGNMENT_SCORE = "MINIMAL_ALIGNMENT_SCORE";
+	public static final String MAX_FEATURE_RANK_FOR_PRIMARY_DATASET = "MAX_FEATURE_RANK_FOR_PRIMARY_DATASET";	
+	public static final String MAX_FEATURE_RANK_FOR_SECONDARY_DATASET = "MAX_FEATURE_RANK_FOR_SECONDARY_DATASET";
+	public static final String SUBGROUP_SCORE_CUTOFF = "SUBGROUP_SCORE_CUTOFF";
+	public static final String MAX_RT_ERROR_FOR_ALIGNED_FEATURES = "MAX_RT_ERROR_FOR_ALIGNED_FEATURES";
+	public static final String RESOLVE_ALIGNMENT_CONFLICTS_IN_OUTPUT = "RESOLVE_ALIGNMENT_CONFLICTS_IN_OUTPUT";
+	public static final String RT_ORDER_FLAG_IN_OUTPUT = "RT_ORDER_FLAG_IN_OUTPUT";
+	
 	public static final String BROWSE_COMMAND = "Browse";
 	
 	private File workDirectory;
@@ -102,7 +130,7 @@ public class MetabCombinerScriptDialog extends JDialog implements ActionListener
 	private JFormattedTextField areaQuantileToleranceTextField;
 	private JFormattedTextField primaryDSanchorRtEclusionWindowTextField;
 	private JFormattedTextField rtQuantileToleranceTextField;
-	private JFormattedTextField secondaryDSanchorRtEclusionWindowTTextField;
+	private JFormattedTextField secondaryDSanchorRtEclusionWindowTextField;
 	private JFormattedTextField scoringMzWeightTextField;
 	private JComboBox<MassErrorType> mzDifferenceTypeComboBox;
 	private JFormattedTextField scoringRtWeightTextField;
@@ -395,16 +423,16 @@ public class MetabCombinerScriptDialog extends JDialog implements ActionListener
 		gbc_lblNewLabel_12.gridy = 2;
 		anchorSelectionParametersPanel.add(lblNewLabel_12, gbc_lblNewLabel_12);
 		
-		secondaryDSanchorRtEclusionWindowTTextField = new JFormattedTextField(MRC2ToolBoxConfiguration.getRtFormat());
-		secondaryDSanchorRtEclusionWindowTTextField.setToolTipText("Optimal values are between 0.01 and 0.05 min (1-3s)");
-		secondaryDSanchorRtEclusionWindowTTextField.setMinimumSize(new Dimension(80, 20));
-		secondaryDSanchorRtEclusionWindowTTextField.setPreferredSize(new Dimension(80, 20));
+		secondaryDSanchorRtEclusionWindowTextField = new JFormattedTextField(MRC2ToolBoxConfiguration.getRtFormat());
+		secondaryDSanchorRtEclusionWindowTextField.setToolTipText("Optimal values are between 0.01 and 0.05 min (1-3s)");
+		secondaryDSanchorRtEclusionWindowTextField.setMinimumSize(new Dimension(80, 20));
+		secondaryDSanchorRtEclusionWindowTextField.setPreferredSize(new Dimension(80, 20));
 		GridBagConstraints gbc_secondaryDSanchorRtEclusionWindowTTextField = new GridBagConstraints();
 		gbc_secondaryDSanchorRtEclusionWindowTTextField.fill = GridBagConstraints.HORIZONTAL;
 		gbc_secondaryDSanchorRtEclusionWindowTTextField.gridx = 5;
 		gbc_secondaryDSanchorRtEclusionWindowTTextField.gridy = 2;
 		anchorSelectionParametersPanel.add(
-				secondaryDSanchorRtEclusionWindowTTextField, gbc_secondaryDSanchorRtEclusionWindowTTextField);
+				secondaryDSanchorRtEclusionWindowTextField, gbc_secondaryDSanchorRtEclusionWindowTTextField);
 		
 		JLabel lblNewLabel_3 = new JLabel("Max % missing");
 		GridBagConstraints gbc_lblNewLabel_3 = new GridBagConstraints();
@@ -433,7 +461,8 @@ public class MetabCombinerScriptDialog extends JDialog implements ActionListener
 		gbc_lblNewLabel_4.gridy = 2;
 		dataImportParametersPanel.add(lblNewLabel_4, gbc_lblNewLabel_4);
 		
-		abundanceMeasureComboBox = new JComboBox();
+		abundanceMeasureComboBox = new JComboBox<>(
+				new DefaultComboBoxModel<>(PeakAbundanceMeasure.values()));
 		GridBagConstraints gbc_abundanceMeasureComboBox = new GridBagConstraints();
 		gbc_abundanceMeasureComboBox.gridwidth = 3;
 		gbc_abundanceMeasureComboBox.insets = new Insets(0, 0, 5, 5);
@@ -553,7 +582,8 @@ public class MetabCombinerScriptDialog extends JDialog implements ActionListener
 		gbc_lblNewLabel_18.gridy = 0;
 		qualityScoringParametersPanel.add(lblNewLabel_18, gbc_lblNewLabel_18);
 		
-		mzDifferenceTypeComboBox = new JComboBox<>();
+		mzDifferenceTypeComboBox = new JComboBox<>(
+				new DefaultComboBoxModel<>(MassErrorType.values()));
 		mzDifferenceTypeComboBox.setMinimumSize(new Dimension(80, 22));
 		mzDifferenceTypeComboBox.setPreferredSize(new Dimension(80, 22));
 		GridBagConstraints gbc_mzDifferenceTypeComboBox = new GridBagConstraints();
@@ -590,7 +620,8 @@ public class MetabCombinerScriptDialog extends JDialog implements ActionListener
 		gbc_lblNewLabel_17.gridy = 1;
 		qualityScoringParametersPanel.add(lblNewLabel_17, gbc_lblNewLabel_17);
 		
-		rtFittingModelComboBox = new JComboBox<>();
+		rtFittingModelComboBox = new JComboBox<>(
+				new DefaultComboBoxModel<>(RtFittingModelType.values()));
 		rtFittingModelComboBox.setToolTipText("Choice of fitted rt model.");
 		GridBagConstraints gbc_rtFittingModelComboBox = new GridBagConstraints();
 		gbc_rtFittingModelComboBox.insets = new Insets(0, 0, 5, 0);
@@ -890,7 +921,173 @@ public class MetabCombinerScriptDialog extends JDialog implements ActionListener
 				fileListingTable.clearTable();
 		}
 	}
+	
+	public File getWorkDirectory() {
+		return workDirectory;
+	}
+	
+	public Range getAlignmentRTRange() {
+		
+		if(!limitRtSpanCheckBox.isSelected())
+			return null;
+		else {
+			Double minRt = null;
+			Double maxRt = null;
+			try {
+				minRt = Double.parseDouble(rtMinTextField.getText());
+			} catch (NumberFormatException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			try {
+				maxRt = Double.parseDouble(rtMaxTextField.getText());
+			} catch (NumberFormatException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			if(minRt != null && maxRt != null && minRt < maxRt)
+				return new Range(minRt, maxRt);
+			else
+				return null;
+		}
+	}
+	
+	public int getMaxMissingPercent() {
+		return (int)maxPercentMissingSpinner.getValue();
+	}
+	
+	public PeakAbundanceMeasure getPeakAbundanceMeasure() {
+		return (PeakAbundanceMeasure)abundanceMeasureComboBox.getSelectedItem();
+	}
+	
+	public double getBinGap() {
+		
+		if(binGapTextField.getText().isBlank())
+			return 0.0d;
+		else
+			return Double.parseDouble(binGapTextField.getText());
+	}
+	
+	public boolean getMCDataSetRtOrderFlag() {
+		return rtOrderCheckBox.isSelected();
+	}
+	
+	public boolean imputeMissingData() {
+		return imputeCheckBox.isSelected();
+	}
+	
+	public double getAnchorMzTolerance(){
+		
+		if(anchorMzToleranceTextField.getText().isBlank())
+			return 0.0d;
+		else
+			return Double.parseDouble(anchorMzToleranceTextField.getText());
+	}
+	
+	public double getAnchorAreaQuantileTolerance(){
+		
+		if(areaQuantileToleranceTextField.getText().isBlank())
+			return 0.0d;
+		else
+			return Double.parseDouble(areaQuantileToleranceTextField.getText());
+	}
+	
+	public double getAnchorRtQuantileTolerance(){
+		
+		if(rtQuantileToleranceTextField.getText().isBlank())
+			return 0.0d;
+		else
+			return Double.parseDouble(rtQuantileToleranceTextField.getText());
+	}
+	
+	public double getPrimaryDataSetAnchorRtExclusionWindow(){
+		
+		if(primaryDSanchorRtEclusionWindowTextField.getText().isBlank())
+			return 0.0d;
+		else
+			return Double.parseDouble(primaryDSanchorRtEclusionWindowTextField.getText());
+	}
+	
+	public double getSecondaryDataSetAnchorRtExclusionWindow(){
+		
+		if(secondaryDSanchorRtEclusionWindowTextField.getText().isBlank())
+			return 0.0d;
+		else
+			return Double.parseDouble(secondaryDSanchorRtEclusionWindowTextField.getText());
+	}
+	
+	public double getScoringMZweight(){
+		
+		if(scoringMzWeightTextField.getText().isBlank())
+			return 0.0d;
+		else
+			return Double.parseDouble(scoringMzWeightTextField.getText());
+	}
+	
+	public double getScoringRTweight(){
+		
+		if(scoringRtWeightTextField.getText().isBlank())
+			return 0.0d;
+		else
+			return Double.parseDouble(scoringRtWeightTextField.getText());
+	}
+	
+	public double getScoringAbundanceWeight(){
+		
+		if(scoringAbundanceWeightTextField.getText().isBlank())
+			return 0.0d;
+		else
+			return Double.parseDouble(scoringAbundanceWeightTextField.getText());
+	}
+	
+	public int getMaxMissingBatchCount() {
+		return (int)maxMissingBatchesSpinner.getValue();
+	}
+	
+	public boolean usePPMforScoringMz() {
+		return (mzDifferenceTypeComboBox.getSelectedItem().equals(MassErrorType.ppm));
+	}
 
+	public RtFittingModelType getRtFittingModelTypeForScoring() {
+		return (RtFittingModelType)rtFittingModelComboBox.getSelectedItem();
+	}
+	
+	public boolean useAdductsToAdjustScore() {
+		return useAdductsCheckBox.isSelected();
+	}
+	
+	public double getMinimalAlignmentScore(){
+		return (double)minimalAlignmentScoreSpinner.getValue();
+	}
+	
+	public int getMaxFeatureRankForPrimaryDataSet() {
+		return (int)primaryMaxRankSpinner.getValue();
+	}
+	
+	public int getMaxFeatureRankForSecondaryDataSet() {
+		return (int)secondaryMaxRankSpinner.getValue();
+	}
+	
+	public double getSubgroupScoreCutoff(){
+		return (double)subgroupScoreCutoffSpinner.getValue();
+	}
+	
+	public double getMaxRTerrorForAlignedFeatures(){
+		
+		if(maxRTerrTextField.getText().isBlank())
+			return 0.0d;
+		else
+			return Double.parseDouble(maxRTerrTextField.getText());
+	}
+	
+	public boolean resolveAlignmentConflictsInOutput() {
+		return resolveConflictsCheckBox.isSelected();
+	}
+	
+	public boolean rtOrderFlagInOutput() {
+		return tableFilterRtOrderCheckBox.isSelected();
+	}
+	
 	private void generateMetabCombinerScript() {
 		// TODO Auto-generated method stub
 		Collection<String>errors = validateFormData();
@@ -901,14 +1098,16 @@ public class MetabCombinerScriptDialog extends JDialog implements ActionListener
 		
 		
 		
-		//	Open script folder
-		
+		//	Open script folder		
 		dispose();
 	}
 	
 	private Collection<String>validateFormData(){
 	    
 	    Collection<String>errors = new ArrayList<>();
+	    if(workDirectory == null || !workDirectory.exists())
+	    	errors.add("Work directory not specified or not a valid directory");
+	    
 	    Collection<MetabCombinerFileInputObject> ioList = 
 	    		fileListingTable.getMetabCombinerFileInputObjects();
 	    if(ioList.isEmpty())
@@ -922,10 +1121,46 @@ public class MetabCombinerScriptDialog extends JDialog implements ActionListener
 	    		}
 	    	}
 	    }
+	    if(limitRtSpanCheckBox.isSelected() && getAlignmentRTRange() == null)
+	    	errors.add("Invalid RT range for data alignment is selected");
+	    
+	    if(getBinGap() <= 0.0d)
+	    	errors.add("M/Z window for feature grouping must be > 0");
+	    
+	    if(getAnchorMzTolerance() <= 0.0d)
+	    	errors.add("M/Z tolerance for anchor selection must be > 0");
 		
+	    if(getAnchorAreaQuantileTolerance() <= 0.0d)
+	    	errors.add("Area quantile tolerance for anchor selection must be > 0");
+	    
+	    if(getAnchorRtQuantileTolerance() <= 0.0d)
+	    	errors.add("Area quantile tolerance for anchor selection must be > 0");
+	    
+	    if(getPrimaryDataSetAnchorRtExclusionWindow() <= 0.0d)
+	    	errors.add("Primary dataset anchor RT exclusion window must be > 0");
+	    
+	    if(getSecondaryDataSetAnchorRtExclusionWindow() <= 0.0d)
+	    	errors.add("Secondary dataset anchor RT exclusion window must be > 0");
+	    
+	    if(getScoringMZweight() <= 0.0d)
+	    	errors.add("M/Z weight for alignment score calculation must be > 0");
+	    
+	    if(getScoringRTweight() <= 0.0d)
+	    	errors.add("RT weight for alignment score calculation must be > 0");
+	    
+	    if(getScoringAbundanceWeight() <= 0.0d)
+	    	errors.add("Abundance weight for alignment score calculation must be > 0");
+	    
+	    if(getMaxRTerrorForAlignedFeatures() <= 0.0d)
+	    	errors.add("Max RT error for output filtering must be > 0");
+	    
 	    return errors;
 	}
-
+	
+	@Override
+	public void loadPreferences() {
+		loadPreferences(Preferences.userNodeForPackage(this.getClass()));		
+	}
 
 	@Override
 	public void loadPreferences(Preferences preferences) {
@@ -938,11 +1173,71 @@ public class MetabCombinerScriptDialog extends JDialog implements ActionListener
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		workDirectoryTextField.setText(workDirectory.getPath());
+		setRtRangeFromPreferences(preferences);		
+		maxPercentMissingSpinner.setValue(preferences.getInt(MAX_MISSING_PERCENT, 50));	
+		String pamString = preferences.get(PEAK_ABUNDANCE_MEASURE, PeakAbundanceMeasure.median.name());
+		abundanceMeasureComboBox.setSelectedItem(PeakAbundanceMeasure.valueOf(pamString));
+		binGapTextField.setText(Double.toString(preferences.getDouble(BIN_GAP, 0.005d)));
+		rtOrderCheckBox.setSelected(preferences.getBoolean(DATA_SET_RT_ORDER_FLAG, Boolean.TRUE));
+		imputeCheckBox.setSelected(preferences.getBoolean(IMPUTE_MISSING, Boolean.FALSE));
+		anchorMzToleranceTextField.setText(
+				Double.toString(preferences.getDouble(ANCHOR_MZ_TOLERANCE, 0.003d)));
+		areaQuantileToleranceTextField.setText(
+				Double.toString(preferences.getDouble(ANCHOR_AREA_QUANTILE_TOLERANCE, 0.3d)));
+		rtQuantileToleranceTextField.setText(
+				Double.toString(preferences.getDouble(ANCHOR_RT_QUANTILE_TOLERANCE, 0.3d)));
+		primaryDSanchorRtEclusionWindowTextField.setText(
+				Double.toString(preferences.getDouble(PRIMARY_DATASET_ANCHOR_RT_EXCLUSION_WINDOW, 0.03d)));
+		secondaryDSanchorRtEclusionWindowTextField.setText(
+				Double.toString(preferences.getDouble(SECONDARY_DATASET_ANCHOR_RT_EXCLUSION_WINDOW, 0.03d)));
+		scoringMzWeightTextField.setText(
+				Double.toString(preferences.getDouble(SCORING_MZ_WEIGHT, 75.0d)));
+		scoringRtWeightTextField.setText(
+				Double.toString(preferences.getDouble(SCORING_RT_WEIGHT, 10.0d)));
+		scoringAbundanceWeightTextField.setText(
+				Double.toString(preferences.getDouble(SCORING_ABUNDANCE_WEIGHT, 0.25d)));
+		maxMissingBatchesSpinner.setValue(preferences.getInt(MAX_MISSING_BATCH_COUNT, 0));
+		if(preferences.getBoolean(USE_PPM_FOR_SCORING_MZ, Boolean.FALSE))
+			mzDifferenceTypeComboBox.setSelectedItem(MassErrorType.ppm);
+		else
+			mzDifferenceTypeComboBox.setSelectedItem(MassErrorType.Da);
+		
+		String rtFitString = preferences.get(RT_FITTING_MODEL_TYPE, RtFittingModelType.gam.name());
+		rtFittingModelComboBox.setSelectedItem(RtFittingModelType.valueOf(rtFitString));
+		
+		useAdductsCheckBox.setSelected(preferences.getBoolean(USE_ADDUCTS_TO_ADJUST_SCORE, Boolean.FALSE));
+		minimalAlignmentScoreSpinner.setValue(preferences.getDouble(MINIMAL_ALIGNMENT_SCORE, 0.5d));	
+		primaryMaxRankSpinner.setValue(preferences.getInt(MAX_FEATURE_RANK_FOR_PRIMARY_DATASET, 2));
+		secondaryMaxRankSpinner.setValue(preferences.getInt(MAX_FEATURE_RANK_FOR_SECONDARY_DATASET, 2));
+		subgroupScoreCutoffSpinner.setValue(preferences.getDouble(SUBGROUP_SCORE_CUTOFF, 0.1d));
+		maxRTerrTextField.setValue(preferences.getDouble(MAX_RT_ERROR_FOR_ALIGNED_FEATURES, 10.0d));
+		resolveConflictsCheckBox.setSelected(preferences.getBoolean(RESOLVE_ALIGNMENT_CONFLICTS_IN_OUTPUT, Boolean.TRUE));
+		tableFilterRtOrderCheckBox.setSelected(preferences.getBoolean(RT_ORDER_FLAG_IN_OUTPUT, Boolean.TRUE));
 	}
-
-	@Override
-	public void loadPreferences() {
-		loadPreferences(Preferences.userNodeForPackage(this.getClass()));		
+	
+	private void setRtRangeFromPreferences(Preferences preferences) {
+		
+		String rtRangeString = preferences.get(ALIGNMENT_RT_RANGE, "");
+		Range rtRange = null;
+		if(!rtRangeString.isBlank()) {
+			try {
+				rtRange = new Range(rtRangeString);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			if(rtRange != null) {
+				rtMinTextField.setText(Double.toString(rtRange.getMin()));
+				rtMaxTextField.setText(Double.toString(rtRange.getMax()));
+				limitRtSpanCheckBox.setSelected(true);
+			}
+			else {
+				rtMinTextField.setText("");
+				rtMaxTextField.setText("");
+				limitRtSpanCheckBox.setSelected(false);
+			}
+		}
 	}
 
 	@Override
@@ -950,5 +1245,54 @@ public class MetabCombinerScriptDialog extends JDialog implements ActionListener
 
 		preferences = Preferences.userNodeForPackage(this.getClass());
 		preferences.put(WORK_DIRECTORY, workDirectory.getAbsolutePath());
+		Range rtRange = getAlignmentRTRange();
+		if(rtRange == null)
+			preferences.put(ALIGNMENT_RT_RANGE, "");
+		else
+			preferences.put(ALIGNMENT_RT_RANGE, 
+					rtRange.getFormattedString(MRC2ToolBoxConfiguration.getRtFormat()));
+		
+		preferences.putInt(MAX_MISSING_PERCENT, getMaxMissingPercent());
+		preferences.put(PEAK_ABUNDANCE_MEASURE, getPeakAbundanceMeasure().name());
+		preferences.putDouble(BIN_GAP, getBinGap());
+		preferences.putBoolean(DATA_SET_RT_ORDER_FLAG, getMCDataSetRtOrderFlag());
+		preferences.putBoolean(IMPUTE_MISSING, imputeMissingData());
+		preferences.putDouble(ANCHOR_MZ_TOLERANCE, getAnchorMzTolerance());
+		preferences.putDouble(ANCHOR_AREA_QUANTILE_TOLERANCE, getAnchorAreaQuantileTolerance());
+		preferences.putDouble(ANCHOR_RT_QUANTILE_TOLERANCE, getAnchorRtQuantileTolerance());
+		preferences.putDouble(PRIMARY_DATASET_ANCHOR_RT_EXCLUSION_WINDOW, 
+				getPrimaryDataSetAnchorRtExclusionWindow());
+		preferences.putDouble(SECONDARY_DATASET_ANCHOR_RT_EXCLUSION_WINDOW, 
+				getSecondaryDataSetAnchorRtExclusionWindow());
+		preferences.putDouble(SCORING_MZ_WEIGHT, getScoringMZweight());
+		preferences.putDouble(SCORING_RT_WEIGHT, getScoringRTweight());
+		preferences.putDouble(SCORING_ABUNDANCE_WEIGHT, getScoringAbundanceWeight());
+		preferences.putInt(MAX_MISSING_BATCH_COUNT, getMaxMissingBatchCount());
+		preferences.putBoolean(USE_PPM_FOR_SCORING_MZ, 
+				mzDifferenceTypeComboBox.getSelectedItem().equals(MassErrorType.ppm));
+		preferences.put(RT_FITTING_MODEL_TYPE, getRtFittingModelTypeForScoring().name());
+		preferences.putBoolean(USE_ADDUCTS_TO_ADJUST_SCORE, useAdductsToAdjustScore());
+		preferences.putDouble(MINIMAL_ALIGNMENT_SCORE, getMinimalAlignmentScore());
+		preferences.putInt(MAX_FEATURE_RANK_FOR_PRIMARY_DATASET, getMaxFeatureRankForPrimaryDataSet());
+		preferences.putInt(MAX_FEATURE_RANK_FOR_SECONDARY_DATASET, getMaxFeatureRankForSecondaryDataSet());
+		preferences.putDouble(SUBGROUP_SCORE_CUTOFF, getSubgroupScoreCutoff());
+		preferences.putDouble(MAX_RT_ERROR_FOR_ALIGNED_FEATURES, getMaxRTerrorForAlignedFeatures());
+		preferences.putBoolean(RESOLVE_ALIGNMENT_CONFLICTS_IN_OUTPUT, resolveAlignmentConflictsInOutput());
+		preferences.getBoolean(RT_ORDER_FLAG_IN_OUTPUT, rtOrderFlagInOutput());
 	}
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
