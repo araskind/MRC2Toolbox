@@ -533,8 +533,8 @@ public class RQCScriptGenerator {
 		rscriptParts.add("\t geom_errorbar(aes(ymin = medianVal-stDev, ymax = medianVal+stDev), "
 				+ "position =  position_dodge(width = 0.5), width = 0.2)+");
 		rscriptParts.add("ggtitle(\"" + experimentId + " " + assayType + " median feature counts by sample type / batch\")");
-		rscriptParts.add("ggsave(\"" + experimentId + "-" + assayType + "-featureCounts.png\","
-				+ " plot = featureCountsPlot,  width = 14, height = 8.5)\n");
+		rscriptParts.add("ggsave(\"" + experimentId + "-" + assayType + "-featureCounts.pdf\","
+				+ " device = \"pdf\", plot = featureCountsPlot,  width = 14, height = 8.5)\n");
 
 		rscriptParts.add(pivotName + ".areas <- " + pivotName + "[(" + pivotName + "$variable %in% c(\"Total area\")),]");
 		rscriptParts.add("areasPlot <- ggplot(" + pivotName + ".areas, aes(x = sample_type, y = medianVal, fill = batch))+");
@@ -542,8 +542,8 @@ public class RQCScriptGenerator {
 		rscriptParts.add("geom_errorbar(aes(ymin = medianVal-stDev, ymax = medianVal+stDev), "
 				+ "position =  position_dodge(width = 0.5), width = 0.2)+");
 		rscriptParts.add("ggtitle(\"" + experimentId + " " + assayType + " median total areas by sample type / batch\")");
-		rscriptParts.add("ggsave(\"" + experimentId + "-" + assayType + "-totalAreas.png\","
-				+ " plot = areasPlot,  width = 14, height = 8.5)\n");
+		rscriptParts.add("ggsave(\"" + experimentId + "-" + assayType + "-totalAreas.pdf\","
+				+ " device = \"pdf\", plot = areasPlot,  width = 14, height = 8.5)\n");
 		
 		String rScriptFileName = experimentId + "-" + assayType + 
 				"-SummaryQC-" + FIOUtils.getTimestamp() + ".R";

@@ -1,0 +1,225 @@
+#
+# There is insufficient memory for the Java Runtime Environment to continue.
+# Native memory allocation (mmap) failed to map 16777216 bytes for object start array expansion
+# Possible reasons:
+#   The system is out of physical RAM or swap space
+#   The process is running with CompressedOops enabled, and the Java Heap may be blocking the growth of the native heap
+# Possible solutions:
+#   Reduce memory load on the system
+#   Increase physical memory or swap space
+#   Check if swap backing store is full
+#   Decrease Java heap size (-Xmx/-Xms)
+#   Decrease number of Java threads
+#   Decrease Java thread stack sizes (-Xss)
+#   Set larger code cache with -XX:ReservedCodeCacheSize=
+#   JVM is running with Zero Based Compressed Oops mode in which the Java heap is
+#     placed in the first 32GB address space. The Java Heap base address is the
+#     maximum limit for the native heap growth. Please use -XX:HeapBaseMinAddress
+#     to set the Java Heap base and to place the Java Heap above 32GB virtual address.
+# This output file may be truncated or incomplete.
+#
+#  Out of Memory Error (./open/src/hotspot/share/gc/parallel/objectStartArray.cpp:103), pid=69036, tid=71384
+#
+# JRE version:  (15.0.2+7) (build )
+# Java VM: Java HotSpot(TM) 64-Bit Server VM (15.0.2+7-27, mixed mode, sharing, tiered, compressed oops, parallel gc, windows-amd64)
+# No core dump will be written. Minidumps are not enabled by default on client versions of Windows
+#
+
+---------------  S U M M A R Y ------------
+
+Command Line: -XX:+ShowCodeDetailsInExceptionMessages -agentlib:jdwp=transport=dt_socket,suspend=y,address=localhost:65096 -XX:+UseParallelGC -Xms12g -Xmx12g -javaagent:E:\Program Files\eclipse-2023-12\configuration\org.eclipse.osgi\1293\0\.cp\lib\javaagent-shaded.jar -Dfile.encoding=UTF-8 -Dstdout.encoding=UTF-8 -Dstderr.encoding=UTF-8 edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore
+
+Host: Intel(R) Xeon(R) Silver 4108 CPU @ 1.80GHz, 16 cores, 31G,  Windows 10 , 64 bit Build 26100 (10.0.26100.3912)
+Time: Wed May 28 14:16:18 2025 Eastern Daylight Time elapsed time: 3.306529 seconds (0d 0h 0m 3s)
+
+---------------  T H R E A D  ---------------
+
+Current thread (0x00000256396b6540):  JavaThread "Unknown thread" [_thread_in_vm, id=71384, stack(0x0000008705200000,0x0000008705300000)]
+
+Stack: [0x0000008705200000,0x0000008705300000]
+Native frames: (J=compiled Java code, j=interpreted, Vv=VM code, C=native code)
+V  [jvm.dll+0x62ae9a]
+V  [jvm.dll+0x7817a9]
+V  [jvm.dll+0x782f03]
+V  [jvm.dll+0x783563]
+V  [jvm.dll+0x216325]
+V  [jvm.dll+0x61731f]
+V  [jvm.dll+0x6611f0]
+V  [jvm.dll+0x6609bc]
+V  [jvm.dll+0x6362a8]
+V  [jvm.dll+0x75e241]
+V  [jvm.dll+0x3341c4]
+V  [jvm.dll+0x73e926]
+V  [jvm.dll+0x3b7557]
+V  [jvm.dll+0x3b8fe1]
+C  [jli.dll+0x52fb]
+C  [ucrtbase.dll+0x37b0]
+C  [KERNEL32.DLL+0x2e8d7]
+C  [ntdll.dll+0x9c5dc]
+
+
+---------------  P R O C E S S  ---------------
+
+Threads class SMR info:
+_java_thread_list=0x00007ffb0f1d4ff0, length=0, elements={
+}
+
+Java Threads: ( => current thread )
+
+Other Threads:
+
+=>0x00000256396b6540 (exited) JavaThread "Unknown thread" [_thread_in_vm, id=71384, stack(0x0000008705200000,0x0000008705300000)]
+
+Threads with active compile tasks:
+
+VM state: not at safepoint (not fully initialized)
+
+VM Mutex/Monitor currently owned by a thread: None
+
+Heap address: 0x0000000500000000, size: 12288 MB, Compressed Oops mode: Zero based, Oop shift amount: 3
+CDS archive(s) mapped at: [0x0000000000000000-0x0000000000000000-0x0000000000000000), size 0, SharedBaseAddress: 0x0000000800000000, ArchiveRelocationMode: 0.
+Narrow klass base: 0x0000000000000000, Narrow klass shift: 0, Narrow klass range: 0x0
+
+Heap:
+ PSYoungGen      total 3670016K, used 0K [0x0000000700000000, 0x0000000800000000, 0x0000000800000000)
+  eden space 3145728K, 0% used [0x0000000700000000,0x0000000700000000,0x00000007c0000000)
+  from space 524288K, 0% used [0x00000007e0000000,0x00000007e0000000,0x0000000800000000)
+  to   space 524288K, 0% used [0x00000007c0000000,0x00000007c0000000,0x00000007e0000000)
+ Metaspace       used 0K, capacity 0K, committed 0K, reserved 0K
+  class space    used 0K, capacity 0K, committed 0K, reserved 0K
+
+Card table byte_map: [0x0000025650c90000,0x00000256524a0000] _byte_map_base: 0x000002564e490000
+
+Marking Bits: (ParMarkBitMap*) 0x00007ffb0f1ac0f0
+ Begin Bits: [0x0000000000000000, 0x0000000000000000)
+ End Bits:   [0x0000000000000000, 0x0000000000000000)
+
+GC Heap History (0 events):
+No events
+
+Deoptimization events (0 events):
+No events
+
+Classes unloaded (0 events):
+No events
+
+Classes redefined (0 events):
+No events
+
+Internal exceptions (0 events):
+No events
+
+Events (1 events):
+Event: 0.031 Loaded shared library C:\Program Files\Java\jdk-15.0.2\bin\java.dll
+
+
+Dynamic libraries:
+0x00007ff7cfc70000 - 0x00007ff7cfc7f000 	C:\Program Files\Java\jdk-15.0.2\bin\javaw.exe
+0x00007ffb68e00000 - 0x00007ffb69066000 	C:\WINDOWS\SYSTEM32\ntdll.dll
+0x00007ffb67c80000 - 0x00007ffb67d49000 	C:\WINDOWS\System32\KERNEL32.DLL
+0x00007ffb661a0000 - 0x00007ffb6656c000 	C:\WINDOWS\System32\KERNELBASE.dll
+0x00007ffb66a70000 - 0x00007ffb66bbb000 	C:\WINDOWS\System32\ucrtbase.dll
+0x00007ffb574e0000 - 0x00007ffb574f9000 	C:\Program Files\Java\jdk-15.0.2\bin\VCRUNTIME140.dll
+0x00007ffb3f840000 - 0x00007ffb3f858000 	C:\Program Files\Java\jdk-15.0.2\bin\jli.dll
+0x00007ffb67460000 - 0x00007ffb67512000 	C:\WINDOWS\System32\ADVAPI32.dll
+0x00007ffb678f0000 - 0x00007ffb67999000 	C:\WINDOWS\System32\msvcrt.dll
+0x00007ffb68ad0000 - 0x00007ffb68b76000 	C:\WINDOWS\System32\sechost.dll
+0x00007ffb68220000 - 0x00007ffb68336000 	C:\WINDOWS\System32\RPCRT4.dll
+0x00007ffb68850000 - 0x00007ffb68a1a000 	C:\WINDOWS\System32\USER32.dll
+0x00007ffb55d20000 - 0x00007ffb55fba000 	C:\WINDOWS\WinSxS\amd64_microsoft.windows.common-controls_6595b64144ccf1df_6.0.26100.3912_none_3e07963ce335137e\COMCTL32.dll
+0x00007ffb668e0000 - 0x00007ffb66907000 	C:\WINDOWS\System32\win32u.dll
+0x00007ffb68340000 - 0x00007ffb6836b000 	C:\WINDOWS\System32\GDI32.dll
+0x00007ffb667a0000 - 0x00007ffb668d2000 	C:\WINDOWS\System32\gdi32full.dll
+0x00007ffb66570000 - 0x00007ffb66613000 	C:\WINDOWS\System32\msvcp_win.dll
+0x00007ffb5f650000 - 0x00007ffb5f65b000 	C:\WINDOWS\SYSTEM32\VERSION.dll
+0x00007ffb67520000 - 0x00007ffb67550000 	C:\WINDOWS\System32\IMM32.DLL
+0x00007ffb49f30000 - 0x00007ffb49f3c000 	C:\Program Files\Java\jdk-15.0.2\bin\vcruntime140_1.dll
+0x00007ffb18c60000 - 0x00007ffb18cf1000 	C:\Program Files\Java\jdk-15.0.2\bin\msvcp140.dll
+0x00007ffb0e710000 - 0x00007ffb0f26e000 	C:\Program Files\Java\jdk-15.0.2\bin\server\jvm.dll
+0x00007ffb67f70000 - 0x00007ffb67f78000 	C:\WINDOWS\System32\PSAPI.DLL
+0x00007ffb5f610000 - 0x00007ffb5f646000 	C:\WINDOWS\SYSTEM32\WINMM.dll
+0x00007ffb55940000 - 0x00007ffb5594a000 	C:\WINDOWS\SYSTEM32\WSOCK32.dll
+0x00007ffb68a50000 - 0x00007ffb68ac4000 	C:\WINDOWS\System32\WS2_32.dll
+0x00007ffb34fb0000 - 0x00007ffb34feb000 	C:\Program Files\Java\jdk-15.0.2\bin\splashscreen.dll
+0x00007ffb3f460000 - 0x00007ffb3f485000 	C:\Program Files\Java\jdk-15.0.2\bin\java.dll
+0x00007ffb67f80000 - 0x00007ffb6806f000 	C:\WINDOWS\System32\shcore.dll
+0x00007ffb64d10000 - 0x00007ffb64d2a000 	C:\WINDOWS\SYSTEM32\kernel.appcore.dll
+0x00007ffb63210000 - 0x00007ffb632bf000 	C:\WINDOWS\system32\uxtheme.dll
+0x00007ffb67560000 - 0x00007ffb678e4000 	C:\WINDOWS\System32\combase.dll
+0x00007ffb49c80000 - 0x00007ffb49c8a000 	C:\Program Files\Java\jdk-15.0.2\bin\jimage.dll
+0x00007ffb56230000 - 0x00007ffb56471000 	C:\WINDOWS\SYSTEM32\DBGHELP.DLL
+0x00007ffb67b90000 - 0x00007ffb67c70000 	C:\WINDOWS\System32\OLEAUT32.dll
+0x00007ffb4bd50000 - 0x00007ffb4bd89000 	C:\WINDOWS\SYSTEM32\dbgcore.DLL
+0x00007ffb66910000 - 0x00007ffb669a9000 	C:\WINDOWS\System32\bcryptPrimitives.dll
+0x00007ffb34940000 - 0x00007ffb34979000 	C:\Program Files\Java\jdk-15.0.2\bin\jdwp.dll
+0x00007ffb41120000 - 0x00007ffb4112e000 	C:\Program Files\Java\jdk-15.0.2\bin\instrument.dll
+0x00007ffb66bc0000 - 0x00007ffb66d1f000 	C:\WINDOWS\System32\MSCTF.dll
+0x00007ffb50f60000 - 0x00007ffb510ad000 	C:\WINDOWS\SYSTEM32\textinputframework.dll
+0x00007ffb62d20000 - 0x00007ffb62e46000 	C:\WINDOWS\SYSTEM32\CoreMessaging.dll
+0x00007ffb60730000 - 0x00007ffb60a13000 	C:\WINDOWS\SYSTEM32\CoreUIComponents.dll
+0x00007ffb66620000 - 0x00007ffb66794000 	C:\WINDOWS\System32\wintypes.dll
+0x00007ffb65490000 - 0x00007ffb6549c000 	C:\WINDOWS\SYSTEM32\CRYPTBASE.DLL
+
+dbghelp: loaded successfully - version: 4.0.5 - missing functions: none
+symbol engine: initialized successfully - sym options: 0x614 - pdb path: .;C:\Program Files\Java\jdk-15.0.2\bin;C:\WINDOWS\SYSTEM32;C:\WINDOWS\WinSxS\amd64_microsoft.windows.common-controls_6595b64144ccf1df_6.0.26100.3912_none_3e07963ce335137e;C:\Program Files\Java\jdk-15.0.2\bin\server
+
+VM Arguments:
+jvm_args: -XX:+ShowCodeDetailsInExceptionMessages -agentlib:jdwp=transport=dt_socket,suspend=y,address=localhost:65096 -XX:+UseParallelGC -Xms12g -Xmx12g -javaagent:E:\Program Files\eclipse-2023-12\configuration\org.eclipse.osgi\1293\0\.cp\lib\javaagent-shaded.jar -Dfile.encoding=UTF-8 -Dstdout.encoding=UTF-8 -Dstderr.encoding=UTF-8 
+java_command: edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore
+java_class_path (initial): E:\Eclipse\git2copy\MRC2Toolbox\target\classes;C:\Program Files\Java\javafx-sdk-15\lib\javafx.base.jar;C:\Program Files\Java\javafx-sdk-15\lib\javafx.controls.jar;C:\Program Files\Java\javafx-sdk-15\lib\javafx.fxml.jar;C:\Program Files\Java\javafx-sdk-15\lib\javafx.graphics.jar;C:\Program Files\Java\javafx-sdk-15\lib\javafx.media.jar;C:\Program Files\Java\javafx-sdk-15\lib\javafx.swing.jar;C:\Program Files\Java\javafx-sdk-15\lib\javafx.web.jar;C:\Program Files\Java\javafx-sdk-15\lib\javafx-swt.jar;E:\Program Files\eclipse-2023-12\plugins\junit-jupiter-api_5.11.3.jar;E:\Program Files\eclipse-2023-12\plugins\junit-jupiter-engine_5.11.3.jar;E:\Program Files\eclipse-2023-12\plugins\junit-jupiter-migrationsupport_5.11.3.jar;E:\Program Files\eclipse-2023-12\plugins\junit-jupiter-params_5.11.3.jar;E:\Program Files\eclipse-2023-12\plugins\junit-platform-commons_1.11.3.jar;E:\Program Files\eclipse-2023-12\plugins\junit-platform-engine_1.11.3.jar;E:\Program Files\eclipse-2023-12\plugins\junit-platform-launcher_1.11.3.jar;E:\Program Files\eclipse-2023-12\plugins\junit-platform-runner_1.11.3.jar;E:\Program Files\eclipse-2023-12\plugins\junit-platform-suite-api_1.11.3.jar;E:\Program Files\eclipse-2023-12\plugins\junit-platform-suite-engine_1.11.3.jar;E:\Program Files\eclipse-2023-12\plugins\junit-platform-suite-commons_1.11.3.jar;E:\Program Files\eclipse-2023-12\plugins\junit-vintage-engine_5.11.3.jar;E:\Program Files\eclipse-2023-12\plugins\org.opentest4j_1.3.0.jar;E:\Program Files\eclipse-2023-12\plugins\org.apiguardian.api_1.1.2.jar;E:\Program Files\eclipse-2023-12\plugins\org.junit_4.13.2.v20240929-1000.jar;E:\Program Files\eclipse-2023-12\plugins\org.hamcrest_3.0.0.jar;E:\Development\.m2\repository\ch\qos\logback\logback-classic\1.2.6\logback-classic-1.2.6.jar;E:\Development\.m2\repository\ch\qos\logback\logback-core\1.2.6\logback-core-1.2.6.jar;E:\Development\.m2\repository\org\slf4j\slf4j-api\1.7.32\slf4j-api-1.7.32.jar;E:\Development\.m2\repo
+Launcher Type: SUN_STANDARD
+
+[Global flags]
+     intx CICompilerCount                          = 12                                        {product} {ergonomic}
+   size_t InitialHeapSize                          = 12884901888                               {product} {command line}
+   size_t MaxHeapSize                              = 12884901888                               {product} {command line}
+   size_t MaxNewSize                               = 4294967296                                {product} {ergonomic}
+   size_t MinHeapDeltaBytes                        = 524288                                    {product} {ergonomic}
+   size_t MinHeapSize                              = 12884901888                               {product} {command line}
+   size_t NewSize                                  = 4294967296                                {product} {ergonomic}
+    uintx NonNMethodCodeHeapSize                   = 7602480                                {pd product} {ergonomic}
+    uintx NonProfiledCodeHeapSize                  = 122027880                              {pd product} {ergonomic}
+   size_t OldSize                                  = 8589934592                                {product} {ergonomic}
+    uintx ProfiledCodeHeapSize                     = 122027880                              {pd product} {ergonomic}
+    uintx ReservedCodeCacheSize                    = 251658240                              {pd product} {ergonomic}
+     bool SegmentedCodeCache                       = true                                      {product} {ergonomic}
+     bool ShowCodeDetailsInExceptionMessages       = true                                   {manageable} {command line}
+   size_t SoftMaxHeapSize                          = 12884901888                            {manageable} {ergonomic}
+     bool UseCompressedClassPointers               = true                                 {lp64_product} {ergonomic}
+     bool UseCompressedOops                        = true                                 {lp64_product} {ergonomic}
+     bool UseLargePagesIndividualAllocation        = false                                  {pd product} {ergonomic}
+     bool UseParallelGC                            = true                                      {product} {command line}
+
+Logging:
+Log output configuration:
+ #0: stdout all=warning uptime,level,tags
+ #1: stderr all=off uptime,level,tags
+
+Environment Variables:
+JAVA_HOME=C:\Program Files\Java\jdk-15.0.2
+PATH=E:/Program Files/eclipse-2023-12//plugins/org.eclipse.justj.openjdk.hotspot.jre.full.win32.x86_64_21.0.7.v20250502-0916/jre/bin/server;E:/Program Files/eclipse-2023-12//plugins/org.eclipse.justj.openjdk.hotspot.jre.full.win32.x86_64_21.0.7.v20250502-0916/jre/bin;E:\Program Files (x86)\RevvitySignalsSoftware\ChemDrawApplications\ChemScript\Lib;E:\Program Files\RevvitySignalsSoftware\ChemDrawApplications\ChemScript\Lib;E:\Program Files\graalvm-jdk-21.0.1\bin;C:\Program Files (x86)\Common Files\Oracle\Java\javapath;C:\gurobi912\win64\bin;E:\Xcalibur\system\programs\;C:\Program Files (x86)\Thermo\Foundation\x64;C:\Program Files\Common Files\Oracle\Java\javapath;E:\Software\Oracle\WINDOWS.X64_193000_db_home\bin;C:\ProgramData\Oracle\Java\javapath;c:\Rtools\bin;C:\Program Files (x86)\Intel\iCLS Client\;C:\Program Files\Intel\iCLS Client\;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\Program Files (x86)\Intel\Intel(R) Management Engine Components\DAL;C:\Program Files\Intel\Intel(R) Management Engine Components\DAL;C:\Program Files (x86)\Intel\Intel(R) Management Engine Components\IPT;C:\Program Files\Intel\Intel(R) Management Engine Components\IPT;E:\Program Files\Apache\apache-maven-3.6.3\bin;C:\Program Files\Microsoft Visual Studio\2022\Preview\VC\Auxiliary\Build;C:\Program Files (x86)\Windows Kits\10\Windows Performance Toolkit\;%SystemRoot%\system32;%SystemRoot%;%SystemRoot%\System32\Wbem;%SYSTEMROOT%\System32\WindowsPowerShell\v1.0\;%SYSTEMROOT%\System32\OpenSSH\;E:\Program Files\OpenBabel-3.1.1;E:\Program Files\Jet\bin;C:\Program Files\OpenBabel-2.4.1;C:\Users\Sasha\AppData\Local\Microsoft\WindowsApps;C:\Users\Sasha\AppData\Local\GitHubDesktop\bin;C:\Program Files (x86)\LipidMiner\LipidMiner;E:\Program Files\PostgreSQL\13\bin;E:\Program Files\gradle\bin;C:\Program Files (x86)\AAC Audiobook Creator\Tools\SSA;C:\Program Files\Java\javafx-sdk-11.0.2\lib;C:\Users\Sasha\AppData\Local\Google\Cloud SDK\google-cloud-
+USERNAME=Sasha
+LD_LIBRARY_PATH=E:\instantclient_19_11
+SHELL=/bin/bash
+OS=Windows_NT
+PROCESSOR_IDENTIFIER=Intel64 Family 6 Model 85 Stepping 4, GenuineIntel
+
+
+
+---------------  S Y S T E M  ---------------
+
+OS:
+ Windows 10 , 64 bit Build 26100 (10.0.26100.3912)
+OS uptime: 12 days 16:56 hours
+HyperV virtualization detected
+
+CPU: total 16 (initial active 16) (8 cores per cpu, 2 threads per core) family 6 model 85 stepping 4 microcode 0x2006d05, cmov, cx8, fxsr, mmx, sse, sse2, sse3, ssse3, sse4.1, sse4.2, popcnt, vzeroupper, avx, avx2, aes, clmul, erms, rtm, 3dnowpref, lzcnt, ht, tsc, tscinvbit, bmi1, bmi2, adx, fma, clflush, clflushopt, clwb
+
+Memory: 4k page, system-wide physical 32471M (15197M free)
+TotalPageFile size 43894M (AvailPageFile size 7M)
+current process WorkingSet (physical memory assigned to process): 42M, peak: 42M
+current process commit charge ("private bytes"): 12348M, peak: 12364M
+
+vm_info: Java HotSpot(TM) 64-Bit Server VM (15.0.2+7-27) for windows-amd64 JRE (15.0.2+7-27), built on Dec  7 2020 20:07:01 by "mach5one" with unknown MS VC++:1925
+
+END.
