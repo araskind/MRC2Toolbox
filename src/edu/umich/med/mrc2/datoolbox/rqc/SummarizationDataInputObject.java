@@ -34,7 +34,7 @@ public class SummarizationDataInputObject {
 		super();
 		uniqueId = "SDIO_" +
 				UUID.randomUUID().toString().substring(0, 12);
-		dataInputMap = new TreeMap<SummaryInputColumns,String>();
+		dataInputMap = new TreeMap<>();
 	}
 	
 	public void setField(SummaryInputColumns field, String value) {

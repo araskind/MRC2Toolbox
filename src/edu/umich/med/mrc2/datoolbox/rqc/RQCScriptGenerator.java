@@ -48,7 +48,7 @@ import edu.umich.med.mrc2.datoolbox.utils.DelimitedTextParser;
 import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
 
 public class RQCScriptGenerator {
-	
+
 	public static void generateMultiBatchMetabCombinerAlignmentScriptScript(
 			File rWorkingDir,
 			File inputMap) {
@@ -61,7 +61,7 @@ public class RQCScriptGenerator {
 			int numMissingBatchesAllowed) {
 		
 		//	List<String>qcSummaryNames = new ArrayList<String>();
-		List<String>rscriptParts = new ArrayList<String>();
+		List<String>rscriptParts = new ArrayList<>();
 		String workDirForR = rWorkingDir.getAbsolutePath().replaceAll("\\\\", "/");
 		String[][] inputMapData = DelimitedTextParser.parseTextFile(
 				inputMap, MRC2ToolBoxConfiguration.getTabDelimiter());
@@ -87,10 +87,8 @@ public class RQCScriptGenerator {
 		rscriptParts.add("## Read in the data for alignment ####\n");
 		rscriptParts.add("clean.data.map.df <- data.frame(data.set = character(), file.name = character())");
 		
-		Map<SummarizationDataInputObject,String>metabDataObjectMap = 
-				new HashMap<SummarizationDataInputObject,String>();
-		Map<SummarizationDataInputObject,String>statsObjectMap = 
-				new HashMap<SummarizationDataInputObject,String>();
+		Map<SummarizationDataInputObject,String>metabDataObjectMap = new HashMap<>();
+		Map<SummarizationDataInputObject,String>statsObjectMap = new HashMap<>();
 		
 		String columnListToExclude = getBinnerColumnListToExclude();
 		String cleanDataFileSuffix = "-cleanData.txt";

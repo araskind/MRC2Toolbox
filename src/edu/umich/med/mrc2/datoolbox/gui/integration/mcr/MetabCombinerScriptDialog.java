@@ -23,6 +23,7 @@ package edu.umich.med.mrc2.datoolbox.gui.integration.mcr;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
@@ -32,6 +33,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -74,6 +76,7 @@ import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
+import edu.umich.med.mrc2.datoolbox.rqc.MetabCombinerAlignmentScriptGenerator;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
 
 public class MetabCombinerScriptDialog extends JDialog implements ActionListener, BackedByPreferences {
@@ -1084,21 +1087,57 @@ public class MetabCombinerScriptDialog extends JDialog implements ActionListener
 		return resolveConflictsCheckBox.isSelected();
 	}
 	
-	public boolean rtOrderFlagInOutput() {
+	public boolean getRtOrderFlagInOutput() {
 		return tableFilterRtOrderCheckBox.isSelected();
 	}
 	
 	private void generateMetabCombinerScript() {
-		// TODO Auto-generated method stub
+
 		Collection<String>errors = validateFormData();
 		if(!errors.isEmpty()){
 		    MessageDialog.showErrorMsg(StringUtils.join(errors, "\n"), this);
 		    return;
 		}
+		MetabCombinerParametersObject mcpo = new MetabCombinerParametersObject();
+		mcpo.setWorkDirectory(workDirectory);
+		mcpo.setMetabCombinerFileInputObjectSet(
+				fileListingTable.getMetabCombinerFileInputObjects());
+		mcpo.setAlignmentRTRange(getAlignmentRTRange());
+		mcpo.setMaxMissingPercent(getMaxMissingPercent());
+		mcpo.setPeakAbundanceMeasure(getPeakAbundanceMeasure());
+		mcpo.setBinGap(getBinGap());
+		mcpo.setMcDataSetRtOrderFlag(getMCDataSetRtOrderFlag());
+		mcpo.setImputeMissingData(imputeMissingData());
+		mcpo.setAnchorMzTolerance(getAnchorMzTolerance());
+		mcpo.setAnchorAreaQuantileTolerance(getAnchorAreaQuantileTolerance());
+		mcpo.setAnchorRtQuantileTolerance(getAnchorRtQuantileTolerance());
+		mcpo.setPrimaryDataSetAnchorRtExclusionWindow(getPrimaryDataSetAnchorRtExclusionWindow());
+		mcpo.setSecondaryDataSetAnchorRtExclusionWindow(getSecondaryDataSetAnchorRtExclusionWindow());
+		mcpo.setScoringMZweight(getScoringMZweight());
+		mcpo.setScoringRTweight(getScoringRTweight());
+		mcpo.setScoringAbundanceWeight(getScoringAbundanceWeight());
+		mcpo.setMaxMissingBatchCount(getMaxMissingBatchCount());
+		mcpo.setUsePPMforScoringMz(usePPMforScoringMz());
+		mcpo.setRtFittingModelType(getRtFittingModelTypeForScoring());
+		mcpo.setUseAdductsToAdjustScore(useAdductsToAdjustScore());
+		mcpo.setMinimalAlignmentScore(getMinimalAlignmentScore());
+		mcpo.setMaxFeatureRankForPrimaryDataSet(getMaxFeatureRankForPrimaryDataSet());
+		mcpo.setMaxFeatureRankForSecondaryDataSet(getMaxFeatureRankForSecondaryDataSet());
+		mcpo.setSubgroupScoreCutoff(getSubgroupScoreCutoff());
+		mcpo.setMaxRTerrorForAlignedFeatures(getMaxRTerrorForAlignedFeatures());
+		mcpo.setResolveAlignmentConflictsInOutput(resolveAlignmentConflictsInOutput());
+		mcpo.setRtOrderFlagInOutput(getRtOrderFlagInOutput());
 		
-		
-		
-		//	Open script folder		
+		MetabCombinerAlignmentScriptGenerator mcsg = 
+				new MetabCombinerAlignmentScriptGenerator(mcpo);
+		mcsg.createMetabCombinerAlignmentScript();
+		if (Desktop.isDesktopSupported()) {
+		    try {
+		        Desktop.getDesktop().open(mcpo.getWorkDirectory());
+		    } catch (IOException ex) {
+		        ex.printStackTrace();
+		    }
+		}	
 		dispose();
 	}
 	
@@ -1278,7 +1317,7 @@ public class MetabCombinerScriptDialog extends JDialog implements ActionListener
 		preferences.putDouble(SUBGROUP_SCORE_CUTOFF, getSubgroupScoreCutoff());
 		preferences.putDouble(MAX_RT_ERROR_FOR_ALIGNED_FEATURES, getMaxRTerrorForAlignedFeatures());
 		preferences.putBoolean(RESOLVE_ALIGNMENT_CONFLICTS_IN_OUTPUT, resolveAlignmentConflictsInOutput());
-		preferences.getBoolean(RT_ORDER_FLAG_IN_OUTPUT, rtOrderFlagInOutput());
+		preferences.getBoolean(RT_ORDER_FLAG_IN_OUTPUT, getRtOrderFlagInOutput());
 	}
 }
 

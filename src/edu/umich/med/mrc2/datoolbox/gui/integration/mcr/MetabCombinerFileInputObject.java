@@ -22,18 +22,22 @@
 package edu.umich.med.mrc2.datoolbox.gui.integration.mcr;
 
 import java.io.File;
+import java.util.EnumMap;
+import java.util.Map;
+
+import edu.umich.med.mrc2.datoolbox.rqc.SummaryInputColumns;
 
 public class MetabCombinerFileInputObject implements Comparable<MetabCombinerFileInputObject>{
 
 	private File dataFile;
-	private String experimentId;
-	private String batchId;
+	private Map<SummaryInputColumns,String>propertiesMap;
 	
 	public MetabCombinerFileInputObject(File dataFile, String experimentId, String batchId) {
 		super();
 		this.dataFile = dataFile;
-		this.experimentId = experimentId;
-		this.batchId = batchId;
+		propertiesMap = new EnumMap<>(SummaryInputColumns.class);
+		propertiesMap.put(SummaryInputColumns.EXPERIMENT, experimentId);
+		propertiesMap.put(SummaryInputColumns.BATCH, batchId);
 	}
 
 	public File getDataFile() {
@@ -41,11 +45,15 @@ public class MetabCombinerFileInputObject implements Comparable<MetabCombinerFil
 	}
 
 	public String getExperimentId() {
-		return experimentId;
+		return propertiesMap.get(SummaryInputColumns.EXPERIMENT);
 	}
 
 	public String getBatchId() {
-		return batchId;
+		return propertiesMap.get(SummaryInputColumns.BATCH);
+	}
+	
+	public String getProperty(SummaryInputColumns property) {
+		return propertiesMap.get(property);
 	}
 	
 	public boolean isDefined() {
@@ -53,10 +61,10 @@ public class MetabCombinerFileInputObject implements Comparable<MetabCombinerFil
 		if(dataFile == null || !dataFile.exists())
 			return false;
 		
-		if(experimentId == null || experimentId.isBlank())
+		if(getExperimentId() == null || getExperimentId().isBlank())
 			return false;
 		
-		if(batchId == null || batchId.isBlank())
+		if(getBatchId() == null || getBatchId().isBlank())
 			return false;
 		
 		return true;
@@ -68,6 +76,9 @@ public class MetabCombinerFileInputObject implements Comparable<MetabCombinerFil
 		if (obj == null)
 			return false;
 		
+		if (obj == this)
+			return true;
+		
 		if (!MetabCombinerFileInputObject.class.isAssignableFrom(obj.getClass()))
 			return false;
 		
@@ -76,14 +87,13 @@ public class MetabCombinerFileInputObject implements Comparable<MetabCombinerFil
 		if ((this.dataFile == null) ? (other.getDataFile() != null) : !this.dataFile.equals(other.getDataFile())) 
 			return false; 
 		
-		if ((this.experimentId == null) ? (other.getExperimentId() != null) : !this.experimentId.equals(other.getExperimentId())) 
+		if ((this.getExperimentId() == null) ? (other.getExperimentId() != null) : !this.getExperimentId().equals(other.getExperimentId())) 
 			return false; 
 		
-		if ((this.batchId == null) ? (other.getBatchId() != null) : !this.batchId.equals(other.getBatchId())) 
+		if ((this.getBatchId() == null) ? (other.getBatchId() != null) : !this.getBatchId().equals(other.getBatchId())) 
 			return false; 
 		
-		if (obj == this)
-			return true;
+		//	TODO compare all properties
 
 		return true;
 	}
@@ -93,21 +103,22 @@ public class MetabCombinerFileInputObject implements Comparable<MetabCombinerFil
 		
 		int hash = 3;
 		hash = 53 * hash + (this.dataFile != null ? this.dataFile.hashCode() : 0)
-        		+ (this.experimentId != null ? this.experimentId.hashCode() : 0)
-        		+ (this.batchId != null ? this.batchId.hashCode() : 0);
+        		+ (this.getExperimentId() != null ? this.getExperimentId().hashCode() : 0)
+        		+ (this.getBatchId() != null ? this.getBatchId().hashCode() : 0);
+		//	TODO use all properties
 		return hash;
 	}
 
 	@Override
 	public int compareTo(MetabCombinerFileInputObject o) {
 
-		int res = this.experimentId.compareTo(o.getExperimentId());
+		int res = this.getExperimentId().compareTo(o.getExperimentId());
 		if(res == 0)
-			res = this.batchId.compareTo(o.getBatchId());
+			res = this.getBatchId().compareTo(o.getBatchId());
 		
 		if(res == 0)
 			res = this.dataFile.compareTo(o.getDataFile());
-		
+		//	TODO use all properties
 		return res;
 	}
 }
