@@ -883,7 +883,7 @@ public class DataAnalysisProject extends Project {
 	public Set<MsFeatureClusterSet>getDataIntegrationSets(){
 		
 		if(dataIntegrationSets == null)
-			dataIntegrationSets = new TreeSet<MsFeatureClusterSet>();
+			dataIntegrationSets = new TreeSet<>();
 
 		return dataIntegrationSets;
 	}

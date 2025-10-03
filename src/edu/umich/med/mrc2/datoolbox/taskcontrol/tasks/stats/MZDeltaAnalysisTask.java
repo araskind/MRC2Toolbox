@@ -23,6 +23,7 @@ package edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.stats;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -32,9 +33,13 @@ import java.util.stream.Collectors;
 
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureCluster;
+import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureComparator;
+import edu.umich.med.mrc2.datoolbox.data.compare.SortDirection;
+import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.gui.mzdelta.MZDeltaAnalysisParametersObject;
+import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
@@ -44,8 +49,9 @@ import edu.umich.med.mrc2.datoolbox.utils.Range;
 public class MZDeltaAnalysisTask extends AbstractTask {
 	
 	private MZDeltaAnalysisParametersObject parameters;
-	private Collection<MsFeatureCluster>featureClusters;
+	private Set<MsFeatureCluster>featureClusters;
 	private Set<Double>massDifferences;
+	private Set<Double>rtSeriesMassSet;
 	private DataPipeline dataPipeline;
 	private double anchorMassError;
 	private MassErrorType anchorMassErrorType;
@@ -53,8 +59,10 @@ public class MZDeltaAnalysisTask extends AbstractTask {
 	private double rtSeriesMassError;
 	private MassErrorType rtSeriesMassErrorType;
 	private double rtSeriesMinStep;
+	private MsFeatureComparator rtSorter;
+	private MsFeatureComparator reverseIntensitySorter;
+	private Set<MsFeature>assignedFeatures;
 	
-
 	public MZDeltaAnalysisTask(MZDeltaAnalysisParametersObject parameters) {
 		super();
 		this.parameters = parameters;
@@ -62,10 +70,12 @@ public class MZDeltaAnalysisTask extends AbstractTask {
 		
 		anchorMassError = parameters.getAnchorMassError();
 		anchorMassErrorType = parameters.getAnchorMassErrorType();
+		rtSeriesMassSet = parameters.getRtSeriesMassSet();
 		anchorRTError = parameters.getAnchorRTError();
 		rtSeriesMassError = parameters.getRtSeriesMassError();
 		rtSeriesMassErrorType = parameters.getRtSeriesMassErrorType();
 		rtSeriesMinStep = parameters.getRtSeriesMinStep();
+		rtSorter = new MsFeatureComparator(SortProperty.RTmedObserved);
 	}
 
 	@Override
@@ -89,32 +99,99 @@ public class MZDeltaAnalysisTask extends AbstractTask {
 				mapToDouble(Double::doubleValue).toArray();
 		for(int i=0; i<anchors.length-1; i++) {
 			
-			for(int j=1; j<anchors.length; j++) {
-				massDifferences.add(Math.abs(anchors[i] - anchors[j]));
-			}
+			for(int j=1; j<anchors.length; j++)
+				massDifferences.add(Math.abs(anchors[i] - anchors[j]));			
 		}		
 	}
 
 	private void findFeatureClusters() {
 
 		taskDescription = "Creating feature clusters";
-		featureClusters = new ArrayList<>();
+		featureClusters = new HashSet<>();
+		assignedFeatures = new HashSet<>();
 		Collection<MsFeature> features = parameters.getFeatureSet().getFeatures();
-		Set<Range>anchorMassRangeSet = createMassRangeSet(
-				parameters.getAnchorMassSet(), 
-				anchorMassError, 
+		Set<Range> anchorMassRangeSet = createMassRangeSet(parameters.getAnchorMassSet(), anchorMassError,
 				anchorMassErrorType);
 		Collection<MsFeatureCluster> anchorClusters = 
-				findMsFeatureCluster(features, anchorMassRangeSet, anchorRTError);
-		
+				findMsFeatureCluster(features, anchorMassRangeSet);
+		featureClusters.addAll(anchorClusters);
+		anchorClusters.stream().
+			flatMap(c -> c.getFeturesForDataPipeline(dataPipeline).stream()).
+			forEach(f -> assignedFeatures.add(f));
+		// Find other contaminant clusters up and down the RT
+		for(double deltaMass : rtSeriesMassSet) {
+			
+			findAdditionalClusters(anchorClusters, deltaMass, SortDirection.ASC);
+			findAdditionalClusters(anchorClusters, deltaMass, SortDirection.DESC);
+		}
 		System.out.println("***");
+	}
+	
+	private void findAdditionalClusters(
+			Collection<MsFeatureCluster> anchorClusters, 
+			double deltaMass,
+			SortDirection direction) {
+		
+		Collection<MsFeatureCluster>newClusters = new ArrayList<>();
+		for(MsFeatureCluster anchorCluster : anchorClusters) {
+					
+			Set<Double>lookupMassSet = createLookupMassSet(anchorCluster, deltaMass, direction);
+			System.out.println("\nNext Mass Set:");
+			for(double mz : lookupMassSet)
+				System.out.println(MRC2ToolBoxConfiguration.getMzFormat().format(mz));
+			
+			System.out.println("\n_________________");
+			
+			Collection<MsFeature> features = new ArrayList<>();
+			Set<Range>lookupMassRangeSet = createMassRangeSet(
+					lookupMassSet, 
+					anchorMassError, 
+					anchorMassErrorType);
+			double deltaRt = rtSeriesMinStep;
+			double rtCutoff = anchorCluster.getRtRange(dataPipeline).getAverage();
+			if(direction.equals(SortDirection.DESC)) {
+				double rtc = rtCutoff - deltaRt;
+				features = parameters.getFeatureSet().getFeatures().stream().
+						filter(f -> f.getRetentionTime() < rtc).
+						filter(f -> !assignedFeatures.contains(f)).
+						sorted(rtSorter).collect(Collectors.toList());
+			}
+			else {
+				double rtc = rtCutoff + deltaRt;
+				features = parameters.getFeatureSet().getFeatures().stream().
+						filter(f -> f.getRetentionTime() > rtc).
+						filter(f -> !assignedFeatures.contains(f)).
+						sorted(rtSorter).collect(Collectors.toList());
+			}
+			Collection<MsFeatureCluster> newClusterSubset = findMsFeatureCluster(features, lookupMassRangeSet);
+			if(!newClusterSubset.isEmpty()) {
+				newClusters.addAll(newClusterSubset);
+				featureClusters.addAll(newClusterSubset);
+				newClusterSubset.stream().
+					flatMap(c -> c.getFeturesForDataPipeline(dataPipeline).stream()).
+					forEach(f -> assignedFeatures.add(f));
+			}
+		}	
+		if(!newClusters.isEmpty())
+			findAdditionalClusters(newClusters, deltaMass, direction);	
+	}
+	
+	private Set<Double>createLookupMassSet(MsFeatureCluster cluster, double deltaMass, SortDirection direction){
+		
+		Set<Double>lookupMassSet = new TreeSet<>();
+		if((deltaMass > 0.0d && direction.equals(SortDirection.DESC)) 
+				|| (deltaMass < 0.0d && direction.equals(SortDirection.ASC)))
+			deltaMass = deltaMass * -1.0d;
+		
+		final double delta = deltaMass;
+		cluster.getMonoisotopicMzSet(dataPipeline).forEach(m -> lookupMassSet.add(m + delta));		
+		return lookupMassSet;
 	}
 	
 	//	TODO allow missing in series?
 	private Collection<MsFeatureCluster> findMsFeatureCluster(
 			Collection<MsFeature> features, 
-			Set<Range>anchorMassRangeSet,
-			double anchorRtError) {
+			Set<Range>anchorMassRangeSet) {
 		
 		List<MsFeatureCluster>clusters = new ArrayList<>();
 		Map<Range,List<MsFeature>>featuresByRange = new TreeMap<>();
@@ -125,7 +202,7 @@ public class MZDeltaAnalysisTask extends AbstractTask {
 					filter(f -> r.contains(f.getMonoisotopicMz())).
 					collect(Collectors.toList());
 			if(inRange.isEmpty())
-				return null;
+				return clusters;
 			
 			if(inRange.size() > maxCount) {
 				maxCount = inRange.size();
@@ -137,17 +214,24 @@ public class MZDeltaAnalysisTask extends AbstractTask {
 		secondaryRanges.remove(maxCountRange);
 		for(MsFeature f : featuresByRange.get(maxCountRange)) {
 			
+			Range refRtRange = new 
+					Range(f.getMedianObservedRetention() - anchorRTError, 
+							f.getMedianObservedRetention() + anchorRTError);
 			MsFeatureCluster cluster = new MsFeatureCluster();
 			cluster.addFeature(f, dataPipeline);
 			int countAdded = 0;
-			for(Range r : secondaryRanges) {				
+			for(Range r : secondaryRanges) {	
 				
-				for(MsFeature sf : featuresByRange.get(r)) {
+				List<MsFeature>inRtRange =  featuresByRange.get(r).stream().
+						filter(msf -> refRtRange.contains(msf.getMedianObservedRetention())).
+						collect(Collectors.toList());
+				if(!inRtRange.isEmpty()) {
 					
-					//	TODO if more than 1 match - best RT match
-					if(cluster.matchesOnRt(sf, dataPipeline, anchorRtError)) {
+					for(MsFeature sf : inRtRange) {
+						
+						//	TODO if more than 1 match - best RT match
 						cluster.addFeature(sf, dataPipeline);
-						countAdded++; 
+						countAdded++; 						
 					}
 				}
 			}
@@ -170,5 +254,13 @@ public class MZDeltaAnalysisTask extends AbstractTask {
 	@Override
 	public Task cloneTask() {
 		return new MZDeltaAnalysisTask(parameters);
+	}
+
+	public Collection<MsFeatureCluster> getFeatureClusters() {
+		return featureClusters;
+	}
+
+	public MZDeltaAnalysisParametersObject getParameters() {
+		return parameters;
 	}
 }

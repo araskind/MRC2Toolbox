@@ -27,6 +27,7 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -56,6 +57,7 @@ import edu.umich.med.mrc2.datoolbox.data.ExperimentalSample;
 import edu.umich.med.mrc2.datoolbox.data.MSRTSearchParametersObject;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureCluster;
+import edu.umich.med.mrc2.datoolbox.data.MsFeatureClusterSet;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureSet;
 import edu.umich.med.mrc2.datoolbox.data.MzFrequencyObject;
@@ -92,6 +94,7 @@ import edu.umich.med.mrc2.datoolbox.gui.fdata.corr.DockableCorrelationDataPanel;
 import edu.umich.med.mrc2.datoolbox.gui.fdata.noid.MissingIdentificationsDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idtable.DockableUniversalIdentificationResultsTable;
 import edu.umich.med.mrc2.datoolbox.gui.idtable.MetabolomicsIdentificationTableModelListener;
+import edu.umich.med.mrc2.datoolbox.gui.integration.DataIntegratorPanel;
 import edu.umich.med.mrc2.datoolbox.gui.io.DataExportDialog;
 import edu.umich.med.mrc2.datoolbox.gui.io.IntegratedReportDialog;
 import edu.umich.med.mrc2.datoolbox.gui.io.MultiFileDataImportDialog;
@@ -1861,9 +1864,18 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 		}
 	}
 	
-	private void finalizeMZDeltaAnalysisTask(MZDeltaAnalysisTask source) {
-		// TODO Auto-generated method stub
+	private void finalizeMZDeltaAnalysisTask(MZDeltaAnalysisTask task) {
 		
+		MsFeatureClusterSet mzDeltaAnalysisClusterDataSet = 
+				new MsFeatureClusterSet("M/Z delta analysis results - " 
+						+ MRC2ToolBoxConfiguration.defaultTimeStampFormat.format(new Date()), 
+				task.getFeatureClusters());
+		mzDeltaAnalysisClusterDataSet.setActive(true);
+		currentExperiment.addDataIntegrationSet(mzDeltaAnalysisClusterDataSet);
+				
+		MRC2ToolBoxCore.getMainWindow().showPanel(PanelList.INTEGRATION);
+		DataIntegratorPanel dip = (DataIntegratorPanel)MRC2ToolBoxCore.getMainWindow().getPanel(PanelList.INTEGRATION);		
+		dip.loadFeatureClusters(mzDeltaAnalysisClusterDataSet.getClusters());
 	}
 
 	private void finalizeMsFeatureAveragingTask(MsFeatureAveragingTask task) {

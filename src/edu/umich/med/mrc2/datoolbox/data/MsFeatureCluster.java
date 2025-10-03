@@ -366,10 +366,7 @@ public class MsFeatureCluster implements Serializable, XmlStorable {
 		if(cf.getStatsSummary() != null)
 			frt = cf.getStatsSummary().getMedianObservedRetention();
 		
-		if(!refRtRange.contains(frt))
-			return false;
-		else
-			return true;
+		return refRtRange.contains(frt);
 	}
 	
 	public boolean matches(
@@ -1052,6 +1049,12 @@ public class MsFeatureCluster implements Serializable, XmlStorable {
 			filter(LibraryMsFeature.class::isInstance).
 			map(LibraryMsFeature.class::cast).
 			filter(f -> f.isMerged()).collect(Collectors.toList());
+	}
+	
+	public Set<Double>getMonoisotopicMzSet(DataPipeline pipeline){
+		
+		return clusterFeatures.get(pipeline).stream().mapToDouble(f -> f.getMonoisotopicMz()).
+				boxed().collect(Collectors.toCollection(TreeSet::new));
 	}
 }
 

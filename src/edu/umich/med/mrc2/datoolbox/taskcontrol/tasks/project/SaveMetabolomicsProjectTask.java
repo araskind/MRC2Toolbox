@@ -181,8 +181,7 @@ public class SaveMetabolomicsProjectTask extends AbstractTask implements TaskLis
 			if(dpaResult.getMergedDataMatrix() != null)	{	
 				
 				ProjectUtils.saveMergedDataMatrixForDataIntegrationSet(projectToSave, dpaResult.getId());
-				ProjectUtils.saveMergedFeatureLibraryForDataIntegrationSet(dpaResult,projectToSave);
-				
+				ProjectUtils.saveMergedFeatureLibraryForDataIntegrationSet(dpaResult,projectToSave);				
 			}
 			processed++;
 		}	
