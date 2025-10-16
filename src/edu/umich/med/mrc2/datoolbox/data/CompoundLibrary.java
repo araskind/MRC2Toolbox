@@ -1,6 +1,6 @@
 /*******************************************************************************
  *
- * (C) Copyright 2018-2020 MRC2 (http://mrc2.umich.edu).
+ * (C) Copyright 2018-2025 MRC2 (http://mrc2.umich.edu).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -186,6 +186,11 @@ public class CompoundLibrary implements Serializable, Comparable<CompoundLibrary
 	public LibraryMsFeature getFeatureById(String targetId) {
 		return libraryFeatures.stream().
 				filter(f -> f.getId().equals(targetId)).findFirst().orElse(null);
+	}
+	
+	public List<LibraryMsFeature> getFeaturesByIds(Collection<String> targetIds) {
+		return libraryFeatures.stream().
+				filter(f -> targetIds.contains(f.getId())).collect(Collectors.toList());
 	}
 
 	public Date getLastModified() {

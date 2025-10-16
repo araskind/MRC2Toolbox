@@ -1,6 +1,6 @@
 /*******************************************************************************
  *
- * (C) Copyright 2018-2020 MRC2 (http://mrc2.umich.edu).
+ * (C) Copyright 2018-2025 MRC2 (http://mrc2.umich.edu).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -239,8 +239,8 @@ public class BasicTable extends JTable implements ActionListener{
 		setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
 		initPreferenceBasedRenderers();		
 		
-		fixedWidthColumns = new TreeSet<Integer>();
-		userColumns = new TreeSet<String>();
+		fixedWidthColumns = new TreeSet<>();
+		userColumns = new TreeSet<>();
 	}
 	
 	public void finalizeLayout() {

@@ -1,6 +1,6 @@
 /*******************************************************************************
  *
- * (C) Copyright 2018-2020 MRC2 (http://mrc2.umich.edu).
+ * (C) Copyright 2018-2025 MRC2 (http://mrc2.umich.edu).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -261,10 +261,10 @@ public class CorrelationResultsPanel extends ClusterDisplayPanel implements Char
 			racalculateClusterCorrMatrixes();
 
 		if (command.equals(MainActionCommands.FILTER_CLUSTERS_COMMAND.getName()))
-			filterClusterTree(currentExperiment.getMsFeatureClustersForDataPipeline(activeDataPipeline));
+			filterClusterTree(currentExperiment.getCorrelationClustersForDataPipeline(activeDataPipeline));
 
 		if (command.equals(MainActionCommands.RESET_FILTER_CLUSTERS_COMMAND.getName()))
-			resetClusterTreeFilter(currentExperiment.getMsFeatureClustersForDataPipeline(activeDataPipeline));
+			resetClusterTreeFilter(currentExperiment.getCorrelationClustersForDataPipeline(activeDataPipeline));
 
 		if (command.equals(MainActionCommands.REJECT_UNEXPLAINED_FEATURES_COMMAND.getName()))
 			rejectUnexplainedFeatures();
@@ -404,7 +404,7 @@ public class CorrelationResultsPanel extends ClusterDisplayPanel implements Char
 		if (!panelStateValid())
 			return;
 
-		if (currentExperiment.getMsFeatureClustersForDataPipeline(activeDataPipeline) != null) {
+		if (currentExperiment.getCorrelationClustersForDataPipeline(activeDataPipeline) != null) {
 
 			if (MessageDialog.showChoiceMsg("Existing results will be erased, do you want to proceed?",
 					this.getContentPane()) == JOptionPane.YES_OPTION) {
@@ -493,7 +493,7 @@ public class CorrelationResultsPanel extends ClusterDisplayPanel implements Char
 					"Please select or create another feature set.");
 			return;
 		} else {
-			currentExperiment.getMsFeatureClustersForDataPipeline(activeDataPipeline).
+			currentExperiment.getCorrelationClustersForDataPipeline(activeDataPipeline).
 				stream().flatMap(c -> c.getActiveFeatures().stream()).
 				forEach(f -> features.addFeature(f));
 
@@ -614,7 +614,7 @@ public class CorrelationResultsPanel extends ClusterDisplayPanel implements Char
 				});
 			});
 			newCluster.setCorrelationMatrix(newCluster.createCorrelationMatrix(false));
-			currentExperiment.getMsFeatureClustersForDataPipeline(activeDataPipeline).add(newCluster);
+			currentExperiment.getCorrelationClustersForDataPipeline(activeDataPipeline).add(newCluster);
 			clusterTree.getModel().addObject(newCluster);
 			clusterTree.resortTree();
 			clusterTree.selectFeatureCluster(newCluster);
@@ -652,7 +652,7 @@ public class CorrelationResultsPanel extends ClusterDisplayPanel implements Char
 						if (!activeSet.isLocked())
 							activeSet.removeFeatures(c.getFeatures());
 
-						currentExperiment.getMsFeatureClustersForDataPipeline(activeDataPipeline).remove(c);
+						currentExperiment.getCorrelationClustersForDataPipeline(activeDataPipeline).remove(c);
 						clusterTree.removeFeatureCluster(c);
 					}
 					activeSet.fireFeatureSetEvent(ParameterSetStatus.CHANGED);
@@ -677,7 +677,7 @@ public class CorrelationResultsPanel extends ClusterDisplayPanel implements Char
 
 				for (MsFeatureCluster c : selected) {
 
-					currentExperiment.getMsFeatureClustersForDataPipeline(activeDataPipeline).remove(c);
+					currentExperiment.getCorrelationClustersForDataPipeline(activeDataPipeline).remove(c);
 					clusterTree.removeFeatureCluster(c);
 				}
 				clearClusterDataPanel();
@@ -702,7 +702,7 @@ public class CorrelationResultsPanel extends ClusterDisplayPanel implements Char
 	private void rejectAllButMolionFeatures() {
 
 		Set<MsFeatureCluster> clusters = 
-				currentExperiment.getMsFeatureClustersForDataPipeline(activeDataPipeline);
+				currentExperiment.getCorrelationClustersForDataPipeline(activeDataPipeline);
 
 		for (MsFeatureCluster cluster : clusters) {
 
@@ -719,7 +719,7 @@ public class CorrelationResultsPanel extends ClusterDisplayPanel implements Char
 	private void rejectUnexplainedFeatures() {
 
 		Set<MsFeatureCluster> clusters = 
-				currentExperiment.getMsFeatureClustersForDataPipeline(activeDataPipeline);
+				currentExperiment.getCorrelationClustersForDataPipeline(activeDataPipeline);
 		for (MsFeatureCluster cluster : clusters) {
 
 			for (MsFeature f : cluster.getFeatures()) {
@@ -757,7 +757,7 @@ public class CorrelationResultsPanel extends ClusterDisplayPanel implements Char
 
 				this.clearClusterDataPanel();
 				clusterTree.removeFeatureCluster(activeCluster);
-				currentExperiment.getMsFeatureClustersForDataPipeline(activeDataPipeline).remove(activeCluster);
+				currentExperiment.getCorrelationClustersForDataPipeline(activeDataPipeline).remove(activeCluster);
 				MsFeatureSet activeSet = currentExperiment.getActiveFeatureSetForDataPipeline(activeDataPipeline);
 
 				if (!activeSet.isLocked())
@@ -803,7 +803,7 @@ public class CorrelationResultsPanel extends ClusterDisplayPanel implements Char
 		if (approve == JOptionPane.YES_OPTION) {
 
 			Set<MsFeatureCluster> clusters = 
-					currentExperiment.getMsFeatureClustersForDataPipeline(activeDataPipeline);
+					currentExperiment.getCorrelationClustersForDataPipeline(activeDataPipeline);
 
 			for (MsFeatureCluster cluster : clusters) {
 
@@ -821,7 +821,7 @@ public class CorrelationResultsPanel extends ClusterDisplayPanel implements Char
 	private void restoreRejectedFeatures() {
 
 		currentExperiment = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
-		Set<MsFeatureCluster> clusters = currentExperiment.getMsFeatureClustersForDataPipeline(activeDataPipeline);
+		Set<MsFeatureCluster> clusters = currentExperiment.getCorrelationClustersForDataPipeline(activeDataPipeline);
 		clusters.stream().forEach(c -> c.enableAllFeatures());
 		clearPanel();
 		loadFeatureClusters(clusters);
@@ -975,9 +975,9 @@ public class CorrelationResultsPanel extends ClusterDisplayPanel implements Char
 		if (!task.getFeatureClusters().isEmpty()) {
 
 			clusteringMode = ClusteringMode.INTERNAL;
-			currentExperiment.setFeatureClustersForDataPipeline(activeDataPipeline, task.getFeatureClusters());
+			currentExperiment.setCorrelationClustersForDataPipeline(activeDataPipeline, task.getFeatureClusters());
 			currentExperiment.setCorrelationMatrixForDataPipeline(activeDataPipeline, task.getCorrMatrix());
-			loadFeatureClusters(currentExperiment.getMsFeatureClustersForDataPipeline(activeDataPipeline));
+			loadFeatureClusters(currentExperiment.getCorrelationClustersForDataPipeline(activeDataPipeline));
 			MRC2ToolBoxCore.getMainWindow().showPanel(PanelList.CORRELATIONS);
 		} else {
 			MessageDialog.showInfoMsg("No correlation clusters found using current settings", this.getContentPane());
@@ -989,8 +989,8 @@ public class CorrelationResultsPanel extends ClusterDisplayPanel implements Char
 		if (!task.getFeatureClusters().isEmpty()) {
 
 			clusteringMode = ClusteringMode.INTERNAL;
-			currentExperiment.setFeatureClustersForDataPipeline(activeDataPipeline, task.getFeatureClusters());
-			loadFeatureClusters(currentExperiment.getMsFeatureClustersForDataPipeline(activeDataPipeline));
+			currentExperiment.setCorrelationClustersForDataPipeline(activeDataPipeline, task.getFeatureClusters());
+			loadFeatureClusters(currentExperiment.getCorrelationClustersForDataPipeline(activeDataPipeline));
 			MRC2ToolBoxCore.getMainWindow().showPanel(PanelList.CORRELATIONS);
 		} else {
 			MessageDialog.showInfoMsg("No correlation clusters found using current settings", this.getContentPane());
@@ -1002,8 +1002,8 @@ public class CorrelationResultsPanel extends ClusterDisplayPanel implements Char
 		if (!task.getFeatureClusters().isEmpty()) {
 
 			clusteringMode = ClusteringMode.BINNER;
-			currentExperiment.setFeatureClustersForDataPipeline(activeDataPipeline, task.getFeatureClusters());
-			loadFeatureClusters(currentExperiment.getMsFeatureClustersForDataPipeline(activeDataPipeline));
+			currentExperiment.setCorrelationClustersForDataPipeline(activeDataPipeline, task.getFeatureClusters());
+			loadFeatureClusters(currentExperiment.getCorrelationClustersForDataPipeline(activeDataPipeline));
 			MRC2ToolBoxCore.getMainWindow().showPanel(PanelList.CORRELATIONS);
 			MRC2ToolBoxCore.getMainWindow().getPreferencesDraw().switchDataPipeline(currentExperiment, activeDataPipeline);
 
@@ -1074,7 +1074,7 @@ public class CorrelationResultsPanel extends ClusterDisplayPanel implements Char
 //		toolbar.updateGuiFromProjectAndDataPipeline(currentProject, activeDataPipeline);
 		if (currentExperiment != null && activeDataPipeline != null) {
 			Set<MsFeatureCluster> clusterList = 
-					currentExperiment.getMsFeatureClustersForDataPipeline(activeDataPipeline);
+					currentExperiment.getCorrelationClustersForDataPipeline(activeDataPipeline);
 			if (clusterList != null)
 				loadFeatureClusters(clusterList);
 		}

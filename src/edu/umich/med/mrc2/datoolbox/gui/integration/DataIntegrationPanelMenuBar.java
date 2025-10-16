@@ -1,6 +1,6 @@
 /*******************************************************************************
  *
- * (C) Copyright 2018-2020 MRC2 (http://mrc2.umich.edu).
+ * (C) Copyright 2018-2025 MRC2 (http://mrc2.umich.edu).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,6 +58,7 @@ public class DataIntegrationPanelMenuBar extends CommonMenuBar {
 	private static final Icon showSummaryIcon = GuiUtils.getIcon("calcStats", 24);
 	private static final Icon exportSummaryIcon = GuiUtils.getIcon("extractList", 24);
 	private static final Icon generateMetabCombinerScriptIcon = GuiUtils.getIcon("rScriptMC", 24);
+	private static final Icon clusterSetIcon = GuiUtils.getIcon("clusterFeatureTable", 24);
 		
 	// Menus
 	private JMenu
@@ -69,7 +70,8 @@ public class DataIntegrationPanelMenuBar extends CommonMenuBar {
 	private JMenuItem
 		integrationSetupMenuItem,
 		acceptListMenuItem,
-		deleteIntegrationMenuItem;
+		deleteIntegrationMenuItem,
+		manageDataSetsMenuItem;
 	
 	// Alignment items
 	private JMenuItem
@@ -107,7 +109,13 @@ public class DataIntegrationPanelMenuBar extends CommonMenuBar {
 		deleteIntegrationMenuItem = addItem(integrationMenu, 
 				MainActionCommands.DELETE_INTEGRATION_SET_COMMAND, 
 				deleteDataSetIcon);
-
+		
+		integrationMenu.addSeparator();
+		
+		manageDataSetsMenuItem = addItem(integrationMenu, 
+				MainActionCommands.SHOW_FEATURE_CLUSTER_SET_MANAGER, 
+				clusterSetIcon);
+		
 		add(integrationMenu);
 				
 		alignmentMenu = new JMenu("Data set alignment");

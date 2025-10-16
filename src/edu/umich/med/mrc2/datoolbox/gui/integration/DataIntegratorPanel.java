@@ -1,6 +1,6 @@
 /*******************************************************************************
  *
- * (C) Copyright 2018-2020 MRC2 (http://mrc2.umich.edu).
+ * (C) Copyright 2018-2025 MRC2 (http://mrc2.umich.edu).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,6 +57,7 @@ import edu.umich.med.mrc2.datoolbox.gui.communication.FeatureSetEvent;
 import edu.umich.med.mrc2.datoolbox.gui.dereplication.ClusterDisplayPanel;
 import edu.umich.med.mrc2.datoolbox.gui.integration.dpalign.DataSetAlignmentManager;
 import edu.umich.med.mrc2.datoolbox.gui.integration.dpalign.DataSetAlignmentSetupDialog;
+import edu.umich.med.mrc2.datoolbox.gui.integration.dsmanager.MsFeatureClusterSetManagerDialog;
 import edu.umich.med.mrc2.datoolbox.gui.integration.mcr.MetabCombinerScriptDialog;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.main.PanelList;
@@ -96,6 +97,7 @@ public class DataIntegratorPanel extends ClusterDisplayPanel {
 	
 	public static final String DATA_INTEGRATOR_FEATURE_SET = "DATA_INTEGRATOR_FEATURE_SET";
 	private MsFeatureSet activeMsFeatureSet;
+	private MsFeatureClusterSetManagerDialog msFeatureClusterSetManagerDialog;
 
 	public DataIntegratorPanel() {
 
@@ -234,8 +236,38 @@ public class DataIntegratorPanel extends ClusterDisplayPanel {
 		
 		if (command.equals(MainActionCommands.GENERATE_METAB_COMBINER_SCRIPT_COMMAND.getName()))
 			showMetabCombinerScriptDialog();	
+		
+		if (command.equals(MainActionCommands.SHOW_FEATURE_CLUSTER_SET_MANAGER.getName()))
+			showFeatureClusterSetManager();
+		
+		if (command.equals(MainActionCommands.LOAD_SELECTED_FEATURE_CLUSTER_SET.getName()))
+			loadSelectedFromClusterSetManager();
 	}
 	
+	private void loadSelectedFromClusterSetManager() {
+		
+		MsFeatureClusterSet selected = 
+				msFeatureClusterSetManagerDialog.getSelectedMsFeatureClusterSet();
+		if(selected == null)
+			return;
+		
+		integratedSet = selected;
+		showClusterData(null);
+		loadFeatureClusters(integratedSet.getClusters());
+		msFeatureClusterSetManagerDialog.dispose();
+	}
+
+	private void showFeatureClusterSetManager() {
+
+		if(currentExperiment == null)
+			return;
+		
+		msFeatureClusterSetManagerDialog = new MsFeatureClusterSetManagerDialog(this);
+		msFeatureClusterSetManagerDialog.loadDataIntegrationSetsForProject(currentExperiment);
+		msFeatureClusterSetManagerDialog.setLocationRelativeTo(this.getContentPane());
+		msFeatureClusterSetManagerDialog.setVisible(true);
+	}
+
 	private void showMetabCombinerScriptDialog() {
 
 		MetabCombinerScriptDialog metabCombinerScriptDialog = new MetabCombinerScriptDialog();

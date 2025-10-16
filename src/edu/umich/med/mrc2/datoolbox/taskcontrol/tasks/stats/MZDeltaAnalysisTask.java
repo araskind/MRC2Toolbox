@@ -1,6 +1,6 @@
 /*******************************************************************************
  *
- * (C) Copyright 2018-2020 MRC2 (http://mrc2.umich.edu).
+ * (C) Copyright 2018-2025 MRC2 (http://mrc2.umich.edu).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,6 @@ import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.gui.mzdelta.MZDeltaAnalysisParametersObject;
-import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
@@ -136,11 +135,11 @@ public class MZDeltaAnalysisTask extends AbstractTask {
 		for(MsFeatureCluster anchorCluster : anchorClusters) {
 					
 			Set<Double>lookupMassSet = createLookupMassSet(anchorCluster, deltaMass, direction);
-			System.out.println("\nNext Mass Set:");
-			for(double mz : lookupMassSet)
-				System.out.println(MRC2ToolBoxConfiguration.getMzFormat().format(mz));
-			
-			System.out.println("\n_________________");
+//			System.out.println("\nNext Mass Set:");
+//			for(double mz : lookupMassSet)
+//				System.out.println(MRC2ToolBoxConfiguration.getMzFormat().format(mz));
+//			
+//			System.out.println("\n_________________");
 			
 			Collection<MsFeature> features = new ArrayList<>();
 			Set<Range>lookupMassRangeSet = createMassRangeSet(

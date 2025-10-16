@@ -1,6 +1,6 @@
 /*******************************************************************************
  *
- * (C) Copyright 2018-2020 MRC2 (http://mrc2.umich.edu).
+ * (C) Copyright 2018-2025 MRC2 (http://mrc2.umich.edu).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -103,7 +103,7 @@ public class FeatureIntensitiesTable extends BasicTable {
 
 	public void sortByFeatureAndSample() {
 
-		ArrayList<RowSorter.SortKey> sortKeys = new ArrayList<RowSorter.SortKey>();
+		ArrayList<RowSorter.SortKey> sortKeys = new ArrayList<>();
 		int featureColumn = model.getColumnIndex(FeatureIntensitiesTableModel.MS_FEATURE_COLUMN);
 		int sampleColumn = model.getColumnIndex(FeatureIntensitiesTableModel.SAMPLE_COLUMN);
 

@@ -1,6 +1,6 @@
 /*******************************************************************************
  *
- * (C) Copyright 2018-2020 MRC2 (http://mrc2.umich.edu).
+ * (C) Copyright 2018-2025 MRC2 (http://mrc2.umich.edu).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,7 +86,7 @@ public class DataAnalysisProject extends Project {
 	protected TreeMap<DataPipeline, Matrix> corrMatrixMap;
 	protected TreeMap<DataPipeline, Matrix[]> metaDataMap;
 	protected TreeMap<DataPipeline, Set<MsFeatureCluster>> duplicatesMap;
-	protected TreeMap<DataPipeline, Set<MsFeatureCluster>> clusterMap;
+	protected TreeMap<DataPipeline, Set<MsFeatureCluster>> correlationClusterMap;
 	protected TreeMap<DataPipeline, Boolean> statsCalculatedMap;
 	protected TreeMap<DataPipeline, Set<MsFeatureSet>> featureSetMap;
 	protected TreeMap<DataAcquisitionMethod, Set<DataFile>> dataFileMap;
@@ -111,7 +111,7 @@ public class DataAnalysisProject extends Project {
 		libraryMap = new TreeMap<>();
 		averagedFeatureMap = new TreeMap<>();
 		duplicatesMap = new TreeMap<>();
-		clusterMap = new TreeMap<>();
+		correlationClusterMap = new TreeMap<>();
 		featureMap = new TreeMap<>();
 		worklistMap = new TreeMap<>();
 		dataFileMap = new TreeMap<>();
@@ -206,7 +206,7 @@ public class DataAnalysisProject extends Project {
 		imputedDataMatrixMap.remove(pipeline);
 		corrMatrixMap.remove(pipeline);
 		duplicatesMap.remove(pipeline);
-		clusterMap.remove(pipeline);	
+		correlationClusterMap.remove(pipeline);	
 		statsCalculatedMap.remove(pipeline);
 		metaDataMap.remove(pipeline);
 		featureSetMap.remove(pipeline);		
@@ -474,6 +474,13 @@ public class DataAnalysisProject extends Project {
 				findFirst().orElse(null);
 	}
 	
+	public List<MsFeature> getMsFeaturesByIds(Collection<String> ids, DataPipeline pipeline) {
+
+		return featureMap.get(pipeline).stream().
+				filter(f -> ids.contains(f.getId())).
+				collect(Collectors.toList());
+	}
+	
 	public MsFeature getMsFeatureById(String id) {
 
 		return featureMap.values().stream().flatMap(v -> v.stream()).
@@ -523,8 +530,8 @@ public class DataAnalysisProject extends Project {
 		return datamatrix.getRowForLabel(file) > -1;
 	}
 
-	public Set<MsFeatureCluster> getMsFeatureClustersForDataPipeline(DataPipeline pipeline) {
-		return clusterMap.get(pipeline);
+	public Set<MsFeatureCluster> getCorrelationClustersForDataPipeline(DataPipeline pipeline) {
+		return correlationClusterMap.get(pipeline);
 	}
 
 	public Set<MsFeatureSet> getMsFeatureSetsForDataPipeline(DataPipeline pipeline) {
@@ -570,12 +577,10 @@ public class DataAnalysisProject extends Project {
 
 	public boolean correlationClustersCalculatedForDataPipeline(DataPipeline pipeline) {
 
-		if (clusterMap.get(pipeline) == null)
+		if (correlationClusterMap.get(pipeline) == null || correlationClusterMap.get(pipeline).isEmpty())
 			return false;
-		else if (!clusterMap.get(pipeline).isEmpty())
-			return true;
 		else
-			return false;
+			return true;
 	}
 
 	public boolean dataPipelineHasData(DataPipeline pipeline) {
@@ -584,13 +589,10 @@ public class DataAnalysisProject extends Project {
 
 	public boolean hasDuplicateClusters(DataPipeline pipeline) {
 
-		if(duplicatesMap.get(pipeline) == null)
+		if(duplicatesMap.get(pipeline) == null || duplicatesMap.get(pipeline).isEmpty())
 			return false;
-
-		if (!duplicatesMap.get(pipeline).isEmpty())
+		else
 			return true;
-
-		return false;
 	}
 
 	public boolean dataPipelineHasLinkedLibrary(DataPipeline pipeline) {
@@ -739,9 +741,9 @@ public class DataAnalysisProject extends Project {
 			DataPipeline pipeline, Collection<MsFeatureCluster> clusterSet) {
 		duplicatesMap.put(pipeline, new HashSet<>(clusterSet));
 	}
-	public void setFeatureClustersForDataPipeline(
+	public void setCorrelationClustersForDataPipeline(
 			DataPipeline pipeline, Set<MsFeatureCluster> clusterSet) {
-		clusterMap.put(pipeline, clusterSet);
+		correlationClusterMap.put(pipeline, clusterSet);
 	}
 
 	public void setFeaturesForDataPipeline(
@@ -848,8 +850,8 @@ public class DataAnalysisProject extends Project {
 		Set<MsFeatureCluster> duplicates = duplicatesMap.remove(oldPipeline);
 		duplicatesMap.put(newPipeline, duplicates);
 
-		Set<MsFeatureCluster> clusters = clusterMap.remove(oldPipeline);
-		clusterMap.put(newPipeline, clusters);
+		Set<MsFeatureCluster> clusters = correlationClusterMap.remove(oldPipeline);
+		correlationClusterMap.put(newPipeline, clusters);
 
 		String dmfile = dataMatrixFileMap.remove(oldPipeline);
 		dataMatrixFileMap.put(newPipeline, dmfile);

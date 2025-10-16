@@ -1,6 +1,6 @@
 /*******************************************************************************
  *
- * (C) Copyright 2018-2020 MRC2 (http://mrc2.umich.edu).
+ * (C) Copyright 2018-2025 MRC2 (http://mrc2.umich.edu).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -384,6 +384,7 @@ public enum MainActionCommands {
 	SEARCH_FEATURES_BY_RT_ID_COMMAND("Search features by RT/identity"),
 	SHOW_MSMS_DATA_SET_STATISTICS_COMMAND("Show MSMS data set statistics"),
 	SHOW_CLUSTERED_MSMS_DATA_SET_STATISTICS_COMMAND("Show clustered MSMS data set statistics"),
+	LOAD_SELECTED_FEATURE_CLUSTER_SET("Load selected feature cluster set"),
 
 	// Duplicates
 	SHOW_FIND_DUPLICATES_DIALOG_COMMAND("Show find duplicates options"),
@@ -417,6 +418,7 @@ public enum MainActionCommands {
 	SHOW_DATA_PIPELINE_ALIGNMENT_MANAGER_COMMAND("Show data alignment manager"),
 	LOAD_DATA_PIPELINE_ALIGNMENT_RESULTS_COMMAND("Load data alignment results"),
 	DELETE_DATA_PIPELINE_ALIGNMENT_RESULTS_COMMAND("Delete data alignment results"),
+	SHOW_FEATURE_CLUSTER_SET_MANAGER("Show feature cluster data set manager"),
 	
 	SHOW_UNMATCHED_FEATURES_FROM_REFERENCE_DATASET_COMMAND("Show unmatched features from reference dataset"),
 	SHOW_DATASET_ALIGNMENT_SUMMARY_COMMAND("Show dataset alignment summary"),

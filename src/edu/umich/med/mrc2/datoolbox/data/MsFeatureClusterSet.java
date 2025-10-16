@@ -1,6 +1,6 @@
 /*******************************************************************************
  * 
- * (C) Copyright 2018-2020 MRC2 (http://mrc2.umich.edu).
+ * (C) Copyright 2018-2025 MRC2 (http://mrc2.umich.edu).
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -171,6 +171,14 @@ public class MsFeatureClusterSet implements
 
 	public Set<MsFeatureCluster> getClusters() {
 		return clusters;
+	}
+	
+	public int getNumberOfClusters() {
+		return clusters.size();
+	}
+	
+	public int getNumberOfFeatures() {
+		return clusters.stream().mapToInt(c -> c.getFeatures().size()).sum();
 	}
 	
 	public Matrix getMergedDataMatrix() {

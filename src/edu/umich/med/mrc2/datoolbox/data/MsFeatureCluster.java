@@ -1,6 +1,6 @@
 /*******************************************************************************
  *
- * (C) Copyright 2018-2020 MRC2 (http://mrc2.umich.edu).
+ * (C) Copyright 2018-2025 MRC2 (http://mrc2.umich.edu).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -938,19 +938,15 @@ public class MsFeatureCluster implements Serializable, XmlStorable {
 				getChildren(ObjectNames.DataPipeline.name());
 		for(Element dpElement : dataPipelineElementList) {
 			
+			Set<String>featureIdSet = new TreeSet<>(Arrays.asList(dpElement.getText().split(",")));
 			String pipelineName = dpElement.getAttributeValue(CommonFields.Name.name());
 			DataPipeline dp = project.getDataPipelineByName(pipelineName);
 			if(dp != null) {
 				CompoundLibrary avgLib = project.getAveragedFeatureLibraryForDataPipeline(dp);
-				if(avgLib != null) {
-					
-					String[]featureIds = dpElement.getText().split(",");
-					for(String id : featureIds) {
-						MsFeature feature = avgLib.getFeatureById(id);
-						if(feature != null)
-							addFeature(feature, dp);
-					}
-				}
+				if(avgLib != null) 					
+					avgLib.getFeaturesByIds(featureIdSet).forEach(f -> addFeature(f, dp));
+				else
+					project.getMsFeaturesByIds(featureIdSet, dp).forEach(f -> addFeature(f, dp));						
 			}
 		}		
 		//	Set primary feature

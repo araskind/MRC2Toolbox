@@ -1,6 +1,6 @@
 /*******************************************************************************
  *
- * (C) Copyright 2018-2020 MRC2 (http://mrc2.umich.edu).
+ * (C) Copyright 2018-2025 MRC2 (http://mrc2.umich.edu).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -376,9 +376,8 @@ public abstract class CEFProcessingTask extends AbstractTask {
 		if(sign.equals("-"))
 			pol = Polarity.Negative;
 
-		Map<Adduct,Collection<MsPoint>>cmMap = 
-				new TreeMap<Adduct,Collection<MsPoint>>();
-		List<Element> peaks = new ArrayList<Element>();
+		Map<Adduct,Collection<MsPoint>>cmMap = new TreeMap<>();
+		List<Element> peaks = new ArrayList<>();
 		if(spectrumElement.getChild("MSPeaks") == null)	
 			return cmMap;
 		else
@@ -391,7 +390,7 @@ public abstract class CEFProcessingTask extends AbstractTask {
 		if(peaks.get(0).getAttribute("s") == null 
 				|| peaks.get(0).getAttributeValue("s").isEmpty()) {
 			
-			Set<MsPoint> points = new TreeSet<MsPoint>(MsUtils.mzSorter);
+			Set<MsPoint> points = new TreeSet<>(MsUtils.mzSorter);
 			for(Element peak : peaks) {
 				points.add(new MsPoint(
 						peak.getAttribute("x").getDoubleValue(),
@@ -400,13 +399,12 @@ public abstract class CEFProcessingTask extends AbstractTask {
 			cmMap.put(AdductManager.getDefaultAdductForPolarity(pol), points);
 			return cmMap;
 		}
-		Map<String,Collection<MsPoint>>adductMap = 
-				new TreeMap<String,Collection<MsPoint>>();
+		Map<String,Collection<MsPoint>>adductMap = new TreeMap<>();
 		for(Element peak : peaks) {
 						
 			String adduct = peak.getAttributeValue("s").replaceAll("\\+[0-9]+$", "");
 			if(!adductMap.containsKey(adduct))
-				adductMap.put(adduct, new TreeSet<MsPoint>(MsUtils.mzSorter));
+				adductMap.put(adduct, new TreeSet<>(MsUtils.mzSorter));
 
 			adductMap.get(adduct).add(new MsPoint(
 					peak.getAttribute("x").getDoubleValue(),
@@ -426,8 +424,7 @@ public abstract class CEFProcessingTask extends AbstractTask {
 	protected Collection<MsFeatureIdentity>parseIdentifications(
 			MsFeature feature, Element compoundElement, Connection conn){
 		
-		Collection<MsFeatureIdentity>identifications = 
-				new HashSet<MsFeatureIdentity>();
+		Collection<MsFeatureIdentity>identifications = new HashSet<>();
 		if(compoundElement.getChild("Results") == null) {
 			
 			CompoundIdentity unkId = new CompoundIdentity(feature.getName(), null);

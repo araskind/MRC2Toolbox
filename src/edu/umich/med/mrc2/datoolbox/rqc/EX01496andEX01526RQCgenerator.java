@@ -1,6 +1,6 @@
 /*******************************************************************************
  *
- * (C) Copyright 2018-2020 MRC2 (http://mrc2.umich.edu).
+ * (C) Copyright 2018-2025 MRC2 (http://mrc2.umich.edu).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,8 @@ import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 
 public class EX01496andEX01526RQCgenerator {
 	
-	private static final String experimentId = "EX01496-1526";
+	private static final String experimentId2B = "EX01496-1526";
+	private static final String experimentId = "1526";
 	private static final File xlQCfile = new File(
 			"Y:\\DataAnalysis\\_Reports\\EX01526 - Human EDTA Tranche 4 plasma H20001805E\\EX01496-1526-QC-summary-tables.xlsm");
 	private static final File xlHighCutoffQCfile = new File(
@@ -45,17 +46,17 @@ public class EX01496andEX01526RQCgenerator {
 		MRC2ToolBoxConfiguration.initConfiguration();
 
 		try {
-			generateSummaryQcScriptForEX01496and1526rppos(true);
+			generateSummaryQcScriptForEX01526ionpneg(false);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		try {
-				//	generateSummaryQcScriptForEX01496rppos(true);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+//		try {
+//			generateSummaryQcScriptForEX01496and1526rpneg(true);
+//		} catch (Exception e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 	}
 	
 	private static void generateSummaryQcScriptForEX01496and1526ionpneg(boolean highCutoffData) {		
@@ -72,7 +73,7 @@ public class EX01496andEX01526RQCgenerator {
 		}	
 		File inputMap = Paths.get(rWorkingDir.getAbsolutePath(), "EX01496_1526_IONP-NEG-SummaryQC-inputMap.txt").toFile();
 		RQCScriptGenerator.generateSummaryQcScript(
-				experimentId,
+				experimentId2B,
 				rWorkingDir,
 				xlQc,
 				inputMap,
@@ -94,7 +95,7 @@ public class EX01496andEX01526RQCgenerator {
 		}		
 		File inputMap = Paths.get(rWorkingDir.getAbsolutePath(), "EX01526_IONP-NEG-SummaryQC-inputMap.txt").toFile();
 		RQCScriptGenerator.generateSummaryQcScript(
-				"EX01496",
+				experimentId,
 				rWorkingDir,
 				xlQc,
 				inputMap,
@@ -116,7 +117,7 @@ public class EX01496andEX01526RQCgenerator {
 		}	
 		File inputMap = Paths.get(rWorkingDir.getAbsolutePath(), "EX01496_1526_RP-NEG-SummaryQC-inputMap.txt").toFile();
 		RQCScriptGenerator.generateSummaryQcScript(
-				experimentId,
+				experimentId2B,
 				rWorkingDir,
 				xlQc,
 				inputMap,
@@ -138,7 +139,7 @@ public class EX01496andEX01526RQCgenerator {
 		}	
 		File inputMap = Paths.get(rWorkingDir.getAbsolutePath(), "EX01526_RP-NEG-SummaryQC-inputMap.txt").toFile();
 		RQCScriptGenerator.generateSummaryQcScript(
-				"EX01496",
+				experimentId,
 				rWorkingDir,
 				xlQc,
 				inputMap,
@@ -160,7 +161,7 @@ public class EX01496andEX01526RQCgenerator {
 		}	
 		File inputMap = Paths.get(rWorkingDir.getAbsolutePath(), "EX01496_1526_RP-POS-SummaryQC-inputMap.txt").toFile();
 		RQCScriptGenerator.generateSummaryQcScript(
-				experimentId,
+				experimentId2B,
 				rWorkingDir,
 				xlQc,
 				inputMap,
@@ -182,7 +183,7 @@ public class EX01496andEX01526RQCgenerator {
 		}		
 		File inputMap = Paths.get(rWorkingDir.getAbsolutePath(), "EX01526_RP-POS-SummaryQC-inputMap.txt").toFile();
 		RQCScriptGenerator.generateSummaryQcScript(
-				"EX01496",
+				experimentId,
 				rWorkingDir,
 				xlQc,
 				inputMap,

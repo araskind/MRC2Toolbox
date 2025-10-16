@@ -1,6 +1,6 @@
 /*******************************************************************************
  *
- * (C) Copyright 2018-2020 MRC2 (http://mrc2.umich.edu).
+ * (C) Copyright 2018-2025 MRC2 (http://mrc2.umich.edu).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -123,7 +123,7 @@ public class MassDifferenceExplorerDialog extends JDialog implements ActionListe
 		int maxClusterSize = toolbar.getMaxClusterSize();
 		DataAnalysisProject currentProject = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
 		Set<MsFeatureCluster> clusters = currentProject.
-				getMsFeatureClustersForDataPipeline(currentProject.getActiveDataPipeline());
+				getCorrelationClustersForDataPipeline(currentProject.getActiveDataPipeline());
 
 		if(clusters == null)
 			return;
