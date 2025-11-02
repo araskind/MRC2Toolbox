@@ -52,7 +52,7 @@ public class MFESummarizer {
 		String cefFolderMask = "CO900-Pk3000";
 		File outputFile = new File("Y:\\DataAnalysis\\_Reports\\EX01496 - Human EDTA Tranche 3 plasma X20001463K\\"
 				+ "A049 - Central carbon metabolism profiling\\MFE\\NEG\\EX01496-IONP-NEG-MFE-HC-counts.txt");
-		File mfeDir = new File("Y:\\DataAnalysis\\_Reports\\EX01552 - Urine Metabolomics for OAB\\A003 - Untargeted\\MFE\\POS\\V1");
+		File mfeDir = new File("Y:\\DataAnalysis\\_Reports\\EX01552 - Urine Metabolomics for OAB\\A003 - Untargeted\\MFE\\NEG");
 		try {
 			readMFEfeatureCounts(mfeDir);
 		} catch (Exception e) {

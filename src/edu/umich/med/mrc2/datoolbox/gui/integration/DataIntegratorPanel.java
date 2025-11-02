@@ -86,15 +86,11 @@ public class DataIntegratorPanel extends ClusterDisplayPanel {
 			new File(MRC2ToolBoxCore.configDir + "DataIntegratorPanel.layout");
 	
 	private DataIntegrationSetupDialog dataIntegrationSetupDialog;
-	private String dataSetName;
-	private MsFeatureClusterSet integratedSet;
-	private DataPipelineAlignmentResults alignmentResults;
-	
+	private DataPipelineAlignmentResults alignmentResults;	
 	private DockableDataIntegrationFeatureSelectionTable featureSelectionTable;
 	private DockableAlignedDataSetSummaryPanel alignedDataSetSummaryPanel;
 	private DataSetAlignmentSetupDialog dataSetAlignmentSetupDialog;
-	private DataSetAlignmentManager dataSetAlignmentManager;
-	
+	private DataSetAlignmentManager dataSetAlignmentManager;	
 	public static final String DATA_INTEGRATOR_FEATURE_SET = "DATA_INTEGRATOR_FEATURE_SET";
 	private MsFeatureSet activeMsFeatureSet;
 	private MsFeatureClusterSetManagerDialog msFeatureClusterSetManagerDialog;
@@ -180,24 +176,24 @@ public class DataIntegratorPanel extends ClusterDisplayPanel {
 			collectIdentifiedCompoundData();
 
 		if (command.equals(MainActionCommands.DELETE_INTEGRATION_SET_COMMAND.getName()))
-			dleleteActiveIntegrationSet();
+			deleteClusterSet(activeClusterSet);
 
 		if (command.equals(MainActionCommands.DATA_INTEGRATION_DIALOG_COMMAND.getName())) {
 
-			if (integratedSet != null)
-				dataIntegrationSetupDialog.setDataSetName(integratedSet.getName());
+			if (activeClusterSet != null)
+				dataIntegrationSetupDialog.setDataSetName(activeClusterSet.getName());
 
 			dataIntegrationSetupDialog.setLocationRelativeTo(this.getContentPane());
 			dataIntegrationSetupDialog.setVisible(true);
 		}
 
 		if (command.equals(MainActionCommands.FILTER_CLUSTERS_COMMAND.getName())  
-				&& integratedSet != null)
-			filterClusterTree(integratedSet.getClusters());
+				&& activeClusterSet != null)
+			filterClusterTree(activeClusterSet.getClusters());
 
 		if (command.equals(MainActionCommands.RESET_FILTER_CLUSTERS_COMMAND.getName()) 
-				&& integratedSet != null)
-			resetClusterTreeFilter(integratedSet.getClusters());
+				&& activeClusterSet != null)
+			resetClusterTreeFilter(activeClusterSet.getClusters());
 		
 		if (command.equals(MainActionCommands.ACCEPT_CLEAN_ID_LIST_COMMAND.getName()))
 			acceptIntegratedCompoundList();
@@ -251,9 +247,9 @@ public class DataIntegratorPanel extends ClusterDisplayPanel {
 		if(selected == null)
 			return;
 		
-		integratedSet = selected;
+		activeClusterSet = selected;
 		showClusterData(null);
-		loadFeatureClusters(integratedSet.getClusters());
+		loadFeatureClusters(activeClusterSet.getClusters());
 		msFeatureClusterSetManagerDialog.dispose();
 	}
 
@@ -495,34 +491,40 @@ public class DataIntegratorPanel extends ClusterDisplayPanel {
 				}
 			}
 			newCluster.setCorrelationMatrix(newCluster.createCorrelationMatrix(false));
-			integratedSet.addCluster(newCluster);
+			activeClusterSet.addCluster(newCluster);
 			clusterTree.getModel().addObject(newCluster);
 			clusterTree.resortTree();
 			clusterTree.selectFeatureCluster(newCluster);
 		}
 	}
 
-	private void dleleteActiveIntegrationSet() {
+	private void deleteClusterSet(MsFeatureClusterSet toDelete) {
 
-		if (integratedSet != null) {
+		if (toDelete == null)
+			return;
+			
+		int res = MessageDialog.showChoiceWithWarningMsg(
+				"Do you want to delete the cluster set " + toDelete.getName() + "?", this.getContentPane());
 
-			MRC2ToolBoxCore.getActiveMetabolomicsExperiment().deleteDataIntegrationSet(integratedSet);
-			integratedSet = null;
-			clearPanel();
+		if(res == JOptionPane.YES_OPTION) {
+			
+			MRC2ToolBoxCore.getActiveMetabolomicsExperiment().deleteFeatureClusterSet(toDelete);			
+			if(activeClusterSet != null && activeClusterSet.equals(toDelete))
+				clearPanel();
 			//	TODO find new place for this functionality?
 			//	toolbar.updateGuiFromActiveSet(null);
-		}
+		}	
 	}
 
 	private void collectIdentifiedCompoundData() {
 
 		Collection<DataPipeline> selectedDataPipelines = 
 				dataIntegrationSetupDialog.getSelectedDataPipelines();
-		dataSetName = dataIntegrationSetupDialog.getDataSetName();
-		if (integratedSet == null)
-			integratedSet = new MsFeatureClusterSet(dataSetName);
+		String dataSetName = dataIntegrationSetupDialog.getDataSetName();
+		if (activeClusterSet == null)
+			activeClusterSet = new MsFeatureClusterSet(dataSetName);
 
-		ArrayList<String> warnings = new ArrayList<String>();
+		ArrayList<String> warnings = new ArrayList<>();
 
 		if (selectedDataPipelines.isEmpty())
 			warnings.add("Please select at least one assay method!");
@@ -531,14 +533,14 @@ public class DataIntegratorPanel extends ClusterDisplayPanel {
 			warnings.add("Please define a name for the dataset!");
 
 		MsFeatureClusterSet nm = MRC2ToolBoxCore.getActiveMetabolomicsExperiment().
-					getDataIntegrationSets().stream().
+					getFeatureClusterSets().stream().
 					filter(s -> s.getName().equalsIgnoreCase(dataSetName)).
 					findFirst().orElse(null);
 
-		if (nm != null && !nm.equals(integratedSet))
+		if (nm != null && !nm.equals(activeClusterSet))
 				warnings.add("Integrated set with name \"" + dataSetName + "\" alredy exists!");
 		else
-			integratedSet = new MsFeatureClusterSet(dataSetName);
+			activeClusterSet = new MsFeatureClusterSet(dataSetName);
 
 		if (!warnings.isEmpty()) {
 			MessageDialog.showErrorMsg(StringUtils.join(warnings, "\n"));
@@ -546,7 +548,7 @@ public class DataIntegratorPanel extends ClusterDisplayPanel {
 		}
 		dataIntegrationSetupDialog.setVisible(false);
 		IdentifiedFeatureIntegrationTask task = 
-				new IdentifiedFeatureIntegrationTask(selectedDataPipelines, integratedSet);
+				new IdentifiedFeatureIntegrationTask(selectedDataPipelines, activeClusterSet);
 		task.addTaskListener(this);
 		MRC2ToolBoxCore.getTaskController().addTask(task);
 	}
@@ -556,8 +558,8 @@ public class DataIntegratorPanel extends ClusterDisplayPanel {
 		if (MessageDialog.showChoiceMsg("Do you want to clear data intergation results?",
 				this.getContentPane()) == JOptionPane.YES_OPTION) {
 
-			if (integratedSet != null)
-				integratedSet.clearClusters();
+			if (activeClusterSet != null)
+				activeClusterSet.clearClusters();
 
 			clusterTree.resetTree();
 			clearClusterDataPanel();
@@ -568,11 +570,11 @@ public class DataIntegratorPanel extends ClusterDisplayPanel {
 
 		currentExperiment = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
 
-		if (integratedSet.getClusters().isEmpty())
+		if (activeClusterSet.getClusters().isEmpty())
 			MessageDialog.showErrorMsg("No identified compounds found.", this.getContentPane());
 
-		integratedSet.setActive(true);
-		currentExperiment.addDataIntegrationSet(integratedSet);
+		activeClusterSet.setActive(true);
+		currentExperiment.addFeatureClusterSet(activeClusterSet);
 //		TODO find new place for this functionality?
 //		toolbar.updateGuiFromActiveSet(integratedSet);
 		// MessageDialogue.showInfoMsg(dataSetName + " set as integrated identified data
@@ -618,22 +620,23 @@ public class DataIntegratorPanel extends ClusterDisplayPanel {
 	
 	public void loadDataPipelineAlignmentResults(DataPipelineAlignmentResults results) {
 		
+		activeClusterSet = null;
 		alignmentResults = results;
 		loadFeatureClusters(alignmentResults.getClusters());
 	}
 
 	private synchronized void finalizeIdentifiedFeatureIntegrationTask(IdentifiedFeatureIntegrationTask task) {
 		
-		integratedSet = task.getIdClusterSet();
+		activeClusterSet = task.getIdClusterSet();
 		
 //		TODO find new place for this functionality?
 //		toolbar.updateGuiFromActiveSet(integratedSet);
 		// currentProject.addIntegratedFeatureClusterSet(integratedSet);
 
-		loadFeatureClusters(integratedSet.getClusters());
+		loadFeatureClusters(activeClusterSet.getClusters());
 		MRC2ToolBoxCore.getMainWindow().showPanel(PanelList.INTEGRATION);
 
-		if (integratedSet.getClusters().isEmpty())
+		if (activeClusterSet.getClusters().isEmpty())
 			MessageDialog.showInfoMsg("No identified feature clusters found using current settings");
 	}
 
@@ -682,8 +685,8 @@ public class DataIntegratorPanel extends ClusterDisplayPanel {
 //		TODO find new place for this functionality?
 //		toolbar.updateGuiFromActiveSet(integratedSet);
 		
-		if (integratedSet != null) 			
-			loadFeatureClusters(integratedSet.getClusters());
+		if (activeClusterSet != null) 			
+			loadFeatureClusters(activeClusterSet.getClusters());
 		else if(alignmentResults != null) 
 			loadFeatureClusters(alignmentResults.getClusters());
 		else
@@ -731,9 +734,9 @@ public class DataIntegratorPanel extends ClusterDisplayPanel {
 
 		if (e.getStateChange() == ItemEvent.SELECTED && e.getItem() instanceof MsFeatureClusterSet) {
 
-			integratedSet = (MsFeatureClusterSet) e.getItem();
+			activeClusterSet = (MsFeatureClusterSet) e.getItem();
 			showClusterData(null);
-			loadFeatureClusters(integratedSet.getClusters());
+			loadFeatureClusters(activeClusterSet.getClusters());
 //			TODO find new place for this functionality?
 //			toolbar.updateGuiFromActiveSet(integratedSet);
 		}
@@ -757,7 +760,7 @@ public class DataIntegratorPanel extends ClusterDisplayPanel {
 
 					for (MsFeatureCluster c : selected) {
 
-						integratedSet.removeCluster(c);
+						activeClusterSet.removeCluster(c);
 						clusterTree.removeFeatureCluster(c);
 					}
 				}

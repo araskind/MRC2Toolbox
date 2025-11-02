@@ -421,7 +421,7 @@ public class OpenMetabolomicsProjectTask extends OpenStandaloneProjectAbstractTa
 				e.printStackTrace();
 			}
 			if(dpaRes != null)
-				project.addDataIntegrationSet(dpaRes);			
+				project.addFeatureClusterSet(dpaRes);			
 		}		
 	}
 		
@@ -448,7 +448,7 @@ public class OpenMetabolomicsProjectTask extends OpenStandaloneProjectAbstractTa
 	
 	private void attachMergedDataToIntegratedSets() {
 		
-		for(MsFeatureClusterSet dis : project.getDataIntegrationSets()) {
+		for(MsFeatureClusterSet dis : project.getFeatureClusterSets()) {
 			
 			Path mergedFeaturesFilePath = 
 					ProjectUtils.getMergedFeaturesFilePath(project, dis.getId());

@@ -318,7 +318,7 @@ public class ProjectUtils {
 			String dataSetId) {
 		
 		MsFeatureClusterSet dpResult = 
-				project.getDataIntegrationSets().stream().
+				project.getFeatureClusterSets().stream().
 				filter(r -> r.getId().equals(dataSetId)).findFirst().orElse(null);
 		if(dpResult == null || dpResult.getMergedDataMatrix() == null)
 			return;

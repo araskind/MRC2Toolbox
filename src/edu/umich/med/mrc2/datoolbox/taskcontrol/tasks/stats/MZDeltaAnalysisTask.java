@@ -109,8 +109,8 @@ public class MZDeltaAnalysisTask extends AbstractTask {
 		featureClusters = new HashSet<>();
 		assignedFeatures = new HashSet<>();
 		Collection<MsFeature> features = parameters.getFeatureSet().getFeatures();
-		Set<Range> anchorMassRangeSet = createMassRangeSet(parameters.getAnchorMassSet(), anchorMassError,
-				anchorMassErrorType);
+		Set<Range> anchorMassRangeSet = createMassRangeSet(
+				parameters.getAnchorMassSet(), anchorMassError, anchorMassErrorType);
 		Collection<MsFeatureCluster> anchorClusters = 
 				findMsFeatureCluster(features, anchorMassRangeSet);
 		featureClusters.addAll(anchorClusters);
@@ -170,7 +170,7 @@ public class MZDeltaAnalysisTask extends AbstractTask {
 					flatMap(c -> c.getFeturesForDataPipeline(dataPipeline).stream()).
 					forEach(f -> assignedFeatures.add(f));
 			}
-		}	
+		}
 		if(!newClusters.isEmpty())
 			findAdditionalClusters(newClusters, deltaMass, direction);	
 	}

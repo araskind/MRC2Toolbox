@@ -119,6 +119,10 @@ public class ExperimentPointer {
 		experimentPointerElement.setAttribute(EXPERIMENT_TYPE, projectType.name());	
 		experimentPointerElement.setAttribute(EXPERIMENT_ID, id);	
 		experimentPointerElement.setAttribute(EXPERIMENT_NAME, name.trim());
+		
+		if(description == null)
+			description = "";
+		
 		experimentPointerElement.setAttribute(EXPERIMENT_DESCRIPTION, description.trim());
 		
 		if(experimentFile != null)

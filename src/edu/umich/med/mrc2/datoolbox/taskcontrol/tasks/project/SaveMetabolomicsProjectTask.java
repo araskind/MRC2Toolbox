@@ -172,8 +172,8 @@ public class SaveMetabolomicsProjectTask extends AbstractTask implements TaskLis
 				new Element(MetabolomicsProjectFields.DataIntegrationSetsList.name());
 		
 		taskDescription = "Saving data integration results ... ";
-		total = projectToSave.getDataIntegrationSets().size();
-		for(MsFeatureClusterSet dpaResult : projectToSave.getDataIntegrationSets()) {
+		total = projectToSave.getFeatureClusterSets().size();
+		for(MsFeatureClusterSet dpaResult : projectToSave.getFeatureClusterSets()) {
 			
 			dataIntegrationSetsListElement.addContent(dpaResult.getXmlElement());
 			

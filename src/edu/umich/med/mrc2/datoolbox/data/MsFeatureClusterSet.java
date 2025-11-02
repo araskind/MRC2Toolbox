@@ -23,10 +23,13 @@ package edu.umich.med.mrc2.datoolbox.data;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.jdom2.Element;
 import org.ujmp.core.Matrix;
@@ -35,6 +38,7 @@ import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureClusterComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.enums.ParameterSetStatus;
+import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
 import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
@@ -114,6 +118,17 @@ public class MsFeatureClusterSet implements
 //				map(f -> f.getAssayMethod()).
 //				collect(Collectors.toCollection(TreeSet::new));
 		return null;
+	}
+	
+	public Set<DataPipeline>getDataPipelines(){
+		return clusters.stream().flatMap(c -> c.getFeatureMap().keySet().stream()).
+				collect(Collectors.toCollection(TreeSet::new));
+	}
+	
+	public Set<MsFeature>getFeaturesForDataPipeline(DataPipeline dp){
+		return clusters.stream().filter(c -> Objects.nonNull(c.getFeturesForDataPipeline(dp))).
+				flatMap(c -> c.getFeturesForDataPipeline(dp).stream()).
+				collect(Collectors.toCollection(HashSet::new));
 	}
 
 	@Override

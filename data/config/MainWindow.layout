@@ -1252,7 +1252,7 @@
 											<placeholder>dock.single.ExperimentSetupDraw</placeholder>
 											<backup-path>
 												<node location="RIGHT" size="0.7217529039070749" id="1672779742083"/>
-												<node location="LEFT" size="0.22447058823529412" id="1676064563113"/>
+												<node location="LEFT" size="0.16333938294010888" id="1676064563113"/>
 												<leaf id="1676064552084"/>
 											</backup-path>
 										</property>

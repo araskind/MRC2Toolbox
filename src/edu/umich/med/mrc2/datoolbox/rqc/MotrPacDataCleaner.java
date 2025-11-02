@@ -19,7 +19,7 @@
  *
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.misctest;
+package edu.umich.med.mrc2.datoolbox.rqc;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;

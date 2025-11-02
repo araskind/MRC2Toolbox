@@ -38,7 +38,7 @@ public class RScriptTestClass {
 		MRC2ToolBoxConfiguration.initConfiguration();
 
 		try {
-			runEX01242RPNEGMultialignment();
+			createDataSummariesForEX01526rpNegExperiment();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -70,7 +70,59 @@ public class RScriptTestClass {
 		
 		RQCScriptGenerator.generateMultiBatchMetabCombinerAlignmentScriptScript(rWorkingDir, inputMap);
 	}
+			
+	private static void createDataSummariesForEX01526rpPosExperiment() {
+		
+		File inputMapFile = 
+				new File("Y:\\DataAnalysis\\_Reports\\EX01526 - Human EDTA Tranche 4 plasma H20001805E\\"
+						+ "QC\\RP-POS\\EX01526-RP-POS-dataSummarization-inputMap.txt");
+		File dataDir = 
+				new File("Y:\\DataAnalysis\\_Reports\\EX01526 - Human EDTA Tranche 4 plasma H20001805E\\QC\\RP-POS");
+		RQCScriptGenerator.createMultyBatchDataSummarizationScript(inputMapFile, dataDir);
+	}
 
+	private static void createDataSummariesForEX01526rpNegExperiment() {
+		
+		File inputMapFile = 
+				new File("Y:\\DataAnalysis\\_Reports\\EX01526 - Human EDTA Tranche 4 plasma H20001805E\\"
+						+ "QC\\RP-NEG\\EX01526-RP-NEG-dataSummarization-inputMap.txt");
+		File dataDir = 
+				new File("Y:\\DataAnalysis\\_Reports\\EX01526 - Human EDTA Tranche 4 plasma H20001805E\\QC\\RP-NEG");
+		RQCScriptGenerator.createMultyBatchDataSummarizationScript(inputMapFile, dataDir);
+	}
+	
+	private static void createDataSummariesForEX01526ionpNegExperiment() {
+		
+		File inputMapFile = 
+				new File("Y:\\DataAnalysis\\_Reports\\EX01526 - Human EDTA Tranche 4 plasma H20001805E\\"
+						+ "QC\\IONP-NEG\\EX01526-IONP-NEG-dataSummarization-inputMap.txt");
+		File dataDir = 
+				new File("Y:\\DataAnalysis\\_Reports\\EX01526 - Human EDTA Tranche 4 plasma H20001805E\\QC\\IONP-NEG");
+		RQCScriptGenerator.createMultyBatchDataSummarizationScript(inputMapFile, dataDir);
+	}
+	
+	private static void createDataSummariesForEX01526ionpNegHighCutoffExperiment() {
+		
+		File inputMapFile = 
+				new File("Y:\\DataAnalysis\\_Reports\\EX01526 - Human EDTA Tranche 4 plasma H20001805E\\"
+						+ "QC\\HighCutoff\\IONP-NEG\\EX01526-IONP-NEG-HC-dataSummarization-inputMap.txt");
+		File dataDir = 
+				new File("Y:\\DataAnalysis\\_Reports\\"
+						+ "EX01526 - Human EDTA Tranche 4 plasma H20001805E\\QC\\HighCutoff\\IONP-NEG");
+		RQCScriptGenerator.createMultyBatchDataSummarizationScript(inputMapFile, dataDir);
+	}
+	
+	private static void createDataSummariesForEX01526rpNegHighCutoffExperiment() {
+		
+		File inputMapFile = 
+				new File("Y:\\DataAnalysis\\_Reports\\EX01526 - Human EDTA Tranche 4 plasma H20001805E\\"
+						+ "QC\\HighCutoff\\RP-NEG\\EX01526-RP-NEG-HC-dataSummarization-inputMap.txt");
+		File dataDir = 
+				new File("Y:\\DataAnalysis\\_Reports\\"
+						+ "EX01526 - Human EDTA Tranche 4 plasma H20001805E\\QC\\HighCutoff\\RP-NEG");
+		RQCScriptGenerator.createMultyBatchDataSummarizationScript(inputMapFile, dataDir);
+	}
+		
 	private static void createDataSummariesForEX01496ionpNegExperiment() {
 		
 		File inputMapFile = 

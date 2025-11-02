@@ -63,7 +63,7 @@ public abstract class FeatureSet implements Serializable, Comparable<FeatureSet>
 		this.featureSetName = name;
 		active = false;
 		eventListeners = ConcurrentHashMap.newKeySet();
-		properties = new TreeMap<FeatureSetProperties,XmlStorable>();
+		properties = new TreeMap<>();
 	}
 	
 	public abstract boolean containsFeature(MsFeature feature);

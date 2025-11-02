@@ -1852,11 +1852,11 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 						+ MRC2ToolBoxConfiguration.defaultTimeStampFormat.format(new Date()), 
 				task.getFeatureClusters());
 		mzDeltaAnalysisClusterDataSet.setActive(true);
-		currentExperiment.addDataIntegrationSet(mzDeltaAnalysisClusterDataSet);
+		currentExperiment.addFeatureClusterSet(mzDeltaAnalysisClusterDataSet);
 				
 		MRC2ToolBoxCore.getMainWindow().showPanel(PanelList.INTEGRATION);
 		DataIntegratorPanel dip = (DataIntegratorPanel)MRC2ToolBoxCore.getMainWindow().getPanel(PanelList.INTEGRATION);		
-		dip.loadFeatureClusters(mzDeltaAnalysisClusterDataSet.getClusters());
+		dip.loadFeatureClusterSet(mzDeltaAnalysisClusterDataSet);
 	}
 
 	private void finalizeMsFeatureAveragingTask(MsFeatureAveragingTask task) {

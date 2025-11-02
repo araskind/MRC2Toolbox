@@ -122,9 +122,19 @@ public class MetabCombinerAlignmentScriptGenerator {
 			
 			String metabDataObject = dataObjectPrefix + ".metabData";
 			
-			rscriptParts.add(metabDataObject + " <- metabData(" + dataObject 
-					+ ", samples = \"CS00000MP\", measure = \"median\", zero = TRUE, duplicate = opts.duplicate())");
-			
+			String metabDataCommand = 
+					metabDataObject + " <- metabData(" + dataObject 
+					+ ", samples = \"CS00000MP\""
+					+ ", misspc = " + Double.toString(parametersObject.getMaxMissingPercent())
+					+ ", measure = \"" + parametersObject.getPeakAbundanceMeasure().name() + "\"";
+			if(parametersObject.getAlignmentRTRange() != null) {
+				
+				metabDataCommand +=  
+					  ", rtmin = " + Double.toString(parametersObject.getAlignmentRTRange().getMin())
+					+ ", rtmax = " + Double.toString(parametersObject.getAlignmentRTRange().getMax());
+			}			
+			metabDataCommand += ", zero = TRUE, duplicate = opts.duplicate())";
+			rscriptParts.add(metabDataCommand);
 			metabDataObjectMap.put(mcio, metabDataObject);
 			
 			String statsObject = dataObjectPrefix + ".stats";
@@ -157,8 +167,7 @@ public class MetabCombinerAlignmentScriptGenerator {
 			for(MetabCombinerFileInputObject mcio2 : parametersObject.getMetabCombinerFileInputObjectSet()) {
 				
 				if(!mcio1.equals(mcio2)) {
-					String matchList = createMetabCombinerAlignmentBlock(mcio1, mcio2);
-					
+					String matchList = createMetabCombinerAlignmentBlock(mcio1, mcio2);					
 					String key = mcio2.getExperimentId() + "." + mcio2.getBatchId();;
 					matchListMap.put(key, matchList);
 				}
@@ -344,46 +353,109 @@ public class MetabCombinerAlignmentScriptGenerator {
 		String outNameSuffix = createOutNameSuffix(io,io2);
 			
 		rscriptParts.add("\n### Aligning " + outNameSuffix + "####");
-		rscriptParts.add("data.combined <- metabCombiner(xdata = " 
-				+ metabDataObjectMap.get(io) + ", ydata = " + metabDataObjectMap.get(io2) 
-				+ ", binGap = 0.005, xid = \"d1\", yid = \"d2\")");
+		String metabCombinerCommand = 
+				"data.combined <- "
+				+ "metabCombiner(xdata = " + metabDataObjectMap.get(io) 
+				+ ", ydata = " + metabDataObjectMap.get(io2) 
+				+ ", binGap = " + Double.toString(parametersObject.getBinGap())
+				+ ", rtOrder = " + Boolean.toString(parametersObject.isMcDataSetRtOrderFlag())
+				+ ", impute = " + Boolean.toString(parametersObject.isImputeMissingData())
+				+ ", xid = \"d1\", yid = \"d2\")";
+				
+		rscriptParts.add(metabCombinerCommand);
 		objectsToClear.add("data.combined");
 		rscriptParts.add("data.report <- combinedTable(data.combined)");
 		objectsToClear.add("data.report");
-		rscriptParts.add("data.combined <- selectAnchors(data.combined, useID = FALSE, "
-				+ "windx = 0.03, windy = 0.03, tolmz = 0.003, tolQ = 0.3)");
+		String selectAnchorsString = 
+				"data.combined <- selectAnchors(data.combined, useID = FALSE"
+				+ ", windx = " +  Double.toString(parametersObject.getPrimaryDataSetAnchorRtExclusionWindow())
+				+ ", windy = " +  Double.toString(parametersObject.getSecondaryDataSetAnchorRtExclusionWindow())
+				+ ", tolmz = " +  Double.toString(parametersObject.getAnchorMzTolerance())
+				+ ", tolQ = " +  Double.toString(parametersObject.getAnchorRtQuantileTolerance()) + ")";
+		rscriptParts.add(selectAnchorsString);
+		
 		rscriptParts.add("anchors <- getAnchors(data.combined)");
 		objectsToClear.add("anchors");
 		String anchorsFileName = "Anchors-" + outNameSuffix +  ".txt";
-		rscriptParts.add("write.table(anchors, file = \"" + anchorsFileName +
-				"\", quote = F, sep = \"\\t\", na = \"\", row.names = FALSE)");
+		rscriptParts.add(
+				"write.table(anchors"
+				+ ", file = \"" + anchorsFileName + "\""
+				+ ", quote = F"
+				+ ", sep = \"\\t\""
+				+ ", na = \"\""
+				+ ", row.names = FALSE)");
 				
 		rscriptParts.add("set.seed(100)");
-		rscriptParts.add("data.combined <- fit_gam(data.combined, "
-				+ "useID = F, k = seq(12, 20, 2), iterFilter = 2, coef = 2, "
-				+ "prop = 0.5, bs = \"bs\", family = \"scat\", "
-				+ "weights = 1, method = \"REML\", optimizer = \"newton\")");
+		String fitGamString = 
+				"data.combined <- fit_gam(data.combined"
+				+ ", useID = F"
+				+ ", k = seq(12, 20, 2)"
+				+ ", iterFilter = 2"
+				+ ", coef = 2"
+				+ ", prop = 0.5"
+				+ ", bs = \"bs\""
+				+ ", family = \"scat\""
+				+ ", weights = 1"
+				+ ", method = \"REML\""
+				+ ", optimizer = \"newton\")";
+		rscriptParts.add(fitGamString);
 		
 		//	Save plot
 		String plotFileName = "AlignmentPlot-" + outNameSuffix +  ".png";
-		rscriptParts.add("png(filename = \"" + plotFileName 
-				+ "\", width = 11, height = 8, units = \"in\",res = 300)");
+		rscriptParts.add(
+				"png(filename = \"" + plotFileName + "\""
+				+ ", width = 11"
+				+ ", height = 8"
+				+ ", units = \"in\""
+				+ ",res = 300)");
 		
 		String ploTitle = "MetabCombiner alignment between " 
 				+ io.getExperimentId() + " " + io.getBatchId() + " and "
 				+ io2.getExperimentId() + " " + io2.getBatchId();
 		String xTitle = io.getExperimentId() + " " + io.getBatchId();
 		String yTitle = io2.getExperimentId() + " " + io2.getBatchId();
-		rscriptParts.add("plot(data.combined, fit = \"gam\", main = \"" + ploTitle + "\", "
-				+ "xlab = \"" + xTitle + "\",  ylab = \"" + yTitle + "\", "
-				+ "pch = 19, lcol = \"red\", pcol = \"black\", outlier = \"s\")");
+		rscriptParts.add(
+				"plot(data.combined"
+				+ ", fit = \"" + parametersObject.getRtFittingModelType().name() + "\""
+				+ ", main = \"" + ploTitle + "\""
+				+ ", xlab = \"" + xTitle + "\""
+				+ ", ylab = \"" + yTitle + "\""
+				+ ", pch = 19"
+				+ ", lcol = \"red\""
+				+ ", pcol = \"black\""
+				+ ", outlier = \"s\")");
 		rscriptParts.add("dev.off()");
 		
 		//	Reports
-		rscriptParts.add("data.combined <- calcScores(data.combined, "
-				+ "A = 90, B = 15, C = 0.5, fit = \"gam\", usePPM = FALSE, groups = NULL)");
-		rscriptParts.add("data.combined <- reduceTable(data.combined, "
-				+ "maxRankX = 2, maxRankY = 2, minScore = 0.5, delta = 0.1)");
+		String calcScoresString = 
+				"data.combined <- calcScores(data.combined"
+				+ ", A = " + Double.toString(parametersObject.getScoringMZweight())
+				+ ", B = " + Double.toString(parametersObject.getScoringRTweight())
+				+ ", C = " + Double.toString(parametersObject.getScoringAbundanceWeight())
+				+ ", fit = \"" + parametersObject.getRtFittingModelType().name() + "\""
+				+ ", useAdduct = " + Boolean.toString(parametersObject.isUseAdductsToAdjustScore())
+				+ ", usePPM = " + Boolean.toString(parametersObject.isUsePPMforScoringMz())
+				+ ", groups = NULL)";
+		rscriptParts.add(calcScoresString);
+		
+//		String reduceTableString = 
+//				"data.combined <- reduceTable(data.combined"
+//				+ ", maxRankX = " + Integer.toString(parametersObject.getMaxFeatureRankForPrimaryDataSet())
+//				+ ", maxRankY = " + Integer.toString(parametersObject.getMaxFeatureRankForSecondaryDataSet())
+//				+ ", minScore = " + Double.toString(parametersObject.getMinimalAlignmentScore())
+//				+ ", delta = " + Double.toString(parametersObject.getSubgroupScoreCutoff())
+//				+ ")";
+		String labelRowsString = 
+				"data.combined <- reduceTable(data.combined"
+				+ ", maxRankX = " + Integer.toString(parametersObject.getMaxFeatureRankForPrimaryDataSet())
+				+ ", maxRankY = " + Integer.toString(parametersObject.getMaxFeatureRankForSecondaryDataSet())
+				+ ", minScore = " + Double.toString(parametersObject.getMinimalAlignmentScore())
+				+ ", delta = " + Double.toString(parametersObject.getSubgroupScoreCutoff())
+				+ ", maxRTerr = " + Double.toString(parametersObject.getMaxRTerrorForAlignedFeatures())
+				+ ", resolveConflicts = " + Boolean.toString(parametersObject.isResolveAlignmentConflictsInOutput())
+				+ ", rtOrder = " + Boolean.toString(parametersObject.isRtOrderFlagInOutput())
+				+ ")";
+		rscriptParts.add(labelRowsString);
 		rscriptParts.add("data.report <- combinedTable(data.combined)");
 		String reportFileName = "AlignmentReport-" + outNameSuffix +  ".txt";		
 		rscriptParts.add("write.table(data.report, file = \"" + reportFileName 

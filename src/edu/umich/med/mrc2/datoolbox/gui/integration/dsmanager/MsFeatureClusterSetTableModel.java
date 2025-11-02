@@ -49,13 +49,13 @@ public class MsFeatureClusterSetTableModel extends BasicTableModel {
 	public void setTableModelFromExperiment(DataAnalysisProject currentProject) {
 		
 		if(currentProject == null 
-				|| currentProject.getDataIntegrationSets().isEmpty()) {
+				|| currentProject.getFeatureClusterSets().isEmpty()) {
 			setRowCount(0);
 			return;
 		}
 		setRowCount(0);
 		List<Object[]>rowData = new ArrayList<>();
-		for (MsFeatureClusterSet cs : currentProject.getDataIntegrationSets()) {
+		for (MsFeatureClusterSet cs : currentProject.getFeatureClusterSets()) {
 
 			Object[] obj = {
 					cs,

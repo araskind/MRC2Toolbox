@@ -29,13 +29,20 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
+import java.util.TreeMap;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRootPane;
 import javax.swing.JScrollPane;
@@ -44,10 +51,20 @@ import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
 
+import org.apache.commons.lang3.StringUtils;
+
+import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureClusterSet;
+import edu.umich.med.mrc2.datoolbox.data.MsFeatureSet;
+import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
+import edu.umich.med.mrc2.datoolbox.gui.dereplication.ClusterDisplayPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
+import edu.umich.med.mrc2.datoolbox.gui.main.MainWindow;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
+import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
+import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
+import edu.umich.med.mrc2.datoolbox.utils.MetabolomicsProjectUtils;
 
 public class MsFeatureClusterSetManagerDialog extends JDialog implements ActionListener {
 
@@ -56,9 +73,13 @@ public class MsFeatureClusterSetManagerDialog extends JDialog implements ActionL
 	private static final Icon dialogIcon = GuiUtils.getIcon("clusterFeatureTable", 32);
 	
 	private MsFeatureClusterSetTable clusterSetTable;
+	private JButton openDataSetButton;
+	private ActionListener parentActionListener;
+	private NewFeatureSubsetFromClustersDialog setNameDialog;
 	
 	public MsFeatureClusterSetManagerDialog(ActionListener actionListener) {
 		super();
+		this.parentActionListener = actionListener;
 		setTitle("Feature cluster set manager");
 		setIconImage(((ImageIcon) dialogIcon).getImage());
 		setPreferredSize(new Dimension(600, 250));
@@ -70,7 +91,9 @@ public class MsFeatureClusterSetManagerDialog extends JDialog implements ActionL
 		dataPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
 		getContentPane().add(dataPanel, BorderLayout.CENTER);
 		clusterSetTable = new MsFeatureClusterSetTable();
-
+		clusterSetTable.addTablePopupMenu(
+				new MsFeatureClusterSetTablePopupMenu(this, clusterSetTable));
+		
 		dataPanel.add(new JScrollPane(clusterSetTable), BorderLayout.CENTER);
 
 		JPanel buttonPanel = new JPanel();
@@ -86,27 +109,122 @@ public class MsFeatureClusterSetManagerDialog extends JDialog implements ActionL
 			}
 		};
 		btnCancel.addActionListener(al);
-		JButton btnSave = new JButton(
+		openDataSetButton = new JButton(
 				MainActionCommands.LOAD_SELECTED_FEATURE_CLUSTER_SET.getName());
-		btnSave.setActionCommand(
+		openDataSetButton.setActionCommand(
 				MainActionCommands.LOAD_SELECTED_FEATURE_CLUSTER_SET.getName());
-		btnSave.addActionListener(actionListener);
+		openDataSetButton.addActionListener(actionListener);
 		clusterSetTable.addMouseListener(
 				new MouseAdapter() {
 					public void mouseClicked(MouseEvent e) {
 						if (e.getClickCount() == 2) {
-							btnSave.doClick();
+							openDataSetButton.doClick();
 						}
 					}
 				});
-		buttonPanel.add(btnSave);
-		JRootPane rootPane = SwingUtilities.getRootPane(btnSave);
+		buttonPanel.add(openDataSetButton);
+		JRootPane rootPane = SwingUtilities.getRootPane(openDataSetButton);
 		rootPane.registerKeyboardAction(al, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
-		rootPane.setDefaultButton(btnSave);
+		rootPane.setDefaultButton(openDataSetButton);
 
 		pack();
 	}
 	
+	@Override
+	public void actionPerformed(ActionEvent e) {
+
+		String command = e.getActionCommand();
+		
+		if(command.equals(MainActionCommands.LOAD_SELECTED_FEATURE_CLUSTER_SET.getName()))
+			openDataSetButton.doClick();
+		
+		if(command.equals(MainActionCommands.DELETE_SELECTED_CLUSTER_SETS.getName()))
+			deleteSelectedDataSets();
+		
+		if(command.equals(MainActionCommands.NEW_FEATURE_COLLECTION_FROM_SELECTED_CLUSTER_SETS.getName()))
+			createNewFeatureCollectionFromSelectedDataSets();
+		
+		if(command.equals(MainActionCommands.CREATE_NEW_FEATURE_SUBSET_COMMAND.getName()))
+			addNewFeatureSubsetToProject();
+	}
+	
+	private void addNewFeatureSubsetToProject() {
+		
+		DataAnalysisProject experiment = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
+		Set<MsFeatureClusterSet>selected = setNameDialog.getSourceClusterSets();
+		String fsName = setNameDialog.getFeatureSubsetName();
+		List<String>errors = new ArrayList<>();
+		if(fsName.isEmpty())
+			errors.add("Feature subset name must be specified");
+			
+		if(experiment.featureSetNameExists(fsName))
+			errors.add("Feature subset \"" + fsName + "\" already exists in this project");
+			
+		if(!errors.isEmpty()){
+		    MessageDialog.showErrorMsg(
+		            StringUtils.join(errors, "\n"), setNameDialog);
+		    return;
+		}
+		Map<DataPipeline, Set<MsFeature>> featureMap = new TreeMap<>();
+		for(MsFeatureClusterSet cs : selected) {
+			
+			for(DataPipeline dp : cs.getDataPipelines()) {
+				featureMap.computeIfAbsent(dp, v -> new HashSet<MsFeature>());
+				featureMap.get(dp).addAll(cs.getFeaturesForDataPipeline(dp));
+			}			
+		}
+		for(Entry<DataPipeline, Set<MsFeature>> fme : featureMap.entrySet()) {
+			
+			String fsNameComplete = fsName;
+			if(featureMap.size() > 1)
+				fsNameComplete = fsName + " (" + fme.getKey().getName() + ")";
+			
+			MsFeatureSet newSet = new MsFeatureSet(fsNameComplete, fme.getValue());
+			
+			experiment.addFeatureSetForDataPipeline(newSet, fme.getKey());
+			MainWindow.getExperimentSetupDraw().
+				getFeatureSubsetPanel().addSetListeners(newSet);
+			
+			if(fme.getKey().equals(experiment.getActiveDataPipeline()))
+				MetabolomicsProjectUtils.switchActiveMsFeatureSet(newSet);
+		}
+		setNameDialog.dispose();
+	}
+
+	private void createNewFeatureCollectionFromSelectedDataSets() {
+
+		Set<MsFeatureClusterSet>selected = 
+				clusterSetTable.getSelectedMsFeatureClusterSets();
+		if(selected.isEmpty())
+			return;
+		
+		setNameDialog = new NewFeatureSubsetFromClustersDialog(this, selected);
+		setNameDialog.setLocationRelativeTo(this);
+		setNameDialog.setVisible(true);
+	}
+
+	private void deleteSelectedDataSets() {
+
+		Set<MsFeatureClusterSet>selected = 
+				clusterSetTable.getSelectedMsFeatureClusterSets();
+		if(selected.isEmpty())
+			return;
+		
+		int res = MessageDialog.showChoiceWithWarningMsg(
+				"Do you want to delete selected data sets?", this);
+
+		if(res == JOptionPane.YES_OPTION) {
+			
+			for(MsFeatureClusterSet ds : selected) {
+				
+				if(ds.isActive() && parentActionListener instanceof ClusterDisplayPanel)
+					((ClusterDisplayPanel)parentActionListener).clearPanel();
+					
+				MRC2ToolBoxCore.getActiveMetabolomicsExperiment().deleteFeatureClusterSet(ds);	
+			}
+		}		
+	}
+
 	public void loadDataIntegrationSetsForProject(DataAnalysisProject project) {
 		clusterSetTable.setTableModelFromExperiment(project);
 	}
@@ -119,9 +237,4 @@ public class MsFeatureClusterSetManagerDialog extends JDialog implements ActionL
 		return clusterSetTable.getSelectedMsFeatureClusterSets();
 	}
 
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		// TODO Auto-generated method stub
-
-	}
 }

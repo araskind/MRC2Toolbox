@@ -22,6 +22,7 @@
 package edu.umich.med.mrc2.datoolbox.gui.plot.dataset;
 
 import java.awt.Paint;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -68,6 +69,13 @@ public class VariableCategorySizeBarChartDataSet extends AbstractDataset impleme
 	
 	public VariableCategorySizeBarChartDataSet(TwoDqcPlotParameterObject plotParameters) {
 		
+		rowMap = new LinkedHashMap<>();
+		columnMap = new LinkedHashMap<>();
+		rowKeys = new ArrayList<>();
+		columnKeys = new ArrayList<>();
+		Integer rowCount = 0;
+		Integer columnCount = 0;
+		
 		DataAnalysisProject experiment = 
 				MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
 		if(experiment == null || experiment.getActiveDataPipeline() == null
@@ -99,11 +107,6 @@ public class VariableCategorySizeBarChartDataSet extends AbstractDataset impleme
 		Map<String,Paint>seriesPaintNameMap = 
 				createSeriesPaintMap(seriesFileMap, plotParameters.getGroupingType(), 
 						plotParameters.getChartColorOption());
-		
-		rowMap = new LinkedHashMap<Comparable,Integer>();
-		columnMap = new LinkedHashMap<Comparable,Integer>();
-		Integer rowCount = 0;
-		Integer columnCount = 0;
 		data = new Double[activeFiles.size()][seriesFileMap.size()];
 		
 		DataSetQcField sf = plotParameters.getStatsField();
@@ -169,8 +172,8 @@ public class VariableCategorySizeBarChartDataSet extends AbstractDataset impleme
 				createSeriesPaintMap(seriesFileMap, plotParameters.getGroupingType(), 
 						plotParameters.getChartColorOption());
 		
-		rowMap = new LinkedHashMap<Comparable,Integer>();
-		columnMap = new LinkedHashMap<Comparable,Integer>();
+		rowMap = new LinkedHashMap<>();
+		columnMap = new LinkedHashMap<>();
 		Integer rowCount = 0;
 		Integer columnCount = 0;
 		data = new Double[fileCount][seriesFileMap.size()];

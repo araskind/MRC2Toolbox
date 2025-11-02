@@ -337,7 +337,7 @@ public class IntegratedReportDialog  extends JDialog implements ActionListener{
 			featureSetSelectors.add(fsp);
 		}
 		MsFeatureClusterSet[] ifs =
-				currentProject.getDataIntegrationSets().stream().
+				currentProject.getFeatureClusterSets().stream().
 				sorted().toArray(MsFeatureClusterSet[]::new);
 		integratedSeComboBox.setModel(new DefaultComboBoxModel<MsFeatureClusterSet>(ifs));
 	}

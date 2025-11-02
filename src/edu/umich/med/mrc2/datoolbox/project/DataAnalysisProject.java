@@ -91,7 +91,7 @@ public class DataAnalysisProject extends Project {
 	protected TreeMap<DataPipeline, Set<MsFeatureSet>> featureSetMap;
 	protected TreeMap<DataAcquisitionMethod, Set<DataFile>> dataFileMap;
 	protected TreeMap<DataAcquisitionMethod, Worklist> worklistMap;
-	protected Set<MsFeatureClusterSet>dataIntegrationSets;
+	protected Set<MsFeatureClusterSet>featureClusterSetCollection;
 	
 	public DataAnalysisProject(
 			String projectName, 
@@ -124,7 +124,7 @@ public class DataAnalysisProject extends Project {
 		corrMatrixMap = new TreeMap<>();	
 		dataPipelines = new TreeSet<>();				
 		featureSetMap = new TreeMap<>();
-		dataIntegrationSets = new TreeSet<>();
+		featureClusterSetCollection = new TreeSet<>();
 		metaDataMap = new TreeMap<>();
 		activeDataPipeline = null;
 		
@@ -882,45 +882,45 @@ public class DataAnalysisProject extends Project {
 	}
 
 
-	public Set<MsFeatureClusterSet>getDataIntegrationSets(){
+	public Set<MsFeatureClusterSet>getFeatureClusterSets(){
 		
-		if(dataIntegrationSets == null)
-			dataIntegrationSets = new TreeSet<>();
+		if(featureClusterSetCollection == null)
+			featureClusterSetCollection = new TreeSet<>();
 
-		return dataIntegrationSets;
+		return featureClusterSetCollection;
 	}
 	
-	public void addDataIntegrationSet(MsFeatureClusterSet newSet) {
+	public void addFeatureClusterSet(MsFeatureClusterSet newSet) {
 
-		getDataIntegrationSets();
+		getFeatureClusterSets();
 		if(newSet.isActive())
-			dataIntegrationSets.stream().forEach(s -> s.setActive(false));
+			featureClusterSetCollection.stream().forEach(s -> s.setActive(false));
 
-		dataIntegrationSets.add(newSet);
+		featureClusterSetCollection.add(newSet);
 	}
 
-	public void deleteDataIntegrationSet(MsFeatureClusterSet theSet) {
+	public void deleteFeatureClusterSet(MsFeatureClusterSet theSet) {
 
-		getDataIntegrationSets();
-		dataIntegrationSets.remove(theSet);
+		getFeatureClusterSets();
+		featureClusterSetCollection.remove(theSet);
 
-		if(theSet.isActive() && !dataIntegrationSets.isEmpty())
-				dataIntegrationSets.iterator().next().setActive(true);		
+		if(theSet.isActive() && !featureClusterSetCollection.isEmpty())
+				featureClusterSetCollection.iterator().next().setActive(true);		
 	}
 
-	public MsFeatureClusterSet getActiveDataIntegrationSet() {
+	public MsFeatureClusterSet getActiveFeatureClusterSet() {
 
-		return getDataIntegrationSets().stream().
+		return getFeatureClusterSets().stream().
 				filter(s -> s.isActive()).
 				findFirst().orElse(null);
 	}
 	
 	public Set<DataPipelineAlignmentResults>getDataPipelineAlignmentResults(){
 		
-		if(dataIntegrationSets == null)
-			dataIntegrationSets = new TreeSet<>();
+		if(featureClusterSetCollection == null)
+			featureClusterSetCollection = new TreeSet<>();
 
-		return dataIntegrationSets.stream().filter(DataPipelineAlignmentResults.class::isInstance).
+		return featureClusterSetCollection.stream().filter(DataPipelineAlignmentResults.class::isInstance).
 				map(DataPipelineAlignmentResults.class::cast).collect(Collectors.toSet());
 	}
 
@@ -930,13 +930,13 @@ public class DataAnalysisProject extends Project {
 		if(!dpaResSet.isEmpty() && newSet.isActive())
 			dpaResSet.stream().forEach(s -> s.setActive(false));
 
-		dataIntegrationSets.add(newSet);
+		featureClusterSetCollection.add(newSet);
 	}
 
 	public void deleteDataPipelineAlignmentResult(DataPipelineAlignmentResults theSet) {
 
-		getDataIntegrationSets();
-		dataIntegrationSets.remove(theSet);
+		getFeatureClusterSets();
+		featureClusterSetCollection.remove(theSet);
 		Set<DataPipelineAlignmentResults>dpaResSet = getDataPipelineAlignmentResults();
 
 		if(theSet.isActive() && !dpaResSet.isEmpty())
@@ -954,16 +954,16 @@ public class DataAnalysisProject extends Project {
 
 		getDataPipelineAlignmentResults().stream().forEach(s -> s.setActive(false));
 		activeSet.setActive(true);
-		if(!dataIntegrationSets.contains(activeSet))
-			dataIntegrationSets.add(activeSet);
+		if(!featureClusterSetCollection.contains(activeSet))
+			featureClusterSetCollection.add(activeSet);
 	}
 
 	public void setActiveDataIntegrationSet(MsFeatureClusterSet activeSet) {
 
-		getDataIntegrationSets().stream().forEach(s -> s.setActive(false));
+		getFeatureClusterSets().stream().forEach(s -> s.setActive(false));
 		activeSet.setActive(true);
-		if(!dataIntegrationSets.contains(activeSet))
-			dataIntegrationSets.add(activeSet);
+		if(!featureClusterSetCollection.contains(activeSet))
+			featureClusterSetCollection.add(activeSet);
 	}
 	
 	public DataFile getDataFileByNameAndMethod(
@@ -1085,7 +1085,14 @@ public class DataAnalysisProject extends Project {
 				filter(p -> p.getAcquisitionMethod().equals(method)).
 				collect(Collectors.toList());
 	}
-
+	
+	public boolean featureSetNameExists(String newName) {
+		
+		MsFeatureSet existing = featureSetMap.values().stream().flatMap(s -> s.stream()).
+				filter(f -> f.getName().equalsIgnoreCase(newName)).findFirst().orElse(null);
+		
+		return existing != null;
+	}
 }
 
 

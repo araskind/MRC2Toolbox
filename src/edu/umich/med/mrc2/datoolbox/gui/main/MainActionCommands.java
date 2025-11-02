@@ -419,6 +419,8 @@ public enum MainActionCommands {
 	LOAD_DATA_PIPELINE_ALIGNMENT_RESULTS_COMMAND("Load data alignment results"),
 	DELETE_DATA_PIPELINE_ALIGNMENT_RESULTS_COMMAND("Delete data alignment results"),
 	SHOW_FEATURE_CLUSTER_SET_MANAGER("Show feature cluster data set manager"),
+	DELETE_SELECTED_CLUSTER_SETS("Delete selected feature cluster set(s)"),
+	NEW_FEATURE_COLLECTION_FROM_SELECTED_CLUSTER_SETS("Create new feature collection from selected cluster set(s)"),
 	
 	SHOW_UNMATCHED_FEATURES_FROM_REFERENCE_DATASET_COMMAND("Show unmatched features from reference dataset"),
 	SHOW_DATASET_ALIGNMENT_SUMMARY_COMMAND("Show dataset alignment summary"),

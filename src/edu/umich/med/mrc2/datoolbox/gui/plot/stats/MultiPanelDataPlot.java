@@ -275,6 +275,10 @@ public class MultiPanelDataPlot extends TwoDimQCPlot{
 
 	@Override
 	public void redrawPlot() {
+		
+		if(plotParameters == null)
+			updateParametersFromControls();
+		
 		loadMultipleFeatureData(plotParameters.getFeaturesMap());
 	}
 

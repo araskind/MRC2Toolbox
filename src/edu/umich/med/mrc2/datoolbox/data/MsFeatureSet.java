@@ -47,14 +47,13 @@ public class MsFeatureSet extends FeatureSet implements Serializable {
 	public MsFeatureSet(String name) {
 
 		super(name);
-		features = new HashSet<MsFeature>();
+		features = new HashSet<>();
 	}
 
 	public MsFeatureSet(String name, Collection<MsFeature> features2) {
 
 		super(name);
-		features = new HashSet<MsFeature>();
-		features.addAll(features2);
+		features = new HashSet<>(features2);
 	}
 
 	public void addFeature(MsFeature newFeature) {

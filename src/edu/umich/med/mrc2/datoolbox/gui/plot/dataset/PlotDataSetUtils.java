@@ -116,10 +116,10 @@ public class PlotDataSetUtils {
 	
 	public static Matrix getActiveMergedDataMatrixFromProjecr(DataAnalysisProject experiment) {
 		
-		if(experiment.getActiveDataIntegrationSet() == null)
+		if(experiment.getActiveFeatureClusterSet() == null)
 			return null;
 		else
-			return experiment.getActiveDataIntegrationSet().getMergedDataMatrix();
+			return experiment.getActiveFeatureClusterSet().getMergedDataMatrix();
 	}
 	
 	public static Map<String, DataFile[]> createSeriesFileMapForActiveData(

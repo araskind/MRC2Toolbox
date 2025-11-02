@@ -30,6 +30,7 @@ import edu.umich.med.mrc2.datoolbox.data.CompoundLibrary;
 import edu.umich.med.mrc2.datoolbox.data.LibraryMsFeature;
 import edu.umich.med.mrc2.datoolbox.data.LibraryMsFeatureDbBundle;
 import edu.umich.med.mrc2.datoolbox.data.TandemMassSpectrum;
+import edu.umich.med.mrc2.datoolbox.data.enums.CompoundIdentificationConfidence;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.database.idt.MSRTLibraryUtils;
@@ -146,6 +147,13 @@ return;
 				MSRTLibraryUtils.generateMassSpectrumFromAdducts(newTarget, adductList);								
 			}
 			newTarget.setId(null);
+			if(newTarget.getPrimaryIdentity().getConfidenceLevel() == null) {
+				
+				if(newTarget.getRetentionTime() > 0)
+					newTarget.getPrimaryIdentity().setConfidenceLevel(CompoundIdentificationConfidence.ACCURATE_MASS_RT);
+				else
+					newTarget.getPrimaryIdentity().setConfidenceLevel(CompoundIdentificationConfidence.ACCURATE_MASS);
+			}			
 			MSRTLibraryUtils.loadLibraryFeature(newTarget, libId, conn);
 			if(fBundle.isQcStandard())
 				MSRTLibraryUtils.setTargetQcStatus(newTarget.getId(), true, conn);

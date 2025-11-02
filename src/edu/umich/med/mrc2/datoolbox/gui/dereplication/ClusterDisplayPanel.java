@@ -44,6 +44,7 @@ import javax.swing.tree.TreePath;
 
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureCluster;
+import edu.umich.med.mrc2.datoolbox.data.MsFeatureClusterSet;
 import edu.umich.med.mrc2.datoolbox.data.enums.ParameterSetStatus;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.gui.annotation.DockableObjectAnnotationPanel;
@@ -86,6 +87,7 @@ public abstract class ClusterDisplayPanel extends DockableMRC2ToolboxPanel
 	protected DockableObjectAnnotationPanel featureAnnotationPanel;
 	protected DockableCorrelationDataPanel correlationPanel;
 	protected FilterTreeDialog filterTreeDialog;
+	protected MsFeatureClusterSet activeClusterSet;
 	protected MsFeatureCluster activeCluster;
 	protected ListSelectionListener[] featureSelectionSource;
 	protected BasicFeatureTable featureDataTable;
@@ -98,6 +100,7 @@ public abstract class ClusterDisplayPanel extends DockableMRC2ToolboxPanel
 		super(id, title, icon);
 		setLayout(new BorderLayout(0, 0));
 
+		activeClusterSet = null;
 		activeCluster = null;
 
 		dataPlot = new DockableDataPlot(
@@ -327,8 +330,14 @@ public abstract class ClusterDisplayPanel extends DockableMRC2ToolboxPanel
 		}
 	}
 
+	public void loadFeatureClusterSet(MsFeatureClusterSet clusterSet) {
+		
+		MRC2ToolBoxCore.getActiveMetabolomicsExperiment().addFeatureClusterSet(clusterSet);
+		this.activeClusterSet = clusterSet;
+		loadFeatureClusters(clusterSet.getClusters());
+	}
+	
 	public void loadFeatureClusters(Collection<MsFeatureCluster> clusterList) {
-
 
 		clearClusterDataPanel();
 		if(clusterList != null) {

@@ -176,7 +176,7 @@ public class AddFeatureSubsetDialog extends JDialog implements ActionListener{
 				new MsFeatureSet(getSubsetName(), selectedFeatures);
 		experiment.addFeatureSetForDataPipeline(newSet, pipeline);
 		MainWindow.getExperimentSetupDraw().
-		getFeatureSubsetPanel().addSetListeners(newSet);	
+			getFeatureSubsetPanel().addSetListeners(newSet);	
 		MetabolomicsProjectUtils.switchActiveMsFeatureSet(newSet);
 		dispose();
 	}

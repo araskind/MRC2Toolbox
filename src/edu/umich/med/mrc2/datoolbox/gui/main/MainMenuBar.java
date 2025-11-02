@@ -215,7 +215,7 @@ public class MainMenuBar extends CommonMenuBar {
 		saveExperimentMenuItem = addItem(experimentMenu, 
 				MainActionCommands.SAVE_EXPERIMENT_COMMAND, saveExperimentIcon);
 		saveExperimentMenuItem.setAccelerator(KeyStroke.getKeyStroke('S', MASK));
-		saveExperimentMenuItem.setEnabled(false);
+//		saveExperimentMenuItem.setEnabled(false);
 		
 		saveExperimentAsMenuItem = addItem(experimentMenu, 
 				MainActionCommands.SAVE_EXPERIMENT_COPY_COMMAND, saveExperimentCopyIcon);

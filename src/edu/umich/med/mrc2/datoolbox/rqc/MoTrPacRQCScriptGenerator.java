@@ -90,7 +90,7 @@ public class MoTrPacRQCScriptGenerator {
 		String[][] methodListData = DelimitedTextParser.parseTextFile(
 				inputMap, MRC2ToolBoxConfiguration.getTabDelimiter());
 		
-		List<String>scriptBlock = new ArrayList<String>();
+		List<String>scriptBlock = new ArrayList<>();
 		
 		scriptBlock.add("# " + experimentId + " QC for MoTrPAC ####");
 		scriptBlock.add("library(ggplot2)");
