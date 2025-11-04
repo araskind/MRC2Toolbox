@@ -38,7 +38,7 @@ public class RScriptTestClass {
 		MRC2ToolBoxConfiguration.initConfiguration();
 
 		try {
-			createDataSummariesForEX01526rpNegExperiment();
+			createDataSummariesForEX01526rpPosExperiment();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

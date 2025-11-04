@@ -615,9 +615,19 @@ public class RQCScriptGenerator {
 	}
 	
 	public static void createMultyBatchDataSummarizationScript(File inputMapFile, File dataDir) {
-
-		List<String>rscriptParts = new ArrayList<String>();
-		String workDirForR = inputMapFile.getParentFile().getAbsolutePath().replaceAll("\\\\", "/");
+		
+		//	Create directory for results
+		String timeStampString = FIOUtils.getTimestamp();
+		Path resultsDirPath = Paths.get(dataDir.getAbsolutePath(), timeStampString);
+		try {
+			resultsDirPath = Files.createDirectories(resultsDirPath);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return;
+		}
+		List<String>rscriptParts = new ArrayList<>();
+		String workDirForR = resultsDirPath.toString().replaceAll("\\\\", "/");
 		String dataPathPrefix = dataDir.getAbsolutePath().replaceAll("\\\\", "/") + "/";
 		String[][] inputData = DelimitedTextParser.parseTextFile(
 				inputMapFile, MRC2ToolBoxConfiguration.getTabDelimiter());
@@ -630,20 +640,18 @@ public class RQCScriptGenerator {
 		Map<SummaryInputColumns,Set<String>>feildVariationMap = 
 				createFeildVariationMap(dataInputList);
 		
-		List<SummaryInputColumns>nonRedundantFields = 
-				new ArrayList<SummaryInputColumns>();
+		List<SummaryInputColumns>nonRedundantFields = new ArrayList<>();
 		feildVariationMap.entrySet().stream().
 			filter(e -> e.getValue().size() > 1).
 			forEach(e -> nonRedundantFields.add(e.getKey()));
-		List<SummaryInputColumns>commonFields = 
-				new ArrayList<SummaryInputColumns>();
+		List<SummaryInputColumns>commonFields = new ArrayList<>();
 		feildVariationMap.entrySet().stream().
 			filter(e -> e.getValue().size() == 1).
 			forEach(e -> commonFields.add(e.getKey()));
 		
 		String prefix = "";
-		ArrayList<String>prefixParts = new ArrayList<String>();
-		ArrayList<String>nonRedundantParts = new ArrayList<String>();		
+		ArrayList<String>prefixParts = new ArrayList<>();
+		ArrayList<String>nonRedundantParts = new ArrayList<>();		
 		
 		if(!commonFields.isEmpty()) {
 			
@@ -652,19 +660,18 @@ public class RQCScriptGenerator {
 			
 			prefix = StringUtils.join(prefixParts, "_");
 		}	
-		rscriptParts.add("# Untargeted data summarization script " + FIOUtils.getTimestamp() + "####\n");
+		rscriptParts.add("# Untargeted data summarization script " + timeStampString + "####\n");
 		rscriptParts.add("setwd(\"" + workDirForR + "\")\n");
 		rscriptParts.add("library(ggplot2)");
 		rscriptParts.add("library(reshape2)");
 		rscriptParts.add("library(dplyr)");
 		
-		Map<SummaryInputColumns,List<String>>mergeComponentsMap = 
-				new TreeMap<SummaryInputColumns,List<String>>();
-		mergeComponentsMap.put(SummaryInputColumns.PEAK_AREAS, new ArrayList<String>());
-		mergeComponentsMap.put(SummaryInputColumns.PEAK_QUALITY, new ArrayList<String>());
-		mergeComponentsMap.put(SummaryInputColumns.MZ_VALUES, new ArrayList<String>());
-		mergeComponentsMap.put(SummaryInputColumns.RT_VALUES, new ArrayList<String>());
-		mergeComponentsMap.put(SummaryInputColumns.PEAK_WIDTH, new ArrayList<String>());
+		Map<SummaryInputColumns,List<String>>mergeComponentsMap = new TreeMap<>();
+		mergeComponentsMap.put(SummaryInputColumns.PEAK_AREAS, new ArrayList<>());
+		mergeComponentsMap.put(SummaryInputColumns.PEAK_QUALITY, new ArrayList<>());
+		mergeComponentsMap.put(SummaryInputColumns.MZ_VALUES, new ArrayList<>());
+		mergeComponentsMap.put(SummaryInputColumns.RT_VALUES, new ArrayList<>());
+		mergeComponentsMap.put(SummaryInputColumns.PEAK_WIDTH, new ArrayList<>());
 		
 		for(SummarizationDataInputObject io : dataInputList) {
 			
@@ -714,9 +721,9 @@ public class RQCScriptGenerator {
 		}
 		rscriptParts.add("\n# Combine and export summaries ####\n");
 		String ts = FIOUtils.getTimestamp();
-		ArrayList<String>meltIdParts = new ArrayList<String>();
-		ArrayList<String>condensedSummaryFields = new ArrayList<String>();
-		List<DataSummarizationParameters>paramsToPlot = new ArrayList<DataSummarizationParameters>();
+		ArrayList<String>meltIdParts = new ArrayList<>();
+		ArrayList<String>condensedSummaryFields = new ArrayList<>();
+		List<DataSummarizationParameters>paramsToPlot = new ArrayList<>();
 		
 		meltIdParts.add("\"" + DataSummarizationParameters.SAMPLE_TYPE.getRName() + "\"");
 		condensedSummaryFields.add(DataSummarizationParameters.SAMPLE_TYPE.getRName());
@@ -747,7 +754,10 @@ public class RQCScriptGenerator {
 			
 			if(gridYParam != null && gridXParam != null)
 				break;
-		}			
+		}	
+		rscriptParts.add("pdf(\"Untargeted-QS-summary-plots-" 
+				+ timeStampString + ".pdf\", width = 14, height = 8.5)");
+		
 		for(Entry<SummaryInputColumns,List<String>> me : mergeComponentsMap.entrySet()) {
 			
 			String combinedSummaryObject = me.getKey().getRName() + ".data.summary";
@@ -783,6 +793,7 @@ public class RQCScriptGenerator {
 			paramsToPlot.clear();
 			
 			//	Charts
+
 			if(me.getKey().equals(SummaryInputColumns.PEAK_AREAS)) {
 				
 				paramsToPlot.add(DataSummarizationParameters.RSD);
@@ -944,9 +955,10 @@ public class RQCScriptGenerator {
 						0.0d, 
 						0.6d);
 			}
-		}		
-		String rScriptFileName = "UntargetedDataSummarization-" + FIOUtils.getTimestamp() + ".R";
-		Path outputPath = Paths.get(inputMapFile.getParentFile().getAbsolutePath(), rScriptFileName);
+		}
+		rscriptParts.add("dev.off()");
+		String rScriptFileName = "UntargetedDataSummarization-" + timeStampString + ".R";
+		Path outputPath = Paths.get(resultsDirPath.toString(), rScriptFileName);
 		try {
 		    Files.write(outputPath, 
 		    		rscriptParts,
@@ -1001,10 +1013,10 @@ public class RQCScriptGenerator {
 					+ DataSummarizationParameters.SAMPLE_TYPE.getRName() + extraByString;
 			condensedBarChartString += " + ggtitle(\"" + plotTitle + "\")";
 			rscriptParts.add(condensedBarChartString);	
-			
-			String plotFileName = createSafeFileName(plotTitle) + ".png";				
-			rscriptParts.add("ggsave(\"" + plotFileName + "\", plot = " + plotObject + ",  width = 14, height = 8.5)");
-			rscriptParts.add("###");
+			rscriptParts.add("print(" + plotObject + ")");
+//			String plotFileName = createSafeFileName(plotTitle) + ".png";				
+//			rscriptParts.add("ggsave(\"" + plotFileName + "\", plot = " + plotObject + ",  width = 14, height = 8.5)");
+			rscriptParts.add("###\n");
 		}		
 	}
 	
@@ -1040,8 +1052,9 @@ public class RQCScriptGenerator {
 			densityPlotString += " + ggtitle(\"" + plotTitle + "\")";
 			rscriptParts.add(densityPlotString);	
 			
-			String plotFileName = createSafeFileName(plotTitle) + ".png";				
-			rscriptParts.add("ggsave(\"" + plotFileName + "\", plot = " + plotObject + ",  width = 14, height = 8.5)");
+			rscriptParts.add("print(" + plotObject + ")");
+//			String plotFileName = createSafeFileName(plotTitle) + ".png";				
+//			rscriptParts.add("ggsave(\"" + plotFileName + "\", plot = " + plotObject + ",  width = 14, height = 8.5)");
 
 			//	Batch / Sample type ...
 			grDef = gridDefinition + "~" + DataSummarizationParameters.SAMPLE_TYPE.getRName();
@@ -1055,9 +1068,10 @@ public class RQCScriptGenerator {
 					+ SummaryInputColumns.BATCH.getName() + extraByString;
 			densityPlotString += " + ggtitle(\"" + plotTitle + "\")";
 			rscriptParts.add(densityPlotString);	
+			rscriptParts.add("print(" + plotObject + "2)");
 			
-			plotFileName = createSafeFileName(plotTitle) + ".png";				
-			rscriptParts.add("ggsave(\"" + plotFileName + "\", plot = " + plotObject + "2,  width = 14, height = 8.5)");
+//			plotFileName = createSafeFileName(plotTitle) + ".png";				
+//			rscriptParts.add("ggsave(\"" + plotFileName + "\", plot = " + plotObject + "2,  width = 14, height = 8.5)");
 			rscriptParts.add("###");
 		}		
 	}

@@ -100,7 +100,8 @@ public class MainMenuBar extends CommonMenuBar {
 	private static final Icon clusterCollectionsIcon = GuiUtils.getIcon("clusterFeatureTable", 24);
 	private static final Icon clusterIcon = GuiUtils.getIcon("cluster", 24);
 	private static final Icon experimentListIcon = GuiUtils.getIcon("idExperiment", 24);	
-	private static final Icon clearListIcon = GuiUtils.getIcon("clearWorklist", 24);	
+	private static final Icon clearListIcon = GuiUtils.getIcon("clearWorklist", 24);
+	private static final Icon rScriptGeneratorIcon = GuiUtils.getIcon("rScript", 24);
 	
 	
 	// Menus
@@ -140,7 +141,8 @@ public class MainMenuBar extends CommonMenuBar {
 	private JMenuItem
 		msToolsMenuItem,
 		adductManagerMenuItem,
-		rawDataToolsMenuItem;
+		rawDataToolsMenuItem,
+		rScriptGeneratorMenuItem;
 
 	// dbAccess
 	private JMenuItem
@@ -266,6 +268,9 @@ public class MainMenuBar extends CommonMenuBar {
 		rawDataToolsMenuItem = addItem(toolsMenu, 
 				MainActionCommands.SHOW_RAW_DATA_FILE_TOOLS_COMMAND, dataFileToolsIcon);
 		rawDataToolsMenuItem.setAccelerator(KeyStroke.getKeyStroke('R', MASK));	
+		
+		rScriptGeneratorMenuItem = addItem(toolsMenu, 
+				MainActionCommands.SHOW_R_SCRIPT_GENERATOR_COMMAND, rScriptGeneratorIcon);
 		
 		add(toolsMenu);
 		

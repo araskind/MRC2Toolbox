@@ -19,7 +19,7 @@
  *
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.gui.integration.mcr;
+package edu.umich.med.mrc2.datoolbox.gui.rgen.mcr;
 
 import java.awt.event.ActionListener;
 

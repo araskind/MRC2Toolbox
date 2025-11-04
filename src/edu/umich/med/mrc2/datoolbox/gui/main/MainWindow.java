@@ -103,6 +103,7 @@ import edu.umich.med.mrc2.datoolbox.gui.rawdata.RawDataExaminerPanel;
 import edu.umich.med.mrc2.datoolbox.gui.rawdata.RawDataExperimentOpenComponent;
 import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.RawDataAnalysisExperimentSetupDialog;
 import edu.umich.med.mrc2.datoolbox.gui.refsamples.ReferenceSampleManagerDialog;
+import edu.umich.med.mrc2.datoolbox.gui.rgen.RscriptGeneratorWindow;
 import edu.umich.med.mrc2.datoolbox.gui.users.UserManagerDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
@@ -164,6 +165,8 @@ public class MainWindow extends JFrame
 	private static DbParserFrame dbParserFrame;
 	private static MSToolsFrame msToolsFrame;
 	private static AdductManagerFrame adductManagerFrame;
+	private RscriptGeneratorWindow rScriptGeneratorWindow;
+	
 	private static AssayManagerDialog assayMethodsManagerDialog;
 	private static ReferenceSampleManagerDialog referenceSampleManagerDialog;
 	private static TaskProgressPanel progressPanel;
@@ -330,6 +333,9 @@ public class MainWindow extends JFrame
 		
 		if(command.equals(MainActionCommands.SHOW_RAW_DATA_FILE_TOOLS_COMMAND.getName()))
 			showFileToolsDialog();
+		
+		if(command.equals(MainActionCommands.SHOW_R_SCRIPT_GENERATOR_COMMAND.getName()))
+			showRscriptGenerator();
 		
 		if(command.equals(MainActionCommands.SHOW_WEB_HELP_COMMAND.getName()))
 			showOnlineHelp();
@@ -602,6 +608,13 @@ public class MainWindow extends JFrame
 		fileToolsDialog = new FileToolsDialog();
 		fileToolsDialog.setLocationRelativeTo(this.getContentPane());
 		fileToolsDialog.setVisible(true);
+	}
+	
+	public void showRscriptGenerator() {
+		
+		rScriptGeneratorWindow = new RscriptGeneratorWindow();
+		rScriptGeneratorWindow.setLocationRelativeTo(this.getContentPane());
+		rScriptGeneratorWindow.setVisible(true);
 	}
 	
 	private void showAboutSoftwareBox() {

@@ -19,7 +19,7 @@
  *
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.gui.integration.mcr;
+package edu.umich.med.mrc2.datoolbox.gui.rgen.mcr;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -31,7 +31,6 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
@@ -42,24 +41,17 @@ import java.util.prefs.Preferences;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.Icon;
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
-import javax.swing.JComponent;
-import javax.swing.JDialog;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JRootPane;
 import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
 import javax.swing.JTextField;
-import javax.swing.KeyStroke;
 import javax.swing.SpinnerNumberModel;
-import javax.swing.SwingUtilities;
-import javax.swing.WindowConstants;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
@@ -67,6 +59,7 @@ import javax.swing.border.TitledBorder;
 
 import org.apache.commons.lang3.StringUtils;
 
+import bibliothek.gui.dock.common.DefaultSingleCDockable;
 import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
 import edu.umich.med.mrc2.datoolbox.data.enums.PeakAbundanceMeasure;
 import edu.umich.med.mrc2.datoolbox.data.enums.RtFittingModelType;
@@ -79,14 +72,15 @@ import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.rqc.MetabCombinerAlignmentScriptGenerator;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
 
-public class MetabCombinerScriptDialog extends JDialog implements ActionListener, BackedByPreferences {
+public class DockableMetabCombinerScriptGenerator extends DefaultSingleCDockable 
+	implements ActionListener, BackedByPreferences {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
 	
-	private static final Icon dialogIcon = GuiUtils.getIcon("rScriptMC", 32);
+	private static final Icon componentIcon = GuiUtils.getIcon("rScriptMC", 32);
 	private Preferences preferences;
 	public static final String WORK_DIRECTORY = "WORK_DIRECTORY";
 	public static final String ALIGNMENT_RT_RANGE = "ALIGNMENT_RT_RANGE";
@@ -149,21 +143,18 @@ public class MetabCombinerScriptDialog extends JDialog implements ActionListener
 	private JSpinner maxMissingBatchesSpinner;
 	private JFormattedTextField maxRTerrTextField;
 	
-	public MetabCombinerScriptDialog() {
-		super();
-		setTitle("Generate MetabCombiner script for multiple batch alignment");
-		setIconImage(((ImageIcon) dialogIcon).getImage());
-		setPreferredSize(new Dimension(1000, 800));
-		setSize(new Dimension(1000, 800));
-		setModalityType(ModalityType.APPLICATION_MODAL);
-		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+	public DockableMetabCombinerScriptGenerator() {
 		
+		super("DockableMetabCombinerScriptGenerator", componentIcon, 
+				"Generate MetabCombiner script for multiple batch alignment", null, Permissions.MIN_MAX_STACK);
+		setCloseable(false);
+		setLayout(new BorderLayout(0, 0));
 		toolbar =new MetabCombinerScriptDialogToolbar(this);
-		getContentPane().add(toolbar, BorderLayout.NORTH);
+		add(toolbar, BorderLayout.NORTH);
 
 		JPanel dataPanel = new JPanel();
 		dataPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
-		getContentPane().add(dataPanel, BorderLayout.CENTER);
+		add(dataPanel, BorderLayout.CENTER);
 		GridBagLayout gbl_dataPanel = new GridBagLayout();
 		gbl_dataPanel.columnWidths = new int[]{0, 0, 105, 0, 0};
 		gbl_dataPanel.rowHeights = new int[]{0, 0, 0, 0, 0, 0};
@@ -831,17 +822,7 @@ public class MetabCombinerScriptDialog extends JDialog implements ActionListener
 		JPanel buttonPanel = new JPanel();
 		FlowLayout flowLayout = (FlowLayout) buttonPanel.getLayout();
 		flowLayout.setAlignment(FlowLayout.RIGHT);
-		getContentPane().add(buttonPanel, BorderLayout.SOUTH);
-
-		JButton btnCancel = new JButton("Cancel");
-		buttonPanel.add(btnCancel);
-		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
-		ActionListener al = new ActionListener() {
-			public void actionPerformed(ActionEvent ae) {
-				dispose();
-			}
-		};
-		btnCancel.addActionListener(al);
+		add(buttonPanel, BorderLayout.SOUTH);
 
 		JButton btnSave = new JButton(
 				MainActionCommands.GENERATE_METAB_COMBINER_SCRIPT_COMMAND.getName());
@@ -849,19 +830,10 @@ public class MetabCombinerScriptDialog extends JDialog implements ActionListener
 				MainActionCommands.GENERATE_METAB_COMBINER_SCRIPT_COMMAND.getName());
 		btnSave.addActionListener(this);
 		buttonPanel.add(btnSave);
-		JRootPane rootPane = SwingUtilities.getRootPane(btnSave);
-		rootPane.registerKeyboardAction(al, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
-		rootPane.setDefaultButton(btnSave);
+//		JRootPane rootPane = SwingUtilities.getRootPane(btnSave);
+//		rootPane.setDefaultButton(btnSave);
 
 		loadPreferences();
-		pack();
-	}
-	
-	@Override
-	public void dispose() {
-		
-		savePreferences();
-		super.dispose();
 	}
 
 	@Override
@@ -887,7 +859,7 @@ public class MetabCombinerScriptDialog extends JDialog implements ActionListener
 		JnaFileChooser fc = new JnaFileChooser(workDirectory.getParentFile());
 		fc.setMode(JnaFileChooser.Mode.Directories);
 		fc.setMultiSelectionEnabled(false);
-		if (fc.showOpenDialog(this)) {
+		if (fc.showOpenDialog(this.getContentPane())) {
 			
 			workDirectory = fc.getSelectedFile();
 			workDirectoryTextField.setText(workDirectory.getPath());
@@ -902,7 +874,7 @@ public class MetabCombinerScriptDialog extends JDialog implements ActionListener
 		fc.addFilter("Text files", "txt", "TXT");
 		fc.setTitle("Select Input data files for MetabCombiner");
 		fc.setMultiSelectionEnabled(true);
-		if (fc.showOpenDialog(this)) {
+		if (fc.showOpenDialog(this.getContentPane())) {
 			
 			File[]mcInputFiles = fc.getSelectedFiles();
 			if(mcInputFiles.length > 0) {
@@ -919,7 +891,7 @@ public class MetabCombinerScriptDialog extends JDialog implements ActionListener
 		if(!fileListingTable.getAllFiles().isEmpty()) {
 			
 			int res = MessageDialog.showChoiceWithWarningMsg(
-					"Do you want to clear input files table?", this);
+					"Do you want to clear input files table?", this.getContentPane());
 			if(res == JOptionPane.YES_OPTION)
 				fileListingTable.clearTable();
 		}
@@ -1095,7 +1067,7 @@ public class MetabCombinerScriptDialog extends JDialog implements ActionListener
 
 		Collection<String>errors = validateFormData();
 		if(!errors.isEmpty()){
-		    MessageDialog.showErrorMsg(StringUtils.join(errors, "\n"), this);
+		    MessageDialog.showErrorMsg(StringUtils.join(errors, "\n"), this.getContentPane());
 		    return;
 		}
 		MetabCombinerParametersObject mcpo = new MetabCombinerParametersObject();
@@ -1128,6 +1100,8 @@ public class MetabCombinerScriptDialog extends JDialog implements ActionListener
 		mcpo.setResolveAlignmentConflictsInOutput(resolveAlignmentConflictsInOutput());
 		mcpo.setRtOrderFlagInOutput(getRtOrderFlagInOutput());
 		
+		savePreferences();
+		
 		MetabCombinerAlignmentScriptGenerator mcsg = 
 				new MetabCombinerAlignmentScriptGenerator(mcpo);
 		mcsg.createMetabCombinerAlignmentScript();
@@ -1137,8 +1111,7 @@ public class MetabCombinerScriptDialog extends JDialog implements ActionListener
 		    } catch (IOException ex) {
 		        ex.printStackTrace();
 		    }
-		}	
-		dispose();
+		}
 	}
 	
 	private Collection<String>validateFormData(){

@@ -112,6 +112,8 @@ public enum MainActionCommands {
 	SET_EXPERIMENT_DATA_UPLOAD_PARAMETERS_COMMAND("Set experiment database upload parameters"),
 	SEND_EXPERIMENT_DATA_TO_DATABASE_COMMAND("Send experiment data to database"),
 	CLEAR_EXPERIMENT_METADATA_COMMAND("Clear experiment metadata"),
+	
+	SHOW_R_SCRIPT_GENERATOR_COMMAND("Show R-script generation tools"),
 
 	ACTIVATE_DATA_PIPELINE_COMMAND("Activate data pipeline"),
 	DELETE_DATA_PIPELINE_COMMAND("Delete data pipeline"),

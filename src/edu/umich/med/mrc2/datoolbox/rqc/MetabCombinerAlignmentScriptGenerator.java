@@ -39,8 +39,8 @@ import java.util.TreeSet;
 
 import org.apache.commons.lang.StringUtils;
 
-import edu.umich.med.mrc2.datoolbox.gui.integration.mcr.MetabCombinerFileInputObject;
-import edu.umich.med.mrc2.datoolbox.gui.integration.mcr.MetabCombinerParametersObject;
+import edu.umich.med.mrc2.datoolbox.gui.rgen.mcr.MetabCombinerFileInputObject;
+import edu.umich.med.mrc2.datoolbox.gui.rgen.mcr.MetabCombinerParametersObject;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
 

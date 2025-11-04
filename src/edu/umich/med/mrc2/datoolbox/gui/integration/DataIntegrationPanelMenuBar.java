@@ -145,15 +145,10 @@ public class DataIntegrationPanelMenuBar extends CommonMenuBar {
 		showAlignmentSummaryMenuItem = addItem(alignmentMenu, 
 				MainActionCommands.SHOW_DATASET_ALIGNMENT_SUMMARY_COMMAND, 
 				showSummaryIcon);
+		
 		exportAlignmentSummaryMenuItem = addItem(alignmentMenu, 
 				MainActionCommands.EXPORT_DATASET_ALIGNMENT_SUMMARY_COMMAND, 
 				exportSummaryIcon);
-		
-		alignmentMenu.addSeparator();
-		
-		generateMetabCombinerScriptMenuItem = addItem(alignmentMenu, 
-				MainActionCommands.GENERATE_METAB_COMBINER_SCRIPT_COMMAND, 
-				generateMetabCombinerScriptIcon);
 			
 		add(alignmentMenu);
 

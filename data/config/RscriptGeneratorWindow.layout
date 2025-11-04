@@ -1,7 +1,7 @@
 <?xml version='1.0'?>
 <root>
 	<resource name="dock.ui.ThemeMap">
-		<key>eclipse</key>
+		<key>smooth</key>
 	</resource>
 	<resource name="ccontrol.frontend">
 		<frontend>
@@ -99,25 +99,11 @@
 									<root>true</root>
 									<content delegate="SplitDockStationFactory">
 										<fullscreen-action>false</fullscreen-action>
-										<node nodeId="1600213797663" orientation="VERTICAL" divider="0.4684959349593496">
-											<node nodeId="1637181838881" orientation="HORIZONTAL" divider="0.7894736842105263">
-												<leaf id="1" nodeId="1600213797667">
-													<placeholders>
-														<placeholder>dock.single.MsLibraryPanelDockableLibraryFeatureTable</placeholder>
-													</placeholders>
-												</leaf>
-												<leaf id="0" nodeId="1600213797669">
-													<placeholders>
-														<placeholder>dock.single.MsLibraryPanelDockableMolStructurePanel</placeholder>
-													</placeholders>
-												</leaf>
-											</node>
-											<leaf id="2" nodeId="1600213797671">
-												<placeholders>
-													<placeholder>dock.single.DockableLibraryFeatureEditorPanel</placeholder>
-												</placeholders>
-											</leaf>
-										</node>
+										<leaf id="0" nodeId="1762217679201">
+											<placeholders>
+												<placeholder>dock.single.DockableMetabCombinerScriptGenerator</placeholder>
+											</placeholders>
+										</leaf>
 									</content>
 								</delegate>
 							</layout>
@@ -128,30 +114,10 @@
 							</adjacent>
 							<children ignore="false">
 								<child>
-									<layout factory="predefined" placeholder="dock.single.MsLibraryPanelDockableMolStructurePanel">
-										<replacement id="dockablesingle MsLibraryPanelDockableMolStructurePanel"/>
+									<layout factory="predefined" placeholder="dock.single.DockableMetabCombinerScriptGenerator">
+										<replacement id="dockablesingle DockableMetabCombinerScriptGenerator"/>
 										<delegate id="delegate_ccontrol backup factory id">
-											<id>MsLibraryPanelDockableMolStructurePanel</id>
-											<area/>
-										</delegate>
-									</layout>
-									<children ignore="false"/>
-								</child>
-								<child>
-									<layout factory="predefined" placeholder="dock.single.MsLibraryPanelDockableLibraryFeatureTable">
-										<replacement id="dockablesingle MsLibraryPanelDockableLibraryFeatureTable"/>
-										<delegate id="delegate_ccontrol backup factory id">
-											<id>MsLibraryPanelDockableLibraryFeatureTable</id>
-											<area/>
-										</delegate>
-									</layout>
-									<children ignore="false"/>
-								</child>
-								<child>
-									<layout factory="predefined" placeholder="dock.single.DockableLibraryFeatureEditorPanel">
-										<replacement id="dockablesingle DockableLibraryFeatureEditorPanel"/>
-										<delegate id="delegate_ccontrol backup factory id">
-											<id>DockableLibraryFeatureEditorPanel</id>
+											<id>DockableMetabCombinerScriptGenerator</id>
 											<area/>
 										</delegate>
 									</layout>
@@ -185,70 +151,9 @@
 				</base>
 				<modes>
 					<dockables>
-						<entry id="single DockableLibraryFeatureEditorPanel" current="dock.mode.normal">
-							<history>
-								<mode>dock.mode.normal</mode>
-							</history>
-							<properties>
-								<property id="dock.mode.normal">
-									<mode>dock.mode.normal</mode>
-									<root>ccontrol center</root>
-									<applicationDefined>false</applicationDefined>
-									<location>
-										<property factory="SplitDockPlaceholderProperty">
-											<placeholder>dock.single.DockableLibraryFeatureEditorPanel</placeholder>
-											<backup-path>
-												<node location="BOTTOM" size="0.45462114904246465" id="1600213797663"/>
-												<leaf id="1600213797671"/>
-											</backup-path>
-										</property>
-									</location>
-								</property>
-							</properties>
-						</entry>
-						<entry id="single MsLibraryPanelDockableLibraryFeatureTable" current="dock.mode.normal">
-							<history>
-								<mode>dock.mode.normal</mode>
-							</history>
-							<properties>
-								<property id="dock.mode.normal">
-									<mode>dock.mode.normal</mode>
-									<root>ccontrol center</root>
-									<applicationDefined>false</applicationDefined>
-									<location>
-										<property factory="SplitDockPlaceholderProperty">
-											<placeholder>dock.single.MsLibraryPanelDockableLibraryFeatureTable</placeholder>
-											<backup-path>
-												<node location="TOP" size="0.5453788509575354" id="1600213797663"/>
-												<node location="LEFT" size="0.75" id="1600213797665"/>
-												<leaf id="1600213797667"/>
-											</backup-path>
-										</property>
-									</location>
-								</property>
-							</properties>
-						</entry>
-						<entry id="single MsLibraryPanelDockableMolStructurePanel" current="dock.mode.normal">
-							<history>
-								<mode>dock.mode.normal</mode>
-							</history>
-							<properties>
-								<property id="dock.mode.normal">
-									<mode>dock.mode.normal</mode>
-									<root>ccontrol center</root>
-									<applicationDefined>false</applicationDefined>
-									<location>
-										<property factory="SplitDockPlaceholderProperty">
-											<placeholder>dock.single.MsLibraryPanelDockableMolStructurePanel</placeholder>
-											<backup-path>
-												<node location="TOP" size="0.5453788509575354" id="1600213797663"/>
-												<node location="BOTTOM" size="0.24079169599556327" id="1615231600226"/>
-												<leaf id="1600213797669"/>
-											</backup-path>
-										</property>
-									</location>
-								</property>
-							</properties>
+						<entry id="single DockableMetabCombinerScriptGenerator" current="dock.mode.normal">
+							<history/>
+							<properties/>
 						</entry>
 					</dockables>
 					<modes>
