@@ -45,13 +45,28 @@ import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
 
 public class MetabCombinerAlignmentScriptGenerator {
-
+	
+	public static final String SCRIPT_FILE_PREFIX = "MetabCombinerMultyBatchAlignmentScript_";
+	public static final String ALIGNMENT_SUMMARY_TABLE_FILE_NAME = "AlignmentSummaryTable.txt";
+	public static final String MERGED_ALIGNED_DATA_FILE_NAME = "MergedAlignedData.txt";
+	public static final String CLEAN_DATA_FILE_SUFFIX= "-cleanData.txt";
+	public static final String INPUT_STATS_FILE_PREFIX = "MetabCombinerMultiAlignmentInputStats_";
+	public static final String CUMMULATIVE_METADATA_FILE_NAME = "CummulativeMetaData.txt";
+	public static final String EXTENDED_CUMMULATIVE_METADATA_FILE_NAME = "CummulativeMetaDataEFS.txt";
+	public static final String ADDUCT_REPRODUCIBILITY_FILE_NAME = "AdductReproducibility.pdf";
+	public static final String ADDUCT_REPRODUCIBILITY_EXTENDED_FILE_NAME = "AdductReproducibilityEFS.pdf";
+	public static final String ALIGNMENT_METADATA_SUFFIX = ".alignmentMetaData";
+	public static final String ANCHORS_FILE_NAME_PREFIX = "Anchors-";
+	public static final String ALIGNMENT_PLOT_NAME_PREFIX = "AlignmentPlot-";
+	public static final String ALIGNMENT_REPORT_NAME_PREFIX = "AlignmentReport-";
+	public static final String COMPLETE_ALIGNMENT_REPORT_NAME_PREFIX = "CompleteAlignmentReport-";
+	
 	private MetabCombinerParametersObject parametersObject;
 	private List<String>rscriptParts;
 	private Map<MetabCombinerFileInputObject,String>metabDataObjectMap;
-	private Map<MetabCombinerFileInputObject,String>statsObjectMap;
+	//	private Map<MetabCombinerFileInputObject,String>statsObjectMap;
 	private File scriptFile;
-	private String cleanDataFileSuffix;
+	
 	private Map<String,String>matchListMap;
 	private List<String>listParts;
 	private Map<MetabCombinerFileInputObject,String>overlapObjectMap;
@@ -62,10 +77,9 @@ public class MetabCombinerAlignmentScriptGenerator {
 		this.parametersObject = parametersObject;
 		rscriptParts = new ArrayList<>();
 		metabDataObjectMap = new HashMap<>();
-		statsObjectMap = new HashMap<>();
+		//	statsObjectMap = new HashMap<>();
 		scriptFile = Paths.get(parametersObject.getWorkDirectory().getAbsolutePath(), 
-				"MetabCombinerMultyBatchAlignmentScript_" + FIOUtils.getTimestamp() + ".R" ).toFile();
-		cleanDataFileSuffix = "-cleanData.txt";
+				SCRIPT_FILE_PREFIX + FIOUtils.getTimestamp() + ".R" ).toFile();
 		
 		matchListMap = new TreeMap<>();
 		listParts = new ArrayList<>();
@@ -75,8 +89,14 @@ public class MetabCombinerAlignmentScriptGenerator {
 	
 	public void createMetabCombinerAlignmentScript() {
 		
+		createAlignmentProjectDirectoryStructure();
 		initRscript();
 		createDataImportBlock();
+		initSummaryDataFrames();
+		
+		if(parametersObject.isUseExistingAlignment())
+			createExistingAlignmentImportBlock();
+		
 		createDataAlignmentBlock();
 		createStrictMatchingBlock();
 		
@@ -85,7 +105,12 @@ public class MetabCombinerAlignmentScriptGenerator {
 		
 		writeScriptToFile();
 	}
-	
+
+	private void createAlignmentProjectDirectoryStructure() {
+		// TODO Auto-generated method stub
+		
+	}
+
 	private void initRscript() {
 		
 		String workDirForR = parametersObject.getWorkDirectory().getAbsolutePath().replaceAll("\\\\", "/");
@@ -95,14 +120,13 @@ public class MetabCombinerAlignmentScriptGenerator {
 		rscriptParts.add("library(metabCombiner)");
 		rscriptParts.add("library(reshape2)");
 		rscriptParts.add("library(dplyr)");
+		rscriptParts.add("library(purrr)");
 		rscriptParts.add("library(ggplot2)\n");
 	}
 	
 	private void createDataImportBlock() {
 		
 		rscriptParts.add("## Read in the data for alignment ####\n");
-		rscriptParts.add("clean.data.map.df <- data.frame(data.set = character(), file.name = character())");
-		
 		
 		for(MetabCombinerFileInputObject mcio : parametersObject.getMetabCombinerFileInputObjectSet()) {
 			
@@ -112,16 +136,12 @@ public class MetabCombinerAlignmentScriptGenerator {
 					mcio.getDataFile().getName() + "\", check.names=FALSE)");
 			
 			//	Write out clean data for final join and record in the data frame
-			String data4join = dataObjectPrefix + cleanDataFileSuffix;
+			String data4join = dataObjectPrefix + CLEAN_DATA_FILE_SUFFIX;
 			rscriptParts.add("write.table(" + dataObject + "[,-c(2:4)], "
-					+ "file = \"" + data4join + "\", quote = F, sep = \"\\t\", na = \"\", row.names = FALSE)");
-			rscriptParts.add("clean.data.map.df[nrow(clean.data.map.df) + 1,] "
-					+ "= list(data.set = \"" + dataObjectPrefix + "\", file.name = \"" + data4join + "\")"); 
-			
+					+ "file = \"" + data4join + "\", quote = F, sep = \"\\t\", na = \"\", row.names = FALSE)");			
 			rscriptParts.add(dataObject + " <- " + dataObject + "[!(" + dataObject + "$rt == \"NaN\"),]");
 			
-			String metabDataObject = dataObjectPrefix + ".metabData";
-			
+			String metabDataObject = dataObjectPrefix + ".metabData";			
 			String metabDataCommand = 
 					metabDataObject + " <- metabData(" + dataObject 
 					+ ", samples = \"CS00000MP\""
@@ -143,21 +163,68 @@ public class MetabCombinerAlignmentScriptGenerator {
 				+ " <- \"" + mcio.getExperimentId() + "\"");
 			rscriptParts.add(statsObject + "$" + SummaryInputColumns.BATCH.getRName() 
 				+ " <- \"" + mcio.getBatchId() + "\"");
-			statsObjectMap.put(mcio, statsObject);
+			rscriptParts.add("stats.all <- bind_rows(stats.all, " + statsObject + ")");
+			
+			//	statsObjectMap.put(mcio, statsObject);
 		}
 		//	Write out statistics for all metabData objects
-		rscriptParts.add("stats.all <- bind_rows(" + StringUtils.join(statsObjectMap.values(), ",") + ")");
-		String statsFileName = "MetabCombinerMultiAlignmentInputStats" + FIOUtils.getTimestamp() + ".txt";
+		//	rscriptParts.add("stats.all <- bind_rows(" + StringUtils.join(statsObjectMap.values(), ",") + ")");
+		String statsFileName = INPUT_STATS_FILE_PREFIX + FIOUtils.getTimestamp() + ".txt";
 		rscriptParts.add("write.table(stats.all, file = \"" + statsFileName +
 				"\", quote = F, sep = \"\\t\", na = \"\", row.names = FALSE)");
+	}	
+
+	private void createExistingAlignmentImportBlock() {
+		
+		rscriptParts.add("## Parse existing alignment data ####");
+		rscriptParts.add("### Read alignment summary file ####");
+		rscriptParts.add("alignment.summary.df <- read.delim(\"" 
+				+ ALIGNMENT_SUMMARY_TABLE_FILE_NAME + "\", check.names=FALSE)");
+		
+//		rscriptParts.add("alignment.summary.df$matched.features <- "
+//				+ "paste(\"matched.features.\", alignment.summary.df$dsx, "
+//				+ "\".\", alignment.summary.df$dsy, sep = \"\")");
+		
+		rscriptParts.add("\n### Read all metadata files ####");
+		rscriptParts.add("readMetaData <- function(df) {");
+		rscriptParts.add("\tb.one <- df['dsx'][[1]]");
+		rscriptParts.add("\tb.two <- df['dsy'][[1]]");
+		rscriptParts.add("\t  md.names <- c( b.one, paste(\"mz.\", b.one, sep=\"\"), "
+				+ "paste(\"rt.\", b.one, sep=\"\"), paste(\"adductx.\", b.one, sep=\"\"), b.two, "
+				+ "paste(\"mz.\", b.two, sep=\"\"), paste(\"rt.\", b.two, sep=\"\"), "
+				+ "paste(\"adducty.\", b.two, sep=\"\"))");
+		rscriptParts.add("\tdata.report <- read.delim(df['report.file'], check.names=FALSE) "
+				+ "%>% select(idx,mzx,rtx,adductx,idy,mzy,rty,adducty)");
+		rscriptParts.add("\tassign(df['matched.features'], as.vector(data.report$idx), envir = .GlobalEnv)");
+		rscriptParts.add("\tdata.report <-  data.report %>% set_names(md.names)");
+		rscriptParts.add("\tassign(df['meta.data'], data.report, envir = .GlobalEnv)");
+		rscriptParts.add("}");
+		rscriptParts.add("\napply(alignment.summary.df, 1, readMetaData)");
+		rscriptParts.add("\n### Recreate feature overlap lists ####");
+		rscriptParts.add("batch.list <- alignment.summary.df %>% select(\"dsx\") %>% distinct() %>% pull(dsx)");
+		rscriptParts.add("overlap.list.collection <- list()");
+		rscriptParts.add("for(batch in batch.list){");
+		rscriptParts.add("\tmatch.list.collection <- mget(alignment.summary.df[alignment.summary.df$dsx == batch,]$matched.features)");
+		rscriptParts.add("\toverlap.list.collection <- append(overlap.list.collection, list(batch = Reduce(intersect, match.list.collection)))");
+		rscriptParts.add("}");
+		rscriptParts.add("names(overlap.list.collection) <- batch.list");
+	}
+	
+	private void initSummaryDataFrames() {
+		
+		rscriptParts.add("alignment.summary.df <- data.frame(dsx = character(), "
+				+ "dsy = character(), report.file = character(), meta.data = character(), "
+				+ "matched.features = character(), num.matched = integer())");
+		rscriptParts.add("overlap.list.collection <- list()");
+		rscriptParts.add("stats.all <- data.frame(");
+		rscriptParts.add("\tinput_size = integer(), filtered_by_rt = integer(), filtered_as_duplicates = integer(),");
+		rscriptParts.add("\tfiltered_by_missingness = integer(), final_count = integer(), exp = character(), batch = character())");
 	}
 	
 	private void createDataAlignmentBlock() {
 		
 		//	Create data frame to keep track of alignment results
-		rscriptParts.add("alignment.summary.df <- data.frame(dsx = character(), "
-				+ "dsy = character(), report.file = character(), "
-				+ "meta.data = character(), num.matched = integer())");
+
 		for(MetabCombinerFileInputObject mcio1 : parametersObject.getMetabCombinerFileInputObjectSet()) {
 			
 			matchListMap.clear();
@@ -202,7 +269,8 @@ public class MetabCombinerAlignmentScriptGenerator {
 		overlapsListString += StringUtils.join(listParts, ",") + ")\n";
 		rscriptParts.add(overlapsListString);
 		
-		rscriptParts.add("write.table(alignment.summary.df, file = \"AlignmentSummaryTable.txt\", "
+		rscriptParts.add("write.table(alignment.summary.df, file = \"" 
+				+ ALIGNMENT_SUMMARY_TABLE_FILE_NAME + "\", "
 				+ "quote = F, sep = \"\\t\", na = \"\", row.names = FALSE)");
 		
 		rscriptParts.add("\n## Find primary batch for alignment ####");
@@ -229,13 +297,14 @@ public class MetabCombinerAlignmentScriptGenerator {
 		rscriptParts.add("adduct.data$max.frequency <- apply(adduct.data, 1, "
 				+ "function(x) max(tabulate(as.factor(x))) / sum(tabulate(as.factor(x))))");
 		rscriptParts.add("adduct.data$common.adduct <- apply(adduct.data.copy,1,function(x) names(which.max(table(x))))");
-		rscriptParts.add("data.out <- cbind(meta.data.joined, select(adduct.data, c(\"common.adduct\", \"max.frequency\")))");
-		rscriptParts.add("write.table(data.out, file = \"CummulativeMetaData.txt\", "
+		rscriptParts.add("cum.meta.data.out <- cbind(meta.data.joined, select(adduct.data, c(\"common.adduct\", \"max.frequency\")))");
+		rscriptParts.add("write.table(cum.meta.data.out, file = \"" + CUMMULATIVE_METADATA_FILE_NAME + "\", "
 				+ "quote = F, sep = \"\\t\", na = \"\", row.names = FALSE)");
-		rscriptParts.add("adduct.plot <- ggplot(data.out, aes(max.frequency)) "
+		rscriptParts.add("adduct.plot <- ggplot(cum.meta.data.out, aes(max.frequency)) "
 				+ "+ geom_bar(color=\"darkblue\", fill=\"lightblue\", alpha=0.5) "
 				+ "+ scale_x_binned(show.limits = T) + ggtitle(\"Adduct Reproducibility\")");
-		rscriptParts.add("ggsave(\"AdductReproducibility.pdf\", plot = adduct.plot,  width = 6, height = 6, device = \"pdf\")");
+		rscriptParts.add("ggsave(\"" + ADDUCT_REPRODUCIBILITY_FILE_NAME 
+				+ "\", plot = adduct.plot,  width = 6, height = 6, device = \"pdf\")");
 		
 		//	Join actual data using best batch and write out resulsts
 		rscriptParts.add("\n## Create merged aligned data ####");
@@ -244,17 +313,17 @@ public class MetabCombinerAlignmentScriptGenerator {
 		rscriptParts.add("meta.data <- meta.data.joined %>% select("
 				+ "all_of(c(\"FeatureID\",\"mzMedian\",\"rtMedian\",primary.batch.name,secondary.batch.list)))");
 		rscriptParts.add("merged.data <- read.delim(paste(primary.batch.name, \"" 
-				+ cleanDataFileSuffix + "\", sep = \"\"), check.names=FALSE)");
+				+ CLEAN_DATA_FILE_SUFFIX + "\", sep = \"\"), check.names=FALSE)");
 		rscriptParts.add("colnames(merged.data)[1] <- primary.batch.name");
 		rscriptParts.add("merged.data <- inner_join(meta.data.joined, merged.data, by = primary.batch.name)");
 		rscriptParts.add("for(sec.batch.name in  secondary.batch.list){");
 		rscriptParts.add("\tsec.batch.data <- read.delim(paste(sec.batch.name, \"" 
-				+ cleanDataFileSuffix + "\", sep = \"\"), check.names=FALSE)");
+				+ CLEAN_DATA_FILE_SUFFIX + "\", sep = \"\"), check.names=FALSE)");
 		rscriptParts.add("\tcolnames(sec.batch.data)[1] <- sec.batch.name");
 		rscriptParts.add("\tmerged.data <- inner_join(merged.data, sec.batch.data, by = sec.batch.name)");
 		rscriptParts.add("}");
 		rscriptParts.add("merged.data <- merged.data %>% select(-any_of(columns.to.remove.from.merged.data))");
-		rscriptParts.add("write.table(merged.data, file = \"MergedAlignedData.txt\", "
+		rscriptParts.add("write.table(merged.data, file = \"" + MERGED_ALIGNED_DATA_FILE_NAME + "\", "
 				+ "quote = F, sep = \"\\t\", na = \"\", row.names = FALSE)");
 	}
 	
@@ -301,14 +370,14 @@ public class MetabCombinerAlignmentScriptGenerator {
 				+ "function(x) max(tabulate(as.factor(x))) / sum(tabulate(as.factor(x))))");
 		rscriptParts.add("adduct.data.union$common.adduct <- apply(adduct.data.union.copy,1,"
 				+ "function(x) names(which.max(table(x))))");
-		rscriptParts.add("data.out.union <- cbind(meta.data.union.joined, select(adduct.data.union, "
+		rscriptParts.add("cum.meta.data.out.union <- cbind(meta.data.union.joined, select(adduct.data.union, "
 				+ "c(\"common.adduct\", \"max.frequency\")))");
-		rscriptParts.add("write.table(data.out.union, file = \"CummulativeMetaDataEFS.txt\", "
+		rscriptParts.add("write.table(cum.meta.data.out.union, file = \"" + EXTENDED_CUMMULATIVE_METADATA_FILE_NAME + "\", "
 				+ "quote = F, sep = \"\\t\", na = \"\", row.names = FALSE)");
-		rscriptParts.add("adduct.plot.union <- ggplot(data.out.union, aes(max.frequency)) "
+		rscriptParts.add("adduct.plot.union <- ggplot(cum.meta.data.out.union, aes(max.frequency)) "
 				+ "+ geom_bar(color=\"darkblue\", fill=\"lightblue\", alpha=0.5) + scale_x_binned(show.limits = T) "
 				+ "+ ggtitle(\"Adduct Reproducibility (extended feature set)\")");
-		rscriptParts.add("ggsave(\"AdductReproducibilityEFS.pdf\", plot = adduct.plot.union,  "
+		rscriptParts.add("ggsave(\"" + ADDUCT_REPRODUCIBILITY_EXTENDED_FILE_NAME + "\", plot = adduct.plot.union,  "
 				+ "width = 6, height = 6, device = \"pdf\")");
 		rscriptParts.add("");
 		rscriptParts.add("## Create merged aligned data for extended alignment (with missing batches allowed) ####");
@@ -318,7 +387,7 @@ public class MetabCombinerAlignmentScriptGenerator {
 				+ "select(all_of(c(\"FeatureID\",\"mzMedian\",\"rtMedian\",\"na_count\","
 				+ "primary.batch.name.union,secondary.batch.list.union)))");
 		rscriptParts.add("merged.data.union <- read.delim(paste(primary.batch.name.union, "
-				+ "\"-cleanData.txt\", sep = \"\"), check.names=FALSE)");
+				+ "\"" + CLEAN_DATA_FILE_SUFFIX + "\", sep = \"\"), check.names=FALSE)");
 		rscriptParts.add("colnames(merged.data.union)[1] <- primary.batch.name.union");
 		rscriptParts.add("merged.data.union <- left_join(meta.data.union, merged.data.union, by = primary.batch.name.union)");
 		rscriptParts.add("for(sec.batch.name in  secondary.batch.list.union){");
@@ -349,7 +418,7 @@ public class MetabCombinerAlignmentScriptGenerator {
 			MetabCombinerFileInputObject io,
 			MetabCombinerFileInputObject io2) {
 		
-		Set<String>objectsToClear = new TreeSet<String>();		
+		Set<String>objectsToClear = new TreeSet<>();		
 		String outNameSuffix = createOutNameSuffix(io,io2);
 			
 		rscriptParts.add("\n### Aligning " + outNameSuffix + "####");
@@ -373,10 +442,10 @@ public class MetabCombinerAlignmentScriptGenerator {
 				+ ", tolmz = " +  Double.toString(parametersObject.getAnchorMzTolerance())
 				+ ", tolQ = " +  Double.toString(parametersObject.getAnchorRtQuantileTolerance()) + ")";
 		rscriptParts.add(selectAnchorsString);
-		
+
 		rscriptParts.add("anchors <- getAnchors(data.combined)");
 		objectsToClear.add("anchors");
-		String anchorsFileName = "Anchors-" + outNameSuffix +  ".txt";
+		String anchorsFileName = ANCHORS_FILE_NAME_PREFIX + outNameSuffix +  ".txt";
 		rscriptParts.add(
 				"write.table(anchors"
 				+ ", file = \"" + anchorsFileName + "\""
@@ -401,7 +470,7 @@ public class MetabCombinerAlignmentScriptGenerator {
 		rscriptParts.add(fitGamString);
 		
 		//	Save plot
-		String plotFileName = "AlignmentPlot-" + outNameSuffix +  ".png";
+		String plotFileName = ALIGNMENT_PLOT_NAME_PREFIX + outNameSuffix +  ".png";
 		rscriptParts.add(
 				"png(filename = \"" + plotFileName + "\""
 				+ ", width = 11"
@@ -438,13 +507,6 @@ public class MetabCombinerAlignmentScriptGenerator {
 				+ ", groups = NULL)";
 		rscriptParts.add(calcScoresString);
 		
-//		String reduceTableString = 
-//				"data.combined <- reduceTable(data.combined"
-//				+ ", maxRankX = " + Integer.toString(parametersObject.getMaxFeatureRankForPrimaryDataSet())
-//				+ ", maxRankY = " + Integer.toString(parametersObject.getMaxFeatureRankForSecondaryDataSet())
-//				+ ", minScore = " + Double.toString(parametersObject.getMinimalAlignmentScore())
-//				+ ", delta = " + Double.toString(parametersObject.getSubgroupScoreCutoff())
-//				+ ")";
 		String labelRowsString = 
 				"data.combined <- reduceTable(data.combined"
 				+ ", maxRankX = " + Integer.toString(parametersObject.getMaxFeatureRankForPrimaryDataSet())
@@ -457,18 +519,20 @@ public class MetabCombinerAlignmentScriptGenerator {
 				+ ")";
 		rscriptParts.add(labelRowsString);
 		rscriptParts.add("data.report <- combinedTable(data.combined)");
-		String reportFileName = "AlignmentReport-" + outNameSuffix +  ".txt";		
+		String reportFileName = ALIGNMENT_REPORT_NAME_PREFIX + outNameSuffix +  ".txt";		
 		rscriptParts.add("write.table(data.report, file = \"" + reportFileName 
 				+ "\", quote = F, sep = \"\\t\", na = \"\", row.names = FALSE)");
 		
 		String xPrefix = io.getExperimentId() + "." + io.getBatchId();
 		String yPrefix = io2.getExperimentId() + "." + io2.getBatchId();
-		
-		String alignmentMetaDataObject = xPrefix + "." + yPrefix + "alignmentMetaData";
+
+		String alignmentMetaDataObject = xPrefix + "." + yPrefix + ALIGNMENT_METADATA_SUFFIX;
 		rscriptParts.add(alignmentMetaDataObject + " <- data.report %>% select(idx,mzx,rtx,adductx,idy,mzy,rty,adducty)");
 		rscriptParts.add("colnames(" + alignmentMetaDataObject + ") <- "
 				+ "c(\"" + xPrefix + "\", \"mz." + xPrefix + "\", \"rt." + xPrefix + "\", \"adductx." + xPrefix + "\", "
 				  + "\"" + yPrefix + "\", \"mz." + yPrefix + "\", \"rt." + yPrefix + "\", \"adducty." + yPrefix + "\")");
+		
+		String firstDataSetMatchedFetureList = "matched.features." + outNameSuffix.replaceAll("-", ".");
 		
 		//	Add line to summary data frame
 		rscriptParts.add("alignment.summary.df[nrow(alignment.summary.df) + 1,] "
@@ -476,15 +540,14 @@ public class MetabCombinerAlignmentScriptGenerator {
 				+ "\", dsy=\"" + yTitle.replaceAll("\\s+", ".") 
 				+ "\", report.file = \"" + reportFileName 
 				+ "\", meta.data = \"" + alignmentMetaDataObject 
+				+ "\", matched.features = \"" + firstDataSetMatchedFetureList 
 				+ "\", num.matched=nrow(data.report))");
-		
-		String firstDataSetMatchedFetureList = "matched.features." + outNameSuffix.replaceAll("-", ".");		
-		rscriptParts.add(firstDataSetMatchedFetureList + " <- as.vector(data.report$idx)");
-		
+				
+		rscriptParts.add(firstDataSetMatchedFetureList + " <- as.vector(data.report$idx)");		
 		rscriptParts.add("data.combined <- updateTables(data.combined, xdata = " 
 				+ metabDataObjectMap.get(io) + ", ydata = " + metabDataObjectMap.get(io2) + ")");
 		rscriptParts.add("data.report <- combinedTable(data.combined)");
-		String completeReportFileName = "CompleteAlignmentReport-" + outNameSuffix +  ".txt";
+		String completeReportFileName = COMPLETE_ALIGNMENT_REPORT_NAME_PREFIX + outNameSuffix +  ".txt";
 		rscriptParts.add("write.table(data.report, file = \"" + completeReportFileName 
 				+ "\", quote = F, sep = \"\\t\", na = \"\", row.names = FALSE)");		
 

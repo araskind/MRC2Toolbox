@@ -38,11 +38,67 @@ public class RScriptTestClass {
 		MRC2ToolBoxConfiguration.initConfiguration();
 
 		try {
-			createDataSummariesForEX01526rpPosExperiment();
+			//	createModalityAnalysisScriptForEX01526ionpNegExperiment();
+			//	createModalityAnalysisScriptForEX01526rpPosExperiment();
+			testMetabCombinerAlignmentScript();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+	
+	private static void createModalityAnalysisScriptForEX01526rpPosExperiment() {
+		
+		File inputMapFile = 
+				new File("Y:\\DataAnalysis\\_Reports\\EX01526 - Human EDTA Tranche 4 plasma H20001805E\\"
+						+ "QC\\RP-POS\\EX01526-RP-POS-dataSummarization-inputMap-B10-12.txt");
+		File dataDir = 
+				new File("Y:\\DataAnalysis\\_Reports\\EX01526 - Human EDTA Tranche 4 plasma H20001805E\\QC\\RP-POS");
+		
+		File workingDir = new File("Y:\\DataAnalysis\\_Reports\\EX01526 - Human EDTA Tranche 4 plasma H20001805E\\"
+				+ "QC\\RP-POS\\Multimodaltest-20251117");
+		
+		ModalityAnalysisScriptGenerator.generateMultiBatchMZRTDistributionModalityAnalysisScript(
+				workingDir,
+				dataDir,
+				inputMapFile,
+				75);
+	}
+	
+	private static void createModalityAnalysisScriptForEX01526rpNegExperiment() {
+		
+		File inputMapFile = 
+				new File("Y:\\DataAnalysis\\_Reports\\EX01526 - Human EDTA Tranche 4 plasma H20001805E\\"
+						+ "QC\\RP-NEG\\EX01526-RP-NEG-dataSummarization-inputMap.txt");
+		File dataDir = 
+				new File("Y:\\DataAnalysis\\_Reports\\EX01526 - Human EDTA Tranche 4 plasma H20001805E\\QC\\RP-NEG");
+		
+		File workingDir = new File("Y:\\DataAnalysis\\_Reports\\EX01526 - Human EDTA Tranche 4 plasma H20001805E\\"
+				+ "QC\\RP-NEG\\Multimodaltest-20251106");
+		
+		ModalityAnalysisScriptGenerator.generateMultiBatchMZRTDistributionModalityAnalysisScript(
+				workingDir,
+				dataDir,
+				inputMapFile,
+				75);
+	}
+	
+	private static void createModalityAnalysisScriptForEX01526ionpNegExperiment() {
+		
+		File inputMapFile = 
+				new File("Y:\\DataAnalysis\\_Reports\\EX01526 - Human EDTA Tranche 4 plasma H20001805E\\"
+						+ "QC\\IONP-NEG\\EX01526-IONP-NEG-dataSummarization-inputMap.txt");
+		File dataDir = 
+				new File("Y:\\DataAnalysis\\_Reports\\EX01526 - Human EDTA Tranche 4 plasma H20001805E\\QC\\IONP-NEG");
+		
+		File workingDir = new File("Y:\\DataAnalysis\\_Reports\\EX01526 - Human EDTA Tranche 4 plasma H20001805E\\"
+				+ "QC\\IONP-NEG\\Multimodaltest-20251106");
+		
+		ModalityAnalysisScriptGenerator.generateMultiBatchMZRTDistributionModalityAnalysisScript(
+				workingDir,
+				dataDir,
+				inputMapFile,
+				75);
 	}
 	
 	private static void runEX01242RPNEGMultialignment() {
@@ -55,20 +111,20 @@ public class RScriptTestClass {
 				"Y:\\DataAnalysis\\_Reports\\EX01242 - preCovid adipose Shipment W20000044X\\"
 				+ "A049 - Central carbon metabolism profiling\\Documents\\4MetabCombinner\\EX01242-IONP-NEG-withAdducts-MC-inputMap.txt");
 		
-		RQCScriptGenerator.generateMultiBatchMetabCombinerAlignmentScriptScript(rWorkingDir, inputMap, 2);
+		RQCScriptGenerator.generateMultiBatchMetabCombinerAlignmentScript(rWorkingDir, inputMap, 2);
 	}
 	
 	private static void testMetabCombinerAlignmentScript() {
 
 		File rWorkingDir = new File(
-				"Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\A049 - Central carbon metabolism profiling\\"
-				+ "Documents\\_4MetabCombiner\\CLEANED");
+				"Y:\\DataAnalysis\\_Reports\\EX01526 - Human EDTA Tranche 4 plasma H20001805E\\A003 - Untargeted\\"
+				+ "Documents\\NEG\\CO300-Pk1000");
 		
 		File inputMap = new File(
-				"Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\A049 - Central carbon metabolism profiling\\"
-				+ "Documents\\_4MetabCombiner\\CLEANED\\EX01190-IONP-NEG-CLEANED-withAdducts-MC-inputMap.txt");
+				"Y:\\DataAnalysis\\_Reports\\EX01526 - Human EDTA Tranche 4 plasma H20001805E\\A003 - Untargeted\\"
+				+ "Documents\\NEG\\CO300-Pk1000\\EX01526-RP-NEG-B2-B4-withAdducts-MC-inputMap-2025-11-19.txt");
 		
-		RQCScriptGenerator.generateMultiBatchMetabCombinerAlignmentScriptScript(rWorkingDir, inputMap);
+		RQCScriptGenerator.generateMultiBatchMetabCombinerAlignmentScript(rWorkingDir, inputMap);
 	}
 			
 	private static void createDataSummariesForEX01526rpPosExperiment() {
@@ -78,6 +134,7 @@ public class RScriptTestClass {
 						+ "QC\\RP-POS\\EX01526-RP-POS-dataSummarization-inputMap.txt");
 		File dataDir = 
 				new File("Y:\\DataAnalysis\\_Reports\\EX01526 - Human EDTA Tranche 4 plasma H20001805E\\QC\\RP-POS");
+		
 		RQCScriptGenerator.createMultyBatchDataSummarizationScript(inputMapFile, dataDir);
 	}
 

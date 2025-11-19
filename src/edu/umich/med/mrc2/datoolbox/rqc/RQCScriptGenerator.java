@@ -49,13 +49,13 @@ import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
 
 public class RQCScriptGenerator {
 
-	public static void generateMultiBatchMetabCombinerAlignmentScriptScript(
+	public static void generateMultiBatchMetabCombinerAlignmentScript(
 			File rWorkingDir,
 			File inputMap) {
-		generateMultiBatchMetabCombinerAlignmentScriptScript(rWorkingDir, inputMap, 0);
+		generateMultiBatchMetabCombinerAlignmentScript(rWorkingDir, inputMap, 0);
 	}
 	
-	public static void generateMultiBatchMetabCombinerAlignmentScriptScript(
+	public static void generateMultiBatchMetabCombinerAlignmentScript(
 			File rWorkingDir,
 			File inputMap,
 			int numMissingBatchesAllowed) {
@@ -101,29 +101,16 @@ public class RQCScriptGenerator {
 			rscriptParts.add(dataObject + " <- read.delim(\"" + 
 					io.getField(SummaryInputColumns.PEAK_AREAS) + "\", check.names=FALSE)");
 			
-//							+ " %>% select(-any_of(c(" + columnListToExclude + ")))");
-//			rscriptParts.add("names(" + dataObject + ")[names(" + dataObject + ") == \"" 
-//					+ BinnerExportFields.FEATURE_NAME.getName() + "\"] <- \"feature\"");
-//			rscriptParts.add("names(" + dataObject + ")[names(" + dataObject + ") == \"" 
-//					+ BinnerExportFields.RT_OBSERVED.getName() + "\"] <- \"rt\"");
-//			rscriptParts.add("names(" + dataObject + ")[names(" + dataObject + ") == \"" 
-//					+ BinnerExportFields.MZ.getName() + "\"] <- \"mz\"");
-			
 			//	Write out clean data for final join and record in the data frame
 			String data4join = dataObjectPrefix + cleanDataFileSuffix;
 			rscriptParts.add("write.table(" + dataObject + "[,-c(2:4)], "
 					+ "file = \"" + data4join + "\", quote = F, sep = \"\\t\", na = \"\", row.names = FALSE)");
 			rscriptParts.add("clean.data.map.df[nrow(clean.data.map.df) + 1,] "
-					+ "= list(data.set = \"" + dataObjectPrefix + "\", file.name = \"" + data4join + "\")"); 
-			
-//			rscriptParts.add(dataObject + " <- " + dataObject  
-//					+ " %>% select(feature, mz, rt, contains(\"CS00000MP\"))");	
+					+ "= list(data.set = \"" + dataObjectPrefix + "\", file.name = \"" + data4join + "\")");
 			
 			rscriptParts.add(dataObject + " <- " + dataObject + "[!(" + dataObject + "$rt == \"NaN\"),]");
 			
 			String metabDataObject = dataObjectPrefix + ".metabData";
-//			rscriptParts.add(metabDataObject + " <- metabData(" + dataObject 
-//					+ ", id = \"feature\", measure = \"median\", zero = TRUE, duplicate = opts.duplicate())");
 			
 			rscriptParts.add(metabDataObject + " <- metabData(" + dataObject 
 					+ ", samples = \"CS00000MP\", measure = \"median\", zero = TRUE, duplicate = opts.duplicate())");
@@ -443,11 +430,11 @@ public class RQCScriptGenerator {
 		
 	}
 	
-	private static String createOutNameSuffix(			
+	public static String createOutNameSuffix(			
 			SummarizationDataInputObject io,
 			SummarizationDataInputObject io2) {
 		
-		ArrayList<String>outNameParts = new ArrayList<String>();
+		ArrayList<String>outNameParts = new ArrayList<>();
 		outNameParts.add(io.getField(SummaryInputColumns.EXPERIMENT));
 		outNameParts.add(io.getField(SummaryInputColumns.BATCH));
 		outNameParts.add(io2.getField(SummaryInputColumns.EXPERIMENT));
@@ -456,7 +443,7 @@ public class RQCScriptGenerator {
 		return StringUtils.join(outNameParts, "-");
 	}
 
-	private static String getBinnerColumnListToExclude(){
+	public static String getBinnerColumnListToExclude(){
 		
 		List<String>columnsToExclude = 
 				Arrays.asList(BinnerExportFields.values()).stream().
@@ -477,8 +464,8 @@ public class RQCScriptGenerator {
 			String assayType,
 			String assayType4R) {
 		
-		List<String>qcSummaryNames = new ArrayList<String>();
-		List<String>rscriptParts = new ArrayList<String>();
+		List<String>qcSummaryNames = new ArrayList<>();
+		List<String>rscriptParts = new ArrayList<>();
 		String workDirForR = rWorkingDir.getAbsolutePath().replaceAll("\\\\", "/");
 		String xlFilePath4R = xlQCfile.getAbsolutePath().replaceAll("\\\\", "/");
 		String[][] methodListData = DelimitedTextParser.parseTextFile(
@@ -558,20 +545,19 @@ public class RQCScriptGenerator {
 		}
 	}	
 	
-	private static List<SummarizationDataInputObject>getDataInputList(
+	public static List<SummarizationDataInputObject>getDataInputList(
 			String[][]inputMap, SummaryInputColumns[]requiredColumns){
 		
+		List<SummarizationDataInputObject>dataInputList =  new ArrayList<>();
 		List<String>header = Arrays.asList(inputMap[0]);
 		for(SummaryInputColumns field : requiredColumns) {
 			
 			if(!header.contains(field.name())) {
 				
 				System.err.println(field.name() + " missing in data input map file!");
-				return null;
+				return dataInputList;
 			}
-		}
-		List<SummarizationDataInputObject>dataInputList = 
-				new ArrayList<SummarizationDataInputObject>();
+		}	
 		for(int i = 1; i<inputMap.length; i++) {
 			
 			SummarizationDataInputObject io = new SummarizationDataInputObject();
@@ -583,7 +569,7 @@ public class RQCScriptGenerator {
 					
 					System.err.println(field.name() + 
 							" missing in data input map file on line " + Integer.toString(i+ 1) + "!");
-					return null;
+					return dataInputList;
 				}					
 				io.setField(field, value);			
 			}
@@ -592,11 +578,10 @@ public class RQCScriptGenerator {
 		return dataInputList;
 	}
 	
-	private static Map<SummaryInputColumns,Set<String>>createFeildVariationMap(
+	public static Map<SummaryInputColumns,Set<String>>createFeildVariationMap(
 			Collection<SummarizationDataInputObject>dataInputList){
 		
-		Map<SummaryInputColumns,Set<String>>feildVariationMap = 
-				new TreeMap<SummaryInputColumns,Set<String>>();
+		Map<SummaryInputColumns,Set<String>>feildVariationMap = new TreeMap<>();
 		for(SummaryInputColumns field : SummaryInputColumns.values()) {
 			
 			if(field.isFactor()) {
@@ -1076,7 +1061,7 @@ public class RQCScriptGenerator {
 		}		
 	}
 	
-	private static String createSafeFileName(String inputFileName) {
+	public static String createSafeFileName(String inputFileName) {
 		return inputFileName.replaceAll("[\\\\/:*?\"<>|%]", "_").replaceAll("\\s+", "_");
 	}
 	

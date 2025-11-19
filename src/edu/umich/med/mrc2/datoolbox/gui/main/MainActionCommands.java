@@ -431,6 +431,7 @@ public enum MainActionCommands {
 	GENERATE_METAB_COMBINER_SCRIPT_COMMAND("Generate MetabCombiner script"),
 	SELECT_METAB_COMBINER_INPUT_FILES_COMMAND("Select MetabCombiner input files"),
 	CLEAR_METAB_COMBINER_INPUT_FILES_COMMAND("Clear MetabCombiner input files"),
+	SELECT_EXISTING_MC_ALIGNMENT_FOLDER_COMMAND("Select existing MetabCombiner alignment project"),
 	
 	// Sorting commands
 	SORT_BY_AREA_COMMAND("Sort by area (high to low)"),

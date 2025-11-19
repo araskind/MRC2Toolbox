@@ -83,6 +83,7 @@ public class DockableMetabCombinerScriptGenerator extends DefaultSingleCDockable
 	private static final Icon componentIcon = GuiUtils.getIcon("rScriptMC", 32);
 	private Preferences preferences;
 	public static final String WORK_DIRECTORY = "WORK_DIRECTORY";
+	public static final String USE_EXISTING_ALIGNMENT = "USE_EXISTING_ALIGNMENT";
 	public static final String ALIGNMENT_RT_RANGE = "ALIGNMENT_RT_RANGE";
 	public static final String MAX_MISSING_PERCENT = "MAX_MISSING_PERCENT";
 	public static final String PEAK_ABUNDANCE_MEASURE = "PEAK_ABUNDANCE_MEASURE";
@@ -111,10 +112,12 @@ public class DockableMetabCombinerScriptGenerator extends DefaultSingleCDockable
 	
 	public static final String BROWSE_COMMAND = "Browse";
 	
-	private File workDirectory;
+	private File workDirectory;	
+	private File projectDirectory;
 	private MetabCombinerScriptDialogToolbar toolbar;	
 	private MetabCombinerInputFileListingTable fileListingTable;
 	private JTextField workDirectoryTextField;
+	private JCheckBox useExistingAlignmentCheckBox;
 	private JCheckBox imputeCheckBox;
 	private JComboBox<PeakAbundanceMeasure> abundanceMeasureComboBox;
 	private JCheckBox rtOrderCheckBox;
@@ -142,6 +145,7 @@ public class DockableMetabCombinerScriptGenerator extends DefaultSingleCDockable
 	private JCheckBox resolveConflictsCheckBox;
 	private JSpinner maxMissingBatchesSpinner;
 	private JFormattedTextField maxRTerrTextField;
+	private JTextField existingAlignmentFolderField;
 	
 	public DockableMetabCombinerScriptGenerator() {
 		
@@ -157,9 +161,9 @@ public class DockableMetabCombinerScriptGenerator extends DefaultSingleCDockable
 		add(dataPanel, BorderLayout.CENTER);
 		GridBagLayout gbl_dataPanel = new GridBagLayout();
 		gbl_dataPanel.columnWidths = new int[]{0, 0, 105, 0, 0};
-		gbl_dataPanel.rowHeights = new int[]{0, 0, 0, 0, 0, 0};
+		gbl_dataPanel.rowHeights = new int[]{0, 0, 0, 0, 0, 0, 0};
 		gbl_dataPanel.columnWeights = new double[]{0.0, 1.0, 0.0, 0.0, Double.MIN_VALUE};
-		gbl_dataPanel.rowWeights = new double[]{0.0, 1.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
+		gbl_dataPanel.rowWeights = new double[]{0.0, 1.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
 		dataPanel.setLayout(gbl_dataPanel);
 		
 		JLabel lblNewLabel = new JLabel("Work directory");
@@ -172,13 +176,13 @@ public class DockableMetabCombinerScriptGenerator extends DefaultSingleCDockable
 		
 		workDirectoryTextField = new JTextField();	
 		workDirectoryTextField.setEditable(false);
-		GridBagConstraints gbc_textField = new GridBagConstraints();
-		gbc_textField.gridwidth = 2;
-		gbc_textField.insets = new Insets(0, 0, 5, 5);
-		gbc_textField.fill = GridBagConstraints.HORIZONTAL;
-		gbc_textField.gridx = 1;
-		gbc_textField.gridy = 0;
-		dataPanel.add(workDirectoryTextField, gbc_textField);
+		GridBagConstraints gbc_workDirectoryTextField = new GridBagConstraints();
+		gbc_workDirectoryTextField.gridwidth = 2;
+		gbc_workDirectoryTextField.insets = new Insets(0, 0, 5, 5);
+		gbc_workDirectoryTextField.fill = GridBagConstraints.HORIZONTAL;
+		gbc_workDirectoryTextField.gridx = 1;
+		gbc_workDirectoryTextField.gridy = 0;
+		dataPanel.add(workDirectoryTextField, gbc_workDirectoryTextField);
 		workDirectoryTextField.setColumns(10);
 		
 		JButton selectWorkingDirButton = new JButton(BROWSE_COMMAND);
@@ -186,7 +190,7 @@ public class DockableMetabCombinerScriptGenerator extends DefaultSingleCDockable
 		selectWorkingDirButton.addActionListener(this);
 		GridBagConstraints gbc_btnNewButton = new GridBagConstraints();
 		gbc_btnNewButton.fill = GridBagConstraints.HORIZONTAL;
-		gbc_btnNewButton.insets = new Insets(0, 0, 5, 5);
+		gbc_btnNewButton.insets = new Insets(0, 0, 5, 0);
 		gbc_btnNewButton.gridx = 3;
 		gbc_btnNewButton.gridy = 0;
 		dataPanel.add(selectWorkingDirButton, gbc_btnNewButton);
@@ -194,7 +198,7 @@ public class DockableMetabCombinerScriptGenerator extends DefaultSingleCDockable
 		fileListingTable = new MetabCombinerInputFileListingTable();
 		GridBagConstraints gbc_table = new GridBagConstraints();
 		gbc_table.gridwidth = 4;
-		gbc_table.insets = new Insets(0, 0, 5, 5);
+		gbc_table.insets = new Insets(0, 0, 5, 0);
 		gbc_table.fill = GridBagConstraints.BOTH;
 		gbc_table.gridx = 0;
 		gbc_table.gridy = 1;
@@ -217,6 +221,14 @@ public class DockableMetabCombinerScriptGenerator extends DefaultSingleCDockable
 				MainActionCommands.CLEAR_METAB_COMBINER_INPUT_FILES_COMMAND.getName());
 		clearMCFilesButton.addActionListener(this);
 		
+		useExistingAlignmentCheckBox = new JCheckBox("Use existing alignment data");
+		GridBagConstraints gbc_useExistingAlignmentCheckBox = new GridBagConstraints();
+		gbc_useExistingAlignmentCheckBox.anchor = GridBagConstraints.WEST;
+		gbc_useExistingAlignmentCheckBox.insets = new Insets(0, 0, 5, 5);
+		gbc_useExistingAlignmentCheckBox.gridx = 0;
+		gbc_useExistingAlignmentCheckBox.gridy = 2;
+		dataPanel.add(useExistingAlignmentCheckBox, gbc_useExistingAlignmentCheckBox);
+		
 		GridBagConstraints gbc_btnNewButton_1 = new GridBagConstraints();
 		gbc_btnNewButton_1.anchor = GridBagConstraints.EAST;
 		gbc_btnNewButton_1.insets = new Insets(0, 0, 5, 5);
@@ -226,7 +238,7 @@ public class DockableMetabCombinerScriptGenerator extends DefaultSingleCDockable
 		GridBagConstraints gbc_selectMCFilesButton = new GridBagConstraints();
 		gbc_selectMCFilesButton.gridwidth = 2;
 		gbc_selectMCFilesButton.anchor = GridBagConstraints.EAST;
-		gbc_selectMCFilesButton.insets = new Insets(0, 0, 5, 5);
+		gbc_selectMCFilesButton.insets = new Insets(0, 0, 5, 0);
 		gbc_selectMCFilesButton.gridx = 2;
 		gbc_selectMCFilesButton.gridy = 2;
 		dataPanel.add(selectMCFilesButton, gbc_selectMCFilesButton);
@@ -237,12 +249,35 @@ public class DockableMetabCombinerScriptGenerator extends DefaultSingleCDockable
 				new Color(160, 160, 160)), "Data import and preprocessing parameters", 
 				TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)), new EmptyBorder(5, 5, 5, 5)));
 		dataPanel.add(scrollPane, gbc_table);
+		
+		JButton selectExistingAlignmentButton = new JButton("Select alignment folder");
+		selectExistingAlignmentButton.setActionCommand(
+				MainActionCommands.SELECT_EXISTING_MC_ALIGNMENT_FOLDER_COMMAND.getName());
+		selectExistingAlignmentButton.addActionListener(this);
+		
+		GridBagConstraints gbc_selectExistingAlignmentButton = new GridBagConstraints();
+		gbc_selectExistingAlignmentButton.fill = GridBagConstraints.HORIZONTAL;
+		gbc_selectExistingAlignmentButton.insets = new Insets(0, 0, 5, 5);
+		gbc_selectExistingAlignmentButton.gridx = 0;
+		gbc_selectExistingAlignmentButton.gridy = 3;
+		dataPanel.add(selectExistingAlignmentButton, gbc_selectExistingAlignmentButton);
+		
+		existingAlignmentFolderField = new JTextField();
+		existingAlignmentFolderField.setEditable(false);
+		GridBagConstraints gbc_existingAlignmentFolderField = new GridBagConstraints();
+		gbc_existingAlignmentFolderField.gridwidth = 3;
+		gbc_existingAlignmentFolderField.insets = new Insets(0, 0, 5, 5);
+		gbc_existingAlignmentFolderField.fill = GridBagConstraints.HORIZONTAL;
+		gbc_existingAlignmentFolderField.gridx = 1;
+		gbc_existingAlignmentFolderField.gridy = 3;
+		dataPanel.add(existingAlignmentFolderField, gbc_existingAlignmentFolderField);
+		existingAlignmentFolderField.setColumns(10);
 		GridBagConstraints gbc_dataImportParametersPanel = new GridBagConstraints();
 		gbc_dataImportParametersPanel.gridwidth = 4;
-		gbc_dataImportParametersPanel.insets = new Insets(0, 0, 5, 5);
+		gbc_dataImportParametersPanel.insets = new Insets(0, 0, 5, 0);
 		gbc_dataImportParametersPanel.fill = GridBagConstraints.BOTH;
 		gbc_dataImportParametersPanel.gridx = 0;
-		gbc_dataImportParametersPanel.gridy = 3;
+		gbc_dataImportParametersPanel.gridy = 4;
 		dataPanel.add(dataImportParametersPanel, gbc_dataImportParametersPanel);
 		GridBagLayout gbl_dataImportParametersPanel = new GridBagLayout();
 		gbl_dataImportParametersPanel.columnWidths = new int[]{0, 0, 0, 0, 0, 0, 0, 0};
@@ -518,11 +553,10 @@ public class DockableMetabCombinerScriptGenerator extends DefaultSingleCDockable
 				new Color(160, 160, 160)), "Alignment and filtering parameters", 
 				TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)), new EmptyBorder(5, 5, 5, 5)));
 		GridBagConstraints gbc_alignmentAndFilteringParametersPanel = new GridBagConstraints();
-		gbc_alignmentAndFilteringParametersPanel.insets = new Insets(0, 0, 0, 5);
 		gbc_alignmentAndFilteringParametersPanel.gridwidth = 4;
 		gbc_alignmentAndFilteringParametersPanel.fill = GridBagConstraints.BOTH;
 		gbc_alignmentAndFilteringParametersPanel.gridx = 0;
-		gbc_alignmentAndFilteringParametersPanel.gridy = 4;
+		gbc_alignmentAndFilteringParametersPanel.gridy = 5;
 		dataPanel.add(alignmentAndFilteringParametersPanel, gbc_alignmentAndFilteringParametersPanel);
 		GridBagLayout gbl_alignmentAndFilteringParametersPanel = new GridBagLayout();
 		gbl_alignmentAndFilteringParametersPanel.columnWidths = new int[]{0, 0, 0};
@@ -844,6 +878,9 @@ public class DockableMetabCombinerScriptGenerator extends DefaultSingleCDockable
 		if (command.equals(BROWSE_COMMAND))
 			selectWorkingDirectory();
 		
+		if (command.equals(MainActionCommands.SELECT_EXISTING_MC_ALIGNMENT_FOLDER_COMMAND.getName()))
+			selectExistingMcAlignmentFolder();
+		
 		if (command.equals(MainActionCommands.SELECT_METAB_COMBINER_INPUT_FILES_COMMAND.getName()))
 			selectMetabCombinerInputFiles();		
 		
@@ -852,6 +889,29 @@ public class DockableMetabCombinerScriptGenerator extends DefaultSingleCDockable
 		
 		if (command.equals(MainActionCommands.GENERATE_METAB_COMBINER_SCRIPT_COMMAND.getName()))
 			generateMetabCombinerScript();
+	}
+
+	private void selectExistingMcAlignmentFolder() {
+
+		JnaFileChooser fc = new JnaFileChooser(workDirectory.getParentFile());
+		fc.setMode(JnaFileChooser.Mode.Directories);
+		fc.setMultiSelectionEnabled(false);
+		if (fc.showOpenDialog(this.getContentPane())) {
+			
+			validateExistingProject(projectDirectory);
+			projectDirectory = fc.getSelectedFile();
+			existingAlignmentFolderField.setText(projectDirectory.getPath());
+			
+			workDirectory = projectDirectory.getParentFile();
+			workDirectoryTextField.setText(workDirectory.getPath());
+			
+			savePreferences();	
+		}
+	}
+
+	private void validateExistingProject(File projectDirectory2) {
+		// TODO Auto-generated method stub
+		
 	}
 
 	private void selectWorkingDirectory() {
@@ -899,6 +959,10 @@ public class DockableMetabCombinerScriptGenerator extends DefaultSingleCDockable
 	
 	public File getWorkDirectory() {
 		return workDirectory;
+	}
+	
+	public boolean useExistingAlignment() {
+		return useExistingAlignmentCheckBox.isSelected();
 	}
 	
 	public Range getAlignmentRTRange() {
@@ -1072,6 +1136,7 @@ public class DockableMetabCombinerScriptGenerator extends DefaultSingleCDockable
 		}
 		MetabCombinerParametersObject mcpo = new MetabCombinerParametersObject();
 		mcpo.setWorkDirectory(workDirectory);
+		mcpo.setUseExistingAlignment(useExistingAlignment());
 		mcpo.setMetabCombinerFileInputObjectSet(
 				fileListingTable.getMetabCombinerFileInputObjects());
 		mcpo.setAlignmentRTRange(getAlignmentRTRange());
@@ -1186,6 +1251,8 @@ public class DockableMetabCombinerScriptGenerator extends DefaultSingleCDockable
 			e.printStackTrace();
 		}
 		workDirectoryTextField.setText(workDirectory.getPath());
+		useExistingAlignmentCheckBox.setSelected(
+				preferences.getBoolean(USE_EXISTING_ALIGNMENT, Boolean.FALSE));
 		setRtRangeFromPreferences(preferences);		
 		maxPercentMissingSpinner.setValue(preferences.getInt(MAX_MISSING_PERCENT, 50));	
 		String pamString = preferences.get(PEAK_ABUNDANCE_MEASURE, PeakAbundanceMeasure.median.name());
@@ -1257,6 +1324,7 @@ public class DockableMetabCombinerScriptGenerator extends DefaultSingleCDockable
 
 		preferences = Preferences.userNodeForPackage(this.getClass());
 		preferences.put(WORK_DIRECTORY, workDirectory.getAbsolutePath());
+		preferences.putBoolean(USE_EXISTING_ALIGNMENT, useExistingAlignment());
 		Range rtRange = getAlignmentRTRange();
 		if(rtRange == null)
 			preferences.put(ALIGNMENT_RT_RANGE, "");

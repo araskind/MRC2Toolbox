@@ -61,6 +61,8 @@ public class MoTrPACCompoundRenamer {
 		
 		for(Path filePath : filesForProcessing) {
 			
+			System.out.println("**********\n"+filePath.getFileName().toString() + "\n");
+			
 			String[][]fileData = new String[0][0];
 			List<String> fixedData = new ArrayList<>();
 			try {
@@ -70,8 +72,9 @@ public class MoTrPACCompoundRenamer {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			for(String[] line : fileData) 
-				fixedData.add(replaceInLine(line, compoundRenameMap));
+			fixedData.add(StringUtils.join(fileData[0], MRC2ToolBoxConfiguration.getTabDelimiter()));
+			for(int i=1; i<fileData.length; i++) 
+				fixedData.add(replaceRefMetNameInLine(fileData[i], compoundRenameMap));
 			
 			try {
 			    Files.write(filePath, 
@@ -85,12 +88,14 @@ public class MoTrPACCompoundRenamer {
 		}		
 	}
 	
-	private static String replaceInLine(String[] line, Map<String, String> compoundRenameMap) {
+	private static String replaceRefMetNameInLine(String[] line, Map<String, String> compoundRenameMap) {
 
-		String newRefMet = compoundRenameMap.get(line[1]);
-		if(newRefMet != null && !newRefMet.isBlank())
+		String oldRefMet = line[1].trim();
+		String newRefMet = compoundRenameMap.get(oldRefMet);
+		if(newRefMet != null && !newRefMet.isBlank()) {
 			line[1] = newRefMet;
-		
+			System.out.println(oldRefMet + " => " + newRefMet);
+		}
 		return StringUtils.join(line, MRC2ToolBoxConfiguration.getTabDelimiter());
 	}
 

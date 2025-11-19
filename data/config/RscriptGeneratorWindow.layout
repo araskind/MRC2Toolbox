@@ -152,8 +152,24 @@
 				<modes>
 					<dockables>
 						<entry id="single DockableMetabCombinerScriptGenerator" current="dock.mode.normal">
-							<history/>
-							<properties/>
+							<history>
+								<mode>dock.mode.normal</mode>
+							</history>
+							<properties>
+								<property id="dock.mode.normal">
+									<mode>dock.mode.normal</mode>
+									<root>ccontrol center</root>
+									<applicationDefined>false</applicationDefined>
+									<location>
+										<property factory="SplitDockPlaceholderProperty">
+											<placeholder>dock.single.DockableMetabCombinerScriptGenerator</placeholder>
+											<backup-path>
+												<leaf id="1762217679201"/>
+											</backup-path>
+										</property>
+									</location>
+								</property>
+							</properties>
 						</entry>
 					</dockables>
 					<modes>

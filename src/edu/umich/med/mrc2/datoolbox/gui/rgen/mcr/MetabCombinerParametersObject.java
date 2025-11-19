@@ -36,6 +36,7 @@ import edu.umich.med.mrc2.datoolbox.utils.Range;
 public class MetabCombinerParametersObject implements XmlStorable{
 	
 	private File workDirectory;
+	private boolean useExistingAlignment;
 	private Set<MetabCombinerFileInputObject>metabCombinerFileInputObjectSet;
 	private Range alignmentRTRange;
 	private double maxMissingPercent;
@@ -295,6 +296,14 @@ public class MetabCombinerParametersObject implements XmlStorable{
 	public Element getXmlElement() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	public boolean isUseExistingAlignment() {
+		return useExistingAlignment;
+	}
+
+	public void setUseExistingAlignment(boolean useExistingAlignment) {
+		this.useExistingAlignment = useExistingAlignment;
 	}
 	
 	

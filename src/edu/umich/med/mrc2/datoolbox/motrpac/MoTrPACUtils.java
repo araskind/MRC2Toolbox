@@ -93,11 +93,42 @@ public class MoTrPACUtils {
 		//	File parentDir = new File("Y:\\DataAnalysis\\_Reports\\EX01117 - PASS 1C\\4BIC\\PASS1A-06\\_FINALS");
 		try {
 			//	extractRefmetDisrepanciesForAllExperiments();
-			fixRefMetNames();
+			//	fixRefMetNames();
 			//	collectAllMetaboliteNames();
 			//	duplicateDataUploadDirectoryForResultsCorrection4PASS1A18();
+			//	createMoTrPACFileManifests4Pass1A18();
+				collectFilePathsForReupload();
 		} catch (Exception e) {
 			e.printStackTrace();
+		}
+	}
+	
+	private static void collectFilePathsForReupload() {
+		
+		List<String>lookupNames = new ArrayList<>(
+				List.of(
+					//"metadata_metabolites_named_",
+					//"results_metabolites_named_",
+					"file_manifest_2023"));
+		Set<Path>pathList = new TreeSet<>();
+		File rootFolder = new File(
+				"Y:\\DataAnalysis\\_Reports\\EX01263 - PASS 1A 1C 18mo P20000245T C20000316E\\"
+				+ "4BIC\\20251016FIX\\PASS1A-18");
+		
+		for(String lookupName : lookupNames)
+			pathList.addAll(FIOUtils.findFilesByNameStartingWith(rootFolder.toPath(), lookupName)) ;
+		
+		List<String>pathnameList = pathList.stream().
+				map(p -> p.toString()).collect(Collectors.toList());
+		Path output = Paths.get(rootFolder.getAbsolutePath(), "PathList.txt");
+		try {
+		    Files.write(output, 
+		    		pathnameList,
+		            StandardCharsets.UTF_8,
+		            StandardOpenOption.CREATE, 
+		            StandardOpenOption.TRUNCATE_EXISTING);
+		} catch (IOException e) {
+		    e.printStackTrace();
 		}
 	}
 	
@@ -559,7 +590,7 @@ public class MoTrPACUtils {
 		
 		List<String>tissueTypes = new ArrayList<String>(Arrays.asList("T31"));
 		File parentDirectory = 
-				new File("Y:\\DataAnalysis\\_Reports\\EX01263 - PASS 1A 1C 18mo P20000245T C20000316E\\4BIC\\PASS1A-18");
+				new File("Y:\\DataAnalysis\\_Reports\\EX01263 - PASS 1A 1C 18mo P20000245T C20000316E\\4BIC\\20251016FIX\\PASS1A-18");
 		String batchDateIdentifier = "BATCH1_20230710";
 		String processingDateIdentifier = "PROCESSED_20230710";
 		createMoTrPACFileManifest(
@@ -567,7 +598,7 @@ public class MoTrPACUtils {
 				parentDirectory,
 				batchDateIdentifier,
 				processingDateIdentifier,
-				"20230817",
+				"20251112",
 				false);
 	}
 	
@@ -576,14 +607,14 @@ public class MoTrPACUtils {
 		List<String>tissueTypes = Arrays.asList(
 				"T31",
 				"T55",
-				//"T58",
+				"T58",
 				"T59",
 				"T66",
 				"T68",
 				"T69",
 				"T70");
 		File parentDirectory = 
-				new File("Y:\\DataAnalysis\\_Reports\\EX01263 - PASS 1A 1C 18mo P20000245T C20000316E\\4BIC\\PASS1A-18");
+				new File("Y:\\DataAnalysis\\_Reports\\EX01263 - PASS 1A 1C 18mo P20000245T C20000316E\\4BIC\\20251016FIX\\PASS1A-18");
 		String batchDateIdentifier = "BATCH1_20230710";
 		String processingDateIdentifier = "PROCESSED_20230710";
 		createMoTrPACFileManifest(
@@ -591,7 +622,7 @@ public class MoTrPACUtils {
 				parentDirectory,
 				batchDateIdentifier,
 				processingDateIdentifier,
-				"20230725",
+				"20251112",
 				false);
 	}
 		
@@ -625,7 +656,7 @@ public class MoTrPACUtils {
 			String manifestDate,
 			boolean processRawFiles) {
 		List<String>assayTypes = 
-				new ArrayList<String>(Arrays.asList("IONPNEG", "RPNEG", "RPPOS"));
+				new ArrayList<>(Arrays.asList("IONPNEG", "RPNEG", "RPPOS"));
 		
 		for(String tissue : tissueTypes) {
 			
