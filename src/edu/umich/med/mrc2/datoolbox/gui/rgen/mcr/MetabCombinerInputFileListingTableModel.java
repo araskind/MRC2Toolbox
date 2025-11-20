@@ -55,7 +55,7 @@ public class MetabCombinerInputFileListingTableModel extends BasicTableModel {
 			return;
 		
 		TreeSet<File>sortedFiles = new TreeSet<File>(files);
-		List<Object[]>rowData = new ArrayList<Object[]>();
+		List<Object[]>rowData = new ArrayList<>();
 		for (File file : sortedFiles) {
 
 			Object[] obj = new Object[] { 
@@ -67,6 +67,31 @@ public class MetabCombinerInputFileListingTableModel extends BasicTableModel {
 		}
 		if(!rowData.isEmpty())
 			addRows(rowData);
+	}
+
+	public void setModelFromInputObjects(
+			Collection<MetabCombinerFileInputObject> mcioCollection, boolean replace) {
+		
+		if(replace)
+			setRowCount(0);
+		
+		if(mcioCollection == null || mcioCollection.isEmpty())
+			return;
+		
+		TreeSet<MetabCombinerFileInputObject>sortedInputObjects 
+			= new TreeSet<MetabCombinerFileInputObject>(mcioCollection);
+		List<Object[]>rowData = new ArrayList<Object[]>();
+		for (MetabCombinerFileInputObject mcio : sortedInputObjects) {
+
+			Object[] obj = new Object[] { 
+					mcio.getExperimentId(),
+					mcio.getBatchId(),
+					mcio.getDataFile(), 
+				};
+			rowData.add(obj);
+		}
+		if(!rowData.isEmpty())
+			addRows(rowData);		
 	}
 }
 

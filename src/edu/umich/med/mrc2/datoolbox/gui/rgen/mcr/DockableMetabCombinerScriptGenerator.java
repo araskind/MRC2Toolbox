@@ -37,6 +37,10 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.prefs.Preferences;
 
 import javax.swing.DefaultComboBoxModel;
@@ -52,6 +56,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
 import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
+import javax.swing.SwingUtilities;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
@@ -70,6 +75,8 @@ import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.rqc.MetabCombinerAlignmentScriptGenerator;
+import edu.umich.med.mrc2.datoolbox.rqc.SummaryInputColumns;
+import edu.umich.med.mrc2.datoolbox.utils.DelimitedTextParser;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
 
 public class DockableMetabCombinerScriptGenerator extends DefaultSingleCDockable 
@@ -160,9 +167,9 @@ public class DockableMetabCombinerScriptGenerator extends DefaultSingleCDockable
 		dataPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
 		add(dataPanel, BorderLayout.CENTER);
 		GridBagLayout gbl_dataPanel = new GridBagLayout();
-		gbl_dataPanel.columnWidths = new int[]{0, 0, 105, 0, 0};
+		gbl_dataPanel.columnWidths = new int[]{111, 0, 0, 0, 0, 105, 0, 0};
 		gbl_dataPanel.rowHeights = new int[]{0, 0, 0, 0, 0, 0, 0};
-		gbl_dataPanel.columnWeights = new double[]{0.0, 1.0, 0.0, 0.0, Double.MIN_VALUE};
+		gbl_dataPanel.columnWeights = new double[]{0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
 		gbl_dataPanel.rowWeights = new double[]{0.0, 1.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
 		dataPanel.setLayout(gbl_dataPanel);
 		
@@ -177,7 +184,7 @@ public class DockableMetabCombinerScriptGenerator extends DefaultSingleCDockable
 		workDirectoryTextField = new JTextField();	
 		workDirectoryTextField.setEditable(false);
 		GridBagConstraints gbc_workDirectoryTextField = new GridBagConstraints();
-		gbc_workDirectoryTextField.gridwidth = 2;
+		gbc_workDirectoryTextField.gridwidth = 5;
 		gbc_workDirectoryTextField.insets = new Insets(0, 0, 5, 5);
 		gbc_workDirectoryTextField.fill = GridBagConstraints.HORIZONTAL;
 		gbc_workDirectoryTextField.gridx = 1;
@@ -188,16 +195,16 @@ public class DockableMetabCombinerScriptGenerator extends DefaultSingleCDockable
 		JButton selectWorkingDirButton = new JButton(BROWSE_COMMAND);
 		selectWorkingDirButton.setActionCommand(BROWSE_COMMAND);
 		selectWorkingDirButton.addActionListener(this);
-		GridBagConstraints gbc_btnNewButton = new GridBagConstraints();
-		gbc_btnNewButton.fill = GridBagConstraints.HORIZONTAL;
-		gbc_btnNewButton.insets = new Insets(0, 0, 5, 0);
-		gbc_btnNewButton.gridx = 3;
-		gbc_btnNewButton.gridy = 0;
-		dataPanel.add(selectWorkingDirButton, gbc_btnNewButton);
+		GridBagConstraints gbc_selectWorkingDirButton = new GridBagConstraints();
+		gbc_selectWorkingDirButton.fill = GridBagConstraints.HORIZONTAL;
+		gbc_selectWorkingDirButton.insets = new Insets(0, 0, 5, 0);
+		gbc_selectWorkingDirButton.gridx = 6;
+		gbc_selectWorkingDirButton.gridy = 0;
+		dataPanel.add(selectWorkingDirButton, gbc_selectWorkingDirButton);
 		
 		fileListingTable = new MetabCombinerInputFileListingTable();
 		GridBagConstraints gbc_table = new GridBagConstraints();
-		gbc_table.gridwidth = 4;
+		gbc_table.gridwidth = 7;
 		gbc_table.insets = new Insets(0, 0, 5, 0);
 		gbc_table.fill = GridBagConstraints.BOTH;
 		gbc_table.gridx = 0;
@@ -215,31 +222,43 @@ public class DockableMetabCombinerScriptGenerator extends DefaultSingleCDockable
 				MainActionCommands.SELECT_METAB_COMBINER_INPUT_FILES_COMMAND.getName());
 		selectMCFilesButton.addActionListener(this);
 		
-		JButton clearMCFilesButton = new JButton(
-				MainActionCommands.CLEAR_METAB_COMBINER_INPUT_FILES_COMMAND.getName());
-		clearMCFilesButton.setActionCommand(
-				MainActionCommands.CLEAR_METAB_COMBINER_INPUT_FILES_COMMAND.getName());
-		clearMCFilesButton.addActionListener(this);
-		
 		useExistingAlignmentCheckBox = new JCheckBox("Use existing alignment data");
 		GridBagConstraints gbc_useExistingAlignmentCheckBox = new GridBagConstraints();
+		gbc_useExistingAlignmentCheckBox.gridwidth = 2;
 		gbc_useExistingAlignmentCheckBox.anchor = GridBagConstraints.WEST;
 		gbc_useExistingAlignmentCheckBox.insets = new Insets(0, 0, 5, 5);
 		gbc_useExistingAlignmentCheckBox.gridx = 0;
 		gbc_useExistingAlignmentCheckBox.gridy = 2;
 		dataPanel.add(useExistingAlignmentCheckBox, gbc_useExistingAlignmentCheckBox);
 		
+		JButton clearMCFilesButton = new JButton(
+				MainActionCommands.CLEAR_METAB_COMBINER_INPUT_FILES_COMMAND.getName());
+		clearMCFilesButton.setActionCommand(
+				MainActionCommands.CLEAR_METAB_COMBINER_INPUT_FILES_COMMAND.getName());
+		clearMCFilesButton.addActionListener(this);
+		
 		GridBagConstraints gbc_btnNewButton_1 = new GridBagConstraints();
 		gbc_btnNewButton_1.anchor = GridBagConstraints.EAST;
 		gbc_btnNewButton_1.insets = new Insets(0, 0, 5, 5);
-		gbc_btnNewButton_1.gridx = 1;
+		gbc_btnNewButton_1.gridx = 2;
 		gbc_btnNewButton_1.gridy = 2;
 		dataPanel.add(clearMCFilesButton, gbc_btnNewButton_1);
+		
+		JButton importFromFileButton = new JButton(
+				MainActionCommands.IMPORT_METAB_COMBINER_INPUTS_FROM_FILE_COMMAND.getName());
+		importFromFileButton.setActionCommand(
+				MainActionCommands.IMPORT_METAB_COMBINER_INPUTS_FROM_FILE_COMMAND.getName());
+		importFromFileButton.addActionListener(this);
+		GridBagConstraints gbc_importFromFileButton = new GridBagConstraints();
+		gbc_importFromFileButton.insets = new Insets(0, 0, 5, 5);
+		gbc_importFromFileButton.gridx = 4;
+		gbc_importFromFileButton.gridy = 2;
+		dataPanel.add(importFromFileButton, gbc_importFromFileButton);
 		GridBagConstraints gbc_selectMCFilesButton = new GridBagConstraints();
 		gbc_selectMCFilesButton.gridwidth = 2;
 		gbc_selectMCFilesButton.anchor = GridBagConstraints.EAST;
 		gbc_selectMCFilesButton.insets = new Insets(0, 0, 5, 0);
-		gbc_selectMCFilesButton.gridx = 2;
+		gbc_selectMCFilesButton.gridx = 5;
 		gbc_selectMCFilesButton.gridy = 2;
 		dataPanel.add(selectMCFilesButton, gbc_selectMCFilesButton);
 		
@@ -265,15 +284,15 @@ public class DockableMetabCombinerScriptGenerator extends DefaultSingleCDockable
 		existingAlignmentFolderField = new JTextField();
 		existingAlignmentFolderField.setEditable(false);
 		GridBagConstraints gbc_existingAlignmentFolderField = new GridBagConstraints();
-		gbc_existingAlignmentFolderField.gridwidth = 3;
-		gbc_existingAlignmentFolderField.insets = new Insets(0, 0, 5, 5);
+		gbc_existingAlignmentFolderField.gridwidth = 6;
+		gbc_existingAlignmentFolderField.insets = new Insets(0, 0, 5, 0);
 		gbc_existingAlignmentFolderField.fill = GridBagConstraints.HORIZONTAL;
 		gbc_existingAlignmentFolderField.gridx = 1;
 		gbc_existingAlignmentFolderField.gridy = 3;
 		dataPanel.add(existingAlignmentFolderField, gbc_existingAlignmentFolderField);
 		existingAlignmentFolderField.setColumns(10);
 		GridBagConstraints gbc_dataImportParametersPanel = new GridBagConstraints();
-		gbc_dataImportParametersPanel.gridwidth = 4;
+		gbc_dataImportParametersPanel.gridwidth = 7;
 		gbc_dataImportParametersPanel.insets = new Insets(0, 0, 5, 0);
 		gbc_dataImportParametersPanel.fill = GridBagConstraints.BOTH;
 		gbc_dataImportParametersPanel.gridx = 0;
@@ -553,7 +572,7 @@ public class DockableMetabCombinerScriptGenerator extends DefaultSingleCDockable
 				new Color(160, 160, 160)), "Alignment and filtering parameters", 
 				TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)), new EmptyBorder(5, 5, 5, 5)));
 		GridBagConstraints gbc_alignmentAndFilteringParametersPanel = new GridBagConstraints();
-		gbc_alignmentAndFilteringParametersPanel.gridwidth = 4;
+		gbc_alignmentAndFilteringParametersPanel.gridwidth = 7;
 		gbc_alignmentAndFilteringParametersPanel.fill = GridBagConstraints.BOTH;
 		gbc_alignmentAndFilteringParametersPanel.gridx = 0;
 		gbc_alignmentAndFilteringParametersPanel.gridy = 5;
@@ -882,7 +901,10 @@ public class DockableMetabCombinerScriptGenerator extends DefaultSingleCDockable
 			selectExistingMcAlignmentFolder();
 		
 		if (command.equals(MainActionCommands.SELECT_METAB_COMBINER_INPUT_FILES_COMMAND.getName()))
-			selectMetabCombinerInputFiles();		
+			selectMetabCombinerInputFiles();
+		
+		if (command.equals(MainActionCommands.IMPORT_METAB_COMBINER_INPUTS_FROM_FILE_COMMAND.getName()))
+			importMetabCombinerInputsFromFile();
 		
 		if (command.equals(MainActionCommands.CLEAR_METAB_COMBINER_INPUT_FILES_COMMAND.getName()))
 			cleartMetabCombinerInputFiles();
@@ -891,12 +913,72 @@ public class DockableMetabCombinerScriptGenerator extends DefaultSingleCDockable
 			generateMetabCombinerScript();
 	}
 
+	private void importMetabCombinerInputsFromFile() {
+
+		JnaFileChooser fc = new JnaFileChooser(workDirectory.getParentFile());
+		fc.setMode(JnaFileChooser.Mode.Files);
+		fc.addFilter("Text files", "txt", "TXT");
+		fc.setMultiSelectionEnabled(false);
+		if (fc.showOpenDialog(SwingUtilities.getWindowAncestor(this.getContentPane()))) {
+			
+			File inputListFile = fc.getSelectedFile();
+			parseInputList(inputListFile);
+		}
+	}
+
+	private void parseInputList(File inputListFile) {
+
+		if(workDirectory == null || !workDirectory.exists()) {
+			
+			MessageDialog.showErrorMsg(
+					"Work directory containing the input files for alignment must be specified first", 
+					SwingUtilities.getWindowAncestor(this.getContentPane()));
+			return;
+		}
+		String[][] mcInputList = DelimitedTextParser.parseTextFile(
+				inputListFile, MRC2ToolBoxConfiguration.getTabDelimiter());
+		Map<SummaryInputColumns,Integer>inputColumnMap = new TreeMap<>();
+		for(int i=0; i<mcInputList[0].length; i++) {
+			
+			SummaryInputColumns column = SummaryInputColumns.getOptionByName(mcInputList[0][i]);
+			if(column != null)
+				inputColumnMap.put(column, i);
+		}
+		if(!inputColumnMap.containsKey(SummaryInputColumns.PEAK_AREAS)
+				|| !inputColumnMap.containsKey(SummaryInputColumns.EXPERIMENT)
+				|| !inputColumnMap.containsKey(SummaryInputColumns.BATCH)) {
+			MessageDialog.showErrorMsg("Input list file doesn't have all required columns.", 
+					SwingUtilities.getWindowAncestor(this.getContentPane()));
+			return;
+		}
+		Collection<String>errors = new ArrayList<String>();
+		Set<MetabCombinerFileInputObject>mcioSet = new TreeSet<>();
+		for(int i=1; i<mcInputList.length; i++) {
+			
+			String fileName = mcInputList[i][inputColumnMap.get(SummaryInputColumns.PEAK_AREAS)];
+			File inputFile = Paths.get(workDirectory.getAbsolutePath(), fileName).toFile();
+			if(!inputFile.exists()) {
+				errors.add("File " + inputFile.getAbsolutePath() + " not found");
+				continue;
+			}
+			String experimentId = mcInputList[i][inputColumnMap.get(SummaryInputColumns.EXPERIMENT)];
+			String batchId = mcInputList[i][inputColumnMap.get(SummaryInputColumns.BATCH)];
+			MetabCombinerFileInputObject mcio = 
+					new MetabCombinerFileInputObject(inputFile, experimentId, batchId);
+			mcioSet.add(mcio);
+		}
+		fileListingTable.setModelFromInputObjects(mcioSet);
+		if(!errors.isEmpty())
+		    MessageDialog.showErrorMsg(StringUtils.join(errors, "\n"), 
+		    		SwingUtilities.getWindowAncestor(this.getContentPane()));		
+	}
+
 	private void selectExistingMcAlignmentFolder() {
 
 		JnaFileChooser fc = new JnaFileChooser(workDirectory.getParentFile());
 		fc.setMode(JnaFileChooser.Mode.Directories);
 		fc.setMultiSelectionEnabled(false);
-		if (fc.showOpenDialog(this.getContentPane())) {
+		if (fc.showOpenDialog(SwingUtilities.getWindowAncestor(this.getContentPane()))) {
 			
 			validateExistingProject(projectDirectory);
 			projectDirectory = fc.getSelectedFile();
@@ -919,7 +1001,7 @@ public class DockableMetabCombinerScriptGenerator extends DefaultSingleCDockable
 		JnaFileChooser fc = new JnaFileChooser(workDirectory.getParentFile());
 		fc.setMode(JnaFileChooser.Mode.Directories);
 		fc.setMultiSelectionEnabled(false);
-		if (fc.showOpenDialog(this.getContentPane())) {
+		if (fc.showOpenDialog(SwingUtilities.getWindowAncestor(this.getContentPane()))) {
 			
 			workDirectory = fc.getSelectedFile();
 			workDirectoryTextField.setText(workDirectory.getPath());
@@ -934,7 +1016,7 @@ public class DockableMetabCombinerScriptGenerator extends DefaultSingleCDockable
 		fc.addFilter("Text files", "txt", "TXT");
 		fc.setTitle("Select Input data files for MetabCombiner");
 		fc.setMultiSelectionEnabled(true);
-		if (fc.showOpenDialog(this.getContentPane())) {
+		if (fc.showOpenDialog(SwingUtilities.getWindowAncestor(this.getContentPane()))) {
 			
 			File[]mcInputFiles = fc.getSelectedFiles();
 			if(mcInputFiles.length > 0) {
@@ -951,7 +1033,8 @@ public class DockableMetabCombinerScriptGenerator extends DefaultSingleCDockable
 		if(!fileListingTable.getAllFiles().isEmpty()) {
 			
 			int res = MessageDialog.showChoiceWithWarningMsg(
-					"Do you want to clear input files table?", this.getContentPane());
+					"Do you want to clear input files table?", 
+					SwingUtilities.getWindowAncestor(this.getContentPane()));
 			if(res == JOptionPane.YES_OPTION)
 				fileListingTable.clearTable();
 		}
@@ -1131,7 +1214,8 @@ public class DockableMetabCombinerScriptGenerator extends DefaultSingleCDockable
 
 		Collection<String>errors = validateFormData();
 		if(!errors.isEmpty()){
-		    MessageDialog.showErrorMsg(StringUtils.join(errors, "\n"), this.getContentPane());
+		    MessageDialog.showErrorMsg(StringUtils.join(errors, "\n"), 
+		    		SwingUtilities.getWindowAncestor(this.getContentPane()));
 		    return;
 		}
 		MetabCombinerParametersObject mcpo = new MetabCombinerParametersObject();

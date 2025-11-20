@@ -90,10 +90,9 @@ public class MetabCombinerAlignmentScriptGenerator {
 	public void createMetabCombinerAlignmentScript() {
 		
 		createAlignmentProjectDirectoryStructure();
-		initRscript();
-		createDataImportBlock();
+		initRscript();	
 		initSummaryDataFrames();
-		
+		createDataImportBlock();
 		if(parametersObject.isUseExistingAlignment())
 			createExistingAlignmentImportBlock();
 		
@@ -126,7 +125,7 @@ public class MetabCombinerAlignmentScriptGenerator {
 	
 	private void createDataImportBlock() {
 		
-		rscriptParts.add("## Read in the data for alignment ####\n");
+		rscriptParts.add("\n## Read in the data for alignment ####\n");
 		
 		for(MetabCombinerFileInputObject mcio : parametersObject.getMetabCombinerFileInputObjectSet()) {
 			
@@ -427,8 +426,8 @@ public class MetabCombinerAlignmentScriptGenerator {
 				+ "metabCombiner(xdata = " + metabDataObjectMap.get(io) 
 				+ ", ydata = " + metabDataObjectMap.get(io2) 
 				+ ", binGap = " + Double.toString(parametersObject.getBinGap())
-				+ ", rtOrder = " + Boolean.toString(parametersObject.isMcDataSetRtOrderFlag())
-				+ ", impute = " + Boolean.toString(parametersObject.isImputeMissingData())
+				+ ", rtOrder = " + Boolean.toString(parametersObject.isMcDataSetRtOrderFlag()).toUpperCase()
+				+ ", impute = " + Boolean.toString(parametersObject.isImputeMissingData()).toUpperCase()
 				+ ", xid = \"d1\", yid = \"d2\")";
 				
 		rscriptParts.add(metabCombinerCommand);
@@ -502,20 +501,21 @@ public class MetabCombinerAlignmentScriptGenerator {
 				+ ", B = " + Double.toString(parametersObject.getScoringRTweight())
 				+ ", C = " + Double.toString(parametersObject.getScoringAbundanceWeight())
 				+ ", fit = \"" + parametersObject.getRtFittingModelType().name() + "\""
-				+ ", useAdduct = " + Boolean.toString(parametersObject.isUseAdductsToAdjustScore())
-				+ ", usePPM = " + Boolean.toString(parametersObject.isUsePPMforScoringMz())
+				+ ", useAdduct = " + Boolean.toString(parametersObject.isUseAdductsToAdjustScore()).toUpperCase()
+				+ ", usePPM = " + Boolean.toString(parametersObject.isUsePPMforScoringMz()).toUpperCase()
 				+ ", groups = NULL)";
 		rscriptParts.add(calcScoresString);
 		
 		String labelRowsString = 
-				"data.combined <- reduceTable(data.combined"
+				"data.combined <- labelRows(data.combined"
 				+ ", maxRankX = " + Integer.toString(parametersObject.getMaxFeatureRankForPrimaryDataSet())
 				+ ", maxRankY = " + Integer.toString(parametersObject.getMaxFeatureRankForSecondaryDataSet())
 				+ ", minScore = " + Double.toString(parametersObject.getMinimalAlignmentScore())
 				+ ", delta = " + Double.toString(parametersObject.getSubgroupScoreCutoff())
 				+ ", maxRTerr = " + Double.toString(parametersObject.getMaxRTerrorForAlignedFeatures())
-				+ ", resolveConflicts = " + Boolean.toString(parametersObject.isResolveAlignmentConflictsInOutput())
-				+ ", rtOrder = " + Boolean.toString(parametersObject.isRtOrderFlagInOutput())
+				+ ", resolveConflicts = " + Boolean.toString(parametersObject.isResolveAlignmentConflictsInOutput()).toUpperCase()
+				+ ", rtOrder = " + Boolean.toString(parametersObject.isRtOrderFlagInOutput()).toUpperCase()
+				+ ", remove = TRUE"
 				+ ")";
 		rscriptParts.add(labelRowsString);
 		rscriptParts.add("data.report <- combinedTable(data.combined)");

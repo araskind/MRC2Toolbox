@@ -80,6 +80,22 @@ public class MetabCombinerInputFileListingTable extends BasicTable {
 		adjustColumns();
 	}
 	
+	public void setModelFromInputObjects(Collection<MetabCombinerFileInputObject> mcioCollection) {
+
+		thf.setTable(null);
+		((MetabCombinerInputFileListingTableModel)model).setModelFromInputObjects(mcioCollection, true);
+		thf.setTable(this);
+		adjustColumns();
+	}
+	
+	public void addInputObjects(Collection<MetabCombinerFileInputObject> mcioCollection) {
+
+		thf.setTable(null);
+		((MetabCombinerInputFileListingTableModel)model).setModelFromInputObjects(mcioCollection, false);
+		thf.setTable(this);
+		adjustColumns();
+	}
+	
 	public Collection<File>getSelectedFiles(){
 		
 		Collection<File>selected = new ArrayList<>();
