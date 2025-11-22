@@ -35,7 +35,8 @@ import edu.umich.med.mrc2.datoolbox.utils.Range;
 
 public class MetabCombinerParametersObject implements XmlStorable{
 	
-	private File workDirectory;
+	private File projectParentDirectory;
+	private File projectDirectory;
 	private boolean useExistingAlignment;
 	private Set<MetabCombinerFileInputObject>metabCombinerFileInputObjectSet;
 	private Range alignmentRTRange;
@@ -69,12 +70,12 @@ public class MetabCombinerParametersObject implements XmlStorable{
 		// TODO Auto-generated constructor stub
 	}
 
-	public File getWorkDirectory() {
-		return workDirectory;
+	public File getProjectParentDirectory() {
+		return projectParentDirectory;
 	}
 
-	public void setWorkDirectory(File workDirectory) {
-		this.workDirectory = workDirectory;
+	public void setProjectParentDirectory(File projectParentDirectory) {
+		this.projectParentDirectory = projectParentDirectory;
 	}
 
 	public Set<MetabCombinerFileInputObject> getMetabCombinerFileInputObjectSet() {
@@ -304,6 +305,14 @@ public class MetabCombinerParametersObject implements XmlStorable{
 
 	public void setUseExistingAlignment(boolean useExistingAlignment) {
 		this.useExistingAlignment = useExistingAlignment;
+	}
+
+	public File getProjectDirectory() {
+		return projectDirectory;
+	}
+
+	public void setProjectDirectory(File projectDirectory) {
+		this.projectDirectory = projectDirectory;
 	}
 	
 	

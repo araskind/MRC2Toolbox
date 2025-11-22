@@ -25,6 +25,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
@@ -46,6 +47,7 @@ import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
 
 public class MetabCombinerAlignmentScriptGenerator {
 	
+	public static final String MC_ALIGNMENT_PROJECT_BASE_NAME = "MetabCombinerMultyBatchAlignment-";
 	public static final String SCRIPT_FILE_PREFIX = "MetabCombinerMultyBatchAlignmentScript_";
 	public static final String ALIGNMENT_SUMMARY_TABLE_FILE_NAME = "AlignmentSummaryTable.txt";
 	public static final String MERGED_ALIGNED_DATA_FILE_NAME = "MergedAlignedData.txt";
@@ -60,12 +62,24 @@ public class MetabCombinerAlignmentScriptGenerator {
 	public static final String ALIGNMENT_PLOT_NAME_PREFIX = "AlignmentPlot-";
 	public static final String ALIGNMENT_REPORT_NAME_PREFIX = "AlignmentReport-";
 	public static final String COMPLETE_ALIGNMENT_REPORT_NAME_PREFIX = "CompleteAlignmentReport-";
+	public static final String R_FOLDER_SEPARATOR = "/";
 	
 	private MetabCombinerParametersObject parametersObject;
 	private List<String>rscriptParts;
 	private Map<MetabCombinerFileInputObject,String>metabDataObjectMap;
 	//	private Map<MetabCombinerFileInputObject,String>statsObjectMap;
-	private File scriptFile;
+	private File scriptFile;	
+	private File projectFolder;
+	
+	public enum McAlignmentProjectSubfolders{
+		
+		CleanData,
+		Anchors,
+		Plots,
+		AlignmentReports,
+		CompleteAlignmentReports,
+		;
+	}
 	
 	private Map<String,String>matchListMap;
 	private List<String>listParts;
@@ -77,10 +91,6 @@ public class MetabCombinerAlignmentScriptGenerator {
 		this.parametersObject = parametersObject;
 		rscriptParts = new ArrayList<>();
 		metabDataObjectMap = new HashMap<>();
-		//	statsObjectMap = new HashMap<>();
-		scriptFile = Paths.get(parametersObject.getWorkDirectory().getAbsolutePath(), 
-				SCRIPT_FILE_PREFIX + FIOUtils.getTimestamp() + ".R" ).toFile();
-		
 		matchListMap = new TreeMap<>();
 		listParts = new ArrayList<>();
 		overlapObjectMap = new HashMap<>();
@@ -89,7 +99,9 @@ public class MetabCombinerAlignmentScriptGenerator {
 	
 	public void createMetabCombinerAlignmentScript() {
 		
-		createAlignmentProjectDirectoryStructure();
+		if(!parametersObject.isUseExistingAlignment())
+			createAlignmentProjectDirectoryStructure();
+		
 		initRscript();	
 		initSummaryDataFrames();
 		createDataImportBlock();
@@ -106,16 +118,41 @@ public class MetabCombinerAlignmentScriptGenerator {
 	}
 
 	private void createAlignmentProjectDirectoryStructure() {
-		// TODO Auto-generated method stub
+
+		File projectParentDir = parametersObject.getProjectParentDirectory();
+		String projectName = MC_ALIGNMENT_PROJECT_BASE_NAME + FIOUtils.getTimestamp();
+		Path newProjectPath = Paths.get(projectParentDir.getAbsolutePath(), projectName);		
+		try {
+			Files.createDirectories(newProjectPath);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		projectFolder = newProjectPath.toFile();
 		
+		for(McAlignmentProjectSubfolders folder : McAlignmentProjectSubfolders.values()) {
+
+			Path subDirectoryPath = newProjectPath.resolve(folder.name());
+			try {
+				Files.createDirectories(subDirectoryPath);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		scriptFile = Paths.get(newProjectPath.toString(), 
+				SCRIPT_FILE_PREFIX + FIOUtils.getTimestamp() + ".R" ).toFile();
 	}
 
 	private void initRscript() {
-		
-		String workDirForR = parametersObject.getWorkDirectory().getAbsolutePath().replaceAll("\\\\", "/");
+				
 		rscriptParts.add("# MetabCombiner alignment of multiple batches of untargeted data " + 
 				MRC2ToolBoxConfiguration.defaultTimeStampFormat.format(new Date())+ " ####\n");
-		rscriptParts.add("setwd(\"" + workDirForR + "\")\n");
+		rscriptParts.add("setwd(r'(" + projectFolder.getAbsolutePath() + ")')\n");
+		
+//		String workDirForR = parametersObject.getProjectParentDirectory().getAbsolutePath().replaceAll("\\\\", "/");
+//		rscriptParts.add("setwd(\"" + workDirForR + "\")\n");
+		
 		rscriptParts.add("library(metabCombiner)");
 		rscriptParts.add("library(reshape2)");
 		rscriptParts.add("library(dplyr)");
@@ -131,11 +168,16 @@ public class MetabCombinerAlignmentScriptGenerator {
 			
 			String dataObjectPrefix = mcio.getExperimentId() + "." + mcio.getBatchId();			
 			String dataObject = dataObjectPrefix + ".data";
-			rscriptParts.add(dataObject + " <- read.delim(\"" + 
-					mcio.getDataFile().getName() + "\", check.names=FALSE)");
+
+			rscriptParts.add(dataObject + " <- read.delim(r'(" 
+					+ mcio.getDataFile().getAbsolutePath() + ")', check.names=FALSE)");
+			
+//			rscriptParts.add(dataObject + " <- read.delim(\"" + 
+//					mcio.getDataFile().getName() + "\", check.names=FALSE)");
 			
 			//	Write out clean data for final join and record in the data frame
-			String data4join = dataObjectPrefix + CLEAN_DATA_FILE_SUFFIX;
+			String data4join = McAlignmentProjectSubfolders.CleanData 
+					+ R_FOLDER_SEPARATOR + dataObjectPrefix + CLEAN_DATA_FILE_SUFFIX;
 			rscriptParts.add("write.table(" + dataObject + "[,-c(2:4)], "
 					+ "file = \"" + data4join + "\", quote = F, sep = \"\\t\", na = \"\", row.names = FALSE)");			
 			rscriptParts.add(dataObject + " <- " + dataObject + "[!(" + dataObject + "$rt == \"NaN\"),]");
@@ -179,10 +221,6 @@ public class MetabCombinerAlignmentScriptGenerator {
 		rscriptParts.add("### Read alignment summary file ####");
 		rscriptParts.add("alignment.summary.df <- read.delim(\"" 
 				+ ALIGNMENT_SUMMARY_TABLE_FILE_NAME + "\", check.names=FALSE)");
-		
-//		rscriptParts.add("alignment.summary.df$matched.features <- "
-//				+ "paste(\"matched.features.\", alignment.summary.df$dsx, "
-//				+ "\".\", alignment.summary.df$dsy, sep = \"\")");
 		
 		rscriptParts.add("\n### Read all metadata files ####");
 		rscriptParts.add("readMetaData <- function(df) {");
@@ -311,12 +349,14 @@ public class MetabCombinerAlignmentScriptGenerator {
 				+ "alignment.summary.df[alignment.summary.df$dsx == primary.batch.name,]$dsy)");
 		rscriptParts.add("meta.data <- meta.data.joined %>% select("
 				+ "all_of(c(\"FeatureID\",\"mzMedian\",\"rtMedian\",primary.batch.name,secondary.batch.list)))");
-		rscriptParts.add("merged.data <- read.delim(paste(primary.batch.name, \"" 
+		rscriptParts.add("merged.data <- read.delim(paste(\"" + McAlignmentProjectSubfolders.CleanData 
+				+ R_FOLDER_SEPARATOR +"\", primary.batch.name, \"" 
 				+ CLEAN_DATA_FILE_SUFFIX + "\", sep = \"\"), check.names=FALSE)");
 		rscriptParts.add("colnames(merged.data)[1] <- primary.batch.name");
 		rscriptParts.add("merged.data <- inner_join(meta.data.joined, merged.data, by = primary.batch.name)");
 		rscriptParts.add("for(sec.batch.name in  secondary.batch.list){");
-		rscriptParts.add("\tsec.batch.data <- read.delim(paste(sec.batch.name, \"" 
+		rscriptParts.add("\tsec.batch.data <- read.delim(paste(\"" + McAlignmentProjectSubfolders.CleanData 
+				+ R_FOLDER_SEPARATOR + "\", sec.batch.name, \"" 
 				+ CLEAN_DATA_FILE_SUFFIX + "\", sep = \"\"), check.names=FALSE)");
 		rscriptParts.add("\tcolnames(sec.batch.data)[1] <- sec.batch.name");
 		rscriptParts.add("\tmerged.data <- inner_join(merged.data, sec.batch.data, by = sec.batch.name)");
@@ -444,7 +484,8 @@ public class MetabCombinerAlignmentScriptGenerator {
 
 		rscriptParts.add("anchors <- getAnchors(data.combined)");
 		objectsToClear.add("anchors");
-		String anchorsFileName = ANCHORS_FILE_NAME_PREFIX + outNameSuffix +  ".txt";
+		String anchorsFileName = McAlignmentProjectSubfolders.Anchors 
+				+ R_FOLDER_SEPARATOR + ANCHORS_FILE_NAME_PREFIX + outNameSuffix +  ".txt";
 		rscriptParts.add(
 				"write.table(anchors"
 				+ ", file = \"" + anchorsFileName + "\""
@@ -469,7 +510,8 @@ public class MetabCombinerAlignmentScriptGenerator {
 		rscriptParts.add(fitGamString);
 		
 		//	Save plot
-		String plotFileName = ALIGNMENT_PLOT_NAME_PREFIX + outNameSuffix +  ".png";
+		String plotFileName = McAlignmentProjectSubfolders.Plots 
+				+ R_FOLDER_SEPARATOR + ALIGNMENT_PLOT_NAME_PREFIX + outNameSuffix +  ".png";
 		rscriptParts.add(
 				"png(filename = \"" + plotFileName + "\""
 				+ ", width = 11"
@@ -519,7 +561,8 @@ public class MetabCombinerAlignmentScriptGenerator {
 				+ ")";
 		rscriptParts.add(labelRowsString);
 		rscriptParts.add("data.report <- combinedTable(data.combined)");
-		String reportFileName = ALIGNMENT_REPORT_NAME_PREFIX + outNameSuffix +  ".txt";		
+		String reportFileName = McAlignmentProjectSubfolders.AlignmentReports 
+				+ R_FOLDER_SEPARATOR + ALIGNMENT_REPORT_NAME_PREFIX + outNameSuffix +  ".txt";		
 		rscriptParts.add("write.table(data.report, file = \"" + reportFileName 
 				+ "\", quote = F, sep = \"\\t\", na = \"\", row.names = FALSE)");
 		
@@ -532,7 +575,7 @@ public class MetabCombinerAlignmentScriptGenerator {
 				+ "c(\"" + xPrefix + "\", \"mz." + xPrefix + "\", \"rt." + xPrefix + "\", \"adductx." + xPrefix + "\", "
 				  + "\"" + yPrefix + "\", \"mz." + yPrefix + "\", \"rt." + yPrefix + "\", \"adducty." + yPrefix + "\")");
 		
-		String firstDataSetMatchedFetureList = "matched.features." + outNameSuffix.replaceAll("-", ".");
+		String firstDataSetMatchedFeatureList = "matched.features." + outNameSuffix.replaceAll("-", ".");
 		
 		//	Add line to summary data frame
 		rscriptParts.add("alignment.summary.df[nrow(alignment.summary.df) + 1,] "
@@ -540,27 +583,28 @@ public class MetabCombinerAlignmentScriptGenerator {
 				+ "\", dsy=\"" + yTitle.replaceAll("\\s+", ".") 
 				+ "\", report.file = \"" + reportFileName 
 				+ "\", meta.data = \"" + alignmentMetaDataObject 
-				+ "\", matched.features = \"" + firstDataSetMatchedFetureList 
-				+ "\", num.matched=nrow(data.report))");
+				+ "\", matched.features = \"" + firstDataSetMatchedFeatureList 
+				+ "\", num.matched = nrow(data.report))");
 				
-		rscriptParts.add(firstDataSetMatchedFetureList + " <- as.vector(data.report$idx)");		
+		rscriptParts.add(firstDataSetMatchedFeatureList + " <- as.vector(data.report$idx)");		
 		rscriptParts.add("data.combined <- updateTables(data.combined, xdata = " 
 				+ metabDataObjectMap.get(io) + ", ydata = " + metabDataObjectMap.get(io2) + ")");
 		rscriptParts.add("data.report <- combinedTable(data.combined)");
-		String completeReportFileName = COMPLETE_ALIGNMENT_REPORT_NAME_PREFIX + outNameSuffix +  ".txt";
+		String completeReportFileName = McAlignmentProjectSubfolders.CompleteAlignmentReports 
+				+ R_FOLDER_SEPARATOR + COMPLETE_ALIGNMENT_REPORT_NAME_PREFIX + outNameSuffix +  ".txt";
 		rscriptParts.add("write.table(data.report, file = \"" + completeReportFileName 
 				+ "\", quote = F, sep = \"\\t\", na = \"\", row.names = FALSE)");		
 
 		rscriptParts.add("rm(" + StringUtils.join(objectsToClear, ",") + ")");
 				
-		return firstDataSetMatchedFetureList;
+		return firstDataSetMatchedFeatureList;
 	}
 	
 	private static String createOutNameSuffix(			
 			MetabCombinerFileInputObject io,
 			MetabCombinerFileInputObject io2) {
 		
-		ArrayList<String>outNameParts = new ArrayList<String>();
+		ArrayList<String>outNameParts = new ArrayList<>();
 		outNameParts.add(io.getExperimentId());
 		outNameParts.add(io.getBatchId());
 		outNameParts.add(io2.getExperimentId());

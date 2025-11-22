@@ -432,7 +432,7 @@ public enum MainActionCommands {
 	SELECT_METAB_COMBINER_INPUT_FILES_COMMAND("Select MetabCombiner input files"),
 	IMPORT_METAB_COMBINER_INPUTS_FROM_FILE_COMMAND("Import MetabCombiner inputs from file"),
 	CLEAR_METAB_COMBINER_INPUT_FILES_COMMAND("Clear MetabCombiner input files"),
-	SELECT_EXISTING_MC_ALIGNMENT_FOLDER_COMMAND("Select existing MetabCombiner alignment project"),
+	SELECT_EXISTING_MC_ALIGNMENT_PROJECT_COMMAND("Select existing MetabCombiner alignment project"),
 	
 	// Sorting commands
 	SORT_BY_AREA_COMMAND("Sort by area (high to low)"),

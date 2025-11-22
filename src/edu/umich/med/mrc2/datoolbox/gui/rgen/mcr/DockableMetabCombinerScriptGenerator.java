@@ -173,7 +173,7 @@ public class DockableMetabCombinerScriptGenerator extends DefaultSingleCDockable
 		gbl_dataPanel.rowWeights = new double[]{0.0, 1.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
 		dataPanel.setLayout(gbl_dataPanel);
 		
-		JLabel lblNewLabel = new JLabel("Work directory");
+		JLabel lblNewLabel = new JLabel("Save alignment project in");
 		GridBagConstraints gbc_lblNewLabel = new GridBagConstraints();
 		gbc_lblNewLabel.insets = new Insets(0, 0, 5, 5);
 		gbc_lblNewLabel.anchor = GridBagConstraints.EAST;
@@ -269,9 +269,9 @@ public class DockableMetabCombinerScriptGenerator extends DefaultSingleCDockable
 				TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)), new EmptyBorder(5, 5, 5, 5)));
 		dataPanel.add(scrollPane, gbc_table);
 		
-		JButton selectExistingAlignmentButton = new JButton("Select alignment folder");
+		JButton selectExistingAlignmentButton = new JButton("Select alignment project");
 		selectExistingAlignmentButton.setActionCommand(
-				MainActionCommands.SELECT_EXISTING_MC_ALIGNMENT_FOLDER_COMMAND.getName());
+				MainActionCommands.SELECT_EXISTING_MC_ALIGNMENT_PROJECT_COMMAND.getName());
 		selectExistingAlignmentButton.addActionListener(this);
 		
 		GridBagConstraints gbc_selectExistingAlignmentButton = new GridBagConstraints();
@@ -897,7 +897,7 @@ public class DockableMetabCombinerScriptGenerator extends DefaultSingleCDockable
 		if (command.equals(BROWSE_COMMAND))
 			selectWorkingDirectory();
 		
-		if (command.equals(MainActionCommands.SELECT_EXISTING_MC_ALIGNMENT_FOLDER_COMMAND.getName()))
+		if (command.equals(MainActionCommands.SELECT_EXISTING_MC_ALIGNMENT_PROJECT_COMMAND.getName()))
 			selectExistingMcAlignmentFolder();
 		
 		if (command.equals(MainActionCommands.SELECT_METAB_COMBINER_INPUT_FILES_COMMAND.getName()))
@@ -1042,6 +1042,10 @@ public class DockableMetabCombinerScriptGenerator extends DefaultSingleCDockable
 	
 	public File getWorkDirectory() {
 		return workDirectory;
+	}
+	
+	public File getProjectDirectory() {
+		return projectDirectory;
 	}
 	
 	public boolean useExistingAlignment() {
@@ -1219,8 +1223,12 @@ public class DockableMetabCombinerScriptGenerator extends DefaultSingleCDockable
 		    return;
 		}
 		MetabCombinerParametersObject mcpo = new MetabCombinerParametersObject();
-		mcpo.setWorkDirectory(workDirectory);
+		mcpo.setProjectParentDirectory(workDirectory);		
 		mcpo.setUseExistingAlignment(useExistingAlignment());
+		mcpo.setProjectDirectory(projectDirectory);
+		if(!useExistingAlignment())
+			mcpo.setProjectDirectory(null);
+		
 		mcpo.setMetabCombinerFileInputObjectSet(
 				fileListingTable.getMetabCombinerFileInputObjects());
 		mcpo.setAlignmentRTRange(getAlignmentRTRange());
@@ -1256,7 +1264,7 @@ public class DockableMetabCombinerScriptGenerator extends DefaultSingleCDockable
 		mcsg.createMetabCombinerAlignmentScript();
 		if (Desktop.isDesktopSupported()) {
 		    try {
-		        Desktop.getDesktop().open(mcpo.getWorkDirectory());
+		        Desktop.getDesktop().open(mcpo.getProjectParentDirectory());
 		    } catch (IOException ex) {
 		        ex.printStackTrace();
 		    }
@@ -1268,6 +1276,9 @@ public class DockableMetabCombinerScriptGenerator extends DefaultSingleCDockable
 	    Collection<String>errors = new ArrayList<>();
 	    if(workDirectory == null || !workDirectory.exists())
 	    	errors.add("Work directory not specified or not a valid directory");
+	    
+	    if(useExistingAlignment() && (projectDirectory == null || !projectDirectory.exists()))
+	    	errors.add("Existing aligment project not found");
 	    
 	    Collection<MetabCombinerFileInputObject> ioList = 
 	    		fileListingTable.getMetabCombinerFileInputObjects();
@@ -1335,8 +1346,8 @@ public class DockableMetabCombinerScriptGenerator extends DefaultSingleCDockable
 			e.printStackTrace();
 		}
 		workDirectoryTextField.setText(workDirectory.getPath());
-		useExistingAlignmentCheckBox.setSelected(
-				preferences.getBoolean(USE_EXISTING_ALIGNMENT, Boolean.FALSE));
+//		useExistingAlignmentCheckBox.setSelected(
+//				preferences.getBoolean(USE_EXISTING_ALIGNMENT, Boolean.FALSE));
 		setRtRangeFromPreferences(preferences);		
 		maxPercentMissingSpinner.setValue(preferences.getInt(MAX_MISSING_PERCENT, 50));	
 		String pamString = preferences.get(PEAK_ABUNDANCE_MEASURE, PeakAbundanceMeasure.median.name());
@@ -1408,7 +1419,7 @@ public class DockableMetabCombinerScriptGenerator extends DefaultSingleCDockable
 
 		preferences = Preferences.userNodeForPackage(this.getClass());
 		preferences.put(WORK_DIRECTORY, workDirectory.getAbsolutePath());
-		preferences.putBoolean(USE_EXISTING_ALIGNMENT, useExistingAlignment());
+		//	preferences.putBoolean(USE_EXISTING_ALIGNMENT, useExistingAlignment());
 		Range rtRange = getAlignmentRTRange();
 		if(rtRange == null)
 			preferences.put(ALIGNMENT_RT_RANGE, "");

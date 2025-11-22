@@ -122,7 +122,7 @@ public class RScriptTestClass {
 		
 		File inputMap = new File(
 				"Y:\\DataAnalysis\\_Reports\\EX01526 - Human EDTA Tranche 4 plasma H20001805E\\A003 - Untargeted\\"
-				+ "Documents\\NEG\\CO300-Pk1000\\EX01526-RP-NEG-B2-B4-withAdducts-MC-inputMap-2025-11-19.txt");
+				+ "Documents\\NEG\\CO300-Pk1000\\EX01526-RP-NEG-ALL-withAdducts-MC-inputMap-2025-11-21.txt");
 		
 		RQCScriptGenerator.generateMultiBatchMetabCombinerAlignmentScript(rWorkingDir, inputMap);
 	}
