@@ -74,8 +74,7 @@ public class LIMSWorklistImportTask extends WorklistTask {
 			} catch (Exception e) {
 				e.printStackTrace();
 				setStatus(TaskStatus.ERROR);
-return;
-
+				return;
 			}
 		}
 		if(importType.equals(WorklistImportType.RAW_DATA_DIRECTORY_SCAN)) {
@@ -90,8 +89,7 @@ return;
 
 					e.printStackTrace();
 					setStatus(TaskStatus.ERROR);
-return;
-
+					return;
 				}
 			}
 		}
@@ -112,7 +110,7 @@ return;
 		TreeSet<ExperimentalSample> samples = 
 				limsExperiment.getExperimentDesign().getSamples();
 		
-		Collection<LIMSWorklistItem>lwItems = new ArrayList<LIMSWorklistItem>();
+		Collection<LIMSWorklistItem>lwItems = new ArrayList<>();
 		for(WorklistItem item : worklist.getWorklistItems()) {
 			
 			//	Acquisition method
@@ -138,7 +136,20 @@ return;
 
 			lwItem.setAcquisitionMethod(limsMethod);
 			lwItem.setSamplePrep(samplePrep);
-			double injectionVolume = Double.parseDouble(item.getProperty(AgilentSampleInfoFields.INJ_VOL.getName()));
+			
+			double injectionVolume = 0.0d;
+			String injectionVolumeString = item.getProperty(AgilentSampleInfoFields.INJ_VOL.getName());
+			if(injectionVolumeString == null)
+				injectionVolumeString = item.getProperty(AgilentSampleInfoFields.INJ_VOL_UTF8.getName());
+			
+			if(injectionVolumeString != null) {
+				try {
+					injectionVolume = Double.parseDouble(injectionVolumeString);
+				} catch (NumberFormatException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
 			lwItem.setInjectionVolume(injectionVolume);
 			lwItem.getDataFile().setInjectionTime(lwItem.getTimeStamp());
 			lwItems.add(lwItem);

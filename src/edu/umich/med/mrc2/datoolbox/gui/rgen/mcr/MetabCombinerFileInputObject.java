@@ -22,12 +22,20 @@
 package edu.umich.med.mrc2.datoolbox.gui.rgen.mcr;
 
 import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.EnumMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
+import org.jdom2.Attribute;
+import org.jdom2.Element;
+
+import edu.umich.med.mrc2.datoolbox.project.store.MetabCombinerAlignmentSettingsFields;
+import edu.umich.med.mrc2.datoolbox.project.store.XmlStorable;
 import edu.umich.med.mrc2.datoolbox.rqc.SummaryInputColumns;
 
-public class MetabCombinerFileInputObject implements Comparable<MetabCombinerFileInputObject>{
+public class MetabCombinerFileInputObject implements Comparable<MetabCombinerFileInputObject>, XmlStorable{
 
 	private File dataFile;
 	private Map<SummaryInputColumns,String>propertiesMap;
@@ -120,5 +128,31 @@ public class MetabCombinerFileInputObject implements Comparable<MetabCombinerFil
 			res = this.dataFile.compareTo(o.getDataFile());
 		//	TODO use all properties
 		return res;
+	}
+
+	@Override
+	public Element getXmlElement() {
+
+		Element metabCombinerFileInputObjectElement = 
+				new Element(MetabCombinerAlignmentSettingsFields.MetabCombinerFileIO.name());
+		for(Entry<SummaryInputColumns, String> pe : propertiesMap.entrySet())			
+			metabCombinerFileInputObjectElement.setAttribute(pe.getKey().name(), pe.getValue());
+		
+		metabCombinerFileInputObjectElement.setText(dataFile.getAbsolutePath());
+		
+		return metabCombinerFileInputObjectElement;
+	}
+	
+	public MetabCombinerFileInputObject(Element metabCombinerFileInputObjectElement) {
+		
+		for(Attribute at : metabCombinerFileInputObjectElement.getAttributes()) {
+			
+			SummaryInputColumns col = SummaryInputColumns.getOptionByName(at.getName());
+			if(col != null && at.getValue() != null)
+				propertiesMap.put(col, at.getValue());
+		}
+		//getOptionByName(String name)
+		Path dataFilePath = Paths.get(metabCombinerFileInputObjectElement.getText());
+		dataFile = dataFilePath.toFile();
 	}
 }

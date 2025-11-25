@@ -1299,9 +1299,9 @@ public class PepSearchSetupDialog extends JDialog implements ActionListener, Ite
 			commandParts.add("/LIB \"" + libFile.getAbsolutePath() + "\"");
 
 		//	Add input file when searching from external file
-		if(fileSource.isSelected()) {
+		if(fileSource.isSelected())
 			commandParts.add("/INP \"" + getInputFile().getAbsolutePath() + "\"");
-		}
+		
 		String timestamp = MRC2ToolBoxConfiguration.getFileTimeStampFormat().format(new Date());
 		//	Generate input file name on the fly if using database as source of features to search
 		if(internalSource.isSelected()) {

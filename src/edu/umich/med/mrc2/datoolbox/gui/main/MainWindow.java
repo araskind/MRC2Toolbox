@@ -165,7 +165,7 @@ public class MainWindow extends JFrame
 	private static DbParserFrame dbParserFrame;
 	private static MSToolsFrame msToolsFrame;
 	private static AdductManagerFrame adductManagerFrame;
-	private RscriptGeneratorWindow rScriptGeneratorWindow;
+	private static RscriptGeneratorWindow rScriptGeneratorWindow;
 	
 	private static AssayManagerDialog assayMethodsManagerDialog;
 	private static ReferenceSampleManagerDialog referenceSampleManagerDialog;
@@ -612,9 +612,15 @@ public class MainWindow extends JFrame
 	
 	public void showRscriptGenerator() {
 		
-		rScriptGeneratorWindow = new RscriptGeneratorWindow();
-		rScriptGeneratorWindow.setLocationRelativeTo(this.getContentPane());
-		rScriptGeneratorWindow.setVisible(true);
+		if(rScriptGeneratorWindow == null) {
+			rScriptGeneratorWindow = new RscriptGeneratorWindow();				
+			rScriptGeneratorWindow.setLocationRelativeTo(this.getContentPane());
+			rScriptGeneratorWindow.setVisible(true);
+		}
+		if(rScriptGeneratorWindow.isVisible())			
+			rScriptGeneratorWindow.toFront();
+		else 
+			rScriptGeneratorWindow.setVisible(true);		
 	}
 	
 	private void showAboutSoftwareBox() {

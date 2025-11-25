@@ -899,7 +899,7 @@ public class NISTPepSearchResultManipulator {
 		//	Add libraries
 		for(File libFile : parametersObject.getLibraryFiles()) {
 			commandParts.add("/LIB");
-			commandParts.add(libFile.getAbsolutePath());
+			commandParts.add("\"" + libFile.getAbsolutePath() + "\"");
 		}
 		//	Input file
 		commandParts.add("/INP");
@@ -935,8 +935,8 @@ public class NISTPepSearchResultManipulator {
 			commandParts.add("/COL");
 			commandParts.add(StringUtils.join(columns, ","));
 		}
-			String commandString = StringUtils.join(commandParts, " ");
-			System.out.println(commandString);
+		String commandString = StringUtils.join(commandParts, " ");
+		System.out.println(commandString);
 		return commandParts;
 	}
 	

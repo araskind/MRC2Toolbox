@@ -39,11 +39,14 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.apache.commons.lang.StringUtils;
+import org.jdom2.Document;
+import org.jdom2.Element;
 
 import edu.umich.med.mrc2.datoolbox.gui.rgen.mcr.MetabCombinerFileInputObject;
 import edu.umich.med.mrc2.datoolbox.gui.rgen.mcr.MetabCombinerParametersObject;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
+import edu.umich.med.mrc2.datoolbox.utils.XmlUtils;
 
 public class MetabCombinerAlignmentScriptGenerator {
 	
@@ -57,12 +60,14 @@ public class MetabCombinerAlignmentScriptGenerator {
 	public static final String EXTENDED_CUMMULATIVE_METADATA_FILE_NAME = "CummulativeMetaDataEFS.txt";
 	public static final String ADDUCT_REPRODUCIBILITY_FILE_NAME = "AdductReproducibility.pdf";
 	public static final String ADDUCT_REPRODUCIBILITY_EXTENDED_FILE_NAME = "AdductReproducibilityEFS.pdf";
+	public static final String MERGED_ALIGNED_DATA_EXTENDED_FILE_NAME = "MergedAlignedDataEFS.txt";
 	public static final String ALIGNMENT_METADATA_SUFFIX = ".alignmentMetaData";
 	public static final String ANCHORS_FILE_NAME_PREFIX = "Anchors-";
 	public static final String ALIGNMENT_PLOT_NAME_PREFIX = "AlignmentPlot-";
 	public static final String ALIGNMENT_REPORT_NAME_PREFIX = "AlignmentReport-";
 	public static final String COMPLETE_ALIGNMENT_REPORT_NAME_PREFIX = "CompleteAlignmentReport-";
 	public static final String R_FOLDER_SEPARATOR = "/";
+	public static final String ALIGNMENT_SETTINGS_FILE = "MetabCombinerAlignmentSettings.xml";
 	
 	private MetabCombinerParametersObject parametersObject;
 	private List<String>rscriptParts;
@@ -115,6 +120,8 @@ public class MetabCombinerAlignmentScriptGenerator {
 			createFuzzyMatchingBlock();
 		
 		writeScriptToFile();
+		
+		saveAlignmentParameters();
 	}
 
 	private void createAlignmentProjectDirectoryStructure() {
@@ -129,6 +136,7 @@ public class MetabCombinerAlignmentScriptGenerator {
 			e.printStackTrace();
 		}
 		projectFolder = newProjectPath.toFile();
+		parametersObject.setProjectDirectory(projectFolder);
 		
 		for(McAlignmentProjectSubfolders folder : McAlignmentProjectSubfolders.values()) {
 
@@ -425,34 +433,23 @@ public class MetabCombinerAlignmentScriptGenerator {
 		rscriptParts.add("meta.data.union <- meta.data.union.joined %>% "
 				+ "select(all_of(c(\"FeatureID\",\"mzMedian\",\"rtMedian\",\"na_count\","
 				+ "primary.batch.name.union,secondary.batch.list.union)))");
-		rscriptParts.add("merged.data.union <- read.delim(paste(primary.batch.name.union, "
+		rscriptParts.add("merged.data.union <- read.delim(paste(\"" 
+				+ McAlignmentProjectSubfolders.CleanData.name() + R_FOLDER_SEPARATOR + "\", primary.batch.name.union, "
 				+ "\"" + CLEAN_DATA_FILE_SUFFIX + "\", sep = \"\"), check.names=FALSE)");
 		rscriptParts.add("colnames(merged.data.union)[1] <- primary.batch.name.union");
 		rscriptParts.add("merged.data.union <- left_join(meta.data.union, merged.data.union, by = primary.batch.name.union)");
 		rscriptParts.add("for(sec.batch.name in  secondary.batch.list.union){");
-		rscriptParts.add("  sec.batch.data <- read.delim(paste(sec.batch.name, \"-cleanData.txt\", sep = \"\"), check.names=FALSE)");
+		rscriptParts.add("  sec.batch.data <- read.delim(paste(\""+ McAlignmentProjectSubfolders.CleanData.name() 
+			+ R_FOLDER_SEPARATOR + "\", sec.batch.name, \"" + CLEAN_DATA_FILE_SUFFIX + "\", sep = \"\"), check.names=FALSE)");
 		rscriptParts.add("  colnames(sec.batch.data)[1] <- sec.batch.name");
 		rscriptParts.add("  merged.data.union <- left_join(merged.data.union, sec.batch.data, by = sec.batch.name)");
 		rscriptParts.add("}");
 		rscriptParts.add("columns.to.remove.from.merged.data.union <- names(overlap.list.collection)");
 		rscriptParts.add("merged.data.union <- merged.data.union %>% select(-any_of(columns.to.remove.from.merged.data.union))");
-		rscriptParts.add("write.table(merged.data.union, file = \"MergedAlignedDataEFS.txt\", "
+		rscriptParts.add("write.table(merged.data.union, file = \"" + MERGED_ALIGNED_DATA_EXTENDED_FILE_NAME + "\", "
 				+ "quote = F, sep = \"\\t\", na = \"\", row.names = FALSE)");
 	}
-	
-	private void writeScriptToFile() {
 
-		try {
-		    Files.write(scriptFile.toPath(), 
-		    		rscriptParts,
-		            StandardCharsets.UTF_8,
-		            StandardOpenOption.CREATE, 
-		            StandardOpenOption.TRUNCATE_EXISTING);
-		} catch (IOException e) {
-		    e.printStackTrace();
-		}
-	}
-	
 	private String createMetabCombinerAlignmentBlock(
 			MetabCombinerFileInputObject io,
 			MetabCombinerFileInputObject io2) {
@@ -612,7 +609,35 @@ public class MetabCombinerAlignmentScriptGenerator {
 		
 		return StringUtils.join(outNameParts, "-");
 	}
+		
+	private void writeScriptToFile() {
 
+		try {
+		    Files.write(scriptFile.toPath(), 
+		    		rscriptParts,
+		            StandardCharsets.UTF_8,
+		            StandardOpenOption.CREATE, 
+		            StandardOpenOption.TRUNCATE_EXISTING);
+		} catch (IOException e) {
+		    e.printStackTrace();
+		}
+	}
+	
+	private void saveAlignmentParameters() {
+
+		File settingsFile = Paths.get(
+				projectFolder.getAbsolutePath(), ALIGNMENT_SETTINGS_FILE).toFile();
+		Document settingsDocument = new Document();
+		
+        Element settingsElement = parametersObject.getXmlElement();
+        settingsElement.setAttribute("version", "1.0.0.0");
+        settingsDocument.addContent(settingsElement);
+		
+		XmlUtils.writePrettyPrintXMLtoFile(
+				settingsDocument, 
+				settingsFile);
+	}
+	
 	public File getScriptFile() {
 		return scriptFile;
 	}

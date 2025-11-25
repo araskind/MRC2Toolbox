@@ -744,7 +744,12 @@ return;
 	private void unloadProcessedScans(Integer scanNumLo, Integer scanNumHi) {
 		LCMSDataSubset subsetToUnload = 
 				new LCMSDataSubset(scanNumLo, scanNumHi, msLvls, null);	
-		data.getScans().unloadData(subsetToUnload);
+		try {
+			data.getScans().unloadData(subsetToUnload);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			//	e.printStackTrace();
+		}
 	}
 	
 	private Collection<MsPoint>interpolateScanData(IScan leftScan, IScan rightScan, double rtOfInterest){

@@ -30,7 +30,10 @@ import org.jdom2.Element;
 
 import edu.umich.med.mrc2.datoolbox.data.enums.PeakAbundanceMeasure;
 import edu.umich.med.mrc2.datoolbox.data.enums.RtFittingModelType;
+import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
+import edu.umich.med.mrc2.datoolbox.project.store.MetabCombinerAlignmentSettingsFields;
 import edu.umich.med.mrc2.datoolbox.project.store.XmlStorable;
+import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
 
 public class MetabCombinerParametersObject implements XmlStorable{
@@ -288,15 +291,117 @@ public class MetabCombinerParametersObject implements XmlStorable{
 		this.rtOrderFlagInOutput = rtOrderFlagInOutput;
 	}
 	
-	public MetabCombinerParametersObject(Element metabCombinerParametersObjectElement) {
+	public MetabCombinerParametersObject(Element metabCombinerParametersElement) {
 		super();
 		// TODO Auto-generated constructor stub
 	}
 
 	@Override
 	public Element getXmlElement() {
-		// TODO Auto-generated method stub
-		return null;
+
+		Element metabCombinerParametersElement = 
+				new Element(MetabCombinerAlignmentSettingsFields.MetabCombinerParameters.name());
+		
+		Element metabCombinerFileIOList = 
+				new Element(MetabCombinerAlignmentSettingsFields.MetabCombinerFileIOList.name());
+		for(MetabCombinerFileInputObject mcio : metabCombinerFileInputObjectSet)
+			metabCombinerFileIOList.addContent(mcio.getXmlElement());
+		
+		metabCombinerParametersElement.addContent(metabCombinerFileIOList);
+		
+		Element projectParentDirectoryElement = 
+				new Element(MetabCombinerAlignmentSettingsFields.projectParentDirectory.name());
+		projectParentDirectoryElement.setText(getProjectParentDirectory().getAbsolutePath());
+		metabCombinerParametersElement.addContent(projectParentDirectoryElement);
+		
+		Element projectDirectoryElement = 
+				new Element(MetabCombinerAlignmentSettingsFields.projectDirectory.name());
+		projectDirectoryElement.setText(getProjectDirectory().getAbsolutePath());
+		metabCombinerParametersElement.addContent(projectDirectoryElement);
+		
+		metabCombinerParametersElement.setAttribute(
+				MetabCombinerAlignmentSettingsFields.useExistingAlignment.name(), 
+				Boolean.toString(useExistingAlignment));
+		
+		if(alignmentRTRange != null) {
+			metabCombinerParametersElement.setAttribute(
+					MetabCombinerAlignmentSettingsFields.alignmentRTRange.name(), 
+					alignmentRTRange.getStorableString());
+		}
+		metabCombinerParametersElement.setAttribute(
+				MetabCombinerAlignmentSettingsFields.maxMissingPercent.name(), 
+				MRC2ToolBoxConfiguration.getPpmFormat().format(maxMissingPercent));
+		metabCombinerParametersElement.setAttribute(
+				MetabCombinerAlignmentSettingsFields.peakAbundanceMeasure.name(), 
+				peakAbundanceMeasure.name());
+		metabCombinerParametersElement.setAttribute(
+				MetabCombinerAlignmentSettingsFields.binGap.name(), 
+				MsUtils.spectrumMzExportFormat.format(binGap));
+		metabCombinerParametersElement.setAttribute(
+				MetabCombinerAlignmentSettingsFields.mcDataSetRtOrderFlag.name(), 
+				Boolean.toString(mcDataSetRtOrderFlag));
+		metabCombinerParametersElement.setAttribute(
+				MetabCombinerAlignmentSettingsFields.imputeMissingData.name(), 
+				Boolean.toString(imputeMissingData));
+		metabCombinerParametersElement.setAttribute(
+				MetabCombinerAlignmentSettingsFields.anchorMzTolerance.name(), 
+				MsUtils.spectrumMzExportFormat.format(anchorMzTolerance));
+		metabCombinerParametersElement.setAttribute(
+				MetabCombinerAlignmentSettingsFields.anchorAreaQuantileTolerance.name(), 
+				MsUtils.spectrumMzExportFormat.format(anchorAreaQuantileTolerance));
+		metabCombinerParametersElement.setAttribute(
+				MetabCombinerAlignmentSettingsFields.anchorRtQuantileTolerance.name(), 
+				MsUtils.spectrumMzExportFormat.format(anchorRtQuantileTolerance));	
+		metabCombinerParametersElement.setAttribute(
+				MetabCombinerAlignmentSettingsFields.primaryDataSetAnchorRtExclusionWindow.name(), 
+				MsUtils.spectrumMzExportFormat.format(primaryDataSetAnchorRtExclusionWindow));
+		metabCombinerParametersElement.setAttribute(
+				MetabCombinerAlignmentSettingsFields.secondaryDataSetAnchorRtExclusionWindow.name(), 
+				MsUtils.spectrumMzExportFormat.format(secondaryDataSetAnchorRtExclusionWindow));		
+		metabCombinerParametersElement.setAttribute(
+				MetabCombinerAlignmentSettingsFields.scoringMZweight.name(), 
+				MRC2ToolBoxConfiguration.getPpmFormat().format(scoringMZweight));
+		metabCombinerParametersElement.setAttribute(
+				MetabCombinerAlignmentSettingsFields.scoringRTweight.name(), 
+				MRC2ToolBoxConfiguration.getPpmFormat().format(scoringRTweight));
+		metabCombinerParametersElement.setAttribute(
+				MetabCombinerAlignmentSettingsFields.scoringAbundanceWeight.name(), 
+				MRC2ToolBoxConfiguration.getPpmFormat().format(scoringAbundanceWeight));		
+		metabCombinerParametersElement.setAttribute(
+				MetabCombinerAlignmentSettingsFields.maxMissingBatchCount.name(), 
+				Integer.toString(maxMissingBatchCount));		
+		metabCombinerParametersElement.setAttribute(
+				MetabCombinerAlignmentSettingsFields.usePPMforScoringMz.name(), 
+				Boolean.toString(usePPMforScoringMz));		
+		metabCombinerParametersElement.setAttribute(
+				MetabCombinerAlignmentSettingsFields.rtFittingModelType.name(), 
+				rtFittingModelType.name());		
+		metabCombinerParametersElement.setAttribute(
+				MetabCombinerAlignmentSettingsFields.useAdductsToAdjustScore.name(), 
+				Boolean.toString(useAdductsToAdjustScore));			
+		metabCombinerParametersElement.setAttribute(
+				MetabCombinerAlignmentSettingsFields.minimalAlignmentScore.name(), 
+				MRC2ToolBoxConfiguration.getPpmFormat().format(minimalAlignmentScore));			
+		metabCombinerParametersElement.setAttribute(
+				MetabCombinerAlignmentSettingsFields.maxFeatureRankForPrimaryDataSet.name(), 
+				Integer.toString(maxFeatureRankForPrimaryDataSet));	
+		metabCombinerParametersElement.setAttribute(
+				MetabCombinerAlignmentSettingsFields.maxFeatureRankForSecondaryDataSet.name(), 
+				Integer.toString(maxFeatureRankForSecondaryDataSet));		
+		metabCombinerParametersElement.setAttribute(
+				MetabCombinerAlignmentSettingsFields.subgroupScoreCutoff.name(), 
+				MRC2ToolBoxConfiguration.getPpmFormat().format(subgroupScoreCutoff));			
+		metabCombinerParametersElement.setAttribute(
+				MetabCombinerAlignmentSettingsFields.maxRTerrorForAlignedFeatures.name(), 
+				MsUtils.spectrumMzExportFormat.format(maxRTerrorForAlignedFeatures));		
+		metabCombinerParametersElement.setAttribute(
+				MetabCombinerAlignmentSettingsFields.resolveAlignmentConflictsInOutput.name(), 
+				Boolean.toString(resolveAlignmentConflictsInOutput));	
+		metabCombinerParametersElement.setAttribute(
+				MetabCombinerAlignmentSettingsFields.rtOrderFlagInOutput.name(), 
+				Boolean.toString(rtOrderFlagInOutput));	
+		
+		return metabCombinerParametersElement;
 	}
 
 	public boolean isUseExistingAlignment() {
@@ -314,7 +419,4 @@ public class MetabCombinerParametersObject implements XmlStorable{
 	public void setProjectDirectory(File projectDirectory) {
 		this.projectDirectory = projectDirectory;
 	}
-	
-	
-
 }

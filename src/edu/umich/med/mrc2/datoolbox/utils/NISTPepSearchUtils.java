@@ -672,7 +672,7 @@ public class NISTPepSearchUtils {
 		//	Add libraries
 		for(File libFile : parametersObject.getLibraryFiles()) {
 			commandParts.add("/LIB");
-			commandParts.add(libFile.getAbsolutePath());
+			commandParts.add("\"" + libFile.getAbsolutePath() + "\"");
 		}
 		//	Input file
 		commandParts.add("/INP");
