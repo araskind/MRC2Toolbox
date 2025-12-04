@@ -144,6 +144,7 @@ public class MRC2ToolBoxConfiguration {
 
     public static final String SAMPLE_ID_MASK = "sampleIdMask";
     public static final String SAMPLE_ID_MASK_DEFAULT =  "S\\d{8}|R\\d{9}|CS\\d{7}|R\\d{8}";
+    public static final String CORE_DATA_FILE_MASK_DEFAULT = "\\d{8}-EX\\d{5}-A\\d{3}-IN\\d{4}-.+(P|N)";
 
     public static final String SAMPLE_NAME_MASK = "sampleNameMask";
     public static final String SAMPLE_NAME_MASK_DEFAULT =  "";

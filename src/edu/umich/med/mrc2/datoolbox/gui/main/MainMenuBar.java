@@ -449,7 +449,7 @@ public class MainMenuBar extends CommonMenuBar {
 	
 	private Icon getIconForProjectType(ProjectType type) {	
 				
-		if(type.equals(ProjectType.DATA_ANALYSIS))
+		if(type.equals(ProjectType.DATA_ANALYSIS) || type.equals(ProjectType.DATA_ANALYSIS_NEW_FORMAT))
 			return openExperimentIcon;
 		
 		else if(type.equals(ProjectType.ID_TRACKER_DATA_ANALYSIS))
@@ -467,6 +467,9 @@ public class MainMenuBar extends CommonMenuBar {
 		String command = null;
 		
 		if(type.equals(ProjectType.DATA_ANALYSIS))
+			command = MainActionCommands.OPEN_RECENT_METABOLOMICS_EXPERIMENT_COMMAND.name();
+		
+		else if(type.equals(ProjectType.DATA_ANALYSIS_NEW_FORMAT))
 			command = MainActionCommands.OPEN_RECENT_METABOLOMICS_EXPERIMENT_COMMAND.name();
 		
 		else if(type.equals(ProjectType.ID_TRACKER_DATA_ANALYSIS))

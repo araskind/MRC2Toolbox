@@ -170,7 +170,7 @@ public class ProFinderArchivePreprocessingTask extends DataWithLibraryImportAbst
 		total = 100;
 		processed = 2;
 		
-		nameRetentionMap = new HashMap<String,Double>();
+		nameRetentionMap = new HashMap<>();
 		String[][] compoundDataArray = 
 				DelimitedTextParser.parseTextFile(proFinderSimpleCsvExportFile, ',');
 		
@@ -197,7 +197,7 @@ public class ProFinderArchivePreprocessingTask extends DataWithLibraryImportAbst
 
 	private boolean createAndValidateFieldMap(String[]header) {
 		
-		dataFieldMap = new TreeMap<AgilentProFinderSimpleCSVexportColumns, Integer>();
+		dataFieldMap = new TreeMap<>();
 		for(int i=0; i<header.length; i++) {
 			
 			AgilentProFinderSimpleCSVexportColumns f = 
@@ -205,7 +205,7 @@ public class ProFinderArchivePreprocessingTask extends DataWithLibraryImportAbst
 			if(f != null)
 				dataFieldMap.put(f, i);
 		}
-		ArrayList<String>missingFields = new ArrayList<String>();
+		ArrayList<String>missingFields = new ArrayList<>();
 		if(!dataFieldMap.containsKey(AgilentProFinderSimpleCSVexportColumns.COMPOUND_NAME))
 			missingFields.add(AgilentProFinderSimpleCSVexportColumns.COMPOUND_NAME.getName());
 

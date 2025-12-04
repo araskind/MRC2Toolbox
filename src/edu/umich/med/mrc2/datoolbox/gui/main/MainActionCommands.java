@@ -160,6 +160,8 @@ public enum MainActionCommands {
 	LOAD_DATA_FROM_PROFINDER_PFA_COMMAND("Load quantitative data from ProFinder PFA file"),
 	SELECT_PROFINDER_SIMPLE_CSV_COMMAND("Select simple ProFinder CSV export file"),
 	SELECT_PROFINDER_DETAILED_CSV_COMMAND("Select detailed ProFinder CSV export file"),
+	SELECT_NORMALIZED_TARGETED_DATA_COMMAND("Select normalized targeted data file"),
+	PARSE_NORMALIZED_TARGETED_DATA_COMMAND("Parse normalized targeted data file"),
 	ADD_DATA_FROM_MULTIFILES_COMMAND("Add quantitative data to active assay from multiple files"),
 	ADD_PEAK_QUALITY_DATA_FROM_MULTIFILES_COMMAND("Add peak quality data to active assay"),
 	START_PEAK_QUALITY_DATA_IMPORT_COMMAND("Start peak quality data import"),

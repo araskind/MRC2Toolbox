@@ -137,7 +137,7 @@
 											<node nodeId="1600213796236" orientation="VERTICAL" divider="0.5">
 												<node nodeId="1600213796238" orientation="VERTICAL" divider="0.6">
 													<node nodeId="1600213796240" orientation="HORIZONTAL" divider="0.6892826488879438">
-														<leaf id="2" nodeId="1600213796242">
+														<leaf id="3" nodeId="1600213796242">
 															<placeholders>
 																<placeholder>dock.single.DockableDataIntegrationFeatureSelectionTable</placeholder>
 															</placeholders>
@@ -160,7 +160,7 @@
 																</entry>
 															</placeholder-map>
 														</leaf>
-														<leaf id="3" nodeId="1600213796244">
+														<leaf id="2" nodeId="1600213796244">
 															<placeholders>
 																<placeholder>dock.single.ClusterDisplayPanelDockableMolStructurePanel</placeholder>
 															</placeholders>
@@ -329,65 +329,6 @@
 								</child>
 								<child>
 									<layout factory="delegate_StackDockStationFactory">
-										<selected>0</selected>
-										<placeholders>
-											<version>0</version>
-											<format>dock.PlaceholderList</format>
-											<entry>
-												<key shared="false">
-													<placeholder>dock.single.DockableDataIntegrationFeatureSelectionTable</placeholder>
-												</key>
-												<item key="convert" type="b">true</item>
-												<item key="convert-keys" type="a">
-													<item type="s">index</item>
-													<item type="s">id</item>
-													<item type="s">placeholder</item>
-												</item>
-												<item key="dock.index" type="i">0</item>
-												<item key="dock.id" type="i">0</item>
-												<item key="dock.placeholder" type="s">dock.single.DockableDataIntegrationFeatureSelectionTable</item>
-											</entry>
-											<entry>
-												<key shared="false">
-													<placeholder>dock.single.DockableAlignedDataSetSummaryPanel</placeholder>
-												</key>
-												<item key="convert" type="b">true</item>
-												<item key="convert-keys" type="a">
-													<item type="s">index</item>
-													<item type="s">id</item>
-													<item type="s">placeholder</item>
-												</item>
-												<item key="dock.index" type="i">1</item>
-												<item key="dock.id" type="i">1</item>
-												<item key="dock.placeholder" type="s">dock.single.DockableAlignedDataSetSummaryPanel</item>
-											</entry>
-										</placeholders>
-									</layout>
-									<children ignore="false">
-										<child>
-											<layout factory="predefined" placeholder="dock.single.DockableDataIntegrationFeatureSelectionTable">
-												<replacement id="dockablesingle DockableDataIntegrationFeatureSelectionTable"/>
-												<delegate id="delegate_ccontrol backup factory id">
-													<id>DockableDataIntegrationFeatureSelectionTable</id>
-													<area/>
-												</delegate>
-											</layout>
-											<children ignore="false"/>
-										</child>
-										<child>
-											<layout factory="predefined" placeholder="dock.single.DockableAlignedDataSetSummaryPanel">
-												<replacement id="dockablesingle DockableAlignedDataSetSummaryPanel"/>
-												<delegate id="delegate_ccontrol backup factory id">
-													<id>DockableAlignedDataSetSummaryPanel</id>
-													<area/>
-												</delegate>
-											</layout>
-											<children ignore="false"/>
-										</child>
-									</children>
-								</child>
-								<child>
-									<layout factory="delegate_StackDockStationFactory">
 										<selected>1</selected>
 										<placeholders>
 											<version>0</version>
@@ -438,6 +379,65 @@
 												<replacement id="dockablesingle ClusterDisplayPanelCorrelationDataPanel"/>
 												<delegate id="delegate_ccontrol backup factory id">
 													<id>ClusterDisplayPanelCorrelationDataPanel</id>
+													<area/>
+												</delegate>
+											</layout>
+											<children ignore="false"/>
+										</child>
+									</children>
+								</child>
+								<child>
+									<layout factory="delegate_StackDockStationFactory">
+										<selected>0</selected>
+										<placeholders>
+											<version>0</version>
+											<format>dock.PlaceholderList</format>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.DockableDataIntegrationFeatureSelectionTable</placeholder>
+												</key>
+												<item key="convert" type="b">true</item>
+												<item key="convert-keys" type="a">
+													<item type="s">index</item>
+													<item type="s">id</item>
+													<item type="s">placeholder</item>
+												</item>
+												<item key="dock.index" type="i">0</item>
+												<item key="dock.id" type="i">0</item>
+												<item key="dock.placeholder" type="s">dock.single.DockableDataIntegrationFeatureSelectionTable</item>
+											</entry>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.DockableAlignedDataSetSummaryPanel</placeholder>
+												</key>
+												<item key="convert" type="b">true</item>
+												<item key="convert-keys" type="a">
+													<item type="s">index</item>
+													<item type="s">id</item>
+													<item type="s">placeholder</item>
+												</item>
+												<item key="dock.index" type="i">1</item>
+												<item key="dock.id" type="i">1</item>
+												<item key="dock.placeholder" type="s">dock.single.DockableAlignedDataSetSummaryPanel</item>
+											</entry>
+										</placeholders>
+									</layout>
+									<children ignore="false">
+										<child>
+											<layout factory="predefined" placeholder="dock.single.DockableDataIntegrationFeatureSelectionTable">
+												<replacement id="dockablesingle DockableDataIntegrationFeatureSelectionTable"/>
+												<delegate id="delegate_ccontrol backup factory id">
+													<id>DockableDataIntegrationFeatureSelectionTable</id>
+													<area/>
+												</delegate>
+											</layout>
+											<children ignore="false"/>
+										</child>
+										<child>
+											<layout factory="predefined" placeholder="dock.single.DockableAlignedDataSetSummaryPanel">
+												<replacement id="dockablesingle DockableAlignedDataSetSummaryPanel"/>
+												<delegate id="delegate_ccontrol backup factory id">
+													<id>DockableAlignedDataSetSummaryPanel</id>
 													<area/>
 												</delegate>
 											</layout>

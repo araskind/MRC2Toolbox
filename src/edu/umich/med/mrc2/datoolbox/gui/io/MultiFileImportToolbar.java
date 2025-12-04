@@ -58,6 +58,7 @@ public class MultiFileImportToolbar extends CommonToolbar {
 	private static final Icon pcdlLibraryIcon = GuiUtils.getIcon("newPCDLfromBase", 24);
 	private static final Icon csvIcon = GuiUtils.getIcon("csv", 24);
 	private static final Icon detailedCsvIcon = GuiUtils.getIcon("detailedCsv", 24);
+	private static final Icon normalizedDataIcon = GuiUtils.getIcon("loess", 24);	
 	private static final Icon adductIcon = GuiUtils.getIcon("editModification", 24);
 	private static final Icon loadPfaFileIcon = GuiUtils.getIcon("importFromProFinderPaf", 24);
 	private static final Icon removeDataFilesIcon = GuiUtils.getIcon("removeMultifile", 24);
@@ -67,7 +68,7 @@ public class MultiFileImportToolbar extends CommonToolbar {
 	private static final Icon addAcqMethodIcon = GuiUtils.getIcon("addDataAcquisitionMethod", 24);
 	private static final Icon addDextrMethodIcon = GuiUtils.getIcon("addDataProcessingMethod", 24);
 	private JButton
-		dataAnalysisPipelineButton,
+		//	dataAnalysisPipelineButton,
 		selectLibraryButton,
 		addDataFilesButton,
 		selectPCDLLibraryButton,
@@ -75,6 +76,7 @@ public class MultiFileImportToolbar extends CommonToolbar {
 		selectSimpleProFinderCSVButton,
 		selectDetailedProFinderCSVButton,
 		loadFromProFinderPfaButton,
+		selectNormalizedTargetedDataButton,
 		removeDataFilesButton,
 		clearDataButton,
 		editReferenceSamplesButton,
@@ -89,8 +91,8 @@ public class MultiFileImportToolbar extends CommonToolbar {
 		
 		super(commandListener);
 
-		importTypeComboBox = new JComboBox<DataTypeForImport>(
-				new DefaultComboBoxModel<DataTypeForImport>(DataTypeForImport.values()));
+		importTypeComboBox = new JComboBox<>(
+				new DefaultComboBoxModel<>(DataTypeForImport.values()));
 		importTypeComboBox.addItemListener((ItemListener)commandListener);
 		importTypeComboBox.setMaximumSize(new Dimension(300,80));
 		add(importTypeComboBox);
@@ -101,9 +103,9 @@ public class MultiFileImportToolbar extends CommonToolbar {
 				MainActionCommands.SELECT_INPUT_LIBRARY_COMMAND.getName(),
 				MainActionCommands.SELECT_INPUT_LIBRARY_COMMAND.getName(), buttonDimension);
 		
-		selectAdductsButton = GuiUtils.addButton(this, null, adductIcon, commandListener,
-				MainActionCommands.SHOW_ADDUCT_SELECTOR.getName(),
-				MainActionCommands.SHOW_ADDUCT_SELECTOR.getName(), buttonDimension);
+		addDataFilesButton = GuiUtils.addButton(this, null, addDataFilesIcon, commandListener,
+				MainActionCommands.ADD_DATA_FILES_COMMAND.getName(),
+				MainActionCommands.ADD_DATA_FILES_COMMAND.getName(), buttonDimension);
 		
 //		selectPCDLLibraryButton = GuiUtils.addButton(this, null, pcdlLibraryIcon, commandListener,
 //				MainActionCommands.SELECT_PCDL_LIBRARY_COMMAND.getName(),
@@ -111,9 +113,9 @@ public class MultiFileImportToolbar extends CommonToolbar {
 
 		addSeparator(buttonDimension);
 
-		addDataFilesButton = GuiUtils.addButton(this, null, addDataFilesIcon, commandListener,
-				MainActionCommands.ADD_DATA_FILES_COMMAND.getName(),
-				MainActionCommands.ADD_DATA_FILES_COMMAND.getName(), buttonDimension);
+		selectAdductsButton = GuiUtils.addButton(this, null, adductIcon, commandListener,
+				MainActionCommands.SHOW_ADDUCT_SELECTOR.getName(),
+				MainActionCommands.SHOW_ADDUCT_SELECTOR.getName(), buttonDimension);
 		
 		loadFromProFinderPfaButton = GuiUtils.addButton(this, null, loadPfaFileIcon, commandListener,
 				MainActionCommands.LOAD_DATA_FROM_PROFINDER_PFA_COMMAND.getName(),
@@ -128,6 +130,13 @@ public class MultiFileImportToolbar extends CommonToolbar {
 		selectDetailedProFinderCSVButton = GuiUtils.addButton(this, null, detailedCsvIcon, commandListener,
 				MainActionCommands.SELECT_PROFINDER_DETAILED_CSV_COMMAND.getName(),
 				MainActionCommands.SELECT_PROFINDER_DETAILED_CSV_COMMAND.getName(),
+				buttonDimension);
+		
+		addSeparator(buttonDimension);
+		
+		selectNormalizedTargetedDataButton = GuiUtils.addButton(this, null, normalizedDataIcon, commandListener,
+				MainActionCommands.SELECT_NORMALIZED_TARGETED_DATA_COMMAND.getName(),
+				MainActionCommands.SELECT_NORMALIZED_TARGETED_DATA_COMMAND.getName(),
 				buttonDimension);
 		
 		addSeparator(buttonDimension);
@@ -196,7 +205,7 @@ public class MultiFileImportToolbar extends CommonToolbar {
 		if(project == null)
 			active = false;
 
-		dataAnalysisPipelineButton.setEnabled(active);
+		//	dataAnalysisPipelineButton.setEnabled(active);
 		selectLibraryButton.setEnabled(active);
 		addDataFilesButton.setEnabled(active);
 		loadFromProFinderPfaButton.setEnabled(active);
@@ -210,6 +219,60 @@ public class MultiFileImportToolbar extends CommonToolbar {
 	
 	public DataTypeForImport getDataTypeForImport() {
 		return (DataTypeForImport)importTypeComboBox.getSelectedItem();
+	}
+	
+	public void updateInterfaceForImportType(DataTypeForImport importType) {
+		
+		if(importType.equals(DataTypeForImport.AGILENT_UNTARGETED))
+			updateInterfaceForAgilentUntargetedImport();
+		
+		if(importType.equals(DataTypeForImport.AGILENT_PROFINDER_TARGETED))
+			updateInterfaceForProFinderImport();
+		
+		if(importType.equals(DataTypeForImport.GENERIC_TARGETED))
+			updateInterfaceForGenericTargetedImport();	
+	}
+
+	private void updateInterfaceForAgilentUntargetedImport() {
+
+		selectLibraryButton.setEnabled(true);
+		addDataFilesButton.setEnabled(true);
+		loadFromProFinderPfaButton.setEnabled(true);
+		
+		selectNormalizedTargetedDataButton.setEnabled(false);
+		
+		selectAdductsButton.setEnabled(false);
+		selectSimpleProFinderCSVButton.setEnabled(false);
+		selectDetailedProFinderCSVButton.setEnabled(false);
+		loadFromProFinderPfaButton.setEnabled(false);
+	}
+
+	private void updateInterfaceForProFinderImport() {
+		
+		selectLibraryButton.setEnabled(false);
+		addDataFilesButton.setEnabled(false);
+		loadFromProFinderPfaButton.setEnabled(false);
+		
+		selectNormalizedTargetedDataButton.setEnabled(false);
+		
+		selectAdductsButton.setEnabled(true);
+		selectSimpleProFinderCSVButton.setEnabled(true);
+		selectDetailedProFinderCSVButton.setEnabled(true);
+		loadFromProFinderPfaButton.setEnabled(true);
+	}
+
+	private void updateInterfaceForGenericTargetedImport() {
+		
+		selectLibraryButton.setEnabled(false);
+		addDataFilesButton.setEnabled(false);
+		loadFromProFinderPfaButton.setEnabled(false);
+		
+		selectNormalizedTargetedDataButton.setEnabled(true);
+		
+		selectAdductsButton.setEnabled(false);
+		selectSimpleProFinderCSVButton.setEnabled(false);
+		selectDetailedProFinderCSVButton.setEnabled(false);
+		loadFromProFinderPfaButton.setEnabled(false);		
 	}
 }
 

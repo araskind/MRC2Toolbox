@@ -36,7 +36,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
-import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -72,12 +72,9 @@ public class RecentDataManager {
 	private static final Path recentObjectFilePath = 
 			Paths.get(MRC2ToolBoxCore.configDir, "recentObjects.xml");
 
-	private static Map<ProjectType,Collection<ExperimentPointer>>recentExperimentsMap = 
-			new TreeMap<ProjectType,Collection<ExperimentPointer>>();	
-	private static Set<MsFeatureInfoBundleCollection>featureCollections = 
-			new LinkedHashSet<MsFeatureInfoBundleCollection>();
-	private static Set<IMSMSClusterDataSet>featureClusterDataSets = 
-			new LinkedHashSet<IMSMSClusterDataSet>();
+	private static Map<ProjectType,LinkedList<ExperimentPointer>>recentExperimentsMap = new TreeMap<>();	
+	private static LinkedList<MsFeatureInfoBundleCollection>featureCollections = new LinkedList<>();
+	private static LinkedList<IMSMSClusterDataSet>featureClusterDataSets = new LinkedList<>();
 
 	public RecentDataManager() {
 		super();
@@ -144,9 +141,7 @@ public class RecentDataManager {
 			ExperimentPointer ep = new ExperimentPointer(experimentElement);
 			if(ep != null && ep.getProjectType() != null) {
 				
-				if(!recentExperimentsMap.containsKey(ep.getProjectType()))
-					recentExperimentsMap.put(ep.getProjectType(), new LinkedHashSet<ExperimentPointer>());
-			
+				recentExperimentsMap.computeIfAbsent(ep.getProjectType(), v -> new LinkedList<>());
 				recentExperimentsMap.get(ep.getProjectType()).add(ep);
 			}
 		}	
@@ -184,8 +179,7 @@ public class RecentDataManager {
         documentRoot.addContent(recentExperimentListElement);
         document.setContent(documentRoot);
         
-        try {
-            FileWriter writer = new FileWriter(recentObjectFilePath.toFile(), false);
+        try(FileWriter writer = new FileWriter(recentObjectFilePath.toFile(), false)) {
             XMLOutputter outputter = new XMLOutputter();
             outputter.setFormat(Format.getPrettyFormat());
             outputter.output(document, writer);
@@ -194,7 +188,7 @@ public class RecentDataManager {
         }
 	}
 
-	public static void setMAX_OBJECTS_COUNT(int maxObjectsCount) {
+	public static void setMaxObjectsCount(int maxObjectsCount) {
 		MAX_OBJECTS_COUNT = maxObjectsCount;
 	}
 	
@@ -204,66 +198,57 @@ public class RecentDataManager {
 	
 	public static void addExperiment(Project toAdd) {
 		
-		if(!recentExperimentsMap.containsKey(toAdd.getProjectType()))
-			recentExperimentsMap.put(toAdd.getProjectType(), new LinkedHashSet<ExperimentPointer>());
-		
-		Collection<ExperimentPointer> projectsOfType = 
+		recentExperimentsMap.computeIfAbsent(toAdd.getProjectType(), v -> new LinkedList<>());		
+		LinkedList<ExperimentPointer> projectsOfType = 
 				recentExperimentsMap.get(toAdd.getProjectType());
 		
-		if(projectsOfType.size() == MAX_OBJECTS_COUNT) {
-			
-			ExperimentPointer toRemove = 
-					projectsOfType.stream().
-					skip(projectsOfType.size()-1).findFirst().orElse(null);
-			if(toRemove != null)			
-				projectsOfType.remove(toRemove);
-		}		
-		recentExperimentsMap.get(toAdd.getProjectType()).add(new ExperimentPointer(toAdd));
+		ExperimentPointer newPointer = new ExperimentPointer(toAdd);
+		
+		if(projectsOfType.contains(newPointer))
+			return;
+		
+		if(projectsOfType.size() == MAX_OBJECTS_COUNT)
+			projectsOfType.removeLast();
+
+		projectsOfType.addFirst(newPointer);
+		
+		//	recentExperimentsMap.get(toAdd.getProjectType()).add(new ExperimentPointer(toAdd));
 		
 		MRC2ToolBoxCore.getMainWindow().updateGuiWithRecentData();
 	}
 	
 	public static void addIDTrackerExperiment(LIMSExperiment limsExperiment) {
 		
-		if(!recentExperimentsMap.containsKey(ProjectType.ID_TRACKER_DATA_ANALYSIS))
-			recentExperimentsMap.put(ProjectType.ID_TRACKER_DATA_ANALYSIS, new LinkedHashSet<ExperimentPointer>());
+		recentExperimentsMap.computeIfAbsent(ProjectType.ID_TRACKER_DATA_ANALYSIS, v -> new LinkedList<>());
 		
-		Collection<ExperimentPointer> projectsOfType = 
+		LinkedList<ExperimentPointer> projectsOfType = 
 				recentExperimentsMap.get(ProjectType.ID_TRACKER_DATA_ANALYSIS);
 
-		if(projectsOfType.size() == MAX_OBJECTS_COUNT) {
-			
-			ExperimentPointer toRemove = 
-					projectsOfType.stream().
-					skip(projectsOfType.size()-1).findFirst().orElse(null);
-			if(toRemove != null)			
-				projectsOfType.remove(toRemove);
-		}			
-		recentExperimentsMap.get(ProjectType.ID_TRACKER_DATA_ANALYSIS).add(new ExperimentPointer(limsExperiment));
+		ExperimentPointer newPointer = new ExperimentPointer(limsExperiment);
+		
+		if(projectsOfType.size() == MAX_OBJECTS_COUNT)
+			projectsOfType.removeLast();	
+		
+		projectsOfType.addFirst(newPointer);
+		
+		//	recentExperimentsMap.get(ProjectType.ID_TRACKER_DATA_ANALYSIS).add(new ExperimentPointer(limsExperiment));
 		
 		MRC2ToolBoxCore.getMainWindow().updateGuiWithRecentData();
 	}
 
-	public static Set<MsFeatureInfoBundleCollection>getRecentFeatureCollections(){
+	public static List<MsFeatureInfoBundleCollection>getRecentFeatureCollections(){
 		return featureCollections;
 	}
 	
 	public static void addFeatureCollection(MsFeatureInfoBundleCollection toAdd) {
 		
-		if(toAdd == null)
+		if(toAdd == null || featureCollections.contains(toAdd))
 			return;
 		
-		if(featureCollections.contains(toAdd))
-			return;
-		
-		if(featureCollections.size() == MAX_OBJECTS_COUNT) {
-			
-			MsFeatureInfoBundleCollection toRemove = featureCollections.stream().
-					skip(featureCollections.size()-1).findFirst().orElse(null);
-			if(toRemove != null)			
-				featureCollections.remove(toRemove);
-		}
-		featureCollections.add(toAdd);
+		if(featureCollections.size() == MAX_OBJECTS_COUNT)
+			featureCollections.removeLast();
+
+		featureCollections.addFirst(toAdd);
 		
 		MRC2ToolBoxCore.getMainWindow().updateGuiWithRecentData();
 	}
@@ -275,26 +260,19 @@ public class RecentDataManager {
 		MRC2ToolBoxCore.getMainWindow().updateGuiWithRecentData();
 	}
 	
-	public static Set<IMSMSClusterDataSet>getRecentFeatureClusterDataSets(){
+	public static List<IMSMSClusterDataSet>getRecentFeatureClusterDataSets(){
 		return featureClusterDataSets;
 	}
 	
 	public static void addIMSMSClusterDataSet(IMSMSClusterDataSet toAdd) {
 		
-		if(toAdd == null)
+		if(toAdd == null || featureClusterDataSets.contains(toAdd))
 			return;
 		
-		if(featureClusterDataSets.contains(toAdd))
-			return;
+		if(featureClusterDataSets.size() == MAX_OBJECTS_COUNT)
+			featureClusterDataSets.removeLast();
 		
-		if(featureClusterDataSets.size() == MAX_OBJECTS_COUNT) {
-		
-			IMSMSClusterDataSet toRemove = featureClusterDataSets.stream().
-					skip(featureClusterDataSets.size()-1).findFirst().orElse(null);
-			if(toRemove != null)			
-				featureClusterDataSets.remove(toRemove);
-		}
-		featureClusterDataSets.add(toAdd);
+		featureClusterDataSets.addFirst(toAdd);
 		
 		MRC2ToolBoxCore.getMainWindow().updateGuiWithRecentData();
 	}

@@ -442,7 +442,7 @@ public class DataPipelineDefinitionPanel extends JPanel
 	
 	public Collection<String>validatePipelineDefinition(){
 		
-		Collection<String>errors = new ArrayList<String>();
+		Collection<String>errors = new ArrayList<>();
 		if(getName().isEmpty())
 			errors.add("Name can not be empty");
 		

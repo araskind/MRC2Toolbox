@@ -393,6 +393,7 @@ public class MainWindow extends JFrame
 				return;
 			}
 		}
+		//	TODO handle new format
 		if(ep.getProjectType().equals(ProjectType.DATA_ANALYSIS)) {
 			
 			File experimentFile = ep.getExperimentFile();
@@ -486,6 +487,13 @@ public class MainWindow extends JFrame
 		
 		if (currentExperiment == null)
 			return;
+		
+		experimentSwitchController = new ExperimentSwitchController(
+				true,
+				null,
+				false,
+				currentExperiment.getProjectType(),
+				null);
 		
 		SaveMetabolomicsProjectTask task = 
 				new SaveMetabolomicsProjectTask(currentExperiment);
@@ -824,19 +832,12 @@ public class MainWindow extends JFrame
 				return;
 
 			if (selectedValue == JOptionPane.YES_OPTION) {
-				
-				ProjectType activeExperimentType = null;
-				if(currentExperiment != null)
-					activeExperimentType = ProjectType.DATA_ANALYSIS;
-				
-				if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() != null)
-					activeExperimentType = ProjectType.RAW_DATA_ANALYSIS;
 						
 				experimentSwitchController = new ExperimentSwitchController(
 						true,
 						ExperimentState.CLOSING_EXPERIMENT,
 						false,
-						activeExperimentType, 
+						currentExperiment.getProjectType(), 
 						null);			
 				saveExperiment();
 			}
@@ -851,9 +852,7 @@ public class MainWindow extends JFrame
 		if(currentExperiment != null) {
 			
 			saveMetabolomicsExperimentInNewFormat();
-//			SaveExperimentTask spt = new SaveExperimentTask(currentExperiment);
-//			spt.addTaskListener(this);
-//			MRC2ToolBoxCore.getTaskController().addTask(spt);
+			return;
 		}
 		if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() != null) {
 			
@@ -869,7 +868,7 @@ public class MainWindow extends JFrame
 		
 		ProjectType activeExperimentType = null;
 		if(currentExperiment != null)
-			activeExperimentType = ProjectType.DATA_ANALYSIS;
+			activeExperimentType = ProjectType.DATA_ANALYSIS_NEW_FORMAT;
 		
 		if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() != null)
 			activeExperimentType = ProjectType.RAW_DATA_ANALYSIS;

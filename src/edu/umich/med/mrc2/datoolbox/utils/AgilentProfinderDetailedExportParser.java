@@ -91,13 +91,12 @@ public class AgilentProfinderDetailedExportParser {
 			String[]header,
 			AgilentProFinderDetailedCSVexportColumns prefixField) {
 		
-		quantDataMap = 
-				new TreeMap<AgilentProFinderDetailedCSVexportColumns,Map<String,Integer>>();
+		quantDataMap = new TreeMap<>();
 
 		for(AgilentProFinderDetailedCSVexportColumns pf : quantitativeFiedldPrefixes)
-			quantDataMap.put(pf, new TreeMap<String,Integer>());
+			quantDataMap.put(pf, new TreeMap<>());
 			
-		dataFieldMap = new TreeMap<AgilentProFinderDetailedCSVexportColumns, Integer>();		
+		dataFieldMap = new TreeMap<>();		
 		for(int i=0; i<header.length; i++) {
 			
 			AgilentProFinderDetailedCSVexportColumns f = 
@@ -116,7 +115,7 @@ public class AgilentProfinderDetailedExportParser {
 		dataFiles = 
 				quantDataMap.get(AgilentProFinderDetailedCSVexportColumns.RT_PREFIX).
 					keySet().stream().toArray(String[]::new);
-		ArrayList<String>missingFields = new ArrayList<String>();
+		ArrayList<String>missingFields = new ArrayList<>();
 		if(!dataFieldMap.containsKey(AgilentProFinderDetailedCSVexportColumns.NAME))
 			missingFields.add(AgilentProFinderDetailedCSVexportColumns.NAME.getName());
 		if(quantDataMap.get(prefixField).isEmpty())

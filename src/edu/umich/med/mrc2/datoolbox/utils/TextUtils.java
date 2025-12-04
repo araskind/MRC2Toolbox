@@ -34,6 +34,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.prefs.Preferences;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 import java.util.stream.Collectors;
 
 public class TextUtils {
@@ -238,6 +240,15 @@ public class TextUtils {
 		}		
 		return sb.toString();
 	}	
+	
+    public static boolean isValidRegex(String regex) {
+        try {
+            Pattern.compile(regex);
+            return true; // Regex is syntactically valid
+        } catch (PatternSyntaxException e) {
+            return false; // Regex is not syntactically valid
+        }
+    }
 }
 
 
