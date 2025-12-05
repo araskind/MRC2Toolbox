@@ -240,12 +240,7 @@ public class METLIMSPanel extends DockableMRC2ToolboxPanel {
 				experimentDataPanel.getSelectedExperiment();
 		if(activeExperiment == null)
 			return;
-		
-		if(MRC2ToolBoxCore.getActiveMetabolomicsExperiment() != null 
-				|| MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() != null) {
-			MessageDialog.showWarningMsg("Please close currently active experiment first!");
-			return;
-		}
+
 		MRC2ToolBoxCore.getMainWindow().
 				showNewExperimentDialog(ProjectType.DATA_ANALYSIS_NEW_FORMAT, activeExperiment);
 	}

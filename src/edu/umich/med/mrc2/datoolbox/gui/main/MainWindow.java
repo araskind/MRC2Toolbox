@@ -174,13 +174,12 @@ public class MainWindow extends JFrame
 	private static DataExplorerPlotFrame dataExplorerPlotDialog;
 	private RawDataUploadPrepDialog rawDataUploadPrepDialog;
 	private IdTrackerLoginDialog idtLogin;
+	private static ExperimentSwitchController experimentSwitchController;
 
 	private MainMenuBar mainMenuBar;
 	private static ExperimentSetupDraw experimentSetupDraw;
 	private static LinkedHashMap<PanelList, DockableMRC2ToolboxPanel> panels;
 	private LinkedHashMap<PanelList, Boolean> panelShowing;
-	
-	private ExperimentSwitchController experimentSwitchController;
 	
 	private boolean savingAsCopy;
 
@@ -205,11 +204,10 @@ public class MainWindow extends JFrame
 
 		super(BuildInformation.getProgramName());
 		MRC2ToolBoxCore.getTaskController().addTaskControlListener(this);
-		initWindow();
+		initWindow();		
 
 		currentExperiment = null;
 		activeDataPipeline = null;
-		experimentSwitchController = new ExperimentSwitchController();
 		experimentSetupDraw.switchDataPipeline(null, null);
 	}
 
@@ -229,23 +227,19 @@ public class MainWindow extends JFrame
 			}
 		}
 		if (command.equals(MainActionCommands.SAVE_EXPERIMENT_COMMAND.getName()))
-			saveExperimentAndContinue();
+			saveExperiment();
 
 		if (command.equals(MainActionCommands.SAVE_EXPERIMENT_COPY_COMMAND.getName()))
 			saveExperimentCopy();
 
 		if (command.equals(MainActionCommands.CLOSE_EXPERIMENT_COMMAND.getName()))
 			closeExperiment();
-
-		if (command.equals(MainActionCommands.NEW_METABOLOMICS_EXPERIMENT_COMMAND.getName()))
-			showNewExperimentDialog(ProjectType.DATA_ANALYSIS, null);
 		
 		if (command.equals(MainActionCommands.NEW_METABOLOMICS_XML_EXPERIMENT_COMMAND.getName()))
 			showNewExperimentDialog(ProjectType.DATA_ANALYSIS_NEW_FORMAT, null);
 
-		if (command.equals(MainActionCommands.CREATE_NEW_METABOLOMICS_EXPERIMENT_COMMAND.getName())
-				|| command.equals(MainActionCommands.CREATE_NEW_METABOLOMICS_XML_EXPERIMENT_COMMAND.getName()))
-			createNewMetabolomicsExperiment();
+		if (command.equals(MainActionCommands.CREATE_NEW_METABOLOMICS_XML_EXPERIMENT_COMMAND.getName()))
+			validateAndCreateNewMetabolomicsExperiment();
 		
 		if (command.equals(MainActionCommands.NEW_RAW_DATA_EXPERIMENT_SETUP_COMMAND.getName()))
 			showNewExperimentDialog(ProjectType.RAW_DATA_ANALYSIS, null);
@@ -261,9 +255,6 @@ public class MainWindow extends JFrame
 
 		if (command.equals(MainActionCommands.IDTRACKER_LOGOUT_COMMAND.getName()))
 			logoutIdTracker();
-
-		if (command.equals(MainActionCommands.OPEN_METABOLOMICS_EXPERIMENT_COMMAND.getName()))
-			openExperiment(ProjectType.DATA_ANALYSIS);
 		
 		if (command.equals(MainActionCommands.OPEN_RAW_DATA_EXPERIMENT_COMMAND.getName()))
 			openExperiment(ProjectType.RAW_DATA_ANALYSIS);
@@ -273,15 +264,9 @@ public class MainWindow extends JFrame
 		
 		if (command.equals(MainActionCommands.OPEN_RAW_DATA_EXPERIMENT_FROM_DATABASE_COMMAND.getName()))
 			openRawDataExperimentFromDatabase();
-		
-		if (command.equals(MainActionCommands.NEW_METABOLOMICS_XML_EXPERIMENT_COMMAND.getName())) {
-			
-		}
+
 		if (command.equals(MainActionCommands.OPEN_METABOLOMICS_XML_EXPERIMENT_COMMAND.getName()))
 			openExperiment(ProjectType.DATA_ANALYSIS_NEW_FORMAT);
-		
-		if (command.equals(MainActionCommands.SAVE_AS_XML_EXPERIMENT_COMMAND.getName()))
-			saveMetabolomicsExperimentInNewFormat();
 		
 		if (command.equals(MainActionCommands.SHOW_MS_TOOLBOX_COMMAND.getName()))
 			showMsTools();
@@ -300,15 +285,6 @@ public class MainWindow extends JFrame
 
 		if (DataExportDialog.getExportTypeByName(command) != null)
 			exportAnalysisResults(command);
-
-//		if (command.equals(MainActionCommands.EXPORT_RESULTS_4MPP_COMMAND.getName()))
-//			exportAnalysisResults(MainActionCommands.EXPORT_RESULTS_4MPP_COMMAND);
-//
-//		if (command.equals(MainActionCommands.EXPORT_RESULTS_4BINNER_COMMAND.getName()))
-//			exportAnalysisResults(MainActionCommands.EXPORT_RESULTS_4BINNER_COMMAND);
-//
-//		if (command.equals(MainActionCommands.EXPORT_RESULTS_4METAB_COMBINER_COMMAND.getName()))
-//			exportAnalysisResults(MainActionCommands.EXPORT_RESULTS_4METAB_COMBINER_COMMAND);
 		
 		if (command.equals(MainActionCommands.SHOW_RAWA_DATA_UPLOAD_PREP_DIALOG.getName()))
 			showRawDataUploadPrepDialog();
@@ -358,81 +334,34 @@ public class MainWindow extends JFrame
 		}
 	}
 	
-	private void openRecentExperiment(String command) {
 
-		String[]parts = command.split("\\|");
-		String expId = parts[parts.length - 1];
-		ExperimentPointer ep = 
-				RecentDataManager.getRecentExperimentById(expId);
-		if(ep == null) {
-			MessageDialog.showErrorMsg(
-					"Requested experiment not found", this.getContentPane());
-			return;
-		}
+	private boolean checkForOpenedProject(String expId) {
+		
 		if(MRC2ToolBoxCore.getActiveMetabolomicsExperiment() != null) {
 			
 			if(MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getId().equals(expId))
-				return;
+				return false;
 			else {
 				MessageDialog.showWarningMsg(
 						"Please close the active metabolomics experiment\n\"" +
 						MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getName() + 
 						"\"", this.getContentPane());
-				return;
+				return false;
 			}
 		}
 		if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() != null) {
 			
 			if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment().getId().equals(expId))
-				return;
+				return false;
 			else {
 				MessageDialog.showWarningMsg(
 						"Please close the active offline raw data analysis experiment\n\"" +
 						MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment().getName() + 
 						"\"", this.getContentPane());
-				return;
+				return false;
 			}
 		}
-		//	TODO handle new format
-		if(ep.getProjectType().equals(ProjectType.DATA_ANALYSIS)) {
-			
-			File experimentFile = ep.getExperimentFile();
-			if(!experimentFile.exists()) {
-				
-				MessageDialog.showErrorMsg(
-						"Project file for \"" + ep.getName() + "\" not found at\n"
-								+ experimentFile.getAbsolutePath(), this.getContentPane());
-				return;
-			}
-			LoadExperimentTask ltp = new LoadExperimentTask(experimentFile);
-			ltp.addTaskListener(this);
-			MRC2ToolBoxCore.getTaskController().addTask(ltp);	
-		}
-		if(ep.getProjectType().equals(ProjectType.RAW_DATA_ANALYSIS)) {
-			
-			File experimentFile = ep.getExperimentFile();
-			if(!experimentFile.exists()) {
-				
-				MessageDialog.showErrorMsg(
-						"Project file for \"" + ep.getName() + "\" not found at\n"
-								+ experimentFile.getAbsolutePath(), this.getContentPane());
-				return;
-			}
-			OpenStoredRawDataAnalysisExperimentTask ltp = 
-					new OpenStoredRawDataAnalysisExperimentTask(experimentFile, true);
-			ltp.addTaskListener(getPanel(PanelList.RAW_DATA_EXAMINER));
-			MRC2ToolBoxCore.getTaskController().addTask(ltp);
-		}
-		if(ep.getProjectType().equals(ProjectType.ID_TRACKER_DATA_ANALYSIS)) {
-			
-			LIMSExperiment idTrackerExperiment = IDTDataCache.getExperimentById(expId);
-			IDTrackerExperimentDataFetchTask task = 
-					new IDTrackerExperimentDataFetchTask(idTrackerExperiment);
-			
-			MRC2ToolBoxCore.getMainWindow().showPanel(PanelList.ID_WORKBENCH);
-			task.addTaskListener(MRC2ToolBoxCore.getMainWindow().getPanel(PanelList.ID_WORKBENCH));
-			MRC2ToolBoxCore.getTaskController().addTask(task);
-		}
+		return true;
 	}
 
 	private void loadRecentFeatureClusterDataSet(String command) {
@@ -481,24 +410,6 @@ public class MainWindow extends JFrame
 		
 		RecentDataManager.saveDataToFile();
 		updateGuiWithRecentData();
-	}
-
-	private void saveMetabolomicsExperimentInNewFormat() {
-		
-		if (currentExperiment == null)
-			return;
-		
-		experimentSwitchController = new ExperimentSwitchController(
-				true,
-				null,
-				false,
-				currentExperiment.getProjectType(),
-				null);
-		
-		SaveMetabolomicsProjectTask task = 
-				new SaveMetabolomicsProjectTask(currentExperiment);
-		task.addTaskListener(this);
-		MRC2ToolBoxCore.getTaskController().addTask(task);
 	}
 
 	private void goToExperimentFolder() {
@@ -803,7 +714,7 @@ public class MainWindow extends JFrame
 			if(complete || (!complete && !entry.getKey().equals(PanelList.DESIGN))) {
 
 				if (entry.getValue() != null)
-					((DockableMRC2ToolboxPanel) entry.getValue()).clearPanel();
+					entry.getValue().clearPanel();
 			}
 		}
 	}
@@ -819,9 +730,8 @@ public class MainWindow extends JFrame
 			if (selectedValue == JOptionPane.CANCEL_OPTION)
 				return;
 			
-			if (selectedValue == JOptionPane.YES_OPTION) {
-				clearGuiAfterExperimentClosed();
-			}
+			if (selectedValue == JOptionPane.YES_OPTION)
+				clearGuiAfterExperimentClosed();			
 		}
 		else {
 			String yesNoQuestion = "You are going to close current experiment,"
@@ -831,19 +741,13 @@ public class MainWindow extends JFrame
 			if (selectedValue == JOptionPane.CANCEL_OPTION)
 				return;
 
-			if (selectedValue == JOptionPane.YES_OPTION) {
-						
-				experimentSwitchController = new ExperimentSwitchController(
-						true,
-						ExperimentState.CLOSING_EXPERIMENT,
-						false,
-						currentExperiment.getProjectType(), 
-						null);			
+			if (selectedValue == JOptionPane.YES_OPTION) {		
 				saveExperiment();
+				experimentSwitchController = new ExperimentSwitchController();
+				experimentSwitchController.setExperimentState(ExperimentState.CLOSING_EXPERIMENT);
 			}
-			else {
-				clearGuiAfterExperimentClosed();
-			}
+			if(selectedValue == JOptionPane.NO_OPTION)
+				clearGuiAfterExperimentClosed();			
 		}
 	}
 	
@@ -851,7 +755,10 @@ public class MainWindow extends JFrame
 		
 		if(currentExperiment != null) {
 			
-			saveMetabolomicsExperimentInNewFormat();
+			SaveMetabolomicsProjectTask task = 
+					new SaveMetabolomicsProjectTask(currentExperiment);
+			task.addTaskListener(this);
+			MRC2ToolBoxCore.getTaskController().addTask(task);
 			return;
 		}
 		if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() != null) {
@@ -862,24 +769,6 @@ public class MainWindow extends JFrame
 			task.addTaskListener(this);
 			MRC2ToolBoxCore.getTaskController().addTask(task);
 		}		
-	}
-	
-	private void saveExperimentAndContinue() {
-		
-		ProjectType activeExperimentType = null;
-		if(currentExperiment != null)
-			activeExperimentType = ProjectType.DATA_ANALYSIS_NEW_FORMAT;
-		
-		if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() != null)
-			activeExperimentType = ProjectType.RAW_DATA_ANALYSIS;
-				
-		experimentSwitchController = new ExperimentSwitchController(
-				true,
-				null,
-				false,
-				activeExperimentType, 
-				null);			
-		saveExperiment();
 	}
 
 	public static void displayErrorMessage(String title, String msg) {
@@ -913,19 +802,15 @@ public class MainWindow extends JFrame
 			if (selectedValue == JOptionPane.CANCEL_OPTION)
 				return;
 			
-			if (selectedValue == JOptionPane.YES_OPTION) {
-
-				experimentSwitchController = new ExperimentSwitchController(
-						true,
-						null,
-						true,
-						null, 
-						null);	
+			experimentSwitchController = new ExperimentSwitchController();
+			experimentSwitchController.setExitProgram(true);
+			
+			if (selectedValue == JOptionPane.YES_OPTION)
 				saveExperiment();
-			}
+					
 			if (selectedValue == JOptionPane.NO_OPTION) {
 
-				if (MessageDialog.showChoiceWithWarningMsg(
+				if(MessageDialog.showChoiceWithWarningMsg(
 						"Are you sure you want to exit?", this.getContentPane()) == JOptionPane.YES_OPTION)
 					MRC2ToolBoxCore.shutDown();
 			}
@@ -991,7 +876,7 @@ public class MainWindow extends JFrame
 		progressDialogue.setVisible(false);
 	}
 
-	private void initExperimentLoadTask(ProjectType experimentType) {
+	private void initExperimentLoadTask(ProjectType projectType) {
 
 		JFileChooser chooser = new ImprovedFileChooser();
 		chooser.setPreferredSize(new Dimension(800, 640));
@@ -1003,71 +888,94 @@ public class MainWindow extends JFrame
 		chooser.getActionMap().get("viewTypeDetails").actionPerformed(null);	
 		FileNameExtensionFilter experimentFileFilter = 
 				new FileNameExtensionFilter(
-						experimentType.getDescription(), 
-						experimentType.getExtension());
+						projectType.getDescription(), 
+						projectType.getExtension());
 		chooser.setFileFilter(experimentFileFilter);
-		if(experimentType.equals(ProjectType.RAW_DATA_ANALYSIS))		
-			chooser.setAccessory(new RawDataExperimentOpenComponent(chooser));			
-
-		Task projectLoadTask = null;
-		if (chooser.showOpenDialog(this.getContentPane()) == JFileChooser.APPROVE_OPTION)			
-			projectLoadTask = constructProjectLoadTask(experimentType, chooser);
 		
-		if(projectLoadTask != null) {
+		RawDataExperimentOpenComponent rdeoc = null;
+		boolean loadResults = true;
+		if(projectType.equals(ProjectType.RAW_DATA_ANALYSIS)) {
+			rdeoc = new RawDataExperimentOpenComponent(chooser);
+			chooser.setAccessory(rdeoc);	
+		}
+		Task projectLoadTask = null;
+		
+		if (chooser.showOpenDialog(this.getContentPane()) == JFileChooser.APPROVE_OPTION) {			
 			
-			TaskListener taskListener = this;
-			if(experimentType.equals(ProjectType.RAW_DATA_ANALYSIS))
-				taskListener = getPanel(PanelList.RAW_DATA_EXAMINER);
+			File projectFile = getProjectFile(chooser,  projectType);
+			if(projectFile == null)
+				return;
 			
-			projectLoadTask.addTaskListener(taskListener);			
+			if(rdeoc != null)
+				loadResults = rdeoc.loadResults();
+			
+			projectLoadTask = constructProjectLoadTask(projectType, projectFile, null, loadResults);
+			if(projectLoadTask == null)
+				return;
+		
 			savePreferences();
-			MRC2ToolBoxCore.getTaskController().addTask(projectLoadTask);
+			initProjectLoad(projectLoadTask, projectType);
 		}
 	}
 	
-	private Task constructProjectLoadTask(
-			ProjectType projectType, 
-			JFileChooser chooser) {
+	private void initProjectLoad(Task projectLoadTask, ProjectType projectType) {
 		
-		Task projectLoadTask = null;
-		File experimentFile = null;
-		String extension = projectType.getExtension();
-		File selectedFile = chooser.getSelectedFile();	
+		TaskListener taskListener = this;
+		if(projectType.equals(ProjectType.RAW_DATA_ANALYSIS)) {
+			showPanel(PanelList.RAW_DATA_EXAMINER);
+			taskListener = getPanel(PanelList.RAW_DATA_EXAMINER);
+		}	
+		if(projectType.equals(ProjectType.ID_TRACKER_DATA_ANALYSIS)) {
+			showPanel(PanelList.ID_WORKBENCH);
+			taskListener = getPanel(PanelList.ID_WORKBENCH);
+		}
+		projectLoadTask.addTaskListener(taskListener);			
+		MRC2ToolBoxCore.getTaskController().addTask(projectLoadTask);
+	}
+	
+	private File getProjectFile(JFileChooser chooser, ProjectType projectType) {
 		
+		File selectedFile = chooser.getSelectedFile();
+		File projectFile = null;
 		if(selectedFile.isDirectory()) {
 			List<Path> pfList = FIOUtils.findFilesByExtension(
-					Paths.get(selectedFile.getAbsolutePath()), extension);
+					Paths.get(selectedFile.getAbsolutePath()), projectType.getExtension());
 			if(pfList == null || pfList.isEmpty()) {
 				MessageDialog.showWarningMsg(selectedFile.getName() + 
 						" is not a valid " + projectType.getDescription(), chooser);
 				return null;
 			}
-			experimentFile = pfList.get(0).toFile();
-			experimentBaseDirectory = selectedFile.getParentFile();
+			projectFile = pfList.get(0).toFile();
 		}
 		else {
-			experimentFile = selectedFile;
-			experimentBaseDirectory = experimentFile.getParentFile().getParentFile();
+			projectFile = selectedFile;
 		}
-		if(experimentFile != null) {
+		return projectFile;
+	}
+
+	private Task constructProjectLoadTask(
+			ProjectType projectType, 
+			File projectFile,
+			String limsId,
+			boolean loadResultsForRawDataProject) {
+		
+		if(projectFile == null)
+			return null;
+		
+		Task projectLoadTask = null;
+		experimentBaseDirectory = projectFile.getParentFile().getParentFile();
+		if(projectType.equals(ProjectType.DATA_ANALYSIS_NEW_FORMAT))
+			projectLoadTask = new OpenMetabolomicsProjectTask(projectFile);
+		
+		if(projectType.equals(ProjectType.RAW_DATA_ANALYSIS))					
+			projectLoadTask = new OpenStoredRawDataAnalysisExperimentTask(
+					projectFile, loadResultsForRawDataProject);	
+		
+		if(projectType.equals(ProjectType.ID_TRACKER_DATA_ANALYSIS)) {
 			
-			if(projectType.equals(ProjectType.DATA_ANALYSIS))
-				projectLoadTask = new LoadExperimentTask(experimentFile);
-			
-			if(projectType.equals(ProjectType.DATA_ANALYSIS_NEW_FORMAT))
-				projectLoadTask = new OpenMetabolomicsProjectTask(experimentFile);
-			
-			if(projectType.equals(ProjectType.RAW_DATA_ANALYSIS)) {	
-				
-				boolean loadResults = true;
-				RawDataExperimentOpenComponent rdeoc = 
-						(RawDataExperimentOpenComponent)chooser.getAccessory();
-				if(rdeoc != null)
-					loadResults = rdeoc.loadResults();
-					
-				projectLoadTask = new OpenStoredRawDataAnalysisExperimentTask(experimentFile, loadResults);	
-			}
-		}
+			LIMSExperiment idTrackerExperiment = IDTDataCache.getExperimentById(limsId);
+			projectLoadTask = new IDTrackerExperimentDataFetchTask(idTrackerExperiment);
+		}		
 		return projectLoadTask;
 	}
 
@@ -1205,112 +1113,131 @@ public class MainWindow extends JFrame
 		// showProgressWindow();
 	}
 	
+	public boolean isActiveProjectPresent() {
+		
+		if(MRC2ToolBoxCore.getActiveMetabolomicsExperiment() != null 
+				|| MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() != null) {
+			MessageDialog.showWarningMsg("Please close currently active experiment first!");
+			return true;
+		}
+		else
+			return false;
+	}
+
 	public void showNewExperimentDialog(
 			ProjectType newExperimentType, 
 			LIMSExperiment newLimsExperiment) {
+			
+		if(isActiveProjectPresent())
+			return;
 		
-		if (currentExperiment != null 
-				|| MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() != null) {
+		if(newExperimentType.equals(ProjectType.DATA_ANALYSIS_NEW_FORMAT))
+			showNewMetabolomicsExperimentDialog(newExperimentType, newLimsExperiment);
+										
+		if(newExperimentType.equals(ProjectType.RAW_DATA_ANALYSIS)) 
+			showNewRawDataAnalysisExperimentDialog();	
+	}
+		
+	private void showNewRawDataAnalysisExperimentDialog() {
 			
-			int selectedValue = 
-					MessageDialog.showChooseOrCancelMsg(
-							"Save current experiment before creating a new one?", 
-							this.getContentPane());
-			if (selectedValue == JOptionPane.CANCEL_OPTION)
-				return;
-			
-			if (selectedValue == JOptionPane.YES_OPTION) {
-				
-				ProjectType activeExperimentType = ProjectType.DATA_ANALYSIS;
-				if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() != null)
-					activeExperimentType = ProjectType.RAW_DATA_ANALYSIS;
-				
-				experimentSwitchController = new ExperimentSwitchController(
-						true,
-						ExperimentState.NEW_EXPERIMENT,
-						false,
-						activeExperimentType, 
-						newExperimentType);
-				experimentSwitchController.setLimsExperiment(newLimsExperiment);			
-				saveExperiment();
-			}			
-			//	TODO LIMS experiment
-			else {
-				clearGuiAfterExperimentClosed();
-				if(newExperimentType.equals(ProjectType.DATA_ANALYSIS) || 
-						newExperimentType.equals(ProjectType.DATA_ANALYSIS_NEW_FORMAT))
-					showNewMetabolomicsExperimentDialog(newExperimentType, newLimsExperiment);
-												
-				if(newExperimentType.equals(ProjectType.RAW_DATA_ANALYSIS)) 
-					showNewRawDataAnalysisExperimentDialog();	
-			}
-		}
-		else {
-			if(newExperimentType.equals(ProjectType.DATA_ANALYSIS) || 
-					newExperimentType.equals(ProjectType.DATA_ANALYSIS_NEW_FORMAT))
-				showNewMetabolomicsExperimentDialog(newExperimentType, newLimsExperiment);
-											
-			if(newExperimentType.equals(ProjectType.RAW_DATA_ANALYSIS)) 
-				showNewRawDataAnalysisExperimentDialog();			
-		}
+		rawDataAnalysisExperimentSetupDialog = 
+				new RawDataAnalysisExperimentSetupDialog(this);
+		rawDataAnalysisExperimentSetupDialog.setLocationRelativeTo(
+				this.getContentPane());
+		rawDataAnalysisExperimentSetupDialog.setVisible(true);
+	}
+	
+	private void showNewMetabolomicsExperimentDialog(
+			ProjectType projectType, 
+			LIMSExperiment newLimsExperiment) {
+		
+		newMetabolomicsExperimentDialog = 
+				new NewMetabolomicsExperimentDialog(this, projectType);
+		newMetabolomicsExperimentDialog.setLimsExperiment(newLimsExperiment);
+		newMetabolomicsExperimentDialog.setLocationRelativeTo(this);
+		newMetabolomicsExperimentDialog.setVisible(true);
 	}
 
 	private void openExperiment(ProjectType newExperimentType) {
+	
+		if(isActiveProjectPresent())
+			return;
+	
+		initExperimentLoadTask(newExperimentType);
+	}
+	
+	private void openRecentExperiment(String command) {
 
-		if (currentExperiment != null 
-				|| MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() != null) {
-
-			int selectedValue = 
-					MessageDialog.showChooseOrCancelMsg(
-							"Save current experiment before opening another one?", 
-							this.getContentPane());
-			if(selectedValue == JOptionPane.CANCEL_OPTION)
-				return;
-			
-			if (selectedValue == JOptionPane.YES_OPTION) {
-
-				ProjectType activeExperimentType = ProjectType.DATA_ANALYSIS;
-				if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() != null)
-					activeExperimentType = ProjectType.RAW_DATA_ANALYSIS;
-				
-				experimentSwitchController = new ExperimentSwitchController(
-						true,
-						ExperimentState.EXISTING_EXPERIMENT,
-						false,
-						activeExperimentType, 
-						newExperimentType);
-				saveExperiment();
-				return;
-			}
-			if (selectedValue == JOptionPane.NO_OPTION) {
-
-				clearGuiAfterExperimentClosed();
-				initExperimentLoadTask(newExperimentType);
-				return;
-			}
+		if(isActiveProjectPresent())
+			return;
+		
+		String[]parts = command.split("\\|");
+		String expId = parts[parts.length - 1];
+		ExperimentPointer ep = 
+				RecentDataManager.getRecentExperimentById(expId);
+		if(ep == null) {
+			MessageDialog.showErrorMsg(
+					"Requested experiment not found", this.getContentPane());
+			return;
 		}
-		else
-			initExperimentLoadTask(newExperimentType);
+		if(!checkForOpenedProject(expId))
+			return;
+		
+		Task projectLoadTask = constructProjectLoadTask(
+				ep.getProjectType(),				
+				ep.getExperimentFile(),
+				expId,
+				true);
+		
+		initProjectLoad(projectLoadTask, ep.getProjectType());
+
+		//	TODO handle new format
+		if(ep.getProjectType().equals(ProjectType.DATA_ANALYSIS_NEW_FORMAT)) {
+			
+			File experimentFile = ep.getExperimentFile();
+			if(!experimentFile.exists()) {
+				
+				MessageDialog.showErrorMsg(
+						"Project file for \"" + ep.getName() + "\" not found at\n"
+								+ experimentFile.getAbsolutePath(), this.getContentPane());
+				return;
+			}
+			LoadExperimentTask ltp = new LoadExperimentTask(experimentFile);
+			ltp.addTaskListener(this);
+			MRC2ToolBoxCore.getTaskController().addTask(ltp);	
+		}
+		if(ep.getProjectType().equals(ProjectType.RAW_DATA_ANALYSIS)) {
+			
+			File experimentFile = ep.getExperimentFile();
+			if(!experimentFile.exists()) {
+				
+				MessageDialog.showErrorMsg(
+						"Project file for \"" + ep.getName() + "\" not found at\n"
+								+ experimentFile.getAbsolutePath(), this.getContentPane());
+				return;
+			}
+			OpenStoredRawDataAnalysisExperimentTask ltp = 
+					new OpenStoredRawDataAnalysisExperimentTask(experimentFile, true);
+			ltp.addTaskListener(getPanel(PanelList.RAW_DATA_EXAMINER));
+			MRC2ToolBoxCore.getTaskController().addTask(ltp);
+		}
+		if(ep.getProjectType().equals(ProjectType.ID_TRACKER_DATA_ANALYSIS)) {
+			
+			LIMSExperiment idTrackerExperiment = IDTDataCache.getExperimentById(expId);
+			IDTrackerExperimentDataFetchTask task = 
+					new IDTrackerExperimentDataFetchTask(idTrackerExperiment);
+			
+			MRC2ToolBoxCore.getMainWindow().showPanel(PanelList.ID_WORKBENCH);
+			task.addTaskListener(MRC2ToolBoxCore.getMainWindow().getPanel(PanelList.ID_WORKBENCH));
+			MRC2ToolBoxCore.getTaskController().addTask(task);
+		}
 	}
 	
 	private void openRawDataExperimentFromDatabase() {
 		
-		if(MRC2ToolBoxCore.getActiveMetabolomicsExperiment() != null) {
-			
-			MessageDialog.showWarningMsg(
-					"Please close the active metabolomics experiment\n\"" +
-					MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getName() + 
-					"\"", this.getContentPane());
-			return;			
-		}
-		if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() != null) {
-			
-			MessageDialog.showWarningMsg(
-					"Please close the active offline raw data analysis experiment\n\"" +
-					MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment().getName() + 
-					"\"", this.getContentPane());
-			return;		
-		}		
+		if(isActiveProjectPresent())
+			return;
+		
 		DatabaseExperimentSelectorDialog experimentSelectorDialog = 
 				new DatabaseExperimentSelectorDialog();
 		experimentSelectorDialog.setLocationRelativeTo(this.getContentPane());
@@ -1338,28 +1265,8 @@ public class MainWindow extends JFrame
 		MessageDialog.showInfoMsg(
 				MainActionCommands.SHOW_HELP_COMMAND.getName());
 	}
-	
-	private void showNewRawDataAnalysisExperimentDialog() {
-			
-		rawDataAnalysisExperimentSetupDialog = 
-				new RawDataAnalysisExperimentSetupDialog(this);
-		rawDataAnalysisExperimentSetupDialog.setLocationRelativeTo(
-				this.getContentPane());
-		rawDataAnalysisExperimentSetupDialog.setVisible(true);
-	}
-	
-	private void showNewMetabolomicsExperimentDialog(
-			ProjectType projectType, 
-			LIMSExperiment newLimsExperiment) {
-		
-		newMetabolomicsExperimentDialog = 
-				new NewMetabolomicsExperimentDialog(this, projectType);
-		newMetabolomicsExperimentDialog.setLimsExperiment(newLimsExperiment);
-		newMetabolomicsExperimentDialog.setLocationRelativeTo(this);
-		newMetabolomicsExperimentDialog.setVisible(true);
-	}
 
-	public void createNewMetabolomicsExperiment() {
+	public void validateAndCreateNewMetabolomicsExperiment() {
 		
 		Collection<String>errors = 
 				newMetabolomicsExperimentDialog.validateExperimentData();
@@ -1368,51 +1275,15 @@ public class MainWindow extends JFrame
 					StringUtils.join(errors, "\n"), newMetabolomicsExperimentDialog);
 			return;
 		}
-		if(newMetabolomicsExperimentDialog.getProjectType().equals(ProjectType.DATA_ANALYSIS)) {
-			
-			createNewMetabolomicsExperimentInLegacyFormat(
-					newMetabolomicsExperimentDialog.getProjectParentFolder(), 
-					newMetabolomicsExperimentDialog.getProjectName(), 
-					newMetabolomicsExperimentDialog.getProjectDescription(), 
-					newMetabolomicsExperimentDialog.getLimsExperiment());
-		}
 		if(newMetabolomicsExperimentDialog.getProjectType().equals(ProjectType.DATA_ANALYSIS_NEW_FORMAT)) {
 			
-			createNewMetabolomicsExperimentInXMLFormat(
+			createNewMetabolomicsExperiment(
 					newMetabolomicsExperimentDialog.getProjectParentFolder(), 
 					newMetabolomicsExperimentDialog.getProjectName(), 
 					newMetabolomicsExperimentDialog.getProjectDescription(), 
 					newMetabolomicsExperimentDialog.getLimsExperiment());
 		}		
 		newMetabolomicsExperimentDialog.dispose();
-	}
-	
-	private void createNewMetabolomicsExperimentInXMLFormat(
-			File parentDirectory, 
-			String experimentName,
-			String experimentDescription, 
-			LIMSExperiment limsExperiment) {
-
-		createNewMetabolomicsExperiment(
-				parentDirectory, 
-				experimentName,
-				experimentDescription, 
-				limsExperiment);
-		saveMetabolomicsExperimentInNewFormat();
-	}
-
-	private void createNewMetabolomicsExperimentInLegacyFormat(
-			File parentDirectory, 
-			String experimentName,
-			String experimentDescription, 
-			LIMSExperiment limsExperiment) {
-		
-		createNewMetabolomicsExperiment(
-				parentDirectory, 
-				experimentName,
-				experimentDescription, 
-				limsExperiment);
-		saveExperiment();
 	}
 	
 	private void createNewMetabolomicsExperiment(
@@ -1446,11 +1317,8 @@ public class MainWindow extends JFrame
 			currentExperiment.getExperimentDesign().addListener(entry.getValue());
 		
 		experimentBaseDirectory = parentDirectory;
-		savePreferences();
-
-		experimentSwitchController = 
-				new ExperimentSwitchController(false, null, false, ProjectType.DATA_ANALYSIS, null);
-		
+		savePreferences();	
+		saveExperiment();
 	}
 	
 	public void showPanel(PanelList panelType) {
@@ -1546,23 +1414,23 @@ public class MainWindow extends JFrame
 			return;
 		}
 		//	If just saving current experiment
-		if(experimentSwitchController.getExperimentState() == null)			
+		if(experimentSwitchController == null 
+				|| experimentSwitchController.getExperimentState() == null)			
 			return;
-		else	// If opening existing project or creating a new one
+		if(experimentSwitchController != null 
+				&& experimentSwitchController.getExperimentState().equals(ExperimentState.CLOSING_EXPERIMENT))
 			clearGuiAfterExperimentClosed();
-		
-		if(experimentSwitchController.getExperimentState().equals(
-				ExperimentSwitchController.ExperimentState.NEW_EXPERIMENT)) {
-			
-			showNewExperimentDialog(
-					experimentSwitchController.getNewExperimentType(),
-					experimentSwitchController.getLimsExperiment());			
-		}
-		if(experimentSwitchController.getExperimentState().equals(
-				ExperimentSwitchController.ExperimentState.EXISTING_EXPERIMENT))
-			initExperimentLoadTask(experimentSwitchController.getNewExperimentType());
-
-		//	TODO if(savingAsCopy) {}
+					
+//		if(experimentSwitchController.getExperimentState().equals(
+//				ExperimentSwitchController.ExperimentState.NEW_EXPERIMENT)) {
+//			
+//			showNewExperimentDialog(
+//					experimentSwitchController.getNewExperimentType(),
+//					experimentSwitchController.getLimsExperiment());			
+//		}
+//		if(experimentSwitchController.getExperimentState().equals(
+//				ExperimentSwitchController.ExperimentState.EXISTING_EXPERIMENT))
+//			initExperimentLoadTask(experimentSwitchController.getNewExperimentType());
 	}
 
 	private void finalizeExperimentLoad(LoadExperimentTask eTask) {
@@ -1610,8 +1478,6 @@ public class MainWindow extends JFrame
 		experimentSetupDraw.switchDataPipeline(currentExperiment, activeDataPipeline);
 		for (Entry<PanelList, DockableMRC2ToolboxPanel> entry : panels.entrySet())
 			entry.getValue().switchDataPipeline(currentExperiment, activeDataPipeline);
-		
-//		toolBar.updateGuiFromProjectAndDataPipeline(currentProject, activeDataPipeline);
 		
 		if(dataExplorerPlotDialog != null) {
 			dataExplorerPlotDialog.clearPanels();
@@ -1665,22 +1531,8 @@ public class MainWindow extends JFrame
 			setGuiFromMetabolomicsProject();
 			return;
 		}
-		if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() != null) {
+		if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() != null)
 			setGuiFromRawDataAnalysisProject();
-			return;
-		}
-	}
-	
-	private void setGuiFromRawDataAnalysisProject() {
-		
-		if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() != null) {
-
-			this.setTitle(BuildInformation.getProgramName() + " - " + 
-					MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment().getName());
-			StatusBar.showRawDataAnalysisExperimentData(
-					MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment());;
-		}
-		//	TODO more
 	}
 	
 	private void setGuiFromMetabolomicsProject() {
@@ -1720,6 +1572,18 @@ public class MainWindow extends JFrame
 				forEach(ss -> ss.addListener(entry.getValue()));			
 		}
 		showPanel(PanelList.FEATURE_DATA);
+	}
+		
+	private void setGuiFromRawDataAnalysisProject() {
+		
+		if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() != null) {
+
+			this.setTitle(BuildInformation.getProgramName() + " - " + 
+					MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment().getName());
+			StatusBar.showRawDataAnalysisExperimentData(
+					MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment());;
+		}
+		//	TODO more
 	}
 
 	public static DbParserFrame getDbParserFrame() {

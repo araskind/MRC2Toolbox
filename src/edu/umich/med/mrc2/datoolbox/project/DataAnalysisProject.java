@@ -98,7 +98,7 @@ public class DataAnalysisProject extends Project {
 			String projectDescription, 
 			File parentDirectory) {
 
-		super(ProjectType.DATA_ANALYSIS, 
+		super(ProjectType.DATA_ANALYSIS_NEW_FORMAT, 
 				projectName, 
 				projectDescription);
 

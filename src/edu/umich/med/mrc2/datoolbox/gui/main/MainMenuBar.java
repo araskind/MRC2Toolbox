@@ -174,20 +174,7 @@ public class MainMenuBar extends CommonMenuBar {
 			
 			openXMLExperimentMenuItem = addItem(experimentMenu, 
 					MainActionCommands.OPEN_METABOLOMICS_XML_EXPERIMENT_COMMAND, openXMLExperimentIcon);
-			openXMLExperimentMenuItem.setAccelerator(KeyStroke.getKeyStroke('O', MASK | InputEvent.SHIFT_DOWN_MASK));
-			
-			saveAsXMLExperimentMenuItem = addItem(experimentMenu, 
-					MainActionCommands.SAVE_AS_XML_EXPERIMENT_COMMAND, saveXMLExperimentIcon);
-			
-			experimentMenu.addSeparator();
-			
-//			newExperimentMenuItem = addItem(experimentMenu, 
-//					MainActionCommands.NEW_METABOLOMICS_EXPERIMENT_COMMAND, newExperimentIcon);
-//			newExperimentMenuItem.setAccelerator(KeyStroke.getKeyStroke('N', MASK | InputEvent.SHIFT_DOWN_MASK));
-//			newExperimentMenuItem.setEnabled(false);
-			
-			openExperimentMenuItem = addItem(experimentMenu, 
-					MainActionCommands.OPEN_METABOLOMICS_EXPERIMENT_COMMAND, openExperimentIcon);
+			openXMLExperimentMenuItem.setAccelerator(KeyStroke.getKeyStroke('O', MASK | InputEvent.SHIFT_DOWN_MASK));			
 			
 			experimentMenu.addSeparator();
 		}
@@ -210,14 +197,9 @@ public class MainMenuBar extends CommonMenuBar {
 		
 		experimentMenu.addSeparator();
 		
-//		editIDExperimentMenuItem = addItem(experimentMenu, 
-//				MainActionCommands.EDIT_RAW_DATA_EXPERIMENT_SETUP_COMMAND, editRdaExperimentIcon);		
-//		editIDExperimentMenuItem.setEnabled(false);
-		
 		saveExperimentMenuItem = addItem(experimentMenu, 
 				MainActionCommands.SAVE_EXPERIMENT_COMMAND, saveExperimentIcon);
 		saveExperimentMenuItem.setAccelerator(KeyStroke.getKeyStroke('S', MASK));
-//		saveExperimentMenuItem.setEnabled(false);
 		
 		saveExperimentAsMenuItem = addItem(experimentMenu, 
 				MainActionCommands.SAVE_EXPERIMENT_COPY_COMMAND, saveExperimentCopyIcon);
@@ -449,7 +431,7 @@ public class MainMenuBar extends CommonMenuBar {
 	
 	private Icon getIconForProjectType(ProjectType type) {	
 				
-		if(type.equals(ProjectType.DATA_ANALYSIS) || type.equals(ProjectType.DATA_ANALYSIS_NEW_FORMAT))
+		if(type.equals(ProjectType.DATA_ANALYSIS_NEW_FORMAT))
 			return openExperimentIcon;
 		
 		else if(type.equals(ProjectType.ID_TRACKER_DATA_ANALYSIS))
@@ -466,10 +448,7 @@ public class MainMenuBar extends CommonMenuBar {
 		ProjectType type = ep.getProjectType();
 		String command = null;
 		
-		if(type.equals(ProjectType.DATA_ANALYSIS))
-			command = MainActionCommands.OPEN_RECENT_METABOLOMICS_EXPERIMENT_COMMAND.name();
-		
-		else if(type.equals(ProjectType.DATA_ANALYSIS_NEW_FORMAT))
+		if(type.equals(ProjectType.DATA_ANALYSIS_NEW_FORMAT))
 			command = MainActionCommands.OPEN_RECENT_METABOLOMICS_EXPERIMENT_COMMAND.name();
 		
 		else if(type.equals(ProjectType.ID_TRACKER_DATA_ANALYSIS))

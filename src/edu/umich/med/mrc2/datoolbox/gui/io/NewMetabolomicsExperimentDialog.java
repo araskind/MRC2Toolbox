@@ -195,12 +195,6 @@ public class NewMetabolomicsExperimentDialog extends JDialog
 		
 		this.projectType = projectType;
 		String command = "";
-		if(projectType.equals(ProjectType.DATA_ANALYSIS)) {
-
-			setTitle("Create new data analysis experiment");
-			setIconImage(((ImageIcon) newProjectIcon).getImage());
-			command = MainActionCommands.CREATE_NEW_METABOLOMICS_EXPERIMENT_COMMAND.getName();
-		}
 		if(projectType.equals(ProjectType.DATA_ANALYSIS_NEW_FORMAT)) {
 
 			setTitle("Create new data analysis experiment (new format)");
