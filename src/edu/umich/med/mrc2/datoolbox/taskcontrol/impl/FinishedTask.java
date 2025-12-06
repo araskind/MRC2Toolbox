@@ -45,18 +45,20 @@ public class FinishedTask extends AbstractTask {
 
 	@Override
 	public Task cloneTask() {
-
 		return ftask.cloneTask();
 	}
 
+	@Override
 	public double getFinishedPercentage() {
 		return finishedPercentage;
 	}
 
+	@Override
 	public String getTaskDescription() {
 		return description;
 	}
 
+	@Override
 	public void run() {
 		// ignore any attempt to run this task, because it is finished
 	}

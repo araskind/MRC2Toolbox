@@ -489,7 +489,6 @@ public class ExperimentDetailsPanel extends DockableMRC2ToolboxPanel {
 
 		lastModifiedValueLabel.setText(modified);
 		dataPipelinesTable.setTableModelFromProject(currentExperiment);
-//		scrollPane.setPreferredSize(dataPipelinesTable.getPreferredScrollableViewportSize());
 		dataPipelinesTable.selectPipeline(newDataPipeline);
 	}
 

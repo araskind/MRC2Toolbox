@@ -59,7 +59,7 @@ public class TaskQueue extends AbstractTableModel {
 
 		size = 0;
 		queue = new WrappedTask[DEFAULT_CAPACITY];
-		progressBars = new Hashtable<Integer, LabeledProgressBar>();
+		progressBars = new Hashtable<>();
 	}
 
 	synchronized void addWrappedTask(WrappedTask task) {
@@ -81,7 +81,6 @@ public class TaskQueue extends AbstractTableModel {
 		// Call fireTableDataChanged because we have a new row and order of rows
 		// may have changed
 		fireTableDataChanged();
-
 	}
 
 	public synchronized boolean allTasksFinished() {
@@ -95,7 +94,7 @@ public class TaskQueue extends AbstractTableModel {
 
 	public synchronized void clear() {
 
-		//	removeAllTaskListeners();
+		removeAllTaskListeners();
 		size = 0;
 		queue = new WrappedTask[DEFAULT_CAPACITY];
 		fireTableDataChanged();
@@ -271,23 +270,12 @@ public class TaskQueue extends AbstractTableModel {
 		if (task == null)
 			return;
 
-		ArrayList<WrappedTask> newQueue = new ArrayList<WrappedTask>();
-
+		ArrayList<WrappedTask> newQueue = new ArrayList<>();
 		for (WrappedTask wt : queue) {
 
-			if (wt != null) {
-
-				if (!wt.getActualTask().equals(task))
-					newQueue.add(wt);
-			}
+			if (wt != null && !wt.getActualTask().equals(task))
+				newQueue.add(wt);			
 		}
-//		WrappedTask[] nQueue = new WrappedTask[queue.length];
-//
-//		for (int i = 0; i < newQueue.size(); i++)
-//			nQueue[i] = newQueue.get(i);
-
-//		queue = nQueue;
-		
 		queue = newQueue.toArray(new WrappedTask[newQueue.size()]);
 		size = queue.length;
 		fireTableDataChanged();

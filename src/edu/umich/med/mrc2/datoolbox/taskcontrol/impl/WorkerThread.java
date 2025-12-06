@@ -60,8 +60,8 @@ public class WorkerThread extends Thread {
 				if (errorMsg == null)
 					errorMsg = "Unspecified error";
 
-				MRC2ToolBoxCore.getMainWindow().displayErrorMessage("Error of task " + actualTask.getTaskDescription(),
-						errorMsg);
+				MRC2ToolBoxCore.getMainWindow().displayErrorMessage(
+						"Error of task " + actualTask.getTaskDescription(), errorMsg);
 			}
 
 			/*
@@ -90,7 +90,5 @@ public class WorkerThread extends Thread {
 		 * Mark this thread as finished
 		 */
 		finished = true;
-
 	}
-
 }

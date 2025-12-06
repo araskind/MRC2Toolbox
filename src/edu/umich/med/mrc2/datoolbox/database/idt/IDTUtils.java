@@ -96,6 +96,10 @@ import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
 import edu.umich.med.mrc2.datoolbox.utils.SQLUtils;
 
 public class IDTUtils {
+	
+	private IDTUtils() {
+		
+	}
 
 	public static boolean isSuperUser(Component parent) {
 		
@@ -113,7 +117,7 @@ public class IDTUtils {
 
 	public static Collection<LIMSExperiment> getExperimentList() throws Exception{
 
-		Collection<LIMSExperiment> experiments = new TreeSet<LIMSExperiment>();
+		Collection<LIMSExperiment> experiments = new TreeSet<>();
 		Connection conn = ConnectionManager.getConnection();
 		String query  =
 			"SELECT E.EXPERIMENT_ID, E.EXPERIMENT_NAME, " +
@@ -134,7 +138,7 @@ public class IDTUtils {
 			String projectId = rs.getString("PROJECT_ID");
 			LIMSProject project =
 				IDTDataCache.getProjects().stream().
-				filter(u -> u.getId().equals(projectId)).findFirst().get();
+				filter(u -> u.getId().equals(projectId)).findFirst().orElse(null);
 
 			if(project != null) {
 				experiment.setProject(project);
@@ -151,7 +155,7 @@ public class IDTUtils {
 	public static Collection<? extends LIMSProject> getProjectList() throws Exception{
 
 		LIMSDataCache.refreshLimsClientList();
-		Collection<LIMSProject> projects = new TreeSet<LIMSProject>();
+		Collection<LIMSProject> projects = new TreeSet<>();
 		Connection conn = ConnectionManager.getConnection();
 		String query  =
 			"SELECT PROJECT_ID, PROJECT_NAME, PROJECT_DESCRIPTION, START_DATE, " +

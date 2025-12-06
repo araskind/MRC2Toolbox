@@ -86,6 +86,8 @@ public class SaveMetabolomicsProjectTask extends AbstractTask implements TaskLis
 		}
 		if(!projectToSave.getDataPipelines().isEmpty())
 			saveDataForPipelines();
+		else
+			setStatus(TaskStatus.FINISHED);
 	}
 	
 	private void extractDatabaseReferences() {
@@ -133,7 +135,6 @@ public class SaveMetabolomicsProjectTask extends AbstractTask implements TaskLis
 			XmlUtils.writeCompactXMLtoFile(
 					projectXmlDocument, projectFile);
 			projectToSave.setProjectFile(projectFile);
-			setStatus(TaskStatus.FINISHED);
 			return;
 		}
 		projectRoot.addContent(addAcquisitionMethodDataFileMap());

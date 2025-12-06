@@ -122,10 +122,9 @@ public class ExperimentSetupDraw extends DockableMRC2ToolboxPanel {
 		
 		super.switchDataPipeline(project, newDataPipeline);
 		clearPanel();
-		if(currentExperiment == null) {
-//			projectToolbar.updateGuiFromProjectAndDataPipeline(null, null);
+		if(currentExperiment == null)
 			return;
-		}
+
 		experimentDetailsPanel.switchDataPipeline(currentExperiment, activeDataPipeline);
 		featureSubsetPanel.switchDataPipeline(currentExperiment, activeDataPipeline);
 		designSubsetPanel.switchDataPipeline(currentExperiment, activeDataPipeline);
@@ -134,12 +133,11 @@ public class ExperimentSetupDraw extends DockableMRC2ToolboxPanel {
 					currentExperiment.getLimsProject(),
 					currentExperiment.getLimsExperiment());
 		}
-//		projectToolbar.updateGuiFromProjectAndDataPipeline(currentProject, activeDataPipeline);
 	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		// TODO Auto-generated method stub
+
 		if(MRC2ToolBoxCore.getIdTrackerUser() == null) {
 			MessageDialog.showErrorMsg(
 					"You are not logged in ID tracker!", 

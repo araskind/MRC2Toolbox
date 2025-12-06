@@ -30,7 +30,6 @@ import java.util.LinkedList;
 import java.util.Set;
 import java.util.TreeSet;
 
-import javax.swing.BoxLayout;
 import javax.swing.Icon;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -97,30 +96,30 @@ public class DesignSubsetPanel extends DockableMRC2ToolboxPanel implements Table
 		super("DesignSubsetPanel", "Experiment design subsets", componentIcon);
 		setLayout(new BorderLayout(0, 0));
 
-		setListeners = new LinkedList<ExperimentDesignSubsetListener>();
+		setListeners = new LinkedList<>();
 
 		toolbar = new DesignSubsetToolbar(this);
 		add(toolbar, BorderLayout.NORTH);
 
-		wrapper = new JPanel();
+		wrapper = new JPanel(new BorderLayout(0,0));
 		wrapper.setBorder(new EmptyBorder(10, 10, 10, 10));
 		add(wrapper, BorderLayout.CENTER);
-		wrapper.setLayout(new BoxLayout(wrapper, BoxLayout.Y_AXIS));
 
-		scrollPane = new JScrollPane();
-		scrollPane.setBorder(new EmptyBorder(0, 0, 20, 0));
 		designSubsetTable = new DesignSubsetTable(this);
 		designSubsetTable.setBorder(new EmptyBorder(10, 0, 20, 0));
 
 		subsetSelectionModel = designSubsetTable.getSelectionModel();
 		subsetSelectionModel.addListSelectionListener(this);
+		
+		scrollPane = new JScrollPane(designSubsetTable);
+		scrollPane.setBorder(new EmptyBorder(0, 0, 20, 0));
 
 		scrollPane.add(designSubsetTable);
 		scrollPane.setViewportView(designSubsetTable);
-		wrapper.add(scrollPane);
+		wrapper.add(scrollPane, BorderLayout.CENTER);
 
 		designEditorPanel = new ProjectDesignEditorPanel();
-		wrapper.add(designEditorPanel);
+		wrapper.add(designEditorPanel, BorderLayout.EAST);
 
 		expDesignEditorDialog = new ExpDesignEditorDialog(this);
 		initActions();
@@ -404,7 +403,6 @@ public class DesignSubsetPanel extends DockableMRC2ToolboxPanel implements Table
 			
 		activeSet = currentExperiment.getExperimentDesign().getActiveDesignSubset();
 		designSubsetTable.setModelFromProject(currentExperiment);
-		scrollPane.setPreferredSize(designSubsetTable.getPreferredScrollableViewportSize());
 		designSubsetTable.selectActiveSubset();
 		toolbar.setToolbarState(activeSet);
 	}

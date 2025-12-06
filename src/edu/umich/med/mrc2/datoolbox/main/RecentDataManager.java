@@ -210,10 +210,7 @@ public class RecentDataManager {
 		if(projectsOfType.size() == MAX_OBJECTS_COUNT)
 			projectsOfType.removeLast();
 
-		projectsOfType.addFirst(newPointer);
-		
-		//	recentExperimentsMap.get(toAdd.getProjectType()).add(new ExperimentPointer(toAdd));
-		
+		projectsOfType.addFirst(newPointer);		
 		MRC2ToolBoxCore.getMainWindow().updateGuiWithRecentData();
 	}
 	
@@ -230,9 +227,6 @@ public class RecentDataManager {
 			projectsOfType.removeLast();	
 		
 		projectsOfType.addFirst(newPointer);
-		
-		//	recentExperimentsMap.get(ProjectType.ID_TRACKER_DATA_ANALYSIS).add(new ExperimentPointer(limsExperiment));
-		
 		MRC2ToolBoxCore.getMainWindow().updateGuiWithRecentData();
 	}
 
@@ -278,7 +272,6 @@ public class RecentDataManager {
 	}
 	
 	public static void removeFeatureClusterDataSet(IMSMSClusterDataSet toRemove) {
-
 		featureClusterDataSets.remove(toRemove);
 		MRC2ToolBoxCore.getMainWindow().updateGuiWithRecentData();
 	}

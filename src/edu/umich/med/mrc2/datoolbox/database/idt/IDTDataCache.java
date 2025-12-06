@@ -557,7 +557,7 @@ public class IDTDataCache {
 	public static Collection<LIMSExperiment> getExperiments() {
 
 		if(experiments == null)
-			experiments = new TreeSet<LIMSExperiment>(new LIMSExperimentComparator(SortProperty.ID, SortDirection.DESC));
+			experiments = new TreeSet<>(new LIMSExperimentComparator(SortProperty.ID, SortDirection.DESC));
 
 		if(experiments.isEmpty()) {
 			try {

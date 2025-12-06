@@ -37,7 +37,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.gui.TaskProgressPanel;
 
 public class TaskControllerImpl implements TaskController, Runnable {
 
-	protected ArrayList<TaskControlListener> listeners = new ArrayList<TaskControlListener>();
+	protected ArrayList<TaskControlListener> listeners = new ArrayList<>();
 	protected TaskControlListener listenerToRemove;
 
 	/**
@@ -188,6 +188,7 @@ public class TaskControllerImpl implements TaskController, Runnable {
 						this.wait();
 					} catch (InterruptedException e) {
 						// Ignore
+						e.printStackTrace();
 					}
 				}
 			}
@@ -243,6 +244,7 @@ public class TaskControllerImpl implements TaskController, Runnable {
 				Thread.sleep(TASKCONTROLLER_THREAD_SLEEP);
 			} catch (InterruptedException e) {
 				// Ignore
+				e.printStackTrace();
 			}
 		}
 	}
@@ -294,8 +296,5 @@ public class TaskControllerImpl implements TaskController, Runnable {
 			}
 		}
 		getTaskQueue().clear();
-		return;
 	}
-
-
 }

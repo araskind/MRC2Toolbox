@@ -536,14 +536,12 @@ public class FeatureSubsetPanel extends DockableMRC2ToolboxPanel {
 		
 		featureSetTable.setModelFromProject(
 				currentExperiment, activeDataPipeline);
-		activeSet = null;
-		if (activeDataPipeline != null) {
 
-			for (MsFeatureSet set : currentExperiment.getMsFeatureSetsForDataPipeline(activeDataPipeline))
-				addSetListeners(set);
+		for (MsFeatureSet set : currentExperiment.getMsFeatureSetsForDataPipeline(activeDataPipeline))
+			addSetListeners(set);
 
-			activeSet = currentExperiment.getActiveFeatureSetForDataPipeline(activeDataPipeline);
-		}
+		activeSet = currentExperiment.getActiveFeatureSetForDataPipeline(activeDataPipeline);
+		
 		toolbar.updateGuiFromExperimentAndDataPipeline(
 				currentExperiment, activeDataPipeline);
 	}
