@@ -371,7 +371,7 @@ public class CefImportFinalizationTask extends AbstractTask {
 		currentExperiment.setDataMatrixForDataPipeline(dataPipeline, dataMatrix);
 		
 		currentExperiment.setFeaturesForDataPipeline(
-				dataPipeline, new HashSet<MsFeature>(library.getFeatures()));
+				dataPipeline, new HashSet<>(library.getFeatures()));
 		currentExperiment.addDataFilesForAcquisitionMethod(
 				dataPipeline.getAcquisitionMethod(), Arrays.asList(dataFiles));		
 		currentExperiment.addFeatureMatrixForDataPipeline(dataPipeline, featureMatrix);		

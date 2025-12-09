@@ -864,7 +864,7 @@ public class MainWindow extends JFrame
 		return panels.get(panelType);
 	}
 
-	public ExperimentSetupDraw getPreferencesDraw() {
+	public ExperimentSetupDraw getExperimentSetupDraw() {
 		return experimentSetupDraw;
 	}
 
@@ -938,7 +938,7 @@ public class MainWindow extends JFrame
 			try {
 				panels.put(panelType, (DockableMRC2ToolboxPanel) panelType.getPanelClass().getDeclaredConstructor().newInstance());			
 				panelShowing.put(panelType, panelType.isVisibleByDefault());
-				panels.get(panelType).switchDataPipeline(null, null);
+				//	panels.get(panelType).switchDataPipeline(null, null);
 				control.addDockable(panels.get(panelType));
 				grid.add( 0, 0, 100, 100, panels.get(panelType));
 			}
@@ -1445,7 +1445,7 @@ public class MainWindow extends JFrame
 			dataExplorerPlotDialog.clearPanels();
 			dataExplorerPlotDialog.setVisible(false);
 		}	
-		StatusBar.switchDataPipeline(project, pipeline);
+		StatusBar.switchDataPipeline(currentExperiment, activeDataPipeline);
 	}
 
 	public void switchPanelForDataPipeline(
@@ -1456,6 +1456,7 @@ public class MainWindow extends JFrame
 		currentExperiment.setActiveDataPipeline(activeDataPipeline);
 		setGuiFromActiveExperiment();
 
+		experimentSetupDraw.switchDataPipeline(currentExperiment, activeDataPipeline);
 		for (Entry<PanelList, DockableMRC2ToolboxPanel> entry : panels.entrySet())
 			entry.getValue().switchDataPipeline(currentExperiment, activeDataPipeline);
 
@@ -1466,7 +1467,11 @@ public class MainWindow extends JFrame
 		if(activePanel != null)
 			showPanel(activePanel);
 		
-		experimentSetupDraw.switchDataPipeline(currentExperiment, activeDataPipeline);
+		if(dataExplorerPlotDialog != null) {
+			dataExplorerPlotDialog.clearPanels();
+			dataExplorerPlotDialog.setVisible(false);
+		}	
+		StatusBar.switchDataPipeline(currentExperiment, pipeline);
 	}
 
 	private void togglePanel(PanelList key, boolean selected) {
@@ -1664,10 +1669,6 @@ public class MainWindow extends JFrame
 
 	public void setIdTrackerUser(LIMSUser user) {
 		mainMenuBar.setIdTrackerUser(user);
-	}
-	
-	public static ExperimentSetupDraw getExperimentSetupDraw() {
-		return experimentSetupDraw;
 	}
 
 	@Override

@@ -541,6 +541,9 @@ public class WorklistPanel extends DockableMRC2ToolboxPanel implements BackedByP
 		clearPanel();
 		super.switchDataPipeline(experiment, newDataPipeline);
 		menuBar.updateMenuFromExperiment(currentExperiment, activeDataPipeline);
+		MRC2ToolBoxCore.getMainWindow().getExperimentSetupDraw().
+			switchDataPipeline(currentExperiment, activeDataPipeline);
+		
 		if(currentExperiment != null && activeDataPipeline != null)
 			showWorklist(currentExperiment.getWorklistForDataAcquisitionMethod(
 					activeDataPipeline.getAcquisitionMethod()));

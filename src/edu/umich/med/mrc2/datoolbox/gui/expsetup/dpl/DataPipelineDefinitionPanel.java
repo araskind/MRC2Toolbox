@@ -272,7 +272,7 @@ public class DataPipelineDefinitionPanel extends JPanel
 		
 		Collection<MoTrPACAssay> mpAssays = MoTrPACDatabaseCache.getMotrpacAssayList();
 		DefaultComboBoxModel<MoTrPACAssay>model = 
-				new DefaultComboBoxModel<MoTrPACAssay>(mpAssays.toArray(new MoTrPACAssay[mpAssays.size()]));
+				new DefaultComboBoxModel<>(mpAssays.toArray(new MoTrPACAssay[mpAssays.size()]));
 		motrpacAssayCodeComboBox.setModel(model);
 		motrpacAssayCodeComboBox.setSelectedIndex(-1);
 	}

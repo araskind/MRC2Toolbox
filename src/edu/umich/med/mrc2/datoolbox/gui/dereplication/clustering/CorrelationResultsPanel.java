@@ -497,7 +497,7 @@ public class CorrelationResultsPanel extends ClusterDisplayPanel implements Char
 				stream().flatMap(c -> c.getActiveFeatures().stream()).
 				forEach(f -> features.addFeature(f));
 
-			MRC2ToolBoxCore.getMainWindow().getPreferencesDraw().
+			MRC2ToolBoxCore.getMainWindow().getExperimentSetupDraw().
 				setActiveFeatureSubset(features);
 		}
 	}
@@ -763,7 +763,7 @@ public class CorrelationResultsPanel extends ClusterDisplayPanel implements Char
 				if (!activeSet.isLocked())
 					activeSet.removeFeatures(selected);
 
-				MRC2ToolBoxCore.getMainWindow().getPreferencesDraw().
+				MRC2ToolBoxCore.getMainWindow().getExperimentSetupDraw().
 					switchDataPipeline(currentExperiment, activeDataPipeline);
 			}
 			return;
@@ -788,7 +788,7 @@ public class CorrelationResultsPanel extends ClusterDisplayPanel implements Char
 
 				showClusterData(activeCluster);
 				clusterTree.updateElement(activeCluster);
-				MRC2ToolBoxCore.getMainWindow().getPreferencesDraw().
+				MRC2ToolBoxCore.getMainWindow().getExperimentSetupDraw().
 					switchDataPipeline(currentExperiment, activeDataPipeline);
 			}
 		}
@@ -1005,7 +1005,7 @@ public class CorrelationResultsPanel extends ClusterDisplayPanel implements Char
 			currentExperiment.setCorrelationClustersForDataPipeline(activeDataPipeline, task.getFeatureClusters());
 			loadFeatureClusters(currentExperiment.getCorrelationClustersForDataPipeline(activeDataPipeline));
 			MRC2ToolBoxCore.getMainWindow().showPanel(PanelList.CORRELATIONS);
-			MRC2ToolBoxCore.getMainWindow().getPreferencesDraw().switchDataPipeline(currentExperiment, activeDataPipeline);
+			MRC2ToolBoxCore.getMainWindow().getExperimentSetupDraw().switchDataPipeline(currentExperiment, activeDataPipeline);
 
 			if (!task.getUnassignedFeatures().isEmpty()) {
 

@@ -211,13 +211,8 @@ public final class MRC2ToolBoxCore {
 		taskController = new TaskControllerImpl();
 		taskController.initModule();
 		taskController.setMaxRunningThreads(MRC2ToolBoxConfiguration.getMaxThreadNumber());
-		rawDataMap = new HashMap<DataFile, LCMSData>();
-		activeMsLibraries = new TreeSet<CompoundLibrary>();
-	
-	    ClassyFireOntologyLoader ontologyLoader = 
-	    		new ClassyFireOntologyLoader();
-	    Thread t = new Thread(ontologyLoader);
-	    t.start();
+		rawDataMap = new HashMap<>();
+		activeMsLibraries = new TreeSet<>();
 	    
         if (g != null) {
         	renderSplashFrame(g, "                                              ");
@@ -253,6 +248,14 @@ public final class MRC2ToolBoxCore {
 			}
         }
         mainWindow.showIdTrackerLogin();
+	}
+	
+	private static void startClassyFireOntology() {		
+		
+	    ClassyFireOntologyLoader ontologyLoader = 
+	    		new ClassyFireOntologyLoader();
+	    Thread t = new Thread(ontologyLoader);
+	    t.start();
 	}
 
 	public static void shutDown() {
@@ -339,6 +342,10 @@ public final class MRC2ToolBoxCore {
     }
     
 	public static OWLGraphWrapper getClassyFireOntologyGraph() {
+		
+		if(graph == null)
+			startClassyFireOntology();
+			
 		return graph;
 	}
 

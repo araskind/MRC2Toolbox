@@ -57,14 +57,19 @@ import edu.umich.med.mrc2.datoolbox.data.MsFeatureSet;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.gui.expsetup.featurelist.SubsetFeaturesTable;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
-import edu.umich.med.mrc2.datoolbox.gui.main.MainWindow;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
+import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
 import edu.umich.med.mrc2.datoolbox.utils.MetabolomicsProjectUtils;
 
 public class AddFeatureSubsetDialog extends JDialog implements ActionListener{
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 
 	private static final Icon newSubsetIcon = GuiUtils.getIcon("newFeatureSubset", 32);
 	
@@ -175,7 +180,7 @@ public class AddFeatureSubsetDialog extends JDialog implements ActionListener{
 		MsFeatureSet newSet = 
 				new MsFeatureSet(getSubsetName(), selectedFeatures);
 		experiment.addFeatureSetForDataPipeline(newSet, pipeline);
-		MainWindow.getExperimentSetupDraw().
+		MRC2ToolBoxCore.getMainWindow().getExperimentSetupDraw().
 			getFeatureSubsetPanel().addSetListeners(newSet);	
 		MetabolomicsProjectUtils.switchActiveMsFeatureSet(newSet);
 		dispose();
@@ -183,7 +188,7 @@ public class AddFeatureSubsetDialog extends JDialog implements ActionListener{
 	
 	public Collection<String> validateFeatureSubsetData() {
 
-		Collection<String> errors = new ArrayList<String>();
+		Collection<String> errors = new ArrayList<>();
 
 		String newName = getSubsetName();
 		if (newName.isEmpty())

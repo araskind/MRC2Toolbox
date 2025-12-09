@@ -84,7 +84,7 @@ public class RemoveEmptyFeaturesTask extends AbstractTask {
 
 		List<MsFeature> featuresToRemove = 
 			currentExperiment.getMsFeaturesForDataPipeline(dataPipeline).stream().
-			filter(f -> (f.getStatsSummary().getTotalMedian() == 0.0d)).
+			filter(f -> Double.isNaN(f.getStatsSummary().getTotalMedian())).
 			collect(Collectors.toList());
 
 		if(!featuresToRemove.isEmpty()) {
@@ -130,33 +130,7 @@ public class RemoveEmptyFeaturesTask extends AbstractTask {
 				currentExperiment, 
 				dataPipeline,
 				true);
-		msFeatureMatrix = null;
-		currentExperiment.setFeatureMatrixForDataPipeline(dataPipeline, null);
-		System.gc();
-		
-//		String featureMatrixFileName = currentExperiment.getFeatureMatrixFileNameForDataPipeline(dataPipeline);
-//		if(featureMatrixFileName != null) {
-//			
-//			taskDescription = "Saving feature matrix for  " + currentExperiment.getName() +
-//					"(" + currentExperiment.getName() + ")";
-//			processed = 90;
-//			File featureMatrixFile = 
-//					Paths.get(currentExperiment.getExperimentDirectory().getAbsolutePath(), 
-//					featureMatrixFileName).toFile();
-//			try {
-//				Matrix featureMatrix = 
-//						Matrix.Factory.linkToArray(msFeatureMatrix.toObjectArray());
-//				featureMatrix.save(featureMatrixFile);
-//				processed = 100;
-//			} catch (IOException e) {
-//				e.printStackTrace();
-//				//					setStatus(TaskStatus.ERROR);
-//				return;
-//
-//			}
-//			msFeatureMatrix = null;
-//			System.gc();
-//		}				
+		currentExperiment.setFeatureMatrixForDataPipeline(dataPipeline, null);			
 	}
 }
 

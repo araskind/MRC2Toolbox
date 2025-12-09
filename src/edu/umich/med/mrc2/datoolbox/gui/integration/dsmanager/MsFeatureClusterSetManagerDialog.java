@@ -59,7 +59,6 @@ import edu.umich.med.mrc2.datoolbox.data.MsFeatureSet;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.gui.dereplication.ClusterDisplayPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
-import edu.umich.med.mrc2.datoolbox.gui.main.MainWindow;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
@@ -182,7 +181,7 @@ public class MsFeatureClusterSetManagerDialog extends JDialog implements ActionL
 			MsFeatureSet newSet = new MsFeatureSet(fsNameComplete, fme.getValue());
 			
 			experiment.addFeatureSetForDataPipeline(newSet, fme.getKey());
-			MainWindow.getExperimentSetupDraw().
+			MRC2ToolBoxCore.getMainWindow().getExperimentSetupDraw().
 				getFeatureSubsetPanel().addSetListeners(newSet);
 			
 			if(fme.getKey().equals(experiment.getActiveDataPipeline()))

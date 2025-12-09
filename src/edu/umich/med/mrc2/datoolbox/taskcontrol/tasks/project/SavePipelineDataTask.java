@@ -158,16 +158,16 @@ public class SavePipelineDataTask extends AbstractTask {
 			ProjectUtils.saveTemporaryFeatureMatrixFileAsPrimary(project,pipeline);			
 		}
 		//	project.setFeatureMatrixForDataPipeline(pipeline, null);
-		cleanupForNewProjectStructure();		
+//		cleanupForNewProjectStructure();		
 		processed = 100;		
 	}
 	
 	//	Tmp fix to convert old project format to new one) 
-	private void cleanupForNewProjectStructure() {
-		
-		ProjectUtils.moveDataMatrixFileToNewDefaultLocation(project,pipeline);
-		ProjectUtils.moveFeatureMatrixFileToNewDefaultLocation(project,pipeline);
-	}
+//	private void cleanupForNewProjectStructure() {
+//		
+//		ProjectUtils.moveDataMatrixFileToNewDefaultLocation(project,pipeline);
+//		ProjectUtils.moveFeatureMatrixFileToNewDefaultLocation(project,pipeline);
+//	}
 
 	@Override
 	public Task cloneTask() {

@@ -61,13 +61,12 @@ public class DockableCompoundClasyFireViewer  extends DefaultSingleCDockable {
 		reasoner = factory.createReasoner(ontology);	
 		canvas = new GraphViewCanvas(graph, reasoner, null);
 		add(new JScrollPane(canvas), BorderLayout.CENTER);
-
 	}
 	
 	public void showCompoundData(String accession) {
 		
 		clearPanel();
-		Collection<String>nodes = new TreeSet<String>();		
+		Collection<String>nodes = new TreeSet<>();		
 		try {
 			nodes = CompoundDatabaseUtils.getClassyFireNodesForCompound(accession);
 		} catch (Exception e) {

@@ -399,11 +399,11 @@ public class DuplicatesPanel extends ClusterDisplayPanel {
 			currentExperiment.getDuplicateClustersForDataPipeline(activeDataPipeline).clear();
 		
 		MRC2ToolBoxCore.getMainWindow().showPanel(PanelList.FEATURE_DATA);
-		MRC2ToolBoxCore.getMainWindow().getPreferencesDraw().
+		MRC2ToolBoxCore.getMainWindow().getExperimentSetupDraw().
 			switchDataPipeline(currentExperiment, activeDataPipeline);
 		
 		CalculateStatisticsTask cst = 
-				new CalculateStatisticsTask(currentExperiment, activeDataPipeline);
+				new CalculateStatisticsTask(currentExperiment, activeDataPipeline, true);
 		cst.addTaskListener((MRC2ToolBoxCore.getMainWindow().getPanel(PanelList.FEATURE_DATA)));
 		MRC2ToolBoxCore.getTaskController().addTask(cst);
 	}

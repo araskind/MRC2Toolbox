@@ -27,6 +27,7 @@ import java.io.Serializable;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Set;
 import java.util.UUID;
@@ -217,6 +218,8 @@ public abstract class Project implements Serializable, XmlStorable{
 	}
 
 	public abstract Set<ExperimentalSample> getPooledSamples();
+	
+	public abstract void setPooledSamples(Collection<ExperimentalSample>pooledSamples);
 
 	public LIMSUser getCreatedBy() {
 		return createdBy;

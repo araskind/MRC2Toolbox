@@ -53,14 +53,22 @@ public class CalculateStatisticsTask extends AbstractTask {
 	private DescriptiveStatistics sampleDescriptiveStatistics;
 	private DescriptiveStatistics pooledDescriptiveStatistics;
 	private DescriptiveStatistics totalDescriptiveStatistics;
+	private boolean useAllSamples;
 
 	public CalculateStatisticsTask(
-			DataAnalysisProject experiment, DataPipeline dataPipeline) {
+			DataAnalysisProject experiment, 
+			DataPipeline dataPipeline,
+			boolean useAllSamples) {
 
 		
 		this.currentExperiment = experiment;
 		this.dataPipeline = dataPipeline;
-		activeDesignSubset = 
+		this.useAllSamples = useAllSamples;
+		if(useAllSamples)
+			activeDesignSubset = 
+				this.currentExperiment.getExperimentDesign().getCompleteDesignSubset();
+		else
+			activeDesignSubset = 
 				this.currentExperiment.getExperimentDesign().getActiveDesignSubset();
 
 		taskDescription = "Calculating statistics for active data pipeline";
@@ -170,6 +178,9 @@ public class CalculateStatisticsTask extends AbstractTask {
 			statSummary.setSampleStDev(sampleDescriptiveStatistics.getStandardDeviation());
 			statSummary.setSampleFrequency((double) sampleDescriptiveStatistics.getN() / (double)sampleFiles.size());
 		}
+//		if (pooledDescriptiveStatistics.getN() == 0 && sampleDescriptiveStatistics.getN() == 0) {
+//			System.out.println("***\n" + Double.toString(totalDescriptiveStatistics.getPercentile(50.0d)));
+//		}
 		statSummary.setTotalMedian(totalDescriptiveStatistics.getPercentile(50.0d));
 	}
 
@@ -180,9 +191,13 @@ public class CalculateStatisticsTask extends AbstractTask {
 			Matrix assayData) {
 		
 		Set<ExperimentalSample> pooledSamples = currentExperiment.getPooledSamples();
-		Set<DataFile>dataFiles =
-				currentExperiment.getActiveDataFilesForDesignAndAcquisitionMethod(
-						activeDesignSubset, dataPipeline.getAcquisitionMethod());
+		Set<DataFile>dataFiles = new TreeSet<>();
+		if(useAllSamples) 
+			dataFiles = currentExperiment.getDataFilesForPipeline(dataPipeline, false);
+		else
+			dataFiles = currentExperiment.getActiveDataFilesForDesignAndAcquisitionMethod(
+							activeDesignSubset, dataPipeline.getAcquisitionMethod());
+		
 		for (DataFile df : dataFiles) {
 			
 			if(pooledSamples.contains(df.getParentSample()) && df.isEnabled())
@@ -194,12 +209,11 @@ public class CalculateStatisticsTask extends AbstractTask {
 			fileCoordinates.put(df, assayData.getRowForLabel(df));
 		}
 	}
-	
-	
+		
 	@Override
 	public Task cloneTask() {
 		return new CalculateStatisticsTask(
-				currentExperiment, dataPipeline);
+				currentExperiment, dataPipeline, useAllSamples);
 	}
 
 	public DataPipeline getDataPipeline() {
@@ -251,6 +265,10 @@ public class CalculateStatisticsTask extends AbstractTask {
 
 		if(!featuresToRemove.isEmpty())
 			subset.removeFeatures(featuresToRemove);
+	}
+
+	public boolean isUseAllSamples() {
+		return useAllSamples;
 	}
 }
 

@@ -95,8 +95,8 @@ public class FeatureDataPanelMenuBar extends CommonMenuBar {
 	private static final Icon openAvgFeatureLibraryIcon = GuiUtils.getIcon("openAvgFeatureLibrary", 24);
 	private static final Icon deleteAvgFeatureLibraryIcon = GuiUtils.getIcon("deleteLibrary", 24);
 	private static final Icon extractDeltasIcon = GuiUtils.getIcon("extractDeltas", 24);
+	private static final Icon normalizedDataIcon = GuiUtils.getIcon("loess", 24);
 	
-
 	// Menus
 	private JMenu
 		loadDataMenu,
@@ -182,9 +182,11 @@ public class FeatureDataPanelMenuBar extends CommonMenuBar {
 		loadMultiFileMenuItem = addItem(loadDataMenu, 
 				MainActionCommands.LOAD_DATA_FROM_MULTIFILES_COMMAND, 
 				loadMultiFileIcon);
-		addFromMultiFileMenuItem = addItem(loadDataMenu, 
-				MainActionCommands.ADD_DATA_FROM_MULTIFILES_COMMAND, 
-				addMultiFileIcon);		
+		
+//		addFromMultiFileMenuItem = addItem(loadDataMenu, 
+//				MainActionCommands.ADD_DATA_FROM_MULTIFILES_COMMAND, 
+//				addMultiFileIcon);	
+		
 		addPeakQualityDataMenuItem = addItem(loadDataMenu, 
 				MainActionCommands.ADD_PEAK_QUALITY_DATA_FROM_MULTIFILES_COMMAND, 
 				addPeakQualityDataIcon);
@@ -192,17 +194,18 @@ public class FeatureDataPanelMenuBar extends CommonMenuBar {
 		loadDataMenu.addSeparator();
 		
 		loadFromTextMenuItem = addItem(loadDataMenu, 
-				MainActionCommands.LOAD_DATA_COMMAND, 
-				loadPlainDataFileIcon);
-		loadLibraryDataMenuItem = addItem(loadDataMenu, 
-				MainActionCommands.LOAD_LIBRARY_COMMAND, 
-				loadLibraryIcon);
-		
-		loadDataMenu.addSeparator();
-		
-		loadFromExcelMenuItem = addItem(loadDataMenu,
-				MainActionCommands.LOAD_DATA_FROM_EXCEL_FILE_COMMAND, 
-				loadFromExcelIcon);
+				MainActionCommands.LOAD_NORMALIZED_TARGETED_DATA_COMMAND, 
+				normalizedDataIcon);
+				
+//		loadDataMenu.addSeparator();
+//		
+//		loadLibraryDataMenuItem = addItem(loadDataMenu, 
+//				MainActionCommands.LOAD_LIBRARY_COMMAND, 
+//				loadLibraryIcon);
+//		
+//		loadFromExcelMenuItem = addItem(loadDataMenu,
+//				MainActionCommands.LOAD_DATA_FROM_EXCEL_FILE_COMMAND, 
+//				loadFromExcelIcon);
 		
 		add(loadDataMenu);
 

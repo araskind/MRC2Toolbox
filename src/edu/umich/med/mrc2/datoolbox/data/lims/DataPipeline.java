@@ -130,8 +130,8 @@ public class DataPipeline implements Serializable, Comparable<DataPipeline>, Xml
             return false;
 
         final DataPipeline other = (DataPipeline) obj;
-        if(name.equalsIgnoreCase(other.getName()))
-        	return true;
+//        if(name.equalsIgnoreCase(other.getName()))
+//        	return true;
         
         if ((this.assay == null) ? (other.getAssay() != null) : !this.assay.equals(other.getAssay()))
             return false;

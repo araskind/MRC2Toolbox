@@ -59,7 +59,6 @@ import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignSubsetEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.FeatureSetEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.MsFeatureEvent;
-import edu.umich.med.mrc2.datoolbox.gui.cpddatabase.cpdinfo.DockableCompoundClasyFireViewer;
 import edu.umich.med.mrc2.datoolbox.gui.cpddatabase.cpdinfo.DockableCompoundPropertiesTable;
 import edu.umich.med.mrc2.datoolbox.gui.cpddatabase.cpdinfo.DockableConcentrationsTable;
 import edu.umich.med.mrc2.datoolbox.gui.cpddatabase.cpdinfo.DockableDatabaseLinksTable;
@@ -122,12 +121,13 @@ public class CompoundDatabasePanel extends DockableMRC2ToolboxPanel implements L
 	private DockableMsMsTable msTwoTable;
 	private DockableMSMSLibraryEntryPropertiesTable msmsLibraryEntryPropertiesTable;
 	private IndeterminateProgressDialog idp;
-	private DockableCompoundClasyFireViewer clasyFireViewer;
 	private SynonymTableModelListener synMoldelListener;
 	private BatchCompoundDatabaseSearchDialog batchCompoundDatabaseSearchDialog;
 	private CompoundDatabaseCuratorFrame compoundDatabaseCuratorFrame;
 	private static CompoundMsReadyCuratorFrame compoundMsReadyCuratorFrame;	
 	private static TautomerCuratorFrame tautomerCuratorFrame;
+	
+//	private DockableCompoundClasyFireViewer clasyFireViewer;
 
 	private static final Icon componentIcon = GuiUtils.getIcon("pubChem", 16);
 	private static final Icon clearSearchIcon = GuiUtils.getIcon("clearSearch", 24);
@@ -179,13 +179,15 @@ public class CompoundDatabasePanel extends DockableMRC2ToolboxPanel implements L
 				"CompoundDatabasePanelDockableMsMsTable", "Library MSMS table");
 		msmsLibraryEntryPropertiesTable = new DockableMSMSLibraryEntryPropertiesTable();
 		
-		clasyFireViewer = new DockableCompoundClasyFireViewer();
+		//	clasyFireViewer = new DockableCompoundClasyFireViewer();
 
 		grid.add(0, 0, 75, 40, compoundTable);
 		grid.add(75, 0, 25, 40, molStructurePanel, compoundDatabaseSearchPanel);
 		grid.add(0, 50, 100, 60, narrativeDataPanel, dbLinksTable, synonymsTable, 				
 				propertiesTable, concentrationsTable, spectraTable, 
-				msTwoPlot, msTwoTable, msmsLibraryEntryPropertiesTable, clasyFireViewer);
+				msTwoPlot, msTwoTable, msmsLibraryEntryPropertiesTable
+				//, clasyFireViewer
+				);
 		grid.select(0, 50, 100, 60, narrativeDataPanel);
 		control.getContentArea().deploy(grid);
 		add(control.getContentArea(), BorderLayout.CENTER);
@@ -959,7 +961,7 @@ public class CompoundDatabasePanel extends DockableMRC2ToolboxPanel implements L
 		spectraTable.clearTable();
 		molStructurePanel.clearPanel();
 		clearSpectrumDataPanels();
-		clasyFireViewer.clearPanel();
+		//	clasyFireViewer.clearPanel();
 	}
 	
 	public void loadCompoundDataByReference(Collection<CompoundIdentity> cpdIds) {
@@ -1076,7 +1078,7 @@ public class CompoundDatabasePanel extends DockableMRC2ToolboxPanel implements L
 					spectraTable.setTableModelFromLibraryFeatureCollection(
 							CompoundDatabaseCache.getMSMSLibraryEntriesForCompound(cpd));
 					
-					clasyFireViewer.showCompoundData(cpd.getPrimaryDatabaseId());
+					//	clasyFireViewer.showCompoundData(cpd.getPrimaryDatabaseId());
 				}
 //				if(cpdIds != null)
 //					loadCompoundDataByReference(cpdIds);

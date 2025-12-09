@@ -65,7 +65,6 @@ import edu.umich.med.mrc2.datoolbox.gui.expsetup.featurelist.SimpleFeatureSubset
 import edu.umich.med.mrc2.datoolbox.gui.fdata.FeatureDataPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.DockableMRC2ToolboxPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
-import edu.umich.med.mrc2.datoolbox.gui.main.MainWindow;
 import edu.umich.med.mrc2.datoolbox.gui.main.PanelList;
 import edu.umich.med.mrc2.datoolbox.gui.plot.renderer.MSFeatureStatsColorRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
@@ -189,7 +188,7 @@ public class DockableMzRtBubblePlotPanel extends DefaultSingleCDockable
 					featureSubsetDialog.getFeatures());
 			setToEdit.addListener((FeatureSetListener) 
 					MRC2ToolBoxCore.getMainWindow().getPanel(PanelList.FEATURE_DATA));			
-			setToEdit.addListener(MainWindow.getExperimentSetupDraw().getFeatureSubsetPanel());
+			setToEdit.addListener(MRC2ToolBoxCore.getMainWindow().getExperimentSetupDraw().getFeatureSubsetPanel());
 			setToEdit.fireFeatureSetEvent(ParameterSetStatus.CREATED);
 		}
 		else {
@@ -197,7 +196,7 @@ public class DockableMzRtBubblePlotPanel extends DefaultSingleCDockable
 			setToEdit.setFeatures(featureSubsetDialog.getFeatures());
 			setToEdit.addListener((FeatureSetListener) 
 					MRC2ToolBoxCore.getMainWindow().getPanel(PanelList.FEATURE_DATA));
-			setToEdit.addListener(MainWindow.getExperimentSetupDraw().getFeatureSubsetPanel());
+			setToEdit.addListener(MRC2ToolBoxCore.getMainWindow().getExperimentSetupDraw().getFeatureSubsetPanel());
 			setToEdit.fireFeatureSetEvent(ParameterSetStatus.CHANGED);
 		}
 		featureSubsetDialog.dispose();

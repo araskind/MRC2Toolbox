@@ -122,7 +122,6 @@ import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignSubsetEven
 import edu.umich.med.mrc2.datoolbox.gui.communication.FeatureSetEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.MsFeatureEvent;
 import edu.umich.med.mrc2.datoolbox.gui.cpddatabase.CompoundDatabasePanel;
-import edu.umich.med.mrc2.datoolbox.gui.cpddatabase.cpdinfo.DockableCompoundClasyFireViewer;
 import edu.umich.med.mrc2.datoolbox.gui.idtable.DockableUniversalIdentificationResultsTable;
 import edu.umich.med.mrc2.datoolbox.gui.idtable.IDTrackerIdentificationTableModelListener;
 import edu.umich.med.mrc2.datoolbox.gui.idtable.UniversalIdentificationResultsTablePopupMenu;
@@ -266,8 +265,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 	private DockableMsTable msOneTable;
 	private DockableMsMsTable msTwoTable;
 	private DockableMsMsInfoPanel msMsInfoPanel;
-	private DockableMSMSLibraryEntryPropertiesTable msmsLibraryEntryPropertiesTable;
-	private DockableCompoundClasyFireViewer clasyFireViewer;
+	private DockableMSMSLibraryEntryPropertiesTable msmsLibraryEntryPropertiesTable;	
 	private DockableChromatogramPlot chromatogramPanel;
 	private DockableMSMSFeatureClusterTree msmsFeatureClusterTreePanel;	
 	private DockableLookupFeatureTable lookupFeatureTable;
@@ -279,7 +277,6 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 	private FileNameExtensionFilter xmlFilter;
 	private FileNameExtensionFilter mgfFilter;
 	private IDTrackerLimsManagerPanel idTrackerManager;
-//	private OpenIDTrackerExperimentDialog openIDTrackerExperimentDialog;
 	private LIMSExperiment idTrackerExperiment;
 	private PepSearchSetupDialog pepSearchSetupDialog;
 	private NISTMSSerchSetupDialog nistMSSerchSetupDialog;
@@ -288,6 +285,8 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 	private DockableFollowupStepTable followupStepTable;	
 	private StandardFeatureAnnotationAssignmentDialog standardFeatureAnnotationAssignmentDialog;
 	private DockableStandardFeatureAnnotationTable standardFeatureAnnotationTable;
+	
+	//	private DockableCompoundClasyFireViewer clasyFireViewer;
 	
 	private Map<LIMSSamplePreparation, Collection<DataAcquisitionMethod>> samplePrepAcquisitionMethodMap;
 	private Map<DataAcquisitionMethod, Collection<DataExtractionMethod>> acquisitionDataExtractionMethodMap;
@@ -398,18 +397,11 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 				"IDWorkbenchPanelDockableMolStructurePanel", "ID structure");
 		referenceMolStructurePanel  = new DockableMolStructurePanel(
 				"IDWorkbenchPanelDockableRefMolStructurePanel", "Reference structure");
-		clasyFireViewer = new DockableCompoundClasyFireViewer();
+		//	clasyFireViewer = new DockableCompoundClasyFireViewer();
 		
 		chromatogramPanel =  new DockableChromatogramPlot(
 				"IDWorkbenchPanelDockableChromatogramPlot", "Chromatograms");
 		
-//		narrativeDataPanel = new NarrativeDataPanel();
-//		dbLinksTable = new DockableDatabaseLinksTable();
-//		synonymsTable = new DockableSynonymsTable(this);
-//		propertiesTable = new DockableCompoundPropertiesTable();
-//		concentrationsTable = new DockableConcentrationsTable();
-//		spectraTable = new DockableSpectraTable();
-
 		featureAnnotationPanel = new DockableObjectAnnotationPanel(
 				"IDWorkbenchPanelAnnotations", "Feature annotations", 80);
 		featureAnnotationPanel.setMsFeatureBundleDataUpdater(this);
@@ -443,10 +435,9 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		grid.add(0, 0, 80, 30, msOneFeatureTable, msTwoFeatureTable, 
 				msmsFeatureClusterTreePanel, lookupFeatureTable);
 		grid.add(80, 0, 20, 30, molStructurePanel, referenceMolStructurePanel, 
-				clasyFireViewer, chromatogramPanel);
+				//	clasyFireViewer, 
+				chromatogramPanel);
 		grid.add(0, 30, 100, 20, identificationsTable);
-//		grid.add(0, 50, 50, 50, narrativeDataPanel, synonymsTable,
-//				propertiesTable, concentrationsTable, spectraTable);
 		grid.add(50, 50, 50, 50, msOnePlot, msOneTable,
 				msTwoPlot, msTwoTable, msMsInfoPanel, 
 				msmsLibraryEntryPropertiesTable, 
@@ -455,7 +446,6 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 				standardFeatureAnnotationTable,
 				binnerAnnotationDetailsPanel);
 
-//		grid.select(0, 50, 50, 50, narrativeDataPanel);
 		grid.select(50, 50, 50, 50, msOnePlot);
 
 		control.getContentArea().deploy(grid);
@@ -4505,7 +4495,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		msMsInfoPanel.clearPanel();
 		molStructurePanel.clearPanel();
 		pepSearchParameterListingPanel.clearPanel();
-		clasyFireViewer.clearPanel();
+		//	clasyFireViewer.clearPanel();
 	}
 
 	@Override
@@ -4741,7 +4731,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		}
 		if(selectedIdentity.getCompoundIdentity() != null) {
 			molStructurePanel.showStructure(selectedIdentity.getCompoundIdentity().getSmiles());
-			clasyFireViewer.showCompoundData(selectedIdentity.getCompoundIdentity().getPrimaryDatabaseId());
+			//	clasyFireViewer.showCompoundData(selectedIdentity.getCompoundIdentity().getPrimaryDatabaseId());
 		}	
 		//	TODO show other compound info
 	}

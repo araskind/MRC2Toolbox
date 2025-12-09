@@ -77,59 +77,6 @@ public class ProjectUtils {
 		return new SimpleDateFormat(dateFormatString);
 	}
 
-//	public static void saveExperimentFile(
-//			RawDataAnalysisProject experimentToSave) {
-//		
-//		experimentToSave.setLastModified(new Date());
-//		try {
-//			XStream xstream = new XStream(new StaxDriver());
-//
-//			xstream.setMode(XStream.XPATH_RELATIVE_REFERENCES);
-//			xstream.addPermission(NoTypePermission.NONE);
-//			xstream.addPermission(NullPermission.NULL);
-//			xstream.addPermission(PrimitiveTypePermission.PRIMITIVES);
-//			
-//			xstream.omitField(DataAnalysisProject.class, "dataMatrixMap");
-//			xstream.omitField(DataAnalysisProject.class, "corrMatrixMap");
-//			xstream.omitField(MsFeature.class, "eventListeners");
-//			xstream.omitField(MsFeatureSet.class, "eventListeners");
-//			xstream.omitField(ExperimentDesignSubset.class, "eventListeners");
-//			xstream.omitField(ExperimentDesign.class, "eventListeners");
-//			
-//			File xmlFile = Paths.get(experimentToSave.getExperimentDirectory().getAbsolutePath(), 
-//					FilenameUtils.getBaseName(experimentToSave.getExperimentFile().getName()) + ".xml").toFile();
-//	        RandomAccessFile raf = new RandomAccessFile(xmlFile.getAbsolutePath(), "rw");
-//	        FileOutputStream fout = new FileOutputStream(raf.getFD());	        
-//			BufferedOutputStream bout = new BufferedOutputStream(fout);
-//			xstream.toXML(experimentToSave, bout);
-//			bout.close();
-//			fout.close();
-//			raf.close();
-//			
-//			if(xmlFile.exists()) {
-//				
-//		        OutputStream archiveStream = new FileOutputStream(experimentToSave.getExperimentFile());
-//		        ZipArchiveOutputStream archive =
-//		        	(ZipArchiveOutputStream) new ArchiveStreamFactory().
-//		        	createArchiveOutputStream(ArchiveStreamFactory.ZIP, archiveStream);
-//		        archive.setUseZip64(Zip64Mode.Always);
-//		        ZipArchiveEntry entry = new ZipArchiveEntry(experimentToSave.getName());
-//		        archive.putArchiveEntry(entry);
-//
-//		        BufferedInputStream input = new BufferedInputStream(new FileInputStream(xmlFile));
-//		        org.apache.commons.io.IOUtils.copy(input, archive);
-//		        input.close();
-//		        archive.closeArchiveEntry();
-//		        archive.finish();
-//		        archive.close();
-//		        archiveStream.close();	        
-//		        xmlFile.delete();
-//			}
-//		} catch (Exception ex) {
-//			ex.printStackTrace();
-//		}
-//	}
-	
 	public static void saveStorableRawDataAnalysisExperiment(
 			RawDataAnalysisProject experimentToSave) {
 		
@@ -204,15 +151,14 @@ public class ProjectUtils {
 		else 
 			return Arrays.asList(idListString.split(","));	
 	}
-	
-	//	TODO this will only work after the project is saved in new format
+
 	public static Matrix readFeatureMatrix(			
 			DataAnalysisProject currentExperiment,
 			DataPipeline dataPipeline,
 			boolean readTemporary) {
 		
 		File featureMatrixFile = 
-				getFeatureMatrixFilePath(currentExperiment,dataPipeline, readTemporary).toFile();
+				getFeatureMatrixFilePath(currentExperiment, dataPipeline, readTemporary).toFile();
 
 		if (!featureMatrixFile.exists())
 			return null;
@@ -406,84 +352,106 @@ public class ProjectUtils {
 		
 		FIOUtils.safeDeleteFile(tmpFeatureMatrixFilePath);
 	}
-
-	public static void moveFeatureMatrixFileToNewDefaultLocation(
-			DataAnalysisProject project, DataPipeline pipeline) {
+	
+	public static void deleteFeatureMatrixFile(
+			DataAnalysisProject currentExperiment,
+			DataPipeline dataPipeline) {
 		
-		createDataDirectoryForProjectIfNotExists(project);
+		createDataDirectoryForProjectIfNotExists(currentExperiment);
+		Path featureMatrixFilePath = 
+				getFeatureMatrixFilePath(currentExperiment, dataPipeline, false);
 		
-		String featureMatrixFileName = 
-				project.getFeatureMatrixFileNameForDataPipeline(pipeline);
-		if(featureMatrixFileName == null) 
-			return;
+		FIOUtils.safeDeleteFile(featureMatrixFilePath);
+	}
+	
+	public static void deleteDataMatrixFile(
+			DataAnalysisProject currentExperiment,
+			DataPipeline dataPipeline) {
 		
-		Path featureMatrixFileNewLocation = 
-				getFeatureMatrixFilePath(project, pipeline, false);
-		Path featureMatrixFileOldLocation = 
-				Paths.get(project.getExperimentDirectory().getAbsolutePath(), 
-				featureMatrixFileName);
+		createDataDirectoryForProjectIfNotExists(currentExperiment);
+		Path dataMatrixFilePath = 
+				getDataMatrixFilePath(currentExperiment, dataPipeline, false);
 		
-		if((featureMatrixFileNewLocation.toFile() == null 
-				|| !featureMatrixFileNewLocation.toFile().exists())
-				&& featureMatrixFileOldLocation.toFile().exists()) {
-			try {
-				Files.move(
-					featureMatrixFileOldLocation, 
-					featureMatrixFileNewLocation, 
-					StandardCopyOption.REPLACE_EXISTING);
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}			
-		}
-		if(featureMatrixFileOldLocation.toFile().exists()) {
-			try {
-				Files.delete(featureMatrixFileOldLocation);
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
+		FIOUtils.safeDeleteFile(dataMatrixFilePath);
 	}
 
-	public static void moveDataMatrixFileToNewDefaultLocation(
-			DataAnalysisProject project, DataPipeline pipeline) {
-		
-		createDataDirectoryForProjectIfNotExists(project);
-		
-		String dataMatrixFileName = 
-				project.getDataMatrixFileNameForDataPipeline(pipeline);
-		if(dataMatrixFileName == null || dataMatrixFileName.isEmpty()) 
-			return;
-		
-		Path dataMatrixFileNewLocation = 
-				getDataMatrixFilePath(project, pipeline, false);
-		Path dataMatrixFileOldLocation = 
-				Paths.get(project.getExperimentDirectory().getAbsolutePath(), 
-				dataMatrixFileName);
-		
-		if((dataMatrixFileNewLocation.toFile() == null 
-				|| !dataMatrixFileNewLocation.toFile().exists()) 
-				&& dataMatrixFileOldLocation.toFile().exists()) {				
-			try {
-				Files.move(
-					dataMatrixFileOldLocation, 
-					dataMatrixFileNewLocation, 
-					StandardCopyOption.REPLACE_EXISTING);
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}		
-		}	
-		if(dataMatrixFileOldLocation.toFile().exists()) {
-			try {
-				Files.delete(dataMatrixFileOldLocation);
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-	}
+//	public static void moveFeatureMatrixFileToNewDefaultLocation(
+//			DataAnalysisProject project, DataPipeline pipeline) {
+//		
+//		createDataDirectoryForProjectIfNotExists(project);
+//		
+//		String featureMatrixFileName = 
+//				project.getFeatureMatrixFileNameForDataPipeline(pipeline);
+//		if(featureMatrixFileName == null) 
+//			return;
+//		
+//		Path featureMatrixFileNewLocation = 
+//				getFeatureMatrixFilePath(project, pipeline, false);
+//		Path featureMatrixFileOldLocation = 
+//				Paths.get(project.getExperimentDirectory().getAbsolutePath(), 
+//				featureMatrixFileName);
+//		
+//		if((featureMatrixFileNewLocation.toFile() == null 
+//				|| !featureMatrixFileNewLocation.toFile().exists())
+//				&& featureMatrixFileOldLocation.toFile().exists()) {
+//			try {
+//				Files.move(
+//					featureMatrixFileOldLocation, 
+//					featureMatrixFileNewLocation, 
+//					StandardCopyOption.REPLACE_EXISTING);
+//			} catch (IOException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}			
+//		}
+//		if(featureMatrixFileOldLocation.toFile().exists()) {
+//			try {
+//				Files.delete(featureMatrixFileOldLocation);
+//			} catch (IOException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//		}
+//	}
+//
+//	public static void moveDataMatrixFileToNewDefaultLocation(
+//			DataAnalysisProject project, DataPipeline pipeline) {
+//		
+//		createDataDirectoryForProjectIfNotExists(project);
+//		
+//		String dataMatrixFileName = 
+//				project.getDataMatrixFileNameForDataPipeline(pipeline);
+//		if(dataMatrixFileName == null || dataMatrixFileName.isEmpty()) 
+//			return;
+//		
+//		Path dataMatrixFileNewLocation = 
+//				getDataMatrixFilePath(project, pipeline, false);
+//		Path dataMatrixFileOldLocation = 
+//				Paths.get(project.getExperimentDirectory().getAbsolutePath(), 
+//				dataMatrixFileName);
+//		
+//		if((dataMatrixFileNewLocation.toFile() == null 
+//				|| !dataMatrixFileNewLocation.toFile().exists()) 
+//				&& dataMatrixFileOldLocation.toFile().exists()) {				
+//			try {
+//				Files.move(
+//					dataMatrixFileOldLocation, 
+//					dataMatrixFileNewLocation, 
+//					StandardCopyOption.REPLACE_EXISTING);
+//			} catch (IOException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}		
+//		}	
+//		if(dataMatrixFileOldLocation.toFile().exists()) {
+//			try {
+//				Files.delete(dataMatrixFileOldLocation);
+//			} catch (IOException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//		}
+//	}
 	
 	public static void moveCEFLibraryFilesToNewDefaultLocation(DataAnalysisProject project) {
 		
@@ -513,9 +481,9 @@ public class ProjectUtils {
 		File dataMatrixFile = getDataMatrixFilePath(project,pipeline,false).toFile();
 		
 		//	TODO temp fix for current projects
-		if(dataMatrixFile == null || !dataMatrixFile.exists())
-			dataMatrixFile = Paths.get(project.getExperimentDirectory().getAbsolutePath(), 
-					project.getDataMatrixFileNameForDataPipeline(pipeline)).toFile();
+//		if(dataMatrixFile == null || !dataMatrixFile.exists())
+//			dataMatrixFile = Paths.get(project.getExperimentDirectory().getAbsolutePath(), 
+//					project.getDataMatrixFileNameForDataPipeline(pipeline)).toFile();
 
 		Matrix dataMatrix = null;
 		if (dataMatrixFile.exists()) {
@@ -644,6 +612,84 @@ public class ProjectUtils {
 		return Paths.get(project.getDataDirectory().getAbsolutePath(), 
 				DataPrefix.FEATURE_MATRIX.getName() + pipeline.getSaveSafeName() 
 				+ temporaryFlag +  "." + DataFileExtensions.DATA_MATRIX_EXTENSION.getExtension());
+	}
+	
+	public static void renameAllPipelineFiles(
+			DataAnalysisProject project, 
+			String oldPipelineName, 
+			String newPipelineName) {
+		
+		renameFeatureListFile(project, oldPipelineName, newPipelineName);
+		renameDataMatrixFile(project, oldPipelineName, newPipelineName);		
+		renameFeatureMatrixFile(project, oldPipelineName, newPipelineName);		
+		renameAveragedLibraryFile(project, oldPipelineName, newPipelineName);		
+		
+		//	TODO - add more stuff if necessary
+	}
+	
+	public static void renameFeatureListFile(
+			DataAnalysisProject project, 
+			String oldPipelineName, 
+			String newPipelineName) {
+
+		renamePipelineDataFile(project, oldPipelineName, newPipelineName,
+				DataPrefix.MS_FEATURE,
+				DataFileExtensions.FEATURE_LIST_EXTENSION);
+	}
+	
+	public static void renameDataMatrixFile(
+			DataAnalysisProject project, 
+			String oldPipelineName, 
+			String newPipelineName) {
+
+		renamePipelineDataFile(project, oldPipelineName, newPipelineName,
+				DataPrefix.DATA_MATRIX,
+				DataFileExtensions.DATA_MATRIX_EXTENSION);
+	}
+	
+	public static void renameFeatureMatrixFile(
+			DataAnalysisProject project, 
+			String oldPipelineName, 
+			String newPipelineName) {
+
+		renamePipelineDataFile(project, oldPipelineName, newPipelineName,
+				DataPrefix.FEATURE_MATRIX,
+				DataFileExtensions.DATA_MATRIX_EXTENSION);
+	}
+	
+	public static void renameAveragedLibraryFile(
+			DataAnalysisProject project, 
+			String oldPipelineName, 
+			String newPipelineName) {
+
+		renamePipelineDataFile(project, oldPipelineName, newPipelineName,
+				DataPrefix.AVERAGED_FEATURE_LIBRARY,
+				DataFileExtensions.AVERAGED_FEATURE_LIBRARY_EXTENSION);
+	}
+	
+	public static void renamePipelineDataFile(
+			DataAnalysisProject project, 
+			String oldPipelineName, 
+			String newPipelineName,
+			DataPrefix prefix,
+			DataFileExtensions extension) {
+		
+		Path oldPath = Paths.get(project.getDataDirectory().getAbsolutePath(),
+				prefix.getName() + FIOUtils.createSaveSafeName(oldPipelineName) 
+				+ "." + extension.getExtension());
+		
+		Path newPath = Paths.get(project.getDataDirectory().getAbsolutePath(),
+				prefix.getName() + FIOUtils.createSaveSafeName(newPipelineName) 
+				+ "." + extension.getExtension());
+		
+		if(oldPath.toFile().exists()) {
+			try {
+				Files.move(oldPath, newPath);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 	}
 	
 	public static Path getAveragedFeaturesFilePath(

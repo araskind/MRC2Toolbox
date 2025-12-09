@@ -61,6 +61,7 @@ import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
+import edu.umich.med.mrc2.datoolbox.utils.ProjectUtils;
 
 public class ExperimentDetailsPanel extends DockableMRC2ToolboxPanel {
 
@@ -392,7 +393,7 @@ public class ExperimentDetailsPanel extends DockableMRC2ToolboxPanel {
 		
 		DataPipeline selectedPipeline = dataPipelinesTable.getSelectedDataPipeline();
 		DataPipeline modifiedPipeline = dataPipelineDefinitionDialog.getDataPipeline();
-		
+				
 		Set<DataPipeline> otherPipelines = currentExperiment.getDataPipelines().stream().
 				filter(p -> !p.equals(selectedPipeline)).
 				collect(Collectors.toSet());
@@ -400,10 +401,12 @@ public class ExperimentDetailsPanel extends DockableMRC2ToolboxPanel {
 		if(!otherPipelines.isEmpty()) {
 			
 			DataPipeline conflictingPipeline = otherPipelines.stream().
-				filter(p -> p.getAcquisitionMethod().equals(modifiedPipeline.getAcquisitionMethod())).
-				filter(p -> p.getDataExtractionMethod().equals(modifiedPipeline.getDataExtractionMethod())).
+				filter(p -> (p.equals(modifiedPipeline) 
+						|| p.getName().equalsIgnoreCase(modifiedPipeline.getName()))).
 				findFirst().orElse(null);
+
 			if(conflictingPipeline != null) {
+				
 				MessageDialog.showErrorMsg(
 						"Current project contains a different data pipeline \"" + conflictingPipeline.getName() + "\"\n" + 
 						"with acquisition method \"" + conflictingPipeline.getAcquisitionMethod().getName() + "\"\n" + 
@@ -412,14 +415,21 @@ public class ExperimentDetailsPanel extends DockableMRC2ToolboxPanel {
 				return;
 			}
 		}
+		ProjectUtils.renameAllPipelineFiles(
+				MRC2ToolBoxCore.getActiveMetabolomicsExperiment(), 
+				selectedPipeline.getName(), 
+				modifiedPipeline.getName());
+		
 		selectedPipeline.setName(modifiedPipeline.getName());
 		selectedPipeline.setDescription(modifiedPipeline.getDescription());
 		selectedPipeline.setAcquisitionMethod(modifiedPipeline.getAcquisitionMethod());
 		selectedPipeline.setDataExtractionMethod(modifiedPipeline.getDataExtractionMethod());
 		selectedPipeline.setMotrpacAssay(modifiedPipeline.getMotrpacAssay());
 		selectedPipeline.setAssay(modifiedPipeline.getAssay());
-		dataPipelinesTable.setTableModelFromProject(currentExperiment);
+		
+		dataPipelinesTable.setTableModelFromProject(currentExperiment);		
 		dataPipelineDefinitionDialog.dispose();
+		MRC2ToolBoxCore.getMainWindow().saveExperimentAndContinue();
 	}
 
 	private void showAsayTypeDialog() {
@@ -455,10 +465,6 @@ public class ExperimentDetailsPanel extends DockableMRC2ToolboxPanel {
 							MRC2ToolBoxCore.getMainWindow(), task);
 			idp.setLocationRelativeTo(this.getContentPane());
 			idp.setVisible(true);
-			
-//			currentExperiment.removeDataPipeline(selectedPipeline);
-//			activeDataPipeline = currentExperiment.getActiveDataPipeline();
-//			MRC2ToolBoxCore.getMainWindow().switchDataPipeline(currentExperiment, activeDataPipeline);
 		}		
 	}
 	

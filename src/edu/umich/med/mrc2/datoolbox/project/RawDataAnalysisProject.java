@@ -543,7 +543,13 @@ public class RawDataAnalysisProject extends Project {
 	@Override
 	public Set<ExperimentalSample> getPooledSamples() {
 		// TODO Auto-generated method stub
-		return null;
+		return new TreeSet<>();
+	}
+
+	@Override
+	public void setPooledSamples(Collection<ExperimentalSample> pooledSamples) {
+		// TODO Auto-generated method stub
+		
 	}
 }
 
