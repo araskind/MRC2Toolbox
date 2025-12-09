@@ -21,14 +21,8 @@
 
 package edu.umich.med.mrc2.datoolbox.utils;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.io.RandomAccessFile;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -37,37 +31,22 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.compress.archivers.ArchiveException;
-import org.apache.commons.compress.archivers.ArchiveStreamFactory;
-import org.apache.commons.compress.archivers.zip.Zip64Mode;
-import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
-import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.ujmp.core.Matrix;
 import org.ujmp.core.calculation.Calculation.Ret;
 
-import com.thoughtworks.xstream.XStream;
-import com.thoughtworks.xstream.io.xml.StaxDriver;
-import com.thoughtworks.xstream.security.NoTypePermission;
-import com.thoughtworks.xstream.security.NullPermission;
-import com.thoughtworks.xstream.security.PrimitiveTypePermission;
-
 import edu.umich.med.mrc2.datoolbox.data.CompoundLibrary;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
-import edu.umich.med.mrc2.datoolbox.data.ExperimentDesign;
-import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignSubset;
 import edu.umich.med.mrc2.datoolbox.data.LibraryMsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureClusterSet;
-import edu.umich.med.mrc2.datoolbox.data.MsFeatureSet;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
@@ -98,58 +77,58 @@ public class ProjectUtils {
 		return new SimpleDateFormat(dateFormatString);
 	}
 
-	public static void saveExperimentFile(
-			RawDataAnalysisProject experimentToSave) {
-		
-		experimentToSave.setLastModified(new Date());
-		try {
-			XStream xstream = new XStream(new StaxDriver());
-
-			xstream.setMode(XStream.XPATH_RELATIVE_REFERENCES);
-			xstream.addPermission(NoTypePermission.NONE);
-			xstream.addPermission(NullPermission.NULL);
-			xstream.addPermission(PrimitiveTypePermission.PRIMITIVES);
-			
-			xstream.omitField(DataAnalysisProject.class, "dataMatrixMap");
-			xstream.omitField(DataAnalysisProject.class, "corrMatrixMap");
-			xstream.omitField(MsFeature.class, "eventListeners");
-			xstream.omitField(MsFeatureSet.class, "eventListeners");
-			xstream.omitField(ExperimentDesignSubset.class, "eventListeners");
-			xstream.omitField(ExperimentDesign.class, "eventListeners");
-			
-			File xmlFile = Paths.get(experimentToSave.getExperimentDirectory().getAbsolutePath(), 
-					FilenameUtils.getBaseName(experimentToSave.getExperimentFile().getName()) + ".xml").toFile();
-	        RandomAccessFile raf = new RandomAccessFile(xmlFile.getAbsolutePath(), "rw");
-	        FileOutputStream fout = new FileOutputStream(raf.getFD());	        
-			BufferedOutputStream bout = new BufferedOutputStream(fout);
-			xstream.toXML(experimentToSave, bout);
-			bout.close();
-			fout.close();
-			raf.close();
-			
-			if(xmlFile.exists()) {
-				
-		        OutputStream archiveStream = new FileOutputStream(experimentToSave.getExperimentFile());
-		        ZipArchiveOutputStream archive =
-		        	(ZipArchiveOutputStream) new ArchiveStreamFactory().
-		        	createArchiveOutputStream(ArchiveStreamFactory.ZIP, archiveStream);
-		        archive.setUseZip64(Zip64Mode.Always);
-		        ZipArchiveEntry entry = new ZipArchiveEntry(experimentToSave.getName());
-		        archive.putArchiveEntry(entry);
-
-		        BufferedInputStream input = new BufferedInputStream(new FileInputStream(xmlFile));
-		        org.apache.commons.io.IOUtils.copy(input, archive);
-		        input.close();
-		        archive.closeArchiveEntry();
-		        archive.finish();
-		        archive.close();
-		        archiveStream.close();	        
-		        xmlFile.delete();
-			}
-		} catch (Exception ex) {
-			ex.printStackTrace();
-		}
-	}
+//	public static void saveExperimentFile(
+//			RawDataAnalysisProject experimentToSave) {
+//		
+//		experimentToSave.setLastModified(new Date());
+//		try {
+//			XStream xstream = new XStream(new StaxDriver());
+//
+//			xstream.setMode(XStream.XPATH_RELATIVE_REFERENCES);
+//			xstream.addPermission(NoTypePermission.NONE);
+//			xstream.addPermission(NullPermission.NULL);
+//			xstream.addPermission(PrimitiveTypePermission.PRIMITIVES);
+//			
+//			xstream.omitField(DataAnalysisProject.class, "dataMatrixMap");
+//			xstream.omitField(DataAnalysisProject.class, "corrMatrixMap");
+//			xstream.omitField(MsFeature.class, "eventListeners");
+//			xstream.omitField(MsFeatureSet.class, "eventListeners");
+//			xstream.omitField(ExperimentDesignSubset.class, "eventListeners");
+//			xstream.omitField(ExperimentDesign.class, "eventListeners");
+//			
+//			File xmlFile = Paths.get(experimentToSave.getExperimentDirectory().getAbsolutePath(), 
+//					FilenameUtils.getBaseName(experimentToSave.getExperimentFile().getName()) + ".xml").toFile();
+//	        RandomAccessFile raf = new RandomAccessFile(xmlFile.getAbsolutePath(), "rw");
+//	        FileOutputStream fout = new FileOutputStream(raf.getFD());	        
+//			BufferedOutputStream bout = new BufferedOutputStream(fout);
+//			xstream.toXML(experimentToSave, bout);
+//			bout.close();
+//			fout.close();
+//			raf.close();
+//			
+//			if(xmlFile.exists()) {
+//				
+//		        OutputStream archiveStream = new FileOutputStream(experimentToSave.getExperimentFile());
+//		        ZipArchiveOutputStream archive =
+//		        	(ZipArchiveOutputStream) new ArchiveStreamFactory().
+//		        	createArchiveOutputStream(ArchiveStreamFactory.ZIP, archiveStream);
+//		        archive.setUseZip64(Zip64Mode.Always);
+//		        ZipArchiveEntry entry = new ZipArchiveEntry(experimentToSave.getName());
+//		        archive.putArchiveEntry(entry);
+//
+//		        BufferedInputStream input = new BufferedInputStream(new FileInputStream(xmlFile));
+//		        org.apache.commons.io.IOUtils.copy(input, archive);
+//		        input.close();
+//		        archive.closeArchiveEntry();
+//		        archive.finish();
+//		        archive.close();
+//		        archiveStream.close();	        
+//		        xmlFile.delete();
+//			}
+//		} catch (Exception ex) {
+//			ex.printStackTrace();
+//		}
+//	}
 	
 	public static void saveStorableRawDataAnalysisExperiment(
 			RawDataAnalysisProject experimentToSave) {

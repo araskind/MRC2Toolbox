@@ -53,6 +53,8 @@ import edu.umich.med.mrc2.datoolbox.gui.main.DockableMRC2ToolboxPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.main.StatusBar;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
+import edu.umich.med.mrc2.datoolbox.gui.utils.IndeterminateProgressDialog;
+import edu.umich.med.mrc2.datoolbox.gui.utils.LongUpdateTask;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.main.BuildInformation;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
@@ -439,16 +441,56 @@ public class ExperimentDetailsPanel extends DockableMRC2ToolboxPanel {
 
 		String yesNoQuestion = 
 				"You are going to delete \"" + selectedPipeline.getName()
-				+ "\" data pipeline from current project!\n"
+				+ "\" data pipeline from current project.\n"
+				+ "This operation is not reversible!\n"
 				+ "Proceed?";
 
 		if (MessageDialog.showChoiceWithWarningMsg(yesNoQuestion,
 				this.getContentPane()) == JOptionPane.OK_OPTION) {
 
-			currentExperiment.removeDataPipeline(selectedPipeline);
-			activeDataPipeline = currentExperiment.getActiveDataPipeline();
-			MRC2ToolBoxCore.getMainWindow().switchDataPipeline(currentExperiment, activeDataPipeline);
+			RemoveDataPipelineTask task = new RemoveDataPipelineTask(selectedPipeline);
+			IndeterminateProgressDialog idp = 
+					new IndeterminateProgressDialog(
+							"Removing data pipeline \"" + selectedPipeline.getName() + "\"", 
+							MRC2ToolBoxCore.getMainWindow(), task);
+			idp.setLocationRelativeTo(this.getContentPane());
+			idp.setVisible(true);
+			
+//			currentExperiment.removeDataPipeline(selectedPipeline);
+//			activeDataPipeline = currentExperiment.getActiveDataPipeline();
+//			MRC2ToolBoxCore.getMainWindow().switchDataPipeline(currentExperiment, activeDataPipeline);
 		}		
+	}
+	
+	class RemoveDataPipelineTask extends LongUpdateTask {
+		/*
+			* Main task. Executed in background thread.
+			*/
+		private DataPipeline toRemove;
+
+		public RemoveDataPipelineTask(DataPipeline toRemove) {
+			this.toRemove = toRemove;
+		}
+
+		@Override
+		public Void doInBackground() {
+
+			try {
+				currentExperiment.removeDataPipeline(toRemove);
+				activeDataPipeline = currentExperiment.getActiveDataPipeline();
+				MRC2ToolBoxCore.getMainWindow().switchDataPipeline(currentExperiment, activeDataPipeline);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			return null;
+		}
+		
+		@Override
+		public void done() {
+			super.done();
+			MRC2ToolBoxCore.getMainWindow().saveExperimentAndContinue();
+		}
 	}
 
 	public synchronized void clearPanel() {

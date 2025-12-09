@@ -225,11 +225,9 @@ public class MainWindow extends JFrame
 				togglePanel(entry.getKey(), selected);
 			}
 		}
-		if (command.equals(MainActionCommands.SAVE_EXPERIMENT_COMMAND.getName())) {
-			experimentSwitchController.setExitProgram(false);
-			experimentSwitchController.setExperimentState(null);
-			saveExperiment();
-		}
+		if (command.equals(MainActionCommands.SAVE_EXPERIMENT_COMMAND.getName()))
+			saveExperimentAndContinue();
+		
 		if (command.equals(MainActionCommands.SAVE_EXPERIMENT_COPY_COMMAND.getName()))
 			saveExperimentCopy();
 
@@ -756,6 +754,13 @@ public class MainWindow extends JFrame
 			if(selectedValue == JOptionPane.NO_OPTION)
 				clearGuiAfterExperimentClosed();			
 		}
+	}
+	
+	public void saveExperimentAndContinue() {
+		
+		experimentSwitchController.setExitProgram(false);
+		experimentSwitchController.setExperimentState(null);
+		saveExperiment();
 	}
 	
 	public void saveExperiment() {

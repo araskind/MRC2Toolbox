@@ -44,7 +44,6 @@ import edu.umich.med.mrc2.datoolbox.data.CompoundLibrary;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.DataPipelineAlignmentResults;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesign;
-import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignLevel;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignSubset;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentalSample;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
@@ -87,7 +86,6 @@ public class DataAnalysisProject extends Project {
 	protected TreeMap<DataPipeline, Matrix[]> metaDataMap;
 	protected TreeMap<DataPipeline, Set<MsFeatureCluster>> duplicatesMap;
 	protected TreeMap<DataPipeline, Set<MsFeatureCluster>> correlationClusterMap;
-	protected TreeMap<DataPipeline, Boolean> statsCalculatedMap;
 	protected TreeMap<DataPipeline, Set<MsFeatureSet>> featureSetMap;
 	protected TreeMap<DataAcquisitionMethod, Set<DataFile>> dataFileMap;
 	protected TreeMap<DataAcquisitionMethod, Worklist> worklistMap;
@@ -115,7 +113,6 @@ public class DataAnalysisProject extends Project {
 		featureMap = new TreeMap<>();
 		worklistMap = new TreeMap<>();
 		dataFileMap = new TreeMap<>();
-		statsCalculatedMap = new TreeMap<>();
 		dataMatrixMap = new TreeMap<>();
 		dataMatrixFileMap = new TreeMap<>();
 		featureMatrixMap = new TreeMap<>();
@@ -138,7 +135,7 @@ public class DataAnalysisProject extends Project {
 	
 	public DataPipeline getDataPipelineByName(String dpName) {
 		return dataPipelines.stream().
-				filter(dp -> dp.getName().equals(dpName)).
+				filter(dp -> dp.getName().equalsIgnoreCase(dpName)).
 				findFirst().orElse(null);
 	}
 
@@ -175,7 +172,6 @@ public class DataAnalysisProject extends Project {
 				ProjectUtils.getDataMatrixFilePath(this,pipeline,false).
 				getFileName().toString();
 		dataMatrixFileMap.put(pipeline, matrixFileName);
-		statsCalculatedMap.put(pipeline, false);
 		featureSetMap.put(pipeline, new TreeSet<>());
 	}
 	
@@ -207,13 +203,13 @@ public class DataAnalysisProject extends Project {
 		corrMatrixMap.remove(pipeline);
 		duplicatesMap.remove(pipeline);
 		correlationClusterMap.remove(pipeline);	
-		statsCalculatedMap.remove(pipeline);
 		metaDataMap.remove(pipeline);
 		featureSetMap.remove(pipeline);		
 		
 		deleteFeaturesAndDataMatricesForPipeline(pipeline);
 		deleteAlignmentAndMergeResultsForDataPipeline(pipeline);
-		removeAcquisitionMethodForPipeline(pipeline);	
+		removeAcquisitionMethodForPipeline(pipeline);
+		removeFaetureClusterSetsForDataPipeline(pipeline);
 		
 		dataPipelines.remove(pipeline);
 		
@@ -246,6 +242,15 @@ public class DataAnalysisProject extends Project {
 
 			worklistMap.remove(acqMethod);
 			dataFileMap.remove(acqMethod);
+		}
+	}
+	
+	private void removeFaetureClusterSetsForDataPipeline(DataPipeline pipeline) {
+		
+		for(MsFeatureClusterSet cs : featureClusterSetCollection) {
+			
+			if(cs.getNonEmptyDataPipelines().contains(pipeline))
+				deleteFeatureClusterSet(cs);		
 		}
 	}
 	
@@ -352,52 +357,59 @@ public class DataAnalysisProject extends Project {
 			ExperimentDesignSubset designSubset, 
 			DataAcquisitionMethod acquisitionMethod) {
 
-		Set<DataFile> files = new TreeSet<DataFile>();
+		Set<DataFile> files = experimentDesign.getSamplesForDesignSubset(designSubset, true).stream().
+			filter(s -> Objects.nonNull(s.getDataFilesForMethod(acquisitionMethod))).
+			flatMap(s -> s.getDataFilesForMethod(acquisitionMethod).stream()).
+			filter(f-> f.isEnabled()).collect(Collectors.toCollection(TreeSet::new));
 
-		for(ExperimentDesignLevel level : designSubset.getDesignMap()){
-
-			for(ExperimentalSample sample : experimentDesign.getSamples()){
-
-				if(sample.getDesignCell().values().contains(level) &&
-						sample.getDataFilesForMethod(acquisitionMethod) != null){
-
-					for(DataFile df : sample.getDataFilesForMethod(acquisitionMethod)){
-
-						if(df.isEnabled())
-							files.add(df);
-					}
-				}
-			}			
-		}
+//		Set<DataFile> files = new TreeSet<>();
+//
+//		for(ExperimentDesignLevel level : designSubset.getDesignMap()){
+//
+//			for(ExperimentalSample sample : experimentDesign.getSamples()){
+//
+//				if(sample.getDesignCell().values().contains(level) &&
+//						sample.getDataFilesForMethod(acquisitionMethod) != null){
+//
+//					for(DataFile df : sample.getDataFilesForMethod(acquisitionMethod)){
+//
+//						if(df.isEnabled())
+//							files.add(df);
+//					}
+//				}
+//			}			
+//		}
 		return files;
 	}
 	
 	public Set<DataFile> getDataFilesForPipeline(DataPipeline dataPipeline, boolean enabledOnly){
 		
-		Set<DataFile> files = new TreeSet<DataFile>();
-		DataAcquisitionMethod method = dataPipeline.getAcquisitionMethod();
-		List<DataFile> methodFiles = experimentDesign.getSamples().stream().
-				flatMap(s -> s.getDataFilesForMethod(method).stream()).
-				collect(Collectors.toList());
-		if(enabledOnly) {
-			List<DataFile>enabled = methodFiles.stream().filter(f -> f.isEnabled()).collect(Collectors.toList());
-			files.addAll(enabled);
-		}
-		else {
-			files.addAll(methodFiles);
-		}		
+		Set<DataFile> files = getDataFilesForAcquisitionMethod(dataPipeline.getAcquisitionMethod());
+		if(enabledOnly) 
+			files = files.stream().filter(f -> f.isEnabled()).collect(Collectors.toCollection(TreeSet::new));
+		
+//		Set<DataFile> files = new TreeSet<>();
+//		DataAcquisitionMethod method = dataPipeline.getAcquisitionMethod();
+//		List<DataFile> methodFiles = experimentDesign.getSamples().stream().
+//				flatMap(s -> s.getDataFilesForMethod(method).stream()).
+//				collect(Collectors.toList());
+//		if(enabledOnly) {
+//			List<DataFile>enabled = methodFiles.stream().filter(f -> f.isEnabled()).collect(Collectors.toList());
+//			files.addAll(enabled);
+//		}
+//		else {
+//			files.addAll(methodFiles);
+//		}		
 		return files;
 	}
 	
 	public Set<DataFile> getDataFilesWithDataForPipeline(DataPipeline dataPipeline){
 		
 		DataAcquisitionMethod method = dataPipeline.getAcquisitionMethod();
-		Set<DataFile> methodFiles = experimentDesign.getSamples().stream().
+		return experimentDesign.getSamples().stream().
 				flatMap(s -> s.getDataFilesForMethod(method).stream()).
 				filter(f -> hasDataForFileInPipeline(f, dataPipeline)).
 				collect(Collectors.toCollection(TreeSet::new));
-	
-		return methodFiles;
 	}
 
 	public MsFeatureSet getActiveFeatureSetForDataPipeline(DataPipeline pipeline) {
@@ -428,7 +440,7 @@ public class DataAnalysisProject extends Project {
 			DataAcquisitionMethod acquisitionMethod) {
 
 		if(acquisitionMethod == null || dataFileMap.get(acquisitionMethod) == null)
-			return null;
+			return new TreeSet<>();
 
 		return dataFileMap.get(acquisitionMethod).
 				stream().collect(Collectors.toCollection(TreeSet::new));
@@ -566,9 +578,18 @@ public class DataAnalysisProject extends Project {
 	public boolean statsCalculetedForDataPipeline(DataPipeline pipeline) {
 		
 		if(pipeline == null)
-			throw new IllegalArgumentException("Pipeline value can not be null!");
+			return false;
 		
-		return statsCalculatedMap.get(pipeline);
+		Set<MsFeature> pipelineFeatures = getMsFeaturesForDataPipeline(pipeline);
+		if(pipelineFeatures == null || pipelineFeatures.isEmpty())
+			return false;
+		
+		long missingStatSummaryCount = pipelineFeatures.stream().
+				filter(f -> Objects.isNull(f.getStatsSummary())).count();
+		if(missingStatSummaryCount > 0)
+			return false;
+		
+		return true;
 	}
 
 	public Worklist getWorklistForDataAcquisitionMethod(DataAcquisitionMethod method) {
@@ -759,12 +780,7 @@ public class DataAnalysisProject extends Project {
 
 		imputedDataMatrixMap.put(pipeline, dataMatrix);
 	}
-
-	public void setStatisticsStatusForDataPipeline(
-			DataPipeline pipeline, boolean statStatus) {
-		statsCalculatedMap.put(pipeline, statStatus);
-	}
-
+	
 	public void setWorklistForAcquisitionMethod(
 			DataAcquisitionMethod method, Worklist newWorklist) {
 		worklistMap.put(method, newWorklist);
@@ -861,10 +877,7 @@ public class DataAnalysisProject extends Project {
 
 		Set<DataFile> fileSet = dataFileMap.remove(oldMethod);
 		dataFileMap.put(newMethod, fileSet);
-
-		Boolean statCalc = statsCalculatedMap.remove(oldPipeline);
-		statsCalculatedMap.put(newPipeline, statCalc);
-
+		
 		Set<MsFeatureSet> featureSets = featureSetMap.remove(oldPipeline);
 		featureSetMap.put(newPipeline, featureSets);
 	}

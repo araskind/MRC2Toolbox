@@ -2073,9 +2073,9 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 		
 		MRC2ToolBoxCore.getMainWindow().
 			switchPanelForDataPipeline(activeDataPipeline, PanelList.FEATURE_DATA);
-		currentExperiment.setStatisticsStatusForDataPipeline(activeDataPipeline, true);
+
 		MRC2ToolBoxCore.getMainWindow().getPreferencesDraw().switchDataPipeline(currentExperiment, activeDataPipeline);
-		currentExperiment.setStatisticsStatusForDataPipeline(activeDataPipeline, true);
+
 		resetFeatureTable();
 		
 		if(cleanEmtyFeatures) {			

@@ -204,6 +204,13 @@ public class MsFeatureClusterSet implements
 		this.mergedDataMatrix = mergedDataMatrix;
 	}
 	
+	public Collection<DataPipeline>getNonEmptyDataPipelines(){
+		
+		Collection<DataPipeline>nonEmptyDataPipelines = new TreeSet<>();	
+		clusters.stream().forEach(c -> nonEmptyDataPipelines.addAll(c.getNonEmptyDataPipelines()));
+		return nonEmptyDataPipelines;
+	}
+	
     @Override
     public boolean equals(Object obj) {
 

@@ -1039,6 +1039,16 @@ public class MsFeatureCluster implements Serializable, XmlStorable {
 		return getDataPipelineForFeature(markedForMerge.iterator().next());
 	}
 	
+	public Collection<DataPipeline>getNonEmptyDataPipelines(){
+		
+		Collection<DataPipeline>nonEmptyDataPipelines = new TreeSet<>();
+		for(DataPipeline dp : clusterFeatures.keySet()) {
+			if(!clusterFeatures.get(dp).isEmpty())
+				nonEmptyDataPipelines.add(dp);
+		}
+		return nonEmptyDataPipelines;
+	}
+	
 	public Collection<LibraryMsFeature>getMergedFeaturesForDataPipeline(DataPipeline pipeline){
 		
 		return clusterFeatures.get(pipeline).stream().

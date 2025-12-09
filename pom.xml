@@ -497,13 +497,12 @@ public final class BuildInformation {
 				</exclusion>
 			</exclusions>
 		</dependency>
-		-->
-		<!-- https://mvnrepository.com/artifact/com.thoughtworks.xstream/xstream -->
 		<dependency>
 		    <groupId>com.thoughtworks.xstream</groupId>
 		    <artifactId>xstream</artifactId>
 		    <version>1.4.21</version>
 		</dependency>
+		-->
 		<dependency>
 			<groupId>com.googlecode.juniversalchardet</groupId>
 			<artifactId>juniversalchardet</artifactId>

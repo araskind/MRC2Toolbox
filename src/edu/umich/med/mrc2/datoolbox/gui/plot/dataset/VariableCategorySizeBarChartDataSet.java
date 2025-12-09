@@ -64,18 +64,15 @@ public class VariableCategorySizeBarChartDataSet extends AbstractDataset impleme
 	private Map<Comparable,Integer>rowMap;
 	private Map<Comparable,Integer>columnMap;
 	private Double[][]data; 
-	private List rowKeys, columnKeys;
+	private List rowKeys;
+	private List columnKeys;
 	private int[]categoryItemCount;
+	private Integer rowCount = 0;
+	private Integer columnCount = 0;
 	
 	public VariableCategorySizeBarChartDataSet(TwoDqcPlotParameterObject plotParameters) {
 		
-		rowMap = new LinkedHashMap<>();
-		columnMap = new LinkedHashMap<>();
-		rowKeys = new ArrayList<>();
-		columnKeys = new ArrayList<>();
-		Integer rowCount = 0;
-		Integer columnCount = 0;
-		
+		initVars();		
 		DataAnalysisProject experiment = 
 				MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
 		if(experiment == null || experiment.getActiveDataPipeline() == null
@@ -137,7 +134,8 @@ public class VariableCategorySizeBarChartDataSet extends AbstractDataset impleme
 			MsFeature feature, 
 			DataPipeline pipeline,
 			TwoDimFeatureDataPlotParameterObject plotParameters) {
-				
+		
+		initVars();				
 		DataAnalysisProject experiment = 
 				MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
 		if(experiment == null || experiment.getActiveDataPipeline() == null
@@ -172,10 +170,6 @@ public class VariableCategorySizeBarChartDataSet extends AbstractDataset impleme
 				createSeriesPaintMap(seriesFileMap, plotParameters.getGroupingType(), 
 						plotParameters.getChartColorOption());
 		
-		rowMap = new LinkedHashMap<>();
-		columnMap = new LinkedHashMap<>();
-		Integer rowCount = 0;
-		Integer columnCount = 0;
 		data = new Double[fileCount][seriesFileMap.size()];
 		
 		Map<DataFile, Double> dataMap = 
@@ -246,6 +240,16 @@ public class VariableCategorySizeBarChartDataSet extends AbstractDataset impleme
 			}
 		}
 		return seriesPaintNameMap;
+	}
+	
+	private void initVars() {
+		
+		rowMap = new LinkedHashMap<>();
+		columnMap = new LinkedHashMap<>();
+		rowKeys = new ArrayList<>();
+		columnKeys = new ArrayList<>();
+		rowCount = 0;
+		columnCount = 0;
 	}
 	
 	private void calculateCategoryItemCount(Map<String, DataFile[]> seriesFileMap) {

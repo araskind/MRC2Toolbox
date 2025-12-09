@@ -24,7 +24,6 @@ package edu.umich.med.mrc2.datoolbox.data;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -429,15 +428,19 @@ public class ExperimentDesign implements ExperimentDesignFactorListener, Seriali
 	public Collection<ExperimentalSample>getSamplesForDesignSubset(
 			ExperimentDesignSubset subset, boolean enabledOnly){
 
-		Collection<ExperimentalSample>subsetSamples = new HashSet<>();
 		TreeSet<ExperimentDesignLevel> levels = subset.getDesignMap();
-		for(ExperimentalSample s : sampleSet) {
-
-			if(!s.getDesignCell().values().stream().
-					filter((e) -> levels.contains(e)).
-					collect(Collectors.toList()).isEmpty())
-				subsetSamples.add(s);
-		}	
+		
+		Collection<ExperimentalSample>subsetSamples = 
+				sampleSet.stream().filter(s -> levels.stream().anyMatch(s.getDesignCell().values()::contains)).
+				collect(Collectors.toSet());
+		
+//		for(ExperimentalSample s : sampleSet) {
+//			
+//			if(!s.getDesignCell().values().stream().
+//					filter(e -> levels.contains(e)).
+//					collect(Collectors.toList()).isEmpty())
+//				subsetSamples.add(s);
+//		}	
 		if(enabledOnly)
 			subsetSamples = subsetSamples.stream().
 				filter(s -> s.isEnabled()).collect(Collectors.toSet());

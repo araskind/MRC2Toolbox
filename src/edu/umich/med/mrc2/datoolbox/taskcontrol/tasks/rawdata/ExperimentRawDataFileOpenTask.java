@@ -60,7 +60,7 @@ public class ExperimentRawDataFileOpenTask extends AbstractTask implements TaskL
 		this.experiment = experiment;
 		this.copyFilesToExperiment = copyFilesToExperiment;
 		ticCount = 0;
-		errors = new ArrayList<String>();
+		errors = new ArrayList<>();
 	}
 	
 	@Override
@@ -77,7 +77,7 @@ public class ExperimentRawDataFileOpenTask extends AbstractTask implements TaskL
 	private void copyDataFiles() {
 		
 		taskDescription = "Copying raw data files to experiment directory ...";
-		TreeSet<DataFile>filesToCopy = new TreeSet<DataFile>();
+		TreeSet<DataFile>filesToCopy = new TreeSet<>();
 		for(DataFile df : experiment.getDataFiles()) {
 			
 			File existingFile = 

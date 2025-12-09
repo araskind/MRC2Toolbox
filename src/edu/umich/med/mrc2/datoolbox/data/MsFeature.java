@@ -90,8 +90,6 @@ public class MsFeature implements AnnotatedObject, Serializable, XmlStorable {
 	protected ParameterSetStatus status;
 	protected Set<MsFeatureListener> eventListeners;
 	protected boolean suppressEvents;
-	
-	//public static final String DEFAULT_ID_NAME = "UNKNOWN";
 
 	public MsFeature() {
 		super();
@@ -100,9 +98,9 @@ public class MsFeature implements AnnotatedObject, Serializable, XmlStorable {
 		this.spectrum = null;
 		this.active = true;
 		this.qualityScore = 0;
-		this.identifications = new HashSet<MsFeatureIdentity>();
+		this.identifications = new HashSet<>();
 		this.primaryIdentity = null;
-		this.annotations = new TreeSet<ObjectAnnotation>();
+		this.annotations = new TreeSet<>();
 		this.defaultModification = null;
 		this.suggestedModification = null;
 		this.binnerAnnotation = null;

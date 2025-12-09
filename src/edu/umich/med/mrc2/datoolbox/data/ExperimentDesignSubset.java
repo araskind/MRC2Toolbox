@@ -69,9 +69,8 @@ public class ExperimentDesignSubset implements Comparable<ExperimentDesignSubset
 		locked = false;
 		suppressEvents = false;
 		status = ParameterSetStatus.CREATED;
-		orderedFactorMap = new TreeMap<Integer, ExperimentDesignFactor>();
-		orderedLevelMap = new TreeMap<ExperimentDesignFactor, 
-				TreeMap<Integer, ExperimentDesignLevel>>();
+		orderedFactorMap = new TreeMap<>();
+		orderedLevelMap = new TreeMap<>();
 		eventListeners = ConcurrentHashMap.newKeySet();
 	}
 
@@ -83,8 +82,7 @@ public class ExperimentDesignSubset implements Comparable<ExperimentDesignSubset
 		for (Entry<ExperimentDesignFactor, ExperimentDesignLevel[]> entry : source.getOrderedDesign().entrySet()) {
 
 			orderedFactorMap.put(fCount, entry.getKey());
-			TreeMap<Integer, ExperimentDesignLevel> orderedLevels = 
-					new TreeMap<Integer, ExperimentDesignLevel>();
+			TreeMap<Integer, ExperimentDesignLevel> orderedLevels = new TreeMap<>();
 			for(int i=0; i<entry.getValue().length; i++)
 				orderedLevels.put(i, entry.getValue()[i]);
 
@@ -102,7 +100,7 @@ public class ExperimentDesignSubset implements Comparable<ExperimentDesignSubset
 		
 		//	Update factor map
 		if(orderedFactorMap == null)
-			orderedFactorMap = new TreeMap<Integer, ExperimentDesignFactor>();
+			orderedFactorMap = new TreeMap<>();
 
 		if(orderedFactorMap.isEmpty())
 			orderedFactorMap.put(0, newLevel.getParentFactor());
@@ -136,7 +134,7 @@ public class ExperimentDesignSubset implements Comparable<ExperimentDesignSubset
 	public Map<ExperimentDesignFactor, ExperimentDesignLevel[]>getOrderedDesign(){
 
 		LinkedHashMap<ExperimentDesignFactor, ExperimentDesignLevel[]>orderedMap
-			= new LinkedHashMap<ExperimentDesignFactor, ExperimentDesignLevel[]>();
+			= new LinkedHashMap<>();
 
 		for (Entry<Integer, ExperimentDesignFactor> entry : orderedFactorMap.entrySet()) {
 
@@ -166,8 +164,7 @@ public class ExperimentDesignSubset implements Comparable<ExperimentDesignSubset
 		if(levelsInNewOrder.length == 0)
 			return;
 		
-		TreeMap<Integer, ExperimentDesignLevel> levelMap = 
-				new TreeMap<Integer, ExperimentDesignLevel>();
+		TreeMap<Integer, ExperimentDesignLevel> levelMap = new TreeMap<>();
 
 		for(int i=0; i<levelsInNewOrder.length; i++)
 			levelMap.put(i, levelsInNewOrder[i]);
@@ -227,8 +224,7 @@ public class ExperimentDesignSubset implements Comparable<ExperimentDesignSubset
 	public TreeSet<ExperimentDesignLevel> getDesignMap() {
 
 		if(orderedLevelMap == null)
-			orderedLevelMap =
-				new TreeMap<ExperimentDesignFactor, TreeMap<Integer, ExperimentDesignLevel>>();
+			orderedLevelMap = new TreeMap<>();
 
 		return orderedLevelMap.values().stream().
 			flatMap(f -> f.values().stream()).
@@ -260,8 +256,9 @@ public class ExperimentDesignSubset implements Comparable<ExperimentDesignSubset
 		if(!orderedFactorMap.values().contains(levelToRemove.getParentFactor()))
 			return;
 
-		Collection<ExperimentDesignLevel> levels = orderedLevelMap.get(levelToRemove.getParentFactor()).values();
-		ArrayList<ExperimentDesignLevel>newLevels = new ArrayList<ExperimentDesignLevel>();
+		Collection<ExperimentDesignLevel> levels = 
+				orderedLevelMap.get(levelToRemove.getParentFactor()).values();
+		ArrayList<ExperimentDesignLevel>newLevels = new ArrayList<>();
 		for(ExperimentDesignLevel level : levels) {
 
 			if(!level.equals(levelToRemove))
@@ -331,7 +328,7 @@ public class ExperimentDesignSubset implements Comparable<ExperimentDesignSubset
 			removeLevel(newLevel, notifyListeners);
 
 		//	Remove and re-order factors
-		ArrayList<ExperimentDesignFactor>newFactors = new ArrayList<ExperimentDesignFactor>();
+		ArrayList<ExperimentDesignFactor>newFactors = new ArrayList<>();
 		for(ExperimentDesignFactor factor : orderedFactorMap.values()) {
 
 			if(!factor.equals(selectedFactor))
@@ -401,7 +398,7 @@ public class ExperimentDesignSubset implements Comparable<ExperimentDesignSubset
 			levelMapElement.setAttribute(
 					ExperimentDesignSubsetFields.FactorKey.name(), 
 					ole.getKey().getName());
-			ArrayList<String>orderedLevels = new ArrayList<String>();
+			ArrayList<String>orderedLevels = new ArrayList<>();
 			for(Entry<Integer, ExperimentDesignLevel>le : ole.getValue().entrySet())
 				orderedLevels.add(Integer.toString(le.getKey()) + "," + le.getValue().getName());
 			
@@ -423,9 +420,8 @@ public class ExperimentDesignSubset implements Comparable<ExperimentDesignSubset
 				ExperimentDesignSubsetFields.Islocked.name()));
 		
 		status = ParameterSetStatus.CREATED;
-		orderedFactorMap = new TreeMap<Integer, ExperimentDesignFactor>();
-		orderedLevelMap = new TreeMap<ExperimentDesignFactor, 
-				TreeMap<Integer, ExperimentDesignLevel>>();
+		orderedFactorMap = new TreeMap<>();
+		orderedLevelMap = new TreeMap<>();
 		eventListeners = ConcurrentHashMap.newKeySet();
 		
 		List<Element> factorMapElements = 
@@ -459,8 +455,7 @@ public class ExperimentDesignSubset implements Comparable<ExperimentDesignSubset
 					String[]levelStrings = lmElement.getText().split("\\|");
 					if(levelStrings.length > 0) {
 						
-						TreeMap<Integer, ExperimentDesignLevel>factorLevelMap = 
-								new TreeMap<Integer, ExperimentDesignLevel>();
+						TreeMap<Integer, ExperimentDesignLevel>factorLevelMap = new TreeMap<>();
 						for(String ls : levelStrings) {
 							String[]parts = ls.split(",");
 							Integer order = Integer.parseInt(parts[0]);
@@ -475,7 +470,7 @@ public class ExperimentDesignSubset implements Comparable<ExperimentDesignSubset
 		}
 	}
 
-	public TreeMap<ExperimentDesignFactor, TreeMap<Integer, ExperimentDesignLevel>> getOrderedLevelMap() {
+	public Map<ExperimentDesignFactor, TreeMap<Integer, ExperimentDesignLevel>> getOrderedLevelMap() {
 		return orderedLevelMap;
 	}
 }
