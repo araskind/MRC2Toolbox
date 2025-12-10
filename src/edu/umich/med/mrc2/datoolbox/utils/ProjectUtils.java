@@ -375,84 +375,6 @@ public class ProjectUtils {
 		FIOUtils.safeDeleteFile(dataMatrixFilePath);
 	}
 
-//	public static void moveFeatureMatrixFileToNewDefaultLocation(
-//			DataAnalysisProject project, DataPipeline pipeline) {
-//		
-//		createDataDirectoryForProjectIfNotExists(project);
-//		
-//		String featureMatrixFileName = 
-//				project.getFeatureMatrixFileNameForDataPipeline(pipeline);
-//		if(featureMatrixFileName == null) 
-//			return;
-//		
-//		Path featureMatrixFileNewLocation = 
-//				getFeatureMatrixFilePath(project, pipeline, false);
-//		Path featureMatrixFileOldLocation = 
-//				Paths.get(project.getExperimentDirectory().getAbsolutePath(), 
-//				featureMatrixFileName);
-//		
-//		if((featureMatrixFileNewLocation.toFile() == null 
-//				|| !featureMatrixFileNewLocation.toFile().exists())
-//				&& featureMatrixFileOldLocation.toFile().exists()) {
-//			try {
-//				Files.move(
-//					featureMatrixFileOldLocation, 
-//					featureMatrixFileNewLocation, 
-//					StandardCopyOption.REPLACE_EXISTING);
-//			} catch (IOException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}			
-//		}
-//		if(featureMatrixFileOldLocation.toFile().exists()) {
-//			try {
-//				Files.delete(featureMatrixFileOldLocation);
-//			} catch (IOException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
-//		}
-//	}
-//
-//	public static void moveDataMatrixFileToNewDefaultLocation(
-//			DataAnalysisProject project, DataPipeline pipeline) {
-//		
-//		createDataDirectoryForProjectIfNotExists(project);
-//		
-//		String dataMatrixFileName = 
-//				project.getDataMatrixFileNameForDataPipeline(pipeline);
-//		if(dataMatrixFileName == null || dataMatrixFileName.isEmpty()) 
-//			return;
-//		
-//		Path dataMatrixFileNewLocation = 
-//				getDataMatrixFilePath(project, pipeline, false);
-//		Path dataMatrixFileOldLocation = 
-//				Paths.get(project.getExperimentDirectory().getAbsolutePath(), 
-//				dataMatrixFileName);
-//		
-//		if((dataMatrixFileNewLocation.toFile() == null 
-//				|| !dataMatrixFileNewLocation.toFile().exists()) 
-//				&& dataMatrixFileOldLocation.toFile().exists()) {				
-//			try {
-//				Files.move(
-//					dataMatrixFileOldLocation, 
-//					dataMatrixFileNewLocation, 
-//					StandardCopyOption.REPLACE_EXISTING);
-//			} catch (IOException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}		
-//		}	
-//		if(dataMatrixFileOldLocation.toFile().exists()) {
-//			try {
-//				Files.delete(dataMatrixFileOldLocation);
-//			} catch (IOException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
-//		}
-//	}
-	
 	public static void moveCEFLibraryFilesToNewDefaultLocation(DataAnalysisProject project) {
 		
 		createDataDirectoryForProjectIfNotExists(project);
@@ -729,6 +651,20 @@ public class ProjectUtils {
 		return Paths.get(project.getDataDirectory().getAbsolutePath(),
 				DataPrefix.DATA_MATRIX.getName() + mergedSuffix + "_" + dataSetId 
 				+ "." + DataFileExtensions.DATA_MATRIX_EXTENSION.getExtension());
+	}
+	
+	public static Matrix removeFeaturesFromMatrixWithMetadata(Matrix originalMatrix, List<Long>featureIndices) {
+		
+		Matrix featureMetadataMatrix = originalMatrix.getMetaDataDimensionMatrix(0);
+		Matrix fileMetadataMatrix = originalMatrix.getMetaDataDimensionMatrix(1);
+		
+		Matrix newMatrix = originalMatrix.deleteColumns(Ret.NEW, featureIndices);
+		Matrix newFeatureMetadataMatrix = featureMetadataMatrix.deleteColumns(Ret.NEW, featureIndices);
+		
+		newMatrix.setMetaDataDimensionMatrix(0, newFeatureMetadataMatrix);
+		newMatrix.setMetaDataDimensionMatrix(1, fileMetadataMatrix);
+		
+		return newMatrix;
 	}
 }
 

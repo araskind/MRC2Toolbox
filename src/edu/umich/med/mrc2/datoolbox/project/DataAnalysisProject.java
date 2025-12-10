@@ -80,7 +80,7 @@ public class DataAnalysisProject extends Project {
 	protected TreeMap<DataPipeline, Matrix> featureMatrixMap;
 	protected TreeMap<DataPipeline, Matrix> imputedDataMatrixMap;
 	protected TreeMap<DataPipeline, Matrix> corrMatrixMap;
-	protected TreeMap<DataPipeline, Matrix[]> metaDataMap;
+	//	protected TreeMap<DataPipeline, Matrix[]> metaDataMap;
 	protected TreeMap<DataPipeline, Set<MsFeatureCluster>> duplicatesMap;
 	protected TreeMap<DataPipeline, Set<MsFeatureCluster>> correlationClusterMap;
 	protected TreeMap<DataPipeline, Set<MsFeatureSet>> featureSetMap;
@@ -117,7 +117,7 @@ public class DataAnalysisProject extends Project {
 		dataPipelines = new TreeSet<>();				
 		featureSetMap = new TreeMap<>();
 		featureClusterSetCollection = new TreeSet<>();
-		metaDataMap = new TreeMap<>();
+		//	metaDataMap = new TreeMap<>();
 		activeDataPipeline = null;
 		
 		if(initDesign)
@@ -187,7 +187,7 @@ public class DataAnalysisProject extends Project {
 		corrMatrixMap.remove(pipeline);
 		duplicatesMap.remove(pipeline);
 		correlationClusterMap.remove(pipeline);	
-		metaDataMap.remove(pipeline);
+		//	metaDataMap.remove(pipeline);
 		featureSetMap.remove(pipeline);		
 		
 		deleteFeaturesAndDataMatricesForPipeline(pipeline);
@@ -245,12 +245,14 @@ public class DataAnalysisProject extends Project {
 		
 		dataMatrixMap.remove(pipeline);
 		ProjectUtils.deleteDataMatrixFile(this, pipeline);
+		
 
 		if(featureMatrixMap == null)
 			featureMatrixMap = new TreeMap<>();
 
 		featureMatrixMap.remove(pipeline);
-		ProjectUtils.deleteFeatureMatrixFile(this, pipeline);		
+		ProjectUtils.deleteFeatureMatrixFile(this, pipeline);
+		ProjectUtils.deleteTemporaryFeatureMatrixFile(this, pipeline);
 	}
 	
 	private void deleteAlignmentAndMergeResultsForDataPipeline(DataPipeline pipeline) {
@@ -289,9 +291,9 @@ public class DataAnalysisProject extends Project {
 			dpSets.add(featureSet);
 	}
 
-	public void clearMetaDataMap() {
-		metaDataMap = new TreeMap<>();
-	}
+//	public void clearMetaDataMap() {
+//		metaDataMap = new TreeMap<>();
+//	}
 
 	public void deleteDataFiles(Set<DataFile> filesToRemove) {
 
@@ -524,11 +526,12 @@ public class DataAnalysisProject extends Project {
 	}
 
 	public Matrix getMetaDataMatrixForDataPipeline(DataPipeline pipeline, int dimension) {
-
-		if (metaDataMap.containsKey(pipeline))
-			return metaDataMap.get(pipeline)[dimension];
-		else
+		
+		Matrix datamatrix = dataMatrixMap.get(pipeline);
+		if(datamatrix == null)
 			return null;
+		else
+			return datamatrix.getMetaDataDimensionMatrix(dimension);
 	}
 
 	public boolean statsCalculetedForDataPipeline(DataPipeline pipeline) {
@@ -694,10 +697,9 @@ public class DataAnalysisProject extends Project {
 		
 		dataMatrixMap.put(pipeline, dataMatrix);
 		
-		Matrix[] mdata = new Matrix[2];
-		mdata[0] = dataMatrix.getMetaDataDimensionMatrix(0);
-		mdata[1] = dataMatrix.getMetaDataDimensionMatrix(1);
-		metaDataMap.put(pipeline, mdata);
+//		Matrix[] mdata = new Matrix[2];
+//		mdata[0] = dataMatrix.getMetaDataDimensionMatrix(0);
+//		mdata[1] = dataMatrix.getMetaDataDimensionMatrix(1);
 	}
 	
 	public void setFeatureMatrixForDataPipeline(
@@ -816,8 +818,8 @@ public class DataAnalysisProject extends Project {
 		Matrix corrMatrix = corrMatrixMap.remove(oldPipeline);
 		corrMatrixMap.put(newPipeline, corrMatrix);
 
-		Matrix[] metaData = metaDataMap.remove(oldPipeline);
-		metaDataMap.put(newPipeline, metaData);
+//		Matrix[] metaData = metaDataMap.remove(oldPipeline);
+//		metaDataMap.put(newPipeline, metaData);
 
 		Set<MsFeatureCluster> duplicates = duplicatesMap.remove(oldPipeline);
 		duplicatesMap.put(newPipeline, duplicates);

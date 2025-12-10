@@ -85,9 +85,9 @@ public abstract class CEFProcessingTask extends AbstractTask {
 
 	public CEFProcessingTask() {
 		super();
-		allAdducts = new TreeSet<String>();
-		unmatchedAdducts = new TreeSet<String>();
-		errorLog = new ArrayList<String>();
+		allAdducts = new TreeSet<>();
+		unmatchedAdducts = new TreeSet<>();
+		errorLog = new ArrayList<>();
 	}
 
 	protected void parseInputCefFile(File fileToParse) throws Exception {
@@ -107,7 +107,7 @@ public abstract class CEFProcessingTask extends AbstractTask {
 			setStatus(TaskStatus.ERROR);
 			return;
 		}
-		inputFeatureList = new ArrayList<MsFeature>();
+		inputFeatureList = new ArrayList<>();
 		List<Element>featureNodes = 
 				cefDocument.getRootElement().getChild("CompoundList").getChildren("Compound");
 		
@@ -212,12 +212,6 @@ public abstract class CEFProcessingTask extends AbstractTask {
 					feature.getPrimaryIdentity().setScoreCarryOver(id.getScoreCarryOver());
 					feature.setTargetId(dbId);
 				}
-				//	TMP for old data
-//				if(feature.getTargetId() == null) {	
-//					feature.clearIdentification();
-//					feature.getPrimaryIdentity().setScoreCarryOver(id.getScoreCarryOver());
-//					feature.setTargetId(dbId);
-//				}	
 			}	
 			feature.setTopScoreIdAsDefault();
 		}
@@ -307,7 +301,7 @@ public abstract class CEFProcessingTask extends AbstractTask {
 		
 		TandemMassSpectrum msms = new TandemMassSpectrum(2, new MsPoint(mz, 333.0d), polarity);
 		List<Element> peaks = spectrumElement.getChild("MSPeaks").getChildren("p");
-		Collection<MsPoint>msmsPoints = new TreeSet<MsPoint>(MsUtils.mzSorter);
+		Collection<MsPoint>msmsPoints = new TreeSet<>(MsUtils.mzSorter);
 		for(Element peak : peaks) {
 			msmsPoints.add(new MsPoint(
 					peak.getAttribute("x").getDoubleValue(),
@@ -355,7 +349,7 @@ public abstract class CEFProcessingTask extends AbstractTask {
 			msms.setFragmenterVoltage(fv);
 		}
 		List<Element> peaks = spectrumElement.getChild("MSPeaks").getChildren("p");
-		Collection<MsPoint>msmsPoints = new TreeSet<MsPoint>(MsUtils.mzSorter);
+		Collection<MsPoint>msmsPoints = new TreeSet<>(MsUtils.mzSorter);
 		for(Element peak : peaks) {
 			msmsPoints.add(new MsPoint(
 					peak.getAttribute("x").getDoubleValue(),

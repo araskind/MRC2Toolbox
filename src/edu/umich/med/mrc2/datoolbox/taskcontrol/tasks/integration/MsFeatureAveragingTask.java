@@ -216,7 +216,6 @@ public class MsFeatureAveragingTask extends AbstractTask {
 		}
 		featureDataMatrix = DataSetUtils.subsetDataMatrixByDataFiles(
 					completeFeatureDataMatrix, dataFiles);
-		System.out.println("***");
 	}
 
 	public DataPipeline getPipeline() {

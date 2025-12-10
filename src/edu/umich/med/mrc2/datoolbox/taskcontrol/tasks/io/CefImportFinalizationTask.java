@@ -37,7 +37,6 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -48,7 +47,6 @@ import org.ujmp.core.calculation.Calculation.Ret;
 import edu.umich.med.mrc2.datoolbox.data.CefImportFinalizationObjest;
 import edu.umich.med.mrc2.datoolbox.data.CompoundLibrary;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
-import edu.umich.med.mrc2.datoolbox.data.LibraryMsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureSet;
 import edu.umich.med.mrc2.datoolbox.data.SimpleMsFeature;
@@ -125,17 +123,14 @@ public class CefImportFinalizationTask extends AbstractTask {
 		setStatus(TaskStatus.FINISHED);
 	}
 
-	//	TODO - deal with standard samples
-	//	Move "remove empty features" to a separate task to allow multipart imports
-	//	removeEmptyFeatures();
 	private void calculateFeatureStatistics() {
 
 		taskDescription = "Calculating Feature Statistics ...";
 		total = retentionMap.size();
+		processed = 0;
 		
 		//	Calculate RT stats 
-		Map<String, DescriptiveStatistics>rtStatsMap = 
-				new TreeMap<String, DescriptiveStatistics>();
+		Map<String, DescriptiveStatistics>rtStatsMap = new TreeMap<>();
 		for(Entry<String, List<Double>> rtCollection : retentionMap.entrySet()) {
 			
 			double[] rtValues = new double[0];
@@ -152,8 +147,7 @@ public class CefImportFinalizationTask extends AbstractTask {
 		processed = 0;
 		
 		//	Calculate M/Z stats
-		Map<String, DescriptiveStatistics>mzStatsMap = 
-				new TreeMap<String, DescriptiveStatistics>();
+		Map<String, DescriptiveStatistics>mzStatsMap = new TreeMap<>();
 		for(Entry<String, List<Double>> mzCollection : mzMap.entrySet()) {
 			
 			double[] mzValues = new double[0];
@@ -170,8 +164,7 @@ public class CefImportFinalizationTask extends AbstractTask {
 		processed = 0;
 		
 		// Calculate peak width stats
-		Map<String, DescriptiveStatistics>peakWidthStatsMap = 
-				new TreeMap<String, DescriptiveStatistics>();
+		Map<String, DescriptiveStatistics>peakWidthStatsMap = new TreeMap<>();
 		for(Entry<String, List<Double>> pwCollection : peakWidthMap.entrySet()) {
 			
 			double[] pwValues = new double[0];
@@ -196,11 +189,15 @@ public class CefImportFinalizationTask extends AbstractTask {
 	
 	private void updateRTvaluesForFeatures() {
 		
-		Map<String,Long>dataFileRowMap = new TreeMap<String,Long>();
+		taskDescription = "Updating RT values for individual features ...";
+		total = dataFiles.length;
+		processed = 0;
+		
+		Map<String,Long>dataFileRowMap = new TreeMap<>();
 		for(int i=0; i<dataFiles.length; i++)
 			dataFileRowMap.put(dataFiles[i].getName(), (long)i);
 		
-		Map<Long,Long>fileToRTRowMap = new TreeMap<Long,Long>();
+		Map<Long,Long>fileToRTRowMap = new TreeMap<>();
 		for(Entry<String,Long>ent : dataFileRowMap.entrySet()) {
 			
 			long dfCol = rtMatrix.getRowForLabel(ent.getKey());
@@ -211,11 +208,11 @@ public class CefImportFinalizationTask extends AbstractTask {
 				featureMatrix.getMetaDataDimensionMatrix(0).
 				selectRows(Ret.LINK, 0).toObjectArray()[0];
 		
-		Map<String,Long>featureColumnMap = new TreeMap<String,Long>();
+		Map<String,Long>featureColumnMap = new TreeMap<>();
 		for(int i=0; i<featureArray.length; i++)
 			featureColumnMap.put(((MsFeature)featureArray[i]).getName(), (long)i);
 		
-		Map<Long,Long>featureToRTColumnMap = new TreeMap<Long,Long>();		
+		Map<Long,Long>featureToRTColumnMap = new TreeMap<>();		
 		for(Entry<String,Long>ent : featureColumnMap.entrySet()) {
 			
 			long rtCol = rtMatrix.getColumnForLabel(ent.getKey());
@@ -239,8 +236,8 @@ public class CefImportFinalizationTask extends AbstractTask {
 				if(sf != null && rt > 0.0d)
 					sf.setRetentionTime(rt);
 			}
+			processed++;
 		}		
-		System.out.println("***");
 	}
 	
 	private void removeTempDirectory() {
@@ -258,28 +255,21 @@ public class CefImportFinalizationTask extends AbstractTask {
 	private void removeFeaturesWithAbnormalIsoPattern() {
 		
 		taskDescription = "Removing features with abnormal isotopic patterns";
+		total = 100;
+		processed = 20;
 		
-		Set<MsFeature> featuresWithAbnormalIsoPattern = new HashSet<MsFeature>();
-		for(MsFeature feature : library.getFeatures()) {
-			
-			if(feature.getStatsSummary() != null 
-					&& feature.getStatsSummary().getMzStatistics().getStandardDeviation() > 0.1d) {
-				featuresWithAbnormalIsoPattern.add(feature);
-			}
-			if(Math.abs(feature.getMonoisotopicMz() - feature.getBasePeakMz()) > 0.01)
-				featuresWithAbnormalIsoPattern.add(feature);
-		}
+		Set<MsFeature> featuresWithAbnormalIsoPattern = findFeaturesWithAbnormalIsoPattern();
 		if(featuresWithAbnormalIsoPattern.isEmpty())
 			return;
 			
-		ArrayList<Long> rem = new ArrayList<Long>();
+		ArrayList<Long> rem = new ArrayList<>();
 		for (MsFeature cf : featuresWithAbnormalIsoPattern)
 			rem.add(dataMatrix.getColumnForLabel(cf));
 
-		Matrix newFeatureMatrix = 
+		Matrix newFeatureMetadataMatrix = 
 				dataMatrix.getMetaDataDimensionMatrix(0).deleteColumns(Ret.NEW, rem);
 		Matrix newDataMatrix = dataMatrix.deleteColumns(Ret.NEW, rem);
-		newDataMatrix.setMetaDataDimensionMatrix(0, newFeatureMatrix);
+		newDataMatrix.setMetaDataDimensionMatrix(0, newFeatureMetadataMatrix);
 		newDataMatrix.setMetaDataDimensionMatrix(1, dataMatrix.getMetaDataDimensionMatrix(1));
 		dataMatrix = newDataMatrix;
 		
@@ -293,10 +283,29 @@ public class CefImportFinalizationTask extends AbstractTask {
 			featureMatrix = newMsFeatureMatrix;
 		}
 		library.getFeatures().removeAll(featuresWithAbnormalIsoPattern);
+		writeFeatureRemovalLog(featuresWithAbnormalIsoPattern);
+		processed = 100;
+	}
+	
+	private Set<MsFeature> findFeaturesWithAbnormalIsoPattern(){
 		
-		//	TODO write log with removed features
-		ArrayList<String>removedFeaturesLog = new ArrayList<String>();
-		ArrayList<String>fLine = new ArrayList<String>();
+		Set<MsFeature> featuresWithAbnormalIsoPattern = new HashSet<>();
+		for(MsFeature feature : library.getFeatures()) {
+			
+			if(feature.getStatsSummary() != null 
+					&& feature.getStatsSummary().getMzStatistics().getStandardDeviation() > 0.1d) {
+				featuresWithAbnormalIsoPattern.add(feature);
+			}
+			if(Math.abs(feature.getMonoisotopicMz() - feature.getBasePeakMz()) > 0.01)
+				featuresWithAbnormalIsoPattern.add(feature);
+		}
+		return featuresWithAbnormalIsoPattern;
+	}
+	
+	private void writeFeatureRemovalLog( Set<MsFeature> featuresWithAbnormalIsoPattern) {
+		
+		ArrayList<String>removedFeaturesLog = new ArrayList<>();
+		ArrayList<String>fLine = new ArrayList<>();
 		removedFeaturesLog.add("The following features with abnormal isotopic patterns were removed:\n");
 		for (MsFeature cf : featuresWithAbnormalIsoPattern) {
 			
@@ -307,10 +316,8 @@ public class CefImportFinalizationTask extends AbstractTask {
 			fLine.add(MRC2ToolBoxConfiguration.getMzFormat().format(cf.getMonoisotopicMz()));
 			removedFeaturesLog.add(StringUtils.join(fLine, "\t"));
 		}
-		DataAnalysisProject currentExperiment = 
-				MRC2ToolBoxCore.getActiveMetabolomicsExperiment();	
-		
-		Path logPath = Paths.get(currentExperiment.getExportsDirectory().getAbsolutePath(), 
+		Path logPath = Paths.get(
+				MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExportsDirectory().getAbsolutePath(), 
 				dataPipeline.getName() + "_featureRemovalLog.txt");
 		try {
 		    Files.write(logPath, 
@@ -321,41 +328,6 @@ public class CefImportFinalizationTask extends AbstractTask {
 		} catch (IOException e) {
 		    e.printStackTrace();
 		}
-	}
-
-	private void removeEmptyFeatures() {
-
-		taskDescription = "Removing features with no data ...";
-		total = 100;
-		processed = 20;
-
-		List<LibraryMsFeature> featuresToRemove = library.getFeatures().stream().
-				filter(f -> (f.getStatsSummary().getSampleFrequency() == 0.0d)).
-				filter(f -> (f.getStatsSummary().getPooledFrequency() == 0.0d)).
-				filter(f -> (f.getStatsSummary().getMeanObservedRetention() == 0.0d)).
-				collect(Collectors.toList());
-
-		if(!featuresToRemove.isEmpty()) {
-
-			Matrix featureMatrix = dataMatrix.getMetaDataDimensionMatrix(0);
-
-			List<Long> rem = featuresToRemove.stream().
-					mapToLong(cf -> dataMatrix.getColumnForLabel(cf)).
-					boxed().collect(Collectors.toList());
-
-			processed = 50;
-
-			Matrix newDataMatrix = dataMatrix.deleteColumns(Ret.NEW, rem);
-			Matrix newFeatureMatrix = featureMatrix.deleteColumns(Ret.NEW, rem);
-			newDataMatrix.setMetaDataDimensionMatrix(0, newFeatureMatrix);
-			newDataMatrix.setMetaDataDimensionMatrix(1, dataMatrix.getMetaDataDimensionMatrix(1));
-			dataMatrix = newDataMatrix;
-
-			library.removeFeatures(featuresToRemove);
-		}
-		dataMatrix.replace(Ret.ORIG, 0.0, Double.NaN);
-		processed = 100;
-		setStatus(TaskStatus.FINISHED);
 	}
 	
 	private void addDataToExperiment() {
@@ -405,9 +377,7 @@ public class CefImportFinalizationTask extends AbstractTask {
 					dataPipeline,
 					false);
 			
-			experimentToSave.setFeatureMatrixForDataPipeline(dataPipeline, null);
-			featureMatrix = null;
-			System.gc();
+			//	experimentToSave.setFeatureMatrixForDataPipeline(dataPipeline, featureMatrix);
 		}		
 	}
 	

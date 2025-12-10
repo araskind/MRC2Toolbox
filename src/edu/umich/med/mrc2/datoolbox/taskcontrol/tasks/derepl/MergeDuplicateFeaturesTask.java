@@ -24,11 +24,12 @@ package edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.derepl;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import org.ujmp.core.Matrix;
-import org.ujmp.core.calculation.Calculation.Ret;
 
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
@@ -126,9 +127,9 @@ public class MergeDuplicateFeaturesTask extends AbstractTask {
 		processed = 0;
 		Matrix dataMatrix = 
 				currentExperiment.getDataMatrixForDataPipeline(activeDataPipeline);
-		ArrayList<MsFeature> featuresToRemove = new ArrayList<MsFeature>();
-		ArrayList<MsFeature> featuresToMerge = new ArrayList<MsFeature>();
-		TreeSet<Long>secondaryFeatureCoorinates = new TreeSet<Long>();	
+		ArrayList<MsFeature> featuresToRemove = new ArrayList<>();
+		ArrayList<MsFeature> featuresToMerge = new ArrayList<>();
+		TreeSet<Long>secondaryFeatureCoorinates = new TreeSet<>();	
 		Set<DataFile> dataFiles = 
 				currentExperiment.getDataFilesForAcquisitionMethod(
 						activeDataPipeline.getAcquisitionMethod());
@@ -191,10 +192,14 @@ public class MergeDuplicateFeaturesTask extends AbstractTask {
 				if(newValue > 0 && replacementFeaturePosition >=0) {
 					
 					dataMatrix.setAsDouble(newValue, primaryFeatureCoordinates);
-					replacementFeatureCoordinates[1] = replacementFeaturePosition;
-					SimpleMsFeature replacementSmf = 
-							(SimpleMsFeature)msFeatureMatrix.getAsObject(replacementFeatureCoordinates);
-					msFeatureMatrix.setAsObject(replacementSmf, primaryFeatureCoordinates);
+					
+					if(msFeatureMatrix != null) {
+						
+						replacementFeatureCoordinates[1] = replacementFeaturePosition;
+						SimpleMsFeature replacementSmf = 
+								(SimpleMsFeature)msFeatureMatrix.getAsObject(replacementFeatureCoordinates);
+						msFeatureMatrix.setAsObject(replacementSmf, primaryFeatureCoordinates);
+					}
 				}
 			}
 			processed++;
@@ -209,13 +214,14 @@ public class MergeDuplicateFeaturesTask extends AbstractTask {
 		processed = 0;
 		Matrix dataMatrix = 
 				currentExperiment.getDataMatrixForDataPipeline(activeDataPipeline);
-		ArrayList<MsFeature> featuresToRemove = new ArrayList<MsFeature>();
-		ArrayList<MsFeature> featuresToMerge = new ArrayList<MsFeature>();
+		ArrayList<MsFeature> featuresToRemove = new ArrayList<>();
+		ArrayList<MsFeature> featuresToMerge = new ArrayList<>();
 		DataAcquisitionMethod acquisitionMethod = activeDataPipeline.getAcquisitionMethod();
 		MsFeature dataFeature = null;
 		long[] coordinates = new long[2];
 		long[] replacementFeatureCoordinates = new long[2];
-		double area, topArea;
+		double area;
+		double topArea;
 
 		for (MsFeatureCluster fclust : duplicateList) {
 
@@ -275,34 +281,33 @@ public class MergeDuplicateFeaturesTask extends AbstractTask {
 		processed = 20;
 		
 		Matrix dataMatrix = 
-				currentExperiment.getDataMatrixForDataPipeline(activeDataPipeline);
-		
-		ArrayList<Long> rem = new ArrayList<Long>();
-		for (MsFeature cf : featuresToRemove)
-			rem.add(dataMatrix.getColumnForLabel(cf));
+				currentExperiment.getDataMatrixForDataPipeline(activeDataPipeline);		
+		List<Long> featureIndices = featuresToRemove.stream().
+				mapToLong(cf -> dataMatrix.getColumnForLabel(cf)).
+				boxed().collect(Collectors.toList());;
 
+		Matrix cleanDataMatrix = 
+				ProjectUtils.removeFeaturesFromMatrixWithMetadata(dataMatrix, featureIndices);
+		currentExperiment.setDataMatrixForDataPipeline(activeDataPipeline, cleanDataMatrix);
+				
 		currentExperiment.deleteFeatures(featuresToRemove, activeDataPipeline);
-		Matrix newFeatureMatrix = 
-				dataMatrix.getMetaDataDimensionMatrix(0).deleteColumns(Ret.NEW, rem);
-		Matrix newDataMatrix = dataMatrix.deleteColumns(Ret.NEW, rem);
-		newDataMatrix.setMetaDataDimensionMatrix(0, newFeatureMatrix);
-		newDataMatrix.setMetaDataDimensionMatrix(1, dataMatrix.getMetaDataDimensionMatrix(1));
-		currentExperiment.setDataMatrixForDataPipeline(activeDataPipeline, newDataMatrix);
+		currentExperiment.setDataMatrixForDataPipeline(activeDataPipeline, cleanDataMatrix);
 		
 		processed = 40;
 		
+		msFeatureMatrix = currentExperiment.getFeatureMatrixForDataPipeline(activeDataPipeline);
+		if(msFeatureMatrix == null)
+			msFeatureMatrix = ProjectUtils.readFeatureMatrix(currentExperiment, activeDataPipeline, false);
+		
 		if(msFeatureMatrix != null) {
 			
-			Matrix newMsFeatureLabelMatrix = 
-					msFeatureMatrix.getMetaDataDimensionMatrix(0).deleteColumns(Ret.NEW, rem);			
-			Matrix newMsFeatureMatrix = msFeatureMatrix.deleteColumns(Ret.NEW, rem);
-			newMsFeatureMatrix.setMetaDataDimensionMatrix(0, newMsFeatureLabelMatrix);
-			newMsFeatureMatrix.setMetaDataDimensionMatrix(1, msFeatureMatrix.getMetaDataDimensionMatrix(1));
+			Matrix cleanFeatureMatrix = 
+					ProjectUtils.removeFeaturesFromMatrixWithMetadata(msFeatureMatrix, featureIndices);
+			currentExperiment.setFeatureMatrixForDataPipeline(activeDataPipeline, cleanFeatureMatrix);
+			saveMsFeatureMatrix(cleanFeatureMatrix);	
 			processed = 70;
-			saveMsFeatureMatrix(newMsFeatureMatrix);
 		}
-		currentExperiment.setDuplicateClustersForDataPipeline(
-				activeDataPipeline, new HashSet<MsFeatureCluster>());
+		currentExperiment.setDuplicateClustersForDataPipeline(activeDataPipeline, new HashSet<>());
 		processed = 100;
 	}
 		
@@ -311,11 +316,13 @@ public class MergeDuplicateFeaturesTask extends AbstractTask {
 		taskDescription = "Reading MS feature matrix data";
 		total = 100;
 		processed = 30;
-		msFeatureMatrix = 
-				ProjectUtils.readFeatureMatrix(currentExperiment, activeDataPipeline, true);
+		
+		msFeatureMatrix =  
+				currentExperiment.getFeatureMatrixForDataPipeline(activeDataPipeline);
+		
 		if(msFeatureMatrix == null)
-			msFeatureMatrix = 
-				ProjectUtils.readFeatureMatrix(currentExperiment, activeDataPipeline, false);
+			msFeatureMatrix = ProjectUtils.readFeatureMatrix(currentExperiment, activeDataPipeline, false);
+
 		processed = 100;
 	}
 	
@@ -333,9 +340,7 @@ public class MergeDuplicateFeaturesTask extends AbstractTask {
 				currentExperiment, 
 				activeDataPipeline,
 				false);	//	TODO handle undo for duplicates removal
-		currentExperiment.setFeatureMatrixForDataPipeline(activeDataPipeline, null);
-		msFeatureMatrix = null;
-		System.gc();
+		currentExperiment.setFeatureMatrixForDataPipeline(activeDataPipeline, newMsFeatureMatrix);
 		processed = 100;				
 	}
 

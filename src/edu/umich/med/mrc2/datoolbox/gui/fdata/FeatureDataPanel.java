@@ -140,6 +140,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io.QuantMatrixImportTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.library.ClearIdentificationsTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.library.LibrarySearchTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.library.LoadDatabaseLibraryTask;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.project.SavePipelineDataTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.stats.CalculateStatisticsTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.stats.ImputeMissingDataTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.stats.MZDeltaAnalysisTask;
@@ -190,7 +191,8 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 	private FeatureDataCleanupDialog featureDataCleanupDialog;
 	private PeakQualityImportDialog peakQualityImportDialog;
 	
-	private boolean cleanEmtyFeatures;
+	private boolean cleanEmptyFeatures;
+	private boolean savePipeline;
 	private MzFrequencyAnalysisSetupDialog mzFrequencyAnalysisSetupDialog;
 	private ExperimentPooledSampleManagerDialog experimentPooledSampleManagerDialog;
 	private MultiMSFeatureQCPlotFrame multiSpectraPlotFrame;
@@ -1261,7 +1263,7 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 		// TODO If no pooled present and required, calculate for the whole set as samples
 		if (DataSetUtils.designValidForStats(currentExperiment, activeDataPipeline, false)) {
 
-			cleanEmtyFeatures = false;
+			cleanEmptyFeatures = false;
 			CalculateStatisticsTask cst = 
 					new CalculateStatisticsTask(currentExperiment, activeDataPipeline, false);
 			cst.addTaskListener(this);
@@ -1275,6 +1277,7 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 	
 	private void cleanEmptyFeatures() {
 	
+		cleanEmptyFeatures = false;
 		RemoveEmptyFeaturesTask task = 
 				new RemoveEmptyFeaturesTask(currentExperiment, activeDataPipeline);
 		task.addTaskListener(this);
@@ -1897,7 +1900,8 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 		MainWindow.hideProgressDialog();
 
 		//	Rerun statistics
-		cleanEmtyFeatures = true;
+		cleanEmptyFeatures = true;
+		savePipeline = true;
 		CalculateStatisticsTask statsTask = 
 				new CalculateStatisticsTask(currentExperiment, activeDataPipeline, true);
 		statsTask.addTaskListener(this);
@@ -1906,14 +1910,20 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 
 	private void finalizeMergeDuplicateFeaturesTask(MergeDuplicateFeaturesTask task) {
 		
-		setTableModelFromFeatureSet(
-				currentExperiment.getActiveFeatureSetForDataPipeline(activeDataPipeline));
-		MRC2ToolBoxCore.getMainWindow().getExperimentSetupDraw().
-			switchDataPipeline(currentExperiment, activeDataPipeline);
+		savePipeline = true;
+		cleanEmptyFeatures = false;
+		CalculateStatisticsTask statsTask = 
+				new CalculateStatisticsTask(currentExperiment, activeDataPipeline, true);
+		statsTask.addTaskListener(this);
+		MRC2ToolBoxCore.getTaskController().addTask(statsTask);
+				
+//		setTableModelFromFeatureSet(
+//				currentExperiment.getActiveFeatureSetForDataPipeline(activeDataPipeline));
+//		MRC2ToolBoxCore.getMainWindow().getExperimentSetupDraw().
+//			switchDataPipeline(currentExperiment, activeDataPipeline);
 	}
 	
 	private void finalizeImputeMissingDataTask(ImputeMissingDataTask task) {
-		
 
 		String mName = task.getImputationMethod().getName();
 		MessageDialog.showInfoMsg("Data were imputed using " + mName + " method");
@@ -1990,7 +2000,7 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 		currentExperiment.setDataMatrixForDataPipeline(
 				dataPipeline, quantMatrixImportTask.getDataMatrix());
 		currentExperiment.setFeaturesForDataPipeline(dataPipeline, 
-				new HashSet<MsFeature>(quantMatrixImportTask.getFeatureList()));
+				new HashSet<>(quantMatrixImportTask.getFeatureList()));
 		currentExperiment.addDataFilesForAcquisitionMethod(dataPipeline.getAcquisitionMethod(), 
 				quantMatrixImportTask.getDataFiles());
 
@@ -2018,8 +2028,6 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 
 	private void finalizeMultiCefDataLoad(MultiCefImportTask multiCefImportTask) {
 		
-//		MRC2ToolBoxCore.getMainWindow().
-//			switchDataPipeline(currentExperiment, multiCefImportTask.getDataPipeline());
 		MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
 		MainWindow.hideProgressDialog();
 
@@ -2027,7 +2035,8 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 		activeDataPipeline = multiCefImportTask.getDataPipeline();
 		
 		//	Rerun statistics
-		cleanEmtyFeatures = true;
+		cleanEmptyFeatures = true;
+		savePipeline = true;
 		CalculateStatisticsTask statsTask = 
 				new CalculateStatisticsTask(currentExperiment, activeDataPipeline, true);
 		statsTask.addTaskListener(this);
@@ -2036,33 +2045,44 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 	
 	private void finalizeMultiCefDataAddition(MultiCefDataAddTask task) {
 
-		MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
-		MainWindow.hideProgressDialog();
-	
-		//	Attach data
-		currentExperiment.setDataMatrixForDataPipeline(activeDataPipeline, task.getDataMatrix());
-		currentExperiment.addDataFilesForAcquisitionMethod(
-				activeDataPipeline.getAcquisitionMethod(), task.getDataFiles());
-		
-		MRC2ToolBoxCore.getMainWindow().getPanel(PanelList.DESIGN).reloadDesign();
-
-		//	Rerun statistics
-		cleanEmtyFeatures = true;
-		CalculateStatisticsTask statsTask = 
-				new CalculateStatisticsTask(currentExperiment, activeDataPipeline, true);
-		statsTask.addTaskListener(this);
-		MRC2ToolBoxCore.getTaskController().addTask(statsTask);
+//		MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
+//		MainWindow.hideProgressDialog();
+//	
+//		//	Attach data
+//		currentExperiment.setDataMatrixForDataPipeline(activeDataPipeline, task.getDataMatrix());
+//		currentExperiment.addDataFilesForAcquisitionMethod(
+//				activeDataPipeline.getAcquisitionMethod(), task.getDataFiles());
+//		
+//		MRC2ToolBoxCore.getMainWindow().getPanel(PanelList.DESIGN).reloadDesign();
+//
+//		//	Rerun statistics
+//		cleanEmptyFeatures = true;
+//		CalculateStatisticsTask statsTask = 
+//				new CalculateStatisticsTask(currentExperiment, activeDataPipeline, true);
+//		statsTask.addTaskListener(this);
+//		MRC2ToolBoxCore.getTaskController().addTask(statsTask);
 	}
 
 	private void finalizeEmptyFeatureCleanup(RemoveEmptyFeaturesTask task) {
-
-//		MRC2ToolBoxCore.getMainWindow().getExperimentSetupDraw().
-//				switchDataPipeline(currentExperiment, activeDataPipeline);
-//		resetFeatureTable();
 		
 		MRC2ToolBoxCore.getMainWindow().switchPanelForDataPipeline(task.getDataPipeline(), PanelList.FEATURE_DATA);
-		//	MRC2ToolBoxCore.getMainWindow().getExperimentSetupDraw().switchDataPipeline(currentExperiment, activeDataPipeline);	
 		resetFeatureTable();
+		savePipeline = true;
+		savePipelineOnRequest();
+	}
+	
+	private void savePipelineOnRequest() {
+		
+		if(savePipeline) {
+			
+			savePipeline = false;
+			if(currentExperiment != null && activeDataPipeline != null) {
+				
+				SavePipelineDataTask spTask = 
+						new SavePipelineDataTask(currentExperiment, activeDataPipeline);
+				MRC2ToolBoxCore.getTaskController().addTask(spTask);
+			}
+		}
 	}
 	
 	private void finalizeDatabaseLibraryLoad(LoadDatabaseLibraryTask task) {
@@ -2076,16 +2096,15 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 
 	private void updateStatisticsResults(CalculateStatisticsTask csTask) {
 		
-		if(csTask.isUseAllSamples() && cleanEmtyFeatures) {					
+		if(csTask.isUseAllSamples() && cleanEmptyFeatures) {					
 			cleanEmptyFeatures();
 		}
 		else {			
-			//	MRC2ToolBoxCore.getMainWindow().switchDataPipeline(currentExperiment, csTask.getDataPipeline());	
 			MRC2ToolBoxCore.getMainWindow().switchPanelForDataPipeline(csTask.getDataPipeline(), PanelList.FEATURE_DATA);
-			//	MRC2ToolBoxCore.getMainWindow().getExperimentSetupDraw().switchDataPipeline(currentExperiment, activeDataPipeline);	
 			resetFeatureTable();
 		}
-		cleanEmtyFeatures = false;
+		cleanEmptyFeatures = false;
+		savePipelineOnRequest();
 	}
 
 	public void findFeaturesByAdductMasses(

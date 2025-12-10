@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.ujmp.core.Matrix;
-import org.ujmp.core.calculation.Calculation.Ret;
 
 import edu.umich.med.mrc2.datoolbox.data.LibraryMsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
@@ -86,35 +85,40 @@ public class RemoveEmptyFeaturesTask extends AbstractTask {
 			currentExperiment.getMsFeaturesForDataPipeline(dataPipeline).stream().
 			filter(f -> Double.isNaN(f.getStatsSummary().getTotalMedian())).
 			collect(Collectors.toList());
+		
+		if(featuresToRemove.isEmpty()) {
+			processed = 100;
+			return;
+		}
+		Matrix dataMatrix = currentExperiment.getDataMatrixForDataPipeline(dataPipeline);
+		List<Long> featureIndices = featuresToRemove.stream().
+				mapToLong(cf -> dataMatrix.getColumnForLabel(cf)).
+				boxed().collect(Collectors.toList());
 
-		if(!featuresToRemove.isEmpty()) {
+		Matrix cleanDataMatrix = 
+				ProjectUtils.removeFeaturesFromMatrixWithMetadata(dataMatrix, featureIndices);
+		currentExperiment.setDataMatrixForDataPipeline(dataPipeline, cleanDataMatrix);
+		processed = 50;
 
-			Matrix dataMatrix = currentExperiment.getDataMatrixForDataPipeline(dataPipeline);
-			Matrix featureMatrix = dataMatrix.getMetaDataDimensionMatrix(0);
-
-			List<Long> rem = featuresToRemove.stream().
-					mapToLong(cf -> dataMatrix.getColumnForLabel(cf)).
-					boxed().collect(Collectors.toList());
-
-			processed = 50;
-
-			currentExperiment.deleteFeatures(featuresToRemove, dataPipeline);
-			Matrix newDataMatrix = dataMatrix.deleteColumns(Ret.NEW, rem);
-			Matrix newFeatureMatrix = featureMatrix.deleteColumns(Ret.NEW, rem);
-			newDataMatrix.setMetaDataDimensionMatrix(0, newFeatureMatrix);
-			newDataMatrix.setMetaDataDimensionMatrix(1, dataMatrix.getMetaDataDimensionMatrix(1));
-			currentExperiment.setDataMatrixForDataPipeline(dataPipeline, newDataMatrix);
-			saveMsFeatureMatrix(newFeatureMatrix);
+		Matrix featureMatrix = currentExperiment.getFeatureMatrixForDataPipeline(dataPipeline);
+		if(featureMatrix == null)
+			featureMatrix = ProjectUtils.readFeatureMatrix(currentExperiment, dataPipeline, false);
+		
+		if(featureMatrix != null) {
 			
-			taskDescription = "Removing features from active data pipeline libary";
-			processed = 90;
+			Matrix cleanFeatureMatrix = 
+					ProjectUtils.removeFeaturesFromMatrixWithMetadata(featureMatrix, featureIndices);
+			currentExperiment.setFeatureMatrixForDataPipeline(dataPipeline, cleanFeatureMatrix);
+			saveMsFeatureMatrix(cleanFeatureMatrix);		
+		}
+		processed = 90;
 			
-			Collection<LibraryMsFeature>libFeatures = 
-					featuresToRemove.stream().filter(LibraryMsFeature.class::isInstance).
-					map(LibraryMsFeature.class::cast).collect(Collectors.toList());
-			
-			currentExperiment.getCompoundLibraryForDataPipeline(dataPipeline).removeFeatures(libFeatures);
-		}		
+		Collection<LibraryMsFeature>libFeatures = 
+				featuresToRemove.stream().filter(LibraryMsFeature.class::isInstance).
+				map(LibraryMsFeature.class::cast).collect(Collectors.toList());			
+		currentExperiment.getCompoundLibraryForDataPipeline(dataPipeline).removeFeatures(libFeatures);		
+		currentExperiment.deleteFeatures(featuresToRemove, dataPipeline);
+		
 		processed = 100;
 	}
 	
@@ -129,8 +133,7 @@ public class RemoveEmptyFeaturesTask extends AbstractTask {
 				msFeatureMatrix,
 				currentExperiment, 
 				dataPipeline,
-				true);
-		currentExperiment.setFeatureMatrixForDataPipeline(dataPipeline, null);			
+				false);		
 	}
 }
 

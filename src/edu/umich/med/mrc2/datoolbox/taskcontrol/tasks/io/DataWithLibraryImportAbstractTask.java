@@ -74,10 +74,10 @@ public abstract class DataWithLibraryImportAbstractTask extends AbstractTask imp
 	
 	protected void initDataMatrixes() {
 
-		featureCoordinateMap = new ConcurrentHashMap<String,Integer>();
-		retentionMap = new ConcurrentHashMap<String, List<Double>>();
-		mzMap = new ConcurrentHashMap<String, List<Double>>();
-		peakWidthMap = new ConcurrentHashMap<String, List<Double>>();
+		featureCoordinateMap = new ConcurrentHashMap<>();
+		retentionMap = new ConcurrentHashMap<>();
+		mzMap = new ConcurrentHashMap<>();
+		peakWidthMap = new ConcurrentHashMap<>();
 		AtomicInteger counter = new AtomicInteger(0);
 		LibraryMsFeature[] features =
 			library.getFeatures().stream().
@@ -85,9 +85,9 @@ public abstract class DataWithLibraryImportAbstractTask extends AbstractTask imp
 			map(f -> {
 				f.setStatsSummary(new MsFeatureStatisticalSummary(f));
 				featureCoordinateMap.put(f.getId(), counter.getAndIncrement());
-				retentionMap.put(f.getId(), new CopyOnWriteArrayList<Double>());
-				peakWidthMap.put(f.getId(), new CopyOnWriteArrayList<Double>());
-				mzMap.put(f.getId(), new CopyOnWriteArrayList<Double>());
+				retentionMap.put(f.getId(), new CopyOnWriteArrayList<>());
+				peakWidthMap.put(f.getId(), new CopyOnWriteArrayList<>());
+				mzMap.put(f.getId(), new CopyOnWriteArrayList<>());
 				return f;
 			}).
 			toArray(size -> new LibraryMsFeature[size]);
@@ -142,8 +142,10 @@ public abstract class DataWithLibraryImportAbstractTask extends AbstractTask imp
 	protected synchronized void finalizeCefImportTask(CefDataImportTask cdit) {
 		
 		fileCounter++;
-		System.out.println("Imported file " + fileCounter + " out of " 
-				+ dataFiles.length + " -> " + cdit.getInputCefFile().getName());
+		
+//		System.out.println("Imported file " + fileCounter + " out of " 
+//				+ dataFiles.length + " -> " + cdit.getInputCefFile().getName());
+		
 		MRC2ToolBoxCore.getTaskController().getTaskQueue().removeTask(cdit);
 		if(!cdit.getUnmatchedAdducts().isEmpty()) {
 

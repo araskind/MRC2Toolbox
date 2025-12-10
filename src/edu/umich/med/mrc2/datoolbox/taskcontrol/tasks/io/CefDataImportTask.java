@@ -148,7 +148,7 @@ public class CefDataImportTask extends CEFProcessingTask {
 	private void recordDataIntoFeatureMatrix() {
 
 		taskDescription = "Parsing CEF data file...";
-		features = new HashSet<SimpleMsFeature>();
+		features = new HashSet<>();
 		total = inputFeatureList.size();
 		processed = 0;
 		

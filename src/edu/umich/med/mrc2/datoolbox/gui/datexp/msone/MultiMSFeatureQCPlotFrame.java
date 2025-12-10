@@ -155,7 +155,7 @@ public class MultiMSFeatureQCPlotFrame extends JFrame
 		
 		super.setVisible(b);
 		if(b)
-			initDataMatrix();
+			initFeatureMatrix();
 	}
 	
 	@Override
@@ -166,7 +166,7 @@ public class MultiMSFeatureQCPlotFrame extends JFrame
 		super.dispose();
 	}
 
-	private void initDataMatrix() {
+	private void initFeatureMatrix() {
 		
 		if(!this.isVisible())
 			return;
@@ -339,7 +339,7 @@ public class MultiMSFeatureQCPlotFrame extends JFrame
 
 	private Map<DataFile,SimpleMsFeature>createFileFeatureMap(MsFeature feature) {
 		
-		Map<DataFile,SimpleMsFeature>fileFeatureMap = new HashMap<DataFile,SimpleMsFeature>();
+		Map<DataFile,SimpleMsFeature>fileFeatureMap = new HashMap<>();
 		long[] coordinates = new long[2];
 		coordinates[1] = featureDataMatrix.getColumnForLabel(feature);
 		
@@ -355,7 +355,7 @@ public class MultiMSFeatureQCPlotFrame extends JFrame
 			if(df.isEnabled() && df.getParentSample().isEnabled()) {
 				
 				coordinates[0] = i;
-				SimpleMsFeature msf = (SimpleMsFeature)featureDataMatrix.getAsObject(coordinates);				
+				SimpleMsFeature msf = (SimpleMsFeature)featureDataMatrix.getAsObject(coordinates);
 				fileFeatureMap.put(df, msf);
 			}
 		}
@@ -384,7 +384,7 @@ public class MultiMSFeatureQCPlotFrame extends JFrame
 		rtVariationPlotPanel.setDataPipeline(dataPipeline);
 		mzVariationPlotPanel.setDataPipeline(dataPipeline);
 		multispectrumPlotPanel.setDataPipeline(dataPipeline);
-		initDataMatrix();
+		initFeatureMatrix();
 	}
 
 	@Override

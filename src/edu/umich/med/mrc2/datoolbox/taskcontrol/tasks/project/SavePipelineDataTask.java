@@ -97,10 +97,6 @@ public class SavePipelineDataTask extends AbstractTask {
 		}
 		msFeatureDocument.setRootElement(featureListElement);
 		
-//		System.out.println("***********");
-//		System.out.println(Integer.toString(processed) + " features converted for pipeline " + pipeline.getName());
-//		System.out.println("***********");
-		
 		taskDescription = "Saving XML features file for " + pipeline.getName();
 		total = 100;
 		processed = 80;
@@ -156,19 +152,10 @@ public class SavePipelineDataTask extends AbstractTask {
 		else {
 			//	If temporary matrix exists swap the original for it
 			ProjectUtils.saveTemporaryFeatureMatrixFileAsPrimary(project,pipeline);			
-		}
-		//	project.setFeatureMatrixForDataPipeline(pipeline, null);
-//		cleanupForNewProjectStructure();		
+		}	
 		processed = 100;		
 	}
 	
-	//	Tmp fix to convert old project format to new one) 
-//	private void cleanupForNewProjectStructure() {
-//		
-//		ProjectUtils.moveDataMatrixFileToNewDefaultLocation(project,pipeline);
-//		ProjectUtils.moveFeatureMatrixFileToNewDefaultLocation(project,pipeline);
-//	}
-
 	@Override
 	public Task cloneTask() {
 		return new SavePipelineDataTask(project, pipeline);

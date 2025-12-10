@@ -120,7 +120,7 @@ public class MiltiCefPeakQualityImportTask extends AbstractTask implements TaskL
 	}
 		
 	private void saveFeatureMatrix() {
-		// TODO Auto-generated method stub
+
 		taskDescription = "Saving updated feature data matrix ...";
 		ProjectUtils.saveFeatureMatrixToFile(
 				featureMatrix,
