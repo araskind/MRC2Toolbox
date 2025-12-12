@@ -48,6 +48,8 @@ public class DataPipeline implements Serializable, Comparable<DataPipeline>, Xml
 	private MoTrPACAssay motrpacAssay;
 	private DataAcquisitionMethod acquisitionMethod;
 	private DataExtractionMethod dataExtractionMethod;
+	private boolean featureSetChanged;
+	private boolean dataFileSetChanged;
 	
 	public DataPipeline(
 			DataAcquisitionMethod acquisitionMethod, 
@@ -276,6 +278,22 @@ public class DataPipeline implements Serializable, Comparable<DataPipeline>, Xml
 	
 	public String getSaveSafeName() {
 		return FIOUtils.createSaveSafeName(name);
+	}
+
+	public boolean isFeatureSetChanged() {
+		return featureSetChanged;
+	}
+
+	public void setFeatureSetChanged(boolean featureSetChanged) {
+		this.featureSetChanged = featureSetChanged;
+	}
+
+	public boolean isDataFileSetChanged() {
+		return dataFileSetChanged;
+	}
+
+	public void setDataFileSetChanged(boolean dataFileSetChanged) {
+		this.dataFileSetChanged = dataFileSetChanged;
 	}
 }
 

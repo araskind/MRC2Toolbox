@@ -65,10 +65,14 @@ public class SaveMetabolomicsProjectTask extends AbstractTask implements TaskLis
 	private int numberOfSavedDataPipelines;
 	private Set<String>uniqueCompoundIds;
 	private Set<String>uniqueMSRTLibraryIds;
+	private boolean ignorePipelineData;
 		
-	public SaveMetabolomicsProjectTask(DataAnalysisProject projectToSave) {
+	public SaveMetabolomicsProjectTask(
+			DataAnalysisProject projectToSave,
+			boolean ignorePipelineData) {
 		super();
 		this.projectToSave = projectToSave;
+		this.ignorePipelineData = ignorePipelineData;
 		numberOfSavedDataPipelines = 0;
 	}
 
@@ -84,7 +88,7 @@ public class SaveMetabolomicsProjectTask extends AbstractTask implements TaskLis
 			setStatus(TaskStatus.ERROR);
 			return;
 		}
-		if(!projectToSave.getDataPipelines().isEmpty())
+		if(!projectToSave.getDataPipelines().isEmpty() && !ignorePipelineData)
 			saveDataForPipelines();
 		else
 			setStatus(TaskStatus.FINISHED);
@@ -334,13 +338,6 @@ public class SaveMetabolomicsProjectTask extends AbstractTask implements TaskLis
 
 	private void saveDataForPipelines() {
 		
-		if(projectToSave.getDataPipelines().isEmpty()) {
-			setStatus(TaskStatus.FINISHED);
-			return;
-		}
-		//	TODO TMP fix for old projects
-		ProjectUtils.moveCEFLibraryFilesToNewDefaultLocation(projectToSave);
-		
 		for(DataPipeline dp : projectToSave.getDataPipelines()) {
 			
 			SavePipelineDataTask task = new SavePipelineDataTask(projectToSave, dp);
@@ -371,7 +368,7 @@ public class SaveMetabolomicsProjectTask extends AbstractTask implements TaskLis
 
 	@Override
 	public Task cloneTask() {
-		return new SaveMetabolomicsProjectTask(projectToSave);
+		return new SaveMetabolomicsProjectTask(projectToSave, ignorePipelineData);
 	}
 
 	public DataAnalysisProject getProject() {

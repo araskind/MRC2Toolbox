@@ -187,12 +187,12 @@ public class CefLibraryImportTask extends CEFProcessingTask {
 
 	private void copyLibraryFileToExperiment() {
 		
-		if(inputCefFile == null ||!inputCefFile.exists())
+		if(inputCefFile == null || !inputCefFile.exists())
 			return;
 
 		try {
 			FileUtils.copyFileToDirectory(
-					inputCefFile, currentExperiment.getDataDirectory());
+					inputCefFile, currentExperiment.getLibraryDirectory());
 		} catch (IOException e) {
 			e.printStackTrace();
 		}		

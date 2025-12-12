@@ -83,20 +83,6 @@ public class CalculateStatisticsTask extends AbstractTask {
 
 		try {
 			calculateStatistics();
-
-			//	Only cleanup global data set from features without data
-			//	and only if all files are enabled
-			
-			//	TODO deal with removing empty features
-//			if(!currentProject.getActiveFeatureSetForDataPipeline(dataPipeline).
-//					getName().equals(GlobalDefaults.ALL_FEATURES.getName())) {
-//				removeEmptyFeaturesFromSubset();
-//			}
-//			else {
-//				if (currentProject.allDataFilesForAcquisitionMethodEnabled(
-//						dataPipeline.getAcquisitionMethod()))
-//					removeEmptyFeatures();
-//			}
 		}
 		catch (Exception e) {
 
@@ -178,9 +164,6 @@ public class CalculateStatisticsTask extends AbstractTask {
 			statSummary.setSampleStDev(sampleDescriptiveStatistics.getStandardDeviation());
 			statSummary.setSampleFrequency((double) sampleDescriptiveStatistics.getN() / (double)sampleFiles.size());
 		}
-//		if (pooledDescriptiveStatistics.getN() == 0 && sampleDescriptiveStatistics.getN() == 0) {
-//			System.out.println("***\n" + Double.toString(totalDescriptiveStatistics.getPercentile(50.0d)));
-//		}
 		statSummary.setTotalMedian(totalDescriptiveStatistics.getPercentile(50.0d));
 	}
 

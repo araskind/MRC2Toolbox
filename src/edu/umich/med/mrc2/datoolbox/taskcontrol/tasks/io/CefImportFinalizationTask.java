@@ -57,10 +57,14 @@ import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskListener;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.stats.CalculateStatisticsTask;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.stats.RemoveEmptyFeaturesTask;
 import edu.umich.med.mrc2.datoolbox.utils.ProjectUtils;
 
-public class CefImportFinalizationTask extends AbstractTask {
+public class CefImportFinalizationTask extends AbstractTask implements TaskListener{
 
 	private CefImportFinalizationObjest ciFinObj;
 
@@ -98,7 +102,7 @@ public class CefImportFinalizationTask extends AbstractTask {
 		setStatus(TaskStatus.PROCESSING);
 		taskDescription = "Finalizing CEF import ...";
 		
-		calculateFeatureStatistics();
+		calculateFeaturePeakQualityStatistics();
 		
 		if(rtMatrix != null)
 			updateRTvaluesForFeatures();
@@ -112,18 +116,9 @@ public class CefImportFinalizationTask extends AbstractTask {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		try {
-			saveDataMatrixes();			
-		} catch (Exception e1) {
-			e1.printStackTrace();
-			setStatus(TaskStatus.ERROR);
-		}
-		removeTempDirectory();
-		
-		setStatus(TaskStatus.FINISHED);
 	}
 
-	private void calculateFeatureStatistics() {
+	private void calculateFeaturePeakQualityStatistics() {
 
 		taskDescription = "Calculating Feature Statistics ...";
 		total = retentionMap.size();
@@ -354,8 +349,14 @@ public class CefImportFinalizationTask extends AbstractTask {
 		allFeatures.setActive(true);
 		allFeatures.setLocked(true);
 		currentExperiment.addFeatureSetForDataPipeline(allFeatures, dataPipeline);
+		
+		CalculateStatisticsTask statsTask = new CalculateStatisticsTask(
+				MRC2ToolBoxCore.getActiveMetabolomicsExperiment(), 
+				 dataPipeline, true);
+		statsTask.addTaskListener(this);
+		MRC2ToolBoxCore.getTaskController().addTask(statsTask);
 	}
-	
+
 	private void saveDataMatrixes() {
 		
 		DataAnalysisProject experimentToSave = 
@@ -376,11 +377,44 @@ public class CefImportFinalizationTask extends AbstractTask {
 					experimentToSave, 
 					dataPipeline,
 					false);
-			
-			//	experimentToSave.setFeatureMatrixForDataPipeline(dataPipeline, featureMatrix);
 		}		
 	}
-	
+
+	@Override
+	public void statusChanged(TaskEvent e) {
+
+		if (e.getStatus() == TaskStatus.FINISHED) {
+
+			((AbstractTask)e.getSource()).removeTaskListener(this);
+
+			if (e.getSource().getClass().equals(CalculateStatisticsTask.class))
+				finalizeCalculateStatisticsTask((CalculateStatisticsTask)e.getSource());
+			
+			if (e.getSource().getClass().equals(RemoveEmptyFeaturesTask.class))
+				finalizeDataImport((RemoveEmptyFeaturesTask)e.getSource());
+		}	
+	}
+
+	private synchronized void finalizeDataImport(RemoveEmptyFeaturesTask source) {
+		
+//		try {
+//			saveDataMatrixes();			
+//		} catch (Exception e1) {
+//			e1.printStackTrace();
+//			setStatus(TaskStatus.ERROR);
+//		}
+		removeTempDirectory();		
+		setStatus(TaskStatus.FINISHED);
+	}
+
+	private synchronized void finalizeCalculateStatisticsTask(CalculateStatisticsTask task) {
+
+		RemoveEmptyFeaturesTask cleanupTask = 
+				new RemoveEmptyFeaturesTask(MRC2ToolBoxCore.getActiveMetabolomicsExperiment(), dataPipeline);
+		cleanupTask.addTaskListener(this);
+		MRC2ToolBoxCore.getTaskController().addTask(cleanupTask);
+	}
+		
 	@Override
 	public Task cloneTask() {
 		return new CefImportFinalizationTask(ciFinObj);

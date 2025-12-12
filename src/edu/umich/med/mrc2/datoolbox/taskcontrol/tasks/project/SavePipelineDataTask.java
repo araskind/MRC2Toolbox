@@ -56,6 +56,10 @@ public class SavePipelineDataTask extends AbstractTask {
 	public void run() {
 
 		setStatus(TaskStatus.PROCESSING);
+		if(!pipeline.isDataFileSetChanged() && !pipeline.isFeatureSetChanged()) {
+			setStatus(TaskStatus.FINISHED);
+			return;
+		}
 		try {
 			saveFeaturesForPipeline();
 		} catch (Exception ex) {
@@ -73,7 +77,9 @@ public class SavePipelineDataTask extends AbstractTask {
 		} catch (Exception ex) {
 			reportErrorAndExit(ex);
 			return;
-		}		
+		}	
+		pipeline.setFeatureSetChanged(false);
+		pipeline.setDataFileSetChanged(false);
 		setStatus(TaskStatus.FINISHED);
 	}
 	

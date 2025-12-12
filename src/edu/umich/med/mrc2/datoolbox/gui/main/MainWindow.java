@@ -768,7 +768,7 @@ public class MainWindow extends JFrame
 		if(currentExperiment != null) {
 			
 			SaveMetabolomicsProjectTask task = 
-					new SaveMetabolomicsProjectTask(currentExperiment);
+					new SaveMetabolomicsProjectTask(currentExperiment, false);
 			task.addTaskListener(this);
 			MRC2ToolBoxCore.getTaskController().addTask(task);
 			return;
