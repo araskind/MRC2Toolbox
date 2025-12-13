@@ -338,6 +338,10 @@ public class SaveMetabolomicsProjectTask extends AbstractTask implements TaskLis
 
 	private void saveDataForPipelines() {
 		
+		if(projectToSave.getDataPipelines().isEmpty()) {
+			setStatus(TaskStatus.FINISHED);
+			return;
+		}		
 		for(DataPipeline dp : projectToSave.getDataPipelines()) {
 			
 			SavePipelineDataTask task = new SavePipelineDataTask(projectToSave, dp);

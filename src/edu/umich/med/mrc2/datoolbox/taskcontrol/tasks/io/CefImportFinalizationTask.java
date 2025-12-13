@@ -62,7 +62,6 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskListener;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.stats.CalculateStatisticsTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.stats.RemoveEmptyFeaturesTask;
-import edu.umich.med.mrc2.datoolbox.utils.ProjectUtils;
 
 public class CefImportFinalizationTask extends AbstractTask implements TaskListener{
 
@@ -331,9 +330,6 @@ public class CefImportFinalizationTask extends AbstractTask implements TaskListe
 				MRC2ToolBoxCore.getActiveMetabolomicsExperiment();		
 		currentExperiment.addDataPipeline(dataPipeline);
 
-		//	Attach library
-		currentExperiment.setCompoundLibraryForDataPipeline(dataPipeline, library);
-
 		//	Attach data
 		currentExperiment.setDataMatrixForDataPipeline(dataPipeline, dataMatrix);
 		
@@ -357,29 +353,6 @@ public class CefImportFinalizationTask extends AbstractTask implements TaskListe
 		MRC2ToolBoxCore.getTaskController().addTask(statsTask);
 	}
 
-	private void saveDataMatrixes() {
-		
-		DataAnalysisProject experimentToSave = 
-				MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
-		if (experimentToSave.getDataMatrixForDataPipeline(dataPipeline) != null) {
-
-			taskDescription = "Saving data matrix for  " + experimentToSave.getName() +
-					"(" + dataPipeline.getName() + ")";
-			processed = 50;			
-			ProjectUtils.saveDataMatrixForPipeline(experimentToSave, dataPipeline);
-			
-			taskDescription = "Saving feature matrix for  " + experimentToSave.getName() +
-					"(" + dataPipeline.getName() + ")";
-			processed = 70;
-
-			ProjectUtils.saveFeatureMatrixToFile(
-					featureMatrix,
-					experimentToSave, 
-					dataPipeline,
-					false);
-		}		
-	}
-
 	@Override
 	public void statusChanged(TaskEvent e) {
 
@@ -396,13 +369,7 @@ public class CefImportFinalizationTask extends AbstractTask implements TaskListe
 	}
 
 	private synchronized void finalizeDataImport(RemoveEmptyFeaturesTask source) {
-		
-//		try {
-//			saveDataMatrixes();			
-//		} catch (Exception e1) {
-//			e1.printStackTrace();
-//			setStatus(TaskStatus.ERROR);
-//		}
+
 		removeTempDirectory();		
 		setStatus(TaskStatus.FINISHED);
 	}

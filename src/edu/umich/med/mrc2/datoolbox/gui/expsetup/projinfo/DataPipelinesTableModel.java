@@ -44,7 +44,6 @@ public class DataPipelinesTableModel extends BasicTableModel {
 	public static final String NUM_DATA_FILES_COLUMN = "# Data files";
 	public static final String NUM_FEATURES_COLUMN = "# Features";
 	public static final String WORKLIST_COLUMN = "Worklist";
-	public static final String LIBRARY_COLUMN = "Library";
 
 	public DataPipelinesTableModel() {
 		super();
@@ -53,8 +52,7 @@ public class DataPipelinesTableModel extends BasicTableModel {
 			new ColumnContext(DATA_PIPELINE_COLUMN, DATA_PIPELINE_COLUMN, DataPipeline.class, false),
 			new ColumnContext(NUM_DATA_FILES_COLUMN, "Number of data files in the pipeline", Integer.class, false),
 			new ColumnContext(NUM_FEATURES_COLUMN, "Number of features in the pipeline", Integer.class, false),
-			new ColumnContext(WORKLIST_COLUMN, "Instrument worklist attached", Boolean.class, false),	//	TODO convert to int 0,1,2 - no, partial, yes
-			new ColumnContext(LIBRARY_COLUMN, "Feature library attached", Boolean.class, false)
+			new ColumnContext(WORKLIST_COLUMN, "Instrument worklist attached", Boolean.class, false),
 		};
 	}
 
@@ -71,7 +69,6 @@ public class DataPipelinesTableModel extends BasicTableModel {
 			int numSamples = 0;
 			int numFeatures = 0;
 			boolean hasWorklist = false;
-			boolean hasLibrary = false;
 			
 			if(pipeline.equals(currentProject.getActiveDataPipeline()))
 				isActive = true;
@@ -88,16 +85,12 @@ public class DataPipelinesTableModel extends BasicTableModel {
 			if (currentProject.getWorklistForDataAcquisitionMethod(pipeline.getAcquisitionMethod()) != null)
 				hasWorklist = true;
 
-			if (currentProject.getCompoundLibraryForDataPipeline(pipeline) != null)
-				hasLibrary = true;
-
 			Object[] obj = {
 					isActive,
 					pipeline,
 					numSamples,
 					numFeatures,
-					hasWorklist,
-					hasLibrary
+					hasWorklist
 				};
 			rowData.add(obj);
 		}

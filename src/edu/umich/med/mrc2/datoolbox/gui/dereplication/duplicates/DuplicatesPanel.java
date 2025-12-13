@@ -49,6 +49,7 @@ import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignSubsetEven
 import edu.umich.med.mrc2.datoolbox.gui.communication.FeatureSetEvent;
 import edu.umich.med.mrc2.datoolbox.gui.dereplication.ClusterDisplayPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
+import edu.umich.med.mrc2.datoolbox.gui.main.MainWindow;
 import edu.umich.med.mrc2.datoolbox.gui.main.PanelList;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicFeatureTable;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
@@ -62,7 +63,6 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.derepl.FindDuplicateFeaturesTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.derepl.FindDuplicateNamesTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.derepl.MergeDuplicateFeaturesTask;
-import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.stats.CalculateStatisticsTask;
 
 public class DuplicatesPanel extends ClusterDisplayPanel {
 
@@ -394,18 +394,11 @@ public class DuplicatesPanel extends ClusterDisplayPanel {
 	}
 
 	private void finalizeDuplicatesMerge() {
-
-		if(currentExperiment.getDuplicateClustersForDataPipeline(activeDataPipeline) != null)
-			currentExperiment.getDuplicateClustersForDataPipeline(activeDataPipeline).clear();
 		
-		MRC2ToolBoxCore.getMainWindow().showPanel(PanelList.FEATURE_DATA);
-		MRC2ToolBoxCore.getMainWindow().getExperimentSetupDraw().
-			switchDataPipeline(currentExperiment, activeDataPipeline);
-		
-		CalculateStatisticsTask cst = 
-				new CalculateStatisticsTask(currentExperiment, activeDataPipeline, true);
-		cst.addTaskListener((MRC2ToolBoxCore.getMainWindow().getPanel(PanelList.FEATURE_DATA)));
-		MRC2ToolBoxCore.getTaskController().addTask(cst);
+		MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
+		MainWindow.hideProgressDialog();
+		MRC2ToolBoxCore.getMainWindow().switchPanelForDataPipeline(
+				activeDataPipeline, PanelList.FEATURE_DATA);
 	}
 
 	@Override
@@ -434,11 +427,6 @@ public class DuplicatesPanel extends ClusterDisplayPanel {
 
 		if (!clusterTree.getSelectedFeatures().isEmpty())
 			selectFeatures(clusterTree.getSelectedFeatures());
-		
-//		for(MsFeature f : activeCluster.getFeatures()) {
-//			System.out.println(f.getName() + " = " + 
-//					MRC2ToolBoxConfiguration.getMzFormat().format(f.getSpectrum().getMonoisotopicMz()));
-//		}
 	}
 
 	@Override

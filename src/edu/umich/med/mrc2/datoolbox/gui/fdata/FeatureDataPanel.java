@@ -1791,9 +1791,11 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 
 			((AbstractTask) e.getSource()).removeTaskListener(this);
 
-			if (e.getSource().getClass().equals(CalculateStatisticsTask.class))
-				updateStatisticsResults((CalculateStatisticsTask) e.getSource());
-
+			if (e.getSource().getClass().equals(CalculateStatisticsTask.class)) {
+				//	updateStatisticsResults((CalculateStatisticsTask) e.getSource());
+				MRC2ToolBoxCore.getMainWindow().switchPanelForDataPipeline(
+						activeDataPipeline, PanelList.FEATURE_DATA);
+			}
 			if (e.getSource().getClass().equals(ImputeMissingDataTask.class))
 				finalizeImputeMissingDataTask((ImputeMissingDataTask) e.getSource());
 			
@@ -1803,8 +1805,11 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 			if (e.getSource().getClass().equals(ClearIdentificationsTask.class))
 				resetFeatureTable();
 
-			if (e.getSource().getClass().equals(MergeDuplicateFeaturesTask.class))
-				finalizeMergeDuplicateFeaturesTask((MergeDuplicateFeaturesTask)e.getSource());
+			if (e.getSource().getClass().equals(MergeDuplicateFeaturesTask.class)) {
+				//	finalizeMergeDuplicateFeaturesTask((MergeDuplicateFeaturesTask)e.getSource());
+				MRC2ToolBoxCore.getMainWindow().switchPanelForDataPipeline(
+						activeDataPipeline, PanelList.FEATURE_DATA);
+			}
 			
 			if (e.getSource().getClass().equals(LoadDatabaseLibraryTask.class))
 				finalizeDatabaseLibraryLoad((LoadDatabaseLibraryTask) e.getSource());
@@ -1904,24 +1909,19 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 		MainWindow.hideProgressDialog();
 
 		//	Rerun statistics
-
-		activeDataPipeline.setFeatureSetChanged(true);	
-		activeDataPipeline.setDataFileSetChanged(true);	
 		CalculateStatisticsTask statsTask = 
 				new CalculateStatisticsTask(currentExperiment, activeDataPipeline, true);
 		statsTask.addTaskListener(this);
 		MRC2ToolBoxCore.getTaskController().addTask(statsTask);
 	}
 
-	//	TODO Calc stats inside merge duplicates!
-	private void finalizeMergeDuplicateFeaturesTask(MergeDuplicateFeaturesTask task) {
-		
-		activeDataPipeline.setFeatureSetChanged(true);
-		CalculateStatisticsTask statsTask = 
-				new CalculateStatisticsTask(currentExperiment, activeDataPipeline, true);
-		statsTask.addTaskListener(this);
-		MRC2ToolBoxCore.getTaskController().addTask(statsTask);
-	}
+//	private void finalizeMergeDuplicateFeaturesTask(MergeDuplicateFeaturesTask task) {
+//
+//		CalculateStatisticsTask statsTask = 
+//				new CalculateStatisticsTask(currentExperiment, activeDataPipeline, true);
+//		statsTask.addTaskListener(this);
+//		MRC2ToolBoxCore.getTaskController().addTask(statsTask);
+//	}
 	
 	private void finalizeImputeMissingDataTask(ImputeMissingDataTask task) {
 
@@ -2036,18 +2036,9 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 				multiCefImportTask.getDataPipeline());
 		
 		SaveMetabolomicsProjectTask task = 
-				new SaveMetabolomicsProjectTask(currentExperiment, false);
+				new SaveMetabolomicsProjectTask(currentExperiment, true);
 		task.addTaskListener(this);
 		MRC2ToolBoxCore.getTaskController().addTask(task);
-		
-		//	Rerun statistics
-//		cleanEmptyFeatures = true;
-//		activeDataPipeline.setDataFileSetChanged(true);
-//		activeDataPipeline.setFeatureSetChanged(true);
-//		CalculateStatisticsTask statsTask = 
-//				new CalculateStatisticsTask(currentExperiment, activeDataPipeline, true);
-//		statsTask.addTaskListener(this);
-//		MRC2ToolBoxCore.getTaskController().addTask(statsTask);
 	}
 	
 	private void finalizeMultiCefDataAddition(MultiCefDataAddTask task) {
@@ -2074,7 +2065,6 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 		
 		MRC2ToolBoxCore.getMainWindow().switchPanelForDataPipeline(task.getDataPipeline(), PanelList.FEATURE_DATA);
 		resetFeatureTable();
-		activeDataPipeline.setFeatureSetChanged(true);
 		SavePipelineDataTask spTask = 
 				new SavePipelineDataTask(currentExperiment, activeDataPipeline);
 		MRC2ToolBoxCore.getTaskController().addTask(spTask);
@@ -2089,15 +2079,11 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 			populateMissingIdDialog(identifiedFeatures, missingLookupLibs);		
 	}
 
-	private void updateStatisticsResults(CalculateStatisticsTask csTask) {
-		
-//		if(csTask.isUseAllSamples() && cleanEmptyFeatures) {					
-//			cleanEmptyFeatures();
-//		}
-//		else {			
-			MRC2ToolBoxCore.getMainWindow().switchPanelForDataPipeline(csTask.getDataPipeline(), PanelList.FEATURE_DATA);
-//		}
-	}
+//	private void updateStatisticsResults(CalculateStatisticsTask csTask) {
+//		
+//		MRC2ToolBoxCore.getMainWindow().switchPanelForDataPipeline(
+//				csTask.getDataPipeline(), PanelList.FEATURE_DATA);
+//	}
 
 	public void findFeaturesByAdductMasses(
 			Collection<Double> monoisotopicAdductMasses, double massAccuracyPpm,

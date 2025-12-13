@@ -25,40 +25,22 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 
 import edu.umich.med.mrc2.datoolbox.data.enums.DatabseDialect;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 
 public class ConnectionManager {
 
-	private static ThreadLocal<Connection> tranConnection = 
-			new ThreadLocal<Connection>();
-	
-//	private static final PooledConnectionManager pooledConnectionManager = 
-//			new PooledConnectionManager();
+	private static ThreadLocal<Connection> tranConnection = new ThreadLocal<>();
 
-	/** get a connection */
-	public static Connection getConnection() throws Exception {
-//
-//		if (tranConnection.get() != null) 
-//			return tranConnection.get();
-//		
-//		if(MRC2ToolBoxConfiguration.getDatabaseType().equals(DatabseDialect.Oracle))
-//			Class.forName("oracle.jdbc.driver.OracleDriver");
-//		
-//		if(MRC2ToolBoxConfiguration.getDatabaseType().equals(DatabseDialect.PostgreSQL))
-//			Class.forName("org.postgresql.Driver");
-//		
-//		Connection connection = DriverManager.getConnection(
-//				MRC2ToolBoxConfiguration.getDatabaseConnectionString(),
-//				MRC2ToolBoxConfiguration.getDatabaseUserName(), 
-//				MRC2ToolBoxConfiguration.getDatabasePassword());
-//		return connection;
-				
+	/** get a connection 
+	 * @throws SQLException */
+	public static Connection getConnection() throws SQLException {				
 		return PooledConnectionManager.getConnection();
 	}
 	
-	public static Connection getTestConnection() throws Exception {
+	public static Connection getTestConnection() throws ClassNotFoundException, SQLException {
 		
 		if(MRC2ToolBoxConfiguration.getDatabaseType().equals(DatabseDialect.Oracle))
 			Class.forName("oracle.jdbc.driver.OracleDriver");
@@ -66,11 +48,10 @@ public class ConnectionManager {
 		if(MRC2ToolBoxConfiguration.getDatabaseType().equals(DatabseDialect.PostgreSQL))
 			Class.forName("org.postgresql.Driver");
 		
-		Connection connection = DriverManager.getConnection(
+		return DriverManager.getConnection(
 				MRC2ToolBoxConfiguration.getDatabaseConnectionString(),
 				MRC2ToolBoxConfiguration.getDatabaseUserName(), 
 				MRC2ToolBoxConfiguration.getDatabasePassword());
-		return connection;
 	}
 
 	public static boolean connectionDefined() {

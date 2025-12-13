@@ -482,7 +482,7 @@ public class ExperimentDetailsPanel extends DockableMRC2ToolboxPanel {
 		public Void doInBackground() {
 
 			try {
-				currentExperiment.removeDataPipeline(toRemove);
+				currentExperiment.deleteDataPipeline(toRemove);
 				activeDataPipeline = currentExperiment.getActiveDataPipeline();
 				MRC2ToolBoxCore.getMainWindow().switchDataPipeline(currentExperiment, activeDataPipeline);
 			} catch (Exception e) {

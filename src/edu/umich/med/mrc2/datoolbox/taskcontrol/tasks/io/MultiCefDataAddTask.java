@@ -21,11 +21,9 @@
 
 package edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io;
 
-import java.io.File;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -36,7 +34,6 @@ import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
@@ -44,13 +41,10 @@ import org.ujmp.core.Matrix;
 import org.ujmp.core.calculation.Calculation.Ret;
 
 import edu.umich.med.mrc2.datoolbox.data.CefImportSettingsObject;
-import edu.umich.med.mrc2.datoolbox.data.CompoundLibrary;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
-import edu.umich.med.mrc2.datoolbox.data.LibraryMsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureStatisticalSummary;
 import edu.umich.med.mrc2.datoolbox.data.SampleDataResultObject;
-import edu.umich.med.mrc2.datoolbox.data.SimpleMsFeature;
 import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.enums.FeatureAlignmentType;
@@ -68,14 +62,13 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskListener;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 
 public class MultiCefDataAddTask extends AbstractTask implements TaskListener{
-
-	private DataFile[] addedDataFiles;
+	
+	private DataAnalysisProject currentExperiment;
 	private DataPipeline dataPipeline;
+	private DataFile[] addedDataFiles;
+	private MsFeature[] features;
 	private FeatureAlignmentType alignmentType;
-	private boolean fileLoadInitiated;
-	private HashMap<DataFile, HashSet<SimpleMsFeature>>featureData;
 	private TreeSet<String> unmatchedAdducts;
-	private CompoundLibrary library;
 	private Matrix featureMatrix;
 	private Matrix addedDataMatrix;
 	boolean dataParsed;
@@ -84,36 +77,35 @@ public class MultiCefDataAddTask extends AbstractTask implements TaskListener{
 	private Map<String, List<Double>>retentionMap;
 	private Map<String, List<Double>> peakWidthMap;
 	private Map<String, List<Double>>mzMap;
-	private HashMap<DataFile, HashSet<SimpleMsFeature>> featureDataPers;
-	private File cacheFile;
-	private DescriptiveStatistics descStats;
-	private DataAnalysisProject currentExperiment;
-	private MsFeature[] features;
-
+	
+	public MultiCefDataAddTask(
+			DataPipeline dataPipeline, 
+			FeatureAlignmentType alignmentType) {
+		this.dataPipeline = dataPipeline;
+		this.alignmentType = alignmentType;
+		currentExperiment = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
+		fileCounter = 0;
+		addedDataFiles = new DataFile[0];
+	}
+	
 	public MultiCefDataAddTask(
 			DataFile[] dataFiles, 
 			DataPipeline dataPipeline, 
 			FeatureAlignmentType alignmentType) {
 
-		super();
-		this.addedDataFiles = dataFiles;
-		this.dataPipeline = dataPipeline;
-		this.alignmentType = alignmentType;
-		featureData = new HashMap<DataFile, HashSet<SimpleMsFeature>>();
-		fileCounter = 0;
+		this(dataPipeline, alignmentType);
+		addedDataFiles = dataFiles;
 	}
 
 	public MultiCefDataAddTask(
 			Set<SampleDataResultObject> dataToImport, 
 			DataPipeline dataPipeline,
 			FeatureAlignmentType alignmentType) {
-		this.dataPipeline = dataPipeline;
-		this.alignmentType = alignmentType;
+		
+		this(dataPipeline, alignmentType);		
 		addedDataFiles = dataToImport.stream().
 				map(s -> s.getDataFile()).
 				toArray(size -> new DataFile[size]);
-		
-		featureData = new HashMap<DataFile, HashSet<SimpleMsFeature>>();
 		fileCounter = 0;
 	}
 
@@ -121,8 +113,6 @@ public class MultiCefDataAddTask extends AbstractTask implements TaskListener{
 	public void run() {
 
 		setStatus(TaskStatus.PROCESSING);
-		currentExperiment = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
-		library = currentExperiment.getCompoundLibraryForDataPipeline(dataPipeline);
 		dataParsed = false;
 		initDataMatrixes();
 		initDataLoad();
@@ -130,19 +120,18 @@ public class MultiCefDataAddTask extends AbstractTask implements TaskListener{
 
 	private void initDataMatrixes() {
 
-		featureCoordinateMap = new ConcurrentHashMap<String,Integer>();
-		retentionMap = new ConcurrentHashMap<String, List<Double>>();
-		peakWidthMap = new ConcurrentHashMap<String, List<Double>>();
-		mzMap = new ConcurrentHashMap<String, List<Double>>();
+		featureCoordinateMap = new ConcurrentHashMap<>();
+		retentionMap = new ConcurrentHashMap<>();
+		peakWidthMap = new ConcurrentHashMap<>();
+		mzMap = new ConcurrentHashMap<>();
 		AtomicInteger counter = new AtomicInteger(0);
-		features =
-			library.getFeatures().stream().
-			sorted(new MsFeatureComparator(SortProperty.ID)).
+		features = currentExperiment.getMsFeaturesForDataPipeline(dataPipeline).
+			stream().sorted(new MsFeatureComparator(SortProperty.ID)).
 			map(f -> {
 				featureCoordinateMap.put(f.getId(), counter.getAndIncrement());
-				retentionMap.put(f.getId(), new CopyOnWriteArrayList<Double>());
-				peakWidthMap.put(f.getId(), new CopyOnWriteArrayList<Double>());
-				mzMap.put(f.getId(), new CopyOnWriteArrayList<Double>());
+				retentionMap.put(f.getId(), new CopyOnWriteArrayList<>());
+				peakWidthMap.put(f.getId(), new CopyOnWriteArrayList<>());
+				mzMap.put(f.getId(), new CopyOnWriteArrayList<>());
 				return f;
 			}).
 			toArray(size -> new MsFeature[size]);
@@ -156,7 +145,7 @@ public class MultiCefDataAddTask extends AbstractTask implements TaskListener{
 				1, Matrix.Factory.linkToArray((Object[])addedDataFiles).transpose(Ret.NEW));
 
 		double[][] quantitativeMatrix = 
-				new double[addedDataFiles.length][library.getFeatures().size()];
+				new double[addedDataFiles.length][currentExperiment.getMsFeaturesForDataPipeline(dataPipeline).size()];
 		addedDataMatrix = Matrix.Factory.linkToArray(quantitativeMatrix);
 		addedDataMatrix.setMetaDataDimensionMatrix(
 				0, Matrix.Factory.linkToArray((Object[])features));
@@ -245,7 +234,7 @@ public class MultiCefDataAddTask extends AbstractTask implements TaskListener{
 		
 		//	New quant matrix
 		double[][] quantitativeMatrix = 
-				new double[fileArray.length][library.getFeatures().size()];
+				new double[fileArray.length][currentExperiment.getMsFeaturesForDataPipeline(dataPipeline).size()];
 		Matrix newDataMatrix = Matrix.Factory.linkToArray(quantitativeMatrix);
 		newDataMatrix.setMetaDataDimensionMatrix(
 				0, Matrix.Factory.linkToArray((Object[])features));
@@ -253,28 +242,28 @@ public class MultiCefDataAddTask extends AbstractTask implements TaskListener{
 				1, Matrix.Factory.linkToArray((Object[])fileArray).transpose(Ret.NEW));
 		
 		//	File coordinates
-		HashMap<DataFile,Long>loadedFileCoordinates = new HashMap<DataFile,Long>();
+		HashMap<DataFile,Long>loadedFileCoordinates = new HashMap<>();
 		for(DataFile f : loadedFiles)
 			loadedFileCoordinates.put(f, loadedDataMatrix.getRowForLabel(f));
 		
-		HashMap<DataFile,Long>addedFileCoordinates = new HashMap<DataFile,Long>();
+		HashMap<DataFile,Long>addedFileCoordinates = new HashMap<>();
 		for(DataFile f : addedDataFiles)
 			addedFileCoordinates.put(f, addedDataMatrix.getRowForLabel(f));
 		
-		HashMap<DataFile,Long>newFileCoordinates = new HashMap<DataFile,Long>();
+		HashMap<DataFile,Long>newFileCoordinates = new HashMap<>();
 		for(DataFile f : fileArray)
 			newFileCoordinates.put(f, newDataMatrix.getRowForLabel(f));
 		
 		//	Feature coordinates
-		HashMap<MsFeature,Long>loadedFeatureCoordinates = new HashMap<MsFeature,Long>();
+		HashMap<MsFeature,Long>loadedFeatureCoordinates = new HashMap<>();
 		for(MsFeature msf : features)
 			loadedFeatureCoordinates.put(msf, loadedDataMatrix.getColumnForLabel(msf));
 		
-		HashMap<MsFeature,Long>addedFeatureCoordinates = new HashMap<MsFeature,Long>();
+		HashMap<MsFeature,Long>addedFeatureCoordinates = new HashMap<>();
 		for(MsFeature msf : features)
 			addedFeatureCoordinates.put(msf, addedDataMatrix.getColumnForLabel(msf));
 		
-		HashMap<MsFeature,Long>newFeatureCoordinates = new HashMap<MsFeature,Long>();
+		HashMap<MsFeature,Long>newFeatureCoordinates = new HashMap<>();
 		for(MsFeature msf : features)
 			newFeatureCoordinates.put(msf, newDataMatrix.getColumnForLabel(msf));
 		
@@ -283,8 +272,7 @@ public class MultiCefDataAddTask extends AbstractTask implements TaskListener{
 		long[] newCoordinates = new long[2];
 		
 		//	Calculate RT stats 
-		Map<String, DescriptiveStatistics>rtStatsMap = 
-				new TreeMap<String, DescriptiveStatistics>();
+		Map<String, DescriptiveStatistics>rtStatsMap = new TreeMap<>();
 		for(Entry<String, List<Double>> rtCollection : retentionMap.entrySet()) {
 			
 			double[] rtValues = new double[0];
@@ -298,8 +286,7 @@ public class MultiCefDataAddTask extends AbstractTask implements TaskListener{
 			rtStatsMap.put(rtCollection.getKey(), new DescriptiveStatistics(rtValues));
 		}	
 		//	Calculate M/Z stats
-		Map<String, DescriptiveStatistics>mzStatsMap = 
-				new TreeMap<String, DescriptiveStatistics>();
+		Map<String, DescriptiveStatistics>mzStatsMap = new TreeMap<>();
 		for(Entry<String, List<Double>> mzCollection : mzMap.entrySet()) {
 			
 			double[] mzValues = new double[0];
@@ -313,7 +300,7 @@ public class MultiCefDataAddTask extends AbstractTask implements TaskListener{
 			mzStatsMap.put(mzCollection.getKey(), new DescriptiveStatistics(mzValues));
 		}
 		// Calculate peak width stats
-		Map<String, DescriptiveStatistics>peakWidthStatsMap = new TreeMap<String, DescriptiveStatistics>();
+		Map<String, DescriptiveStatistics>peakWidthStatsMap = new TreeMap<>();
 		for(Entry<String, List<Double>> pwCollection : peakWidthMap.entrySet()) {
 			
 			double[] pwValues = new double[0];
@@ -375,40 +362,40 @@ public class MultiCefDataAddTask extends AbstractTask implements TaskListener{
 		addedDataMatrix.replace(Ret.ORIG, 0.0, Double.NaN);
 	}
 	
-	private void removeEmptyFeatures() {
-
-		taskDescription = "Removing features with no data ...";
-		total = 100;
-		processed = 20;
-
-		List<LibraryMsFeature> featuresToRemove = library.getFeatures().stream().
-				filter(f -> (f.getStatsSummary().getSampleFrequency() == 0.0d)).
-				filter(f -> (f.getStatsSummary().getPooledFrequency() == 0.0d)).
-				filter(f -> (f.getStatsSummary().getMeanObservedRetention() == 0.0d)).
-				collect(Collectors.toList());
-
-		if(!featuresToRemove.isEmpty()) {
-
-			Matrix featureMatrix = addedDataMatrix.getMetaDataDimensionMatrix(0);
-
-			List<Long> rem = featuresToRemove.stream().
-					mapToLong(cf -> addedDataMatrix.getColumnForLabel(cf)).
-					boxed().collect(Collectors.toList());
-
-			processed = 50;
-
-			Matrix newDataMatrix = addedDataMatrix.deleteColumns(Ret.NEW, rem);
-			Matrix newFeatureMatrix = featureMatrix.deleteColumns(Ret.NEW, rem);
-			newDataMatrix.setMetaDataDimensionMatrix(0, newFeatureMatrix);
-			newDataMatrix.setMetaDataDimensionMatrix(1, addedDataMatrix.getMetaDataDimensionMatrix(1));
-			addedDataMatrix = newDataMatrix;
-
-			library.removeFeatures(featuresToRemove);
-		}
-		addedDataMatrix.replace(Ret.ORIG, 0.0, Double.NaN);
-		processed = 100;
-		setStatus(TaskStatus.FINISHED);
-	}
+//	private void removeEmptyFeatures() {
+//
+//		taskDescription = "Removing features with no data ...";
+//		total = 100;
+//		processed = 20;
+//
+//		List<LibraryMsFeature> featuresToRemove = library.getFeatures().stream().
+//				filter(f -> (f.getStatsSummary().getSampleFrequency() == 0.0d)).
+//				filter(f -> (f.getStatsSummary().getPooledFrequency() == 0.0d)).
+//				filter(f -> (f.getStatsSummary().getMeanObservedRetention() == 0.0d)).
+//				collect(Collectors.toList());
+//
+//		if(!featuresToRemove.isEmpty()) {
+//
+//			Matrix featureMatrix = addedDataMatrix.getMetaDataDimensionMatrix(0);
+//
+//			List<Long> rem = featuresToRemove.stream().
+//					mapToLong(cf -> addedDataMatrix.getColumnForLabel(cf)).
+//					boxed().collect(Collectors.toList());
+//
+//			processed = 50;
+//
+//			Matrix newDataMatrix = addedDataMatrix.deleteColumns(Ret.NEW, rem);
+//			Matrix newFeatureMatrix = featureMatrix.deleteColumns(Ret.NEW, rem);
+//			newDataMatrix.setMetaDataDimensionMatrix(0, newFeatureMatrix);
+//			newDataMatrix.setMetaDataDimensionMatrix(1, addedDataMatrix.getMetaDataDimensionMatrix(1));
+//			addedDataMatrix = newDataMatrix;
+//
+//			library.removeFeatures(featuresToRemove);
+//		}
+//		addedDataMatrix.replace(Ret.ORIG, 0.0, Double.NaN);
+//		processed = 100;
+//		setStatus(TaskStatus.FINISHED);
+//	}
 	
 	/**
 	 * @return the method
@@ -417,42 +404,22 @@ public class MultiCefDataAddTask extends AbstractTask implements TaskListener{
 		return dataPipeline;
 	}
 
-	/**
-	 * @return the unmatchedAdducts
-	 */
-	public TreeSet<String> getUnmatchedAdducts() {
+	public Set<String> getUnmatchedAdducts() {
 		return unmatchedAdducts;
 	}
 
-	/**
-	 * @return the featureMatrix
-	 */
 	public Matrix getFeatureMatrix() {
 		return featureMatrix;
 	}
 
-	/**
-	 * @return the dataMatrix
-	 */
 	public Matrix getDataMatrix() {
 		return addedDataMatrix;
 	}
 
-	/**
-	 * @return the library
-	 */
-	public CompoundLibrary getLibrary() {
-		return library;
-	}
-
-	/**
-	 * @return the dataFiles
-	 */
 	public Collection<DataFile> getDataFiles() {		
 		return Arrays.asList(addedDataFiles);
 	}
 	
-
 	@Override
 	public Task cloneTask() {
 		return new MultiCefDataAddTask(addedDataFiles, dataPipeline, alignmentType);

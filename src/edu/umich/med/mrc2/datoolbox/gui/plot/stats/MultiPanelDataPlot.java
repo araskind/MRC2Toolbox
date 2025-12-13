@@ -23,6 +23,7 @@ package edu.umich.med.mrc2.datoolbox.gui.plot.stats;
 
 import java.awt.Color;
 import java.awt.event.ActionEvent;
+import java.io.File;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -31,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.commons.lang3.StringUtils;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
@@ -50,9 +52,12 @@ import org.jfree.data.Range;
 import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
 
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
+import edu.umich.med.mrc2.datoolbox.data.enums.DataScale;
 import edu.umich.med.mrc2.datoolbox.data.enums.FileSortingOrder;
+import edu.umich.med.mrc2.datoolbox.data.enums.ImageExportFormat;
 import edu.umich.med.mrc2.datoolbox.data.enums.PlotDataGrouping;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
+import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.plot.MasterPlotPanel;
 import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.BoxAndWhiskerCategoryDatasetCa;
 import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.ScatterDataSet;
@@ -64,6 +69,8 @@ import edu.umich.med.mrc2.datoolbox.gui.plot.renderer.category.VariableCategoryS
 import edu.umich.med.mrc2.datoolbox.gui.plot.tooltip.NamedXYSeriesToolTipGenerator;
 import edu.umich.med.mrc2.datoolbox.gui.plot.tooltip.StatsPlotDataFileToolTipGenerator;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
+import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
+import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
 
 public class MultiPanelDataPlot extends TwoDimQCPlot{
 
@@ -263,8 +270,56 @@ public class MultiPanelDataPlot extends TwoDimQCPlot{
 			toggleDataPoints();
 			return;
 		}
+		else if(command.equals(ChartPanel.SAVE_COMMAND) 
+				|| command.equals(MainActionCommands.SAVE_AS_PNG.name()) 
+				|| command.equals(MainActionCommands.SAVE_AS_SVG.name()) 
+				|| command.equals(MainActionCommands.SAVE_AS_PDF.name())){
+				saveFeaturePlot(command);
+		}
 		else
 			super.actionPerformed(event);
+	}
+
+	private void saveFeaturePlot(String command) {
+
+		DataAnalysisProject experiment = plotParameters.getExperiment();
+		
+		if(experiment == null || experiment.getActiveDataPipeline() == null)
+			return;
+		
+		File exportFolder = experiment.getExportsDirectory();
+		ImageExportFormat format = ImageExportFormat.PNG;
+		
+		if(command.equals(MainActionCommands.SAVE_AS_PDF.name()))
+			format = ImageExportFormat.PDF;
+		
+		if(command.equals(MainActionCommands.SAVE_AS_SVG.name()))
+			format = ImageExportFormat.SVG;
+				
+		String plotFileName = FIOUtils.createSaveSafeName(
+				constructFeaturePlotName (experiment)).replaceAll("\\s+", "_")
+				+ "." + format.getExtension();
+		
+		saveChartAsImageToFile(exportFolder, plotFileName, format);
+	}
+	
+	private String constructFeaturePlotName(DataAnalysisProject experiment) {
+		
+		List<String>nameParts = new ArrayList<>();
+		nameParts.add(experiment.getName());
+		if(plotParameters.getFeaturesMap().size() == 1) {
+		nameParts.add(plotParameters.getFeaturesMap().keySet().
+					iterator().next().getSaveSafeName());
+		}
+		plotParameters.getFeaturesMap().values().stream().
+			flatMap(c -> c.stream()).forEach(f -> nameParts.add(f.getName()));
+		nameParts.add(plotParameters.getDesignDescriptor());
+		if(!plotParameters.getDataScale().equals(DataScale.RAW))
+			nameParts.add(plotParameters.getDataScale().getName());
+		
+		nameParts.add(plotParameters.getStatPlotType().getName());
+		nameParts.add(FIOUtils.getTimestamp());
+		return  StringUtils.join(nameParts, "_");
 	}
 
 	public void clearPlotPanel(){

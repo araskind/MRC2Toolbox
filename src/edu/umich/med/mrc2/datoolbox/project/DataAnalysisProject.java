@@ -29,6 +29,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -73,14 +74,13 @@ public class DataAnalysisProject extends Project {
 	protected LIMSProject limsProject;	//	TODO - get on the fly from LIMS experiment
 	protected TreeSet<DataPipeline> dataPipelines;
 	protected DataPipeline activeDataPipeline;	
-	protected TreeMap<DataPipeline, CompoundLibrary> libraryMap;
+	//	protected TreeMap<DataPipeline, CompoundLibrary> libraryMap;
 	protected TreeMap<DataPipeline, CompoundLibrary> averagedFeatureMap;
 	protected TreeMap<DataPipeline, Set<MsFeature>> featureMap;
 	protected TreeMap<DataPipeline, Matrix> dataMatrixMap;
 	protected TreeMap<DataPipeline, Matrix> featureMatrixMap;
 	protected TreeMap<DataPipeline, Matrix> imputedDataMatrixMap;
 	protected TreeMap<DataPipeline, Matrix> corrMatrixMap;
-	//	protected TreeMap<DataPipeline, Matrix[]> metaDataMap;
 	protected TreeMap<DataPipeline, Set<MsFeatureCluster>> duplicatesMap;
 	protected TreeMap<DataPipeline, Set<MsFeatureCluster>> correlationClusterMap;
 	protected TreeMap<DataPipeline, Set<MsFeatureSet>> featureSetMap;
@@ -103,7 +103,7 @@ public class DataAnalysisProject extends Project {
 
 	protected void initProjectFields(boolean initDesign) {
 
-		libraryMap = new TreeMap<>();
+		//	libraryMap = new TreeMap<>();
 		averagedFeatureMap = new TreeMap<>();
 		duplicatesMap = new TreeMap<>();
 		correlationClusterMap = new TreeMap<>();
@@ -177,10 +177,10 @@ public class DataAnalysisProject extends Project {
 		featureMatrixMap.put(pipeline, featureMatrix);
 	}
 
-	public void removeDataPipeline(DataPipeline pipeline) {
+	public void deleteDataPipeline(DataPipeline pipeline) {
 
 		// Remove all objects related to data pipeline
-		libraryMap.remove(pipeline);
+		//	libraryMap.remove(pipeline);
 		averagedFeatureMap.remove(pipeline);
 		featureMap.remove(pipeline);	
 		imputedDataMatrixMap.remove(pipeline);
@@ -244,8 +244,7 @@ public class DataAnalysisProject extends Project {
 		FIOUtils.safeDeleteFile(ProjectUtils.getAveragedFeaturesFilePath(this, pipeline));
 		
 		dataMatrixMap.remove(pipeline);
-		ProjectUtils.deleteDataMatrixFile(this, pipeline);
-		
+		ProjectUtils.deleteDataMatrixFile(this, pipeline);	
 
 		if(featureMatrixMap == null)
 			featureMatrixMap = new TreeMap<>();
@@ -327,29 +326,10 @@ public class DataAnalysisProject extends Project {
 			ExperimentDesignSubset designSubset, 
 			DataAcquisitionMethod acquisitionMethod) {
 
-		Set<DataFile> files = experimentDesign.getSamplesForDesignSubset(designSubset, true).stream().
+		return experimentDesign.getSamplesForDesignSubset(designSubset, true).stream().
 			filter(s -> Objects.nonNull(s.getDataFilesForMethod(acquisitionMethod))).
 			flatMap(s -> s.getDataFilesForMethod(acquisitionMethod).stream()).
 			filter(f-> f.isEnabled()).collect(Collectors.toCollection(TreeSet::new));
-
-//		Set<DataFile> files = new TreeSet<>();
-//
-//		for(ExperimentDesignLevel level : designSubset.getDesignMap()){
-//
-//			for(ExperimentalSample sample : experimentDesign.getSamples()){
-//
-//				if(sample.getDesignCell().values().contains(level) &&
-//						sample.getDataFilesForMethod(acquisitionMethod) != null){
-//
-//					for(DataFile df : sample.getDataFilesForMethod(acquisitionMethod)){
-//
-//						if(df.isEnabled())
-//							files.add(df);
-//					}
-//				}
-//			}			
-//		}
-		return files;
 	}
 	
 	public Set<DataFile> getDataFilesForPipeline(DataPipeline dataPipeline, boolean enabledOnly){
@@ -357,19 +337,7 @@ public class DataAnalysisProject extends Project {
 		Set<DataFile> files = getDataFilesForAcquisitionMethod(dataPipeline.getAcquisitionMethod());
 		if(enabledOnly) 
 			files = files.stream().filter(f -> f.isEnabled()).collect(Collectors.toCollection(TreeSet::new));
-		
-//		Set<DataFile> files = new TreeSet<>();
-//		DataAcquisitionMethod method = dataPipeline.getAcquisitionMethod();
-//		List<DataFile> methodFiles = experimentDesign.getSamples().stream().
-//				flatMap(s -> s.getDataFilesForMethod(method).stream()).
-//				collect(Collectors.toList());
-//		if(enabledOnly) {
-//			List<DataFile>enabled = methodFiles.stream().filter(f -> f.isEnabled()).collect(Collectors.toList());
-//			files.addAll(enabled);
-//		}
-//		else {
-//			files.addAll(methodFiles);
-//		}		
+	
 		return files;
 	}
 	
@@ -392,10 +360,6 @@ public class DataAnalysisProject extends Project {
 
 		return featureSetMap.get(pipeline).stream().
 				filter(s -> s.isActive()).findFirst().orElse(null);
-	}
-	
-	public CompoundLibrary getCompoundLibraryForDataPipeline(DataPipeline pipeline) {
-		return libraryMap.get(pipeline);
 	}
 	
 	public CompoundLibrary getAveragedFeatureLibraryForDataPipeline(DataPipeline pipeline) {
@@ -568,19 +532,9 @@ public class DataAnalysisProject extends Project {
 	}
 
 	public boolean hasDuplicateClusters(DataPipeline pipeline) {
-
-		if(duplicatesMap.get(pipeline) == null || duplicatesMap.get(pipeline).isEmpty())
-			return false;
-		else
-			return true;
-	}
-
-	public boolean dataPipelineHasLinkedLibrary(DataPipeline pipeline) {
-
-		if(pipeline == null)
-			throw new IllegalArgumentException("Data pipeline can not be null!");
-
-		return libraryMap.containsKey(pipeline);
+		
+		return (duplicatesMap.get(pipeline) != null 
+				&& !duplicatesMap.get(pipeline).isEmpty());
 	}
 
 	public boolean acquisitionMethodHasLinkedWorklist(DataAcquisitionMethod method) {
@@ -597,12 +551,10 @@ public class DataAnalysisProject extends Project {
 	public Set<MsFeatureSet> getCustomSetsForDataPipeline(DataPipeline pipeline) {
 		
 		Set<MsFeatureSet> dpfeatureSets = featureSetMap.get(pipeline);
-		MsFeatureSet dpAllFeatureSet = getAllFeaturesSetFordataPipeline(pipeline);
-		Set<MsFeatureSet> customSets = 
-				dpfeatureSets.stream().
+		MsFeatureSet dpAllFeatureSet = getAllFeaturesSetFordataPipeline(pipeline);			
+		return dpfeatureSets.stream().
 				filter(s -> !s.equals(dpAllFeatureSet)).
 				collect(Collectors.toSet());
-		return customSets;
 	}
 	
 	public void removeWorklistForMethod(DataAcquisitionMethod method) {
@@ -614,13 +566,6 @@ public class DataAnalysisProject extends Project {
 
 	public void restoreData() {
 
-//		for (DataPipeline pipeline : dataPipelines) {
-//
-//			// Restore correlation matrix if clusters are present
-//			if (clusterMap.get(pipeline) != null)
-//				corrMatrixMap.put(pipeline, 
-//						dataMatrixMap.get(pipeline).corrcoef(Ret.LINK, false, false));
-//		}
 		for (DataPipeline pipeline : dataPipelines) {
 			
 			for(MsFeature feature : featureMap.get(pipeline)) {
@@ -666,12 +611,7 @@ public class DataAnalysisProject extends Project {
 			activeSet.setActive(true);
 	}
 
-	public void setCompoundLibraryForDataPipeline(
-			DataPipeline pipeline, CompoundLibrary library) {
-		libraryMap.put(pipeline, library);
-	}
-
-	public TreeMap<DataPipeline, CompoundLibrary> getAveragedFeatureMap() {
+	public SortedMap<DataPipeline, CompoundLibrary> getAveragedFeatureMap() {
 		return averagedFeatureMap;
 	}
 	
@@ -696,10 +636,6 @@ public class DataAnalysisProject extends Project {
 			DataPipeline pipeline, Matrix dataMatrix) {
 		
 		dataMatrixMap.put(pipeline, dataMatrix);
-		
-//		Matrix[] mdata = new Matrix[2];
-//		mdata[0] = dataMatrix.getMetaDataDimensionMatrix(0);
-//		mdata[1] = dataMatrix.getMetaDataDimensionMatrix(1);
 	}
 	
 	public void setFeatureMatrixForDataPipeline(
@@ -744,25 +680,6 @@ public class DataAnalysisProject extends Project {
 		worklistMap.put(method, newWorklist);
 	}
 
-	//	TODO when needed
-	public void updateFeatureDataFromLibrary(Assay method) {
-  
-//		if (libraryMap.get(method) != null) {
-//
-//			for (MsFeature cf : featureMap.get(method)) {
-//
-//				MsFeature lf = libraryMap.get(method).getFeatureByName(cf.getName());
-//				if (lf != null) {
-//
-//					// Update library spectrum
-//					cf.setSpectrum(lf.getSpectrum());
-//					for (MsFeatureIdentity cid : lf.getIdentifications())
-//						cf.addIdentity(cid);
-//				}
-//			}
-//		}
-	}
-
 	public boolean allDataFilesForAcquisitionMethodEnabled(DataAcquisitionMethod method) {
 		
 		return experimentDesign.getSamples().stream().
@@ -799,9 +716,6 @@ public class DataAnalysisProject extends Project {
 
 		if(activeDataPipeline.equals(oldPipeline))
 				activeDataPipeline = newPipeline;
-
-		CompoundLibrary lib = libraryMap.remove(oldPipeline);
-		libraryMap.put(newPipeline, lib);
 		
 		CompoundLibrary avgLib = averagedFeatureMap.remove(oldPipeline);
 		averagedFeatureMap.put(newPipeline, avgLib);
@@ -817,9 +731,6 @@ public class DataAnalysisProject extends Project {
 
 		Matrix corrMatrix = corrMatrixMap.remove(oldPipeline);
 		corrMatrixMap.put(newPipeline, corrMatrix);
-
-//		Matrix[] metaData = metaDataMap.remove(oldPipeline);
-//		metaDataMap.put(newPipeline, metaData);
 
 		Set<MsFeatureCluster> duplicates = duplicatesMap.remove(oldPipeline);
 		duplicatesMap.put(newPipeline, duplicates);

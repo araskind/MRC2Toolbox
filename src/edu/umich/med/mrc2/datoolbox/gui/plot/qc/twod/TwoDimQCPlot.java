@@ -26,8 +26,11 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
 import java.io.File;
 import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.axis.DateAxis;
@@ -46,6 +49,7 @@ import edu.umich.med.mrc2.datoolbox.data.DataFileStatisticalSummary;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataSetQcField;
 import edu.umich.med.mrc2.datoolbox.data.enums.FileSortingOrder;
 import edu.umich.med.mrc2.datoolbox.data.enums.ImageExportFormat;
+import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.plot.AbstractControlledDataPlot;
 import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.PlotDataSetUtils;
@@ -61,6 +65,7 @@ import edu.umich.med.mrc2.datoolbox.gui.plot.tooltip.FileStatsBoxAndWhiskerToolT
 import edu.umich.med.mrc2.datoolbox.gui.plot.tooltip.StatsPlotDataFileToolTipGenerator;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
+import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.project.Project;
 import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
 
@@ -224,10 +229,6 @@ public class TwoDimQCPlot extends AbstractControlledDataPlot {
 		if(experiment == null)
 			return;
 		
-		String prefix = experiment.getName();
-		if(experiment.getLimsExperiment() != null)
-			prefix = experiment.getLimsExperiment().getId();
-		
 		File exportFolder = experiment.getExportsDirectory();
 		ImageExportFormat format = ImageExportFormat.PNG;
 		
@@ -236,14 +237,31 @@ public class TwoDimQCPlot extends AbstractControlledDataPlot {
 		
 		if(command.equals(MainActionCommands.SAVE_AS_SVG.name()))
 			format = ImageExportFormat.SVG;
-		
-		String plotFileName = prefix + "_"
-				+ plotParameters.getDesignDescriptor()
-				+ "_" + FIOUtils.getTimestamp()
+				
+		String plotFileName = FIOUtils.createSaveSafeName(
+				constructQcPlotName(experiment)).replaceAll("\\s+", "_")
 				+ "." + format.getExtension();
-		String plotFileNameClean = FIOUtils.createSaveSafeName(plotFileName).replaceAll("\\s+", "_");
 		
-		saveChartAsImageToFile(exportFolder, plotFileNameClean, format);
+		saveChartAsImageToFile(exportFolder, plotFileName, format);
+	}
+	
+	private String constructQcPlotName(Project experiment) {
+		
+		List<String>nameParts = new ArrayList<>();
+		String prefix = experiment.getName();
+		if(experiment.getLimsExperiment() != null)
+			prefix = experiment.getLimsExperiment().getId();
+		
+		nameParts.add(prefix);
+		if(experiment instanceof DataAnalysisProject) {
+			
+			DataPipeline pipeline = ((DataAnalysisProject)experiment).getActiveDataPipeline();
+			if(pipeline != null)
+				nameParts.add(pipeline.getSaveSafeName());				
+		}
+		nameParts.add(plotParameters.getDesignDescriptor());
+		nameParts.add(FIOUtils.getTimestamp());
+		return  StringUtils.join(nameParts, "_");
 	}
 
 	@Override

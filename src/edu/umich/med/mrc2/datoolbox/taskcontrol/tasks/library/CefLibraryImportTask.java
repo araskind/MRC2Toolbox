@@ -25,14 +25,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -53,21 +46,10 @@ public class CefLibraryImportTask extends CEFProcessingTask {
 	private DataAnalysisProject currentExperiment;
 	private DataPipeline dataPipeline;
 	private String plusRtMask;
-	private Matcher regexMatcher;
-	private Pattern plusRtPattern;
 	private ArrayList<MsFeature> unassigned;
-
-	private HashSet<String>knownTargetIds;
-	private HashSet<String>cpdDatabases;
-	private Map<String, HashMap<String, String>> targetIdMap;
 	private CompoundLibrary newLibrary;
-	private String libraryId;
-	private Map<String, MsFeatureIdentity> identityMap;
 	private boolean matchToFeatures;
 	private boolean generateLibraryFeatures;
-
-	//	Debug only
-	private Set<String>featureNames;
 
 	public CefLibraryImportTask(
 			DataPipeline dataPipeline,
@@ -78,24 +60,24 @@ public class CefLibraryImportTask extends CEFProcessingTask {
 		inputCefFile = inputFile;
 		this.dataPipeline = dataPipeline;
 		currentExperiment = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
-		taskDescription = "Importing library from  " + inputFile.getName();
-		total = 100;
-		processed = 0;
-		libraryId = "";
+
+
 		this.matchToFeatures = matchToFeatures;
 		this.generateLibraryFeatures = generateLibraryFeatures;
 
 		plusRtMask = "(\\d+.\\d+)@(\\d+.\\d+) [\\+\\-] (\\d+.\\d+)\\s*:*\\d*";
-		plusRtPattern = Pattern.compile(plusRtMask);
 
-		unmatchedAdducts = new TreeSet<String>();
-		unassigned = new ArrayList<MsFeature>();
-		identityMap =  new TreeMap<String, MsFeatureIdentity>();
-		unassigned = new ArrayList<MsFeature>();
+		unmatchedAdducts = new TreeSet<>();
+		unassigned = new ArrayList<>();
+		unassigned = new ArrayList<>();
 	}
 
 	@Override
 	public void run() {
+		
+		taskDescription = "Importing library from  " + inputCefFile.getName();
+		total = 100;
+		processed = 0;
 		
 		if(inputCefFile == null || !inputCefFile.exists()) {
 			errorMessage = "Library file not found";
@@ -103,15 +85,10 @@ public class CefLibraryImportTask extends CEFProcessingTask {
 			return;
 		}
 		setStatus(TaskStatus.PROCESSING);
-
-		if(currentExperiment.getCompoundLibraryForDataPipeline(dataPipeline) != null)
-			clearCurrentLibrary();
-		
 		newLibrary = 
 				new CompoundLibrary(FilenameUtils.getBaseName(inputCefFile.getPath()));
 		newLibrary.setDataPipeline(dataPipeline);
-		
-		try {
+				try {
 			parseInputCefFile(inputCefFile);
 		} catch (Exception e1) {
 			errorMessage = "Failed to parse library file";
@@ -129,31 +106,30 @@ public class CefLibraryImportTask extends CEFProcessingTask {
 			matchToFeatures();
 			collectUnassignedFeatures();
 		}
-		currentExperiment.setCompoundLibraryForDataPipeline(dataPipeline, newLibrary);
 		setStatus(TaskStatus.FINISHED);
 	}
 
-	private void clearCurrentLibrary() {
-
-		taskDescription = "Clearing old library data...";
-		total = 100;
-		processed = 10;
-		
-		if(dataPipeline == null)
-			return;
-		
-		if(currentExperiment.getMsFeaturesForDataPipeline(dataPipeline) == null ||
-				currentExperiment.getMsFeaturesForDataPipeline(dataPipeline).isEmpty())
-			return;
-
-		for (MsFeature cf : currentExperiment.getMsFeaturesForDataPipeline(dataPipeline)) {
-
-			cf.setSpectrum(null);
-			cf.setNeutralMass(0.0d);
-			cf.clearIdentification();
-			processed++;
-		}
-	}
+//	private void clearCurrentLibrary() {
+//
+//		taskDescription = "Clearing old library data...";
+//		total = 100;
+//		processed = 10;
+//		
+//		if(dataPipeline == null)
+//			return;
+//		
+//		if(currentExperiment.getMsFeaturesForDataPipeline(dataPipeline) == null ||
+//				currentExperiment.getMsFeaturesForDataPipeline(dataPipeline).isEmpty())
+//			return;
+//
+//		for (MsFeature cf : currentExperiment.getMsFeaturesForDataPipeline(dataPipeline)) {
+//
+//			cf.setSpectrum(null);
+//			cf.setNeutralMass(0.0d);
+//			cf.clearIdentification();
+//			processed++;
+//		}
+//	}
 	
 	private void matchToFeatures() {
 
