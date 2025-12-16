@@ -296,7 +296,7 @@ public class WizardWorklistPanel extends IDTrackerDataLoadWizardPanel
 			MainWindow.hideProgressDialog();
 	}
 
-	private void loadImportedWorklistForReview(LIMSWorklistImportTask task) {
+	private synchronized void loadImportedWorklistForReview(LIMSWorklistImportTask task) {
 
 		if(task.getWorklist() == null) {
 			MessageDialog.showErrorMsg("Error creating worklist,", this);

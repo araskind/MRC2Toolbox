@@ -314,11 +314,23 @@ public class ManualIntegrationWindow extends JFrame
 			((AbstractTask)e.getSource()).removeTaskListener(this);
 			
 //			if (e.getSource().getClass().equals(PeakReintegrationTaskNew.class)) {
-//				
-//				PeakReintegrationTaskNew task = (PeakReintegrationTaskNew)e.getSource();
-//				reintegratedChromatograms = task.getExtractedChromatograms();		
-//				peakIntegrationPlotPanel.updateReintegratedChromatograms(reintegratedChromatograms);
-//			}
+//				finalizePeakReintegrationTask((PeakReintegrationTaskNew)e.getSource());
 		}
 	}
+	
+//	private synchronized void finalizePeakReintegrationTask(PeakReintegrationTaskNew task){		
+//		PeakReintegrationTaskNew task = (PeakReintegrationTaskNew)e.getSource();
+//		reintegratedChromatograms = task.getExtractedChromatograms();		
+//		peakIntegrationPlotPanel.updateReintegratedChromatograms(reintegratedChromatograms);
+//	}
 }
+
+
+
+
+
+
+
+
+
+

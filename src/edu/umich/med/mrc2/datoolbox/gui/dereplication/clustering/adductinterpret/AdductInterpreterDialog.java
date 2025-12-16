@@ -530,7 +530,7 @@ public class AdductInterpreterDialog extends JDialog implements ActionListener, 
 			MainWindow.hideProgressDialog();
 	}
 	
-	private void finalizeAdductAssignmentTask(AdductAssignmentTask task) {
+	private synchronized void finalizeAdductAssignmentTask(AdductAssignmentTask task) {
 
 		currentCluster = task.getClusterSet().iterator().next();
 		adductInterpreterTable.setTableModelFromFeatureCluster(

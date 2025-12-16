@@ -223,7 +223,7 @@ public class FormulaGeneratorPanel extends JPanel implements ActionListener, Tas
 		}
 	}
 	
-	private void finalizeFormulaGeneratorTask(FormulaGeneratorTask task) {
+	private synchronized void finalizeFormulaGeneratorTask(FormulaGeneratorTask task) {
 		
 		IMolecularFormulaSet formulas = task.getFormulas();
 		double mz = Double.parseDouble(mzTextField.getText());

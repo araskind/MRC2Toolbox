@@ -954,7 +954,7 @@ public class CorrelationResultsPanel extends ClusterDisplayPanel implements Char
 		}
 	}
 	
-	private void finalizeClusterCorrelationMatrixTask() {
+	private synchronized void finalizeClusterCorrelationMatrixTask() {
 		
 		MessageDialog.showInfoMsg(
 				"Correlation matrixes for all clusters have been re-calculated", 
@@ -963,14 +963,14 @@ public class CorrelationResultsPanel extends ClusterDisplayPanel implements Char
 		resortTree();
 	}
 	
-	private void finalizeMassDifferenceOrAdductAssignmentTask() {
+	private synchronized void finalizeMassDifferenceOrAdductAssignmentTask() {
 		
 		MessageDialog.showInfoMsg("Mass differences has been analyzed");
 		clearClusterDataPanel();
 		resortTree();
 	}
 	
-	private void finalizeFeatureClusteringTask(FeatureClusteringTask task) {
+	private synchronized void finalizeFeatureClusteringTask(FeatureClusteringTask task) {
 		
 		if (!task.getFeatureClusters().isEmpty()) {
 
@@ -984,7 +984,7 @@ public class CorrelationResultsPanel extends ClusterDisplayPanel implements Char
 		}
 	}
 	
-	private void finalizeSlidingWindowClusteringTask(SlidingWindowClusteringTask task) {
+	private synchronized void finalizeSlidingWindowClusteringTask(SlidingWindowClusteringTask task) {
 		
 		if (!task.getFeatureClusters().isEmpty()) {
 
@@ -997,7 +997,7 @@ public class CorrelationResultsPanel extends ClusterDisplayPanel implements Char
 		}
 	}
 	
-	private void finalizeBinnerClustersImportTask(BinnerClustersImportTask task) {
+	private synchronized void finalizeBinnerClustersImportTask(BinnerClustersImportTask task) {
 
 		if (!task.getFeatureClusters().isEmpty()) {
 
@@ -1023,7 +1023,7 @@ public class CorrelationResultsPanel extends ClusterDisplayPanel implements Char
 		}
 	}
 	
-	private void finalizeBinnerProcessingTask(BinnerProcessingTask task) {
+	private synchronized void finalizeBinnerProcessingTask(BinnerProcessingTask task) {
 		// TODO Auto-generated method stub
 		MessageDialog.showInfoMsg(
 				"Binner Annotation finished.", 

@@ -97,7 +97,7 @@ public class SaveMetabolomicsProjectTask extends AbstractTask implements TaskLis
 	private void extractDatabaseReferences() {
 		taskDescription = "Collecting common database references ...";
 		processed = 10;	
-		List<MsFeatureIdentity> idList = new ArrayList<MsFeatureIdentity>();
+		List<MsFeatureIdentity> idList = new ArrayList<>();
 		for(DataPipeline dp : projectToSave.getDataPipelines()) {
 			
 			Set<MsFeature> dpFeatures = projectToSave.getMsFeaturesForDataPipeline(dp);

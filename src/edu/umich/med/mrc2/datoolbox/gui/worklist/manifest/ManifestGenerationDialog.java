@@ -428,7 +428,7 @@ public class ManifestGenerationDialog extends JDialog
 			MainWindow.hideProgressDialog();
 	}
 
-	private void finalizeWorklistExtraction(WorklistImportTask task) {
+	private synchronized void finalizeWorklistExtraction(WorklistImportTask task) {
 		
 		//	Add obligatory manifest fields based on design
 		DataAnalysisProject project = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();

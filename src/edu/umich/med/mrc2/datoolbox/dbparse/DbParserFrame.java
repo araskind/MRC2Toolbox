@@ -404,11 +404,9 @@ public class DbParserFrame extends JFrame
 		if (e.getStatus() == TaskStatus.FINISHED) {
 
 			((AbstractTask)e.getSource()).removeTaskListener(this);
+			
 			if(e.getSource().getClass().equals(HMDBParseAndUploadTask.class))
 				finalizeHMDBParseAndUploadTask((HMDBParseAndUploadTask)e.getSource());
-
-			unbindSystemStreams();
-			hideProgressDialog();
 		}		
 		if (e.getStatus() == TaskStatus.ERROR || e.getStatus() == TaskStatus.CANCELED) {
 			DbParserCore.getTaskController().getTaskQueue().clear();
@@ -417,9 +415,11 @@ public class DbParserFrame extends JFrame
 		}
 	}
 	
-	private void finalizeHMDBParseAndUploadTask(HMDBParseAndUploadTask source) {
+	private synchronized void finalizeHMDBParseAndUploadTask(HMDBParseAndUploadTask source) {
 		// TODO Auto-generated method stub
 		
+		unbindSystemStreams();
+		hideProgressDialog();
 	}
 
 	@Override

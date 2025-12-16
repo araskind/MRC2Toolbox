@@ -277,11 +277,17 @@ public class ExperimentalSample implements Comparable<ExperimentalSample>, Seria
 		nameIsValid = valid;
 	}
 
+	/**
+	 * This method assumes that Acquisition Method is already updated in the data files
+	 * @param oldMethod
+	 * @param newMethod
+	 */
 	public void replaceDataAcquisitionMethod(
 			DataAcquisitionMethod oldMethod, 
 			DataAcquisitionMethod newMethod) {
 		NavigableSet<DataFile> files = dataFilesMap.remove(oldMethod);
-		dataFilesMap.put(newMethod, files);
+		dataFilesMap.computeIfAbsent(newMethod, v -> new TreeSet<>());
+		dataFilesMap.get(newMethod).addAll(files);
 	}
 
 	/**

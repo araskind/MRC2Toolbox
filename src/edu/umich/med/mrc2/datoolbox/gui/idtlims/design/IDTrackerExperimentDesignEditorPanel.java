@@ -339,7 +339,7 @@ public class IDTrackerExperimentDesignEditorPanel extends JPanel
 		}
 	}
 	
-	private void finalizeIDTExperimentDesignPullTask(IDTExperimentDesignPullTask task) {
+	private synchronized void finalizeIDTExperimentDesignPullTask(IDTExperimentDesignPullTask task) {
 		
 		expDesignTable.clearTable();
 		experimentDesign = task.getDesign();

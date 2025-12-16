@@ -195,7 +195,6 @@ public class MgfPanel extends DockableMRC2ToolboxPanel implements TreeSelectionL
 
 			((AbstractTask)e.getSource()).removeTaskListener(this);
 
-			// MgfImportTask
 			if (e.getSource().getClass().equals(MgfImportTask.class))
 				finalizeMgfImportTask((MgfImportTask) e.getSource());
 		}
@@ -203,7 +202,7 @@ public class MgfPanel extends DockableMRC2ToolboxPanel implements TreeSelectionL
 			MainWindow.hideProgressDialog();
 	}
 	
-	private void finalizeMgfImportTask(MgfImportTask task) {
+	private synchronized void finalizeMgfImportTask(MgfImportTask task) {
 		
 		clearPanel();
 

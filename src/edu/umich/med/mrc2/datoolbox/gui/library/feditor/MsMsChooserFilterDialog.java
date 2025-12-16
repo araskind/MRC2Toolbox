@@ -279,18 +279,20 @@ public class MsMsChooserFilterDialog extends JDialog
 			((AbstractTask)e.getSource()).removeTaskListener(this);
 
 			if (e.getSource().getClass().equals(MSMSImportTask.class)) {
-
-				MSMSImportTask mit = (MSMSImportTask) e.getSource();
-				mit.removeTaskListener(this);
-
-				if(mit.getActiveMsMs() != null)
-					parentPanel.loadMsMsData(mit.getActiveMsMs());
-
-				this.dispose();
+				finalizeMSMSimport((MSMSImportTask) e.getSource());
 			}
 		}
 	}
 	
+	private synchronized void finalizeMSMSimport(MSMSImportTask mit) {
+		
+		if(mit.getActiveMsMs() != null)
+			parentPanel.loadMsMsData(mit.getActiveMsMs());
+
+		this.dispose();
+	}
+	
+	@Override
 	public void dispose() {
 		savePreferences();
 		super.dispose();

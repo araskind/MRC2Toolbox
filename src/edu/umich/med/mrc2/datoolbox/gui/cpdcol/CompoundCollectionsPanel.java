@@ -367,7 +367,7 @@ public class CompoundCollectionsPanel extends DockableMRC2ToolboxPanel {
 		}
 	}
 	
-	private void finalizeCompoundMultiplexesLoad(LoadCompoundMultiplexesTask task) {
+	private synchronized void finalizeCompoundMultiplexesLoad(LoadCompoundMultiplexesTask task) {
 		clearPanel();
 		Collection<CompoundMultiplexMixture> multiplexes = task.getMultiplexes();
 		loadCompoundMultiplexesData(multiplexes);
@@ -380,7 +380,7 @@ public class CompoundCollectionsPanel extends DockableMRC2ToolboxPanel {
 				setTableModelFromCompoundMultiplexMixtureCollection(multiplexes);
 	}
 	
-	private void finalizeMultiplexDataExportTask(MultiplexDataExportTask task) {
+	private synchronized void finalizeMultiplexDataExportTask(MultiplexDataExportTask task) {
 		
 		File results = task.getOutputFile();
 		if(results.exists()) {
@@ -400,7 +400,7 @@ public class CompoundCollectionsPanel extends DockableMRC2ToolboxPanel {
 		}
 	}
 
-	private void finalizeCompoundCollectionLoad(LoadCompoundCollectionTask task){
+	private synchronized void finalizeCompoundCollectionLoad(LoadCompoundCollectionTask task){
 		clearPanel();
 		CompoundCollection collection = task.getCollection();
 		loadCompoundCollectionData(collection);

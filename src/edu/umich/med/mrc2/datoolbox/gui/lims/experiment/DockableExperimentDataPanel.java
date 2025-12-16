@@ -199,7 +199,7 @@ public class DockableExperimentDataPanel  extends DefaultSingleCDockable
 		}
 	}
 	
-	private void finalizeExperimentDesignPullTask(ExperimentDesignPullTask task) {
+	private synchronized void finalizeExperimentDesignPullTask(ExperimentDesignPullTask task) {
 		
 		ExperimentDesign design = task.getDesign();
 		if(design != null)

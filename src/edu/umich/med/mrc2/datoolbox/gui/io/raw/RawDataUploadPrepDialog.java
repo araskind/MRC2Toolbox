@@ -303,7 +303,7 @@ public class RawDataUploadPrepDialog extends JDialog
 		}
 	}
 	
-	private void finalizeRawDataUploadPrepTask(RawDataUploadPrepTask task) {
+	private synchronized void finalizeRawDataUploadPrepTask(RawDataUploadPrepTask task) {
 		
 		MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
 		MainWindow.hideProgressDialog();

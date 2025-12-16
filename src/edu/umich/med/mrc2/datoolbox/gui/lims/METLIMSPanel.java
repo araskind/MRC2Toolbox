@@ -245,7 +245,7 @@ public class METLIMSPanel extends DockableMRC2ToolboxPanel {
 				showNewExperimentDialog(ProjectType.DATA_ANALYSIS_NEW_FORMAT, activeExperiment);
 	}
 
-	public void refreshLimsData() {
+	public synchronized void refreshLimsData() {
 
 		LimsDataPullTask lpt = new LimsDataPullTask();
 		lpt.addTaskListener(this);
@@ -262,16 +262,15 @@ public class METLIMSPanel extends DockableMRC2ToolboxPanel {
 			if (e.getSource().getClass().equals(LimsDataPullTask.class))
 				finalizeLimsDataPullTask((LimsDataPullTask)e.getSource());
 				
-//			if(e.getSource().getClass().equals(MetLimsToMrc2limsDataTransferTask.class)) {
+//			if(e.getSource().getClass().equals(MetLimsToMrc2limsDataTransferTask.class))
 //				refreshLimsData();
-//			}
-			if(e.getSource().getClass().equals(MetLimsToIDtrackerCrossDbUpdateTask.class)) {
-				refreshLimsData();
-			}			
+
+			if(e.getSource().getClass().equals(MetLimsToIDtrackerCrossDbUpdateTask.class))
+				refreshLimsData();					
 		}
 	}
 	
-	private void finalizeLimsDataPullTask(LimsDataPullTask task) {
+	private synchronized void finalizeLimsDataPullTask(LimsDataPullTask task) {
 		
 		clearPanel();
 		experimentDataPanel.loadExperimentList(LIMSDataCache.getExperiments());				

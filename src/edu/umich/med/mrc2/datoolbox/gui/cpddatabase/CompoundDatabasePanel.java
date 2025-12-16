@@ -885,7 +885,7 @@ public class CompoundDatabasePanel extends DockableMRC2ToolboxPanel implements L
 		}
 	}
 
-	private void showImportedCompounds(PubChemDataFetchTask importTask) {
+	private synchronized void showImportedCompounds(PubChemDataFetchTask importTask) {
 
 		if(!importTask.getFetchLog().isEmpty()) {
 			InformationDialog id = new InformationDialog(
@@ -903,7 +903,7 @@ public class CompoundDatabasePanel extends DockableMRC2ToolboxPanel implements L
 		addPubchemCompoundsDialog.dispose();
 	}
 
-	private void showSearchResults(SearchCompoundDatabaseTask searchTask) {
+	private synchronized void showSearchResults(SearchCompoundDatabaseTask searchTask) {
 
 		loadCompoundDataByReference(searchTask.getCompoundList());		
 //		if (searchTask.getCompoundList().isEmpty())

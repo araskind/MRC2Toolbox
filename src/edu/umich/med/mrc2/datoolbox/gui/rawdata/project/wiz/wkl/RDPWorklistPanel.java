@@ -459,7 +459,7 @@ public class RDPWorklistPanel extends RDPMetadataWizardPanel
 			MainWindow.hideProgressDialog();
 	}
 
-	private void loadImportedWorklistForReview(LIMSWorklistImportTask task) {
+	private synchronized void loadImportedWorklistForReview(LIMSWorklistImportTask task) {
 
 		if(task.getWorklist() == null) {
 			MessageDialog.showErrorMsg(

@@ -74,7 +74,7 @@ public class LIMSExperiment implements Serializable, Comparable<LIMSExperiment>,
 		this.notes = notes;
 		this.serviceRequestId = serviceRequestId;
 		this.startDate = startDate;
-		samplePreps = new TreeSet<LIMSSamplePreparation>();
+		samplePreps = new TreeSet<>();
 	}
 
 	public LIMSExperiment(
@@ -88,7 +88,7 @@ public class LIMSExperiment implements Serializable, Comparable<LIMSExperiment>,
 		this.description = description;
 		this.notes = notes;
 		this.project = parentProject;
-		samplePreps = new TreeSet<LIMSSamplePreparation>();
+		samplePreps = new TreeSet<>();
 	}
 	
 	public LIMSExperiment(LIMSExperiment experimentToCopy) {
@@ -102,7 +102,7 @@ public class LIMSExperiment implements Serializable, Comparable<LIMSExperiment>,
 		this.startDate = experimentToCopy.getStartDate();
 		this.creator = experimentToCopy.getCreator();		
 		this.project = experimentToCopy.getProject();
-		samplePreps = new TreeSet<LIMSSamplePreparation>();
+		samplePreps = new TreeSet<>();
 		for(LIMSSamplePreparation prep : experimentToCopy.getSamplePreps()) {
 			
 			LIMSSamplePreparation prepCopy = new LIMSSamplePreparation (prep);

@@ -165,13 +165,13 @@ public class QCPanel extends DockableMRC2ToolboxPanel {
 			MainWindow.hideProgressDialog();
 	}
 
-	private void showDataSetStatistics(DataSetStatisticsTask dssTask) {
+	private synchronized void showDataSetStatistics(DataSetStatisticsTask dssTask) {
 
 		dataSetStatsTable.loadDataSetStats(dssTask.getStatsList());
 		twoDQCpanel.loadDataSetStats(dssTask.getStatsList());
 	}
 
-	private void showPCAResults(PCATask dssTask) {
+	private synchronized void showPCAResults(PCATask dssTask) {
 
 //		threeDpanel.showPca(
 //				dssTask.getProjection(), 

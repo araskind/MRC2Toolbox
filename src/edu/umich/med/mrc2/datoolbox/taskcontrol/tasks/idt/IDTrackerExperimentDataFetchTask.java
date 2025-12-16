@@ -61,8 +61,7 @@ public class IDTrackerExperimentDataFetchTask extends IDTMSMSFeatureSearchTask {
 	public IDTrackerExperimentDataFetchTask(LIMSExperiment idTrackerExperiment) {
 		super();
 		this.idTrackerExperiment = idTrackerExperiment;
-		featureSetataExtractionMethodMap =
-				new TreeMap<DataExtractionMethod,Collection<MsFeature>>();
+		featureSetataExtractionMethodMap = new TreeMap<>();
 	}
 
 	@Override

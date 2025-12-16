@@ -491,7 +491,7 @@ public class DockableMSMSClusterDataSetsManager extends DefaultSingleCDockable i
 		}
 	}
 
-	private void finalizeMSMSClusterDataSetUploadTask(MSMSClusterDataSetUploadTask task) {
+	private synchronized void finalizeMSMSClusterDataSetUploadTask(MSMSClusterDataSetUploadTask task) {
 
 		IMSMSClusterDataSet newDataSet = task.getDataSet();
 		if(msmsClusterDataSetEditorDialog.loadMSMSClusterDataSetIntoWorkBench()) {

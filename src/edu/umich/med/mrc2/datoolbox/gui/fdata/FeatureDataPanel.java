@@ -1576,7 +1576,7 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 		}
 	}
 
-	private void resetFeatureTable() {
+	private synchronized void resetFeatureTable() {
 		
 		if(currentExperiment == null || activeDataPipeline == null) {
 			clearPanel();
@@ -1855,7 +1855,7 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 		}
 	}
 	
-	private void finalizeMZDeltaAnalysisTask(MZDeltaAnalysisTask task) {
+	private synchronized void finalizeMZDeltaAnalysisTask(MZDeltaAnalysisTask task) {
 
 		MsFeatureClusterSet mzDeltaAnalysisClusterDataSet = 
 				new MsFeatureClusterSet("M/Z delta analysis results - " 
@@ -1869,7 +1869,7 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 		dip.loadFeatureClusterSet(mzDeltaAnalysisClusterDataSet);
 	}
 
-	private void finalizeMsFeatureAveragingTask(MsFeatureAveragingTask task) {
+	private synchronized void finalizeMsFeatureAveragingTask(MsFeatureAveragingTask task) {
 
 		CompoundLibrary averagedLibrary = task.getAveragedFeaturesLibrary();
 		if(averagedLibrary != null) {
@@ -1885,7 +1885,7 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 	}
 
 	//	TODO Calculate statistics and save the data
-	private void finalizeProFinderArchivePreprocessingTask(ProFinderArchivePreprocessingTask task) {
+	private synchronized void finalizeProFinderArchivePreprocessingTask(ProFinderArchivePreprocessingTask task) {
 
 		DataPipeline dataPipeline = task.getDataPipeline();
 		List<DataFile> filesWithoutTimestamp = 
@@ -1923,13 +1923,13 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 //		MRC2ToolBoxCore.getTaskController().addTask(statsTask);
 //	}
 	
-	private void finalizeImputeMissingDataTask(ImputeMissingDataTask task) {
+	private synchronized void finalizeImputeMissingDataTask(ImputeMissingDataTask task) {
 
 		String mName = task.getImputationMethod().getName();
 		MessageDialog.showInfoMsg("Data were imputed using " + mName + " method");
 	}
 
-	private void finalizeBinnerAnnotationsImportTask(ImportBinnerAnnotationsForUntargetedDataTask task) {
+	private synchronized void finalizeBinnerAnnotationsImportTask(ImportBinnerAnnotationsForUntargetedDataTask task) {
 		
 		Collection<BinnerAnnotation>unassignedAnnotations = task.getUnassignedAnnotations();
 		if(unassignedAnnotations.isEmpty()) {
@@ -1952,14 +1952,14 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 		resetFeatureTable();
 	}
 
-	private void finalizePeakQualityImportTask(MiltiCefPeakQualityImportTask source) {
+	private synchronized void finalizePeakQualityImportTask(MiltiCefPeakQualityImportTask source) {
 		
 		MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
 		MainWindow.hideProgressDialog();
 		MessageDialog.showInfoMsg("Peak quality data import completed", this.getContentPane());
 	}
 
-	private void finalizeMzFrequencyAnalysisTask(MzFrequencyAnalysisTask task) {
+	private synchronized void finalizeMzFrequencyAnalysisTask(MzFrequencyAnalysisTask task) {
 	
 		Collection<MzFrequencyObject>mzFrequencyObjects = task.getMzFrequencyObjects();
 		String binningParameter = 
@@ -1973,7 +1973,7 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 		resultsDialog.setVisible(true);
 	}
 
-	private void finalizeDuplicateNameSearch(FindDuplicateNamesTask task) {
+	private synchronized void finalizeDuplicateNameSearch(FindDuplicateNamesTask task) {
 
 		if(task.getDuplicateNameList().isEmpty()) {
 			MessageDialog.showInfoMsg(
@@ -1993,7 +1993,7 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 		id.setVisible(true);
 	}
 	
-	private void finalizeQuantDataLoad(QuantMatrixImportTask quantMatrixImportTask) {
+	private synchronized void finalizeQuantDataLoad(QuantMatrixImportTask quantMatrixImportTask) {
 
 		DataPipeline dataPipeline = quantMatrixImportTask.getDataPipeline();
 		currentExperiment.addDataPipeline(dataPipeline);
@@ -2026,7 +2026,7 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 		}
 	}
 
-	private void finalizeMultiCefDataLoad(MultiCefImportTask multiCefImportTask) {
+	private synchronized void finalizeMultiCefDataLoad(MultiCefImportTask multiCefImportTask) {
 		
 		MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
 		MainWindow.hideProgressDialog();
@@ -2041,7 +2041,7 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 		MRC2ToolBoxCore.getTaskController().addTask(task);
 	}
 	
-	private void finalizeMultiCefDataAddition(MultiCefDataAddTask task) {
+	private synchronized void finalizeMultiCefDataAddition(MultiCefDataAddTask task) {
 
 //		MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
 //		MainWindow.hideProgressDialog();
@@ -2061,7 +2061,7 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 //		MRC2ToolBoxCore.getTaskController().addTask(statsTask);
 	}
 
-	private void finalizeEmptyFeatureCleanup(RemoveEmptyFeaturesTask task) {
+	private synchronized void finalizeEmptyFeatureCleanup(RemoveEmptyFeaturesTask task) {
 		
 		MRC2ToolBoxCore.getMainWindow().switchPanelForDataPipeline(task.getDataPipeline(), PanelList.FEATURE_DATA);
 		resetFeatureTable();
@@ -2070,7 +2070,7 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 		MRC2ToolBoxCore.getTaskController().addTask(spTask);
 	}
 	
-	private void finalizeDatabaseLibraryLoad(LoadDatabaseLibraryTask task) {
+	private synchronized void finalizeDatabaseLibraryLoad(LoadDatabaseLibraryTask task) {
 
 		MRC2ToolBoxCore.getActiveMsLibraries().add(task.getLibrary());
 		loadedLibsCount = loadedLibsCount + 1;
@@ -2114,7 +2114,7 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 		}
 	}
 
-	private void reviewLibrarySearchResults(LibrarySearchTask lst) {
+	private synchronized void reviewLibrarySearchResults(LibrarySearchTask lst) {
 		
 		MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
 		MainWindow.hideProgressDialog();

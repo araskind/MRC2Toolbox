@@ -452,7 +452,7 @@ public class DockableWorklistManagerPanel extends AbstractIDTrackerLimsPanel imp
 			MainWindow.hideProgressDialog();
 	}
 
-	private void loadImportedWorklistForReview(LIMSWorklistImportTask task) {
+	private synchronized void loadImportedWorklistForReview(LIMSWorklistImportTask task) {
 
 		if(!task.getMissingMethods().isEmpty()) {
 

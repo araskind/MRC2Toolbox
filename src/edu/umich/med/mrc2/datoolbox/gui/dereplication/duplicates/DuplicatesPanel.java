@@ -357,7 +357,7 @@ public class DuplicatesPanel extends ClusterDisplayPanel {
 		}
 	}
 
-	private void finalizeDuplicateNameSearch(FindDuplicateNamesTask task) {
+	private synchronized void finalizeDuplicateNameSearch(FindDuplicateNamesTask task) {
 
 		if(task.getDuplicateNameList().isEmpty()) {
 			MessageDialog.showInfoMsg(
@@ -377,7 +377,7 @@ public class DuplicatesPanel extends ClusterDisplayPanel {
 		id.setVisible(true);
 	}
 
-	private void showDuplicateFeatureClusters(FindDuplicateFeaturesTask fdt) {
+	private synchronized void showDuplicateFeatureClusters(FindDuplicateFeaturesTask fdt) {
 
 		Collection<MsFeatureCluster> duplicates = fdt.getDuplicateList();
 		if (!duplicates.isEmpty()) {
@@ -393,7 +393,7 @@ public class DuplicatesPanel extends ClusterDisplayPanel {
 		}
 	}
 
-	private void finalizeDuplicatesMerge() {
+	private synchronized void finalizeDuplicatesMerge() {
 		
 		MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
 		MainWindow.hideProgressDialog();

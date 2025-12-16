@@ -56,6 +56,7 @@ import edu.umich.med.mrc2.datoolbox.data.ExperimentPointer;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundleCollection;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.data.msclust.IMSMSClusterDataSet;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.project.Project;
 import edu.umich.med.mrc2.datoolbox.project.ProjectType;
 import edu.umich.med.mrc2.datoolbox.utils.ProjectUtils;
@@ -142,7 +143,15 @@ public class RecentDataManager {
 			if(ep != null && ep.getProjectType() != null) {
 				
 				recentExperimentsMap.computeIfAbsent(ep.getProjectType(), v -> new LinkedList<>());
-				recentExperimentsMap.get(ep.getProjectType()).add(ep);
+				if(ep.getProjectType().equals(ProjectType.ID_TRACKER_DATA_ANALYSIS)) {
+					
+					if(IDTDataCache.getExperimentById(ep.getId()) != null)
+						recentExperimentsMap.get(ep.getProjectType()).add(ep);					
+				}
+				else {
+					if(ep.getExperimentFile().exists())
+						recentExperimentsMap.get(ep.getProjectType()).add(ep);
+				}			
 			}
 		}	
 		addFeatureCollection(FeatureCollectionManager.msmsSearchResults);
@@ -201,19 +210,46 @@ public class RecentDataManager {
 		recentExperimentsMap.computeIfAbsent(toAdd.getProjectType(), v -> new LinkedList<>());		
 		LinkedList<ExperimentPointer> projectsOfType = 
 				recentExperimentsMap.get(toAdd.getProjectType());
-		
-		ExperimentPointer newPointer = new ExperimentPointer(toAdd);
-		
-		if(projectsOfType.contains(newPointer))
-			return;
-		
-		if(projectsOfType.size() == MAX_OBJECTS_COUNT)
-			projectsOfType.removeLast();
 
-		projectsOfType.addFirst(newPointer);		
-		MRC2ToolBoxCore.getMainWindow().updateGuiWithRecentData();
+		boolean addToList = true;
+		ExperimentPointer newPointer = new ExperimentPointer(toAdd);
+		int position = -1;
+		if(toAdd.getProjectType().equals(ProjectType.ID_TRACKER_DATA_ANALYSIS)){
+			
+			position = projectsOfType.indexOf(newPointer);
+			if(position >= 0) {
+				projectsOfType.set(position, newPointer);
+				addToList = false;
+			}
+			else
+				addToList = true;
+		}
+		else {			
+			String projectFilePath = toAdd.getExperimentFile().getAbsolutePath();
+			ExperimentPointer existing = projectsOfType.stream().
+					filter(p -> p.getExperimentFile().getAbsolutePath().equals(projectFilePath)).
+					findFirst().orElse(null);
+			if(existing != null) {
+				
+				position = projectsOfType.indexOf(existing);
+				if(position >= 0) {
+					projectsOfType.set(position, newPointer);
+					addToList = false;
+				}
+				else
+					addToList = true;
+			}
+		}
+		if(addToList) {
+			
+			if(projectsOfType.size() == MAX_OBJECTS_COUNT)
+				projectsOfType.removeLast();
+			
+			projectsOfType.addFirst(newPointer);		
+			MRC2ToolBoxCore.getMainWindow().updateGuiWithRecentData();
+		}
 	}
-	
+
 	public static void addIDTrackerExperiment(LIMSExperiment limsExperiment) {
 		
 		recentExperimentsMap.computeIfAbsent(ProjectType.ID_TRACKER_DATA_ANALYSIS, v -> new LinkedList<>());
@@ -222,6 +258,8 @@ public class RecentDataManager {
 				recentExperimentsMap.get(ProjectType.ID_TRACKER_DATA_ANALYSIS);
 
 		ExperimentPointer newPointer = new ExperimentPointer(limsExperiment);
+		if(projectsOfType.contains(newPointer))
+			return;
 		
 		if(projectsOfType.size() == MAX_OBJECTS_COUNT)
 			projectsOfType.removeLast();	

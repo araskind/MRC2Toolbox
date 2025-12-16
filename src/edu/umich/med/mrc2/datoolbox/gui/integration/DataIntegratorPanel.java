@@ -590,7 +590,7 @@ public class DataIntegratorPanel extends ClusterDisplayPanel {
 		}
 	}
 	
-	private void finalizeCreateMergedFeaturesTask(CreateMergedFeaturesTask task) {
+	private synchronized void finalizeCreateMergedFeaturesTask(CreateMergedFeaturesTask task) {
 
 		Collection<MsFeatureCluster> updated = task.getUpdatedFeatureClusters();
 		if(!updated.isEmpty())
@@ -599,7 +599,7 @@ public class DataIntegratorPanel extends ClusterDisplayPanel {
 			MessageDialog.showWarningMsg("No features merged", this.getContentPane());		
 	}
 
-	private void finalizeDataPipelineAlignmentTask(DataPipelineAlignmentTask task) {
+	private synchronized void finalizeDataPipelineAlignmentTask(DataPipelineAlignmentTask task) {
 		
 		DataPipelineAlignmentResults res = task.getAlignmentResults();
 		res.setActive(true);

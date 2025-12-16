@@ -418,7 +418,7 @@ public class ManualIdentificationDialog extends JDialog
 		}
 	}
 	
-	private void showSearchResults(SearchCompoundDatabaseTask searchTask) {
+	private synchronized void showSearchResults(SearchCompoundDatabaseTask searchTask) {
 
 		clearResults();
 		if (searchTask.getCompoundList().isEmpty())

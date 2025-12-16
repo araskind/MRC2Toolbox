@@ -698,54 +698,20 @@ public class DataAnalysisProject extends Project {
 		return false;
 	}
 
-	public void replaceAssayMethod(DataPipeline oldPipeline, DataPipeline newPipeline) {
+	public void replaceAcquisitionMethod(
+			DataAcquisitionMethod oldMethod, 
+			DataAcquisitionMethod newMethod) {
 
-		//	Update assay references in data files
-		DataAcquisitionMethod oldMethod = oldPipeline.getAcquisitionMethod();
-		DataAcquisitionMethod newMethod = newPipeline.getAcquisitionMethod();
-		dataFileMap.get(oldMethod).stream().
-			forEach(f -> f.setDataAcquisitionMethod(newMethod));
+		Set<DataFile> oldMethodFiles = dataFileMap.remove(oldMethod);
+		oldMethodFiles.stream().forEach(f -> f.setDataAcquisitionMethod(newMethod));
+		dataFileMap.computeIfAbsent(newMethod, v -> new TreeSet<>());		
+		dataFileMap.get(newMethod).addAll(oldMethodFiles);
 
-		//	Replace method in design
 		experimentDesign.getSamples().stream().
 			forEach(es -> es.replaceDataAcquisitionMethod(oldMethod, newMethod));
 
-		// Update all maps with method key
-		dataPipelines.remove(oldPipeline);
-		dataPipelines.add(newPipeline);
-
-		if(activeDataPipeline.equals(oldPipeline))
-				activeDataPipeline = newPipeline;
-		
-		CompoundLibrary avgLib = averagedFeatureMap.remove(oldPipeline);
-		averagedFeatureMap.put(newPipeline, avgLib);
-
-		Set<MsFeature>features = featureMap.remove(oldPipeline);
-		featureMap.put(newPipeline, features);
-
-		Matrix dataMatrix = dataMatrixMap.remove(oldPipeline);
-		dataMatrixMap.put(newPipeline, dataMatrix);
-
-		Matrix imputedMatrix = imputedDataMatrixMap.remove(oldPipeline);
-		imputedDataMatrixMap.put(newPipeline, imputedMatrix);
-
-		Matrix corrMatrix = corrMatrixMap.remove(oldPipeline);
-		corrMatrixMap.put(newPipeline, corrMatrix);
-
-		Set<MsFeatureCluster> duplicates = duplicatesMap.remove(oldPipeline);
-		duplicatesMap.put(newPipeline, duplicates);
-
-		Set<MsFeatureCluster> clusters = correlationClusterMap.remove(oldPipeline);
-		correlationClusterMap.put(newPipeline, clusters);
-
 		Worklist wklist = worklistMap.remove(oldMethod);
 		worklistMap.put(newMethod, wklist);
-
-		Set<DataFile> fileSet = dataFileMap.remove(oldMethod);
-		dataFileMap.put(newMethod, fileSet);
-		
-		Set<MsFeatureSet> featureSets = featureSetMap.remove(oldPipeline);
-		featureSetMap.put(newPipeline, featureSets);
 	}
 
 	public boolean isDataAcquisitionMultiBatch(DataAcquisitionMethod method) {
@@ -759,7 +725,6 @@ public class DataAnalysisProject extends Project {
 		return dataFileMap.get(method).stream().
 				mapToInt(f -> f.getBatchNumber()).distinct().sorted().toArray();
 	}
-
 
 	public Set<MsFeatureClusterSet>getFeatureClusterSets(){
 		

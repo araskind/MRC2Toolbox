@@ -398,6 +398,9 @@ public class ExperimentDetailsPanel extends DockableMRC2ToolboxPanel {
 				filter(p -> !p.equals(selectedPipeline)).
 				collect(Collectors.toSet());
 		
+		//	Check for same combination of acquisition and data analysis methods 
+		//	and / or another pipeline with the same name
+		//	TODO Handle same Acquisition Method but different data analysis (see below)
 		if(!otherPipelines.isEmpty()) {
 			
 			DataPipeline conflictingPipeline = otherPipelines.stream().
@@ -413,8 +416,33 @@ public class ExperimentDetailsPanel extends DockableMRC2ToolboxPanel {
 						"and data extraction method \"" + conflictingPipeline.getDataExtractionMethod().getName() + "\"", 
 				this.getContentPane());
 				return;
-			}
+			}		
 		}
+		//	TODO This is part of a more general problem of handling same data files analyzed with different methods.
+		//	Probably easiest way is to enforce the same set of data files acquired using the same instrument method 
+		//	for every data analysis method
+		//	
+		//	Check if more than one pipeline uses the same acquisition method as "old" one
+		//		List<DataPipeline>sameAcqMethodPipelines =  currentExperiment.getDataPipelines().stream().
+		//			filter(p -> p.getAcquisitionMethod().equals(selectedPipeline.getAcquisitionMethod())).
+		//			collect(Collectors.toList());
+		//		if(sameAcqMethodPipelines.size() > 1) {
+		//			
+		//			sameAcqMethodPipelines.str
+		//			//String pipelineList 
+		//			
+		//			String message = "M";
+		//			int res = MessageDialog.showChoiceWithWarningMsg(
+		//					message, this.getContentPane());
+		//		}
+		
+		if(!selectedPipeline.getAcquisitionMethod().equals(modifiedPipeline.getAcquisitionMethod())) {
+			
+			currentExperiment.replaceAcquisitionMethod(
+					selectedPipeline.getAcquisitionMethod(), 
+					modifiedPipeline.getAcquisitionMethod());
+		}
+		
 		ProjectUtils.renameAllPipelineFiles(
 				MRC2ToolBoxCore.getActiveMetabolomicsExperiment(), 
 				selectedPipeline.getName(), 
@@ -483,10 +511,7 @@ public class ExperimentDetailsPanel extends DockableMRC2ToolboxPanel {
 
 			try {
 				currentExperiment.deleteDataPipeline(toRemove);
-				activeDataPipeline = currentExperiment.getActiveDataPipeline();
-				MRC2ToolBoxCore.getMainWindow().switchDataPipeline(currentExperiment, activeDataPipeline);
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			return null;
@@ -495,6 +520,8 @@ public class ExperimentDetailsPanel extends DockableMRC2ToolboxPanel {
 		@Override
 		public void done() {
 			super.done();
+			activeDataPipeline = currentExperiment.getActiveDataPipeline();
+			MRC2ToolBoxCore.getMainWindow().switchDataPipeline(currentExperiment, activeDataPipeline);
 			MRC2ToolBoxCore.getMainWindow().saveExperimentAndContinue();
 		}
 	}

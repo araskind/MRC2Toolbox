@@ -323,7 +323,7 @@ public class MoTrPACDataTrackingPanel extends DockableMRC2ToolboxPanel implement
 		}
 	}
 	
-	private void finalizeMotrpacLimsDataPullTask(MotrpacLimsDataPullTask task) {
+	private synchronized void finalizeMotrpacLimsDataPullTask(MotrpacLimsDataPullTask task) {
 		
 		refreshPanels();
 		limsDataLoaded = true;

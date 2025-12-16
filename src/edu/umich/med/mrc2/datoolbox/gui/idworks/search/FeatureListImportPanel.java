@@ -220,7 +220,7 @@ public class FeatureListImportPanel extends JPanel implements ActionListener, Ta
 		}		
 	}
 
-	private void finalizeCefImportTask(ImportMinimalMSOneFeaturesFromCefTask task) {
+	private synchronized void finalizeCefImportTask(ImportMinimalMSOneFeaturesFromCefTask task) {
 
 		Collection<MinimalMSOneFeature>features = task.getMinFeatures(); 
 		if(features != null)

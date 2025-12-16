@@ -3837,21 +3837,20 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		}
 	}
 	
-	private void finalizeNISTMsSearchTask(NISTMsSearchTask task) {
+	private synchronized void finalizeNISTMsSearchTask(NISTMsSearchTask task) {
 		
 		File results = task.getResultsFile();
 		MessageDialog.showInfoMsg("Results are in " + 
 				results.getAbsolutePath(), this.getContentPane());		
 	}
 
-	private void finalizeSearchMSMSfeaturesByCompoundIdentifiersTask(
+	private synchronized void finalizeSearchMSMSfeaturesByCompoundIdentifiersTask(
 			SearchMSMSfeaturesByCompoundIdentifiersTask task) {
 		
 		if(task.getSelectedFeatures() == null || task.getSelectedFeatures().isEmpty()) {
 			activeFeatureCollection = null;
 			StatusBar.setActiveFeatureCollection(activeFeatureCollection);
 			MessageDialog.showWarningMsg("No features found!", this.getContentPane());
-			return;
 		}
 		else {
 			activeFeatureCollection = new MsFeatureInfoBundleCollection(
@@ -3862,7 +3861,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		}
 	}
 
-	private void finalizeFeatureVsFeatureMSMSSearchTask(FeatureVsFeatureMSMSSearchTask task) {
+	private synchronized void finalizeFeatureVsFeatureMSMSSearchTask(FeatureVsFeatureMSMSSearchTask task) {
 
 		IMSMSClusterDataSet featureVsFeatureSearchResults = task.getSearchResults();
 		if(featureVsFeatureSearchResults == null 
@@ -3884,7 +3883,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
     	idp.setVisible(true);
 	}
 	
-	private void finalizeMzFrequencyAnalysisTask(MzFrequencyAnalysisTask task) {
+	private synchronized void finalizeMzFrequencyAnalysisTask(MzFrequencyAnalysisTask task) {
 
 		Collection<MzFrequencyObject>mzFrequencyObjects = task.getMzFrequencyObjects();
 		String binningParameter = 
@@ -3897,7 +3896,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		mzFrequencyAnalysisResultsDialog.setVisible(true);
 	}
 
-	private void finalizeIdTrackerExperimentLoad(IDTrackerExperimentDataFetchTask task) {
+	private synchronized void finalizeIdTrackerExperimentLoad(IDTrackerExperimentDataFetchTask task) {
 
 		LIMSExperiment experiment = task.getIdTrackerExperiment();
 		RecentDataManager.addIDTrackerExperiment(experiment);		
@@ -3915,7 +3914,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		StatusBar.setActiveFeatureCollection(activeFeatureCollection);
 	}
 
-	private void finalizeIDTrackerMSMSClusterDataExportTask(IDTrackerMSMSClusterDataExportTask task) {
+	private synchronized void finalizeIDTrackerMSMSClusterDataExportTask(IDTrackerMSMSClusterDataExportTask task) {
 
 		File results = task.getOutputFile();
 		if(results.exists()) {
@@ -3932,23 +3931,23 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		}	
 	}
 
-	private void finalizeMSMSClusterDataSetUploadTask(MSMSClusterDataSetUploadTask task) {
+	private synchronized void finalizeMSMSClusterDataSetUploadTask(MSMSClusterDataSetUploadTask task) {
 
 		loadMSMSClusterDataSetInGUI(task.getDataSet());
 		MessageDialog.showInfoMsg("MSMS cluster data set \"" + task.getDataSet().getName() + 
 				"\" was saved to the database", this.getContentPane());		
 	}
 
-	private void finalizeIDTMSMSClusterDataPullTask(IDTMSMSClusterDataPullTask source) {
+	private synchronized void finalizeIDTMSMSClusterDataPullTask(IDTMSMSClusterDataPullTask source) {
 		loadMSMSClusterDataSetInGUI(source.getDataSet());
 	}
 	
 	
-	private void finalizeBinnerAnnotationLookupTask(BinnerAnnotationLookupTask source) {
+	private synchronized void finalizeBinnerAnnotationLookupTask(BinnerAnnotationLookupTask source) {
 		loadMSMSClusterDataSetInGUI(source.getMSMSClusterDataSet());
 	}
 
-	private void finalizeMSMSFeatureClusteringTask(MSMSFeatureClusteringTask source) {
+	private synchronized void finalizeMSMSFeatureClusteringTask(MSMSFeatureClusteringTask source) {
 		
 		if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() != null)
 			MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment().
@@ -4001,7 +4000,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		}
 	}
 
-	private void finalizeSpectrumEntropyRecalculation() {
+	private synchronized void finalizeSpectrumEntropyRecalculation() {
 		
 		MSFeatureInfoBundle selected = msTwoFeatureTable.getSelectedBundle();
 		reloadActiveMSMSFeatureCollection();			
@@ -4009,7 +4008,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			msTwoFeatureTable.selectBundle(selected);
 	}
 
-	private void finalizeDefaultMSMSLibraryHitReassignmentTask(
+	private synchronized void finalizeDefaultMSMSLibraryHitReassignmentTask(
 			DefaultMSMSLibraryHitReassignmentTask source) {
 
 		MSFeatureInfoBundle selected = msTwoFeatureTable.getSelectedBundle();
@@ -4018,7 +4017,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			msTwoFeatureTable.selectBundle(selected);
 	}
 
-	private void finalizePercolatorFDREstimationTask(PercolatorFDREstimationTask task) {		
+	private synchronized void finalizePercolatorFDREstimationTask(PercolatorFDREstimationTask task) {		
 		
 		MainWindow.hideProgressDialog();
 		if(!task.getMessageLog().isEmpty()) {
@@ -4028,7 +4027,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		reloadActiveMSMSFeatureCollection();
 	}
 
-	private void finalizeIDTMSMSFeatureDataPullTask(IDTMSMSFeatureDataPullTask task) {
+	private synchronized void finalizeIDTMSMSFeatureDataPullTask(IDTMSMSFeatureDataPullTask task) {
 		
 		if(task.getParentCollection() != null) {
 			activeFeatureCollection = task.getParentCollection();
@@ -4044,7 +4043,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		activeCluster = null;
 	}
 	
-	private void finalizeIDTMSMSFeatureDataPullWithFilteringTask(
+	private synchronized void finalizeIDTMSMSFeatureDataPullWithFilteringTask(
 			IDTMSMSFeatureDataPullWithFilteringTask task) {
 		
 		if(task.getMsmsClusterDataSet() != null)
@@ -4063,7 +4062,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		}
 	}
 
-	private void finalizeCromatogramExtractionTask(ChromatogramExtractionTask task) {
+	private synchronized void finalizeCromatogramExtractionTask(ChromatogramExtractionTask task) {
 	
 		((RawDataExaminerPanel)MRC2ToolBoxCore.getMainWindow().
 				getPanel(PanelList.RAW_DATA_EXAMINER)).finalizeChromatogramExtraction(task);
@@ -4072,7 +4071,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		MainWindow.hideProgressDialog();	
 	}
 
-	private void finalizeRawDataLoadTask(RawDataLoadForInjectionsTask task) {
+	private synchronized void finalizeRawDataLoadTask(RawDataLoadForInjectionsTask task) {
 		
 		Collection<DataFile> missingFiles = task.getMissingRawFiles();
 		if(!missingFiles.isEmpty()) {
@@ -4089,7 +4088,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		MRC2ToolBoxCore.getMainWindow().showPanel(PanelList.RAW_DATA_EXAMINER);
 	}
 
-	private void finalizeIDTrackerExportTask(IDTrackerDataExportTask task) {
+	private synchronized void finalizeIDTrackerExportTask(IDTrackerDataExportTask task) {
 
 		File results = task.getOutputFile();
 		if(results.exists()) {
@@ -4106,7 +4105,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		}	
 	}
 
-	private void finalizeNISTMspepSearchRoundTripTask(NISTMsPepSearchRoundTripTask task) {
+	private synchronized void finalizeNISTMspepSearchRoundTripTask(NISTMsPepSearchRoundTripTask task) {
 
 		Collection<MSFeatureInfoBundle> bundles = msTwoFeatureTable.getTable().getFilteredBundles();
 		MSFeatureInfoBundle selected = msTwoFeatureTable.getSelectedBundle();
@@ -4134,7 +4133,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		}
 	}
 
-	private void finalizeNISTMspepSearchOfflineTask(NISTMspepSearchOfflineTask task) {
+	private synchronized void finalizeNISTMspepSearchOfflineTask(NISTMspepSearchOfflineTask task) {
 		
 		File results = task.getResultsFile();
 		if(results.exists()) {
@@ -4274,7 +4273,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		}
 	}
 	
-	private void finalizeMSMSFeatureSearch(IDTMSMSFeatureSearchTask task) {
+	private synchronized void finalizeMSMSFeatureSearch(IDTMSMSFeatureSearchTask task) {
 		
 		FeatureCollectionManager.msmsSearchResults.clearCollection();
 		FeatureCollectionManager.msmsSearchResults.addFeatures(task.getSelectedFeatures());
@@ -4361,7 +4360,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			getSelectionModel().addListSelectionListener(this);
 	}
 
-	private void loadMsOneSearchData(Collection<MSFeatureInfoBundle> features) {
+	private synchronized void loadMsOneSearchData(Collection<MSFeatureInfoBundle> features) {
 		
 		FeatureCollectionManager.msOneSearchResults.clearCollection();
 		FeatureCollectionManager.msOneSearchResults.addFeatures(features);

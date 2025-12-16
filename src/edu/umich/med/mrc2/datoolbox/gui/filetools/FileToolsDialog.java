@@ -645,7 +645,7 @@ public class FileToolsDialog extends JDialog
 			MainWindow.hideProgressDialog();		
 	}
 	
-	private void finalizeWorklistExtractionTask(WorklistExtractionTask eTask) {
+	private synchronized void finalizeWorklistExtractionTask(WorklistExtractionTask eTask) {
 		
 		Worklist newWorklist = eTask.getWorklist();
 		if(worklist == null) {

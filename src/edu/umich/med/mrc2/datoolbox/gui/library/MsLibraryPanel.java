@@ -1096,7 +1096,7 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ItemList
 		}
 	}
 
-	public void reloadLibraryData(CompoundLibrary selectedLibrary) {
+	public synchronized void reloadLibraryData(CompoundLibrary selectedLibrary) {
 
 		if(!MRC2ToolBoxCore.getActiveMsLibraries().contains(selectedLibrary)) {
 			
@@ -1184,7 +1184,7 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ItemList
 		}
 	}
 
-	private void finalizeIDTraclerLibraryImportTask(IDTraclerLibraryImportTask task) {
+	private synchronized void finalizeIDTraclerLibraryImportTask(IDTraclerLibraryImportTask task) {
 		// TODO Auto-generated method stub
 		//	MRC2ToolBoxCore.getActiveMsLibraries().add(task.getLibrary());
 		if(task.getLibrary() == null) {
@@ -1197,7 +1197,7 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ItemList
 		showPendingFeature();
 	}
 
-	private void finalizePCDLfromBaseLibraryTask(PCDLfromBaseLibraryTask task) {
+	private synchronized void finalizePCDLfromBaseLibraryTask(PCDLfromBaseLibraryTask task) {
 		
 		if(!task.getUnmatchedFeatures().isEmpty()) {
 			
@@ -1222,7 +1222,7 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ItemList
 		}
 	}
 
-	private void finalizePCDLTextLibraryImportTask(PCDLTextLibraryImportTask task) {
+	private synchronized void finalizePCDLTextLibraryImportTask(PCDLTextLibraryImportTask task) {
 		
 		String libName = task.getInputLibraryFile().getName();
 		if(task.getLibrary() != null)
@@ -1264,7 +1264,7 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ItemList
 		}
 	}
 
-	private void finalizeDecoyLibraryGenerationTask(DecoyLibraryGenerationTask task) {
+	private synchronized void finalizeDecoyLibraryGenerationTask(DecoyLibraryGenerationTask task) {
 		
 		File results = task.getOutputFile();
 		if(results != null && results.exists()) {
@@ -1282,7 +1282,7 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ItemList
 		}
 	}
 	
-	private void finalizeLoadDatabaseLibraryTask(LoadDatabaseLibraryTask task) {
+	private synchronized void finalizeLoadDatabaseLibraryTask(LoadDatabaseLibraryTask task) {
 		
 		MRC2ToolBoxCore.getActiveMsLibraries().add(task.getLibrary());
 		reloadLibraryData(task.getLibrary());
@@ -1313,7 +1313,7 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ItemList
 		}
 	}
 
-	private void finalizeReferenceMSMSLibraryExportTask(ReferenceMSMSLibraryExportTask task) {
+	private synchronized void finalizeReferenceMSMSLibraryExportTask(ReferenceMSMSLibraryExportTask task) {
 
 		File results = task.getOutputFile();
 		if(results.exists()) {

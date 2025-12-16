@@ -1283,7 +1283,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 		}
 	}
 	
-	private void finalizeImportMS1DataFromCEFTask(ImportMS1DataFromCEFTask task) {
+	private synchronized void finalizeImportMS1DataFromCEFTask(ImportMS1DataFromCEFTask task) {
 		
 		RawDataAnalysisProject experiment = 
 				MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment();
@@ -1326,13 +1326,15 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 		MRC2ToolBoxCore.getTaskController().addTask(saveTask);
 	}
 
-	private void finalizeRawDataFileConversionTask() {
+	private synchronized void finalizeRawDataFileConversionTask() {
+		
 		MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
 		MainWindow.hideProgressDialog();
 		MessageDialog.showInfoMsg("Data conversion completed", this.getContentPane());
 	}
 	
-	private void finalizeRawDataFileOpenTask(RawDataFileOpenTask rdoTask) {
+	private synchronized void finalizeRawDataFileOpenTask(RawDataFileOpenTask rdoTask) {
+		
 		OpenRawDataFilesTask task = new OpenRawDataFilesTask(rdoTask.getOpenedFiles());
 		MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
 		MainWindow.hideProgressDialog();		
@@ -1341,7 +1343,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 		idp.setVisible(true);
 	}
 	
-	private void finalizeRawMSMSBatchExtractionTask(MsMsfeatureBatchExtractionTask task) {
+	private synchronized void finalizeRawMSMSBatchExtractionTask(MsMsfeatureBatchExtractionTask task) {
 
 		MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
 		MainWindow.hideProgressDialog();
@@ -1360,7 +1362,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 		idp.setVisible(true);
 	}
 	
-	private void finalizeStoredRawDataAnalysisExperimentOpen(OpenStoredRawDataAnalysisExperimentTask task) {
+	private synchronized void finalizeStoredRawDataAnalysisExperimentOpen(OpenStoredRawDataAnalysisExperimentTask task) {
 
 		if(!task.getErrors().isEmpty()) {
 			
@@ -1384,7 +1386,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 		sendMSMSFeaturesToIDTrackerWorkbench();
 	}
 
-	private void finalizeRawDataAnalysisExperimentSave() {
+	private synchronized void finalizeRawDataAnalysisExperimentSave() {
 		
 		MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
 		MainWindow.hideProgressDialog();		
@@ -1418,7 +1420,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 		}
 	}
 	
-	public void finalizeExperimentRawDataLoad(ExperimentRawDataFileOpenTask task) {
+	public synchronized void finalizeExperimentRawDataLoad(ExperimentRawDataFileOpenTask task) {
 		
 		Collection<String> errors = task.getErrors();
 		if(!errors.isEmpty()) {
@@ -1438,7 +1440,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 		idp.setVisible(true);
 	}
 
-	public void finalizeMassSpectraAveraging(MassSpectraAveragingTask task) {
+	public synchronized void finalizeMassSpectraAveraging(MassSpectraAveragingTask task) {
 		
 		Collection<AverageMassSpectrum> spectra = task.getExtractedSpectra();
 		for (AverageMassSpectrum ms : spectra)
@@ -1452,7 +1454,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 		avgSpectraListingPanel.addSpectra(spectra);
 	}
 	
-	public void finalizeChromatogramExtraction(ChromatogramExtractionTask task) {
+	public synchronized void finalizeChromatogramExtraction(ChromatogramExtractionTask task) {
 		
 		Collection<ExtractedChromatogram> chroms = task.getExtractedChromatograms();
 		for (ExtractedChromatogram ec : chroms)

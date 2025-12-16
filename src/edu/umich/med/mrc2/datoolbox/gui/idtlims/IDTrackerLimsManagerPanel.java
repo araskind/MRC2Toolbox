@@ -946,14 +946,14 @@ public class IDTrackerLimsManagerPanel extends DockableMRC2ToolboxPanel implemen
 		}
 	}
 	
-	private void finalizeIDTrackerMetadataPullTask(IDTrackerMetadataPullTask task) {
+	private synchronized void finalizeIDTrackerMetadataPullTask(IDTrackerMetadataPullTask task) {
 		
 		refreshPanelData();
 		RecentDataManager.readDataFromFile();
 		MRC2ToolBoxCore.getMainWindow().updateGuiWithRecentData();
 	}
 
-	private void finalizeCefPrescan(MSMSSearchResultsBatchPrescanTask task) {
+	private synchronized void finalizeCefPrescan(MSMSSearchResultsBatchPrescanTask task) {
 
 		MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
 		MainWindow.hideProgressDialog();

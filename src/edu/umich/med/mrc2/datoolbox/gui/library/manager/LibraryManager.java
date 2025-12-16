@@ -310,7 +310,7 @@ public class LibraryManager extends JDialog implements ActionListener, TaskListe
 		return libraryListingTable.getSelectedLibrary();
 	}
 
-	public void refreshLibraryListing(){
+	public synchronized void refreshLibraryListing(){
 
 		IDTDataCache.refreshMsRtLibraryList();		
 		libList = IDTDataCache.getMsRtLibraryList();

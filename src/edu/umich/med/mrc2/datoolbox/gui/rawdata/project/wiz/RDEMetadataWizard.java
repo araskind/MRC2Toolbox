@@ -886,9 +886,8 @@ public class RDEMetadataWizard extends JDialog
 		}
 	}
 	
-	private void finalizeSaveStoredRawDataAnalysisExperimentTask(
-			SaveStoredRawDataAnalysisExperimentTask task) {
-		
+	private synchronized void finalizeSaveStoredRawDataAnalysisExperimentTask(
+			SaveStoredRawDataAnalysisExperimentTask task) {		
 		
 		MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
 		MainWindow.hideProgressDialog();

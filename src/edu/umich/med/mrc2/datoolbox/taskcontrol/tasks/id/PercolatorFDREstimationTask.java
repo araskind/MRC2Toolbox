@@ -548,7 +548,7 @@ return;
 		}
 	}
 	
-	private void finalizeNISTMspepSearchOfflineTask(NISTMspepSearchOfflineTask task) {
+	private synchronized void finalizeNISTMspepSearchOfflineTask(NISTMspepSearchOfflineTask task) {
 		
 		try {
 			insertPepSearchParametersInDatabase();

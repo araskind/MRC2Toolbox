@@ -336,7 +336,7 @@ public class RDPMsDataVerifierPanel extends RDPMetadataWizardPanel
 			MainWindow.hideProgressDialog();
 	}
 	
-	private void finalizeMSMSSearchResultsBatchPrescanTask(MSMSSearchResultsBatchPrescanTask task) {
+	private synchronized void finalizeMSMSSearchResultsBatchPrescanTask(MSMSSearchResultsBatchPrescanTask task) {
 		
 		missingIdentities = task.getMissingIdentities();
 		if(!task.getPrescanLog().isEmpty()) {

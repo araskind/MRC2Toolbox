@@ -372,10 +372,10 @@ public class PepserchResultsImportDialog extends JDialog
 		}
 	}
 	
-	private void finalizeNISTMsPepSearchDataUploadTask(NISTMsPepSearchDataUploadTask task) {
+	private synchronized void finalizeNISTMsPepSearchDataUploadTask(NISTMsPepSearchDataUploadTask task) {
 		
 		File log = task.getLogFile();
-		List<String>lines = new ArrayList<String>();
+		List<String>lines = new ArrayList<>();
 		try {
 			lines = Files.readAllLines(Paths.get(log.getAbsolutePath()));
 		} catch (IOException e1) {

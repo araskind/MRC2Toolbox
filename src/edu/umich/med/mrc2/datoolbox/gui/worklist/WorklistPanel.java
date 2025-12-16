@@ -574,7 +574,7 @@ public class WorklistPanel extends DockableMRC2ToolboxPanel implements BackedByP
 			MainWindow.hideProgressDialog();
 	}
 	
-	private void finalizeWorklistExtraction(WorklistExtractionTask task) {
+	private synchronized void finalizeWorklistExtraction(WorklistExtractionTask task) {
 		
 		File worklist = task.getOutputFile();
 		if(worklist == null || !worklist.exists()) {
@@ -592,7 +592,7 @@ public class WorklistPanel extends DockableMRC2ToolboxPanel implements BackedByP
 		}
 	}
 
-	private void finalizeWorklistLoad(WorklistImportTask eTask) {
+	private synchronized void finalizeWorklistLoad(WorklistImportTask eTask) {
 		
 		//	Clean worklist from files missing in the experiment 
 		//	and check for files missing in worklist

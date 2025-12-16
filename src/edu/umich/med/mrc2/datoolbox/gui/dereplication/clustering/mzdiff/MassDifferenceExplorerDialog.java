@@ -221,7 +221,7 @@ public class MassDifferenceExplorerDialog extends JDialog implements ActionListe
 		}
 	}
 	
-	private void finalizeMassDifferenceExtractionTask(MassDifferenceExtractionTask task) {
+	private synchronized void finalizeMassDifferenceExtractionTask(MassDifferenceExtractionTask task) {
 		
 		deltaMassPlot.showMzDifferenceDistribution(task.getMassDifferenceBins());
 		deltaMassTable.setModelFromBins(task.getMassDifferenceBins());

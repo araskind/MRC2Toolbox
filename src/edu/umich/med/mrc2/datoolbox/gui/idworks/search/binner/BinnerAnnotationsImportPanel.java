@@ -323,7 +323,7 @@ public class BinnerAnnotationsImportPanel extends JPanel
 		}		
 	}
 
-	private void finalizeBinnerImportTask(
+	private synchronized void finalizeBinnerImportTask(
 			ExtractBinnerAnnotationsForMSMSFeatureClusteringTask task) {
 
 		clustersTable.setTableModelFromBinnerAnnotationClusterCollection(

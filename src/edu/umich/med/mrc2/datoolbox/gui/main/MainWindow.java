@@ -1375,7 +1375,7 @@ public class MainWindow extends JFrame
 		}
 	}
 
-	private void finalizeExperimentRawDataLoad(ExperimentRawDataFileOpenTask task) {
+	private synchronized void finalizeExperimentRawDataLoad(ExperimentRawDataFileOpenTask task) {
 		
 		MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
 		MainWindow.hideProgressDialog();
@@ -1386,7 +1386,7 @@ public class MainWindow extends JFrame
 		rawDataPanel.finalizeExperimentRawDataLoad(task);
 	}
 	
-	private void finalizeExperimentSave(Project experiment) {
+	private synchronized void finalizeExperimentSave(Project experiment) {
 		
 		MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
 		MainWindow.hideProgressDialog();
@@ -1406,7 +1406,7 @@ public class MainWindow extends JFrame
 			clearGuiAfterExperimentClosed();
 	}
 	
-	private void finalizeMetabolomicsProjectLoad(OpenMetabolomicsProjectTask task) {
+	private synchronized void finalizeMetabolomicsProjectLoad(OpenMetabolomicsProjectTask task) {
 
 		MRC2ToolBoxCore.setActiveMetabolomicsExperiment(task.getProject());				
 		setGuiFromActiveExperiment();
@@ -1448,7 +1448,7 @@ public class MainWindow extends JFrame
 		StatusBar.switchDataPipeline(currentExperiment, activeDataPipeline);
 	}
 
-	public void switchPanelForDataPipeline(
+	public synchronized void switchPanelForDataPipeline(
 			DataPipeline pipeline, PanelList activePanel) {
 
 		currentExperiment = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
