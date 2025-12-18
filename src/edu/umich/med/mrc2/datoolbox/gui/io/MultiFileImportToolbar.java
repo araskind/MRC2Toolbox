@@ -217,6 +217,10 @@ public class MultiFileImportToolbar extends CommonToolbar {
 		addDextrMethodButton.setEnabled(active);
 	}
 	
+	public void setDataTypeForImport(DataTypeForImport newType) {
+		importTypeComboBox.setSelectedItem(newType);
+	}
+	
 	public DataTypeForImport getDataTypeForImport() {
 		return (DataTypeForImport)importTypeComboBox.getSelectedItem();
 	}

@@ -644,7 +644,7 @@ public class MSRTLibraryUtils {
 	public static Collection<LibraryMsFeatureDbBundle> createFeatureBundlesForLibrary(
 			String libraryId, Connection conn) throws SQLException {
 
-		Collection<LibraryMsFeatureDbBundle>bundles = new ArrayList<LibraryMsFeatureDbBundle>();
+		Collection<LibraryMsFeatureDbBundle>bundles = new ArrayList<>();
 		String query =
 			"SELECT TARGET_ID, ACCESSION, NAME, RETENTION_TIME, RT_MIN, RT_MAX, ID_CONFIDENCE, "+
 			"DATE_LOADED, LAST_MODIFIED, ENABLED, IS_QC FROM MS_LIBRARY_COMPONENT "

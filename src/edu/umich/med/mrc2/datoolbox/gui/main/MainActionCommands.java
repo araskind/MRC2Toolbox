@@ -158,6 +158,8 @@ public enum MainActionCommands {
 	SELECT_PROFINDER_DETAILED_CSV_COMMAND("Select detailed ProFinder CSV export file"),
 	LOAD_NORMALIZED_TARGETED_DATA_COMMAND("Load normalized targeted data"),
 	SELECT_NORMALIZED_TARGETED_DATA_COMMAND("Select normalized targeted data file"),
+	SELECT_REFERENCE_TARGETED_LIBRARY_COMMAND("Select reference library"),
+	SET_REFERENCE_TARGETED_LIBRARY_COMMAND("Set reference library"),
 	PARSE_NORMALIZED_TARGETED_DATA_COMMAND("Parse normalized targeted data file"),
 	ADD_DATA_FROM_MULTIFILES_COMMAND("Add quantitative data to active assay from multiple files"),
 	ADD_PEAK_QUALITY_DATA_FROM_MULTIFILES_COMMAND("Add peak quality data to active assay"),

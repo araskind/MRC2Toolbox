@@ -89,6 +89,7 @@ public class IndeterminateProgressDialog extends JDialog {
 		pack();
 		task.setProgressDialog(this);
 		task.execute();
+	
 	}
 
 	public void setMessage(String message) {

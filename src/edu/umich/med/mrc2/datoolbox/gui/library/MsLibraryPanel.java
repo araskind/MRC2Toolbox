@@ -1014,13 +1014,15 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ItemList
 	}
 
 	@Override
-	public synchronized void clearPanel() {
+	public void clearPanel() {
 
+		libraryFeatureTable.getTable().getSelectionModel().removeListSelectionListener(this);
 		((LibraryFeatureTableModel) libraryFeatureTable.getTable().getModel()).setRowCount(0);
 		libraryFeatureEditorPanel.clearPanel();
 		molStructurePanel.clearPanel();
 		currentLibrary = null;
 		((MsLibraryPanelMenuBar)menuBar).updateLibraryList(currentLibrary, MRC2ToolBoxCore.getActiveMsLibraries());
+		libraryFeatureTable.getTable().getSelectionModel().addListSelectionListener(this);
 	}
 
 	private void closeActiveLibrary() {
@@ -1125,14 +1127,12 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ItemList
 
 		@Override
 		public Void doInBackground() {
-			
-			libraryFeatureTable.getTable().getSelectionModel().removeListSelectionListener(MsLibraryPanel.this);
+
 			clearPanel();
 			currentLibrary = selectedLibrary;
 			((MsLibraryPanelMenuBar)menuBar).updateLibraryList(
 					currentLibrary, MRC2ToolBoxCore.getActiveMsLibraries());
 			libraryFeatureTable.getTable().setTableModelFromCompoundLibrary(currentLibrary);
-			libraryFeatureTable.getTable().getSelectionModel().addListSelectionListener(MsLibraryPanel.this);
 			libraryFeatureEditorPanel.setAndLockFeaturePolarity(currentLibrary.getPolarity());		
 			return null;
 		}		

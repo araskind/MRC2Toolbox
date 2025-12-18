@@ -65,6 +65,7 @@ import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.enums.CompoundIdSource;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataExportFields;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataImputationType;
+import edu.umich.med.mrc2.datoolbox.data.enums.DataTypeForImport;
 import edu.umich.med.mrc2.datoolbox.data.enums.FeatureFilter;
 import edu.umich.med.mrc2.datoolbox.data.enums.FeatureSetProperties;
 import edu.umich.med.mrc2.datoolbox.data.enums.GlobalDefaults;
@@ -411,15 +412,21 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 
 		String command = event.getActionCommand();
 		
-		if (command.equals(MainActionCommands.LOAD_DATA_COMMAND.getName()))
-			showDataLoader();
+//		if (command.equals(MainActionCommands.LOAD_DATA_COMMAND.getName()))
+//			showDataLoader();
 
 		if (command.equals(MainActionCommands.LOAD_DATA_FROM_MULTIFILES_COMMAND.getName()))
-			showMultifileDataLoader(null);
+			showMultifileDataLoader(null, DataTypeForImport.AGILENT_UNTARGETED);
 		
 		if (command.equals(MainActionCommands.ADD_DATA_FROM_MULTIFILES_COMMAND.getName()))
-			showMultifileDataLoader(activeDataPipeline);
+			showMultifileDataLoader(activeDataPipeline, DataTypeForImport.AGILENT_UNTARGETED);
+		
+		if (command.equals(MainActionCommands.LOAD_DATA_FROM_PROFINDER_PFA_COMMAND.getName()))
+			showMultifileDataLoader(null, DataTypeForImport.AGILENT_PROFINDER_TARGETED);
 
+		if (command.equals(MainActionCommands.LOAD_NORMALIZED_TARGETED_DATA_COMMAND.getName()))
+			showMultifileDataLoader(null, DataTypeForImport.GENERIC_TARGETED);
+		
 		if (command.equals(MainActionCommands.LOAD_DATA_FROM_EXCEL_FILE_COMMAND.getName()))
 			showExcelDataLoader();
 
@@ -1187,9 +1194,10 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 		dataImputationSetupDialog.setVisible(true);
 	}
 
-	private void showMultifileDataLoader(DataPipeline pipeline) {
+	private void showMultifileDataLoader(DataPipeline pipeline, DataTypeForImport importType) {
 
 		multiFileDataImportDialog = new MultiFileDataImportDialog(this);
+		multiFileDataImportDialog.setDataTypeForImport(importType);
 		if(pipeline != null)
 			multiFileDataImportDialog.setExistingDataPipeline(pipeline);
 			
@@ -1197,15 +1205,15 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 		multiFileDataImportDialog.setVisible(true);
 	}
 
-	private void showDataLoader() {
-
-		if(currentExperiment == null)
-			return;
-		
-		textDataImportDialog = new TextDataImportDialog();
-		textDataImportDialog.setLocationRelativeTo(this.getContentPane());
-		textDataImportDialog.setVisible(true);
-	}
+//	private void showDataLoader() {
+//
+//		if(currentExperiment == null)
+//			return;
+//		
+//		textDataImportDialog = new TextDataImportDialog();
+//		textDataImportDialog.setLocationRelativeTo(this.getContentPane());
+//		textDataImportDialog.setVisible(true);
+//	}
 	
 	private void setUpPeakQualityDataImport() {
 		

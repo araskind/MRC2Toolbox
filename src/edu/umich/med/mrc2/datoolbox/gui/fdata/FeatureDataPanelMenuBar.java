@@ -96,6 +96,7 @@ public class FeatureDataPanelMenuBar extends CommonMenuBar {
 	private static final Icon deleteAvgFeatureLibraryIcon = GuiUtils.getIcon("deleteLibrary", 24);
 	private static final Icon extractDeltasIcon = GuiUtils.getIcon("extractDeltas", 24);
 	private static final Icon normalizedDataIcon = GuiUtils.getIcon("loess", 24);
+	private static final Icon loadPfaFileIcon = GuiUtils.getIcon("importFromProFinderPaf", 24);
 	
 	// Menus
 	private JMenu
@@ -109,8 +110,9 @@ public class FeatureDataPanelMenuBar extends CommonMenuBar {
 
 	// Load data items
 	private JMenuItem
-		loadMultiFileMenuItem,
+		loadMultiCEFFileMenuItem,
 		addFromMultiFileMenuItem,
+		loadFromProFinderArchiveMenuItem,
 		addPeakQualityDataMenuItem,
 		loadFromTextMenuItem,
 		loadFromExcelMenuItem,
@@ -179,7 +181,7 @@ public class FeatureDataPanelMenuBar extends CommonMenuBar {
 		loadDataMenu = new JMenu("Load data");
 		loadDataMenu.setIcon(loadPlainDataFileIconSmall);
 		
-		loadMultiFileMenuItem = addItem(loadDataMenu, 
+		loadMultiCEFFileMenuItem = addItem(loadDataMenu, 
 				MainActionCommands.LOAD_DATA_FROM_MULTIFILES_COMMAND, 
 				loadMultiFileIcon);
 		
@@ -187,15 +189,19 @@ public class FeatureDataPanelMenuBar extends CommonMenuBar {
 //				MainActionCommands.ADD_DATA_FROM_MULTIFILES_COMMAND, 
 //				addMultiFileIcon);	
 		
-		addPeakQualityDataMenuItem = addItem(loadDataMenu, 
-				MainActionCommands.ADD_PEAK_QUALITY_DATA_FROM_MULTIFILES_COMMAND, 
-				addPeakQualityDataIcon);
-		
-		loadDataMenu.addSeparator();
+		loadFromProFinderArchiveMenuItem = addItem(loadDataMenu, 
+				MainActionCommands.LOAD_DATA_FROM_PROFINDER_PFA_COMMAND, 
+				loadPfaFileIcon);
 		
 		loadFromTextMenuItem = addItem(loadDataMenu, 
 				MainActionCommands.LOAD_NORMALIZED_TARGETED_DATA_COMMAND, 
 				normalizedDataIcon);
+		
+		loadDataMenu.addSeparator();
+		
+		addPeakQualityDataMenuItem = addItem(loadDataMenu, 
+				MainActionCommands.ADD_PEAK_QUALITY_DATA_FROM_MULTIFILES_COMMAND, 
+				addPeakQualityDataIcon);
 				
 //		loadDataMenu.addSeparator();
 //		

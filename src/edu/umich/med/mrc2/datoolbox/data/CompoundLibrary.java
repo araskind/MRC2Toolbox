@@ -183,6 +183,11 @@ public class CompoundLibrary implements Serializable, Comparable<CompoundLibrary
 				filter(f -> f.getName().equals(name)).findFirst().orElse(null);
 	}
 
+	public LibraryMsFeature getFeatureByNameIgnoreCase(String name) {
+		return libraryFeatures.stream().
+				filter(f -> f.getName().equalsIgnoreCase(name)).findFirst().orElse(null);
+	}
+	
 	public LibraryMsFeature getFeatureById(String targetId) {
 		return libraryFeatures.stream().
 				filter(f -> f.getId().equals(targetId)).findFirst().orElse(null);

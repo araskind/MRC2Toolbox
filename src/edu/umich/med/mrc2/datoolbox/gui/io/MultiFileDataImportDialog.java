@@ -23,6 +23,7 @@ package edu.umich.med.mrc2.datoolbox.gui.io;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -36,16 +37,22 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+import java.sql.Connection;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.prefs.Preferences;
 import java.util.regex.Pattern;
@@ -77,8 +84,11 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import edu.umich.med.mrc2.datoolbox.data.Adduct;
+import edu.umich.med.mrc2.datoolbox.data.CompoundLibrary;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentalSample;
+import edu.umich.med.mrc2.datoolbox.data.LibraryMsFeature;
+import edu.umich.med.mrc2.datoolbox.data.LibraryMsFeatureDbBundle;
 import edu.umich.med.mrc2.datoolbox.data.ResultsFile;
 import edu.umich.med.mrc2.datoolbox.data.SampleDataResultObject;
 import edu.umich.med.mrc2.datoolbox.data.compare.SampleDataResultObjectComparator;
@@ -88,9 +98,11 @@ import edu.umich.med.mrc2.datoolbox.data.enums.FeatureAlignmentType;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
+import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.database.idt.AcquisitionMethodUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
+import edu.umich.med.mrc2.datoolbox.database.idt.MSRTLibraryUtils;
 import edu.umich.med.mrc2.datoolbox.gui.communication.DataPipelineEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.DataPipelineEventListener;
 import edu.umich.med.mrc2.datoolbox.gui.expdesign.editor.ReferenceSampleDialog;
@@ -169,10 +181,13 @@ public class MultiFileDataImportDialog extends JDialog
 	private AdductSelectionDialog adductSelectionDialog;
 	private NormalizedTargetedDataSelectionDialog normalizedTargetedDataSelectionDialog;
 
-	private JTextField dataFileTextField;
+	//	private JTextField dataFileTextField;
 	private Collection<Adduct> selectedAdducts;
+	private String[]compoundNames;
+	private int linesToSkipAfterHeader;
+	private CompoundLibrary referenceLibrary;
+	private Map<String,LibraryMsFeature>nameFeatureMap;
 	
-
 	public MultiFileDataImportDialog(TaskListener dataLoadTaskListener) {
 
 		super();
@@ -399,7 +414,7 @@ public class MultiFileDataImportDialog extends JDialog
 			selectAdducts();
 
 		if (command.equals(MainActionCommands.ADD_DATA_FILES_COMMAND.getName()))
-			selectDataFiles();
+			selectCEFDataFiles();
 		
 		if (command.equals(MainActionCommands.LOAD_DATA_FROM_PROFINDER_PFA_COMMAND.getName()))
 			selectPfaFile();
@@ -422,11 +437,9 @@ public class MultiFileDataImportDialog extends JDialog
 		if (event.getActionCommand().equals(MainActionCommands.IMPORT_DATA_COMMAND.getName()))
 			importData();
 
-		if (command.equals(MainActionCommands.CLEAR_DATA_COMMAND.getName())) {
-
-			if (MessageDialog.showChoiceMsg("Clear input data?", this) == JOptionPane.YES_OPTION)
-				clearPanel();
-		}
+		if (command.equals(MainActionCommands.CLEAR_DATA_COMMAND.getName()))
+			clearInputData();
+		
 		if(command.equals(MainActionCommands.SHOW_REFERENCE_SAMPLES_EDIT_DIALOG_COMMAND.getName()))
 			showReferenceSamplesEditDialog();
 		
@@ -447,6 +460,12 @@ public class MultiFileDataImportDialog extends JDialog
 		
 		if(command.equals(MainActionCommands.ADD_DATA_EXTRACTION_METHOD_COMMAND.getName()))
 			addDataExtractionMethod();
+	}
+	
+	private void clearInputData() {
+		
+		if (MessageDialog.showChoiceMsg("Clear input data?", this) == JOptionPane.YES_OPTION)
+			clearPanel();
 	}
 
 	private void showAdductSelector() {
@@ -813,10 +832,13 @@ public class MultiFileDataImportDialog extends JDialog
 			if(dataTypeForImport.equals(DataTypeForImport.AGILENT_PROFINDER_TARGETED))
 				initiateProFinderDataImport(dataToImport, importPipeline);
 			
+			if(dataTypeForImport.equals(DataTypeForImport.GENERIC_TARGETED))
+				initiateGenericTargetedDataImport(dataToImport, importPipeline);
+			
 			dispose();
 		}		
 	}
-	
+
 	private void initiateProFinderDataImport(
 			Set<SampleDataResultObject> dataToImport, 
 			DataPipeline importPipeline) {
@@ -847,12 +869,20 @@ public class MultiFileDataImportDialog extends JDialog
 		task.addTaskListener(dataLoadTaskListener);
 		MRC2ToolBoxCore.getTaskController().addTask(task);
 	}
+		
+	private void initiateGenericTargetedDataImport(Set<SampleDataResultObject> dataToImport,
+			DataPipeline importPipeline) {
+		// TODO Auto-generated method stub
+		
+	}
 	
 	private Collection<String>validateInputData(){
 		
 		Collection<String>errors = new ArrayList<>();
 		if(newDataPipeline != null)
 			errors.addAll(dataPipelineDefinitionPanel.validatePipelineDefinition());
+		
+		checkForUnmatchedSamples(errors);
 		
 		DataTypeForImport dataTypeForImport = toolBar.getDataTypeForImport();
 		
@@ -869,8 +899,6 @@ public class MultiFileDataImportDialog extends JDialog
 	}
 
 	private void validateInputDataForAgilentProFinderImport(Collection<String>errors) {
-
-		checkForUnmatchedSamples(errors);
 		
 		if(newDataPipeline != null) {			
 			
@@ -885,15 +913,10 @@ public class MultiFileDataImportDialog extends JDialog
 		}
 		if(selectedAdducts == null || selectedAdducts.isEmpty())
 			errors.add("Adduct list for the library construction is not selected");
-
-		
-		
-
 	}
 
 	private void validateInputDataForAgilentUntargetedImport(Collection<String>errors) {
 		
-		checkForUnmatchedSamples(errors);
 		if(newDataPipeline != null)	{		
 			if(libraryFile == null || !libraryFile.exists() || !libraryFile.canRead())
 				errors.add("CEF Library file not specified or not readable");
@@ -901,16 +924,122 @@ public class MultiFileDataImportDialog extends JDialog
 	}
 	
 	private void validateInputDataForNormalizedTargetedImport(Collection<String> errors) {
-		// TODO Auto-generated method stub
 		
+		CompoundNameMatchingTask task = new CompoundNameMatchingTask(errors);
+		IndeterminateProgressDialog idp = 
+				new IndeterminateProgressDialog(
+						"Fetching reference library and matching compound names ...", this, task);
+		idp.setLocationRelativeTo(this.getContentPane());
+		idp.setVisible(true);
 	}
 	
-//	private void verifyLibraryFileIsPresent(Collection<String>errors) {
-//		
-//		if(libraryFile == null || !libraryFile.exists() || !libraryFile.canRead())
-//			errors.add("Library file not specified or not readable");
-//	}
-	
+	class CompoundNameMatchingTask extends LongUpdateTask {
+
+		private Collection<String> errors;
+		private Collection<String> compoundErrors;
+			
+		public CompoundNameMatchingTask(Collection<String> errors) {
+			this.errors = errors;
+			nameFeatureMap = new TreeMap<>();
+		}
+
+		@Override
+		public Void doInBackground() {
+
+			fetchLibraryCompounds();
+			try {
+				matchCompounds();
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			return null;
+		}
+		
+		private void fetchLibraryCompounds() {
+			
+			if(referenceLibrary != null) {
+				
+				if(MRC2ToolBoxCore.getActiveMsLibraries().contains(referenceLibrary)) {
+					
+					referenceLibrary = MRC2ToolBoxCore.getActiveMsLibraries().stream().
+						filter(l -> l.getLibraryId().equals(referenceLibrary.getLibraryId())).
+						findFirst().orElse(null);
+				}
+				else {
+					try {
+						Connection conn = ConnectionManager.getConnection();
+						Collection<LibraryMsFeatureDbBundle>bundles =
+								MSRTLibraryUtils.createFeatureBundlesForLibrary(referenceLibrary.getLibraryId(), conn);
+						
+						for(LibraryMsFeatureDbBundle fBundle : bundles) {
+
+							if(fBundle.getConmpoundDatabaseAccession() != null) {
+
+								LibraryMsFeature newTarget = fBundle.getFeature();
+								MSRTLibraryUtils.attachIdentity(
+										newTarget, fBundle.getConmpoundDatabaseAccession(), fBundle.isQcStandard(), conn);
+
+								if(newTarget.getPrimaryIdentity() != null) {
+
+									newTarget.getPrimaryIdentity().setConfidenceLevel(fBundle.getIdConfidence());
+									MSRTLibraryUtils.attachMassSpectrum(newTarget, conn);
+									MSRTLibraryUtils.attachTandemMassSpectrum(newTarget, conn);
+									MSRTLibraryUtils.attachAnnotations(newTarget, conn);
+									referenceLibrary.addFeature(newTarget);
+								}
+							}
+						}
+						ConnectionManager.releaseConnection(conn);
+						MRC2ToolBoxCore.getActiveMsLibraries().add(referenceLibrary);	
+					}
+					catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+			}			
+		}
+		
+		private void matchCompounds() {
+
+			compoundErrors = new TreeSet<>();
+			for (String cpdName : compoundNames) {
+
+				LibraryMsFeature libFeature = referenceLibrary.getFeatureByNameIgnoreCase(cpdName);
+				if (libFeature == null)
+					compoundErrors.add(cpdName);
+				else {
+					nameFeatureMap.put(cpdName, libFeature);
+				}				
+			}
+			if(!compoundErrors.isEmpty()) {
+				errors.add("\nNo match found in reference library for the following compounds:\n");
+				errors.addAll(compoundErrors);
+				
+				// Write log file
+				Path logPath = Paths.get(
+						MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExportsDirectory().getAbsolutePath(),
+						 "Unmatched-compounds-" + referenceLibrary.getLibraryName() + ".txt");
+				try {
+				    Files.write(logPath, 
+				    		compoundErrors,
+				            StandardCharsets.UTF_8,
+				            StandardOpenOption.CREATE, 
+				            StandardOpenOption.TRUNCATE_EXISTING);
+				} catch (IOException e) {
+				    e.printStackTrace();
+				}
+				if (Desktop.isDesktopSupported()) {
+				    try {
+				        Desktop.getDesktop().open(logPath.toFile());
+				    } catch (IOException ex) {
+				        ex.printStackTrace();
+				    }
+				}
+			}
+		}
+	}
+
 	private void checkForUnmatchedSamples(Collection<String>errors){
 		
 		Set<SampleDataResultObject> objectsToImport = 			
@@ -930,8 +1059,15 @@ public class MultiFileDataImportDialog extends JDialog
 		matchPanel.removeSelected();
 	}
 
-	private void selectDataFiles() {
+	private void selectCEFDataFiles() {
 
+		if(pfaLoaded && !matchPanel.getSampleDataResultObjects(false).isEmpty()) {
+			
+			MessageDialog.showErrorMsg("You've selected ProFinder archive as data source.\n"
+					+ "Adding individual CEF files to this data analysis pipeline is not supported.", 
+					this);
+			return;
+		}		
 		JnaFileChooser fc = new JnaFileChooser(dataFileDirectory);
 		fc.setMode(JnaFileChooser.Mode.Files);
 		fc.addFilter("CEF files", "cef", "CEF");
@@ -941,43 +1077,44 @@ public class MultiFileDataImportDialog extends JDialog
 			
 			File[] dataFiles = fc.getSelectedFiles();
 			if(dataFiles.length == 0)
-				return;
-			
-			if(pfaLoaded && !matchPanel.getSampleDataResultObjects(false).isEmpty()) {
-				
-				MessageDialog.showErrorMsg("You've selected ProFinder archive as data source.\n"
-						+ "Adding individual CEF files to this data analysis pipeline is not supported.", 
-						this);
-				return;
-			}		
+				return;			
+		
 			dataFileDirectory = dataFiles[0].getParentFile();
 			savePreferences();
-			//	Add data to existing pipeline
-			if(existingDataPipeline != null) {
+			
+			if(existingDataPipeline != null && newDataPipeline == null) {	//	Add data to existing pipeline
 				addResultsToExistingPipeline(dataFiles);
-				return;
-			}
-			//	Add extra data to new pipeline
-			if(newDataPipeline != null) {
+			}			
+			else if(newDataPipeline != null && existingDataPipeline == null) {	//	Add extra data to new pipeline
 				addResultsToNewPipeline(newDataPipeline, dataFiles);
-				return;
 			}
-			//	Create new pipeline and add data to it		
-			newDataPipeline = dataPipelineDefinitionPanel.getDataPipeline();
-			if(existingDataPipeline == null  && newDataPipeline != null
-					&& (MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getDataPipelines().contains(newDataPipeline)
-							|| MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getDataPipelineByName(newDataPipeline.getName()) != null)) {
-				MessageDialog.showErrorMsg("The experiment already contains data pipeline with the same name \n"
-						+ "and/or with selected combination of assay, data acquisition and data analysis methods.\n"
-						+ "Please adjust you selection.\n"
-						+ "If you want to replace the existing data\n"
-						+ "please delete them first and then re-upload.", 
-						this);
-				newDataPipeline = null;
-				return;
-			}	
-			addResultsToNewPipeline(newDataPipeline, dataFiles);
+			else {	//	Create new pipeline and add data to it		
+				if(!getNewDataPipeline())
+					return;
+				else
+					addResultsToNewPipeline(newDataPipeline, dataFiles);					
+			}				
 		}
+	}
+	
+	private boolean getNewDataPipeline() {
+		
+		newDataPipeline = dataPipelineDefinitionPanel.getDataPipeline();
+		if(newDataPipeline == null)
+			return false;
+		
+		if(MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getDataPipelines().contains(newDataPipeline)
+				|| MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getDataPipelineByName(newDataPipeline.getName()) != null) {
+			MessageDialog.showErrorMsg("The experiment already contains data pipeline with the same name \n"
+					+ "and/or with selected combination of assay, data acquisition and data analysis methods.\n"
+					+ "Please adjust you selection.\n"
+					+ "If you want to replace the existing data\n"
+					+ "please delete them first and then re-upload.", this);
+			
+			return false;
+		}
+		else 
+			return true;
 	}
 	
 	private void selectPfaFile() {
@@ -987,7 +1124,10 @@ public class MultiFileDataImportDialog extends JDialog
 					+ "to existing data analysis pipeline i not supported\n"
 					+ "Please create new data pipeline to import the data from ProFinder.", this);
 			return;
-		}	
+		}		
+		if(!getNewDataPipeline())
+			return;
+		
 		JnaFileChooser fc = new JnaFileChooser(dataFileDirectory);
 		fc.setMode(JnaFileChooser.Mode.Files);
 		fc.addFilter("ProFinder archive files", "pfa", "PFA");
@@ -995,19 +1135,6 @@ public class MultiFileDataImportDialog extends JDialog
 		fc.setMultiSelectionEnabled(false);
 		if (fc.showOpenDialog(this)) {
 			
-			newDataPipeline = dataPipelineDefinitionPanel.getDataPipeline();
-			if(newDataPipeline == null)
-				return;
-
-			if(MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getDataPipelines().contains(newDataPipeline)) {
-				MessageDialog.showErrorMsg("The experiment already contains data pipeline \n"
-						+ "with selected combination of assay, data acquisition and data analysis methods.\n"
-						+ "Please adjust you selection.\n"
-						+ "If you want to replace the existing data\n"
-						+ "please delete them first and then re-upload.", 
-						this);
-				return;
-			}
 			File pfaFile = fc.getSelectedFile();
 			dataFileDirectory = pfaFile.getParentFile();
 			savePreferences();	
@@ -1047,6 +1174,9 @@ public class MultiFileDataImportDialog extends JDialog
 					+ "Please create new data pipeline to import the data from ProFinder.", this);
 			return;
 		}
+		if(!getNewDataPipeline())
+			return;
+		
 		JnaFileChooser fc = new JnaFileChooser(baseLibraryDirectory);
 		fc.setMode(JnaFileChooser.Mode.Files);
 		fc.addFilter("CSV files", "csv", "CSV");
@@ -1080,10 +1210,9 @@ public class MultiFileDataImportDialog extends JDialog
 					+ "Please create new data pipeline to import the data from ProFinder.", this);
 			return;
 		}
-		newDataPipeline = dataPipelineDefinitionPanel.getDataPipeline();
-		if(newDataPipeline == null)
+		if(!getNewDataPipeline())
 			return;
-		
+				
 		normalizedTargetedDataSelectionDialog = 
 				new NormalizedTargetedDataSelectionDialog(this, baseLibraryDirectory);
 		normalizedTargetedDataSelectionDialog.setLocationRelativeTo(this);
@@ -1101,8 +1230,11 @@ public class MultiFileDataImportDialog extends JDialog
 		libraryFile = normalizedTargetedDataSelectionDialog.getInputFile();
 		libraryTextField.setText(libraryFile.getAbsolutePath());
 		baseLibraryDirectory = libraryFile.getParentFile();
+		String featureColumn = normalizedTargetedDataSelectionDialog.getFeatureColumnName();
+		referenceLibrary = normalizedTargetedDataSelectionDialog.getReferenceLibrary();
 
 		extractDataFilesFromNormalizedTargetedData(libraryFile, 
+				featureColumn,
 				normalizedTargetedDataSelectionDialog.getFileNameMask(), 
 				normalizedTargetedDataSelectionDialog.getNumberOfLinesToSkipAfterHeader());
 		
@@ -1113,9 +1245,11 @@ public class MultiFileDataImportDialog extends JDialog
 	
 	private void extractDataFilesFromNormalizedTargetedData(
 			File inputFile, 
+			String featureColumn,
 			String fileNameMask, 
 			int linesToSkipAfterHeader) {
 		
+		this.linesToSkipAfterHeader = linesToSkipAfterHeader;
 		String[][] inputDataArray = 
 				DelimitedTextParser.parseTextFile(
 						inputFile, MRC2ToolBoxConfiguration.getTabDelimiter());
@@ -1127,8 +1261,36 @@ public class MultiFileDataImportDialog extends JDialog
 			if(fileNamePattern.matcher(column).find())
 				sampleFiles.add(new File(column));						
 		}
+		extractCompoundNames(inputDataArray, featureColumn);
+		long badNameCount = Arrays.asList(compoundNames).stream().
+				filter(n -> (Objects.isNull(n) || n.isBlank())).count();
+		if(badNameCount > 0) {
+			MessageDialog.showErrorMsg("Missing names in \"" + featureColumn + "\" column");
+			return;
+		}		
 		File[]sampleFilesArray = sampleFiles.toArray(new File[sampleFiles.size()]);
-		addResultsToNewPipeline(dataPipelineDefinitionPanel.getDataPipeline(), sampleFilesArray);
+		addResultsToNewPipeline(dataPipelineDefinitionPanel.getDataPipeline(), sampleFilesArray);		
+	}
+	
+	private void extractCompoundNames(String[][] inputDataArray, String featureColumn) {
+		
+		int featureColumnIndex = -1;
+		for(int i=0; i<inputDataArray[0].length; i++) {
+			
+			if(inputDataArray[0][i].equals(featureColumn)) {
+				
+				featureColumnIndex = i;
+				break;
+			}
+		}
+		if(featureColumnIndex == -1)
+			return;
+		
+		int start = 1 + linesToSkipAfterHeader;
+		
+		compoundNames = new String[inputDataArray.length - start];
+		for(int i=start; i<inputDataArray.length; i++) 			
+			compoundNames[i-start] = inputDataArray[i][featureColumnIndex].trim();
 	}
 		
 	public void selectDesignFile() {
@@ -1164,8 +1326,12 @@ public class MultiFileDataImportDialog extends JDialog
 				updateInterfaceForImportType((DataTypeForImport)e.getItem());			
 		}
 	}
+	
+	public void setDataTypeForImport(DataTypeForImport newType) {
+		toolBar.setDataTypeForImport(newType);
+	}
 
-	private void updateInterfaceForImportType(DataTypeForImport importType) {
+	public void updateInterfaceForImportType(DataTypeForImport importType) {
 		
 		toolBar.updateInterfaceForImportType(importType);
 		
@@ -1273,89 +1439,6 @@ public class MultiFileDataImportDialog extends JDialog
 		
 		MessageDialog.showWarningMsg("Under construction", this);
 		return;
-	
-	//	TODO
-	//	Collection<DataFile> dataFiles = matchPanel.getAllDataFiles();
-	//	if(dataFiles.isEmpty())
-	//		return;
-	//			
-	//	File designFile = chooser.getSelectedFile();
-	//	baseLibraryDirectory = designFile.getParentFile();
-	//	savePreferences();
-	//	
-	//	//	Read design file
-	//	String[][] designData = null;
-	//	try {
-	//		designData = DelimitedTextParser.parseTextFileWithEncoding(designFile, MRC2ToolBoxCore.getDataDelimiter());
-	//	} catch (IOException e) {
-	//		// TODO Auto-generated catch block
-	//		e.printStackTrace();
-	//	}
-	//	if (designData == null) {
-	//		MessageDialog.showErrorMsg("Couldn't read design file!", this);
-	//		return;
-	//	}
-	//	String[] header = designData[0];
-	//	int dataFileColumn = -1;
-	//	int nameColumn = -1;
-	//	int idColumn = -1;
-	//	for (int i = 0; i < header.length; i++) {
-	//
-	//		if (header[i].equals(ExperimentDesignFields.SAMPLE_NAME.getName()))
-	//			nameColumn = i;
-	//
-	//		if (header[i].equals(ExperimentDesignFields.SAMPLE_ID.getName()))
-	//			idColumn = i;
-	//
-	//		if (header[i].equals(ExperimentDesignFields.DATA_FILE.getName()))
-	//			dataFileColumn = i;
-	//	}
-	//	if (dataFileColumn == -1 && (nameColumn == -1 || idColumn == -1)) {
-	//		MessageDialog.showErrorMsg("One or more obligatory columns missing!\n"
-	//				+ "Obligatory columns:\n"
-	//				+ "1. " + ExperimentDesignFields.DATA_FILE.getName() + "\n"
-	//				+ "2. " + ExperimentDesignFields.SAMPLE_ID.getName() 
-	//				+ " or " + ExperimentDesignFields.SAMPLE_NAME.getName(), this);
-	//		return;
-	//	}
-	//	Map<DataFile,ExperimentalSample>fileSampleMap = new TreeMap<DataFile,ExperimentalSample>();
-	//	ExperimentDesign design = MRC2ToolBoxCore.getCurrentProject().getExperimentDesign();
-	//	for (int i = 1; i < designData.length; i++) {
-	//		
-	//		String dataFileName = FilenameUtils.getBaseName(designData[i][dataFileColumn]);
-	//		String sampleId = null;
-	//		String sampleName = null;
-	//		ExperimentalSample sample = null;
-	//		if(idColumn > -1) {
-	//			sampleId = designData[i][idColumn];
-	//			sample = design.getSampleById(sampleId);
-	//		}			
-	//		if(sample == null && nameColumn > -1) {
-	//			sampleName = designData[i][nameColumn];
-	//			sample = design.getSampleByName(sampleName);
-	//		}	
-	//		DataFile dataFile = dataFiles.stream().
-	//				filter(f -> FilenameUtils.getBaseName(f.getName()).equals(dataFileName)).
-	//				findFirst().orElse(null);
-	//		
-	//		if(sample != null && dataFile != null)
-	//			fileSampleMap.put(dataFile, sample);
-	//	}
-	//	//	Assign samples in the table
-	//	matchPanel.assignSamples(fileSampleMap);
-	//	
-	//	//	Find unmapped files
-	//	Set<DataFile> mappedFiles = fileSampleMap.keySet();
-	//	List<String> unmappedFileNames = 
-	//			dataFiles.stream().filter(f -> !mappedFiles.contains(f)).
-	//			sorted().map(f -> f.getName()).collect(Collectors.toList());
-	//	
-	//	if (!unmappedFileNames.isEmpty()) {
-	//		MessageDialog.showWarningMsg("The following data files were not mapped to samples:\n" + 
-	//				StringUtils.join(unmappedFileNames, "\n"), this);
-	//
-	//	}
-	//	return;
 	}
 }
 

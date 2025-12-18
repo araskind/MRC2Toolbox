@@ -93,7 +93,7 @@ public class LibraryManager extends JDialog implements ActionListener, TaskListe
 		getContentPane().add(toolbar, BorderLayout.NORTH);
 
 		libraryListingTable = new LibraryListingTable();
-		libList = new TreeSet<CompoundLibrary>();
+		libList = new TreeSet<>();
 		refreshLibraryListing();
 		libraryListingTable.addTablePopupMenu(
 				new LibraryManagerPopupMenu(this, libraryListingTable));

@@ -1388,7 +1388,7 @@ public class IDTDataCache {
 	public static Collection<CompoundLibrary> getMsRtLibraryList() {
 		
 		if(msRtLibraryList == null)
-			msRtLibraryList =  new TreeSet<CompoundLibrary>();
+			msRtLibraryList =  new TreeSet<>();
 		
 		if(msRtLibraryList.isEmpty()) {
 			try {

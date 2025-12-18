@@ -42,19 +42,6 @@
 												<key shared="false">
 													<placeholder>dock.single.DockableSpectraTable</placeholder>
 												</key>
-												<item key="convert" type="b">true</item>
-												<item key="convert-keys" type="a">
-													<item type="s">size</item>
-													<item type="s">index</item>
-													<item type="s">id</item>
-													<item type="s">placeholder</item>
-													<item type="s">hold</item>
-												</item>
-												<item key="dock.size" type="i">400</item>
-												<item key="dock.index" type="i">0</item>
-												<item key="dock.id" type="i">0</item>
-												<item key="dock.placeholder" type="s">dock.single.DockableSpectraTable</item>
-												<item key="dock.hold" type="b">false</item>
 											</entry>
 											<entry>
 												<key shared="false">
@@ -110,18 +97,7 @@
 									<type>dock.CContentArea.minimize</type>
 								</layout>
 							</adjacent>
-							<children ignore="false">
-								<child>
-									<layout factory="predefined" placeholder="dock.single.DockableSpectraTable">
-										<replacement id="dockablesingle DockableSpectraTable"/>
-										<delegate id="delegate_ccontrol backup factory id">
-											<id>DockableSpectraTable</id>
-											<area/>
-										</delegate>
-									</layout>
-									<children ignore="false"/>
-								</child>
-							</children>
+							<children ignore="false"/>
 						</root>
 						<root name="ccontrol south">
 							<layout factory="predefined">
@@ -246,7 +222,7 @@
 															</placeholder-map>
 														</leaf>
 													</node>
-													<leaf id="-1" nodeId="1600214095261">
+													<leaf id="7" nodeId="1600214095261">
 														<placeholders>
 															<placeholder>dock.single.DockableSpectraTable</placeholder>
 														</placeholders>
@@ -510,6 +486,16 @@
 											<children ignore="false"/>
 										</child>
 									</children>
+								</child>
+								<child>
+									<layout factory="predefined" placeholder="dock.single.DockableSpectraTable">
+										<replacement id="dockablesingle DockableSpectraTable"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>DockableSpectraTable</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
 								</child>
 							</children>
 						</root>
@@ -903,10 +889,10 @@
 								</property>
 							</properties>
 						</entry>
-						<entry id="single DockableSpectraTable" current="dock.mode.minimized">
+						<entry id="single DockableSpectraTable" current="dock.mode.normal">
 							<history>
-								<mode>dock.mode.normal</mode>
 								<mode>dock.mode.minimized</mode>
+								<mode>dock.mode.normal</mode>
 							</history>
 							<properties>
 								<property id="dock.mode.minimized">

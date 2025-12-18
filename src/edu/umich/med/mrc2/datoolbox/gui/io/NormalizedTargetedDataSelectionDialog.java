@@ -24,6 +24,7 @@ package edu.umich.med.mrc2.datoolbox.gui.io;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -35,9 +36,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.prefs.Preferences;
 
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
@@ -51,11 +54,14 @@ import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
 
+import edu.umich.med.mrc2.datoolbox.data.CompoundLibrary;
+import edu.umich.med.mrc2.datoolbox.gui.library.manager.LibrarySelectorDialog;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
+import edu.umich.med.mrc2.datoolbox.utils.DelimitedTextParser;
 import edu.umich.med.mrc2.datoolbox.utils.TextUtils;
 
 public class NormalizedTargetedDataSelectionDialog extends JDialog implements ActionListener, BackedByPreferences {
@@ -76,10 +82,17 @@ public class NormalizedTargetedDataSelectionDialog extends JDialog implements Ac
 	private JTextField inputFileTextField;
 	private JTextField fileNameMaskField;
 	private JSpinner lineSkipSpinner;
+	private JComboBox<String> featureColumnComboBox;
+	private LibrarySelectorDialog librarySelectorDialog;
+
+	private CompoundLibrary referenceLibrary;
+
+	private JLabel refLibraryNameLabel;
 	
 	private static final String BROWSE = "BROWSE";
 
-	public NormalizedTargetedDataSelectionDialog(ActionListener parserListener, File baseLibraryDirectory) {
+	public NormalizedTargetedDataSelectionDialog(
+			ActionListener parserListener, File baseLibraryDirectory) {
 		super();
 		this.baseLibraryDirectory = baseLibraryDirectory;
 		setTitle("Select normalized targeted data file");
@@ -94,9 +107,9 @@ public class NormalizedTargetedDataSelectionDialog extends JDialog implements Ac
 		getContentPane().add(dataPanel, BorderLayout.CENTER);
 		GridBagLayout gbl_dataPanel = new GridBagLayout();
 		gbl_dataPanel.columnWidths = new int[]{0, 0, 0, 0, 0};
-		gbl_dataPanel.rowHeights = new int[]{0, 0, 0, 0, 0};
+		gbl_dataPanel.rowHeights = new int[]{0, 0, 0, 0, 0, 0, 0};
 		gbl_dataPanel.columnWeights = new double[]{0.0, 0.0, 1.0, 0.0, Double.MIN_VALUE};
-		gbl_dataPanel.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
+		gbl_dataPanel.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
 		dataPanel.setLayout(gbl_dataPanel);
 		
 		JLabel lblNewLabel = new JLabel("Input file");
@@ -138,6 +151,7 @@ public class NormalizedTargetedDataSelectionDialog extends JDialog implements Ac
 		lineSkipSpinner = new JSpinner();
 		lineSkipSpinner.setModel(new SpinnerNumberModel(0, 0, 10, 1));
 		GridBagConstraints gbc_lineSkipSpinner = new GridBagConstraints();
+		gbc_lineSkipSpinner.fill = GridBagConstraints.HORIZONTAL;
 		gbc_lineSkipSpinner.insets = new Insets(0, 0, 5, 5);
 		gbc_lineSkipSpinner.gridx = 1;
 		gbc_lineSkipSpinner.gridy = 2;
@@ -153,20 +167,67 @@ public class NormalizedTargetedDataSelectionDialog extends JDialog implements Ac
 		
 		JLabel lblNewLabel_3 = new JLabel("File name mask");
 		GridBagConstraints gbc_lblNewLabel_3 = new GridBagConstraints();
+		gbc_lblNewLabel_3.anchor = GridBagConstraints.WEST;
 		gbc_lblNewLabel_3.gridwidth = 2;
-		gbc_lblNewLabel_3.insets = new Insets(0, 0, 0, 5);
+		gbc_lblNewLabel_3.insets = new Insets(0, 0, 5, 5);
 		gbc_lblNewLabel_3.gridx = 0;
 		gbc_lblNewLabel_3.gridy = 3;
 		dataPanel.add(lblNewLabel_3, gbc_lblNewLabel_3);
 		
 		fileNameMaskField = new JTextField();
 		GridBagConstraints gbc_fileNameMaskField = new GridBagConstraints();
-		gbc_fileNameMaskField.insets = new Insets(0, 0, 0, 5);
+		gbc_fileNameMaskField.insets = new Insets(0, 0, 5, 5);
 		gbc_fileNameMaskField.fill = GridBagConstraints.HORIZONTAL;
 		gbc_fileNameMaskField.gridx = 2;
 		gbc_fileNameMaskField.gridy = 3;
 		dataPanel.add(fileNameMaskField, gbc_fileNameMaskField);
 		fileNameMaskField.setColumns(10);
+		
+		JLabel lblNewLabel_4 = new JLabel("Feature column");
+		GridBagConstraints gbc_lblNewLabel_4 = new GridBagConstraints();
+		gbc_lblNewLabel_4.anchor = GridBagConstraints.WEST;
+		gbc_lblNewLabel_4.gridwidth = 2;
+		gbc_lblNewLabel_4.insets = new Insets(0, 0, 5, 5);
+		gbc_lblNewLabel_4.gridx = 0;
+		gbc_lblNewLabel_4.gridy = 4;
+		dataPanel.add(lblNewLabel_4, gbc_lblNewLabel_4);
+		
+		featureColumnComboBox = new JComboBox<>();
+		GridBagConstraints gbc_featureColumnComboBox = new GridBagConstraints();
+		gbc_featureColumnComboBox.insets = new Insets(0, 0, 5, 0);
+		gbc_featureColumnComboBox.gridwidth = 2;
+		gbc_featureColumnComboBox.fill = GridBagConstraints.HORIZONTAL;
+		gbc_featureColumnComboBox.gridx = 2;
+		gbc_featureColumnComboBox.gridy = 4;
+		dataPanel.add(featureColumnComboBox, gbc_featureColumnComboBox);
+		
+		JLabel lblNewLabel_5 = new JLabel("Reference library");
+		GridBagConstraints gbc_lblNewLabel_5 = new GridBagConstraints();
+		gbc_lblNewLabel_5.anchor = GridBagConstraints.WEST;
+		gbc_lblNewLabel_5.gridwidth = 2;
+		gbc_lblNewLabel_5.insets = new Insets(0, 0, 0, 5);
+		gbc_lblNewLabel_5.gridx = 0;
+		gbc_lblNewLabel_5.gridy = 5;
+		dataPanel.add(lblNewLabel_5, gbc_lblNewLabel_5);
+		
+		refLibraryNameLabel = new JLabel("");
+		refLibraryNameLabel.setFont(new Font("Tahoma", Font.BOLD, 12));
+		GridBagConstraints gbc_refLibraryNameLabel = new GridBagConstraints();
+		gbc_refLibraryNameLabel.anchor = GridBagConstraints.WEST;
+		gbc_refLibraryNameLabel.insets = new Insets(0, 0, 0, 5);
+		gbc_refLibraryNameLabel.gridx = 2;
+		gbc_refLibraryNameLabel.gridy = 5;
+		dataPanel.add(refLibraryNameLabel, gbc_refLibraryNameLabel);
+		
+		JButton refLibrarySelectButton = new JButton(
+				MainActionCommands.SELECT_REFERENCE_TARGETED_LIBRARY_COMMAND.getName());
+		refLibrarySelectButton.setActionCommand(
+				MainActionCommands.SELECT_REFERENCE_TARGETED_LIBRARY_COMMAND.getName());
+		refLibrarySelectButton.addActionListener(this);
+		GridBagConstraints gbc_refLibrarySelectButton = new GridBagConstraints();
+		gbc_refLibrarySelectButton.gridx = 3;
+		gbc_refLibrarySelectButton.gridy = 5;
+		dataPanel.add(refLibrarySelectButton, gbc_refLibrarySelectButton);
 
 		JPanel buttonPanel = new JPanel();
 		FlowLayout flowLayout = (FlowLayout) buttonPanel.getLayout();
@@ -193,7 +254,15 @@ public class NormalizedTargetedDataSelectionDialog extends JDialog implements Ac
 		rootPane.registerKeyboardAction(al, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 		rootPane.setDefaultButton(btnSave);
 
+		loadPreferences();
 		pack();
+	}
+		
+	@Override
+	public void dispose() {
+		
+		savePreferences();
+		super.dispose();
 	}
 
 	@Override
@@ -201,8 +270,28 @@ public class NormalizedTargetedDataSelectionDialog extends JDialog implements Ac
 
 		if(e.getActionCommand().equals(BROWSE))
 			selectNormalizedTargetedDataFile();
+		
+		if(e.getActionCommand().equals(MainActionCommands.SELECT_REFERENCE_TARGETED_LIBRARY_COMMAND.getName()))
+			selectReferenceLibrary();
+		
+		if(e.getActionCommand().equals(MainActionCommands.SET_REFERENCE_TARGETED_LIBRARY_COMMAND.getName()))
+			setReferenceLibrary();
 	}
 	
+	private void selectReferenceLibrary() {
+
+		librarySelectorDialog = new LibrarySelectorDialog(this);
+		librarySelectorDialog.setLocationRelativeTo(this);
+		librarySelectorDialog.setVisible(true);
+	}
+	
+	private void setReferenceLibrary() {
+		
+		referenceLibrary = librarySelectorDialog.getSelectedLibrary();
+		refLibraryNameLabel.setText(referenceLibrary.getLibraryName());
+		librarySelectorDialog.dispose();
+	}
+
 	private void selectNormalizedTargetedDataFile() {
 		
 		JnaFileChooser fc = new JnaFileChooser(baseLibraryDirectory);
@@ -214,7 +303,17 @@ public class NormalizedTargetedDataSelectionDialog extends JDialog implements Ac
 			
 			inputFile = fc.getSelectedFile();
 			inputFileTextField.setText(inputFile.getAbsolutePath());
+			populateColumnSelector();
 		}
+	}
+
+	private void populateColumnSelector() {
+
+		String[][] inputDataArray = 
+				DelimitedTextParser.parseTextFile(
+						inputFile, MRC2ToolBoxConfiguration.getTabDelimiter());
+		featureColumnComboBox.setModel(new DefaultComboBoxModel<>(inputDataArray[0]));
+		featureColumnComboBox.setSelectedIndex(0);
 	}
 
 	public File getInputFile() {
@@ -229,6 +328,14 @@ public class NormalizedTargetedDataSelectionDialog extends JDialog implements Ac
 		return (int)lineSkipSpinner.getValue();
 	}
 	
+	public String getFeatureColumnName() {
+		return (String)featureColumnComboBox.getSelectedItem();
+	}
+	
+	public CompoundLibrary getReferenceLibrary() {
+		return referenceLibrary;
+	}
+	
 	public Collection<String>validateFormData(){
 	    
 	    Collection<String>errors = new ArrayList<>();
@@ -240,7 +347,13 @@ public class NormalizedTargetedDataSelectionDialog extends JDialog implements Ac
 	    else {
 	    	if(!TextUtils.isValidRegex(getFileNameMask()))
 	    		errors.add("File name mask is not a valid regular expression");
-	    }	    	
+	    }	
+	    if(getFeatureColumnName() == null || getFeatureColumnName().isBlank())
+	    	errors.add("Feature column not specified");
+	    
+	    if(referenceLibrary == null)
+	    	errors.add("Reference library not specified");
+	    
 	    return errors;
 	} 
 
@@ -250,6 +363,9 @@ public class NormalizedTargetedDataSelectionDialog extends JDialog implements Ac
 		this.preferences = preferences;
 		String fileNameMask = preferences.get(FILE_NAME_MASK, 
 						MRC2ToolBoxConfiguration.CORE_DATA_FILE_MASK_DEFAULT);
+		if(fileNameMask == null || fileNameMask.isBlank())
+			fileNameMask = MRC2ToolBoxConfiguration.CORE_DATA_FILE_MASK_DEFAULT;
+			
 		fileNameMaskField.setText(fileNameMask);
 		lineSkipSpinner.setValue(preferences.getInt(LINES_TO_SKIP, 1));
 	}
