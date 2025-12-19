@@ -79,7 +79,7 @@ public class DockableMultispectraPlotPanel extends DockableMSFeatureQCPlotPanel{
 		mspPlotPanel.showFeatureData(currentExperiment, plotParametersObject);
 	}
 	
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 		mspPlotPanel.clearPanel();
 	}
 

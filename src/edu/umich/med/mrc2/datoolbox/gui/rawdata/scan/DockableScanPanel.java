@@ -64,7 +64,7 @@ public class DockableScanPanel extends DefaultSingleCDockable {
 		return scanTable;
 	}
 	
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 		scanTable.clearTable();
 	}
 }

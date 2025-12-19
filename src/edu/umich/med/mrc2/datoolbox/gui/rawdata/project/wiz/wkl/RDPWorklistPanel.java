@@ -617,7 +617,7 @@ public class RDPWorklistPanel extends RDPMetadataWizardPanel
 	}
 
 	@Override
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 		instrumentSequenceTable.clearTable();		
 	}
 }

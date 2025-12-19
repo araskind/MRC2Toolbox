@@ -170,15 +170,12 @@ public class DatasetSummaryDialog extends JDialog
 	}
 	
 	private void createDataSetSummary(MsFeatureInfoBundleCollection featureCollection) {
-		// TODO Auto-generated method stub
 		
 		List<LIMSExperiment> experiments = 
 				featureCollection.getFeatures().stream().
 				map(b -> b.getExperiment()).distinct().
 				sorted().collect(Collectors.toList());
 		experimentsTable.setTableModelFromExperimentList(experiments);
-		
-		
 	}
 	
 	@Override

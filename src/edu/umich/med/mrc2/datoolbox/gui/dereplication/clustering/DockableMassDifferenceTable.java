@@ -70,7 +70,9 @@ public class DockableMassDifferenceTable extends DefaultSingleCDockable {
 		idp.setVisible(true);
 	}
 
-	public void setTableModelFromFeatures(Collection<MsFeature> selectedFeatures, MsFeatureCluster activeCluster) {
+	public void setTableModelFromFeatures(
+			Collection<MsFeature> selectedFeatures, 
+			MsFeatureCluster activeCluster) {
 
 		TableUpdateTask task = new TableUpdateTask(selectedFeatures, activeCluster);
 		idp = new IndeterminateProgressDialog("Uptating table data ...", massDifferenceTable, task);
@@ -79,9 +81,7 @@ public class DockableMassDifferenceTable extends DefaultSingleCDockable {
 	}
 
 	class TableUpdateTask extends LongUpdateTask {
-		/*
-		 * Main task. Executed in background thread.
-		 */
+
 		private Collection<MsFeature> featureList;
 		private MsFeatureCluster selectedCluster;
 
@@ -102,6 +102,7 @@ public class DockableMassDifferenceTable extends DefaultSingleCDockable {
 
 			if (selectedCluster != null && featureList == null)
 				massDifferenceTable.setTableModelFromFeatureCluster(selectedCluster);
+			
 			if (selectedCluster != null && featureList != null)
 				massDifferenceTable.setTableModelFromFeatures(featureList, selectedCluster);
 

@@ -173,7 +173,6 @@ public class TextUtils {
 			result.append("\n");
 			result.append(line.toString());
 		}
-
 		return result.toString();
 	}
 

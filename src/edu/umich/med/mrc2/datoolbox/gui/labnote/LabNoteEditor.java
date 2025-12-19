@@ -483,9 +483,7 @@ public class LabNoteEditor extends JDialog implements ActionListener, ItemListen
 				limsExperiment.setDesign(design);
 				ExperimentalSample[] samples = limsExperiment.getExperimentDesign().getSamples().
 						stream().toArray(size -> new ExperimentalSample[size]);
-				DefaultComboBoxModel<ExperimentalSample> aModel =
-						new DefaultComboBoxModel<ExperimentalSample>(samples);
-				sampleComboBox.setModel(aModel);
+				sampleComboBox.setModel(new DefaultComboBoxModel<>(samples));
 				sampleComboBox.setSelectedIndex(-1);
 			}
 //			AssayMethod[] assays = null;

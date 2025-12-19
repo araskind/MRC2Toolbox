@@ -98,6 +98,7 @@ import edu.umich.med.mrc2.datoolbox.gui.integration.DataIntegratorPanel;
 import edu.umich.med.mrc2.datoolbox.gui.io.DataExportDialog;
 import edu.umich.med.mrc2.datoolbox.gui.io.IntegratedReportDialog;
 import edu.umich.med.mrc2.datoolbox.gui.io.MultiFileDataImportDialog;
+import edu.umich.med.mrc2.datoolbox.gui.io.NormalizedTargetedDataSelectionDialog;
 import edu.umich.med.mrc2.datoolbox.gui.io.PeakQualityImportDialog;
 import edu.umich.med.mrc2.datoolbox.gui.io.excel.ExcelImportWizard;
 import edu.umich.med.mrc2.datoolbox.gui.io.mwtab.MWTabExportDialog;
@@ -136,7 +137,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io.ImportBinnerAnnotations
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io.MiltiCefPeakQualityImportTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io.MultiCefDataAddTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io.MultiCefImportTask;
-import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io.ProFinderArchivePreprocessingTask;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io.ProFinderResultsImportTaskTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io.QuantMatrixImportTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.library.ClearIdentificationsTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.library.LibrarySearchTask;
@@ -279,7 +280,7 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 		
 		dataImputationSetupDialog = new DataImputationSetupDialog(this);
 		duplicateMergeDialog = new DuplicateMergeDialog(this);
-		selectedFeaturesMap = new TreeMap<DataPipeline, Collection<MsFeature>>();
+		selectedFeaturesMap = new TreeMap<>();
 		activeMsFeatureSet = null;
 		activeFeatureFilter = FeatureFilter.ALL_FEATURES;
 	}
@@ -402,24 +403,21 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 			return;
 		}
 		super.actionPerformed(event);
-		
-		if (currentExperiment == null)
-			return;
 
-		if (currentExperiment.getExperimentDesign() == null || 
+		if (currentExperiment == null || currentExperiment.getExperimentDesign() == null || 
 				currentExperiment.getExperimentDesign().getSamples().isEmpty())
 			return;
 
 		String command = event.getActionCommand();
-		
-//		if (command.equals(MainActionCommands.LOAD_DATA_COMMAND.getName()))
-//			showDataLoader();
 
 		if (command.equals(MainActionCommands.LOAD_DATA_FROM_MULTIFILES_COMMAND.getName()))
 			showMultifileDataLoader(null, DataTypeForImport.AGILENT_UNTARGETED);
 		
 		if (command.equals(MainActionCommands.ADD_DATA_FROM_MULTIFILES_COMMAND.getName()))
 			showMultifileDataLoader(activeDataPipeline, DataTypeForImport.AGILENT_UNTARGETED);
+		
+		if (command.equals(MainActionCommands.SETUP_COMPOUND_NAME_VERIFICATION_COMMAND.getName()))
+			setupCompoundNameVerification();
 		
 		if (command.equals(MainActionCommands.LOAD_DATA_FROM_PROFINDER_PFA_COMMAND.getName()))
 			showMultifileDataLoader(null, DataTypeForImport.AGILENT_PROFINDER_TARGETED);
@@ -433,10 +431,7 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 		if (command.equals(MainActionCommands.LOAD_LIBRARY_COMMAND.getName()))
 			loadLibrary();
 		
-		if(activeDataPipeline == null) {
-			return;
-		}
-		else {
+		if(activeDataPipeline != null) {
 			
 			if (command.equals(MainActionCommands.ADD_PEAK_QUALITY_DATA_FROM_MULTIFILES_COMMAND.getName()))
 				setUpPeakQualityDataImport();
@@ -445,7 +440,7 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 				addPeakQualityData();
 				
 			if (command.equals(MainActionCommands.CALC_FEATURES_STATS_COMMAND.getName()))
-				calculateDataStats();
+				setupDataStatsCalculation();
 			
 			if (command.equals(MainActionCommands.RECALCULATE_STATISTICS_WITH_SELECTED_POOLS_COMMAND.getName()))
 				recalculateDataStatsWithSelectedPools();
@@ -495,7 +490,6 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 			if (command.equals(MainActionCommands.SHOW_PRIMARY_BINNER_ANNOTATED_FEATURES_COMMAND.getName()))
 				showBinnerAnnotated(true);
 
-			// Feature popup
 			if (command.equals(MainActionCommands.EDIT_FEATURE_METADATA_COMMAND.getName()))
 				editFeatureMetaData();
 
@@ -583,14 +577,10 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 					
 			if (command.equals(MainActionCommands.RUN_MZ_DIFFERENCE_ANALYSIS_COMMAND.getName()))
 				runMZDifferenceAnalysis();
-
-//			if (command.equals(MainActionCommands.GET_DATA_MATRIX_FOR_FEATURE_SET_AND_DESIGN.getName()))
-//				createDataMatrixForActiveFeatureSet();
 		}	
 	}
 
 	private void setUpMZDifferenceAnalysis() {
-		// TODO Auto-generated method stub
 		
 		mzDeltaAnalysisDialog = new MZDeltaAnalysisDialog(this);
 		mzDeltaAnalysisDialog.setLocationRelativeTo(this.getContentPane());
@@ -969,7 +959,6 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 			MessageDialog.showErrorMsg(
 					"No identified features found, please run library search first!",
 					this.getContentPane());
-			return;
 		} else {
 			Set<CompoundIdSource> idSources = 
 					identifiedFeatures.stream().
@@ -989,7 +978,7 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 					map(f -> f.getPrimaryIdentity().getMsRtLibraryMatch().getLibraryTargetId()).
 					distinct().collect(Collectors.toSet());
 
-			Collection<CompoundLibrary> libraries = new HashSet<CompoundLibrary>();
+			Collection<CompoundLibrary> libraries = new HashSet<>();
 			try {
 				libraries = MSRTLibraryUtils.getLibrariesForTargets(targetIds);
 			} catch (Exception e) {
@@ -1002,7 +991,7 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 						this.getContentPane());
 				return;
 			}
-			libsToLoad = new HashSet<CompoundLibrary>();
+			libsToLoad = new HashSet<>();
 			for (CompoundLibrary l : libraries) {
 
 				boolean loaded = false;
@@ -1193,6 +1182,15 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 		dataImputationSetupDialog.setLocationRelativeTo(MRC2ToolBoxCore.getMainWindow());
 		dataImputationSetupDialog.setVisible(true);
 	}
+	
+	private void setupCompoundNameVerification() {
+		
+		NormalizedTargetedDataSelectionDialog ntdDialog = 
+				new NormalizedTargetedDataSelectionDialog(
+						this, currentExperiment.getLibraryDirectory(), true);
+		ntdDialog.setLocationRelativeTo(this.getContentPane());
+		ntdDialog.setVisible(true);
+	}
 
 	private void showMultifileDataLoader(DataPipeline pipeline, DataTypeForImport importType) {
 
@@ -1204,16 +1202,6 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 		multiFileDataImportDialog.setLocationRelativeTo(this.getContentPane());
 		multiFileDataImportDialog.setVisible(true);
 	}
-
-//	private void showDataLoader() {
-//
-//		if(currentExperiment == null)
-//			return;
-//		
-//		textDataImportDialog = new TextDataImportDialog();
-//		textDataImportDialog.setLocationRelativeTo(this.getContentPane());
-//		textDataImportDialog.setVisible(true);
-//	}
 	
 	private void setUpPeakQualityDataImport() {
 		
@@ -1228,7 +1216,7 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 	}
 	
 	private void addPeakQualityData() {
-		// TODO Auto-generated method stub
+
 		Collection<File> cefFiles = peakQualityImportDialog.getCefFiles();
 		if(cefFiles.isEmpty()) {
 			MessageDialog.showWarningMsg(
@@ -1247,7 +1235,7 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 
 	}
 
-	private void calculateDataStats() {
+	private void setupDataStatsCalculation() {
 
 		if(currentExperiment == null || activeDataPipeline == null)
 			return;
@@ -1441,7 +1429,7 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 	public synchronized void clearPanel() {
 
 		clearFeatureData();
-		featureDataTable.clearTable();
+		clearFeatureTable();
 	}
 
 	public void clearFeatureData() {
@@ -1451,10 +1439,17 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 		featureIntensitiesTable.clearTable();
 		spectrumPlot.removeAllDataSets();
 		spectrumTable.clearTable();
-		identificationsTable.clearTable();
+		clearIdentificationTable();
 		molStructurePanel.clearPanel();
 		featureAnnotationPanel.clearPanel();
 		binnerAnnotationDetailsPanel.clearPanel();
+	}
+	
+	private void clearIdentificationTable() {
+		
+		identificationsTable.getTable().getSelectionModel().removeListSelectionListener(this);		
+		identificationsTable.clearTable();
+		identificationsTable.getTable().getSelectionModel().addListSelectionListener(this);
 	}
 
 	private void editFeatureMetaData() {
@@ -1471,7 +1466,7 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 		Collection<MsFeature> features = 
 				currentExperiment.getActiveFeatureSetForDataPipeline(activeDataPipeline)
 				.getFeatures();
-		HashSet<MsFeature> filtered = new HashSet<MsFeature>();
+		HashSet<MsFeature> filtered = new HashSet<>();
 		boolean append;
 
 		String featureName = filterFeaturesDialog.getFeatureNameSubstring();
@@ -1573,7 +1568,7 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 		}
 		Collection<MsFeature> selected = featureDataTable.getSelectedFeatures();
 
-		if (selected.size() > 0) {
+		if (!selected.isEmpty()) {
 
 			int approve = MessageDialog.showChoiceMsg(
 					"Remove selected feature(s) from subset?\n" + "(NO UNDO!)", 
@@ -1606,11 +1601,11 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 	public void setTableModelFromFeatureSet(
 			MsFeatureSet activeFeatureSetForMethod) {
 		
-		if(activeFeatureSetForMethod.equals(activeMsFeatureSet)
-				&& featureDataTable.getTable().getRowCount() == activeMsFeatureSet.getFeatures().size())
-			return;
+//		if(activeFeatureSetForMethod.equals(activeMsFeatureSet)
+//				&& featureDataTable.getTable().getRowCount() == activeMsFeatureSet.getFeatures().size())
+//			return;
 		
-		featureDataTable.clearTable();
+		clearFeatureTable();
 		if(activeMsFeatureSet != null)
 			activeMsFeatureSet.removeListener(this);
 
@@ -1618,6 +1613,12 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 		activeMsFeatureSet.addListener(this);
 		setTableModelFromFeatureMap(Collections.singletonMap(
 				activeDataPipeline, activeMsFeatureSet.getFeatures()));
+	}
+	
+	private void clearFeatureTable() {
+		featureDataTable.getTable().getSelectionModel().removeListSelectionListener(this);
+		featureDataTable.clearTable();
+		featureDataTable.getTable().getSelectionModel().addListSelectionListener(this);
 	}
 
 	public void showFeatureData(MsFeature selectedFeature) {
@@ -1801,8 +1802,10 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 
 			if (e.getSource().getClass().equals(CalculateStatisticsTask.class)) {
 				//	updateStatisticsResults((CalculateStatisticsTask) e.getSource());
-				MRC2ToolBoxCore.getMainWindow().switchPanelForDataPipeline(
-						activeDataPipeline, PanelList.FEATURE_DATA);
+//				MRC2ToolBoxCore.getMainWindow().switchPanelForDataPipeline(
+//						activeDataPipeline, PanelList.FEATURE_DATA);
+				setTableModelFromFeatureMap(Collections.singletonMap(
+						activeDataPipeline, activeMsFeatureSet.getFeatures()));
 			}
 			if (e.getSource().getClass().equals(ImputeMissingDataTask.class))
 				finalizeImputeMissingDataTask((ImputeMissingDataTask) e.getSource());
@@ -1848,8 +1851,8 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 			if (e.getSource().getClass().equals(ImportBinnerAnnotationsForUntargetedDataTask.class))
 				finalizeBinnerAnnotationsImportTask((ImportBinnerAnnotationsForUntargetedDataTask)e.getSource());	
 			
-			if (e.getSource().getClass().equals(ProFinderArchivePreprocessingTask.class))
-				finalizeProFinderArchivePreprocessingTask((ProFinderArchivePreprocessingTask)e.getSource());
+			if (e.getSource().getClass().equals(ProFinderResultsImportTaskTask.class))
+				finalizeProFinderResultsImportTaskTask((ProFinderResultsImportTaskTask)e.getSource());
 			
 			if (e.getSource().getClass().equals(MsFeatureAveragingTask.class))
 				finalizeMsFeatureAveragingTask((MsFeatureAveragingTask)e.getSource());		
@@ -1893,7 +1896,7 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 	}
 
 	//	TODO Calculate statistics and save the data
-	private synchronized void finalizeProFinderArchivePreprocessingTask(ProFinderArchivePreprocessingTask task) {
+	private synchronized void finalizeProFinderResultsImportTaskTask(ProFinderResultsImportTaskTask task) {
 
 		DataPipeline dataPipeline = task.getDataPipeline();
 		List<DataFile> filesWithoutTimestamp = 
@@ -1923,14 +1926,6 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 		MRC2ToolBoxCore.getTaskController().addTask(statsTask);
 	}
 
-//	private void finalizeMergeDuplicateFeaturesTask(MergeDuplicateFeaturesTask task) {
-//
-//		CalculateStatisticsTask statsTask = 
-//				new CalculateStatisticsTask(currentExperiment, activeDataPipeline, true);
-//		statsTask.addTaskListener(this);
-//		MRC2ToolBoxCore.getTaskController().addTask(statsTask);
-//	}
-	
 	private synchronized void finalizeImputeMissingDataTask(ImputeMissingDataTask task) {
 
 		String mName = task.getImputationMethod().getName();
@@ -2278,7 +2273,7 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 
 		MsFeature selectedFeature = getSelectedFeature();
 		if(selectedFeature == null)
-			identificationsTable.clearTable();
+			clearIdentificationTable();
 		else
 			identificationsTable.setModelFromMsFeature(selectedFeature);
 	}
@@ -2349,6 +2344,23 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 		det.setMsFeatureSet4export(activeMsFeatureSet.getFeatures());
 		det.addTaskListener(this);
 		MRC2ToolBoxCore.getTaskController().addTask(det);		
+	}
+	
+	public void loadCompleteDataSetForActivedataPipeline() {
+		
+		if(currentExperiment == null || activeDataPipeline == null)
+			return;
+		
+		MsFeatureSet completeSet = 
+				currentExperiment.getAllFeaturesSetFordataPipeline(activeDataPipeline);
+		if(!completeSet.equals(activeMsFeatureSet)) {
+			activeMsFeatureSet = completeSet;
+			currentExperiment.setActiveFeatureSetForDataPipeline(activeMsFeatureSet, activeDataPipeline);
+		}
+		else {
+			setTableModelFromFeatureMap(Collections.singletonMap(
+					activeDataPipeline, activeMsFeatureSet.getFeatures()));
+		}
 	}
 
 	@Override

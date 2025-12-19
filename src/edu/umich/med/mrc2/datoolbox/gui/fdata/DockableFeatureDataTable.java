@@ -146,9 +146,7 @@ public class DockableFeatureDataTable extends DefaultSingleCDockable{
 	}
 
 	class TableUpdateTask extends LongUpdateTask {
-		/*
-		 * Main task. Executed in background thread.
-		 */
+
 		private Map<DataPipeline, Collection<MsFeature>>featureMap;
 		private MsFeatureCluster selectedCluster;
 
@@ -169,6 +167,7 @@ public class DockableFeatureDataTable extends DefaultSingleCDockable{
 
 			if (selectedCluster != null)
 				featureDataTable.setTableModelFromFeatureCluster(selectedCluster);
+			
 			if (featureMap != null)
 				featureDataTable.setTableModelFromFeatureMap(featureMap);
 

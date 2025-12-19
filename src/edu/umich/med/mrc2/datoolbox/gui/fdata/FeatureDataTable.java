@@ -191,6 +191,7 @@ public class FeatureDataTable extends BasicFeatureTable {
 					model.getColumnIndex(FeatureDataTableModel.MS_FEATURE_COLUMN));
 	}
 
+	@Override
 	public synchronized void clearTable() {
 		model.setRowCount(0);
 	}

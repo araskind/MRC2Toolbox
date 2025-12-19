@@ -33,7 +33,11 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
+import java.util.TreeMap;
 import java.util.prefs.Preferences;
 
 import javax.swing.DefaultComboBoxModel;
@@ -54,15 +58,22 @@ import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
 
+import org.apache.commons.lang3.StringUtils;
+
 import edu.umich.med.mrc2.datoolbox.data.CompoundLibrary;
 import edu.umich.med.mrc2.datoolbox.gui.library.manager.LibrarySelectorDialog;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
+import edu.umich.med.mrc2.datoolbox.gui.utils.IndeterminateProgressDialog;
+import edu.umich.med.mrc2.datoolbox.gui.utils.InformationDialog;
+import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
+import edu.umich.med.mrc2.datoolbox.utils.DataImportUtils;
 import edu.umich.med.mrc2.datoolbox.utils.DelimitedTextParser;
 import edu.umich.med.mrc2.datoolbox.utils.TextUtils;
+import edu.umich.med.mrc2.datoolbox.utils.mslib.CompoundNameMatchingTask;
 
 public class NormalizedTargetedDataSelectionDialog extends JDialog implements ActionListener, BackedByPreferences {
 	
@@ -76,23 +87,25 @@ public class NormalizedTargetedDataSelectionDialog extends JDialog implements Ac
 	private Preferences preferences;
 	public static final String FILE_NAME_MASK = "FILE_NAME_MASK";
 	private static final String LINES_TO_SKIP = "LINES_TO_SKIP";
-	
-	private File inputFile;
-	private File baseLibraryDirectory;
+
 	private JTextField inputFileTextField;
 	private JTextField fileNameMaskField;
 	private JSpinner lineSkipSpinner;
 	private JComboBox<String> featureColumnComboBox;
-	private LibrarySelectorDialog librarySelectorDialog;
-
-	private CompoundLibrary referenceLibrary;
-
 	private JLabel refLibraryNameLabel;
+	private LibrarySelectorDialog librarySelectorDialog;
+	private JButton btnSave;
+	
+	private File inputFile;
+	private File baseLibraryDirectory;
+	private CompoundLibrary referenceLibrary;
 	
 	private static final String BROWSE = "BROWSE";
 
 	public NormalizedTargetedDataSelectionDialog(
-			ActionListener parserListener, File baseLibraryDirectory) {
+			ActionListener parserListener, 
+			File baseLibraryDirectory, 
+			boolean useToverifyCompoundData) {
 		super();
 		this.baseLibraryDirectory = baseLibraryDirectory;
 		setTitle("Select normalized targeted data file");
@@ -244,11 +257,21 @@ public class NormalizedTargetedDataSelectionDialog extends JDialog implements Ac
 		};
 		btnCancel.addActionListener(al);
 
-		JButton btnSave = new JButton(
-				MainActionCommands.PARSE_NORMALIZED_TARGETED_DATA_COMMAND.getName());
-		btnSave.setActionCommand(
-				MainActionCommands.PARSE_NORMALIZED_TARGETED_DATA_COMMAND.getName());
-		btnSave.addActionListener(parserListener);
+		if(useToverifyCompoundData) {
+			
+			btnSave = new JButton(
+					MainActionCommands.VERIFY_COMPOUNDS_IN_TARGETED_DATA_COMMAND.getName());
+			btnSave.setActionCommand(
+					MainActionCommands.VERIFY_COMPOUNDS_IN_TARGETED_DATA_COMMAND.getName());
+			btnSave.addActionListener(this);
+		}
+		else {
+			btnSave = new JButton(
+					MainActionCommands.PARSE_NORMALIZED_TARGETED_DATA_COMMAND.getName());
+			btnSave.setActionCommand(
+					MainActionCommands.PARSE_NORMALIZED_TARGETED_DATA_COMMAND.getName());
+			btnSave.addActionListener(parserListener);
+		}
 		buttonPanel.add(btnSave);
 		JRootPane rootPane = SwingUtilities.getRootPane(btnSave);
 		rootPane.registerKeyboardAction(al, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
@@ -276,8 +299,63 @@ public class NormalizedTargetedDataSelectionDialog extends JDialog implements Ac
 		
 		if(e.getActionCommand().equals(MainActionCommands.SET_REFERENCE_TARGETED_LIBRARY_COMMAND.getName()))
 			setReferenceLibrary();
+		
+		if(e.getActionCommand().equals(MainActionCommands.VERIFY_COMPOUNDS_IN_TARGETED_DATA_COMMAND.getName()))
+			verifyCompoundData();
 	}
 	
+	private void verifyCompoundData() {
+
+		if(referenceLibrary == null || inputFile == null) {
+			
+			MessageDialog.showErrorMsg(
+					"Both input data file and reference library must be defined", this);
+		}
+		else {
+			String[][] inputDataArray = 
+					DelimitedTextParser.parseTextFile(
+							inputFile, MRC2ToolBoxConfiguration.getTabDelimiter());
+			
+			String featureColumn = getFeatureColumnName();
+			if(featureColumn == null || featureColumn.isBlank()) {
+				MessageDialog.showErrorMsg("Feature column not specified", this);
+				return;
+			}	
+			String[] compoundNames = DataImportUtils.extractNamedColumn(
+					inputDataArray, featureColumn, getNumberOfLinesToSkipAfterHeader());
+			long badNameCount = Arrays.asList(compoundNames).stream().
+					filter(n -> (Objects.isNull(n) || n.isBlank())).count();
+			if(badNameCount > 0) {
+				MessageDialog.showErrorMsg("Missing names in \"" + featureColumn + "\" column");
+				return;
+			}
+			List<String> errors = new ArrayList<>();
+			CompoundNameMatchingTask task = new CompoundNameMatchingTask(
+					compoundNames, 
+					referenceLibrary,
+					errors, 
+					new TreeMap<>(), 
+					false,
+					null);
+			IndeterminateProgressDialog idp = 
+					new IndeterminateProgressDialog(
+							"Fetching reference library and matching compound names ...", this, task);
+			idp.setLocationRelativeTo(this.getContentPane());
+			idp.setVisible(true);				
+			
+			if(!errors.isEmpty()) {
+				String message = errors.remove(0);
+				String details = StringUtils.join(errors, "\n");
+				InformationDialog infoDialog = new InformationDialog(
+						"Unmatched compounds", 
+						message, 
+						details);
+				infoDialog.setLocationRelativeTo(this);
+				infoDialog.setVisible(true);
+			}
+		}		
+	}
+
 	private void selectReferenceLibrary() {
 
 		librarySelectorDialog = new LibrarySelectorDialog(this);

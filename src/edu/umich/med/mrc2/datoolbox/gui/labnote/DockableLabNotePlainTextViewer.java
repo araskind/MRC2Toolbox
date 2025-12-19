@@ -56,6 +56,10 @@ public class DockableLabNotePlainTextViewer extends DefaultSingleCDockable {
 	public synchronized void clearPanel() {
 		textArea.setText("");
 	}
+	
+	public void clearPanelUnsynchronized() {
+		textArea.setText("");
+	}
 
 	public String getText() {
 		return textArea.getText();

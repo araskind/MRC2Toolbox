@@ -361,4 +361,17 @@ public class DockableExperimentSummaryPanel extends DefaultSingleCDockable imple
 		contactPersonDataLabel.setText("");
 		piDataLabel.setText("");
 	}
+	
+	public void clearPanelUnsynchronized() {
+
+		expIdValueLabel.setText("");
+		expNameLabel.setText("");
+		startDateLabel.setText("");
+		descriptionTextArea.setText("");
+		notesTextArea.setText("");
+		projectNameLabel.setText("");
+		clientDataLabel.setText("");
+		contactPersonDataLabel.setText("");
+		piDataLabel.setText("");
+	}
 }

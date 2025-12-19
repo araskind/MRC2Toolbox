@@ -96,7 +96,7 @@ public class DockableCompoundStructuralDescriptorsPanel extends DefaultSingleCDo
 		structuralDescriptorsPanel.unlockEditing();
 	}
 
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 		structuralDescriptorsPanel.clearPanel();		
 	}
 }

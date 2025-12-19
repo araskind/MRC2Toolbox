@@ -191,9 +191,6 @@ public class SampleTypeLookupDialog extends JDialog implements ActionListener{
 	}
 
 	class SampleTypeLookupTask extends LongUpdateTask {
-		/*
-		 * Main task. Executed in background thread.
-		 */
 
 		public SampleTypeLookupTask() {
 			super();

@@ -225,7 +225,9 @@ public class DockableExperimentDataPanel  extends DefaultSingleCDockable
 		public Void doInBackground() {
 
 			if(experimentList == null) {
-				clearPanel();
+				
+				experimentListingTable.getTable().clearTable();
+				experimentSummary.clearPanelUnsynchronized();
 				experimentListingTable.setModelFromExperimentCollection(experimentList);
 			}
 			else {

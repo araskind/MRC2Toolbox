@@ -152,7 +152,8 @@ public enum MainActionCommands {
 
 	// Load data
 	LOAD_DATA_COMMAND("Load quantitative data"),
-	LOAD_DATA_FROM_MULTIFILES_COMMAND("Load quantitative data from multiple files"),
+	LOAD_DATA_FROM_MULTIFILES_COMMAND("Load quantitative data from multiple files"),	
+	SETUP_COMPOUND_NAME_VERIFICATION_COMMAND("Setup compound name verification"),	
 	LOAD_DATA_FROM_PROFINDER_PFA_COMMAND("Load quantitative data from ProFinder PFA file"),
 	SELECT_PROFINDER_SIMPLE_CSV_COMMAND("Select simple ProFinder CSV export file"),
 	SELECT_PROFINDER_DETAILED_CSV_COMMAND("Select detailed ProFinder CSV export file"),
@@ -161,6 +162,7 @@ public enum MainActionCommands {
 	SELECT_REFERENCE_TARGETED_LIBRARY_COMMAND("Select reference library"),
 	SET_REFERENCE_TARGETED_LIBRARY_COMMAND("Set reference library"),
 	PARSE_NORMALIZED_TARGETED_DATA_COMMAND("Parse normalized targeted data file"),
+	VERIFY_COMPOUNDS_IN_TARGETED_DATA_COMMAND("Verify compound names in targeted data file"),
 	ADD_DATA_FROM_MULTIFILES_COMMAND("Add quantitative data to active assay from multiple files"),
 	ADD_PEAK_QUALITY_DATA_FROM_MULTIFILES_COMMAND("Add peak quality data to active assay"),
 	START_PEAK_QUALITY_DATA_IMPORT_COMMAND("Start peak quality data import"),

@@ -52,7 +52,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 import edu.umich.med.mrc2.datoolbox.utils.AgilentProfinderDetailedExportParser;
 import edu.umich.med.mrc2.datoolbox.utils.DelimitedTextParser;
 
-public class ProFinderArchivePreprocessingTask extends DataWithLibraryImportAbstractTask {
+public class ProFinderResultsImportTaskTask extends DataWithLibraryImportAbstractTask {
 
 	private Set<SampleDataResultObject> dataToImport;
 	private File proFinderSimpleCsvExportFile;
@@ -64,7 +64,7 @@ public class ProFinderArchivePreprocessingTask extends DataWithLibraryImportAbst
 	private Map<String, Double> unmatchedProFinderCompounds;
 	private File proFinderDetailedCsvExportFile;
 
-	public ProFinderArchivePreprocessingTask(
+	public ProFinderResultsImportTaskTask(
 			DataPipeline dataPipeline,
 			File pfaTempDir,
 			Set<SampleDataResultObject> dataToImport, 			
@@ -240,7 +240,7 @@ public class ProFinderArchivePreprocessingTask extends DataWithLibraryImportAbst
 	@Override
 	public Task cloneTask() {
 
-		return new ProFinderArchivePreprocessingTask(
+		return new ProFinderResultsImportTaskTask(
 				dataPipeline,
 				tmpCefDirectory,
 				dataToImport, 			

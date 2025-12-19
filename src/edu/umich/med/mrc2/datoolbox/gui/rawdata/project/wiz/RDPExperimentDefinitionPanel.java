@@ -94,7 +94,7 @@ public class RDPExperimentDefinitionPanel extends RDPMetadataWizardPanel {
 	}
 
 	@Override
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 		experimentDefinitionPanel.clearPanel();
 	}
 }

@@ -469,7 +469,7 @@ public class BinnerAnnotationsImportPanel extends JPanel
 				formDataChanged(event));
 	}
 	
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 		clustersTable.clearTable();
 		dataSetNameTextField.setText("");
 		descriptionTextArea.setText("");

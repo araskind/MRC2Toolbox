@@ -99,4 +99,29 @@ public class DataImportUtils {
 			return experiment.getExperimentDesign().getReferenceSamples().stream().
 					filter(s -> fileName.contains(s.getId())).findFirst().orElse(null);
 	}
+	
+	public static String[] extractNamedColumn(
+			String[][] inputDataArray, 
+			String columnName,
+			int linesToSkipAfterHeader) {
+		
+		int columnIndex = -1;
+		for(int i=0; i<inputDataArray[0].length; i++) {
+			
+			if(inputDataArray[0][i].equals(columnName)) {
+				
+				columnIndex = i;
+				break;
+			}
+		}
+		if(columnIndex == -1)
+			return new String[0];
+		
+		int start = 1 + linesToSkipAfterHeader;		
+		String[]columnData = new String[inputDataArray.length - start];
+		for(int i=start; i<inputDataArray.length; i++) 			
+			columnData[i-start] = inputDataArray[i][columnIndex].trim();
+		
+		return columnData;
+	}
 }

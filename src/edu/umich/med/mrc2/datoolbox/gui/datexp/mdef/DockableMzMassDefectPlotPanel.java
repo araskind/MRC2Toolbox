@@ -110,10 +110,13 @@ public class DockableMzMassDefectPlotPanel extends DefaultSingleCDockable
 		private String featureSetTitle;
 		private Collection<MsFeature>features;
 				
-		public CreateMassDefectDataSetTask(String featureSetTitle, Collection<MsFeature>features) {
+		public CreateMassDefectDataSetTask(
+				String featureSetTitle, 
+				Collection<MsFeature>features) {
 			this.features = features;
 			this.featureSetTitle = featureSetTitle;
 		}
+		
 		@Override
 		public Void doInBackground() {
 

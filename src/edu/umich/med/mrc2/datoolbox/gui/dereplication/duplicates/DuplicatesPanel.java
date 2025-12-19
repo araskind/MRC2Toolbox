@@ -48,6 +48,7 @@ import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignSubsetEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.FeatureSetEvent;
 import edu.umich.med.mrc2.datoolbox.gui.dereplication.ClusterDisplayPanel;
+import edu.umich.med.mrc2.datoolbox.gui.fdata.FeatureDataPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainWindow;
 import edu.umich.med.mrc2.datoolbox.gui.main.PanelList;
@@ -397,8 +398,13 @@ public class DuplicatesPanel extends ClusterDisplayPanel {
 		
 		MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
 		MainWindow.hideProgressDialog();
-		MRC2ToolBoxCore.getMainWindow().switchPanelForDataPipeline(
-				activeDataPipeline, PanelList.FEATURE_DATA);
+		MRC2ToolBoxCore.getMainWindow().showPanel(PanelList.FEATURE_DATA);
+		FeatureDataPanel fdp = (FeatureDataPanel)MRC2ToolBoxCore.getMainWindow().getPanel(PanelList.FEATURE_DATA);		
+		fdp.loadCompleteDataSetForActivedataPipeline();
+		MRC2ToolBoxCore.getMainWindow().getExperimentSetupDraw().switchDataPipeline(currentExperiment, activeDataPipeline);
+		
+//		MRC2ToolBoxCore.getMainWindow().switchPanelForDataPipeline(
+//				activeDataPipeline, PanelList.FEATURE_DATA);
 	}
 
 	@Override

@@ -166,7 +166,7 @@ public class DockableAcquisitionMethodDataPanel extends DefaultSingleCDockable
 	}
 	
 	@SuppressWarnings("unchecked")
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 		
 		method = null;	
 		polarityComboBox.setSelectedIndex(-1);

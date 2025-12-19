@@ -73,7 +73,7 @@ public class DockableDataVariationPlotPanel extends DockableMSFeatureQCPlotPanel
 		chartColorOption = ChartColorOption.BY_SAMPLE_TYPE;		
 	}
 
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 		featurePropertiesTimelinePlot.removeAllDataSets();
 	}
 

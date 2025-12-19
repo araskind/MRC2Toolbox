@@ -264,7 +264,7 @@ public class LabNoteBookPanel extends DockableMRC2ToolboxPanel {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			noteViewer.clearPanel();
+			noteViewer.clearPanelUnsynchronized();
 			labNotesTable.setTableModelFromAnnotations(annotations);
 			return null;
 		}
@@ -474,7 +474,7 @@ public class LabNoteBookPanel extends DockableMRC2ToolboxPanel {
 	public synchronized void clearPanel() {
 
 		labNotesTable.clearTable();
-		noteViewer.clearPanel();;
+		noteViewer.clearPanelUnsynchronized();
 		labNoteSearchForm.clearForm();
 	}
 

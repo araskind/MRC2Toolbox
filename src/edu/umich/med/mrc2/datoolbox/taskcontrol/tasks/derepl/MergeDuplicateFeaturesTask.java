@@ -299,8 +299,8 @@ public class MergeDuplicateFeaturesTask extends FeatureSetAlteringTask implement
 		total = 100;
 		processed = 20;
 		
-		currentExperiment.deleteFeatures(featuresToRemove, activeDataPipeline);		
-		processed = 100;
+		currentExperiment.deleteFeaturesSilently(featuresToRemove, activeDataPipeline);		
+		processed = 95;
 
 		currentExperiment.setDuplicateClustersForDataPipeline(activeDataPipeline, new HashSet<>());
 		processed = 100;

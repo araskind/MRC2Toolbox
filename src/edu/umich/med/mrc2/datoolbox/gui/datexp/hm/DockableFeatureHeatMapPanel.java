@@ -105,7 +105,7 @@ public class DockableFeatureHeatMapPanel extends DefaultSingleCDockable implemen
 			initPlotRedraw(chartSettingsPanel);
 	}
 	
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 
 		heatChart.removeAllDataSets();
 		chartSettingsPanel.clearSampleGroups();
@@ -150,11 +150,7 @@ public class DockableFeatureHeatMapPanel extends DefaultSingleCDockable implemen
 
 		@Override
 		public Void doInBackground() {
-			
-//			if(redrawTrigger.equals(chartSettingsPanel)) {
-//				redrawPlot();
-//				return null;
-//			}
+
 			if(redrawTrigger instanceof MsFeatureSet) {
 				loadFeatureCollection(experiment, (MsFeatureSet)redrawTrigger);
 				return null;
@@ -259,7 +255,8 @@ public class DockableFeatureHeatMapPanel extends DefaultSingleCDockable implemen
 			DataAnalysisProject experiment, 
 			MsFeatureSet featureSet) {
 
-		clearPanel();
+		heatChart.removeAllDataSets();
+		chartSettingsPanel.clearSampleGroups();
 		
 		if(experiment == null || experiment.getExperimentDesign() == null 
 				|| experiment.getExperimentDesign().getSamples().isEmpty()

@@ -97,6 +97,7 @@ public class FeatureDataPanelMenuBar extends CommonMenuBar {
 	private static final Icon extractDeltasIcon = GuiUtils.getIcon("extractDeltas", 24);
 	private static final Icon normalizedDataIcon = GuiUtils.getIcon("loess", 24);
 	private static final Icon loadPfaFileIcon = GuiUtils.getIcon("importFromProFinderPaf", 24);
+	private static final Icon matchCompoundsIcon = GuiUtils.getIcon("replaceCompound", 24);
 	
 	// Menus
 	private JMenu
@@ -118,7 +119,8 @@ public class FeatureDataPanelMenuBar extends CommonMenuBar {
 		loadFromExcelMenuItem,
 		loadLibraryDataMenuItem,
 		importBinnerAnnotationsMenuItem,
-		clearBinnerAnnotationsMenuItem;
+		clearBinnerAnnotationsMenuItem,
+		matchCompoundsMenuItem;
 
 	// Statistics items
 	private JMenuItem
@@ -188,6 +190,12 @@ public class FeatureDataPanelMenuBar extends CommonMenuBar {
 //		addFromMultiFileMenuItem = addItem(loadDataMenu, 
 //				MainActionCommands.ADD_DATA_FROM_MULTIFILES_COMMAND, 
 //				addMultiFileIcon);	
+		
+		loadDataMenu.addSeparator();
+		
+		matchCompoundsMenuItem = addItem(loadDataMenu, 
+				MainActionCommands.SETUP_COMPOUND_NAME_VERIFICATION_COMMAND, 
+				matchCompoundsIcon);
 		
 		loadFromProFinderArchiveMenuItem = addItem(loadDataMenu, 
 				MainActionCommands.LOAD_DATA_FROM_PROFINDER_PFA_COMMAND, 

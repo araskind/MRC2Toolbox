@@ -99,7 +99,7 @@
 									<root>true</root>
 									<content delegate="SplitDockStationFactory">
 										<fullscreen-action>false</fullscreen-action>
-										<node nodeId="1676064404309" orientation="VERTICAL" divider="0.5445887445887446">
+										<node nodeId="1676064404309" orientation="VERTICAL" divider="0.6175">
 											<leaf id="0" nodeId="1676064404566">
 												<placeholders>
 													<placeholder>dock.single.DockableLIMSDataPanel</placeholder>

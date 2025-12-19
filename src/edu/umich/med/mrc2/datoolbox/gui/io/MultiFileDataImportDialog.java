@@ -23,7 +23,6 @@ package edu.umich.med.mrc2.datoolbox.gui.io;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -37,12 +36,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
-import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -88,7 +84,6 @@ import edu.umich.med.mrc2.datoolbox.data.CompoundLibrary;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentalSample;
 import edu.umich.med.mrc2.datoolbox.data.LibraryMsFeature;
-import edu.umich.med.mrc2.datoolbox.data.LibraryMsFeatureDbBundle;
 import edu.umich.med.mrc2.datoolbox.data.ResultsFile;
 import edu.umich.med.mrc2.datoolbox.data.SampleDataResultObject;
 import edu.umich.med.mrc2.datoolbox.data.compare.SampleDataResultObjectComparator;
@@ -98,11 +93,9 @@ import edu.umich.med.mrc2.datoolbox.data.enums.FeatureAlignmentType;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
-import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.database.idt.AcquisitionMethodUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
-import edu.umich.med.mrc2.datoolbox.database.idt.MSRTLibraryUtils;
 import edu.umich.med.mrc2.datoolbox.gui.communication.DataPipelineEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.DataPipelineEventListener;
 import edu.umich.med.mrc2.datoolbox.gui.expdesign.editor.ReferenceSampleDialog;
@@ -124,10 +117,11 @@ import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskListener;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io.MultiCefDataAddTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io.MultiCefImportTask;
-import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io.ProFinderArchivePreprocessingTask;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io.ProFinderResultsImportTaskTask;
 import edu.umich.med.mrc2.datoolbox.utils.DataImportUtils;
 import edu.umich.med.mrc2.datoolbox.utils.DelimitedTextParser;
 import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
+import edu.umich.med.mrc2.datoolbox.utils.mslib.CompoundNameMatchingTask;
 
 public class MultiFileDataImportDialog extends JDialog
 	implements ActionListener, ItemListener, DataPipelineEventListener, BackedByPreferences{
@@ -170,7 +164,6 @@ public class MultiFileDataImportDialog extends JDialog
 	private DataFileSampleMatchPanel matchPanel;
 	private TaskListener dataLoadTaskListener;
 	private DataPipelineDefinitionPanel dataPipelineDefinitionPanel;
-	private IndeterminateProgressDialog idp;
 	private ReferenceSampleDialog rsd;	
 	private DataAcquisitionMethod activeDataAcquisitionMethod;
 	private Set<DataFile>dataFilesForMethod;
@@ -843,7 +836,7 @@ public class MultiFileDataImportDialog extends JDialog
 			Set<SampleDataResultObject> dataToImport, 
 			DataPipeline importPipeline) {
 				
-		ProFinderArchivePreprocessingTask task = new ProFinderArchivePreprocessingTask(
+		ProFinderResultsImportTaskTask task = new ProFinderResultsImportTaskTask(
 					importPipeline,
 					pfaTempDir,
 					dataToImport, 			
@@ -870,7 +863,8 @@ public class MultiFileDataImportDialog extends JDialog
 		MRC2ToolBoxCore.getTaskController().addTask(task);
 	}
 		
-	private void initiateGenericTargetedDataImport(Set<SampleDataResultObject> dataToImport,
+	private void initiateGenericTargetedDataImport(
+			Set<SampleDataResultObject> dataToImport,
 			DataPipeline importPipeline) {
 		// TODO Auto-generated method stub
 		
@@ -925,7 +919,14 @@ public class MultiFileDataImportDialog extends JDialog
 	
 	private void validateInputDataForNormalizedTargetedImport(Collection<String> errors) {
 		
-		CompoundNameMatchingTask task = new CompoundNameMatchingTask(errors);
+		nameFeatureMap = new TreeMap<>();
+		CompoundNameMatchingTask task = new CompoundNameMatchingTask(
+				compoundNames, 
+				referenceLibrary,
+				errors, 
+				nameFeatureMap, 
+				true,
+				MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExportsDirectory());
 		IndeterminateProgressDialog idp = 
 				new IndeterminateProgressDialog(
 						"Fetching reference library and matching compound names ...", this, task);
@@ -933,112 +934,113 @@ public class MultiFileDataImportDialog extends JDialog
 		idp.setVisible(true);
 	}
 	
-	class CompoundNameMatchingTask extends LongUpdateTask {
-
-		private Collection<String> errors;
-		private Collection<String> compoundErrors;
-			
-		public CompoundNameMatchingTask(Collection<String> errors) {
-			this.errors = errors;
-			nameFeatureMap = new TreeMap<>();
-		}
-
-		@Override
-		public Void doInBackground() {
-
-			fetchLibraryCompounds();
-			try {
-				matchCompounds();
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			return null;
-		}
-		
-		private void fetchLibraryCompounds() {
-			
-			if(referenceLibrary != null) {
-				
-				if(MRC2ToolBoxCore.getActiveMsLibraries().contains(referenceLibrary)) {
-					
-					referenceLibrary = MRC2ToolBoxCore.getActiveMsLibraries().stream().
-						filter(l -> l.getLibraryId().equals(referenceLibrary.getLibraryId())).
-						findFirst().orElse(null);
-				}
-				else {
-					try {
-						Connection conn = ConnectionManager.getConnection();
-						Collection<LibraryMsFeatureDbBundle>bundles =
-								MSRTLibraryUtils.createFeatureBundlesForLibrary(referenceLibrary.getLibraryId(), conn);
-						
-						for(LibraryMsFeatureDbBundle fBundle : bundles) {
-
-							if(fBundle.getConmpoundDatabaseAccession() != null) {
-
-								LibraryMsFeature newTarget = fBundle.getFeature();
-								MSRTLibraryUtils.attachIdentity(
-										newTarget, fBundle.getConmpoundDatabaseAccession(), fBundle.isQcStandard(), conn);
-
-								if(newTarget.getPrimaryIdentity() != null) {
-
-									newTarget.getPrimaryIdentity().setConfidenceLevel(fBundle.getIdConfidence());
-									MSRTLibraryUtils.attachMassSpectrum(newTarget, conn);
-									MSRTLibraryUtils.attachTandemMassSpectrum(newTarget, conn);
-									MSRTLibraryUtils.attachAnnotations(newTarget, conn);
-									referenceLibrary.addFeature(newTarget);
-								}
-							}
-						}
-						ConnectionManager.releaseConnection(conn);
-						MRC2ToolBoxCore.getActiveMsLibraries().add(referenceLibrary);	
-					}
-					catch (Exception e) {
-						e.printStackTrace();
-					}
-				}
-			}			
-		}
-		
-		private void matchCompounds() {
-
-			compoundErrors = new TreeSet<>();
-			for (String cpdName : compoundNames) {
-
-				LibraryMsFeature libFeature = referenceLibrary.getFeatureByNameIgnoreCase(cpdName);
-				if (libFeature == null)
-					compoundErrors.add(cpdName);
-				else {
-					nameFeatureMap.put(cpdName, libFeature);
-				}				
-			}
-			if(!compoundErrors.isEmpty()) {
-				errors.add("\nNo match found in reference library for the following compounds:\n");
-				errors.addAll(compoundErrors);
-				
-				// Write log file
-				Path logPath = Paths.get(
-						MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExportsDirectory().getAbsolutePath(),
-						 "Unmatched-compounds-" + referenceLibrary.getLibraryName() + ".txt");
-				try {
-				    Files.write(logPath, 
-				    		compoundErrors,
-				            StandardCharsets.UTF_8,
-				            StandardOpenOption.CREATE, 
-				            StandardOpenOption.TRUNCATE_EXISTING);
-				} catch (IOException e) {
-				    e.printStackTrace();
-				}
-				if (Desktop.isDesktopSupported()) {
-				    try {
-				        Desktop.getDesktop().open(logPath.toFile());
-				    } catch (IOException ex) {
-				        ex.printStackTrace();
-				    }
-				}
-			}
-		}
-	}
+//	class CompoundNameMatchingTask extends LongUpdateTask {
+//
+//		private Collection<String> errors;
+//		private Collection<String> compoundErrors;
+//			
+//		public CompoundNameMatchingTask(Collection<String> errors) {
+//			this.errors = errors;
+//			nameFeatureMap = new TreeMap<>();
+//		}
+//
+//		@Override
+//		public Void doInBackground() {
+//
+//			fetchLibraryCompounds();
+//			try {
+//				matchCompounds();
+//			} catch (Exception e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//			return null;
+//		}
+//		
+//		private void fetchLibraryCompounds() {
+//			
+//			if(referenceLibrary != null) {
+//				
+//				if(MRC2ToolBoxCore.getActiveMsLibraries().contains(referenceLibrary)) {
+//					
+//					referenceLibrary = MRC2ToolBoxCore.getActiveMsLibraries().stream().
+//						filter(l -> l.getLibraryId().equals(referenceLibrary.getLibraryId())).
+//						findFirst().orElse(null);
+//				}
+//				else {
+//					try {
+//						Connection conn = ConnectionManager.getConnection();
+//						Collection<LibraryMsFeatureDbBundle>bundles =
+//								MSRTLibraryUtils.createFeatureBundlesForLibrary(referenceLibrary.getLibraryId(), conn);
+//						
+//						for(LibraryMsFeatureDbBundle fBundle : bundles) {
+//
+//							if(fBundle.getConmpoundDatabaseAccession() != null) {
+//
+//								LibraryMsFeature newTarget = fBundle.getFeature();
+//								MSRTLibraryUtils.attachIdentity(
+//										newTarget, fBundle.getConmpoundDatabaseAccession(), fBundle.isQcStandard(), conn);
+//
+//								if(newTarget.getPrimaryIdentity() != null) {
+//
+//									newTarget.getPrimaryIdentity().setConfidenceLevel(fBundle.getIdConfidence());
+//									MSRTLibraryUtils.attachMassSpectrum(newTarget, conn);
+//									MSRTLibraryUtils.attachTandemMassSpectrum(newTarget, conn);
+//									MSRTLibraryUtils.attachAnnotations(newTarget, conn);
+//									referenceLibrary.addFeature(newTarget);
+//								}
+//							}
+//						}
+//						ConnectionManager.releaseConnection(conn);
+//						MRC2ToolBoxCore.getActiveMsLibraries().add(referenceLibrary);	
+//					}
+//					catch (Exception e) {
+//						e.printStackTrace();
+//					}
+//				}
+//			}			
+//		}
+//		
+//		private void matchCompounds() {
+//
+//			compoundErrors = new TreeSet<>();
+//			for (String cpdName : compoundNames) {
+//
+//				LibraryMsFeature libFeature = referenceLibrary.getFeatureByNameIgnoreCase(cpdName);
+//				if (libFeature == null)
+//					compoundErrors.add(cpdName);
+//				else {
+//					nameFeatureMap.put(cpdName, libFeature);
+//				}				
+//			}
+//			if(!compoundErrors.isEmpty()) {
+//				
+//				errors.add("\nNo match found in reference library for the following compounds:\n");
+//				errors.addAll(compoundErrors);
+//				
+//				// Write log file
+//				Path logPath = Paths.get(
+//						MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExportsDirectory().getAbsolutePath(),
+//						 "Unmatched-compounds-" + referenceLibrary.getLibraryName() + ".txt");
+//				try {
+//				    Files.write(logPath, 
+//				    		compoundErrors,
+//				            StandardCharsets.UTF_8,
+//				            StandardOpenOption.CREATE, 
+//				            StandardOpenOption.TRUNCATE_EXISTING);
+//				} catch (IOException e) {
+//				    e.printStackTrace();
+//				}
+//				if (Desktop.isDesktopSupported()) {
+//				    try {
+//				        Desktop.getDesktop().open(logPath.toFile());
+//				    } catch (IOException ex) {
+//				        ex.printStackTrace();
+//				    }
+//				}
+//			}
+//		}
+//	}
 
 	private void checkForUnmatchedSamples(Collection<String>errors){
 		
@@ -1141,7 +1143,8 @@ public class MultiFileDataImportDialog extends JDialog
 
 			ProFinderArchiveExtractionTask task = 
 					new ProFinderArchiveExtractionTask(pfaFile, newDataPipeline);
-			idp = new IndeterminateProgressDialog("Loading document preview ...", this, task);
+			IndeterminateProgressDialog idp = 
+					new IndeterminateProgressDialog("Loading document preview ...", this, task);
 			idp.setLocationRelativeTo(this.getContentPane());
 			idp.setVisible(true);
 		}
@@ -1214,7 +1217,7 @@ public class MultiFileDataImportDialog extends JDialog
 			return;
 				
 		normalizedTargetedDataSelectionDialog = 
-				new NormalizedTargetedDataSelectionDialog(this, baseLibraryDirectory);
+				new NormalizedTargetedDataSelectionDialog(this, baseLibraryDirectory, false);
 		normalizedTargetedDataSelectionDialog.setLocationRelativeTo(this);
 		normalizedTargetedDataSelectionDialog.setVisible(true);
 	}
@@ -1260,8 +1263,10 @@ public class MultiFileDataImportDialog extends JDialog
 			
 			if(fileNamePattern.matcher(column).find())
 				sampleFiles.add(new File(column));						
-		}
-		extractCompoundNames(inputDataArray, featureColumn);
+		}		
+		compoundNames = DataImportUtils.extractNamedColumn(
+				inputDataArray, featureColumn, linesToSkipAfterHeader);
+		
 		long badNameCount = Arrays.asList(compoundNames).stream().
 				filter(n -> (Objects.isNull(n) || n.isBlank())).count();
 		if(badNameCount > 0) {
@@ -1270,27 +1275,6 @@ public class MultiFileDataImportDialog extends JDialog
 		}		
 		File[]sampleFilesArray = sampleFiles.toArray(new File[sampleFiles.size()]);
 		addResultsToNewPipeline(dataPipelineDefinitionPanel.getDataPipeline(), sampleFilesArray);		
-	}
-	
-	private void extractCompoundNames(String[][] inputDataArray, String featureColumn) {
-		
-		int featureColumnIndex = -1;
-		for(int i=0; i<inputDataArray[0].length; i++) {
-			
-			if(inputDataArray[0][i].equals(featureColumn)) {
-				
-				featureColumnIndex = i;
-				break;
-			}
-		}
-		if(featureColumnIndex == -1)
-			return;
-		
-		int start = 1 + linesToSkipAfterHeader;
-		
-		compoundNames = new String[inputDataArray.length - start];
-		for(int i=start; i<inputDataArray.length; i++) 			
-			compoundNames[i-start] = inputDataArray[i][featureColumnIndex].trim();
 	}
 		
 	public void selectDesignFile() {

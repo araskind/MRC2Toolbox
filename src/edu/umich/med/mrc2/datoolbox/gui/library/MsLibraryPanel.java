@@ -1014,7 +1014,18 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ItemList
 	}
 
 	@Override
-	public void clearPanel() {
+	public synchronized void clearPanel() {
+
+		libraryFeatureTable.getTable().getSelectionModel().removeListSelectionListener(this);
+		((LibraryFeatureTableModel) libraryFeatureTable.getTable().getModel()).setRowCount(0);
+		libraryFeatureEditorPanel.clearPanel();
+		molStructurePanel.clearPanel();
+		currentLibrary = null;
+		((MsLibraryPanelMenuBar)menuBar).updateLibraryList(currentLibrary, MRC2ToolBoxCore.getActiveMsLibraries());
+		libraryFeatureTable.getTable().getSelectionModel().addListSelectionListener(this);
+	}
+	
+	public void clearPanelUnsynchronized() {
 
 		libraryFeatureTable.getTable().getSelectionModel().removeListSelectionListener(this);
 		((LibraryFeatureTableModel) libraryFeatureTable.getTable().getModel()).setRowCount(0);
@@ -1098,7 +1109,8 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ItemList
 		}
 	}
 
-	public synchronized void reloadLibraryData(CompoundLibrary selectedLibrary) {
+	//	synchronized ?
+	public void reloadLibraryData(CompoundLibrary selectedLibrary) {
 
 		if(!MRC2ToolBoxCore.getActiveMsLibraries().contains(selectedLibrary)) {
 			
@@ -1128,7 +1140,7 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ItemList
 		@Override
 		public Void doInBackground() {
 
-			clearPanel();
+			clearPanelUnsynchronized();
 			currentLibrary = selectedLibrary;
 			((MsLibraryPanelMenuBar)menuBar).updateLibraryList(
 					currentLibrary, MRC2ToolBoxCore.getActiveMsLibraries());

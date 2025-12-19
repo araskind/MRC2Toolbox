@@ -575,7 +575,7 @@ public class SamplePrepEditorPanel extends JPanel
 		}
 	}
 	
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 		clearGui();
 		prep = null;
 	}

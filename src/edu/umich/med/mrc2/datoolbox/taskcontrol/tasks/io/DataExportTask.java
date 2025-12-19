@@ -262,9 +262,14 @@ public class DataExportTask extends AbstractTask {
 	private void writeAllQCDataExportFiles() {
 
 		taskDescription = "Reading feature data matrix ...";
-		Matrix dataMatrix = 
-				ProjectUtils.readFeatureMatrix(currentExperiment, dataPipeline, false);
-		if(dataMatrix == null) {
+		
+		Matrix featureDataMatrix = 
+				currentExperiment.getFeatureMatrixForDataPipeline(dataPipeline);
+		if(featureDataMatrix == null)
+			featureDataMatrix = ProjectUtils.readFeatureMatrix(
+					currentExperiment, dataPipeline, false);
+		
+		if(featureDataMatrix == null) {
 			errorMessage = "Unable to read feature data matrix file";
 			setStatus(TaskStatus.ERROR);
 			return;
@@ -309,15 +314,15 @@ public class DataExportTask extends AbstractTask {
 			String[] pwLine = Arrays.copyOf(mzLine, mzLine.length);
 			String[] qualLine = Arrays.copyOf(mzLine, mzLine.length);
 
-			coordinates[1] = dataMatrix.getColumnForLabel(msf);
+			coordinates[1] = featureDataMatrix.getColumnForLabel(msf);
 			for (Entry<ExperimentalSample, TreeMap<DataPipeline, DataFile[]>> entry : sampleFileMap.entrySet()) {
 
 				for(DataFile df : entry.getValue().get(dataPipeline)) {
 
 					SimpleMsFeature value = null;
-					coordinates[0] = dataMatrix.getRowForLabel(df);
+					coordinates[0] = featureDataMatrix.getRowForLabel(df);
 					if(coordinates[0] >= 0) //	TODO find out why it happens - screwed up design cleanup?
-						value = (SimpleMsFeature)dataMatrix.getAsObject(coordinates);
+						value = (SimpleMsFeature)featureDataMatrix.getAsObject(coordinates);
 					else {
 						System.out.println(df.getName());
 					}

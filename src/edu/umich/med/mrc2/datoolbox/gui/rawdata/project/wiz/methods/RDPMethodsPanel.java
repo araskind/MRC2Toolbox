@@ -166,7 +166,7 @@ public class RDPMethodsPanel extends RDPMetadataWizardPanel
 		return panel;
 	}
 
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 		acquisitionMethodTable.clearTable();
 	}	
 	

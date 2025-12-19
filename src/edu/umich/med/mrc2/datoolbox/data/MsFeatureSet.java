@@ -91,13 +91,17 @@ public class MsFeatureSet extends FeatureSet implements Serializable {
 
 		features.removeAll(featuresToRemove);
 		fireFeatureSetEvent(ParameterSetStatus.CHANGED);
+	}
+	
+	public void removeFeaturesSilently(Collection<MsFeature> featuresToRemove) {
+		features.removeAll(featuresToRemove);
 	}	
 
 	public MsFeatureSet(Element featureSetElement) {
 		
 		super(featureSetElement);
-		features = new HashSet<MsFeature>();
-		featureIdSet = new HashSet<String>();
+		features = new HashSet<>();
+		featureIdSet = new HashSet<>();
 		Element featureListElement = 
 				featureSetElement.getChild(CommonFields.FeatureList.name());
 		if(featureListElement != null && !featureListElement.getText().isBlank()) {

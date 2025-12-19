@@ -74,8 +74,8 @@ public class ExperimentDesign implements ExperimentDesignFactorListener, Seriali
 	public ExperimentDesign() {
 
 		super();
-		factorSet = new TreeSet<ExperimentDesignFactor>();
-		sampleSet = new TreeSet<ExperimentalSample>();
+		factorSet = new TreeSet<>();
+		sampleSet = new TreeSet<>();
 		suppressEvents = false;
 		eventListeners = ConcurrentHashMap.newKeySet();
 		initCleanDesign();
@@ -90,7 +90,7 @@ public class ExperimentDesign implements ExperimentDesignFactorListener, Seriali
 				new ExperimentDesignLevel(ReferenceSamplesManager.REGULAR_SAMPLE));
 		sampleTypeFactor.addListener(this);
 		factorSet.add(sampleTypeFactor);
-		designSubsets  = new TreeSet<ExperimentDesignSubset>();
+		designSubsets  = new TreeSet<>();
 
 		//	Create new "All levels" set and unlocked copy
 		ExperimentDesignSubset allLevels = 

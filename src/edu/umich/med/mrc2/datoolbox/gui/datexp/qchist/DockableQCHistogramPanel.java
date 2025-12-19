@@ -105,7 +105,7 @@ public class DockableQCHistogramPanel extends DefaultSingleCDockable
 		//	TODO
 	}
 	
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 		qcHistogramPanel.removeAllDataSets();
 	}
 }

@@ -51,7 +51,7 @@ public class DockableBinnerAnnotationDetailsPanel extends DefaultSingleCDockable
 		getContentPane().add(designScrollPane, BorderLayout.CENTER);
 	}
 	
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 		binnerAnnotationDetailsTable.clearTable();
 	}
 	

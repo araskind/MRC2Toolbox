@@ -290,10 +290,6 @@ public class DataAnalysisProject extends Project {
 			dpSets.add(featureSet);
 	}
 
-//	public void clearMetaDataMap() {
-//		metaDataMap = new TreeMap<>();
-//	}
-
 	public void deleteDataFiles(Set<DataFile> filesToRemove) {
 
 		experimentDesign.removeDataFiles(filesToRemove);
@@ -317,6 +313,15 @@ public class DataAnalysisProject extends Project {
 		for (MsFeatureSet set : featureSetMap.get(dataPipeline))
 			set.removeFeatures(featuresToRemove);
 	}
+	
+	public void deleteFeaturesSilently(
+			Collection<MsFeature> featuresToRemove, DataPipeline dataPipeline) {
+
+		featureMap.get(dataPipeline).removeAll(featuresToRemove);
+		for (MsFeatureSet set : featureSetMap.get(dataPipeline))
+			set.removeFeaturesSilently(featuresToRemove);
+	}
+	
 
 	public DataPipeline getActiveDataPipeline() {
 		return activeDataPipeline;

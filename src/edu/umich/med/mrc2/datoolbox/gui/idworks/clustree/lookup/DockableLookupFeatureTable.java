@@ -222,7 +222,7 @@ public class DockableLookupFeatureTable extends DefaultSingleCDockable implement
 		featureTable.getSelectionModel().addListSelectionListener(lsl);
 	}
 	
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 		
 		dataSetNameTextField.setText("");
 		descriptionTextArea.setText("");		

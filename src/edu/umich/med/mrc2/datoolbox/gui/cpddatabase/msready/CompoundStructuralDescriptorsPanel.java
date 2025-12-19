@@ -257,7 +257,7 @@ public class CompoundStructuralDescriptorsPanel extends JPanel implements Action
 		smilesTextArea.setEditable(true);
 	}
 
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 
 		formulaTextField.setText("");
 		inchiKeyTextField.setText("");	

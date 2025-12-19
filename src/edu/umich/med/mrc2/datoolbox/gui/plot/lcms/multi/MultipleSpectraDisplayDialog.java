@@ -138,7 +138,7 @@ public class MultipleSpectraDisplayDialog extends JDialog
 
 	}
 
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 		plotPanel.removeAllDataSets();
 	}
 }

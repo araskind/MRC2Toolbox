@@ -149,7 +149,9 @@ public class RecentDataManager {
 						recentExperimentsMap.get(ep.getProjectType()).add(ep);					
 				}
 				else {
-					if(ep.getExperimentFile().exists())
+					
+					if(ep.getExperimentFile().exists() 
+							&& !recentExperimentsMap.get(ep.getProjectType()).contains(ep))
 						recentExperimentsMap.get(ep.getProjectType()).add(ep);
 				}			
 			}

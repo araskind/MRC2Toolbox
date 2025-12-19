@@ -393,7 +393,7 @@ public class IDTExperimentDefinitionPanel extends JPanel implements ActionListen
 					instrument.getManufacturer() + " " + instrument.getModel());
 	}
 	
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 		
 		experiment = null;
 		instrument = null;

@@ -640,7 +640,7 @@ public class IDTrackerLimsManagerPanel extends DockableMRC2ToolboxPanel implemen
 
 	public void refreshIdTrackerdata() {
 		
-		clearPanel();
+		//	clearPanel();
 		IDTrackerMetadataPullTask task = new IDTrackerMetadataPullTask();
 		task.addTaskListener(this);
 		MRC2ToolBoxCore.getTaskController().addTask(task);

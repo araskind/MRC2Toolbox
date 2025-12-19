@@ -69,7 +69,7 @@ public class DockableDataPipelinesTable extends DockableParametersPanel {
 		dataPipelinesTable.clearSelection();
 	}
 	
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 		dataPipelinesTable.clearTable();
 	}
 

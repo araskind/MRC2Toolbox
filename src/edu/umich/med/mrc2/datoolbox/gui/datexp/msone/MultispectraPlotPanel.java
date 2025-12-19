@@ -120,7 +120,7 @@ public class MultispectraPlotPanel extends JPanel
 		add(new JScrollPane(plotPanel), BorderLayout.CENTER);
 	}
 	
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 		
 		removeAll();
 		plotPanel = new JPanel();

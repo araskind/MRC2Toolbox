@@ -358,7 +358,7 @@ public class RDPMsDataVerifierPanel extends RDPMetadataWizardPanel
 	}
 
 	@Override
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 		dataFileSampleMatchTable.clearTable();
 		missingIdentities = null;
 		dataVerified = false;

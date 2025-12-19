@@ -77,7 +77,7 @@ public class DockableXICListingPanel extends DefaultSingleCDockable {
 		chromatogramTable.removeChromatograms(chromatograms);		
 	}
 	
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 		chromatogramTable.clearTable();
 	}
 

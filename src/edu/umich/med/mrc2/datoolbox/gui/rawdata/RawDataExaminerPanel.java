@@ -1333,7 +1333,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 		MessageDialog.showInfoMsg("Data conversion completed", this.getContentPane());
 	}
 	
-	private synchronized void finalizeRawDataFileOpenTask(RawDataFileOpenTask rdoTask) {
+	private void finalizeRawDataFileOpenTask(RawDataFileOpenTask rdoTask) {
 		
 		OpenRawDataFilesTask task = new OpenRawDataFilesTask(rdoTask.getOpenedFiles());
 		MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
@@ -1343,7 +1343,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 		idp.setVisible(true);
 	}
 	
-	private synchronized void finalizeRawMSMSBatchExtractionTask(MsMsfeatureBatchExtractionTask task) {
+	private void finalizeRawMSMSBatchExtractionTask(MsMsfeatureBatchExtractionTask task) {
 
 		MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
 		MainWindow.hideProgressDialog();
@@ -1362,7 +1362,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 		idp.setVisible(true);
 	}
 	
-	private synchronized void finalizeStoredRawDataAnalysisExperimentOpen(OpenStoredRawDataAnalysisExperimentTask task) {
+	private void finalizeStoredRawDataAnalysisExperimentOpen(OpenStoredRawDataAnalysisExperimentTask task) {
 
 		if(!task.getErrors().isEmpty()) {
 			
@@ -1420,7 +1420,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 		}
 	}
 	
-	public synchronized void finalizeExperimentRawDataLoad(ExperimentRawDataFileOpenTask task) {
+	public void finalizeExperimentRawDataLoad(ExperimentRawDataFileOpenTask task) {
 		
 		Collection<String> errors = task.getErrors();
 		if(!errors.isEmpty()) {

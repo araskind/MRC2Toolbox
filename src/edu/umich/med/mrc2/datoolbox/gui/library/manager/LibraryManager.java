@@ -72,6 +72,7 @@ public class LibraryManager extends JDialog implements ActionListener, TaskListe
 	private LibraryListingTable libraryListingTable;
 	private LibraryInfoDialog libraryInfoDialog;
 	private DuplicateLibraryDialog duplicateLibraryDialog;
+	private MsLibraryPanel parentPanel;
 
 	private Collection<CompoundLibrary>libList;
 	private CompoundLibrary activeLibrary;
@@ -81,7 +82,7 @@ public class LibraryManager extends JDialog implements ActionListener, TaskListe
 	public LibraryManager(MsLibraryPanel parentPanel, CompoundLibrary activeLibrary) {
 
 		super(MRC2ToolBoxCore.getMainWindow(), "Manage MS libraries", true);
-		
+		this.parentPanel = parentPanel;
 		setIconImage(((ImageIcon) libraryManagerIcon).getImage());
 		setSize(new Dimension(800, 640));
 		setPreferredSize(new Dimension(800, 640));
@@ -104,10 +105,8 @@ public class LibraryManager extends JDialog implements ActionListener, TaskListe
 
 		          public void mouseClicked(MouseEvent e){
 
-		            if (e.getClickCount() == 2) {
-		            	parentPanel.openLibraryFromDatabase(getSelectedLibrary());
-		            	dispose();
-		            }
+		            if (e.getClickCount() == 2) 
+		            	initLibraryLoad();		            
 		          }
 	        });
 		getContentPane().add(new JScrollPane(libraryListingTable), BorderLayout.CENTER);
@@ -127,6 +126,9 @@ public class LibraryManager extends JDialog implements ActionListener, TaskListe
 	public void actionPerformed(ActionEvent event) {
 
 		String command = event.getActionCommand();
+		
+		if (command.equals(MainActionCommands.OPEN_LIBRARY_COMMAND.getName()))
+			initLibraryLoad();
 
 		if (command.equals(MainActionCommands.NEW_LIBRARY_DIALOG_COMMAND.getName()))
 			showNewLibraryDialog();
@@ -148,6 +150,15 @@ public class LibraryManager extends JDialog implements ActionListener, TaskListe
 		
 		if (command.equals(MainActionCommands.DELETE_LIBRARY_COMMAND.getName()))
 			deleteSelectedLibrary();
+	}
+	
+	private void initLibraryLoad() {
+		
+		CompoundLibrary libraryToOpen = getSelectedLibrary();
+		if(libraryToOpen != null) {
+	    	parentPanel.openLibraryFromDatabase(libraryToOpen);
+	    	dispose();
+		}
 	}
 	
 	private void createNewLibrary() {

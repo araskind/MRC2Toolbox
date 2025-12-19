@@ -83,7 +83,7 @@ public class DockableAlignedDataSetSummaryPanel extends DefaultSingleCDockable {
 		
 	}
 	
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 		alignedDataSetSummaryTable.clearTable();
 	}
 }

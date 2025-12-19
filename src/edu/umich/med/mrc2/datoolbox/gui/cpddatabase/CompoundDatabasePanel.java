@@ -1050,14 +1050,7 @@ public class CompoundDatabasePanel extends DockableMRC2ToolboxPanel implements L
 
 		public CompoundDataRetrievalTask(CompoundIdentity cpd) {
 			this.cpd = cpd;
-//			cpdIds = null;
 		}
-		
-//		private Collection<CompoundIdentity> cpdIds;
-//		public CompoundDataRetrievalTask(Collection<CompoundIdentity> cpdIds) {
-//			this.cid = null;
-//			this.cpdIds = cpdIds;
-//		}
 
 		@SuppressWarnings("unchecked")
 		@Override
@@ -1079,10 +1072,7 @@ public class CompoundDatabasePanel extends DockableMRC2ToolboxPanel implements L
 							CompoundDatabaseCache.getMSMSLibraryEntriesForCompound(cpd));
 					
 					//	clasyFireViewer.showCompoundData(cpd.getPrimaryDatabaseId());
-				}
-//				if(cpdIds != null)
-//					loadCompoundDataByReference(cpdIds);
-					
+				}					
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

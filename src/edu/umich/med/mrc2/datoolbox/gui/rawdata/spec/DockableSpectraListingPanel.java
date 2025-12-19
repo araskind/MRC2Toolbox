@@ -81,7 +81,7 @@ public class DockableSpectraListingPanel extends DefaultSingleCDockable {
 		spectraTable.removeSpectra(spectra);		
 	}
 	
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 		spectraTable.clearTable();
 	}
 

@@ -113,7 +113,7 @@ public class RDPSamplePrepPanel extends RDPMetadataWizardPanel {
 	}
 
 	@Override
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 		samplePrepEditorPanel.clearPanel();
 	}
 }
