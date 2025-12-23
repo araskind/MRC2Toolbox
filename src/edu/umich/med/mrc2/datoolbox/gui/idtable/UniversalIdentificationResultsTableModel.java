@@ -227,13 +227,17 @@ public class UniversalIdentificationResultsTableModel extends BasicTableModel {
 							id.getMsRtLibraryMatch().getLibraryId());	
 				}
 				deltaMz = MsUtils.getPpmMassErrorForTopAdductMatch(parentFeature);
-			}			
-			TandemMassSpectrum experimentalMsMs = 
-					parentFeature.getSpectrum().getTandemSpectrum(SpectrumSource.EXPERIMENTAL);
-			if(experimentalMsMs != null) {
+			}
+			TandemMassSpectrum experimentalMsMs = null;
+			if(parentFeature.getSpectrum() != null) {
+				
+				experimentalMsMs = 
+						parentFeature.getSpectrum().getTandemSpectrum(SpectrumSource.EXPERIMENTAL);
+				if(experimentalMsMs != null) {
 
-				if(experimentalMsMs.getParent() != null)
-					parentMz = experimentalMsMs.getParent().getMz();
+					if(experimentalMsMs.getParent() != null)
+						parentMz = experimentalMsMs.getParent().getMz();
+				}
 			}
 			ReferenceMsMsLibraryMatch msmslibMatch = id.getReferenceMsMsLibraryMatch();
 			ReferenceMsMsLibrary lib = null;

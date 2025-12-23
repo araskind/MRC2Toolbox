@@ -1054,8 +1054,10 @@ public class MsFeature implements AnnotatedObject, Serializable, XmlStorable {
 		if(rtRangeString != null)
 			rtRange = new Range(rtRangeString);
 		
-		setSpectrum(new MassSpectrum(
-				featureElement.getChild(ObjectNames.Spectrum.name())));	
+		Element spectrumElement = featureElement.getChild(ObjectNames.Spectrum.name());
+		if(spectrumElement != null)
+			setSpectrum(new MassSpectrum(spectrumElement));	
+		
 		String qsValue = 
 				featureElement.getAttributeValue(MsFeatureFields.QS.name());
 		if(qsValue != null)

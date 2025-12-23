@@ -33,6 +33,8 @@ import java.sql.Connection;
 import java.util.Collection;
 import java.util.Map;
 import java.util.TreeSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import edu.umich.med.mrc2.datoolbox.data.CompoundLibrary;
 import edu.umich.med.mrc2.datoolbox.data.LibraryMsFeature;
@@ -43,6 +45,7 @@ import edu.umich.med.mrc2.datoolbox.gui.library.MsLibraryPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.PanelList;
 import edu.umich.med.mrc2.datoolbox.gui.utils.LongUpdateTask;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
+import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
 
 public class CompoundNameMatchingTask extends LongUpdateTask {
 
@@ -53,6 +56,19 @@ public class CompoundNameMatchingTask extends LongUpdateTask {
 	private String[] compoundNames;
 	private boolean writeLog;
 	private File logDir;
+	
+	private static final String[]compoundAnnotationMasks 
+		= new String[] {
+				"\\{.+\\}",
+				"\\[contaminant\\]",
+				"\\(duplicate \\d\\)",
+				"\\[fragment\\]",
+				" \\(variant\\)"
+			};
+	
+	private static final Pattern excludePattern = Pattern.compile("\\[[a-zA-Z]+\\]");
+	
+	//	TODO keep variant and duplicate as features
 
 	public CompoundNameMatchingTask(
 			String[] compoundNames, 
@@ -140,9 +156,13 @@ public class CompoundNameMatchingTask extends LongUpdateTask {
 		compoundErrors = new TreeSet<>();
 		for (String cpdName : compoundNames) {
 
-			LibraryMsFeature libFeature = referenceLibrary.getFeatureByNameIgnoreCase(cpdName);
+			String cleanCompoundName = getCleanCompoundName(cpdName);
+			if(cleanCompoundName == null)
+				continue;
+			
+			LibraryMsFeature libFeature = referenceLibrary.getFeatureByNameIgnoreCase(cleanCompoundName);
 			if (libFeature == null)
-				compoundErrors.add(cpdName);
+				compoundErrors.add(cleanCompoundName);
 			else {
 				nameFeatureMap.put(cpdName, libFeature);
 			}				
@@ -156,10 +176,24 @@ public class CompoundNameMatchingTask extends LongUpdateTask {
 		}
 	}
 	
+	private String getCleanCompoundName(String compoundName) {
+		
+		Matcher m = excludePattern.matcher(compoundName.trim());
+		if(m.find())
+			return null;
+		
+		String cleanCompoundName = compoundName;
+		for(String annotationMask : compoundAnnotationMasks)			
+			cleanCompoundName = cleanCompoundName.replaceAll(annotationMask, "");
+		
+		return cleanCompoundName.trim();
+	}
+	
 	private void writeAndOpenLogFile() {
 		
 		Path logPath = Paths.get( logDir.getAbsolutePath(),
-				 "Unmatched-compounds-" + referenceLibrary.getLibraryName() + ".txt");
+				 "Unmatched-compounds-" + referenceLibrary.getLibraryName() 
+				 	+ "-" + FIOUtils.getTimestamp() + ".txt");
 		try {
 		    Files.write(logPath, 
 		    		compoundErrors,

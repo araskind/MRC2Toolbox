@@ -166,12 +166,12 @@
 												<node nodeId="1600213794195" orientation="VERTICAL" divider="0.6">
 													<node nodeId="1600213794197" orientation="HORIZONTAL" divider="0.8">
 														<node nodeId="1758648671933" orientation="HORIZONTAL" divider="0.7357091429859072">
-															<leaf id="1" nodeId="1600213794199">
+															<leaf id="4" nodeId="1600213794199">
 																<placeholders>
 																	<placeholder>dock.single.DockableDuplicateSelectionTable</placeholder>
 																</placeholders>
 															</leaf>
-															<leaf id="4" nodeId="1754946103951">
+															<leaf id="1" nodeId="1754946103951">
 																<placeholders>
 																	<placeholder>dock.single.ClusterDisplayPanelCorrelationDataPanel</placeholder>
 																</placeholders>
@@ -323,10 +323,10 @@
 									</children>
 								</child>
 								<child>
-									<layout factory="predefined" placeholder="dock.single.DockableDuplicateSelectionTable">
-										<replacement id="dockablesingle DockableDuplicateSelectionTable"/>
+									<layout factory="predefined" placeholder="dock.single.ClusterDisplayPanelCorrelationDataPanel">
+										<replacement id="dockablesingle ClusterDisplayPanelCorrelationDataPanel"/>
 										<delegate id="delegate_ccontrol backup factory id">
-											<id>DockableDuplicateSelectionTable</id>
+											<id>ClusterDisplayPanelCorrelationDataPanel</id>
 											<area/>
 										</delegate>
 									</layout>
@@ -431,10 +431,10 @@
 									<children ignore="false"/>
 								</child>
 								<child>
-									<layout factory="predefined" placeholder="dock.single.ClusterDisplayPanelCorrelationDataPanel">
-										<replacement id="dockablesingle ClusterDisplayPanelCorrelationDataPanel"/>
+									<layout factory="predefined" placeholder="dock.single.DockableDuplicateSelectionTable">
+										<replacement id="dockablesingle DockableDuplicateSelectionTable"/>
 										<delegate id="delegate_ccontrol backup factory id">
-											<id>ClusterDisplayPanelCorrelationDataPanel</id>
+											<id>DockableDuplicateSelectionTable</id>
 											<area/>
 										</delegate>
 									</layout>

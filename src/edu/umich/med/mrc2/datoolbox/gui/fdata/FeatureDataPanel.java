@@ -139,6 +139,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io.MultiCefDataAddTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io.MultiCefImportTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io.ProFinderResultsImportTaskTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io.QuantMatrixImportTask;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io.TargetedDataMatrixImportTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.library.ClearIdentificationsTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.library.LibrarySearchTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.library.LoadDatabaseLibraryTask;
@@ -1833,6 +1834,10 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 			if (e.getSource().getClass().equals(MultiCefImportTask.class))
 				finalizeMultiCefDataLoad((MultiCefImportTask) e.getSource());
 			
+			//	Load targeted data from text file
+			if (e.getSource().getClass().equals(TargetedDataMatrixImportTask.class))
+				finalizeTargetedDataMatrixImportTask((TargetedDataMatrixImportTask) e.getSource());
+			
 			if (e.getSource().getClass().equals(MultiCefDataAddTask.class))
 				finalizeMultiCefDataAddition((MultiCefDataAddTask) e.getSource());
 			
@@ -1865,7 +1870,7 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 			MainWindow.hideProgressDialog();
 		}
 	}
-	
+
 	private synchronized void finalizeMZDeltaAnalysisTask(MZDeltaAnalysisTask task) {
 
 		MsFeatureClusterSet mzDeltaAnalysisClusterDataSet = 
@@ -2037,6 +2042,21 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 		MRC2ToolBoxCore.getMainWindow().switchDataPipeline(
 				MRC2ToolBoxCore.getActiveMetabolomicsExperiment(), 
 				multiCefImportTask.getDataPipeline());
+		
+		SaveMetabolomicsProjectTask task = 
+				new SaveMetabolomicsProjectTask(currentExperiment, true);
+		task.addTaskListener(this);
+		MRC2ToolBoxCore.getTaskController().addTask(task);
+	}
+		
+	private void finalizeTargetedDataMatrixImportTask(TargetedDataMatrixImportTask tdmTask) {
+
+		MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
+		MainWindow.hideProgressDialog();
+		
+		MRC2ToolBoxCore.getMainWindow().switchDataPipeline(
+				MRC2ToolBoxCore.getActiveMetabolomicsExperiment(), 
+				tdmTask.getDataPipeline());
 		
 		SaveMetabolomicsProjectTask task = 
 				new SaveMetabolomicsProjectTask(currentExperiment, true);

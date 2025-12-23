@@ -353,6 +353,9 @@ public class NormalizedTargetedDataSelectionDialog extends JDialog implements Ac
 				infoDialog.setLocationRelativeTo(this);
 				infoDialog.setVisible(true);
 			}
+			else {
+				MessageDialog.showInfoMsg("Data successfully verified", this);
+			}
 		}		
 	}
 

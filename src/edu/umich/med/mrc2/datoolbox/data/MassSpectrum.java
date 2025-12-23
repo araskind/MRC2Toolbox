@@ -566,12 +566,11 @@ public class MassSpectrum implements Serializable, XmlStorable {
 	
 	public MassSpectrum(Element spectrumElement) {
 		
-		msPoints = new TreeSet<MsPoint>(MsUtils.mzSorter);
-		adductMap = new TreeMap<Adduct, 
-				NavigableSet<MsPoint>>(new AdductComparator(SortProperty.Name));
+		msPoints = new TreeSet<>(MsUtils.mzSorter);
+		adductMap = new TreeMap<>(new AdductComparator(SortProperty.Name));
 		primaryAdduct = null;
-		tandemSpectra = new HashSet<TandemMassSpectrum>();
-		patternMap = new TreeMap<String, NavigableSet<MsPoint>>();	
+		tandemSpectra = new HashSet<>();
+		patternMap = new TreeMap<>();	
 		detectionAlgorithm = 
 				spectrumElement.getAttributeValue(MassSpectrumFields.Algo.name());
 
