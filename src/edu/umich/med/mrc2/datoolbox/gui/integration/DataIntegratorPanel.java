@@ -73,6 +73,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.integration.CreateMergedFeaturesTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.integration.DataPipelineAlignmentTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.integration.IdentifiedFeatureIntegrationTask;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.integration.NamedDataIntegrationTask;
 
 public class DataIntegratorPanel extends ClusterDisplayPanel {
 
@@ -101,8 +102,6 @@ public class DataIntegratorPanel extends ClusterDisplayPanel {
 		featureSelectionTable = new DockableDataIntegrationFeatureSelectionTable(this);
 		featureDataTable = featureSelectionTable.getTable();
 		alignedDataSetSummaryPanel = new DockableAlignedDataSetSummaryPanel(this);
-		
-		dataIntegrationSetupDialog = new DataIntegrationSetupDialog(this);
 
 		createPanelLayout();
 		finalizeLayout();
@@ -129,62 +128,28 @@ public class DataIntegratorPanel extends ClusterDisplayPanel {
 		grid.add(-25, 0, 25, 100, clusterTree);
 		grid.select(-25, 0, 25, 100, clusterTree);
 	}
-
-	@Override
-	protected void initActions() {
-			
-		super.initActions();
-		
-		menuActions.add(GuiUtils.setupButtonAction(
-				MainActionCommands.DATA_INTEGRATION_DIALOG_COMMAND.getName(),
-				MainActionCommands.DATA_INTEGRATION_DIALOG_COMMAND.getName(), 
-				collectIDDataIcon, this));
-
-		menuActions.add(GuiUtils.setupButtonAction(
-				MainActionCommands.ACCEPT_CLEAN_ID_LIST_COMMAND.getName(),
-				MainActionCommands.ACCEPT_CLEAN_ID_LIST_COMMAND.getName(), 
-				acceptListIcon, this));
-		
-		menuActions.addSeparator();
-		
-		menuActions.add(GuiUtils.setupButtonAction(
-				MainActionCommands.DELETE_INTEGRATION_SET_COMMAND.getName(),
-				MainActionCommands.DELETE_INTEGRATION_SET_COMMAND.getName(), 
-				deleteDataSetIcon, this));
-		
-		menuActions.addSeparator();
-		
-		menuActions.add(GuiUtils.setupButtonAction(
-				MainActionCommands.SHOW_CLUSTER_FILTER_COMMAND.getName(),
-				MainActionCommands.SHOW_CLUSTER_FILTER_COMMAND.getName(), 
-				filterIcon, this));
-		menuActions.add(GuiUtils.setupButtonAction(
-				MainActionCommands.RESET_FILTER_CLUSTERS_COMMAND.getName(),
-				MainActionCommands.RESET_FILTER_CLUSTERS_COMMAND.getName(), 
-				resetFilterIcon, this));		
-	}
 	
 	@Override
 	public void actionPerformed(ActionEvent event) {
+		
+		if(currentExperiment == null)
+			return;
 
 		super.actionPerformed(event);
 
 		String command = event.getActionCommand();
 
+		if (command.equals(MainActionCommands.DATA_INTEGRATION_DIALOG_COMMAND.getName()))
+			showDataIntegrationSetupDialog();
+		
+		if (command.equals(MainActionCommands.INTEGRATE_NAMED_DATA_COMMAND.getName()))
+			initNamedDataIntergration();
+		
 		if (command.equals(MainActionCommands.COLLECT_IDENTIFIED_CPD_COMMAND.getName()))
 			collectIdentifiedCompoundData();
 
 		if (command.equals(MainActionCommands.DELETE_INTEGRATION_SET_COMMAND.getName()))
 			deleteClusterSet(activeClusterSet);
-
-		if (command.equals(MainActionCommands.DATA_INTEGRATION_DIALOG_COMMAND.getName())) {
-
-			if (activeClusterSet != null)
-				dataIntegrationSetupDialog.setDataSetName(activeClusterSet.getName());
-
-			dataIntegrationSetupDialog.setLocationRelativeTo(this.getContentPane());
-			dataIntegrationSetupDialog.setVisible(true);
-		}
 
 		if (command.equals(MainActionCommands.FILTER_CLUSTERS_COMMAND.getName())  
 				&& activeClusterSet != null)
@@ -236,6 +201,26 @@ public class DataIntegratorPanel extends ClusterDisplayPanel {
 			loadSelectedFromClusterSetManager();
 	}
 	
+	private void showDataIntegrationSetupDialog() {
+
+//		if (activeClusterSet != null) {
+//			
+////			String message = "";
+////			int res = MessageDialog.showChoiceWithWarningMsg(message, this.getContentPane());
+////			if(res == JOptionPane.YES_OPTION) {
+//				
+//				dataIntegrationSetupDialog = new DataIntegrationSetupDialog(this, activeClusterSet);
+//				dataIntegrationSetupDialog.setLocationRelativeTo(this.getContentPane());
+//				dataIntegrationSetupDialog.setVisible(true);
+//			//}
+//		}
+//		else {
+			dataIntegrationSetupDialog = new DataIntegrationSetupDialog(this, activeClusterSet);
+			dataIntegrationSetupDialog.setLocationRelativeTo(this.getContentPane());
+			dataIntegrationSetupDialog.setVisible(true);
+//		}
+	}
+
 	private void loadSelectedFromClusterSetManager() {
 		
 		MsFeatureClusterSet selected = 
@@ -504,6 +489,24 @@ public class DataIntegratorPanel extends ClusterDisplayPanel {
 			//	toolbar.updateGuiFromActiveSet(null);
 		}	
 	}
+	
+	private void initNamedDataIntergration() {
+		
+		Collection<String>errors = dataIntegrationSetupDialog.validateFormData();
+		if(!errors.isEmpty()){
+		    MessageDialog.showErrorMsg(
+		            StringUtils.join(errors, "\n"), dataIntegrationSetupDialog);
+		    return;
+		}
+		NamedDataIntegrationTask task = new NamedDataIntegrationTask(
+				currentExperiment, 
+				dataIntegrationSetupDialog.getSelectedDataPipelines(),
+				dataIntegrationSetupDialog.getPrimaryFeatureSelectionOption(), 
+				dataIntegrationSetupDialog.getDataSetName());
+		task.addTaskListener(this);
+		MRC2ToolBoxCore.getTaskController().addTask(task);
+		dataIntegrationSetupDialog.dispose();
+	}
 
 	private void collectIdentifiedCompoundData() {
 
@@ -535,7 +538,7 @@ public class DataIntegratorPanel extends ClusterDisplayPanel {
 			MessageDialog.showErrorMsg(StringUtils.join(warnings, "\n"));
 			return;
 		}
-		dataIntegrationSetupDialog.setVisible(false);
+		dataIntegrationSetupDialog.dispose();
 		IdentifiedFeatureIntegrationTask task = 
 				new IdentifiedFeatureIntegrationTask(selectedDataPipelines, activeClusterSet);
 		task.addTaskListener(this);
@@ -587,9 +590,26 @@ public class DataIntegratorPanel extends ClusterDisplayPanel {
 			
 			if (e.getSource().getClass().equals(CreateMergedFeaturesTask.class))
 				finalizeCreateMergedFeaturesTask((CreateMergedFeaturesTask) e.getSource());
+			
+			if (e.getSource().getClass().equals(NamedDataIntegrationTask.class))
+				finalizeNamedDataIntegrationTask((NamedDataIntegrationTask) e.getSource());
 		}
 	}
 	
+	private void finalizeNamedDataIntegrationTask(NamedDataIntegrationTask task) {
+		
+		activeClusterSet = task.getIntegratedDataSet();
+		loadFeatureClusters(activeClusterSet.getClusters());
+		MRC2ToolBoxCore.getMainWindow().showPanel(PanelList.INTEGRATION);
+
+		if (activeClusterSet.getClusters().isEmpty())
+			MessageDialog.showInfoMsg("No identified feature clusters found using current settings");	
+		else {
+			activeClusterSet.setActive(true);
+			currentExperiment.addFeatureClusterSet(activeClusterSet);
+		}
+	}
+
 	private synchronized void finalizeCreateMergedFeaturesTask(CreateMergedFeaturesTask task) {
 
 		Collection<MsFeatureCluster> updated = task.getUpdatedFeatureClusters();

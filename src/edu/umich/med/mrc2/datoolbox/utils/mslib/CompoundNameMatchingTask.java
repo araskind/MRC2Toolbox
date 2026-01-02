@@ -127,7 +127,7 @@ public class CompoundNameMatchingTask extends LongUpdateTask {
 
 						if(fBundle.getConmpoundDatabaseAccession() != null) {
 
-							LibraryMsFeature newTarget = fBundle.getFeature();
+							LibraryMsFeature newTarget = fBundle.getFeature();							
 							MSRTLibraryUtils.attachIdentity(
 									newTarget, fBundle.getConmpoundDatabaseAccession(), fBundle.isQcStandard(), conn);
 
@@ -163,9 +163,8 @@ public class CompoundNameMatchingTask extends LongUpdateTask {
 			LibraryMsFeature libFeature = referenceLibrary.getFeatureByNameIgnoreCase(cleanCompoundName);
 			if (libFeature == null)
 				compoundErrors.add(cleanCompoundName);
-			else {
-				nameFeatureMap.put(cpdName, libFeature);
-			}				
+			else			
+				nameFeatureMap.put(cpdName, new LibraryMsFeature(libFeature));					
 		}
 		if(!compoundErrors.isEmpty()) {
 			

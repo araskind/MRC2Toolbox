@@ -50,6 +50,7 @@ import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
 import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
+import edu.umich.med.mrc2.datoolbox.data.enums.PrimaryFeatureSelectionOption;
 import edu.umich.med.mrc2.datoolbox.data.enums.SpectrumSource;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.main.AdductManager;
@@ -103,11 +104,10 @@ public class MsFeatureCluster implements Serializable, XmlStorable {
 
 	public void addFeature(MsFeature cf, DataPipeline pipeline) {
 		
-		if(!clusterFeatures.containsKey(pipeline)) {
-			clusterFeatures.put(pipeline, new HashSet<>());
-			featureRTStatistics.put(pipeline, new DescriptiveStatistics());
-			featureMZStatistics.put(pipeline, new DescriptiveStatistics());
-		}		
+		clusterFeatures.computeIfAbsent(pipeline, k -> new HashSet<>());
+		featureRTStatistics.computeIfAbsent(pipeline, k -> new DescriptiveStatistics());
+		featureMZStatistics.computeIfAbsent(pipeline, k -> new DescriptiveStatistics());
+
 		clusterFeatures.get(pipeline).add(cf);
 		
 		if(cf.getStatsSummary() != null) {
@@ -129,7 +129,7 @@ public class MsFeatureCluster implements Serializable, XmlStorable {
 			Range differenceRange,
 			DataPipeline pipeline){
 
-		Collection<Double>massDifferences = new ArrayList<Double>();
+		Collection<Double>massDifferences = new ArrayList<>();
 		MsFeature[] fArray = clusterFeatures.get(pipeline).
 				stream().toArray(size -> new MsFeature[size]);
 		for(int i=0; i<fArray.length-1; i++) {
@@ -332,6 +332,36 @@ public class MsFeatureCluster implements Serializable, XmlStorable {
 			return mif.getMonoisotopicMz();
 		else 
 			return 0.0d;
+	}
+	
+	public MsFeature findPrimaryFeature(PrimaryFeatureSelectionOption option) {
+		
+		MsFeature prim = null;
+		List<MsFeature> allFeatures = clusterFeatures.values().stream().
+			flatMap(c -> c.stream()).collect(Collectors.toList());
+		if(option.equals(PrimaryFeatureSelectionOption.MAX_AREA)) {
+			
+			double maxArea = 0.0d;
+			for(MsFeature msf : allFeatures) {
+				
+				if(msf.getStatsSummary().getSampleMedian() > maxArea) {
+					maxArea = msf.getStatsSummary().getSampleMedian();
+					prim = msf;
+				}
+			}
+		}
+		if(option.equals(PrimaryFeatureSelectionOption.MIN_MISSING)) {
+			
+			double minMissing = 1000000.0d;
+			for(MsFeature msf : allFeatures) {
+				
+				if(msf.getStatsSummary().getSampleMissingness() < minMissing) {
+					minMissing = msf.getStatsSummary().getSampleMissingness();
+					prim = msf;
+				}
+			}
+		}
+		return prim;
 	}
 
 	public boolean isLocked() {

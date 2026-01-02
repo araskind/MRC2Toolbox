@@ -62,16 +62,14 @@ public class IdentifiedFeatureIntegrationTask  extends AbstractTask {
 		catch (Exception e) {
 			e.printStackTrace();
 			setStatus(TaskStatus.ERROR);
-return;
-
+			return;
 		}
 		setStatus(TaskStatus.FINISHED);
 	}
 
 	private void createIdClusters() {
 		
-		TreeMap<String, MsFeatureCluster>idClusterMap = 
-				new TreeMap<String, MsFeatureCluster>();
+		TreeMap<String, MsFeatureCluster>idClusterMap =  new TreeMap<>();
 		for(DataPipeline pipeine : pipelines) {		
 			
 			Set<MsFeature> features = currentExperiment.getMsFeaturesForDataPipeline(pipeine);

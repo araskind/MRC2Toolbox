@@ -38,6 +38,7 @@ import edu.umich.med.mrc2.datoolbox.data.MsFeatureSet;
 import edu.umich.med.mrc2.datoolbox.data.SampleDataResultObject;
 import edu.umich.med.mrc2.datoolbox.data.TargetedDataMatrixImportSettingsObject;
 import edu.umich.med.mrc2.datoolbox.data.enums.GlobalDefaults;
+import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
@@ -117,12 +118,16 @@ public class TargetedDataMatrixImportTask extends AbstractTask implements TaskLi
 		}
 		// Create feature / line map
 		featureLineMap = new HashMap<>();
+		Polarity ppPoplarity = dataPipeline.getAcquisitionMethod().getPolarity();
 		for (int i = 1 + linesToSkipAfterHeader; i < inputDataArray.length; i++) {
 
 			String featureName = inputDataArray[i][featureColumnIndex].trim();
 			LibraryMsFeature libFeature = nameFeatureMap.get(featureName);
-			if (libFeature != null)
+			
+			if (libFeature != null) {
+				libFeature.setPolarity(ppPoplarity);
 				featureLineMap.put(libFeature, i);
+			}
 		}
 	}
 

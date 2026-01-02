@@ -49,7 +49,7 @@ public class DataPipelineSelectionTableModel extends BasicTableModel {
 	}
 
 	public void setTableModelFromExperiment(DataAnalysisProject currentProject) {
-		
+				
 		if(currentProject == null 
 				|| currentProject.getDataPipelines().isEmpty()) {
 			setRowCount(0);
@@ -72,6 +72,28 @@ public class DataPipelineSelectionTableModel extends BasicTableModel {
 		}
 		if(!rowData.isEmpty())
 			addRows(rowData);
+	}
+
+	public void setTableModelFromExperimentAndMarkSelected(
+			DataAnalysisProject currentProject,
+			Collection<DataPipeline> selected) {
+		
+		if(currentProject == null 
+				|| currentProject.getDataPipelines().isEmpty()) {
+			setRowCount(0);
+			return;
+		}
+		List<Object[]>rowData = new ArrayList<Object[]>();
+		for (DataPipeline dp : currentProject.getDataPipelines()) {
+
+			Object[] obj = {
+					selected.contains(dp),
+					dp
+				};
+			rowData.add(obj);
+		}
+		if(!rowData.isEmpty())
+			addRows(rowData);		
 	}
 }
 

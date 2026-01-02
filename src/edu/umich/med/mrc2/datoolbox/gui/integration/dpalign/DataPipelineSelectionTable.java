@@ -59,6 +59,13 @@ public class DataPipelineSelectionTable extends BasicTable {
 		adjustColumns();
 	}
 	
+	public void setTableModelFromExperimentAndMarkSelected(
+			DataAnalysisProject currentProject, 
+			Collection<DataPipeline>selected) {
+		((DataPipelineSelectionTableModel)model).setTableModelFromExperimentAndMarkSelected(currentProject, selected);
+		adjustColumns();
+	}
+	
 	public void setTableModelFromDataPipelineCollection(Collection<DataPipeline>pipelines) {
 		((DataPipelineSelectionTableModel)model).setTableModelFromDataPipelineCollection(pipelines);
 		adjustColumns();

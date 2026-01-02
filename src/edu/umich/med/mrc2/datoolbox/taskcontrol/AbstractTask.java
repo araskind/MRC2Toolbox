@@ -26,7 +26,7 @@ import java.util.LinkedList;
 public abstract class AbstractTask implements Task {
 
 	private TaskStatus status = TaskStatus.WAITING;
-	private LinkedList<TaskListener> taskListeners = new LinkedList<TaskListener>();
+	private LinkedList<TaskListener> taskListeners = new LinkedList<>();
 	protected String errorMessage = null;
 
 	protected int total;

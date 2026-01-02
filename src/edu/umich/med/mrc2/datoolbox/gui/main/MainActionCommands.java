@@ -414,6 +414,7 @@ public enum MainActionCommands {
 
 	// Data integration
 	DATA_INTEGRATION_DIALOG_COMMAND("Data integration setup"),
+	INTEGRATE_NAMED_DATA_COMMAND("Integrate data for named compounds"),
 	COLLECT_IDENTIFIED_CPD_COMMAND("Collect data for identified compounds"),
 	CLEAR_IDENTIFIED_CPD_COMMAND("Clear data for identified compounds"),
 	DELETE_INTEGRATION_SET_COMMAND("Delete data integration set"),

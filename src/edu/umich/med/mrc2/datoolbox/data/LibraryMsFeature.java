@@ -251,6 +251,10 @@ public class LibraryMsFeature extends MsFeature implements Serializable {
 	public boolean isMerged() {
 		return getParentIdSet().size() > 1;
 	}
+	
+	public void generateUniqueId() {
+		id = DataPrefix.MS_LIBRARY_TARGET.getName() + UUID.randomUUID().toString();
+	}
 }
 
 
