@@ -22,6 +22,7 @@
 package edu.umich.med.mrc2.datoolbox.data;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -34,8 +35,6 @@ import java.util.stream.Collectors;
 import org.jdom2.Element;
 import org.ujmp.core.Matrix;
 
-import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureClusterComparator;
-import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.enums.ParameterSetStatus;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
@@ -65,8 +64,7 @@ public class MsFeatureClusterSet implements
 				+ UUID.randomUUID().toString();
 		this.clusterSetName = clusterSetName;
 		active = false;
-		clusters = new TreeSet<>(
-				new MsFeatureClusterComparator(SortProperty.pimaryId));
+		clusters = new HashSet<>();
 		status = ParameterSetStatus.CREATED;
 	}
 
@@ -115,9 +113,9 @@ public class MsFeatureClusterSet implements
 
 //		return clusters.stream().
 //				flatMap(c -> c.getFeatures().stream()).
-//				map(f -> f.getAssayMethod()).
+//				map(f -> f.g).
 //				collect(Collectors.toCollection(TreeSet::new));
-		return null;
+		return new ArrayList<Assay>();
 	}
 	
 	public Set<DataPipeline>getDataPipelines(){
@@ -223,20 +221,12 @@ public class MsFeatureClusterSet implements
         if (!MsFeatureClusterSet.class.isAssignableFrom(obj.getClass()))
             return false;
 
-        final MsFeatureClusterSet other = (MsFeatureClusterSet) obj;
-
-        if((this.id == null) ? (other.getId() != null) : !this.id.equals(other.getId()))
-            return false;
-
-        return true;
+        return this.id.equals(((MsFeatureClusterSet) obj).getId());
     }
 
     @Override
     public int hashCode() {
-
-        int hash = 3;
-        hash = 53 * hash + (this.id != null ? this.id.hashCode() : 0);
-        return hash;
+        return id.hashCode();
     }
 
 	@Override

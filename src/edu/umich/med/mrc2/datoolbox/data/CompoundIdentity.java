@@ -58,11 +58,11 @@ public class CompoundIdentity implements Serializable, Comparable<CompoundIdenti
 	private int charge;
 
 	public CompoundIdentity(){
-		dbIdMap = new HashMap<CompoundDatabaseEnum, String>();
+		dbIdMap = new HashMap<>();
 	}
 
 	public CompoundIdentity(CompoundDatabaseEnum dbSource, String dbId) {
-		dbIdMap = new HashMap<CompoundDatabaseEnum, String>();
+		dbIdMap = new HashMap<>();
 		dbIdMap.put(dbSource, dbId);
 		primaryDatabase = dbSource;
 	}
@@ -80,7 +80,7 @@ public class CompoundIdentity implements Serializable, Comparable<CompoundIdenti
 		this.formula = formula;
 		this.exactMass = exactMass;
 		this.smiles = smiles;
-		dbIdMap = new HashMap<CompoundDatabaseEnum, String>();
+		dbIdMap = new HashMap<>();
 		dbIdMap.put(dbSource, dbId);
 		primaryDatabase = dbSource;
 	}
@@ -99,7 +99,7 @@ public class CompoundIdentity implements Serializable, Comparable<CompoundIdenti
 		this.smiles = smiles;
 		this.inChiKey = inChiKey;
 
-		dbIdMap = new HashMap<CompoundDatabaseEnum, String>();
+		dbIdMap = new HashMap<>();
 		dbIdMap.put(dbSource, dbId);
 		primaryDatabase = dbSource;
 	}
@@ -117,7 +117,7 @@ public class CompoundIdentity implements Serializable, Comparable<CompoundIdenti
 		this.inChiKey = inChiKey;
 		this.exactMass = getExactMass();
 
-		dbIdMap = new HashMap<CompoundDatabaseEnum, String>();
+		dbIdMap = new HashMap<>();
 		dbIdMap.put(dbSource, dbId);
 		primaryDatabase = dbSource;
 	}
@@ -129,7 +129,7 @@ public class CompoundIdentity implements Serializable, Comparable<CompoundIdenti
 		this.formula = rs.getString(4);
 		this.exactMass = rs.getDouble(5);
 		this.smiles = rs.getString(6);
-		dbIdMap = new HashMap<CompoundDatabaseEnum, String>();
+		dbIdMap = new HashMap<>();
 		dbIdMap.put(dbSource, rs.getString(1));
 		primaryDatabase = dbSource;
 	}
@@ -152,7 +152,7 @@ public class CompoundIdentity implements Serializable, Comparable<CompoundIdenti
 			
 			this.formula = MolecularFormulaManipulator.getString(mf);
 		}
-		dbIdMap = new HashMap<CompoundDatabaseEnum, String>();
+		dbIdMap = new HashMap<>();
 	}
 	
 	public void addDbId(CompoundDatabaseEnum dbSource, String id) {

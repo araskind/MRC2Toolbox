@@ -22,12 +22,17 @@
 package edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.integration;
 
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
-import java.util.TreeMap;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureCluster;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureClusterSet;
+import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureClusterComparator;
+import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.enums.PrimaryFeatureSelectionOption;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
@@ -42,6 +47,9 @@ public class NamedDataIntegrationTask extends AbstractTask {
 	private PrimaryFeatureSelectionOption primaryFeatureSelectionOption;
 	private String dataSetName;
 	private MsFeatureClusterSet integratedDataSet;
+	
+	private static final String[]compoundAnnotationMasks 
+		= new String[] { "\\(duplicate \\d\\)", " \\(variant\\)" };
 	
 	public NamedDataIntegrationTask(
 			DataAnalysisProject project, 
@@ -84,10 +92,15 @@ public class NamedDataIntegrationTask extends AbstractTask {
 		processed = 0;
 		for(MsFeatureCluster cluster : integratedDataSet.getClusters()) {
 			
-			MsFeature primary = cluster.findPrimaryFeature(primaryFeatureSelectionOption);
-			if(primary != null)
-				cluster.setPrimaryFeature(primary);
-			
+			if(cluster.getFeatures().size() > 1) {
+				
+				MsFeature primary = cluster.findPrimaryFeature(primaryFeatureSelectionOption);
+				if(primary != null)
+					cluster.setPrimaryFeature(primary);
+			}
+			else {
+				cluster.setPrimaryFeature(cluster.getFeatures().iterator().next()); 
+			}
 			processed++;
 		}
 	}
@@ -95,8 +108,10 @@ public class NamedDataIntegrationTask extends AbstractTask {
 	private void createIdClusters() {
 		
 		taskDescription = "Creating feature clusters based on compound ID ...";
-		TreeMap<String, MsFeatureCluster>idClusterMap =  new TreeMap<>();
-		
+//		TreeMap<String, MsFeatureCluster>idClusterMap =  new TreeMap<>();
+		Set<MsFeatureCluster>featureClusters = new HashSet<>();
+//		Pattern[]annotationPatterns = createAnnotationPatterns();
+				
 		for(DataPipeline pipeine : selectedDataPipelines) {		
 			
 			Set<MsFeature> features = project.getMsFeaturesForDataPipeline(pipeine);
@@ -104,13 +119,61 @@ public class NamedDataIntegrationTask extends AbstractTask {
 			processed = 0;
 			for(MsFeature f : features) {
 					
-				String label = f.getPrimaryIdentity().getPrimaryLinkLabel();	
-				idClusterMap.computeIfAbsent(label, k -> new MsFeatureCluster());				
-				idClusterMap.get(label).addFeature(f,pipeine);				
+				String label = f.getPrimaryIdentity().getPrimaryLinkLabel();
+//				if(f.getName().contains("(duplicate"))
+//					System.out.println(f.getName());
+				
+				MsFeatureCluster existingCluster = 
+						featureClusters.stream().
+						filter(c -> c.getPrimaryIdentity().getPrimaryLinkLabel().equals(label)).
+						findFirst().orElse(null);
+				if(existingCluster == null) {
+					MsFeatureCluster newCluster = new MsFeatureCluster();
+					newCluster.addFeature(f, pipeine);
+					featureClusters.add(newCluster);
+				}
+				else{
+					if(existingCluster.getFeturesForDataPipeline(pipeine) == null
+							|| existingCluster.getFeturesForDataPipeline(pipeine).isEmpty())
+						existingCluster.addFeature(f, pipeine);
+					else {
+						MsFeatureCluster newCluster = new MsFeatureCluster();
+						newCluster.addFeature(f, pipeine);
+						featureClusters.add(newCluster);
+					}
+				}
+//				if(isAmbiguous(f, annotationPatterns))
+//					label = f.getName();
+//				
+//				idClusterMap.computeIfAbsent(label, k -> new MsFeatureCluster());				
+//				idClusterMap.get(label).addFeature(f,pipeine);				
 				processed++;
 			}
 		}
-		integratedDataSet.addClusterCollection(idClusterMap.values());
+		List<MsFeatureCluster> idSorted = featureClusters.stream().
+				sorted(new MsFeatureClusterComparator(SortProperty.pimaryId)).
+				collect(Collectors.toList());
+		
+		integratedDataSet.addClusterCollection(idSorted);
+	}
+	
+	private boolean isAmbiguous(MsFeature msf, Pattern[]annotationPatterns) {
+		
+		for(Pattern ap : annotationPatterns) {
+			
+			if(ap.matcher(msf.getName()).find())
+				return true;
+		}
+		return false;
+	}
+	
+	private Pattern[] createAnnotationPatterns() {
+		
+		Pattern[]annotationPatterns = new Pattern[compoundAnnotationMasks.length];
+		for(int i=0; i<compoundAnnotationMasks.length; i++)
+			annotationPatterns[i] = Pattern.compile(compoundAnnotationMasks[i]);
+				
+		return annotationPatterns;
 	}
 	
 	@Override

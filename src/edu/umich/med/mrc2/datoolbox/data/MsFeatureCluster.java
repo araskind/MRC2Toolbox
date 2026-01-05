@@ -22,6 +22,7 @@
 package edu.umich.med.mrc2.datoolbox.data;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -29,6 +30,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.NavigableMap;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
@@ -352,12 +354,24 @@ public class MsFeatureCluster implements Serializable, XmlStorable {
 		}
 		if(option.equals(PrimaryFeatureSelectionOption.MIN_MISSING)) {
 			
-			double minMissing = 1000000.0d;
+			NavigableMap<BigDecimal, Set<MsFeature>> sortedByMissingness = new TreeMap<>();
 			for(MsFeature msf : allFeatures) {
 				
-				if(msf.getStatsSummary().getSampleMissingness() < minMissing) {
-					minMissing = msf.getStatsSummary().getSampleMissingness();
-					prim = msf;
+				BigDecimal key = BigDecimal.valueOf(msf.getStatsSummary().getSampleMissingness());
+				sortedByMissingness.computeIfAbsent(key, v -> new HashSet<>());
+				sortedByMissingness.get(key).add(msf);
+			}
+			if(sortedByMissingness.firstEntry().getValue().size() == 1) {
+				prim = sortedByMissingness.firstEntry().getValue().iterator().next();
+			}
+			else {
+				double maxArea = 0.0d;
+				for(MsFeature msf : sortedByMissingness.firstEntry().getValue()) {
+					
+					if(msf.getStatsSummary().getSampleMedian() > maxArea) {
+						maxArea = msf.getStatsSummary().getSampleMedian();
+						prim = msf;
+					}
 				}
 			}
 		}
@@ -664,11 +678,14 @@ public class MsFeatureCluster implements Serializable, XmlStorable {
 		if(getPrimaryIdentity() != null 
 				&& getPrimaryIdentity().getCompoundIdentity() != null)
 			clusterName = getPrimaryIdentity().getCompoundName() + " ";
-
-		clusterName += 
-				"RT " + MRC2ToolBoxConfiguration.getRtFormat().format(getRtRange().getAverage()) + 
-				" | group of " + getFeatures().size() + 
-				" | top M/Z " + MRC2ToolBoxConfiguration.getMzFormat().format(getTopMass());
+		
+		if(getRtRange() != null && getRtRange().getAverage() > 0.0d) {
+			clusterName += 
+					"RT " + MRC2ToolBoxConfiguration.getRtFormat().format(getRtRange().getAverage());
+		}
+		clusterName += " | group of " + getFeatures().size();
+		if(getTopMass() > 0.0d)
+			clusterName += " | top M/Z " + MRC2ToolBoxConfiguration.getMzFormat().format(getTopMass());
 
 		return clusterName;
 	}
@@ -851,20 +868,12 @@ public class MsFeatureCluster implements Serializable, XmlStorable {
         if (!MsFeatureCluster.class.isAssignableFrom(obj.getClass()))
             return false;
 
-        final MsFeatureCluster other = (MsFeatureCluster) obj;
-
-        if ((this.clusterId == null) ? (other.getClusterId() != null) : !this.clusterId.equals(other.getClusterId()))
-            return false;
-
-        return true;
+        return this.clusterId.equals(((MsFeatureCluster) obj).getClusterId());
     }
 
     @Override
     public int hashCode() {
-
-        int hash = 3;
-        hash = 53 * hash + (this.clusterId != null ? this.clusterId.hashCode() : 0);
-        return hash;
+        return clusterId.hashCode();
     }
     
     public MsFeature getFeatureById(String id) {

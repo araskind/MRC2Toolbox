@@ -23,9 +23,9 @@ package edu.umich.med.mrc2.datoolbox.gui.integration;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.TreeSet;
 
 import javax.swing.ListSelectionModel;
 import javax.swing.event.TableModelEvent;
@@ -232,7 +232,7 @@ public class DataIntegrationFeatureSelectionTable extends FeatureSelectionTable 
 	@Override
 	public Collection<MsFeature> getSelectedFeatures() {
 
-		ArrayList<MsFeature> selected = new ArrayList<MsFeature>();
+		ArrayList<MsFeature> selected = new ArrayList<>();
 		int col = getColumnModel().getColumnIndex(DataIntegrationFeatureSelectionTableModel.FEATURE_COLUMN);
 
 		for (int i : getSelectedRows()) {
@@ -260,14 +260,14 @@ public class DataIntegrationFeatureSelectionTable extends FeatureSelectionTable 
 	public Map<DataPipeline, Collection<MsFeature>> getSelectedFeaturesMap() {
 
 		Map<DataPipeline, Collection<MsFeature>>featureMap = 
-				new TreeMap<DataPipeline, Collection<MsFeature>>();
+				new TreeMap<>();
 		int fcol = model.getColumnIndex(DataIntegrationFeatureSelectionTableModel.FEATURE_COLUMN);
 		int dpcol = model.getColumnIndex(DataIntegrationFeatureSelectionTableModel.DATA_PIPELINE_COLUMN);
 		for (int i : getSelectedRows()) {
 			
 			MsFeature rowFeature = (MsFeature) getValueAt(i, fcol);
 			DataPipeline dp = (DataPipeline) getValueAt(i, dpcol);
-			featureMap.computeIfAbsent(dp, v -> new TreeSet<MsFeature>(new MsFeatureComparator(SortProperty.Name)));
+			featureMap.computeIfAbsent(dp, v -> new HashSet<MsFeature>());
 
 			featureMap.get(dp).add(rowFeature);
 		}

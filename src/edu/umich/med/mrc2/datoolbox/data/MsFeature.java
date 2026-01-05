@@ -29,6 +29,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -158,7 +159,7 @@ public class MsFeature implements AnnotatedObject, Serializable, XmlStorable {
 		neutralMass = source.getNeutralMass();
 		active = source.isActive();
 		qualityScore = source.getQualityScore();
-		identifications = new HashSet<MsFeatureIdentity>(source.getIdentifications());
+		identifications = new HashSet<>(source.getIdentifications());
 		source.getIdentifications().stream().
 			forEach(i -> identifications.add(new MsFeatureIdentity(i)));
 		for(MsFeatureIdentity msfid : identifications) {
@@ -166,8 +167,7 @@ public class MsFeature implements AnnotatedObject, Serializable, XmlStorable {
 				setPrimaryIdentity(msfid);
 		}
 		annotatedObjectType = source.getAnnotatedObjectType();
-		annotations = 
-				new TreeSet<ObjectAnnotation>(source.getAnnotations());
+		annotations =  new TreeSet<>(source.getAnnotations());
 
 		defaultModification = source.getDefaultChemicalModification();
 		suggestedModification = null;
@@ -198,7 +198,7 @@ public class MsFeature implements AnnotatedObject, Serializable, XmlStorable {
 		return annotations;
 	}
 
-	public void setAnnotations(TreeSet<ObjectAnnotation> annotations) {
+	public void setAnnotations(SortedSet<ObjectAnnotation> annotations) {
 
 		this.annotations.clear();
 		this.annotations.addAll(annotations);
@@ -282,14 +282,14 @@ public class MsFeature implements AnnotatedObject, Serializable, XmlStorable {
 	public Set<MsFeatureIdentity> getMSRTIdentifications() {
 		
 		return identifications.stream().
-				filter(id -> Objects.nonNull(id.getMsRtLibraryMatch())).
+				filter(fid -> Objects.nonNull(fid.getMsRtLibraryMatch())).
 				collect(Collectors.toSet());
 	}
 	
 	public Set<MsFeatureIdentity> getMSMSIdentifications() {
 		
 		return identifications.stream().
-				filter(id -> Objects.nonNull(id.getReferenceMsMsLibraryMatch())).
+				filter(fid -> Objects.nonNull(fid.getReferenceMsMsLibraryMatch())).
 				collect(Collectors.toSet());
 	}
 	
@@ -717,28 +717,30 @@ public class MsFeature implements AnnotatedObject, Serializable, XmlStorable {
 
         final MsFeature other = (MsFeature) obj;
 
-        if ((this.id == null) ? (other.getId() != null) : !this.id.equals(other.getId()))
-            return false;
-
-//        if ((this.name == null) ? (other.getName() != null) : !this.name.equals(other.getName()))
+//        if ((this.id == null) ? (other.getId() != null) : !this.id.equals(other.getId()))
 //            return false;
 
-        return true;
+        return this.id.equals(other.getId());
     }
 
     @Override
     public int hashCode() {
-
-        int hash = 3;
-        hash = 53 * hash + (this.id != null ? this.id.hashCode() : 0)
-        		+ (this.name != null ? this.name.hashCode() : 0);
-        return hash;
+        return id.hashCode();
     }
+    
+//    @Override
+//    public int hashCode() {
+//
+//        int hash = 3;
+//        hash = 53 * hash + (this.id != null ? this.id.hashCode() : 0)
+//        		+ (this.name != null ? this.name.hashCode() : 0);
+//        return id.hashCode();
+//    }
 
     public void addPostProcessorAnnotation(PostProcessorAnnotation annotation) {
 
     	if(postProcessorAnnotations == null)
-    		postProcessorAnnotations = new ArrayList<PostProcessorAnnotation>();
+    		postProcessorAnnotations = new ArrayList<>();
 
     	postProcessorAnnotations.add(annotation);
     	binnerAnnotation = annotation.getBa();

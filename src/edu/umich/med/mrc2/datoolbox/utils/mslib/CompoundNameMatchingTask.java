@@ -163,8 +163,11 @@ public class CompoundNameMatchingTask extends LongUpdateTask {
 			LibraryMsFeature libFeature = referenceLibrary.getFeatureByNameIgnoreCase(cleanCompoundName);
 			if (libFeature == null)
 				compoundErrors.add(cleanCompoundName);
-			else			
-				nameFeatureMap.put(cpdName, new LibraryMsFeature(libFeature));					
+			else {	
+				LibraryMsFeature newLibFeature = new LibraryMsFeature(libFeature);
+				newLibFeature.setName(cpdName);
+				nameFeatureMap.put(cpdName, newLibFeature);
+			}
 		}
 		if(!compoundErrors.isEmpty()) {
 			
