@@ -76,7 +76,7 @@ public class DockableCompoundClasyFireViewer  extends DefaultSingleCDockable {
 		if(nodes == null || nodes.isEmpty())
 			return;
 		
-		Set<OWLObject> selectedObjects = new HashSet<OWLObject>();
+		Set<OWLObject> selectedObjects = new HashSet<>();
 		for(String s : nodes) {
 			OWLObject owlObject = graph.getOWLObjectByIdentifier(s);
 			if (owlObject != null) {
@@ -94,7 +94,7 @@ public class DockableCompoundClasyFireViewer  extends DefaultSingleCDockable {
 
 	public synchronized void clearPanel() {
 		
-		canvas.setSelected(new HashSet<OWLObject>());
+		canvas.setSelected(new HashSet<>());
 		try {
 			canvas.reset();
 		} catch (Exception e) {

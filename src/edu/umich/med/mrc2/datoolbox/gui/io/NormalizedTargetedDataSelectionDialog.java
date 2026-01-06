@@ -348,10 +348,14 @@ public class NormalizedTargetedDataSelectionDialog extends JDialog implements Ac
 	
 	private void verifyCompoundData() {
 
-		if(referenceLibrary == null || inputFile == null) {
+		if((refLibRadioButton.isSelected() && referenceLibrary == null) || inputFile == null) {
 			
-			MessageDialog.showErrorMsg(
-					"Both input data file and reference library must be defined", this);
+			String message = "Input data file ";
+			if(refLibRadioButton.isSelected())
+				message += "and reference library ";
+			
+			message += "must be defined ";			
+			MessageDialog.showErrorMsg(message, this);
 		}
 		else {
 			String[][] inputDataArray = 
@@ -474,7 +478,7 @@ public class NormalizedTargetedDataSelectionDialog extends JDialog implements Ac
 	    if(getFeatureColumnName() == null || getFeatureColumnName().isBlank())
 	    	errors.add("Feature column not specified");
 	    
-	    if(referenceLibrary == null)
+	    if(refLibRadioButton.isSelected() && referenceLibrary == null)
 	    	errors.add("Reference library not specified");
 	    
 	    return errors;

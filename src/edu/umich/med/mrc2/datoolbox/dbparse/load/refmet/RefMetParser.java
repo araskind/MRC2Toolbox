@@ -41,7 +41,7 @@ public class RefMetParser {
 
 	public static Collection<Map<RefMetFields,String>>parseRefMetDataFile(File inputFile){
 
-		Collection<Map<RefMetFields,String>>refMetDataCollection = new ArrayList<Map<RefMetFields,String>>();
+		Collection<Map<RefMetFields,String>>refMetDataCollection = new ArrayList<>();
 		String[][] refmetData = null;
 		try {
 			refmetData = DelimitedTextParser.parseTextFileWithEncoding(inputFile, '\t');
@@ -53,7 +53,7 @@ public class RefMetParser {
 
 			//	Parse header
 			String[]header = refmetData[0];
-			Map<Integer,RefMetFields>headerMap = new TreeMap<Integer,RefMetFields>();
+			Map<Integer,RefMetFields>headerMap = new TreeMap<>();
 			for(int i=0; i<header.length; i++) {
 
 				for(RefMetFields f : RefMetFields.values()) {
@@ -63,7 +63,7 @@ public class RefMetParser {
 			}
 			for(int i=1; i<refmetData.length; i++) {
 
-				Map<RefMetFields,String>record = new TreeMap<RefMetFields,String>();
+				Map<RefMetFields,String>record = new TreeMap<>();
 
 				for (Entry<Integer, RefMetFields> entry : headerMap.entrySet())
 					record.put(entry.getValue(), refmetData[i][entry.getKey()]);

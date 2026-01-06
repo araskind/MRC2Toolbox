@@ -23,6 +23,7 @@ package edu.umich.med.mrc2.datoolbox.misctest;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -82,6 +83,7 @@ import edu.umich.med.mrc2.datoolbox.database.idt.ChromatographyDatabaseUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.database.idt.MSMSClusteringDBUtils;
 import edu.umich.med.mrc2.datoolbox.dbparse.load.nist.NISTParserUtils;
+import edu.umich.med.mrc2.datoolbox.dbparse.load.refmet.RefMetFields;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.FilePreferencesFactory;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
@@ -89,6 +91,7 @@ import edu.umich.med.mrc2.datoolbox.utils.DelimitedTextParser;
 import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
 import edu.umich.med.mrc2.datoolbox.utils.MSMSClusteringUtils;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
+import edu.umich.med.mrc2.datoolbox.utils.RefMetUtils;
 import edu.umich.med.mrc2.datoolbox.utils.acqmethod.AgilentAcquisitionMethodParser;
 import edu.umich.med.mrc2.datoolbox.utils.acqmethod.ChromatographicGradientUtils;
 import edu.umich.med.mrc2.datoolbox.utils.acqmethod.ThermoAcquisitionMethodParser;
@@ -117,13 +120,26 @@ public class RunContainer2 {
 		MRC2ToolBoxConfiguration.initConfiguration();
 
 		try {
-			groupAndReassignThermoGradients();
+			testRefMetMatcher();
 			//	downloadMethodsToExtractGradients();
 			//	extractTemporaryGradients();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}		
+	}
+	
+	private static void testRefMetMatcher() {
+		
+		String nameToMatch = "2-HydroxybutyrateQQWS";
+		Map<RefMetFields, String> result = new TreeMap<>();
+		
+		try {
+			result = RefMetUtils.getRefMetRecordByMatchingName(nameToMatch);
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	private static void groupAndReassignThermoGradients() throws Exception{

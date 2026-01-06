@@ -828,7 +828,7 @@ public class CompoundDatabaseUtils {
 	
 	public static Collection<String>getClassyFireNodesForCompound(String accession) throws Exception {
 		
-		TreeSet<String>nodes = new TreeSet<String>();
+		TreeSet<String>nodes = new TreeSet<>();
 		Connection conn = ConnectionManager.getConnection();
 		String sql = 
 				"SELECT KINGDOM, SUPERCLASS, CLASS, SUBCLASS, DIRECT_PARENT " +
@@ -879,12 +879,50 @@ public class CompoundDatabaseUtils {
 	
 	public static Collection<CompoundDatabase>getCompoundDatabaseList(Connection conn) throws Exception {
 		
-		Collection<CompoundDatabase>databases = new TreeSet<CompoundDatabase>();
+		Collection<CompoundDatabase>databases = new TreeSet<>();
 		
 		
 		
 		return databases;
 	}
+	
+	public static CompoundIdentity getRefMetCompoundById(
+			String refMetId, Connection conn) throws Exception{
+
+		CompoundIdentity identity = DiskCacheUtils.retrieveCompoundIdentityFromCache(refMetId);
+		if(identity != null)
+			return identity;
+		
+		String query =
+			"SELECT NAME, FORMULA, EXACTMASS, "
+			+ "PUBCHEM_CID, CHEBI_ID, HMDB_ID, LIPIDMAPS_ID, KEGG_ID, INCHI_KEY "
+			+ "FROM REFMET_DATA_NEW WHERE REFMET_ID = ?";
+
+		PreparedStatement ps = conn.prepareStatement(query);
+		ps.setString(1, refMetId);
+		ResultSet rs = ps.executeQuery();
+		while (rs.next()){
+
+			identity = new CompoundIdentity(
+					CompoundDatabaseEnum.REFMET, 
+					refMetId, 
+					rs.getString("NAME"),
+					rs.getString("FORMULA"), 
+					rs.getDouble("EXACTMASS"), 
+					null,
+					rs.getString("INCHI_KEY"));
+			
+			identity.addDbId(CompoundDatabaseEnum.PUBCHEM, rs.getString("PUBCHEM_CID"));
+			identity.addDbId(CompoundDatabaseEnum.CHEBI, rs.getString("CHEBI_ID"));
+			identity.addDbId(CompoundDatabaseEnum.HMDB, rs.getString("HMDB_ID"));
+			identity.addDbId(CompoundDatabaseEnum.LIPIDMAPS, rs.getString("LIPIDMAPS_ID"));
+			identity.addDbId(CompoundDatabaseEnum.KEGG, rs.getString("KEGG_ID"));
+		}
+		rs.close();
+		ps.close();
+		return identity;
+	}
+	
 	
 //	public static String getNextMrc2CompoundId() {
 //

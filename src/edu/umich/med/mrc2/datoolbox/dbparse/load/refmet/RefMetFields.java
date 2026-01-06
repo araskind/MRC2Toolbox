@@ -23,14 +23,19 @@ package edu.umich.med.mrc2.datoolbox.dbparse.load.refmet;
 
 public enum RefMetFields {
 
-	NAME("name"),
-	PUBCHEM_CID("pubchem_cid"),
-	EXACT_MASS("exactmass"),
-	FORMULA("formula"),
-	INCHI_KEY("inchi_key"),
+	REFMET_ID("refmet_id"),
+	NAME("refmet_name"),
 	SUPER_CLASS("super_class"),
 	MAIN_CLASS("main_class"),
 	SUB_CLASS("sub_class"),
+	FORMULA("formula"),
+	EXACT_MASS("exactmass"),
+	PUBCHEM_CID("pubchem_cid"),
+	CHEBI_ID("chebi_id"),
+	HMDB_ID("hmdb_id"),
+	LIPIDMAPS_ID("lipidmaps_id"),
+	KEGG_ID("kegg_id"),	
+	INCHI_KEY("inchi_key"),
 	MW_REGNO("MW_regno"),
 	;
 

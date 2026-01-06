@@ -156,6 +156,9 @@ public class CompoundIdentity implements Serializable, Comparable<CompoundIdenti
 	}
 	
 	public void addDbId(CompoundDatabaseEnum dbSource, String id) {
+		
+		if(dbSource == null || id == null || id.isBlank())
+			return;
 
 		if(primaryDatabase == null)
 			primaryDatabase = dbSource;
