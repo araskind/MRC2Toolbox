@@ -30,6 +30,8 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.util.ArrayList;
@@ -40,6 +42,7 @@ import java.util.Objects;
 import java.util.TreeMap;
 import java.util.prefs.Preferences;
 
+import javax.swing.ButtonGroup;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -49,6 +52,7 @@ import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 import javax.swing.JRootPane;
 import javax.swing.JSpinner;
 import javax.swing.JTextField;
@@ -56,7 +60,9 @@ import javax.swing.KeyStroke;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
+import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
+import javax.swing.border.TitledBorder;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -75,7 +81,7 @@ import edu.umich.med.mrc2.datoolbox.utils.DelimitedTextParser;
 import edu.umich.med.mrc2.datoolbox.utils.TextUtils;
 import edu.umich.med.mrc2.datoolbox.utils.mslib.CompoundNameMatchingTask;
 
-public class NormalizedTargetedDataSelectionDialog extends JDialog implements ActionListener, BackedByPreferences {
+public class NormalizedTargetedDataSelectionDialog extends JDialog implements ActionListener, ItemListener, BackedByPreferences {
 	
 	/**
 	 * 
@@ -87,6 +93,7 @@ public class NormalizedTargetedDataSelectionDialog extends JDialog implements Ac
 	private Preferences preferences;
 	public static final String FILE_NAME_MASK = "FILE_NAME_MASK";
 	private static final String LINES_TO_SKIP = "LINES_TO_SKIP";
+	private static final String USE_DATABASE_FOR_MATCHING = "USE_DATABASE_FOR_MATCHING";
 
 	private JTextField inputFileTextField;
 	private JTextField fileNameMaskField;
@@ -95,6 +102,9 @@ public class NormalizedTargetedDataSelectionDialog extends JDialog implements Ac
 	private JLabel refLibraryNameLabel;
 	private LibrarySelectorDialog librarySelectorDialog;
 	private JButton btnSave;
+	private JRadioButton refLibRadioButton;
+	private JRadioButton cpdDatabaseRadioButton;
+	private JButton refLibrarySelectButton;
 	
 	private File inputFile;
 	private File baseLibraryDirectory;
@@ -110,8 +120,8 @@ public class NormalizedTargetedDataSelectionDialog extends JDialog implements Ac
 		this.baseLibraryDirectory = baseLibraryDirectory;
 		setTitle("Select normalized targeted data file");
 		setIconImage(((ImageIcon) dialogIcon).getImage());
-		setPreferredSize(new Dimension(600, 250));
-		setSize(new Dimension(600, 250));
+		setPreferredSize(new Dimension(700, 300));
+		setSize(new Dimension(700, 300));
 		setModalityType(ModalityType.APPLICATION_MODAL);
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
@@ -122,7 +132,7 @@ public class NormalizedTargetedDataSelectionDialog extends JDialog implements Ac
 		gbl_dataPanel.columnWidths = new int[]{0, 0, 0, 0, 0};
 		gbl_dataPanel.rowHeights = new int[]{0, 0, 0, 0, 0, 0, 0};
 		gbl_dataPanel.columnWeights = new double[]{0.0, 0.0, 1.0, 0.0, Double.MIN_VALUE};
-		gbl_dataPanel.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
+		gbl_dataPanel.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 1.0, Double.MIN_VALUE};
 		dataPanel.setLayout(gbl_dataPanel);
 		
 		JLabel lblNewLabel = new JLabel("Input file");
@@ -214,33 +224,65 @@ public class NormalizedTargetedDataSelectionDialog extends JDialog implements Ac
 		gbc_featureColumnComboBox.gridy = 4;
 		dataPanel.add(featureColumnComboBox, gbc_featureColumnComboBox);
 		
-		JLabel lblNewLabel_5 = new JLabel("Reference library");
-		GridBagConstraints gbc_lblNewLabel_5 = new GridBagConstraints();
-		gbc_lblNewLabel_5.anchor = GridBagConstraints.WEST;
-		gbc_lblNewLabel_5.gridwidth = 2;
-		gbc_lblNewLabel_5.insets = new Insets(0, 0, 0, 5);
-		gbc_lblNewLabel_5.gridx = 0;
-		gbc_lblNewLabel_5.gridy = 5;
-		dataPanel.add(lblNewLabel_5, gbc_lblNewLabel_5);
+		JPanel panel = new JPanel();
+		panel.setBorder(new CompoundBorder(
+				new TitledBorder(null, "Compound matching settings", 
+						TitledBorder.LEADING, TitledBorder.TOP, null, null), 
+				new EmptyBorder(10, 10, 10, 10)));
+		GridBagConstraints gbc_panel = new GridBagConstraints();
+		gbc_panel.gridwidth = 4;
+		gbc_panel.fill = GridBagConstraints.BOTH;
+		gbc_panel.gridx = 0;
+		gbc_panel.gridy = 5;
+		dataPanel.add(panel, gbc_panel);
+		GridBagLayout gbl_panel = new GridBagLayout();
+		gbl_panel.columnWidths = new int[]{0, 0, 0, 0};
+		gbl_panel.rowHeights = new int[]{0, 0, 0};
+		gbl_panel.columnWeights = new double[]{0.0, 1.0, 0.0, Double.MIN_VALUE};
+		gbl_panel.rowWeights = new double[]{0.0, 0.0, Double.MIN_VALUE};
+		panel.setLayout(gbl_panel);
+		
+		ButtonGroup radioGroup = new ButtonGroup();
+
+		refLibRadioButton = new JRadioButton("Use reference library");
+		radioGroup.add(refLibRadioButton);
+		refLibRadioButton.addItemListener(this);
+		GridBagConstraints gbc_refLibRadioButton = new GridBagConstraints();
+		gbc_refLibRadioButton.anchor = GridBagConstraints.WEST;
+		gbc_refLibRadioButton.insets = new Insets(0, 0, 5, 5);
+		gbc_refLibRadioButton.gridx = 0;
+		gbc_refLibRadioButton.gridy = 0;
+		panel.add(refLibRadioButton, gbc_refLibRadioButton);
 		
 		refLibraryNameLabel = new JLabel("");
-		refLibraryNameLabel.setFont(new Font("Tahoma", Font.BOLD, 12));
 		GridBagConstraints gbc_refLibraryNameLabel = new GridBagConstraints();
-		gbc_refLibraryNameLabel.anchor = GridBagConstraints.WEST;
-		gbc_refLibraryNameLabel.insets = new Insets(0, 0, 0, 5);
-		gbc_refLibraryNameLabel.gridx = 2;
-		gbc_refLibraryNameLabel.gridy = 5;
-		dataPanel.add(refLibraryNameLabel, gbc_refLibraryNameLabel);
+		gbc_refLibraryNameLabel.insets = new Insets(0, 0, 5, 5);
+		gbc_refLibraryNameLabel.gridx = 1;
+		gbc_refLibraryNameLabel.gridy = 0;
+		panel.add(refLibraryNameLabel, gbc_refLibraryNameLabel);
+		refLibraryNameLabel.setFont(new Font("Tahoma", Font.BOLD, 12));
 		
-		JButton refLibrarySelectButton = new JButton(
+		refLibrarySelectButton = new JButton(
 				MainActionCommands.SELECT_REFERENCE_TARGETED_LIBRARY_COMMAND.getName());
+		GridBagConstraints gbc_refLibrarySelectButton = new GridBagConstraints();
+		gbc_refLibrarySelectButton.insets = new Insets(0, 0, 5, 0);
+		gbc_refLibrarySelectButton.gridx = 2;
+		gbc_refLibrarySelectButton.gridy = 0;
+		panel.add(refLibrarySelectButton, gbc_refLibrarySelectButton);
 		refLibrarySelectButton.setActionCommand(
 				MainActionCommands.SELECT_REFERENCE_TARGETED_LIBRARY_COMMAND.getName());
+		
+		cpdDatabaseRadioButton = new JRadioButton("Use compound database");
+		radioGroup.add(cpdDatabaseRadioButton);
+		cpdDatabaseRadioButton.addItemListener(this);
+		GridBagConstraints gbc_cpdDatabaseRadioButton = new GridBagConstraints();
+		gbc_cpdDatabaseRadioButton.gridwidth = 2;
+		gbc_cpdDatabaseRadioButton.anchor = GridBagConstraints.WEST;
+		gbc_cpdDatabaseRadioButton.insets = new Insets(0, 0, 0, 5);
+		gbc_cpdDatabaseRadioButton.gridx = 0;
+		gbc_cpdDatabaseRadioButton.gridy = 1;
+		panel.add(cpdDatabaseRadioButton, gbc_cpdDatabaseRadioButton);
 		refLibrarySelectButton.addActionListener(this);
-		GridBagConstraints gbc_refLibrarySelectButton = new GridBagConstraints();
-		gbc_refLibrarySelectButton.gridx = 3;
-		gbc_refLibrarySelectButton.gridy = 5;
-		dataPanel.add(refLibrarySelectButton, gbc_refLibrarySelectButton);
 
 		JPanel buttonPanel = new JPanel();
 		FlowLayout flowLayout = (FlowLayout) buttonPanel.getLayout();
@@ -449,6 +491,9 @@ public class NormalizedTargetedDataSelectionDialog extends JDialog implements Ac
 			
 		fileNameMaskField.setText(fileNameMask);
 		lineSkipSpinner.setValue(preferences.getInt(LINES_TO_SKIP, 1));
+		
+		boolean useDbForMatching = preferences.getBoolean(USE_DATABASE_FOR_MATCHING, Boolean.TRUE);
+		cpdDatabaseRadioButton.setSelected(useDbForMatching);
 	}
 
 	@Override
@@ -462,5 +507,16 @@ public class NormalizedTargetedDataSelectionDialog extends JDialog implements Ac
 		preferences = Preferences.userNodeForPackage(this.getClass());
 		preferences.put(FILE_NAME_MASK, getFileNameMask());
 		preferences.putInt(LINES_TO_SKIP, getNumberOfLinesToSkipAfterHeader());
+		preferences.putBoolean(USE_DATABASE_FOR_MATCHING, cpdDatabaseRadioButton.isSelected());
+	}
+
+	@Override
+	public void itemStateChanged(ItemEvent e) {
+
+		if(e.getSource().equals(refLibRadioButton) && e.getStateChange() == ItemEvent.SELECTED)
+			refLibrarySelectButton.setEnabled(true);
+		
+		if(e.getSource().equals(cpdDatabaseRadioButton) && e.getStateChange() == ItemEvent.SELECTED)
+			refLibrarySelectButton.setEnabled(false);		
 	}
 }
