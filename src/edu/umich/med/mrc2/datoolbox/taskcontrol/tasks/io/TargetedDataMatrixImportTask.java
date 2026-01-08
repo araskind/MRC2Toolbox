@@ -41,7 +41,6 @@ import edu.umich.med.mrc2.datoolbox.data.enums.GlobalDefaults;
 import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
-import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
@@ -98,8 +97,8 @@ public class TargetedDataMatrixImportTask extends AbstractTask implements TaskLi
 		total = 100;
 		processed = 20;
 		
-		inputDataArray = DelimitedTextParser.parseTextFile(inputDataFile,
-				MRC2ToolBoxConfiguration.getTabDelimiter());
+		inputDataArray = 
+				DelimitedTextParser.parseDataFileBasedOnExtension(inputDataFile);
 
 		int featureColumnIndex = -1;
 		// Create file / column map

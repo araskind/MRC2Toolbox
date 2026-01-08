@@ -40,8 +40,9 @@ public class RefMetUtils {
 	public static Map<RefMetFields,String>getRefMetRecordByMatchingName(String nameToMatch) throws UnsupportedEncodingException {
 				
 		Map<RefMetFields,String>record = new TreeMap<>();
-		JSONObject jso = JSONUtils.readJsonFromUrl(
-				refMetMatchUrl + URLEncoder.encode(nameToMatch.replace("/", " "), encoding).replace("+", "%20"));
+		String queryName = URLEncoder.encode(
+				nameToMatch.replace("/", " ").replace("\\", " "), encoding).replace("+", "%20");
+		JSONObject jso = JSONUtils.readJsonFromUrl(refMetMatchUrl + queryName);
 
 		if(jso != null) {
 			

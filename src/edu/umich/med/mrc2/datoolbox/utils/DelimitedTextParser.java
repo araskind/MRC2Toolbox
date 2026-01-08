@@ -30,6 +30,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 
+import org.apache.commons.io.FilenameUtils;
 import org.mozilla.universalchardet.UniversalDetector;
 
 import com.Ostermiller.util.BadDelimiterException;
@@ -39,12 +40,33 @@ public class DelimitedTextParser {
 
 	public static final char TAB_DELIMITER = '\t';
 	
+	public static String[][] parseCSVFile(File fileToParse) {
+
+		String[][] parsedFile = null;
+		FileReader dbFileReader = null;
+		if (fileToParse.exists()) {
+
+			try {
+				dbFileReader = new FileReader(fileToParse);
+				parsedFile = CSVParser.parse(dbFileReader);
+			} catch (FileNotFoundException e) {
+
+				e.printStackTrace();
+			} catch (BadDelimiterException e) {
+
+				e.printStackTrace();
+			} catch (IOException e) {
+
+				e.printStackTrace();
+			}
+		}
+		return parsedFile;
+	}
+	
 	public static String[][] parseTextFile(File fileToParse, char delimiter) {
 
 		String[][] parsedFile = null;
 		FileReader dbFileReader = null;
-		//StandardCharsets.UTF_8
-
 		if (fileToParse.exists()) {
 
 			try {
@@ -138,5 +160,19 @@ public class DelimitedTextParser {
 			}
 		}
 		return parsedFile;
+	}
+	
+	public static String[][] parseDataFileBasedOnExtension(File inputFile){
+		
+		String[][] inputDataArray = new String[0][0];		
+		String extension = FilenameUtils.getExtension(inputFile.getName());
+		
+		if(extension.equalsIgnoreCase("TXT") || extension.equalsIgnoreCase("TSV"))		
+			inputDataArray = parseTextFile(inputFile, TAB_DELIMITER);
+		
+		if(extension.equalsIgnoreCase("CSV"))
+			inputDataArray = DelimitedTextParser.parseCSVFile(inputFile);
+		
+		return inputDataArray;
 	}
 }

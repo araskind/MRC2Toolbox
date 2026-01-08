@@ -895,7 +895,7 @@ public class CompoundDatabaseUtils {
 		
 		String query =
 			"SELECT NAME, FORMULA, EXACTMASS, "
-			+ "PUBCHEM_CID, CHEBI_ID, HMDB_ID, LIPIDMAPS_ID, KEGG_ID, INCHI_KEY "
+			+ "PUBCHEM_CID, CHEBI_ID, HMDB_ID, LIPIDMAPS_ID, KEGG_ID, INCHI_KEY, SMILES "
 			+ "FROM REFMET_DATA_NEW WHERE REFMET_ID = ?";
 
 		PreparedStatement ps = conn.prepareStatement(query);
@@ -909,7 +909,7 @@ public class CompoundDatabaseUtils {
 					rs.getString("NAME"),
 					rs.getString("FORMULA"), 
 					rs.getDouble("EXACTMASS"), 
-					null,
+					rs.getString("SMILES"),
 					rs.getString("INCHI_KEY"));
 			
 			identity.addDbId(CompoundDatabaseEnum.PUBCHEM, rs.getString("PUBCHEM_CID"));

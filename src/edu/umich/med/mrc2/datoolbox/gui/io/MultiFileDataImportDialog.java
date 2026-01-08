@@ -1144,7 +1144,8 @@ public class MultiFileDataImportDialog extends JDialog
 		featureColumn = normalizedTargetedDataSelectionDialog.getFeatureColumnName();
 		referenceLibrary = normalizedTargetedDataSelectionDialog.getReferenceLibrary();
 
-		extractDataFilesFromNormalizedTargetedData(libraryFile, 
+		extractDataFilesFromNormalizedTargetedData(
+				libraryFile, 
 				featureColumn,
 				normalizedTargetedDataSelectionDialog.getFileNameMask(), 
 				normalizedTargetedDataSelectionDialog.getNumberOfLinesToSkipAfterHeader());
@@ -1162,8 +1163,7 @@ public class MultiFileDataImportDialog extends JDialog
 		
 		this.linesToSkipAfterHeader = linesToSkipAfterHeader;
 		String[][] inputDataArray = 
-				DelimitedTextParser.parseTextFile(
-						inputFile, MRC2ToolBoxConfiguration.getTabDelimiter());
+				DelimitedTextParser.parseDataFileBasedOnExtension(inputFile);;
 		Pattern fileNamePattern = Pattern.compile(fileNameMask);
 
 		Set<File>sampleFiles = new TreeSet<>();

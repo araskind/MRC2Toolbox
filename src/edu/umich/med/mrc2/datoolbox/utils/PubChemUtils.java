@@ -31,10 +31,13 @@ import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.Namespace;
@@ -43,6 +46,7 @@ import org.openscience.cdk.silent.SilentChemObjectBuilder;
 
 import edu.umich.med.mrc2.datoolbox.data.PubChemCompoundDescription;
 import edu.umich.med.mrc2.datoolbox.data.PubChemCompoundDescriptionBundle;
+import edu.umich.med.mrc2.datoolbox.dbparse.load.pubchem.PubChemRESTCompoundProperties;
 
 public class PubChemUtils {
 	
@@ -96,7 +100,7 @@ public class PubChemUtils {
 				System.out.println(e.getMessage());
 			}
 		}
-		Set<Integer>cidSet = new TreeSet<Integer>();
+		Set<Integer>cidSet = new TreeSet<>();
 		if(cids.length > 0) {
 			for(String cid : cids)
 				cidSet.add(Integer.parseInt(cid));
@@ -179,8 +183,7 @@ public class PubChemUtils {
 		String descriptionText = null;
 		String sourceName = null;
 		String url = null;
-		List<PubChemCompoundDescription>descriptions = 
-				new ArrayList<PubChemCompoundDescription>();
+		List<PubChemCompoundDescription>descriptions = new ArrayList<>();
 		List<Element>infoList = root.getChildren("Information", ns);
 		for(Element info : infoList) {
 			
@@ -348,6 +351,36 @@ public class PubChemUtils {
 			}
 		}
 		return synonyms;
+	}
+	
+	public static Map<String,String> getPropertyForCidSet(
+			Set<String> cids, 
+			PubChemRESTCompoundProperties property){		
+		
+		Map<String,String>propertyMap = new TreeMap<>();
+		String cidSet = StringUtils.join(cids, ",");
+		String[]lines = null;
+		InputStream propertyStream = null;
+		try {
+			propertyStream = WebUtils.getInputStreamFromURL(pubchemCidUrl + cidSet + "/property/" + property.name() +"/CSV");
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+			//	e.printStackTrace();
+		}
+		if(propertyStream != null) {
+			try {
+				lines = IOUtils.toString(propertyStream, StandardCharsets.UTF_8).split("\\r?\\n");
+			}
+			catch (Exception e) {
+				System.out.println(e.getMessage());
+				//	e.printStackTrace();
+			}
+			for(int i= 1; i<lines.length; i++) {
+				String[] params = lines[i].replace("\"", "").split(",");
+				propertyMap.put(params[0], params[1]);
+			}
+		}		
+		return propertyMap;
 	}
 }
 

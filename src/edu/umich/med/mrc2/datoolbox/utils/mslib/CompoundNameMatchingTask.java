@@ -274,9 +274,12 @@ public class CompoundNameMatchingTask extends LongUpdateTask {
 	
 	private void writeAndOpenLogFile() {
 		
-		Path logPath = Paths.get( logDir.getAbsolutePath(),
-				 "Unmatched-compounds-" + referenceLibrary.getLibraryName() 
-				 	+ "-" + FIOUtils.getTimestamp() + ".txt");
+		String fileName = "Unmatched-compounds-";
+		if(referenceLibrary != null)
+			fileName += referenceLibrary.getLibraryName();
+		
+		fileName += "-" + FIOUtils.getTimestamp() + ".txt";
+		Path logPath = Paths.get( logDir.getAbsolutePath(), fileName);
 		try {
 		    Files.write(logPath, 
 		    		compoundErrors,

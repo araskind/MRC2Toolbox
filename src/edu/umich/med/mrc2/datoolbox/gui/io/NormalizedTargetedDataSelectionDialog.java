@@ -359,9 +359,7 @@ public class NormalizedTargetedDataSelectionDialog extends JDialog implements Ac
 		}
 		else {
 			String[][] inputDataArray = 
-					DelimitedTextParser.parseTextFile(
-							inputFile, MRC2ToolBoxConfiguration.getTabDelimiter());
-			
+					DelimitedTextParser.parseDataFileBasedOnExtension(inputFile);			
 			String featureColumn = getFeatureColumnName();
 			if(featureColumn == null || featureColumn.isBlank()) {
 				MessageDialog.showErrorMsg("Feature column not specified", this);
@@ -424,7 +422,8 @@ public class NormalizedTargetedDataSelectionDialog extends JDialog implements Ac
 		JnaFileChooser fc = new JnaFileChooser(baseLibraryDirectory);
 		fc.setTitle("Select normalized targeted data file (TAB-separated)");
 		fc.setMode(JnaFileChooser.Mode.Files);
-		fc.addFilter("Text files", "txt", "TXT", "tsv", "TSV");
+		fc.addFilter("Text files (TAB-separated)", "txt", "TXT", "tsv", "TSV");
+		fc.addFilter("CSV files (Comma-separated)", "csv", "CSV");
 		fc.setMultiSelectionEnabled(false);
 		if (fc.showOpenDialog(this)) {
 			
@@ -435,10 +434,9 @@ public class NormalizedTargetedDataSelectionDialog extends JDialog implements Ac
 	}
 
 	private void populateColumnSelector() {
-
+		
 		String[][] inputDataArray = 
-				DelimitedTextParser.parseTextFile(
-						inputFile, MRC2ToolBoxConfiguration.getTabDelimiter());
+				DelimitedTextParser.parseDataFileBasedOnExtension(inputFile);
 		featureColumnComboBox.setModel(new DefaultComboBoxModel<>(inputDataArray[0]));
 		featureColumnComboBox.setSelectedIndex(0);
 	}

@@ -34,6 +34,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -83,6 +84,7 @@ import edu.umich.med.mrc2.datoolbox.database.idt.ChromatographyDatabaseUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.database.idt.MSMSClusteringDBUtils;
 import edu.umich.med.mrc2.datoolbox.dbparse.load.nist.NISTParserUtils;
+import edu.umich.med.mrc2.datoolbox.dbparse.load.pubchem.PubChemRESTCompoundProperties;
 import edu.umich.med.mrc2.datoolbox.dbparse.load.refmet.RefMetFields;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.FilePreferencesFactory;
@@ -91,6 +93,7 @@ import edu.umich.med.mrc2.datoolbox.utils.DelimitedTextParser;
 import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
 import edu.umich.med.mrc2.datoolbox.utils.MSMSClusteringUtils;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
+import edu.umich.med.mrc2.datoolbox.utils.PubChemUtils;
 import edu.umich.med.mrc2.datoolbox.utils.RefMetUtils;
 import edu.umich.med.mrc2.datoolbox.utils.acqmethod.AgilentAcquisitionMethodParser;
 import edu.umich.med.mrc2.datoolbox.utils.acqmethod.ChromatographicGradientUtils;
@@ -120,7 +123,7 @@ public class RunContainer2 {
 		MRC2ToolBoxConfiguration.initConfiguration();
 
 		try {
-			testRefMetMatcher();
+			updateRefMetWithSmiles();
 			//	downloadMethodsToExtractGradients();
 			//	extractTemporaryGradients();
 		} catch (Exception e) {
@@ -140,6 +143,66 @@ public class RunContainer2 {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+	
+	private static void testPubChemPropertyFetch() {
+		
+		String[]cidArray = new String[]{
+				"52925095",
+				"52925096",
+				"52925097",
+				"52925099",
+				"52925101",
+				"53480898",
+				"53480909",
+			};
+		
+		Set<String>cids = new TreeSet(Arrays.asList( cidArray));
+		Map<String,String>proipertyMap = PubChemUtils.getPropertyForCidSet(cids, 
+				PubChemRESTCompoundProperties.SMILES);
+	}
+	
+	private static void updateRefMetWithSmiles() throws Exception{
+		
+		Connection conn = ConnectionManager.getConnection();
+		String query = "SELECT PUBCHEM_CID FROM REFMET_DATA_NEW WHERE PUBCHEM_CID IS NOT NULL AND SMILES IS NULL";
+		PreparedStatement ps = conn.prepareStatement(query);
+		Set<String>allCids = new TreeSet<>();
+		ResultSet rs = ps.executeQuery();
+		while(rs.next())
+			allCids.add(rs.getString(1));
+		
+		rs.close();
+		ps.close();
+		
+		String[] cidArray = allCids.toArray(new String[allCids.size()]);
+		query = "UPDATE REFMET_DATA_NEW SET SMILES = ? WHERE PUBCHEM_CID = ?";
+		ps = conn.prepareStatement(query);
+		
+		Set<String>cids = new TreeSet<>();
+		int counter = 0;
+		int maxCount = cidArray.length - 1;
+		for(int i= 0; i<cidArray.length; i++) {
+			
+			cids.add(cidArray[i]);
+			counter++;
+			if(counter == 20 || i == maxCount) {
+				
+				Map<String,String>proipertyMap = PubChemUtils.getPropertyForCidSet(cids, 
+						PubChemRESTCompoundProperties.SMILES);
+				for(Entry<String,String>mapEntry : proipertyMap.entrySet()) {
+					ps.setString(1, mapEntry.getValue());
+					ps.setString(2, mapEntry.getKey());
+					ps.addBatch();
+				}
+				Thread.sleep(500);
+				ps.executeBatch();
+				cids.clear();
+				counter = 0;
+			}
+		}
+		ps.close();
+		ConnectionManager.releaseConnection(conn);
 	}
 	
 	private static void groupAndReassignThermoGradients() throws Exception{
