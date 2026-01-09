@@ -38,6 +38,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
 
@@ -58,7 +59,6 @@ import org.apache.commons.lang3.StringUtils;
 import bibliothek.gui.dock.action.actions.SimpleButtonAction;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.Worklist;
-import edu.umich.med.mrc2.datoolbox.data.WorklistItem;
 import edu.umich.med.mrc2.datoolbox.data.enums.WorklistImportType;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignEvent;
@@ -592,60 +592,93 @@ public class WorklistPanel extends DockableMRC2ToolboxPanel implements BackedByP
 		}
 	}
 
+	/*	
+	 *	Clean worklist from files missing in the experiment 
+	 *	and check for files missing in worklist
+	 **/
 	private synchronized void finalizeWorklistLoad(WorklistImportTask eTask) {
-		
-		//	Clean worklist from files missing in the experiment 
-		//	and check for files missing in worklist
-		Worklist newWorklist = eTask.getWorklist();
+
+		Worklist newWorklist = eTask.getWorklist();		
 		Set<DataFile> allDataFiles = 
 				currentExperiment.getDataFilesForPipeline(activeDataPipeline, false);
-		Set<DataFile> worklistDataFiles = newWorklist.getWorklistItems().stream().
-				map(i -> i.getDataFile()).collect(Collectors.toSet());
-		
-		//	update timestamps
-		for(DataFile df : allDataFiles) {
-			
-			for(DataFile wklFile : worklistDataFiles) {
 				
-				if(df.equals(wklFile)) {
-					
-					df.setInjectionTime(wklFile.getInjectionTime());
-//					df.setInjectionVolume(wklFile.getInjectionVolume());
-				}
-			}
-		}		
-		List<DataFile> missingInWorklistFiles = 
-				allDataFiles.stream().filter(f -> !worklistDataFiles.contains(f)).
-				sorted().collect(Collectors.toList());
+		Set<DataFile> newWorklistDataFiles = 
+				newWorklist.getWorklistItems().stream().
+				//	filter(w -> allDataFiles.contains(w.getDataFile())).
+				map(i -> i.getDataFile()).collect(Collectors.toSet());
+		updateTimeStamps(allDataFiles, newWorklistDataFiles);
 		
-		List<DataFile> missingInExperimentFiles = 
-				worklistDataFiles.stream().filter(f -> !allDataFiles.contains(f)).
-				sorted().collect(Collectors.toList());
-		if(!missingInExperimentFiles.isEmpty()) {
+		Set<DataFile>filesNotInExperiment = 
+				newWorklistDataFiles.stream().filter(f -> !allDataFiles.contains(f)).
+				collect(Collectors.toSet());
+		if(!filesNotInExperiment.isEmpty())
+			newWorklistDataFiles.removeAll(filesNotInExperiment);
+				
+		//	If this is new / replacement worklist
+		if(!eTask.isAppendWorklist()) {
 			
-			List<WorklistItem> newItems = newWorklist.getWorklistItems().
-					stream().filter(i -> allDataFiles.contains(i.getDataFile())).
-					collect(Collectors.toList());
-			newWorklist.getWorklistItems().clear();
-			newWorklist.getWorklistItems().addAll(newItems);
-		}
-		if(!eTask.isAppendWorklist())
 			currentExperiment.setWorklistForAcquisitionMethod(
 					eTask.getDataAcquisitionMethod(), newWorklist);
-		else
-			currentExperiment.getWorklistForDataAcquisitionMethod(
-					eTask.getDataAcquisitionMethod()).appendWorklist(newWorklist);
+		}
+		else {	//	Add missing data to existing worklist
+			Set<DataFile>existingWorklistDataFiles = getDataFilesFromExistingWorklist();
+			Worklist existingWorklist = 
+					currentExperiment.getWorklistForDataAcquisitionMethod(
+							activeDataPipeline.getAcquisitionMethod());
+			
+			newWorklist.getWorklistItems().stream().
+				filter(w -> !existingWorklistDataFiles.contains(w.getDataFile())).
+				filter(w -> newWorklistDataFiles.contains(w.getDataFile())).
+				forEach(existingWorklist::addItem);
+		}
+		Set<DataFile>allDataFilesInWorklist = 
+				currentExperiment.getWorklistForDataAcquisitionMethod(
+				activeDataPipeline.getAcquisitionMethod()).getWorklistItems().stream().
+				map(w -> w.getDataFile()).collect(Collectors.toSet());
+		Set<DataFile>missingInWorklist = allDataFiles.stream().
+				filter(f -> !allDataFilesInWorklist.contains(f)).
+				collect(Collectors.toCollection(TreeSet::new));		
 		
 		switchDataPipeline(currentExperiment, activeDataPipeline);
 		
-		if(!missingInWorklistFiles.isEmpty()) {
+		if(!missingInWorklist.isEmpty()) {
 			
-			List<String> fileNames = missingInWorklistFiles.stream().
-					map(f -> f.getName()).sorted().collect(Collectors.toList());
+			List<String> fileNames = missingInWorklist.stream().
+					map(f -> f.getName()).collect(Collectors.toList());
 			
 			MessageDialog.showWarningMsg(
 					"Worklist data missing for:\n" + StringUtils.join(fileNames, "\n"), 
 					this.getContentPane());
+		}
+	}
+	
+	private void updateTimeStamps(
+			Collection<DataFile> allDataFiles, 
+			Collection<DataFile> newWorklistDataFiles) {
+		
+		for(DataFile df : allDataFiles) {
+			
+			for(DataFile wklFile : newWorklistDataFiles) {
+				
+				if(df.equals(wklFile)) 					
+					df.setInjectionTime(wklFile.getInjectionTime());				
+			}
+		}
+	}
+	
+	private Set<DataFile> getDataFilesFromExistingWorklist() {
+		
+		Worklist existingWorklist = 
+				currentExperiment.getWorklistForDataAcquisitionMethod(
+						activeDataPipeline.getAcquisitionMethod());
+		
+		if(existingWorklist != null && !existingWorklist.getWorklistItems().isEmpty()) {
+			
+			return existingWorklist.getWorklistItems().stream().
+					map(w -> w.getDataFile()).collect(Collectors.toCollection(TreeSet::new));
+		}
+		else {
+			return new TreeSet<>();
 		}
 	}
 

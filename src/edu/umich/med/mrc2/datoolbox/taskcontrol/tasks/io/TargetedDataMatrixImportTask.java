@@ -48,6 +48,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskListener;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.stats.CalculateStatisticsTask;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.stats.RemoveEmptyFeaturesTask;
 import edu.umich.med.mrc2.datoolbox.utils.DelimitedTextParser;
 
 public class TargetedDataMatrixImportTask extends AbstractTask implements TaskListener {
@@ -203,7 +204,6 @@ public class TargetedDataMatrixImportTask extends AbstractTask implements TaskLi
 		MRC2ToolBoxCore.getTaskController().addTask(statsTask);
 	}
 	
-
 	@Override
 	public void statusChanged(TaskEvent e) {
 
@@ -213,13 +213,24 @@ public class TargetedDataMatrixImportTask extends AbstractTask implements TaskLi
 
 			if (e.getSource().getClass().equals(CalculateStatisticsTask.class))
 				finalizeCalculateStatisticsTask((CalculateStatisticsTask)e.getSource());
+			
+			if (e.getSource().getClass().equals(RemoveEmptyFeaturesTask.class))
+				finalizeDataImport((RemoveEmptyFeaturesTask)e.getSource());
 		}	
 	}
-	
+
 	private synchronized void finalizeCalculateStatisticsTask(CalculateStatisticsTask task) {
+
+		RemoveEmptyFeaturesTask cleanupTask = 
+				new RemoveEmptyFeaturesTask(MRC2ToolBoxCore.getActiveMetabolomicsExperiment(), dataPipeline);
+		cleanupTask.addTaskListener(this);
+		MRC2ToolBoxCore.getTaskController().addTask(cleanupTask);
+	}
+	
+	private void finalizeDataImport(RemoveEmptyFeaturesTask source) {
 		setStatus(TaskStatus.FINISHED);
 	}
-		
+	
 	@Override
 	public Task cloneTask() {
 		// TODO Auto-generated method stub

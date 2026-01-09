@@ -40,7 +40,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Enumeration;
@@ -48,7 +47,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.prefs.Preferences;
 import java.util.regex.Pattern;
@@ -109,6 +107,8 @@ import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.IndeterminateProgressDialog;
+import edu.umich.med.mrc2.datoolbox.gui.utils.InfoDialogType;
+import edu.umich.med.mrc2.datoolbox.gui.utils.InformationDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.LongUpdateTask;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
@@ -123,10 +123,9 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io.TargetedDataMatrixImpor
 import edu.umich.med.mrc2.datoolbox.utils.DataImportUtils;
 import edu.umich.med.mrc2.datoolbox.utils.DelimitedTextParser;
 import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
-import edu.umich.med.mrc2.datoolbox.utils.mslib.CompoundNameMatchingTask;
 
 public class MultiFileDataImportDialog extends JDialog
-	implements ActionListener, ItemListener, DataPipelineEventListener, BackedByPreferences{
+	implements ActionListener, ItemListener, DataPipelineEventListener, BackedByPreferences {
 
 	/**
 	 *
@@ -178,11 +177,12 @@ public class MultiFileDataImportDialog extends JDialog
 
 	//	private JTextField dataFileTextField;
 	private Collection<Adduct> selectedAdducts;
-	private String[]compoundNames;
+	//	private String[]compoundNames;
 	private int linesToSkipAfterHeader;
 	private String featureColumn;
 	private CompoundLibrary referenceLibrary;
 	private Map<String,LibraryMsFeature>nameFeatureMap;
+	private Collection<String>dataValidationErrors;
 	
 	public MultiFileDataImportDialog(TaskListener dataLoadTaskListener) {
 
@@ -430,7 +430,7 @@ public class MultiFileDataImportDialog extends JDialog
 		if (command.equals(MainActionCommands.REMOVE_DATA_FILES_COMMAND.getName()))
 			removeDataFiles();
 
-		if (event.getActionCommand().equals(MainActionCommands.IMPORT_DATA_COMMAND.getName()))
+		if (command.equals(MainActionCommands.IMPORT_DATA_COMMAND.getName()))
 			importData();
 
 		if (command.equals(MainActionCommands.CLEAR_DATA_COMMAND.getName()))
@@ -790,9 +790,8 @@ public class MultiFileDataImportDialog extends JDialog
 				|| matchPanel.getSampleDataResultObjects(true).isEmpty())
 			return;
 		
-		Collection<String>errors = validateInputData();
-		if(!errors.isEmpty()) {
-			MessageDialog.showErrorMsg(StringUtils.join(errors, "\n"));
+		if(!validateInputData()){
+			showDataValidationErrors();
 			return;		
 		}
 		DataPipeline importPipeline = existingDataPipeline;	
@@ -886,71 +885,65 @@ public class MultiFileDataImportDialog extends JDialog
 		MRC2ToolBoxCore.getTaskController().addTask(task);		
 	}
 	
-	private Collection<String>validateInputData(){
+	private boolean validateInputData(){
 		
-		Collection<String>errors = new ArrayList<>();
+		dataValidationErrors = new ArrayList<>();
 		if(newDataPipeline != null)
-			errors.addAll(dataPipelineDefinitionPanel.validatePipelineDefinition());
+			dataValidationErrors.addAll(dataPipelineDefinitionPanel.validatePipelineDefinition());
 		
-		checkForUnmatchedSamples(errors);
+		checkForUnmatchedSamples();
 		
 		DataTypeForImport dataTypeForImport = toolBar.getDataTypeForImport();
 		
 		if(dataTypeForImport.equals(DataTypeForImport.AGILENT_UNTARGETED))
-			validateInputDataForAgilentUntargetedImport(errors);
+			validateInputDataForAgilentUntargetedImport();
 
 		if(dataTypeForImport.equals(DataTypeForImport.AGILENT_PROFINDER_TARGETED))
-			validateInputDataForAgilentProFinderImport(errors);
+			validateInputDataForAgilentProFinderImport();
 		
-		if(dataTypeForImport.equals(DataTypeForImport.GENERIC_TARGETED))
-			validateInputDataForNormalizedTargetedImport(errors);
+//		if(dataTypeForImport.equals(DataTypeForImport.GENERIC_TARGETED))
+//			validateInputDataForNormalizedTargetedImport();
 		
-		return errors;
+		return dataValidationErrors.isEmpty();
 	}
 
-	private void validateInputDataForAgilentProFinderImport(Collection<String>errors) {
+	private void validateInputDataForAgilentProFinderImport() {
 		
 		if(newDataPipeline != null) {			
 			
 			if(libraryFile == null || !libraryFile.exists() || !libraryFile.canRead())
-				errors.add("ProFinder simple export file not specified or not readable");
+				dataValidationErrors.add("ProFinder simple export file not specified or not readable");
 			
 			if(detailedProFinderFile == null || !detailedProFinderFile.exists() 
 					|| !detailedProFinderFile.canRead())
-				errors.add("ProFinder detailed export file not specified or not readable");
+				dataValidationErrors.add("ProFinder detailed export file not specified or not readable");
 			
 
 		}
 		if(selectedAdducts == null || selectedAdducts.isEmpty())
-			errors.add("Adduct list for the library construction is not selected");
+			dataValidationErrors.add("Adduct list for the library construction is not selected");
 	}
 
-	private void validateInputDataForAgilentUntargetedImport(Collection<String>errors) {
+	private void validateInputDataForAgilentUntargetedImport() {
 		
 		if(newDataPipeline != null)	{		
 			if(libraryFile == null || !libraryFile.exists() || !libraryFile.canRead())
-				errors.add("CEF Library file not specified or not readable");
+				dataValidationErrors.add("CEF Library file not specified or not readable");
 		}
 	}
 	
-	private void validateInputDataForNormalizedTargetedImport(Collection<String> errors) {
-		
-		nameFeatureMap = new TreeMap<>();
-		CompoundNameMatchingTask task = new CompoundNameMatchingTask(
-				compoundNames, 
-				referenceLibrary,
-				errors, 
-				nameFeatureMap, 
-				true,
-				MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExportsDirectory());
-		IndeterminateProgressDialog idp = 
-				new IndeterminateProgressDialog(
-						"Fetching reference library and matching compound names ...", this, task);
-		idp.setLocationRelativeTo(this.getContentPane());
-		idp.setVisible(true);
-	}
+//	private void validateInputDataForNormalizedTargetedImport() {
+//
+//		CompoundNameMatchingTask task = new CompoundNameMatchingTask(
+//				compoundNames, 
+//				referenceLibrary,
+//				true,
+//				MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExportsDirectory());
+//		task.addTaskListener(this);
+//		MRC2ToolBoxCore.getTaskController().addTask(task);
+//	}
 
-	private void checkForUnmatchedSamples(Collection<String>errors){
+	private void checkForUnmatchedSamples(){
 		
 		Set<SampleDataResultObject> objectsToImport = 			
 				matchPanel.getSampleDataResultObjects(true);
@@ -961,7 +954,7 @@ public class MultiFileDataImportDialog extends JDialog
 				collect(Collectors.toList());
 
 		if(!unmatched.isEmpty())
-			errors.add("Not all files matched to samples:\n" +
+			dataValidationErrors.add("Not all files matched to samples:\n" +
 					StringUtils.join(unmatched, "\n"));
 	}
 
@@ -1143,7 +1136,7 @@ public class MultiFileDataImportDialog extends JDialog
 		baseLibraryDirectory = libraryFile.getParentFile();
 		featureColumn = normalizedTargetedDataSelectionDialog.getFeatureColumnName();
 		referenceLibrary = normalizedTargetedDataSelectionDialog.getReferenceLibrary();
-
+		nameFeatureMap = normalizedTargetedDataSelectionDialog.getNameFeatureMap();
 		extractDataFilesFromNormalizedTargetedData(
 				libraryFile, 
 				featureColumn,
@@ -1172,15 +1165,15 @@ public class MultiFileDataImportDialog extends JDialog
 			if(fileNamePattern.matcher(column).find())
 				sampleFiles.add(new File(column));						
 		}		
-		compoundNames = DataImportUtils.extractNamedColumn(
-				inputDataArray, featureColumn, linesToSkipAfterHeader);
-		
-		long badNameCount = Arrays.asList(compoundNames).stream().
-				filter(n -> (Objects.isNull(n) || n.isBlank())).count();
-		if(badNameCount > 0) {
-			MessageDialog.showErrorMsg("Missing names in \"" + featureColumn + "\" column");
-			return;
-		}		
+//		compoundNames = DataImportUtils.extractNamedColumn(
+//				inputDataArray, featureColumn, linesToSkipAfterHeader);
+//		
+//		long badNameCount = Arrays.asList(compoundNames).stream().
+//				filter(n -> (Objects.isNull(n) || n.isBlank())).count();
+//		if(badNameCount > 0) {
+//			MessageDialog.showErrorMsg("Missing names in \"" + featureColumn + "\" column");
+//			return;
+//		}		
 		File[]sampleFilesArray = sampleFiles.toArray(new File[sampleFiles.size()]);
 		addResultsToNewPipeline(dataPipelineDefinitionPanel.getDataPipeline(), sampleFilesArray);		
 	}
@@ -1331,6 +1324,42 @@ public class MultiFileDataImportDialog extends JDialog
 		
 		MessageDialog.showWarningMsg("Under construction", this);
 		return;
+	}
+	
+//	@Override
+//	public void statusChanged(TaskEvent e) {
+//
+//	    if (e.getStatus() == TaskStatus.FINISHED) {
+//
+//	        ((AbstractTask)e.getSource()).removeTaskListener(this);
+//
+//	        if (e.getSource().getClass().equals(CompoundNameMatchingTask.class))
+//	        	finalizeCompoundNameMatchingTask((CompoundNameMatchingTask)e.getSource());
+//	    }		
+//	}
+//
+//	private void finalizeCompoundNameMatchingTask(CompoundNameMatchingTask task) {
+//
+//		List<String> compoundErrors = task.getErrors();
+//		dataValidationErrors.addAll(compoundErrors);
+//		if(!dataValidationErrors.isEmpty()) {			
+//			showDataValidationErrors();
+//		}
+//		else {			
+//			nameFeatureMap = task.getNameFeatureMap();			
+//			MessageDialog.showInfoMsg("Data successfully verified", this);
+//		}
+//	}
+	
+	private void showDataValidationErrors() {
+		
+		InformationDialog infoDialog = new InformationDialog(
+				"Data validation errors", 
+				"The following errors were found:", 
+				StringUtils.join(dataValidationErrors, "\n"),
+				InfoDialogType.ERROR);
+		infoDialog.setLocationRelativeTo(this);
+		infoDialog.setVisible(true);
 	}
 }
 

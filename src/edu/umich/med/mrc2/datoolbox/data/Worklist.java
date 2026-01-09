@@ -100,6 +100,14 @@ public class Worklist implements Serializable, XmlStorable {
 		items.removeAll(toRemove);
 	}
 	
+	public void removeDataFiles(Collection<DataFile> filesToRemove) {
+		
+		Collection<WorklistItem>toRemove = 
+				items.stream().filter(i -> filesToRemove.contains(i.getDataFile())).
+				collect(Collectors.toSet());
+		items.removeAll(toRemove);
+	}
+	
 	public void updateExistingWorklistItem(WorklistItem newItem) {
 		
 		DataFile df = newItem.getDataFile();

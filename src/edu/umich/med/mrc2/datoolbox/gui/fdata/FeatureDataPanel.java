@@ -2086,7 +2086,11 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 
 	private synchronized void finalizeEmptyFeatureCleanup(RemoveEmptyFeaturesTask task) {
 		
-		MRC2ToolBoxCore.getMainWindow().switchPanelForDataPipeline(task.getDataPipeline(), PanelList.FEATURE_DATA);
+		MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
+		MainWindow.hideProgressDialog();
+		
+		MRC2ToolBoxCore.getMainWindow().switchPanelForDataPipeline(
+				task.getDataPipeline(), PanelList.FEATURE_DATA);
 		resetFeatureTable();
 		SavePipelineDataTask spTask = 
 				new SavePipelineDataTask(currentExperiment, activeDataPipeline);

@@ -19,7 +19,7 @@
  *
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.utils.mslib;
+package edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io;
 
 import java.awt.Desktop;
 import java.io.File;
@@ -32,11 +32,12 @@ import java.nio.file.StandardOpenOption;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
-import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -50,16 +51,16 @@ import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.database.cpd.CompoundDatabaseUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.MSRTLibraryUtils;
 import edu.umich.med.mrc2.datoolbox.dbparse.load.refmet.RefMetFields;
-import edu.umich.med.mrc2.datoolbox.gui.library.MsLibraryPanel;
-import edu.umich.med.mrc2.datoolbox.gui.main.PanelList;
-import edu.umich.med.mrc2.datoolbox.gui.utils.LongUpdateTask;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
 import edu.umich.med.mrc2.datoolbox.utils.RefMetUtils;
 
-public class CompoundNameMatchingTask extends LongUpdateTask {
+public class CompoundNameMatchingTask extends AbstractTask {
 
-	private Collection<String> errors;
+	private List<String> errors;
 	private Collection<String> compoundErrors;
 	private CompoundLibrary referenceLibrary;
 	private Map<String,LibraryMsFeature>nameFeatureMap;
@@ -77,49 +78,42 @@ public class CompoundNameMatchingTask extends LongUpdateTask {
 			};
 	
 	private static final Pattern excludePattern = Pattern.compile("\\[[a-zA-Z]+\\]");
-	
-	//	TODO keep variant and duplicate as features
 
 	public CompoundNameMatchingTask(
 			String[] compoundNames, 
-			CompoundLibrary referenceLibrary,
-			Collection<String> errors, 
-			Map<String, LibraryMsFeature> nameFeatureMap, 
+			CompoundLibrary referenceLibrary,			
 			boolean writeLog,
 			File logDir) {
 		super();
-		this.errors = errors;
 		this.referenceLibrary = referenceLibrary;
-		this.nameFeatureMap = nameFeatureMap;
 		this.compoundNames = compoundNames;
 		this.writeLog = writeLog;
 		this.logDir = logDir;
+		compoundErrors = new ArrayList<>();
+		errors = new ArrayList<>();
+		nameFeatureMap = new TreeMap<>();
 	}
 
 	@Override
-	public Void doInBackground() {
+	public void run() {
 
+		setStatus(TaskStatus.PROCESSING);
 		if(referenceLibrary != null)
 			fetchLibraryCompounds();
 		
 		try {
 			matchCompounds();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		return null;
-	}
-	
-	@Override
-	public void done() {
-		
-		((MsLibraryPanel)MRC2ToolBoxCore.getMainWindow().
-				getPanel(PanelList.MS_LIBRARY)).updateLibraryMenuAndLabel();
-		super.done();
+		setStatus(TaskStatus.FINISHED);
 	}
 	
 	private void fetchLibraryCompounds() {
+		
+		taskDescription = "Fetching library compounds ...";
+		total = 100;
+		processed = 20;
 		
 		if(MRC2ToolBoxCore.getActiveMsLibraries().contains(referenceLibrary)) {
 			
@@ -157,12 +151,13 @@ public class CompoundNameMatchingTask extends LongUpdateTask {
 			catch (Exception e) {
 				e.printStackTrace();
 			}
-		}				
+		}	
+		processed = 100;
 	}
 	
 	private void matchCompounds() {
 		
-		compoundErrors = new TreeSet<>();
+		
 		if(referenceLibrary != null)
 			matchCompoundsToLibrary();
 		else {
@@ -184,6 +179,11 @@ public class CompoundNameMatchingTask extends LongUpdateTask {
 	
 	private void matchCompoundsToLibrary() {
 		
+		
+		taskDescription = "Matching feature names to compounds ...";
+		total = compoundNames.length;
+		processed = 0;
+		
 		for (String cpdName : compoundNames) {
 
 			String cleanCompoundName = getCleanCompoundName(cpdName);
@@ -199,9 +199,14 @@ public class CompoundNameMatchingTask extends LongUpdateTask {
 				nameFeatureMap.put(cpdName, newLibFeature);
 			}
 		}
+		processed++;
 	}
 	
 	private void matchCompoundsToDatabase() throws Exception{
+		
+		taskDescription = "Matching feature names to compounds ...";
+		total = compoundNames.length;
+		processed = 0;
 		
 		Connection conn = ConnectionManager.getConnection();
 		String query = "SELECT REFMET_ID FROM REFMET_DATA_NEW WHERE UPPER(NAME) = ?";
@@ -234,9 +239,13 @@ public class CompoundNameMatchingTask extends LongUpdateTask {
 				compoundErrors.add(cleanCompoundName);
 			
 			rs.close();
+			processed++;
 		}
 		ps.close();
 		for(Entry<String,String>mapEntry : nameRefMetIdMap.entrySet()) {
+			
+			total = nameRefMetIdMap.size();
+			processed = 0;
 			
 			CompoundIdentity cpdId = null;
 			try {
@@ -255,6 +264,7 @@ public class CompoundNameMatchingTask extends LongUpdateTask {
 				newLibFeature.removeDefaultPrimaryIdentity();
 				nameFeatureMap.put(mapEntry.getKey(), newLibFeature);
 			}
+			processed++;
 		}		
 		ConnectionManager.releaseConnection(conn);
 	}
@@ -296,5 +306,23 @@ public class CompoundNameMatchingTask extends LongUpdateTask {
 		        ex.printStackTrace();
 		    }
 		}
+	}
+
+	public List<String> getErrors() {
+		return errors;
+	}
+
+	public Map<String, LibraryMsFeature> getNameFeatureMap() {
+		return nameFeatureMap;
+	}
+
+	@Override
+	public Task cloneTask() {
+
+		return new CompoundNameMatchingTask(
+				compoundNames, 
+				referenceLibrary,			
+				writeLog,
+				logDir);
 	}
 }

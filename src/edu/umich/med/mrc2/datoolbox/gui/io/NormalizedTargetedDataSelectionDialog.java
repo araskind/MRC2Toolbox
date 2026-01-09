@@ -38,8 +38,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
-import java.util.TreeMap;
 import java.util.prefs.Preferences;
 
 import javax.swing.ButtonGroup;
@@ -67,21 +67,27 @@ import javax.swing.border.TitledBorder;
 import org.apache.commons.lang3.StringUtils;
 
 import edu.umich.med.mrc2.datoolbox.data.CompoundLibrary;
+import edu.umich.med.mrc2.datoolbox.data.LibraryMsFeature;
 import edu.umich.med.mrc2.datoolbox.gui.library.manager.LibrarySelectorDialog;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
-import edu.umich.med.mrc2.datoolbox.gui.utils.IndeterminateProgressDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.InformationDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
+import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskListener;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io.CompoundNameMatchingTask;
 import edu.umich.med.mrc2.datoolbox.utils.DataImportUtils;
 import edu.umich.med.mrc2.datoolbox.utils.DelimitedTextParser;
 import edu.umich.med.mrc2.datoolbox.utils.TextUtils;
-import edu.umich.med.mrc2.datoolbox.utils.mslib.CompoundNameMatchingTask;
 
-public class NormalizedTargetedDataSelectionDialog extends JDialog implements ActionListener, ItemListener, BackedByPreferences {
+public class NormalizedTargetedDataSelectionDialog extends JDialog 
+		implements ActionListener, ItemListener, BackedByPreferences, TaskListener {
 	
 	/**
 	 * 
@@ -109,6 +115,8 @@ public class NormalizedTargetedDataSelectionDialog extends JDialog implements Ac
 	private File inputFile;
 	private File baseLibraryDirectory;
 	private CompoundLibrary referenceLibrary;
+
+	private Map<String, LibraryMsFeature> nameFeatureMap;
 	
 	private static final String BROWSE = "BROWSE";
 
@@ -347,59 +355,48 @@ public class NormalizedTargetedDataSelectionDialog extends JDialog implements Ac
 	}
 	
 	private void verifyCompoundData() {
+		
+		String message = "";
+		if(inputFile == null)
+			message = "Input data file must be defined\n";
 
-		if((refLibRadioButton.isSelected() && referenceLibrary == null) || inputFile == null) {
-			
-			String message = "Input data file ";
-			if(refLibRadioButton.isSelected())
-				message += "and reference library ";
-			
-			message += "must be defined ";			
+		if((refLibRadioButton.isSelected() && referenceLibrary == null))
+			message += "Reference library must be defined\n";
+		
+		if(!message.isEmpty()) {
 			MessageDialog.showErrorMsg(message, this);
+			btnSave.setEnabled(false);
 		}
 		else {
+			btnSave.setEnabled(true);
 			String[][] inputDataArray = 
 					DelimitedTextParser.parseDataFileBasedOnExtension(inputFile);			
 			String featureColumn = getFeatureColumnName();
 			if(featureColumn == null || featureColumn.isBlank()) {
 				MessageDialog.showErrorMsg("Feature column not specified", this);
-				return;
-			}	
-			String[] compoundNames = DataImportUtils.extractNamedColumn(
-					inputDataArray, featureColumn, getNumberOfLinesToSkipAfterHeader());
-			long badNameCount = Arrays.asList(compoundNames).stream().
-					filter(n -> (Objects.isNull(n) || n.isBlank())).count();
-			if(badNameCount > 0) {
-				MessageDialog.showErrorMsg("Missing names in \"" + featureColumn + "\" column");
-				return;
-			}
-			List<String> errors = new ArrayList<>();
-			CompoundNameMatchingTask task = new CompoundNameMatchingTask(
-					compoundNames, 
-					referenceLibrary,
-					errors, 
-					new TreeMap<>(), 
-					false,
-					null);
-			IndeterminateProgressDialog idp = 
-					new IndeterminateProgressDialog(
-							"Fetching reference library and matching compound names ...", this, task);
-			idp.setLocationRelativeTo(this.getContentPane());
-			idp.setVisible(true);				
-			
-			if(!errors.isEmpty()) {
-				String message = errors.remove(0);
-				String details = StringUtils.join(errors, "\n");
-				InformationDialog infoDialog = new InformationDialog(
-						"Unmatched compounds", 
-						message, 
-						details);
-				infoDialog.setLocationRelativeTo(this);
-				infoDialog.setVisible(true);
+				btnSave.setEnabled(false);
 			}
 			else {
-				MessageDialog.showInfoMsg("Data successfully verified", this);
-			}
+				btnSave.setEnabled(true);
+				String[] compoundNames = DataImportUtils.extractNamedColumn(
+						inputDataArray, featureColumn, getNumberOfLinesToSkipAfterHeader());
+				long badNameCount = Arrays.asList(compoundNames).stream().
+						filter(n -> (Objects.isNull(n) || n.isBlank())).count();
+				if(badNameCount > 0) {
+					MessageDialog.showErrorMsg("Missing names in \"" + featureColumn + "\" column");
+					btnSave.setEnabled(false);
+				}
+				else {
+					btnSave.setEnabled(true);
+					CompoundNameMatchingTask task = new CompoundNameMatchingTask(
+							compoundNames, 
+							referenceLibrary,
+							false,
+							null);
+					task.addTaskListener(this);
+					MRC2ToolBoxCore.getTaskController().addTask(task);
+				}
+			}			
 		}		
 	}
 
@@ -430,6 +427,7 @@ public class NormalizedTargetedDataSelectionDialog extends JDialog implements Ac
 			inputFile = fc.getSelectedFile();
 			inputFileTextField.setText(inputFile.getAbsolutePath());
 			populateColumnSelector();
+			verifyCompoundData();
 		}
 	}
 
@@ -520,5 +518,43 @@ public class NormalizedTargetedDataSelectionDialog extends JDialog implements Ac
 		
 		if(e.getSource().equals(cpdDatabaseRadioButton) && e.getStateChange() == ItemEvent.SELECTED)
 			refLibrarySelectButton.setEnabled(false);		
+	}
+
+	@Override
+	public void statusChanged(TaskEvent e) {
+
+	    if (e.getStatus() == TaskStatus.FINISHED) {
+
+	        ((AbstractTask)e.getSource()).removeTaskListener(this);
+
+	        if (e.getSource().getClass().equals(CompoundNameMatchingTask.class))
+	        	finalizeCompoundNameMatchingTask((CompoundNameMatchingTask)e.getSource());
+	    }		
+	}
+
+	private void finalizeCompoundNameMatchingTask(CompoundNameMatchingTask task) {
+
+		List<String> compoundErrors = task.getErrors();
+		if(!compoundErrors.isEmpty()) {
+			
+			btnSave.setEnabled(false);
+			String message = compoundErrors.remove(0);
+			String details = StringUtils.join(compoundErrors, "\n");
+			InformationDialog infoDialog = new InformationDialog(
+					"Unmatched compounds", 
+					message, 
+					details);
+			infoDialog.setLocationRelativeTo(this);
+			infoDialog.setVisible(true);
+		}
+		else {
+			MessageDialog.showInfoMsg("Data successfully verified", this);
+			nameFeatureMap = task.getNameFeatureMap();
+			btnSave.setEnabled(true);
+		}
+	}
+
+	public Map<String, LibraryMsFeature> getNameFeatureMap() {
+		return nameFeatureMap;
 	}
 }
