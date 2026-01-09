@@ -391,6 +391,10 @@ public class DataAnalysisProject extends Project {
 	 }
 
 	public Matrix getDataMatrixForDataPipeline(DataPipeline pipeline) {
+		
+		if(dataMatrixMap.get(pipeline) == null)
+			ProjectUtils.loadDataMatrixForPipeline(this, pipeline);
+		
 		return dataMatrixMap.get(pipeline);
 	}
 

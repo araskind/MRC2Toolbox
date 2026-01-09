@@ -58,6 +58,7 @@ public class TargetedDataMatrixImportTask extends AbstractTask implements TaskLi
 	private File inputDataFile;
 	private int linesToSkipAfterHeader;
 	private String featureColumn;
+	private String retentionColumn;
 	private Map<String,LibraryMsFeature>nameFeatureMap;
 	
 	private String[][] inputDataArray;
@@ -74,6 +75,7 @@ public class TargetedDataMatrixImportTask extends AbstractTask implements TaskLi
 		this.inputDataFile = importettings.getInputDataFile();
 		this.linesToSkipAfterHeader = importettings.getLinesToSkipAfterHeader();
 		this.featureColumn = importettings.getFeatureColumn();
+		this.retentionColumn = importettings.getRetentionColumn();
 		this.nameFeatureMap = importettings.getNameFeatureMap();
 	}
 
@@ -102,6 +104,7 @@ public class TargetedDataMatrixImportTask extends AbstractTask implements TaskLi
 				DelimitedTextParser.parseDataFileBasedOnExtension(inputDataFile);
 
 		int featureColumnIndex = -1;
+		int retentionColumnIndex = -1;
 		// Create file / column map
 		fileColumnMap = new TreeMap<>();
 		for (int i = 0; i < inputDataArray[0].length; i++) {
@@ -109,6 +112,9 @@ public class TargetedDataMatrixImportTask extends AbstractTask implements TaskLi
 			String colName = inputDataArray[0][i].trim();
 			if (featureColumn.trim().equals(colName))
 				featureColumnIndex = i;
+			
+			if (retentionColumn.trim().equals(colName))
+				retentionColumnIndex = i;
 
 			SampleDataResultObject sdro = dataToImport.stream().
 					filter(o -> o.getDataFile().getName().equals(colName))
@@ -123,9 +129,14 @@ public class TargetedDataMatrixImportTask extends AbstractTask implements TaskLi
 
 			String featureName = inputDataArray[i][featureColumnIndex].trim();
 			LibraryMsFeature libFeature = nameFeatureMap.get(featureName);
-			
 			if (libFeature != null) {
 				libFeature.setPolarity(ppPoplarity);
+				if(retentionColumnIndex > -1) {
+					
+					String rtString = inputDataArray[i][retentionColumnIndex].trim();
+					if(NumberUtils.isCreatable(rtString))
+						libFeature.setRetentionTime(NumberUtils.createDouble(rtString));
+				}
 				featureLineMap.put(libFeature, i);
 			}
 		}

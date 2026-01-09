@@ -25,6 +25,7 @@ import java.sql.Connection;
 import java.util.Collection;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.regex.Pattern;
 
 import org.jdom2.Element;
 
@@ -124,10 +125,17 @@ public abstract class OpenStandaloneProjectAbstractTask extends AbstractTask {
 		total = uniqueCompoundIds.size();
 		processed = 0;
 		
+		//	TODO this is a stopgap solution before ID lookup is all done through compound database
+		Pattern pattern = Pattern.compile("RM\\d{7}");
+		
 		for(String cid : uniqueCompoundIds) {
 			
-			CompoundIdentity compId = 
-					CompoundDatabaseUtils.getCompoundById(cid, conn);
+			CompoundIdentity compId = null;
+			if(pattern.matcher(cid).matches())
+				compId = CompoundDatabaseUtils.getRefMetCompoundById(cid, conn);	
+			else				
+				compId = CompoundDatabaseUtils.getCompoundById(cid, conn);
+			
 			if(compId != null)
 				OfflineExperimentLoadCache.addCompoundIdentity(compId);
 			

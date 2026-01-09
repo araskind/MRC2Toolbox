@@ -34,6 +34,7 @@ public class TargetedDataMatrixImportSettingsObject {
 	private File inputDataFile;
 	private int linesToSkipAfterHeader;
 	private String featureColumn;
+	private String retentionColumn;
 	private CompoundLibrary referenceLibrary;
 	private Map<String,LibraryMsFeature>nameFeatureMap;
 	
@@ -46,7 +47,8 @@ public class TargetedDataMatrixImportSettingsObject {
 			DataPipeline importPipeline,
 			File inputDataFile, 
 			int linesToSkipAfterHeader, 
-			String featureColumn, 
+			String featureColumn,
+			String retentionColumn,
 			CompoundLibrary referenceLibrary,
 			Map<String, 
 			LibraryMsFeature> nameFeatureMap) {
@@ -56,6 +58,7 @@ public class TargetedDataMatrixImportSettingsObject {
 		this.inputDataFile = inputDataFile;
 		this.linesToSkipAfterHeader = linesToSkipAfterHeader;
 		this.featureColumn = featureColumn;
+		this.retentionColumn = retentionColumn;
 		this.referenceLibrary = referenceLibrary;
 		this.nameFeatureMap = nameFeatureMap;
 	}
@@ -114,5 +117,13 @@ public class TargetedDataMatrixImportSettingsObject {
 
 	public void setNameFeatureMap(Map<String, LibraryMsFeature> nameFeatureMap) {
 		this.nameFeatureMap = nameFeatureMap;
+	}
+
+	public String getRetentionColumn() {
+		return retentionColumn;
+	}
+
+	public void setRetentionColumn(String retentionColumn) {
+		this.retentionColumn = retentionColumn;
 	}
 }

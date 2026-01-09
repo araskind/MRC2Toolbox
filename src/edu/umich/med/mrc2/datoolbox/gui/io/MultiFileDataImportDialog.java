@@ -180,6 +180,7 @@ public class MultiFileDataImportDialog extends JDialog
 	//	private String[]compoundNames;
 	private int linesToSkipAfterHeader;
 	private String featureColumn;
+	private String retentionColumn;
 	private CompoundLibrary referenceLibrary;
 	private Map<String,LibraryMsFeature>nameFeatureMap;
 	private Collection<String>dataValidationErrors;
@@ -877,6 +878,7 @@ public class MultiFileDataImportDialog extends JDialog
 						libraryFile, 
 						linesToSkipAfterHeader,
 						featureColumn,
+						retentionColumn,
 						referenceLibrary, 
 						nameFeatureMap);
 
@@ -1135,6 +1137,7 @@ public class MultiFileDataImportDialog extends JDialog
 		libraryTextField.setText(libraryFile.getAbsolutePath());
 		baseLibraryDirectory = libraryFile.getParentFile();
 		featureColumn = normalizedTargetedDataSelectionDialog.getFeatureColumnName();
+		retentionColumn = normalizedTargetedDataSelectionDialog.getRetentionColumnName();
 		referenceLibrary = normalizedTargetedDataSelectionDialog.getReferenceLibrary();
 		nameFeatureMap = normalizedTargetedDataSelectionDialog.getNameFeatureMap();
 		extractDataFilesFromNormalizedTargetedData(
@@ -1164,16 +1167,7 @@ public class MultiFileDataImportDialog extends JDialog
 			
 			if(fileNamePattern.matcher(column).find())
 				sampleFiles.add(new File(column));						
-		}		
-//		compoundNames = DataImportUtils.extractNamedColumn(
-//				inputDataArray, featureColumn, linesToSkipAfterHeader);
-//		
-//		long badNameCount = Arrays.asList(compoundNames).stream().
-//				filter(n -> (Objects.isNull(n) || n.isBlank())).count();
-//		if(badNameCount > 0) {
-//			MessageDialog.showErrorMsg("Missing names in \"" + featureColumn + "\" column");
-//			return;
-//		}		
+		}	
 		File[]sampleFilesArray = sampleFiles.toArray(new File[sampleFiles.size()]);
 		addResultsToNewPipeline(dataPipelineDefinitionPanel.getDataPipeline(), sampleFilesArray);		
 	}

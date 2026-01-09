@@ -81,7 +81,7 @@ public class FeatureIntensitiesTableModel extends BasicTableModel {
 		if(project == null)
 			return;
 
-		List<Object[]>rowData = new ArrayList<Object[]>();
+		List<Object[]>rowData = new ArrayList<>();
 		long[] coordinates = new long[2];
 		long[] nameCoordinates = new long[2];
 		int rowCount = 1;

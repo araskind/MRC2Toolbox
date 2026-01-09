@@ -105,6 +105,7 @@ public class NormalizedTargetedDataSelectionDialog extends JDialog
 	private JTextField fileNameMaskField;
 	private JSpinner lineSkipSpinner;
 	private JComboBox<String> featureColumnComboBox;
+	private JComboBox<String> rtColumnComboBox;
 	private JLabel refLibraryNameLabel;
 	private LibrarySelectorDialog librarySelectorDialog;
 	private JButton btnSave;
@@ -128,8 +129,8 @@ public class NormalizedTargetedDataSelectionDialog extends JDialog
 		this.baseLibraryDirectory = baseLibraryDirectory;
 		setTitle("Select normalized targeted data file");
 		setIconImage(((ImageIcon) dialogIcon).getImage());
-		setPreferredSize(new Dimension(700, 300));
-		setSize(new Dimension(700, 300));
+		setPreferredSize(new Dimension(700, 350));
+		setSize(new Dimension(700, 350));
 		setModalityType(ModalityType.APPLICATION_MODAL);
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
@@ -138,9 +139,9 @@ public class NormalizedTargetedDataSelectionDialog extends JDialog
 		getContentPane().add(dataPanel, BorderLayout.CENTER);
 		GridBagLayout gbl_dataPanel = new GridBagLayout();
 		gbl_dataPanel.columnWidths = new int[]{0, 0, 0, 0, 0};
-		gbl_dataPanel.rowHeights = new int[]{0, 0, 0, 0, 0, 0, 0};
+		gbl_dataPanel.rowHeights = new int[]{0, 0, 0, 0, 0, 0, 0, 0};
 		gbl_dataPanel.columnWeights = new double[]{0.0, 0.0, 1.0, 0.0, Double.MIN_VALUE};
-		gbl_dataPanel.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 1.0, Double.MIN_VALUE};
+		gbl_dataPanel.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, Double.MIN_VALUE};
 		dataPanel.setLayout(gbl_dataPanel);
 		
 		JLabel lblNewLabel = new JLabel("Input file");
@@ -232,6 +233,24 @@ public class NormalizedTargetedDataSelectionDialog extends JDialog
 		gbc_featureColumnComboBox.gridy = 4;
 		dataPanel.add(featureColumnComboBox, gbc_featureColumnComboBox);
 		
+		JLabel lblNewLabel_5 = new JLabel("RT column");
+		GridBagConstraints gbc_lblNewLabel_5 = new GridBagConstraints();
+		gbc_lblNewLabel_5.anchor = GridBagConstraints.WEST;
+		gbc_lblNewLabel_5.gridwidth = 2;
+		gbc_lblNewLabel_5.insets = new Insets(0, 0, 5, 5);
+		gbc_lblNewLabel_5.gridx = 0;
+		gbc_lblNewLabel_5.gridy = 5;
+		dataPanel.add(lblNewLabel_5, gbc_lblNewLabel_5);
+		
+		rtColumnComboBox = new JComboBox<>();
+		GridBagConstraints gbc_rtColumnComboBox = new GridBagConstraints();
+		gbc_rtColumnComboBox.gridwidth = 2;
+		gbc_rtColumnComboBox.insets = new Insets(0, 0, 5, 5);
+		gbc_rtColumnComboBox.fill = GridBagConstraints.HORIZONTAL;
+		gbc_rtColumnComboBox.gridx = 2;
+		gbc_rtColumnComboBox.gridy = 5;
+		dataPanel.add(rtColumnComboBox, gbc_rtColumnComboBox);
+		
 		JPanel panel = new JPanel();
 		panel.setBorder(new CompoundBorder(
 				new TitledBorder(null, "Compound matching settings", 
@@ -241,7 +260,7 @@ public class NormalizedTargetedDataSelectionDialog extends JDialog
 		gbc_panel.gridwidth = 4;
 		gbc_panel.fill = GridBagConstraints.BOTH;
 		gbc_panel.gridx = 0;
-		gbc_panel.gridy = 5;
+		gbc_panel.gridy = 6;
 		dataPanel.add(panel, gbc_panel);
 		GridBagLayout gbl_panel = new GridBagLayout();
 		gbl_panel.columnWidths = new int[]{0, 0, 0, 0};
@@ -437,6 +456,17 @@ public class NormalizedTargetedDataSelectionDialog extends JDialog
 				DelimitedTextParser.parseDataFileBasedOnExtension(inputFile);
 		featureColumnComboBox.setModel(new DefaultComboBoxModel<>(inputDataArray[0]));
 		featureColumnComboBox.setSelectedIndex(0);
+		
+		rtColumnComboBox.setModel(new DefaultComboBoxModel<>(inputDataArray[0]));
+		rtColumnComboBox.setSelectedIndex(-1);
+		for(int i=0; i<inputDataArray[0].length; i++) {
+			
+			if(inputDataArray[0][i].toUpperCase().contains("RT") 
+					|| inputDataArray[0][i].toUpperCase().contains("RETEN")) {
+				rtColumnComboBox.setSelectedIndex(i);
+				break;
+			}
+		}
 	}
 
 	public File getInputFile() {
@@ -453,6 +483,10 @@ public class NormalizedTargetedDataSelectionDialog extends JDialog
 	
 	public String getFeatureColumnName() {
 		return (String)featureColumnComboBox.getSelectedItem();
+	}
+	
+	public String getRetentionColumnName() {
+		return (String)rtColumnComboBox.getSelectedItem();
 	}
 	
 	public CompoundLibrary getReferenceLibrary() {
