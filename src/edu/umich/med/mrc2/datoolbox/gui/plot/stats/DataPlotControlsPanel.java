@@ -41,7 +41,8 @@ import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignSubset;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataTypeName;
 import edu.umich.med.mrc2.datoolbox.data.enums.PlotDataGrouping;
 import edu.umich.med.mrc2.datoolbox.gui.plot.IControlledDataPlot;
-import edu.umich.med.mrc2.datoolbox.gui.utils.SortedComboBoxModel;
+import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
+import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 
 public class DataPlotControlsPanel extends JPanel implements ItemListener {
 
@@ -50,9 +51,9 @@ public class DataPlotControlsPanel extends JPanel implements ItemListener {
 	 */
 	private static final long serialVersionUID = 6747485797254654577L;
 
-	private JComboBox groupByComboBox;
-	private JComboBox categoryComboBox;
-	private JComboBox subCategoryComboBox;	
+	private JComboBox<PlotDataGrouping> groupByComboBox;
+	private JComboBox<ExperimentDesignFactor> categoryComboBox;
+	private JComboBox<ExperimentDesignFactor> subCategoryComboBox;	
 
 	private IControlledDataPlot plot;
 	
@@ -78,9 +79,8 @@ public class DataPlotControlsPanel extends JPanel implements ItemListener {
 		gbc_lblNewLabel.gridy = 0;
 		add(lblNewLabel, gbc_lblNewLabel);
 		
-		groupByComboBox = new JComboBox<PlotDataGrouping>();
-		groupByComboBox.setModel(
-				new DefaultComboBoxModel<PlotDataGrouping>(PlotDataGrouping.values()));
+		groupByComboBox = new JComboBox<>(
+				new DefaultComboBoxModel<>(PlotDataGrouping.values()));
 		groupByComboBox.setSelectedItem(PlotDataGrouping.IGNORE_DESIGN);
 		groupByComboBox.setMaximumSize(new Dimension(120, 26));
 		
@@ -99,10 +99,8 @@ public class DataPlotControlsPanel extends JPanel implements ItemListener {
 		gbc_lblNewLabel_1.gridy = 1;
 		add(lblNewLabel_1, gbc_lblNewLabel_1);
 		
-		categoryComboBox = new JComboBox<ExperimentDesignFactor>();
+		categoryComboBox = new JComboBox<>(new DefaultComboBoxModel<>());
 		categoryComboBox.setName(DataTypeName.CATEGORY.name());
-		categoryComboBox.setModel(
-				new DefaultComboBoxModel<ExperimentDesignFactor>());
 		categoryComboBox.setMaximumSize(new Dimension(250, 26));
 		categoryComboBox.setEnabled(false);
 		
@@ -121,9 +119,8 @@ public class DataPlotControlsPanel extends JPanel implements ItemListener {
 		gbc_lblNewLabel_2.gridy = 2;
 		add(lblNewLabel_2, gbc_lblNewLabel_2);
 		
-		subCategoryComboBox = new JComboBox<ExperimentDesignFactor>();
+		subCategoryComboBox = new JComboBox<>(new DefaultComboBoxModel<>());
 		subCategoryComboBox.setName(DataTypeName.SUB_CATEGORY.name());
-		subCategoryComboBox.setModel(new DefaultComboBoxModel<ExperimentDesignFactor>());
 		subCategoryComboBox.setMaximumSize(new Dimension(250, 26));
 		subCategoryComboBox.setEnabled(false);
 		
@@ -154,31 +151,38 @@ public class DataPlotControlsPanel extends JPanel implements ItemListener {
 	@SuppressWarnings("unchecked")
 	public void populateCategories(ExperimentDesignSubset activeSubset) {
 
+		populateFactorSelectors(activeSubset);
+		updateFactorSelectors();
+	}
+	
+	private void populateFactorSelectors(ExperimentDesignSubset activeSubset) {
+		
+		toggleItemListeners(false);
 		ExperimentDesignFactor[] factors = new ExperimentDesignFactor[0];
 
 		if (activeSubset != null) {
 
 			factors = activeSubset.getOrderedDesign().keySet()
 					.toArray(new ExperimentDesignFactor[activeSubset.getOrderedDesign().size()]);
-			categoryComboBox.setModel(new SortedComboBoxModel<ExperimentDesignFactor>(factors));
+			categoryComboBox.setModel(new DefaultComboBoxModel<>(factors));
 			categoryComboBox.setSelectedItem(factors[0]);
 
 			if (factors.length > 1) {
 
-				subCategoryComboBox.setModel(new SortedComboBoxModel<ExperimentDesignFactor>(factors));
+				subCategoryComboBox.setModel(new DefaultComboBoxModel<>(factors));
 				subCategoryComboBox.setSelectedItem(factors[1]);
 				subCategoryComboBox.setEnabled(true);
 			} else {
-				subCategoryComboBox.setModel(new DefaultComboBoxModel<ExperimentDesignFactor>());
+				subCategoryComboBox.setModel(new DefaultComboBoxModel<>());
 				subCategoryComboBox.setEnabled(false);
 			}
 		} else {
-			categoryComboBox.setModel(new DefaultComboBoxModel<ExperimentDesignFactor>());
+			categoryComboBox.setModel(new DefaultComboBoxModel<>());
 			categoryComboBox.setEnabled(false);
-			subCategoryComboBox.setModel(new DefaultComboBoxModel<ExperimentDesignFactor>());
+			subCategoryComboBox.setModel(new DefaultComboBoxModel<>());
 			subCategoryComboBox.setEnabled(false);
 		}
-		updateFactorSelectors();
+		toggleItemListeners(true);
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -191,7 +195,7 @@ public class DataPlotControlsPanel extends JPanel implements ItemListener {
 				|| plotType.equals(StatsPlotType.BOXPLOT_BY_GROUP)) {
 
 			groupByComboBox.setModel(
-					new DefaultComboBoxModel<PlotDataGrouping>(PlotDataGrouping.values()));
+					new DefaultComboBoxModel<>(PlotDataGrouping.values()));
 			groupByComboBox.removeItem(PlotDataGrouping.IGNORE_DESIGN);
 			groupByComboBox.setSelectedItem(PlotDataGrouping.EACH_FACTOR);
 			categoryComboBox.setSelectedIndex(-1);
@@ -203,21 +207,37 @@ public class DataPlotControlsPanel extends JPanel implements ItemListener {
 		if (plotType.equals(StatsPlotType.BARCHART)) {
 
 			groupByComboBox.setModel(
-					new DefaultComboBoxModel<PlotDataGrouping>(PlotDataGrouping.values()));
+					new DefaultComboBoxModel<>(PlotDataGrouping.values()));
 			groupByComboBox.setSelectedItem(grouping);
 			updateFactorSelectors();
 		}
 		if (plotType.equals(StatsPlotType.LINES) || plotType.equals(StatsPlotType.SCATTER)) {
 
-			groupByComboBox.setModel(new DefaultComboBoxModel<PlotDataGrouping>(
+			groupByComboBox.setModel(new DefaultComboBoxModel<>(
 					new PlotDataGrouping[] { PlotDataGrouping.IGNORE_DESIGN }));
 			groupByComboBox.setSelectedItem(PlotDataGrouping.IGNORE_DESIGN);
 			updateFactorSelectors();
 		}		
 		toggleItemListeners(true);
 	}
+		
+	private void updateFactorSelectorModels() {
+		
+		DataAnalysisProject experiment = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
+		if(experiment == null 
+				|| experiment.getExperimentDesign() == null 
+				|| experiment.getExperimentDesign().getActiveDesignSubset() == null) {
+			populateFactorSelectors(null);
+		}
+		else
+			populateFactorSelectors(experiment.getExperimentDesign().getActiveDesignSubset());
+	}
 	
 	private void updateFactorSelectors() {
+		
+		if (categoryComboBox.getModel().getSize() == 0
+				|| subCategoryComboBox.getModel().getSize() == 0)
+			updateFactorSelectorModels();
 
 		PlotDataGrouping grouping = getDataGroupingType();
 

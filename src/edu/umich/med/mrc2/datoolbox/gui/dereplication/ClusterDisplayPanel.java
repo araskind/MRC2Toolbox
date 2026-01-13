@@ -51,6 +51,7 @@ import edu.umich.med.mrc2.datoolbox.gui.annotation.DockableObjectAnnotationPanel
 import edu.umich.med.mrc2.datoolbox.gui.clustertree.ClusterTree;
 import edu.umich.med.mrc2.datoolbox.gui.clustertree.DockableClusterTree;
 import edu.umich.med.mrc2.datoolbox.gui.clustertree.FilterTreeDialog;
+import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.MsFeatureEvent;
 import edu.umich.med.mrc2.datoolbox.gui.dereplication.clustering.ClusterFeatureSelectionTableModel;
 import edu.umich.med.mrc2.datoolbox.gui.fdata.DockableFeatureIntensitiesTable;
@@ -552,6 +553,14 @@ public abstract class ClusterDisplayPanel extends DockableMRC2ToolboxPanel
 
 		super.switchDataPipeline(project, newPipeline);
 		clearPanel();
+	}
+	
+	@Override
+	public void designStatusChanged(ExperimentDesignEvent e) {
+
+		if (e.getStatus().equals(ParameterSetStatus.CHANGED) 
+				&& currentExperiment != null)
+			dataPlot.setActiveDesign(currentExperiment.getExperimentDesign().getActiveDesignSubset());		
 	}
 }
 
