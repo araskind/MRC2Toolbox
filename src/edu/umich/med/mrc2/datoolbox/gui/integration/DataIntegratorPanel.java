@@ -58,6 +58,7 @@ import edu.umich.med.mrc2.datoolbox.gui.dereplication.ClusterDisplayPanel;
 import edu.umich.med.mrc2.datoolbox.gui.integration.dpalign.DataSetAlignmentManager;
 import edu.umich.med.mrc2.datoolbox.gui.integration.dpalign.DataSetAlignmentSetupDialog;
 import edu.umich.med.mrc2.datoolbox.gui.integration.dsmanager.MsFeatureClusterSetManagerDialog;
+import edu.umich.med.mrc2.datoolbox.gui.io.DataExportDialog;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.main.PanelList;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicFeatureTable;
@@ -148,6 +149,9 @@ public class DataIntegratorPanel extends ClusterDisplayPanel {
 		if (command.equals(MainActionCommands.COLLECT_IDENTIFIED_CPD_COMMAND.getName()))
 			collectIdentifiedCompoundData();
 
+		if (command.equals(MainActionCommands.EXPORT_INTEGRATED_DATA_SET_COMMAND.getName()))
+			setupIntegratedDataSetExport();
+		
 		if (command.equals(MainActionCommands.DELETE_INTEGRATION_SET_COMMAND.getName()))
 			deleteClusterSet(activeClusterSet);
 
@@ -557,6 +561,20 @@ public class DataIntegratorPanel extends ClusterDisplayPanel {
 			clearClusterDataPanel();
 		}
 	}
+	
+	private void setupIntegratedDataSetExport() {
+	
+		if(activeClusterSet == null)
+			return;
+		
+		DataExportDialog exportDialog = 
+				new DataExportDialog(MainActionCommands.EXPORT_INTEGRATED_DATA_SET_COMMAND);
+		exportDialog.setAndLockExportManifestOption(false);
+		exportDialog.lockExportTypeSelector();
+		exportDialog.setActiveClusterSet(activeClusterSet);
+		exportDialog.setLocationRelativeTo(this.getContentPane());	
+		exportDialog.setVisible(true);
+	}
 
 	private void acceptIntegratedCompoundList() {
 
@@ -567,10 +585,10 @@ public class DataIntegratorPanel extends ClusterDisplayPanel {
 
 		activeClusterSet.setActive(true);
 		currentExperiment.addFeatureClusterSet(activeClusterSet);
-//		TODO find new place for this functionality?
-//		toolbar.updateGuiFromActiveSet(integratedSet);
-		// MessageDialogue.showInfoMsg(dataSetName + " set as integrated identified data
-		// list", this);
+		
+		//	TODO find new place for this functionality?
+		//	toolbar.updateGuiFromActiveSet(integratedSet);
+		//	MessageDialogue.showInfoMsg(dataSetName + " set as integrated identified data list", this);
 	}
 
 	@Override

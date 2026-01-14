@@ -114,7 +114,7 @@ public class DataExportTask extends AbstractTask {
 	private ExperimentDesignSubset experimentDesignSubset;
 	private TreeSet<ExperimentalSample>activeSamples;
 	private boolean exportManifest;
-	boolean replaceSpecialCharacters;
+	private boolean replaceSpecialCharacters;
 	
 	private int metadataColumnCount;
 	
@@ -250,6 +250,16 @@ public class DataExportTask extends AbstractTask {
 		if (exportType.equals(MainActionCommands.EXPORT_FEATURE_STATISTICS_COMMAND)) {
 			try {
 				writeFeatureQCDataExportFile();
+				setStatus(TaskStatus.FINISHED);
+			} catch (Exception e) {
+				e.printStackTrace();
+				setStatus(TaskStatus.ERROR);
+				return;
+			}
+		}
+		if (exportType.equals(MainActionCommands.EXPORT_INTEGRATED_DATA_SET_COMMAND)) {
+			try {
+				writeIntegratedDataExportFile();
 				setStatus(TaskStatus.FINISHED);
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -1076,6 +1086,11 @@ public class DataExportTask extends AbstractTask {
 		}
 		writer.flush();
 		writer.close();
+	}
+	
+	private void writeIntegratedDataExportFile() throws Exception {
+		//	TODO
+		
 	}
 	
 	@Override

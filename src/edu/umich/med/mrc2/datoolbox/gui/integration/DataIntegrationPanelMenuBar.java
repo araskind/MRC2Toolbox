@@ -59,6 +59,7 @@ public class DataIntegrationPanelMenuBar extends CommonMenuBar {
 	private static final Icon exportSummaryIcon = GuiUtils.getIcon("extractList", 24);
 	private static final Icon generateMetabCombinerScriptIcon = GuiUtils.getIcon("rScriptMC", 24);
 	private static final Icon clusterSetIcon = GuiUtils.getIcon("clusterFeatureTable", 24);
+	private static final Icon exportResultsIcon = GuiUtils.getIcon("export", 24);
 		
 	// Menus
 	private JMenu
@@ -71,7 +72,8 @@ public class DataIntegrationPanelMenuBar extends CommonMenuBar {
 		integrationSetupMenuItem,
 		acceptListMenuItem,
 		deleteIntegrationMenuItem,
-		manageDataSetsMenuItem;
+		manageDataSetsMenuItem,
+		exportResultsMenuItem;
 	
 	// Alignment items
 	private JMenuItem
@@ -103,6 +105,12 @@ public class DataIntegrationPanelMenuBar extends CommonMenuBar {
 		acceptListMenuItem = addItem(integrationMenu, 
 				MainActionCommands.ACCEPT_CLEAN_ID_LIST_COMMAND, 
 				acceptListIcon);
+		
+		integrationMenu.addSeparator();
+		
+		exportResultsMenuItem = addItem(integrationMenu, 
+				MainActionCommands.EXPORT_INTEGRATED_DATA_SET_COMMAND, 
+				exportResultsIcon);
 		
 		integrationMenu.addSeparator();
 		

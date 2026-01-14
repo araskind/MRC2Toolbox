@@ -419,6 +419,7 @@ public enum MainActionCommands {
 	CLEAR_IDENTIFIED_CPD_COMMAND("Clear data for identified compounds"),
 	DELETE_INTEGRATION_SET_COMMAND("Delete data integration set"),
 	ACCEPT_CLEAN_ID_LIST_COMMAND("Accept integrated list of identified compounds"),
+	EXPORT_INTEGRATED_DATA_SET_COMMAND("Export integrated data set"),
 	DATA_SET_ALIGNMENT_SETUP_COMMAND("Setup data set alignment"),
 	DATA_SET_ALIGNMENT_RUN_COMMAND("Align data sets"),
 	SHOW_DATA_PIPELINE_ALIGNMENT_MANAGER_COMMAND("Show data alignment manager"),

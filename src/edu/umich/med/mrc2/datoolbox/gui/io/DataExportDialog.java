@@ -59,6 +59,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import org.apache.commons.jcs3.access.exception.InvalidArgumentException;
 import org.apache.commons.lang.StringUtils;
 
+import edu.umich.med.mrc2.datoolbox.data.MsFeatureClusterSet;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureSet;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataExportFields;
 import edu.umich.med.mrc2.datoolbox.data.enums.MissingExportType;
@@ -76,6 +77,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskListener;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io.DataExportTask;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io.IntegratedDataSetExportTask;
 import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
 
 public class DataExportDialog extends JDialog 
@@ -107,25 +109,21 @@ public class DataExportDialog extends JDialog
 			MainActionCommands.EXPORT_RESULTS_4METSCAPE_COMMAND,
 			MainActionCommands.EXPORT_DUPLICATES_COMMAND,
 			MainActionCommands.EXPORT_ALL_FEATURE_STATISTICS_COMMAND,
-//			MainActionCommands.EXPORT_MZRT_STATISTICS_COMMAND,
-//			MainActionCommands.EXPORT_PEAK_WIDTH_STATISTICS_COMMAND,
+			MainActionCommands.EXPORT_INTEGRATED_DATA_SET_COMMAND,
 		};
 	
-	private JComboBox exportTypeComboBox;
+	private JComboBox<MainActionCommands> exportTypeComboBox;
 	private JComboBox<MissingExportType> missingTypeComboBox;
-	private JComboBox namingComboBox;
+	private JComboBox<DataExportFields> namingComboBox;
 	private FileNameExtensionFilter txtFilter;
 	private JCheckBox exportManifestCheckBox;	
 	private JCheckBox replaceSpecCharsCheckBox;
-	
+	private JButton btnSave;
+
 	private MsFeatureSet activeFeatureSet;
+	private MsFeatureClusterSet activeClusterSet;
 	private File baseDirectory;
 	private File exportFile;
-	
-//	private JTextField resultsFileTextField;
-//	private JCheckBox enableFiltersCheckBox;
-//	private JSpinner minFrequencySpinner;
-//	private JFormattedTextField maxRsdTextField;
 	
 	public DataExportDialog() {		
 		this(MainActionCommands.EXPORT_RESULTS_4BINNER_COMMAND);
@@ -164,8 +162,8 @@ public class DataExportDialog extends JDialog
 		gbl_panel.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
 		panel.setLayout(gbl_panel);
 
-		exportTypeComboBox = new JComboBox<MainActionCommands>(
-				new DefaultComboBoxModel<MainActionCommands>(exportTypes));
+		exportTypeComboBox = new JComboBox<>(
+				new DefaultComboBoxModel<>(exportTypes));
 		exportTypeComboBox.addItemListener(this);
 
 		JLabel exportTypeLabel = new JLabel("Export type");
@@ -201,14 +199,14 @@ public class DataExportDialog extends JDialog
 		panel.add(lblNaming, gbc_lblNaming);
 
 		DefaultComboBoxModel<DataExportFields> namingModel = 
-				new DefaultComboBoxModel<DataExportFields>(
+				new DefaultComboBoxModel<>(
 						new DataExportFields[] {
 							DataExportFields.SAMPLE_EXPORT_NAME,
 							DataExportFields.SAMPLE_EXPORT_ID,
 							DataExportFields.DATA_FILE_EXPORT 
 						});
 
-		namingComboBox = new JComboBox<DataExportFields>(namingModel);
+		namingComboBox = new JComboBox<>(namingModel);
 		GridBagConstraints gbc_namingComboBox = new GridBagConstraints();
 		gbc_namingComboBox.gridwidth = 2;
 		gbc_namingComboBox.insets = new Insets(0, 0, 5, 5);
@@ -225,9 +223,8 @@ public class DataExportDialog extends JDialog
 		gbc_lblExportMissingValues.gridy = 2;
 		panel.add(lblExportMissingValues, gbc_lblExportMissingValues);
 
-		missingTypeComboBox = new JComboBox<MissingExportType>();
-		missingTypeComboBox.setModel(
-				new DefaultComboBoxModel<MissingExportType>(MissingExportType.values()));
+		missingTypeComboBox = new JComboBox<>(
+				new DefaultComboBoxModel<>(MissingExportType.values()));
 		missingTypeComboBox.setSelectedItem(MissingExportType.AS_MISSING);
 
 		GridBagConstraints gbc_missingTypeComboBox = new GridBagConstraints();
@@ -262,7 +259,7 @@ public class DataExportDialog extends JDialog
 		};
 		btnCancel.addActionListener(al);
 
-		JButton btnSave = new JButton(MainActionCommands.EXPORT_RESULTS_COMMAND.getName());
+		btnSave = new JButton(MainActionCommands.EXPORT_RESULTS_COMMAND.getName());
 		btnSave.setActionCommand(MainActionCommands.EXPORT_RESULTS_COMMAND.getName());
 		btnSave.addActionListener(this);
 		buttonPanel.add(btnSave);
@@ -351,27 +348,39 @@ public class DataExportDialog extends JDialog
 		if(!errors.isEmpty()) {
 			MessageDialog.showErrorMsg(StringUtils.join(errors, "\n"), this);
 			return;
-		}			
-		DataExportTask det = new DataExportTask(
-				MRC2ToolBoxCore.getActiveMetabolomicsExperiment(),
-				MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getActiveDataPipeline(),
-				exportFile,
-				getExportType(),
-				getMissingExportType(),
-				false,
-				1000.0d,
-				0.0d,
-				getDataExportNamingField(),
-				exportManifest(),
-				replaceSpecChars());
-		det.setMsFeatureSet4export(activeFeatureSet.getFeatures());
-		det.addTaskListener(this);
-		MRC2ToolBoxCore.getTaskController().addTask(det);		
+		}
+		AbstractTask exportTask = null;
+		if(getExportType().equals(MainActionCommands.EXPORT_INTEGRATED_DATA_SET_COMMAND)) {
+			exportTask = new IntegratedDataSetExportTask(
+					MRC2ToolBoxCore.getActiveMetabolomicsExperiment(),
+					activeClusterSet,
+					getMissingExportType(),
+					replaceSpecChars(),
+					exportFile);
+		}
+		else {
+			exportTask = new DataExportTask(
+					MRC2ToolBoxCore.getActiveMetabolomicsExperiment(),
+					MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getActiveDataPipeline(),
+					exportFile,
+					getExportType(),
+					getMissingExportType(),
+					false,
+					1000.0d,
+					0.0d,
+					getDataExportNamingField(),
+					exportManifest(),
+					replaceSpecChars());
+			((DataExportTask)exportTask).setMsFeatureSet4export(activeFeatureSet.getFeatures());
+		}
+
+		exportTask.addTaskListener(this);
+		MRC2ToolBoxCore.getTaskController().addTask(exportTask);		
 	}
 	
 	private Collection<String>validateInput(){
 		
-		Collection<String>errors = new ArrayList<String>();
+		Collection<String>errors = new ArrayList<>();
 //		if(getResultsFile() == null)
 //			errors.add("Output file not specified");
 		
@@ -389,7 +398,8 @@ public class DataExportDialog extends JDialog
 		if (event.getStateChange() == ItemEvent.SELECTED) {			
 			
 			MainActionCommands exportType = (MainActionCommands) event.getItem();			
-			if(exportType.equals(MainActionCommands.EXPORT_RESULTS_FOR_METABOLOMICS_WORKBENCH_COMMAND)) {
+			if(exportType.equals(MainActionCommands.EXPORT_RESULTS_FOR_METABOLOMICS_WORKBENCH_COMMAND)
+					|| exportType.equals(MainActionCommands.EXPORT_INTEGRATED_DATA_SET_COMMAND)) {
 				namingComboBox.setSelectedItem(DataExportFields.SAMPLE_EXPORT_NAME);
 				namingComboBox.setEnabled(false);
 			}
@@ -423,9 +433,10 @@ public class DataExportDialog extends JDialog
 	@Override
 	public void statusChanged(TaskEvent e) {
 
-		if (e.getSource().getClass().equals(DataExportTask.class)) {
-
-			if (e.getStatus() == TaskStatus.FINISHED) {
+		if (e.getStatus() == TaskStatus.FINISHED) {
+			
+			if (e.getSource().getClass().equals(DataExportTask.class)
+					|| e.getSource().getClass().equals(IntegratedDataSetExportTask.class)) {
 
 				((AbstractTask)e.getSource()).removeTaskListener(this);
 				this.dispose();
@@ -440,8 +451,7 @@ public class DataExportDialog extends JDialog
 	
 	@Override
 	public void loadPreferences() {
-		Preferences prefs = Preferences.userNodeForPackage(this.getClass());
-		loadPreferences(prefs);
+		loadPreferences(Preferences.userNodeForPackage(this.getClass()));
 	}
 
 	@Override
@@ -471,10 +481,6 @@ public class DataExportDialog extends JDialog
 		prefs.put(SAMPLE_NAMING_FIELD, getNamingField().name());
 		prefs.put(EXPORT_MISSING_TYPE, getMissingExportType().name());
 		prefs.putBoolean(REPLACE_SPEC_CHARS, replaceSpecCharsCheckBox.isSelected());
-		
-//		prefs.putBoolean(ENABLE_FILTERS, enableFiltersCheckBox.isSelected());
-//		prefs.putInt(MAX_RSD, Integer.parseInt(maxRsdTextField.getText()));
-//		prefs.putInt(MIN_FREQUENCY, (Integer)minFrequencySpinner.getValue());
 	}
 	
 	public static Collection<String>getExportTypes(){
@@ -490,6 +496,24 @@ public class DataExportDialog extends JDialog
 				return c;
 		}
 		return null;
+	}
+	
+	public void setAndLockExportManifestOption(boolean export) {
+
+		exportManifestCheckBox.setSelected(export);
+		exportManifestCheckBox.setEnabled(false);		
+	}
+	
+	public void lockExportTypeSelector() {
+		exportTypeComboBox.setEnabled(false);
+	}
+
+	public MsFeatureClusterSet getActiveClusterSet() {
+		return activeClusterSet;
+	}
+
+	public void setActiveClusterSet(MsFeatureClusterSet activeClusterSet) {
+		this.activeClusterSet = activeClusterSet;
 	}
 }
 
