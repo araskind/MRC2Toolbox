@@ -273,6 +273,9 @@ public class FIOUtils {
 
 		if (type.equals(MainActionCommands.EXPORT_FEATURE_STATISTICS_COMMAND))
 			typeString = "_FEATURE_MULTIPLE_QC_STATS_";
+		
+		if (type.equals(MainActionCommands.EXPORT_INTEGRATED_DATA_SET_COMMAND))
+			typeString = "_INTEGRATED_DATA_SET_";
 
 		String timestamp = MRC2ToolBoxConfiguration.getFileTimeStampFormat().format(new Date());
 		DataPipeline dataPipeline = currentProject.getActiveDataPipeline();
@@ -280,11 +283,13 @@ public class FIOUtils {
 		if (currentProject.getLimsExperiment() != null)
 			fileName = currentProject.getLimsExperiment().getId();
 
-		fileName += "_" + dataPipeline.getName();
-		MsFeatureSet fSet = currentProject.getActiveFeatureSetForDataPipeline(dataPipeline);
-		if (!fSet.getName().equals(GlobalDefaults.ALL_FEATURES.getName()))
-			fileName += "_" + currentProject.getActiveFeatureSetForDataPipeline(dataPipeline).getName();
-
+		if (!type.equals(MainActionCommands.EXPORT_INTEGRATED_DATA_SET_COMMAND)) {
+			
+			fileName += "_" + dataPipeline.getName();
+			MsFeatureSet fSet = currentProject.getActiveFeatureSetForDataPipeline(dataPipeline);
+			if (!fSet.getName().equals(GlobalDefaults.ALL_FEATURES.getName()))
+				fileName += "_" + currentProject.getActiveFeatureSetForDataPipeline(dataPipeline).getName();
+		}	
 		fileName += typeString + timestamp + ".txt";
 
 		return fileName;

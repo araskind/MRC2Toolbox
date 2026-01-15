@@ -37,12 +37,15 @@ import edu.umich.med.mrc2.datoolbox.data.compare.SortDirection;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
+import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTablePopupMenu;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.AutoChoices;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.TableFilterHeader;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.DataFileCellRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.DecimalAlignRenderer;
+import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.FormattedDecimalRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.IntensityRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.MsFeatureRenderer;
+import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 
 public class FeatureIntensitiesTable extends BasicTable {
 
@@ -77,8 +80,9 @@ public class FeatureIntensitiesTable extends BasicTable {
 		intensityRenderer = new IntensityRenderer();
 		lefttRenderer = new DecimalAlignRenderer();
 		columnModel.getColumnById(FeatureIntensitiesTableModel.AREA_COLUMN)
-			.setCellRenderer(lefttRenderer);
+			.setCellRenderer(new FormattedDecimalRenderer(MRC2ToolBoxConfiguration.getIntensityFormat()));
 
+		addTablePopupMenu(new BasicTablePopupMenu(null, this, true));
 		thf = new TableFilterHeader(this, AutoChoices.ENABLED);
 		finalizeLayout();
 	}

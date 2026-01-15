@@ -35,7 +35,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -479,7 +478,7 @@ return;
 			return;
 		}
 		// Create header
-		TreeMap<ExperimentalSample, TreeMap<DataPipeline, DataFile[]>>sampleFileMap =
+		Map<ExperimentalSample, Map<DataPipeline, DataFile[]>>sampleFileMap =
 				DataExportUtils.createSampleFileMapForDataPipeline(
 						experiment, experimentDesignSubset, dataPipeline, DataExportFields.SAMPLE_EXPORT_ID);
 		String[] columnList =
@@ -490,10 +489,10 @@ return;
 		int columnCount = 0;
 		header[columnCount] = "Samples";
 
-		HashMap<DataFile, Integer> fileColumnMap =
+		Map<DataFile, Integer> fileColumnMap =
 				DataExportUtils.createFileColumnMap(sampleFileMap, columnCount);
 
-		HashMap<DataFile, Long>matrixFileMap = new HashMap<DataFile, Long>();
+		HashMap<DataFile, Long>matrixFileMap = new HashMap<>();
 		fileColumnMap.keySet().stream().forEach(f -> matrixFileMap.put(f, dataMatrix.getRowForLabel(f)));
 
 		for(String columnName : columnList)
@@ -526,7 +525,7 @@ return;
 			columnCount = 0;
 			line[columnCount] = compoundName;
 			coordinates[1] = dataMatrix.getColumnForLabel(msf);
-			for (Entry<ExperimentalSample, TreeMap<DataPipeline, DataFile[]>> entry : sampleFileMap.entrySet()) {
+			for (Entry<ExperimentalSample, Map<DataPipeline, DataFile[]>> entry : sampleFileMap.entrySet()) {
 
 				for(DataFile df : entry.getValue().get(dataPipeline)) {
 

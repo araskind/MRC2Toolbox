@@ -294,7 +294,7 @@ public class DataExportTask extends AbstractTask {
 		Collection<String>peakWidthDataToExport = new ArrayList<String>();
 		Collection<String>peakQualityDataToExport = new ArrayList<String>();
 
-		TreeMap<ExperimentalSample, TreeMap<DataPipeline, DataFile[]>>sampleFileMap
+		Map<ExperimentalSample, Map<DataPipeline, DataFile[]>>sampleFileMap
 			= DataExportUtils.createSampleFileMapForDataPipeline(
 					currentExperiment, experimentDesignSubset, dataPipeline, namingField);
 
@@ -305,7 +305,7 @@ public class DataExportTask extends AbstractTask {
 		peakWidthDataToExport.add(headerString);
 		peakQualityDataToExport.add(headerString);
 
-		HashMap<DataFile, Integer> fileColumnMap = 
+		Map<DataFile, Integer> fileColumnMap = 
 				DataExportUtils.createFileColumnMap(sampleFileMap, metadataColumnCount);
 		
 		MsFeature[] featureList = msFeatureSet4export.stream().
@@ -325,7 +325,7 @@ public class DataExportTask extends AbstractTask {
 			String[] qualLine = Arrays.copyOf(mzLine, mzLine.length);
 
 			coordinates[1] = featureDataMatrix.getColumnForLabel(msf);
-			for (Entry<ExperimentalSample, TreeMap<DataPipeline, DataFile[]>> entry : sampleFileMap.entrySet()) {
+			for (Entry<ExperimentalSample, Map<DataPipeline, DataFile[]>> entry : sampleFileMap.entrySet()) {
 
 				for(DataFile df : entry.getValue().get(dataPipeline)) {
 
@@ -494,7 +494,7 @@ public class DataExportTask extends AbstractTask {
 		total = msFeatureSet4export.size();
 		processed = 0;
 		
-		TreeMap<ExperimentalSample, TreeMap<DataPipeline, DataFile[]>>sampleFileMap =
+		Map<ExperimentalSample, Map<DataPipeline, DataFile[]>>sampleFileMap =
 				DataExportUtils.createSampleFileMapForDataPipeline(
 						currentExperiment, experimentDesignSubset, dataPipeline, namingField);
 		
@@ -502,7 +502,7 @@ public class DataExportTask extends AbstractTask {
 		String[] header = createMPPexportHeader(sampleFileMap);
 		output.add(StringUtils.join(header, columnSeparator));
 
-		HashMap<DataFile, Integer> fileColumnMap =
+		Map<DataFile, Integer> fileColumnMap =
 				DataExportUtils.createFileColumnMap(sampleFileMap, metadataColumnCount);
 		
 		final Matrix dataMatrix = currentExperiment.getDataMatrixForDataPipeline(dataPipeline);
@@ -561,7 +561,7 @@ public class DataExportTask extends AbstractTask {
 	}
 	
 	private String[]createMPPexportHeader(
-			TreeMap<ExperimentalSample, TreeMap<DataPipeline, DataFile[]>>sampleFileMap){
+			Map<ExperimentalSample, Map<DataPipeline, DataFile[]>>sampleFileMap){
 		
 		String[] columnList =
 				DataExportUtils.createSampleColumnNameArrayForDataPipeline(
@@ -593,16 +593,16 @@ public class DataExportTask extends AbstractTask {
 		total = msFeatureSet4export.size();
 		processed = 0;
 		
-		TreeMap<ExperimentalSample, TreeMap<DataPipeline, DataFile[]>>sampleFileMap = 
+		Map<ExperimentalSample, Map<DataPipeline, DataFile[]>>sampleFileMap = 
 				DataExportUtils.createSampleFileMapForDataPipeline(
 						currentExperiment, experimentDesignSubset, dataPipeline, namingField);
 		
-		ArrayList<String>output = new ArrayList<String>();
+		ArrayList<String>output = new ArrayList<>();
 		
 		String[] header = createBinnerExportHeader(sampleFileMap);		
 		output.add(StringUtils.join(header, columnSeparator));	
 
-		HashMap<DataFile, Integer> fileColumnMap = 
+		Map<DataFile, Integer> fileColumnMap = 
 				DataExportUtils.createFileColumnMap(sampleFileMap, metadataColumnCount);
 
 		final Matrix dataMatrix = currentExperiment.getDataMatrixForDataPipeline(dataPipeline);
@@ -669,13 +669,13 @@ public class DataExportTask extends AbstractTask {
 	private void addQuantDataForFeature(
 			MsFeature msf, 
 			Matrix dataMatrix, 
-			Map<ExperimentalSample, TreeMap<DataPipeline, DataFile[]>>sampleFileMap,
+			Map<ExperimentalSample, Map<DataPipeline, DataFile[]>>sampleFileMap,
 			Map<DataFile, Integer> fileColumnMap,
 			String[] line) {
 		
 		long[] coordinates = new long[2];
 		coordinates[1] = dataMatrix.getColumnForLabel(msf);
-		for (Entry<ExperimentalSample, TreeMap<DataPipeline, DataFile[]>> entry : sampleFileMap.entrySet()) {
+		for (Entry<ExperimentalSample, Map<DataPipeline, DataFile[]>> entry : sampleFileMap.entrySet()) {
 
 			for(DataFile df : entry.getValue().get(dataPipeline)) {
 
@@ -700,7 +700,7 @@ public class DataExportTask extends AbstractTask {
 	}
 
 	private String[]createBinnerExportHeader(
-			TreeMap<ExperimentalSample, TreeMap<DataPipeline, DataFile[]>>sampleFileMap){
+			Map<ExperimentalSample,Map<DataPipeline, DataFile[]>>sampleFileMap){
 
 		String[] columnList =
 			DataExportUtils.createSampleColumnNameArrayForDataPipeline(
@@ -736,7 +736,7 @@ public class DataExportTask extends AbstractTask {
 		total = msFeatureSet4export.size();
 		processed = 0;
 		
-		TreeMap<ExperimentalSample, TreeMap<DataPipeline, DataFile[]>>sampleFileMap = 
+		Map<ExperimentalSample, Map<DataPipeline, DataFile[]>>sampleFileMap = 
 				DataExportUtils.createSampleFileMapForDataPipeline(
 						currentExperiment, experimentDesignSubset, dataPipeline, namingField);
 		
@@ -745,7 +745,7 @@ public class DataExportTask extends AbstractTask {
 		String[] header = createMetabCombinerExportHeader(sampleFileMap);		
 		output.add(StringUtils.join(header, columnSeparator));	
 
-		HashMap<DataFile, Integer> fileColumnMap = 
+		Map<DataFile, Integer> fileColumnMap = 
 				DataExportUtils.createFileColumnMap(sampleFileMap, metadataColumnCount);
 
 		final Matrix dataMatrix = currentExperiment.getDataMatrixForDataPipeline(dataPipeline);
@@ -772,7 +772,7 @@ public class DataExportTask extends AbstractTask {
 	}
 
 	private String[]createMetabCombinerExportHeader(
-			TreeMap<ExperimentalSample, TreeMap<DataPipeline, DataFile[]>>sampleFileMap){
+			Map<ExperimentalSample, Map<DataPipeline, DataFile[]>>sampleFileMap){
 
 		String[] columnList =
 			DataExportUtils.createSampleColumnNameArrayForDataPipeline(
@@ -910,7 +910,7 @@ public class DataExportTask extends AbstractTask {
 		final Matrix dataMatrix = currentExperiment.getDataMatrixForDataPipeline(dataPipeline);
 
 		// Create header
-		TreeMap<ExperimentalSample, TreeMap<DataPipeline, DataFile[]>>sampleFileMap
+		Map<ExperimentalSample, Map<DataPipeline, DataFile[]>>sampleFileMap
 			= DataExportUtils.createSampleFileMapForDataPipeline(
 					currentExperiment, experimentDesignSubset, dataPipeline, namingField);
 
@@ -921,7 +921,7 @@ public class DataExportTask extends AbstractTask {
 		String[] header = new String[columnList.length + 1];
 		int columnCount = 0;
 		header[columnCount] = "feature_name";
-		HashMap<DataFile, Integer> fileColumnMap = 
+		Map<DataFile, Integer> fileColumnMap = 
 				DataExportUtils.createFileColumnMap(sampleFileMap, columnCount);
 
 		for(String columnName : columnList)
@@ -946,7 +946,7 @@ public class DataExportTask extends AbstractTask {
 
 			// Data
 			coordinates[1] = dataMatrix.getColumnForLabel(msf);
-			for (Entry<ExperimentalSample, TreeMap<DataPipeline, DataFile[]>> entry : sampleFileMap.entrySet()) {
+			for (Entry<ExperimentalSample, Map<DataPipeline, DataFile[]>> entry : sampleFileMap.entrySet()) {
 
 				for(DataFile df : entry.getValue().get(dataPipeline)) {
 
@@ -990,7 +990,7 @@ public class DataExportTask extends AbstractTask {
 				map(l->l.getParentFactor()).
 				collect(Collectors.toCollection(TreeSet::new));
 
-		HashMap<MsFeature, Long>matrixFeatureMap = new HashMap<MsFeature, Long>();
+		HashMap<MsFeature, Long>matrixFeatureMap = new HashMap<>();
 		msFeatureSet4export.stream().forEach(
 				f -> matrixFeatureMap.put(f, dataMatrix.getColumnForLabel(f)));
 

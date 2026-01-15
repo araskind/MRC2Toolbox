@@ -25,7 +25,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -627,10 +626,11 @@ public class IntegratedExcelReportExportTask  extends AbstractTask {
 		int annotationColumnCount = columnCount;
 
 		//	Add sample columns
-		TreeMap<ExperimentalSample, TreeMap<DataPipeline, DataFile[]>>sampleFileMap =
-				DataExportUtils.createSampleFileMapForDataPipeline(currentExperiment, experimentDesignSubset, pipeline, exportFieldNaming);
+		Map<ExperimentalSample, Map<DataPipeline, DataFile[]>>sampleFileMap =
+				DataExportUtils.createSampleFileMapForDataPipeline(
+						currentExperiment, experimentDesignSubset, pipeline, exportFieldNaming);
 
-		HashMap<DataFile, Integer> fileColumnMap =
+		Map<DataFile, Integer> fileColumnMap =
 				DataExportUtils.createFileColumnMap(sampleFileMap, columnCount);
 
 		String[] columnList =
@@ -707,7 +707,7 @@ public class IntegratedExcelReportExportTask  extends AbstractTask {
 				dbLinkCell.setCellStyle(hlinkStyle);
 			}
 			//	Add data
-			for (Entry<ExperimentalSample, TreeMap<DataPipeline, DataFile[]>> entry : sampleFileMap.entrySet()) {
+			for (Entry<ExperimentalSample, Map<DataPipeline, DataFile[]>> entry : sampleFileMap.entrySet()) {
 
 				for(DataFile df : entry.getValue().get(pipeline)) {
 
@@ -890,8 +890,7 @@ public class IntegratedExcelReportExportTask  extends AbstractTask {
 		taskDescription = "Creating sample => file map";
 		
 		//	TODO this is a placeholder untill data integration is re-written to use data pipelines
-		TreeMap<ExperimentalSample, TreeMap<DataPipeline, DataFile[]>>sampleFileMap = 
-				new TreeMap<ExperimentalSample, TreeMap<DataPipeline, DataFile[]>>();
+		Map<ExperimentalSample, Map<DataPipeline, DataFile[]>>sampleFileMap = new TreeMap<>();
 
 		taskDescription = "Writing integrated report data for the experiment";
 		total = exportArray.length;
@@ -943,7 +942,7 @@ public class IntegratedExcelReportExportTask  extends AbstractTask {
 
 		// TODO Add statistics columns - recalculate values for exported design?
 		//	Sample names
-		HashMap<DataFile, Integer> fileColumnMap = 
+		Map<DataFile, Integer> fileColumnMap = 
 				DataExportUtils.createFileColumnMap(sampleFileMap, columnCount);
 		String[] columnList = 
 				DataExportUtils.createSampleColumnNameArray(sampleFileMap, exportFieldNaming);
