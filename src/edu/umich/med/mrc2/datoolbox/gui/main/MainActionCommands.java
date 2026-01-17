@@ -448,6 +448,7 @@ public enum MainActionCommands {
 	SORT_BY_RANK_COMMAND("Sort by rank"),
 	SORT_BY_FILE_NAME_COMMAND("Sort by file name"),
 	SORT_BY_INJECTION_TIME_COMMAND("Sort by injection time"),
+	SORT_BY_SAMPLE_NAME_COMMAND("Sort by sample name"),
 	
 	//	Chart color options
 	COLOR_BY_FILE_NAME_COMMAND("Color by file"),

@@ -52,6 +52,7 @@ import edu.umich.med.mrc2.datoolbox.data.enums.ImageExportFormat;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.plot.AbstractControlledDataPlot;
+import edu.umich.med.mrc2.datoolbox.gui.plot.MultiPanelDataPlotToolbar;
 import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.PlotDataSetUtils;
 import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.QcBoxPlotDataSet;
 import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.QcScatterDataSet;
@@ -81,7 +82,7 @@ public class TwoDimQCPlot extends AbstractControlledDataPlot {
 	protected Collection<DataFileStatisticalSummary> dataSetStats;
 	protected Plot activePlot;
 	protected DataPlotControlsPanel dataPlotControlsPanel;
-	protected TwoDqcPlotToolbar toolbar;
+	protected MultiPanelDataPlotToolbar toolbar;
 
 	public TwoDimQCPlot() {
 		super();
@@ -412,7 +413,7 @@ public class TwoDimQCPlot extends AbstractControlledDataPlot {
 	}
 
 
-	public void setToolbar(TwoDqcPlotToolbar toolbar) {
+	public void setToolbar(MultiPanelDataPlotToolbar toolbar) {
 		this.toolbar = toolbar;
 	}
 

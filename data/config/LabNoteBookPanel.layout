@@ -106,7 +106,7 @@
 														<placeholder>dock.single.DockableLabNoteSearchForm</placeholder>
 													</placeholders>
 												</leaf>
-												<leaf id="3" nodeId="1600213803647">
+												<leaf id="1" nodeId="1600213803647">
 													<placeholders>
 														<placeholder>dock.single.DockableLabNotesTable</placeholder>
 													</placeholders>
@@ -127,7 +127,7 @@
 														<placeholder>dock.single.LabNoteBookPanelDockableRTFEditor</placeholder>
 													</placeholders>
 												</leaf>
-												<leaf id="1" nodeId="1600214241000">
+												<leaf id="3" nodeId="1600214241000">
 													<placeholders>
 														<placeholder>dock.single.DockableLabNotePlainTextViewer</placeholder>
 													</placeholders>
@@ -154,10 +154,10 @@
 									<children ignore="false"/>
 								</child>
 								<child>
-									<layout factory="predefined" placeholder="dock.single.DockableLabNotePlainTextViewer">
-										<replacement id="dockablesingle DockableLabNotePlainTextViewer"/>
+									<layout factory="predefined" placeholder="dock.single.DockableLabNotesTable">
+										<replacement id="dockablesingle DockableLabNotesTable"/>
 										<delegate id="delegate_ccontrol backup factory id">
-											<id>DockableLabNotePlainTextViewer</id>
+											<id>DockableLabNotesTable</id>
 											<area/>
 										</delegate>
 									</layout>
@@ -174,10 +174,10 @@
 									<children ignore="false"/>
 								</child>
 								<child>
-									<layout factory="predefined" placeholder="dock.single.DockableLabNotesTable">
-										<replacement id="dockablesingle DockableLabNotesTable"/>
+									<layout factory="predefined" placeholder="dock.single.DockableLabNotePlainTextViewer">
+										<replacement id="dockablesingle DockableLabNotePlainTextViewer"/>
 										<delegate id="delegate_ccontrol backup factory id">
-											<id>DockableLabNotesTable</id>
+											<id>DockableLabNotePlainTextViewer</id>
 											<area/>
 										</delegate>
 									</layout>

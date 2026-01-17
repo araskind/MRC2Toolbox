@@ -41,6 +41,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 
 import org.apache.commons.lang3.StringUtils;
@@ -231,7 +232,7 @@ public class DataPipelineDefinitionPanel extends JPanel
 		
 		JLabel lblNewLabel_5 = new JLabel("MoTrPAC assay code");
 		GridBagConstraints gbc_lblNewLabel_5 = new GridBagConstraints();
-		gbc_lblNewLabel_5.anchor = GridBagConstraints.WEST;
+		gbc_lblNewLabel_5.anchor = GridBagConstraints.EAST;
 		gbc_lblNewLabel_5.gridwidth = 2;
 		gbc_lblNewLabel_5.insets = new Insets(0, 0, 0, 5);
 		gbc_lblNewLabel_5.gridx = 0;
@@ -303,7 +304,7 @@ public class DataPipelineDefinitionPanel extends JPanel
 	private void showAcquisitionMethodSelector() {
 		
 		acquisitionMethodSelectorDialog = new AcquisitionMethodSelectorDialog(this);
-		acquisitionMethodSelectorDialog.setLocationRelativeTo(this);
+		acquisitionMethodSelectorDialog.setLocationRelativeTo(SwingUtilities.getWindowAncestor(this));
 		acquisitionMethodSelectorDialog.setVisible(true);
 	}
 	
@@ -321,7 +322,7 @@ public class DataPipelineDefinitionPanel extends JPanel
 	private void showDataExtractionMethodSelector() {
 		
 		dataExtractionMethodSelectorDialog = new DataExtractionMethodSelectorDialog(this);
-		dataExtractionMethodSelectorDialog.setLocationRelativeTo(this);
+		dataExtractionMethodSelectorDialog.setLocationRelativeTo(SwingUtilities.getWindowAncestor(this));
 		dataExtractionMethodSelectorDialog.setVisible(true);
 	}
 	
@@ -339,7 +340,7 @@ public class DataPipelineDefinitionPanel extends JPanel
 	private void showAssaySelector() {
 		
 		assaySelectorDialog = new AssaySelectorDialog(this);
-		assaySelectorDialog.setLocationRelativeTo(this);
+		assaySelectorDialog.setLocationRelativeTo(SwingUtilities.getWindowAncestor(this));
 		assaySelectorDialog.setVisible(true);
 	}
 	
@@ -454,6 +455,9 @@ public class DataPipelineDefinitionPanel extends JPanel
 		
 		if(dataExtractionMethod == null)
 			errors.add("Data analysis method not defined");
+		
+		if(getMotrpacAssay() == null)
+			errors.add("MoTrPAC assay mode not defined");
 		
 		return errors;
 	}

@@ -33,6 +33,7 @@ import edu.umich.med.mrc2.datoolbox.data.DataFileStatisticalSummary;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignSubset;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
+import edu.umich.med.mrc2.datoolbox.gui.plot.MultiPanelDataPlotToolbar;
 import edu.umich.med.mrc2.datoolbox.gui.plot.stats.DataPlotControlsPanel;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
@@ -41,7 +42,7 @@ import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 public class Dockable2DQCPanel extends DefaultSingleCDockable implements ActionListener{
 
 	private TwoDimQCPlot plotPanel;	
-	private TwoDqcPlotToolbar toolbar;
+	private MultiPanelDataPlotToolbar toolbar;
 	private DataPlotControlsPanel dataPlotControlsPanel;
 
 	private static final Icon componentIcon = GuiUtils.getIcon("poxplot", 16);
@@ -55,7 +56,7 @@ public class Dockable2DQCPanel extends DefaultSingleCDockable implements ActionL
 		plotPanel = new TwoDimQCPlot();
 		add(plotPanel, BorderLayout.CENTER);
 		
-		toolbar = new TwoDqcPlotToolbar(plotPanel, this, true);
+		toolbar = new MultiPanelDataPlotToolbar(plotPanel, this, true);
 		plotPanel.setToolbar(toolbar);
 		add(toolbar, BorderLayout.NORTH);
 		

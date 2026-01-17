@@ -46,7 +46,6 @@ import edu.umich.med.mrc2.datoolbox.data.Assay;
 import edu.umich.med.mrc2.datoolbox.database.lims.LIMSDataCache;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
-import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 
 public class AssaySelectorDialog extends JDialog  {
 
@@ -63,7 +62,7 @@ public class AssaySelectorDialog extends JDialog  {
 
 	public AssaySelectorDialog(ActionListener actionListener) {
 
-		super(MRC2ToolBoxCore.getMainWindow(), "Select assay");
+		setTitle("Select assay");
 		setIconImage(((ImageIcon) acqMethodIcon).getImage());
 		setPreferredSize(new Dimension(640, 480));
 

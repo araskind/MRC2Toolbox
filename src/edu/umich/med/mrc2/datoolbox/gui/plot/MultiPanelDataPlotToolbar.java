@@ -19,12 +19,15 @@
  *  
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.gui.plot.stats;
+package edu.umich.med.mrc2.datoolbox.gui.plot;
 
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -34,32 +37,38 @@ import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.JMenuItem;
+import javax.swing.JPopupMenu;
 
 import org.jfree.chart.ChartPanel;
 
 import edu.umich.med.mrc2.datoolbox.data.compare.ChartColorOption;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataScale;
+import edu.umich.med.mrc2.datoolbox.data.enums.DataSetQcField;
 import edu.umich.med.mrc2.datoolbox.data.enums.FileSortingOrder;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
-import edu.umich.med.mrc2.datoolbox.gui.plot.PlotToolbar;
+import edu.umich.med.mrc2.datoolbox.gui.plot.stats.StatsPlotType;
 import edu.umich.med.mrc2.datoolbox.gui.utils.ComboBoxRendererWithIcons;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 
-public class MultiPanelDataPlotToolbar extends PlotToolbar implements ActionListener{
+public class MultiPanelDataPlotToolbar extends PlotToolbar implements ItemListener{
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1141069124870103442L;
 	
-	protected static final Icon sortByNameIcon = GuiUtils.getIcon("sortByClusterName", 24);
-	protected static final Icon sortByTimeIcon = GuiUtils.getIcon("sortByTime", 24);
+	protected static final Icon sortIcon = GuiUtils.getIcon("sortBy", 24);
+	protected static final Icon sortBySampleNameIcon = GuiUtils.getIcon("sortByClusterName", 24);
+	protected static final Icon sortByTimeIcon = GuiUtils.getIcon("clock", 24);
+	protected static final Icon sortByFileNameIcon = GuiUtils.getIcon("sortByFileName", 24);
 	protected static final Icon colorByFileIcon = GuiUtils.getIcon("barChart", 24);
 	protected static final Icon colorBySampleTypeIcon = GuiUtils.getIcon("barChartGrouped", 24);
 	protected static final Icon sidePanelShowIcon = GuiUtils.getIcon("sidePanelShow", 24);
-	protected static final Icon sidePanelHideIcon = GuiUtils.getIcon("sidePanelHide", 24);		
+	protected static final Icon sidePanelHideIcon = GuiUtils.getIcon("sidePanelHide", 24);				
 
-	private MultiPanelDataPlot plot;
+	private JComboBox<DataSetQcField> statParameterComboBox;
+	private AbstractControlledDataPlot plot;
 	private JComboBox<StatsPlotType> plotTypeComboBox;
 	private JComboBox<DataScale> dataScaleComboBox;
 	private FileSortingOrder fileSortingOrder;
@@ -68,86 +77,41 @@ public class MultiPanelDataPlotToolbar extends PlotToolbar implements ActionList
 	private JButton colorOptionButton;
 	private JButton sidePanelButton;
 	
+	private JPopupMenu orderMenu;
+	private JMenuItem sortByInjectionTimeMenuItem;
+	private JMenuItem sortByFileNameMenuItem;
+	private JMenuItem sortBySampleNameMenuItem;
+	
 	public MultiPanelDataPlotToolbar(
-			MultiPanelDataPlot plot, 
+			AbstractControlledDataPlot plot, 
 			ActionListener secondaryListener,
-			ItemListener itemListener) {
+			boolean includeQcFieldSelector) {
 
 		super(plot);
 		this.plot = plot;
 		xAxisUnits = "design";
 
 		createLegendToggle();
-
 		addSeparator(buttonDimension);
 
-		GuiUtils.addButton(this, null, autoRangeIcon, commandListener, ChartPanel.ZOOM_RESET_BOTH_COMMAND,
-				"Reset zoom", buttonDimension);
-
+		GuiUtils.addButton(this, null, autoRangeIcon, commandListener, 
+				ChartPanel.ZOOM_RESET_BOTH_COMMAND, "Reset zoom", buttonDimension);
 		addSeparator(buttonDimension);
 		
 		createServiceBlock();
-
-		toggleLegendIcon(plot.isLegendVisible());
-
-		// Add plot type options
-		addSeparator(buttonDimension);
-		//	add(new JLabel("Plot type: "));
-		plotTypeComboBox = new JComboBox<StatsPlotType>();
-		plotTypeComboBox.setModel(
-				new DefaultComboBoxModel<StatsPlotType>(new StatsPlotType[] {
-						StatsPlotType.BARCHART,
-						StatsPlotType.LINES,
-						StatsPlotType.SCATTER,
-//						StatsPlotType.BOXPLOT_BY_FEATURE,
-//						StatsPlotType.BOXPLOT_BY_GROUP,						
-						}));	//	TODO fix boxplot
-		plotTypeComboBox.setSelectedItem(StatsPlotType.LINES);
-		plotTypeComboBox.addItemListener(itemListener);
-		plotTypeComboBox.setMaximumSize(new Dimension(120, 26));
+		toggleLegendIcon(plot.isLegendVisible());		
+		addSeparator(buttonDimension);	
 		
-		Map<Object,Icon> imageMap = new HashMap<Object,Icon>();
-		imageMap.put(StatsPlotType.BARCHART, GuiUtils.getIcon("barChart", 24));
-		imageMap.put(StatsPlotType.LINES, GuiUtils.getIcon("lines", 24));
-		imageMap.put(StatsPlotType.SCATTER, GuiUtils.getIcon("scatter", 24));
-		imageMap.put(StatsPlotType.BOXPLOT_BY_FEATURE, GuiUtils.getIcon("boxplot", 24));
-		imageMap.put(StatsPlotType.BOXPLOT_BY_GROUP, GuiUtils.getIcon("boxplot", 24));
-		
-		plotTypeComboBox.setRenderer(
-				new ComboBoxRendererWithIcons(imageMap));
-		
-		add(plotTypeComboBox);		
-
-		// Add data scale options
-		add(new JLabel("  Scale: "));
-		dataScaleComboBox = new JComboBox<DataScale>();
-		dataScaleComboBox.setModel(
-				new DefaultComboBoxModel<DataScale>(DataScale.values()));
-		dataScaleComboBox.setSelectedItem(DataScale.RAW);
-		dataScaleComboBox.addItemListener(itemListener);
-		dataScaleComboBox.setMaximumSize(new Dimension(120, 26));
-		add(dataScaleComboBox);
-		
+		createPlotTypeBlock();
+		createDataScaleBlock();		
 		addSeparator(buttonDimension);
 		
-		// Add file sorting options
-		fileSortingOrder = FileSortingOrder.NAME;
-		sortOrderButton = GuiUtils.addButton(
-				this, null, sortByNameIcon, this, 
-				MainActionCommands.SORT_BY_INJECTION_TIME_COMMAND.getName(), 
-				MainActionCommands.SORT_BY_FILE_NAME_COMMAND.getName(), 
-				buttonDimension);
-		add(sortOrderButton);
-		
-		chartColorOption = ChartColorOption.BY_SAMPLE_TYPE;
-		colorOptionButton = GuiUtils.addButton(
-				this, null, colorBySampleTypeIcon, this, 
-				MainActionCommands.COLOR_BY_FILE_NAME_COMMAND.getName(), 
-				MainActionCommands.COLOR_BY_SAMPLE_TYPE_COMMAND.getName(), 
-				buttonDimension);
-		add(sortOrderButton);
-		
+		createColorControlBlock();		
+		createSortingBlock();		
 		addSeparator(buttonDimension);
+		
+		if(includeQcFieldSelector)
+			createQcFieldSelector();
 		
 		add(Box.createHorizontalGlue());
 		
@@ -160,6 +124,93 @@ public class MultiPanelDataPlotToolbar extends PlotToolbar implements ActionList
 		add(sidePanelButton);
 	}
 	
+	private void createPlotTypeBlock() {
+		
+		plotTypeComboBox = new JComboBox<>();
+		plotTypeComboBox.setModel(
+				new DefaultComboBoxModel<>(new StatsPlotType[] {
+						StatsPlotType.BARCHART,
+						StatsPlotType.LINES,
+						StatsPlotType.SCATTER,
+						StatsPlotType.BOXPLOT
+						}));
+		plotTypeComboBox.setSelectedItem(StatsPlotType.BARCHART);
+		plotTypeComboBox.addItemListener(this);
+		plotTypeComboBox.setMaximumSize(new Dimension(120, 26));
+		
+		Map<Object,Icon> imageMap = new HashMap<>();
+		imageMap.put(StatsPlotType.BARCHART, GuiUtils.getIcon("barChart", 24));
+		imageMap.put(StatsPlotType.BOXPLOT, GuiUtils.getIcon("boxplot", 24));
+		imageMap.put(StatsPlotType.LINES, GuiUtils.getIcon("lines", 24));
+		imageMap.put(StatsPlotType.SCATTER, GuiUtils.getIcon("scatter", 24));
+		
+		ComboBoxRendererWithIcons qcPlotTypeRenderer = 
+				new ComboBoxRendererWithIcons(imageMap);
+		plotTypeComboBox.setRenderer(qcPlotTypeRenderer);
+		
+		add(plotTypeComboBox);
+	}
+	
+	private void createDataScaleBlock(){
+		
+		add(new JLabel("  Scale: "));
+		dataScaleComboBox = new JComboBox<>(
+				new DefaultComboBoxModel<>(DataScale.values()));
+		dataScaleComboBox.setSelectedItem(DataScale.RAW);
+		dataScaleComboBox.addItemListener(this);
+		dataScaleComboBox.setMaximumSize(new Dimension(120, 26));
+		add(dataScaleComboBox);
+	}
+	
+	private void createColorControlBlock() {
+		
+		chartColorOption = ChartColorOption.BY_SAMPLE_TYPE;
+		colorOptionButton = GuiUtils.addButton(
+				this, null, colorBySampleTypeIcon, this, 
+				MainActionCommands.COLOR_BY_FILE_NAME_COMMAND.getName(), 
+				MainActionCommands.COLOR_BY_SAMPLE_TYPE_COMMAND.getName(), 
+				buttonDimension);
+		
+	}
+	
+	private void createSortingBlock(){
+		
+		orderMenu = new JPopupMenu("Data order");
+		fileSortingOrder = FileSortingOrder.NAME;
+		
+		sortByFileNameMenuItem = GuiUtils.addMenuItem(orderMenu,
+				MainActionCommands.SORT_BY_FILE_NAME_COMMAND.getName(), this,
+				MainActionCommands.SORT_BY_FILE_NAME_COMMAND.getName(), sortByFileNameIcon);
+		
+		sortByInjectionTimeMenuItem = GuiUtils.addMenuItem(orderMenu,
+				MainActionCommands.SORT_BY_INJECTION_TIME_COMMAND.getName(), this,
+				MainActionCommands.SORT_BY_INJECTION_TIME_COMMAND.getName(), sortByTimeIcon);
+
+		sortBySampleNameMenuItem = GuiUtils.addMenuItem(orderMenu,
+				MainActionCommands.SORT_BY_SAMPLE_NAME_COMMAND.getName(), this,
+				MainActionCommands.SORT_BY_SAMPLE_NAME_COMMAND.getName(), sortBySampleNameIcon);
+
+		sortOrderButton = GuiUtils.addButton(
+				this, "Data order", sortByFileNameIcon, null, null, null, new Dimension(105, 35));
+		
+		sortOrderButton.addMouseListener(new MouseAdapter() {
+			public void mousePressed(MouseEvent e) {
+				orderMenu.show(e.getComponent(), e.getX(), e.getY());
+			}
+		});
+	}
+	
+	private void createQcFieldSelector() {
+		
+		add(new JLabel("  Parameter: "));
+		statParameterComboBox = new JComboBox<>(
+				new DefaultComboBoxModel<>(DataSetQcField.values()));
+		statParameterComboBox.setSelectedItem(DataSetQcField.OBSERVATIONS);
+		statParameterComboBox.addItemListener(this);
+		statParameterComboBox.setMaximumSize(new Dimension(120, 26));
+		add(statParameterComboBox);
+	}
+	
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		
@@ -169,6 +220,9 @@ public class MultiPanelDataPlotToolbar extends PlotToolbar implements ActionList
 		
 		if(command.equals(MainActionCommands.SORT_BY_INJECTION_TIME_COMMAND.getName()))
 			sortDataByInjectionTime();
+			
+		if(command.equals(MainActionCommands.SORT_BY_SAMPLE_NAME_COMMAND.getName()))
+			sortDataBySampleName();
 			
 		if(command.equals(MainActionCommands.COLOR_BY_FILE_NAME_COMMAND.getName()))
 			colorByDataFile();
@@ -181,12 +235,13 @@ public class MultiPanelDataPlotToolbar extends PlotToolbar implements ActionList
 		
 		if(command.equals(MainActionCommands.HIDE_CHART_SIDE_PANEL_COMMAND.getName())) 
 			setSidePanelVisible(false);
+		
+		super.actionPerformed(e);
 	}
 	
 	private void sortDataByFileName(){
 		
-		sortOrderButton.setIcon(sortByNameIcon);
-		sortOrderButton.setActionCommand(MainActionCommands.SORT_BY_INJECTION_TIME_COMMAND.getName());
+		sortOrderButton.setIcon(sortByFileNameIcon);
 		sortOrderButton.setToolTipText(MainActionCommands.SORT_BY_FILE_NAME_COMMAND.getName());
 		fileSortingOrder = FileSortingOrder.NAME;
 		updatePlot();
@@ -195,9 +250,16 @@ public class MultiPanelDataPlotToolbar extends PlotToolbar implements ActionList
 	private void sortDataByInjectionTime(){
 		
 		sortOrderButton.setIcon(sortByTimeIcon);
-		sortOrderButton.setActionCommand(MainActionCommands.SORT_BY_FILE_NAME_COMMAND.getName());
 		sortOrderButton.setToolTipText(MainActionCommands.SORT_BY_INJECTION_TIME_COMMAND.getName());
 		fileSortingOrder = FileSortingOrder.TIMESTAMP;
+		updatePlot();
+	}
+	
+	private void sortDataBySampleName(){
+		
+		sortOrderButton.setIcon(sortBySampleNameIcon);
+		sortOrderButton.setToolTipText(MainActionCommands.SORT_BY_SAMPLE_NAME_COMMAND.getName());
+		fileSortingOrder = FileSortingOrder.SAMPLE_NAME;
 		updatePlot();
 	}
 	
@@ -233,34 +295,63 @@ public class MultiPanelDataPlotToolbar extends PlotToolbar implements ActionList
 		}
 	}
 
-//	private void toggleItemListeners(boolean enabled) {
-//		
-//		if(enabled) {			
-//			plotTypeComboBox.addItemListener(this);
-//			dataScaleComboBox.addItemListener(this);
-//		}
-//		else {
-//			plotTypeComboBox.removeItemListener(this);
-//			dataScaleComboBox.removeItemListener(this);
-//		}
-//	}
+	private void toggleItemListeners(boolean enabled) {
+		
+		if(enabled) {			
+			plotTypeComboBox.addItemListener(this);
+			dataScaleComboBox.addItemListener(this);
+			
+			if(statParameterComboBox != null)
+				statParameterComboBox.addItemListener(this);	
+		}
+		else {
+			plotTypeComboBox.removeItemListener(this);
+			dataScaleComboBox.removeItemListener(this);
+			
+			if(statParameterComboBox != null)
+				statParameterComboBox.removeItemListener(this);	
+		}
+	}
 
-//	@Override
-//	public void itemStateChanged(ItemEvent e) {
-//		
-//		if(e.getStateChange() == ItemEvent.SELECTED) {
-//			
-//			toggleItemListeners(false);
-//			updatePlotType();
-//			toggleItemListeners(true);			
-//		}		
-//	}
-	
-//	private void updatePlotType() {
-//		
-//		plot.updatePlotType();
-//		plot.redrawPlot();
-//	}
+	@Override
+	public void itemStateChanged(ItemEvent e) {
+		
+		if(e.getStateChange() == ItemEvent.SELECTED) {
+			
+			toggleItemListeners(false);
+			
+			if(e.getSource().equals(plotTypeComboBox)) {
+				
+				DataScale scale = getDataScale();
+
+				if(getStatsPlotType().equals(StatsPlotType.BOXPLOT)) {
+					
+					if(statParameterComboBox != null)
+						statParameterComboBox.setModel(
+								new DefaultComboBoxModel<DataSetQcField>(
+										new DataSetQcField[] {DataSetQcField.RAW_VALUES}));
+					
+					dataScaleComboBox.setSelectedItem(DataScale.RAW);
+				}
+				else {
+					if(statParameterComboBox != null) {
+						
+						statParameterComboBox.setModel(
+								new DefaultComboBoxModel<DataSetQcField>(DataSetQcField.values()));
+						statParameterComboBox.removeItem(DataSetQcField.RAW_VALUES);
+					}
+					dataScaleComboBox.setSelectedItem(scale);
+				}
+			}	
+			if(e.getSource().equals(dataScaleComboBox)) {
+				
+				if(!getDataScale().equals(DataScale.RAW)  && getStatsPlotType().equals(StatsPlotType.BOXPLOT))
+					plotTypeComboBox.setSelectedItem(StatsPlotType.BARCHART);				
+			}
+			toggleItemListeners(true);
+			updatePlot();
+		}		
+	}
 	
 	private void updatePlot() {
 		
@@ -284,15 +375,17 @@ public class MultiPanelDataPlotToolbar extends PlotToolbar implements ActionList
 
 		fileSortingOrder = order;
 		if(fileSortingOrder.equals(FileSortingOrder.NAME)) {
-			sortOrderButton.setIcon(sortByNameIcon);
-			sortOrderButton.setActionCommand(MainActionCommands.SORT_BY_INJECTION_TIME_COMMAND.getName());
+			sortOrderButton.setIcon(sortByFileNameIcon);
 			sortOrderButton.setToolTipText(MainActionCommands.SORT_BY_FILE_NAME_COMMAND.getName());
 		}
 		if(fileSortingOrder.equals(FileSortingOrder.TIMESTAMP)) {
 			sortOrderButton.setIcon(sortByTimeIcon);
-			sortOrderButton.setActionCommand(MainActionCommands.SORT_BY_FILE_NAME_COMMAND.getName());
 			sortOrderButton.setToolTipText(MainActionCommands.SORT_BY_INJECTION_TIME_COMMAND.getName());
 		}
+		if(fileSortingOrder.equals(FileSortingOrder.SAMPLE_NAME)) {
+			sortOrderButton.setIcon(sortBySampleNameIcon);
+			sortOrderButton.setToolTipText(MainActionCommands.SORT_BY_SAMPLE_NAME_COMMAND.getName());
+		}		
 	}
 		
 	public DataScale getDataScale() {
@@ -303,6 +396,20 @@ public class MultiPanelDataPlotToolbar extends PlotToolbar implements ActionList
 		dataScaleComboBox.setSelectedItem(scale);
 	}
 	
+	public DataSetQcField getStatParameter() {
+		
+		if(statParameterComboBox != null)
+			return (DataSetQcField) statParameterComboBox.getSelectedItem();
+		else
+			return null;
+	}
+	
+	public void setStatParameter(DataSetQcField field) {
+		
+		if(statParameterComboBox != null)
+			statParameterComboBox.setSelectedItem(field);
+	}
+
 	public ChartColorOption getChartColorOption() {
 		return chartColorOption;
 	}

@@ -120,7 +120,7 @@ public enum CompoundDatabaseEnum {
 	PUBMED("PubMed", "https://www.ncbi.nlm.nih.gov/pubmed/", "", null),
 	PUBMED_CENTRAL("PubMed Central", "https://www.ncbi.nlm.nih.gov/pmc/articles/", "/", null),
 	REACTOME("Reactome", "https://reactome.org/content/detail/", "", null),
-	REFMET("RefMet", "https://www.metabolomicsworkbench.org/databases/refmet/refmet_details.php?REFMET_NAME=", "", null),
+	REFMET("RefMet", "https://www.metabolomicsworkbench.org/databases/refmet/refmet_details.php?REFMET_ID=", "", null),
 	RESID("RESID", "http://pir0.georgetown.edu/cgi-bin/resid?id=", "", null),
 	RHEA("Rhea", "https://www.rhea-db.org/reaction?id=", "", null),
 	SABIO_RK("SABIO-RK Database Links", "http://sabio.h-its.org/reacdetails.jsp?reactid=", "", null),
