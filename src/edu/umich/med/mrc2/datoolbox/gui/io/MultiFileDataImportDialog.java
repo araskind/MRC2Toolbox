@@ -173,7 +173,7 @@ public class MultiFileDataImportDialog extends JDialog
 	private AcquisitionMethodExtendedEditorDialog acquisitionMethodEditorDialog;
 	private DataExtractionMethodEditorDialog dataExtractionMethodEditorDialog;
 	private AdductSelectionDialog adductSelectionDialog;
-	private NormalizedTargetedDataSelectionDialog normalizedTargetedDataSelectionDialog;
+	private TargetedDataFileSelectionDialog targetedDataFileSelectionDialog;
 
 	//	private JTextField dataFileTextField;
 	private Collection<Adduct> selectedAdducts;
@@ -422,10 +422,10 @@ public class MultiFileDataImportDialog extends JDialog
 		if (command.equals(MainActionCommands.SELECT_PROFINDER_DETAILED_CSV_COMMAND.getName()))
 			selectProFinderCsvFile(true);
 		
-		if (command.equals(MainActionCommands.SELECT_NORMALIZED_TARGETED_DATA_COMMAND.getName()))
-			selectNormalizedTargetedDataFile();
+		if (command.equals(MainActionCommands.SELECT_TARGETED_DATA_FILE_COMMAND.getName()))
+			selectTargetedDataFile();
 		
-		if (command.equals(MainActionCommands.PARSE_NORMALIZED_TARGETED_DATA_COMMAND.getName()))
+		if (command.equals(MainActionCommands.PARSE_TARGETED_DATA_COMMAND.getName()))
 			parseNormalizedTargetedDataFile();
 
 		if (command.equals(MainActionCommands.REMOVE_DATA_FILES_COMMAND.getName()))
@@ -1108,47 +1108,47 @@ public class MultiFileDataImportDialog extends JDialog
 		}
 	}
 	
-	private void selectNormalizedTargetedDataFile() {
+	private void selectTargetedDataFile() {
 		
 		if(existingDataPipeline != null) {
-			MessageDialog.showWarningMsg("Adding normalized targeted results \n"
-					+ "to existing data analysis pipeline i not supported\n"
+			MessageDialog.showWarningMsg("Adding targeted results \n"
+					+ "to existing data analysis pipeline is not supported\n"
 					+ "Please create new data pipeline to import the data from ProFinder.", this);
 			return;
 		}
 		if(!getNewDataPipeline())
 			return;
 				
-		normalizedTargetedDataSelectionDialog = 
-				new NormalizedTargetedDataSelectionDialog(this, baseLibraryDirectory, false);
-		normalizedTargetedDataSelectionDialog.setLocationRelativeTo(this);
-		normalizedTargetedDataSelectionDialog.setVisible(true);
+		targetedDataFileSelectionDialog = 
+				new TargetedDataFileSelectionDialog(this, baseLibraryDirectory, false);
+		targetedDataFileSelectionDialog.setLocationRelativeTo(this);
+		targetedDataFileSelectionDialog.setVisible(true);
 	}
 	
 	private void parseNormalizedTargetedDataFile() {
 
-		Collection<String>errors = normalizedTargetedDataSelectionDialog.validateFormData();
+		Collection<String>errors = targetedDataFileSelectionDialog.validateFormData();
 		if(!errors.isEmpty()){
 		    MessageDialog.showErrorMsg(
-		            StringUtils.join(errors, "\n"), normalizedTargetedDataSelectionDialog);
+		            StringUtils.join(errors, "\n"), targetedDataFileSelectionDialog);
 		    return;
 		}
-		libraryFile = normalizedTargetedDataSelectionDialog.getInputFile();
+		libraryFile = targetedDataFileSelectionDialog.getInputFile();
 		libraryTextField.setText(libraryFile.getAbsolutePath());
 		baseLibraryDirectory = libraryFile.getParentFile();
-		featureColumn = normalizedTargetedDataSelectionDialog.getFeatureColumnName();
-		retentionColumn = normalizedTargetedDataSelectionDialog.getRetentionColumnName();
-		referenceLibrary = normalizedTargetedDataSelectionDialog.getReferenceLibrary();
-		nameFeatureMap = normalizedTargetedDataSelectionDialog.getNameFeatureMap();
+		featureColumn = targetedDataFileSelectionDialog.getFeatureColumnName();
+		retentionColumn = targetedDataFileSelectionDialog.getRetentionColumnName();
+		referenceLibrary = targetedDataFileSelectionDialog.getReferenceLibrary();
+		nameFeatureMap = targetedDataFileSelectionDialog.getNameFeatureMap();
 		extractDataFilesFromNormalizedTargetedData(
 				libraryFile, 
 				featureColumn,
-				normalizedTargetedDataSelectionDialog.getFileNameMask(), 
-				normalizedTargetedDataSelectionDialog.getNumberOfLinesToSkipAfterHeader());
+				targetedDataFileSelectionDialog.getFileNameMask(), 
+				targetedDataFileSelectionDialog.getNumberOfLinesToSkipAfterHeader());
 		
 		savePreferences();
-		normalizedTargetedDataSelectionDialog.savePreferences();
-		normalizedTargetedDataSelectionDialog.dispose();
+		targetedDataFileSelectionDialog.savePreferences();
+		targetedDataFileSelectionDialog.dispose();
 	}
 	
 	private void extractDataFilesFromNormalizedTargetedData(
@@ -1247,7 +1247,7 @@ public class MultiFileDataImportDialog extends JDialog
 	private void updateInterfaceForGenericTargetedImport() {
 		
 		selectCefLibraryButton.setActionCommand(
-				MainActionCommands.SELECT_NORMALIZED_TARGETED_DATA_COMMAND.getName());
+				MainActionCommands.SELECT_TARGETED_DATA_FILE_COMMAND.getName());
 		libraryTextFieldLabel.setText("Normalized targeted data: ");
 		removeAbnormalIsoPatternsCheckBox.setEnabled(false);
 		selectPFdetailedCsvButton.setEnabled(false);

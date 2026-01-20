@@ -98,8 +98,8 @@ import edu.umich.med.mrc2.datoolbox.gui.integration.DataIntegratorPanel;
 import edu.umich.med.mrc2.datoolbox.gui.io.DataExportDialog;
 import edu.umich.med.mrc2.datoolbox.gui.io.IntegratedReportDialog;
 import edu.umich.med.mrc2.datoolbox.gui.io.MultiFileDataImportDialog;
-import edu.umich.med.mrc2.datoolbox.gui.io.NormalizedTargetedDataSelectionDialog;
 import edu.umich.med.mrc2.datoolbox.gui.io.PeakQualityImportDialog;
+import edu.umich.med.mrc2.datoolbox.gui.io.TargetedDataFileSelectionDialog;
 import edu.umich.med.mrc2.datoolbox.gui.io.excel.ExcelImportWizard;
 import edu.umich.med.mrc2.datoolbox.gui.io.mwtab.MWTabExportDialog;
 import edu.umich.med.mrc2.datoolbox.gui.io.txt.TextDataImportDialog;
@@ -423,7 +423,7 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 		if (command.equals(MainActionCommands.LOAD_DATA_FROM_PROFINDER_PFA_COMMAND.getName()))
 			showMultifileDataLoader(null, DataTypeForImport.AGILENT_PROFINDER_TARGETED);
 
-		if (command.equals(MainActionCommands.LOAD_NORMALIZED_TARGETED_DATA_COMMAND.getName()))
+		if (command.equals(MainActionCommands.LOAD_TARGETED_DATA_FROM_PLAIN_TEXT_COMMAND.getName()))
 			showMultifileDataLoader(null, DataTypeForImport.GENERIC_TARGETED);
 		
 		if (command.equals(MainActionCommands.LOAD_DATA_FROM_EXCEL_FILE_COMMAND.getName()))
@@ -1186,8 +1186,8 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 	
 	private void setupCompoundNameVerification() {
 		
-		NormalizedTargetedDataSelectionDialog ntdDialog = 
-				new NormalizedTargetedDataSelectionDialog(
+		TargetedDataFileSelectionDialog ntdDialog = 
+				new TargetedDataFileSelectionDialog(
 						this, currentExperiment.getLibraryDirectory(), true);
 		ntdDialog.setLocationRelativeTo(this.getContentPane());
 		ntdDialog.setVisible(true);

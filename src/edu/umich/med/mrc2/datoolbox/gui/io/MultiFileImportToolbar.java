@@ -135,8 +135,8 @@ public class MultiFileImportToolbar extends CommonToolbar {
 		addSeparator(buttonDimension);
 		
 		selectNormalizedTargetedDataButton = GuiUtils.addButton(this, null, normalizedDataIcon, commandListener,
-				MainActionCommands.SELECT_NORMALIZED_TARGETED_DATA_COMMAND.getName(),
-				MainActionCommands.SELECT_NORMALIZED_TARGETED_DATA_COMMAND.getName(),
+				MainActionCommands.SELECT_TARGETED_DATA_FILE_COMMAND.getName(),
+				MainActionCommands.SELECT_TARGETED_DATA_FILE_COMMAND.getName(),
 				buttonDimension);
 		
 		addSeparator(buttonDimension);

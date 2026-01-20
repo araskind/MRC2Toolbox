@@ -86,7 +86,7 @@ import edu.umich.med.mrc2.datoolbox.utils.DataImportUtils;
 import edu.umich.med.mrc2.datoolbox.utils.DelimitedTextParser;
 import edu.umich.med.mrc2.datoolbox.utils.TextUtils;
 
-public class NormalizedTargetedDataSelectionDialog extends JDialog 
+public class TargetedDataFileSelectionDialog extends JDialog 
 		implements ActionListener, ItemListener, BackedByPreferences, TaskListener {
 	
 	/**
@@ -116,18 +116,22 @@ public class NormalizedTargetedDataSelectionDialog extends JDialog
 	private File inputFile;
 	private File baseLibraryDirectory;
 	private CompoundLibrary referenceLibrary;
-
+	private boolean useToverifyCompoundData;
+	private ActionListener parserListener;
 	private Map<String, LibraryMsFeature> nameFeatureMap;
 	
 	private static final String BROWSE = "BROWSE";
-
-	public NormalizedTargetedDataSelectionDialog(
+	
+	public TargetedDataFileSelectionDialog(
 			ActionListener parserListener, 
 			File baseLibraryDirectory, 
 			boolean useToverifyCompoundData) {
 		super();
 		this.baseLibraryDirectory = baseLibraryDirectory;
-		setTitle("Select normalized targeted data file");
+		this.useToverifyCompoundData = useToverifyCompoundData;
+		this.parserListener = parserListener;
+		
+		setTitle("Select targeted data file");
 		setIconImage(((ImageIcon) dialogIcon).getImage());
 		setPreferredSize(new Dimension(700, 350));
 		setSize(new Dimension(700, 350));
@@ -326,21 +330,12 @@ public class NormalizedTargetedDataSelectionDialog extends JDialog
 		};
 		btnCancel.addActionListener(al);
 
-		if(useToverifyCompoundData) {
-			
-			btnSave = new JButton(
-					MainActionCommands.VERIFY_COMPOUNDS_IN_TARGETED_DATA_COMMAND.getName());
-			btnSave.setActionCommand(
-					MainActionCommands.VERIFY_COMPOUNDS_IN_TARGETED_DATA_COMMAND.getName());
-			btnSave.addActionListener(this);
-		}
-		else {
-			btnSave = new JButton(
-					MainActionCommands.PARSE_NORMALIZED_TARGETED_DATA_COMMAND.getName());
-			btnSave.setActionCommand(
-					MainActionCommands.PARSE_NORMALIZED_TARGETED_DATA_COMMAND.getName());
-			btnSave.addActionListener(parserListener);
-		}
+		btnSave = new JButton(
+				MainActionCommands.VERIFY_COMPOUNDS_IN_TARGETED_DATA_COMMAND.getName());
+		btnSave.setActionCommand(
+				MainActionCommands.VERIFY_COMPOUNDS_IN_TARGETED_DATA_COMMAND.getName());
+		btnSave.addActionListener(this);
+
 		buttonPanel.add(btnSave);
 		JRootPane rootPane = SwingUtilities.getRootPane(btnSave);
 		rootPane.registerKeyboardAction(al, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
@@ -361,7 +356,7 @@ public class NormalizedTargetedDataSelectionDialog extends JDialog
 	public void actionPerformed(ActionEvent e) {
 
 		if(e.getActionCommand().equals(BROWSE))
-			selectNormalizedTargetedDataFile();
+			selectTargetedDataFile();
 		
 		if(e.getActionCommand().equals(MainActionCommands.SELECT_REFERENCE_TARGETED_LIBRARY_COMMAND.getName()))
 			selectReferenceLibrary();
@@ -373,7 +368,7 @@ public class NormalizedTargetedDataSelectionDialog extends JDialog
 			verifyCompoundData();
 	}
 	
-	private void verifyCompoundData() {
+	public void verifyCompoundData() {
 		
 		String message = "";
 		if(inputFile == null)
@@ -433,10 +428,10 @@ public class NormalizedTargetedDataSelectionDialog extends JDialog
 		librarySelectorDialog.dispose();
 	}
 
-	private void selectNormalizedTargetedDataFile() {
+	private void selectTargetedDataFile() {
 		
 		JnaFileChooser fc = new JnaFileChooser(baseLibraryDirectory);
-		fc.setTitle("Select normalized targeted data file (TAB-separated)");
+		fc.setTitle("Select targeted data file (plain text)");
 		fc.setMode(JnaFileChooser.Mode.Files);
 		fc.addFilter("Text files (TAB-separated)", "txt", "TXT", "tsv", "TSV");
 		fc.addFilter("CSV files (Comma-separated)", "csv", "CSV");
@@ -446,7 +441,7 @@ public class NormalizedTargetedDataSelectionDialog extends JDialog
 			inputFile = fc.getSelectedFile();
 			inputFileTextField.setText(inputFile.getAbsolutePath());
 			populateColumnSelector();
-			verifyCompoundData();
+			//	verifyCompoundData();
 		}
 	}
 
@@ -570,8 +565,7 @@ public class NormalizedTargetedDataSelectionDialog extends JDialog
 
 		List<String> compoundErrors = task.getErrors();
 		if(!compoundErrors.isEmpty()) {
-			
-			btnSave.setEnabled(false);
+
 			String message = compoundErrors.remove(0);
 			String details = StringUtils.join(compoundErrors, "\n");
 			InformationDialog infoDialog = new InformationDialog(
@@ -584,7 +578,16 @@ public class NormalizedTargetedDataSelectionDialog extends JDialog
 		else {
 			MessageDialog.showInfoMsg("Data successfully verified", this);
 			nameFeatureMap = task.getNameFeatureMap();
-			btnSave.setEnabled(true);
+			
+			if(!useToverifyCompoundData) {
+				
+				btnSave.removeActionListener(this);
+				btnSave.setActionCommand(
+						MainActionCommands.PARSE_TARGETED_DATA_COMMAND.getName());
+				btnSave.setText(
+						MainActionCommands.PARSE_TARGETED_DATA_COMMAND.getName());
+				btnSave.addActionListener(parserListener);
+			}
 		}
 	}
 

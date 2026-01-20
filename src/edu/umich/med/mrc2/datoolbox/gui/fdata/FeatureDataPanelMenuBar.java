@@ -202,7 +202,7 @@ public class FeatureDataPanelMenuBar extends CommonMenuBar {
 				loadPfaFileIcon);
 		
 		loadFromTextMenuItem = addItem(loadDataMenu, 
-				MainActionCommands.LOAD_NORMALIZED_TARGETED_DATA_COMMAND, 
+				MainActionCommands.LOAD_TARGETED_DATA_FROM_PLAIN_TEXT_COMMAND, 
 				normalizedDataIcon);
 		
 		loadDataMenu.addSeparator();
