@@ -66,7 +66,6 @@ public class DataIntegrationFeatureSelectionTable extends FeatureSelectionTable 
 		featureSorter.setComparator(model.getColumnIndex(DataIntegrationFeatureSelectionTableModel.FEATURE_COLUMN),
 				new MsFeatureComparator(SortProperty.Name, SortDirection.ASC));
 
-		putClientProperty("terminateEditOnFocusLost", Boolean.TRUE);
 		setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 
 		columnModel.getColumnById(DataIntegrationFeatureSelectionTableModel.ID_COLUMN)
@@ -127,7 +126,7 @@ public class DataIntegrationFeatureSelectionTable extends FeatureSelectionTable 
 			
 			if (col == model.getColumnIndex(DataIntegrationFeatureSelectionTableModel.ID_COLUMN)) {
 
-				boolean isPrimary = (boolean) getValueAt(row, col);
+				boolean isPrimary = (boolean) model.getValueAt(row, col);
 				if(isPrimary)
 					activeCluster.setPrimaryFeature(selectedFeature);
 			}

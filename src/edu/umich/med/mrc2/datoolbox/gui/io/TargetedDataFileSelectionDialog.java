@@ -40,6 +40,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Vector;
 import java.util.prefs.Preferences;
 
 import javax.swing.ButtonGroup;
@@ -441,7 +442,6 @@ public class TargetedDataFileSelectionDialog extends JDialog
 			inputFile = fc.getSelectedFile();
 			inputFileTextField.setText(inputFile.getAbsolutePath());
 			populateColumnSelector();
-			//	verifyCompoundData();
 		}
 	}
 
@@ -452,12 +452,15 @@ public class TargetedDataFileSelectionDialog extends JDialog
 		featureColumnComboBox.setModel(new DefaultComboBoxModel<>(inputDataArray[0]));
 		featureColumnComboBox.setSelectedIndex(0);
 		
-		rtColumnComboBox.setModel(new DefaultComboBoxModel<>(inputDataArray[0]));
+		Vector<String>rtColumns = new Vector<>();
+		rtColumns.add(null);
+		rtColumns.addAll(Arrays.asList(inputDataArray[0]));
+		rtColumnComboBox.setModel(new DefaultComboBoxModel<>(rtColumns));
 		rtColumnComboBox.setSelectedIndex(-1);
-		for(int i=0; i<inputDataArray[0].length; i++) {
+		for(int i=1; i<rtColumns.size(); i++) {
 			
-			if(inputDataArray[0][i].toUpperCase().contains("RT") 
-					|| inputDataArray[0][i].toUpperCase().contains("RETEN")) {
+			if(rtColumns.get(i).toUpperCase().contains("RT") 
+					|| rtColumns.get(i).toUpperCase().contains("RETEN")) {
 				rtColumnComboBox.setSelectedIndex(i);
 				break;
 			}

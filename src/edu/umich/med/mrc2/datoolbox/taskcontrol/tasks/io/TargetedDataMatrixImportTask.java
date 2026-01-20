@@ -113,7 +113,7 @@ public class TargetedDataMatrixImportTask extends AbstractTask implements TaskLi
 			if (featureColumn.trim().equals(colName))
 				featureColumnIndex = i;
 			
-			if (retentionColumn.trim().equals(colName))
+			if (retentionColumn != null && retentionColumn.trim().equals(colName))
 				retentionColumnIndex = i;
 
 			SampleDataResultObject sdro = dataToImport.stream().

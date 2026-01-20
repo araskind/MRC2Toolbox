@@ -227,13 +227,20 @@ public class OpenMetabolomicsProjectTask extends OpenStandaloneProjectAbstractTa
 			DataAcquisitionMethod method = acquisitionMethods.stream().
 				filter(m -> m.getId().equals(methodId)).findFirst().orElse(null);
 			Worklist wkl = new Worklist(worklistMapElement);
+			List<WorklistItem>toRemove = new ArrayList<>();
 			for(WorklistItem item : wkl.getWorklistItems()) {
 				
 				DataFile df = project.getDataFilesForAcquisitionMethod(method).
 					stream().filter(f -> f.getName().equals(item.getDataFileName())).
 					findFirst().orElse(null);
-				item.setDataFile(df);
+				if(df != null)
+					item.setDataFile(df);
+				else
+					toRemove.add(item);
 			}
+			if(!toRemove.isEmpty())
+				wkl.getWorklistItems().removeAll(toRemove);
+				
 			project.setWorklistForAcquisitionMethod(method, wkl);
 		}		
 	}

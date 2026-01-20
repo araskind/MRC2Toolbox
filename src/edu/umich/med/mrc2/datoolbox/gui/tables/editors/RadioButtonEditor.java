@@ -21,70 +21,52 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.tables.editors;
 
+import java.awt.Component;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+
 import javax.swing.DefaultCellEditor;
 import javax.swing.JCheckBox;
 import javax.swing.JRadioButton;
+import javax.swing.JTable;
 
-public class RadioButtonEditor extends DefaultCellEditor {
+public class RadioButtonEditor extends DefaultCellEditor implements ItemListener {
 
 	/**
 	 *
 	 */
 	private static final long serialVersionUID = -5639973332738850529L;
-	public JRadioButton btn;
-
-	@SuppressWarnings("serial")
-	public RadioButtonEditor(JCheckBox checkBox) {
-
-		super(checkBox);
-
-		btn = new JRadioButton();
-		editorComponent = btn;
-        delegate = new EditorDelegate() {
-
-            public void setValue(Object value) {
-
-                boolean selected = false;
-                if (value instanceof Boolean) {
-                    selected = ((Boolean)value).booleanValue();
-                }
-                else if (value instanceof String) {
-                    selected = value.equals("true");
-                }
-                btn.setSelected(selected);
-            }
-
-            public Object getCellEditorValue() {
-                return Boolean.valueOf(btn.isSelected());
-            }
-        };
-        btn.addActionListener(delegate);
-        btn.setRequestFocusEnabled(false);
-	}
-/*
-	public Object getCellEditorValue() {
-
-		return btn.isSelected();
-	}
-
-	public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
-
-		if (value == null)
-			return null;
-
-		btn.addActionListener(this);
-
-		if (((Boolean) value).booleanValue())
-			btn.setSelected(true);
-		else
-			btn.setSelected(false);
-
-		return btn;
-	}
-
-	@Override
-	public void actionPerformed(ActionEvent e) {
-
-		stopCellEditing();
-	}*/
+	
+	   private JRadioButton button;
+	   
+	   public RadioButtonEditor(JCheckBox checkBox) {
+	      super(checkBox);
+	      button = new JRadioButton();	      
+	   }
+	   
+	   @Override
+	   public Component getTableCellEditorComponent(
+			   JTable table, Object value, boolean isSelected, int row, int column) {
+		   
+		 button.addItemListener(this);
+         boolean selected = false;
+         if (value instanceof Boolean) {
+             selected = ((Boolean)value).booleanValue();
+         }
+         else if (value instanceof String) {
+             selected = value.equals("true");
+         }
+         button.setSelected(selected);
+         return button;
+	   }
+	   
+	   @Override
+	   public Object getCellEditorValue() {	
+		  button.removeItemListener(this);
+	      return button.isSelected();
+	   }
+	   
+	   public void itemStateChanged(ItemEvent e) {
+	      super.fireEditingStopped();
+	   }
 }

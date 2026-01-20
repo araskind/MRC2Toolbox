@@ -198,6 +198,9 @@ public abstract class ClusterDisplayPanel extends DockableMRC2ToolboxPanel
 
 	@Override
 	public synchronized void clearPanel() {
+		
+		activeClusterSet = null;
+		activeCluster = null;
 
 		Runnable swingCode = new Runnable() {
 
