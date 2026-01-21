@@ -57,7 +57,7 @@ public class DataSetStatsTable extends BasicTable {
 		// Data file
 		dfRenderer = new DataFileCellRenderer();
 		dtRenderer = new DateTimeCellRenderer();
-		percentRenderer = new PercentValueRenderer();
+		percentRenderer = new PercentValueRenderer(0,1);
 
 		columnModel.getColumnById(DataSetStatsTableModel.DATA_FILE_COLUMN)
 			.setCellRenderer(dfRenderer);

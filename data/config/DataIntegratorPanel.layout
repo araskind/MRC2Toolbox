@@ -128,15 +128,15 @@
 									<root>true</root>
 									<content delegate="SplitDockStationFactory">
 										<fullscreen-action>false</fullscreen-action>
-										<node nodeId="1600213796232" orientation="HORIZONTAL" divider="0.1750865051903114">
+										<node nodeId="1600213796232" orientation="HORIZONTAL" divider="0.1319514661274014">
 											<leaf id="0" nodeId="1600213796234">
 												<placeholders>
 													<placeholder>dock.single.DataIntegratorPanelDockableClusterTree</placeholder>
 												</placeholders>
 											</leaf>
-											<node nodeId="1600213796236" orientation="VERTICAL" divider="0.5">
+											<node nodeId="1600213796236" orientation="VERTICAL" divider="0.45038167938931295">
 												<node nodeId="1600213796238" orientation="VERTICAL" divider="0.6">
-													<node nodeId="1600213796240" orientation="HORIZONTAL" divider="0.6892826488879438">
+													<node nodeId="1600213796240" orientation="HORIZONTAL" divider="0.6769372977969496">
 														<leaf id="2" nodeId="1600213796242">
 															<placeholders>
 																<placeholder>dock.single.DockableDataIntegrationFeatureSelectionTable</placeholder>
@@ -190,7 +190,7 @@
 														</placeholders>
 													</leaf>
 												</node>
-												<node nodeId="1600213796248" orientation="HORIZONTAL" divider="0.6310607664619944">
+												<node nodeId="1600213796248" orientation="HORIZONTAL" divider="0.7320816417936158">
 													<leaf id="3" nodeId="1600213796250">
 														<placeholders>
 															<placeholder>dock.single.ClusterDisplayPanelDockableFeatureIntensitiesTable</placeholder>

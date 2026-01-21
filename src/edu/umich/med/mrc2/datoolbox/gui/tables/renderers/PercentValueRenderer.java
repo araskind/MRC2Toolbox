@@ -37,11 +37,15 @@ public class PercentValueRenderer extends DefaultTableCellRenderer {
 	private static final long serialVersionUID = -397304660915803312L;
 	private final NumberFormat defaultFormat = NumberFormat.getPercentInstance();
 
-	public PercentValueRenderer() {
-
+	public PercentValueRenderer(
+			int minFractionDigits, 
+			int maxFractionDigits) {
 		super();
-		defaultFormat.setMinimumFractionDigits(2);
-		defaultFormat.setMaximumFractionDigits(2);
+		defaultFormat.setMinimumFractionDigits(minFractionDigits);
+		defaultFormat.setMaximumFractionDigits(maxFractionDigits);
+	}
+	public PercentValueRenderer() {
+		this(2,2);
 	}
 
 	@Override

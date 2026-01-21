@@ -87,7 +87,7 @@ public class FeatureDataTable extends BasicFeatureTable {
 		
 		msfIdRenderer = new CompoundIdentityDatabaseLinkRenderer();
 		chmodRenderer = new AdductRenderer();
-		pieChartFrequencyRenderer = new PieChartFrequencyRenderer();
+		pieChartFrequencyRenderer = new PieChartFrequencyRenderer(0,0);
 
 		//	Renderers
 		columnModel.getColumnById(FeatureDataTableModel.MS_FEATURE_COLUMN)

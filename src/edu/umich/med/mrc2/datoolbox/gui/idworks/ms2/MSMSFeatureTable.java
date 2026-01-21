@@ -160,7 +160,7 @@ public class MSMSFeatureTable extends BasicTable {
 		columnModel.getColumnById(MSMSFeatureTableModel.ID_LEVEL_COLUMN)
 			.setCellRenderer(new MSFeatureIdentificationLevelColorRenderer());
 		columnModel.getColumnById(MSMSFeatureTableModel.PARENT_ION_PURITY_COLUMN)
-			.setCellRenderer(new PercentValueRenderer());
+			.setCellRenderer(new PercentValueRenderer(0,1));
 		columnModel.getColumnById(MSMSFeatureTableModel.PARENT_ION_IS_MINOR_ISOTOPE_COLUMN)
 			.setCellRenderer(new RadioButtonRenderer());
 		columnModel.getColumnById(MSMSFeatureTableModel.SPECTRUM_ENTROPY_COLUMN)

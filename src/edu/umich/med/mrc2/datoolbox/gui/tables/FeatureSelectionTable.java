@@ -47,7 +47,7 @@ public abstract class FeatureSelectionTable extends BasicFeatureTable {
 	public FeatureSelectionTable() {
 
 		super();
-		pieChartFrequencyRenderer = new PieChartFrequencyRenderer();
+		pieChartFrequencyRenderer = new PieChartFrequencyRenderer(0,0);
 		pooledMeanRenderer = new RelativeIntensityRenderer();
 		sampleMeanRenderer = new RelativeIntensityRenderer();
 	}

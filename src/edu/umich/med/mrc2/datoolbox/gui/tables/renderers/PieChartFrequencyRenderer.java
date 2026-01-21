@@ -37,12 +37,18 @@ public class PieChartFrequencyRenderer extends DefaultTableCellRenderer {
 	
 	private final NumberFormat defaultFormat = NumberFormat.getPercentInstance();	
 	
-	public PieChartFrequencyRenderer() {
+	public PieChartFrequencyRenderer(
+			int minFractionDigits, 
+			int maxFractionDigits) {
 
 		super();
-		defaultFormat.setMinimumFractionDigits(2);
-		defaultFormat.setMaximumFractionDigits(2);
+		defaultFormat.setMinimumFractionDigits(minFractionDigits);
+		defaultFormat.setMaximumFractionDigits(maxFractionDigits);
 		setBorder(new EmptyBorder(2,2,2,2));
+	}
+	
+	public PieChartFrequencyRenderer() {
+		this(2,2);
 	}
 
 	@Override

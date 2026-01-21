@@ -47,7 +47,7 @@ public abstract class BasicFeatureTable extends BasicTable {
 
 		super();
 
-		percentRenderer = new PercentValueRenderer();
+		percentRenderer = new PercentValueRenderer(0,0);
 		cfRenderer = new MsFeatureRenderer(SortProperty.Name);
 		radioRenderer = new RadioButtonRenderer();
 		radioEditor = new RadioButtonEditor(new JCheckBox());
