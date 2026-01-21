@@ -198,9 +198,6 @@ public abstract class ClusterDisplayPanel extends DockableMRC2ToolboxPanel
 
 	@Override
 	public synchronized void clearPanel() {
-		
-		activeClusterSet = null;
-		activeCluster = null;
 
 		Runnable swingCode = new Runnable() {
 
@@ -271,7 +268,7 @@ public abstract class ClusterDisplayPanel extends DockableMRC2ToolboxPanel
 
 	protected void filterClusterTree(Collection<MsFeatureCluster> clusters) {
 
-		HashSet<MsFeatureCluster> filtered = new HashSet<MsFeatureCluster>();
+		HashSet<MsFeatureCluster> filtered = new HashSet<>();
 		boolean append;
 		boolean multIdOnly = filterTreeDialog.multIdOnly();
 		String featureName = filterTreeDialog.getFeatureNameSubstring();
@@ -556,6 +553,10 @@ public abstract class ClusterDisplayPanel extends DockableMRC2ToolboxPanel
 
 		super.switchDataPipeline(project, newPipeline);
 		clearPanel();
+		if(project == null) {
+			activeClusterSet = null;
+			activeCluster = null;
+		}
 	}
 	
 	@Override

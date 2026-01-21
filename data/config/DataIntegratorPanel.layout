@@ -128,13 +128,13 @@
 									<root>true</root>
 									<content delegate="SplitDockStationFactory">
 										<fullscreen-action>false</fullscreen-action>
-										<node nodeId="1600213796232" orientation="HORIZONTAL" divider="0.1319514661274014">
+										<node nodeId="1600213796232" orientation="HORIZONTAL" divider="0.14937759336099585">
 											<leaf id="0" nodeId="1600213796234">
 												<placeholders>
 													<placeholder>dock.single.DataIntegratorPanelDockableClusterTree</placeholder>
 												</placeholders>
 											</leaf>
-											<node nodeId="1600213796236" orientation="VERTICAL" divider="0.45038167938931295">
+											<node nodeId="1600213796236" orientation="VERTICAL" divider="0.509493670886076">
 												<node nodeId="1600213796238" orientation="VERTICAL" divider="0.6">
 													<node nodeId="1600213796240" orientation="HORIZONTAL" divider="0.6769372977969496">
 														<leaf id="2" nodeId="1600213796242">

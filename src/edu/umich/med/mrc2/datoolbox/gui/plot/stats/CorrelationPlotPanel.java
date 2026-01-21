@@ -170,8 +170,15 @@ public class CorrelationPlotPanel extends MasterPlotPanel {
 				MRC2ToolBoxCore.getActiveMetabolomicsExperiment());
 
 		plot.setDataset(0, inputData);
-		plot.getDomainAxis().setLabel(fOne.getName());
-		plot.getRangeAxis().setLabel(fTwo.getName());
+		
+		String labelOne = fOne.getName();
+		String labelTwo = fTwo.getName();
+		if(!dataPipelineOne.equals(dataPipelineTwo)) {
+			labelOne += " (" + dataPipelineOne.getName() + ")";
+			labelTwo += " (" + dataPipelineTwo.getName() + ")";
+		}		
+		plot.getDomainAxis().setLabel(labelOne);
+		plot.getRangeAxis().setLabel(labelTwo);
 		drawRegressionLine();
 	}
 

@@ -180,6 +180,7 @@ public class DataIntegratorPanel extends ClusterDisplayPanel {
 		
 		if (command.equals(MainActionCommands.SHOW_DATA_PIPELINE_ALIGNMENT_MANAGER_COMMAND.getName()))
 			showDataAlignmentResultsManager();
+		
 		if (command.equals(MainActionCommands.DELETE_DATA_PIPELINE_ALIGNMENT_RESULTS_COMMAND.getName()))
 			deleteSelectedDataAlignmentResults();
 		

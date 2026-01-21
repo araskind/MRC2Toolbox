@@ -528,13 +528,13 @@ public class MultiPanelDataPlot extends TwoDimQCPlot{
 
 	private void createFeatureBarChart() {
 		
+		boolean multipipeline = plottedFeaturesMap.size() > 1;
+		
 		for (Entry<DataPipeline, Collection<MsFeature>> entry : plottedFeaturesMap.entrySet()) {
 			
 			for(MsFeature msf : entry.getValue()) {
 				
 				CategoryPlot barChart = getNewBarchart();
-
-				//	MsFeatureBarChartDataSet ds = new MsFeatureBarChartDataSet(msf, plotParameters);
 				VariableCategorySizeBarChartDataSet ds = 
 						new VariableCategorySizeBarChartDataSet(msf, entry.getKey(), plotParameters);
 				VariableCategorySizeBarRenderer renderer = new VariableCategorySizeBarRenderer();
@@ -548,7 +548,11 @@ public class MultiPanelDataPlot extends TwoDimQCPlot{
 				barChart.setDataset(ds);
 				
 				CategoryAxis axis = barChart.getDomainAxis();
-				axis.setLabel(msf.getName());
+				String label = msf.getName();
+				if(multipipeline)
+					label += " (" + entry.getKey().getName() + ")";
+				
+				axis.setLabel(label);
 				axis.setCategoryLabelPositions(CategoryLabelPositions.STANDARD);
 				axis.setMaximumCategoryLabelLines(calculateLineNumberForCategoryLabels());
 				axis.setLowerMargin(0.1);
