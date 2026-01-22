@@ -274,7 +274,7 @@ public class ExpSampleEditorDialog extends JDialog  implements ActionListener, B
 		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
 		ActionListener al = new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
-				dispose();
+				disposeWithoutSavingPreferences();
 			}
 		};
 		btnCancel.addActionListener(al);
@@ -288,6 +288,10 @@ public class ExpSampleEditorDialog extends JDialog  implements ActionListener, B
 
 		loadSampleData();
 		loadPreferences();
+	}
+	
+	private void disposeWithoutSavingPreferences() {
+		super.dispose();
 	}
 
 	private void loadSampleData() {

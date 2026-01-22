@@ -166,7 +166,7 @@ public class MobilePhaseEditorDialog extends JDialog implements ActionListener {
 		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
 		ActionListener al = new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
-				dispose();
+				disposeWithoutSavingPreferences();
 			}
 		};
 		btnCancel.addActionListener(al);
@@ -179,6 +179,10 @@ public class MobilePhaseEditorDialog extends JDialog implements ActionListener {
 		rootPane.setDefaultButton(btnSave);
 
 		loadMobilePhaseData();
+	}
+	
+	private void disposeWithoutSavingPreferences() {
+		super.dispose();
 	}
 
 	private void loadMobilePhaseData() {

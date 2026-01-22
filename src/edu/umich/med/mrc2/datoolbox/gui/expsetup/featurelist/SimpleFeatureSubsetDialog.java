@@ -167,7 +167,7 @@ public class SimpleFeatureSubsetDialog extends JDialog implements ItemListener {
 		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
 		ActionListener al = new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
-				dispose();
+				disposeWithoutSavingPreferences();
 			}
 		};
 		btnCancel.addActionListener(al);
@@ -179,6 +179,10 @@ public class SimpleFeatureSubsetDialog extends JDialog implements ItemListener {
 		JRootPane rootPane = SwingUtilities.getRootPane(btnSave);
 		rootPane.registerKeyboardAction(al, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 		rootPane.setDefaultButton(btnSave);
+	}
+	
+	private void disposeWithoutSavingPreferences() {
+		super.dispose();
 	}
 	
 	public String getSubsetName() {

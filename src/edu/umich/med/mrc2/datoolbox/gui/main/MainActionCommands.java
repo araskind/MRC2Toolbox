@@ -1112,6 +1112,9 @@ public enum MainActionCommands {
 	SETUP_MAJOR_CLUSTER_FEATURE_EXTRACTION_COMMAND("Set up major cluster feature extraction"),
 	EXTRACT_MAJOR_CLUSTER_FEATURES_COMMAND("Extract major cluster features"),
 	
+	SETUP_FEATURE_CLUSTERING_BY_STRUCTURE_COMMAND("Set up feature clustering by structure"),
+	CLUSTER_FEATURES_BY_STRUCTURE_COMMAND("Cluster features by structure"),
+	
 	
 	//	NIST-MS / PEP-search / Sirius commands
 	NIST_MS_PEPSEARCH_SETUP_COMMAND("Set up NIST MSMS pepsearch"),

@@ -96,7 +96,7 @@ public class AssaySelectorDialog extends JDialog  {
 		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
 		ActionListener al = new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
-				dispose();
+				disposeWithoutSavingPreferences();
 			}
 		};
 		btnCancel.addActionListener(al);
@@ -111,6 +111,10 @@ public class AssaySelectorDialog extends JDialog  {
 		rootPane.setDefaultButton(btnSave);
 		
 		pack();
+	}
+	
+	private void disposeWithoutSavingPreferences() {
+		super.dispose();
 	}
 	
 	public Assay getSelectedAssay() {

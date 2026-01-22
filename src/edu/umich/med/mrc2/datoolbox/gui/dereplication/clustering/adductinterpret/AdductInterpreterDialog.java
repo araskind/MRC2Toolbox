@@ -125,7 +125,7 @@ public class AdductInterpreterDialog extends JDialog implements ActionListener, 
 		setModalityType(ModalityType.MODELESS);
 		setSize(new Dimension(800, 600));
 		setPreferredSize(new Dimension(800, 600));
-		setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
+		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		defaultGlassPane = this.getGlassPane();
 
 		toolbar = new AdductInterpreterToolbar(this);
@@ -233,7 +233,7 @@ public class AdductInterpreterDialog extends JDialog implements ActionListener, 
 		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
 		ActionListener al = new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
-				setVisible(false);
+				disposeWithoutSavingPreferences();
 			}
 		};
 		JRootPane rootPane = SwingUtilities.getRootPane(toolbar);
@@ -266,12 +266,13 @@ public class AdductInterpreterDialog extends JDialog implements ActionListener, 
 				adductInterpreterTable.getSelectionModel().removeListSelectionListener(parentPanel);
 			}
 		});
-
 		pack();
-		setLocationRelativeTo(MRC2ToolBoxCore.getMainWindow());
-		setVisible(false);
 	}
 
+	private void disposeWithoutSavingPreferences() {
+		super.dispose();
+	}
+	
 	private void acceptInterpretationResults() {
 
 		AdductInterpreterTableModel model = 

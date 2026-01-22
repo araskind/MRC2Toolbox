@@ -82,7 +82,7 @@ public class BatchAnnotationPreferencesDialog extends JDialog {
 
 		setSize(new Dimension(400, 220));
 		setPreferredSize(new Dimension(400, 220));
-		setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
+		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
 		JPanel panel = new JPanel();
 		panel.setBorder(new EmptyBorder(10, 10, 10, 10));
@@ -200,7 +200,7 @@ public class BatchAnnotationPreferencesDialog extends JDialog {
 		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
 		ActionListener al = new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
-				setVisible(false);
+				disposeWithoutSavingPreferences();
 			}
 		};
 		cancelButton.addActionListener(al);
@@ -209,10 +209,12 @@ public class BatchAnnotationPreferencesDialog extends JDialog {
 		rootPane.setDefaultButton(runButton);
 
 		pack();
-		setLocationRelativeTo(MRC2ToolBoxCore.getMainWindow());
-		setVisible(false);
 	}
 
+	private void disposeWithoutSavingPreferences() {
+		super.dispose();
+	}
+	
 	public boolean autoGenerateAdducts() {
 
 		return generateAdductsCheckBox.isSelected();

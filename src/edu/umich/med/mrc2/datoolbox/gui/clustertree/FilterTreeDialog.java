@@ -212,13 +212,17 @@ public class FilterTreeDialog extends JDialog implements ActionListener {
 		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
 		ActionListener al = new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
-				dispose();
+				disposeWithoutSavingPreferences();
 			}
 		};
 		rootPane.registerKeyboardAction(al, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 		cancelButton.addActionListener(al);
 	}
 
+	private void disposeWithoutSavingPreferences() {
+		super.dispose();
+	}
+	
 	@Override
 	public void actionPerformed(ActionEvent event) {
 

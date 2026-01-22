@@ -91,7 +91,7 @@ public class DataAnalysisMethodSelectionDialog extends JDialog {
 		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
 		ActionListener al = new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
-				dispose();
+				disposeWithoutSavingPreferences();
 			}
 		};
 		btnCancel.addActionListener(al);
@@ -104,6 +104,10 @@ public class DataAnalysisMethodSelectionDialog extends JDialog {
 		rootPane.setDefaultButton(btnSelect);
 
 		pack();
+	}
+	
+	private void disposeWithoutSavingPreferences() {
+		super.dispose();
 	}
 
 	public DataExtractionMethod getSelectedMethod() {

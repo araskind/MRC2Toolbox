@@ -37,6 +37,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
+import javax.swing.WindowConstants;
 
 import edu.umich.med.mrc2.datoolbox.data.lims.ObjectAnnotation;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
@@ -56,6 +57,8 @@ public class AnnotationTextEditor extends JDialog {
 
 		super(MRC2ToolBoxCore.getMainWindow(), "Edit annotation text", true);
 
+		setModalityType(ModalityType.APPLICATION_MODAL);
+		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		setPreferredSize(new Dimension(400, 200));
 		setMinimumSize(new Dimension(400, 200));
 
@@ -83,7 +86,7 @@ public class AnnotationTextEditor extends JDialog {
 		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
 		ActionListener al = new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
-				setVisible(false);
+				disposeWithoutSavingPreferences();
 			}
 		};
 		cancelButton.addActionListener(al);
@@ -91,12 +94,13 @@ public class AnnotationTextEditor extends JDialog {
 		JRootPane rootPane = SwingUtilities.getRootPane(saveButton);
 		rootPane.registerKeyboardAction(al, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 		rootPane.setDefaultButton(saveButton);
-
 		pack();
-		setLocationRelativeTo(MRC2ToolBoxCore.getMainWindow());
-		setVisible(false);
 	}
 
+	private void disposeWithoutSavingPreferences() {
+		super.dispose();
+	}
+	
 	public synchronized void clearPanel() {
 
 		textArea.setText("");

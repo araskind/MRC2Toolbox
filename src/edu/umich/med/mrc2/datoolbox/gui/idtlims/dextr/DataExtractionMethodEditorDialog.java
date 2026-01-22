@@ -252,7 +252,7 @@ public class DataExtractionMethodEditorDialog extends JDialog implements ActionL
 		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
 		ActionListener al = new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
-				dispose();
+				disposeWithoutSavingPreferences();
 			}
 		};
 		btnCancel.addActionListener(al);
@@ -267,6 +267,10 @@ public class DataExtractionMethodEditorDialog extends JDialog implements ActionL
 		loadMethodData();
 	}
 
+	private void disposeWithoutSavingPreferences() {
+		super.dispose();
+	}
+	
 	private void loadMethodData() {
 
 		if(method == null) {

@@ -101,7 +101,7 @@ public class MissingIdentificationsDialog extends JDialog implements ActionListe
 		super(MRC2ToolBoxCore.getMainWindow(), "Missing identifications", false);
 		setIconImage(((ImageIcon) missingIdentificationsIcon).getImage());
 
-		setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
+		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		setSize(new Dimension(800, 640));
 		setPreferredSize(new Dimension(800, 640));
 		preferences = Preferences.userNodeForPackage(this.getClass());
@@ -188,7 +188,7 @@ public class MissingIdentificationsDialog extends JDialog implements ActionListe
 		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
 		ActionListener al = new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
-				setVisible(false);
+				disposeWithoutSavingPreferences();
 			}
 		};
 		closeButton = new JButton("Close dialog");
@@ -200,6 +200,10 @@ public class MissingIdentificationsDialog extends JDialog implements ActionListe
 		loadPreferences();
 
 		pack();
+	}
+	
+	private void disposeWithoutSavingPreferences() {
+		super.dispose();
 	}
 
 	public void loadFeatureData(LibraryMsFeature feature) {

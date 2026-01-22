@@ -208,7 +208,7 @@ public class AddSamplesDialog extends JDialog implements BackedByPreferences, Ac
 		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
 		ActionListener al = new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
-				dispose();
+				disposeWithoutSavingPreferences();
 			}
 		};
 		cancelButton.addActionListener(al);
@@ -218,7 +218,11 @@ public class AddSamplesDialog extends JDialog implements BackedByPreferences, Ac
 
 		pack();
 		loadPreferences();
-		newSamples = new TreeSet<ExperimentalSample>();
+		newSamples = new TreeSet<>();
+	}
+	
+	private void disposeWithoutSavingPreferences() {
+		super.dispose();
 	}
 
 	public Collection<ExperimentalSample>getNewSamples(){

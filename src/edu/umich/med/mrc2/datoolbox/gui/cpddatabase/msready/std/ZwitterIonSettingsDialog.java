@@ -212,7 +212,7 @@ public class ZwitterIonSettingsDialog extends JDialog implements BackedByPrefere
 		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
 		ActionListener al = new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
-				dispose();
+				disposeWithoutSavingPreferences();
 			}
 		};
 		btnCancel.addActionListener(al);
@@ -230,6 +230,10 @@ public class ZwitterIonSettingsDialog extends JDialog implements BackedByPrefere
 		loadPreferences();
 		pack();
 	}	
+	
+	private void disposeWithoutSavingPreferences() {
+		super.dispose();
+	}
 	
 	@Override
 	public void loadPreferences(Preferences prefs) {

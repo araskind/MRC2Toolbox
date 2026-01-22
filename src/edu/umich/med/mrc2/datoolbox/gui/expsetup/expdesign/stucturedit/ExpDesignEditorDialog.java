@@ -85,7 +85,7 @@ public class ExpDesignEditorDialog extends JDialog implements ActionListener {
 		setModalityType(ModalityType.APPLICATION_MODAL);
 		setSize(new Dimension(400, 400));
 		setPreferredSize(new Dimension(400, 400));
-		setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
+		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		setIconImage(((ImageIcon) factorIcon).getImage());
 
 		panel = new JPanel();
@@ -155,7 +155,7 @@ public class ExpDesignEditorDialog extends JDialog implements ActionListener {
 		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
 		ActionListener al = new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
-				setVisible(false);
+				disposeWithoutSavingPreferences();
 			}
 		};
 		btnCancel.addActionListener(al);
@@ -164,8 +164,10 @@ public class ExpDesignEditorDialog extends JDialog implements ActionListener {
 		rootPane.setDefaultButton(btnSave);
 
 		pack();
-		setLocationRelativeTo(MRC2ToolBoxCore.getMainWindow());
-		setVisible(false);
+	}
+	
+	private void disposeWithoutSavingPreferences() {
+		super.dispose();
 	}
 
 	public void setEditingEnabled(boolean editingEnabled) {

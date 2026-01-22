@@ -82,7 +82,7 @@ public class ChargeCarrierSelectorDialog extends JDialog {
 		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
 		ActionListener al = new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
-				dispose();
+				disposeWithoutSavingPreferences();
 			}
 		};
 		JButton cancelButton = new JButton("Cancel");
@@ -101,6 +101,10 @@ public class ChargeCarrierSelectorDialog extends JDialog {
 		rootPane.setDefaultButton(saveButton);
 		
 		pack();
+	}
+	
+	private void disposeWithoutSavingPreferences() {
+		super.dispose();
 	}
 	
 	public SimpleAdduct getSelectedChargeCarrier() {

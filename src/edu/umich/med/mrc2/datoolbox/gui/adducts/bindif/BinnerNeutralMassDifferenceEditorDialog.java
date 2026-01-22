@@ -227,7 +227,7 @@ public class BinnerNeutralMassDifferenceEditorDialog extends JDialog
 		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
 		ActionListener al = new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
-				dispose();
+				disposeWithoutSavingPreferences();
 			}
 		};
 		cancelButton = new JButton("Cancel");
@@ -246,6 +246,10 @@ public class BinnerNeutralMassDifferenceEditorDialog extends JDialog
 		
 		loadBinnerNeutralMassDifference();
 		pack();
+	}
+	
+	private void disposeWithoutSavingPreferences() {
+		super.dispose();
 	}
 	
 	private void loadBinnerNeutralMassDifference() {

@@ -185,7 +185,7 @@ public class EditFactorDialog extends JDialog implements ActionListener, ItemLis
 		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
 		ActionListener al = new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
-				dispose();
+				disposeWithoutSavingPreferences();
 			}
 		};
 		cancelButton.addActionListener(al);
@@ -195,6 +195,10 @@ public class EditFactorDialog extends JDialog implements ActionListener, ItemLis
 
 		loadCurrentDesign();
 		pack();
+	}
+	
+	private void disposeWithoutSavingPreferences() {
+		super.dispose();
 	}
 
 	@SuppressWarnings("unchecked")

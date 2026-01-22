@@ -83,7 +83,7 @@ public class DatabaseSearchDialog extends JDialog implements ActionListener{
 		setModalityType(ModalityType.MODELESS);
 		setSize(new Dimension(450, 220));
 		setResizable(true);
-		setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
+		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
 		JPanel panel = new JPanel();
 		panel.setBorder(new EmptyBorder(10, 10, 10, 10));
@@ -257,15 +257,18 @@ public class DatabaseSearchDialog extends JDialog implements ActionListener{
 		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
 		ActionListener al = new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
-				setVisible(false);
+				disposeWithoutSavingPreferences();
 			}
 		};
 		btnCancel.addActionListener(al);
 		JRootPane rootPane = SwingUtilities.getRootPane(searchButton);
 		rootPane.registerKeyboardAction(al, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 		rootPane.setDefaultButton(searchButton);
-
 		pack();
+	}
+	
+	private void disposeWithoutSavingPreferences() {
+		super.dispose();
 	}
 
 	@Override

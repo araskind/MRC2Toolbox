@@ -63,7 +63,7 @@ public class DataImputationSetupDialog extends JDialog {
 
 		setSize(new Dimension(400, 220));
 		setPreferredSize(new Dimension(400, 220));
-		setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
+		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		getContentPane().setLayout(new BorderLayout(0, 0));
 		
 		JPanel panel = new JPanel();
@@ -151,7 +151,7 @@ public class DataImputationSetupDialog extends JDialog {
 		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
 		ActionListener al = new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
-				setVisible(false);
+				disposeWithoutSavingPreferences();
 			}
 		};
 		cancelButton.addActionListener(al);
@@ -162,6 +162,10 @@ public class DataImputationSetupDialog extends JDialog {
 		pack();
 		setLocationRelativeTo(MRC2ToolBoxCore.getMainWindow());
 		setVisible(false);
+	}
+	
+	private void disposeWithoutSavingPreferences() {
+		super.dispose();
 	}
 	
 	public int getKnnParameter() {

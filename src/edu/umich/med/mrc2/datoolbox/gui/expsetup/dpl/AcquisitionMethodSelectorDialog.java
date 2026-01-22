@@ -87,7 +87,7 @@ public class AcquisitionMethodSelectorDialog extends JDialog {
 		
 		ActionListener al = new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
-				dispose();
+				disposeWithoutSavingPreferences();
 			}
 		};
 		JButton btnCancel = new JButton("Cancel");
@@ -107,6 +107,10 @@ public class AcquisitionMethodSelectorDialog extends JDialog {
 		acquisitionMethodTable.setTableModelFromAcquisitionMethods(
 				IDTDataCache.getAcquisitionMethods());
 		pack();
+	}
+	
+	private void disposeWithoutSavingPreferences() {
+		super.dispose();
 	}
 	
 	public DataAcquisitionMethod getSelectedMethod() {

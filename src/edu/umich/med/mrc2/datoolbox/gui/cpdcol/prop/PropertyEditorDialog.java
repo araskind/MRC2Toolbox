@@ -153,7 +153,7 @@ public class PropertyEditorDialog extends JDialog {
 		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
 		ActionListener al = new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
-				dispose();
+				disposeWithoutSavingPreferences();
 			}
 		};
 		btnCancel.addActionListener(al);
@@ -166,6 +166,10 @@ public class PropertyEditorDialog extends JDialog {
 		rootPane.setDefaultButton(btnSave);
 
 		loadColumnData();
+	}
+	
+	private void disposeWithoutSavingPreferences() {
+		super.dispose();
 	}
 
 	@SuppressWarnings("unchecked")

@@ -218,7 +218,7 @@ public class CompoundStandardizerSettingsDialog extends JDialog implements Backe
 		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
 		ActionListener al = new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
-				dispose();
+				disposeWithoutSavingPreferences();
 			}
 		};
 		btnCancel.addActionListener(al);
@@ -236,6 +236,10 @@ public class CompoundStandardizerSettingsDialog extends JDialog implements Backe
 		loadPreferences();
 		pack();
 	}	
+	
+	private void disposeWithoutSavingPreferences() {
+		super.dispose();
+	}
 	
 	@Override
 	public void loadPreferences(Preferences prefs) {

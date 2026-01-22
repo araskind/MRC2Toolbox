@@ -109,13 +109,17 @@ public class AnnotationListManagerDialog extends JDialog implements ActionListen
 		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
 		ActionListener al = new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
-				dispose();
+				disposeWithoutSavingPreferences();
 			}
 		};
 		btnCancel.addActionListener(al);
 		JRootPane rootPane = SwingUtilities.getRootPane(btnCancel);
 		rootPane.registerKeyboardAction(al, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);		
 		loadAnnotationLists();
+	}
+	
+	private void disposeWithoutSavingPreferences() {
+		super.dispose();
 	}
 
 	private void loadAnnotationLists() {

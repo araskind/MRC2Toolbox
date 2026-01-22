@@ -116,7 +116,7 @@ public class BatchAssignmentDialog extends JDialog implements ActionListener{
 		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
 		ActionListener al = new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
-				dispose();
+				disposeWithoutSavingPreferences();
 			}
 		};
 		btnCancel = new JButton("Cancel");
@@ -142,6 +142,10 @@ public class BatchAssignmentDialog extends JDialog implements ActionListener{
 		rootPane.setDefaultButton(assignBatchButton);
 	}
 
+	private void disposeWithoutSavingPreferences() {
+		super.dispose();
+	}
+	
 	@Override
 	public void actionPerformed(ActionEvent e) {
 

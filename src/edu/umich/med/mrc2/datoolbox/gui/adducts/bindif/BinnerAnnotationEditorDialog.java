@@ -156,7 +156,7 @@ public class BinnerAnnotationEditorDialog extends JDialog {
 		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
 		ActionListener al = new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
-				dispose();
+				disposeWithoutSavingPreferences();
 			}
 		};
 		JButton cancelButton = new JButton("Cancel");
@@ -173,6 +173,10 @@ public class BinnerAnnotationEditorDialog extends JDialog {
 		rootPane.registerKeyboardAction(al, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 		rootPane.setDefaultButton(saveButton);		
 		pack();
+	}
+	
+	private void disposeWithoutSavingPreferences() {
+		super.dispose();
 	}
 	
 	private void initEditorPanel() {

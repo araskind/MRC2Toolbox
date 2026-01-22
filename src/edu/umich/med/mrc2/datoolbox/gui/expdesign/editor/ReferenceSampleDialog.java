@@ -223,7 +223,7 @@ public class ReferenceSampleDialog extends JDialog implements ActionListener{
 		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
 		ActionListener al = new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
-				dispose();
+				disposeWithoutSavingPreferences();
 			}
 		};
 		btnCancel.addActionListener(al);
@@ -232,18 +232,18 @@ public class ReferenceSampleDialog extends JDialog implements ActionListener{
 		rootPane.setDefaultButton(btnSaveChanges);
 	}
 
+	private void disposeWithoutSavingPreferences() {
+		super.dispose();
+	}
 
-	@SuppressWarnings("unchecked")
 	private void populateSampleListsFromLimsExperiment(LIMSExperiment limsExperiment2) {
 
 		ReferenceSamplesManager.refreshReferenceSampleList();
 		if(ReferenceSamplesManager.getReferenceSamples() == null || limsExperiment2 == null)
 			return;
 
-//		SortedListModel<ExperimentalSample> availableReferenceListModel = new SortedListModel<ExperimentalSample>();
-//		SortedListModel<ExperimentalSample> usedReferenceListModel = new SortedListModel<ExperimentalSample>();
-		Collection<ExperimentalSample>available = new ArrayList<ExperimentalSample>();
-		Collection<ExperimentalSample>used = new ArrayList<ExperimentalSample>();
+		Collection<ExperimentalSample>available = new ArrayList<>();
+		Collection<ExperimentalSample>used = new ArrayList<>();
 		for(ExperimentalSample ref : ReferenceSamplesManager.getReferenceSamples()) {
 
 			if(limsExperiment2.getExperimentDesign().containsSample(ref))
@@ -251,23 +251,18 @@ public class ReferenceSampleDialog extends JDialog implements ActionListener{
 			else
 				available.add(ref);
 		}
-//		usedReferenceListModel.addAll(used);
-//		availableReferenceListModel.addAll(available);
 		availableReferenceList.setTableModelFromReferenceSamples(available);
 		usedReferenceList.setTableModelFromReferenceSamples(used);
 	}
 
-	@SuppressWarnings("unchecked")
 	private void populateSampleListsFromCefAnalyzerProject(DataAnalysisProject cefAnalyzerProject2) {
 
 		ReferenceSamplesManager.refreshReferenceSampleList();
 		if(ReferenceSamplesManager.getReferenceSamples() == null || cefAnalyzerProject2 == null)
 			return;
 
-//		SortedListModel<ExperimentalSample> availableReferenceListModel = new SortedListModel<ExperimentalSample>();
-//		SortedListModel<ExperimentalSample> usedReferenceListModel = new SortedListModel<ExperimentalSample>();
-		Collection<ExperimentalSample>available = new ArrayList<ExperimentalSample>();
-		Collection<ExperimentalSample>used = new ArrayList<ExperimentalSample>();
+		Collection<ExperimentalSample>available = new ArrayList<>();
+		Collection<ExperimentalSample>used = new ArrayList<>();
 		for(ExperimentalSample ref : ReferenceSamplesManager.getReferenceSamples()) {
 
 			if(cefAnalyzerProject2.getExperimentDesign().containsSample(ref))
@@ -275,10 +270,6 @@ public class ReferenceSampleDialog extends JDialog implements ActionListener{
 			else
 				available.add(ref);
 		}
-//		usedReferenceListModel.addAll(used);
-//		availableReferenceListModel.addAll(available);
-//		availableReferenceList.setModel(availableReferenceListModel);
-//		usedReferenceList.setModel(usedReferenceListModel);
 		availableReferenceList.setTableModelFromReferenceSamples(available);
 		usedReferenceList.setTableModelFromReferenceSamples(used);
 	}

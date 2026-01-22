@@ -100,7 +100,7 @@ public class EditSynonymDialog extends JDialog {
 		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
 		ActionListener al = new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
-				dispose();
+				disposeWithoutSavingPreferences();
 			}
 		};
 		btnCancel.addActionListener(al);
@@ -115,6 +115,10 @@ public class EditSynonymDialog extends JDialog {
 		finalizeDialog();
 	}
 
+	private void disposeWithoutSavingPreferences() {
+		super.dispose();
+	}
+	
 	private void finalizeDialog() {
 
 		if(originalName == null) {

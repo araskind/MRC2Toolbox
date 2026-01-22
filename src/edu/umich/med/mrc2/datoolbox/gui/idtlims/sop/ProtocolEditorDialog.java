@@ -284,7 +284,7 @@ public class ProtocolEditorDialog extends JDialog implements ActionListener, Bac
 		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
 		ActionListener al = new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
-				dispose();
+				disposeWithoutSavingPreferences();
 			}
 		};
 		btnCancel.addActionListener(al);
@@ -301,6 +301,10 @@ public class ProtocolEditorDialog extends JDialog implements ActionListener, Bac
 		pack();
 	}
 
+	private void disposeWithoutSavingPreferences() {
+		super.dispose();
+	}
+	
 	private void loadProtocolData() {
 
 		if(protocol == null) {

@@ -266,7 +266,7 @@ public class IDtrackerAverageMsOneImportDialog extends JDialog
 		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
 		ActionListener al = new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
-				dispose();
+				disposeWithoutSavingPreferences();
 			}
 		};
 		btnCancel.addActionListener(al);
@@ -281,18 +281,12 @@ public class IDtrackerAverageMsOneImportDialog extends JDialog
 
 		loadPreferences();
 
-//		chooser = new ImprovedFileChooser();
-//		chooser.setBorder(new EmptyBorder(10, 10, 10, 10));
-//		chooser.addActionListener(this);
-//		chooser.setAcceptAllFileFilterUsed(false);
-//		chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-//		chooser.setCurrentDirectory(baseDirectory);
-//		xmlFilter = new FileNameExtensionFilter("XML files", "xml", "cef", "CEF");
-//		chooser.setMultiSelectionEnabled(false);
-//		chooser.setFileFilter(xmlFilter);
-
 		importLog = new ArrayList<String>();
 		pack();
+	}
+	
+	private void disposeWithoutSavingPreferences() {
+		super.dispose();
 	}
 
 	@Override

@@ -85,7 +85,7 @@ public class DatabaseToLibraryDialog  extends JDialog implements ActionListener{
 		setSize(new Dimension(450, 140));
 		setPreferredSize(new Dimension(450, 140));
 		setResizable(true);
-		setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
+		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
 		JPanel panel = new JPanel();
 		panel.setBorder(new EmptyBorder(10, 10, 10, 10));
@@ -133,7 +133,7 @@ public class DatabaseToLibraryDialog  extends JDialog implements ActionListener{
 		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
 		ActionListener al = new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
-				setVisible(false);
+				disposeWithoutSavingPreferences();
 			}
 		};
 		cancelButton.addActionListener(al);
@@ -144,6 +144,10 @@ public class DatabaseToLibraryDialog  extends JDialog implements ActionListener{
 		pack();
 
 		newCompounds = new ArrayList<CompoundIdentity>();
+	}
+	
+	private void disposeWithoutSavingPreferences() {
+		super.dispose();
 	}
 
 	public void updateDialog(String command, CompoundIdentity id) {

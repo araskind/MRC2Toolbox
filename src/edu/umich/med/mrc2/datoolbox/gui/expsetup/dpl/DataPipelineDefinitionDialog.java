@@ -76,7 +76,7 @@ public class DataPipelineDefinitionDialog extends JDialog {
 		
 		ActionListener al = new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
-				dispose();
+				disposeWithoutSavingPreferences();
 			}
 		};
 		JButton btnCancel = new JButton("Cancel");
@@ -92,6 +92,10 @@ public class DataPipelineDefinitionDialog extends JDialog {
 		rootPane.setDefaultButton(btnSave);
 		
 		pack();
+	}
+	
+	private void disposeWithoutSavingPreferences() {
+		super.dispose();
 	}
 	
 	public DataPipeline getDataPipeline() {

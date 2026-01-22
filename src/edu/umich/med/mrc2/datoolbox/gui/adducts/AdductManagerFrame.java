@@ -101,7 +101,7 @@ public class AdductManagerFrame extends JFrame
 		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
 		ActionListener al = new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
-				dispose();
+				disposeWithoutSavingPreferences();
 			}
 		};
 		JRootPane rootPane = SwingUtilities.getRootPane(control.getContentArea());
@@ -109,6 +109,10 @@ public class AdductManagerFrame extends JFrame
 		
 		loadLayout(layoutConfigFile);
 		pack();
+	}
+	
+	private void disposeWithoutSavingPreferences() {
+		super.dispose();
 	}
 	
 	public void refreshAdductList() {

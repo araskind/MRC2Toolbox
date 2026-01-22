@@ -88,7 +88,7 @@ public class ExchangeDataEditorDialog extends JDialog implements ItemListener, L
 		setModalityType(ModalityType.APPLICATION_MODAL);
 		setSize(new Dimension(640, 480));
 		setPreferredSize(new Dimension(640, 480));
-		setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
+		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
 		JPanel panel = new JPanel();
 		FlowLayout flowLayout_2 = (FlowLayout) panel.getLayout();
@@ -147,7 +147,7 @@ public class ExchangeDataEditorDialog extends JDialog implements ItemListener, L
 		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
 		ActionListener al = new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
-				setVisible(false);
+				disposeWithoutSavingPreferences();
 			}
 		};
 		rootPane.registerKeyboardAction(al, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
@@ -168,6 +168,10 @@ public class ExchangeDataEditorDialog extends JDialog implements ItemListener, L
 		pack();
 	}
 
+	private void disposeWithoutSavingPreferences() {
+		super.dispose();
+	}
+	
 	public void loadExchange(AdductExchange activeExchange) {
 
 		this.activeExchange = activeExchange;

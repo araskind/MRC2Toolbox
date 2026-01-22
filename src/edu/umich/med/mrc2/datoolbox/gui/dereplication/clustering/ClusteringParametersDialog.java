@@ -136,7 +136,7 @@ public class ClusteringParametersDialog extends JDialog implements BackedByPrefe
 		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
 		ActionListener al = new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
-				setVisible(false);
+				disposeWithoutSavingPreferences();
 			}
 		};
 		btnCancel = new JButton("Cancel");
@@ -151,6 +151,10 @@ public class ClusteringParametersDialog extends JDialog implements BackedByPrefe
 		rootPane.setDefaultButton(btnRunAnalysis);
 
 		pack();
+	}
+	
+	private void disposeWithoutSavingPreferences() {
+		super.dispose();
 	}
 
 	private void createDataPrepSettingdPanel() {

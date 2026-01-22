@@ -90,7 +90,7 @@ public class IDTrackerExperimentDialog  extends JDialog {
 		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
 		ActionListener al = new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
-				dispose();
+				disposeWithoutSavingPreferences();
 			}
 		};
 		btnCancel.addActionListener(al);
@@ -102,6 +102,10 @@ public class IDTrackerExperimentDialog  extends JDialog {
 		pack();
 	}
 
+	private void disposeWithoutSavingPreferences() {
+		super.dispose();
+	}
+	
 	private void loadExperimentData() {
 
 		if(experimentDefinitionPanel.getExperiment() == null) {

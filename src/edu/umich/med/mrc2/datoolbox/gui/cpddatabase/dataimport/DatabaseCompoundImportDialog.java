@@ -129,7 +129,7 @@ public class DatabaseCompoundImportDialog extends JDialog
 		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
 		ActionListener al = new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
-				dispose();
+				disposeWithoutSavingPreferences();
 			}
 		};
 		btnCancel.addActionListener(al);
@@ -147,6 +147,10 @@ public class DatabaseCompoundImportDialog extends JDialog
 		pack();
 	}
 
+	private void disposeWithoutSavingPreferences() {
+		super.dispose();
+	}
+	
 	@Override
 	public void actionPerformed(ActionEvent e) {
 

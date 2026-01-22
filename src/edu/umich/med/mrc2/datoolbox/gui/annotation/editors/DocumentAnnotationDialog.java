@@ -175,7 +175,7 @@ public class DocumentAnnotationDialog extends JDialog implements ActionListener,
 		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
 		ActionListener al = new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
-				dispose();
+				disposeWithoutSavingPreferences();
 			}
 		};
 		cancelButton.addActionListener(al);
@@ -187,6 +187,10 @@ public class DocumentAnnotationDialog extends JDialog implements ActionListener,
 
 		loadPreferences();
 		pack();
+	}
+	
+	private void disposeWithoutSavingPreferences() {
+		super.dispose();
 	}
 	
 	public void setSaveButtonText(String text) {

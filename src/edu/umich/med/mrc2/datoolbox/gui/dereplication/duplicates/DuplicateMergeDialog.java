@@ -75,7 +75,7 @@ public class DuplicateMergeDialog extends JDialog implements BackedByPreferences
 		setModalityType(ModalityType.APPLICATION_MODAL);
 		setSize(new Dimension(450, 150));
 		setPreferredSize(new Dimension(450, 150));
-		setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
+		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
 		JPanel panel = new JPanel();
 		panel.setBorder(new EmptyBorder(10, 10, 10, 10));
@@ -132,7 +132,7 @@ public class DuplicateMergeDialog extends JDialog implements BackedByPreferences
 		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
 		ActionListener al = new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
-				setVisible(false);
+				disposeWithoutSavingPreferences();
 			}
 		};
 		cancelButton.addActionListener(al);
@@ -141,6 +141,10 @@ public class DuplicateMergeDialog extends JDialog implements BackedByPreferences
 		rootPane.setDefaultButton(mergeButton);
 		loadPreferences();
 		pack();
+	}
+	
+	private void disposeWithoutSavingPreferences() {
+		super.dispose();
 	}
 
 	public DuplicatesCleanupOptions getMergeOption() {

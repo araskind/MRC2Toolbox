@@ -126,6 +126,7 @@ import edu.umich.med.mrc2.datoolbox.gui.idtable.DockableUniversalIdentificationR
 import edu.umich.med.mrc2.datoolbox.gui.idtable.IDTrackerIdentificationTableModelListener;
 import edu.umich.med.mrc2.datoolbox.gui.idtable.UniversalIdentificationResultsTablePopupMenu;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.IDTrackerLimsManagerPanel;
+import edu.umich.med.mrc2.datoolbox.gui.idworks.clustree.ClusteringByStructureSetupDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.clustree.DockableMSMSFeatureClusterTree;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.clustree.MSMSFeatureClusterTree;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.clustree.MajorClusterFeatureDefiningProperty;
@@ -331,6 +332,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 	private FeatureVsFeatureMSMSSearchSetupDialog featureVsFeatureMSMSSearchSetupDialog;
 	private MultipleSpectraDisplayDialog multipleSpectraDisplayDialog;
 	private MultipleCompoundIdSearchSetupDialog multipleCompoundIdSearchSetupDialog;
+	private ClusteringByStructureSetupDialog clusteringByStructureSetupDialog;
 	
 	private static final Icon searchIdTrackerIcon = GuiUtils.getIcon("searchDatabase", 24);
 	private static final Icon searchExperimentIcon = GuiUtils.getIcon("searchIdExperiment", 24);
@@ -913,6 +915,12 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		if (command.equals(MainActionCommands.RUN_MZ_FREQUENCY_ANALYSIS_COMMAND.getName()))
 			runMSMSParentIonFrequencyAnalysis();	
 		
+		if (command.equals(MainActionCommands.SETUP_FEATURE_CLUSTERING_BY_STRUCTURE_COMMAND.getName()))
+			setUpFeatureClusteringByStructure();
+		
+		if (command.equals(MainActionCommands.CLUSTER_FEATURES_BY_STRUCTURE_COMMAND.getName()))
+			clusterFeaturesByStructure();
+		
 		//	Feature cluster commands
 		if (command.equals(MainActionCommands.EDIT_CLUSTER_COMMAND.getName()))
 			editFeatureCluster();
@@ -1083,6 +1091,22 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 				massWindowType);
 		task.addTaskListener(this);
 		MRC2ToolBoxCore.getTaskController().addTask(task);		
+	}
+	
+	private void setUpFeatureClusteringByStructure() {
+
+		clusteringByStructureSetupDialog = new ClusteringByStructureSetupDialog(this);
+		clusteringByStructureSetupDialog.setLocationRelativeTo(this.getContentPane());
+		clusteringByStructureSetupDialog.setVisible(true);
+	}
+	
+	private void clusterFeaturesByStructure() {
+		//	TODO	
+	
+	
+	
+	
+		clusteringByStructureSetupDialog.dispose();
 	}
 
 	private void majorClusterFeatureExtractionSetup() {

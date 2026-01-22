@@ -311,7 +311,7 @@ public class AddCustomCompoundDialog extends JDialog implements ActionListener, 
 		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
 		ActionListener al = new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
-				dispose();
+				disposeWithoutSavingPreferences();
 			}
 		};
 		btnCancel.addActionListener(al);
@@ -341,6 +341,10 @@ public class AddCustomCompoundDialog extends JDialog implements ActionListener, 
 		pack();
 	}
 
+	private void disposeWithoutSavingPreferences() {
+		super.dispose();
+	}
+	
 	@Override
 	public void actionPerformed(ActionEvent e) {
 

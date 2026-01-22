@@ -89,7 +89,7 @@ public class DataExtractionMethodSelectorDialog extends JDialog {
 		
 		ActionListener al = new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
-				dispose();
+				disposeWithoutSavingPreferences();
 			}
 		};
 		JButton btnCancel = new JButton("Cancel");
@@ -106,8 +106,11 @@ public class DataExtractionMethodSelectorDialog extends JDialog {
 		rootPane.registerKeyboardAction(al, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 		rootPane.setDefaultButton(btnSave);
 
-
 		pack();
+	}
+	
+	private void disposeWithoutSavingPreferences() {
+		super.dispose();
 	}
 	
 	public DataExtractionMethod getSelectedMethod() {

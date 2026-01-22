@@ -85,6 +85,7 @@ public class IDWorkbenchMenuBar extends CommonMenuBar {
 	private static final Icon filterClustersByMZRTIcon = GuiUtils.getIcon("filterClusterByMZRTList", 24);	
 	private static final Icon reloadClusterTreeIcon = GuiUtils.getIcon("rerun", 24);
 	private static final Icon clusteringSummaryIcon = GuiUtils.getIcon("summary", 24);
+	private static final Icon clusterByStrructureIcon = GuiUtils.getIcon("clusterByStrructure", 24);
 	private static final Icon mzFrequencyIcon = GuiUtils.getIcon("mzFrequency", 24);
 	private static final Icon binnerLookupIcon = GuiUtils.getIcon("binnerLookupIcon", 24);
 	private static final Icon statsFilteredIcon = GuiUtils.getIcon("calcFilteredStats", 24);
@@ -132,7 +133,8 @@ public class IDWorkbenchMenuBar extends CommonMenuBar {
 		filterClustersMenuItem,
 		filterClustersMZRTListMenuItem,
 		reloadClusterTreeMenuItem,
-		clusteringSummaryMenuItem;
+		clusteringSummaryMenuItem,
+		clusterByStrructureMenuItem;
 
 	// Annotation managers
 	private JMenuItem
@@ -267,6 +269,12 @@ public class IDWorkbenchMenuBar extends CommonMenuBar {
 		extractMajorClusterFeaturesMenuItem = addItem(clusterMenu, 
 				MainActionCommands.SETUP_MAJOR_CLUSTER_FEATURE_EXTRACTION_COMMAND, 
 				searchIdActiveDataSetIcon);
+		
+		clusterMenu.addSeparator();
+		
+		clusterByStrructureMenuItem = addItem(clusterMenu, 
+				MainActionCommands.SETUP_FEATURE_CLUSTERING_BY_STRUCTURE_COMMAND, 
+				clusterByStrructureIcon);
 		
 		clusterMenu.addSeparator();
 		

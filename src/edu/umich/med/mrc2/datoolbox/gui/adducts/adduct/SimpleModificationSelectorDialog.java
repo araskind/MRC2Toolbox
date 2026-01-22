@@ -115,7 +115,7 @@ public class SimpleModificationSelectorDialog extends JDialog
 		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
 		ActionListener al = new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
-				dispose();
+				disposeWithoutSavingPreferences();
 			}
 		};
 		GridBagLayout gbl_buttonPanel = new GridBagLayout();
@@ -184,6 +184,10 @@ public class SimpleModificationSelectorDialog extends JDialog
 		
 		loadLayout(layoutConfigFile);		
 		pack();
+	}
+	
+	private void disposeWithoutSavingPreferences() {
+		super.dispose();
 	}
 
 	@Override

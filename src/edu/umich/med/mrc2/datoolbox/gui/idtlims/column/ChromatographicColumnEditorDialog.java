@@ -212,7 +212,7 @@ public class ChromatographicColumnEditorDialog extends JDialog {
 		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
 		ActionListener al = new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
-				dispose();
+				disposeWithoutSavingPreferences();
 			}
 		};
 		btnCancel.addActionListener(al);
@@ -225,6 +225,10 @@ public class ChromatographicColumnEditorDialog extends JDialog {
 		rootPane.setDefaultButton(btnSave);
 
 		loadColumnData();
+	}
+	
+	private void disposeWithoutSavingPreferences() {
+		super.dispose();
 	}
 
 	private void loadColumnData() {
