@@ -68,14 +68,9 @@ import javax.swing.border.TitledBorder;
 import org.apache.commons.lang3.StringUtils;
 
 import edu.umich.med.mrc2.datoolbox.data.IDTrackerDataExportParameters;
-import edu.umich.med.mrc2.datoolbox.data.enums.DecoyExportHandling;
-import edu.umich.med.mrc2.datoolbox.data.enums.FeatureIDSubset;
 import edu.umich.med.mrc2.datoolbox.data.enums.IDTrackerFeatureIdentificationProperties;
 import edu.umich.med.mrc2.datoolbox.data.enums.IDTrackerMSMSClusterProperties;
 import edu.umich.med.mrc2.datoolbox.data.enums.IDTrackerMsFeatureProperties;
-import edu.umich.med.mrc2.datoolbox.data.enums.MSMSMatchType;
-import edu.umich.med.mrc2.datoolbox.data.enums.MSMSScoringParameter;
-import edu.umich.med.mrc2.datoolbox.data.enums.MsDepth;
 import edu.umich.med.mrc2.datoolbox.data.msclust.IMSMSClusterDataSet;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.clustree.MajorClusterFeatureDefiningProperty;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
@@ -84,7 +79,7 @@ import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 
-public class IDTrackerMSMSClusterDataSetExportDialog extends JDialog 
+public class IDTrackerMSMSClusterDataSetExport4IdentificationDialog extends JDialog 
 		implements ActionListener, BackedByPreferences, ItemListener { 
 
 	/**
@@ -95,7 +90,7 @@ public class IDTrackerMSMSClusterDataSetExportDialog extends JDialog
 	protected Preferences preferences;
 		
 	private static final String PREFS_NODE = 
-			"edu.umich.med.mrc2.datoolbox.IDTrackerMSMSClusterDataSetExportDialog";
+			"edu.umich.med.mrc2.IDTrackerMSMSClusterDataSetExport4IdentificationDialog";
 	private static final String BASE_DIR = "BASE_DIR";
 	private static final String MSMS_CLUSTER_PROPERTIES = 
 			"MSMS_CLUSTER_PROPERTIES";
@@ -154,20 +149,18 @@ public class IDTrackerMSMSClusterDataSetExportDialog extends JDialog
 	private JList<IDTrackerMSMSClusterProperties> clusterPropertyList;
 	private JList<IDTrackerMsFeatureProperties> featurePropertyList;
 	private JList<IDTrackerFeatureIdentificationProperties> identificationDetailsList;	
-	private IdentificationExportSettingsPanel identificationExportSettingsPanel;
 	
 	private final String BROWSE_COMMAND = "BROWSE_FOR_OUTPUT";
 	
 	private IMSMSClusterDataSet activeMSMSClusterDataSet;
 	private JCheckBox exportIndividualFeatureDataCheckBox;
-	private JComboBox mfpComboBox;
-	
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public IDTrackerMSMSClusterDataSetExportDialog(
+	private JComboBox<MajorClusterFeatureDefiningProperty> mfpComboBox;
+
+	public IDTrackerMSMSClusterDataSetExport4IdentificationDialog(
 			ActionListener listener, 
 			IMSMSClusterDataSet activeMSMSClusterDataSet) {
 		super();
-		setTitle("Export data for the active MSMS cluster data set \"" + 
+		setTitle("Export identification summary data for the active MSMS cluster data set \"" + 
 				activeMSMSClusterDataSet.getName() +"\"");
 		setIconImage(((ImageIcon) dialogIcon).getImage());
 		setModalityType(ModalityType.APPLICATION_MODAL);
@@ -293,7 +286,7 @@ public class IDTrackerMSMSClusterDataSetExportDialog extends JDialog
 		gbc_lblNewLabel.gridy = 2;
 		panel_3.add(lblNewLabel, gbc_lblNewLabel);
 		
-		mfpComboBox = new JComboBox<MajorClusterFeatureDefiningProperty>(
+		mfpComboBox = new JComboBox<>(
 				new DefaultComboBoxModel<>(MajorClusterFeatureDefiningProperty.values()));
 		mfpComboBox.setSelectedIndex(-1);
 		GridBagConstraints gbc_comboBox = new GridBagConstraints();
@@ -303,15 +296,6 @@ public class IDTrackerMSMSClusterDataSetExportDialog extends JDialog
 		gbc_comboBox.gridx = 1;
 		gbc_comboBox.gridy = 2;
 		panel_3.add(mfpComboBox, gbc_comboBox);
-		
-		
-		identificationExportSettingsPanel = new IdentificationExportSettingsPanel();
-		GridBagConstraints gbc_panel_2 = new GridBagConstraints();
-		gbc_panel_2.gridwidth = 3;
-		gbc_panel_2.fill = GridBagConstraints.BOTH;
-		gbc_panel_2.gridx = 0;
-		gbc_panel_2.gridy = 3;
-		panel_3.add(identificationExportSettingsPanel, gbc_panel_2);
 			
 		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
 		ActionListener al = new ActionListener() {
@@ -503,10 +487,6 @@ public class IDTrackerMSMSClusterDataSetExportDialog extends JDialog
 		
 		exportIndividualFeatureDataCheckBox.setSelected(
 				preferences.getBoolean(EXPORT_INDIVIDUAL_FEATURE_DATA, false));
-		
-		identificationExportSettingsPanel.loadPreferences(preferences);
-		identificationExportSettingsPanel.toggleFormStatus(
-				exportIndividualFeatureDataCheckBox.isSelected());
 	}
 
 	@Override
@@ -532,31 +512,6 @@ public class IDTrackerMSMSClusterDataSetExportDialog extends JDialog
 		
 		preferences.putBoolean(EXPORT_INDIVIDUAL_FEATURE_DATA, 
 				exportIndividualFeatureDataCheckBox.isSelected());
-				
-		Collection<MSMSMatchType>selectedMatchTypes = getMSMSSearchTypes();
-		preferences.putBoolean(
-				IdentificationExportSettingsPanel.INCLUDE_NORMAL_MATCH, 
-				selectedMatchTypes.contains(MSMSMatchType.Regular));
-		preferences.putBoolean(
-				IdentificationExportSettingsPanel.INCLUDE_IN_SOURCE_MATCH, 
-				selectedMatchTypes.contains(MSMSMatchType.InSource));
-		preferences.putBoolean(
-				IdentificationExportSettingsPanel.INCLUDE_HYBRID_MATCH, 
-				selectedMatchTypes.contains(MSMSMatchType.Hybrid));
-		preferences.putDouble(
-				IdentificationExportSettingsPanel.MIN_SCORE, getMinimalMSMSScore());		
-		preferences.put(
-				IdentificationExportSettingsPanel.SCORING_PARAMETER, 
-				getMSMSScoringParameter().name());
-		preferences.put(
-				IdentificationExportSettingsPanel.IDS_PER_FEATURE, 
-				getFeatureIDSubset().name());		
-		preferences.putBoolean(
-				IdentificationExportSettingsPanel.EXCLUDE_IF_NO_IDS, 
-				excludeIfNoIdsLeft());
-		preferences.put(
-				IdentificationExportSettingsPanel.DECOY_EXPORT_HANDLING, 
-				getDecoyExportHandling().name());
 	}
 	
 	private void selectClusterPropertiesListItems(
@@ -635,30 +590,6 @@ public class IDTrackerMSMSClusterDataSetExportDialog extends JDialog
 		return (MajorClusterFeatureDefiningProperty)mfpComboBox.getSelectedItem();
 	}
 	
-	public MSMSScoringParameter getMSMSScoringParameter() {
-		return identificationExportSettingsPanel.getMSMSScoringParameter();
-	}
-	
-	public double getMinimalMSMSScore() {	
-		return identificationExportSettingsPanel.getMinimalMSMSScore();
-	}
-	
-	public FeatureIDSubset getFeatureIDSubset() {		
-		return identificationExportSettingsPanel.getFeatureIDSubset();
-	}
-	
-	public Collection<MSMSMatchType>getMSMSSearchTypes(){
-		return identificationExportSettingsPanel.getMSMSSearchTypes();
-	}
-	
-	public boolean excludeIfNoIdsLeft() {
-		return identificationExportSettingsPanel.excludeIfNoIdsLeft();
-	}
-	
-	public DecoyExportHandling getDecoyExportHandling() {		
-		return identificationExportSettingsPanel.getDecoyExportHandling();
-	}
-	
 	public Collection<String>validateFormParameters(){
 		
 		Collection<String>errors = new ArrayList<>();
@@ -676,38 +607,32 @@ public class IDTrackerMSMSClusterDataSetExportDialog extends JDialog
 		
 		return errors;
 	}
-
-	@Override
-	public void itemStateChanged(ItemEvent e) {
-		
-		if (e.getStateChange() == ItemEvent.SELECTED) {
-			identificationExportSettingsPanel.toggleFormStatus(true);
-			mfpComboBox.setSelectedIndex(-1);
-			mfpComboBox.setEnabled(false);
-		}		
-		if (e.getStateChange() == ItemEvent.DESELECTED) {
-			identificationExportSettingsPanel.toggleFormStatus(false);
-			mfpComboBox.setEnabled(true);
-		}
-	}
 	
 	public IDTrackerDataExportParameters getIDTrackerDataExportParameters() {
 		
-		IDTrackerDataExportParameters params = new IDTrackerDataExportParameters(
-				MsDepth.MS2, 
-				getSelectedMSMSClusterProperties(),
-				getSelectedFeatureProperties(),
-				getSelectedIdentificationProperties(), 
-				exportIndividualFeatureData(),
-				getMSMSScoringParameter(), 
-				getMinimalMSMSScore(), 
-				getFeatureIDSubset(),
-				getMSMSSearchTypes(),
-				excludeIfNoIdsLeft(),
-				getMajorClusterFeatureDefiningProperty());
-		params.setDecoyExportHandling(getDecoyExportHandling());
-		params.setCompoundIdFilter(identificationExportSettingsPanel.getCompoundFilter());
-		return params;
+//		IDTrackerDataExportParameters params = new IDTrackerDataExportParameters(
+//				MsDepth.MS2, 
+//				getSelectedMSMSClusterProperties(),
+//				getSelectedFeatureProperties(),
+//				getSelectedIdentificationProperties(), 
+//				exportIndividualFeatureData(),
+//				getMSMSScoringParameter(), 
+//				getMinimalMSMSScore(), 
+//				getFeatureIDSubset(),
+//				getMSMSSearchTypes(),
+//				excludeIfNoIdsLeft(),
+//				getMajorClusterFeatureDefiningProperty());
+//		params.setDecoyExportHandling(getDecoyExportHandling());
+//		params.setCompoundIdFilter(identificationExportSettingsPanel.getCompoundFilter());
+//		return params;
+		
+		return null;
+	}
+
+	@Override
+	public void itemStateChanged(ItemEvent e) {
+		// TODO Auto-generated method stub
+		
 	}
 }
 

@@ -351,8 +351,8 @@ public class PepSearchSetupDialog extends JDialog implements ActionListener, Ite
 		gbc_lblInternalSubset.gridy = rowCount;
 		panel_1.add(lblInternalSubset, gbc_lblInternalSubset);
 
-		featureSubsetComboBox = new JComboBox<TableRowSubset>(
-				new DefaultComboBoxModel<TableRowSubset>(TableRowSubset.values()));
+		featureSubsetComboBox = new JComboBox<>(
+				new DefaultComboBoxModel<>(TableRowSubset.values()));
 		featureSubsetComboBox.setMinimumSize(new Dimension(200, 25));
 		featureSubsetComboBox.setPreferredSize(new Dimension(200, 25));
 		GridBagConstraints gbc_featureSubset = new GridBagConstraints();

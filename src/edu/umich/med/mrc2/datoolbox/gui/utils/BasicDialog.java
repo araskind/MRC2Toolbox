@@ -49,8 +49,7 @@ public abstract class BasicDialog extends JDialog implements ActionListener {
 	protected JButton btnCancel;
 	protected JPanel mainPanel;
 	protected JPanel buttonPanel;
-	protected ActionListener cancelListener;
-	
+
 	public BasicDialog(
 			String title,
 			String iconId,
@@ -74,11 +73,14 @@ public abstract class BasicDialog extends JDialog implements ActionListener {
 		flowLayout.setAlignment(FlowLayout.RIGHT);
 		getContentPane().add(buttonPanel, BorderLayout.SOUTH);
 
-		createCancelListener();
+		ActionListener cancelListener = new ActionListener() {
+			public void actionPerformed(ActionEvent ae) {
+				dispose();
+			}
+		};
 		btnCancel = new JButton("Cancel");
 		buttonPanel.add(btnCancel);
 		btnCancel.addActionListener(cancelListener);
-
 
 		primaryActionButton = new JButton("Save");
 		primaryActionButton.addActionListener(actionListener);
@@ -88,14 +90,5 @@ public abstract class BasicDialog extends JDialog implements ActionListener {
 				cancelListener, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), 
 				JComponent.WHEN_IN_FOCUSED_WINDOW);
 		rootPane.setDefaultButton(primaryActionButton);
-	}
-	
-	protected void createCancelListener() {
-		
-		cancelListener = new ActionListener() {
-			public void actionPerformed(ActionEvent ae) {
-				dispose();
-			}
-		};		
 	}
 }

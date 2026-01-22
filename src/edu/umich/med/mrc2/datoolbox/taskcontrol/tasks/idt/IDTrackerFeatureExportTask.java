@@ -420,17 +420,19 @@ public abstract class IDTrackerFeatureExportTask extends AbstractTask {
 			filteredIds.clear();
 			if(topHit != null)
 				filteredIds.add(topHit);
-		}	
-		if(decoyExportHandling.equals(DecoyExportHandling.NORMAL_ONLY))
-			filteredIds = filteredIds.stream().
-				filter(id -> !IdentificationUtils.isDecoyHit(id)).
-				collect(Collectors.toList());
-		
-		if(decoyExportHandling.equals(DecoyExportHandling.DECOY_ONLY))
-			filteredIds = filteredIds.stream().
-				filter(id -> IdentificationUtils.isDecoyHit(id)).
-				collect(Collectors.toList());
-		
+		}
+		if(decoyExportHandling != null) {	//	TODO check why missing
+			
+			if(decoyExportHandling.equals(DecoyExportHandling.NORMAL_ONLY))
+				filteredIds = filteredIds.stream().
+					filter(id -> !IdentificationUtils.isDecoyHit(id)).
+					collect(Collectors.toList());
+			
+			if(decoyExportHandling.equals(DecoyExportHandling.DECOY_ONLY))
+				filteredIds = filteredIds.stream().
+					filter(id -> IdentificationUtils.isDecoyHit(id)).
+					collect(Collectors.toList());
+		}
 		if(params.getCompoundIdFilter() != null)
 			filteredIds = applyCompoundIdFilter(filteredIds);
 				

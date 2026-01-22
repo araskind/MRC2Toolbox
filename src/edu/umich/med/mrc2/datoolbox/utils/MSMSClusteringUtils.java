@@ -63,9 +63,11 @@ public class MSMSClusteringUtils {
 
 	public static String calculateClusteringParametersMd5(MSMSClusteringParameterSet params){
 
-		List<String> chunks = new ArrayList<String>();
+		List<String> chunks = new ArrayList<>();
 		chunks.add(MsUtils.spectrumMzExportFormat.format(params.getMzErrorValue()));
-		chunks.add(params.getMassErrorType().name());
+		if(params.getMassErrorType() != null)
+			chunks.add(params.getMassErrorType().name());
+		
 		chunks.add(MsUtils.spectrumMzExportFormat.format(params.getRtErrorValue()));
 		chunks.add(MsUtils.spectrumMzExportFormat.format(params.getMsmsSimilarityCutoff()));
 	    try {

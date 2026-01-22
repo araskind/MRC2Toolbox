@@ -46,18 +46,13 @@ import edu.umich.med.mrc2.datoolbox.utils.Range;
 public class MzFrequencyAnalysisTask extends AbstractTask {
 	
 	private Collection<MsFeature>featuresToProcess;
-	private Collection<MsFeature>featuresToProcessFiltered = 
-			new ArrayList<MsFeature>();
+	private Collection<MsFeature>featuresToProcessFiltered;
 	private MzFrequencyType mzFrequencyType;
 	private double massWindowSize;
 	private MassErrorType massWindowType;
-	private Collection<MsFeatureCluster>mzClusters = 
-			new TreeSet<MsFeatureCluster>(
-					new MsFeatureClusterComparator(SortProperty.MZ));
-	private Collection<MzFrequencyObject>mzFrequencyObjects = 
-			new TreeSet<MzFrequencyObject>(
-					new MzFrequencyObjectComparator(SortProperty.rangeMidpoint));
-	private DataPipeline dp = new DataPipeline();
+	private Collection<MsFeatureCluster>mzClusters;
+	private Collection<MzFrequencyObject>mzFrequencyObjects;
+	private DataPipeline dp;
 	private Range dataSetRtRange;
 	
 	public MzFrequencyAnalysisTask(
@@ -70,6 +65,11 @@ public class MzFrequencyAnalysisTask extends AbstractTask {
 		this.mzFrequencyType = mzFrequencyType;
 		this.massWindowSize = massWindowSize;
 		this.massWindowType = massWindowType;
+		
+		dp = new DataPipeline();
+		featuresToProcessFiltered = new ArrayList<>();
+		mzClusters =  new TreeSet<>(new MsFeatureClusterComparator(SortProperty.MZ));
+		mzFrequencyObjects = new TreeSet<>(new MzFrequencyObjectComparator(SortProperty.rangeMidpoint));
 	}
 
 	@Override
@@ -84,8 +84,7 @@ public class MzFrequencyAnalysisTask extends AbstractTask {
 			e.printStackTrace();
 			errorMessage = e.getMessage();
 			setStatus(TaskStatus.ERROR);
-return;
-
+			return;
 		}
 		try {
 			summarizeData();
@@ -95,8 +94,7 @@ return;
 			e.printStackTrace();
 			errorMessage = e.getMessage();
 			setStatus(TaskStatus.ERROR);
-return;
-
+			return;
 		}
 		setStatus(TaskStatus.FINISHED);
 	}

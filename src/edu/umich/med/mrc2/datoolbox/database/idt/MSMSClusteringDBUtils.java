@@ -151,6 +151,9 @@ public class MSMSClusteringDBUtils {
 			MSMSClusteringParameterSet params,
 			Connection conn) throws Exception {
 		
+		if(params == null)
+			throw new Exception("Clustering parameters missing");
+			
 		String newId = SQLUtils.getNextIdFromSequence(conn, 
 				"MSMS_CLUST_PARAMS_SEQ",
 				DataPrefix.MSMS_CLUSTERING_PARAM_SET,
@@ -666,14 +669,17 @@ public class MSMSClusteringDBUtils {
 			parSet = MSMSClusterDataSetManager.getMsmsClusteringParameterSetByMd5(
 					dataSet.getParameters().getMd5());
 			
-		if(parSet == null) {
-			addMSMSClusteringParameterSet(parSet, conn);
-			MSMSClusterDataSetManager.getMsmsClusteringParameters().add(parSet);
-			dataSet.setParameters(parSet);
+		if(parSet == null && dataSet.getParameters() != null) {
+			addMSMSClusteringParameterSet(dataSet.getParameters(), conn);
+			MSMSClusterDataSetManager.getMsmsClusteringParameters().add(dataSet.getParameters());
 		}
 		else {
-			dataSet.setParameters(parSet);
+			if(parSet != null)
+				dataSet.setParameters(parSet);
 		}
+		if(dataSet.getParameters() == null)
+			throw new Exception("Clustering parameters missing");
+					
 		String newId = SQLUtils.getNextIdFromSequence(conn, 
 				"MSMS_CLUSTERS_DATA_SET_SEQ",
 				DataPrefix.MSMS_CLUSTER_DATA_SET,

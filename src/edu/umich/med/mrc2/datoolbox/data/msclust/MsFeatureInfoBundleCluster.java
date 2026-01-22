@@ -93,7 +93,7 @@ public class MsFeatureInfoBundleCluster implements IMsFeatureInfoBundleCluster{
 		this.mz = mz;
 		this.rt = rt;
 		this.primaryIdentity = prinmaryIdentity;
-		components = new HashSet<MSFeatureInfoBundle>();
+		components = new HashSet<>();
 		updateName();
 	}
 	

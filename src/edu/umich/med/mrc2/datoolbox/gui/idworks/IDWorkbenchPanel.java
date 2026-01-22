@@ -217,6 +217,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.id.NISTMsSearchTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.id.NISTMspepSearchOfflineTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.id.PercolatorFDREstimationTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.BinnerAnnotationLookupTask;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.ClusterMSMSbyCompoundStructureTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.FeatureVsFeatureMSMSSearchTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.IDTMS1FeatureSearchTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.IDTMSMSClusterDataPullTask;
@@ -1101,12 +1102,47 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 	}
 	
 	private void clusterFeaturesByStructure() {
-		//	TODO	
-	
-	
-	
-	
+		
+		Range rtRange = clusteringByStructureSetupDialog.getRtRange();
+		double msmsRtGroupingWindow = 
+				clusteringByStructureSetupDialog.getMsmsRtGroupingWindow();
+		String clusterSetName = clusteringByStructureSetupDialog.getClusterSetName();
+		boolean useOnlyPrimaryId = clusteringByStructureSetupDialog.useOnlyPrimaryId();
+		double entropyScoreCutoff = clusteringByStructureSetupDialog.getEntropyScoreCutoff();
+		
+		Collection<String>errors = clusteringByStructureSetupDialog.validateFormData();
+		Collection<MSFeatureInfoBundle> featuresToProcess = 
+				msTwoFeatureTable.getBundles(clusteringByStructureSetupDialog.getFeatureSubset()).stream().
+				filter(b -> b.getMsFeature().isIdentified()).
+				collect(Collectors.toList());
+		if(featuresToProcess.isEmpty())
+			errors.add("No identified features in the selected feature subset");	
+		else {
+			if(rtRange != null) {
+				featuresToProcess = featuresToProcess.stream().
+						filter(f -> rtRange.contains(f.getRetentionTime())).
+						collect(Collectors.toList());
+				if(featuresToProcess.isEmpty())
+					errors.add("No identified features in the selected feature subset within selested RT range");
+			}
+		}		
+		if(!errors.isEmpty()){
+		    MessageDialog.showErrorMsg(
+		            StringUtils.join(errors, "\n"), clusteringByStructureSetupDialog);
+		    return;
+		}
+		clusteringByStructureSetupDialog.savePreferences();
 		clusteringByStructureSetupDialog.dispose();
+		
+		ClusterMSMSbyCompoundStructureTask task = 
+				new ClusterMSMSbyCompoundStructureTask(
+						clusterSetName, 
+						featuresToProcess, 
+						msmsRtGroupingWindow, 
+						useOnlyPrimaryId, 
+						entropyScoreCutoff);
+		task.addTaskListener(this);
+		MRC2ToolBoxCore.getTaskController().addTask(task);	
 	}
 
 	private void majorClusterFeatureExtractionSetup() {
@@ -3850,8 +3886,10 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 				finalizeFeatureVsFeatureMSMSSearchTask((FeatureVsFeatureMSMSSearchTask)e.getSource());	
 			
 			if (e.getSource().getClass().equals(SearchMSMSfeaturesByCompoundIdentifiersTask.class))
-				finalizeSearchMSMSfeaturesByCompoundIdentifiersTask((SearchMSMSfeaturesByCompoundIdentifiersTask)e.getSource());	
+				finalizeSearchMSMSfeaturesByCompoundIdentifiersTask((SearchMSMSfeaturesByCompoundIdentifiersTask)e.getSource());
 			
+			if (e.getSource().getClass().equals(ClusterMSMSbyCompoundStructureTask.class))
+				finalizeClusterMSMSbyCompoundStructureTask((ClusterMSMSbyCompoundStructureTask)e.getSource());			
 		}
 		if (e.getStatus() == TaskStatus.CANCELED || e.getStatus() == TaskStatus.ERROR) {
 			
@@ -3861,6 +3899,27 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		}
 	}
 	
+	private void finalizeClusterMSMSbyCompoundStructureTask(ClusterMSMSbyCompoundStructureTask task) {
+		
+		IMSMSClusterDataSet clusterDataSet = task.getFeatureClusterDataSet();
+		if(clusterDataSet == null 
+				|| clusterDataSet.getClusters().isEmpty()) {
+			
+			MessageDialog.showWarningMsg("No feature clusters found.", this.getContentPane());
+			return;
+		}	
+		MainWindow.hideProgressDialog();
+		MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
+		
+		LoadMSMSClusterDataSetInGUITask ldt = 
+				new LoadMSMSClusterDataSetInGUITask(clusterDataSet);
+    	IndeterminateProgressDialog idp = new IndeterminateProgressDialog(
+    			"Loading results ...", 
+    			IDWorkbenchPanel.this.getContentPane(), ldt);
+    	idp.setLocationRelativeTo(IDWorkbenchPanel.this.getContentPane());
+    	idp.setVisible(true);		
+	}
+
 	private synchronized void finalizeNISTMsSearchTask(NISTMsSearchTask task) {
 		
 		File results = task.getResultsFile();
@@ -3895,7 +3954,6 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			return;
 		}	
 		MainWindow.hideProgressDialog();
-		//	MRC2ToolBoxCore.getTaskController().getTaskQueue().removeTask(task);
 		MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
 		
 		LoadMSMSClusterDataSetInGUITask ldt = 

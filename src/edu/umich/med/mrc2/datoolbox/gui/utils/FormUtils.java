@@ -21,21 +21,18 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.utils;
 
-import java.awt.Dimension;
-import java.awt.event.ActionListener;
+import javax.swing.JTextField;
 
-import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
+import org.apache.commons.lang3.math.NumberUtils;
 
-public abstract class BasicDialogWithPreferences extends BasicDialog implements BackedByPreferences {
+public class FormUtils {
 
-	private static final long serialVersionUID = 1L;
-	
-	public BasicDialogWithPreferences(
-			String title,
-			String iconId,
-			Dimension preferredSize,
-			ActionListener actionListener) {
-		
-		super(title, iconId,  preferredSize, actionListener);
+	public static double getDoubleValueFromTextField(JTextField textField) {
+
+		String valueString = textField.getText().trim();
+		if(valueString.isEmpty() || !NumberUtils.isCreatable(valueString))
+			return 0.0d;
+		else
+			return NumberUtils.createDouble(valueString);
 	}
 }

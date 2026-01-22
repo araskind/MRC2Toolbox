@@ -206,6 +206,14 @@ public class CompoundIdentity implements Serializable, Comparable<CompoundIdenti
 	public String getInChiKey() {
 		return inChiKey;
 	}
+	
+	public String getInChiKey2D() {
+		
+		if(inChiKey != null)
+			return inChiKey.substring(0, 14);
+		else
+			return null;
+	}
 
 	// Get common name, if not available - systematic name (this should always
 	// be present)

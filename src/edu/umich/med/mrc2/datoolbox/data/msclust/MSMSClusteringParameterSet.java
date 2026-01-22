@@ -175,9 +175,11 @@ public class MSMSClusteringParameterSet {
 		msmsClusteringParameterSetElement.setAttribute(
 				MSMSClusteringParameterSetFields.MZErrorValue.name(), 
 				Double.toString(mzErrorValue));	
-		msmsClusteringParameterSetElement.setAttribute(
-				MSMSClusteringParameterSetFields.MassErrorType.name(), 
-				massErrorType.name());
+		if(massErrorType != null)
+			msmsClusteringParameterSetElement.setAttribute(
+					MSMSClusteringParameterSetFields.MassErrorType.name(), 
+					massErrorType.name());
+		
 		msmsClusteringParameterSetElement.setAttribute(
 				MSMSClusteringParameterSetFields.RTErrorValue.name(), 
 				Double.toString(rtErrorValue));	
@@ -200,9 +202,12 @@ public class MSMSClusteringParameterSet {
 		mzErrorValue = Double.parseDouble(
 				xmlElement.getAttributeValue(
 						MSMSClusteringParameterSetFields.MZErrorValue.name()));
-		massErrorType = MassErrorType.getTypeByName(
-				xmlElement.getAttributeValue(
-						MSMSClusteringParameterSetFields.MassErrorType.name()));
+		
+		if(xmlElement.getAttributeValue(MSMSClusteringParameterSetFields.MassErrorType.name()) != null)
+			massErrorType = MassErrorType.getTypeByName(
+					xmlElement.getAttributeValue(
+							MSMSClusteringParameterSetFields.MassErrorType.name()));
+		
 		rtErrorValue = Double.parseDouble(
 				xmlElement.getAttributeValue(
 						MSMSClusteringParameterSetFields.RTErrorValue.name()));

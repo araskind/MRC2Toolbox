@@ -189,14 +189,14 @@ public class MsFeatureStatsUtils {
 		
 		if(filterParameters.getIdStatusSubset().equals(FeatureSubsetByIdentification.IDENTIFIED_ONLY)) {
 			features = features.stream().
-					filter(f -> Objects.nonNull(f.getMsFeature().getPrimaryIdentity())).
+					filter(f -> f.getMsFeature().isIdentified()).
 					collect(Collectors.toList());
 			if(features.isEmpty())
 				return features;
 		}
 		if(filterParameters.getIdStatusSubset().equals(FeatureSubsetByIdentification.UNKNOWN_ONLY)) {
 			features = features.stream().
-					filter(f -> Objects.isNull(f.getMsFeature().getPrimaryIdentity())).
+					filter(f -> !f.getMsFeature().isIdentified()).
 					collect(Collectors.toList());
 			if(features.isEmpty())
 				return features;
@@ -416,19 +416,19 @@ public class MsFeatureStatsUtils {
 			FeatureSubsetByIdentification idSubset) {
 		
 		if(idSubset.equals(FeatureSubsetByIdentification.ALL))
-			return new ArrayList<MSFeatureInfoBundle>(inputFeatures);
+			return new ArrayList<>(inputFeatures);
 			
-		if(idSubset.equals(FeatureSubsetByIdentification.IDENTIFIED_ONLY))
+		else if(idSubset.equals(FeatureSubsetByIdentification.IDENTIFIED_ONLY))
 			return inputFeatures.stream().
-				filter(f -> Objects.nonNull(f.getMsFeature().getPrimaryIdentity())).
+				filter(f -> f.getMsFeature().isIdentified()).
 				collect(Collectors.toList());
 		
-		if(idSubset.equals(FeatureSubsetByIdentification.UNKNOWN_ONLY))
+		else if(idSubset.equals(FeatureSubsetByIdentification.UNKNOWN_ONLY))
 			return inputFeatures.stream().
-				filter(f -> Objects.isNull(f.getMsFeature().getPrimaryIdentity())).
+				filter(f -> !f.getMsFeature().isIdentified()).
 				collect(Collectors.toList());
-		
-		return null;
+		else
+			return null;
 	}
 	
 	public static Collection<MSFeatureInfoBundle>getFeaturesWithMSMSLibMatch(
