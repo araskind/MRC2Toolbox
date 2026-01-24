@@ -61,10 +61,10 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 
 public class IDTrackerMSMSClusterDataExportTask extends IDTrackerFeatureExportTask {
 	
-	private IMSMSClusterDataSet msmsClusterDataSet;
-	private Collection<IDTrackerMSMSClusterProperties> msmsClusterPropertyList;	
-	private boolean exportIndividualFeatureData;
-	private MajorClusterFeatureDefiningProperty mcfdp;
+	protected IMSMSClusterDataSet msmsClusterDataSet;
+	protected Collection<IDTrackerMSMSClusterProperties> msmsClusterPropertyList;	
+	protected boolean exportIndividualFeatureData;
+	protected MajorClusterFeatureDefiningProperty mcfdp;
 
 	public IDTrackerMSMSClusterDataExportTask(
 			IMSMSClusterDataSet msmsClusterDataSet,
@@ -72,7 +72,7 @@ public class IDTrackerMSMSClusterDataExportTask extends IDTrackerFeatureExportTa
 			File outputFile) {
 		super();
 		this.params = params;
-		this.featureIDSubset = params.getFeatureIDSubset();
+		this.featureIdSubset = params.getFeatureIDSubset();
 		this.msLevel = params.getMsLevel();
 		this.msmsClusterDataSet = msmsClusterDataSet;
 		this.msmsClusterPropertyList = params.getMsmsClusterPropertyList();
@@ -93,53 +93,8 @@ public class IDTrackerMSMSClusterDataExportTask extends IDTrackerFeatureExportTa
 		
 		setStatus(TaskStatus.PROCESSING);
 		
-		Set<MSFeatureInfoBundle> bundles = msmsClusterDataSet.getClusters().stream().
-				flatMap(c -> c.getComponents().stream()).collect(Collectors.toSet());
-		
-		if(msmsClusterPropertyList.contains(IDTrackerMSMSClusterProperties.PRIMARY_ID_RAW_DATA_FILE)
-				|| featurePropertyList.contains(IDTrackerMsFeatureProperties.RAW_DATA_FILE)) {
-			
-			try {
-				getInjections(bundles);
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}	
-		accessions = getAccessionsForClusters(msmsClusterDataSet.getClusters());
-		
-		if(identificationDetailsList.contains(IDTrackerFeatureIdentificationProperties.SYSTEMATIC_NAME)) {
-			try {
-				getSystematicNames();
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		if(identificationDetailsList.contains(IDTrackerFeatureIdentificationProperties.REFMET_NAME)) {
-			try {
-				getRefMetNames();
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}		
-		if(identificationDetailsList.contains(IDTrackerFeatureIdentificationProperties.REFMET_CLASSIFICATION)) {
-			try {
-				getRefMetClassifications();
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		if(identificationDetailsList.contains(IDTrackerFeatureIdentificationProperties.CLASSYFIRE_CLASSIFICATION)) {
-			try {
-				getClassyFireClassifications();
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
+		getInjectionData();
+		getCompoundMetadata();
 		try {
 			writeExportFile();
 			setStatus(TaskStatus.FINISHED);
@@ -147,13 +102,60 @@ public class IDTrackerMSMSClusterDataExportTask extends IDTrackerFeatureExportTa
 		catch (Exception e1) {
 			e1.printStackTrace();
 			setStatus(TaskStatus.ERROR);
-			return;
+		}
+	}
+	
+	protected void getCompoundMetadata() {
+		
+		getAccessionsForClusters(msmsClusterDataSet.getClusters());
+		
+		if(identificationDetailsList.contains(IDTrackerFeatureIdentificationProperties.SYSTEMATIC_NAME)) {
+			try {
+				getSystematicNames();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		if(identificationDetailsList.contains(IDTrackerFeatureIdentificationProperties.REFMET_NAME)) {
+			try {
+				getRefMetNames();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}		
+		if(identificationDetailsList.contains(IDTrackerFeatureIdentificationProperties.REFMET_CLASSIFICATION)) {
+			try {
+				getRefMetClassifications();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		if(identificationDetailsList.contains(IDTrackerFeatureIdentificationProperties.CLASSYFIRE_CLASSIFICATION)) {
+			try {
+				getClassyFireClassifications();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	protected void getInjectionData() {
+		
+		if(msmsClusterPropertyList.contains(IDTrackerMSMSClusterProperties.PRIMARY_ID_RAW_DATA_FILE)
+				|| featurePropertyList.contains(IDTrackerMsFeatureProperties.RAW_DATA_FILE)) {
+			
+			Set<MSFeatureInfoBundle> bundles = msmsClusterDataSet.getClusters().stream().
+					flatMap(c -> c.getComponents().stream()).collect(Collectors.toSet());
+			try {
+				getInjections(bundles);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 	}
 
-	private Collection<String>getAccessionsForClusters(Collection<IMsFeatureInfoBundleCluster> msmsClusters){
-		
-		Collection<String>accessions = new ArrayList<String>();
+	protected void getAccessionsForClusters(Collection<IMsFeatureInfoBundleCluster> msmsClusters){
+
 		if(exportIndividualFeatureData) {
 			
 			accessions = msmsClusters.stream().
@@ -167,19 +169,17 @@ public class IDTrackerMSMSClusterDataExportTask extends IDTrackerFeatureExportTa
 			accessions = msmsClusters.stream().
 					filter(f -> Objects.nonNull(f.getPrimaryIdentity())).
 					filter(f -> Objects.nonNull(f.getPrimaryIdentity().getCompoundIdentity())).
-					map(f -> f.getPrimaryIdentity().
-							getCompoundIdentity().getPrimaryDatabaseId()).
+					map(f -> f.getPrimaryIdentity().getCompoundIdentity().getPrimaryDatabaseId()).
 					distinct().sorted().collect(Collectors.toList());
 		}
-		return accessions;
 	}
 	
-	private void writeExportFile() throws IOException {
+	protected void writeExportFile() throws IOException {
 
 		taskDescription = "Wtiting output";
 		total = msmsClusterDataSet.getClusters().size();
 		processed = 0;
-		List<String>dataToExport = new ArrayList<String>();
+		List<String>dataToExport = new ArrayList<>();
 		String header = createExportFileHeader();
 		dataToExport.add(header);
 		
@@ -199,7 +199,7 @@ public class IDTrackerMSMSClusterDataExportTask extends IDTrackerFeatureExportTa
 					if ((!me.getKey().getMsFeature().getIdentifications().isEmpty() && !excludeIfNoIdsLeft)
 							|| me.getKey().getMsFeature().getPrimaryIdentity() == null) {
 
-						ArrayList<String>line = new ArrayList<String>();
+						ArrayList<String>line = new ArrayList<>();
 						
 						for(IDTrackerMSMSClusterProperties property : msmsClusterPropertyList)
 							line.add(getClusterProperty(msmsCluster, property));
@@ -207,7 +207,7 @@ public class IDTrackerMSMSClusterDataExportTask extends IDTrackerFeatureExportTa
 						for (IDTrackerMsFeatureProperties property : featurePropertyList)
 							line.add(getFeatureProperty(me.getKey(), property));
 
-						for (IDTrackerFeatureIdentificationProperties property : identificationDetailsList)
+						for (int i=0; i<IDTrackerFeatureIdentificationProperties.values().length; i++)
 							line.add("");
 						
 						dataToExport.add(StringUtils.join(line, columnSeparator));
@@ -216,7 +216,7 @@ public class IDTrackerMSMSClusterDataExportTask extends IDTrackerFeatureExportTa
 				else {			
 					for(MsFeatureIdentity fid : me.getValue()) {
 						
-						ArrayList<String>line = new ArrayList<String>();
+						ArrayList<String>line = new ArrayList<>();
 						
 						for(IDTrackerMSMSClusterProperties property : msmsClusterPropertyList)
 							line.add(getClusterProperty(msmsCluster, property));
@@ -231,38 +231,10 @@ public class IDTrackerMSMSClusterDataExportTask extends IDTrackerFeatureExportTa
 						for(IDTrackerFeatureIdentificationProperties property : identificationDetailsList) {
 							
 							if(property.equals(IDTrackerFeatureIdentificationProperties.REFMET_CLASSIFICATION)) {
-
-								if(accession != null) {
-									Map<RefMetClassificationLevels,String> rmClassMap = refMetClassifications.get(accession);
-									for(RefMetClassificationLevels rmLevel : RefMetClassificationLevels.values())
-										line.add(rmClassMap.get(rmLevel));
-								}
-								else {
-									for(RefMetClassificationLevels rmLevel : RefMetClassificationLevels.values())
-										line.add("");
-								}
+								addRefMetClassification(accession, line);
 							}
 							else if(property.equals(IDTrackerFeatureIdentificationProperties.CLASSYFIRE_CLASSIFICATION)) {
-								
-								if(accession != null) {
-									Map<ClassyFireClassificationLevels,String> cfClassMap = classyFireClassifications.get(accession);
-									if(cfClassMap != null) {
-										
-										for(ClassyFireClassificationLevels cfLevel : ClassyFireClassificationLevels.values())
-											if(cfLevel != null)
-												line.add(cfClassMap.get(cfLevel));
-											else
-												line.add("");
-									}
-									else {
-										for(ClassyFireClassificationLevels cfLevel : ClassyFireClassificationLevels.values())
-											line.add("");
-									}
-								}
-								else {
-									for(ClassyFireClassificationLevels cfLevel : ClassyFireClassificationLevels.values())
-										line.add("");
-								}
+								addClassyFireClassification(accession, line);
 							}
 							else {
 								line.add(getFeatureIdentificationProperty(fid, me.getKey().getMsFeature(), property));
@@ -286,11 +258,46 @@ public class IDTrackerMSMSClusterDataExportTask extends IDTrackerFeatureExportTa
 		}
 	}
 	
-	private Map<MSFeatureInfoBundle, Collection<MsFeatureIdentity>>
+	protected void addRefMetClassification(String accession, Collection<String>line) {
+		
+		if(accession != null) {
+			Map<RefMetClassificationLevels,String> rmClassMap = refMetClassifications.get(accession);
+			for(RefMetClassificationLevels rmLevel : RefMetClassificationLevels.values())
+				line.add(rmClassMap.get(rmLevel));
+		}
+		else {
+			for(RefMetClassificationLevels rmLevel : RefMetClassificationLevels.values())
+				line.add("");
+		}
+	}
+	
+	protected void addClassyFireClassification(String accession, Collection<String>line) {
+		
+		if(accession != null) {
+			Map<ClassyFireClassificationLevels,String> cfClassMap = classyFireClassifications.get(accession);
+			if(cfClassMap != null) {
+				
+				for(ClassyFireClassificationLevels cfLevel : ClassyFireClassificationLevels.values())
+					if(cfLevel != null)
+						line.add(cfClassMap.get(cfLevel));
+					else
+						line.add("");
+			}
+			else {
+				for(ClassyFireClassificationLevels cfLevel : ClassyFireClassificationLevels.values())
+					line.add("");
+			}
+		}
+		else {
+			for(ClassyFireClassificationLevels cfLevel : ClassyFireClassificationLevels.values())
+				line.add("");
+		}
+	}
+	
+	protected Map<MSFeatureInfoBundle, Collection<MsFeatureIdentity>>
 			filterClusterIdentifications(IMsFeatureInfoBundleCluster cluster) {
 		
-		Map<MSFeatureInfoBundle, Collection<MsFeatureIdentity>>idMap = 
-				new HashMap<MSFeatureInfoBundle, Collection<MsFeatureIdentity>>();
+		Map<MSFeatureInfoBundle, Collection<MsFeatureIdentity>>idMap = new HashMap<>();
 		if(exportIndividualFeatureData) {
 			
 			for(MSFeatureInfoBundle bundle : cluster.getComponents())
@@ -321,10 +328,10 @@ public class IDTrackerMSMSClusterDataExportTask extends IDTrackerFeatureExportTa
 		return idMap;
 	}
 	
-	private String createExportFileHeader() {
+	protected String createExportFileHeader() {
 		
 		//	Cluster properties
-		ArrayList<String>header = new ArrayList<String>();
+		ArrayList<String>header = new ArrayList<>();
 		msmsClusterPropertyList.stream().forEach(v -> header.add(v.getName()));
 		
 		//	Feature properties
@@ -350,105 +357,7 @@ public class IDTrackerMSMSClusterDataExportTask extends IDTrackerFeatureExportTa
 		return StringUtils.join(header, columnSeparator);
 	}
 	
-//	private void writeExportFileOld() throws IOException {
-//
-//		taskDescription = "Wtiting output";
-//		total = msmsClusterDataSet.getClusters().size();
-//		processed = 0;
-//		final Writer writer = new BufferedWriter(
-//				new FileWriter(outputFile, StandardCharsets.UTF_8));
-//		
-//		//	Header
-//		//	Cluster properties
-//		ArrayList<String>header = new ArrayList<String>();
-//		msmsClusterPropertyList.stream().forEach(v -> header.add(v.getName()));
-//		
-//		//	Feature properties
-//		
-//		// Add Identification fields
-//		for(IDTrackerFeatureIdentificationProperties idField : identificationDetailsList) {
-//			
-//			if(idField.equals(IDTrackerFeatureIdentificationProperties.REFMET_CLASSIFICATION)) {
-//				
-//				for(RefMetClassificationLevels rmLevel : RefMetClassificationLevels.values())
-//					header.add(rmLevel.getName());			
-//			}
-//			else if(idField.equals(IDTrackerFeatureIdentificationProperties.CLASSYFIRE_CLASSIFICATION)) {
-//				
-//				for(ClassyFireClassificationLevels cfLevel : ClassyFireClassificationLevels.values())
-//					header.add(cfLevel.getName());	
-//			}
-//			else {
-//				header.add(idField.getName());
-//			}		
-//		}		
-//		writer.append(StringUtils.join(header, columnSeparator));
-//		writer.append(lineSeparator);
-//		
-//		List<MsFeatureInfoBundleCluster> toExport = msmsClusterDataSet.getClusters().stream().
-//				sorted(new MsFeatureInfoBundleClusterComparator(SortProperty.RT)).
-//				collect(Collectors.toList());
-//		ArrayList<String>line;
-//		for(MsFeatureInfoBundleCluster msmsCluster : toExport) {
-//
-//			line = new ArrayList<String>();
-//			for(IDTrackerMSMSClusterProperties property : msmsClusterPropertyList)
-//				line.add(getClusterProperty(msmsCluster, property));
-//			
-//			String accession = null;
-//			if(msmsCluster.getPrimaryIdentity() != null 
-//					&& msmsCluster.getPrimaryIdentity().getCompoundIdentity() != null)
-//				accession = msmsCluster.getPrimaryIdentity().getCompoundIdentity().getPrimaryDatabaseId();
-//			
-//			for(IDTrackerFeatureIdentificationProperties property : identificationDetailsList) {
-//				
-//				if(property.equals(IDTrackerFeatureIdentificationProperties.REFMET_CLASSIFICATION)) {
-//
-//					if(accession != null) {
-//						Map<RefMetClassificationLevels,String> rmClassMap = refMetClassifications.get(accession);
-//						for(RefMetClassificationLevels rmLevel : RefMetClassificationLevels.values())
-//							line.add(rmClassMap.get(rmLevel));
-//					}
-//					else {
-//						for(RefMetClassificationLevels rmLevel : RefMetClassificationLevels.values())
-//							line.add("");
-//					}
-//				}
-//				else if(property.equals(IDTrackerFeatureIdentificationProperties.CLASSYFIRE_CLASSIFICATION)) {
-//					
-//					if(accession != null) {
-//						Map<ClassyFireClassificationLevels,String> cfClassMap = classyFireClassifications.get(accession);
-//						if(cfClassMap != null) {
-//							
-//							for(ClassyFireClassificationLevels cfLevel : ClassyFireClassificationLevels.values())
-//								if(cfLevel != null)
-//									line.add(cfClassMap.get(cfLevel));
-//								else
-//									line.add("");
-//						}
-//						else {
-//							for(ClassyFireClassificationLevels cfLevel : ClassyFireClassificationLevels.values())
-//								line.add("");
-//						}
-//					}
-//					else {
-//						for(ClassyFireClassificationLevels cfLevel : ClassyFireClassificationLevels.values())
-//							line.add("");
-//					}
-//				}
-//				else {
-//					line.add(getFeatureIdentificationProperty(msmsCluster, property));
-//				}
-//			}
-//			writer.append(StringUtils.join(line, columnSeparator));
-//			writer.append(lineSeparator);
-//			processed++;
-//		}
-//		writer.flush();
-//		writer.close();
-//	}
-	
-	private String getClusterProperty(
+	protected String getClusterProperty(
 			IMsFeatureInfoBundleCluster cluster, 
 			IDTrackerMSMSClusterProperties property) {
 		
@@ -524,7 +433,7 @@ public class IDTrackerMSMSClusterDataExportTask extends IDTrackerFeatureExportTa
 			else
 				return bundle.getDataFile().getName();
 		}
-		return "";		
+		return "";
 	}
 
 	@Override

@@ -187,8 +187,7 @@ public class MSMSLibraryUtils {
 					rs.getString(MSMSComponentTableFields.COLLISION_ENERGY.name()));
 			feature.setSpectrumEntropy(
 					rs.getDouble(MSMSComponentTableFields.ENTROPY.name()));
-			
-			Map<String, String> properties = feature.getProperties();
+
 			for(MSMSComponentTableFields field : MSMSComponentTableFields.values()) {
 
 				if(!field.equals(MSMSComponentTableFields.PRECURSOR_MZ) 
@@ -196,7 +195,7 @@ public class MSMSLibraryUtils {
 					
 					String value = rs.getString(field.name());
 					if(value != null && !value.trim().isEmpty())
-						properties.put(field.getName(), value);
+						feature.addProperty(field.getName(), value);
 				}
 			}
 			ReferenceMsMsLibrary refLib =

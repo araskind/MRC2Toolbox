@@ -32,6 +32,7 @@ import edu.umich.med.mrc2.datoolbox.data.enums.MSMSMatchType;
 import edu.umich.med.mrc2.datoolbox.data.enums.MSMSScoringParameter;
 import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
 import edu.umich.med.mrc2.datoolbox.data.enums.MsDepth;
+import edu.umich.med.mrc2.datoolbox.data.enums.SummaryIdentificationProperties;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.clustree.MajorClusterFeatureDefiningProperty;
 
 public class IDTrackerDataExportParameters {
@@ -40,6 +41,7 @@ public class IDTrackerDataExportParameters {
 	private Collection<IDTrackerMSMSClusterProperties> msmsClusterPropertyList;
 	private Collection<IDTrackerMsFeatureProperties> featurePropertyList;
 	private Collection<IDTrackerFeatureIdentificationProperties> identificationDetailsList; 
+	private Collection<SummaryIdentificationProperties> identificationSummaryPropertyList; 
 	private boolean removeRedundant;
 	private double redundantMzWindow;
 	private MassErrorType redMzErrorType;
@@ -89,7 +91,18 @@ public class IDTrackerDataExportParameters {
 				excludeFromExportWhenAllIdsFilteredOut;		
 	}
 	
-	//	For cluster export
+	//	For cluster ID summary export
+	public IDTrackerDataExportParameters(
+			Collection<IDTrackerMSMSClusterProperties> msmsClusterPropertyList,			
+			Collection<IDTrackerFeatureIdentificationProperties> identificationDetailsList,
+			Collection<SummaryIdentificationProperties> identificationSummaryPropertyList) {
+		super();
+		this.msmsClusterPropertyList = msmsClusterPropertyList;
+		this.identificationSummaryPropertyList = identificationSummaryPropertyList;
+		this.identificationDetailsList = identificationDetailsList;
+		this.exportIndividualFeatures = false;
+	}
+
 	public IDTrackerDataExportParameters(
 			MsDepth msLevel, 
 			Collection<IDTrackerMSMSClusterProperties> msmsClusterPropertyList,
@@ -115,7 +128,7 @@ public class IDTrackerDataExportParameters {
 		this.excludeFromExportWhenAllIdsFilteredOut = excludeFromExportWhenAllIdsFilteredOut;
 		this.majorClusterFeatureDefiningProperty = majorClusterFeatureDefiningProperty;
 	}
-
+	
 	public MsDepth getMsLevel() {
 		return msLevel;
 	}
@@ -252,5 +265,14 @@ public class IDTrackerDataExportParameters {
 
 	public void setCompoundIdFilter(CompoundIdFilter compoundIdFilter) {
 		this.compoundIdFilter = compoundIdFilter;
+	}
+
+	public Collection<SummaryIdentificationProperties> getIdentificationSummaryPropertyList() {
+		return identificationSummaryPropertyList;
+	}
+
+	public void setIdentificationSummaryPropertyList(
+			Collection<SummaryIdentificationProperties> identificationSummaryPropertyList) {
+		this.identificationSummaryPropertyList = identificationSummaryPropertyList;
 	}
 }

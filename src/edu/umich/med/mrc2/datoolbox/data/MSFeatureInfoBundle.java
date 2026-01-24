@@ -64,10 +64,8 @@ public class MSFeatureInfoBundle implements Serializable {
 	public MSFeatureInfoBundle(MsFeature msFeature) {
 		super();
 		this.msFeature = msFeature;
-		idFollowupSteps =  
-				new TreeSet<MSFeatureIdentificationFollowupStep>();
-		standadAnnotations = 
-				new TreeSet<StandardFeatureAnnotation>();
+		idFollowupSteps = new TreeSet<>();
+		standadAnnotations = new TreeSet<>();
 	}
 
 	/**

@@ -1525,7 +1525,7 @@ public class MsUtils {
 				sorted(mzSorter).
 				toArray(size -> new MsPoint[size]);
 		
-		ArrayList<MsPointBucket> msBins = new ArrayList<MsPointBucket>();
+		ArrayList<MsPointBucket> msBins = new ArrayList<>();
 		MsPointBucket first = new MsPointBucket(points[0], mzBinWidth, errorType);
 		msBins.add(first);
 		for(int i=1; i<points.length; i++) {

@@ -57,9 +57,9 @@ public class MsMsLibraryFeature implements Serializable {
 
 		super();
 		this.uniqueId = uniqueId;
-		spectrum = new TreeSet<MsPoint>(MsUtils.mzSorter);
-		massAnnotations = new TreeMap<MsPoint,String>(MsUtils.mzSorter);
-		properties = new TreeMap<String,String>();
+		spectrum = new TreeSet<>(MsUtils.mzSorter);
+		massAnnotations = new TreeMap<>(MsUtils.mzSorter);
+		properties = new TreeMap<>();
 	}
 
 	public MsMsLibraryFeature(String uniqueId, Polarity polarity) {

@@ -530,6 +530,27 @@ public class MsFeatureInfoBundleCluster implements IMsFeatureInfoBundleCluster{
 				filter(f -> mzRange.contains(f.getPrecursorMz())).
 				collect(Collectors.toList());
 	}
+	
+	@Override
+	public Range getRTrange() {
+		
+		if(components.isEmpty())
+			return new Range(0.0d);
+		else {
+			double[] rtArray = components.stream().
+					filter(c -> c.getRetentionTime() > 0.0d).
+					mapToDouble(c -> c.getRetentionTime()).toArray(); 
+			if(rtArray.length == 0)
+				return new Range(0.0d);
+			else {
+				Range rtRange = new Range(rtArray[0]);
+				for(int i=1; i<rtArray.length; i++)
+					rtRange.extendRange(rtArray[i]);
+				
+				return rtRange;
+			}
+		}
+	}
 }
 
 

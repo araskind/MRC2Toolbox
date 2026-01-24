@@ -82,6 +82,8 @@ public interface IMsFeatureInfoBundleCluster {
 	double getMz();
 
 	double getRt();
+	
+	Range getRTrange();
 
 	double getMedianArea();
 

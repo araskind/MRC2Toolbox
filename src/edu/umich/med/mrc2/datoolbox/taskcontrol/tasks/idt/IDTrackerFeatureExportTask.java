@@ -108,7 +108,6 @@ public abstract class IDTrackerFeatureExportTask extends AbstractTask {
 	protected Map<String,String>systematicNames;
 	protected Map<String,String>refMetNames;
 	protected Map<MSFeatureInfoBundle, Collection<MsFeatureIdentity>>identificationMap;
-	protected FeatureIDSubset featureIDSubset;
 
 	protected void getInjections(Collection<MSFeatureInfoBundle>features) throws Exception {
 		
@@ -119,7 +118,7 @@ public abstract class IDTrackerFeatureExportTask extends AbstractTask {
 		
 		total = injectionIds.size();
 		processed = 0;
-		injections = new TreeSet<Injection>();
+		injections = new TreeSet<>();
 		Connection conn = ConnectionManager.getConnection();		
 		for(String id : injectionIds) {
 			
@@ -131,11 +130,10 @@ public abstract class IDTrackerFeatureExportTask extends AbstractTask {
 	}
 	
 	protected Collection<String>getAccessions(Collection<MSFeatureInfoBundle>features){
-		
-		Collection<String>accessions = null;
-		if(featureIDSubset.equals(FeatureIDSubset.PRIMARY_ONLY)  ) {
+
+		if(featureIdSubset.equals(FeatureIDSubset.PRIMARY_ONLY)  ) {
 			
-			accessions = features.stream().
+			return features.stream().
 					filter(f -> Objects.nonNull(f.getMsFeature().getPrimaryIdentity())).
 					filter(f -> Objects.nonNull(f.getMsFeature().
 							getPrimaryIdentity().getCompoundIdentity())).
@@ -144,19 +142,18 @@ public abstract class IDTrackerFeatureExportTask extends AbstractTask {
 					distinct().sorted().collect(Collectors.toList());
 		}
 		else {
-			accessions = features.stream().
+			return features.stream().
 				flatMap(f -> f.getMsFeature().getIdentifications().stream()).
 				filter(i -> Objects.nonNull(i.getCompoundIdentity())).
 				map(i -> i.getCompoundIdentity().getPrimaryDatabaseId()).
 				distinct().sorted().collect(Collectors.toList());
 		}	
-		return accessions;
 	}
 	
 	protected void getSystematicNames() throws Exception {
 		
-		systematicNames = new TreeMap<String,String>();
-		if(accessions == null || accessions.isEmpty())
+		systematicNames = new TreeMap<>();
+		if(accessions.isEmpty())
 			return;
 		
 		taskDescription = "Getting systematic names ...";		
@@ -164,38 +161,35 @@ public abstract class IDTrackerFeatureExportTask extends AbstractTask {
 		processed = 0;
 		Connection conn = ConnectionManager.getConnection();
 		String query = "SELECT S.NAME, S.NTYPE FROM COMPOUND_SYNONYMS S WHERE S.ACCESSION = ?";
-		PreparedStatement ps = conn.prepareStatement(query);
+		try(PreparedStatement ps = conn.prepareStatement(query)){
 		
-		for(String accession : accessions) {
-			
-			systematicNames.put(accession, "");
-			CompoundNameSet nameSet = new CompoundNameSet(accession);
-			ps.setString(1, accession);
-			ResultSet rs = ps.executeQuery();
-			while (rs.next())
-				nameSet.addName(rs.getString("NAME"), rs.getString("NTYPE"));
-
-			rs.close();
-			if(nameSet.getIupacName() != null && !nameSet.getIupacName().isEmpty())
-				systematicNames.put(accession, nameSet.getIupacName());
-			
-			if(systematicNames.get(accession).isEmpty() 
-					&& nameSet.getSystematicName() != null 
-					&& !nameSet.getSystematicName().isEmpty())
-				systematicNames.put(accession, nameSet.getSystematicName());
-			
-			processed++;
-		}
-		ps.close();	
+			for(String accession : accessions) {
+				
+				systematicNames.put(accession, "");
+				CompoundNameSet nameSet = new CompoundNameSet(accession);
+				ps.setString(1, accession);
+				try(ResultSet rs = ps.executeQuery()){
+					while (rs.next())
+						nameSet.addName(rs.getString("NAME"), rs.getString("NTYPE"));	
+				}
+				if(nameSet.getIupacName() != null && !nameSet.getIupacName().isEmpty())
+					systematicNames.put(accession, nameSet.getIupacName());
+				
+				if(systematicNames.get(accession).isEmpty() 
+						&& nameSet.getSystematicName() != null 
+						&& !nameSet.getSystematicName().isEmpty())
+					systematicNames.put(accession, nameSet.getSystematicName());
+				
+				processed++;
+			}
+		}	
 		ConnectionManager.releaseConnection(conn);
 	}
 	
 	protected void getRefMetClassifications() throws Exception {
 		
-		refMetClassifications = 
-				new TreeMap<String,Map<RefMetClassificationLevels,String>>();
-		
-		if(accessions == null || accessions.isEmpty())
+		refMetClassifications = new TreeMap<>();		
+		if(accessions.isEmpty())
 			return;
 		
 		taskDescription = "Getting RefMet classification ...";
@@ -209,37 +203,35 @@ public abstract class IDTrackerFeatureExportTask extends AbstractTask {
 				"WHERE C.SOURCE_DB = ? " +
 				"AND C.SOURCE_DB_ID = R.NAME " +
 				"AND C.ACCESSION = ? ";
-		PreparedStatement ps = conn.prepareStatement(sql);
+		try(PreparedStatement ps = conn.prepareStatement(sql)){
 		ps.setString(1, CompoundDatabaseEnum.REFMET.name());
-		for(String accession : accessions) {
-			
-			Map<RefMetClassificationLevels,String>classifiers = 
-					new TreeMap<RefMetClassificationLevels,String>();
-			classifiers.put(RefMetClassificationLevels.SUPER_CLASS, "");
-			classifiers.put(RefMetClassificationLevels.MAIN_CLASS, "");
-			classifiers.put(RefMetClassificationLevels.SUB_CLASS, "");
-			
-			ps.setString(2, accession);
-			ResultSet rs = ps.executeQuery();
-			while(rs.next()) {
-				classifiers.put(RefMetClassificationLevels.SUPER_CLASS, rs.getString("SUPER_CLASS"));
-				classifiers.put(RefMetClassificationLevels.MAIN_CLASS, rs.getString("MAIN_CLASS"));
-				classifiers.put(RefMetClassificationLevels.SUB_CLASS, rs.getString("SUB_CLASS"));
+			for(String accession : accessions) {
+				
+				Map<RefMetClassificationLevels,String>classifiers = new TreeMap<>();
+				classifiers.put(RefMetClassificationLevels.SUPER_CLASS, "");
+				classifiers.put(RefMetClassificationLevels.MAIN_CLASS, "");
+				classifiers.put(RefMetClassificationLevels.SUB_CLASS, "");
+				
+				ps.setString(2, accession);
+				try(ResultSet rs = ps.executeQuery()){
+					while(rs.next()) {
+						classifiers.put(RefMetClassificationLevels.SUPER_CLASS, rs.getString("SUPER_CLASS"));
+						classifiers.put(RefMetClassificationLevels.MAIN_CLASS, rs.getString("MAIN_CLASS"));
+						classifiers.put(RefMetClassificationLevels.SUB_CLASS, rs.getString("SUB_CLASS"));
+					}
+				}
+				refMetClassifications.put(accession, classifiers);			
+				processed++;
 			}
-			rs.close();
-			refMetClassifications.put(accession, classifiers);			
-			processed++;
 		}
-		ps.close();
 		ConnectionManager.releaseConnection(conn);
 	}
 	
 	protected void getClassyFireClassifications() throws Exception {
 				
-		classyFireClassifications = 
-				new TreeMap<String,Map<ClassyFireClassificationLevels,String>>();
-		classyFireAlternativeParents = new TreeMap<String,Collection<String>>();
-		if(accessions == null || accessions.isEmpty())
+		classyFireClassifications = new TreeMap<>();
+		classyFireAlternativeParents = new TreeMap<>();
+		if(accessions.isEmpty())
 			return;
 		
 		taskDescription = "Getting ClassyFire classification ...";
@@ -262,16 +254,14 @@ public abstract class IDTrackerFeatureExportTask extends AbstractTask {
 		
 		for(String accession : accessions) {
 			
-			Map<ClassyFireClassificationLevels,String>classifiers = 
-					new TreeMap<ClassyFireClassificationLevels,String>();
+			Map<ClassyFireClassificationLevels,String>classifiers = new TreeMap<>();
 			classifiers.put(ClassyFireClassificationLevels.KINGDOM, "");
 			classifiers.put(ClassyFireClassificationLevels.SUPERCLASS, "");
 			classifiers.put(ClassyFireClassificationLevels.CLASS, "");
 			classifiers.put(ClassyFireClassificationLevels.SUBCLASS, "");
 			classifiers.put(ClassyFireClassificationLevels.DIRECT_PARENT, "");
 			
-			Map<ClassyFireClassificationLevels,String>classifierNames = 
-					new TreeMap<ClassyFireClassificationLevels,String>();
+			Map<ClassyFireClassificationLevels,String>classifierNames = new TreeMap<>();
 			classifierNames.put(ClassyFireClassificationLevels.KINGDOM, "");
 			classifierNames.put(ClassyFireClassificationLevels.SUPERCLASS, "");
 			classifierNames.put(ClassyFireClassificationLevels.CLASS, "");
@@ -302,7 +292,7 @@ public abstract class IDTrackerFeatureExportTask extends AbstractTask {
 			}
 			classyFireClassifications.put(accession, classifiers);	
 			
-			Collection<String>altParents = new TreeSet<String>();
+			Collection<String>altParents = new TreeSet<>();
 			apps.setString(1, accession);
 			rs = apps.executeQuery();
 			while(rs.next())
@@ -320,7 +310,7 @@ public abstract class IDTrackerFeatureExportTask extends AbstractTask {
 		
 	protected void getRefMetNames() throws Exception {
 		
-		refMetNames = new TreeMap<String,String>();
+		refMetNames = new TreeMap<>();
 		if(accessions == null || accessions.isEmpty())
 			return;
 		
@@ -331,27 +321,26 @@ public abstract class IDTrackerFeatureExportTask extends AbstractTask {
 		String query = 
 				"SELECT S.SOURCE_DB_ID FROM COMPOUND_CROSSREF S "
 				+ "WHERE SOURCE_DB = ? AND S.ACCESSION = ?";		
-		PreparedStatement ps = conn.prepareStatement(query);
-		ps.setString(1, CompoundDatabaseEnum.REFMET.name());
-		for(String accession : accessions) {
-			
-			refMetNames.put(accession, "");
-			ps.setString(2, accession);
-			ResultSet rs = ps.executeQuery();
-			while (rs.next())
-				refMetNames.put(accession, rs.getString("SOURCE_DB_ID"));
-
-			rs.close();
-			processed++;
-		}
-		ps.close();		
+		try(PreparedStatement ps = conn.prepareStatement(query)){
+			ps.setString(1, CompoundDatabaseEnum.REFMET.name());
+			for(String accession : accessions) {
+				
+				refMetNames.put(accession, "");
+				ps.setString(2, accession);
+				try(ResultSet rs = ps.executeQuery()){
+					while (rs.next())
+						refMetNames.put(accession, rs.getString("SOURCE_DB_ID"));	
+				}
+				processed++;
+			}
+		}		
 		ConnectionManager.releaseConnection(conn);
 	}
 	
 	protected void createIdentificationsMap(Collection<MSFeatureInfoBundle>featuresToExport) {
 
 		taskDescription = "Filtering IDs for export ...";
-		identificationMap = new HashMap<MSFeatureInfoBundle, Collection<MsFeatureIdentity>>();
+		identificationMap = new HashMap<>();
 		featuresToExport.stream().
 			filter(f -> Objects.isNull(f.getMsFeature().getPrimaryIdentity())).
 			forEach(f -> identificationMap.put(f, null));
@@ -371,24 +360,22 @@ public abstract class IDTrackerFeatureExportTask extends AbstractTask {
 	
 	protected Collection<MsFeatureIdentity>filterIdentities(MSFeatureInfoBundle f){
 		
-		Collection<MsFeatureIdentity>filteredIds = new HashSet<MsFeatureIdentity>();
+		Collection<MsFeatureIdentity>filteredIds = new HashSet<>();
 		MsFeatureIdentity primaryId = f.getMsFeature().getPrimaryIdentity();
 		Set<MsFeatureIdentity> allIds = f.getMsFeature().getIdentifications();
 		
-		if(featureIDSubset.equals(FeatureIDSubset.PRIMARY_ONLY)) {
+		if(featureIdSubset.equals(FeatureIDSubset.PRIMARY_ONLY)) {
 			
 			if(decoyExportHandling.equals(DecoyExportHandling.EXPORT_ALL) 
-					||(decoyExportHandling.equals(DecoyExportHandling.DECOY_ONLY) 
-							&& IdentificationUtils.isDecoyHit(primaryId))
-					||(decoyExportHandling.equals(DecoyExportHandling.NORMAL_ONLY) 
-							&& !IdentificationUtils.isDecoyHit(primaryId)))
+					||(decoyExportHandling.equals(DecoyExportHandling.DECOY_ONLY) && IdentificationUtils.isDecoyHit(primaryId))
+					||(decoyExportHandling.equals(DecoyExportHandling.NORMAL_ONLY) && !IdentificationUtils.isDecoyHit(primaryId)))
 			filteredIds.add(primaryId);
 		}	
-		if(featureIDSubset.equals(FeatureIDSubset.ALL) 
-				|| featureIDSubset.equals(FeatureIDSubset.BEST_SCORING_ONLY))
+		if(featureIdSubset.equals(FeatureIDSubset.ALL) 
+				|| featureIdSubset.equals(FeatureIDSubset.BEST_SCORING_ONLY))
 			filteredIds.addAll(allIds);
 
-		if(featureIDSubset.equals(FeatureIDSubset.BEST_FOR_EACH_COMPOUND))
+		if(featureIdSubset.equals(FeatureIDSubset.BEST_FOR_EACH_COMPOUND))
 			filteredIds.addAll(IdentificationUtils.getBestMatchIds(f.getMsFeature()));
 		
 		if(filteredIds.isEmpty())
@@ -409,7 +396,7 @@ public abstract class IDTrackerFeatureExportTask extends AbstractTask {
 			if(filteredIds.isEmpty())
 				return filteredIds;
 		}
-		if(featureIDSubset.equals(FeatureIDSubset.BEST_SCORING_ONLY)) {
+		if(featureIdSubset.equals(FeatureIDSubset.BEST_SCORING_ONLY)) {
 			
 			MsFeatureIdentity topHit = 
 					IdentificationUtils.getTopScoringIdForMatchTypes(
@@ -573,7 +560,7 @@ public abstract class IDTrackerFeatureExportTask extends AbstractTask {
 			}		
 			if(property.equals(IDTrackerMsFeatureProperties.PRECURSOR_MZ)) {
 				
-				if(instrumentMsMs.getParent() != null)
+				if(instrumentMsMs != null && instrumentMsMs.getParent() != null)
 					return mzFormat.format(instrumentMsMs.getParent().getMz());
 				else
 					return "";
@@ -581,15 +568,27 @@ public abstract class IDTrackerFeatureExportTask extends AbstractTask {
 			if(property.equals(IDTrackerMsFeatureProperties.FEATURE_MSMS))
 				return featureSpectrumArray;	
 			
-			if(property.equals(IDTrackerMsFeatureProperties.COLLISION_ENERGY))
-				return ppmFormat.format(instrumentMsMs.getCidLevel());
-			
-			if(property.equals(IDTrackerMsFeatureProperties.SPECTRUM_ENTROPY)) 
-				return entropyFormat.format(instrumentMsMs.getEntropy());
-			
-			if(property.equals(IDTrackerMsFeatureProperties.TOTAL_INTENSITY))
-				return intensityFormat.format(instrumentMsMs.getTotalIntensity());	
-			
+			if(property.equals(IDTrackerMsFeatureProperties.COLLISION_ENERGY)) {
+				
+				if(instrumentMsMs != null)
+					return ppmFormat.format(instrumentMsMs.getCidLevel());
+				else
+					return "";
+			}
+			if(property.equals(IDTrackerMsFeatureProperties.SPECTRUM_ENTROPY)) {
+				
+				if(instrumentMsMs != null)
+					return entropyFormat.format(instrumentMsMs.getEntropy());
+				else
+					return "";
+			}
+			if(property.equals(IDTrackerMsFeatureProperties.TOTAL_INTENSITY)) {
+				
+				if(instrumentMsMs != null)
+					return intensityFormat.format(instrumentMsMs.getTotalIntensity());
+				else
+					return "";
+			}
 			if(property.equals(IDTrackerMsFeatureProperties.PRECURSOR_PURITY) 
 					&& precursorPurity != 0.0d)
 				return entropyFormat.format(precursorPurity);
@@ -674,16 +673,14 @@ public abstract class IDTrackerFeatureExportTask extends AbstractTask {
 		if(property.equals(IDTrackerFeatureIdentificationProperties.MRC2_ID_LEVEL))
 			return idLevelName;
 		
-		if(property.equals(IDTrackerFeatureIdentificationProperties.ID_SCORE)) {
-			
-			if(id.getScore() > 0.0d)
+		if(property.equals(IDTrackerFeatureIdentificationProperties.ID_SCORE) 
+				&& id.getScore() > 0.0d)
 				return entropyFormat.format(id.getScore());
-		}
-		if(property.equals(IDTrackerFeatureIdentificationProperties.MSMS_ENTROPY_SCORE)) {
-			
-			if(id.getEntropyBasedScore() > 0.0d)
+		
+		if(property.equals(IDTrackerFeatureIdentificationProperties.MSMS_ENTROPY_SCORE) 
+				&& id.getEntropyBasedScore() > 0.0d)
 				return entropyFormat.format(id.getEntropyBasedScore());
-		}		
+				
 		if(property.equals(IDTrackerFeatureIdentificationProperties.MASS_ERROR) 
 				&& deltaMz != 0.0d)
 			return ppmFormat.format(deltaMz);
@@ -692,6 +689,7 @@ public abstract class IDTrackerFeatureExportTask extends AbstractTask {
 		if(msLevel.equals(MsDepth.MS1)) {
 
 			if(id.getMsRtLibraryMatch() != null) {
+				
 				if(property.equals(IDTrackerFeatureIdentificationProperties.BEST_MATCH_ADDUCT))
 					return id.getMsRtLibraryMatch().getTopAdductMatch().getLibraryMatch().getName();
 			

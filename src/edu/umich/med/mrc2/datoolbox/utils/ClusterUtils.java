@@ -33,6 +33,7 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.math4.legacy.stat.descriptive.DescriptiveStatistics;
 import org.ujmp.core.Matrix;
 import org.ujmp.core.calculation.Calculation.Ret;
 
@@ -43,10 +44,15 @@ import edu.umich.med.mrc2.datoolbox.data.LibraryMsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MassSpectrum;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureCluster;
+import edu.umich.med.mrc2.datoolbox.data.MsMsLibraryFeature;
+import edu.umich.med.mrc2.datoolbox.data.MsPoint;
 import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortDirection;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
+import edu.umich.med.mrc2.datoolbox.data.enums.MSMSComponentTableFields;
+import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
+import edu.umich.med.mrc2.datoolbox.data.msclust.IMsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 
@@ -246,6 +252,103 @@ public class ClusterUtils {
 		
 		return merged;
 	}
+	
+	public static double getMedianTopEntropyMatchScoreForCluster(
+			IMsFeatureInfoBundleCluster cluster) {
+		
+		if(cluster.getComponents().isEmpty())
+			return 0.0d;
+		
+		double[] topEntropyScores = cluster.getComponents().stream().
+			filter(c -> c.getMsFeature().isIdentified()).
+			filter(c -> Objects.nonNull(c.getMsFeature().getPrimaryIdentity().getReferenceMsMsLibraryMatch())).
+			filter(c -> c.getMsFeature().getPrimaryIdentity().getReferenceMsMsLibraryMatch().getEntropyBasedScore() > 0.0d).
+			mapToDouble(c -> c.getMsFeature().getPrimaryIdentity().getReferenceMsMsLibraryMatch().getEntropyBasedScore()).
+			toArray();
+		if(topEntropyScores.length == 0)
+			return 0.0d;
+		else {
+			DescriptiveStatistics ds = new DescriptiveStatistics(topEntropyScores);		
+			return ds.getPercentile(50);
+		}
+	}
+	
+	public static Set<Double> getFragmentationEnergiesForCluster(
+			IMsFeatureInfoBundleCluster cluster) {
+		
+		return cluster.getComponents().stream().
+			filter(c -> c.getMsFeature().isIdentified()).
+			filter(c -> Objects.nonNull(c.getMsFeature().getSpectrum().getExperimentalTandemSpectrum())).
+			map(c -> c.getMsFeature().getSpectrum().getExperimentalTandemSpectrum().getFragmenterVoltage()).
+			filter(e -> e > 0.0d).
+			collect(Collectors.toCollection(TreeSet::new));
+	}
+	
+	public static Set<Double> getParentIonsForCluster(
+			IMsFeatureInfoBundleCluster cluster) {
+		
+		return cluster.getComponents().stream().
+			filter(c -> c.getMsFeature().isIdentified()).
+			filter(c -> Objects.nonNull(c.getMsFeature().getSpectrum().getExperimentalTandemSpectrum())).
+			filter(c -> Objects.nonNull(c.getMsFeature().getSpectrum().getExperimentalTandemSpectrum().getParent())).
+			map(c -> c.getMsFeature().getSpectrum().getExperimentalTandemSpectrum().getParent().getMz()).
+			filter(e -> e > 0.0d).
+			collect(Collectors.toCollection(TreeSet::new));
+	}
+	
+	public static Set<Double> getBinnedParentIonsForCluster(
+			IMsFeatureInfoBundleCluster cluster, double mzBinWidth, MassErrorType errorType) {
+		
+		Set<Double>binnedParentMasses = new TreeSet<>();
+		List<MsPoint>parentPoints = cluster.getComponents().stream().
+				filter(c -> c.getMsFeature().isIdentified()).
+				filter(c -> Objects.nonNull(c.getMsFeature().getSpectrum().getExperimentalTandemSpectrum())).
+				filter(c -> Objects.nonNull(c.getMsFeature().getSpectrum().getExperimentalTandemSpectrum().getParent())).
+				map(c -> c.getMsFeature().getSpectrum().getExperimentalTandemSpectrum().getParent()).
+				//filter(p -> p.getIntensity() > 0.0).
+				collect(Collectors.toList());
+		if(parentPoints.isEmpty()) {
+			return binnedParentMasses;
+		}
+		else if(parentPoints.size() == 1) {
+			binnedParentMasses.add(parentPoints.get(0).getMz());
+			return binnedParentMasses;
+		}
+		else {
+			Collection<MsPoint>averaged = 
+					MsUtils.averageMassSpectrum(parentPoints, mzBinWidth,errorType);
+			averaged.stream().forEach(p -> binnedParentMasses.add(p.getMz()));
+		}
+		return binnedParentMasses;
+	}
+	
+	public static Set<String> getLibraryAdductsForCluster(
+			IMsFeatureInfoBundleCluster cluster) {
+		
+		Set<String> libraryAdducts = new TreeSet<>();
+		List<MsMsLibraryFeature> libMatches = cluster.getComponents().stream().
+			filter(c -> c.getMsFeature().isIdentified()).
+			filter(c -> Objects.nonNull(c.getMsFeature().getPrimaryIdentity().getReferenceMsMsLibraryMatch())).
+			map(c -> c.getMsFeature().getPrimaryIdentity().getReferenceMsMsLibraryMatch().getMatchedLibraryFeature()).
+			collect(Collectors.toList());
+	
+		for(MsMsLibraryFeature match : libMatches) {
+			String adduct = match.getProperty(MSMSComponentTableFields.ADDUCT.getName());
+			if(adduct != null)
+				libraryAdducts.add(adduct);
+		}
+		return libraryAdducts;
+	}
+	
+	public static Set<String> getMSMSmatchTypesForCluster(
+			IMsFeatureInfoBundleCluster cluster) {
+		
+		return cluster.getComponents().stream().
+			filter(c -> c.getMsFeature().isIdentified()).
+			filter(c -> Objects.nonNull(c.getMsFeature().getPrimaryIdentity().getReferenceMsMsLibraryMatch())).
+			map(c -> c.getMsFeature().getPrimaryIdentity().getReferenceMsMsLibraryMatch().getMatchType().getName()).
+			collect(Collectors.toCollection(TreeSet::new));
+	}		
 }
 
 

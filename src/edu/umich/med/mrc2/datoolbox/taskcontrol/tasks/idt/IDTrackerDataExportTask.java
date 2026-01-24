@@ -82,7 +82,7 @@ public class IDTrackerDataExportTask extends IDTrackerFeatureExportTask {
 		
 		this.msmsScoringParameter = params.getMsmsScoringParameter();	
 		this.minimalMSMSScore = params.getMinimalMSMSScore();	
-		this.featureIDSubset = params.getFeatureIDSubset();	
+		this.featureIdSubset = params.getFeatureIDSubset();	
 		this.msmsSearchTypes = params.getMsmsSearchTypes();
 		this.excludeIfNoIdsLeft = params.isExcludeFromExportWhenAllIdsFilteredOut();
 		this.decoyExportHandling = params.getDecoyExportHandling();
@@ -102,7 +102,6 @@ public class IDTrackerDataExportTask extends IDTrackerFeatureExportTask {
 			try {
 				getInjections(featuresToExport);
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}	
@@ -110,7 +109,6 @@ public class IDTrackerDataExportTask extends IDTrackerFeatureExportTask {
 			try {
 				getSystematicNames();
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -118,7 +116,6 @@ public class IDTrackerDataExportTask extends IDTrackerFeatureExportTask {
 			try {
 				getRefMetNames();
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}		
@@ -126,7 +123,6 @@ public class IDTrackerDataExportTask extends IDTrackerFeatureExportTask {
 			try {
 				getRefMetClassifications();
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
