@@ -284,6 +284,17 @@ public class ClusterUtils {
 			collect(Collectors.toCollection(TreeSet::new));
 	}
 	
+	public static Set<Double> getCollisionVoltagesForCluster(
+			IMsFeatureInfoBundleCluster cluster) {
+		
+		return cluster.getComponents().stream().
+			filter(c -> c.getMsFeature().isIdentified()).
+			filter(c -> Objects.nonNull(c.getMsFeature().getSpectrum().getExperimentalTandemSpectrum())).
+			map(c -> c.getMsFeature().getSpectrum().getExperimentalTandemSpectrum().getCidLevel()).
+			filter(e -> e > 0.0d).
+			collect(Collectors.toCollection(TreeSet::new));
+	}
+	
 	public static Set<Double> getParentIonsForCluster(
 			IMsFeatureInfoBundleCluster cluster) {
 		

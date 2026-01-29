@@ -28,6 +28,8 @@ public enum SummaryIdentificationProperties {
 	RT_RANGE("RT range"),
 	FRAGMENTATION_ENERGIES_NUMBER("Number of fragmentation energies"),
 	FRAGMENTATION_ENERGIES("List of fragmentation energies"),
+	COLLISION_ENERGIES_NUMBER("Number of collision energies"),
+	COLLISION_ENERGIES("List of collision energies"),
 	PARENT_IONS_NUMBER("Number of parent ions"),
 	PARENT_IONS("List of parent ions"),
 	LIB_ADDUCTS_NUMBER("Number of adducts (from library)"),

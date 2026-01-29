@@ -574,7 +574,7 @@ public abstract class IDTrackerFeatureExportTask extends AbstractTask {
 					return ppmFormat.format(instrumentMsMs.getCidLevel());
 				else
 					return "";
-			}
+			}			
 			if(property.equals(IDTrackerMsFeatureProperties.SPECTRUM_ENTROPY)) {
 				
 				if(instrumentMsMs != null)
@@ -709,6 +709,7 @@ public abstract class IDTrackerFeatureExportTask extends AbstractTask {
 			
 			double parentMz = 0.0d;
 			String collisionEnergyValue = null;
+			double collisionEnergyAcquisition = 0.0d;
 			boolean isHybrid = false;
 			boolean isInSource = false;
 			double forwardScore = 0.0d;
@@ -773,14 +774,15 @@ public abstract class IDTrackerFeatureExportTask extends AbstractTask {
 			}	
 			if(property.equals(IDTrackerFeatureIdentificationProperties.MSMS_LIBRARY) && lib != null)
 				return lib.getName();
-			
-//			if(property.equals(IDTrackerFeatureIdentificationProperties.MSMS_LIBRARY_ENTRY_ID)) {
-//				msmslibMatch.getMatchedLibraryFeature().getMsmsLibraryIdentifier()
-//			}
-			if(property.equals(IDTrackerFeatureIdentificationProperties.COLLISION_ENERGY) 
+
+			if(property.equals(IDTrackerFeatureIdentificationProperties.COLLISION_ENERGY_LIBRARY) 
 					&& collisionEnergyValue != null)
 				return collisionEnergyValue;
 			
+			if(property.equals(IDTrackerFeatureIdentificationProperties.COLLISION_ENERGY_ACQUIRED) 
+					&& instrumentMsMs.getCidLevel() != 0.0d)
+				return ppmFormat.format(instrumentMsMs.getCidLevel());
+		
 			if(property.equals(IDTrackerFeatureIdentificationProperties.REVERSE_SCORE) 
 					&& reverseScore != 0.0d)
 				return entropyFormat.format(reverseScore);

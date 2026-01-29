@@ -200,6 +200,7 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 	private MultiMSFeatureQCPlotFrame multiSpectraPlotFrame;
 	private FeatureAveragingSetupDialog featureAveragingSetupDialog;
 	private MZDeltaAnalysisDialog mzDeltaAnalysisDialog;
+	private FilterFeaturesByMzRtListDialog filterFeaturesByMzRtListDialog;
 
 	private static final Icon componentIcon = GuiUtils.getIcon("barChart", 16);
 	private static final Icon loadLibraryIcon = GuiUtils.getIcon("loadLibrary", 24);
@@ -472,7 +473,13 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 				
 			if (command.equals(MainActionCommands.FILTER_FEATURES_COMMAND.getName()))
 				filterFeatureTable();
-
+			
+			if (command.equals(MainActionCommands.SHOW_FEATURE_MZ_RT_LIST_FILTER_COMMAND.getName()))
+				showFeatureMZRTListFilter();
+				
+			if (command.equals(MainActionCommands.FILTER_FEATURES_BY_MZ_RT_LIST_COMMAND.getName()))
+				filterFeatureTableByMZRTList();
+			
 			if (command.equals(MainActionCommands.RESET_FEATURE_FILTERS_COMMAND.getName()))
 				resetFeatureTable();
 
@@ -1505,6 +1512,26 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 		}
 		filterFeaturesDialog.dispose();
 		activeFeatureFilter = FeatureFilter.CUSTOM_FILTER;
+	}
+	
+	private void showFeatureMZRTListFilter() {
+		
+		filterFeaturesByMzRtListDialog = new FilterFeaturesByMzRtListDialog(this);
+		filterFeaturesByMzRtListDialog.setLocationRelativeTo(this.getContentPane());
+		filterFeaturesByMzRtListDialog.setVisible(true);
+	}
+	
+	private void filterFeatureTableByMZRTList() {
+		//	TODO
+		Collection<String>errors = filterFeaturesByMzRtListDialog.validateFormData();
+		if(!errors.isEmpty()){
+		    MessageDialog.showErrorMsg(
+		            StringUtils.join(errors, "\n"), filterFeaturesByMzRtListDialog);
+		    return;
+		}
+		
+		filterFeaturesByMzRtListDialog.savePreferences();
+		filterFeaturesByMzRtListDialog.dispose();
 	}
 
 	public MsFeature[] getFilteredFeatures() {

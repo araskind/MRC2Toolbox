@@ -1118,6 +1118,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		String clusterSetName = clusteringByStructureSetupDialog.getClusterSetName();
 		boolean useOnlyPrimaryId = clusteringByStructureSetupDialog.useOnlyPrimaryId();
 		double entropyScoreCutoff = clusteringByStructureSetupDialog.getEntropyScoreCutoff();
+		boolean useAssignedPrimaryIds = clusteringByStructureSetupDialog.useAssignedPrimaryIds();
 		
 		Collection<String>errors = clusteringByStructureSetupDialog.validateFormData();
 		Collection<MSFeatureInfoBundle> featuresToProcess = 
@@ -1149,7 +1150,8 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 						featuresToProcess, 
 						msmsRtGroupingWindow, 
 						useOnlyPrimaryId, 
-						entropyScoreCutoff);
+						entropyScoreCutoff,
+						useAssignedPrimaryIds);
 		task.addTaskListener(this);
 		MRC2ToolBoxCore.getTaskController().addTask(task);	
 	}

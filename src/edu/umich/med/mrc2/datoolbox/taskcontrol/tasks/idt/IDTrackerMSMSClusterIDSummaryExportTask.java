@@ -127,8 +127,13 @@ public class IDTrackerMSMSClusterIDSummaryExportTask extends IDTrackerMSMSCluste
 					addClassyFireClassification(accession, line);
 				}
 				else {
-					line.add(getFeatureIdentificationProperty(prinmaryId, 
-							msmsCluster.getMSFeatureInfoBundleForPrimaryId().getMsFeature(), property));
+					if(msmsCluster.getMSFeatureInfoBundleForPrimaryId() == null) {
+						System.out.println("***");
+					}
+					else {
+						line.add(getFeatureIdentificationProperty(prinmaryId, 
+								msmsCluster.getMSFeatureInfoBundleForPrimaryId().getMsFeature(), property));
+					}
 				}
 			}
 			for(SummaryIdentificationProperties summaryProperty : identificationSummaryPropertyList)				
@@ -202,6 +207,17 @@ public class IDTrackerMSMSClusterIDSummaryExportTask extends IDTrackerMSMSCluste
 					ClusterUtils.getFragmentationEnergiesForCluster(cluster).
 						stream().map(e -> Double.toString(e)).collect(Collectors.toList());
 			return StringUtils.join(fragEnergies, ",");
+		}
+		if(property.equals(SummaryIdentificationProperties.COLLISION_ENERGIES_NUMBER)){
+			Set<Double>collisionEnergies = ClusterUtils.getCollisionVoltagesForCluster(cluster);
+			return Integer.toString(collisionEnergies.size());
+		}
+		if(property.equals(SummaryIdentificationProperties.COLLISION_ENERGIES)){
+			
+			List<String>collisionEnergies = 
+					ClusterUtils.getCollisionVoltagesForCluster(cluster).
+						stream().map(e -> Double.toString(e)).collect(Collectors.toList());
+			return StringUtils.join(collisionEnergies, ",");
 		}
 		if(property.equals(SummaryIdentificationProperties.PARENT_IONS_NUMBER)){
 			

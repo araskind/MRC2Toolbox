@@ -34,6 +34,7 @@ import java.util.prefs.Preferences;
 import javax.swing.ButtonGroup;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
@@ -64,12 +65,14 @@ public class ClusteringByStructureSetupDialog extends BasicDialogWithPreferences
 	private JComboBox<TableRowSubset> featureSubsetComboBox;
 	private JRadioButton useOnlyPrimaryIdButton;
 	private JRadioButton useIDwithScoreAboveButton;
+	private JCheckBox useAssignedPrimaryIdsCheckBox;
 	
 	public static final String RT_START = "RT_START";
 	public static final String RT_END = "RT_END";
 	public static final String RT_WINDOW = "RT_WINDOW";
 	public static final String PRIMARY_ID_ONLY = "PRIMARY_ID_ONLY";
 	public static final String SCORE_CUTOFF = "SCORE_CUTOFF";
+	public static final String USE_ASSIGNED_PRIMARY_IDS = "USE_ASSIGNED_PRIMARY_IDS";
 	
 	private JTextField clusterSetNameTextField;
 	
@@ -78,14 +81,14 @@ public class ClusteringByStructureSetupDialog extends BasicDialogWithPreferences
 	public ClusteringByStructureSetupDialog(ActionListener actionListener) {
 		super("Cluster features by structure",
 				"clusterByStrructure",
-				new Dimension(480, 300),
+				new Dimension(480, 350),
 				actionListener);
 
 		GridBagLayout gbl_dataPanel = new GridBagLayout();
 		gbl_dataPanel.columnWidths = new int[]{0, 0, 0, 0, 0, 0, 0};
-		gbl_dataPanel.rowHeights = new int[]{0, 0, 0, 0, 0, 0};
+		gbl_dataPanel.rowHeights = new int[]{0, 0, 0, 0, 0, 0, 0};
 		gbl_dataPanel.columnWeights = new double[]{1.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
-		gbl_dataPanel.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 1.0, Double.MIN_VALUE};
+		gbl_dataPanel.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 1.0, 0.0, Double.MIN_VALUE};
 		mainPanel.setLayout(gbl_dataPanel);
 		
 		JLabel lblNewLabel_6 = new JLabel("Result name");
@@ -211,8 +214,8 @@ public class ClusteringByStructureSetupDialog extends BasicDialogWithPreferences
 		panel.setBorder(new CompoundBorder(new TitledBorder(null, "ID for matching", 
 				TitledBorder.LEADING, TitledBorder.TOP, null, null), new EmptyBorder(10, 10, 10, 10)));
 		GridBagConstraints gbc_panel = new GridBagConstraints();
+		gbc_panel.insets = new Insets(0, 0, 5, 0);
 		gbc_panel.gridwidth = 6;
-		gbc_panel.insets = new Insets(0, 0, 0, 5);
 		gbc_panel.fill = GridBagConstraints.BOTH;
 		gbc_panel.gridx = 0;
 		gbc_panel.gridy = 4;
@@ -259,6 +262,16 @@ public class ClusteringByStructureSetupDialog extends BasicDialogWithPreferences
 		gbc_lblNewLabel_7.gridx = 2;
 		gbc_lblNewLabel_7.gridy = 1;
 		panel.add(lblNewLabel_7, gbc_lblNewLabel_7);
+		
+		useAssignedPrimaryIdsCheckBox = 
+			new JCheckBox("Use features assigned primary IDs to determine cluster primary ID");
+		GridBagConstraints gbc_chckbxNewCheckBox = new GridBagConstraints();
+		gbc_chckbxNewCheckBox.anchor = GridBagConstraints.WEST;
+		gbc_chckbxNewCheckBox.gridwidth = 4;
+		gbc_chckbxNewCheckBox.insets = new Insets(0, 0, 0, 5);
+		gbc_chckbxNewCheckBox.gridx = 0;
+		gbc_chckbxNewCheckBox.gridy = 5;
+		mainPanel.add(useAssignedPrimaryIdsCheckBox, gbc_chckbxNewCheckBox);
 
 		primaryActionButton.setText(
 				MainActionCommands.CLUSTER_FEATURES_BY_STRUCTURE_COMMAND.getName());
@@ -301,6 +314,10 @@ public class ClusteringByStructureSetupDialog extends BasicDialogWithPreferences
 		return FormUtils.getDoubleValueFromTextField(minScoreTextField);
 	}
 	
+	public boolean useAssignedPrimaryIds() {
+		return useAssignedPrimaryIdsCheckBox.isSelected();
+	}
+	
 	@Override
 	public void loadPreferences(Preferences preferences) {
 		
@@ -314,10 +331,14 @@ public class ClusteringByStructureSetupDialog extends BasicDialogWithPreferences
 		double groupingWindow = preferences.getDouble(RT_WINDOW, 0.1d);
 		msmsRtGroupingWindowField.setText(Double.toString(groupingWindow));
 		
-		useOnlyPrimaryIdButton.setSelected(preferences.getBoolean(PRIMARY_ID_ONLY, true));
+		useOnlyPrimaryIdButton.setSelected(
+				preferences.getBoolean(PRIMARY_ID_ONLY, true));
 		
 		double scoreCutoff = preferences.getDouble(SCORE_CUTOFF, 0.8d);
 		minScoreTextField.setText(Double.toString(scoreCutoff));
+				
+		useAssignedPrimaryIdsCheckBox.setSelected(
+				preferences.getBoolean(USE_ASSIGNED_PRIMARY_IDS, true));
 	}
 
 	@Override
@@ -339,8 +360,11 @@ public class ClusteringByStructureSetupDialog extends BasicDialogWithPreferences
 			preferences.putDouble(RT_END, rtRange.getMax());
 		}
 		preferences.putDouble(RT_WINDOW, getMsmsRtGroupingWindow());	
-		preferences.putBoolean(PRIMARY_ID_ONLY, useOnlyPrimaryIdButton.isSelected());
-		preferences.putDouble(SCORE_CUTOFF, getEntropyScoreCutoff());
+		preferences.putBoolean(
+				PRIMARY_ID_ONLY, useOnlyPrimaryIdButton.isSelected());
+		preferences.putDouble(SCORE_CUTOFF, getEntropyScoreCutoff());		
+		preferences.putBoolean(
+				USE_ASSIGNED_PRIMARY_IDS, useAssignedPrimaryIdsCheckBox.isSelected());
 	}
 
 	@Override

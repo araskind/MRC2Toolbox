@@ -89,10 +89,7 @@ import edu.umich.med.mrc2.datoolbox.utils.TextUtils;
 
 public class TargetedDataFileSelectionDialog extends JDialog 
 		implements ActionListener, ItemListener, BackedByPreferences, TaskListener {
-	
-	/**
-	 * 
-	 */
+
 	private static final long serialVersionUID = 1L;
 	
 	private static final Icon dialogIcon = GuiUtils.getIcon("loess", 32);

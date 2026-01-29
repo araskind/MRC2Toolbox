@@ -37,7 +37,8 @@ public enum IDTrackerFeatureIdentificationProperties {
 	MSRT_LIB("MS/RT library name"),
 	MSMS_LIBRARY("MSMS library name"),	
 	//	MSMS_LIBRARY_ENTRY_ID("MSMS library entry ID"), TODO 
-	COLLISION_ENERGY("Collision energy (lib)"),
+	COLLISION_ENERGY_LIBRARY("Collision energy (lib)"),
+	COLLISION_ENERGY_ACQUIRED("Collision energy (acquisition)"),
 	FWD_SCORE("Fwd. score"),
 	REVERSE_SCORE("Rev. score"),
 	PROBABILITY("Probability"),

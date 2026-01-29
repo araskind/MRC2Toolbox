@@ -118,10 +118,8 @@ public class MSMSClusteringUtils {
 			return null;
 
 		MsFeatureIdentity topHit = null;
-		Collection<MsFeatureIdentity>idsToRank = 
-				new TreeSet<MsFeatureIdentity>(entropyScoreComparator);
-		Collection<MsFeatureIdentity>hybridIdsToRank = 
-				new TreeSet<MsFeatureIdentity>(NISTPepSearchUtils.idScoreComparator);
+		Collection<MsFeatureIdentity>idsToRank = new TreeSet<>(entropyScoreComparator);
+		Collection<MsFeatureIdentity>hybridIdsToRank = new TreeSet<>(NISTPepSearchUtils.idScoreComparator);
 		String metlinLibId = 
 				IDTDataCache.getReferenceMsMsLibraryByName("Metlin_AMRT_PCDL").getUniqueId();
 			

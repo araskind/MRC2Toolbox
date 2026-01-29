@@ -58,74 +58,21 @@ public class IDTrackerIdentificationTableModelListener  implements TableModelLis
 
 		MsFeatureIdentity selectedId = (MsFeatureIdentity) model.getValueAt(row,
 				model.getColumnIndex(UniversalIdentificationResultsTableModel.IDENTIFICATION_COLUMN));
-		
-//		boolean dataChanged = false;
+
 		if (col == model.getColumnIndex(UniversalIdentificationResultsTableModel.DEFAULT_ID_COLUMN)) {
 
 			if(selectedMsMsFeatureBundle != null 
 					&& !selectedId.equals(selectedMsMsFeatureBundle.getMsFeature().getPrimaryIdentity())) {
 				
 				selectedMsMsFeatureBundle.getMsFeature().setPrimaryIdentity(selectedId);
-				parentPanel.updateIdentificationsForMSMSFeatures(Collections.singleton(selectedMsMsFeatureBundle));
-//				dataChanged = true;				
+				parentPanel.updateIdentificationsForMSMSFeatures(Collections.singleton(selectedMsMsFeatureBundle));			
 			}
 			if(selectedMS1FeatureBundle != null
 					&& !selectedId.equals(selectedMS1FeatureBundle.getMsFeature().getPrimaryIdentity())) {
 				
 				selectedMS1FeatureBundle.getMsFeature().setPrimaryIdentity(selectedId);
 				parentPanel.updateIdentificationsForMSFeatures(Collections.singleton(selectedMS1FeatureBundle));
-//				dataChanged = true;
 			}
 		}		
-//		if (col == model.getColumnIndex(UniversalIdentificationResultsTableModel.ID_LEVEL_COLUMN)) {
-//			
-//			MSFeatureIdentificationLevel selectedLevel = (MSFeatureIdentificationLevel) model.getValueAt(row,
-//					model.getColumnIndex(UniversalIdentificationResultsTableModel.ID_LEVEL_COLUMN));
-//			MSFeatureIdentificationLevel current = selectedId.getIdentificationLevel();
-//			boolean updateIdLevel = false;
-//			if((selectedLevel == null && current != null) || (selectedLevel != null && current == null)
-//					|| (selectedLevel != null && current != null && !selectedLevel.equals(current))) {
-//				updateIdLevel = true;
-//				dataChanged = true;	
-//			}		
-//			if(selectedMsMsFeatureBundle != null && updateIdLevel) {
-//				
-//				try {
-//					parentPanel.setPrimaryIdLevelForMultipleFeatures(
-//							selectedLevel, 
-//							2,
-//							Collections.singleton(selectedMsMsFeatureBundle.getMsFeature()),
-//							true);
-//				} catch (Exception e1) {
-//					// TODO Auto-generated catch block
-//					e1.printStackTrace();
-//				}			
-//			}
-//			if(selectedMS1FeatureBundle != null && updateIdLevel) {
-//				
-//				try {
-//					parentPanel.setPrimaryIdLevelForMultipleFeatures(
-//							selectedLevel, 
-//							1,
-//							Collections.singleton(selectedMS1FeatureBundle.getMsFeature()),
-//							true);
-//				} catch (Exception e1) {
-//					// TODO Auto-generated catch block
-//					e1.printStackTrace();
-//				}
-//			}
-//		}
-//		TODO handle other changes if necessary
-		
-//		if(dataChanged) {
-//			
-//			if(selectedMsMsFeatureBundle != null) 
-//				parentPanel.selectMSMSFeature(selectedMsMsFeatureBundle);
-//
-//			if(selectedMS1FeatureBundle != null)
-//				parentPanel.selectMSFeature(selectedMS1FeatureBundle);
-//			
-//			parentPanel.refreshIdentificationsTable();
-//		}
 	}
 }

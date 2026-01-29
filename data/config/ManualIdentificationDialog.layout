@@ -106,7 +106,7 @@
 												</placeholders>
 											</leaf>
 											<node nodeId="1603755099188" orientation="VERTICAL" divider="0.47035573122529645">
-												<leaf id="1" nodeId="1603755084874">
+												<leaf id="0" nodeId="1603755084874">
 													<placeholders>
 														<placeholder>dock.single.DockableDatabaseCompoundTable</placeholder>
 													</placeholders>
@@ -121,12 +121,12 @@
 													</placeholder-map>
 												</leaf>
 												<node nodeId="1603755115448" orientation="HORIZONTAL" divider="0.604384133611691">
-													<leaf id="0" nodeId="1603755115446">
+													<leaf id="3" nodeId="1603755115446">
 														<placeholders>
 															<placeholder>dock.single.ManualIdentificationDialogDockableMolStructurePanel</placeholder>
 														</placeholders>
 													</leaf>
-													<leaf id="3" nodeId="1603755099187">
+													<leaf id="1" nodeId="1603755099187">
 														<placeholders>
 															<placeholder>dock.single.Synonyms</placeholder>
 														</placeholders>
@@ -144,20 +144,20 @@
 							</adjacent>
 							<children ignore="false">
 								<child>
-									<layout factory="predefined" placeholder="dock.single.ManualIdentificationDialogDockableMolStructurePanel">
-										<replacement id="dockablesingle ManualIdentificationDialogDockableMolStructurePanel"/>
+									<layout factory="predefined" placeholder="dock.single.DockableDatabaseCompoundTable">
+										<replacement id="dockablesingle DockableDatabaseCompoundTable"/>
 										<delegate id="delegate_ccontrol backup factory id">
-											<id>ManualIdentificationDialogDockableMolStructurePanel</id>
+											<id>DockableDatabaseCompoundTable</id>
 											<area/>
 										</delegate>
 									</layout>
 									<children ignore="false"/>
 								</child>
 								<child>
-									<layout factory="predefined" placeholder="dock.single.DockableDatabaseCompoundTable">
-										<replacement id="dockablesingle DockableDatabaseCompoundTable"/>
+									<layout factory="predefined" placeholder="dock.single.Synonyms">
+										<replacement id="dockablesingle Synonyms"/>
 										<delegate id="delegate_ccontrol backup factory id">
-											<id>DockableDatabaseCompoundTable</id>
+											<id>Synonyms</id>
 											<area/>
 										</delegate>
 									</layout>
@@ -174,10 +174,10 @@
 									<children ignore="false"/>
 								</child>
 								<child>
-									<layout factory="predefined" placeholder="dock.single.Synonyms">
-										<replacement id="dockablesingle Synonyms"/>
+									<layout factory="predefined" placeholder="dock.single.ManualIdentificationDialogDockableMolStructurePanel">
+										<replacement id="dockablesingle ManualIdentificationDialogDockableMolStructurePanel"/>
 										<delegate id="delegate_ccontrol backup factory id">
-											<id>Synonyms</id>
+											<id>ManualIdentificationDialogDockableMolStructurePanel</id>
 											<area/>
 										</delegate>
 									</layout>
@@ -280,9 +280,18 @@
 						</entry>
 						<entry id="single DockableExtendedCompoundDatabaseSearchPanel" current="dock.mode.normal">
 							<history>
+								<mode>dock.mode.maximized</mode>
 								<mode>dock.mode.normal</mode>
 							</history>
 							<properties>
+								<property id="dock.mode.maximized">
+									<mode>dock.mode.maximized</mode>
+									<root>ccontrol center</root>
+									<applicationDefined>false</applicationDefined>
+									<location>
+										<property factory="SplitDockFullScreenPropertyFactory"/>
+									</location>
+								</property>
 								<property id="dock.mode.normal">
 									<mode>dock.mode.normal</mode>
 									<root>ccontrol center</root>
@@ -291,7 +300,7 @@
 										<property factory="SplitDockPlaceholderProperty">
 											<placeholder>dock.single.DockableExtendedCompoundDatabaseSearchPanel</placeholder>
 											<backup-path>
-												<node location="LEFT" size="0.4886058981233244" id="1603755091641"/>
+												<node location="LEFT" size="0.35656836461126007" id="1603755091641"/>
 												<leaf id="1603755091639"/>
 											</backup-path>
 										</property>

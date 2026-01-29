@@ -390,6 +390,8 @@ public enum MainActionCommands {
 	SHOW_MSMS_DATA_SET_STATISTICS_COMMAND("Show MSMS data set statistics"),
 	SHOW_CLUSTERED_MSMS_DATA_SET_STATISTICS_COMMAND("Show clustered MSMS data set statistics"),
 	LOAD_SELECTED_FEATURE_CLUSTER_SET("Load selected feature cluster set"),
+	SHOW_FEATURE_MZ_RT_LIST_FILTER_COMMAND("Setup feature MZ/RT list filter"),
+	FILTER_FEATURES_BY_MZ_RT_LIST_COMMAND("Filter features using MZ/RT list"),
 
 	// Duplicates
 	SHOW_FIND_DUPLICATES_DIALOG_COMMAND("Show find duplicates options"),

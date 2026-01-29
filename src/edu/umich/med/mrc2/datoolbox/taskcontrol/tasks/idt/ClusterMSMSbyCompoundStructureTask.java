@@ -23,10 +23,13 @@ package edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
+import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
+import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureIdentityComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureInfoBundleComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortDirection;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
@@ -35,9 +38,11 @@ import edu.umich.med.mrc2.datoolbox.data.msclust.IMsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusterDataSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusteringParameterSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MsFeatureInfoBundleCluster;
+import edu.umich.med.mrc2.datoolbox.gui.idworks.nist.pepsearch.HiResSearchOption;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
+import edu.umich.med.mrc2.datoolbox.utils.NISTPepSearchUtils;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
 
 public class ClusterMSMSbyCompoundStructureTask extends AbstractTask {
@@ -47,6 +52,7 @@ public class ClusterMSMSbyCompoundStructureTask extends AbstractTask {
 	private double msmsRtGroupingWindow;
 	private boolean usePrimaryIdOnly;
 	private double entropyScoreCutoff;
+	private boolean useAssignedPrimaryIds;
 	
 	private IMSMSClusterDataSet clusterDataSet;
 		
@@ -56,13 +62,15 @@ public class ClusterMSMSbyCompoundStructureTask extends AbstractTask {
 			Collection<MSFeatureInfoBundle> featuresToProcess,
 			double msmsRtGroupingWindow, 
 			boolean usePrimaryIdOnly,
-			double entropyScoreCutoff) {
+			double entropyScoreCutoff,
+			boolean useAssignedPrimaryIds) {
 		super();
 		this.clusterSetName = clusterSetName;
 		this.featuresToProcess = featuresToProcess;
 		this.msmsRtGroupingWindow = msmsRtGroupingWindow;
 		this.usePrimaryIdOnly = usePrimaryIdOnly;
 		this.entropyScoreCutoff = entropyScoreCutoff;
+		this.useAssignedPrimaryIds = useAssignedPrimaryIds;
 		
 		clusterDataSet = new MSMSClusterDataSet(clusterSetName);
 		MSMSClusteringParameterSet params = new MSMSClusteringParameterSet();		
@@ -91,9 +99,12 @@ public class ClusterMSMSbyCompoundStructureTask extends AbstractTask {
 				reportErrorAndExit(e);
 			}
 		}
+		if(useAssignedPrimaryIds) {
+			reassignPrimaryIdentitiesBasedOnFeatureData();
+		}
 		setStatus(TaskStatus.FINISHED);
 	}
-	
+
 	private void clusterFeaturesByPrimaryIdentity() {
 		
 		taskDescription = "Clustering features using primary identities";
@@ -110,7 +121,6 @@ public class ClusterMSMSbyCompoundStructureTask extends AbstractTask {
 				filter(b -> Objects.nonNull(b.getMsFeature().getPrimaryIdentity().getCompoundIdentity().getInChiKey2D())).
 				sorted(revIntensitySorter).
 				collect(Collectors.toList());
-		
 		IMsFeatureInfoBundleCluster firstCluster = 
 				new MsFeatureInfoBundleCluster(featuresToProcessSorted.get(0));
 		clusterDataSet.getClusters().add(firstCluster);
@@ -131,6 +141,7 @@ public class ClusterMSMSbyCompoundStructureTask extends AbstractTask {
 					if(clusterIdTag.equals(featureIdTag)) {
 						cluster.addComponent(null, msfb);
 						featureAdded = true;
+						break;
 					}
 				}
 			}
@@ -154,6 +165,53 @@ public class ClusterMSMSbyCompoundStructureTask extends AbstractTask {
 		}
 	}
 	
+	private void reassignPrimaryIdentitiesBasedOnFeatureData() {
+
+		taskDescription = "Setting primary IDs";
+		total = clusterDataSet.getClusters().size();
+		processed = 0;
+		MsFeatureIdentityComparator eScoreComparator = 
+				new MsFeatureIdentityComparator(SortProperty.msmsEntropyScore, SortDirection.DESC);
+
+		for(IMsFeatureInfoBundleCluster cluster : clusterDataSet.getClusters()) {
+			
+			if(cluster.getComponents().size() > 1) {
+				
+				List<MsFeatureIdentity> idList = cluster.getComponents().stream().
+						map(c -> c.getMsFeature().getPrimaryIdentity()).
+						collect(Collectors.toList());
+				
+				Map<String,HiResSearchOption>searchTypeMap = 
+						NISTPepSearchUtils.getSearchTypeMap(cluster.getComponents());
+				Map<HiResSearchOption,Collection<MsFeatureIdentity>>stIdMap = 
+						NISTPepSearchUtils.getSearchTypeIdentityMap( idList, searchTypeMap, true);
+				if(!stIdMap.get(HiResSearchOption.z).isEmpty()) {
+					
+					List<MsFeatureIdentity> mwpHitList = 
+							stIdMap.get(HiResSearchOption.z).stream().
+							sorted(eScoreComparator).
+							collect(Collectors.toList());
+					cluster.setPrimaryIdentity(mwpHitList.get(0));
+				}
+				else {
+					if(!stIdMap.get(HiResSearchOption.u).isEmpty()) {
+						
+						List<MsFeatureIdentity> isHitList = 
+								stIdMap.get(HiResSearchOption.u).stream().
+								sorted(eScoreComparator).
+								collect(Collectors.toList());
+						cluster.setPrimaryIdentity(isHitList.get(0));
+					}
+				}
+			}
+			else {
+				cluster.setPrimaryIdentity(cluster.getComponents().
+						iterator().next().getMsFeature().getPrimaryIdentity());
+			}
+			processed++;
+		}
+	}
+	
 	@Override
 	public Task cloneTask() {
 
@@ -162,7 +220,8 @@ public class ClusterMSMSbyCompoundStructureTask extends AbstractTask {
 				featuresToProcess, 
 				msmsRtGroupingWindow, 
 				usePrimaryIdOnly, 
-				entropyScoreCutoff);
+				entropyScoreCutoff,
+				useAssignedPrimaryIds);
 	}
 
 	public IMSMSClusterDataSet getFeatureClusterDataSet() {

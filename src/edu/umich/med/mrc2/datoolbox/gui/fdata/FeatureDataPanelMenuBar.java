@@ -58,6 +58,7 @@ public class FeatureDataPanelMenuBar extends CommonMenuBar {
 	private static final Icon filterIcon = GuiUtils.getIcon("filter", 24);
 	private static final Icon filterIconSmall = GuiUtils.getIcon("filter", 16);
 	private static final Icon resetFilterIcon = GuiUtils.getIcon("resetFilter", 24);
+	private static final Icon filterFeaturesByMZRTIcon = GuiUtils.getIcon("filterByMZRTList", 24);
 	private static final Icon knownIcon = GuiUtils.getIcon("showKnowns", 24);
 	private static final Icon qcIcon = GuiUtils.getIcon("qc", 24);
 	private static final Icon unknownIcon = GuiUtils.getIcon("showUnknowns", 24);
@@ -135,6 +136,7 @@ public class FeatureDataPanelMenuBar extends CommonMenuBar {
 	// Search items
 	private JMenuItem
 		featureFilterMenuItem,
+		featureFilterByMzRtMenuItem,
 		resetFilterMenuItem,
 		showOnlyKnownsMenuItem,
 		showOnlyUnknownsMenuItem,
@@ -266,6 +268,11 @@ public class FeatureDataPanelMenuBar extends CommonMenuBar {
 		featureFilterMenuItem = addItem(searchMenu, 
 				MainActionCommands.SHOW_FEATURE_FILTER_COMMAND, 
 				filterIcon);
+		
+		featureFilterByMzRtMenuItem = addItem(searchMenu, 
+				MainActionCommands.SHOW_FEATURE_MZ_RT_LIST_FILTER_COMMAND, 
+				filterFeaturesByMZRTIcon);
+		
 		showOnlyKnownsMenuItem = addItem(searchMenu, 
 				MainActionCommands.SHOW_KNOWN_FEATURES_COMMAND, 
 				knownIcon);

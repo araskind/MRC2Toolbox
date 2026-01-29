@@ -761,8 +761,7 @@ public class NISTPepSearchUtils {
 				map(i -> i.getReferenceMsMsLibraryMatch().getSearchParameterSetId()).
 				collect(Collectors.toSet());
 			
-		Map<String,HiResSearchOption>searchTypeMap = 
-					new TreeMap<String,HiResSearchOption>();
+		Map<String,HiResSearchOption>searchTypeMap = new TreeMap<>();
 		for(String spId : searchParamSet) {
 			NISTPepSearchParameterObject pepSearchParams = 
 					IDTDataCache.getNISTPepSearchParameterObjectById(spId);
@@ -774,14 +773,21 @@ public class NISTPepSearchUtils {
 	public static Map<HiResSearchOption,Collection<MsFeatureIdentity>>getSearchTypeIdentityMap(
 			MsFeature feature, 
 			Map<String,HiResSearchOption>searchTypeMap,
+			boolean ignoreDecoys) {	
+		return getSearchTypeIdentityMap(
+				feature.getIdentifications(), searchTypeMap, ignoreDecoys);
+	}
+	
+	public static Map<HiResSearchOption,Collection<MsFeatureIdentity>>getSearchTypeIdentityMap(
+			Collection<MsFeatureIdentity>idList, 
+			Map<String,HiResSearchOption>searchTypeMap,
 			boolean ignoreDecoys) {
 		
-		Map<HiResSearchOption,Collection<MsFeatureIdentity>>typeMap = 
-				new TreeMap<HiResSearchOption,Collection<MsFeatureIdentity>>();
+		Map<HiResSearchOption,Collection<MsFeatureIdentity>>typeMap = new TreeMap<>();
 		for(HiResSearchOption o : HiResSearchOption.values())
-			typeMap.put(o, new TreeSet<MsFeatureIdentity>(idScoreComparator));
+			typeMap.put(o, new TreeSet<>(idScoreComparator));
 		
-		List<MsFeatureIdentity> nistSearchHits = feature.getIdentifications().stream().
+		List<MsFeatureIdentity> nistSearchHits = idList.stream().
 			filter(i -> Objects.nonNull(i.getReferenceMsMsLibraryMatch())).
 			filter(i -> Objects.nonNull(i.getReferenceMsMsLibraryMatch().getSearchParameterSetId())).
 			collect(Collectors.toList());

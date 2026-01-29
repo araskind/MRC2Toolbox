@@ -141,7 +141,7 @@ public class DefaultMSMSLibraryHitReassignmentTask extends AbstractTask {
 				assignNISTTopHit(bundle, searchTypeMap, hitTypeMap);
 	
 			MsFeatureIdentity primaryId = bundle.getMsFeature().getPrimaryIdentity();
-			if(primaryId.getIdentificationLevel() == null)
+			if(primaryId.getIdentificationLevel() == null && bundle.getMsFeature().isIdentified())
 				primaryId.setIdentificationLevel(tentativeLevel);
 			
 			processed++;
@@ -172,8 +172,7 @@ public class DefaultMSMSLibraryHitReassignmentTask extends AbstractTask {
 						.getMatchedLibraryFeature().getMsmsLibraryIdentifier().equals(metlinLibId)).
 				sorted(NISTPepSearchUtils.idScoreComparator).collect(Collectors.toList());		
 		idsToRank.addAll(metlinHits);
-		
-		
+				
 		if(idsToRank.isEmpty()) {
 			assignNISTTopHit(bundle, searchTypeMap, hitTypeMap);
 			return true;

@@ -101,8 +101,8 @@ public class MSMSClusterDataSet implements IMSMSClusterDataSet {
 		this.createdBy = createdBy;
 		this.dateCreated = dateCreated;
 		this.lastModified = lastModified;
-		clusters = new HashSet<IMsFeatureInfoBundleCluster>();
-		clusterIds = new TreeSet<String>();
+		clusters = new HashSet<>();
+		clusterIds = new TreeSet<>();
 	}
 	
 	public Set<IMsFeatureInfoBundleCluster> getClusters() {

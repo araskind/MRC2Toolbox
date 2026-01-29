@@ -171,7 +171,7 @@
 																	<placeholder>dock.single.DockableDuplicateSelectionTable</placeholder>
 																</placeholders>
 															</leaf>
-															<leaf id="4" nodeId="1754946103951">
+															<leaf id="2" nodeId="1754946103951">
 																<placeholders>
 																	<placeholder>dock.single.ClusterDisplayPanelCorrelationDataPanel</placeholder>
 																</placeholders>
@@ -214,7 +214,7 @@
 															</entry>
 														</placeholder-map>
 													</leaf>
-													<leaf id="2" nodeId="1600213794212">
+													<leaf id="4" nodeId="1600213794212">
 														<placeholders>
 															<placeholder>dock.single.ClusterDisplayPanelDockableMsTableMS1</placeholder>
 															<placeholder>dock.single.ClusterDisplayPanelAnnotations</placeholder>
@@ -333,6 +333,26 @@
 									<children ignore="false"/>
 								</child>
 								<child>
+									<layout factory="predefined" placeholder="dock.single.ClusterDisplayPanelCorrelationDataPanel">
+										<replacement id="dockablesingle ClusterDisplayPanelCorrelationDataPanel"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>ClusterDisplayPanelCorrelationDataPanel</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
+								</child>
+								<child>
+									<layout factory="predefined" placeholder="dock.single.DuplicatesPanelDockableClusterTree">
+										<replacement id="dockablesingle DuplicatesPanelDockableClusterTree"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>DuplicatesPanelDockableClusterTree</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
+								</child>
+								<child>
 									<layout factory="delegate_StackDockStationFactory">
 										<selected>2</selected>
 										<placeholders>
@@ -419,26 +439,6 @@
 											<children ignore="false"/>
 										</child>
 									</children>
-								</child>
-								<child>
-									<layout factory="predefined" placeholder="dock.single.DuplicatesPanelDockableClusterTree">
-										<replacement id="dockablesingle DuplicatesPanelDockableClusterTree"/>
-										<delegate id="delegate_ccontrol backup factory id">
-											<id>DuplicatesPanelDockableClusterTree</id>
-											<area/>
-										</delegate>
-									</layout>
-									<children ignore="false"/>
-								</child>
-								<child>
-									<layout factory="predefined" placeholder="dock.single.ClusterDisplayPanelCorrelationDataPanel">
-										<replacement id="dockablesingle ClusterDisplayPanelCorrelationDataPanel"/>
-										<delegate id="delegate_ccontrol backup factory id">
-											<id>ClusterDisplayPanelCorrelationDataPanel</id>
-											<area/>
-										</delegate>
-									</layout>
-									<children ignore="false"/>
 								</child>
 							</children>
 						</root>
