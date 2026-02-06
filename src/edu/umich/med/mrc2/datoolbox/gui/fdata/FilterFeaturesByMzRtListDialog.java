@@ -32,6 +32,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 import java.util.Vector;
 import java.util.prefs.Preferences;
 
@@ -46,12 +47,17 @@ import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 
+import org.apache.commons.lang3.math.NumberUtils;
+
+import edu.umich.med.mrc2.datoolbox.data.MsFeatureSet;
 import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.BasicDialogWithPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.FormUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
+import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
+import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.utils.DelimitedTextParser;
 
 public class FilterFeaturesByMzRtListDialog extends BasicDialogWithPreferences {
@@ -75,12 +81,13 @@ public class FilterFeaturesByMzRtListDialog extends BasicDialogWithPreferences {
 	private JComboBox<MassErrorType> massErrorTypecomboBox;
 	private JFormattedTextField rtWindowField;
 	private JFormattedTextField massWindowField;
+	private JTextField dataSetNameField;
 	
 	
 	public FilterFeaturesByMzRtListDialog( ActionListener actionListener) {
 		super("Filter features usin MZ/RT list", 
 				"filterClusterByMZRTList", 
-				new Dimension(640,280), 
+				new Dimension(640,320), 
 				actionListener);
 		primaryActionButton.setText(
 				MainActionCommands.FILTER_FEATURES_BY_MZ_RT_LIST_COMMAND.getName());
@@ -89,28 +96,49 @@ public class FilterFeaturesByMzRtListDialog extends BasicDialogWithPreferences {
 		
 		GridBagLayout gridBagLayout = new GridBagLayout();
 		gridBagLayout.columnWidths = new int[]{0, 0, 0, 0};
-		gridBagLayout.rowHeights = new int[]{0, 0, 0, 0, 0, 0};
+		gridBagLayout.rowHeights = new int[]{0, 0, 0, 0, 0, 0, 0};
 		gridBagLayout.columnWeights = new double[]{0.0, 1.0, 0.0, Double.MIN_VALUE};
-		gridBagLayout.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 1.0, Double.MIN_VALUE};
+		gridBagLayout.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 1.0, Double.MIN_VALUE};
 		mainPanel.setLayout(gridBagLayout);
+		
+		JLabel lblNewLabel_6 = new JLabel("Filtered set name");
+		GridBagConstraints gbc_lblNewLabel_6 = new GridBagConstraints();
+		gbc_lblNewLabel_6.anchor = GridBagConstraints.EAST;
+		gbc_lblNewLabel_6.insets = new Insets(0, 0, 5, 5);
+		gbc_lblNewLabel_6.gridx = 0;
+		gbc_lblNewLabel_6.gridy = 0;
+		mainPanel.add(lblNewLabel_6, gbc_lblNewLabel_6);
+		
+		dataSetNameField = new JTextField();
+		dataSetNameField.setText("MZ/RT filtered feature set " + 
+				MRC2ToolBoxConfiguration.defaultTimeStampFormat.format(new Date()));
+		GridBagConstraints gbc_dataSetNameField = new GridBagConstraints();
+		gbc_dataSetNameField.gridwidth = 2;
+		gbc_dataSetNameField.insets = new Insets(0, 0, 5, 5);
+		gbc_dataSetNameField.fill = GridBagConstraints.HORIZONTAL;
+		gbc_dataSetNameField.gridx = 1;
+		gbc_dataSetNameField.gridy = 0;
+		mainPanel.add(dataSetNameField, gbc_dataSetNameField);
+		dataSetNameField.setColumns(10);
 		
 		JLabel lblNewLabel = new JLabel("MZ/RT list file");
 		GridBagConstraints gbc_lblNewLabel = new GridBagConstraints();
+		gbc_lblNewLabel.anchor = GridBagConstraints.WEST;
 		gbc_lblNewLabel.gridwidth = 2;
 		gbc_lblNewLabel.insets = new Insets(0, 0, 5, 5);
 		gbc_lblNewLabel.gridx = 0;
-		gbc_lblNewLabel.gridy = 0;
+		gbc_lblNewLabel.gridy = 1;
 		mainPanel.add(lblNewLabel, gbc_lblNewLabel);
 		
 		inputFileTextField = new JTextField();
 		inputFileTextField.setEditable(false);
-		GridBagConstraints gbc_textField = new GridBagConstraints();
-		gbc_textField.gridwidth = 2;
-		gbc_textField.insets = new Insets(0, 0, 5, 5);
-		gbc_textField.fill = GridBagConstraints.HORIZONTAL;
-		gbc_textField.gridx = 0;
-		gbc_textField.gridy = 1;
-		mainPanel.add(inputFileTextField, gbc_textField);
+		GridBagConstraints gbc_inputFileTextField = new GridBagConstraints();
+		gbc_inputFileTextField.gridwidth = 2;
+		gbc_inputFileTextField.insets = new Insets(0, 0, 5, 5);
+		gbc_inputFileTextField.fill = GridBagConstraints.HORIZONTAL;
+		gbc_inputFileTextField.gridx = 0;
+		gbc_inputFileTextField.gridy = 2;
+		mainPanel.add(inputFileTextField, gbc_inputFileTextField);
 		
 		JButton btnNewButton = new JButton(BROWSE_COMMAND);
 		btnNewButton.setActionCommand(BROWSE_COMMAND);
@@ -118,7 +146,7 @@ public class FilterFeaturesByMzRtListDialog extends BasicDialogWithPreferences {
 		GridBagConstraints gbc_btnNewButton = new GridBagConstraints();
 		gbc_btnNewButton.insets = new Insets(0, 0, 5, 0);
 		gbc_btnNewButton.gridx = 2;
-		gbc_btnNewButton.gridy = 1;
+		gbc_btnNewButton.gridy = 2;
 		mainPanel.add(btnNewButton, gbc_btnNewButton);
 		
 		JLabel lblNewLabel_1 = new JLabel("Select M/Z column");
@@ -126,15 +154,15 @@ public class FilterFeaturesByMzRtListDialog extends BasicDialogWithPreferences {
 		gbc_lblNewLabel_1.anchor = GridBagConstraints.EAST;
 		gbc_lblNewLabel_1.insets = new Insets(0, 0, 5, 5);
 		gbc_lblNewLabel_1.gridx = 0;
-		gbc_lblNewLabel_1.gridy = 2;
+		gbc_lblNewLabel_1.gridy = 3;
 		mainPanel.add(lblNewLabel_1, gbc_lblNewLabel_1);
 		
 		mzColumnComboBox = new JComboBox<>();
 		GridBagConstraints gbc_comboBox = new GridBagConstraints();
-		gbc_comboBox.insets = new Insets(0, 0, 5, 0);
+		gbc_comboBox.insets = new Insets(0, 0, 5, 5);
 		gbc_comboBox.fill = GridBagConstraints.HORIZONTAL;
 		gbc_comboBox.gridx = 1;
-		gbc_comboBox.gridy = 2;
+		gbc_comboBox.gridy = 3;
 		mainPanel.add(mzColumnComboBox, gbc_comboBox);
 		
 		JLabel lblNewLabel_2 = new JLabel("Select RT column");
@@ -142,15 +170,15 @@ public class FilterFeaturesByMzRtListDialog extends BasicDialogWithPreferences {
 		gbc_lblNewLabel_2.anchor = GridBagConstraints.EAST;
 		gbc_lblNewLabel_2.insets = new Insets(0, 0, 5, 5);
 		gbc_lblNewLabel_2.gridx = 0;
-		gbc_lblNewLabel_2.gridy = 3;
+		gbc_lblNewLabel_2.gridy = 4;
 		mainPanel.add(lblNewLabel_2, gbc_lblNewLabel_2);
 		
 		rtColumnComboBox = new JComboBox<>();
 		GridBagConstraints gbc_comboBox_1 = new GridBagConstraints();
-		gbc_comboBox_1.insets = new Insets(0, 0, 5, 0);
+		gbc_comboBox_1.insets = new Insets(0, 0, 5, 5);
 		gbc_comboBox_1.fill = GridBagConstraints.HORIZONTAL;
 		gbc_comboBox_1.gridx = 1;
-		gbc_comboBox_1.gridy = 3;
+		gbc_comboBox_1.gridy = 4;
 		mainPanel.add(rtColumnComboBox, gbc_comboBox_1);
 		
 		JPanel panel = new JPanel();
@@ -159,10 +187,9 @@ public class FilterFeaturesByMzRtListDialog extends BasicDialogWithPreferences {
 				TitledBorder.TOP, null, null), new EmptyBorder(10, 10, 10, 10)));
 		GridBagConstraints gbc_panel = new GridBagConstraints();
 		gbc_panel.gridwidth = 3;
-		gbc_panel.insets = new Insets(0, 0, 0, 5);
 		gbc_panel.fill = GridBagConstraints.BOTH;
 		gbc_panel.gridx = 0;
-		gbc_panel.gridy = 4;
+		gbc_panel.gridy = 5;
 		mainPanel.add(panel, gbc_panel);
 		GridBagLayout gbl_panel = new GridBagLayout();
 		gbl_panel.columnWidths = new int[]{0, 0, 0, 0};
@@ -275,6 +302,10 @@ public class FilterFeaturesByMzRtListDialog extends BasicDialogWithPreferences {
 		}
 	}
 	
+	public String getFilteredFeatureSetName() {
+		return dataSetNameField.getText().trim();
+	}
+	
 	public File getInputFile() {
 		return inputFile;
 	}
@@ -283,8 +314,16 @@ public class FilterFeaturesByMzRtListDialog extends BasicDialogWithPreferences {
 		return (String)mzColumnComboBox.getSelectedItem();
 	}
 	
+	public int getMzColumnIndex() {
+		return mzColumnComboBox.getSelectedIndex();
+	}
+	
 	public String getRetentionColumnName() {
 		return (String)rtColumnComboBox.getSelectedItem();
+	}
+	
+	public int getRtColumnIndex() {
+		return rtColumnComboBox.getSelectedIndex() - 1;
 	}
 	
 	public double getMassWindow() {
@@ -301,8 +340,20 @@ public class FilterFeaturesByMzRtListDialog extends BasicDialogWithPreferences {
 	
 	public Collection<String>validateFormData(){
 	    
-	    Collection<String>errors = new ArrayList<String>();
+	    Collection<String>errors = new ArrayList<>();
 	    
+	    String dataSetName = getFilteredFeatureSetName();
+	    
+	    if(dataSetName.isEmpty())
+	    	errors.add("Filtered set name must be specified");
+	    else {
+	    	DataAnalysisProject project = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
+	    	MsFeatureSet existing = 
+	    			project.getMsFeatureSetsForDataPipeline(project.getActiveDataPipeline()).
+	    			stream().filter(s -> s.getName().equals(dataSetName)).findFirst().orElse(null);
+	    	if(existing != null)
+	    		errors.add("MS feature set \"" + dataSetName +"\" already exists in the project");
+	    }	    
 	    if(getInputFile() == null)
 	    	errors.add("MZ/RT list file not specified");
 	    
@@ -328,8 +379,21 @@ public class FilterFeaturesByMzRtListDialog extends BasicDialogWithPreferences {
 	}
 	
 	private void validateInputData(Collection<String> errors) {
-		// TODO Auto-generated method stub
+				
+		int rtColumnIndex = getRtColumnIndex();		
+		int mzColumnIndex = getMzColumnIndex();
+		String value = null;
 		
+		for(int i=1; i<inputDataArray.length; i++) {
+			
+			value = inputDataArray[i][rtColumnIndex];
+			if(value == null || value.isBlank() || !NumberUtils.isCreatable(value))
+				errors.add("Invalid RT value on the line " + (i+1));
+			
+			value = inputDataArray[i][mzColumnIndex];
+			if(value == null || value.isBlank() || !NumberUtils.isCreatable(value))
+				errors.add("Invalid MZ value on the line " + (i+1));
+		}	
 	}
 
 	@Override
@@ -370,5 +434,9 @@ public class FilterFeaturesByMzRtListDialog extends BasicDialogWithPreferences {
 		preferences.putDouble(MASS_WINDOW, getMassWindow());
 		preferences.put(MASS_ERROR_TYPE, getMassErrorType().name());
 		preferences.putDouble(RT_WINDOW, getRTWindow());
+	}
+
+	public String[][] getInputDataArray() {
+		return inputDataArray;
 	}
 }

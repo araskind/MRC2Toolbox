@@ -145,13 +145,13 @@ public class MetabCombinerFileInputObject implements Comparable<MetabCombinerFil
 	
 	public MetabCombinerFileInputObject(Element metabCombinerFileInputObjectElement) {
 		
+		propertiesMap = new EnumMap<>(SummaryInputColumns.class);
 		for(Attribute at : metabCombinerFileInputObjectElement.getAttributes()) {
 			
 			SummaryInputColumns col = SummaryInputColumns.getOptionByName(at.getName());
 			if(col != null && at.getValue() != null)
 				propertiesMap.put(col, at.getValue());
 		}
-		//getOptionByName(String name)
 		Path dataFilePath = Paths.get(metabCombinerFileInputObjectElement.getText());
 		dataFile = dataFilePath.toFile();
 	}

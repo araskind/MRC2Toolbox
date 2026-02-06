@@ -22,6 +22,7 @@
 package edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt;
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -39,9 +40,12 @@ import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusterDataSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusteringParameterSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.nist.pepsearch.HiResSearchOption;
+import edu.umich.med.mrc2.datoolbox.main.MSMSClusterDataSetManager;
+import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
+import edu.umich.med.mrc2.datoolbox.utils.MSMSClusteringUtils;
 import edu.umich.med.mrc2.datoolbox.utils.NISTPepSearchUtils;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
 
@@ -75,7 +79,19 @@ public class ClusterMSMSbyCompoundStructureTask extends AbstractTask {
 		clusterDataSet = new MSMSClusterDataSet(clusterSetName);
 		MSMSClusteringParameterSet params = new MSMSClusteringParameterSet();		
 		params.setRtErrorValue(msmsRtGroupingWindow);
-		clusterDataSet.setParameters(params);
+		String md5 = MSMSClusteringUtils.calculateClusteringParametersMd5(params);
+		MSMSClusteringParameterSet existingParamsSet = 
+				MSMSClusterDataSetManager.getMsmsClusteringParameterSetByMd5(md5);
+		if(existingParamsSet == null) {
+			
+			params.setName("Clustering by structure parameters (" + 
+					MRC2ToolBoxConfiguration.defaultTimeStampFormat.format(new Date()) +")");
+			params.setMd5(md5);
+			clusterDataSet.setParameters(params);
+		}
+		else {
+			clusterDataSet.setParameters(existingParamsSet);
+		}
 	}
 
 	@Override

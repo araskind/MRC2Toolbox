@@ -289,6 +289,7 @@ public class Range implements Serializable, Comparable<Range> {
 	}
 	
 	public Range(String rtRangeString) {
+		
 		if(rtRangeString == null || rtRangeString.isEmpty() || !rtRangeString.contains("_"))
 			throw (new IllegalArgumentException("Invalid string"));
 		

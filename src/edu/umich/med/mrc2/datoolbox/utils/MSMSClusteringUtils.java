@@ -82,7 +82,7 @@ public class MSMSClusteringUtils {
 	
 	public static String calculateMSMSSearchParametersMd5(MSMSSearchParameterSet params){
 
-		List<String> chunks = new ArrayList<String>();
+		List<String> chunks = new ArrayList<>();
 		chunks.add(MsUtils.spectrumMzExportFormat.format(params.getMzErrorValue()));
 		chunks.add(params.getMassErrorType().name());
 		chunks.add(Boolean.toString(params.ignoreParentIon()));

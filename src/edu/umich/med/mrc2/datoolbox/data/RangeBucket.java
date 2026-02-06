@@ -32,7 +32,7 @@ public class RangeBucket {
 
 	public RangeBucket() {
 		super();
-		rangeSet = new TreeSet<Range>();
+		rangeSet = new TreeSet<>();
 	}
 	
 	public void addRange(Range newRange) {

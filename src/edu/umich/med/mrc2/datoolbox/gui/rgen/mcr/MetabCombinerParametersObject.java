@@ -23,9 +23,13 @@ package edu.umich.med.mrc2.datoolbox.gui.rgen.mcr;
 
 import java.io.File;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.apache.commons.lang.math.NumberUtils;
+import org.jdom2.Attribute;
+import org.jdom2.DataConversionException;
 import org.jdom2.Element;
 
 import edu.umich.med.mrc2.datoolbox.data.enums.PeakAbundanceMeasure;
@@ -293,7 +297,116 @@ public class MetabCombinerParametersObject implements XmlStorable{
 	
 	public MetabCombinerParametersObject(Element metabCombinerParametersElement) {
 		super();
-		// TODO Auto-generated constructor stub
+		
+		Element projectParentDirectoryElement = metabCombinerParametersElement.getChild(
+				MetabCombinerAlignmentSettingsFields.projectParentDirectory.name());
+		if(projectParentDirectoryElement != null 
+				&& !projectParentDirectoryElement.getText().isEmpty())
+			projectParentDirectory = new File(projectParentDirectoryElement.getText());
+		
+		Element projectDirectoryElement = metabCombinerParametersElement.getChild(
+				MetabCombinerAlignmentSettingsFields.projectDirectory.name());
+		if(projectDirectoryElement != null 
+				&& !projectDirectoryElement.getText().isEmpty())
+			projectDirectory = new File(projectDirectoryElement.getText());
+		
+		metabCombinerFileInputObjectSet = new TreeSet<>();
+		List<Element> ioFieldList = metabCombinerParametersElement.getChild(
+				MetabCombinerAlignmentSettingsFields.MetabCombinerFileIOList.name()).getChildren(
+						MetabCombinerAlignmentSettingsFields.MetabCombinerFileIO.name());
+		for(Element iofElement : ioFieldList)			
+			metabCombinerFileInputObjectSet.add(new MetabCombinerFileInputObject(iofElement));	
+		
+		Attribute rtRangeAttribute = metabCombinerParametersElement.getAttribute(
+				MetabCombinerAlignmentSettingsFields.alignmentRTRange.name());
+		if(rtRangeAttribute != null) {
+			try {
+				alignmentRTRange = new Range(rtRangeAttribute.getValue());
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+				
+		try {
+			useExistingAlignment = metabCombinerParametersElement.getAttribute(
+					MetabCombinerAlignmentSettingsFields.useExistingAlignment.name()).getBooleanValue();
+		} catch (DataConversionException e) {
+			e.printStackTrace();
+		}
+		maxMissingPercent = NumberUtils.toDouble(metabCombinerParametersElement.getAttributeValue(
+				MetabCombinerAlignmentSettingsFields.maxMissingPercent.name()));		
+		peakAbundanceMeasure = PeakAbundanceMeasure.valueOf(
+				metabCombinerParametersElement.getAttributeValue(
+						MetabCombinerAlignmentSettingsFields.peakAbundanceMeasure.name()));
+		binGap = NumberUtils.toDouble(metabCombinerParametersElement.getAttributeValue(
+				MetabCombinerAlignmentSettingsFields.binGap.name()));
+		try {
+			mcDataSetRtOrderFlag = metabCombinerParametersElement.getAttribute(
+					MetabCombinerAlignmentSettingsFields.mcDataSetRtOrderFlag.name()).getBooleanValue();
+		} catch (DataConversionException e) {
+			e.printStackTrace();
+		}
+		try {
+			imputeMissingData = metabCombinerParametersElement.getAttribute(
+					MetabCombinerAlignmentSettingsFields.imputeMissingData.name()).getBooleanValue();
+		} catch (DataConversionException e) {
+			e.printStackTrace();
+		}
+		anchorMzTolerance = NumberUtils.toDouble(metabCombinerParametersElement.getAttributeValue(
+				MetabCombinerAlignmentSettingsFields.anchorMzTolerance.name()));		
+		anchorAreaQuantileTolerance = NumberUtils.toDouble(metabCombinerParametersElement.getAttributeValue(
+				MetabCombinerAlignmentSettingsFields.anchorAreaQuantileTolerance.name()));
+		anchorRtQuantileTolerance = NumberUtils.toDouble(metabCombinerParametersElement.getAttributeValue(
+				MetabCombinerAlignmentSettingsFields.anchorRtQuantileTolerance.name()));
+		primaryDataSetAnchorRtExclusionWindow = NumberUtils.toDouble(metabCombinerParametersElement.getAttributeValue(
+				MetabCombinerAlignmentSettingsFields.primaryDataSetAnchorRtExclusionWindow.name()));
+		secondaryDataSetAnchorRtExclusionWindow = NumberUtils.toDouble(metabCombinerParametersElement.getAttributeValue(
+				MetabCombinerAlignmentSettingsFields.secondaryDataSetAnchorRtExclusionWindow.name()));
+		scoringMZweight = NumberUtils.toDouble(metabCombinerParametersElement.getAttributeValue(
+				MetabCombinerAlignmentSettingsFields.scoringMZweight.name()));
+		scoringRTweight = NumberUtils.toDouble(metabCombinerParametersElement.getAttributeValue(
+				MetabCombinerAlignmentSettingsFields.scoringRTweight.name()));
+		scoringAbundanceWeight = NumberUtils.toDouble(metabCombinerParametersElement.getAttributeValue(
+				MetabCombinerAlignmentSettingsFields.scoringAbundanceWeight.name()));		
+		maxMissingBatchCount = NumberUtils.toInt(metabCombinerParametersElement.getAttributeValue(
+				MetabCombinerAlignmentSettingsFields.maxMissingBatchCount.name()));
+		try {
+			usePPMforScoringMz = metabCombinerParametersElement.getAttribute(
+					MetabCombinerAlignmentSettingsFields.usePPMforScoringMz.name()).getBooleanValue();
+		} catch (DataConversionException e) {
+			e.printStackTrace();
+		}
+		rtFittingModelType = RtFittingModelType.valueOf(
+				metabCombinerParametersElement.getAttributeValue(
+						MetabCombinerAlignmentSettingsFields.rtFittingModelType.name()));
+		try {
+			useAdductsToAdjustScore = metabCombinerParametersElement.getAttribute(
+					MetabCombinerAlignmentSettingsFields.useAdductsToAdjustScore.name()).getBooleanValue();
+		} catch (DataConversionException e) {
+			e.printStackTrace();
+		}
+		minimalAlignmentScore = NumberUtils.toDouble(metabCombinerParametersElement.getAttributeValue(
+				MetabCombinerAlignmentSettingsFields.minimalAlignmentScore.name()));		
+		maxFeatureRankForPrimaryDataSet = NumberUtils.toInt(metabCombinerParametersElement.getAttributeValue(
+				MetabCombinerAlignmentSettingsFields.maxFeatureRankForPrimaryDataSet.name()));
+		maxFeatureRankForSecondaryDataSet = NumberUtils.toInt(metabCombinerParametersElement.getAttributeValue(
+				MetabCombinerAlignmentSettingsFields.maxFeatureRankForSecondaryDataSet.name()));		
+		subgroupScoreCutoff = NumberUtils.toDouble(metabCombinerParametersElement.getAttributeValue(
+				MetabCombinerAlignmentSettingsFields.subgroupScoreCutoff.name()));		
+		maxRTerrorForAlignedFeatures = NumberUtils.toDouble(metabCombinerParametersElement.getAttributeValue(
+				MetabCombinerAlignmentSettingsFields.maxRTerrorForAlignedFeatures.name()));		
+		try {
+			resolveAlignmentConflictsInOutput = metabCombinerParametersElement.getAttribute(
+					MetabCombinerAlignmentSettingsFields.resolveAlignmentConflictsInOutput.name()).getBooleanValue();
+		} catch (DataConversionException e) {
+			e.printStackTrace();
+		}
+		try {
+			rtOrderFlagInOutput = metabCombinerParametersElement.getAttribute(
+					MetabCombinerAlignmentSettingsFields.rtOrderFlagInOutput.name()).getBooleanValue();
+		} catch (DataConversionException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override

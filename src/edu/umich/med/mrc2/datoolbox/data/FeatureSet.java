@@ -235,7 +235,7 @@ public abstract class FeatureSet implements Serializable, Comparable<FeatureSet>
 	public FeatureSet(Element featureSetElement) {
 
 		eventListeners = ConcurrentHashMap.newKeySet();
-		properties = new TreeMap<FeatureSetProperties,XmlStorable>();
+		properties = new TreeMap<>();
 		featureSetName = featureSetElement.getAttributeValue(CommonFields.Name.name());
 		active = Boolean.parseBoolean(
 				featureSetElement.getAttributeValue(CommonFields.Enabled.name()));

@@ -174,14 +174,14 @@ public class MSMSClusteringDBUtils {
 				"INSERT INTO MSMS_CLUSTERING_PARAMETERS_XML ( " +
 				"PAR_SET_ID, PAR_SET_NAME, PAR_SET_XML, PAR_SET_MD5)  " +
 				"VALUES(?, ?, ?, ?)";
-		PreparedStatement ps = conn.prepareStatement(query);
+		try(PreparedStatement ps = conn.prepareStatement(query)){
 		
-		ps.setString(1, params.getId());
-		ps.setString(2,params.getName());		
-		ps.setString(3, paramsXml);
-		ps.setString(4, params.getMd5());
-		ps.executeUpdate();
-		ps.close();
+			ps.setString(1, params.getId());
+			ps.setString(2,params.getName());		
+			ps.setString(3, paramsXml);
+			ps.setString(4, params.getMd5());
+			ps.executeUpdate();
+		}
 	}
 	
 	public static void addMSMSClusteringParameterSetOld(

@@ -46,6 +46,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
+import org.apache.commons.lang.math.NumberUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.ujmp.core.Matrix;
 
@@ -60,6 +61,7 @@ import edu.umich.med.mrc2.datoolbox.data.MsFeatureClusterSet;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureSet;
 import edu.umich.med.mrc2.datoolbox.data.MzFrequencyObject;
+import edu.umich.med.mrc2.datoolbox.data.MzRtFilter;
 import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.enums.CompoundIdSource;
@@ -165,7 +167,6 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 	private DockableFeatureIntensitiesTable featureIntensitiesTable;
 	private DockableSpectumPlot spectrumPlot;
 	private DockableMsTable spectrumTable;
-	//	private DockableIdentificationResultsTable idTable;
 	private DockableMolStructurePanel molStructurePanel;
 	private DockableObjectAnnotationPanel featureAnnotationPanel;
 	private DockableCorrelationDataPanel correlationPanel;
@@ -1471,6 +1472,7 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 	}
 
 	private void filterFeatureTable() {
+		
 		Collection<MsFeature> features = 
 				currentExperiment.getActiveFeatureSetForDataPipeline(activeDataPipeline)
 				.getFeatures();
@@ -1516,22 +1518,63 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 	
 	private void showFeatureMZRTListFilter() {
 		
+		if(activeMsFeatureSet == null 
+				|| activeMsFeatureSet.getFeatures().isEmpty())
+			return;
+		
 		filterFeaturesByMzRtListDialog = new FilterFeaturesByMzRtListDialog(this);
 		filterFeaturesByMzRtListDialog.setLocationRelativeTo(this.getContentPane());
 		filterFeaturesByMzRtListDialog.setVisible(true);
 	}
 	
 	private void filterFeatureTableByMZRTList() {
-		//	TODO
+
 		Collection<String>errors = filterFeaturesByMzRtListDialog.validateFormData();
 		if(!errors.isEmpty()){
 		    MessageDialog.showErrorMsg(
 		            StringUtils.join(errors, "\n"), filterFeaturesByMzRtListDialog);
 		    return;
 		}
+		String[][]dataArray = filterFeaturesByMzRtListDialog.getInputDataArray();
+		int mzColumnIndex = filterFeaturesByMzRtListDialog.getMzColumnIndex();
+		int rtColumnIndex = filterFeaturesByMzRtListDialog.getRtColumnIndex();
+		double massWindow = filterFeaturesByMzRtListDialog.getMassWindow();
+		MassErrorType massErrorType = filterFeaturesByMzRtListDialog.getMassErrorType();
+		double rtWindow = filterFeaturesByMzRtListDialog.getRTWindow();
+		String dataSetName = filterFeaturesByMzRtListDialog.getFilteredFeatureSetName();
 		
 		filterFeaturesByMzRtListDialog.savePreferences();
 		filterFeaturesByMzRtListDialog.dispose();
+		
+		double[][]mzRtArray = new double[dataArray.length-1][2];
+		for(int i=1; i<dataArray.length; i++) {
+			mzRtArray[i-1][0] = NumberUtils.createDouble(dataArray[i][mzColumnIndex]);
+			mzRtArray[i-1][1] = NumberUtils.createDouble(dataArray[i][rtColumnIndex]);
+		}
+		Set<MsFeature> filtered = new HashSet<>();
+		for(int i=0; i<mzRtArray.length; i++) {
+			
+			MzRtFilter mzRtFilter = new MzRtFilter(
+					mzRtArray[i][0], massWindow, massErrorType, mzRtArray[i][1], rtWindow);			
+			Set<MsFeature> matches = activeMsFeatureSet.getFeatures().stream().
+				filter(f -> mzRtFilter.matches(f.getMonoisotopicMz(), f.getRetentionTime())).
+				collect(Collectors.toSet());
+			if(!matches.isEmpty())
+				filtered.addAll(matches);
+		}
+		if(filtered.isEmpty()){
+		    MessageDialog.showErrorMsg(
+		    		"No features found using MZ/RT list", 
+		    		this.getContentPane());
+		}
+		else {
+			MsFeatureSet filteredDataSet = new MsFeatureSet(dataSetName);
+			filteredDataSet.addFeatures(filtered);
+			currentExperiment.addFeatureSetForDataPipeline(filteredDataSet, activeDataPipeline);			
+    		MRC2ToolBoxCore.getMainWindow().getExperimentSetupDraw().
+				getFeatureSubsetPanel().addSetListeners(filteredDataSet);		
+    		MetabolomicsProjectUtils.switchActiveMsFeatureSet(filteredDataSet);
+		}
 	}
 
 	public MsFeature[] getFilteredFeatures() {
