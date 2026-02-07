@@ -50,6 +50,8 @@ public class GapFillTestClass {
 						+ "EX01409-RPNEG-1miss-MCMultyBatchAlignment-20260204_093122");
 		MCAlignmentGapFiller mcgf = new MCAlignmentGapFiller(mcAlignmentProjectDir);
 		mcgf.parseAlignmentProjectSettings();
-		
+		mcgf.readCummulativeMetaDataWithGaps();
+		mcgf.readPairwiseBatchAlignments();
+		mcgf.fillAlignmentGaps();		
 	}
 }

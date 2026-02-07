@@ -33,6 +33,7 @@ public class PairwiseBatchAlignment implements Comparable<PairwiseBatchAlignment
 	private String secondExperimentId;
 	private String secondBatchId;
 	private Map<String,String>featureAlignmentMap;
+	private Map<String,String>reverseFeatureAlignmentMap;
 	
 	public PairwiseBatchAlignment(
 			File dataSource, 
@@ -47,6 +48,7 @@ public class PairwiseBatchAlignment implements Comparable<PairwiseBatchAlignment
 		this.secondExperimentId = secondExperimentId;
 		this.secondBatchId = secondBatchId;
 		featureAlignmentMap = new TreeMap<>();
+		reverseFeatureAlignmentMap = new TreeMap<>();
 	}
 
 	public File getDataSource() {
@@ -68,9 +70,25 @@ public class PairwiseBatchAlignment implements Comparable<PairwiseBatchAlignment
 	public String getSecondBatchId() {
 		return secondBatchId;
 	}
+	
+	public String getFirstCompositeId() {
+		return firstExperimentId + "." + firstBatchId;
+	}
+
+	public String getSecondCompositeId() {
+		return secondExperimentId + "." + secondBatchId;
+	}
 
 	public Map<String, String> getFeatureAlignmentMap() {
 		return featureAlignmentMap;
+	}
+	
+	public String getForwardMatch(String featureId) {
+		return featureAlignmentMap.get(featureId);
+	}
+	
+	public String getReverseMatch(String featureId) {
+		return reverseFeatureAlignmentMap.get(featureId);
 	}
 	
     @Override
@@ -100,5 +118,9 @@ public class PairwiseBatchAlignment implements Comparable<PairwiseBatchAlignment
 	@Override
 	public int compareTo(PairwiseBatchAlignment o) {
 		return this.dataSource.compareTo(o.getDataSource());
+	}
+
+	public Map<String, String> getReverseFeatureAlignmentMap() {
+		return reverseFeatureAlignmentMap;
 	}
 }

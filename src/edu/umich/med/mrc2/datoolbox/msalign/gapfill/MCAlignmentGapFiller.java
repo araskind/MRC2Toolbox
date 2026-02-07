@@ -27,6 +27,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -36,6 +37,7 @@ import org.jdom2.Document;
 import org.jdom2.JDOMException;
 import org.jdom2.input.SAXBuilder;
 
+import edu.umich.med.mrc2.datoolbox.gui.rgen.mcr.MetabCombinerFileInputObject;
 import edu.umich.med.mrc2.datoolbox.gui.rgen.mcr.MetabCombinerParametersObject;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.rqc.MetabCombinerAlignmentScriptGenerator;
@@ -47,28 +49,15 @@ public class MCAlignmentGapFiller {
 	private File mcAlignmentProjectDir;
 	private Set<PairwiseBatchAlignment>pairwiseBatchAlignmentSet;
 	private MetabCombinerParametersObject alignmentProjectSettings;
+	private Set<String>batchIdSet;
+	private CummulativeAlignmentMetadataObject alignmentMetadataObject;
 	
 	public MCAlignmentGapFiller(File mcAlignmentProjectDir) {
 		super();
 		
 		this.mcAlignmentProjectDir = mcAlignmentProjectDir;
 		pairwiseBatchAlignmentSet = new TreeSet<>();
-	}
-	
-	public void readCummulativeMetaDataWithGaps() {
-		
-		Path cummulativeMetaDataPath = Paths.get(mcAlignmentProjectDir.getAbsolutePath(),
-				MetabCombinerAlignmentScriptGenerator.EXTENDED_CUMMULATIVE_METADATA_FILE_NAME);
-		String[][]alignmentData  = new String[0][0];
-		try {
-			alignmentData = DelimitedTextParser.parseTextFileWithEncoding(
-					cummulativeMetaDataPath.toFile(), MRC2ToolBoxConfiguration.getTabDelimiter());
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		if(alignmentData.length > 1) {
-			
-		}
+		batchIdSet = new TreeSet<>();
 	}
 	
 	public void parseAlignmentProjectSettings() {
@@ -85,9 +74,44 @@ public class MCAlignmentGapFiller {
 			e1.printStackTrace();
 			return;						
 		}
-		if(doc != null)
-			alignmentProjectSettings = 
-				new MetabCombinerParametersObject(doc.getRootElement());
+		if(doc != null) {
+			
+			alignmentProjectSettings = new MetabCombinerParametersObject(doc.getRootElement());		
+			for(MetabCombinerFileInputObject mcFio : alignmentProjectSettings.getMetabCombinerFileInputObjectSet())
+				batchIdSet.add(mcFio.getExperimentId() + "." + mcFio.getBatchId());			
+		}
+	}
+	
+	public void readCummulativeMetaDataWithGaps() {
+		
+		Path cummulativeMetaDataPath = Paths.get(mcAlignmentProjectDir.getAbsolutePath(),
+				MetabCombinerAlignmentScriptGenerator.EXTENDED_CUMMULATIVE_METADATA_FILE_NAME);
+		String[][]alignmentData  = new String[0][0];
+		try {
+			alignmentData = DelimitedTextParser.parseTextFileWithEncoding(
+					cummulativeMetaDataPath.toFile(), MRC2ToolBoxConfiguration.getTabDelimiter());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		if(alignmentData.length <= 1)
+			return;
+			
+		Map<String,Integer>batchIdColumnMap = new TreeMap<>();
+		for(int i=1; i<alignmentData[0].length; i++){
+			
+			if(batchIdSet.contains(alignmentData[0][i]))
+				batchIdColumnMap.put(alignmentData[0][i], i);
+		}
+		String primaryBatchId = alignmentData[0][0];
+		alignmentMetadataObject = new CummulativeAlignmentMetadataObject(primaryBatchId);
+		Map<String, Map<String, String>> alignmentMap = alignmentMetadataObject.getAlignmentMap();
+		for(int i=1; i<alignmentData.length; i++){
+			
+			String primaryId = alignmentData[i][0];			
+			alignmentMap.computeIfAbsent(primaryId, e -> new TreeMap<>());
+			for(Entry<String, Integer> me : batchIdColumnMap.entrySet())
+				alignmentMap.get(primaryId).put(me.getKey(), alignmentData[i][me.getValue()]);						
+		}		
 	}
 
 	public void readPairwiseBatchAlignments() {
@@ -138,11 +162,43 @@ public class MCAlignmentGapFiller {
 					idy = i;
 			}
 			Map<String,String>featureAlignmentMap = new TreeMap<>();
-			for(int i=1; i<alignmentData.length; i++)
+			Map<String,String>reverseFeatureAlignmentMap = new TreeMap<>();
+			for(int i=1; i<alignmentData.length; i++) {
 				featureAlignmentMap.put(alignmentData[i][idx], alignmentData[i][idy]);
-			
+				reverseFeatureAlignmentMap.put(alignmentData[i][idy], alignmentData[i][idx]);
+			}			
 			pba.getFeatureAlignmentMap().putAll(featureAlignmentMap);
+			pba.getReverseFeatureAlignmentMap().putAll(reverseFeatureAlignmentMap);
 		}		
 		return pba;
+	}
+	
+	public void fillAlignmentGaps() {
+		
+		for(String primaryId : alignmentMetadataObject.getPrimaryFeatureSet()) {
+			
+			Set<String> missingForFeature = 
+					alignmentMetadataObject.getMissingBatchesForFeature(primaryId);
+			if(missingForFeature.isEmpty())
+				continue;
+			
+			Map<String, String> matchesMap = alignmentMetadataObject.getMatchesForFeature(primaryId);
+			
+			
+			
+			for(String batchWithMissing : missingForFeature) {
+				
+				PairwiseBatchAlignment forwardAlignment = 
+						pairwiseBatchAlignmentSet.stream().
+						filter(s -> s.getFirstCompositeId().equals(batchWithMissing)).
+						findFirst().orElse(null);
+				if(forwardAlignment != null) {
+					
+					//String forwardMtch = forwardAlignment.getForwardMatch(batchWithMissing)
+				}
+
+				
+			}
+		}
 	}
 }
