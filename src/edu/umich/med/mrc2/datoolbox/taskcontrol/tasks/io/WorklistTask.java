@@ -195,7 +195,7 @@ public abstract class WorklistTask extends AbstractTask {
 				if (sampleInfo != null) {
 
 					List<Element> fieldElements = sampleInfo.getRootElement().getChildren("Field");
-					TreeMap<String, String> sampleData = new TreeMap<String, String>();
+					TreeMap<String, String> sampleData = new TreeMap<>();
 					for (Element fieldElement : fieldElements) {
 
 						String name = fieldElement.getChild("Name").getText().trim();

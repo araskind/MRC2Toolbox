@@ -221,17 +221,20 @@ public class WorklistUtils {
 
 	public static Map<DataFile, String> createDataFileMotrPacSampleIdMap(Worklist worklist, ExperimentDesign design) {
 		
-		Map<DataFile,String>fileMotrPacSampleIdMap = new TreeMap<DataFile,String>();
+		Map<DataFile,String>fileMotrPacSampleIdMap = new TreeMap<>();
 		List<? extends WorklistItem> items = worklist.getTimeSortedWorklistItems().stream().
 				sorted(new WorklistItemComparator(SortProperty.injectionTime)).
 				collect(Collectors.toList());
 		
-		Map<ExperimentalSample,List<DataFile>>sampleFileMap = new TreeMap<ExperimentalSample,List<DataFile>>();
+		Map<ExperimentalSample,List<DataFile>>sampleFileMap = new TreeMap<>();
 		
 		for(WorklistItem item : items) {
 			
 			DataFile df = item.getDataFile();		
-			ExperimentalSample sample = design.getSampleByDataFile(df);			
+			ExperimentalSample sample = design.getSampleByDataFile(df);	
+			if(sample == null)
+				continue;
+			
 			if(!sampleFileMap.containsKey(sample))
 				sampleFileMap.put(sample, new ArrayList<>());
 			
@@ -266,11 +269,15 @@ public class WorklistUtils {
 
 	public static Map<DataFile, String> createDataFileMotrPacSampleTypeMap(Worklist worklist, ExperimentDesign design) {
 		
-		Map<DataFile,String>fileMotrPacSampleTypeMap = new TreeMap<DataFile,String>();
+		Map<DataFile,String>fileMotrPacSampleTypeMap = new TreeMap<>();
 		for(WorklistItem item : worklist.getTimeSortedWorklistItems()) {
 			
 			DataFile df = item.getDataFile();		
-			ExperimentalSample sample = design.getSampleByDataFile(df);		
+			ExperimentalSample sample = design.getSampleByDataFile(df);	
+			if(sample == null) {
+				System.out.println("Sample not found for data file " + df.getName());
+				continue;
+			}
 			if(sample.getSampleType().equals(ReferenceSamplesManager.sampleLevel))
 				fileMotrPacSampleTypeMap.put(df,"Sample");
 			else {				

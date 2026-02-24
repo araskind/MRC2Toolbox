@@ -334,9 +334,9 @@ public class MsImportUtils {
 
 	public static List<List<String>> parseMspInputFile(File inputFile) {
 
-		List<List<String>> mspChunks = new ArrayList<List<String>>();
+		List<List<String>> mspChunks = new ArrayList<>();
 		List<String> allLines = TextUtils.readTextFileToList(inputFile.getAbsolutePath());
-		List<String> chunk = new ArrayList<String>();
+		List<String> chunk = new ArrayList<>();
 		Pattern namePattern = Pattern.compile("(?i)^" + MSPField.NAME.getName() + ":");
 		Pattern pnumPattern = Pattern.compile("(?i)^" + MSPField.NUM_PEAKS.getName() + ":?\\s+\\d+");
 		Matcher regexMatcher;
@@ -354,7 +354,7 @@ public class MsImportUtils {
 
 					if (numPeaks.isPresent()) {
 
-						List<String> newChunk = new ArrayList<String>();
+						List<String> newChunk = new ArrayList<>();
 						newChunk.addAll(chunk);
 						mspChunks.add(newChunk);
 					}

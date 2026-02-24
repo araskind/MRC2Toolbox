@@ -65,10 +65,10 @@ public class EX01496andEX01526RQCgenerator {
 		String assayType4R = "ionpneg";
 		File xlQc = xlQCfile;
 		File rWorkingDir = new File("Y:\\DataAnalysis\\_Reports\\EX01526 - Human EDTA Tranche 4 plasma H20001805E\\"
-				+ "A049 - Central carbon metabolism profiling\\Documents\\CO300-Pk1000\\T3T4");	
+				+ "A049 - Central carbon metabolism profiling\\Documents\\CO300-Pk1000\\All\\QC");	
 		if(highCutoffData) {
 			rWorkingDir = new File("Y:\\DataAnalysis\\_Reports\\EX01526 - Human EDTA Tranche 4 plasma H20001805E\\"
-					+ "A049 - Central carbon metabolism profiling\\Documents\\CO900-Pk3000\\T3T4");
+					+ "A049 - Central carbon metabolism profiling\\Documents\\CO900-Pk3000\\All\\QC");
 			xlQc = xlHighCutoffQCfile;
 		}	
 		File inputMap = Paths.get(rWorkingDir.getAbsolutePath(), "EX01496_1526_IONP-NEG-SummaryQC-inputMap.txt").toFile();
@@ -87,10 +87,10 @@ public class EX01496andEX01526RQCgenerator {
 		String assayType4R = "ionpneg";
 		File xlQc = xlQCfile;
 		File rWorkingDir = new File("Y:\\DataAnalysis\\_Reports\\EX01526 - Human EDTA Tranche 4 plasma H20001805E\\"
-				+ "A049 - Central carbon metabolism profiling\\Documents\\CO300-Pk1000\\T3T4");	
+				+ "A049 - Central carbon metabolism profiling\\Documents\\CO300-Pk1000\\All\\QC");	
 		if(highCutoffData) {
 			rWorkingDir = new File("Y:\\DataAnalysis\\_Reports\\EX01526 - Human EDTA Tranche 4 plasma H20001805E\\"
-					+ "A049 - Central carbon metabolism profiling\\Documents\\CO900-Pk3000\\T3T4");
+					+ "A049 - Central carbon metabolism profiling\\Documents\\CO900-Pk3000\\All\\QC");
 			xlQc = xlHighCutoffQCfile;
 		}		
 		File inputMap = Paths.get(rWorkingDir.getAbsolutePath(), "EX01526_IONP-NEG-SummaryQC-inputMap.txt").toFile();
@@ -109,10 +109,10 @@ public class EX01496andEX01526RQCgenerator {
 		String assayType4R = "rpneg";
 		File xlQc = xlQCfile;
 		File rWorkingDir = new File("Y:\\DataAnalysis\\_Reports\\EX01526 - Human EDTA Tranche 4 plasma H20001805E\\"
-				+ "A003 - Untargeted\\Documents\\NEG\\CO300-Pk1000\\T3T4");	
+				+ "A003 - Untargeted\\Documents\\NEG\\CO300-Pk1000\\All\\QC");	
 		if(highCutoffData) {
 			rWorkingDir = new File("Y:\\DataAnalysis\\_Reports\\EX01526 - Human EDTA Tranche 4 plasma H20001805E\\"
-					+ "A003 - Untargeted\\Documents\\NEG\\CO900-Pk3000\\T3T4");
+					+ "A003 - Untargeted\\Documents\\NEG\\CO900-Pk3000\\All\\QC");
 			xlQc = xlHighCutoffQCfile;
 		}	
 		File inputMap = Paths.get(rWorkingDir.getAbsolutePath(), "EX01496_1526_RP-NEG-SummaryQC-inputMap.txt").toFile();
@@ -131,10 +131,10 @@ public class EX01496andEX01526RQCgenerator {
 		String assayType4R = "rpneg";
 		File xlQc = xlQCfile;
 		File rWorkingDir = new File("Y:\\DataAnalysis\\_Reports\\EX01526 - Human EDTA Tranche 4 plasma H20001805E\\"
-				+ "A003 - Untargeted\\Documents\\NEG\\CO300-Pk1000\\T3T4");	
+				+ "A003 - Untargeted\\Documents\\NEG\\CO300-Pk1000\\All\\QC");	
 		if(highCutoffData) {
 			rWorkingDir = new File("Y:\\DataAnalysis\\_Reports\\EX01526 - Human EDTA Tranche 4 plasma H20001805E\\"
-					+ "A003 - Untargeted\\Documents\\NEG\\CO900-Pk3000\\T3T4");
+					+ "A003 - Untargeted\\Documents\\NEG\\CO900-Pk3000\\All\\QC");
 			xlQc = xlHighCutoffQCfile;
 		}	
 		File inputMap = Paths.get(rWorkingDir.getAbsolutePath(), "EX01526_RP-NEG-SummaryQC-inputMap.txt").toFile();
@@ -153,10 +153,10 @@ public class EX01496andEX01526RQCgenerator {
 		String assayType4R = "rppos";
 		File xlQc = xlQCfile;
 		File rWorkingDir = new File("Y:\\DataAnalysis\\_Reports\\EX01526 - Human EDTA Tranche 4 plasma H20001805E\\"
-				+ "A003 - Untargeted\\Documents\\POS\\CO300-Pk1000\\T3T4");	
+				+ "A003 - Untargeted\\Documents\\POS\\CO300-Pk1000\\All\\QC");	
 		if(highCutoffData) {
 			rWorkingDir = new File("Y:\\DataAnalysis\\_Reports\\EX01526 - Human EDTA Tranche 4 plasma H20001805E\\"
-					+ "A003 - Untargeted\\Documents\\POS\\CO900-Pk3000\\T3T4");
+					+ "A003 - Untargeted\\Documents\\POS\\CO900-Pk3000\\All\\QC");
 			xlQc = xlHighCutoffQCfile;
 		}	
 		File inputMap = Paths.get(rWorkingDir.getAbsolutePath(), "EX01496_1526_RP-POS-SummaryQC-inputMap.txt").toFile();
@@ -175,10 +175,10 @@ public class EX01496andEX01526RQCgenerator {
 		String assayType4R = "rppos";
 		File xlQc = xlQCfile;
 		File rWorkingDir = new File("Y:\\DataAnalysis\\_Reports\\EX01526 - Human EDTA Tranche 4 plasma H20001805E\\"
-				+ "A003 - Untargeted\\Documents\\POS\\CO300-Pk1000\\T3T4");	
+				+ "A003 - Untargeted\\Documents\\POS\\CO300-Pk1000\\All\\QC");	
 		if(highCutoffData) {
 			rWorkingDir = new File("Y:\\DataAnalysis\\_Reports\\EX01526 - Human EDTA Tranche 4 plasma H20001805E\\"
-					+ "A003 - Untargeted\\Documents\\POS\\CO900-Pk3000\\T3T4");
+					+ "A003 - Untargeted\\Documents\\POS\\CO900-Pk3000\\All\\QC");
 			xlQc = xlHighCutoffQCfile;
 		}		
 		File inputMap = Paths.get(rWorkingDir.getAbsolutePath(), "EX01526_RP-POS-SummaryQC-inputMap.txt").toFile();

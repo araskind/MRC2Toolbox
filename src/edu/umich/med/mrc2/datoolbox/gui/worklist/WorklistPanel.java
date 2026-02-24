@@ -59,6 +59,7 @@ import org.apache.commons.lang3.StringUtils;
 import bibliothek.gui.dock.action.actions.SimpleButtonAction;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.Worklist;
+import edu.umich.med.mrc2.datoolbox.data.WorklistItem;
 import edu.umich.med.mrc2.datoolbox.data.enums.WorklistImportType;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignEvent;
@@ -613,7 +614,16 @@ public class WorklistPanel extends DockableMRC2ToolboxPanel implements BackedByP
 				collect(Collectors.toSet());
 		if(!filesNotInExperiment.isEmpty())
 			newWorklistDataFiles.removeAll(filesNotInExperiment);
-				
+		
+		//	Replace data files in worklist with corresponding files from the experiment
+		for(WorklistItem item : newWorklist.getWorklistItems()) {
+			
+			final DataFile wdf = item.getDataFile();
+			DataFile expDf = allDataFiles.stream().
+					filter(f -> f.equals(wdf)).findFirst().orElse(null);
+			if(expDf != null)
+				item.setDataFile(expDf);
+		}				
 		//	If this is new / replacement worklist
 		if(!eTask.isAppendWorklist()) {
 			

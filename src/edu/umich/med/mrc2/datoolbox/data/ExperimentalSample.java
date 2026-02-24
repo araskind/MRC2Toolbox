@@ -198,9 +198,11 @@ public class ExperimentalSample implements Comparable<ExperimentalSample>, Seria
 		if(dataFilesMap.get(file.getDataAcquisitionMethod()) == null)
 			return false;
 		
-		return dataFilesMap.get(file.getDataAcquisitionMethod()).stream().
+		DataFile df = dataFilesMap.get(file.getDataAcquisitionMethod()).stream().
 				filter(f -> f.equals(file)).
-				findFirst().isPresent();
+				findFirst().orElse(null);
+		
+		return df != null;
 	}
 
 	public boolean hasFactor(ExperimentDesignFactor ef) {

@@ -78,7 +78,8 @@ public class WorklistExtractionTask extends WorklistTask {
 		}
 		if(importType.equals(WorklistImportType.RAW_DATA_DIRECTORY_SCAN)) {
 
-			if (sourceFileOrDirectory == null || !sourceFileOrDirectory.exists() || !sourceFileOrDirectory.canRead()) {
+			if (sourceFileOrDirectory == null || !sourceFileOrDirectory.exists() 
+					|| !sourceFileOrDirectory.canRead()) {
 				setStatus(TaskStatus.ERROR);
 				return;
 			}
