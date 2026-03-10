@@ -192,6 +192,23 @@ public class FIOUtils {
 		return result;
 	}
 
+	public static List<Path> findFilesByNameContainingString(Path path, String substring) {
+
+		if (!Files.isDirectory(path)) {
+			throw new IllegalArgumentException("Path must be a directory!");
+		}
+		String substringSearch = substring.toLowerCase();
+		List<Path> result = null;
+		try (Stream<Path> walk = Files.walk(path)) {
+			result = walk.filter(p -> !Files.isDirectory(p))
+					.filter(p -> p.getName(p.getNameCount() - 1).toString().toLowerCase().contains(substringSearch))
+					.collect(Collectors.toList());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return result;
+	}
+	
 	public static List<Path> findDirectoriesByNameStartingWith(Path path, String nameStart) {
 
 		if (!Files.isDirectory(path)) {

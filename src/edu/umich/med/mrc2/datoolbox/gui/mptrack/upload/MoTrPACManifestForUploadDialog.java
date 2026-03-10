@@ -77,7 +77,7 @@ public class MoTrPACManifestForUploadDialog extends JDialog implements ActionLis
 		
 		JTabbedPane tabbedPane = new JTabbedPane();
 		getContentPane().add(tabbedPane, BorderLayout.CENTER);
-		assayPanelMap = new TreeMap<MoTrPACAssay,ManifestForUploadSetupPanel>();
+		assayPanelMap = new TreeMap<>();
 		for(MoTrPACAssay assay : MoTrPACDatabaseCache.getMotrpacAssayList()) {
 			
 			ManifestForUploadSetupPanel assayPanel = new ManifestForUploadSetupPanel(assay, this);
@@ -93,12 +93,7 @@ public class MoTrPACManifestForUploadDialog extends JDialog implements ActionLis
 		JButton btnCancel = new JButton("Cancel");
 		buttonPanel.add(btnCancel);
 		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
-		ActionListener al = new ActionListener() {
-			public void actionPerformed(ActionEvent ae) {
-				dispose();
-			}
-		};
-		btnCancel.addActionListener(al);
+		btnCancel.addActionListener(e -> dispose());
 
 		JButton btnSave = new JButton(
 				MainActionCommands.CREATE_MANIFEST_FOR_BIC_UPLOAD_COMMAND.getName());
@@ -107,7 +102,7 @@ public class MoTrPACManifestForUploadDialog extends JDialog implements ActionLis
 		btnSave.addActionListener(listener);
 		buttonPanel.add(btnSave);
 		JRootPane rootPane = SwingUtilities.getRootPane(btnSave);
-		rootPane.registerKeyboardAction(al, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
+		rootPane.registerKeyboardAction(al -> {dispose();}, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 		rootPane.setDefaultButton(btnSave);
 
 		loadPreferences();

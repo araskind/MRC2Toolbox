@@ -32,20 +32,26 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.text.DecimalFormat;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.NavigableSet;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.compress.archivers.ArchiveException;
+import org.apache.commons.compress.utils.FileNameUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.filefilter.FileFilterUtils;
@@ -59,8 +65,12 @@ import org.openscience.cdk.io.MDLV2000Reader;
 import org.openscience.cdk.silent.SilentChemObjectBuilder;
 import org.openscience.cdk.smiles.SmilesParser;
 
+import edu.umich.med.mrc2.datoolbox.data.ExperimentalSample;
+import edu.umich.med.mrc2.datoolbox.data.enums.DataExportFields;
+import edu.umich.med.mrc2.datoolbox.data.enums.MoTrPACRawDataManifestFields;
 import edu.umich.med.mrc2.datoolbox.data.enums.MoTrPACmetaboliteMetaDataFields;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
+import edu.umich.med.mrc2.datoolbox.main.ReferenceSamplesManager;
 import edu.umich.med.mrc2.datoolbox.main.config.FilePreferencesFactory;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.utils.CompressionUtils;
@@ -89,20 +99,142 @@ public class MoTrPACUtils {
 				MRC2ToolBoxCore.configDir + "MRC2ToolBoxPrefs.txt");
 		MRC2ToolBoxConfiguration.initConfiguration();
 		
+//		File[]mFiles = new File[] {
+//				new File("Y:\\DataAnalysis\\_Reports\\EX01355 - Human Muscle Tranche 1 H20000820Y\\A003 - Untargeted\\QCaNVaS_v0.8.0\\Unnamed\\RP-NEG\\EX01355-RP-NEG-Manifest-complete.txt"),
+//				new File("Y:\\DataAnalysis\\_Reports\\EX01355 - Human Muscle Tranche 1 H20000820Y\\A003 - Untargeted\\QCaNVaS_v0.8.0\\Unnamed\\RP-POS\\EX01355-RP-POS-Manifest-complete.txt"),
+//				new File("Y:\\DataAnalysis\\_Reports\\EX01355 - Human Muscle Tranche 1 H20000820Y\\A049 - Central carbon metabolism profiling\\QCaNVaS_v0.8.0\\Unnamed\\EX01355-IONP-NEG-Manifest-complete.txt"),
+//				new File("Y:\\DataAnalysis\\_Reports\\EX01387 - Human Post Suspension Adipose powder H20000902J\\4QCANVAS\\IONP-NEG\\EX01387-IONP-NEG-Manifest-complete.txt"),
+//				new File("Y:\\DataAnalysis\\_Reports\\EX01387 - Human Post Suspension Adipose powder H20000902J\\4QCANVAS\\RP-POS\\EX01387-RP-POS-Manifest-complete.txt"),
+//				new File("Y:\\DataAnalysis\\_Reports\\EX01409 - Human EDTA Tranche 1 plasma W20000960M\\A003 - Untargeted\\QCaNVaS\\RP-NEG\\EX01409-RP-NEG-Manifest-complete.txt"),
+//				new File("Y:\\DataAnalysis\\_Reports\\EX01409 - Human EDTA Tranche 1 plasma W20000960M\\A003 - Untargeted\\QCaNVaS\\RP-POS\\EX01409-RP-POS-Manifest-complete.txt"),
+//				new File("Y:\\DataAnalysis\\_Reports\\EX01409 - Human EDTA Tranche 1 plasma W20000960M\\A049 - Central carbon metabolism profiling\\QCaNVaS\\EX01409-IONP-NEG-Manifest-complete.txt"),
+//				new File("Y:\\DataAnalysis\\_Reports\\EX01426 - Human EDTA Tranche 2 plasma W20001176L\\A003 - Untargeted\\QCaNVaS\\RP-NEG\\EX01426-RP-NEG-Manifest-complete.txt"),
+//				new File("Y:\\DataAnalysis\\_Reports\\EX01426 - Human EDTA Tranche 2 plasma W20001176L\\A003 - Untargeted\\QCaNVaS\\RP-POS\\EX01426-RP-POS-Manifest-complete.txt"),
+//				new File("Y:\\DataAnalysis\\_Reports\\EX01426 - Human EDTA Tranche 2 plasma W20001176L\\A049 - Central carbon metabolism profiling\\QCaNVaS\\EX01426-IONP-NEG-Manifest-complete.txt"),
+//				new File("Y:\\DataAnalysis\\_Reports\\EX01496 - Human EDTA Tranche 3 plasma X20001463K\\A003 - Untargeted\\QCaNVaS\\RP-NEG\\EX01496-RP-NEG-Manifest-complete.txt"),
+//				new File("Y:\\DataAnalysis\\_Reports\\EX01496 - Human EDTA Tranche 3 plasma X20001463K\\A003 - Untargeted\\QCaNVaS\\RP-POS\\EX01496-RP-POS-Manifest-complete.txt"),
+//				new File("Y:\\DataAnalysis\\_Reports\\EX01496 - Human EDTA Tranche 3 plasma X20001463K\\A049 - Central carbon metabolism profiling\\QCaNVaS\\EX01496-IONP-NEG-Manifest-complete.txt"),
+//				new File("Y:\\DataAnalysis\\_Reports\\EX01526 - Human EDTA Tranche 4 plasma H20001805E\\A003 - Untargeted\\QCaNVaS\\RP-NEG\\EX01526-RP-NEG-Manifest-complete.txt"),
+//				new File("Y:\\DataAnalysis\\_Reports\\EX01526 - Human EDTA Tranche 4 plasma H20001805E\\A003 - Untargeted\\QCaNVaS\\RP-POS\\EX01526-RP-POS-Manifest-complete.txt"),
+//				new File("Y:\\DataAnalysis\\_Reports\\EX01526 - Human EDTA Tranche 4 plasma H20001805E\\A049 - Central carbon metabolism profiling\\QCaNVaS\\EX01526-IONP-NEG-Manifest-complete.txt"),
+//		};
+//		for(File runManifestFile : mFiles) {
+//			
+//			try {
+//				createUniqueSampleIdsForControlsAndOrderSamples(runManifestFile);
+//			} catch (Exception e) {
+//				e.printStackTrace();
+//			}
+//		}
+		try {
+			extractBatchRunDatesFromManifests();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 		// File parentDir = new File("Y:\\DataAnalysis\\_Reports\\EX01094 - MoTrPAC Muscle PreCOVID-20210219\\4Upload\\_4BIC\\HUMAN");
 		//	File parentDir = new File("Y:\\DataAnalysis\\_Reports\\EX01117 - PASS 1C\\4BIC\\PASS1A-06\\_FINALS");
+	}
+	
+	private static void extractBatchRunDatesFromManifests() {
+		
+		Pattern pattern = Pattern.compile("BATCH\\d+", Pattern.CASE_INSENSITIVE);
+		
+		
+		File manifestMap = new File("Y:\\DataAnalysis\\_Reports\\_MoTrPAC\\manifest_map.txt");
+		String[][] manifestMapData = null;
 		try {
-			//	extractRefmetDisrepanciesForAllExperiments();
-			//	fixRefMetNames();
-			//	collectAllMetaboliteNames();
-			//	duplicateDataUploadDirectoryForResultsCorrection4PASS1A18();
-			//	createMoTrPACFileManifests4Pass1A18();
-				collectFilePathsForReupload();
-		} catch (Exception e) {
+			manifestMapData = DelimitedTextParser.parseTextFileWithEncoding(manifestMap, '\t');
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
+		}
+		List<BatchMetadataObject>dataList = new ArrayList<>();
+		for(int i=0; i<manifestMapData.length; i++) {
+			
+			String experimentId = manifestMapData[i][0];
+			String assay = manifestMapData[i][1];
+			String batchName = "";
+			List<Path>manifestList = 
+					FIOUtils.findFilesByNameContainingString(Paths.get(manifestMapData[i][2]), "_MANIFEST");
+			for(Path manifestPath : manifestList) {
+				
+				Matcher bMatcher = pattern.matcher(manifestPath.getFileName().toString());
+				if(bMatcher.find())
+					batchName = bMatcher.group();
+				
+				
+				NavigableSet<Date>dateSet = extractDateSetFromManifest(manifestPath);
+				BatchMetadataObject bmo = new BatchMetadataObject(
+						experimentId, assay, batchName, dateSet.first(), dateSet.last());
+				
+				dataList.add(bmo);
+			}			
+		}
+		List<String>dataListOutput = new ArrayList<>();
+		List<String>line = new ArrayList<>();
+		line.add("Experiment");
+		line.add("Assay");
+		line.add("Batch");
+		line.add("Run started");
+		line.add("Run ended");
+		dataListOutput.add(StringUtils.join(line, "\t"));
+		for(BatchMetadataObject bmo : dataList) {
+			
+			line.clear();
+			line.add(bmo.getExperimentId());
+			line.add(bmo.getAssay());
+			line.add(bmo.getBatchName());
+			line.add(MRC2ToolBoxConfiguration.defaultTimeStampFormat.format(bmo.getRunStart()));
+			line.add(MRC2ToolBoxConfiguration.defaultTimeStampFormat.format(bmo.getRunEnd()));
+			dataListOutput.add(StringUtils.join(line, "\t"));		
+		}
+		Path outputPath = Paths.get("Y:\\DataAnalysis\\_Reports\\_MoTrPAC\\BatchRunDates.txt");
+		try {
+		    Files.write(outputPath, 
+		    		dataListOutput,
+		            StandardCharsets.UTF_8,
+		            StandardOpenOption.CREATE, 
+		            StandardOpenOption.TRUNCATE_EXISTING);
+		} catch (IOException e) {
+		    e.printStackTrace();
 		}
 	}
 	
+	private static NavigableSet<Date> extractDateSetFromManifest(Path manifestPath) {
+		
+		NavigableSet<Date>dateSet = new TreeSet<>();
+		String[][] manifestMapData = null;
+		try {
+			manifestMapData = DelimitedTextParser.parseTextFileWithEncoding(manifestPath.toFile(), '\t');
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		int timeColumnIndex = -1;
+		for(int i=0; i<manifestMapData[0].length; i++) {
+			
+			if(manifestMapData[0][i].equals(DataExportFields.INJECTION_TIME.getName())) {
+				timeColumnIndex = i;
+				break;
+			}
+		}
+		for(int i=1; i<manifestMapData.length; i++) {
+			
+			String dateString = manifestMapData[i][timeColumnIndex];
+			Date injTime = null;
+	        try {
+	        	injTime = MRC2ToolBoxConfiguration.defaultTimeStampFormat.parse(dateString);
+
+	        } catch (ParseException e) {
+	            System.err.println("Error parsing date: " + e.getMessage());
+	        }
+	        dateSet.add(injTime);
+		}
+		return dateSet;
+	}
+
 	private static void collectFilePathsForReupload() {
 		
 		List<String>lookupNames = new ArrayList<>(
@@ -1216,7 +1348,7 @@ public class MoTrPACUtils {
 
 	private static void createMoTrPACFileManifest() throws IOException {
 		
-		List<String>tissueTypes = new ArrayList<String>(
+		List<String>tissueTypes = new ArrayList<>(
 				Arrays.asList(
 						"T31 - Plasma",
 						"T55 - Muscle",
@@ -1227,7 +1359,7 @@ public class MoTrPACUtils {
 						"T69 - Adipose brown",
 						"T70 - Adipose white"));
 		List<String>assayTypes = 
-				new ArrayList<String>(Arrays.asList("IONPNEG" ,"RPNEG", "RPPOS"));
+				new ArrayList<>(Arrays.asList("IONPNEG" ,"RPNEG", "RPPOS"));
 		File parentDirectory = 
 				new File("Y:\\DataAnalysis\\_Reports\\EX01117 - PASS 1C\\4BIC\\PASS1A-06");	
 		String batchId = "BATCH1_20210603";	
@@ -1751,6 +1883,111 @@ public class MoTrPACUtils {
 		} catch (IOException e) {
 		    e.printStackTrace();
 		}
+	}
+	
+	public static void createUniqueSampleIdsForControlsAndOrderSamples(File runManifestFile) {
+		
+		String[][] manifestData = null;
+		try {
+			manifestData = DelimitedTextParser.parseTextFileWithEncoding(runManifestFile, '\t');
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		if(manifestData == null || manifestData.length == 0)
+			return;
+		
+		//	Find sample ID and order column indexes
+		int sampleIdCol = -1;
+		int sampleTypeCol = -1;
+		int sampleOrderCol = -1;
+		for(int i=0; i<manifestData[0].length; i++) {
+			
+			if(manifestData[0][i].equals(MoTrPACRawDataManifestFields.MOTRPAC_SAMPLE_ID.getName()))				
+				sampleIdCol = i;
+
+			if(manifestData[0][i].equals(MoTrPACRawDataManifestFields.MOTRPAC_SAMPLE_ORDER.getName()))				
+				sampleOrderCol = i;
+			
+			if(manifestData[0][i].equals(MoTrPACRawDataManifestFields.MOTRPAC_SAMPLE_TYPE.getName()))				
+				sampleTypeCol = i;
+		}
+		if(sampleIdCol == -1 || sampleTypeCol == -1 || sampleOrderCol == -1) {
+			System.err.println("Obligatory column(s) not found");
+			return;
+		}
+		ReferenceSamplesManager.refreshReferenceSampleList();
+		Map<String,Integer>controlCounts = new TreeMap<>();
+		for(ExperimentalSample sample : ReferenceSamplesManager.getReferenceSamples())
+			controlCounts.put(sample.getId(), 1);
+		
+		//	Correct names for male/female controls
+		Map<String,String>sampleNameMap = getMailFemailControlsMap();
+		Map<Integer,String>sampleTypeMap = new TreeMap<>();
+		
+		String[]controlIdMap = new String[manifestData.length];
+		for(int i=1; i<manifestData.length; i++) {
+			
+			String sampleId = manifestData[i][sampleIdCol];
+			String controlId = controlCounts.keySet().stream().
+					filter(sampleId::startsWith).findFirst().orElse(null);
+			if(controlId != null) {
+				int currentCount = controlCounts.get(controlId);
+				String newControlId = controlId + "-" 
+						+ StringUtils.leftPad(Integer.toString(currentCount), 3, '0');
+				controlIdMap[i] = newControlId;
+				controlCounts.put(controlId, currentCount + 1);
+				
+				if(sampleNameMap.containsKey(controlId))
+					sampleTypeMap.put(i, sampleNameMap.get(controlId));			
+			}
+			else {
+				controlIdMap[i] = sampleId;
+			}
+		}
+		List<String>lines = new ArrayList<>();
+		lines.add(StringUtils.join(manifestData[0], "\t"));
+		List<String>nextLine = new ArrayList<>();
+		int columnCount = manifestData[0].length;
+		for(int i=1; i<manifestData.length; i++) {
+			
+			nextLine.clear();
+			for(int j=0; j<columnCount; j++) {
+				
+				if(j == sampleIdCol) {
+					nextLine.add(controlIdMap[i]);
+				}
+				else if(j == sampleTypeCol && sampleTypeMap.containsKey(i)) {
+					nextLine.add(sampleTypeMap.get(i));
+				}
+				else if(j == sampleOrderCol) {
+					nextLine.add(Integer.toString(i));
+				}
+				else
+					nextLine.add(manifestData[i][j]);
+			}
+			lines.add(StringUtils.join(nextLine, "\t"));
+		}
+		Path outputPath = Paths.get(runManifestFile.getParent(), 
+				FileNameUtils.getBaseName(runManifestFile.getName()) + "_uniqueControls.txt");
+		try {
+		    Files.write(outputPath, 
+		    		lines,
+		            StandardCharsets.UTF_8,
+		            StandardOpenOption.CREATE, 
+		            StandardOpenOption.TRUNCATE_EXISTING);
+		} catch (IOException e) {
+		    e.printStackTrace();
+		}
+	}
+	
+	private static Map<String,String> getMailFemailControlsMap() {
+		
+		Map<String,String>sampleNameMap = new TreeMap<>();
+		sampleNameMap.put("CSMR81030","QC-Reference-Female");
+		sampleNameMap.put("CSMR81040","QC-Reference-Male");
+		sampleNameMap.put("CSMR81020","QC-Reference-Female");
+		sampleNameMap.put("CSMR81010","QC-Reference-Male");
+		return sampleNameMap;
 	}
 }
 

@@ -156,11 +156,11 @@ public class WorklistUtils {
 	
 	public static List<String> createManifestColumns(Worklist worklist) {
 
-		Set<String> allColumnNames = new TreeSet<String>();
+		Set<String> allColumnNames = new TreeSet<>();
 		worklist.getTimeSortedWorklistItems().stream().
 			forEach(i -> allColumnNames.addAll(i.getProperties().keySet()));
 
-		HashMap<String, Integer> valueCount = new HashMap<String, Integer>();
+		HashMap<String, Integer> valueCount = new HashMap<>();
 
 		for (String field : allColumnNames) {
 
@@ -176,25 +176,12 @@ public class WorklistUtils {
 				}
 			}
 		}
-		ArrayList<String>columnNames = new ArrayList<String>();
-		
-		//	Add MoTrPAC obligatory column names
+		ArrayList<String>columnNames = new ArrayList<>();
 		for(MoTrPACRawDataManifestFields field : MoTrPACRawDataManifestFields.values())
 			columnNames.add(field.getName());
 			
 		columnNames.add(DataExportFields.MRC2_SAMPLE_ID.getName());
-		
-		//	This will go to MoTrPAC sample id
-		//	columnNames.add(DataExportFields.CLIENT_SAMPLE_ID.getName());
-		
-		//	Data file goes to MotrPAC column
-//		if(valueCount.containsKey(AgilentSampleInfoFields.DATA_FILE.getName())) {
-//			columnNames.add(AgilentSampleInfoFields.DATA_FILE.getName());
-//		}
-//		else {
-//			MessageDialogue.showErrorMsg("Data file name field missing.", this.getContentPane());
-//			return null;
-//		}
+
 		if(!valueCount.containsKey(AgilentSampleInfoFields.DATA_FILE.getName())) {			
 			MessageDialog.showErrorMsg("Data file name field missing.", MRC2ToolBoxCore.getMainWindow());
 			return null;

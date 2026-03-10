@@ -42,6 +42,19 @@
 												<key shared="false">
 													<placeholder>dock.single.ExperimentSetupDraw</placeholder>
 												</key>
+												<item key="convert" type="b">true</item>
+												<item key="convert-keys" type="a">
+													<item type="s">size</item>
+													<item type="s">index</item>
+													<item type="s">id</item>
+													<item type="s">placeholder</item>
+													<item type="s">hold</item>
+												</item>
+												<item key="dock.size" type="i">400</item>
+												<item key="dock.index" type="i">0</item>
+												<item key="dock.id" type="i">0</item>
+												<item key="dock.placeholder" type="s">dock.single.ExperimentSetupDraw</item>
+												<item key="dock.hold" type="b">false</item>
 											</entry>
 											<entry>
 												<key shared="false">
@@ -57,7 +70,18 @@
 									<type>dock.CContentArea.minimize</type>
 								</layout>
 							</adjacent>
-							<children ignore="false"/>
+							<children ignore="false">
+								<child>
+									<layout factory="predefined" placeholder="dock.single.ExperimentSetupDraw">
+										<replacement id="dockablesingle ExperimentSetupDraw"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>ExperimentSetupDraw</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
+								</child>
+							</children>
 						</root>
 						<root name="ccontrol south">
 							<layout factory="predefined">
@@ -242,7 +266,7 @@
 												</placeholders>
 											</leaf>
 											<node nodeId="1676064563113" orientation="HORIZONTAL" divider="0.18282252316464717">
-												<leaf id="1" nodeId="1676064552084">
+												<leaf id="-1" nodeId="1676064552084">
 													<placeholders>
 														<placeholder>dock.single.ExperimentSetupDraw</placeholder>
 													</placeholders>
@@ -260,7 +284,6 @@
 														<placeholder>dock.single.LabNoteBookPanel</placeholder>
 														<placeholder>dock.single.AutomatorPanel</placeholder>
 														<placeholder>dock.single.QCPanel</placeholder>
-														<placeholder>dock.single.MoTrPACDataTrackingPanel</placeholder>
 														<placeholder>dock.single.MsLibraryPanel</placeholder>
 														<placeholder>dock.single.FeatureDataPanel</placeholder>
 														<placeholder>dock.single.METLIMSPanel</placeholder>
@@ -354,7 +377,7 @@
 							<children ignore="false">
 								<child>
 									<layout factory="delegate_StackDockStationFactory">
-										<selected>1</selected>
+										<selected>9</selected>
 										<placeholders>
 											<version>0</version>
 											<format>dock.PlaceholderList</format>
@@ -513,6 +536,15 @@
 												<key shared="false">
 													<placeholder>dock.single.MoTrPACDataTrackingPanel</placeholder>
 												</key>
+												<item key="convert" type="b">true</item>
+												<item key="convert-keys" type="a">
+													<item type="s">index</item>
+													<item type="s">id</item>
+													<item type="s">placeholder</item>
+												</item>
+												<item key="dock.index" type="i">9</item>
+												<item key="dock.id" type="i">9</item>
+												<item key="dock.placeholder" type="s">dock.single.MoTrPACDataTrackingPanel</item>
 											</entry>
 											<entry>
 												<key shared="false">
@@ -524,8 +556,8 @@
 													<item type="s">id</item>
 													<item type="s">placeholder</item>
 												</item>
-												<item key="dock.index" type="i">9</item>
-												<item key="dock.id" type="i">9</item>
+												<item key="dock.index" type="i">10</item>
+												<item key="dock.id" type="i">10</item>
 												<item key="dock.placeholder" type="s">dock.single.METLIMSPanel</item>
 											</entry>
 											<entry>
@@ -538,8 +570,8 @@
 													<item type="s">id</item>
 													<item type="s">placeholder</item>
 												</item>
-												<item key="dock.index" type="i">10</item>
-												<item key="dock.id" type="i">10</item>
+												<item key="dock.index" type="i">11</item>
+												<item key="dock.id" type="i">11</item>
 												<item key="dock.placeholder" type="s">dock.single.RawDataExaminerPanel</item>
 											</entry>
 											<entry>
@@ -641,6 +673,16 @@
 											<children ignore="false"/>
 										</child>
 										<child>
+											<layout factory="predefined" placeholder="dock.single.MoTrPACDataTrackingPanel">
+												<replacement id="dockablesingle MoTrPACDataTrackingPanel"/>
+												<delegate id="delegate_ccontrol backup factory id">
+													<id>MoTrPACDataTrackingPanel</id>
+													<area/>
+												</delegate>
+											</layout>
+											<children ignore="false"/>
+										</child>
+										<child>
 											<layout factory="predefined" placeholder="dock.single.METLIMSPanel">
 												<replacement id="dockablesingle METLIMSPanel"/>
 												<delegate id="delegate_ccontrol backup factory id">
@@ -661,16 +703,6 @@
 											<children ignore="false"/>
 										</child>
 									</children>
-								</child>
-								<child>
-									<layout factory="predefined" placeholder="dock.single.ExperimentSetupDraw">
-										<replacement id="dockablesingle ExperimentSetupDraw"/>
-										<delegate id="delegate_ccontrol backup factory id">
-											<id>ExperimentSetupDraw</id>
-											<area/>
-										</delegate>
-									</layout>
-									<children ignore="false"/>
 								</child>
 							</children>
 						</root>
@@ -767,33 +799,6 @@
 									<replacement id="dockablesingle CompoundCollectionsPanel"/>
 									<delegate id="delegate_ccontrol backup factory id">
 										<id>CompoundCollectionsPanel</id>
-										<area/>
-									</delegate>
-								</layout>
-								<children ignore="false"/>
-							</layout>
-						</child>
-						<child key="single MoTrPACDataTrackingPanel" root="ccontrol center" location="true">
-							<location>
-								<property factory="SplitDockPlaceholderProperty">
-									<placeholder>dock.single.MoTrPACDataTrackingPanel</placeholder>
-									<backup-path>
-										<node location="BOTTOM" size="0.5" id="1692380926531"/>
-										<node location="RIGHT" size="0.7217529039070749" id="1672779742083"/>
-										<node location="RIGHT" size="0.71682398667407" id="1676064563113"/>
-										<leaf id="1672779039466"/>
-									</backup-path>
-								</property>
-								<property factory="StackDockPropertyFactory">
-									<index>6</index>
-									<placeholder>dock.single.MoTrPACDataTrackingPanel</placeholder>
-								</property>
-							</location>
-							<layout>
-								<layout factory="predefined" placeholder="dock.single.MoTrPACDataTrackingPanel">
-									<replacement id="dockablesingle MoTrPACDataTrackingPanel"/>
-									<delegate id="delegate_ccontrol backup factory id">
-										<id>MoTrPACDataTrackingPanel</id>
 										<area/>
 									</delegate>
 								</layout>
@@ -1189,7 +1194,7 @@
 								</property>
 							</properties>
 						</entry>
-						<entry id="single MoTrPACDataTrackingPanel">
+						<entry id="single MoTrPACDataTrackingPanel" current="dock.mode.normal">
 							<history>
 								<mode>dock.mode.normal</mode>
 							</history>
@@ -1210,10 +1215,10 @@
 								</property>
 							</properties>
 						</entry>
-						<entry id="single ExperimentSetupDraw" current="dock.mode.normal">
+						<entry id="single ExperimentSetupDraw" current="dock.mode.minimized">
 							<history>
-								<mode>dock.mode.minimized</mode>
 								<mode>dock.mode.normal</mode>
+								<mode>dock.mode.minimized</mode>
 							</history>
 							<properties>
 								<property id="dock.mode.minimized">
