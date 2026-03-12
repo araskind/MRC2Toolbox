@@ -219,6 +219,9 @@ public class MWTabExportDialog extends JDialog implements BackedByPreferences, A
 	}
 	
 	private void setOutputFile() {
+		
+		if(MRC2ToolBoxCore.getActiveMetabolomicsExperiment() != null)
+			baseDirectory = MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExportsDirectory();
 
 		JnaFileChooser fc = new JnaFileChooser(baseDirectory);
 		fc.setMode(JnaFileChooser.Mode.Files);

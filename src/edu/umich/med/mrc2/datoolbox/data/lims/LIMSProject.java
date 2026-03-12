@@ -55,7 +55,7 @@ public class LIMSProject implements Serializable, Comparable<LIMSProject>, XmlSt
 		this.id = id;
 		this.name = name;
 		this.description = description;
-		experiments = new TreeSet<LIMSExperiment>();
+		experiments = new TreeSet<>();
 	}
 	
 	public LIMSProject(
@@ -69,7 +69,7 @@ public class LIMSProject implements Serializable, Comparable<LIMSProject>, XmlSt
 		this.description = description;
 		this.notes = notes;
 		this.client = client;
-		experiments = new TreeSet<LIMSExperiment>();
+		experiments = new TreeSet<>();
 	}
 	
 	public LIMSProject(
@@ -84,7 +84,7 @@ public class LIMSProject implements Serializable, Comparable<LIMSProject>, XmlSt
 		this.description = description;
 		this.notes = notes;
 		this.client = client;
-		experiments = new TreeSet<LIMSExperiment>();
+		experiments = new TreeSet<>();
 	}
 
     @Override
@@ -207,6 +207,13 @@ public class LIMSProject implements Serializable, Comparable<LIMSProject>, XmlSt
 
 	public void setClient(LIMSClient client) {
 		this.client = client;
+	}
+	
+	public LIMSExperiment getExperimentById(String experimentId) {
+		
+		return experiments.stream().
+				filter(e -> e.getId().equals(experimentId)).
+				findFirst().orElse(null);
 	}
 	
 	public LIMSProject(Element limsProjectElement) {

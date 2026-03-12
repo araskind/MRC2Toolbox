@@ -551,9 +551,14 @@ public class IDTDataCache {
 				findFirst().orElse(null);
 	}
 
-	/**
-	 * @return the experiments
-	 */
+	
+	public static LIMSProject getProjectByExperimentId(String experimentId) {
+		
+		return getProjects().stream().
+				filter(p -> Objects.nonNull(p.getExperimentById(experimentId))).
+				findFirst().orElse(null);
+	}
+
 	public static Collection<LIMSExperiment> getExperiments() {
 
 		if(experiments == null)

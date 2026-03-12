@@ -77,7 +77,7 @@ public class LIMSUtils {
 	public static Collection<LIMSProject> getLimsProjectList(Connection conn) throws Exception {		
 		
 		LIMSDataCache.refreshLimsClientList();
-		Collection<LIMSProject> projects = new TreeSet<LIMSProject>();
+		Collection<LIMSProject> projects = new TreeSet<>();
 		String query  =
 			"SELECT PROJECT_ID, PROJECT_NAME, CLIENT_ID, PROJECT_DESCRIPTION, CONTACTPERSON_ID, "
 			+ "STATUS_ID, START_DATE, NOTES FROM LIMS_PROJECT "

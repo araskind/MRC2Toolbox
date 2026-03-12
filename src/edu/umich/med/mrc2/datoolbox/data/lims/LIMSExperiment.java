@@ -29,7 +29,7 @@ import java.util.TreeSet;
 import org.jdom2.Element;
 
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesign;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
+import edu.umich.med.mrc2.datoolbox.database.lims.LIMSDataCache;
 import edu.umich.med.mrc2.datoolbox.project.Project;
 import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
 import edu.umich.med.mrc2.datoolbox.project.store.LIMSExperimentFields;
@@ -366,8 +366,13 @@ public class LIMSExperiment implements Serializable, Comparable<LIMSExperiment>,
 		String projectId = experimentElement.getAttributeValue(
 						LIMSExperimentFields.ProjectId.name());
 		if(projectId != null)
-			project = IDTDataCache.getProjectById(projectId);
+			project = LIMSDataCache.getProjectById(projectId);
 		
+		if(project == null) {
+			LIMSExperiment dbExperiment = LIMSDataCache.getExperimentById(id);
+			if(dbExperiment != null)
+				project = dbExperiment.getProject();
+		}
 		startDate = ProjectStoreUtils.getDateFromAttribute(
 				experimentElement, CommonFields.DateCreated);
 		if(startDate == null)
@@ -383,7 +388,7 @@ public class LIMSExperiment implements Serializable, Comparable<LIMSExperiment>,
 					experimentDesignElement, parentProject);
 				
 		//	LIMSSamplePreparation list
-		samplePreps = new TreeSet<LIMSSamplePreparation>();
+		samplePreps = new TreeSet<>();
 		Element prepListElement = 
 				experimentElement.getChild(LIMSExperimentFields.SamplePrepList.name());
 		if(prepListElement != null) {

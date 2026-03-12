@@ -416,7 +416,12 @@ return;
 		else {
 			appendDataBlock("CH:CHROMATOGRAPHY_TYPE", 33, null, 80, TAB, writer);
 			appendDataBlock("CH:INSTRUMENT_NAME", 33, null, 80, TAB, writer);
-			appendDataBlock("CH:COLUMN_NAME", 33, dataPipeline.getAcquisitionMethod().getColumn().getColumnName(), 80, TAB, writer);
+			
+			String columnName = "";
+			if(dataPipeline.getAcquisitionMethod() != null && dataPipeline.getAcquisitionMethod().getColumn() != null)
+				columnName = dataPipeline.getAcquisitionMethod().getColumn().getColumnName();
+			
+			appendDataBlock("CH:COLUMN_NAME", 33, columnName, 80, TAB, writer);
 			appendDataBlock("CH:METHODS_FILENAME", 33, dataPipeline.getAcquisitionMethod().getName(), 80, TAB, writer);
 		}
 	}

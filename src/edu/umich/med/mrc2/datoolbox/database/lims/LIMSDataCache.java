@@ -22,6 +22,7 @@
 package edu.umich.med.mrc2.datoolbox.database.lims;
 
 import java.util.Collection;
+import java.util.Objects;
 import java.util.TreeSet;
 
 import edu.umich.med.mrc2.datoolbox.data.Assay;
@@ -43,26 +44,17 @@ import edu.umich.med.mrc2.datoolbox.database.idt.UserUtils;
 
 public class LIMSDataCache {
 
-	private static Collection<LIMSUser>users = 
-			new TreeSet<LIMSUser>();
-	private static Collection<IdTrackerOrganization>organizations = 
-			new TreeSet<IdTrackerOrganization>();
-	private static Collection<LIMSOrganization>limsOrganizations = 
-			new TreeSet<LIMSOrganization>();
-	private static Collection<LIMSClient>limsClients = 
-			new TreeSet<LIMSClient>();	
-	private static Collection<LIMSProject>projects = 
-			new TreeSet<LIMSProject>();
+	private static Collection<LIMSUser>users = new TreeSet<>();
+	private static Collection<IdTrackerOrganization>organizations = new TreeSet<>();
+	private static Collection<LIMSOrganization>limsOrganizations = new TreeSet<>();
+	private static Collection<LIMSClient>limsClients = new TreeSet<>();	
+	private static Collection<LIMSProject>projects = new TreeSet<>();
 	private static Collection<LIMSExperiment>experiments =
-			new TreeSet<LIMSExperiment>(new LIMSExperimentComparator(SortProperty.ID, SortDirection.DESC));
-	private static Collection<Assay>assays = 
-			new TreeSet<Assay>();
-	private static Collection<InstrumentPlatform>instrumentPlatforms = 
-			new TreeSet<InstrumentPlatform>();
-	public static Collection<ChromatographicSeparationType>chromatographicSeparationTypes = 
-			new TreeSet<ChromatographicSeparationType>();
-	public static Collection<LIMSInstrument>analyticalInstruments = 
-			new TreeSet<LIMSInstrument>();
+			new TreeSet<>(new LIMSExperimentComparator(SortProperty.ID, SortDirection.DESC));
+	private static Collection<Assay>assays = new TreeSet<>();
+	private static Collection<InstrumentPlatform>instrumentPlatforms = new TreeSet<>();
+	public static Collection<ChromatographicSeparationType>chromatographicSeparationTypes = new TreeSet<>();
+	public static Collection<LIMSInstrument>analyticalInstruments = new TreeSet<>();
 
 	public static void refreshUserList() {
 		users.clear();
@@ -117,12 +109,11 @@ public class LIMSDataCache {
 	public static Collection<LIMSInstrument> getAnalyticalInstruments() {
 
 		if(analyticalInstruments == null)			
-			analyticalInstruments = new TreeSet<LIMSInstrument>();
+			analyticalInstruments = new TreeSet<>();
 		
 		if(analyticalInstruments.isEmpty()) {
 			try {
-				analyticalInstruments.addAll(
-						AcquisitionMethodUtils.getInstrumentList());
+				analyticalInstruments.addAll(AcquisitionMethodUtils.getInstrumentList());
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -141,7 +132,7 @@ public class LIMSDataCache {
 			getChromatographicSeparationTypes() {
 		
 		if(chromatographicSeparationTypes == null)			
-			chromatographicSeparationTypes = new TreeSet<ChromatographicSeparationType>();
+			chromatographicSeparationTypes = new TreeSet<>();
 		
 		if(chromatographicSeparationTypes.isEmpty()) {
 			try {
@@ -163,7 +154,7 @@ public class LIMSDataCache {
 	public static Collection<InstrumentPlatform> getInstrumentPlatforms() {
 
 		if(instrumentPlatforms == null)			
-			instrumentPlatforms = new TreeSet<InstrumentPlatform>();
+			instrumentPlatforms = new TreeSet<>();
 		
 		if(instrumentPlatforms.isEmpty()) {
 			try {
@@ -186,13 +177,10 @@ public class LIMSDataCache {
 				filter(p -> p.getId().equalsIgnoreCase(manufacturer)).findFirst().orElse(null);
 	}
 
-	/**
-	 * @return the projects
-	 */
 	public static Collection<LIMSProject> getProjects() {
 
 		if(projects == null)
-			projects = new TreeSet<LIMSProject>();
+			projects = new TreeSet<>();
 
 		if(projects.isEmpty()) {
 			try {
@@ -204,14 +192,11 @@ public class LIMSDataCache {
 		}
 		return projects;
 	}
-
-	/**
-	 * @return the users
-	 */
+	
 	public static Collection<LIMSUser> getUsers() {
 
 		if(users == null)
-			users = new TreeSet<LIMSUser>();
+			users = new TreeSet<>();
 
 		if(users.isEmpty()) {
 			try {
@@ -223,13 +208,10 @@ public class LIMSDataCache {
 		return users;
 	}
 
-	/**
-	 * @return the organizations
-	 */
 	public static Collection<IdTrackerOrganization> getOrganizations() {
 
 		if(organizations == null)
-			organizations = new TreeSet<IdTrackerOrganization>();
+			organizations = new TreeSet<>();
 
 		if(organizations.isEmpty()) {
 			try {
@@ -245,7 +227,7 @@ public class LIMSDataCache {
 	public static Collection<LIMSOrganization> getLimsOrganizations() {
 		
 		if(limsOrganizations == null)
-			limsOrganizations = new TreeSet<LIMSOrganization>();
+			limsOrganizations = new TreeSet<>();
 
 		if(limsOrganizations.isEmpty()) {
 			try {
@@ -265,7 +247,7 @@ public class LIMSDataCache {
 	public static Collection<LIMSClient> getLimsClients() {
 		
 		if(limsClients == null)
-			limsClients = new TreeSet<LIMSClient>();
+			limsClients = new TreeSet<>();
 
 		if(limsClients.isEmpty()) {
 			try {
@@ -297,7 +279,7 @@ public class LIMSDataCache {
 	public static Collection<LIMSExperiment> getExperiments() {
 
 		if(experiments == null)
-			experiments = new TreeSet<LIMSExperiment>(
+			experiments = new TreeSet<>(
 					new LIMSExperimentComparator(SortProperty.ID, SortDirection.DESC));
 
 		if(experiments.isEmpty()) {
@@ -314,7 +296,7 @@ public class LIMSDataCache {
 	public static Collection<Assay>getAssays(){
 
 		if(assays == null)
-			assays = new TreeSet<Assay>();
+			assays = new TreeSet<>();
 
 		if(assays.isEmpty()) {
 			try {
@@ -331,6 +313,16 @@ public class LIMSDataCache {
 
 		return getProjects().stream().
 				filter(p -> p.getId().equals(projectId)).
+				findFirst().orElse(null);
+	}
+	
+	public static LIMSProject getProjectByExperimentId(String experimentId) {
+		
+		LIMSExperiment experiment = getExperimentById(experimentId);
+		//	if(experiment == null)
+
+		return getProjects().stream().
+				filter(p -> Objects.nonNull(p.getExperimentById(experimentId))).
 				findFirst().orElse(null);
 	}
 	

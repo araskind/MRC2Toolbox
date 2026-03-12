@@ -361,6 +361,7 @@ public class OpenMetabolomicsProjectTask extends OpenStandaloneProjectAbstractTa
 		if(limsExperimentElement != null) {
 			limsExperiment = new LIMSExperiment(limsExperimentElement, project);
 			project.setLimsExperiment(limsExperiment);
+			project.setLimsProject(limsExperiment.getProject());
 		}
 	}
 	
