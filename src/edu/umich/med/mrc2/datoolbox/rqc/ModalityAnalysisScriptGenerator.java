@@ -37,6 +37,10 @@ import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
 
 public class ModalityAnalysisScriptGenerator {
 	
+	private ModalityAnalysisScriptGenerator() {
+		/* This utility class should not be instantiated */
+	}
+	
 	public static final String DESIGN_OBJECT_SUFFIX = ".design";
 	public static final String VALID_SAMPLES_LIST_SUFFIX = ".valid.samples";
 	public static final String FEATURE_LIST_SUFFIX = ".features";
@@ -146,7 +150,7 @@ public class ModalityAnalysisScriptGenerator {
 		rscriptParts.add(designObject + " <- read.delim(r'(" + filePath + ")', check.names=FALSE)");
 		String validSamplesObject = dataObjectPrefix + VALID_SAMPLES_LIST_SUFFIX;
 		rscriptParts.add(validSamplesObject + " <- " + designObject + 
-				"%>% filter(!(sample_type %in% c(\"QC-Blank\",\"QC-InternalStandard\",\"QC-Reference\"))) "
+				" %>% filter(!(sample_type %in% c(\"QC-Blank\",\"QC-InternalStandard\",\"QC-Reference\"))) "
 				+ "%>% select(raw_file)");
 		rscriptParts.add(validSamplesObject + " <- as.character(" + validSamplesObject + "[,1])");
 	}

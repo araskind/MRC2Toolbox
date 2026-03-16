@@ -54,5 +54,6 @@ public enum MetabCombinerAlignmentSettingsFields {
 	maxRTerrorForAlignedFeatures,
 	resolveAlignmentConflictsInOutput,
 	rtOrderFlagInOutput,
+	EntryFileSet,
 	;
 }

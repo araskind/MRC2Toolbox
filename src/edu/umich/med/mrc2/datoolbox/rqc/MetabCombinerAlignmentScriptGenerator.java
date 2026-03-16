@@ -29,6 +29,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -42,8 +43,8 @@ import org.apache.commons.lang.StringUtils;
 import org.jdom2.Document;
 import org.jdom2.Element;
 
-import edu.umich.med.mrc2.datoolbox.gui.rgen.mcr.MetabCombinerFileInputObject;
 import edu.umich.med.mrc2.datoolbox.gui.rgen.mcr.MetabCombinerParametersObject;
+import edu.umich.med.mrc2.datoolbox.gui.rgen.mcr.RMultibatchAnalysisInputObject;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
 import edu.umich.med.mrc2.datoolbox.utils.XmlUtils;
@@ -69,10 +70,15 @@ public class MetabCombinerAlignmentScriptGenerator {
 	public static final String R_FOLDER_SEPARATOR = "/";
 	public static final String ALIGNMENT_SETTINGS_FILE = "MetabCombinerAlignmentSettings.xml";
 	
+	public static final List<SummaryInputColumns> requiredProperties = 
+			Arrays.asList(
+					SummaryInputColumns.EXPERIMENT, 
+					SummaryInputColumns.BATCH,
+					SummaryInputColumns.PEAK_AREAS);
+	
 	private MetabCombinerParametersObject parametersObject;
 	private List<String>rscriptParts;
-	private Map<MetabCombinerFileInputObject,String>metabDataObjectMap;
-	//	private Map<MetabCombinerFileInputObject,String>statsObjectMap;
+	private Map<RMultibatchAnalysisInputObject,String>metabDataObjectMap;
 	private File scriptFile;	
 	private File projectFolder;
 	
@@ -88,8 +94,8 @@ public class MetabCombinerAlignmentScriptGenerator {
 	
 	private Map<String,String>matchListMap;
 	private List<String>listParts;
-	private Map<MetabCombinerFileInputObject,String>overlapObjectMap;
-	private Map<MetabCombinerFileInputObject,String>unionObjectMap;
+	private Map<RMultibatchAnalysisInputObject,String>overlapObjectMap;
+	private Map<RMultibatchAnalysisInputObject,String>unionObjectMap;
 
 	public MetabCombinerAlignmentScriptGenerator(MetabCombinerParametersObject parametersObject) {
 		super();
@@ -172,17 +178,15 @@ public class MetabCombinerAlignmentScriptGenerator {
 		
 		rscriptParts.add("\n## Read in the data for alignment ####\n");
 		
-		for(MetabCombinerFileInputObject mcio : parametersObject.getMetabCombinerFileInputObjectSet()) {
+		for(RMultibatchAnalysisInputObject mcio : parametersObject.getMetabCombinerFileInputObjectSet()) {
 			
 			String dataObjectPrefix = mcio.getExperimentId() + "." + mcio.getBatchId();			
 			String dataObject = dataObjectPrefix + ".data";
 
 			rscriptParts.add(dataObject + " <- read.delim(r'(" 
-					+ mcio.getDataFile().getAbsolutePath() + ")', check.names=FALSE)");
-			
-//			rscriptParts.add(dataObject + " <- read.delim(\"" + 
-//					mcio.getDataFile().getName() + "\", check.names=FALSE)");
-			
+					+ mcio.getDataFile(SummaryInputColumns.PEAK_AREAS).getAbsolutePath() 
+					+ ")', check.names=FALSE)");
+
 			//	Write out clean data for final join and record in the data frame
 			String data4join = McAlignmentProjectSubfolders.CleanData 
 					+ R_FOLDER_SEPARATOR + dataObjectPrefix + CLEAN_DATA_FILE_SUFFIX;
@@ -213,11 +217,8 @@ public class MetabCombinerAlignmentScriptGenerator {
 			rscriptParts.add(statsObject + "$" + SummaryInputColumns.BATCH.getRName() 
 				+ " <- \"" + mcio.getBatchId() + "\"");
 			rscriptParts.add("stats.all <- bind_rows(stats.all, " + statsObject + ")");
-			
-			//	statsObjectMap.put(mcio, statsObject);
 		}
 		//	Write out statistics for all metabData objects
-		//	rscriptParts.add("stats.all <- bind_rows(" + StringUtils.join(statsObjectMap.values(), ",") + ")");
 		String statsFileName = INPUT_STATS_FILE_PREFIX + FIOUtils.getTimestamp() + ".txt";
 		rscriptParts.add("write.table(stats.all, file = \"" + statsFileName +
 				"\", quote = F, sep = \"\\t\", na = \"\", row.names = FALSE)");
@@ -270,13 +271,13 @@ public class MetabCombinerAlignmentScriptGenerator {
 		
 		//	Create data frame to keep track of alignment results
 
-		for(MetabCombinerFileInputObject mcio1 : parametersObject.getMetabCombinerFileInputObjectSet()) {
+		for(RMultibatchAnalysisInputObject mcio1 : parametersObject.getMetabCombinerFileInputObjectSet()) {
 			
 			matchListMap.clear();
 			listParts.clear();
 			String firstDataSet = mcio1.getExperimentId() + "." + mcio1.getBatchId();
 					
-			for(MetabCombinerFileInputObject mcio2 : parametersObject.getMetabCombinerFileInputObjectSet()) {
+			for(RMultibatchAnalysisInputObject mcio2 : parametersObject.getMetabCombinerFileInputObjectSet()) {
 				
 				if(!mcio1.equals(mcio2)) {
 					String matchList = createMetabCombinerAlignmentBlock(mcio1, mcio2);					
@@ -306,7 +307,7 @@ public class MetabCombinerAlignmentScriptGenerator {
 		//	Overlap of features from master batch
 		listParts.clear();
 		String overlapsListString = "overlap.list.collection <- list(";
-		for(Entry<MetabCombinerFileInputObject,String>ent : overlapObjectMap.entrySet()) {
+		for(Entry<RMultibatchAnalysisInputObject,String>ent : overlapObjectMap.entrySet()) {
 			
 			String key = ent.getKey().getExperimentId() + "." + ent.getKey().getBatchId();
 			listParts.add("\"" + key + "\" = " + ent.getValue());
@@ -380,7 +381,7 @@ public class MetabCombinerAlignmentScriptGenerator {
 		// Union of features from master batch
 		listParts.clear();
 		String unionsListString = "union.list.collection <- list(";
-		for(Entry<MetabCombinerFileInputObject, String> ent : unionObjectMap.entrySet()) {
+		for(Entry<RMultibatchAnalysisInputObject, String> ent : unionObjectMap.entrySet()) {
 			
 			String key = ent.getKey().getExperimentId() + "." 
 					+ ent.getKey().getBatchId();
@@ -451,8 +452,8 @@ public class MetabCombinerAlignmentScriptGenerator {
 	}
 
 	private String createMetabCombinerAlignmentBlock(
-			MetabCombinerFileInputObject io,
-			MetabCombinerFileInputObject io2) {
+			RMultibatchAnalysisInputObject io,
+			RMultibatchAnalysisInputObject io2) {
 		
 		Set<String>objectsToClear = new TreeSet<>();		
 		String outNameSuffix = createOutNameSuffix(io,io2);
@@ -598,8 +599,8 @@ public class MetabCombinerAlignmentScriptGenerator {
 	}
 	
 	private static String createOutNameSuffix(			
-			MetabCombinerFileInputObject io,
-			MetabCombinerFileInputObject io2) {
+			RMultibatchAnalysisInputObject io,
+			RMultibatchAnalysisInputObject io2) {
 		
 		ArrayList<String>outNameParts = new ArrayList<>();
 		outNameParts.add(io.getExperimentId());

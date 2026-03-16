@@ -32,6 +32,7 @@ import org.jdom2.Attribute;
 import org.jdom2.DataConversionException;
 import org.jdom2.Element;
 
+import edu.umich.med.mrc2.datoolbox.data.compare.RMultibatchAnalysisInputObjectComparator;
 import edu.umich.med.mrc2.datoolbox.data.enums.PeakAbundanceMeasure;
 import edu.umich.med.mrc2.datoolbox.data.enums.RtFittingModelType;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
@@ -45,7 +46,7 @@ public class MetabCombinerParametersObject implements XmlStorable{
 	private File projectParentDirectory;
 	private File projectDirectory;
 	private boolean useExistingAlignment;
-	private Set<MetabCombinerFileInputObject>metabCombinerFileInputObjectSet;
+	private Set<RMultibatchAnalysisInputObject>metabCombinerFileInputObjectSet;
 	private Range alignmentRTRange;
 	private double maxMissingPercent;
 	private PeakAbundanceMeasure peakAbundanceMeasure;
@@ -85,13 +86,14 @@ public class MetabCombinerParametersObject implements XmlStorable{
 		this.projectParentDirectory = projectParentDirectory;
 	}
 
-	public Set<MetabCombinerFileInputObject> getMetabCombinerFileInputObjectSet() {
+	public Set<RMultibatchAnalysisInputObject> getMetabCombinerFileInputObjectSet() {
 		return metabCombinerFileInputObjectSet;
 	}
 
 	public void setMetabCombinerFileInputObjectSet(
-			Collection<MetabCombinerFileInputObject> metabCombinerFileInputObjectCollection) {
-		this.metabCombinerFileInputObjectSet = new TreeSet<>();
+			Collection<RMultibatchAnalysisInputObject> metabCombinerFileInputObjectCollection) {
+		this.metabCombinerFileInputObjectSet = 
+				new TreeSet<>(new RMultibatchAnalysisInputObjectComparator());
 		metabCombinerFileInputObjectSet.addAll(metabCombinerFileInputObjectCollection);
 	}
 
@@ -315,7 +317,7 @@ public class MetabCombinerParametersObject implements XmlStorable{
 				MetabCombinerAlignmentSettingsFields.MetabCombinerFileIOList.name()).getChildren(
 						MetabCombinerAlignmentSettingsFields.MetabCombinerFileIO.name());
 		for(Element iofElement : ioFieldList)			
-			metabCombinerFileInputObjectSet.add(new MetabCombinerFileInputObject(iofElement));	
+			metabCombinerFileInputObjectSet.add(new RMultibatchAnalysisInputObject(iofElement));	
 		
 		Attribute rtRangeAttribute = metabCombinerParametersElement.getAttribute(
 				MetabCombinerAlignmentSettingsFields.alignmentRTRange.name());
@@ -417,7 +419,7 @@ public class MetabCombinerParametersObject implements XmlStorable{
 		
 		Element metabCombinerFileIOList = 
 				new Element(MetabCombinerAlignmentSettingsFields.MetabCombinerFileIOList.name());
-		for(MetabCombinerFileInputObject mcio : metabCombinerFileInputObjectSet)
+		for(RMultibatchAnalysisInputObject mcio : metabCombinerFileInputObjectSet)
 			metabCombinerFileIOList.addContent(mcio.getXmlElement());
 		
 		metabCombinerParametersElement.addContent(metabCombinerFileIOList);

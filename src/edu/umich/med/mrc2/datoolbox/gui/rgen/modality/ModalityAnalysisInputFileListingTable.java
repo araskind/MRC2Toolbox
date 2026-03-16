@@ -19,39 +19,47 @@
  *
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.dbparse.load.refmet;
+package edu.umich.med.mrc2.datoolbox.gui.rgen.modality;
 
-public enum RefMetFields {
+import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
 
-	REFMET_ID("refmet_id"),
-	NAME("refmet_name"),
-	SUPER_CLASS("super_class"),
-	MAIN_CLASS("main_class"),
-	SUB_CLASS("sub_class"),
-	FORMULA("formula"),
-	EXACT_MASS("exactmass"),
-	PUBCHEM_CID("pubchem_cid"),
-	CHEBI_ID("chebi_id"),
-	HMDB_ID("hmdb_id"),
-	LIPIDMAPS_ID("lipidmaps_id"),
-	KEGG_ID("kegg_id"),	
-	INCHI_KEY("inchi_key"),
-	MW_REGNO("MW_regno"),
-	SMILES("smiles"),
-	;
+public class ModalityAnalysisInputFileListingTable extends BasicTable {
 
-	private final String name;
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 7128358130733304926L;
 
-	RefMetFields(String name) {
-		this.name = name;
+	public ModalityAnalysisInputFileListingTable() {
+
+		super();
+
+
 	}
 
-	public String getName() {
-		return name;
-	}
-
-	@Override
-	public String toString() {
-		return name;
-	}
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -65,6 +65,7 @@ import javax.swing.border.TitledBorder;
 import org.apache.commons.lang3.StringUtils;
 
 import bibliothek.gui.dock.common.DefaultSingleCDockable;
+import edu.umich.med.mrc2.datoolbox.data.compare.RMultibatchAnalysisInputObjectComparator;
 import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
 import edu.umich.med.mrc2.datoolbox.data.enums.PeakAbundanceMeasure;
 import edu.umich.med.mrc2.datoolbox.data.enums.RtFittingModelType;
@@ -915,7 +916,7 @@ public class DockableMetabCombinerScriptGenerator extends DefaultSingleCDockable
 
 	private void importMetabCombinerInputsFromFile() {
 
-		JnaFileChooser fc = new JnaFileChooser(workDirectory.getParentFile());
+		JnaFileChooser fc = new JnaFileChooser(workDirectory);
 		fc.setMode(JnaFileChooser.Mode.Files);
 		fc.addFilter("Text files", "txt", "TXT");
 		fc.setMultiSelectionEnabled(false);
@@ -951,8 +952,9 @@ public class DockableMetabCombinerScriptGenerator extends DefaultSingleCDockable
 					SwingUtilities.getWindowAncestor(this.getContentPane()));
 			return;
 		}
-		Collection<String>errors = new ArrayList<String>();
-		Set<MetabCombinerFileInputObject>mcioSet = new TreeSet<>();
+		Collection<String>errors = new ArrayList<>();
+		Set<RMultibatchAnalysisInputObject>mcioSet = 
+				new TreeSet<>(new RMultibatchAnalysisInputObjectComparator());
 		for(int i=1; i<mcInputList.length; i++) {
 			
 			String fileName = mcInputList[i][inputColumnMap.get(SummaryInputColumns.PEAK_AREAS)];
@@ -963,8 +965,9 @@ public class DockableMetabCombinerScriptGenerator extends DefaultSingleCDockable
 			}
 			String experimentId = mcInputList[i][inputColumnMap.get(SummaryInputColumns.EXPERIMENT)];
 			String batchId = mcInputList[i][inputColumnMap.get(SummaryInputColumns.BATCH)];
-			MetabCombinerFileInputObject mcio = 
-					new MetabCombinerFileInputObject(inputFile, experimentId, batchId);
+			RMultibatchAnalysisInputObject mcio = 
+					new RMultibatchAnalysisInputObject(
+							inputFile, SummaryInputColumns.PEAK_AREAS, experimentId, batchId);
 			mcioSet.add(mcio);
 		}
 		fileListingTable.setModelFromInputObjects(mcioSet);
@@ -1021,7 +1024,8 @@ public class DockableMetabCombinerScriptGenerator extends DefaultSingleCDockable
 			File[]mcInputFiles = fc.getSelectedFiles();
 			if(mcInputFiles.length > 0) {
 				
-				fileListingTable.addDataFiles(Arrays.asList(mcInputFiles));
+				fileListingTable.addDataFiles(
+						Arrays.asList(mcInputFiles), SummaryInputColumns.PEAK_AREAS);
 				workDirectory = mcInputFiles[0].getParentFile();
 				savePreferences();	
 			}
@@ -1030,7 +1034,7 @@ public class DockableMetabCombinerScriptGenerator extends DefaultSingleCDockable
 	
 	private void cleartMetabCombinerInputFiles() {
 
-		if(!fileListingTable.getAllFiles().isEmpty()) {
+		if(!fileListingTable.getAllFiles(SummaryInputColumns.PEAK_AREAS).isEmpty()) {
 			
 			int res = MessageDialog.showChoiceWithWarningMsg(
 					"Do you want to clear input files table?", 
@@ -1280,14 +1284,15 @@ public class DockableMetabCombinerScriptGenerator extends DefaultSingleCDockable
 	    if(useExistingAlignment() && (projectDirectory == null || !projectDirectory.exists()))
 	    	errors.add("Existing aligment project not found");
 	    
-	    Collection<MetabCombinerFileInputObject> ioList = 
+	    
+	    Collection<RMultibatchAnalysisInputObject> ioList = 
 	    		fileListingTable.getMetabCombinerFileInputObjects();
 	    if(ioList.isEmpty())
 	    	errors.add("No input data files for alignment specified");
 	    else {
-	    	for(MetabCombinerFileInputObject io : ioList) {
+	    	for(RMultibatchAnalysisInputObject io : ioList) {
 	    		
-	    		if(!io.isDefined()) {
+	    		if(!io.isDefined(MetabCombinerAlignmentScriptGenerator.requiredProperties)) {
 	    			errors.add("Experiment and batch must be specified for each input file");
 	    			break;
 	    		}

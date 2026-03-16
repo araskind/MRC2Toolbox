@@ -41,6 +41,7 @@ import org.apache.commons.lang.StringUtils;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.Namespace;
+import org.json.JSONObject;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.silent.SilentChemObjectBuilder;
 
@@ -89,6 +90,31 @@ public class PubChemUtils {
 		InputStream cidStream = null;
 		try {
 			cidStream = WebUtils.getInputStreamFromURL(pubchemSmilesUrl + urlEncodedSmiles + "/cids/TXT");
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
+		if(cidStream != null) {
+			try {
+				cids = IOUtils.toString(cidStream, StandardCharsets.UTF_8).split("\\r?\\n");
+			}
+			catch (Exception e) {
+				System.out.println(e.getMessage());
+			}
+		}
+		Set<Integer>cidSet = new TreeSet<>();
+		if(cids.length > 0) {
+			for(String cid : cids)
+				cidSet.add(Integer.parseInt(cid));
+		}		
+		return cidSet;
+	}
+	
+	public static Set<Integer>getPubChemIdsByInChiKey(String inchiKey){
+		
+		String[] cids = new String[0];
+		InputStream cidStream = null;
+		try {
+			cidStream = WebUtils.getInputStreamFromURL(pubchemInchiKeyUrl + inchiKey + "/cids/TXT");
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
 		}
@@ -381,6 +407,74 @@ public class PubChemUtils {
 			}
 		}		
 		return propertyMap;
+	}
+	
+	public static Map<PubChemRESTCompoundProperties,String> getCompoundPropertiesByInchiKey(
+			String inchiKey, Set<PubChemRESTCompoundProperties> properties) {
+		
+		Map<PubChemRESTCompoundProperties,String>propertyMap = new TreeMap<>();
+		InputStream propsStream = null;
+		try {
+			propsStream = WebUtils.getInputStreamFromURL(
+					pubchemInchiKeyUrl + inchiKey + "/property/" + StringUtils.join(properties, ",") + "/TXT");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		if (propsStream != null) {
+			try {
+				String[] lines = IOUtils.toString(propsStream, StandardCharsets.UTF_8).split("\\r?\\n");
+				String[] values = lines[1].split("\\t");
+				int i = 0;
+				for (PubChemRESTCompoundProperties property : properties) {
+					propertyMap.put(property, values[i]);
+					i++;
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		return propertyMap;
+	}
+	
+	public static Map<PubChemRESTCompoundProperties,String> getCompoundPropertiesByCid(
+			String pubChemId, Set<PubChemRESTCompoundProperties> properties) {
+		
+		Map<PubChemRESTCompoundProperties,String>propertyMap = new TreeMap<>();
+		String url = pubchemCidUrl + pubChemId + "/property/" + StringUtils.join(properties, ",") + "/JSON";
+		JSONObject jso = JSONUtils.readJsonFromUrl(url);
+		if (jso != null) {
+
+			JSONObject propertiesObject = jso.getJSONObject("PropertyTable").getJSONArray("Properties")
+					.getJSONObject(0);
+			for (PubChemRESTCompoundProperties property : properties) {
+
+				if (propertiesObject.has(property.name())
+						&& !propertiesObject.get(property.name()).equals(JSONObject.NULL))
+					propertyMap.put(property, propertiesObject.get(property.name()).toString());
+			}
+		}
+		return propertyMap;
+	}
+	
+	public static String getCidByName(String compoundName) throws Exception {
+
+		String requestUrl = pubchemByNameUrl + urlEncodeSmiles(compoundName) + "/cids/TXT";
+		InputStream cidStream = null;
+		try {
+			cidStream = WebUtils.getInputStreamFromURL(requestUrl);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		if (cidStream == null)
+			return null;
+
+		String cid = null;
+		try {
+			cid = IOUtils.toString(cidStream, StandardCharsets.UTF_8).split("\\r?\\n")[0];
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return cid;
 	}
 }
 

@@ -123,7 +123,8 @@ public class RunContainer2 {
 		MRC2ToolBoxConfiguration.initConfiguration();
 
 		try {
-			updateRefMetWithSmiles();
+			updateRefMetWithSmilesByName();
+			//	updateRefMetWithSmiles();
 			//	downloadMethodsToExtractGradients();
 			//	extractTemporaryGradients();
 		} catch (Exception e) {
@@ -203,6 +204,135 @@ public class RunContainer2 {
 		}
 		ps.close();
 		ConnectionManager.releaseConnection(conn);
+	}
+		
+	private static void updateRefMetWithPubChemIdByInchiKey() throws Exception{
+		
+		Connection conn = ConnectionManager.getConnection();
+		String query = "SELECT REFMET_ID, INCHI_KEY FROM REFMET_DATA_NEW WHERE SMILES IS NULL AND INCHI_KEY IS NOT NULL";
+		PreparedStatement ps = conn.prepareStatement(query);
+		Map<String,String>idNameMap = new TreeMap<>();
+		ResultSet rs = ps.executeQuery();
+		while(rs.next())
+			idNameMap.put(rs.getString(1),rs.getString(2));
+		
+		rs.close();
+		ps.close();
+
+		Map<String,String>pubcheIdMap = new TreeMap<>();
+		query = "UPDATE REFMET_DATA_NEW SET PUBCHEM_CID = ? WHERE REFMET_ID = ?";
+		ps = conn.prepareStatement(query);
+		for(Entry<String,String>mapEntry : idNameMap.entrySet()) {
+
+			Set<Integer>cidSet = PubChemUtils.getPubChemIdsByInChiKey(mapEntry.getValue());
+			if(!pubcheIdMap.isEmpty()) {
+				
+				ps.setString(1,  Integer.toString(cidSet.iterator().next()));
+				ps.setString(2, mapEntry.getKey());
+				ps.executeUpdate();				
+			}
+			Thread.sleep(300);
+		}						
+		ps.close();
+		ConnectionManager.releaseConnection(conn);
+	}
+	
+	private static void updateRefMetSmilesFromRefMetWebByInchyKey() throws Exception{
+		
+		Connection conn = ConnectionManager.getConnection();
+		String query = "SELECT REFMET_ID, INCHI_KEY FROM REFMET_DATA_NEW WHERE SMILES IS NULL AND INCHI_KEY IS NOT NULL";
+		PreparedStatement ps = conn.prepareStatement(query);
+		Map<String,String>idNameMap = new TreeMap<>();
+		ResultSet rs = ps.executeQuery();
+		while(rs.next())
+			idNameMap.put(rs.getString(1),rs.getString(2));
+		
+		rs.close();
+		ps.close();
+
+		query = "UPDATE REFMET_DATA_NEW SET SMILES = ? WHERE REFMET_ID = ?";
+		ps = conn.prepareStatement(query);
+		for(Entry<String,String>mapEntry : idNameMap.entrySet()) {
+			
+			Map<RefMetFields, String> refMetRecord = 
+					RefMetUtils.getRefMetRecordByInchyKey(mapEntry.getValue());
+			if(refMetRecord.containsKey(RefMetFields.SMILES)) {
+				
+				ps.setString(1, refMetRecord.get(RefMetFields.SMILES));
+				ps.setString(2, mapEntry.getKey());
+				ps.executeUpdate();	
+			}
+			Thread.sleep(300);
+		}						
+		ps.close();
+		ConnectionManager.releaseConnection(conn);
+	}
+	
+	private static void updateRefMetWithSmilesByName() throws Exception {
+		
+		Connection conn = ConnectionManager.getConnection();
+		String query = "SELECT REFMET_ID, FORMULA, NAME FROM REFMET_DATA_NEW "
+				+ "WHERE SMILES IS NULL AND FORMULA IS NOT NULL "
+				+ "AND SUPER_CLASS NOT IN ('Glycerolipids','Glycerophospholipids','Sphingolipids','Sterol Lipids')";
+		PreparedStatement ps = conn.prepareStatement(query);
+		Map<String,String>idNameMap = new TreeMap<>();
+		Map<String,String>idFormulaMap = new TreeMap<>();
+		ResultSet rs = ps.executeQuery();
+		while(rs.next()) {
+			idNameMap.put(rs.getString(1),rs.getString(3));
+			idFormulaMap.put(rs.getString(1),rs.getString(2));
+		}		
+		rs.close();
+		ps.close();
+
+		Set<PubChemRESTCompoundProperties> properties = new TreeSet<>();
+		properties.add(PubChemRESTCompoundProperties.MolecularFormula);
+		properties.add(PubChemRESTCompoundProperties.SMILES);
+		
+		query = "UPDATE REFMET_DATA_NEW SET PUBCHEM_CID = ?, SMILES = ? WHERE REFMET_ID = ?";
+		ps = conn.prepareStatement(query);
+		List<String>mismatchLog = new ArrayList<>();
+		Path logFilePath = Paths.get("E:\\DataAnalysis\\Databases\\RefMet\\RefMetPubChemFormulaNameMismatch.txt");
+		for(Entry<String,String>mapEntry : idNameMap.entrySet()) {
+			
+			mismatchLog.clear();
+			String cid  = PubChemUtils.getCidByName(mapEntry.getValue());
+			if(cid != null) {
+				
+				Map<PubChemRESTCompoundProperties,String>compoundProperties = 
+						PubChemUtils.getCompoundPropertiesByCid(cid, properties);
+				
+				
+				if(idFormulaMap.get(mapEntry.getKey()).equals(
+						compoundProperties.get(PubChemRESTCompoundProperties.MolecularFormula))){
+					
+					ps.setString(1, cid);
+					ps.setString(2, compoundProperties.get(PubChemRESTCompoundProperties.SMILES));
+					ps.setString(3, mapEntry.getKey());
+					ps.executeUpdate();
+				}
+				else {	
+					mismatchLog.add("Formula mismatch for " + mapEntry.getKey());
+					mismatchLog.add("RefMet >> " + idFormulaMap.get(mapEntry.getKey()));
+					mismatchLog.add("PubChemID " + cid + " >> " + compoundProperties.get(PubChemRESTCompoundProperties.MolecularFormula));
+					appendLinesToLog(logFilePath, mismatchLog);
+				}
+			}
+			Thread.sleep(300);
+		}
+		ps.close();
+		ConnectionManager.releaseConnection(conn);
+	}
+	
+	private static void appendLinesToLog(Path logFilePath, List<String> linesToAppend) {
+		
+        try {
+            Files.write(logFilePath, linesToAppend,
+                        StandardOpenOption.APPEND, StandardOpenOption.CREATE);
+            System.out.println("Line appended using Files.write.");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 	}
 	
 	private static void groupAndReassignThermoGradients() throws Exception{

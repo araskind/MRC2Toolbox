@@ -37,8 +37,8 @@ import org.jdom2.Document;
 import org.jdom2.JDOMException;
 import org.jdom2.input.SAXBuilder;
 
-import edu.umich.med.mrc2.datoolbox.gui.rgen.mcr.MetabCombinerFileInputObject;
 import edu.umich.med.mrc2.datoolbox.gui.rgen.mcr.MetabCombinerParametersObject;
+import edu.umich.med.mrc2.datoolbox.gui.rgen.mcr.RMultibatchAnalysisInputObject;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.rqc.MetabCombinerAlignmentScriptGenerator;
 import edu.umich.med.mrc2.datoolbox.utils.DelimitedTextParser;
@@ -77,7 +77,7 @@ public class MCAlignmentGapFiller {
 		if(doc != null) {
 			
 			alignmentProjectSettings = new MetabCombinerParametersObject(doc.getRootElement());		
-			for(MetabCombinerFileInputObject mcFio : alignmentProjectSettings.getMetabCombinerFileInputObjectSet())
+			for(RMultibatchAnalysisInputObject mcFio : alignmentProjectSettings.getMetabCombinerFileInputObjectSet())
 				batchIdSet.add(mcFio.getExperimentId() + "." + mcFio.getBatchId());			
 		}
 	}

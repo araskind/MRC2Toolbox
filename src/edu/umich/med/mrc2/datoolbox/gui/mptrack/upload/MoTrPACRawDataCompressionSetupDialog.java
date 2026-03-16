@@ -77,7 +77,7 @@ public class MoTrPACRawDataCompressionSetupDialog extends JDialog implements Act
 		
 		JTabbedPane tabbedPane = new JTabbedPane();
 		getContentPane().add(tabbedPane, BorderLayout.CENTER);
-		assayPanelMap = new TreeMap<MoTrPACAssay,CompressionSetupPanel>();
+		assayPanelMap = new TreeMap<>();
 		for(MoTrPACAssay assay : MoTrPACDatabaseCache.getMotrpacAssayList()) {
 			
 			CompressionSetupPanel assayPanel = new CompressionSetupPanel(assay, this);
@@ -140,13 +140,12 @@ public class MoTrPACRawDataCompressionSetupDialog extends JDialog implements Act
 	
 	public Collection<AgilentDataCompressionTask>getCompressionTasks(){
 		
-		Collection<AgilentDataCompressionTask>tasks = 
-				new ArrayList<AgilentDataCompressionTask>();
+		Collection<AgilentDataCompressionTask>tasks = new ArrayList<>();
 		if(validateInput().isEmpty()) {
 			
 			for(CompressionSetupPanel panel : assayPanelMap.values()) {
-				AgilentDataCompressionTask task = 
-						panel.getCompressionTask();
+				
+				AgilentDataCompressionTask task = panel.getCompressionTask();
 				
 				if(task != null)
 					tasks.add(task);

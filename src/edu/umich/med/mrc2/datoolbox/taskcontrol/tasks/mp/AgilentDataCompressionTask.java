@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.compress.archivers.ArchiveException;
@@ -67,7 +68,7 @@ public class AgilentDataCompressionTask extends AbstractTask {
 		this.rawDataDirectories = rawDataDirectories;
 		this.destinationDir = destinationDir;
 		this.assayName = assayName;
-		fileCheckSums = new ArrayList<String>();
+		fileCheckSums = new ArrayList<>();
 	}
 
 	@Override
@@ -79,47 +80,42 @@ public class AgilentDataCompressionTask extends AbstractTask {
 		} catch (Exception e) {
 			e.printStackTrace();
 			setStatus(TaskStatus.ERROR);
-return;
-
+			return;
 		}
 		try {
 			collectFilesForCompression();
 		} catch (Exception e) {
 			e.printStackTrace();
 			setStatus(TaskStatus.ERROR);
-return;
-
+			return;
 		}
 		try {
 			compressFiles();
 		} catch (Exception e) {
 			e.printStackTrace();
 			setStatus(TaskStatus.ERROR);
-return;
-
+			return;
 		}
 		try {
 			writeLog();
 		} catch (Exception e) {
 			e.printStackTrace();
 			setStatus(TaskStatus.ERROR);
-return;
-
+			return;
 		}
 		try {
 			writeCheckSumFile();
 		} catch (Exception e) {
 			e.printStackTrace();
 			setStatus(TaskStatus.ERROR);
-return;
-
+			return;
 		}
 		setStatus(TaskStatus.FINISHED);
 	}
 	
 	private void parseInputFileNamesList() {
 		
-		inputFileNames = new TreeSet<String>();
+		inputFileNames = new TreeSet<>();
 		Path includeFileListPath = Paths.get(inputFileList.getAbsolutePath());
 		try {
 			inputFileNames = Files.readAllLines(includeFileListPath);
@@ -134,18 +130,17 @@ return;
 		taskDescription = "Collecting .D files for compression for " + assayName;
 		total = rawDataDirectories.size();
 		processed = 0;
-		rawFilesPathList = new TreeSet<Path>();
+		rawFilesPathList = new TreeSet<>();
 		for(File sourceDir : rawDataDirectories) {
 			
 			if(isCanceled())
 				return;
 			
 			Path sourcePath = Paths.get(sourceDir.getAbsolutePath());
-			List<Path> pathList = new ArrayList<Path>();
-			try {
-				pathList = Files.find(sourcePath,
-						1, (filePath, fileAttr) -> (filePath.toString().toLowerCase().endsWith(".d"))).
-					collect(Collectors.toList());
+			List<Path> pathList = new ArrayList<>();
+			try (Stream<Path> stream = Files.find(sourcePath,
+					1, (filePath, fileAttr) -> (filePath.toString().toLowerCase().endsWith(".d")))){
+				pathList = stream.collect(Collectors.toList());
 			} catch (IOException e2) {
 				// TODO Auto-generated catch block
 				e2.printStackTrace();
@@ -163,7 +158,7 @@ return;
 		total = inputFileNames.size();
 		processed = 0;
 		
-		processedFileNames = new TreeSet<String>();
+		processedFileNames = new TreeSet<>();
 		
 		Path destinationPath = Paths.get(destinationDir.getAbsolutePath());
 		

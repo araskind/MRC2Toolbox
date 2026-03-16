@@ -33,6 +33,9 @@ import edu.umich.med.mrc2.datoolbox.dbparse.load.refmet.RefMetFields;
 
 public class RefMetUtils {
 
+	public static final String refMethUrl = 
+			"https://www.metabolomicsworkbench.org/rest/refmet/";
+	
 	public static final String refMetMatchUrl = 
 			"https://www.metabolomicsworkbench.org/rest/refmet/match/";
 	public static final String encoding = StandardCharsets.UTF_8.toString();
@@ -51,6 +54,23 @@ public class RefMetUtils {
 				if(jso.has(field.getName()) && !jso.get(field.getName()).equals(JSONObject.NULL))
 					record.put(field, jso.get(field.getName()).toString());
 			}			
+		}
+		return record;
+	}
+	
+	public static Map<RefMetFields, String> getRefMetRecordByInchyKey(String inchikey)
+			throws UnsupportedEncodingException {
+
+		Map<RefMetFields, String> record = new TreeMap<>();
+		JSONObject jso = JSONUtils.readJsonFromUrl(refMethUrl + "inchi_key/" + inchikey + "/all");
+
+		if (jso != null) {
+
+			for (RefMetFields field : RefMetFields.values()) {
+
+				if (jso.has(field.getName()) && !jso.get(field.getName()).equals(JSONObject.NULL))
+					record.put(field, jso.get(field.getName()).toString());
+			}
 		}
 		return record;
 	}
