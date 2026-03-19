@@ -6,7 +6,6 @@ import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.util.stream.IntStream;
@@ -192,18 +191,13 @@ public class ManualIntegrationSettingsDialog extends JDialog {
 		panel.add(lblPx, gbc_lblPx);
 		
 		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
-		ActionListener al = new ActionListener() {
-			public void actionPerformed(ActionEvent ae) {
-				dispose();
-			}
-		};
 		JPanel buttonPanel = new JPanel();
 		getContentPane().add(buttonPanel, BorderLayout.SOUTH);
 		FlowLayout fl_buttonPanel = (FlowLayout) buttonPanel.getLayout();
 		fl_buttonPanel.setAlignment(FlowLayout.RIGHT);
 		JButton btnCancel = new JButton("Cancel");
 		buttonPanel.add(btnCancel);
-		btnCancel.addActionListener(al);
+		btnCancel.addActionListener(e -> dispose());
 
 		JButton exportButton = new JButton(MainActionCommands.SAVE_MANUAL_INTEGRATOR_SETTINGS.getName());
 		buttonPanel.add(exportButton);
@@ -211,7 +205,7 @@ public class ManualIntegrationSettingsDialog extends JDialog {
 		exportButton.addActionListener(listener);
 		JRootPane rootPane = SwingUtilities.getRootPane(exportButton);
 		rootPane.setDefaultButton(exportButton);
-		rootPane.registerKeyboardAction(al, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
+		rootPane.registerKeyboardAction(al -> { dispose(); }, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 		pack();
 	}
 	

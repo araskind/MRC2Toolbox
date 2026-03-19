@@ -1,6 +1,6 @@
 /*******************************************************************************
  *
- * (C) Copyright 2018-2025 MRC2 (http://mrc2.umich.edu).
+ * (C) Copyright 2018-2026 MRC2 (http://mrc2.umich.edu).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,10 +37,8 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Map;
+import java.util.List;
 import java.util.Set;
-import java.util.TreeMap;
-import java.util.TreeSet;
 import java.util.prefs.Preferences;
 
 import javax.swing.DefaultComboBoxModel;
@@ -65,7 +63,6 @@ import javax.swing.border.TitledBorder;
 import org.apache.commons.lang3.StringUtils;
 
 import bibliothek.gui.dock.common.DefaultSingleCDockable;
-import edu.umich.med.mrc2.datoolbox.data.compare.RMultibatchAnalysisInputObjectComparator;
 import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
 import edu.umich.med.mrc2.datoolbox.data.enums.PeakAbundanceMeasure;
 import edu.umich.med.mrc2.datoolbox.data.enums.RtFittingModelType;
@@ -76,6 +73,7 @@ import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.rqc.MetabCombinerAlignmentScriptGenerator;
+import edu.umich.med.mrc2.datoolbox.rqc.RAnalysisUtils;
 import edu.umich.med.mrc2.datoolbox.rqc.SummaryInputColumns;
 import edu.umich.med.mrc2.datoolbox.utils.DelimitedTextParser;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
@@ -174,7 +172,7 @@ public class DockableMetabCombinerScriptGenerator extends DefaultSingleCDockable
 		gbl_dataPanel.rowWeights = new double[]{0.0, 1.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
 		dataPanel.setLayout(gbl_dataPanel);
 		
-		JLabel lblNewLabel = new JLabel("Save alignment project in");
+		JLabel lblNewLabel = new JLabel("Data files directory:");
 		GridBagConstraints gbc_lblNewLabel = new GridBagConstraints();
 		gbc_lblNewLabel.insets = new Insets(0, 0, 5, 5);
 		gbc_lblNewLabel.anchor = GridBagConstraints.EAST;
@@ -223,6 +221,14 @@ public class DockableMetabCombinerScriptGenerator extends DefaultSingleCDockable
 				MainActionCommands.SELECT_METAB_COMBINER_INPUT_FILES_COMMAND.getName());
 		selectMCFilesButton.addActionListener(this);
 		
+		GridBagConstraints gbc_selectMCFilesButton = new GridBagConstraints();
+		gbc_selectMCFilesButton.gridwidth = 2;
+		gbc_selectMCFilesButton.anchor = GridBagConstraints.EAST;
+		gbc_selectMCFilesButton.insets = new Insets(0, 0, 5, 0);
+		gbc_selectMCFilesButton.gridx = 5;
+		gbc_selectMCFilesButton.gridy = 2;
+		dataPanel.add(selectMCFilesButton, gbc_selectMCFilesButton);
+		
 		useExistingAlignmentCheckBox = new JCheckBox("Use existing alignment data");
 		GridBagConstraints gbc_useExistingAlignmentCheckBox = new GridBagConstraints();
 		gbc_useExistingAlignmentCheckBox.gridwidth = 2;
@@ -255,13 +261,6 @@ public class DockableMetabCombinerScriptGenerator extends DefaultSingleCDockable
 		gbc_importFromFileButton.gridx = 4;
 		gbc_importFromFileButton.gridy = 2;
 		dataPanel.add(importFromFileButton, gbc_importFromFileButton);
-		GridBagConstraints gbc_selectMCFilesButton = new GridBagConstraints();
-		gbc_selectMCFilesButton.gridwidth = 2;
-		gbc_selectMCFilesButton.anchor = GridBagConstraints.EAST;
-		gbc_selectMCFilesButton.insets = new Insets(0, 0, 5, 0);
-		gbc_selectMCFilesButton.gridx = 5;
-		gbc_selectMCFilesButton.gridy = 2;
-		dataPanel.add(selectMCFilesButton, gbc_selectMCFilesButton);
 		
 		JPanel dataImportParametersPanel = new JPanel();
 		dataImportParametersPanel.setBorder(new CompoundBorder(
@@ -884,8 +883,6 @@ public class DockableMetabCombinerScriptGenerator extends DefaultSingleCDockable
 				MainActionCommands.GENERATE_METAB_COMBINER_SCRIPT_COMMAND.getName());
 		btnSave.addActionListener(this);
 		buttonPanel.add(btnSave);
-//		JRootPane rootPane = SwingUtilities.getRootPane(btnSave);
-//		rootPane.setDefaultButton(btnSave);
 
 		loadPreferences();
 	}
@@ -936,44 +933,24 @@ public class DockableMetabCombinerScriptGenerator extends DefaultSingleCDockable
 					SwingUtilities.getWindowAncestor(this.getContentPane()));
 			return;
 		}
-		String[][] mcInputList = DelimitedTextParser.parseTextFile(
+		String[][] mcInputData = DelimitedTextParser.parseTextFile(
 				inputListFile, MRC2ToolBoxConfiguration.getTabDelimiter());
-		Map<SummaryInputColumns,Integer>inputColumnMap = new TreeMap<>();
-		for(int i=0; i<mcInputList[0].length; i++) {
-			
-			SummaryInputColumns column = SummaryInputColumns.getOptionByName(mcInputList[0][i]);
-			if(column != null)
-				inputColumnMap.put(column, i);
+		
+		List<String>errorList = new ArrayList<>();
+		Set<RMultibatchAnalysisInputObject>mcioSet = RAnalysisUtils.createRmultibatchInputSet(
+				mcInputData, 
+				MetabCombinerAlignmentScriptGenerator.requiredProperties,
+				new ArrayList<>(),
+				workDirectory,
+				errorList);		
+		
+		if(!errorList.isEmpty()) {
+		    MessageDialog.showErrorMsg(StringUtils.join(errorList, "\n"), 
+		    		SwingUtilities.getWindowAncestor(this.getContentPane()));	
 		}
-		if(!inputColumnMap.containsKey(SummaryInputColumns.PEAK_AREAS)
-				|| !inputColumnMap.containsKey(SummaryInputColumns.EXPERIMENT)
-				|| !inputColumnMap.containsKey(SummaryInputColumns.BATCH)) {
-			MessageDialog.showErrorMsg("Input list file doesn't have all required columns.", 
-					SwingUtilities.getWindowAncestor(this.getContentPane()));
-			return;
+		else {
+			fileListingTable.setModelFromInputObjects(mcioSet);
 		}
-		Collection<String>errors = new ArrayList<>();
-		Set<RMultibatchAnalysisInputObject>mcioSet = 
-				new TreeSet<>(new RMultibatchAnalysisInputObjectComparator());
-		for(int i=1; i<mcInputList.length; i++) {
-			
-			String fileName = mcInputList[i][inputColumnMap.get(SummaryInputColumns.PEAK_AREAS)];
-			File inputFile = Paths.get(workDirectory.getAbsolutePath(), fileName).toFile();
-			if(!inputFile.exists()) {
-				errors.add("File " + inputFile.getAbsolutePath() + " not found");
-				continue;
-			}
-			String experimentId = mcInputList[i][inputColumnMap.get(SummaryInputColumns.EXPERIMENT)];
-			String batchId = mcInputList[i][inputColumnMap.get(SummaryInputColumns.BATCH)];
-			RMultibatchAnalysisInputObject mcio = 
-					new RMultibatchAnalysisInputObject(
-							inputFile, SummaryInputColumns.PEAK_AREAS, experimentId, batchId);
-			mcioSet.add(mcio);
-		}
-		fileListingTable.setModelFromInputObjects(mcioSet);
-		if(!errors.isEmpty())
-		    MessageDialog.showErrorMsg(StringUtils.join(errors, "\n"), 
-		    		SwingUtilities.getWindowAncestor(this.getContentPane()));		
 	}
 
 	private void selectExistingMcAlignmentFolder() {

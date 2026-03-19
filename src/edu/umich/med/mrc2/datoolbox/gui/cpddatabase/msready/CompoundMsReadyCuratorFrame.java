@@ -1,6 +1,6 @@
 /*******************************************************************************
  *
- * (C) Copyright 2018-2025 MRC2 (http://mrc2.umich.edu).
+ * (C) Copyright 2018-2026 MRC2 (http://mrc2.umich.edu).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -254,14 +254,14 @@ public class CompoundMsReadyCuratorFrame extends JFrame
 //				dispose();
 //			}
 //		};
-//		btnCancel.addActionListener(al);
+//		btnCancel.addActionListener(e -> dispose());
 
 		JButton btnSave = new JButton(MainActionCommands.SAVE_COMPOUND_MS_READY_STRUCTURE_COMMAND.getName());
 		btnSave.setActionCommand(MainActionCommands.SAVE_COMPOUND_MS_READY_STRUCTURE_COMMAND.getName());
 		btnSave.addActionListener(this);
 		panel.add(btnSave);
 		JRootPane rootPane = SwingUtilities.getRootPane(btnSave);
-//		rootPane.registerKeyboardAction(al, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
+//		rootPane.registerKeyboardAction(al -> { dispose(); }, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 		rootPane.setDefaultButton(btnSave);
 	}
 

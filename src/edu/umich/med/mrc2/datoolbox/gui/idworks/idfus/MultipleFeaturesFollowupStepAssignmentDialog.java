@@ -1,6 +1,6 @@
 /*******************************************************************************
  *
- * (C) Copyright 2018-2025 MRC2 (http://mrc2.umich.edu).
+ * (C) Copyright 2018-2026 MRC2 (http://mrc2.umich.edu).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,6 @@ import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.util.Collection;
@@ -111,12 +110,7 @@ public class MultipleFeaturesFollowupStepAssignmentDialog extends JDialog {
 		
 
 		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
-		ActionListener al = new ActionListener() {
-			public void actionPerformed(ActionEvent ae) {
-				dispose();
-			}
-		};
-		rootPane.registerKeyboardAction(al, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
+		rootPane.registerKeyboardAction(al -> { dispose(); }, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 		
 		JButton btnCancel = new JButton("Cancel");
 		GridBagConstraints gbc_btnCancel = new GridBagConstraints();
@@ -125,7 +119,7 @@ public class MultipleFeaturesFollowupStepAssignmentDialog extends JDialog {
 		gbc_btnCancel.gridx = 0;
 		gbc_btnCancel.gridy = 5;
 		panel.add(btnCancel, gbc_btnCancel);
-		btnCancel.addActionListener(al);
+		btnCancel.addActionListener(e -> dispose());
 		
 		JButton btnSaveChanges = new JButton(
 				MainActionCommands.SAVE_ID_FOLLOWUP_STEP_ASSIGNMENT_COMMAND.getName());

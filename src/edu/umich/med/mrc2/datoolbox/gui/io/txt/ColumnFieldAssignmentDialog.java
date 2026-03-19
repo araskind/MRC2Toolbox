@@ -1,6 +1,6 @@
 /*******************************************************************************
  *
- * (C) Copyright 2018-2025 MRC2 (http://mrc2.umich.edu).
+ * (C) Copyright 2018-2026 MRC2 (http://mrc2.umich.edu).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,6 @@ import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
@@ -122,13 +121,8 @@ public class ColumnFieldAssignmentDialog extends JDialog {
 		panel.add(label, gbc_label);
 
 		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
-		ActionListener al = new ActionListener() {
-			public void actionPerformed(ActionEvent ae) {
-				dispose();
-			}
-		};
 		btnCancel = new JButton("Cancel");
-		btnCancel.addActionListener(al);
+		btnCancel.addActionListener(e -> dispose());
 		GridBagConstraints gbc_btnCancel = new GridBagConstraints();
 		gbc_btnCancel.anchor = GridBagConstraints.EAST;
 		gbc_btnCancel.insets = new Insets(0, 0, 0, 5);
@@ -146,7 +140,7 @@ public class ColumnFieldAssignmentDialog extends JDialog {
 		panel.add(assignLevelsButton, gbc_assignBatchButton);
 
 		JRootPane rootPane = SwingUtilities.getRootPane(assignLevelsButton);
-		rootPane.registerKeyboardAction(al, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
+		rootPane.registerKeyboardAction(al -> { dispose(); }, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 		rootPane.setDefaultButton(assignLevelsButton);
 		pack();
 	}

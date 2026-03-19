@@ -1,6 +1,6 @@
 /*******************************************************************************
  *
- * (C) Copyright 2018-2025 MRC2 (http://mrc2.umich.edu).
+ * (C) Copyright 2018-2026 MRC2 (http://mrc2.umich.edu).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,6 @@ import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 
@@ -139,12 +138,7 @@ public class DuplicateLibraryDialog extends JDialog {
 		cancelButton = new JButton("Cancel");
 		panel.add(cancelButton);
 		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
-		ActionListener al = new ActionListener() {
-			public void actionPerformed(ActionEvent ae) {
-				setVisible(false);
-			}
-		};
-		cancelButton.addActionListener(al);
+		cancelButton.addActionListener(e -> dispose());
 
 		copyButton = new JButton("Create new library");
 		copyButton.setActionCommand(MainActionCommands.DUPLICATE_LIBRARY_COMMAND.getName());
@@ -153,7 +147,7 @@ public class DuplicateLibraryDialog extends JDialog {
 
 		JRootPane rootPane = SwingUtilities.getRootPane(copyButton);
 		rootPane.setDefaultButton(copyButton);
-		rootPane.registerKeyboardAction(al, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
+		rootPane.registerKeyboardAction(al -> { dispose(); }, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 
 		pack();
 	}

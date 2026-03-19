@@ -1,6 +1,6 @@
 /*******************************************************************************
  *
- * (C) Copyright 2018-2025 MRC2 (http://mrc2.umich.edu).
+ * (C) Copyright 2018-2026 MRC2 (http://mrc2.umich.edu).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -176,11 +176,6 @@ public class RawDataConversionSetupDialog extends JDialog implements ActionListe
 		panel_1.add(lblNewLabel_2, gbc_lblNewLabel_2);
 
 		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
-		ActionListener al = new ActionListener() {
-			public void actionPerformed(ActionEvent ae) {
-				dispose();
-			}
-		};
 
 		JButton cancelButton = new JButton("Cancel");
 		GridBagConstraints gbc_cancelButton = new GridBagConstraints();
@@ -189,9 +184,9 @@ public class RawDataConversionSetupDialog extends JDialog implements ActionListe
 		gbc_cancelButton.gridx = 3;
 		gbc_cancelButton.gridy = 0;
 		panel_1.add(cancelButton, gbc_cancelButton);
-		cancelButton.addActionListener(al);
+		cancelButton.addActionListener(e -> dispose());
 
-		rootPane.registerKeyboardAction(al, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
+		rootPane.registerKeyboardAction(al -> { dispose(); }, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 
 		JButton closeFilesButton = new JButton(MainActionCommands.CONVERT_RAW_DATA_COMMAND.getName());
 		closeFilesButton.setActionCommand(MainActionCommands.CONVERT_RAW_DATA_COMMAND.getName());

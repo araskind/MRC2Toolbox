@@ -1,6 +1,6 @@
 /*******************************************************************************
  *
- * (C) Copyright 2018-2025 MRC2 (http://mrc2.umich.edu).
+ * (C) Copyright 2018-2026 MRC2 (http://mrc2.umich.edu).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,6 @@ import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.io.File;
@@ -113,11 +112,6 @@ public class SimpleModificationSelectorDialog extends JDialog
 		getContentPane().add(buttonPanel, BorderLayout.SOUTH);
 
 		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
-		ActionListener al = new ActionListener() {
-			public void actionPerformed(ActionEvent ae) {
-				disposeWithoutSavingPreferences();
-			}
-		};
 		GridBagLayout gbl_buttonPanel = new GridBagLayout();
 		gbl_buttonPanel.columnWidths = new int[]{95, 76, 30, 0, 0, 0};
 		gbl_buttonPanel.rowHeights = new int[]{23, 0};
@@ -136,7 +130,7 @@ public class SimpleModificationSelectorDialog extends JDialog
 		JButton saveButton = new JButton("Save");
 		saveButton.addActionListener(listener);
 		JButton cancelButton = new JButton("Cancel");
-		cancelButton.addActionListener(al);	
+		cancelButton.addActionListener(e -> dispose());	
 		
 		numUnitsComboBox = new JComboBox<Integer>(
 				new DefaultComboBoxModel<Integer>(new Integer[] {1,2,3,4,5,6,7,8}));
@@ -180,15 +174,13 @@ public class SimpleModificationSelectorDialog extends JDialog
 			saveButton.setActionCommand(
 					MainActionCommands.ADD_NEUTRAL_ADDUCT_COMMAND.getName());
 		}
-		rootPane.registerKeyboardAction(al, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
+		rootPane.registerKeyboardAction(al -> { dispose(); }, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 		
 		loadLayout(layoutConfigFile);		
 		pack();
 	}
 	
-	private void disposeWithoutSavingPreferences() {
-		super.dispose();
-	}
+
 
 	@Override
 	public void dispose() {

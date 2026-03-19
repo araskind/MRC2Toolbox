@@ -1,6 +1,6 @@
 /*******************************************************************************
  *
- * (C) Copyright 2018-2020 MRC2 (http://mrc2.umich.edu).
+ * (C) Copyright 2018-2026 MRC2 (http://mrc2.umich.edu).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,24 +23,21 @@ package edu.umich.med.mrc2.datoolbox.rqc;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
-import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
-import edu.umich.med.mrc2.datoolbox.utils.DelimitedTextParser;
+import edu.umich.med.mrc2.datoolbox.gui.rgen.TemplareRbasedProjectGenerator;
+import edu.umich.med.mrc2.datoolbox.gui.rgen.mcr.RMultibatchAnalysisInputObject;
+import edu.umich.med.mrc2.datoolbox.gui.rgen.modality.ModalityAnalysisParametersObject;
 import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
 
-public class ModalityAnalysisScriptGenerator {
+public class ModalityAnalysisScriptGenerator extends TemplareRbasedProjectGenerator {
 	
-	private ModalityAnalysisScriptGenerator() {
-		/* This utility class should not be instantiated */
-	}
-	
+	public static final String MODALITY_ANALYSIS_PROJECT_BASE_NAME = "ModalityAnalysis-";
+	public static final String SCRIPT_FILE_PREFIX = "ModalityAnalysisScript_";
 	public static final String DESIGN_OBJECT_SUFFIX = ".design";
 	public static final String VALID_SAMPLES_LIST_SUFFIX = ".valid.samples";
 	public static final String FEATURE_LIST_SUFFIX = ".features";
@@ -50,32 +47,106 @@ public class ModalityAnalysisScriptGenerator {
 	public static final String MODE_STATS_SUFFIX = ".mod.stats";
 	public static final String OUTPUT_SUFFIX = ".MZRT.modality.stats";
 	public static final String OUTPUT_FILE_SUFFIX = "_RTMZ_modality_analysis_";
+	
+	public static final List<SummaryInputColumns> requiredProperties = 
+			Arrays.asList(
+					SummaryInputColumns.EXPERIMENT, 
+					SummaryInputColumns.BATCH,
+					SummaryInputColumns.MANIFEST);
+	public static final List<SummaryInputColumns> selectableProperties = 
+			Arrays.asList(
+					SummaryInputColumns.RT_VALUES,
+					SummaryInputColumns.MZ_VALUES, 
+					SummaryInputColumns.PEAK_QUALITY,
+					SummaryInputColumns.PEAK_WIDTH);
+	public static final List<SummaryInputColumns> allProperties = 
+			Arrays.asList(
+					SummaryInputColumns.EXPERIMENT, 
+					SummaryInputColumns.BATCH,
+					SummaryInputColumns.RT_VALUES,
+					SummaryInputColumns.MZ_VALUES, 
+					SummaryInputColumns.PEAK_QUALITY,
+					SummaryInputColumns.PEAK_WIDTH);
+	
+	private ModalityAnalysisParametersObject parameters;
+	
+	public ModalityAnalysisScriptGenerator(ModalityAnalysisParametersObject parameters) {
+		super();
+		this.parameters = parameters;
+
+	}
+
+	public void createMultiBatchMZRTDistributionModalityAnalysisScript() {
+
+		createProjectDirectoryStructure();
 		
-	public static void generateMultiBatchMZRTDistributionModalityAnalysisScript(
-			File rWorkingDir,
-			File dataDir,
-			File inputMap,
-			int maxPercenrMissing) {
+		File dataDir = parameters.getProjectParentDirectory();
+//		Set<RMultibatchAnalysisInputObject>mcioSet,
+//		int maxPercenrMissing
+		initRscript();
+
+		
+		for(RMultibatchAnalysisInputObject sdio : parameters.getMetabCombinerFileInputObjectSet()) {
 			
-		List<String>rscriptParts = new ArrayList<>();
-		String workDirForR = rWorkingDir.getAbsolutePath().replaceAll("\\\\", "/");
-		String[][] inputMapData = DelimitedTextParser.parseTextFile(
-				inputMap, MRC2ToolBoxConfiguration.getTabDelimiter());
-		
-		SummaryInputColumns[]requiredColumns = new SummaryInputColumns[] {
-				SummaryInputColumns.EXPERIMENT,
-				SummaryInputColumns.BATCH,
-				SummaryInputColumns.MANIFEST,
-				SummaryInputColumns.MZ_VALUES,
-				SummaryInputColumns.RT_VALUES,
-		};
-		List<SummarizationDataInputObject>inputObjectList = 
-				RQCScriptGenerator.getDataInputList(inputMapData, requiredColumns);
-		
-		if(inputObjectList == null) {
-			System.err.println("Unable to parse input map file!");
-			return;
+			String dataObjectPrefix = 
+					sdio.getProperty(SummaryInputColumns.EXPERIMENT) + "." + 
+					sdio.getProperty(SummaryInputColumns.BATCH);
+			
+			rscriptParts.add("\n## Multimodality analysis for " 
+					+ sdio.getProperty(SummaryInputColumns.EXPERIMENT) 
+					+ "," + sdio.getProperty(SummaryInputColumns.BATCH) + " ####");
+			
+			createValidSampleObject(sdio, dataDir, dataObjectPrefix, rscriptParts);
+			
+			String rtResultsObjectName = 
+					createMultimodalytyAnalysisBlockForParameter(
+							sdio, dataDir, dataObjectPrefix, SummaryInputColumns.RT_VALUES, 
+							parameters.getMaxPercenrMissing(), rscriptParts);
+			String mzResultsObjectName = 
+					createMultimodalytyAnalysisBlockForParameter(
+							sdio, dataDir, dataObjectPrefix, SummaryInputColumns.MZ_VALUES, 
+							parameters.getMaxPercenrMissing(), rscriptParts);
+			
+			String metaDataObject = createMetaDataObject(dataObjectPrefix, rscriptParts);
+			
+			rscriptParts.add("\n#### Generate output ####");
+			String resultsObject = dataObjectPrefix + OUTPUT_SUFFIX;
+			rscriptParts.add(resultsObject + " <-  merge(" 
+					+ rtResultsObjectName + ", " + mzResultsObjectName+ ", by = 0, all = T)");
+			rscriptParts.add("colnames(" + resultsObject + ")[1] <- \"Feature\"");
+			rscriptParts.add(resultsObject + " <- right_join(" + metaDataObject 
+					+ ", " + resultsObject + ") %>% arrange(MZ,RT)");
+			
+			String outputFileName =
+					sdio.getProperty(SummaryInputColumns.EXPERIMENT) + "_" + 
+					sdio.getProperty(SummaryInputColumns.BATCH) +
+					OUTPUT_FILE_SUFFIX + FIOUtils.getTimestamp()+ ".txt";
+			rscriptParts.add("write.table(" + resultsObject + ", file = \"" 
+					+ outputFileName + "\", quote = F, sep = \"\\t\", na = \"\", row.names = F)");
 		}
+		writeScriptToFile();
+	}
+	
+	protected void createProjectDirectoryStructure() {
+
+		File projectParentDir = parameters.getProjectParentDirectory();
+		String projectName = MODALITY_ANALYSIS_PROJECT_BASE_NAME + FIOUtils.getTimestamp();
+		Path newProjectPath = Paths.get(projectParentDir.getAbsolutePath(), projectName);		
+		try {
+			Files.createDirectories(newProjectPath);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		projectFolder = newProjectPath.toFile();
+		parameters.setProjectDirectory(projectFolder);
+		scriptFile = Paths.get(newProjectPath.toString(), 
+				SCRIPT_FILE_PREFIX + FIOUtils.getTimestamp() + ".R" ).toFile();
+	}
+	
+	protected void initRscript() {
+		
+		String workDirForR = parameters.getProjectDirectory().getAbsolutePath().replaceAll("\\\\", "/");
 		rscriptParts.add("# Find features with multimodal distribution of RT and MZ values ####\n");
 		rscriptParts.add("setwd(\"" + workDirForR + "\")\n");
 
@@ -95,50 +166,10 @@ public class ModalityAnalysisScriptGenerator {
 				+ "alternative = NA, method = NA, sample.size = NA, data.name = NA, bad.obs = NA)");
 		rscriptParts.add("class(empty.list) <- \"htest\"");
 		rscriptParts.add("edf <- do.call(rbind, empty.list)");
-		
-		for(SummarizationDataInputObject sdio : inputObjectList) {
-			
-			String dataObjectPrefix = 
-					sdio.getField(SummaryInputColumns.EXPERIMENT) + "." + 
-					sdio.getField(SummaryInputColumns.BATCH);
-			
-			rscriptParts.add("\n## Multimodality analysis for " 
-					+ sdio.getField(SummaryInputColumns.EXPERIMENT) 
-					+ "," + sdio.getField(SummaryInputColumns.BATCH) + " ####");
-			
-			createValidSampleObject(sdio, dataDir, dataObjectPrefix, rscriptParts);
-			
-			String rtResultsObjectName = 
-					createMultimodalytyAnalysisBlockForParameter(
-							sdio, dataDir, dataObjectPrefix, SummaryInputColumns.RT_VALUES, 
-							maxPercenrMissing, rscriptParts);
-			String mzResultsObjectName = 
-					createMultimodalytyAnalysisBlockForParameter(
-							sdio, dataDir, dataObjectPrefix, SummaryInputColumns.MZ_VALUES, 
-							maxPercenrMissing, rscriptParts);
-			
-			String metaDataObject = createMetaDataObject(dataObjectPrefix, rscriptParts);
-			
-			rscriptParts.add("\n#### Generate output ####");
-			String resultsObject = dataObjectPrefix + OUTPUT_SUFFIX;
-			rscriptParts.add(resultsObject + " <-  merge(" 
-					+ rtResultsObjectName + ", " + mzResultsObjectName+ ", by = 0, all = T)");
-			rscriptParts.add("colnames(" + resultsObject + ")[1] <- \"Feature\"");
-			rscriptParts.add(resultsObject + " <- right_join(" + metaDataObject 
-					+ ", " + resultsObject + ") %>% arrange(MZ,RT)");
-			
-			String outputFileName =
-					sdio.getField(SummaryInputColumns.EXPERIMENT) + "_" + 
-					sdio.getField(SummaryInputColumns.BATCH) +
-					OUTPUT_FILE_SUFFIX + FIOUtils.getTimestamp()+ ".txt";
-			rscriptParts.add("write.table(" + resultsObject + ", file = \"" 
-					+ outputFileName + "\", quote = F, sep = \"\\t\", na = \"\", row.names = F)");
-		}
-		writeScript(rscriptParts, rWorkingDir);
 	}
 	
-	private static void createValidSampleObject(
-			SummarizationDataInputObject sdio,
+	private void createValidSampleObject(
+			RMultibatchAnalysisInputObject sdio,
 			File dataDir,
 			String dataObjectPrefix,			
 			List<String>rscriptParts) {
@@ -146,7 +177,7 @@ public class ModalityAnalysisScriptGenerator {
 		rscriptParts.add("\n### Select only samples and pools ####");
 		String designObject = dataObjectPrefix + DESIGN_OBJECT_SUFFIX;
 		String filePath = Paths.get(dataDir.getAbsolutePath(), 
-				sdio.getField(SummaryInputColumns.MANIFEST)).toString();
+				sdio.getProperty(SummaryInputColumns.MANIFEST)).toString();
 		rscriptParts.add(designObject + " <- read.delim(r'(" + filePath + ")', check.names=FALSE)");
 		String validSamplesObject = dataObjectPrefix + VALID_SAMPLES_LIST_SUFFIX;
 		rscriptParts.add(validSamplesObject + " <- " + designObject + 
@@ -155,7 +186,7 @@ public class ModalityAnalysisScriptGenerator {
 		rscriptParts.add(validSamplesObject + " <- as.character(" + validSamplesObject + "[,1])");
 	}
 	
-	private static String createMetaDataObject(
+	private String createMetaDataObject(
 			String dataObjectPrefix,
 			List<String>rscriptParts) {
 		
@@ -170,8 +201,8 @@ public class ModalityAnalysisScriptGenerator {
 		return metaDataObject;
 	}
 	
-	private static String createMultimodalytyAnalysisBlockForParameter(
-			SummarizationDataInputObject sdio,
+	private String createMultimodalytyAnalysisBlockForParameter(
+			RMultibatchAnalysisInputObject sdio,
 			File dataDir,
 			String dataObjectPrefix,
 			SummaryInputColumns parameter,
@@ -181,7 +212,7 @@ public class ModalityAnalysisScriptGenerator {
 		rscriptParts.add("\n#### Analyze " + parameter.getName() + " for multimodal distribution ####");
 		String paramDataObject = dataObjectPrefix + "." + parameter.getRName();		
 		String dataObjectIn = paramDataObject + INPUT_DATA_SUFFIX;
-		String filePath = Paths.get(dataDir.getAbsolutePath(), sdio.getField(parameter)).toString();
+		String filePath = Paths.get(dataDir.getAbsolutePath(), sdio.getProperty(parameter)).toString();
 		
 		rscriptParts.add(dataObjectIn + " <- read.delim(r'(" + filePath + ")', check.names=FALSE)");
 		rscriptParts.add(paramDataObject + " <- " + dataObjectIn + "[,-c(1:9)]");
@@ -209,22 +240,5 @@ public class ModalityAnalysisScriptGenerator {
 				+ parameter.getRName() + "\", sep = \"\")");
 		
 		return modStatsObject;
-	}
-	
-	private static void writeScript(			
-			List<String>rscriptParts, File rWorkingDir) {
-
-		String rScriptFileName = "AnalyzeRTMZMultimodalDistribution-" + FIOUtils.getTimestamp() + ".R";
-		Path outputPath = Paths.get(
-				rWorkingDir.getAbsolutePath(), rScriptFileName);
-		try {
-		    Files.write(outputPath, 
-		    		rscriptParts,
-		            StandardCharsets.UTF_8,
-		            StandardOpenOption.CREATE, 
-		            StandardOpenOption.TRUNCATE_EXISTING);
-		} catch (IOException e) {
-		    e.printStackTrace();
-		}
 	}
 }

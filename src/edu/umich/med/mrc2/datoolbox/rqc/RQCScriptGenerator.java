@@ -1,6 +1,6 @@
 /*******************************************************************************
  *
- * (C) Copyright 2018-2025 MRC2 (http://mrc2.umich.edu).
+ * (C) Copyright 2018-2026 MRC2 (http://mrc2.umich.edu).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,8 +59,7 @@ public class RQCScriptGenerator {
 			File rWorkingDir,
 			File inputMap,
 			int numMissingBatchesAllowed) {
-		
-		//	List<String>qcSummaryNames = new ArrayList<String>();
+
 		List<String>rscriptParts = new ArrayList<>();
 		String workDirForR = rWorkingDir.getAbsolutePath().replaceAll("\\\\", "/");
 		String[][] inputMapData = DelimitedTextParser.parseTextFile(
@@ -72,7 +71,7 @@ public class RQCScriptGenerator {
 				SummaryInputColumns.PEAK_AREAS,
 		};
 		List<SummarizationDataInputObject>inputObjectList = 
-				getDataInputList(inputMapData, requiredColumns);
+				getDataInputList(inputMapData,Arrays.asList(requiredColumns));
 		
 		if(inputObjectList == null) {
 			System.err.println("Unable to parse input map file!");
@@ -545,26 +544,40 @@ public class RQCScriptGenerator {
 		}
 	}	
 	
-	public static List<SummarizationDataInputObject>getDataInputList(
-			String[][]inputMap, SummaryInputColumns[]requiredColumns){
+	public static List<SummarizationDataInputObject>getSparseDataInputList(
+			String[][]mcInputData, 
+			List<SummaryInputColumns>obligatoryColumns,
+			List<SummaryInputColumns>selectableColumns){
 		
 		List<SummarizationDataInputObject>dataInputList =  new ArrayList<>();
-		List<String>header = Arrays.asList(inputMap[0]);
-		for(SummaryInputColumns field : requiredColumns) {
+		List<String>header = Arrays.asList(mcInputData[0]);
+		for(SummaryInputColumns field : obligatoryColumns) {
 			
 			if(!header.contains(field.name())) {
 				
 				System.err.println(field.name() + " missing in data input map file!");
 				return dataInputList;
 			}
-		}	
-		for(int i = 1; i<inputMap.length; i++) {
+		}
+		int countSelectable = 0;
+		for(SummaryInputColumns field : selectableColumns) {
+			
+            if(header.contains(field.name()))
+                countSelectable++;
+		}
+		if (countSelectable == 0) {
+
+			System.err.println("None of the selectable columns are present in data input map file!");
+			return dataInputList;
+		}
+		
+		for(int i = 1; i<mcInputData.length; i++) {
 			
 			SummarizationDataInputObject io = new SummarizationDataInputObject();
-			for(int j = 0; j<inputMap[0].length; j++) {
+			for(int j = 0; j<mcInputData[0].length; j++) {
 			
-				SummaryInputColumns field = SummaryInputColumns.getOptionByName(inputMap[0][j]);
-				String value = inputMap[i][j];
+				SummaryInputColumns field = SummaryInputColumns.getOptionByName(mcInputData[0][j]);
+				String value = mcInputData[i][j];
 				if(value == null || value.isEmpty()) {
 					
 					System.err.println(field.name() + 
@@ -577,6 +590,42 @@ public class RQCScriptGenerator {
 		}
 		return dataInputList;
 	}
+	
+	public static List<SummarizationDataInputObject>getDataInputList(
+			String[][]mcInputData, 
+			List<SummaryInputColumns>requiredColumns){
+		
+		List<SummarizationDataInputObject>dataInputList =  new ArrayList<>();
+		List<String>header = Arrays.asList(mcInputData[0]);
+		for(SummaryInputColumns field : requiredColumns) {
+			
+			if(!header.contains(field.name())) {
+				
+				System.err.println(field.name() + " missing in data input map file!");
+				return dataInputList;
+			}
+		}	
+		for(int i = 1; i<mcInputData.length; i++) {
+			
+			SummarizationDataInputObject io = new SummarizationDataInputObject();
+			for(int j = 0; j<mcInputData[0].length; j++) {
+			
+				SummaryInputColumns field = SummaryInputColumns.getOptionByName(mcInputData[0][j]);
+				String value = mcInputData[i][j];
+				if(value == null || value.isEmpty()) {
+					
+					System.err.println(field.name() + 
+							" missing in data input map file on line " + Integer.toString(i+ 1) + "!");
+					return dataInputList;
+				}					
+				io.setField(field, value);			
+			}
+			dataInputList.add(io);			
+		}
+		return dataInputList;
+	}
+	
+
 	
 	public static Map<SummaryInputColumns,Set<String>>createFeildVariationMap(
 			Collection<SummarizationDataInputObject>dataInputList){
@@ -618,7 +667,7 @@ public class RQCScriptGenerator {
 				inputMapFile, MRC2ToolBoxConfiguration.getTabDelimiter());
 		
 		List<SummarizationDataInputObject>dataInputList = 
-				getDataInputList(inputData, SummaryInputColumns.values());
+				getDataInputList(inputData, Arrays.asList(SummaryInputColumns.values()));
 		if(dataInputList == null)
 			return;
 		

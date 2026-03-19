@@ -1,6 +1,6 @@
 /*******************************************************************************
  *
- * (C) Copyright 2018-2025 MRC2 (http://mrc2.umich.edu).
+ * (C) Copyright 2018-2026 MRC2 (http://mrc2.umich.edu).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -325,14 +325,8 @@ public class MZDeltaAnalysisDialog extends JDialog implements ActionListener, Ba
 		getContentPane().add(buttonPanel, BorderLayout.SOUTH);
 
 		JButton btnCancel = new JButton("Cancel");
+		btnCancel.addActionListener(e -> dispose());
 		buttonPanel.add(btnCancel);
-		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
-		ActionListener al = new ActionListener() {
-			public void actionPerformed(ActionEvent ae) {
-				dispose();
-			}
-		};
-		btnCancel.addActionListener(al);
 
 		JButton btnSave = new JButton(
 				MainActionCommands.RUN_MZ_DIFFERENCE_ANALYSIS_COMMAND.getName());
@@ -340,8 +334,10 @@ public class MZDeltaAnalysisDialog extends JDialog implements ActionListener, Ba
 				MainActionCommands.RUN_MZ_DIFFERENCE_ANALYSIS_COMMAND.getName());
 		btnSave.addActionListener(actionListener);
 		buttonPanel.add(btnSave);
-		JRootPane rootPane = SwingUtilities.getRootPane(btnSave);
-		rootPane.registerKeyboardAction(al, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
+		
+		JRootPane rootPane = SwingUtilities.getRootPane(btnSave);		
+		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
+		rootPane.registerKeyboardAction(al -> { dispose(); }, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 		rootPane.setDefaultButton(btnSave);
 
 		loadPreferences();

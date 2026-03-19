@@ -1,6 +1,6 @@
 /*******************************************************************************
  *
- * (C) Copyright 2018-2025 MRC2 (http://mrc2.umich.edu).
+ * (C) Copyright 2018-2026 MRC2 (http://mrc2.umich.edu).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -287,6 +287,7 @@ public class LabNoteEditor extends JDialog implements ActionListener, ItemListen
 		getContentPane().add(panel, BorderLayout.SOUTH);
 
 		cancelButton = new JButton("Cancel");
+		cancelButton.addActionListener(e -> dispose());
 		panel.add(cancelButton);
 
 		saveButton = new JButton("Save");
@@ -295,15 +296,8 @@ public class LabNoteEditor extends JDialog implements ActionListener, ItemListen
 				MainActionCommands.SAVE_LAB_NOTE_COMMAND.getName());
 		panel.add(saveButton);
 		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
-		ActionListener al = new ActionListener() {
-			public void actionPerformed(ActionEvent ae) {
-				setVisible(false);
-			}
-		};
-		cancelButton.addActionListener(al);
-
 		JRootPane rootPane = SwingUtilities.getRootPane(saveButton);
-		rootPane.registerKeyboardAction(al, stroke,
+		rootPane.registerKeyboardAction(al -> { dispose(); }, stroke,
 				JComponent.WHEN_IN_FOCUSED_WINDOW);
 		rootPane.setDefaultButton(saveButton);
 

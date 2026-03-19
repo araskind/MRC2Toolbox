@@ -1,6 +1,6 @@
 /*******************************************************************************
  *
- * (C) Copyright 2018-2025 MRC2 (http://mrc2.umich.edu).
+ * (C) Copyright 2018-2026 MRC2 (http://mrc2.umich.edu).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -156,13 +156,8 @@ public class DesignLevelAssignmentDialog extends JDialog implements ActionListen
 		rowCount++;
 
 		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
-		ActionListener al = new ActionListener() {
-			public void actionPerformed(ActionEvent ae) {
-				disposeWithoutSavingPreferences();
-			}
-		};
 		btnCancel = new JButton("Cancel");
-		btnCancel.addActionListener(al);
+		btnCancel.addActionListener(e -> dispose());
 
 		GridBagConstraints gbc_btnCancel = new GridBagConstraints();
 		gbc_btnCancel.insets = new Insets(0, 0, 0, 5);
@@ -180,13 +175,11 @@ public class DesignLevelAssignmentDialog extends JDialog implements ActionListen
 		panel.add(assignLevelsButton, gbc_assignBatchButton);
 
 		JRootPane rootPane = SwingUtilities.getRootPane(assignLevelsButton);
-		rootPane.registerKeyboardAction(al, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
+		rootPane.registerKeyboardAction(al -> { dispose(); }, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 		rootPane.setDefaultButton(assignLevelsButton);
 	}
 
-	private void disposeWithoutSavingPreferences() {
-		super.dispose();
-	}
+
 	
 	@Override
 	public void actionPerformed(ActionEvent e) {

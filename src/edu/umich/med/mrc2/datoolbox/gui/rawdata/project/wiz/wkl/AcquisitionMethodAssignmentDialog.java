@@ -1,6 +1,6 @@
 /*******************************************************************************
  *
- * (C) Copyright 2018-2025 MRC2 (http://mrc2.umich.edu).
+ * (C) Copyright 2018-2026 MRC2 (http://mrc2.umich.edu).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ package edu.umich.med.mrc2.datoolbox.gui.rawdata.project.wiz.wkl;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
@@ -81,12 +80,7 @@ public class AcquisitionMethodAssignmentDialog extends JDialog {
 		JButton btnCancel = new JButton("Cancel");
 		panel.add(btnCancel);
 		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
-		ActionListener al = new ActionListener() {
-			public void actionPerformed(ActionEvent ae) {
-				dispose();
-			}
-		};
-		btnCancel.addActionListener(al);
+		btnCancel.addActionListener(e -> dispose());
 
 		JButton btnSave = new JButton(
 				MainActionCommands.ASSIGN_ACQ_METHOD_FOR_SELECTED_DATA_FILES_COMMAND.getName());
@@ -95,7 +89,7 @@ public class AcquisitionMethodAssignmentDialog extends JDialog {
 		btnSave.addActionListener(actionListener);
 		panel.add(btnSave);
 		JRootPane rootPane = SwingUtilities.getRootPane(btnSave);
-		rootPane.registerKeyboardAction(al, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
+		rootPane.registerKeyboardAction(al -> { dispose(); }, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 		rootPane.setDefaultButton(btnSave);
 		
 		methodTable.addMouseListener(

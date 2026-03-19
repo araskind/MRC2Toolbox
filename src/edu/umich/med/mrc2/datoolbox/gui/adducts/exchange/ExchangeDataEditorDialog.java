@@ -1,6 +1,6 @@
 /*******************************************************************************
  *
- * (C) Copyright 2018-2025 MRC2 (http://mrc2.umich.edu).
+ * (C) Copyright 2018-2026 MRC2 (http://mrc2.umich.edu).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,6 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
@@ -145,16 +144,11 @@ public class ExchangeDataEditorDialog extends JDialog implements ItemListener, L
 		getContentPane().add(panel_4, BorderLayout.SOUTH);
 
 		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
-		ActionListener al = new ActionListener() {
-			public void actionPerformed(ActionEvent ae) {
-				disposeWithoutSavingPreferences();
-			}
-		};
-		rootPane.registerKeyboardAction(al, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
+		rootPane.registerKeyboardAction(al -> { dispose(); }, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 
 		btnCancel = new JButton("Cancel");
 		panel_4.add(btnCancel);
-		btnCancel.addActionListener(al);
+		btnCancel.addActionListener(e -> dispose());
 
 		btnSave = new JButton("Save");
 		panel_4.add(btnSave);
@@ -168,9 +162,7 @@ public class ExchangeDataEditorDialog extends JDialog implements ItemListener, L
 		pack();
 	}
 
-	private void disposeWithoutSavingPreferences() {
-		super.dispose();
-	}
+
 	
 	public void loadExchange(AdductExchange activeExchange) {
 

@@ -1,6 +1,6 @@
 /*******************************************************************************
  *
- * (C) Copyright 2018-2020 MRC2 (http://mrc2.umich.edu).
+ * (C) Copyright 2018-2026 MRC2 (http://mrc2.umich.edu).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ import javax.swing.JFrame;
 import javax.swing.JRootPane;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
+import javax.swing.WindowConstants;
 
 import bibliothek.extension.gui.dock.theme.EclipseTheme;
 import bibliothek.gui.dock.common.CControl;
@@ -44,6 +45,7 @@ import bibliothek.gui.dock.common.CGrid;
 import edu.umich.med.mrc2.datoolbox.gui.main.PersistentLayout;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.rgen.mcr.DockableMetabCombinerScriptGenerator;
+import edu.umich.med.mrc2.datoolbox.gui.rgen.modality.DockableModalityAnalysisScriptGenerator;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 
@@ -59,17 +61,17 @@ public class RscriptGeneratorWindow extends JFrame
 	
 	private static final Icon frameIcon = GuiUtils.getIcon("rScript", 32);
 	private static final File layoutConfigFile = new File(MRC2ToolBoxCore.configDir + "RscriptGeneratorWindow.layout");
-	private CControl control;
-	private CGrid grid;
-	
-	private DockableMetabCombinerScriptGenerator metabCombinerScriptGenerator;
+	private transient CControl control;
+	private transient CGrid grid;	
+	private transient DockableMetabCombinerScriptGenerator metabCombinerScriptGenerator;
+	private transient DockableModalityAnalysisScriptGenerator modalityAnalysisScriptGenerator;
 	
 	public RscriptGeneratorWindow() throws HeadlessException {
 
 		super("R-script generator");
 		setIconImage(((ImageIcon) frameIcon).getImage());
 
-		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		setMinimumSize(new Dimension(1000, 800));
 		setPreferredSize(new Dimension(1000, 800));
 		
@@ -79,18 +81,14 @@ public class RscriptGeneratorWindow extends JFrame
 		grid = new CGrid(control);
 		
 		metabCombinerScriptGenerator = new DockableMetabCombinerScriptGenerator();
-		grid.add(0, 0, 1, 1, metabCombinerScriptGenerator);
+		modalityAnalysisScriptGenerator = new DockableModalityAnalysisScriptGenerator();
+		grid.add(0, 0, 1, 1, metabCombinerScriptGenerator, modalityAnalysisScriptGenerator);
 		
 		control.getContentArea().deploy(grid);
 
 		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
-		ActionListener al = new ActionListener() {
-			public void actionPerformed(ActionEvent ae) {
-				dispose();
-			}
-		};
 		JRootPane rootPane = SwingUtilities.getRootPane(control.getContentArea());
-		rootPane.registerKeyboardAction(al, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
+		rootPane.registerKeyboardAction(al -> { dispose(); }, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 		
 		loadLayout(layoutConfigFile);
 		pack();

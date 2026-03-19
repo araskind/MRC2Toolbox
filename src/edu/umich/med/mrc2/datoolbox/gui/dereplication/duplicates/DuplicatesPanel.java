@@ -1,6 +1,6 @@
 /*******************************************************************************
  *
- * (C) Copyright 2018-2025 MRC2 (http://mrc2.umich.edu).
+ * (C) Copyright 2018-2026 MRC2 (http://mrc2.umich.edu).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -231,6 +231,7 @@ public class DuplicatesPanel extends ClusterDisplayPanel {
 				duplicateFindDialog.getRetentionWindow());
 
 		fdt.addTaskListener(this);
+		duplicateFindDialog.savePreferences();
 		duplicateFindDialog.dispose();
 		MRC2ToolBoxCore.getTaskController().addTask(fdt);
 	}
@@ -258,6 +259,7 @@ public class DuplicatesPanel extends ClusterDisplayPanel {
 						activeDataPipeline, 
 						duplicateMergeDialog.getMergeOption());
 		ddt.addTaskListener(this);
+		duplicateMergeDialog.savePreferences();
 		duplicateMergeDialog.dispose();
 		MRC2ToolBoxCore.getTaskController().addTask(ddt);			
 	}

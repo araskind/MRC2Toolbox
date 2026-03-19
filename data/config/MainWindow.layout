@@ -241,7 +241,7 @@
 													<placeholder>dock.single.ProjectSetupDraw</placeholder>
 												</placeholders>
 											</leaf>
-											<node nodeId="1676064563113" orientation="HORIZONTAL" divider="0.18282252316464717">
+											<node nodeId="1676064563113" orientation="HORIZONTAL" divider="0.2335">
 												<leaf id="0" nodeId="1676064552084">
 													<placeholders>
 														<placeholder>dock.single.ExperimentSetupDraw</placeholder>

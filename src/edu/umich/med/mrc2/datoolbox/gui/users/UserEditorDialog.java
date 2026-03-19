@@ -1,6 +1,6 @@
 /*******************************************************************************
  *
- * (C) Copyright 2018-2025 MRC2 (http://mrc2.umich.edu).
+ * (C) Copyright 2018-2026 MRC2 (http://mrc2.umich.edu).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,6 @@ import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.util.Collection;
@@ -229,11 +228,6 @@ public class UserEditorDialog extends JDialog {
 		phoneTextField.setColumns(10);
 		
 		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
-		ActionListener al = new ActionListener() {
-			public void actionPerformed(ActionEvent ae) {
-				setVisible(false);
-			}
-		};
 		
 		chckbxSuperuser = new JCheckBox("Superuser");
 		GridBagConstraints gbc_chckbxSuperuser = new GridBagConstraints();
@@ -260,7 +254,7 @@ public class UserEditorDialog extends JDialog {
 		gbc_cancelButton.gridx = 1;
 		gbc_cancelButton.gridy = 7;
 		panel.add(cancelButton, gbc_cancelButton);
-		cancelButton.addActionListener(al);
+		cancelButton.addActionListener(e -> dispose());
 		
 		saveButton = new JButton("Save user data");
 		saveButton.setActionCommand(MainActionCommands.EDIT_ASSAY_METHOD_COMMAND.getName());
@@ -273,7 +267,7 @@ public class UserEditorDialog extends JDialog {
 		panel.add(saveButton, gbc_saveButton);
 		
 		JRootPane rootPane = SwingUtilities.getRootPane(saveButton);
-		rootPane.registerKeyboardAction(al, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
+		rootPane.registerKeyboardAction(al -> { dispose(); }, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 		rootPane.setDefaultButton(saveButton);
 		
 		loadUserData();

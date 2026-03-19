@@ -1,6 +1,6 @@
 /*******************************************************************************
  *
- * (C) Copyright 2018-2025 MRC2 (http://mrc2.umich.edu).
+ * (C) Copyright 2018-2026 MRC2 (http://mrc2.umich.edu).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ package edu.umich.med.mrc2.datoolbox.gui.expsetup.dpl;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
@@ -85,14 +84,9 @@ public class AcquisitionMethodSelectorDialog extends JDialog {
 		flowLayout.setAlignment(FlowLayout.RIGHT);
 		getContentPane().add(buttonPanel, BorderLayout.SOUTH);
 		
-		ActionListener al = new ActionListener() {
-			public void actionPerformed(ActionEvent ae) {
-				disposeWithoutSavingPreferences();
-			}
-		};
 		JButton btnCancel = new JButton("Cancel");
 		buttonPanel.add(btnCancel);
-		btnCancel.addActionListener(al);
+		btnCancel.addActionListener(e -> dispose());
 		btnSave = new JButton(
 				MainActionCommands.SELECT_DATA_ACQUISITION_METHOD_COMMAND.getName());
 		btnSave.setActionCommand(
@@ -101,7 +95,7 @@ public class AcquisitionMethodSelectorDialog extends JDialog {
 		buttonPanel.add(btnSave);
 		JRootPane rootPane = SwingUtilities.getRootPane(btnSave);
 		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
-		rootPane.registerKeyboardAction(al, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
+		rootPane.registerKeyboardAction(al -> { dispose(); }, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 		rootPane.setDefaultButton(btnSave);
 
 		acquisitionMethodTable.setTableModelFromAcquisitionMethods(
@@ -109,9 +103,7 @@ public class AcquisitionMethodSelectorDialog extends JDialog {
 		pack();
 	}
 	
-	private void disposeWithoutSavingPreferences() {
-		super.dispose();
-	}
+
 	
 	public DataAcquisitionMethod getSelectedMethod() {
 		return acquisitionMethodTable.getSelectedMethod();

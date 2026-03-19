@@ -1,6 +1,6 @@
 /*******************************************************************************
  *
- * (C) Copyright 2018-2025 MRC2 (http://mrc2.umich.edu).
+ * (C) Copyright 2018-2026 MRC2 (http://mrc2.umich.edu).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,11 +23,9 @@ package edu.umich.med.mrc2.datoolbox.rqc;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -43,13 +41,14 @@ import org.apache.commons.lang.StringUtils;
 import org.jdom2.Document;
 import org.jdom2.Element;
 
+import edu.umich.med.mrc2.datoolbox.gui.rgen.TemplareRbasedProjectGenerator;
 import edu.umich.med.mrc2.datoolbox.gui.rgen.mcr.MetabCombinerParametersObject;
 import edu.umich.med.mrc2.datoolbox.gui.rgen.mcr.RMultibatchAnalysisInputObject;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
 import edu.umich.med.mrc2.datoolbox.utils.XmlUtils;
 
-public class MetabCombinerAlignmentScriptGenerator {
+public class MetabCombinerAlignmentScriptGenerator extends TemplareRbasedProjectGenerator {
 	
 	public static final String MC_ALIGNMENT_PROJECT_BASE_NAME = "MetabCombinerMultyBatchAlignment-";
 	public static final String SCRIPT_FILE_PREFIX = "MetabCombinerMultyBatchAlignmentScript_";
@@ -77,10 +76,7 @@ public class MetabCombinerAlignmentScriptGenerator {
 					SummaryInputColumns.PEAK_AREAS);
 	
 	private MetabCombinerParametersObject parametersObject;
-	private List<String>rscriptParts;
 	private Map<RMultibatchAnalysisInputObject,String>metabDataObjectMap;
-	private File scriptFile;	
-	private File projectFolder;
 	
 	public enum McAlignmentProjectSubfolders{
 		
@@ -111,7 +107,7 @@ public class MetabCombinerAlignmentScriptGenerator {
 	public void createMetabCombinerAlignmentScript() {
 		
 		if(!parametersObject.isUseExistingAlignment())
-			createAlignmentProjectDirectoryStructure();
+			createProjectDirectoryStructure();
 		
 		initRscript();	
 		initSummaryDataFrames();
@@ -130,7 +126,7 @@ public class MetabCombinerAlignmentScriptGenerator {
 		saveAlignmentParameters();
 	}
 
-	private void createAlignmentProjectDirectoryStructure() {
+	protected void createProjectDirectoryStructure() {
 
 		File projectParentDir = parametersObject.getProjectParentDirectory();
 		String projectName = MC_ALIGNMENT_PROJECT_BASE_NAME + FIOUtils.getTimestamp();
@@ -158,15 +154,11 @@ public class MetabCombinerAlignmentScriptGenerator {
 				SCRIPT_FILE_PREFIX + FIOUtils.getTimestamp() + ".R" ).toFile();
 	}
 
-	private void initRscript() {
+	protected void initRscript() {
 				
 		rscriptParts.add("# MetabCombiner alignment of multiple batches of untargeted data " + 
 				MRC2ToolBoxConfiguration.defaultTimeStampFormat.format(new Date())+ " ####\n");
-		rscriptParts.add("setwd(r'(" + projectFolder.getAbsolutePath() + ")')\n");
-		
-//		String workDirForR = parametersObject.getProjectParentDirectory().getAbsolutePath().replaceAll("\\\\", "/");
-//		rscriptParts.add("setwd(\"" + workDirForR + "\")\n");
-		
+		rscriptParts.add("setwd(r'(" + projectFolder.getAbsolutePath() + ")')\n");	
 		rscriptParts.add("library(metabCombiner)");
 		rscriptParts.add("library(reshape2)");
 		rscriptParts.add("library(dplyr)");
@@ -610,20 +602,7 @@ public class MetabCombinerAlignmentScriptGenerator {
 		
 		return StringUtils.join(outNameParts, "-");
 	}
-		
-	private void writeScriptToFile() {
 
-		try {
-		    Files.write(scriptFile.toPath(), 
-		    		rscriptParts,
-		            StandardCharsets.UTF_8,
-		            StandardOpenOption.CREATE, 
-		            StandardOpenOption.TRUNCATE_EXISTING);
-		} catch (IOException e) {
-		    e.printStackTrace();
-		}
-	}
-	
 	private void saveAlignmentParameters() {
 
 		File settingsFile = Paths.get(

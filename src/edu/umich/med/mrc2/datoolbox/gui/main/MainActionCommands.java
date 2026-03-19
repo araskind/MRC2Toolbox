@@ -1,6 +1,6 @@
 /*******************************************************************************
  *
- * (C) Copyright 2018-2025 MRC2 (http://mrc2.umich.edu).
+ * (C) Copyright 2018-2026 MRC2 (http://mrc2.umich.edu).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -440,6 +440,11 @@ public enum MainActionCommands {
 	IMPORT_METAB_COMBINER_INPUTS_FROM_FILE_COMMAND("Import MetabCombiner inputs from file"),
 	CLEAR_METAB_COMBINER_INPUT_FILES_COMMAND("Clear MetabCombiner input files"),
 	SELECT_EXISTING_MC_ALIGNMENT_PROJECT_COMMAND("Select existing MetabCombiner alignment project"),
+	
+	GENERATE_MODALITY_ANALYSIS_SCRIPT_COMMAND("Generate modality analysis script"),
+	SELECT_MODALITY_ANALYSIS_INPUT_FILES_COMMAND("Select modality analysis input files"),
+	IMPORT_MODALITY_ANALYSIS_INPUTS_FROM_FILE_COMMAND("Import modality analysis inputs from file"),
+	CLEAR_MODALITY_ANALYSIS_INPUT_FILES_COMMAND("Clear modality analysis input files"),
 	
 	// Sorting commands
 	SORT_BY_AREA_COMMAND("Sort by area (high to low)"),

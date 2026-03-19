@@ -1,6 +1,6 @@
 /*******************************************************************************
  *
- * (C) Copyright 2018-2025 MRC2 (http://mrc2.umich.edu).
+ * (C) Copyright 2018-2026 MRC2 (http://mrc2.umich.edu).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,11 +58,11 @@ public class RScriptTestClass {
 		File workingDir = new File("Y:\\DataAnalysis\\_Reports\\EX01526 - Human EDTA Tranche 4 plasma H20001805E\\"
 				+ "QC\\RP-POS\\Multimodaltest-20251117");
 		
-		ModalityAnalysisScriptGenerator.generateMultiBatchMZRTDistributionModalityAnalysisScript(
-				workingDir,
-				dataDir,
-				inputMapFile,
-				75);
+//		ModalityAnalysisScriptGenerator.generateMultiBatchMZRTDistributionModalityAnalysisScript(
+//				workingDir,
+//				dataDir,
+//				inputMapFile,
+//				75);
 	}
 	
 	private static void createModalityAnalysisScriptForEX01526rpNegExperiment() {
@@ -76,11 +76,11 @@ public class RScriptTestClass {
 		File workingDir = new File("Y:\\DataAnalysis\\_Reports\\EX01526 - Human EDTA Tranche 4 plasma H20001805E\\"
 				+ "QC\\RP-NEG\\Multimodaltest-20251106");
 		
-		ModalityAnalysisScriptGenerator.generateMultiBatchMZRTDistributionModalityAnalysisScript(
-				workingDir,
-				dataDir,
-				inputMapFile,
-				75);
+//		ModalityAnalysisScriptGenerator.generateMultiBatchMZRTDistributionModalityAnalysisScript(
+//				workingDir,
+//				dataDir,
+//				inputMapFile,
+//				75);
 	}
 	
 	private static void createModalityAnalysisScriptForEX01526ionpNegExperiment() {
@@ -94,11 +94,11 @@ public class RScriptTestClass {
 		File workingDir = new File("Y:\\DataAnalysis\\_Reports\\EX01526 - Human EDTA Tranche 4 plasma H20001805E\\"
 				+ "QC\\IONP-NEG\\Multimodaltest-20251106");
 		
-		ModalityAnalysisScriptGenerator.generateMultiBatchMZRTDistributionModalityAnalysisScript(
-				workingDir,
-				dataDir,
-				inputMapFile,
-				75);
+//		ModalityAnalysisScriptGenerator.generateMultiBatchMZRTDistributionModalityAnalysisScript(
+//				workingDir,
+//				dataDir,
+//				inputMapFile,
+//				75);
 	}
 	
 	private static void runEX01242RPNEGMultialignment() {

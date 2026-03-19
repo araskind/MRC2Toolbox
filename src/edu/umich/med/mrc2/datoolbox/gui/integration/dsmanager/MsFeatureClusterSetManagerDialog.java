@@ -1,6 +1,6 @@
 /*******************************************************************************
  *
- * (C) Copyright 2018-2025 MRC2 (http://mrc2.umich.edu).
+ * (C) Copyright 2018-2026 MRC2 (http://mrc2.umich.edu).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -102,12 +102,7 @@ public class MsFeatureClusterSetManagerDialog extends JDialog implements ActionL
 		JButton btnCancel = new JButton("Cancel");
 		buttonPanel.add(btnCancel);
 		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
-		ActionListener al = new ActionListener() {
-			public void actionPerformed(ActionEvent ae) {
-				dispose();
-			}
-		};
-		btnCancel.addActionListener(al);
+		btnCancel.addActionListener(e -> dispose());
 		openDataSetButton = new JButton(
 				MainActionCommands.LOAD_SELECTED_FEATURE_CLUSTER_SET.getName());
 		openDataSetButton.setActionCommand(
@@ -123,7 +118,7 @@ public class MsFeatureClusterSetManagerDialog extends JDialog implements ActionL
 				});
 		buttonPanel.add(openDataSetButton);
 		JRootPane rootPane = SwingUtilities.getRootPane(openDataSetButton);
-		rootPane.registerKeyboardAction(al, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
+		rootPane.registerKeyboardAction(al -> { dispose(); }, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 		rootPane.setDefaultButton(openDataSetButton);
 
 		pack();

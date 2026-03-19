@@ -1,6 +1,6 @@
 /*******************************************************************************
  *
- * (C) Copyright 2018-2025 MRC2 (http://mrc2.umich.edu).
+ * (C) Copyright 2018-2026 MRC2 (http://mrc2.umich.edu).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,6 @@ import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 
@@ -130,23 +129,16 @@ public class AssayEditorDialog extends JDialog {
 		panel.add(saveButton, gbc_saveButton);
 
 		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
-		ActionListener al = new ActionListener() {
-			public void actionPerformed(ActionEvent ae) {
-				disposeWithoutSavingPreferences();
-			}
-		};
-		cancelButton.addActionListener(al);
+		cancelButton.addActionListener(e -> dispose());
 		JRootPane rootPane = SwingUtilities.getRootPane(saveButton);
-		rootPane.registerKeyboardAction(al, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
+		rootPane.registerKeyboardAction(al -> { dispose(); }, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 		rootPane.setDefaultButton(saveButton);
 
 		activeMethod = null;
 		pack();
 	}
 	
-	private void disposeWithoutSavingPreferences() {
-		super.dispose();
-	}
+
 
 	public void loadMethodData(Assay method, boolean createNewMethod) {
 

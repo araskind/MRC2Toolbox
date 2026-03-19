@@ -1,6 +1,6 @@
 /*******************************************************************************
  *
- * (C) Copyright 2018-2025 MRC2 (http://mrc2.umich.edu).
+ * (C) Copyright 2018-2026 MRC2 (http://mrc2.umich.edu).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -135,7 +135,9 @@ public class DockableBinnerAnnotationDataSetManager extends DefaultSingleCDockab
 		dataSet.getBinnerAnnotationClusters().addAll(
 				binnerAnnotationLookupDataSetEditorDialog.getAllClusters());
 			
+		binnerAnnotationLookupDataSetEditorDialog.savePreferences();
 		binnerAnnotationLookupDataSetEditorDialog.dispose();
+		
 		if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() == null)
 			createNewBinnerAnnotationLookupDataSetInDatabase(dataSet);
 		else

@@ -1,6 +1,6 @@
 /*******************************************************************************
  *
- * (C) Copyright 2018-2025 MRC2 (http://mrc2.umich.edu).
+ * (C) Copyright 2018-2026 MRC2 (http://mrc2.umich.edu).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -130,18 +130,13 @@ implements ActionListener, BackedByPreferences {
 		panel_1.add(polarityComboBox, gbc_comboBox);
 		
 		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
-		ActionListener al = new ActionListener() {
-			public void actionPerformed(ActionEvent ae) {
-				dispose();
-			}
-		};
 		JPanel buttonPanel = new JPanel();
 		getContentPane().add(buttonPanel, BorderLayout.SOUTH);
 		FlowLayout fl_buttonPanel = (FlowLayout) buttonPanel.getLayout();
 		fl_buttonPanel.setAlignment(FlowLayout.RIGHT);
 		JButton btnCancel = new JButton("Cancel");
 		buttonPanel.add(btnCancel);
-		btnCancel.addActionListener(al);
+		btnCancel.addActionListener(e -> dispose());
 
 		JButton addFilterButton = new JButton(
 				MainActionCommands.SEARCH_IDTRACKER_BY_MULTIPLE_COMPOUND_IDS_COMMAND.getName());
@@ -152,7 +147,7 @@ implements ActionListener, BackedByPreferences {
 		
 		JRootPane rootPane = SwingUtilities.getRootPane(addFilterButton);
 		rootPane.setDefaultButton(addFilterButton);
-		rootPane.registerKeyboardAction(al, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
+		rootPane.registerKeyboardAction(al -> { dispose(); }, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 		
 		pack();
 	}

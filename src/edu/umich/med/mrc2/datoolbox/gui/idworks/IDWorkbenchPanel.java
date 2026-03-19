@@ -1,6 +1,6 @@
 /*******************************************************************************
  *
- * (C) Copyright 2018-2025 MRC2 (http://mrc2.umich.edu).
+ * (C) Copyright 2018-2026 MRC2 (http://mrc2.umich.edu).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1189,6 +1189,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 				filter(b -> b.getMsFeature().isIdentified()).
 				collect(Collectors.toList());
 		}
+		majorClusterFeatureExtractionSetupDialog.savePreferences();
 		majorClusterFeatureExtractionSetupDialog.dispose();	
 		safelyLoadMSMSFeatures(definingFeatures);
 	}
@@ -1255,6 +1256,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 					idTrackerMSMSClusterDataSetExportDialog.getOutputFile());
 		task.addTaskListener(this);
 		MRC2ToolBoxCore.getTaskController().addTask(task);	
+		idTrackerMSMSClusterDataSetExportDialog.savePreferences();
 		idTrackerMSMSClusterDataSetExportDialog.dispose();
 	}
 	
@@ -1290,6 +1292,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		task.addTaskListener(this);
 		MRC2ToolBoxCore.getTaskController().addTask(task);	
 		
+		idTrackerMSMSClusterDataSetExport4IdentificationDialog.savePreferences();
 		idTrackerMSMSClusterDataSetExport4IdentificationDialog.dispose();
 	}
 
@@ -1310,8 +1313,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			MessageDialog.showErrorMsg(StringUtils.join(errors, "\n"), msmsClusterFilterDialog);
 			return;
 		}
-		Collection<IMsFeatureInfoBundleCluster> filteredClusters = 
-				new ArrayList<IMsFeatureInfoBundleCluster>();
+		Collection<IMsFeatureInfoBundleCluster> filteredClusters = new ArrayList<>();
 		filteredClusters.addAll(activeMSMSClusterDataSet.getClusters());
 		Range mzRange = msmsClusterFilterDialog.getMzRange();
 		if(mzRange != null) {
@@ -1359,7 +1361,6 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			MessageDialog.showWarningMsg(
 					"No clusters found matching all selected criteria", 
 					msmsClusterFilterDialog);
-			return;
 		}
 		else {
 			clearMSMSFeatureData();
@@ -1369,6 +1370,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 					map(c -> c.getLookupFeature()).collect(Collectors.toSet());
 			lookupFeatureTable.loadLookupFeatures(lookupFeatures);
 			activeCluster = null;
+			msmsClusterFilterDialog.savePreferences();
 			msmsClusterFilterDialog.dispose();
 		}		
 	}
@@ -1429,6 +1431,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 					map(c -> c.getLookupFeature()).collect(Collectors.toSet());
 			lookupFeatureTable.loadLookupFeatures(lookupFeatures);
 			activeCluster = null;
+			msmsClusterMZRTListFilterDialog.savePreferences();
 			msmsClusterMZRTListFilterDialog.dispose();
 		}
 	}
@@ -2449,6 +2452,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		
 		task.addTaskListener(this);
 		MRC2ToolBoxCore.getTaskController().addTask(task);		
+		idTrackerDataExportDialog.savePreferences();
 		idTrackerDataExportDialog.dispose();
 	}
 
@@ -3678,6 +3682,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 						exportFile);
 		task.addTaskListener(this);
 		MRC2ToolBoxCore.getTaskController().addTask(task);	
+		siriusDataExportDialog.savePreferences();
 		siriusDataExportDialog.dispose();
 	}
 	

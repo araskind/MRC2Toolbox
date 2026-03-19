@@ -1,4 +1,6 @@
-2026-03-16 19:28:03 INFO  Statring the program
-2026-03-16 19:28:03 INFO  HikariPool-1 - Starting...
-2026-03-16 19:28:04 INFO  HikariPool-1 - Added connection oracle.jdbc.driver.T4CConnection@6ee660fb
-2026-03-16 19:28:04 INFO  HikariPool-1 - Start completed.
+2026-03-18 14:23:27 INFO  Statring the program
+2026-03-18 14:23:28 INFO  HikariPool-1 - Starting...
+2026-03-18 14:23:29 INFO  HikariPool-1 - Added connection oracle.jdbc.driver.T4CConnection@6ee660fb
+2026-03-18 14:23:29 INFO  HikariPool-1 - Start completed.
+2026-03-18 14:48:32 INFO  HikariPool-1 - Shutdown initiated...
+2026-03-18 14:48:32 INFO  HikariPool-1 - Shutdown completed.

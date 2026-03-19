@@ -1,6 +1,6 @@
 /*******************************************************************************
  *
- * (C) Copyright 2018-2025 MRC2 (http://mrc2.umich.edu).
+ * (C) Copyright 2018-2026 MRC2 (http://mrc2.umich.edu).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -314,18 +314,13 @@ public class IDTrackerMSMSClusterDataSetExportDialog extends JDialog
 		panel_3.add(identificationExportSettingsPanel, gbc_panel_2);
 			
 		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
-		ActionListener al = new ActionListener() {
-			public void actionPerformed(ActionEvent ae) {
-				dispose();
-			}
-		};
 		JPanel buttonPanel = new JPanel();
 		getContentPane().add(buttonPanel, BorderLayout.SOUTH);
 		FlowLayout fl_buttonPanel = (FlowLayout) buttonPanel.getLayout();
 		fl_buttonPanel.setAlignment(FlowLayout.RIGHT);
 		JButton btnCancel = new JButton("Cancel");
 		buttonPanel.add(btnCancel);
-		btnCancel.addActionListener(al);
+		btnCancel.addActionListener(e -> dispose());
 
 		exportButton = new JButton(MainActionCommands.EXPORT_MSMS_CLUSTER_DATA_COMMAND.getName());
 		buttonPanel.add(exportButton);
@@ -333,7 +328,7 @@ public class IDTrackerMSMSClusterDataSetExportDialog extends JDialog
 		exportButton.addActionListener(listener);
 		JRootPane rootPane = SwingUtilities.getRootPane(exportButton);
 		rootPane.setDefaultButton(exportButton);
-		rootPane.registerKeyboardAction(al, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
+		rootPane.registerKeyboardAction(al -> { dispose(); }, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 			
 		populateExportPropertyLists();
 		loadPreferences();
@@ -344,12 +339,6 @@ public class IDTrackerMSMSClusterDataSetExportDialog extends JDialog
 		String filePath = Paths.get(baseDirectory.getAbsolutePath(), fileName).toString();
 		outputFilleTextField.setText(filePath);
 		pack();
-	}
-	
-	@Override
-	public void dispose() {
-		savePreferences();
-		super.dispose();
 	}
 	
 	private void populateExportPropertyLists() {

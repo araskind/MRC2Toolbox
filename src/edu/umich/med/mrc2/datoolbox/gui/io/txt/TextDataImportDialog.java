@@ -1,6 +1,6 @@
 /*******************************************************************************
  *
- * (C) Copyright 2018-2025 MRC2 (http://mrc2.umich.edu).
+ * (C) Copyright 2018-2026 MRC2 (http://mrc2.umich.edu).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -151,12 +151,7 @@ public class TextDataImportDialog extends JDialog
 		table = new ColumnFieldMatchTable();
 		panel_2.add(new JScrollPane(table), BorderLayout.CENTER);
 
-		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
-		ActionListener al = new ActionListener() {
-			public void actionPerformed(ActionEvent ae) {
-				dispose();
-			}
-		};		
+		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);		
 		dataPipelineDefinitionPanel = new DataPipelineDefinitionPanel();
 		dataPipelineDefinitionPanel.setBorder(
 				new CompoundBorder(new EmptyBorder(10, 0, 0, 0), 
@@ -178,9 +173,9 @@ public class TextDataImportDialog extends JDialog
 		gbc_cancelButton.gridx = 2;
 		gbc_cancelButton.gridy = 1;
 		panel_1.add(cancelButton, gbc_cancelButton);
-		cancelButton.addActionListener(al);
+		cancelButton.addActionListener(e -> dispose());
 
-		rootPane.registerKeyboardAction(al, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
+		rootPane.registerKeyboardAction(al -> { dispose(); }, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 
 		importDataButton = new JButton("Import data");
 		importDataButton.setActionCommand(MainActionCommands.IMPORT_DATA_COMMAND.getName());

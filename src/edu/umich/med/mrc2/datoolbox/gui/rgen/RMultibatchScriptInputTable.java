@@ -1,6 +1,6 @@
 /*******************************************************************************
  *
- * (C) Copyright 2018-2020 MRC2 (http://mrc2.umich.edu).
+ * (C) Copyright 2018-2026 MRC2 (http://mrc2.umich.edu).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import edu.umich.med.mrc2.datoolbox.gui.rgen.mcr.RMultibatchAnalysisInputObject;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.AutoChoices;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.TableFilterHeader;
+import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.FileRenderer;
 import edu.umich.med.mrc2.datoolbox.rqc.SummaryInputColumns;
 
 public class RMultibatchScriptInputTable extends BasicTable {
@@ -67,6 +68,7 @@ public class RMultibatchScriptInputTable extends BasicTable {
 		for(SummaryInputColumns c : fileCols) {			
 			rowSorter.setComparator(
 					model.getColumnIndex(c.getName()), new FileBaseNameComparator());
+			columnModel.getColumnById(c.getName()).setCellRenderer(new FileRenderer());		
 		}
 		thf = new TableFilterHeader(this, AutoChoices.ENABLED);
 		thf.getParserModel().setComparator(File.class, new FileBaseNameComparator());

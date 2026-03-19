@@ -1,6 +1,6 @@
 /*******************************************************************************
  *
- * (C) Copyright 2018-2025 MRC2 (http://mrc2.umich.edu).
+ * (C) Copyright 2018-2026 MRC2 (http://mrc2.umich.edu).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -344,11 +344,12 @@ public class CorrelationResultsPanel extends ClusterDisplayPanel implements Char
 			MessageDialog.showErrorMsg(
 					StringUtils.join(errors, "\n"), binnerProcessingSetupDialog);
 			return;
-			}
+		}
 		BinnerPreferencesObject bpo = binnerProcessingSetupDialog.getBinnerPreferencesObject();
 		BinnerProcessingTask task = new BinnerProcessingTask(bpo);
 		task.addTaskListener(this);
 		MRC2ToolBoxCore.getTaskController().addTask(task);
+		binnerProcessingSetupDialog.savePreferences();
 		binnerProcessingSetupDialog.dispose();
 	}
 	
@@ -371,6 +372,7 @@ public class CorrelationResultsPanel extends ClusterDisplayPanel implements Char
 		BinnerClustersImportTask ibct = new BinnerClustersImportTask(binnerDataFile, postprocessorDataFile);
 		ibct.addTaskListener(this);
 		MRC2ToolBoxCore.getTaskController().addTask(ibct);
+		binnerDataImportDialog.savePreferences();
 		binnerDataImportDialog.dispose();
 	}
 

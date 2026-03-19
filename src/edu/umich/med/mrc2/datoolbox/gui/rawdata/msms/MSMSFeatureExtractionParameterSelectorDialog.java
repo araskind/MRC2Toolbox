@@ -1,6 +1,6 @@
 /*******************************************************************************
  *
- * (C) Copyright 2018-2025 MRC2 (http://mrc2.umich.edu).
+ * (C) Copyright 2018-2026 MRC2 (http://mrc2.umich.edu).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ package edu.umich.med.mrc2.datoolbox.gui.rawdata.msms;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 
@@ -87,13 +86,8 @@ public class MSMSFeatureExtractionParameterSelectorDialog extends JDialog implem
 		getContentPane().add(panel_2, BorderLayout.SOUTH);
 
 		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
-		ActionListener al = new ActionListener() {
-			public void actionPerformed(ActionEvent ae) {
-				dispose();
-			}
-		};
 		JButton cancelButton = new JButton("Cancel");
-		cancelButton.addActionListener(al);
+		cancelButton.addActionListener(e -> dispose());
 		panel_2.add(cancelButton);
 		JButton extractButton = new JButton(
 				MainActionCommands.LOAD_SAVED_MSMS_FEATURE_EXTRACTION_METHOD_COMMAND.getName());
@@ -102,7 +96,7 @@ public class MSMSFeatureExtractionParameterSelectorDialog extends JDialog implem
 		extractButton.addActionListener(listener);
 		panel_2.add(extractButton);	
 		JRootPane rootPane = SwingUtilities.getRootPane(extractButton);
-		rootPane.registerKeyboardAction(al, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
+		rootPane.registerKeyboardAction(al -> { dispose(); }, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 		rootPane.setDefaultButton(extractButton);
 
 		pack();
