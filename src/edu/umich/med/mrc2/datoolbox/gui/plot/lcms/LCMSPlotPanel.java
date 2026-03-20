@@ -293,6 +293,7 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 			return;
 		
 		smoothingFilter = smoothingPreferencesDialog.getSmoothingFilter();
+		smoothingPreferencesDialog.savePreferences();
 		smoothingPreferencesDialog.dispose();
 		try {
 			smoothChromatograms();

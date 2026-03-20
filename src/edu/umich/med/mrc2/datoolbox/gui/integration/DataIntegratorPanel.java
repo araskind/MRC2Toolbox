@@ -449,6 +449,8 @@ public class DataIntegratorPanel extends ClusterDisplayPanel {
 				dataSetAlignmentSetupDialog.excludeUndetected());
 		task.addTaskListener(this);
 		MRC2ToolBoxCore.getTaskController().addTask(task);
+		
+		dataSetAlignmentSetupDialog.savePreferences();
 		dataSetAlignmentSetupDialog.dispose();
 	}
 
@@ -510,6 +512,8 @@ public class DataIntegratorPanel extends ClusterDisplayPanel {
 				dataIntegrationSetupDialog.getDataSetName());
 		task.addTaskListener(this);
 		MRC2ToolBoxCore.getTaskController().addTask(task);
+		
+		dataIntegrationSetupDialog.savePreferences();
 		dataIntegrationSetupDialog.dispose();
 	}
 

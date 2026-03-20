@@ -177,7 +177,7 @@ public class CefMsMsPrescanSetupDialog extends JDialog
 		gbc_btnScanCefFiles.gridy = 4;
 		panel.add(btnScanCefFiles, gbc_btnScanCefFiles);
 		JRootPane rootPane = SwingUtilities.getRootPane(btnScanCefFiles);
-		rootPane.registerKeyboardAction(al -> { dispose(); }, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
+		rootPane.registerKeyboardAction(al -> dispose(), stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 		rootPane.setDefaultButton(btnScanCefFiles);
 
 		loadPreferences();

@@ -99,7 +99,8 @@ public class ManualIdentificationDialog extends JDialog
 	private ActionListener listener;
 	private CControl control;
 	private CGrid grid;
-	private static final File layoutConfigFile = new File(MRC2ToolBoxCore.configDir + "ManualIdentificationDialog.layout");
+	private static final File layoutConfigFile = 
+			new File(MRC2ToolBoxCore.configDir + "ManualIdentificationDialog.layout");
 	
 	private DockableDatabaseCompoundTable compoundTable;
 	private DockableMolStructurePanel molStructurePanel;
@@ -157,14 +158,14 @@ public class ManualIdentificationDialog extends JDialog
 		JButton btnCancel = new JButton("Cancel");
 		panel.add(btnCancel);
 		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
-		btnCancel.addActionListener(e -> dispose());
+		btnCancel.addActionListener(e -> super.dispose());
 
 		btnSave = new JButton("Assign selected identification");
 		btnSave.setActionCommand(MainActionCommands.SET_MANUAL_FEATURE_ID_COMMAND.getName());
 		btnSave.addActionListener(listener);
 		panel.add(btnSave);
 		JRootPane rootPane = SwingUtilities.getRootPane(btnSave);
-		rootPane.registerKeyboardAction(al -> { dispose(); }, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
+		rootPane.registerKeyboardAction(al -> { super.dispose(); }, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 		rootPane.setDefaultButton(btnSave);
 		
 		loadLayout(layoutConfigFile);
@@ -341,16 +342,6 @@ public class ManualIdentificationDialog extends JDialog
 	public File getLayoutFile() {
 		return layoutConfigFile;
 	}
-
-	@Override
-	public void setVisible(boolean b) {
-
-		if(!b) {
-			saveLayout(layoutConfigFile);
-			savePreferences();
-		}
-		super.setVisible(b);
-	}
 	
 	@Override
 	public void dispose() {
@@ -359,7 +350,7 @@ public class ManualIdentificationDialog extends JDialog
 		savePreferences();
 		super.dispose();
 	}
-
+	
 	@Override
 	public void valueChanged(ListSelectionEvent e) {
 

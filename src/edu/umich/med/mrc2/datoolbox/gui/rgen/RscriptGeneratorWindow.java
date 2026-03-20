@@ -88,7 +88,7 @@ public class RscriptGeneratorWindow extends JFrame
 
 		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
 		JRootPane rootPane = SwingUtilities.getRootPane(control.getContentArea());
-		rootPane.registerKeyboardAction(al -> { dispose(); }, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
+		rootPane.registerKeyboardAction(al -> dispose(), stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 		
 		loadLayout(layoutConfigFile);
 		pack();

@@ -140,7 +140,7 @@ public class TaxonomyLookupDialog extends JDialog implements ActionListener{
 		btnSelect.addActionListener(listener);
 		panel.add(btnSelect);
 		JRootPane rootPane = SwingUtilities.getRootPane(btnSelect);
-		rootPane.registerKeyboardAction(al -> { dispose(); }, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
+		rootPane.registerKeyboardAction(al -> dispose(), stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 		rootPane.setDefaultButton(btnSelect);
 		
 		loadExistingSpecies();

@@ -118,7 +118,7 @@ public class MsFeatureClusterSetManagerDialog extends JDialog implements ActionL
 				});
 		buttonPanel.add(openDataSetButton);
 		JRootPane rootPane = SwingUtilities.getRootPane(openDataSetButton);
-		rootPane.registerKeyboardAction(al -> { dispose(); }, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
+		rootPane.registerKeyboardAction(al -> dispose(), stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 		rootPane.setDefaultButton(openDataSetButton);
 
 		pack();

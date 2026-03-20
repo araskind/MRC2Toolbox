@@ -106,7 +106,7 @@ public class BinnerAnnotationLookupDataSetSelectorDialog extends JDialog {
 		panel.add(btnLoadDataSet);
 		
 		JRootPane rootPane = SwingUtilities.getRootPane(btnLoadDataSet);
-		rootPane.registerKeyboardAction(al -> { dispose(); }, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
+		rootPane.registerKeyboardAction(al -> dispose(), stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 		rootPane.setDefaultButton(btnLoadDataSet);
 		
 		pack();

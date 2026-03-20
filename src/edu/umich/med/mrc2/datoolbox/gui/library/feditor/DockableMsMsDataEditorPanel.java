@@ -115,15 +115,10 @@ public class DockableMsMsDataEditorPanel extends DefaultSingleCDockable implemen
 
 		if (activeFeature != null) {
 
-			if (command.equals(MainActionCommands.SHOW_MSMS_IMPORT_DIALOG_COMMAND.getName())) {
+			if (command.equals(MainActionCommands.SHOW_MSMS_IMPORT_DIALOG_COMMAND.getName()))
+				showMsMsChooserFilterDialog();
 
-				if(msMsChooserFilterDialog == null)
-					msMsChooserFilterDialog = new MsMsChooserFilterDialog(this);
-
-				msMsChooserFilterDialog.setActiveFeature(activeFeature);
-				msMsChooserFilterDialog.setLocationRelativeTo(this.getContentPane());
-				msMsChooserFilterDialog.setVisible(true);
-			}
+			
 
 			if (command.equals(MainActionCommands.SHOW_MSMS_DATA_FILTER_COMMAND.getName()))
 				showMsMsFilter();
@@ -140,6 +135,16 @@ public class DockableMsMsDataEditorPanel extends DefaultSingleCDockable implemen
 			if (command.equals(MainActionCommands.DELETE_MSMS_COMMAND.getName()))
 				deleteMsMs();
 		}
+	}
+
+	private void showMsMsChooserFilterDialog() {
+
+		if(msMsChooserFilterDialog == null)
+			msMsChooserFilterDialog = new MsMsChooserFilterDialog(this);
+
+		msMsChooserFilterDialog.setActiveFeature(activeFeature);
+		msMsChooserFilterDialog.setLocationRelativeTo(this.getContentPane());
+		msMsChooserFilterDialog.setVisible(true);
 	}
 
 	private void showMsMsFilter() {

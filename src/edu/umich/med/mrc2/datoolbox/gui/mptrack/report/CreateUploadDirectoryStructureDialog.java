@@ -298,7 +298,7 @@ public class CreateUploadDirectoryStructureDialog extends JDialog
 		btnSave.addActionListener(this);
 		buttonPanel.add(btnSave);
 		JRootPane rootPane = SwingUtilities.getRootPane(btnSave);
-		rootPane.registerKeyboardAction(al -> { dispose(); }, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
+		rootPane.registerKeyboardAction(al -> dispose(), stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 		rootPane.setDefaultButton(btnSave);
 
 		loadPreferences();
@@ -384,6 +384,8 @@ public class CreateUploadDirectoryStructureDialog extends JDialog
 			MessageDialog.showErrorMsg(StringUtils.join(errors, "\n"), this);
 			return;
 		}
+		savePreferences();
+		
 		//	Create study code directory
 		MoTrPACStudy study = getSelectedStudy();
 		Path studyDirPath = Files.createDirectories(
@@ -445,12 +447,6 @@ public class CreateUploadDirectoryStructureDialog extends JDialog
 			tissueCodeTable.setTableModelFromTissueCodes(study.getAllTissueCodes());
 			motrpacAssayTable.setTableModelFromAssays(study.getAssays());
 		}
-	}
-
-	@Override
-	public void dispose() {
-		savePreferences();
-		super.dispose();
 	}
 
 	@Override

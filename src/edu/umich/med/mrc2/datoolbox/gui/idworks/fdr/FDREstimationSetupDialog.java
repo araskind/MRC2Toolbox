@@ -132,7 +132,7 @@ public class FDREstimationSetupDialog extends JDialog
 		btnSave.addActionListener(actionListener);
 		panel.add(btnSave);
 		JRootPane rootPane = SwingUtilities.getRootPane(btnSave);
-		rootPane.registerKeyboardAction(al -> { dispose(); }, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
+		rootPane.registerKeyboardAction(al -> dispose(), stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 		rootPane.setDefaultButton(btnSave);
 		
 		pack();
@@ -152,12 +152,6 @@ public class FDREstimationSetupDialog extends JDialog
 		pepSearchSetupDialog.loadDefaultDecoySearchparameters();
 		if(parameterSet != null)
 			pepSearchSetupDialog.adjustDefaultDecoySearchParametersFromParameterSet(parameterSet);
-	}
-	
-	@Override
-	public void dispose() {		
-		savePreferences();
-		super.dispose();
 	}
 
 	@Override

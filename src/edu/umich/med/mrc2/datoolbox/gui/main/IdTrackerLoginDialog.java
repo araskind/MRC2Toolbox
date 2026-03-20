@@ -172,7 +172,7 @@ public class IdTrackerLoginDialog extends JDialog implements ActionListener {
 	    });
 
 		JRootPane rootPane = SwingUtilities.getRootPane(btnLogIn);
-//		rootPane.registerKeyboardAction(al -> { dispose(); }, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
+//		rootPane.registerKeyboardAction(al -> dispose(), stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 		rootPane.setDefaultButton(btnLogIn);
 		
 		JLabel label = new JLabel("   ");

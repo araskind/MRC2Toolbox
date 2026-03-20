@@ -1090,6 +1090,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			MessageDialog.showErrorMsg("Invalid parameters!", mzFrequencyAnalysisSetupDialog);
 			return;
 		}
+		mzFrequencyAnalysisSetupDialog.savePreferences();
 		mzFrequencyAnalysisSetupDialog.dispose();
 		Collection<MsFeature> featuresToProcess = 
 				msTwoFeatureTable.getBundles(TableRowSubset.ALL).stream().
@@ -1846,6 +1847,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		// TODO Auto-generated method stub
 		
 		
+		msmsFeatureRTIDSearchDialog.savePreferences();
 		msmsFeatureRTIDSearchDialog.dispose();
 	}
 
@@ -1889,6 +1891,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 
 			MSMSFilterParameters filterParameters = 
 					filterTrackerFeaturesDialog.getMSMSFilterParameters();
+			filterTrackerFeaturesDialog.savePreferences();
 			filterTrackerFeaturesDialog.dispose();
 
 			Collection<MSFeatureInfoBundle>filtered = 
@@ -1942,6 +1945,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 
 			IDLAnnotationFilterParameters filterParameters = 
 					annotationFilterDialog.getFilterParameters();
+			annotationFilterDialog.savePreferences();
 			annotationFilterDialog.dispose();
 
 			Collection<MSFeatureInfoBundle>filtered = 
@@ -1985,6 +1989,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 						reassignDefaultMSMSLibraryHitDialog.commitChangesTodatabase());
 		task.addTaskListener(this);
 		MRC2ToolBoxCore.getTaskController().addTask(task);
+		reassignDefaultMSMSLibraryHitDialog.savePreferences();
 		reassignDefaultMSMSLibraryHitDialog.dispose();
 	}
 	
@@ -2026,6 +2031,8 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 				featureVsFeatureMSMSSearchSetupDialog.getSelectedFeatureCollection();
 		MSMSSearchParameterSet searchParameters =  
 				featureVsFeatureMSMSSearchSetupDialog.getMSMSSearchParameters();
+		
+		featureVsFeatureMSMSSearchSetupDialog.savePreferences();
 		featureVsFeatureMSMSSearchSetupDialog.dispose();
 		
 		FeatureVsFeatureMSMSSearchTask task = 
@@ -2083,6 +2090,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		task.addTaskListener(this);
 		MRC2ToolBoxCore.getTaskController().addTask(task);
 		
+		fdrEstimationSetupDialog.savePreferences();
 		fdrEstimationSetupDialog.dispose();
 	}
 	
@@ -2183,7 +2191,9 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 				new SearchMSMSfeaturesByCompoundIdentifiersTask(
 						multipleCompoundIdSearchSetupDialog.getCompoundIdFilter(), 
 						multipleCompoundIdSearchSetupDialog.getPolarity());
-		task.addTaskListener(this);		
+		task.addTaskListener(this);	
+		
+		multipleCompoundIdSearchSetupDialog.savePreferences();
 		multipleCompoundIdSearchSetupDialog.dispose();
 		MRC2ToolBoxCore.getTaskController().addTask(task);	}
 	
@@ -2250,6 +2260,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 				new MSMSFeatureClusteringTask(msmsFeatures, params, flds);
 		task.addTaskListener(this);
 		MRC2ToolBoxCore.getTaskController().addTask(task);
+		activeDataSetMZRTDataSearchDialog.savePreferences();
 		activeDataSetMZRTDataSearchDialog.dispose();
 	}
 	
@@ -2302,6 +2313,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		task.addTaskListener(this);
 		MRC2ToolBoxCore.getTaskController().addTask(task);
 		
+		activeDataSetBinnerAnnotationsSearchDialog.savePreferences();
 		activeDataSetBinnerAnnotationsSearchDialog.dispose();
 	}
 	
@@ -2368,6 +2380,8 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		ChromatogramExtractionTask task = xicSetupDialog.createChromatogramExtractionTask();
 		task.addTaskListener(this);
 		MRC2ToolBoxCore.getTaskController().addTask(task);
+		xicSetupDialog.savePreferences();
+		xicSetupDialog.saveLayout(xicSetupDialog.getLayoutFile());
 		xicSetupDialog.dispose();
 	}
 
@@ -3722,7 +3736,6 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			MessageDialog.showErrorMsg(StringUtils.join(errors, "\n"), pepSearchSetupDialog);
 			return;
 		}
-		pepSearchSetupDialog.savePreferences();
 		List<String>commandParts = pepSearchSetupDialog.getSearchCommandParts();
 		if(pepSearchSetupDialog.getFeaturesFromDatabase()) {
 
@@ -5221,7 +5234,6 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		if(multipleSpectraDisplayDialog != null 
 				&& multipleSpectraDisplayDialog.isVisible()) {
 			multipleSpectraDisplayDialog.toFront();
-			return;
 		}
 		else {
 			multipleSpectraDisplayDialog = new MultipleSpectraDisplayDialog();

@@ -95,7 +95,7 @@ public class StructuralAnnotationEditor extends JDialog implements ActionListene
 		getContentPane().add(panel, BorderLayout.SOUTH);
 		panel.setLayout(new BorderLayout(0, 0));
 		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
-		rootPane.registerKeyboardAction(al -> { dispose(); }, stroke,
+		rootPane.registerKeyboardAction(al -> dispose(), stroke,
 				JComponent.WHEN_IN_FOCUSED_WINDOW);
 		
 		panel_1 = new JPanel();

@@ -484,6 +484,8 @@ public class MainWindow extends JFrame
 		
 		boolean copyDataToExperiment = 
 				rawDataAnalysisExperimentSetupDialog.copyRawDataToExperiment();
+		
+		rawDataAnalysisExperimentSetupDialog.savePreferences();
 		rawDataAnalysisExperimentSetupDialog.dispose();
 		
 		//	Save experiment file
@@ -1268,7 +1270,8 @@ public class MainWindow extends JFrame
 					newMetabolomicsExperimentDialog.getProjectName(), 
 					newMetabolomicsExperimentDialog.getProjectDescription(), 
 					newMetabolomicsExperimentDialog.getLimsExperiment());
-		}		
+		}
+		newMetabolomicsExperimentDialog.savePreferences();
 		newMetabolomicsExperimentDialog.dispose();
 	}
 	

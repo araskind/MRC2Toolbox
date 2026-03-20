@@ -84,7 +84,7 @@ public class SaveQueryDialog extends JDialog {
 		panel_1.add(searchButton);
 		
 		JRootPane rootPane = SwingUtilities.getRootPane(searchButton);
-		rootPane.registerKeyboardAction(al -> { dispose(); }, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
+		rootPane.registerKeyboardAction(al -> dispose(), stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 		rootPane.setDefaultButton(searchButton);
 		
 		pack();

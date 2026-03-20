@@ -120,7 +120,7 @@ public class AcquisitionMethodExtendedEditorDialog extends JDialog implements Pe
 		btnSave.addActionListener(actionListener);
 		panel.add(btnSave);
 		JRootPane rootPane = SwingUtilities.getRootPane(btnSave);
-		rootPane.registerKeyboardAction(al -> { dispose(); }, stroke, 
+		rootPane.registerKeyboardAction(al -> dispose(), stroke, 
 				JComponent.WHEN_IN_FOCUSED_WINDOW);
 		rootPane.setDefaultButton(btnSave);
 		

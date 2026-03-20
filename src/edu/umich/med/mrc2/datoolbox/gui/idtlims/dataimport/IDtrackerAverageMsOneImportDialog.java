@@ -271,7 +271,7 @@ public class IDtrackerAverageMsOneImportDialog extends JDialog
 		panel_1.add(uploadDataButton);
 
 		JRootPane rootPane = SwingUtilities.getRootPane(uploadDataButton);
-		rootPane.registerKeyboardAction(al -> { dispose(); }, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
+		rootPane.registerKeyboardAction(al -> dispose(), stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 		rootPane.setDefaultButton(uploadDataButton);
 
 		loadPreferences();

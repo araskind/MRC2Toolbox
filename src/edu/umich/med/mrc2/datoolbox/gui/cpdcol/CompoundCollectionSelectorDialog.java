@@ -105,7 +105,7 @@ public class CompoundCollectionSelectorDialog extends JDialog {
 		btnLoad.addActionListener(actionListener);
 		panel.add(btnLoad);
 		JRootPane rootPane = SwingUtilities.getRootPane(btnLoad);
-		rootPane.registerKeyboardAction(al -> { dispose(); }, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
+		rootPane.registerKeyboardAction(al -> dispose(), stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 		rootPane.setDefaultButton(btnLoad);
 		
 		compoundCollectionListingTable.addMouseListener(

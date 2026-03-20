@@ -171,7 +171,7 @@ public class IDTrackerDataLoadWizard extends JDialog implements ActionListener, 
 		panel_1.add(btnCancel, gbc_btnCancel);
 		btnCancel.addActionListener(e -> dispose());
 
-		rootPane.registerKeyboardAction(al -> { dispose(); }, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
+		rootPane.registerKeyboardAction(al -> dispose(), stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 
 		saveButton = new JButton(MainActionCommands.UPLOAD_DATA_TO_IDTRACKER_COMMAND.getName());
 		saveButton.setActionCommand(MainActionCommands.UPLOAD_DATA_TO_IDTRACKER_COMMAND.getName());

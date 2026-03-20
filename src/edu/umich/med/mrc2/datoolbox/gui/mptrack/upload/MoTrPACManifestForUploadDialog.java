@@ -115,12 +115,6 @@ public class MoTrPACManifestForUploadDialog extends JDialog implements ActionLis
 
 	}
 	
-	@Override
-	public void dispose() {		
-		savePreferences();
-		super.dispose();
-	}
-	
 	public Collection<CreateUploadManifestTask>getManifestTasks(){
 		
 		Collection<CreateUploadManifestTask>tasks = 

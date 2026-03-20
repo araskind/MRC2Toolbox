@@ -132,9 +132,9 @@ public class MoTrPACStudyEditorFrame  extends  JFrame
 		panel_1.add(saveButton);
 
 		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
-		btnCancel.addActionListener(e -> dispose());
+		btnCancel.addActionListener(e -> super.dispose());
 		JRootPane rootPane = SwingUtilities.getRootPane(saveButton);
-		rootPane.registerKeyboardAction(al -> { dispose(); }, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
+		rootPane.registerKeyboardAction(al -> { super.dispose(); }, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 		rootPane.setDefaultButton(saveButton);
 		
 		control.getContentArea().deploy(grid);		

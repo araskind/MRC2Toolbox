@@ -120,7 +120,7 @@ public class RenameDialog extends JDialog implements ActionListener {
 		panel.add(saveButton, gbc_btnNewButton);
 		
 		JRootPane rootPane = SwingUtilities.getRootPane(saveButton);
-		rootPane.registerKeyboardAction(al -> { dispose(); }, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
+		rootPane.registerKeyboardAction(al -> dispose(), stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 		rootPane.setDefaultButton(saveButton);		
 		pack();
 	}

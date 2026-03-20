@@ -105,7 +105,7 @@ public class MSMSFeatureExtractionSetupDialog extends JDialog  implements Action
 		extractButton.addActionListener(listener);
 		panel_2.add(extractButton);	
 		JRootPane rootPane = SwingUtilities.getRootPane(extractButton);
-		rootPane.registerKeyboardAction(al -> { dispose(); }, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
+		rootPane.registerKeyboardAction(al -> dispose(), stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 		rootPane.setDefaultButton(extractButton);
 		loadPreferences();
 		pack();
@@ -207,12 +207,6 @@ public class MSMSFeatureExtractionSetupDialog extends JDialog  implements Action
 	@Override
 	public void loadPreferences() {
 		loadPreferences(Preferences.userNodeForPackage(this.getClass()));
-	}
-
-	@Override
-	public void dispose() {
-		savePreferences();
-		super.dispose();	
 	}
 
 	public MSMSExtractionParameterSet getMSMSExtractionParameterSet() {

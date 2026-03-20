@@ -41,13 +41,10 @@ import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.TreeMap;
-import java.util.TreeSet;
 import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
 
@@ -83,7 +80,6 @@ import edu.umich.med.mrc2.datoolbox.data.Worklist;
 import edu.umich.med.mrc2.datoolbox.data.WorklistItem;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.compare.WorklistItemComparator;
-import edu.umich.med.mrc2.datoolbox.data.enums.AgilentSampleInfoFields;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataExportFields;
 import edu.umich.med.mrc2.datoolbox.data.enums.MoTrPACRawDataManifestFields;
 import edu.umich.med.mrc2.datoolbox.data.enums.WorklistImportType;
@@ -175,15 +171,9 @@ public class ManifestGenerationDialog extends JDialog
 		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
 		btnCancel.addActionListener(e -> dispose());
 		JRootPane rootPane = SwingUtilities.getRootPane(btnCancel);
-		rootPane.registerKeyboardAction(al -> { dispose(); }, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
+		rootPane.registerKeyboardAction(al -> dispose(), stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 		loadPreferences();
 		pack();
-	}
-	
-	@Override
-	public void dispose() {		
-		savePreferences();
-		super.dispose();
 	}
 
 	private String getMsMode() {
@@ -326,70 +316,6 @@ public class ManifestGenerationDialog extends JDialog
 			return null;
 	}
 	
-	private List<String> createManifestColumns(Worklist worklist) {
-
-		Set<String> allColumnNames = new TreeSet<String>();
-		worklist.getTimeSortedWorklistItems().stream().
-			forEach(i -> allColumnNames.addAll(i.getProperties().keySet()));
-
-		HashMap<String, Integer> valueCount = new HashMap<String, Integer>();
-
-		for (String field : allColumnNames) {
-
-			valueCount.put(field, 0);
-			for (WorklistItem item : worklist.getTimeSortedWorklistItems()) {
-
-				if (item.getProperty(field) == null)
-					continue;
-
-				if (!item.getProperty(field).isEmpty()) {
-					Integer current = valueCount.get(field) + 1;
-					valueCount.replace(field, current);
-				}
-			}
-		}
-		ArrayList<String>columnNames = new ArrayList<String>();
-		
-		//	Add MoTrPAC obligatory column names
-		for(MoTrPACRawDataManifestFields field : MoTrPACRawDataManifestFields.values())
-			columnNames.add(field.getName());
-			
-		columnNames.add(DataExportFields.MRC2_SAMPLE_ID.getName());
-		
-		//	This will go to MoTrPAC sample id
-		//	columnNames.add(DataExportFields.CLIENT_SAMPLE_ID.getName());
-		
-		//	Data file goes to MotrPAC column
-//		if(valueCount.containsKey(AgilentSampleInfoFields.DATA_FILE.getName())) {
-//			columnNames.add(AgilentSampleInfoFields.DATA_FILE.getName());
-//		}
-//		else {
-//			MessageDialogue.showErrorMsg("Data file name field missing.", this.getContentPane());
-//			return null;
-//		}
-		if(!valueCount.containsKey(AgilentSampleInfoFields.DATA_FILE.getName())) {			
-			MessageDialog.showErrorMsg("Data file name field missing.", MRC2ToolBoxCore.getMainWindow());
-			return null;
-		}
-		if(valueCount.containsKey(AgilentSampleInfoFields.ACQUISITION_TIME.getName())
-				|| valueCount.containsKey(AgilentSampleInfoFields.ACQTIME.getName())) {
-			columnNames.add(DataExportFields.INJECTION_TIME.getName());
-		}
-		else {
-			MessageDialog.showErrorMsg("Injection time field missing.", MRC2ToolBoxCore.getMainWindow());
-			return null;
-		}
-		for (Entry<String, Integer> entry : valueCount.entrySet()) {
-
-			if (entry.getValue() > 0
-					&& !entry.getKey().equals(AgilentSampleInfoFields.DATA_FILE.getName())
-					&& !entry.getKey().equals(AgilentSampleInfoFields.ACQTIME.getName())
-					&& !entry.getKey().equals(AgilentSampleInfoFields.ACQUISITION_TIME.getName()))
-				columnNames.add(entry.getKey());
-		}
-		return columnNames;
-	}
-
 	@Override
 	public void loadPreferences(Preferences prefs) {
 		preferences = prefs;

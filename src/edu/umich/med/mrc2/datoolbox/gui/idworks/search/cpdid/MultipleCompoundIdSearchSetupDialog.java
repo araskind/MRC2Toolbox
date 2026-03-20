@@ -147,7 +147,7 @@ implements ActionListener, BackedByPreferences {
 		
 		JRootPane rootPane = SwingUtilities.getRootPane(addFilterButton);
 		rootPane.setDefaultButton(addFilterButton);
-		rootPane.registerKeyboardAction(al -> { dispose(); }, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
+		rootPane.registerKeyboardAction(al -> dispose(), stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 		
 		pack();
 	}
@@ -158,13 +158,6 @@ implements ActionListener, BackedByPreferences {
 	
 	public Polarity getPolarity() {
 		return (Polarity)polarityComboBox.getSelectedItem();
-	}
-	
-	@Override
-	public void dispose() {
-		
-		savePreferences();
-		super.dispose();
 	}
 	
 	public void loadFilter(CompoundIdFilter compoundIdFilter) {

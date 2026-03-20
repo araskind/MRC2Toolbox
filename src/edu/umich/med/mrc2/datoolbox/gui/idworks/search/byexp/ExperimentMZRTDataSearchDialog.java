@@ -168,7 +168,7 @@ public class ExperimentMZRTDataSearchDialog extends JDialog
 		panel_1.add(searchButton);
 		
 		JRootPane rootPane = SwingUtilities.getRootPane(searchButton);
-		rootPane.registerKeyboardAction(al -> { dispose(); }, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
+		rootPane.registerKeyboardAction(al -> dispose(), stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 		rootPane.setDefaultButton(searchButton);
 		
 		loadPreferences();
@@ -246,9 +246,7 @@ public class ExperimentMZRTDataSearchDialog extends JDialog
 					this.getContentPane());
 			return;
 		}
-		Collection<MinimalMSOneFeature>mzrtFeatureList = 
-				featureListPanel.getAllFeatures();
-			
+		Collection<MinimalMSOneFeature>mzrtFeatureList = featureListPanel.getAllFeatures();			
 		if(mzrtFeatureList.isEmpty()) {	
 			
 			int res = MessageDialog.showChooseOrCancelMsg(

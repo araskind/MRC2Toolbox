@@ -147,7 +147,7 @@ public class DuplicateLibraryDialog extends JDialog {
 
 		JRootPane rootPane = SwingUtilities.getRootPane(copyButton);
 		rootPane.setDefaultButton(copyButton);
-		rootPane.registerKeyboardAction(al -> { dispose(); }, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
+		rootPane.registerKeyboardAction(al -> dispose(), stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 
 		pack();
 	}

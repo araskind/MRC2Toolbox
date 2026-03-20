@@ -174,7 +174,7 @@ public class SimpleModificationSelectorDialog extends JDialog
 			saveButton.setActionCommand(
 					MainActionCommands.ADD_NEUTRAL_ADDUCT_COMMAND.getName());
 		}
-		rootPane.registerKeyboardAction(al -> { dispose(); }, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
+		rootPane.registerKeyboardAction(al -> dispose(), stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 		
 		loadLayout(layoutConfigFile);		
 		pack();

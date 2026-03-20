@@ -151,16 +151,10 @@ public class ReassignDefaultMSMSLibraryHitDialog extends JDialog
 		btnSave.addActionListener(listener);
 		panel.add(btnSave);
 		JRootPane rootPane = SwingUtilities.getRootPane(btnSave);
-		rootPane.registerKeyboardAction(al -> { dispose(); }, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
+		rootPane.registerKeyboardAction(al -> dispose(), stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 		rootPane.setDefaultButton(btnSave);
 		loadPreferences();
 		pack();
-	}
-	
-	@Override
-	public void dispose() {		
-		savePreferences();
-		super.dispose();
 	}
 	
 	public boolean commitChangesTodatabase() {

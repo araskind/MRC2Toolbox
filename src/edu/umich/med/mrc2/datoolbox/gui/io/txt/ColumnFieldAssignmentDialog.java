@@ -140,7 +140,7 @@ public class ColumnFieldAssignmentDialog extends JDialog {
 		panel.add(assignLevelsButton, gbc_assignBatchButton);
 
 		JRootPane rootPane = SwingUtilities.getRootPane(assignLevelsButton);
-		rootPane.registerKeyboardAction(al -> { dispose(); }, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
+		rootPane.registerKeyboardAction(al -> dispose(), stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 		rootPane.setDefaultButton(assignLevelsButton);
 		pack();
 	}

@@ -102,7 +102,7 @@ public class MoTrPACRawDataCompressionSetupDialog extends JDialog implements Act
 		btnSave.addActionListener(listener);
 		buttonPanel.add(btnSave);
 		JRootPane rootPane = SwingUtilities.getRootPane(btnSave);
-		rootPane.registerKeyboardAction(al -> { dispose(); }, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
+		rootPane.registerKeyboardAction(al -> dispose(), stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 		rootPane.setDefaultButton(btnSave);
 
 		loadPreferences();
@@ -113,12 +113,6 @@ public class MoTrPACRawDataCompressionSetupDialog extends JDialog implements Act
 	public void actionPerformed(ActionEvent e) {
 		// TODO Auto-generated method stub
 
-	}
-	
-	@Override
-	public void dispose() {		
-		savePreferences();
-		super.dispose();
 	}
 	
 	public Collection<String>validateInput(){

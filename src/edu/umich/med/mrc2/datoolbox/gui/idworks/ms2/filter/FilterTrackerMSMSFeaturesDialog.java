@@ -800,7 +800,7 @@ public class FilterTrackerMSMSFeaturesDialog extends JDialog
 		rootPane.setDefaultButton(filterButton);
 
 		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
-		rootPane.registerKeyboardAction(al -> { dispose(); }, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
+		rootPane.registerKeyboardAction(al -> dispose(), stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 		cancelButton.addActionListener(e -> dispose());
 		loadPreferences();
 		pack();
@@ -828,12 +828,6 @@ public class FilterTrackerMSMSFeaturesDialog extends JDialog
 //		if (command.equals(MainActionCommands.DELETE_MSMS_QUERY_COMMAND.getName())) {
 //			
 //		}
-	}
-	
-	@Override
-	public void dispose() {
-		savePreferences();
-		super.dispose();	
 	}
 	
 	private void resetFilters() {

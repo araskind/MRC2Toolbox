@@ -265,7 +265,7 @@ public class LibrarySearchSetupDialog extends JDialog implements BackedByPrefere
 		cancelButton.addActionListener(e -> dispose());
 
 		JRootPane rootPane = SwingUtilities.getRootPane(searchButton);
-		rootPane.registerKeyboardAction(al -> { dispose(); }, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
+		rootPane.registerKeyboardAction(al -> dispose(), stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 		rootPane.setDefaultButton(searchButton);
 
 		loadPreferences();
@@ -318,12 +318,6 @@ public class LibrarySearchSetupDialog extends JDialog implements BackedByPrefere
 		preferences.putInt(MAX_HITS, (int) maxHitsSpinner.getValue());
 		preferences.putBoolean(IGNORE_ADDUCT_TYPE, ignoreAddudctTypeCheckBox.isSelected());
 		preferences.putBoolean(RELAX_MASS_ERROR, relaxMassErrorCheckBox.isSelected());
-	}
-
-	@Override
-	public void dispose() {
-		savePreferences();
-		super.dispose();
 	}
 
 	private void populateLibraryTable() {

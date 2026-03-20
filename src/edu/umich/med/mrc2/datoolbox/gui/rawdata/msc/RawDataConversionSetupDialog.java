@@ -159,7 +159,7 @@ public class RawDataConversionSetupDialog extends JDialog implements ActionListe
 		panel_1.add(lblNewLabel_1, gbc_lblNewLabel_1);
 
 		outputFormatComboBox = new JComboBox<MsConvertOutputFormat>(
-				new DefaultComboBoxModel<MsConvertOutputFormat>(MsConvertOutputFormat.values()));
+				new DefaultComboBoxModel<>(MsConvertOutputFormat.values()));
 		outputFormatComboBox.setSelectedItem(MsConvertOutputFormat.mzML);
 		GridBagConstraints gbc_outputFormatComboBox = new GridBagConstraints();
 		gbc_outputFormatComboBox.insets = new Insets(0, 0, 0, 5);
@@ -186,7 +186,7 @@ public class RawDataConversionSetupDialog extends JDialog implements ActionListe
 		panel_1.add(cancelButton, gbc_cancelButton);
 		cancelButton.addActionListener(e -> dispose());
 
-		rootPane.registerKeyboardAction(al -> { dispose(); }, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
+		rootPane.registerKeyboardAction(al -> dispose(), stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 
 		JButton closeFilesButton = new JButton(MainActionCommands.CONVERT_RAW_DATA_COMMAND.getName());
 		closeFilesButton.setActionCommand(MainActionCommands.CONVERT_RAW_DATA_COMMAND.getName());
@@ -201,12 +201,6 @@ public class RawDataConversionSetupDialog extends JDialog implements ActionListe
 
 		loadPreferences();
 		pack();
-	}
-
-	@Override
-	public void dispose() {
-		savePreferences();
-		super.dispose();
 	}
 
 	@Override
@@ -258,17 +252,17 @@ public class RawDataConversionSetupDialog extends JDialog implements ActionListe
 
 		// Agilent files
 		if (dataFile.isDirectory() 
-				&& FilenameUtils.getExtension(dataFile.getName()).toUpperCase().equals("D"))
+				&& FilenameUtils.getExtension(dataFile.getName()).equalsIgnoreCase("D"))
 			return true;
 
 		// SCIEX files
 		if (dataFile.isFile() 
-				&& FilenameUtils.getExtension(dataFile.getName()).toUpperCase().equals("WIFF"))
+				&& FilenameUtils.getExtension(dataFile.getName()).equalsIgnoreCase("WIFF"))
 			return true;
 
 		// Thermo files
 		if (dataFile.isFile() 
-				&& FilenameUtils.getExtension(dataFile.getName()).toUpperCase().equals("RAW"))
+				&& FilenameUtils.getExtension(dataFile.getName()).equalsIgnoreCase("RAW"))
 			return true;
 
 		return false;

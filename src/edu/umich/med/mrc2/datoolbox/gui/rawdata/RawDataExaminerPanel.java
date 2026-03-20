@@ -103,7 +103,6 @@ import edu.umich.med.mrc2.datoolbox.gui.utils.LongUpdateTask;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.fc.ImprovedFileChooser;
 import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
-import edu.umich.med.mrc2.datoolbox.main.BuildInformation;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.RawDataManager;
 import edu.umich.med.mrc2.datoolbox.main.RecentDataManager;
@@ -325,22 +324,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 		}
 		super.actionPerformed(event);
 		
-		String command = event.getActionCommand();
-			
-		if (command.equals(MainActionCommands.OPEN_RAW_DATA_EXPERIMENT_COMMAND.getName())) 
-			openRawDataAnalysisExperiment();
-		
-		if (command.equals(MainActionCommands.CLOSE_RAW_DATA_EXPERIMENT_COMMAND.getName())) 
-			closeRawDataAnalysisExperiment(false);
-		
-		if (command.equals(MainActionCommands.SAVE_RAW_DATA_EXPERIMENT_COMMAND.getName())) 
-			saveRawDataAnalysisExperiment();
-		
-		if (command.equals(MainActionCommands.EDIT_RAW_DATA_EXPERIMENT_SETUP_COMMAND.getName()))
-			showNewRawDataAnalysisExperimentEditor();
-			
-		if (command.equals(MainActionCommands.EDIT_RAW_DATA_EXPERIMENT_COMMAND.getName()))
-			saveChangesToExperiment();
+		String command = event.getActionCommand();		
 		
 		if (command.equals(MainActionCommands.MSMS_FEATURE_EXTRACTION_SETUP_COMMAND.getName()))
 			setupMSMSFeatureExtraction();
@@ -554,6 +538,8 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 						msOneMZWindow);
 		task.addTaskListener(this);
 		MRC2ToolBoxCore.getTaskController().addTask(task);
+		
+		rawDataAnalysisExperimentDatabaseUploadDialog.savePreferences();
 		rawDataAnalysisExperimentDatabaseUploadDialog.dispose();
 	}
 	
@@ -766,6 +752,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 						MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment().getMSOneDataFiles());			
 		task.addTaskListener(this);
 		MRC2ToolBoxCore.getTaskController().addTask(task);	
+		msmsFeatureExtractionSetupDialog.savePreferences();
 		msmsFeatureExtractionSetupDialog.dispose();
 	}
 	
@@ -786,21 +773,6 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 		workbench.clearPanel();		
 		dataFileTreePanel.loadData(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment().getDataFiles(), true);	
 		dataFileTreePanel.toggleTreeExpanded(dataFileTreePanel.isTreeExpanded());
-	}	
-
-	public void showNewRawDataAnalysisExperimentDialog() {
-		
-		if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() != null) {
-			MessageDialog.showWarningMsg(
-					"Please close active raw data analysis experiment \"" + 
-					MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment().getName() + 
-					"\" first.", 
-					this.getContentPane());
-			return;
-		}		
-		rawDataAnalysisExperimentSetupDialog = new RawDataAnalysisExperimentSetupDialog(this);
-		rawDataAnalysisExperimentSetupDialog.setLocationRelativeTo(this.getContentPane());
-		rawDataAnalysisExperimentSetupDialog.setVisible(true);
 	}
 	
 	private void showNewRawDataAnalysisExperimentEditor() {
@@ -809,59 +781,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 	
 	private void saveChangesToExperiment() {
 		//	TODO
-	}
-	
-	private void openRawDataAnalysisExperiment() {		
-
-		if (MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() != null) {
-
-			int selectedValue = MessageDialog.showChooseOrCancelMsg(
-					"You are going to close current experiment, do you want "
-					+ "to save the results (Yes - save, No - discard)?", 
-					this.getContentPane());
-
-			if (selectedValue == JOptionPane.YES_OPTION) {
-
-				runSaveExperimentTask();
-				clearGuiAfterExperimentClosed();
-				//	TODO clear tracker workbench if used
-				MRC2ToolBoxCore.getMainWindow().setTitle(BuildInformation.getProgramName());
-				MRC2ToolBoxCore.setActiveOfflineRawDataAnalysisExperiment(null);
-				showOpenExperimentDialog = true;
-			}
-			if (selectedValue == JOptionPane.NO_OPTION) {
-
-				clearGuiAfterExperimentClosed();
-				//	TODO clear tracker workbench if used
-				MRC2ToolBoxCore.getMainWindow().setTitle(BuildInformation.getProgramName());
-				MRC2ToolBoxCore.setActiveOfflineRawDataAnalysisExperiment(null);
-				initRawDataAnalysisExperimentLoadTask();
-			}
-			if (selectedValue == JOptionPane.CANCEL_OPTION)
-				return;
-		}
-		else {
-			initRawDataAnalysisExperimentLoadTask();
-		}
 	}	
-	
-	private void saveRawDataAnalysisExperiment() {
-
-		if (MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() != null)
-			runSaveExperimentTask();
-	}
-	
-	public void runSaveExperimentTask() {
-
-		if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() == null)
-			return;
-		
-		SaveStoredRawDataAnalysisExperimentTask task = 
-				new SaveStoredRawDataAnalysisExperimentTask(
-						MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment());
-		task.addTaskListener(this);
-		MRC2ToolBoxCore.getTaskController().addTask(task);
-	}
 
 	private void initRawDataAnalysisExperimentLoadTask() {
 
@@ -908,51 +828,6 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 			ltp.addTaskListener(this);
 			MRC2ToolBoxCore.getTaskController().addTask(ltp);
 		}
-	}
-
-	public void closeRawDataAnalysisExperiment(boolean exitProgram) {
-
-		if (MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() == null) {
-			
-			if(exitProgram) {
-				if (MessageDialog.showChoiceWithWarningMsg(
-						"Are you sure you want to exit?", this.getContentPane()) == JOptionPane.YES_OPTION)
-					MRC2ToolBoxCore.shutDown();
-			}
-			else {
-				return;
-			}
-		}
-		String yesNoQuestion = "You are going to close current experiment,"
-				+ " do you want to save the results (Yes - save, No - discard)?";
-		int selectedValue = MessageDialog.showChooseOrCancelMsg(
-				yesNoQuestion, this.getContentPane());
-		if (selectedValue == JOptionPane.CANCEL_OPTION)
-			return;
-
-		if (selectedValue == JOptionPane.YES_OPTION) {
-			
-			if(exitProgram)
-				saveOnExitRequested = true;
-			else
-				saveOnCloseRequested = true;
-			
-			runSaveExperimentTask();
-			return;
-		}
-		if (selectedValue == JOptionPane.NO_OPTION) {
-			
-			if(exitProgram) {
-				selectedValue = 
-						MessageDialog.showChoiceWithWarningMsg("Are you sure you want to exit?", 
-								this.getContentPane());
-				if (selectedValue == JOptionPane.YES_OPTION)
-					MRC2ToolBoxCore.shutDown();
-			}
-			else {
-				clearGuiAfterExperimentClosed();
-			}
-		}			
 	}
 	
 	public void clearGuiAfterExperimentClosed() {		

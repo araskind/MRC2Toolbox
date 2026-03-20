@@ -135,7 +135,7 @@ public class DatabaseToLibraryDialog  extends JDialog implements ActionListener{
 
 		JRootPane rootPane = SwingUtilities.getRootPane(addButton);
 		rootPane.setDefaultButton(addButton);
-		rootPane.registerKeyboardAction(al -> { dispose(); }, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
+		rootPane.registerKeyboardAction(al -> dispose(), stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 		pack();
 
 		newCompounds = new ArrayList<CompoundIdentity>();

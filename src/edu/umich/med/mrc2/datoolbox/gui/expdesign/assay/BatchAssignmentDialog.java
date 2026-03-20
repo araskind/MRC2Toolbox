@@ -133,7 +133,7 @@ public class BatchAssignmentDialog extends JDialog implements ActionListener{
 		panel.add(assignBatchButton, gbc_assignBatchButton);
 
 		JRootPane rootPane = SwingUtilities.getRootPane(assignBatchButton);
-		rootPane.registerKeyboardAction(al -> { dispose(); }, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
+		rootPane.registerKeyboardAction(al -> dispose(), stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 		rootPane.setDefaultButton(assignBatchButton);
 	}
 

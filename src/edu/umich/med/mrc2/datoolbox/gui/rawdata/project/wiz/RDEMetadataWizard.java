@@ -189,7 +189,7 @@ public class RDEMetadataWizard extends JDialog
 		panel_1.add(btnCancel, gbc_btnCancel);
 		btnCancel.addActionListener(e -> dispose());
 
-		rootPane.registerKeyboardAction(al -> { dispose(); }, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
+		rootPane.registerKeyboardAction(al -> dispose(), stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 
 		saveButton = new JButton(NEXT_STAGE_COMMAND);
 		saveButton.setActionCommand(NEXT_STAGE_COMMAND);

@@ -191,7 +191,7 @@ public class MissingIdentificationsDialog extends JDialog implements ActionListe
 		closeButton.addActionListener(e -> dispose());
 
 		JRootPane rootPane = SwingUtilities.getRootPane(closeButton);
-		rootPane.registerKeyboardAction(al -> { dispose(); }, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
+		rootPane.registerKeyboardAction(al -> dispose(), stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 		loadPreferences();
 
 		pack();

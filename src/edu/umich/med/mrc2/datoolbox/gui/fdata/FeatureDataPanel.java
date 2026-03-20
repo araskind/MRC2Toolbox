@@ -616,6 +616,8 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 				mzDeltaAnalysisDialog.getRTSeriesMassError(), 
 				mzDeltaAnalysisDialog.getRTSeriesMassErrorType(),
 				mzDeltaAnalysisDialog.getRTSeriesMinStep());
+		
+		mzDeltaAnalysisDialog.savePreferences();
 		mzDeltaAnalysisDialog.dispose();
 		MZDeltaAnalysisTask task = new MZDeltaAnalysisTask(analysisParameters);
 		task.addTaskListener(this);
@@ -644,6 +646,7 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 			MessageDialog.showErrorMsg("Invalid parameters!", mzFrequencyAnalysisSetupDialog);
 			return;
 		}
+		mzFrequencyAnalysisSetupDialog.savePreferences();
 		mzFrequencyAnalysisSetupDialog.dispose();
 		MzFrequencyAnalysisTask task = new MzFrequencyAnalysisTask(
 				activeMsFeatureSet.getFeatures(), 
@@ -1179,6 +1182,7 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 		LibrarySearchTask lst = new LibrarySearchTask(featuresToSearch, spo);
 		lst.addTaskListener(this);
 		MRC2ToolBoxCore.getTaskController().addTask(lst);
+		librarySearchSetupDialog.savePreferences();
 		librarySearchSetupDialog.dispose();
 	}
 
@@ -1237,6 +1241,7 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 				currentExperiment, activeDataPipeline, cefFiles);
 		task.addTaskListener(this);
 		MRC2ToolBoxCore.getTaskController().addTask(task);		
+		peakQualityImportDialog.savePreferences();
 		peakQualityImportDialog.dispose();
 	}
 

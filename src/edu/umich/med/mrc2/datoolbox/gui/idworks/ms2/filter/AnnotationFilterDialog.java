@@ -289,18 +289,12 @@ public class AnnotationFilterDialog extends JDialog implements BackedByPreferenc
 		buttonPanel.add(filterButton);
 
 		JRootPane rootPane = SwingUtilities.getRootPane(filterButton);
-		rootPane.registerKeyboardAction(al -> { dispose(); }, stroke,
+		rootPane.registerKeyboardAction(al -> dispose(), stroke,
 				JComponent.WHEN_IN_FOCUSED_WINDOW);
 		rootPane.setDefaultButton(filterButton);
 		populateTables();
 		loadPreferences();
 		pack();
-	}
-	
-	@Override
-	public void dispose() {		
-		savePreferences();
-		super.dispose();
 	}
 	
 	private void populateTables() {

@@ -120,17 +120,10 @@ public class FeatureVsFeatureMSMSSearchSetupDialog extends JDialog
 		btnSave.addActionListener(commandListener);
 		panel.add(btnSave);
 		JRootPane rootPane = SwingUtilities.getRootPane(btnSave);
-		rootPane.registerKeyboardAction(al -> { dispose(); }, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
+		rootPane.registerKeyboardAction(al -> dispose(), stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 		rootPane.setDefaultButton(btnSave);
 		
 		pack();
-	}
-	
-	@Override
-	public void dispose() {
-		
-		savePreferences();
-		super.dispose();
 	}
 	
 	private void populateCollectiosTable() {

@@ -235,8 +235,8 @@ public class ExcelImportWizard extends JDialog
 
 		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
 		JRootPane rootPane = SwingUtilities.getRootPane(btnImportData);
-		rootPane.registerKeyboardAction(al -> { dispose(); }, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
-		btnCancel.addActionListener(e -> dispose());
+		rootPane.registerKeyboardAction(al -> { super.dispose(); }, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
+		btnCancel.addActionListener(e -> super.dispose());
 
 		loadPreferences();
 		pack();

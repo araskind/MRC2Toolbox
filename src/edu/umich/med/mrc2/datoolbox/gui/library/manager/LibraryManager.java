@@ -113,7 +113,7 @@ public class LibraryManager extends JDialog implements ActionListener, TaskListe
 
 		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
 		JRootPane rootPane = SwingUtilities.getRootPane(toolbar);
-		rootPane.registerKeyboardAction(al -> { dispose(); }, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
+		rootPane.registerKeyboardAction(al -> dispose(), stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 		pack();
 	}
 
@@ -194,7 +194,8 @@ public class LibraryManager extends JDialog implements ActionListener, TaskListe
 		if(inputFile != null && inputFile.exists()) {
 			((MsLibraryPanel)MRC2ToolBoxCore.getMainWindow().
 					getPanel(PanelList.MS_LIBRARY)).importLibraryFromFile(inputFile, adductList);
-		}		
+		}	
+		libraryInfoDialog.savePreferences();
 		libraryInfoDialog.dispose();
 		dispose();
 	}
@@ -217,6 +218,7 @@ public class LibraryManager extends JDialog implements ActionListener, TaskListe
 			e.printStackTrace();
 		}
 		refreshLibraryListing();
+		libraryInfoDialog.savePreferences();
 		libraryInfoDialog.dispose();
 		((MsLibraryPanel)MRC2ToolBoxCore.getMainWindow().
 				getPanel(PanelList.MS_LIBRARY)).updateLibraryMenuAndLabel();
@@ -271,11 +273,6 @@ public class LibraryManager extends JDialog implements ActionListener, TaskListe
 		CompoundLibrary selected = getSelectedLibrary();
 		if(selected == null)
 			return;
-//
-//		duplicateLibraryDialog = new DuplicateLibraryDialog(this, this);
-//		duplicateLibraryDialog.loadLibrary(selected);
-//		duplicateLibraryDialog.setLocationRelativeTo(this);
-//		duplicateLibraryDialog.setVisible(true);
 		
 		libraryInfoDialog = new LibraryInfoDialog(this);
 		libraryInfoDialog.setLocationRelativeTo(this);
@@ -305,6 +302,7 @@ public class LibraryManager extends JDialog implements ActionListener, TaskListe
 				libraryInfoDialog.getSelectedAdducts());
 		dlt.addTaskListener(this);
 		MRC2ToolBoxCore.getTaskController().addTask(dlt);
+		libraryInfoDialog.savePreferences();
 		libraryInfoDialog.dispose();
 	}
 

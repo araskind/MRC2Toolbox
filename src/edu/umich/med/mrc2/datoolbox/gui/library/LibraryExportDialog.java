@@ -192,19 +192,12 @@ public class LibraryExportDialog extends JDialog implements ActionListener, Back
 		btnSave.addActionListener(this);
 		panel.add(btnSave);
 		JRootPane rootPane = SwingUtilities.getRootPane(btnSave);
-		rootPane.registerKeyboardAction(al -> { dispose(); }, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
+		rootPane.registerKeyboardAction(al -> dispose(), stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 		rootPane.setDefaultButton(btnSave);
 		
 		destinationDirectory = null;
 		loadPreferences();
 		pack();
-	}
-	
-	@Override
-	public void dispose() {
-		
-		savePreferences();
-		super.dispose();
 	}
 
 	@Override
@@ -258,6 +251,8 @@ public class LibraryExportDialog extends JDialog implements ActionListener, Back
 			MessageDialog.showErrorMsg("Unrecognized export format: " + extension, this);
 			return;
 		}
+		baseDirectory = exportFile.getParentFile();
+		savePreferences();
 		LibraryExportTask let = new LibraryExportTask(
 					null,
 					exportFile,				

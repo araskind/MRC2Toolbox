@@ -176,7 +176,7 @@ public class DocumentAnnotationDialog extends JDialog implements ActionListener,
 		cancelButton.addActionListener(e -> dispose());
 
 		JRootPane rootPane = SwingUtilities.getRootPane(saveButton);
-		rootPane.registerKeyboardAction(al -> { dispose(); }, stroke,
+		rootPane.registerKeyboardAction(al -> dispose(), stroke,
 				JComponent.WHEN_IN_FOCUSED_WINDOW);
 		rootPane.setDefaultButton(saveButton);
 

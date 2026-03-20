@@ -144,7 +144,7 @@ public class ExchangeDataEditorDialog extends JDialog implements ItemListener, L
 		getContentPane().add(panel_4, BorderLayout.SOUTH);
 
 		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
-		rootPane.registerKeyboardAction(al -> { dispose(); }, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
+		rootPane.registerKeyboardAction(al -> dispose(), stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 
 		btnCancel = new JButton("Cancel");
 		panel_4.add(btnCancel);

@@ -175,7 +175,7 @@ public class IdTrackerPasswordActionUnlockDialog extends JDialog {
 		panel.add(btnLogIn, gbc_btnLogIn);
 
 		JRootPane rootPane = SwingUtilities.getRootPane(btnLogIn);
-		rootPane.registerKeyboardAction(al -> { dispose(); }, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
+		rootPane.registerKeyboardAction(al -> dispose(), stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 		rootPane.setDefaultButton(btnLogIn);
 
 		pack();

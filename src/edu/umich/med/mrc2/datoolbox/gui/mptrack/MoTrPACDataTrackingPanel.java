@@ -211,6 +211,7 @@ public class MoTrPACDataTrackingPanel extends DockableMRC2ToolboxPanel implement
 			for(CreateUploadManifestTask task : tasks)
 				MRC2ToolBoxCore.getTaskController().addTask(task);
 			
+			motrpacManifestForUploadDialog.savePreferences();
 			motrpacManifestForUploadDialog.dispose();
 		}
 	}
@@ -239,7 +240,8 @@ public class MoTrPACDataTrackingPanel extends DockableMRC2ToolboxPanel implement
 			
 			for(AgilentDataCompressionTask task : tasks) {
 				MRC2ToolBoxCore.getTaskController().addTask(task);
-			}			
+			}	
+			motrpacRawDataCompressionSetupDialog.savePreferences();
 			motrpacRawDataCompressionSetupDialog.dispose();
 		}			
 	}

@@ -80,17 +80,11 @@ public class MSMSFeatureRTIDSearchDialog extends JDialog implements ActionListen
 		btnSearch.addActionListener(listener);
 		buttonPanel.add(btnSearch);
 		JRootPane rootPane = SwingUtilities.getRootPane(btnSearch);
-		rootPane.registerKeyboardAction(al -> { dispose(); }, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
+		rootPane.registerKeyboardAction(al -> dispose(), stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 		rootPane.setDefaultButton(btnSearch);
 		
 		loadPreferences();
 		pack();
-	}
-	
-	@Override
-	public void dispose() {
-		savePreferences();
-		super.dispose();
 	}
 
 	@Override

@@ -155,17 +155,11 @@ public class PeakQualityImportDialog extends JDialog implements ActionListener, 
 		startImportButton.addActionListener(listener);
 		panel.add(startImportButton);
 		JRootPane rootPane = SwingUtilities.getRootPane(startImportButton);
-		rootPane.registerKeyboardAction(al -> { dispose(); }, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
+		rootPane.registerKeyboardAction(al -> dispose(), stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 		rootPane.setDefaultButton(startImportButton);
 		
 		loadPreferences();
 		pack();
-	}
-	
-	public void dispose() {
-		
-		savePreferences();
-		super.dispose();
 	}
 
 	@Override

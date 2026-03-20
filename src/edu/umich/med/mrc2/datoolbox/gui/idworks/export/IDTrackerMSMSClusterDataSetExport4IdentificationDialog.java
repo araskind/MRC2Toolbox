@@ -313,7 +313,7 @@ public class IDTrackerMSMSClusterDataSetExport4IdentificationDialog extends JDia
 		exportButton.addActionListener(listener);
 		JRootPane rootPane = SwingUtilities.getRootPane(exportButton);
 		rootPane.setDefaultButton(exportButton);
-		rootPane.registerKeyboardAction(al -> { dispose(); }, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
+		rootPane.registerKeyboardAction(al -> dispose(), stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 			
 		populateExportPropertyLists();
 		loadPreferences();

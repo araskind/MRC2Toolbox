@@ -187,16 +187,10 @@ public class DataIntegrationSetupDialog extends JDialog implements BackedByPrefe
 		cancelButton.addActionListener(e -> dispose());
 
 		JRootPane rootPane = SwingUtilities.getRootPane(integrateButton);
-		rootPane.registerKeyboardAction(al -> { dispose(); }, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
+		rootPane.registerKeyboardAction(al -> dispose(), stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 		rootPane.setDefaultButton(integrateButton);
 		loadPreferences();
 		pack();
-	}
-	
-	@Override
-	public void dispose() {
-		savePreferences();
-		super.dispose();
 	}
 	
 	public Collection<DataPipeline> getSelectedDataPipelines(){

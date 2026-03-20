@@ -319,18 +319,11 @@ public class LibraryInfoDialog extends JDialog
 		saveButton.addActionListener(listener);
 		buttonPanel.add(saveButton);
 		JRootPane rootPane = SwingUtilities.getRootPane(saveButton);
-		rootPane.registerKeyboardAction(al -> { dispose(); }, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
+		rootPane.registerKeyboardAction(al -> dispose(), stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 		rootPane.setDefaultButton(saveButton);
 		
 		loadPreferences();
 		pack();
-	}
-	
-	@Override
-	public void dispose() {
-		
-		savePreferences();
-		super.dispose();
 	}
 	
 	public void initNewLibrary(){

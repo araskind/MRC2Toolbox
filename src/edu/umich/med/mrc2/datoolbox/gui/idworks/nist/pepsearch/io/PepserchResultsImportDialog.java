@@ -203,7 +203,7 @@ public class PepserchResultsImportDialog extends JDialog
 		pepSearchSetupDialog.lockSearchOptionsPanelForEditing();
 		
 		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
-		rootPane.registerKeyboardAction(al -> { dispose(); }, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
+		rootPane.registerKeyboardAction(al -> { super.dispose(); }, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 
 		JPanel buttonPanel = new JPanel();
 		getContentPane().add(buttonPanel, BorderLayout.SOUTH);
@@ -211,7 +211,7 @@ public class PepserchResultsImportDialog extends JDialog
 		fl_buttonPanel.setAlignment(FlowLayout.RIGHT);
 		JButton btnCancel = new JButton("Cancel");
 		buttonPanel.add(btnCancel);
-		btnCancel.addActionListener(e -> dispose());
+		btnCancel.addActionListener(e -> super.dispose());
 		
 		JButton validateAndWriteSpectra = 
 				new JButton(MainActionCommands.VALIDATE_PEPSEARCH_RESULTS_AND_WRITE_FILE_WITH_SPECTRA_COMMAND.getName());
@@ -343,8 +343,7 @@ public class PepserchResultsImportDialog extends JDialog
 	public void savePreferences() {
 		
 		preferences = Preferences.userNodeForPackage(this.getClass());
-		preferences.put(BASE_DIR, inputFileDirectory.getAbsolutePath());
-		
+		preferences.put(BASE_DIR, inputFileDirectory.getAbsolutePath());		
 	}
 	
 	public boolean resultsValidated() {

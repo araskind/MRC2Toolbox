@@ -89,7 +89,7 @@ public class CompoundFilterDefinitionDialog extends JDialog implements ActionLis
 		
 		JRootPane rootPane = SwingUtilities.getRootPane(addFilterButton);
 		rootPane.setDefaultButton(addFilterButton);
-		rootPane.registerKeyboardAction(al -> { dispose(); }, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
+		rootPane.registerKeyboardAction(al -> dispose(), stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 		
 		pack();
 	}

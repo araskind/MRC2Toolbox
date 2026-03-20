@@ -129,7 +129,7 @@ public class MajorClusterFeatureExtractionSetupDialog extends JDialog implements
 		cancelButton.addActionListener(e -> dispose());
 
 		JRootPane rootPane = SwingUtilities.getRootPane(filterButton);
-		rootPane.registerKeyboardAction(al -> { dispose(); }, stroke,
+		rootPane.registerKeyboardAction(al -> dispose(), stroke,
 				JComponent.WHEN_IN_FOCUSED_WINDOW);
 		rootPane.setDefaultButton(filterButton);
 		loadPreferences();

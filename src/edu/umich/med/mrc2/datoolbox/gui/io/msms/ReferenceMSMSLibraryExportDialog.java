@@ -321,7 +321,7 @@ public class ReferenceMSMSLibraryExportDialog extends JDialog implements ActionL
 		JButton btnCancel = new JButton("Cancel");
 		panel.add(btnCancel);
 		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
-		btnCancel.addActionListener(e -> dispose());
+		btnCancel.addActionListener(e -> super.dispose());
 
 		JButton btnSave = new JButton(
 				MainActionCommands.EXPORT_REFERENCE_MSMS_LIBRARY_COMMAND.getName());
@@ -337,7 +337,7 @@ public class ReferenceMSMSLibraryExportDialog extends JDialog implements ActionL
 		panel.add(createDecoyButton);
 		panel.add(btnSave);
 		JRootPane rootPane = SwingUtilities.getRootPane(btnSave);
-		rootPane.registerKeyboardAction(al -> { dispose(); }, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
+		rootPane.registerKeyboardAction(al -> { super.dispose(); }, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 		rootPane.setDefaultButton(btnSave);
 		
 		loadPreferences();

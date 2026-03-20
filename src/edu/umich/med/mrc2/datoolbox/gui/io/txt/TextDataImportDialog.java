@@ -173,9 +173,9 @@ public class TextDataImportDialog extends JDialog
 		gbc_cancelButton.gridx = 2;
 		gbc_cancelButton.gridy = 1;
 		panel_1.add(cancelButton, gbc_cancelButton);
-		cancelButton.addActionListener(e -> dispose());
+		cancelButton.addActionListener(e -> super.dispose());
 
-		rootPane.registerKeyboardAction(al -> { dispose(); }, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
+		rootPane.registerKeyboardAction(al -> { super.dispose(); }, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 
 		importDataButton = new JButton("Import data");
 		importDataButton.setActionCommand(MainActionCommands.IMPORT_DATA_COMMAND.getName());
@@ -190,12 +190,6 @@ public class TextDataImportDialog extends JDialog
 
 		loadPreferences();
 		pack();
-	}
-	
-	@Override
-	public void dispose() {
-		savePreferences();
-		super.dispose();
 	}
 
 	@Override

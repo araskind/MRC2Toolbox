@@ -137,6 +137,7 @@ public class DockableFeatureLookupListManager extends DefaultSingleCDockable imp
 		dataSet.getFeatures().addAll(
 				featureLookupListDialog.getAllFeatures());
 			
+		featureLookupListDialog.savePreferences();
 		featureLookupListDialog.dispose();
 		if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() == null)
 			createNewFeatureLookupDataSetInDatabase(dataSet);
@@ -228,6 +229,7 @@ public class DockableFeatureLookupListManager extends DefaultSingleCDockable imp
 		edited.setDescription(featureLookupListDialog.getDataSetDescription());
 		edited.setLastModified(new Date());
 		
+		featureLookupListDialog.savePreferences();
 		featureLookupListDialog.dispose();
 		
 		if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() == null)

@@ -257,7 +257,7 @@ public class DatabaseSearchDialog extends JDialog implements ActionListener{
 		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
 		btnCancel.addActionListener(e -> dispose());
 		JRootPane rootPane = SwingUtilities.getRootPane(searchButton);
-		rootPane.registerKeyboardAction(al -> { dispose(); }, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
+		rootPane.registerKeyboardAction(al -> dispose(), stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 		rootPane.setDefaultButton(searchButton);
 		pack();
 	}

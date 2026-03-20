@@ -219,7 +219,7 @@ public class IdTrackerPasswordChangeDialog extends JDialog {
 		panel.add(changePasswordButton, gbc_changePasswordButton);
 
 		JRootPane rootPane = SwingUtilities.getRootPane(changePasswordButton);
-		rootPane.registerKeyboardAction(al -> { dispose(); }, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
+		rootPane.registerKeyboardAction(al -> dispose(), stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 		rootPane.setDefaultButton(changePasswordButton);
 		pack();
 	}

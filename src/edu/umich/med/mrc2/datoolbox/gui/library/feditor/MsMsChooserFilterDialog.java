@@ -205,7 +205,7 @@ public class MsMsChooserFilterDialog extends JDialog
 
 		JRootPane rootPane = SwingUtilities.getRootPane(btnFilter);
 		rootPane.setDefaultButton(btnFilter);
-		rootPane.registerKeyboardAction(al -> { dispose(); }, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
+		rootPane.registerKeyboardAction(al -> dispose(), stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 		loadPreferences();
 		pack();
 	}
@@ -284,13 +284,7 @@ public class MsMsChooserFilterDialog extends JDialog
 		if(mit.getActiveMsMs() != null)
 			parentPanel.loadMsMsData(mit.getActiveMsMs());
 
-		this.dispose();
-	}
-	
-	@Override
-	public void dispose() {
-		savePreferences();
-		super.dispose();
+		dispose();
 	}
 
 	/**

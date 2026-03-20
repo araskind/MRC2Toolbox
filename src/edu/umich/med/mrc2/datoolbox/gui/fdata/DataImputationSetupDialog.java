@@ -150,7 +150,7 @@ public class DataImputationSetupDialog extends JDialog {
 		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
 		cancelButton.addActionListener(e -> dispose());
 		JRootPane rootPane = SwingUtilities.getRootPane(imputeButton);
-		rootPane.registerKeyboardAction(al -> { dispose(); }, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
+		rootPane.registerKeyboardAction(al -> dispose(), stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 		rootPane.setDefaultButton(imputeButton);
 
 		pack();

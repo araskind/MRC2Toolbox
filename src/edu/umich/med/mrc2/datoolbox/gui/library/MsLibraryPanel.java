@@ -428,6 +428,7 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ItemList
 		if(inputFile != null && inputFile.exists())
 			importLibraryFromFile(inputFile, adductList);
 			
+		libraryInfoDialog.savePreferences();
 		libraryInfoDialog.dispose();
 	}
 	

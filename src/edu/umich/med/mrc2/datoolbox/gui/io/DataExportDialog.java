@@ -259,20 +259,13 @@ public class DataExportDialog extends JDialog
 		btnSave.addActionListener(this);
 		buttonPanel.add(btnSave);
 		JRootPane rootPane = SwingUtilities.getRootPane(btnSave);
-		rootPane.registerKeyboardAction(al -> { dispose(); }, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
+		rootPane.registerKeyboardAction(al -> dispose(), stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 		rootPane.setDefaultButton(btnSave);
 
 		loadPreferences();
 		setBaseDirectory(currentProject.getExportsDirectory());
 		exportTypeComboBox.setSelectedItem(exportType);
 		pack();
-	}
-	
-	@Override
-	public void dispose() {
-		
-		savePreferences();
-		super.dispose();
 	}
 
 	@Override
@@ -299,7 +292,6 @@ public class DataExportDialog extends JDialog
 		if (fc.showSaveDialog(SwingUtilities.getWindowAncestor(this.getContentPane()))) {
 						
 			File exportFile  = fc.getSelectedFile();
-//			resultsFileTextField.setText(exportFile.getAbsolutePath());
 			baseDirectory = exportFile.getParentFile();
 		}
 	}
@@ -310,10 +302,6 @@ public class DataExportDialog extends JDialog
 
 	public void setBaseDirectory(File newBase) {		
 		baseDirectory = newBase;
-//		String fileName = createExportFile(getExportType());	
-//		String newFilePath = Paths.get(baseDirectory.getAbsolutePath(),fileName).
-//				toAbsolutePath().toString();
-//		resultsFileTextField.setText(newFilePath);
 	}
 
 	public void setExportType(MainActionCommands exportType) {
@@ -368,7 +356,7 @@ public class DataExportDialog extends JDialog
 					replaceSpecChars());
 			((DataExportTask)exportTask).setMsFeatureSet4export(activeFeatureSet.getFeatures());
 		}
-
+		savePreferences();
 		exportTask.addTaskListener(this);
 		MRC2ToolBoxCore.getTaskController().addTask(exportTask);		
 	}

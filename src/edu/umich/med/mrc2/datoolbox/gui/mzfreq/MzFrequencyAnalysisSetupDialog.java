@@ -133,18 +133,11 @@ public class MzFrequencyAnalysisSetupDialog extends JDialog implements BackedByP
 		btnRun.addActionListener(actionListener);
 		panel.add(btnRun);
 		JRootPane rootPane = SwingUtilities.getRootPane(btnRun);
-		rootPane.registerKeyboardAction(al -> { dispose(); }, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
+		rootPane.registerKeyboardAction(al -> dispose(), stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 		rootPane.setDefaultButton(btnRun);
 		
 		loadPreferences();
 		pack();
-	}
-	
-	@Override
-	public void dispose() {
-		
-		savePreferences();
-		super.dispose();
 	}
 
 	public double getMZWindow() {

@@ -357,6 +357,7 @@ public class MultiFileDataImportDialog extends JDialog
 		gbc_panel.gridx = 0;
 		gbc_panel.gridy = 2;
 		panel_1.add(dataPipelineDefinitionPanel, gbc_panel);
+		
 		JButton cancelButton = new JButton("Cancel");
 		GridBagConstraints gbc_cancelButton = new GridBagConstraints();
 		gbc_cancelButton.anchor = GridBagConstraints.NORTHWEST;
@@ -364,9 +365,9 @@ public class MultiFileDataImportDialog extends JDialog
 		gbc_cancelButton.gridx = 2;
 		gbc_cancelButton.gridy = 3;
 		panel_1.add(cancelButton, gbc_cancelButton);
-		cancelButton.addActionListener(e -> dispose());
+		cancelButton.addActionListener(e -> super.dispose());
 
-		rootPane.registerKeyboardAction(al -> { dispose(); }, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
+		rootPane.registerKeyboardAction(al -> { super.dispose(); }, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 
 		JButton importDataButton = new JButton("Import data");
 		importDataButton.setActionCommand(MainActionCommands.IMPORT_DATA_COMMAND.getName());

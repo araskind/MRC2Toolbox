@@ -161,7 +161,7 @@ public class BinnerDataImportDialog extends JDialog implements BackedByPreferenc
 		btnImport.addActionListener(actionListener);
 		panel.add(btnImport);
 		JRootPane rootPane = SwingUtilities.getRootPane(btnImport);
-		rootPane.registerKeyboardAction(al -> { dispose(); }, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
+		rootPane.registerKeyboardAction(al -> dispose(), stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 		rootPane.setDefaultButton(btnImport);
 		
 		loadPreferences();

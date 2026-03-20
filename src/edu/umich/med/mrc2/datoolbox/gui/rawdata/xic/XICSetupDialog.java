@@ -118,7 +118,7 @@ public class XICSetupDialog extends JDialog
 							
 		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
 		JRootPane rootPane = SwingUtilities.getRootPane(getContentPane());
-		rootPane.registerKeyboardAction(al -> { dispose(); }, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);		
+		rootPane.registerKeyboardAction(al -> dispose(), stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);		
 		loadPreferences();
 		populateMassSelector(bundle);
 		loadLayout(layoutConfigFile);	
@@ -176,13 +176,6 @@ public class XICSetupDialog extends JDialog
 				xicSetupPanel.getPanel().setMassList(MRC2ToolBoxConfiguration.getMzFormat().format(selected.getMz()));
 			}
 		}
-	}
-	
-	@Override
-	public void dispose() {
-		savePreferences();
-		saveLayout(layoutConfigFile);
-		super.dispose();
 	}
 
 	public Collection<String> veryfyParameters() {

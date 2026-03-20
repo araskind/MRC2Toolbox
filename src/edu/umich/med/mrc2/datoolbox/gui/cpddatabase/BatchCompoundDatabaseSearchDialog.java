@@ -75,7 +75,7 @@ public class BatchCompoundDatabaseSearchDialog extends JDialog {
 		btnSearch.addActionListener(listener);
 		panel.add(btnSearch);
 		JRootPane rootPane = SwingUtilities.getRootPane(btnSearch);
-		rootPane.registerKeyboardAction(al -> { dispose(); }, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
+		rootPane.registerKeyboardAction(al -> dispose(), stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 		rootPane.setDefaultButton(btnSearch);
 
 		pack();

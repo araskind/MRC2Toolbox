@@ -147,7 +147,7 @@ public class DAMethodAssignmentDialog extends JDialog{
 		assignSampleButton.addActionListener(listener);
 		panel2.add(assignSampleButton);
 		JRootPane rootPane = SwingUtilities.getRootPane(assignSampleButton);
-		rootPane.registerKeyboardAction(al -> { dispose(); }, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
+		rootPane.registerKeyboardAction(al -> dispose(), stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 		rootPane.setDefaultButton(assignSampleButton);
 
 		pack();

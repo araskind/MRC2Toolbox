@@ -183,7 +183,7 @@ public class MsMsFilterDialog extends JDialog implements BackedByPreferences{
 
 		JRootPane rootPane = SwingUtilities.getRootPane(btnFilter);
 		rootPane.setDefaultButton(btnFilter);
-		rootPane.registerKeyboardAction(al -> { dispose(); }, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
+		rootPane.registerKeyboardAction(al -> dispose(), stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 
 		loadPreferences();
 		pack();

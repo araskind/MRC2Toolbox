@@ -235,17 +235,11 @@ public class LibraryRtImportDialog extends JDialog implements ActionListener, Ba
 		btnImport.addActionListener(actionListener);
 		panel.add(btnImport);
 		JRootPane rootPane = SwingUtilities.getRootPane(btnImport);
-		rootPane.registerKeyboardAction(al -> { dispose(); }, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
+		rootPane.registerKeyboardAction(al -> dispose(), stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 		rootPane.setDefaultButton(btnImport);
 
 		loadPreferences();
 		pack();
-	}
-	
-	@Override
-	public void dispose() {
-		savePreferences();
-		super.dispose();
 	}
 
 	@Override

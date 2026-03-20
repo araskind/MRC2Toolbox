@@ -177,17 +177,10 @@ public class RawDataAnalysisExperimentDatabaseUploadDialog
 		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
 		cancelButton.addActionListener(e -> dispose());
 		JRootPane rootPane = SwingUtilities.getRootPane(uploadButton);
-		rootPane.registerKeyboardAction(al -> { dispose(); }, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
+		rootPane.registerKeyboardAction(al -> dispose(), stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 		rootPane.setDefaultButton(uploadButton);
 		loadPreferences();
 		pack();
-	}
-	
-	@Override
-	public void dispose() {
-		
-		savePreferences();
-		super.dispose();
 	}
 	
 	public void setMSMSExtractionParameterSet(MSMSExtractionParameterSet ps) {
