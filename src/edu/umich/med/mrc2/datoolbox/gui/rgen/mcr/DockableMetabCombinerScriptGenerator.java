@@ -1014,7 +1014,7 @@ public class DockableMetabCombinerScriptGenerator extends DefaultSingleCDockable
 		if(!fileListingTable.getAllFiles(SummaryInputColumns.PEAK_AREAS).isEmpty()) {
 			
 			int res = MessageDialog.showChoiceWithWarningMsg(
-					"Do you want to clear input files table?", 
+					"Do you want to clear input data table?", 
 					SwingUtilities.getWindowAncestor(this.getContentPane()));
 			if(res == JOptionPane.YES_OPTION)
 				fileListingTable.clearTable();
@@ -1260,7 +1260,6 @@ public class DockableMetabCombinerScriptGenerator extends DefaultSingleCDockable
 	    
 	    if(useExistingAlignment() && (projectDirectory == null || !projectDirectory.exists()))
 	    	errors.add("Existing aligment project not found");
-	    
 	    
 	    Collection<RMultibatchAnalysisInputObject> ioList = 
 	    		fileListingTable.getMetabCombinerFileInputObjects();

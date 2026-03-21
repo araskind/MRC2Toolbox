@@ -36,6 +36,7 @@ public class ModalityAnalysisParametersObject implements XmlStorable{
 	private Set<RMultibatchAnalysisInputObject>metabCombinerFileInputObjectSet;
 	private int maxPercenrMissing;
 	private File featureAlignmentFile;
+	private double pValueCutoff;
 	
 	public ModalityAnalysisParametersObject() {
 		super();
@@ -47,12 +48,14 @@ public class ModalityAnalysisParametersObject implements XmlStorable{
 			File projectDirectory,
 			Set<RMultibatchAnalysisInputObject> metabCombinerFileInputObjectSet, 
 			int maxPercenrMissing,
+			double pValueCutoff,
 			File featureAlignmentFile) {
 		super();
 		this.projectParentDirectory = projectParentDirectory;
 		this.projectDirectory = projectDirectory;
 		this.metabCombinerFileInputObjectSet = metabCombinerFileInputObjectSet;
 		this.maxPercenrMissing = maxPercenrMissing;
+		this.pValueCutoff = pValueCutoff;
 		this.featureAlignmentFile = featureAlignmentFile;
 	}
 	
@@ -104,6 +107,14 @@ public class ModalityAnalysisParametersObject implements XmlStorable{
 
 	public void setFeatureAlignmentFile(File featureAlignmentFile) {
 		this.featureAlignmentFile = featureAlignmentFile;
+	}
+
+	public double getpValueCutoff() {
+		return pValueCutoff;
+	}
+
+	public void setpValueCutoff(double pValueCutoff) {
+		this.pValueCutoff = pValueCutoff;
 	}
 
 }

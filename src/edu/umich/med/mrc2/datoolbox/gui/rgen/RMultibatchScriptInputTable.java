@@ -25,10 +25,13 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 import javax.swing.table.TableRowSorter;
 
 import edu.umich.med.mrc2.datoolbox.data.compare.FileBaseNameComparator;
+import edu.umich.med.mrc2.datoolbox.data.compare.RMultibatchAnalysisInputObjectComparator;
 import edu.umich.med.mrc2.datoolbox.data.format.FileBaseNameFormat;
 import edu.umich.med.mrc2.datoolbox.gui.rgen.mcr.RMultibatchAnalysisInputObject;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
@@ -132,9 +135,10 @@ public class RMultibatchScriptInputTable extends BasicTable {
 		return files;
 	}
 	
-	public Collection<RMultibatchAnalysisInputObject>getMetabCombinerFileInputObjects(){
+	public Set<RMultibatchAnalysisInputObject>getMetabCombinerFileInputObjects(){
 		
-		Collection<RMultibatchAnalysisInputObject>mcfList = new ArrayList<>();
+		Set<RMultibatchAnalysisInputObject>mcfSet = 
+				new TreeSet<>(new RMultibatchAnalysisInputObjectComparator());
 		for(int i=0; i<model.getRowCount(); i++) {
 			
 			RMultibatchAnalysisInputObject mco = new RMultibatchAnalysisInputObject();
@@ -150,9 +154,9 @@ public class RMultibatchScriptInputTable extends BasicTable {
 				if(dataFile != null)
 					mco.setDataFile(c, dataFile);
 			}
-			mcfList.add(mco);
+			mcfSet.add(mco);
 		}
-		return mcfList;
+		return mcfSet;
 	}
 }
 

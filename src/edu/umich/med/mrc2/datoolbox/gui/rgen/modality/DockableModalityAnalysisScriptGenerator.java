@@ -23,6 +23,7 @@ package edu.umich.med.mrc2.datoolbox.gui.rgen.modality;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Desktop;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -30,23 +31,31 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Paths;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.prefs.Preferences;
 
 import javax.swing.Icon;
 import javax.swing.JButton;
+import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSpinner;
 import javax.swing.JTextField;
+import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingUtilities;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
+import javax.swing.text.NumberFormatter;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -60,6 +69,7 @@ import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.rqc.ModalityAnalysisScriptGenerator;
 import edu.umich.med.mrc2.datoolbox.rqc.RAnalysisUtils;
+import edu.umich.med.mrc2.datoolbox.rqc.SummaryInputColumns;
 import edu.umich.med.mrc2.datoolbox.utils.DelimitedTextParser;
 
 public class DockableModalityAnalysisScriptGenerator extends DefaultSingleCDockable
@@ -68,14 +78,18 @@ public class DockableModalityAnalysisScriptGenerator extends DefaultSingleCDocka
 	private static final Icon componentIcon = GuiUtils.getIcon("chromatogram", 32);
 	private Preferences preferences;
 	public static final String PREFS_NODE = "edu.umich.med.mrc2.DockableModalityAnalysisScriptGenerator";
+	public static final String WORK_DIRECTORY = "WORK_DIRECTORY";
+	public static final String MAX_PERCENT_MISSING = "MAX_PERCENT_MISSING";
+	public static final String P_VALUE_CUTOFF = "P_VALUE_CUTOFF";
 	
 	public static final String BROWSE_COMMAND = "Browse";
 	
 	private File workDirectory;	
-	private File projectDirectory;
 	private ModalityAnalysisInputFileListingTable inputFileListingTable;
 	private ModalityAnalysisScriptDialogToolbar toolbar;
 	private JTextField workDirectoryTextField;
+	private JSpinner maxPercentMissingSpinner;
+	private JFormattedTextField pValueTextField;
 	
 	public DockableModalityAnalysisScriptGenerator() {
 		
@@ -93,9 +107,9 @@ public class DockableModalityAnalysisScriptGenerator extends DefaultSingleCDocka
 		add(dataPanel, BorderLayout.CENTER);
 		GridBagLayout gbl_dataPanel = new GridBagLayout();
 		gbl_dataPanel.columnWidths = new int[]{111, 0, 0, 0, 0, 105, 0, 0};
-		gbl_dataPanel.rowHeights = new int[]{0, 0, 0, 0, 0, 0, 0};
+		gbl_dataPanel.rowHeights = new int[]{0, 0, 0, 0, 0};
 		gbl_dataPanel.columnWeights = new double[]{0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
-		gbl_dataPanel.rowWeights = new double[]{0.0, 1.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
+		gbl_dataPanel.rowWeights = new double[]{0.0, 1.0, 0.0, 0.0, Double.MIN_VALUE};
 		dataPanel.setLayout(gbl_dataPanel);
 		
 		JLabel lblNewLabel = new JLabel("Data files directory:");
@@ -179,6 +193,42 @@ public class DockableModalityAnalysisScriptGenerator extends DefaultSingleCDocka
 		gbc_importFromFileButton.gridy = 2;
 		dataPanel.add(importFromFileButton, gbc_importFromFileButton);
 		
+		JLabel lblNewLabel_1 = new JLabel("Max. % missing data");
+		GridBagConstraints gbc_lblNewLabel_1 = new GridBagConstraints();
+		gbc_lblNewLabel_1.anchor = GridBagConstraints.EAST;
+		gbc_lblNewLabel_1.insets = new Insets(0, 0, 0, 5);
+		gbc_lblNewLabel_1.gridx = 0;
+		gbc_lblNewLabel_1.gridy = 3;
+		dataPanel.add(lblNewLabel_1, gbc_lblNewLabel_1);
+		
+		maxPercentMissingSpinner = new JSpinner();
+		maxPercentMissingSpinner.setModel(new SpinnerNumberModel(0, 0, 100, 1));
+		GridBagConstraints gbc_maxPercentMissingSpinner = new GridBagConstraints();
+		gbc_maxPercentMissingSpinner.fill = GridBagConstraints.HORIZONTAL;
+		gbc_maxPercentMissingSpinner.insets = new Insets(0, 0, 0, 5);
+		gbc_maxPercentMissingSpinner.gridx = 1;
+		gbc_maxPercentMissingSpinner.gridy = 3;
+		dataPanel.add(maxPercentMissingSpinner, gbc_maxPercentMissingSpinner);
+		
+		JLabel lblNewLabel_2 = new JLabel("P-value upper cutoff for result filtering");
+		GridBagConstraints gbc_lblNewLabel_2 = new GridBagConstraints();
+		gbc_lblNewLabel_2.anchor = GridBagConstraints.EAST;
+		gbc_lblNewLabel_2.insets = new Insets(0, 0, 0, 5);
+		gbc_lblNewLabel_2.gridx = 4;
+		gbc_lblNewLabel_2.gridy = 3;
+		dataPanel.add(lblNewLabel_2, gbc_lblNewLabel_2);
+		
+        NumberFormatter formatter = new NumberFormatter(new DecimalFormat("0.0000"));
+        formatter.setMinimum(0.0d);
+        formatter.setMaximum(1.0d);
+ 		pValueTextField = new JFormattedTextField(formatter);
+		GridBagConstraints gbc_pValueTextField = new GridBagConstraints();
+		gbc_pValueTextField.insets = new Insets(0, 0, 0, 5);
+		gbc_pValueTextField.fill = GridBagConstraints.HORIZONTAL;
+		gbc_pValueTextField.gridx = 5;
+		gbc_pValueTextField.gridy = 3;
+		dataPanel.add(pValueTextField, gbc_pValueTextField);
+		
 		JPanel buttonPanel = new JPanel();
 		FlowLayout flowLayout = (FlowLayout) buttonPanel.getLayout();
 		flowLayout.setAlignment(FlowLayout.RIGHT);
@@ -201,20 +251,84 @@ public class DockableModalityAnalysisScriptGenerator extends DefaultSingleCDocka
 		if (command.equals(BROWSE_COMMAND))
 			selectWorkingDirectory();
 		
-		if (command.equals(MainActionCommands.GENERATE_MODALITY_ANALYSIS_SCRIPT_COMMAND.getName())) {
-			
-		}
 		if (command.equals(MainActionCommands.SELECT_MODALITY_ANALYSIS_INPUT_FILES_COMMAND.getName())) {
 			
 		}
 		if (command.equals(MainActionCommands.IMPORT_MODALITY_ANALYSIS_INPUTS_FROM_FILE_COMMAND.getName()))
 			importModalityAnalysisInputsFromFile();
 		
-		if (command.equals(MainActionCommands.CLEAR_MODALITY_ANALYSIS_INPUT_FILES_COMMAND.getName())) {
-			inputFileListingTable.clearTable();
-		}
-			
+		if (command.equals(MainActionCommands.CLEAR_MODALITY_ANALYSIS_INPUT_FILES_COMMAND.getName()))
+			cleartInputFiles();
+		
+		if (command.equals(MainActionCommands.GENERATE_MODALITY_ANALYSIS_SCRIPT_COMMAND.getName()))
+			generateModalityAnalysisScript();			
 	}	
+	
+	private void generateModalityAnalysisScript() {
+
+		Collection<String>errors = validateFormData();
+		if(!errors.isEmpty()){
+		    MessageDialog.showErrorMsg(StringUtils.join(errors, "\n"), 
+		    		SwingUtilities.getWindowAncestor(this.getContentPane()));
+		    return;
+		}
+		ModalityAnalysisParametersObject parameters = new ModalityAnalysisParametersObject(
+				workDirectory, 
+				null,
+				inputFileListingTable.getMetabCombinerFileInputObjects(), 
+				getMaxPercentMissing(), 
+				getPvalueCutoff(),
+				null);
+		ModalityAnalysisScriptGenerator scriptGen = 
+				new ModalityAnalysisScriptGenerator(parameters);
+		
+		scriptGen.createMultiBatchMZRTDistributionModalityAnalysisScript();
+		if (Desktop.isDesktopSupported()) {
+		    try {
+		        Desktop.getDesktop().open(parameters.getProjectDirectory());
+		    } catch (IOException ex) {
+		        ex.printStackTrace();
+		    }
+		}
+	}
+	
+	private int getMaxPercentMissing() {
+		return (int) maxPercentMissingSpinner.getValue();
+	}
+	
+	public double getPvalueCutoff(){
+		
+		if(pValueTextField.getText().isBlank())
+			return 0.0d;
+		else
+			return Double.parseDouble(pValueTextField.getText());
+	}
+	
+	private Collection<String>validateFormData(){
+	    
+	    Collection<String>errors = new ArrayList<>();
+	    if(workDirectory == null || !workDirectory.exists())
+	    	errors.add("Work directory not specified or not a valid directory");
+	    
+	    Collection<RMultibatchAnalysisInputObject> ioList = 
+	    		inputFileListingTable.getMetabCombinerFileInputObjects();
+	    if(ioList.isEmpty())
+	    	errors.add("No input data files for alignment specified");
+	    
+	    return errors;
+	}
+
+	private void cleartInputFiles() {
+
+		if(!inputFileListingTable.getAllFiles(SummaryInputColumns.PEAK_AREAS).isEmpty()) {
+			
+			int res = MessageDialog.showChoiceWithWarningMsg(
+					"Do you want to clear input data table?", 
+					SwingUtilities.getWindowAncestor(this.getContentPane()));
+			if(res == JOptionPane.YES_OPTION)
+				inputFileListingTable.clearTable();
+		}
+	}
 	
 	private void selectWorkingDirectory() {
 
@@ -281,23 +395,30 @@ public class DockableModalityAnalysisScriptGenerator extends DefaultSingleCDocka
 	
 	@Override
 	public void loadPreferences(Preferences prefs) {
+		
 	    preferences = prefs;
-//	    baseDirectory =
-//	        new File(preferences.get(BASE_DIRECTORY,
-//	            MRC2ToolBoxConfiguration.getDefaultDataDirectory()));
+		String baseDirPath = preferences.get(WORK_DIRECTORY, 
+				MRC2ToolBoxConfiguration.getDefaultExperimentsDirectory());
+		try {
+			workDirectory = Paths.get(baseDirPath).toFile();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		workDirectoryTextField.setText(workDirectory.getPath());
+		maxPercentMissingSpinner.setValue(preferences.getInt(MAX_PERCENT_MISSING, 50));
+		pValueTextField.setText(Double.toString(preferences.getDouble(P_VALUE_CUTOFF, 0.001d)));
 	}
 
 	@Override
 	public void loadPreferences() {
 	    loadPreferences(Preferences.userRoot().node(PREFS_NODE));
-//		 Preferences.userNodeForPackage(this.getClass());
 	}
 
 	@Override
 	public void savePreferences() {
 	    preferences = Preferences.userRoot().node(PREFS_NODE);
-//		 preferences = Preferences.userNodeForPackage(this.getClass());
-//	    preferences.put(BASE_DIRECTORY, baseDirectory.getAbsolutePath());
+	    preferences.put(WORK_DIRECTORY, workDirectory.getAbsolutePath());
+	    preferences.putInt(MAX_PERCENT_MISSING, getMaxPercentMissing());
+	    preferences.putDouble(P_VALUE_CUTOFF, getPvalueCutoff());
 	}
-
 }

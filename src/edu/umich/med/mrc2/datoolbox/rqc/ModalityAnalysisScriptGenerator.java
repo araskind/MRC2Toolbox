@@ -44,9 +44,13 @@ public class ModalityAnalysisScriptGenerator extends TemplareRbasedProjectGenera
 	public static final String METADATA_SUFFIX = ".metadata";
 	public static final String INPUT_DATA_SUFFIX = ".in";
 	public static final String CLEAN_OBJECT_SUFFIX = ".clean";
+	public static final String HIGH_PROBABILITY_LIST_OBJECT_SUFFIX = ".high.prob";
+	public static final String HIGH_PROBABILITY_DATA_OBJECT_SUFFIX = ".data.high.prob";
 	public static final String MODE_STATS_SUFFIX = ".mod.stats";
 	public static final String OUTPUT_SUFFIX = ".MZRT.modality.stats";
 	public static final String OUTPUT_FILE_SUFFIX = "_RTMZ_modality_analysis_";
+	public static final String PEAKS_SUFFIX = ".mod.peaks";
+	public static final String R_FOLDER_SEPARATOR = "/";
 	
 	public static final List<SummaryInputColumns> requiredProperties = 
 			Arrays.asList(
@@ -63,6 +67,7 @@ public class ModalityAnalysisScriptGenerator extends TemplareRbasedProjectGenera
 			Arrays.asList(
 					SummaryInputColumns.EXPERIMENT, 
 					SummaryInputColumns.BATCH,
+					SummaryInputColumns.MANIFEST,
 					SummaryInputColumns.RT_VALUES,
 					SummaryInputColumns.MZ_VALUES, 
 					SummaryInputColumns.PEAK_QUALITY,
@@ -73,7 +78,6 @@ public class ModalityAnalysisScriptGenerator extends TemplareRbasedProjectGenera
 	public ModalityAnalysisScriptGenerator(ModalityAnalysisParametersObject parameters) {
 		super();
 		this.parameters = parameters;
-
 	}
 
 	public void createMultiBatchMZRTDistributionModalityAnalysisScript() {
@@ -81,10 +85,7 @@ public class ModalityAnalysisScriptGenerator extends TemplareRbasedProjectGenera
 		createProjectDirectoryStructure();
 		
 		File dataDir = parameters.getProjectParentDirectory();
-//		Set<RMultibatchAnalysisInputObject>mcioSet,
-//		int maxPercenrMissing
 		initRscript();
-
 		
 		for(RMultibatchAnalysisInputObject sdio : parameters.getMetabCombinerFileInputObjectSet()) {
 			
@@ -100,11 +101,11 @@ public class ModalityAnalysisScriptGenerator extends TemplareRbasedProjectGenera
 			
 			String rtResultsObjectName = 
 					createMultimodalytyAnalysisBlockForParameter(
-							sdio, dataDir, dataObjectPrefix, SummaryInputColumns.RT_VALUES, 
+							sdio, dataObjectPrefix, SummaryInputColumns.RT_VALUES, 
 							parameters.getMaxPercenrMissing(), rscriptParts);
 			String mzResultsObjectName = 
 					createMultimodalytyAnalysisBlockForParameter(
-							sdio, dataDir, dataObjectPrefix, SummaryInputColumns.MZ_VALUES, 
+							sdio, dataObjectPrefix, SummaryInputColumns.MZ_VALUES, 
 							parameters.getMaxPercenrMissing(), rscriptParts);
 			
 			String metaDataObject = createMetaDataObject(dataObjectPrefix, rscriptParts);
@@ -152,6 +153,8 @@ public class ModalityAnalysisScriptGenerator extends TemplareRbasedProjectGenera
 
 		rscriptParts.add("library(dplyr)");
 		rscriptParts.add("library(purrr)");
+		rscriptParts.add("library(broom)");
+		rscriptParts.add("library(data.table)");
 		rscriptParts.add("library(multimode)");
 		rscriptParts.add("library(future.apply)");
 		rscriptParts.add("plan(multisession)\n");
@@ -160,12 +163,18 @@ public class ModalityAnalysisScriptGenerator extends TemplareRbasedProjectGenera
 		rscriptParts.add("\tdf <- do.call(rbind, mt)");
 		rscriptParts.add("\treturn (df)");
 		rscriptParts.add("}\n");
+		rscriptParts.add("findLocModes <- function(df.line) {");
+		rscriptParts.add("\tmod_locs <- locmodes(as.numeric(df.line), mod = 2)");
+		rscriptParts.add("\tdf <- do.call(rbind, as.list(mod_locs$locations))");
+		rscriptParts.add("\treturn (df)");
+		rscriptParts.add("}\n");
 		
 		rscriptParts.add("stat.result.names <- c(\"statistic\",\"p.value\",\"null.value\",\"alternative\",\"method\",\"sample.size\",\"data.name\",\"bad.obs\")\n");
 		rscriptParts.add("empty.list <- list(statistic = NA, p.value = NA, null.value = NA, "
 				+ "alternative = NA, method = NA, sample.size = NA, data.name = NA, bad.obs = NA)");
 		rscriptParts.add("class(empty.list) <- \"htest\"");
-		rscriptParts.add("edf <- do.call(rbind, empty.list)");
+		rscriptParts.add("edf <- do.call(rbind, empty.list)\n");
+		rscriptParts.add("peaks.empty.list <- list(Peak1 = NA, valley = NA, peak2 = NA)\n");
 	}
 	
 	private void createValidSampleObject(
@@ -176,8 +185,7 @@ public class ModalityAnalysisScriptGenerator extends TemplareRbasedProjectGenera
 		
 		rscriptParts.add("\n### Select only samples and pools ####");
 		String designObject = dataObjectPrefix + DESIGN_OBJECT_SUFFIX;
-		String filePath = Paths.get(dataDir.getAbsolutePath(), 
-				sdio.getProperty(SummaryInputColumns.MANIFEST)).toString();
+		String filePath = sdio.getFile(SummaryInputColumns.MANIFEST).getAbsolutePath();
 		rscriptParts.add(designObject + " <- read.delim(r'(" + filePath + ")', check.names=FALSE)");
 		String validSamplesObject = dataObjectPrefix + VALID_SAMPLES_LIST_SUFFIX;
 		rscriptParts.add(validSamplesObject + " <- " + designObject + 
@@ -203,7 +211,6 @@ public class ModalityAnalysisScriptGenerator extends TemplareRbasedProjectGenera
 	
 	private String createMultimodalytyAnalysisBlockForParameter(
 			RMultibatchAnalysisInputObject sdio,
-			File dataDir,
 			String dataObjectPrefix,
 			SummaryInputColumns parameter,
 			int maxPercenrMissing,
@@ -212,7 +219,7 @@ public class ModalityAnalysisScriptGenerator extends TemplareRbasedProjectGenera
 		rscriptParts.add("\n#### Analyze " + parameter.getName() + " for multimodal distribution ####");
 		String paramDataObject = dataObjectPrefix + "." + parameter.getRName();		
 		String dataObjectIn = paramDataObject + INPUT_DATA_SUFFIX;
-		String filePath = Paths.get(dataDir.getAbsolutePath(), sdio.getProperty(parameter)).toString();
+		String filePath = sdio.getFile(parameter).getAbsolutePath();
 		
 		rscriptParts.add(dataObjectIn + " <- read.delim(r'(" + filePath + ")', check.names=FALSE)");
 		rscriptParts.add(paramDataObject + " <- " + dataObjectIn + "[,-c(1:9)]");
@@ -238,6 +245,34 @@ public class ModalityAnalysisScriptGenerator extends TemplareRbasedProjectGenera
 		rscriptParts.add(modStatsObject + " <- " + modStatsObject + " %>% select(\"statistic\",\"p.value\",\"sample.size\",\"bad.obs\")");
 		rscriptParts.add("colnames(" + modStatsObject + ") <- paste(colnames(" + modStatsObject + "),\"." 
 				+ parameter.getRName() + "\", sep = \"\")");
+		
+		//	Add peak locations for features with multimodal distribution	
+		String highProbListObject = dataObjectPrefix + "." + parameter.getRName() + 
+				HIGH_PROBABILITY_LIST_OBJECT_SUFFIX;
+		String highProbDataObject = dataObjectPrefix + "." + parameter.getRName() + 
+				HIGH_PROBABILITY_DATA_OBJECT_SUFFIX;
+		String pValueCutoffString = Double.toString(parameters.getpValueCutoff());
+		
+		rscriptParts.add(highProbListObject + " <- " + modStatsObject + " %>% filter(p.value.rt < 0.001)");
+		rscriptParts.add(highProbDataObject + " <- " + paramDataObjectClean + 
+				"[row.names(" + paramDataObjectClean + ") %in% rownames(" + highProbListObject + "),]");
+		String peaksObject = paramDataObject + PEAKS_SUFFIX; 
+		rscriptParts.add(peaksObject + " <- as.data.frame(t(future_apply(" + highProbDataObject + 
+				", 1, possibly(findLocModes, otherwise = peaks.empty.list))))");
+		rscriptParts.add("colnames(" + peaksObject + ") <- c(\"RT.low\", \"Valley\", \"RT.high\")");
+		rscriptParts.add(peaksObject + " <- " + peaksObject + 
+				" %>% mutate(Delta.RT = RT.high - RT.low) "
+				+ "%>% mutate(across(where(is.numeric), \\(x) round(x, digits = 4)))");
+		
+		rscriptParts.add("setDT(" + modStatsObject + ", keep.rownames = \"Feature\")");
+		String modStatsOutputFileName = modStatsObject.replaceAll("\\.", "_") + ".txt";
+		rscriptParts.add("write.table(" + modStatsObject + ", file = \"" + 
+				modStatsOutputFileName + "\", quote = F, sep = \"\\t\", na = \"\", row.names = F)");
+		
+		rscriptParts.add("setDT(" + peaksObject + ", keep.rownames = \"Feature\")");
+		String peaksOutputFileName = peaksObject.replaceAll("\\.", "_") + ".txt";
+		rscriptParts.add("write.table(" + peaksObject + ", file = \"" + 
+				peaksOutputFileName + "\", quote = F, sep = \"\\t\", na = \"\", row.names = F)");
 		
 		return modStatsObject;
 	}
