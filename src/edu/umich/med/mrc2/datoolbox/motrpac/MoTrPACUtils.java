@@ -33,6 +33,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.text.DecimalFormat;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -40,7 +41,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.NavigableMap;
 import java.util.NavigableSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -65,7 +68,9 @@ import org.openscience.cdk.io.MDLV2000Reader;
 import org.openscience.cdk.silent.SilentChemObjectBuilder;
 import org.openscience.cdk.smiles.SmilesParser;
 
+import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentalSample;
+import edu.umich.med.mrc2.datoolbox.data.WorklistItem;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataExportFields;
 import edu.umich.med.mrc2.datoolbox.data.enums.MoTrPACRawDataManifestFields;
 import edu.umich.med.mrc2.datoolbox.data.enums.MoTrPACmetaboliteMetaDataFields;
@@ -90,6 +95,35 @@ public class MoTrPACUtils {
 	private static InChIGeneratorFactory igfactory;
 	private static InChIGenerator inChIGenerator;
 	private static final DecimalFormat intensityFormat = new DecimalFormat("###");
+	
+	private enum AssayModes {
+		
+		RPPOS("Waters-186003589", "_", 15), 
+		RPNEG("Waters-186003589", "_", 15), 
+		IONPNEG("Agilent-759700-902", "_US00000000-B", 5);
+
+		private final String columnName;
+		private final String counterSuffix;
+		private final int counterDigits;
+
+		AssayModes(String columnName, String counterSuffix, int counterDigits) {
+			this.columnName = columnName;
+			this.counterSuffix = counterSuffix;
+			this.counterDigits = counterDigits;
+		}
+
+		public String getColumnName() {
+			return columnName;
+		}
+		
+		public String getCounterSuffix() {
+			return counterSuffix;
+		}
+		
+		public int getCounterDigits() {
+			return counterDigits;
+		}
+	}
 
 	public static void main(String[] args) {
 		
@@ -98,43 +132,227 @@ public class MoTrPACUtils {
 		System.setProperty(FilePreferencesFactory.SYSTEM_PROPERTY_FILE, 
 				MRC2ToolBoxCore.configDir + "MRC2ToolBoxPrefs.txt");
 		MRC2ToolBoxConfiguration.initConfiguration();
-		
-//		File[]mFiles = new File[] {
-//				new File("Y:\\DataAnalysis\\_Reports\\EX01355 - Human Muscle Tranche 1 H20000820Y\\A003 - Untargeted\\QCaNVaS_v0.8.0\\Unnamed\\RP-NEG\\EX01355-RP-NEG-Manifest-complete.txt"),
-//				new File("Y:\\DataAnalysis\\_Reports\\EX01355 - Human Muscle Tranche 1 H20000820Y\\A003 - Untargeted\\QCaNVaS_v0.8.0\\Unnamed\\RP-POS\\EX01355-RP-POS-Manifest-complete.txt"),
-//				new File("Y:\\DataAnalysis\\_Reports\\EX01355 - Human Muscle Tranche 1 H20000820Y\\A049 - Central carbon metabolism profiling\\QCaNVaS_v0.8.0\\Unnamed\\EX01355-IONP-NEG-Manifest-complete.txt"),
-//				new File("Y:\\DataAnalysis\\_Reports\\EX01387 - Human Post Suspension Adipose powder H20000902J\\4QCANVAS\\IONP-NEG\\EX01387-IONP-NEG-Manifest-complete.txt"),
-//				new File("Y:\\DataAnalysis\\_Reports\\EX01387 - Human Post Suspension Adipose powder H20000902J\\4QCANVAS\\RP-POS\\EX01387-RP-POS-Manifest-complete.txt"),
-//				new File("Y:\\DataAnalysis\\_Reports\\EX01409 - Human EDTA Tranche 1 plasma W20000960M\\A003 - Untargeted\\QCaNVaS\\RP-NEG\\EX01409-RP-NEG-Manifest-complete.txt"),
-//				new File("Y:\\DataAnalysis\\_Reports\\EX01409 - Human EDTA Tranche 1 plasma W20000960M\\A003 - Untargeted\\QCaNVaS\\RP-POS\\EX01409-RP-POS-Manifest-complete.txt"),
-//				new File("Y:\\DataAnalysis\\_Reports\\EX01409 - Human EDTA Tranche 1 plasma W20000960M\\A049 - Central carbon metabolism profiling\\QCaNVaS\\EX01409-IONP-NEG-Manifest-complete.txt"),
-//				new File("Y:\\DataAnalysis\\_Reports\\EX01426 - Human EDTA Tranche 2 plasma W20001176L\\A003 - Untargeted\\QCaNVaS\\RP-NEG\\EX01426-RP-NEG-Manifest-complete.txt"),
-//				new File("Y:\\DataAnalysis\\_Reports\\EX01426 - Human EDTA Tranche 2 plasma W20001176L\\A003 - Untargeted\\QCaNVaS\\RP-POS\\EX01426-RP-POS-Manifest-complete.txt"),
-//				new File("Y:\\DataAnalysis\\_Reports\\EX01426 - Human EDTA Tranche 2 plasma W20001176L\\A049 - Central carbon metabolism profiling\\QCaNVaS\\EX01426-IONP-NEG-Manifest-complete.txt"),
-//				new File("Y:\\DataAnalysis\\_Reports\\EX01496 - Human EDTA Tranche 3 plasma X20001463K\\A003 - Untargeted\\QCaNVaS\\RP-NEG\\EX01496-RP-NEG-Manifest-complete.txt"),
-//				new File("Y:\\DataAnalysis\\_Reports\\EX01496 - Human EDTA Tranche 3 plasma X20001463K\\A003 - Untargeted\\QCaNVaS\\RP-POS\\EX01496-RP-POS-Manifest-complete.txt"),
-//				new File("Y:\\DataAnalysis\\_Reports\\EX01496 - Human EDTA Tranche 3 plasma X20001463K\\A049 - Central carbon metabolism profiling\\QCaNVaS\\EX01496-IONP-NEG-Manifest-complete.txt"),
-//				new File("Y:\\DataAnalysis\\_Reports\\EX01526 - Human EDTA Tranche 4 plasma H20001805E\\A003 - Untargeted\\QCaNVaS\\RP-NEG\\EX01526-RP-NEG-Manifest-complete.txt"),
-//				new File("Y:\\DataAnalysis\\_Reports\\EX01526 - Human EDTA Tranche 4 plasma H20001805E\\A003 - Untargeted\\QCaNVaS\\RP-POS\\EX01526-RP-POS-Manifest-complete.txt"),
-//				new File("Y:\\DataAnalysis\\_Reports\\EX01526 - Human EDTA Tranche 4 plasma H20001805E\\A049 - Central carbon metabolism profiling\\QCaNVaS\\EX01526-IONP-NEG-Manifest-complete.txt"),
-//		};
-//		for(File runManifestFile : mFiles) {
-//			
-//			try {
-//				createUniqueSampleIdsForControlsAndOrderSamples(runManifestFile);
-//			} catch (Exception e) {
-//				e.printStackTrace();
-//			}
-//		}
 		try {
-			extractBatchRunDatesFromManifests();
+			addExtractionDatesToManifestForEX01409RpNeg();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+	
+	private static void addExtractionDatesToManifestForEX01409RpNeg() {
+        
+        File completeManifestFile = 
+        		new File("Y:\\DataAnalysis\\_Reports\\EX01409 - Human EDTA Tranche 1 plasma W20000960M\\"
+				+ "A003 - Untargeted\\QCaNVaS\\RP-NEG\\EX01409-RP-NEG-Manifest-complete_uniqueControls.txt");
+        File commonFileListFile = new File("Y:\\DataAnalysis\\_Reports\\EX01409 - Human EDTA Tranche 1 plasma W20000960M\\"
+        		+ "A003 - Untargeted\\QCaNVaS\\RP-NEG\\EX01409-RP-NEG-raw-file-list.txt");
+        File extrtactionDatesMapFile = new File("Y:\\DataAnalysis\\_Reports\\EX01409 - Human EDTA Tranche 1 plasma W20000960M\\"
+        + "A003 - Untargeted\\QCaNVaS\\RP-NEG\\EX01409-RP-NEG-extractionDatesMap.txt");
+        File batchManifestsBaseDir = new File("Y:\\DataAnalysis\\_Reports\\EX01409 - Human EDTA Tranche 1 plasma W20000960M\\"
+        		+ "A003 - Untargeted\\QCaNVaS\\RP-NEG\\Manifests");
+        File columnChangeDatesFile = new File("Y:\\DataAnalysis\\_Reports\\EX01409 - Human EDTA Tranche 1 plasma W20000960M\\"
+        		+ "A003 - Untargeted\\QCaNVaS\\RP-NEG\\EX01409-RP-NEG-columnChangeTimes.txt");
+        AssayModes assayMode = AssayModes.RPNEG;
+        
+        addExtractionDatesAndColumnIdsToManifest(
+        		completeManifestFile, 
+        		commonFileListFile,
+        		extrtactionDatesMapFile,
+        		batchManifestsBaseDir,
+        		columnChangeDatesFile,
+        		assayMode);
+    }
+	
+	private static void addExtractionDatesAndColumnIdsToManifest(
+			File completeManifestFile,
+			File commonFileListFile,
+			File extrtactionDatesMapFile,
+			File batchManifestsBaseDir,
+			File columnChangeDatesFile,
+			AssayModes assayMode) {
+
+		List<WorklistItem>worklistItems = parseCompleteManifest(completeManifestFile);
+        List<String> commonFiles = new ArrayList<>();
+        try {
+			commonFiles = Files.readAllLines(
+					commonFileListFile.toPath(), Charset.forName("ISO-8859-1"));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        final List<String>cfiles = commonFiles;
+		worklistItems = worklistItems.stream().filter(wi -> cfiles.contains(wi.getDataFileName()))
+				.collect(Collectors.toList());
 		
-		// File parentDir = new File("Y:\\DataAnalysis\\_Reports\\EX01094 - MoTrPAC Muscle PreCOVID-20210219\\4Upload\\_4BIC\\HUMAN");
-		//	File parentDir = new File("Y:\\DataAnalysis\\_Reports\\EX01117 - PASS 1C\\4BIC\\PASS1A-06\\_FINALS");
+		//	Read individual batch manifests and assign batch and extraction dates
+		List<WorklistItem>wklWithExtractionDates = parseBatchManifests(
+				extrtactionDatesMapFile, batchManifestsBaseDir);
+		
+		for(WorklistItem item : worklistItems) {	
+            
+            Optional<WorklistItem>match = wklWithExtractionDates.stream().
+                    filter(wi -> wi.getDataFileName().equals(item.getDataFileName())).findFirst();
+            if(match.isPresent()) {
+                item.setProperty(MoTrPACRawDataManifestFields.MOTRPAC_EXTRACTION_DATE.getName(), 
+                        match.get().getProperty(MoTrPACRawDataManifestFields.MOTRPAC_EXTRACTION_DATE.getName()));
+            }
+        }
+		addColumnIdsToWorklistItems(worklistItems, columnChangeDatesFile, assayMode, 35);
+		
+		List<String> lines = new ArrayList<>();		
+		List<String> line = new ArrayList<>();
+		for (MoTrPACRawDataManifestFields field : MoTrPACRawDataManifestFields.values())
+			line.add(field.getName());
+		
+		lines.add(StringUtils.join(line, MRC2ToolBoxConfiguration.getTabDelimiter()));
+		
+		for(WorklistItem wklItem : worklistItems) {
+            
+			line.clear();
+			for (MoTrPACRawDataManifestFields field : MoTrPACRawDataManifestFields.values()) {
+				
+				if (field.equals(MoTrPACRawDataManifestFields.MOTRPAC_RAW_FILE))
+					line.add(wklItem.getDataFileName());
+				else if (field.equals(MoTrPACRawDataManifestFields.MOTRPAC_ACQUISITION_DATE)) {
+                    
+                    Date injTs = wklItem.getTimeStamp();
+                    line.add(MRC2ToolBoxConfiguration.defaultTimeStampFormat.format(injTs));
+                } else {	
+					String value = wklItem.getProperty(field.getName());
+					if (value == null)
+						value = "";
+					
+					line.add(value);
+                }
+			}
+			lines.add(StringUtils.join(line, MRC2ToolBoxConfiguration.getTabDelimiter()));
+        }
+		Path outputPath = Paths.get(completeManifestFile.getParent(),
+				FileNameUtils.getBaseName(completeManifestFile.getName()) 
+				+ "_withExtractionDates.txt");
+		try {
+		    Files.write(outputPath, 
+		    		lines,
+		            StandardCharsets.UTF_8,
+		            StandardOpenOption.CREATE, 
+		            StandardOpenOption.TRUNCATE_EXISTING);
+		} catch (IOException e) {
+		    e.printStackTrace();
+		}
+	}
+	
+	private static List<WorklistItem>parseBatchManifests(
+			File extrtactionDatesMapFile,
+			File batchManifestsBaseDir) {
+        List<WorklistItem>worklistItems = new ArrayList<>();
+        String[][] extractionDatesMapData = null;
+        try {
+        	extractionDatesMapData = DelimitedTextParser.parseTextFileWithEncoding(
+        			extrtactionDatesMapFile, MRC2ToolBoxConfiguration.getTabDelimiter());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        for(int i=0; i<extractionDatesMapData.length; i++) {
+        	
+        	String manifestName = extractionDatesMapData[i][0];
+        	String extractionDateString = extractionDatesMapData[i][1];
+        	File batchManifestFile = 
+        			Paths.get(batchManifestsBaseDir.getAbsolutePath(), manifestName).toFile();
+        	List<WorklistItem>batchWkl = parseCompleteManifest(batchManifestFile);
+			batchWkl.stream().forEach(wi -> wi.setProperty(
+					MoTrPACRawDataManifestFields.MOTRPAC_EXTRACTION_DATE.getName(), extractionDateString));
+			worklistItems.addAll(batchWkl);
+        }
+        return worklistItems;
+	}
+	
+	private static List<WorklistItem>parseCompleteManifest(File completeManifestFile) {
+        
+        List<WorklistItem>worklistItems = new ArrayList<>();
+        String[][] completeManifestData = null;
+        try {
+        	completeManifestData = DelimitedTextParser.parseTextFileWithEncoding(
+        			completeManifestFile, MRC2ToolBoxConfiguration.getTabDelimiter());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        String[] header = completeManifestData[0];
+		for (int i = 1; i < completeManifestData.length; i++) {
+
+			WorklistItem item = new WorklistItem();
+			for (int j = 0; j < header.length; j++) {
+
+				if (header[j].equals(MoTrPACRawDataManifestFields.MOTRPAC_RAW_FILE.getName())) {
+					item.setDataFile(new DataFile(completeManifestData[i][j]));
+				} else if (header[j].equals(DataExportFields.INJECTION_TIME.getName())) {
+					
+					Date injTs = new Date();
+					try {
+						injTs = MRC2ToolBoxConfiguration.defaultTimeStampFormat.parse(completeManifestData[i][j]);
+					} catch (ParseException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					item.setTimeStamp(injTs);
+				} else{
+					item.setProperty(header[j], completeManifestData[i][j]);
+				} 
+			}
+			worklistItems.add(item);
+		}	
+        return worklistItems;
+	}
+	
+	private static void addColumnIdsToWorklistItems(
+			List<WorklistItem> worklistItems,
+			File columnIdMapFile,
+			AssayModes assayMode,
+			int nextColumnId) {
+		
+		String[][] columnIdMapData = null;
+		try {
+			columnIdMapData = DelimitedTextParser.parseTextFileWithEncoding(columnIdMapFile,
+					MRC2ToolBoxConfiguration.getTabDelimiter());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		SimpleDateFormat sdf = new SimpleDateFormat("M/d/yyyy");
+		Set<Date>timeline = new TreeSet<>();
+		for (int i = 0; i < columnIdMapData.length; i++) {
+
+			String dateString = columnIdMapData[i][0];
+			Date date = null;
+			try {
+				date = sdf.parse(dateString);
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			if(date != null)
+				timeline.add(date);
+		}
+		NavigableMap<Date,String>dateColumnMap = new TreeMap<>();
+		for (Date date : timeline) {
+
+			String columnId = assayMode.getColumnName() + assayMode.getCounterSuffix()
+					+ StringUtils.leftPad(Integer.toString(nextColumnId), assayMode.getCounterDigits(), "0");
+			dateColumnMap.put(date, columnId);
+			nextColumnId++;
+		}
+		for (WorklistItem item : worklistItems) {
+			
+			Date injDate = item.getTimeStamp();
+			Optional<Entry<Date, String>> match = dateColumnMap.entrySet().stream()
+					.filter(e -> e.getKey().compareTo(injDate) >= 0).findFirst();
+			if (match.isPresent()) {
+				item.setProperty(MoTrPACRawDataManifestFields.MOTRPAC_LC_COLUMN_ID.getName(), 
+						dateColumnMap.lowerEntry(match.get().getKey()).getValue());
+			}
+			else
+				System.err.println("No column id found for date "
+						+ MRC2ToolBoxConfiguration.defaultTimeStampFormat.format(injDate));
+		}
 	}
 	
 	private static void extractBatchRunDatesFromManifests() {
@@ -1989,6 +2207,40 @@ public class MoTrPACUtils {
 		sampleNameMap.put("CSMR81010","QC-Reference-Male");
 		return sampleNameMap;
 	}
+	
+	
+//	File[]mFiles = new File[] {
+//			new File("Y:\\DataAnalysis\\_Reports\\EX01355 - Human Muscle Tranche 1 H20000820Y\\A003 - Untargeted\\QCaNVaS_v0.8.0\\Unnamed\\RP-NEG\\EX01355-RP-NEG-Manifest-complete.txt"),
+//			new File("Y:\\DataAnalysis\\_Reports\\EX01355 - Human Muscle Tranche 1 H20000820Y\\A003 - Untargeted\\QCaNVaS_v0.8.0\\Unnamed\\RP-POS\\EX01355-RP-POS-Manifest-complete.txt"),
+//			new File("Y:\\DataAnalysis\\_Reports\\EX01355 - Human Muscle Tranche 1 H20000820Y\\A049 - Central carbon metabolism profiling\\QCaNVaS_v0.8.0\\Unnamed\\EX01355-IONP-NEG-Manifest-complete.txt"),
+//			new File("Y:\\DataAnalysis\\_Reports\\EX01387 - Human Post Suspension Adipose powder H20000902J\\4QCANVAS\\IONP-NEG\\EX01387-IONP-NEG-Manifest-complete.txt"),
+//			new File("Y:\\DataAnalysis\\_Reports\\EX01387 - Human Post Suspension Adipose powder H20000902J\\4QCANVAS\\RP-POS\\EX01387-RP-POS-Manifest-complete.txt"),
+//			new File("Y:\\DataAnalysis\\_Reports\\EX01409 - Human EDTA Tranche 1 plasma W20000960M\\A003 - Untargeted\\QCaNVaS\\RP-NEG\\EX01409-RP-NEG-Manifest-complete.txt"),
+//			new File("Y:\\DataAnalysis\\_Reports\\EX01409 - Human EDTA Tranche 1 plasma W20000960M\\A003 - Untargeted\\QCaNVaS\\RP-POS\\EX01409-RP-POS-Manifest-complete.txt"),
+//			new File("Y:\\DataAnalysis\\_Reports\\EX01409 - Human EDTA Tranche 1 plasma W20000960M\\A049 - Central carbon metabolism profiling\\QCaNVaS\\EX01409-IONP-NEG-Manifest-complete.txt"),
+//			new File("Y:\\DataAnalysis\\_Reports\\EX01426 - Human EDTA Tranche 2 plasma W20001176L\\A003 - Untargeted\\QCaNVaS\\RP-NEG\\EX01426-RP-NEG-Manifest-complete.txt"),
+//			new File("Y:\\DataAnalysis\\_Reports\\EX01426 - Human EDTA Tranche 2 plasma W20001176L\\A003 - Untargeted\\QCaNVaS\\RP-POS\\EX01426-RP-POS-Manifest-complete.txt"),
+//			new File("Y:\\DataAnalysis\\_Reports\\EX01426 - Human EDTA Tranche 2 plasma W20001176L\\A049 - Central carbon metabolism profiling\\QCaNVaS\\EX01426-IONP-NEG-Manifest-complete.txt"),
+//			new File("Y:\\DataAnalysis\\_Reports\\EX01496 - Human EDTA Tranche 3 plasma X20001463K\\A003 - Untargeted\\QCaNVaS\\RP-NEG\\EX01496-RP-NEG-Manifest-complete.txt"),
+//			new File("Y:\\DataAnalysis\\_Reports\\EX01496 - Human EDTA Tranche 3 plasma X20001463K\\A003 - Untargeted\\QCaNVaS\\RP-POS\\EX01496-RP-POS-Manifest-complete.txt"),
+//			new File("Y:\\DataAnalysis\\_Reports\\EX01496 - Human EDTA Tranche 3 plasma X20001463K\\A049 - Central carbon metabolism profiling\\QCaNVaS\\EX01496-IONP-NEG-Manifest-complete.txt"),
+//			new File("Y:\\DataAnalysis\\_Reports\\EX01526 - Human EDTA Tranche 4 plasma H20001805E\\A003 - Untargeted\\QCaNVaS\\RP-NEG\\EX01526-RP-NEG-Manifest-complete.txt"),
+//			new File("Y:\\DataAnalysis\\_Reports\\EX01526 - Human EDTA Tranche 4 plasma H20001805E\\A003 - Untargeted\\QCaNVaS\\RP-POS\\EX01526-RP-POS-Manifest-complete.txt"),
+//			new File("Y:\\DataAnalysis\\_Reports\\EX01526 - Human EDTA Tranche 4 plasma H20001805E\\A049 - Central carbon metabolism profiling\\QCaNVaS\\EX01526-IONP-NEG-Manifest-complete.txt"),
+//	};
+//	for(File runManifestFile : mFiles) {
+//		
+//		try {
+//			createUniqueSampleIdsForControlsAndOrderSamples(runManifestFile);
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
+//	}
+	
+	
+	// File parentDir = new File("Y:\\DataAnalysis\\_Reports\\EX01094 - MoTrPAC Muscle PreCOVID-20210219\\4Upload\\_4BIC\\HUMAN");
+	//	File parentDir = new File("Y:\\DataAnalysis\\_Reports\\EX01117 - PASS 1C\\4BIC\\PASS1A-06\\_FINALS");
+	
 }
 
 

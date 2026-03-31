@@ -42,6 +42,7 @@ import org.openscience.cdk.smiles.SmilesParser;
 import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator;
 
 import edu.umich.med.mrc2.datoolbox.data.enums.InChiKeyCharge;
+import edu.umich.med.mrc2.datoolbox.data.enums.MoleculeProperties;
 import io.github.dan2097.jnainchi.InchiStatus;
 
 public class ChemInfoUtils {
@@ -111,6 +112,38 @@ public class ChemInfoUtils {
 			e1.printStackTrace();
 		}
 		return mol;
+	}
+	
+	public static IAtomContainer generateMoleculeWithInchiFromSMILES(String smiles) throws CDKException {
+		
+		if (smiles == null)
+			return null;
+
+		IAtomContainer mol = null;
+		try {
+			mol = smilesParser.parseSmiles(smiles);
+		}
+		catch (Exception e1) {
+			e1.printStackTrace();
+			return null;
+		}
+		if(mol != null) {
+			try {
+				igfactory = InChIGeneratorFactory.getInstance();
+			} catch (CDKException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			inChIGenerator = igfactory.getInChIGenerator(mol);
+			InchiStatus ret = inChIGenerator.getStatus();
+			if (ret == InchiStatus.WARNING || ret == InchiStatus.SUCCESS) {
+
+				mol.setProperty(MoleculeProperties.INCHI.name(), inChIGenerator.getInchi());
+				mol.setProperty(MoleculeProperties.INCHIKEY.name(), inChIGenerator.getInchiKey());
+				return mol;
+			}
+		}
+		return null;
 	}
 	
 	public static String generateFormulaStringFromSMILES(String smiles) throws CDKException {

@@ -47,7 +47,7 @@ public class EX01355andEX01572RQCgenerator2 {
 		MRC2ToolBoxConfiguration.initConfiguration();
 
 		try {
-			generateSummaryQcScriptForEX01355and1526rppos(false);
+			generateSummaryQcScriptForEX01572rpneg(false);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -60,7 +60,7 @@ public class EX01355andEX01572RQCgenerator2 {
 //		}
 	}
 	
-	private static void generateSummaryQcScriptForEX01355and1526ionpneg(boolean highCutoffData) {		
+	private static void generateSummaryQcScriptForEX01355and1572ionpneg(boolean highCutoffData) {		
 		
 		String assayType = "IONP-NEG";
 		String assayType4R = "ionpneg";
@@ -104,7 +104,7 @@ public class EX01355andEX01572RQCgenerator2 {
 				assayType4R);
 	}
 			
-	private static void generateSummaryQcScriptForEX01355and1526rpneg(boolean highCutoffData) {
+	private static void generateSummaryQcScriptForEX01355and1572rpneg(boolean highCutoffData) {
 
 		String assayType = "RP-NEG";
 		String assayType4R = "rpneg";
@@ -148,7 +148,7 @@ public class EX01355andEX01572RQCgenerator2 {
 				assayType4R);
 	}
 	
-	private static void generateSummaryQcScriptForEX01355and1526rppos(boolean highCutoffData) {
+	private static void generateSummaryQcScriptForEX01355and1572rppos(boolean highCutoffData) {
 
 		String assayType = "RP-POS";
 		String assayType4R = "rppos";

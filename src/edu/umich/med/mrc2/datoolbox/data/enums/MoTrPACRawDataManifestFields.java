@@ -27,7 +27,10 @@ public enum MoTrPACRawDataManifestFields {
 	MOTRPAC_SAMPLE_TYPE("sample_type"),
 	MOTRPAC_SAMPLE_ORDER("sample_order"),
 	MOTRPAC_MS_MODE("ms_mode"),
-	MOTRPAC_RAW_FILE("raw_file"),
+	MOTRPAC_RAW_FILE("raw_file"),	
+	MOTRPAC_EXTRACTION_DATE	("extraction_date"),
+	MOTRPAC_ACQUISITION_DATE("acquisition_date"),	
+	MOTRPAC_LC_COLUMN_ID("lc_column_id"),
 	;
 		
 	private final String uiName;

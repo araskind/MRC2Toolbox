@@ -24,6 +24,7 @@ package edu.umich.med.mrc2.datoolbox.data;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 
@@ -42,14 +43,19 @@ public class WorklistItem implements Comparable<WorklistItem>, Serializable, Xml
 	private static final long serialVersionUID = 5767562224759235903L;
 	protected DataFile dataFile;
 	protected String dataFileName;
-	protected TreeMap<String, String> properties;
+	protected Map<String, String> properties;
 	protected Date timeStamp;
 
-	public WorklistItem(DataFile dataFile) {
+	
+	public WorklistItem() {
 		super();
+		properties = new TreeMap<>();
+	}
+
+	public WorklistItem(DataFile dataFile) {
+		this();
 		this.dataFile = dataFile;
-		this.dataFileName = dataFile.getName();
-		properties = new TreeMap<String, String>();
+		this.dataFileName = dataFile.getName();	
 	}
 
 	public void setProperty(String propertyName, String propertyValue) {
@@ -75,7 +81,7 @@ public class WorklistItem implements Comparable<WorklistItem>, Serializable, Xml
 	/**
 	 * @return the properties
 	 */
-	public TreeMap<String, String> getProperties() {
+	public Map<String, String> getProperties() {
 		return properties;
 	}
 
@@ -136,7 +142,7 @@ public class WorklistItem implements Comparable<WorklistItem>, Serializable, Xml
 				worklistItemElement, CommonFields.DateCreated);
 		dataFileName = worklistItemElement.getAttributeValue(ObjectNames.DataFile.name());
 		
-		properties = new TreeMap<String, String>();
+		properties = new TreeMap<>();
 		List<Element>propertyElementList = 
 				worklistItemElement.getChild(CommonFields.Properties.name()).
 				getChildren(CommonFields.Property.name());

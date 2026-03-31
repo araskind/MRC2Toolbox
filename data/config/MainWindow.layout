@@ -363,7 +363,7 @@
 								</child>
 								<child>
 									<layout factory="delegate_StackDockStationFactory">
-										<selected>1</selected>
+										<selected>11</selected>
 										<placeholders>
 											<version>0</version>
 											<format>dock.PlaceholderList</format>

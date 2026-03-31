@@ -21,6 +21,8 @@
 
 package edu.umich.med.mrc2.datoolbox.misctest;
 
+import java.awt.Image;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -47,6 +49,9 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
@@ -61,8 +66,12 @@ import org.apache.poi.poifs.filesystem.DirectoryEntry;
 import org.apache.poi.poifs.filesystem.DocumentInputStream;
 import org.apache.poi.poifs.filesystem.DocumentNode;
 import org.openscience.cdk.aromaticity.Aromaticity;
+import org.openscience.cdk.depict.Depiction;
+import org.openscience.cdk.depict.DepictionGenerator;
+import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.inchi.InChIGenerator;
 import org.openscience.cdk.inchi.InChIGeneratorFactory;
+import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IChemObjectBuilder;
 import org.openscience.cdk.interfaces.IMolecularFormula;
 import org.openscience.cdk.io.MDLV2000Reader;
@@ -74,6 +83,7 @@ import org.openscience.cdk.tautomers.InChITautomerGenerator;
 import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator;
 
 import edu.umich.med.mrc2.datoolbox.data.MsPoint;
+import edu.umich.med.mrc2.datoolbox.data.enums.MoleculeProperties;
 import edu.umich.med.mrc2.datoolbox.data.lims.ChromatographicGradient;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.MobilePhase;
@@ -89,6 +99,7 @@ import edu.umich.med.mrc2.datoolbox.dbparse.load.refmet.RefMetFields;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.FilePreferencesFactory;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
+import edu.umich.med.mrc2.datoolbox.utils.ChemInfoUtils;
 import edu.umich.med.mrc2.datoolbox.utils.DelimitedTextParser;
 import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
 import edu.umich.med.mrc2.datoolbox.utils.MSMSClusteringUtils;
@@ -123,7 +134,8 @@ public class RunContainer2 {
 		MRC2ToolBoxConfiguration.initConfiguration();
 
 		try {
-			updateRefMetWithSmilesByName();
+			generateMolPicture();
+			//	applyClassSmilesFix();
 			//	updateRefMetWithSmiles();
 			//	downloadMethodsToExtractGradients();
 			//	extractTemporaryGradients();
@@ -131,6 +143,73 @@ public class RunContainer2 {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}		
+	}
+	
+	public static IAtomContainer generateMolPicture() throws CDKException {
+
+		String smiles = "[R2]C(OCC(OC([R1]($([O])))=O)COP(O)(OCC(OC([R3])=O)CO)=O)=O";
+		DepictionGenerator dptgen = new DepictionGenerator().withAtomColors();		
+		Depiction dpic = null;
+		IAtomContainer mol = null;
+		try {
+			mol = smipar.parseSmiles(smiles);
+		} catch (Exception e1) {
+			e1.printStackTrace();
+			return null;
+		}
+		if (mol != null) {
+			try {
+				dpic = dptgen.depict(mol);
+			}
+			catch (CDKException e) {
+				e.printStackTrace();
+			}
+		}
+		if (dpic != null) {
+			ImageIcon icon = new ImageIcon(dpic.toImg());
+			Image img = icon.getImage();
+		    BufferedImage buffered = new BufferedImage(
+		            img.getWidth(null),
+		            img.getHeight(null),
+		            BufferedImage.TYPE_INT_ARGB
+		        );
+		        buffered.getGraphics().drawImage(img, 0, 0, null);
+		        try {
+					ImageIO.write(buffered, "png", new File("E:\\Development\\MRC2Toolbox\\1,2-DG.png"));
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+		}
+		return mol;
+	}
+	
+	public static void applyClassSmilesFix() throws Exception {
+		
+		File inputFile = new File("E:\\Development\\MRC2Toolbox\\Database\\RefMetClassSmilesFix.txt");
+		String[][] refmetData = null;
+		try {
+			refmetData = DelimitedTextParser.parseTextFileWithEncoding(inputFile, '\t');
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		Connection conn = ConnectionManager.getConnection();
+		String query = "UPDATE COMPOUNDDB.REFMET_DATA_NEW SET SMILES = ? WHERE SMILES = ?";
+		try(PreparedStatement ps = conn.prepareStatement(query)){
+			for(int i=0; i<refmetData.length; i++) {
+	            
+	            String oldSmiles = refmetData[i][0];
+	            String smiles = refmetData[i][1];
+				if (!oldSmiles.equals(smiles)) {
+	
+					ps.setString(1, smiles);
+					ps.setString(2, oldSmiles);
+					ps.executeUpdate();
+				}	
+			}
+		}
+		ConnectionManager.releaseConnection(conn);
 	}
 	
 	private static void testRefMetMatcher() {
@@ -240,33 +319,115 @@ public class RunContainer2 {
 	private static void updateRefMetSmilesFromRefMetWebByInchyKey() throws Exception{
 		
 		Connection conn = ConnectionManager.getConnection();
-		String query = "SELECT REFMET_ID, INCHI_KEY FROM REFMET_DATA_NEW WHERE SMILES IS NULL AND INCHI_KEY IS NOT NULL";
-		PreparedStatement ps = conn.prepareStatement(query);
-		Map<String,String>idNameMap = new TreeMap<>();
-		ResultSet rs = ps.executeQuery();
-		while(rs.next())
-			idNameMap.put(rs.getString(1),rs.getString(2));
+		String query = "SELECT REFMET_ID, INCHI_KEY "
+				+ "FROM COMPOUNDDB.REFMET_DATA_NEW "
+				+ "WHERE SMILES IS NULL AND INCHI_KEY IS NOT NULL";
 		
-		rs.close();
-		ps.close();
-
-		query = "UPDATE REFMET_DATA_NEW SET SMILES = ? WHERE REFMET_ID = ?";
-		ps = conn.prepareStatement(query);
-		for(Entry<String,String>mapEntry : idNameMap.entrySet()) {
+		Map<String,String>idNameMap = new TreeMap<>();
+		try(PreparedStatement ps = conn.prepareStatement(query)){
+		
+			ResultSet rs = ps.executeQuery();
+			while(rs.next())
+				idNameMap.put(rs.getString(1),rs.getString(2));
 			
-			Map<RefMetFields, String> refMetRecord = 
-					RefMetUtils.getRefMetRecordByInchyKey(mapEntry.getValue());
-			if(refMetRecord.containsKey(RefMetFields.SMILES)) {
+			rs.close();
+		}
+		query = "UPDATE COMPOUNDDB.REFMET_DATA_NEW SET SMILES = ? WHERE REFMET_ID = ?";
+		try(PreparedStatement ps = conn.prepareStatement(query)){
+			
+			for(Entry<String,String>mapEntry : idNameMap.entrySet()) {
 				
-				ps.setString(1, refMetRecord.get(RefMetFields.SMILES));
-				ps.setString(2, mapEntry.getKey());
-				ps.executeUpdate();	
-			}
-			Thread.sleep(300);
-		}						
-		ps.close();
+				Map<RefMetFields, String> refMetRecord = 
+						RefMetUtils.getRefMetRecordByInchyKey(mapEntry.getValue());
+				if(refMetRecord.containsKey(RefMetFields.SMILES)) {
+					
+					ps.setString(1, refMetRecord.get(RefMetFields.SMILES));
+					ps.setString(2, mapEntry.getKey());
+					ps.executeUpdate();	
+				}
+			}						
+		}
 		ConnectionManager.releaseConnection(conn);
 	}
+	
+	private static void generateMissingInChiKeysFromSmilesForRefmet() throws Exception {
+
+		Connection conn = ConnectionManager.getConnection();
+		String query = "SELECT REFMET_ID, SMILES "
+				+ "FROM COMPOUNDDB.REFMET_DATA_NEW "
+				+ "WHERE INCHI_KEY IS NULL AND SMILES IS NOT NULL";
+		Map<String, String> idSmilesMap = new TreeMap<>();
+		
+		try(PreparedStatement ps = conn.prepareStatement(query)){
+		
+			ResultSet rs = ps.executeQuery();
+			while (rs.next())
+				idSmilesMap.put(rs.getString(1), rs.getString(2));
+	
+			rs.close();
+		}
+
+		query = "UPDATE COMPOUNDDB.REFMET_DATA_NEW SET INCHI_KEY = ? WHERE REFMET_ID = ?";
+		try(PreparedStatement ps = conn.prepareStatement(query)){
+			
+			for (Entry<String, String> mapEntry : idSmilesMap.entrySet()) {
+				
+				IAtomContainer mol = null;
+				try {
+					mol = ChemInfoUtils.generateMoleculeWithInchiFromSMILES(mapEntry.getValue());
+				} catch (CDKException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				if (mol != null) {
+					ps.setString(1, mol.getProperty(MoleculeProperties.INCHIKEY.name()).toString());
+					ps.setString(2, mapEntry.getKey());
+					ps.executeUpdate();
+				}
+			}
+		}
+		ConnectionManager.releaseConnection(conn);
+	}
+	
+	private static void generateInChiFromSmilesForCFCpd() throws Exception {
+
+		Connection conn = ConnectionManager.getConnection();
+		String query = "SELECT ACCESSION, SMILES "
+				+ "FROM COMPOUNDDB.CF_COMPOUND_DATA_REFMET "
+				+ "WHERE SMILES IS NOT NULL";
+		Map<String, String> idSmilesMap = new TreeMap<>();
+		
+		try(PreparedStatement ps = conn.prepareStatement(query)){
+		
+			ResultSet rs = ps.executeQuery();
+			while (rs.next())
+				idSmilesMap.put(rs.getString(1), rs.getString(2));
+	
+			rs.close();
+		}
+
+		query = "UPDATE COMPOUNDDB.CF_COMPOUND_DATA_REFMET SET INCHI = ? WHERE ACCESSION = ?";
+		try(PreparedStatement ps = conn.prepareStatement(query)){
+			
+			for (Entry<String, String> mapEntry : idSmilesMap.entrySet()) {
+				
+				IAtomContainer mol = null;
+				try {
+					mol = ChemInfoUtils.generateMoleculeWithInchiFromSMILES(mapEntry.getValue());
+				} catch (CDKException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				if (mol != null) {
+					ps.setString(1, mol.getProperty(MoleculeProperties.INCHI.name()).toString());
+					ps.setString(2, mapEntry.getKey());
+					ps.executeUpdate();
+				}
+			}
+		}
+		ConnectionManager.releaseConnection(conn);
+	}
+	
 	
 	private static void updateRefMetWithSmilesByName() throws Exception {
 		
