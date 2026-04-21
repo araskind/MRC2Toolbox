@@ -51,6 +51,9 @@ import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.mp.CreateUploadManifestTask;
+import javax.swing.JCheckBox;
+import java.awt.Component;
+import javax.swing.Box;
 
 public class MoTrPACManifestForUploadDialog extends JDialog implements ActionListener, BackedByPreferences {
 
@@ -63,6 +66,8 @@ public class MoTrPACManifestForUploadDialog extends JDialog implements ActionLis
 	public static final String OUTPUT_DIRECTORY = "OUTPUT_DIRECTORY";	
 	
 	private Map<MoTrPACAssay,ManifestForUploadSetupPanel>assayPanelMap;
+
+	private JCheckBox chckbxNewCheckBox;
 	
 	public MoTrPACManifestForUploadDialog(ActionListener listener) {
 		super();
@@ -89,6 +94,16 @@ public class MoTrPACManifestForUploadDialog extends JDialog implements ActionLis
 		FlowLayout flowLayout = (FlowLayout) buttonPanel.getLayout();
 		flowLayout.setAlignment(FlowLayout.RIGHT);
 		getContentPane().add(buttonPanel, BorderLayout.SOUTH);
+		
+		chckbxNewCheckBox = new JCheckBox("Do not process raw data");
+		chckbxNewCheckBox.setAlignmentX(Component.CENTER_ALIGNMENT);
+		chckbxNewCheckBox.setSelected(true);
+		buttonPanel.add(chckbxNewCheckBox);
+		
+		Component horizontalStrut = Box.createHorizontalStrut(20);
+		horizontalStrut.setPreferredSize(new Dimension(150, 0));
+		horizontalStrut.setMinimumSize(new Dimension(150, 0));
+		buttonPanel.add(horizontalStrut);
 
 		JButton btnCancel = new JButton("Cancel");
 		buttonPanel.add(btnCancel);
@@ -117,14 +132,15 @@ public class MoTrPACManifestForUploadDialog extends JDialog implements ActionLis
 	
 	public Collection<CreateUploadManifestTask>getManifestTasks(){
 		
-		Collection<CreateUploadManifestTask>tasks = 
-				new ArrayList<CreateUploadManifestTask>();
+		Collection<CreateUploadManifestTask>tasks = new ArrayList<>();
 			
 		for(ManifestForUploadSetupPanel panel : assayPanelMap.values()) {
 			
 			CreateUploadManifestTask task = panel.getManifestTask();				
-			if(task != null)
+			if(task != null) {
 				tasks.add(task);
+				task.setOmitRawDataProcessing(chckbxNewCheckBox.isSelected());
+			}
 		}		
 		return tasks;
 	}

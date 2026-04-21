@@ -50,6 +50,7 @@ public class CreateUploadManifestTask extends AbstractTask {
 	private String assayName;
 	private Date manifestDate;
 	private Collection<String>manifestData;
+	private boolean omitRawDataProcessing;
 	
 	public static final DateFormat defaultDateFormat = 
 			new SimpleDateFormat("yyyyMMdd");
@@ -75,24 +76,24 @@ public class CreateUploadManifestTask extends AbstractTask {
 		} catch (Exception e) {
 			e.printStackTrace();
 			setStatus(TaskStatus.ERROR);
-return;
-
+			return;
 		}
-		try {
-			parseRawDataFolder();
-		} catch (Exception e) {
-			e.printStackTrace();
-			setStatus(TaskStatus.ERROR);
-return;
-
+		if(!omitRawDataProcessing) {
+			
+			try {
+				parseRawDataFolder();
+			} catch (Exception e) {
+				e.printStackTrace();
+				setStatus(TaskStatus.ERROR);
+				return;
+			}
 		}
 		try {
 			writeManifestFile();
 		} catch (Exception e) {
 			e.printStackTrace();
 			setStatus(TaskStatus.ERROR);
-return;
-
+			return;
 		}
 		setStatus(TaskStatus.FINISHED);
 	}
@@ -197,9 +198,13 @@ return;
 	@Override
 	public Task cloneTask() {
 
-		return new CreateUploadManifestTask(
-				 batchDirectory, 
-				 manifestDate,
-				 assayName);
+		CreateUploadManifestTask task = 
+				new CreateUploadManifestTask(batchDirectory,  manifestDate, assayName);
+		task.setOmitRawDataProcessing(omitRawDataProcessing);
+		return task;
+	}
+
+	public void setOmitRawDataProcessing(boolean omitRawDataProcessing) {
+		this.omitRawDataProcessing = omitRawDataProcessing;
 	}
 }

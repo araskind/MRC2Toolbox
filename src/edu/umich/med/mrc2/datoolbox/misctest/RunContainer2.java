@@ -147,7 +147,7 @@ public class RunContainer2 {
 	
 	public static IAtomContainer generateMolPicture() throws CDKException {
 
-		String smiles = "[R2]C(OCC(OC([R1]($([O])))=O)COP(O)(OCC(OC([R3])=O)CO)=O)=O";
+		String smiles = "[R1]C(N[C@@H](CO)[C@@H](/C=C/[R2]($([OH])))O)=O";
 		DepictionGenerator dptgen = new DepictionGenerator().withAtomColors();		
 		Depiction dpic = null;
 		IAtomContainer mol = null;

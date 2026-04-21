@@ -31,6 +31,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -96,6 +97,9 @@ public class MoTrPACUtils {
 	private static InChIGenerator inChIGenerator;
 	private static final DecimalFormat intensityFormat = new DecimalFormat("###");
 	
+	private static final DateFormat acquisitionDateFormat = 
+			new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
+	
 	private enum AssayModes {
 		
 		RPPOS("Waters-186003589", "_", 15), 
@@ -133,12 +137,87 @@ public class MoTrPACUtils {
 				MRC2ToolBoxCore.configDir + "MRC2ToolBoxPrefs.txt");
 		MRC2ToolBoxConfiguration.initConfiguration();
 		try {
-			addExtractionDatesToManifestForEX01409RpNeg();
+			addExtractionDatesToManifestForEX01355IonPNeg();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
+
+	private static void addExtractionDatesToManifestForEX01355RpNeg() {
+        
+        File completeManifestFile = new File("Y:\\DataAnalysis\\_Reports\\EX01355 - Human Muscle Tranche 1 H20000820Y\\"
+        		+ "A003 - Untargeted\\QCaNVaS_v0.8.0\\RP-NEG\\Unnamed\\EX01355-RP-NEG-Manifest-complete_uniqueControls.txt");
+        File commonFileListFile = new File("Y:\\DataAnalysis\\_Reports\\EX01355 - Human Muscle Tranche 1 H20000820Y\\"
+        		+ "A003 - Untargeted\\QCaNVaS_v0.8.0\\RP-NEG\\EX01355-RP-NEG-raw-file-list.txt");
+        File batchManifestsBaseDir = new File("Y:\\DataAnalysis\\_Reports\\EX01355 - Human Muscle Tranche 1 H20000820Y\\"
+        		+ "A003 - Untargeted\\QCaNVaS_v0.8.0\\RP-NEG\\Manifests");        
+        File extrtactionDatesMapFile = new File("Y:\\DataAnalysis\\_Reports\\EX01355 - Human Muscle Tranche 1 H20000820Y\\"
+        		+ "A003 - Untargeted\\QCaNVaS_v0.8.0\\RP-NEG\\EX01355-RP-NEG-extraction-dates-list.txt");
+        File columnChangeDatesFile = new File("Y:\\DataAnalysis\\_Reports\\EX01355 - Human Muscle Tranche 1 H20000820Y\\"
+        		+ "A003 - Untargeted\\QCaNVaS_v0.8.0\\RP-NEG\\EX01355-RP-NEG-columnChangeTimes.txt");
+        AssayModes assayMode = AssayModes.RPNEG;
+        int nextColumnId = 35;
+        
+        addExtractionDatesAndColumnIdsToManifest(
+        		completeManifestFile, 
+        		commonFileListFile,
+        		extrtactionDatesMapFile,
+        		batchManifestsBaseDir,
+        		columnChangeDatesFile,
+        		assayMode,
+        		nextColumnId);
+    }
+	
+	private static void addExtractionDatesToManifestForEX01355RpPos() {
+        
+        File completeManifestFile = new File("Y:\\DataAnalysis\\_Reports\\EX01355 - Human Muscle Tranche 1 H20000820Y\\"
+        		+ "A003 - Untargeted\\QCaNVaS_v0.8.0\\RP-POS\\Unnamed\\EX01355-RP-POS-Manifest-complete_uniqueControls.txt");
+        File commonFileListFile = new File("Y:\\DataAnalysis\\_Reports\\EX01355 - Human Muscle Tranche 1 H20000820Y\\"
+        		+ "A003 - Untargeted\\QCaNVaS_v0.8.0\\RP-POS\\EX01355-RP-POS-raw-file-list.txt");
+        File extrtactionDatesMapFile = new File("Y:\\DataAnalysis\\_Reports\\EX01355 - Human Muscle Tranche 1 H20000820Y\\"
+        		+ "A003 - Untargeted\\QCaNVaS_v0.8.0\\RP-POS\\EX01355-RP-POS-extraction-dates-list.txt");
+        File batchManifestsBaseDir = new File("Y:\\DataAnalysis\\_Reports\\EX01355 - Human Muscle Tranche 1 H20000820Y\\"
+        		+ "A003 - Untargeted\\QCaNVaS_v0.8.0\\RP-POS\\Manifests");
+        File columnChangeDatesFile = new File("Y:\\DataAnalysis\\_Reports\\EX01355 - Human Muscle Tranche 1 H20000820Y\\"
+        		+ "A003 - Untargeted\\QCaNVaS_v0.8.0\\RP-POS\\EX01355-RP-POS-columnChangeTimes.txt");
+        AssayModes assayMode = AssayModes.RPPOS;
+        int nextColumnId = 35;
+        
+        addExtractionDatesAndColumnIdsToManifest(
+        		completeManifestFile, 
+        		commonFileListFile,
+        		extrtactionDatesMapFile,
+        		batchManifestsBaseDir,
+        		columnChangeDatesFile,
+        		assayMode,
+        		nextColumnId);
+    }
+	
+	private static void addExtractionDatesToManifestForEX01355IonPNeg() {
+		
+        File completeManifestFile = new File("Y:\\DataAnalysis\\_Reports\\EX01355 - Human Muscle Tranche 1 H20000820Y\\"
+        		+ "A049 - Central carbon metabolism profiling\\QCaNVaS_v0.8.0\\Unnamed\\EX01355-IONP-NEG-Manifest-complete_uniqueControls.txt");
+        File commonFileListFile = new File("Y:\\DataAnalysis\\_Reports\\EX01355 - Human Muscle Tranche 1 H20000820Y\\"
+        		+ "A049 - Central carbon metabolism profiling\\QCaNVaS_v0.8.0\\EX01355-IONP-NEG-raw-file-list.txt");
+        File extrtactionDatesMapFile = new File("Y:\\DataAnalysis\\_Reports\\EX01355 - Human Muscle Tranche 1 H20000820Y\\"
+        		+ "A049 - Central carbon metabolism profiling\\QCaNVaS_v0.8.0\\EX01355-IONP-NEG-extraction-dates-list.txt");
+        File batchManifestsBaseDir = new File("Y:\\DataAnalysis\\_Reports\\EX01355 - Human Muscle Tranche 1 H20000820Y\\"
+        		+ "A049 - Central carbon metabolism profiling\\QCaNVaS_v0.8.0\\Manifests");
+        File columnChangeDatesFile = new File("Y:\\DataAnalysis\\_Reports\\EX01355 - Human Muscle Tranche 1 H20000820Y\\"
+        		+ "A049 - Central carbon metabolism profiling\\QCaNVaS_v0.8.0\\EX01355-IONP-NEG-columnChangeTimes.txt");
+        AssayModes assayMode = AssayModes.IONPNEG;
+        int nextColumnId = 35;
+        
+        addExtractionDatesAndColumnIdsToManifest(
+        		completeManifestFile, 
+        		commonFileListFile,
+        		extrtactionDatesMapFile,
+        		batchManifestsBaseDir,
+        		columnChangeDatesFile,
+        		assayMode,
+        		nextColumnId);
+    }
 	
 	private static void addExtractionDatesToManifestForEX01409RpNeg() {
         
@@ -154,6 +233,7 @@ public class MoTrPACUtils {
         File columnChangeDatesFile = new File("Y:\\DataAnalysis\\_Reports\\EX01409 - Human EDTA Tranche 1 plasma W20000960M\\"
         		+ "A003 - Untargeted\\QCaNVaS\\RP-NEG\\EX01409-RP-NEG-columnChangeTimes.txt");
         AssayModes assayMode = AssayModes.RPNEG;
+        int nextColumnId = 38;
         
         addExtractionDatesAndColumnIdsToManifest(
         		completeManifestFile, 
@@ -161,7 +241,60 @@ public class MoTrPACUtils {
         		extrtactionDatesMapFile,
         		batchManifestsBaseDir,
         		columnChangeDatesFile,
-        		assayMode);
+        		assayMode,
+        		nextColumnId);
+    }
+	
+	private static void addExtractionDatesToManifestForEX01409RpPos() {
+        
+        File completeManifestFile = 
+        		new File("Y:\\DataAnalysis\\_Reports\\EX01409 - Human EDTA Tranche 1 plasma W20000960M\\"
+        				+ "A003 - Untargeted\\QCaNVaS\\RP-POS\\EX01409-RP-POS-Manifest-complete_uniqueControls.txt");
+        File commonFileListFile = new File("Y:\\DataAnalysis\\_Reports\\EX01409 - Human EDTA Tranche 1 plasma W20000960M\\"
+        		+ "A003 - Untargeted\\QCaNVaS\\RP-POS\\EX01409-RP-POS-raw-file-list.txt");
+        File extrtactionDatesMapFile = new File("Y:\\DataAnalysis\\_Reports\\EX01409 - Human EDTA Tranche 1 plasma W20000960M\\"
+        		+ "A003 - Untargeted\\QCaNVaS\\RP-POS\\EX01409-RP-POS-extractionDatesMap.txt");
+        File batchManifestsBaseDir = new File("Y:\\DataAnalysis\\_Reports\\EX01409 - Human EDTA Tranche 1 plasma W20000960M\\"
+        		+ "A003 - Untargeted\\QCaNVaS\\RP-POS\\Manifests");
+        File columnChangeDatesFile = new File("Y:\\DataAnalysis\\_Reports\\EX01409 - Human EDTA Tranche 1 plasma W20000960M\\"
+        		+ "A003 - Untargeted\\QCaNVaS\\RP-POS\\EX01409-RP-POS-columnChangeTimes.txt");
+        AssayModes assayMode = AssayModes.RPPOS;
+        int nextColumnId = 38;
+        
+        addExtractionDatesAndColumnIdsToManifest(
+        		completeManifestFile, 
+        		commonFileListFile,
+        		extrtactionDatesMapFile,
+        		batchManifestsBaseDir,
+        		columnChangeDatesFile,
+        		assayMode,
+        		nextColumnId);
+    }
+	
+	private static void addExtractionDatesToManifestForEX01409IonPNeg() {
+        
+        File completeManifestFile = 
+        		new File("Y:\\DataAnalysis\\_Reports\\EX01409 - Human EDTA Tranche 1 plasma W20000960M\\"
+        				+ "A049 - Central carbon metabolism profiling\\QCaNVaS\\EX01409-IONP-NEG-Manifest-complete_uniqueControls.txt");
+        File commonFileListFile = new File("Y:\\DataAnalysis\\_Reports\\EX01409 - Human EDTA Tranche 1 plasma W20000960M\\"
+        		+ "A049 - Central carbon metabolism profiling\\QCaNVaS\\EX01409-IONP-NEG-raw-file-list.txt");
+        File extrtactionDatesMapFile = new File("Y:\\DataAnalysis\\_Reports\\EX01409 - Human EDTA Tranche 1 plasma W20000960M\\"
+        		+ "A049 - Central carbon metabolism profiling\\QCaNVaS\\EX01409-IONP-NEG-extractionDatesMap.txt");
+        File batchManifestsBaseDir = new File("Y:\\DataAnalysis\\_Reports\\EX01409 - Human EDTA Tranche 1 plasma W20000960M\\"
+        		+ "A049 - Central carbon metabolism profiling\\QCaNVaS\\Manifests");
+        File columnChangeDatesFile = new File("Y:\\DataAnalysis\\_Reports\\EX01409 - Human EDTA Tranche 1 plasma W20000960M\\"
+        		+ "A049 - Central carbon metabolism profiling\\QCaNVaS\\EX01409-IONP-NEG-columnChangeTimes.txt");
+        AssayModes assayMode = AssayModes.IONPNEG;
+        int nextColumnId = 38;
+        
+        addExtractionDatesAndColumnIdsToManifest(
+        		completeManifestFile, 
+        		commonFileListFile,
+        		extrtactionDatesMapFile,
+        		batchManifestsBaseDir,
+        		columnChangeDatesFile,
+        		assayMode,
+        		nextColumnId);
     }
 	
 	private static void addExtractionDatesAndColumnIdsToManifest(
@@ -170,7 +303,8 @@ public class MoTrPACUtils {
 			File extrtactionDatesMapFile,
 			File batchManifestsBaseDir,
 			File columnChangeDatesFile,
-			AssayModes assayMode) {
+			AssayModes assayMode,
+			int nextColumnId) {
 
 		List<WorklistItem>worklistItems = parseCompleteManifest(completeManifestFile);
         List<String> commonFiles = new ArrayList<>();
@@ -198,7 +332,7 @@ public class MoTrPACUtils {
                         match.get().getProperty(MoTrPACRawDataManifestFields.MOTRPAC_EXTRACTION_DATE.getName()));
             }
         }
-		addColumnIdsToWorklistItems(worklistItems, columnChangeDatesFile, assayMode, 35);
+		addColumnIdsToWorklistItems(worklistItems, columnChangeDatesFile, assayMode, nextColumnId);
 		
 		List<String> lines = new ArrayList<>();		
 		List<String> line = new ArrayList<>();
@@ -212,13 +346,23 @@ public class MoTrPACUtils {
 			line.clear();
 			for (MoTrPACRawDataManifestFields field : MoTrPACRawDataManifestFields.values()) {
 				
-				if (field.equals(MoTrPACRawDataManifestFields.MOTRPAC_RAW_FILE))
-					line.add(wklItem.getDataFileName());
+				if (field.equals(MoTrPACRawDataManifestFields.MOTRPAC_RAW_FILE)) {
+					line.add(wklItem.getDataFileName() + ".zip");	//	Add .zip suffix to match raw file names in manifest
+				}
 				else if (field.equals(MoTrPACRawDataManifestFields.MOTRPAC_ACQUISITION_DATE)) {
                     
                     Date injTs = wklItem.getTimeStamp();
-                    line.add(MRC2ToolBoxConfiguration.defaultTimeStampFormat.format(injTs));
-                } else {	
+                    line.add(acquisitionDateFormat.format(injTs));
+                }
+				else if(field.equals(MoTrPACRawDataManifestFields.MOTRPAC_MS_MODE)) {
+                    
+                    String columnId = wklItem.getProperty(field.getName());
+                    if (columnId == null)
+                        columnId = "";
+                    
+                    line.add(assayMode.name());
+                }
+				else {	
 					String value = wklItem.getProperty(field.getName());
 					if (value == null)
 						value = "";

@@ -47,13 +47,13 @@ public class MFESummarizer {
 //		File mfeDir = new File("Y:\\DataAnalysis\\_Reports\\EX01526 - Human EDTA Tranche 4 plasma H20001805E\\"
 //				+ "A003 - Untargeted\\MFE\\POS\\CO300PK1000\\BATCH02");
 		
-		File rootDir = new File("Y:\\DataAnalysis\\_Reports\\EX01496 - Human EDTA Tranche 3 plasma X20001463K\\"
-				+ "A049 - Central carbon metabolism profiling\\MFE\\NEG");
-		String cefFolderMask = "CO900-Pk3000";
-		File outputFile = new File("Y:\\DataAnalysis\\_Reports\\EX01496 - Human EDTA Tranche 3 plasma X20001463K\\"
-				+ "A049 - Central carbon metabolism profiling\\MFE\\NEG\\EX01496-IONP-NEG-MFE-HC-counts.txt");
-		File mfeDir = new File("Y:\\DataAnalysis\\_Reports\\EX01526 - Human EDTA Tranche 4 plasma H20001805E\\"
-				+ "A003 - Untargeted\\MFE\\POS\\CO300PK1000\\BATCH11");
+//		File rootDir = new File("Y:\\DataAnalysis\\_Reports\\EX01496 - Human EDTA Tranche 3 plasma X20001463K\\"
+//				+ "A049 - Central carbon metabolism profiling\\MFE\\NEG");
+//		String cefFolderMask = "CO900-Pk3000";
+//		File outputFile = new File("Y:\\DataAnalysis\\_Reports\\EX01496 - Human EDTA Tranche 3 plasma X20001463K\\"
+//				+ "A049 - Central carbon metabolism profiling\\MFE\\NEG\\EX01496-IONP-NEG-MFE-HC-counts.txt");
+		
+		File mfeDir = new File("Y:\\_QUALTMP\\EX01558\\RP-POS\\BATCH03");
 		try {
 			readMFEfeatureCounts(mfeDir);
 		} catch (Exception e) {
