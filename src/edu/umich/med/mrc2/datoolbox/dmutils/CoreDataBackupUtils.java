@@ -63,17 +63,63 @@ public class CoreDataBackupUtils {
 				MRC2ToolBoxCore.configDir + "MRC2ToolBoxPrefs.txt");
 		MRC2ToolBoxConfiguration.initConfiguration();
 		try {			
-			File sourceDir = new File("K:\\DataAnalysis");
-			File destinationDir = new File("J:\\Metabolomics-BRCF\\Shared\\_Reports");
-			File batchFile = new File("E:\\DataAnalysis\\_BACKUP\\server2_to_corefs2_update_20250723.bat");
-			File unmatchedDirsList = new File("E:\\DataAnalysis\\_BACKUP\\server2_to_corefs2_update_unmatched_dirs_20250723.txt");
-			File copyLogDir = new File("F:\\DataAnalysis\\_COPY_LOGS");
-			createRoboCopyUpdateScript(
-					sourceDir, destinationDir, batchFile, unmatchedDirsList, copyLogDir);
+//			File sourceDir = new File("K:\\DataAnalysis");
+//			File destinationDir = new File("J:\\Metabolomics-BRCF\\Shared\\_Reports");
+//			File batchFile = new File("E:\\DataAnalysis\\_BACKUP\\server2_to_corefs2_update_20250723.bat");
+//			File unmatchedDirsList = new File("E:\\DataAnalysis\\_BACKUP\\server2_to_corefs2_update_unmatched_dirs_20250723.txt");
+//			File copyLogDir = new File("F:\\DataAnalysis\\_COPY_LOGS");{
+			
+//			createRoboCopyUpdateScript(
+//					sourceDir, destinationDir, batchFile, unmatchedDirsList, copyLogDir);
+			
+			//	createRoboCopyNewExperimentsScript20260519();
+			
+			File sourceFolder = new File("Z:\\Raw Data\\TM\\TM-5600_D drive backup\\2026");
+			deleteMiscLipidomicsRawData(sourceFolder);
 			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+	
+	private static void deleteMiscLipidomicsRawData(File sourceFolder) {
+		
+		List<Path> dirPathList = new ArrayList<>();
+		try {
+			dirPathList = FIOUtils.recursivelyListAllDirectoriesWithFiles(sourceFolder.toPath());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		for(Path dirPath : dirPathList) {
+			
+//			if (!dirPath.toString().contains("EX0"))
+//				continue;
+
+			List<Path> convertedFilesList = FIOUtils.findFilesByExtension(dirPath, "~idx2");
+			convertedFilesList.addAll(FIOUtils.findFilesByExtension(dirPath, "mgf"));
+			convertedFilesList.addAll(FIOUtils.findFilesByExtension(dirPath, "tsv"));
+			convertedFilesList.addAll(FIOUtils.findFilesByExtension(dirPath, "mzml"));
+			if (!convertedFilesList.isEmpty()) {
+
+				for (Path convertedFilePath : convertedFilesList) {
+					try {
+						Files.deleteIfExists(convertedFilePath);
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+			}
+		}
+	}	
+	
+	private static void createRoboCopyNewExperimentsScript20260519() {
+		
+		File sourceDir = new File("Y:\\DataAnalysis\\_Reports"); 
+		File destinationDir =	 new File("Y:\\Metabolomics-BRCF\\Shared\\_Reports");
+		File batchFile = new File("E:\\DataAnalysis\\_BACKUP\\server2_to_corefs2_new_experiments_20260519.bat");
+		createRoboCopyNewExperimentsScript(sourceDir, destinationDir, batchFile);
 	}
 	
 //	File reportsDir = new File("Y:\\DataAnalysis\\_Reports");
@@ -84,7 +130,7 @@ public class CoreDataBackupUtils {
 		
 		Path zipLogPath = Paths.get(logDir.toPath().toString(), "cefCompressionFailedLog.txt");
 		File[] expFiles = reportsDir.listFiles();
-		Map<Path,Collection<Path>>cefDirMap = new TreeMap<Path,Collection<Path>>();
+		Map<Path,Collection<Path>>cefDirMap = new TreeMap<>();
 		for(File expFile : expFiles) {
 			
 			if(!expFile.getName().startsWith("EX0"))
@@ -193,6 +239,37 @@ public class CoreDataBackupUtils {
 			exNum = Integer.parseInt(regexMatcher.group(1));
 		
 		return exNum;
+	}
+	
+	
+	//	Y:\Metabolomics-BRCF\Shared\_Reports
+	
+	private static void createRoboCopyNewExperimentsScript(File sourceDir, File destinationDir, File batchFile) {
+
+		File[]sourceDirs = sourceDir.listFiles();
+		List<String> commands = new ArrayList<>();
+		for (File source : sourceDirs) {
+			
+			if (!source.isDirectory() || !source.getName().startsWith("EX"))
+				continue;
+			
+			Path copyDestinationPath = 
+					Paths.get(destinationDir.getAbsolutePath(), source.getName());
+
+			String command = "call robocopy \"" + source.getAbsolutePath() + "\\ \" \""
+					+ copyDestinationPath.toString() + " \" /mir /mt:16 /tbd /r:1 /w:3 /fft /np";
+			commands.add(command);
+		}
+		try {
+			Files.write(
+					batchFile.toPath(), 
+					commands, 
+					StandardCharsets.UTF_8, 
+					StandardOpenOption.CREATE,
+					StandardOpenOption.TRUNCATE_EXISTING);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	private static void createRoboCopyScript() {

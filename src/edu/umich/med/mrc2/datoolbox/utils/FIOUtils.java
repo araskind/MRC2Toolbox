@@ -226,6 +226,33 @@ public class FIOUtils {
 		return result;
 	}
 
+	public static List<Path> recursivelyListAllDirectories(Path root) {
+		if (!Files.isDirectory(root)) {
+			throw new IllegalArgumentException("Path must be a directory!");
+		}
+		try (Stream<Path> walk = Files.walk(root)) {
+			return walk.filter(Files::isDirectory).collect(Collectors.toList());
+		} catch (IOException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
+	public static List<Path> recursivelyListAllDirectoriesWithFiles(Path root) throws IOException {
+	    try (Stream<Path> walk = Files.walk(root)) {
+	        return walk.filter(Files::isDirectory)
+	            .filter(dir -> {
+	                try (Stream<Path> children = Files.list(dir)) {
+	                    return children.anyMatch(p -> !Files.isDirectory(p));
+	                } catch (IOException e) {
+	                    return false;
+	                }
+	            })
+	            .collect(Collectors.toList());
+	    }
+	}
+
+
 //	try (Stream<Path> walkStream = Files.walk(Paths.get("your search directory"))) {
 //	    walkStream.filter(p -> p.toFile().isFile()).forEach(f -> {
 //	        if (f.toString().endsWith("file to be searched")) {

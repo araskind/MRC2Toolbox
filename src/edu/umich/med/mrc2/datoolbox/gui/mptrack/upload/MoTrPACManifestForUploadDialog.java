@@ -22,6 +22,7 @@
 package edu.umich.med.mrc2.datoolbox.gui.mptrack.upload;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
@@ -33,9 +34,11 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.prefs.Preferences;
 
+import javax.swing.Box;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
@@ -51,9 +54,6 @@ import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.mp.CreateUploadManifestTask;
-import javax.swing.JCheckBox;
-import java.awt.Component;
-import javax.swing.Box;
 
 public class MoTrPACManifestForUploadDialog extends JDialog implements ActionListener, BackedByPreferences {
 

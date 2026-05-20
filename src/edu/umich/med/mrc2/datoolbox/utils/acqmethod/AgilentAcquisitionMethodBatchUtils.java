@@ -175,12 +175,12 @@ public class AgilentAcquisitionMethodBatchUtils {
 	 * 
 	 * @param methodsFolder
 	 */
-	public static void extractEmbededXmlFromAcqMethodReport(File methodsFolder) {
+	public static void extractEmbededXmlElementsFromMultipleAcqMethodReports(File methodsFolder) {
 		
 		Path methodReportsFolder = Paths.get(methodsFolder.getAbsolutePath(), "MethodReports");
 		String rcDevicesDir = "RCDevicesXml";
 		String scicDevicesDir = "SCICDevicesXml";
-		ArrayList<String>log = new ArrayList<String>();
+		ArrayList<String>log = new ArrayList<>();
 		List<Path> methodReportsList = FIOUtils.findFilesByExtension(methodReportsFolder, "xml");
 		for(Path mrPath : methodReportsList) {
 			
@@ -247,6 +247,32 @@ public class AgilentAcquisitionMethodBatchUtils {
 				e.printStackTrace();
 			}
 		}		
+	}
+	
+	public static void extractRCDevicesXmlFromAcqMethodReport(
+			File methodReport, 
+			File rcDevicesXmlOutput) {
+
+		Document methodDocument = XmlUtils.readXmlFile(methodReport);
+		Namespace ns = methodDocument.getRootElement().getNamespace();
+		Element mr = methodDocument.getRootElement().getChild("MethodReport", ns);
+		if (mr == null) {
+			System.err.println("No MethodReport element in " + methodReport.getName());
+			return;
+		}
+		Element rcDevicesXmlElement = mr.getChild("RCDevicesXml", ns);
+		if (rcDevicesXmlElement == null || rcDevicesXmlElement.getText() == null
+				|| rcDevicesXmlElement.getText().isEmpty()) {
+			System.err.println("No RCDevicesXml element in " + methodReport.getName());
+			return;
+		}
+		String rcDevicesXml = StringEscapeUtils.unescapeXml(rcDevicesXmlElement.getText());
+		try {
+			Files.writeString(rcDevicesXmlOutput.toPath(), rcDevicesXml, StandardCharsets.UTF_8,
+					StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}	
 	}
 	
 	/**
@@ -627,12 +653,11 @@ public class AgilentAcquisitionMethodBatchUtils {
 		
 		IOFileFilter dotMfilter = 
 				FileFilterUtils.makeDirectoryOnly(new RegexFileFilter(".+\\.[mM]$"));
-		Collection<File> methodFolders = FileUtils.listFilesAndDirs(
+		
+		return FileUtils.listFilesAndDirs(
 				dirToScan,
 				DirectoryFileFilter.DIRECTORY,
 				dotMfilter);
-		
-		return methodFolders;
 	}
 	
 	/**
@@ -659,8 +684,7 @@ public class AgilentAcquisitionMethodBatchUtils {
 	public static Map<String,MassAnalyzerType> getMethodMassAnalyzerMap(File massAnalyzerMapFile) {
 		
 		Map<String,String>mmaMap = getMethodPropertyMap(massAnalyzerMapFile);
-		Map<String,MassAnalyzerType> methodMassAnalyzerMap = 
-				new TreeMap<String,MassAnalyzerType>();
+		Map<String,MassAnalyzerType> methodMassAnalyzerMap = new TreeMap<>();
 		for(Entry<String, String> pair : mmaMap.entrySet()) {
 
 			MassAnalyzerType massAnalyzer = 
@@ -971,7 +995,7 @@ public class AgilentAcquisitionMethodBatchUtils {
 	
 	public static void extractGradientsFromMethodFiles(File tmpFolder, File logFile){
 		
-		Collection<String>logData = new ArrayList<String>();
+		Collection<String>logData = new ArrayList<>();
 		Collection<DataAcquisitionMethod>methodsToUpdate = 
 				getMethodsWithMissingGradientData();
 

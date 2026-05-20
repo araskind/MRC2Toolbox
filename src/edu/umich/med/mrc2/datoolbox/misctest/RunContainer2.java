@@ -103,9 +103,11 @@ import edu.umich.med.mrc2.datoolbox.utils.ChemInfoUtils;
 import edu.umich.med.mrc2.datoolbox.utils.DelimitedTextParser;
 import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
 import edu.umich.med.mrc2.datoolbox.utils.MSMSClusteringUtils;
+import edu.umich.med.mrc2.datoolbox.utils.MsImportUtils;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 import edu.umich.med.mrc2.datoolbox.utils.PubChemUtils;
 import edu.umich.med.mrc2.datoolbox.utils.RefMetUtils;
+import edu.umich.med.mrc2.datoolbox.utils.acqmethod.AgilentAcquisitionMethodBatchUtils;
 import edu.umich.med.mrc2.datoolbox.utils.acqmethod.AgilentAcquisitionMethodParser;
 import edu.umich.med.mrc2.datoolbox.utils.acqmethod.ChromatographicGradientUtils;
 import edu.umich.med.mrc2.datoolbox.utils.acqmethod.ThermoAcquisitionMethodParser;
@@ -134,7 +136,7 @@ public class RunContainer2 {
 		MRC2ToolBoxConfiguration.initConfiguration();
 
 		try {
-			generateMolPicture();
+			extractAcqMethod();
 			//	applyClassSmilesFix();
 			//	updateRefMetWithSmiles();
 			//	downloadMethodsToExtractGradients();
@@ -143,6 +145,26 @@ public class RunContainer2 {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}		
+	}
+	
+	private static void extractAcqMethod() {
+
+		File acqXml = new File(
+				"S:\\DataAnalysis\\EX01579\\A049 - Central carbon metabolism profiling\\"
+				+ "Documents\\4Workbench\\Raw data\\20260227-EX01579-A049-IN0030-S00086177-WT1-N.d\\AcqData\\AcqMethod.xml");
+		File output = new File("S:\\DataAnalysis\\EX01579\\A049 - Central carbon metabolism profiling\\Documents\\4Workbench\\RCDevices.xml");
+		AgilentAcquisitionMethodBatchUtils.extractRCDevicesXmlFromAcqMethodReport(acqXml, output);
+	}
+	
+	private static void testAgilentMSMSImport() {
+
+		File msmsFile = new File("E:\\Development\\CF\\workspace2026\\20260414-EX01589-A003-IN0028-CS00000MP-08-IDDA_ce10_2-N.XML");
+		try {
+			MsImportUtils.parseAgilentMsMsExportFile(msmsFile);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	public static IAtomContainer generateMolPicture() throws CDKException {

@@ -28,15 +28,14 @@ import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.FilePreferencesFactory;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 
-public class EX01355andEX01572RQCgenerator2 {
+public class EX01572andEX01573RQCgenerator3 {
 	
 	private static final String experimentId2B = "EX01572-1573";
 	private static final String experimentId = "1573";
 
 	private static final File xlQCfile = new File(
 			"Y:\\DataAnalysis\\_Reports\\EX01573 - Human Tranche 3 Muscle Z20001532M\\EX01572-1573-QC-summary-tables.xlsm");
-	private static final File xlHighCutoffQCfile = new File(
-			"Y:\\DataAnalysis\\_Reports\\EX01573 - Human Tranche 3 Muscle Z20001532M\\EX01572-1573-QC-HC-summary-tables.xlsm");
+	private static final File xlHighCutoffQCfile = new File("");
 	
 	public static void main(String[] args) {
 
@@ -47,7 +46,7 @@ public class EX01355andEX01572RQCgenerator2 {
 		MRC2ToolBoxConfiguration.initConfiguration();
 
 		try {
-			generateSummaryQcScriptForEX01572and1573rpneg(false);
+			generateSummaryQcScriptForEX01572and1573rppos(false);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -58,50 +57,6 @@ public class EX01355andEX01572RQCgenerator2 {
 //			// TODO Auto-generated catch block
 //			e.printStackTrace();
 //		}
-	}
-	
-	private static void generateSummaryQcScriptForEX01572and1573ionpneg(boolean highCutoffData) {		
-		
-		String assayType = "IONP-NEG";
-		String assayType4R = "ionpneg";
-		File xlQc = xlQCfile;
-		File rWorkingDir = new File("Y:\\DataAnalysis\\_Reports\\EX01573 - Human Tranche 3 Muscle Z20001532M\\"
-				+ "A049 - Central carbon metabolism profiling\\Documents\\CO300-Pk1000\\All\\QC");	
-		if(highCutoffData) {
-			rWorkingDir = new File("Y:\\DataAnalysis\\_Reports\\EX01573 - Human Tranche 3 Muscle Z20001532M\\"
-				+ "A049 - Central carbon metabolism profiling\\Documents\\CO900-Pk3000\\All\\QC");
-			xlQc = xlHighCutoffQCfile;
-		}	
-		File inputMap = Paths.get(rWorkingDir.getAbsolutePath(), "EX01572-1573_IONP-NEG-SummaryQC-inputMap.txt").toFile();
-		RQCScriptGenerator.generateSummaryQcScript(
-				experimentId2B,
-				rWorkingDir,
-				xlQc,
-				inputMap,
-				assayType,
-				assayType4R);
-	}
-	
-	private static void generateSummaryQcScriptForEX01573ionpneg(boolean highCutoffData) {		
-		
-		String assayType = "IONP-NEG";
-		String assayType4R = "ionpneg";
-		File xlQc = xlQCfile;
-		File rWorkingDir = new File("Y:\\DataAnalysis\\_Reports\\EX01573 - Human Tranche 3 Muscle Z20001532M\\"
-				+ "A049 - Central carbon metabolism profiling\\Documents\\CO300-Pk1000\\All\\QC");	
-		if(highCutoffData) {
-			rWorkingDir = new File("Y:\\DataAnalysis\\_Reports\\EX01573 - Human Tranche 3 Muscle Z20001532M\\"
-				+ "A049 - Central carbon metabolism profiling\\Documents\\CO900-Pk3000\\All\\QC");
-			xlQc = xlHighCutoffQCfile;
-		}		
-		File inputMap = Paths.get(rWorkingDir.getAbsolutePath(), "EX1573_IONP-NEG-SummaryQC-inputMap.txt").toFile();
-		RQCScriptGenerator.generateSummaryQcScript(
-				experimentId,
-				rWorkingDir,
-				xlQc,
-				inputMap,
-				assayType,
-				assayType4R);
 	}
 			
 	private static void generateSummaryQcScriptForEX01572and1573rpneg(boolean highCutoffData) {
@@ -115,7 +70,7 @@ public class EX01355andEX01572RQCgenerator2 {
 			rWorkingDir = new File("Y:\\DataAnalysis\\_Reports\\EX01573 - Human Tranche 3 Muscle Z20001532M\\"
 					+ "A003 - Untargeted\\Documents\\NEG\\CO900-Pk3000\\All\\QC");
 			xlQc = xlHighCutoffQCfile;
-		}		
+		}	
 		File inputMap = Paths.get(rWorkingDir.getAbsolutePath(), "EX01572-1573_RP-NEG-SummaryQC-inputMap.txt").toFile();
 		RQCScriptGenerator.generateSummaryQcScript(
 				experimentId2B,
@@ -131,14 +86,14 @@ public class EX01355andEX01572RQCgenerator2 {
 		String assayType = "RP-NEG";
 		String assayType4R = "rpneg";
 		File xlQc = xlQCfile;
-		File rWorkingDir = new File("Y:\\DataAnalysis\\_Reports\\EX01573 - Human Tranche 3 Muscle Z20001532M\\"
+		File rWorkingDir = new File("Y:\\DataAnalysis\\_Reports\\EX01572 - Human Tranche 2 Muscle G20001069S\\"
 				+ "A003 - Untargeted\\Documents\\NEG\\CO300-Pk1000\\All\\QC");	
 		if(highCutoffData) {
-			rWorkingDir = new File("Y:\\DataAnalysis\\_Reports\\EX01573 - Human Tranche 3 Muscle Z20001532M\\"
+			rWorkingDir = new File("Y:\\DataAnalysis\\_Reports\\EX01572 - Human Tranche 2 Muscle G20001069S\\"
 					+ "A003 - Untargeted\\Documents\\NEG\\CO900-Pk3000\\All\\QC");
 			xlQc = xlHighCutoffQCfile;
 		}	
-		File inputMap = Paths.get(rWorkingDir.getAbsolutePath(), "EX01572-1573_RP-NEG-SummaryQC-inputMap.txt").toFile();
+		File inputMap = Paths.get(rWorkingDir.getAbsolutePath(), "EX01573_RP-NEG-SummaryQC-inputMap.txt").toFile();
 		RQCScriptGenerator.generateSummaryQcScript(
 				experimentId,
 				rWorkingDir,
@@ -178,11 +133,55 @@ public class EX01355andEX01572RQCgenerator2 {
 		File rWorkingDir = new File("Y:\\DataAnalysis\\_Reports\\EX01573 - Human Tranche 3 Muscle Z20001532M\\"
 				+ "A003 - Untargeted\\Documents\\POS\\CO300-Pk1000\\All\\QC");	
 		if(highCutoffData) {
-			rWorkingDir = new File("Y:\\DataAnalysis\\_Reports\\"
-					+ "EX01573 - Human Tranche 3 Muscle Z20001532M\\A003 - Untargeted\\Documents\\POS\\CO900-Pk3000\\All\\QC");
+			rWorkingDir = new File("Y:\\DataAnalysis\\_Reports\\EX01573 - Human Tranche 3 Muscle Z20001532M\\"
+					+ "A003 - Untargeted\\Documents\\POS\\CO900-Pk3000\\All\\QC");
 			xlQc = xlHighCutoffQCfile;
 		}		
-		File inputMap = Paths.get(rWorkingDir.getAbsolutePath(), "EX1573_RP-POS-SummaryQC-inputMap.txt").toFile();
+		File inputMap = Paths.get(rWorkingDir.getAbsolutePath(), "EX01573_RP-POS-SummaryQC-inputMap.txt").toFile();
+		RQCScriptGenerator.generateSummaryQcScript(
+				experimentId,
+				rWorkingDir,
+				xlQc,
+				inputMap,
+				assayType,
+				assayType4R);
+	}
+		
+	private static void generateSummaryQcScriptForEX01572and1573ionpneg(boolean highCutoffData) {		
+		
+		String assayType = "IONP-NEG";
+		String assayType4R = "ionpneg";
+		File xlQc = xlQCfile;
+		File rWorkingDir = new File("Y:\\DataAnalysis\\_Reports\\EX01573 - Human Tranche 3 Muscle Z20001532M\\"
+				+ "A049 - Central carbon metabolism profiling\\Documents\\CO300-Pk1000\\All\\QC");	
+		if(highCutoffData) {
+			rWorkingDir = new File("Y:\\DataAnalysis\\_Reports\\EX01573 - Human Tranche 3 Muscle Z20001532M\\"
+					+ "A049 - Central carbon metabolism profiling\\Documents\\CO900-Pk3000\\All\\QC");
+			xlQc = xlHighCutoffQCfile;
+		}	
+		File inputMap = Paths.get(rWorkingDir.getAbsolutePath(), "EX01572-1573_IONP-NEG-SummaryQC-inputMap.txt").toFile();
+		RQCScriptGenerator.generateSummaryQcScript(
+				experimentId2B,
+				rWorkingDir,
+				xlQc,
+				inputMap,
+				assayType,
+				assayType4R);
+	}
+	
+	private static void generateSummaryQcScriptForEX01573ionpneg(boolean highCutoffData) {		
+		
+		String assayType = "IONP-NEG";
+		String assayType4R = "ionpneg";
+		File xlQc = xlQCfile;
+		File rWorkingDir = new File("Y:\\DataAnalysis\\_Reports\\EX01573 - Human Tranche 3 Muscle Z20001532M\\"
+				+ "A049 - Central carbon metabolism profiling\\Documents\\CO300-Pk1000\\All\\QC");
+		if(highCutoffData) {
+			rWorkingDir = new File("Y:\\DataAnalysis\\_Reports\\EX01573 - Human Tranche 3 Muscle Z20001532M\\"
+					+ "A049 - Central carbon metabolism profiling\\Documents\\CO900-Pk3000\\All\\QC");
+			xlQc = xlHighCutoffQCfile;
+		}		
+		File inputMap = Paths.get(rWorkingDir.getAbsolutePath(), "EX01573_IONP-NEG-SummaryQC-inputMap.txt").toFile();
 		RQCScriptGenerator.generateSummaryQcScript(
 				experimentId,
 				rWorkingDir,

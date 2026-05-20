@@ -29,11 +29,6 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpression;
-import javax.xml.xpath.XPathFactory;
-
 import org.apache.commons.lang.StringUtils;
 import org.jdom2.Document;
 import org.jdom2.Element;
@@ -55,15 +50,6 @@ public class MsImportUtils {
 	@SuppressWarnings("unchecked")
 	public static TandemMassSpectrum parseAgilentMsMsExportFile(File xmInput) throws Exception {
 
-		TandemMassSpectrum msms = null;
-		Document msmsDocument = XmlUtils.readXmlFile(xmInput);
-		XPathExpression expr = null;
-		List<Element>spectraNodes;
-		XPathFactory factory = XPathFactory.newInstance();
-		XPath xpath = factory.newXPath();
-		expr = xpath.compile("//Report/SpecRawData");
-		spectraNodes = (List<Element>) expr.evaluate(msmsDocument, XPathConstants.NODESET);
-
 		Pattern fragVoltagePattern = Pattern.compile("Frag=(\\d+\\.\\d+)V");
 		Pattern cidPattern = Pattern.compile("CID@(\\d+\\.\\d+)");
 		Pattern parentIonPattern = Pattern.compile("\\((\\d+\\.\\d+)\\[z=\\d\\].+\\)");
@@ -71,57 +57,46 @@ public class MsImportUtils {
 		double fragVoltage = 0.0d;
 		double cid = 0.0d;
 		double parentMass = 0.0d;
+		
+		TandemMassSpectrum msms = null;
+		Document msmsDocument = XmlUtils.readXmlFile(xmInput);
+				
+		String title = msmsDocument.getRootElement().getChild("SpecRawData").getChild("Title").getText();
+		if (title.contains("Product Ion")) {
 
-		for (int i = 0; i < spectraNodes.size(); i++) {
+			regexMatcher = fragVoltagePattern.matcher(title);
+			if (regexMatcher.find())
+				fragVoltage = Double.parseDouble(regexMatcher.group(1));
 
-			//	Find first MSMS spectrum
-			Element cpdElement = spectraNodes.get(i);		
-			String title = cpdElement.getChild("Title").getText();
+			regexMatcher = cidPattern.matcher(title);
+			if (regexMatcher.find())
+				cid = Double.parseDouble(regexMatcher.group(1));
+
+			regexMatcher = parentIonPattern.matcher(title);
+			if (regexMatcher.find())
+				parentMass = Double.parseDouble(regexMatcher.group(1));
 			
-			//	String title = cpdElement.getElementsByTagName("Title").item(0).getFirstChild().getNodeValue();
+			Polarity pol = Polarity.Positive;
+			if (title.trim().startsWith("-"))
+				pol = Polarity.Negative;
 			
-			if(title.contains("Product Ion")) {
+			MsPoint parent = new MsPoint(parentMass, 1000.0d);
+			msms = new TandemMassSpectrum(2, parent, pol);
+			msms.setFragmenterVoltage(fragVoltage);
+			msms.setCidLevel(cid);
+		}	
+		if (msms != null) {
+			
+			List<Element> peaks = msmsDocument.getRootElement().getChild("SpecRawData").getChildren("d");
+			ArrayList<MsPoint> points = new ArrayList<>();
+			for (int i = 0; i < peaks.size(); i++) {
 
-				Polarity polarity = null;
-				if(title.startsWith("+"))
-					polarity = Polarity.Positive;
-
-				if(title.startsWith("-"))
-					polarity = Polarity.Negative;
-
-				if(polarity == null)
-					throw new Exception("MSMS polarity not defined");
-
-				regexMatcher = fragVoltagePattern.matcher(title);
-				if (regexMatcher.find())
-					fragVoltage = Double.parseDouble(regexMatcher.group(1));
-
-				regexMatcher = cidPattern.matcher(title);
-				if (regexMatcher.find())
-					cid = Double.parseDouble(regexMatcher.group(1));
-
-				regexMatcher = parentIonPattern.matcher(title);
-				if (regexMatcher.find())
-					parentMass = Double.parseDouble(regexMatcher.group(1));
-
-				MsPoint parent  = new MsPoint(parentMass, 1000.0d);
-				msms = new TandemMassSpectrum(2, parent, polarity);
-				msms.setFragmenterVoltage(fragVoltage);
-				msms.setCidLevel(cid);
-
-				// Parse spectrum
-				ArrayList<MsPoint>points = new ArrayList<MsPoint>();
-				List<Element> peaks = cpdElement.getChildren("d");  //.getElementsByTagName("d");
-
-				for (int j = 0; j < peaks.size(); j++) {
-
-					Element peakElement = (Element) peaks.get(j);
-					double mz = peakElement.getAttribute("x").getDoubleValue(); //	Double.parseDouble();
-					double intensity = peakElement.getAttribute("y").getDoubleValue(); //	Double.parseDouble(peakElement.getAttribute("y"));
-					points.add(new MsPoint(mz, intensity));
-				}
-				msms.setSpectrum(points);
+				Element peakElement = (Element) peaks.get(i);
+				double mz = Double.parseDouble(peakElement.getAttributeValue("x"));
+				double intensity = Double.parseDouble(peakElement.getAttributeValue("y"));
+				points.add(new MsPoint(mz, intensity));
 			}
+			msms.setSpectrum(points);
 		}
 		return msms;
 	}
