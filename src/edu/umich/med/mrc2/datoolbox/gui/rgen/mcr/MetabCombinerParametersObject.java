@@ -48,7 +48,8 @@ public class MetabCombinerParametersObject implements XmlStorable{
 	private boolean useExistingAlignment;
 	private Set<RMultibatchAnalysisInputObject>metabCombinerFileInputObjectSet;
 	private Range alignmentRTRange;
-	private double maxMissingPercent;
+	private double maxPercentMissingInDriftCorrSamples;
+	private double maxPercentMissingInRegularSamples;
 	private PeakAbundanceMeasure peakAbundanceMeasure;
 	private double binGap;
 	private boolean mcDataSetRtOrderFlag;
@@ -72,6 +73,9 @@ public class MetabCombinerParametersObject implements XmlStorable{
 	private double  maxRTerrorForAlignedFeatures;
 	private boolean resolveAlignmentConflictsInOutput;
 	private boolean rtOrderFlagInOutput;
+	private boolean imputeMissingValuesInAlignedData;
+	private File designFile;
+	private Set<String> factorsForImputation;
 
 	public MetabCombinerParametersObject() {
 		super();
@@ -105,12 +109,12 @@ public class MetabCombinerParametersObject implements XmlStorable{
 		this.alignmentRTRange = alignmentRTRange;
 	}
 
-	public double getMaxMissingPercent() {
-		return maxMissingPercent;
+	public double getmaxPercentMissingInDriftCorrSamples() {
+		return maxPercentMissingInDriftCorrSamples;
 	}
 
-	public void setMaxMissingPercent(double maxMissingPercent) {
-		this.maxMissingPercent = maxMissingPercent;
+	public void setmaxPercentMissingInDriftCorrSamples(double maxPercentMissingInDriftCorrSamples) {
+		this.maxPercentMissingInDriftCorrSamples = maxPercentMissingInDriftCorrSamples;
 	}
 
 	public PeakAbundanceMeasure getPeakAbundanceMeasure() {
@@ -296,6 +300,55 @@ public class MetabCombinerParametersObject implements XmlStorable{
 	public void setRtOrderFlagInOutput(boolean rtOrderFlagInOutput) {
 		this.rtOrderFlagInOutput = rtOrderFlagInOutput;
 	}
+
+	public boolean isUseExistingAlignment() {
+		return useExistingAlignment;
+	}
+
+	public void setUseExistingAlignment(boolean useExistingAlignment) {
+		this.useExistingAlignment = useExistingAlignment;
+	}
+
+	public File getProjectDirectory() {
+		return projectDirectory;
+	}
+
+	public void setProjectDirectory(File projectDirectory) {
+		this.projectDirectory = projectDirectory;
+	}
+
+	public boolean isImputeMissingValuesInAlignedData() {
+		return imputeMissingValuesInAlignedData;
+	}
+
+	public void setImputeMissingValuesInAlignedData(boolean imputeMissingValuesInAlignedData) {
+		this.imputeMissingValuesInAlignedData = imputeMissingValuesInAlignedData;
+	}
+
+	public File getDesignFile() {
+		return designFile;
+	}
+
+	public void setDesignFile(File designFile) {
+		this.designFile = designFile;
+	}
+
+	public Set<String> getFactorsForImputation() {
+		return factorsForImputation;
+	}
+
+	public void setFactorsForImputation(Set<String> factorsForImputation) {
+		this.factorsForImputation = factorsForImputation;
+	}
+
+	public double getMaxPercentMissingInRegularSamples() {
+		return maxPercentMissingInRegularSamples;
+	}
+
+	public void setMaxPercentMissingInRegularSamples(double maxPercentMissingInRegularSamples) {
+		this.maxPercentMissingInRegularSamples = maxPercentMissingInRegularSamples;
+	}
+	
 	
 	public MetabCombinerParametersObject(Element metabCombinerParametersElement) {
 		super();
@@ -335,8 +388,27 @@ public class MetabCombinerParametersObject implements XmlStorable{
 		} catch (DataConversionException e) {
 			e.printStackTrace();
 		}
-		maxMissingPercent = NumberUtils.toDouble(metabCombinerParametersElement.getAttributeValue(
-				MetabCombinerAlignmentSettingsFields.maxMissingPercent.name()));		
+		if(metabCombinerParametersElement.getAttribute(MetabCombinerAlignmentSettingsFields.maxMissingPercent.name()) != null) {
+			
+			maxPercentMissingInDriftCorrSamples = NumberUtils.toDouble(metabCombinerParametersElement.getAttributeValue(
+					MetabCombinerAlignmentSettingsFields.maxMissingPercent.name()));	
+		}
+		else {				
+			maxPercentMissingInDriftCorrSamples = NumberUtils.toDouble(metabCombinerParametersElement.getAttributeValue(
+					MetabCombinerAlignmentSettingsFields.maxPercentMissingInDriftCorrSamples.name()));				
+		}
+		if(metabCombinerParametersElement.getAttribute(MetabCombinerAlignmentSettingsFields.maxPercentMissingInRegularSamples.name()) != null) {
+			
+			maxPercentMissingInRegularSamples = NumberUtils.toDouble(metabCombinerParametersElement.getAttributeValue(
+					MetabCombinerAlignmentSettingsFields.maxPercentMissingInRegularSamples.name()));
+		}
+		else {
+			maxPercentMissingInRegularSamples = 50.0d;
+		}
+		
+//		maxPercentMissingInDriftCorrSamples 
+//		maxPercentMissingInRegularSamples
+		
 		peakAbundanceMeasure = PeakAbundanceMeasure.valueOf(
 				metabCombinerParametersElement.getAttributeValue(
 						MetabCombinerAlignmentSettingsFields.peakAbundanceMeasure.name()));
@@ -409,6 +481,30 @@ public class MetabCombinerParametersObject implements XmlStorable{
 		} catch (DataConversionException e) {
 			e.printStackTrace();
 		}
+		try {
+			imputeMissingValuesInAlignedData = metabCombinerParametersElement.getAttribute(
+					MetabCombinerAlignmentSettingsFields.imputeMissingValuesInAlignedData.name()).getBooleanValue();
+		} catch (DataConversionException e) {
+			e.printStackTrace();
+		}
+		Element designFileElement = metabCombinerParametersElement
+				.getChild(MetabCombinerAlignmentSettingsFields.designFile.name());
+		if (designFileElement != null && !designFileElement.getText().isEmpty()) {
+			designFile = new File(designFileElement.getText());
+		}
+		Element factorsForImputationElement = metabCombinerParametersElement
+				.getChild(MetabCombinerAlignmentSettingsFields.factorsForImputation.name());
+		if (factorsForImputationElement != null) {
+
+			factorsForImputation = new TreeSet<>();
+			List<Element> factorElements = factorsForImputationElement
+					.getChildren(MetabCombinerAlignmentSettingsFields.impFactor.name());
+			for (Element factorElement : factorElements) {
+				if (!factorElement.getText().isEmpty()) {
+					factorsForImputation.add(factorElement.getText());
+				}
+			}
+		}
 	}
 
 	@Override
@@ -444,8 +540,11 @@ public class MetabCombinerParametersObject implements XmlStorable{
 					alignmentRTRange.getStorableString());
 		}
 		metabCombinerParametersElement.setAttribute(
-				MetabCombinerAlignmentSettingsFields.maxMissingPercent.name(), 
-				MRC2ToolBoxConfiguration.getPpmFormat().format(maxMissingPercent));
+				MetabCombinerAlignmentSettingsFields.maxPercentMissingInDriftCorrSamples.name(), 
+				MRC2ToolBoxConfiguration.getPpmFormat().format(maxPercentMissingInDriftCorrSamples));		
+		metabCombinerParametersElement.setAttribute(
+				MetabCombinerAlignmentSettingsFields.maxPercentMissingInRegularSamples.name(), 
+				MRC2ToolBoxConfiguration.getPpmFormat().format(maxPercentMissingInRegularSamples));
 		metabCombinerParametersElement.setAttribute(
 				MetabCombinerAlignmentSettingsFields.peakAbundanceMeasure.name(), 
 				peakAbundanceMeasure.name());
@@ -515,23 +614,29 @@ public class MetabCombinerParametersObject implements XmlStorable{
 		metabCombinerParametersElement.setAttribute(
 				MetabCombinerAlignmentSettingsFields.rtOrderFlagInOutput.name(), 
 				Boolean.toString(rtOrderFlagInOutput));	
+		metabCombinerParametersElement.setAttribute(
+				MetabCombinerAlignmentSettingsFields.imputeMissingValuesInAlignedData.name(), 
+				Boolean.toString(imputeMissingValuesInAlignedData));
 		
+		if (imputeMissingValuesInAlignedData && designFile != null) {
+			
+			Element designFileElement = 
+					new Element(MetabCombinerAlignmentSettingsFields.designFile.name());
+			designFileElement.setText(designFile.getAbsolutePath());
+			metabCombinerParametersElement.addContent(designFileElement);
+			
+			if (factorsForImputation != null && !factorsForImputation.isEmpty()) {
+
+				Element factorsForImputationElement = new Element(
+						MetabCombinerAlignmentSettingsFields.factorsForImputation.name());
+				for (String factor : factorsForImputation) {
+					Element factorElement = new Element(MetabCombinerAlignmentSettingsFields.impFactor.name());
+					factorElement.setText(factor);
+					factorsForImputationElement.addContent(factorElement);
+				}
+				metabCombinerParametersElement.addContent(factorsForImputationElement);
+			}
+		}
 		return metabCombinerParametersElement;
-	}
-
-	public boolean isUseExistingAlignment() {
-		return useExistingAlignment;
-	}
-
-	public void setUseExistingAlignment(boolean useExistingAlignment) {
-		this.useExistingAlignment = useExistingAlignment;
-	}
-
-	public File getProjectDirectory() {
-		return projectDirectory;
-	}
-
-	public void setProjectDirectory(File projectDirectory) {
-		this.projectDirectory = projectDirectory;
 	}
 }

@@ -473,7 +473,7 @@ public class RQCScriptGenerator {
 		rscriptParts.add("# " + experimentId + " " + assayType + " summary QC ####\n");
 		rscriptParts.add("setwd(\"" + workDirForR + "\")\n");
 		rscriptParts.add("library(ggplot2)");
-		rscriptParts.add("library(reshape2)");
+		rscriptParts.add("library(data.table)");
 		rscriptParts.add("library(dplyr)");
 		rscriptParts.add("library(readxl)\n");	
 		rscriptParts.add("## Feature count and total area summaries ####\n");
@@ -498,9 +498,10 @@ public class RQCScriptGenerator {
 		rscriptParts.add("\n## Summary plots ####\n");
 		
 		String masterName = assayType4R + ".QC.summary";		
-		rscriptParts.add(masterName + " <- rbind(" + StringUtils.join(qcSummaryNames, ",") + ")");
+		rscriptParts.add(masterName + " <- bind_rows(" + StringUtils.join(qcSummaryNames, ",") + ")");
 		rscriptParts.add(masterName + "$sample_type <- as.factor(" + masterName + "$sample_type)");
 		rscriptParts.add(masterName + "$batch <- as.factor(" + masterName + "$batch)");
+		rscriptParts.add("setDT(" + masterName + ")");
 		rscriptParts.add(masterName +".melt <- melt(" + masterName + 
 				", id.vars = c(\"sample_type\",\"batch\"), measure.vars = c(\"Observations\",\"Total area\"))");		
 		String pivotName = assayType4R + ".QC.pivot";

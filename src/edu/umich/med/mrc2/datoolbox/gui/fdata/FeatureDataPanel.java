@@ -2440,6 +2440,7 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 				0.0d,
 				DataExportFields.DATA_FILE,
 				false,
+				true,
 				false);
 		det.setMsFeatureSet4export(activeMsFeatureSet.getFeatures());
 		det.addTaskListener(this);

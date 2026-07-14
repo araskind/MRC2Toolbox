@@ -41,14 +41,14 @@ import org.apache.commons.lang.StringUtils;
 import org.jdom2.Document;
 import org.jdom2.Element;
 
-import edu.umich.med.mrc2.datoolbox.gui.rgen.TemplareRbasedProjectGenerator;
+import edu.umich.med.mrc2.datoolbox.gui.rgen.TemplateRbasedProjectGenerator;
 import edu.umich.med.mrc2.datoolbox.gui.rgen.mcr.MetabCombinerParametersObject;
 import edu.umich.med.mrc2.datoolbox.gui.rgen.mcr.RMultibatchAnalysisInputObject;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
 import edu.umich.med.mrc2.datoolbox.utils.XmlUtils;
 
-public class MetabCombinerAlignmentScriptGenerator extends TemplareRbasedProjectGenerator {
+public class MetabCombinerAlignmentScriptGenerator extends TemplateRbasedProjectGenerator {
 	
 	public static final String MC_ALIGNMENT_PROJECT_BASE_NAME = "MetabCombinerMultyBatchAlignment-";
 	public static final String SCRIPT_FILE_PREFIX = "MetabCombinerMultyBatchAlignmentScript_";
@@ -121,6 +121,9 @@ public class MetabCombinerAlignmentScriptGenerator extends TemplareRbasedProject
 		if(parametersObject.getMaxMissingBatchCount() > 0)
 			createFuzzyMatchingBlock();
 		
+		if(parametersObject.isImputeMissingValuesInAlignedData())
+			createImputationBlock();
+		
 		writeScriptToFile();
 		
 		saveAlignmentParameters();
@@ -178,19 +181,42 @@ public class MetabCombinerAlignmentScriptGenerator extends TemplareRbasedProject
 			rscriptParts.add(dataObject + " <- read.delim(r'(" 
 					+ mcio.getDataFile(SummaryInputColumns.PEAK_AREAS).getAbsolutePath() 
 					+ ")', check.names=FALSE)");
-
+			//    Remove rows with missing RT values
+			rscriptParts.add(dataObject + " <- " + dataObject + "[!(" + dataObject + "$rt == \"NaN\"),]");
+			
+			//	Filter data based on missingness in drift correction and regular samples
+			String sampleDataObject = dataObject + ".samples";			
+			rscriptParts.add(sampleDataObject + " <- " + dataObject + " %>% select(1,contains(\"-S00\"))");
+			rscriptParts.add(sampleDataObject + "$pcMissing <- rowMeans(is.na(" + sampleDataObject + "[,-1]) * 100, na.rm = T)");			
+			String sampleFeaturesDataObject = sampleDataObject + ".features";
+			rscriptParts.add(sampleFeaturesDataObject + " <- " + sampleDataObject + "  %>% filter(pcMissing < " + 
+					Double.toString(parametersObject.getMaxPercentMissingInRegularSamples()) + ") %>% pull(1) %>% as.list()");
+			
+			String driftCorrDataObject = dataObject + ".driftcorr";			
+			rscriptParts.add(driftCorrDataObject + " <- " + dataObject + " %>% select(1,contains(\"CS00000MP\"))");
+			rscriptParts.add(driftCorrDataObject + "$pcMissing <- rowMeans(is.na(" + driftCorrDataObject + "[,-1]) * 100, na.rm = T)");			
+			String driftCorrFeaturesDataObject = driftCorrDataObject + ".features";
+			rscriptParts.add(driftCorrFeaturesDataObject + " <- " + driftCorrDataObject + "  %>% filter(pcMissing < " + 
+					Double.toString(parametersObject.getmaxPercentMissingInDriftCorrSamples()) + ") %>% pull(1) %>% as.list()");
+			
+			String filterFeaturesListObject = dataObjectPrefix + ".filtered.features";
+			rscriptParts.add(filterFeaturesListObject +
+					" <- intersect(unlist(" + sampleFeaturesDataObject + "), unlist(" + driftCorrFeaturesDataObject + "))");
+			String filteredDataObject = dataObject + ".filtered";
+			rscriptParts.add(filteredDataObject + " <- " + dataObject + " %>% filter(id %in% " + filterFeaturesListObject + ")");
+			
 			//	Write out clean data for final join and record in the data frame
 			String data4join = McAlignmentProjectSubfolders.CleanData 
 					+ R_FOLDER_SEPARATOR + dataObjectPrefix + CLEAN_DATA_FILE_SUFFIX;
-			rscriptParts.add("write.table(" + dataObject + "[,-c(2:4)], "
+			rscriptParts.add("write.table(" + filteredDataObject + "[,-c(2:4)], "
 					+ "file = \"" + data4join + "\", quote = F, sep = \"\\t\", na = \"\", row.names = FALSE)");			
-			rscriptParts.add(dataObject + " <- " + dataObject + "[!(" + dataObject + "$rt == \"NaN\"),]");
+			
 			
 			String metabDataObject = dataObjectPrefix + ".metabData";			
 			String metabDataCommand = 
-					metabDataObject + " <- metabData(" + dataObject 
+					metabDataObject + " <- metabData(" + filteredDataObject 
 					+ ", samples = \"CS00000MP\""
-					+ ", misspc = " + Double.toString(parametersObject.getMaxMissingPercent())
+					+ ", misspc = " + Double.toString(parametersObject.getmaxPercentMissingInDriftCorrSamples())
 					+ ", measure = \"" + parametersObject.getPeakAbundanceMeasure().name() + "\"";
 			if(parametersObject.getAlignmentRTRange() != null) {
 				
@@ -602,6 +628,17 @@ public class MetabCombinerAlignmentScriptGenerator extends TemplareRbasedProject
 		
 		return StringUtils.join(outNameParts, "-");
 	}
+	
+	private void createImputationBlock() {
+		
+		rscriptParts.add("\n# Impute missing values in aligned data ####");
+		
+		//merged.data
+		
+		
+		//merged.data.union
+	}
+
 
 	private void saveAlignmentParameters() {
 

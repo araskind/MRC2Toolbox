@@ -91,7 +91,8 @@ public class DockableMetabCombinerScriptGenerator extends DefaultSingleCDockable
 	public static final String WORK_DIRECTORY = "WORK_DIRECTORY";
 	public static final String USE_EXISTING_ALIGNMENT = "USE_EXISTING_ALIGNMENT";
 	public static final String ALIGNMENT_RT_RANGE = "ALIGNMENT_RT_RANGE";
-	public static final String MAX_MISSING_PERCENT = "MAX_MISSING_PERCENT";
+	public static final String MAX_PERCENT_MISSING_IN_DRIFT_CORR_SAMPLES = "MAX_PERCENT_MISSING_IN_DRIFT_CORR_SAMPLES";
+	public static final String MAX_PERCENT_MISSING_IN_REGULAR_SAMPLES = "MAX_PERCENT_MISSING_IN_REGULAR_SAMPLES";
 	public static final String PEAK_ABUNDANCE_MEASURE = "PEAK_ABUNDANCE_MEASURE";
 	public static final String BIN_GAP = "BIN_GAP";
 	public static final String DATA_SET_RT_ORDER_FLAG = "DATA_SET_RT_ORDER_FLAG";
@@ -115,6 +116,8 @@ public class DockableMetabCombinerScriptGenerator extends DefaultSingleCDockable
 	public static final String MAX_RT_ERROR_FOR_ALIGNED_FEATURES = "MAX_RT_ERROR_FOR_ALIGNED_FEATURES";
 	public static final String RESOLVE_ALIGNMENT_CONFLICTS_IN_OUTPUT = "RESOLVE_ALIGNMENT_CONFLICTS_IN_OUTPUT";
 	public static final String RT_ORDER_FLAG_IN_OUTPUT = "RT_ORDER_FLAG_IN_OUTPUT";
+	public static final String IMPUTE_MISSING_IN_ALIGNED_DATA = "IMPUTE_MISSING_IN_ALIGNED_DATA";
+	public static final String DESIGN_FILE_DIRECTORY = "DESIGN_FILE_DIRECTORY";
 	
 	public static final String BROWSE_COMMAND = "Browse";
 	
@@ -127,7 +130,7 @@ public class DockableMetabCombinerScriptGenerator extends DefaultSingleCDockable
 	private JCheckBox imputeCheckBox;
 	private JComboBox<PeakAbundanceMeasure> abundanceMeasureComboBox;
 	private JCheckBox rtOrderCheckBox;
-	private JSpinner maxPercentMissingSpinner;
+	private JSpinner maxPercentMissingInDriftCorrSpinner;
 	private JFormattedTextField binGapTextField;
 	private JFormattedTextField rtMaxTextField;
 	private JFormattedTextField rtMinTextField;
@@ -152,6 +155,14 @@ public class DockableMetabCombinerScriptGenerator extends DefaultSingleCDockable
 	private JSpinner maxMissingBatchesSpinner;
 	private JFormattedTextField maxRTerrTextField;
 	private JTextField existingAlignmentFolderField;
+	private JCheckBox imputeInAlignedCheckBox;
+	private JTextField designFileTextField;
+
+	private JButton selectDesignFileButton;
+
+	private JButton selectImputeFactorsButton;
+
+	private JSpinner maxPercentMissingInRegularSpinner;
 	
 	public DockableMetabCombinerScriptGenerator() {
 		
@@ -167,9 +178,9 @@ public class DockableMetabCombinerScriptGenerator extends DefaultSingleCDockable
 		add(dataPanel, BorderLayout.CENTER);
 		GridBagLayout gbl_dataPanel = new GridBagLayout();
 		gbl_dataPanel.columnWidths = new int[]{111, 0, 0, 0, 0, 105, 0, 0};
-		gbl_dataPanel.rowHeights = new int[]{0, 0, 0, 0, 0, 0, 0};
+		gbl_dataPanel.rowHeights = new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0};
 		gbl_dataPanel.columnWeights = new double[]{0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
-		gbl_dataPanel.rowWeights = new double[]{0.0, 1.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
+		gbl_dataPanel.rowWeights = new double[]{0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
 		dataPanel.setLayout(gbl_dataPanel);
 		
 		JLabel lblNewLabel = new JLabel("Data files directory:");
@@ -300,9 +311,9 @@ public class DockableMetabCombinerScriptGenerator extends DefaultSingleCDockable
 		dataPanel.add(dataImportParametersPanel, gbc_dataImportParametersPanel);
 		GridBagLayout gbl_dataImportParametersPanel = new GridBagLayout();
 		gbl_dataImportParametersPanel.columnWidths = new int[]{0, 0, 0, 0, 0, 0, 0, 0};
-		gbl_dataImportParametersPanel.rowHeights = new int[]{0, 0, 0, 0, 0, 0};
+		gbl_dataImportParametersPanel.rowHeights = new int[]{0, 0, 0, 0, 0, 0, 0};
 		gbl_dataImportParametersPanel.columnWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, Double.MIN_VALUE};
-		gbl_dataImportParametersPanel.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
+		gbl_dataImportParametersPanel.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
 		dataImportParametersPanel.setLayout(gbl_dataImportParametersPanel);
 		
 		limitRtSpanCheckBox = new JCheckBox("Limit alignment to RT span, min");
@@ -355,8 +366,7 @@ public class DockableMetabCombinerScriptGenerator extends DefaultSingleCDockable
 				new Color(160, 160, 160)), "Anchor selection parameters", 
 				TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)), new EmptyBorder(5, 5, 5, 5)));
 		GridBagConstraints gbc_anchorSelectionParametersPanel = new GridBagConstraints();
-		gbc_anchorSelectionParametersPanel.gridheight = 5;
-		gbc_anchorSelectionParametersPanel.insets = new Insets(0, 0, 5, 0);
+		gbc_anchorSelectionParametersPanel.gridheight = 6;
 		gbc_anchorSelectionParametersPanel.fill = GridBagConstraints.BOTH;
 		gbc_anchorSelectionParametersPanel.gridx = 6;
 		gbc_anchorSelectionParametersPanel.gridy = 0;
@@ -482,7 +492,7 @@ public class DockableMetabCombinerScriptGenerator extends DefaultSingleCDockable
 		anchorSelectionParametersPanel.add(
 				secondaryDSanchorRtEclusionWindowTextField, gbc_secondaryDSanchorRtEclusionWindowTTextField);
 		
-		JLabel lblNewLabel_3 = new JLabel("Max % missing");
+		JLabel lblNewLabel_3 = new JLabel("Max % missing in drift correction samples");
 		GridBagConstraints gbc_lblNewLabel_3 = new GridBagConstraints();
 		gbc_lblNewLabel_3.gridwidth = 2;
 		gbc_lblNewLabel_3.anchor = GridBagConstraints.EAST;
@@ -491,14 +501,30 @@ public class DockableMetabCombinerScriptGenerator extends DefaultSingleCDockable
 		gbc_lblNewLabel_3.gridy = 1;
 		dataImportParametersPanel.add(lblNewLabel_3, gbc_lblNewLabel_3);
 		
-		maxPercentMissingSpinner = new JSpinner();
-		maxPercentMissingSpinner.setModel(new SpinnerNumberModel(50, 0, 100, 1));
-		GridBagConstraints gbc_maxPercentMissingSpinner = new GridBagConstraints();
-		gbc_maxPercentMissingSpinner.fill = GridBagConstraints.HORIZONTAL;
-		gbc_maxPercentMissingSpinner.insets = new Insets(0, 0, 5, 5);
-		gbc_maxPercentMissingSpinner.gridx = 2;
-		gbc_maxPercentMissingSpinner.gridy = 1;
-		dataImportParametersPanel.add(maxPercentMissingSpinner, gbc_maxPercentMissingSpinner);
+		maxPercentMissingInDriftCorrSpinner = new JSpinner(new SpinnerNumberModel(30, 0, 100, 1));
+		GridBagConstraints gbc_maxPercentMissingInDriftCorrSpinner = new GridBagConstraints();
+		gbc_maxPercentMissingInDriftCorrSpinner.fill = GridBagConstraints.HORIZONTAL;
+		gbc_maxPercentMissingInDriftCorrSpinner.insets = new Insets(0, 0, 5, 5);
+		gbc_maxPercentMissingInDriftCorrSpinner.gridx = 2;
+		gbc_maxPercentMissingInDriftCorrSpinner.gridy = 1;
+		dataImportParametersPanel.add(maxPercentMissingInDriftCorrSpinner, gbc_maxPercentMissingInDriftCorrSpinner);
+		
+		JLabel lblNewLabel_24 = new JLabel("Max % missing in regular samples");
+		GridBagConstraints gbc_lblNewLabel_24 = new GridBagConstraints();
+		gbc_lblNewLabel_24.anchor = GridBagConstraints.EAST;
+		gbc_lblNewLabel_24.gridwidth = 2;
+		gbc_lblNewLabel_24.insets = new Insets(0, 0, 5, 5);
+		gbc_lblNewLabel_24.gridx = 0;
+		gbc_lblNewLabel_24.gridy = 2;
+		dataImportParametersPanel.add(lblNewLabel_24, gbc_lblNewLabel_24);
+		
+		maxPercentMissingInRegularSpinner = new JSpinner(new SpinnerNumberModel(50, 0, 100, 1));
+		GridBagConstraints gbc_maxPercentMissingInRegularSpinner = new GridBagConstraints();
+		gbc_maxPercentMissingInRegularSpinner.fill = GridBagConstraints.HORIZONTAL;
+		gbc_maxPercentMissingInRegularSpinner.insets = new Insets(0, 0, 5, 5);
+		gbc_maxPercentMissingInRegularSpinner.gridx = 2;
+		gbc_maxPercentMissingInRegularSpinner.gridy = 2;
+		dataImportParametersPanel.add(maxPercentMissingInRegularSpinner, gbc_maxPercentMissingInRegularSpinner);
 		
 		JLabel lblNewLabel_4 = new JLabel("Peak abundance measure");
 		GridBagConstraints gbc_lblNewLabel_4 = new GridBagConstraints();
@@ -506,7 +532,7 @@ public class DockableMetabCombinerScriptGenerator extends DefaultSingleCDockable
 		gbc_lblNewLabel_4.gridwidth = 2;
 		gbc_lblNewLabel_4.insets = new Insets(0, 0, 5, 5);
 		gbc_lblNewLabel_4.gridx = 0;
-		gbc_lblNewLabel_4.gridy = 2;
+		gbc_lblNewLabel_4.gridy = 3;
 		dataImportParametersPanel.add(lblNewLabel_4, gbc_lblNewLabel_4);
 		
 		abundanceMeasureComboBox = new JComboBox<>(
@@ -516,7 +542,7 @@ public class DockableMetabCombinerScriptGenerator extends DefaultSingleCDockable
 		gbc_abundanceMeasureComboBox.insets = new Insets(0, 0, 5, 5);
 		gbc_abundanceMeasureComboBox.fill = GridBagConstraints.HORIZONTAL;
 		gbc_abundanceMeasureComboBox.gridx = 2;
-		gbc_abundanceMeasureComboBox.gridy = 2;
+		gbc_abundanceMeasureComboBox.gridy = 3;
 		dataImportParametersPanel.add(abundanceMeasureComboBox, gbc_abundanceMeasureComboBox);
 		
 		JLabel lblNewLabel_5 = new JLabel("M/Z window for feature grouping");
@@ -525,7 +551,7 @@ public class DockableMetabCombinerScriptGenerator extends DefaultSingleCDockable
 		gbc_lblNewLabel_5.anchor = GridBagConstraints.EAST;
 		gbc_lblNewLabel_5.insets = new Insets(0, 0, 5, 5);
 		gbc_lblNewLabel_5.gridx = 0;
-		gbc_lblNewLabel_5.gridy = 3;
+		gbc_lblNewLabel_5.gridy = 4;
 		dataImportParametersPanel.add(lblNewLabel_5, gbc_lblNewLabel_5);
 		
 		binGapTextField = new JFormattedTextField(MRC2ToolBoxConfiguration.getMzFormat());
@@ -537,33 +563,36 @@ public class DockableMetabCombinerScriptGenerator extends DefaultSingleCDockable
 		gbc_binGapTextField.insets = new Insets(0, 0, 5, 5);
 		gbc_binGapTextField.fill = GridBagConstraints.HORIZONTAL;
 		gbc_binGapTextField.gridx = 2;
-		gbc_binGapTextField.gridy = 3;
+		gbc_binGapTextField.gridy = 4;
 		dataImportParametersPanel.add(binGapTextField, gbc_binGapTextField);
 		
 		JLabel lblNewLabel_6 = new JLabel("Da");
 		GridBagConstraints gbc_lblNewLabel_6 = new GridBagConstraints();
 		gbc_lblNewLabel_6.insets = new Insets(0, 0, 5, 5);
 		gbc_lblNewLabel_6.gridx = 3;
-		gbc_lblNewLabel_6.gridy = 3;
+		gbc_lblNewLabel_6.gridy = 4;
 		dataImportParametersPanel.add(lblNewLabel_6, gbc_lblNewLabel_6);
 		
 		rtOrderCheckBox = new JCheckBox("Enforce RT order");
-		rtOrderCheckBox.setToolTipText("<HTML>If selected, retention order consistency expected <BR>when resolving conflicting alignments for metabCombiner object inputs.");
+		rtOrderCheckBox.setToolTipText("<HTML>If selected, retention order consistency expected <BR>"
+				+ "when resolving conflicting alignments for metabCombiner object inputs.");
 		GridBagConstraints gbc_rtOrderCheckBox = new GridBagConstraints();
 		gbc_rtOrderCheckBox.anchor = GridBagConstraints.EAST;
 		gbc_rtOrderCheckBox.insets = new Insets(0, 0, 0, 5);
 		gbc_rtOrderCheckBox.gridx = 0;
-		gbc_rtOrderCheckBox.gridy = 4;
+		gbc_rtOrderCheckBox.gridy = 5;
 		dataImportParametersPanel.add(rtOrderCheckBox, gbc_rtOrderCheckBox);
 		
 		imputeCheckBox = new JCheckBox("Impute missing data");
-		imputeCheckBox.setToolTipText("<HTML>If selected imputes the mean mz/rt/Q values for missing features <BR>in metabCombiner object inputs before use in alignment <BR>(not recommended for disparate data alignment).<BR>Otherwise, features with missing information are dropped.");
+		imputeCheckBox.setToolTipText("<HTML>If selected imputes the mean mz/rt/Q values for missing features <BR>"
+				+ "in metabCombiner object inputs before use in alignment <BR>"
+				+ "(not recommended for disparate data alignment).<BR>Otherwise, features with missing information are dropped.");
 		GridBagConstraints gbc_imputeCheckBox = new GridBagConstraints();
 		gbc_imputeCheckBox.gridwidth = 2;
 		gbc_imputeCheckBox.insets = new Insets(0, 0, 0, 5);
 		gbc_imputeCheckBox.anchor = GridBagConstraints.WEST;
 		gbc_imputeCheckBox.gridx = 2;
-		gbc_imputeCheckBox.gridy = 4;
+		gbc_imputeCheckBox.gridy = 5;
 		dataImportParametersPanel.add(imputeCheckBox, gbc_imputeCheckBox);
 		
 		JPanel alignmentAndFilteringParametersPanel = new JPanel();
@@ -572,6 +601,7 @@ public class DockableMetabCombinerScriptGenerator extends DefaultSingleCDockable
 				new Color(160, 160, 160)), "Alignment and filtering parameters", 
 				TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)), new EmptyBorder(5, 5, 5, 5)));
 		GridBagConstraints gbc_alignmentAndFilteringParametersPanel = new GridBagConstraints();
+		gbc_alignmentAndFilteringParametersPanel.insets = new Insets(0, 0, 5, 0);
 		gbc_alignmentAndFilteringParametersPanel.gridwidth = 7;
 		gbc_alignmentAndFilteringParametersPanel.fill = GridBagConstraints.BOTH;
 		gbc_alignmentAndFilteringParametersPanel.gridx = 0;
@@ -871,6 +901,48 @@ public class DockableMetabCombinerScriptGenerator extends DefaultSingleCDockable
 		gbc_tableFilterRtOrderCheckBox.gridx = 3;
 		gbc_tableFilterRtOrderCheckBox.gridy = 3;
 		outputFilteringParametersPanel.add(tableFilterRtOrderCheckBox, gbc_tableFilterRtOrderCheckBox);
+		
+		imputeInAlignedCheckBox = new JCheckBox("Impute missing values in alignmed data");
+		GridBagConstraints gbc_imputeInAlignedCheckBox = new GridBagConstraints();
+		gbc_imputeInAlignedCheckBox.gridwidth = 2;
+		gbc_imputeInAlignedCheckBox.anchor = GridBagConstraints.WEST;
+		gbc_imputeInAlignedCheckBox.insets = new Insets(0, 0, 5, 5);
+		gbc_imputeInAlignedCheckBox.gridx = 0;
+		gbc_imputeInAlignedCheckBox.gridy = 6;
+		dataPanel.add(imputeInAlignedCheckBox, gbc_imputeInAlignedCheckBox);
+		
+		designFileTextField = new JTextField();
+		GridBagConstraints gbc_designFileTextField = new GridBagConstraints();
+		gbc_designFileTextField.gridwidth = 3;
+		gbc_designFileTextField.insets = new Insets(0, 0, 0, 5);
+		gbc_designFileTextField.fill = GridBagConstraints.HORIZONTAL;
+		gbc_designFileTextField.gridx = 0;
+		gbc_designFileTextField.gridy = 7;
+		dataPanel.add(designFileTextField, gbc_designFileTextField);
+		designFileTextField.setColumns(10);
+		designFileTextField.setEditable(false);
+		
+		selectDesignFileButton = new JButton("...");
+		selectDesignFileButton.setActionCommand(MainActionCommands.SELECT_EXP_DESIGN_4MC_ALIGNMENT_COMMAND.getName());
+		selectDesignFileButton.setToolTipText(MainActionCommands.SELECT_EXP_DESIGN_4MC_ALIGNMENT_COMMAND.getName());		
+		selectDesignFileButton.addActionListener(this);
+		GridBagConstraints gbc_selectDesignFileButton = new GridBagConstraints();
+		gbc_selectDesignFileButton.fill = GridBagConstraints.HORIZONTAL;
+		gbc_selectDesignFileButton.insets = new Insets(0, 0, 0, 5);
+		gbc_selectDesignFileButton.gridx = 3;
+		gbc_selectDesignFileButton.gridy = 7;
+		dataPanel.add(selectDesignFileButton, gbc_selectDesignFileButton);
+		
+		selectImputeFactorsButton = new JButton("Select factors for imputation");
+		selectImputeFactorsButton.setActionCommand(MainActionCommands.SELECT_EXP_FACTORS_4MC_ALIGNMENT_IMPUTE_COMMAND.getName());
+		selectImputeFactorsButton.setToolTipText(MainActionCommands.SELECT_EXP_FACTORS_4MC_ALIGNMENT_IMPUTE_COMMAND.getName());
+		selectImputeFactorsButton.addActionListener(this);
+		GridBagConstraints gbc_selectImputeFactorsButton = new GridBagConstraints();
+		gbc_selectImputeFactorsButton.fill = GridBagConstraints.HORIZONTAL;
+		gbc_selectImputeFactorsButton.insets = new Insets(0, 0, 0, 5);
+		gbc_selectImputeFactorsButton.gridx = 4;
+		gbc_selectImputeFactorsButton.gridy = 7;
+		dataPanel.add(selectImputeFactorsButton, gbc_selectImputeFactorsButton);
 
 		JPanel buttonPanel = new JPanel();
 		FlowLayout flowLayout = (FlowLayout) buttonPanel.getLayout();
@@ -907,10 +979,34 @@ public class DockableMetabCombinerScriptGenerator extends DefaultSingleCDockable
 		if (command.equals(MainActionCommands.CLEAR_METAB_COMBINER_INPUT_FILES_COMMAND.getName()))
 			cleartMetabCombinerInputFiles();
 		
+		if (command.equals(MainActionCommands.SELECT_EXP_DESIGN_4MC_ALIGNMENT_COMMAND.getName()))
+			selectDesignFileForDataImputation();
+			
+		if (command.equals(MainActionCommands.SELECT_EXP_FACTORS_4MC_ALIGNMENT_IMPUTE_COMMAND.getName()))
+			selectDesignFactorsForDataImputation();				
+				
+		if (command.equals(MainActionCommands.ACCEPT_EXP_FACTORS_4MC_ALIGNMENT_IMPUTE_COMMAND.getName()))
+			acceptDesignFactorsForDataImputation();
+		
 		if (command.equals(MainActionCommands.GENERATE_METAB_COMBINER_SCRIPT_COMMAND.getName()))
 			generateMetabCombinerScript();
+	}	
+
+	private void selectDesignFileForDataImputation() {
+		// TODO Auto-generated method stub
+		
 	}
 
+	private void selectDesignFactorsForDataImputation() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private void acceptDesignFactorsForDataImputation() {
+		// TODO Auto-generated method stub
+		
+	}
+	
 	private void importMetabCombinerInputsFromFile() {
 
 		JnaFileChooser fc = new JnaFileChooser(workDirectory);
@@ -1059,8 +1155,12 @@ public class DockableMetabCombinerScriptGenerator extends DefaultSingleCDockable
 		}
 	}
 	
-	public int getMaxMissingPercent() {
-		return (int)maxPercentMissingSpinner.getValue();
+	public int getMaxPercentMissingInDriftCorrSamples() {
+		return (int)maxPercentMissingInDriftCorrSpinner.getValue();
+	}
+	
+	public int getMaxPercentMissingInRegularSamples() {
+		return (int)maxPercentMissingInRegularSpinner.getValue();
 	}
 	
 	public PeakAbundanceMeasure getPeakAbundanceMeasure() {
@@ -1195,6 +1295,10 @@ public class DockableMetabCombinerScriptGenerator extends DefaultSingleCDockable
 		return tableFilterRtOrderCheckBox.isSelected();
 	}
 	
+	public boolean imputeInAligned() {
+		return imputeInAlignedCheckBox.isSelected();
+	}
+	
 	private void generateMetabCombinerScript() {
 
 		Collection<String>errors = validateFormData();
@@ -1213,7 +1317,8 @@ public class DockableMetabCombinerScriptGenerator extends DefaultSingleCDockable
 		mcpo.setMetabCombinerFileInputObjectSet(
 				fileListingTable.getMetabCombinerFileInputObjects());
 		mcpo.setAlignmentRTRange(getAlignmentRTRange());
-		mcpo.setMaxMissingPercent(getMaxMissingPercent());
+		mcpo.setmaxPercentMissingInDriftCorrSamples(getMaxPercentMissingInDriftCorrSamples());
+		mcpo.setMaxPercentMissingInRegularSamples(getMaxPercentMissingInRegularSamples());
 		mcpo.setPeakAbundanceMeasure(getPeakAbundanceMeasure());
 		mcpo.setBinGap(getBinGap());
 		mcpo.setMcDataSetRtOrderFlag(getMCDataSetRtOrderFlag());
@@ -1237,6 +1342,7 @@ public class DockableMetabCombinerScriptGenerator extends DefaultSingleCDockable
 		mcpo.setMaxRTerrorForAlignedFeatures(getMaxRTerrorForAlignedFeatures());
 		mcpo.setResolveAlignmentConflictsInOutput(resolveAlignmentConflictsInOutput());
 		mcpo.setRtOrderFlagInOutput(getRtOrderFlagInOutput());
+		mcpo.setImputeMissingValuesInAlignedData(imputeInAligned());
 		
 		savePreferences();
 		
@@ -1327,10 +1433,14 @@ public class DockableMetabCombinerScriptGenerator extends DefaultSingleCDockable
 			e.printStackTrace();
 		}
 		workDirectoryTextField.setText(workDirectory.getPath());
+		
 //		useExistingAlignmentCheckBox.setSelected(
 //				preferences.getBoolean(USE_EXISTING_ALIGNMENT, Boolean.FALSE));
+		
 		setRtRangeFromPreferences(preferences);		
-		maxPercentMissingSpinner.setValue(preferences.getInt(MAX_MISSING_PERCENT, 50));	
+		maxPercentMissingInDriftCorrSpinner.setValue(preferences.getInt(MAX_PERCENT_MISSING_IN_DRIFT_CORR_SAMPLES, 30));
+		maxPercentMissingInRegularSpinner.setValue(preferences.getInt(MAX_PERCENT_MISSING_IN_REGULAR_SAMPLES, 50));
+		
 		String pamString = preferences.get(PEAK_ABUNDANCE_MEASURE, PeakAbundanceMeasure.median.name());
 		abundanceMeasureComboBox.setSelectedItem(PeakAbundanceMeasure.valueOf(pamString));
 		binGapTextField.setText(Double.toString(preferences.getDouble(BIN_GAP, 0.005d)));
@@ -1368,7 +1478,8 @@ public class DockableMetabCombinerScriptGenerator extends DefaultSingleCDockable
 		subgroupScoreCutoffSpinner.setValue(preferences.getDouble(SUBGROUP_SCORE_CUTOFF, 0.1d));
 		maxRTerrTextField.setValue(preferences.getDouble(MAX_RT_ERROR_FOR_ALIGNED_FEATURES, 10.0d));
 		resolveConflictsCheckBox.setSelected(preferences.getBoolean(RESOLVE_ALIGNMENT_CONFLICTS_IN_OUTPUT, Boolean.TRUE));
-		tableFilterRtOrderCheckBox.setSelected(preferences.getBoolean(RT_ORDER_FLAG_IN_OUTPUT, Boolean.TRUE));
+		tableFilterRtOrderCheckBox.setSelected(preferences.getBoolean(RT_ORDER_FLAG_IN_OUTPUT, Boolean.TRUE));		
+		imputeInAlignedCheckBox.setSelected(preferences.getBoolean(IMPUTE_MISSING_IN_ALIGNED_DATA, Boolean.TRUE));		
 	}
 	
 	private void setRtRangeFromPreferences(Preferences preferences) {
@@ -1408,7 +1519,8 @@ public class DockableMetabCombinerScriptGenerator extends DefaultSingleCDockable
 			preferences.put(ALIGNMENT_RT_RANGE, 
 					rtRange.getFormattedString(MRC2ToolBoxConfiguration.getRtFormat()));
 		
-		preferences.putInt(MAX_MISSING_PERCENT, getMaxMissingPercent());
+		preferences.putInt(MAX_PERCENT_MISSING_IN_DRIFT_CORR_SAMPLES, getMaxPercentMissingInDriftCorrSamples());
+		preferences.putInt(MAX_PERCENT_MISSING_IN_REGULAR_SAMPLES, getMaxPercentMissingInRegularSamples());
 		preferences.put(PEAK_ABUNDANCE_MEASURE, getPeakAbundanceMeasure().name());
 		preferences.putDouble(BIN_GAP, getBinGap());
 		preferences.putBoolean(DATA_SET_RT_ORDER_FLAG, getMCDataSetRtOrderFlag());
@@ -1434,7 +1546,8 @@ public class DockableMetabCombinerScriptGenerator extends DefaultSingleCDockable
 		preferences.putDouble(SUBGROUP_SCORE_CUTOFF, getSubgroupScoreCutoff());
 		preferences.putDouble(MAX_RT_ERROR_FOR_ALIGNED_FEATURES, getMaxRTerrorForAlignedFeatures());
 		preferences.putBoolean(RESOLVE_ALIGNMENT_CONFLICTS_IN_OUTPUT, resolveAlignmentConflictsInOutput());
-		preferences.getBoolean(RT_ORDER_FLAG_IN_OUTPUT, getRtOrderFlagInOutput());
+		preferences.putBoolean(RT_ORDER_FLAG_IN_OUTPUT, getRtOrderFlagInOutput());
+		preferences.putBoolean(IMPUTE_MISSING_IN_ALIGNED_DATA,imputeInAligned());
 	}
 }
 

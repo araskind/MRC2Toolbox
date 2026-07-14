@@ -29,6 +29,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -142,7 +143,29 @@ public class FIOUtils {
 		}
 		return result;
 	}
-
+	
+	public static List<Path> findDirectoriesByExtensionsNonRecursive(Path startPath, String extension) {
+		
+		if(!Files.isDirectory(startPath)) {
+            throw new IllegalArgumentException("Path must be a directory!");
+        }
+		
+		String ext = extension.toLowerCase();
+		if (!ext.startsWith("."))
+            ext = "." + ext;
+		
+		String finalExt = ext;
+		List<Path> result = new ArrayList<>();
+		try {
+			result = Files.find(startPath, 1, (path, attr) -> path.toString().toLowerCase().endsWith(finalExt) 
+					&& attr.isDirectory()).collect(Collectors.toList());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return result;
+	}
+	
 	public static List<Path> findDirectoriesByExtension(Path path, String fileExtension) {
 
 		if (!Files.isDirectory(path)) {

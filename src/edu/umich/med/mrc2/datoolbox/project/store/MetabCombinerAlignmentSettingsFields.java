@@ -31,6 +31,8 @@ public enum MetabCombinerAlignmentSettingsFields {
 	useExistingAlignment,
 	alignmentRTRange,
 	maxMissingPercent,
+	maxPercentMissingInDriftCorrSamples,
+	maxPercentMissingInRegularSamples,
 	peakAbundanceMeasure,
 	binGap,
 	mcDataSetRtOrderFlag,
@@ -55,5 +57,9 @@ public enum MetabCombinerAlignmentSettingsFields {
 	resolveAlignmentConflictsInOutput,
 	rtOrderFlagInOutput,
 	EntryFileSet,
+	imputeMissingValuesInAlignedData,
+	designFile,
+	factorsForImputation,
+	impFactor
 	;
 }

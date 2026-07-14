@@ -97,6 +97,7 @@ public class DataExportDialog extends JDialog
 	public static final String MAX_RSD = "MAX_RSD";
 	public static final String MIN_FREQUENCY = "MIN_FREQUENCY";	
 	public static final String EXPORT_MANIFEST = "EXPORT_MANIFEST";
+	public static final String USE_BINNER_ANNOTATIONS = "USE_BINNER_ANNOTATIONS";
 	public static final String REPLACE_SPEC_CHARS = "REPLACE_SPEC_CHARS";
 	
 	
@@ -124,6 +125,7 @@ public class DataExportDialog extends JDialog
 	private MsFeatureClusterSet activeClusterSet;
 	private File baseDirectory;
 	private File exportFile;
+	private JCheckBox useBinnerAnnotationsCheckBox;
 	
 	public DataExportDialog() {		
 		this(MainActionCommands.EXPORT_RESULTS_4BINNER_COMMAND);
@@ -235,14 +237,24 @@ public class DataExportDialog extends JDialog
 		gbc_missingTypeComboBox.gridy = 2;
 		panel.add(missingTypeComboBox, gbc_missingTypeComboBox);
 		
+		useBinnerAnnotationsCheckBox = 
+				new JCheckBox("Use Binner annotatios as adducts where available (for MetabCombiner export only)");
+		GridBagConstraints gbc_useBinnerAnnotationsCheckBox = new GridBagConstraints();
+		gbc_useBinnerAnnotationsCheckBox.gridwidth = 4;
+		gbc_useBinnerAnnotationsCheckBox.anchor = GridBagConstraints.WEST;
+		gbc_useBinnerAnnotationsCheckBox.insets = new Insets(0, 0, 5, 5);
+		gbc_useBinnerAnnotationsCheckBox.gridx = 0;
+		gbc_useBinnerAnnotationsCheckBox.gridy = 3;
+		panel.add(useBinnerAnnotationsCheckBox, gbc_useBinnerAnnotationsCheckBox);
+		
 		replaceSpecCharsCheckBox = 
 				new JCheckBox("Replace special characters in names with dash symbol");
-		GridBagConstraints gbc_chckbxNewCheckBox = new GridBagConstraints();
-		gbc_chckbxNewCheckBox.anchor = GridBagConstraints.WEST;
-		gbc_chckbxNewCheckBox.gridwidth = 4;
-		gbc_chckbxNewCheckBox.gridx = 0;
-		gbc_chckbxNewCheckBox.gridy = 4;
-		panel.add(replaceSpecCharsCheckBox, gbc_chckbxNewCheckBox);
+		GridBagConstraints gbc_replaceSpecCharsCheckBox = new GridBagConstraints();
+		gbc_replaceSpecCharsCheckBox.anchor = GridBagConstraints.WEST;
+		gbc_replaceSpecCharsCheckBox.gridwidth = 4;
+		gbc_replaceSpecCharsCheckBox.gridx = 0;
+		gbc_replaceSpecCharsCheckBox.gridy = 4;
+		panel.add(replaceSpecCharsCheckBox, gbc_replaceSpecCharsCheckBox);
 
 		JPanel buttonPanel = new JPanel();
 		FlowLayout flowLayout = (FlowLayout) buttonPanel.getLayout();
@@ -294,6 +306,10 @@ public class DataExportDialog extends JDialog
 			File exportFile  = fc.getSelectedFile();
 			baseDirectory = exportFile.getParentFile();
 		}
+	}
+	
+	public boolean useBinnerAnnotations() {
+		return useBinnerAnnotationsCheckBox.isSelected();
 	}
 	
 	public boolean replaceSpecChars() {
@@ -353,6 +369,7 @@ public class DataExportDialog extends JDialog
 					0.0d,
 					getDataExportNamingField(),
 					exportManifest(),
+					useBinnerAnnotations(),
 					replaceSpecChars());
 			((DataExportTask)exportTask).setMsFeatureSet4export(activeFeatureSet.getFeatures());
 		}
@@ -453,6 +470,7 @@ public class DataExportDialog extends JDialog
 						preferences.get(EXPORT_MISSING_TYPE, MissingExportType.AS_MISSING.name())));
 		
 		replaceSpecCharsCheckBox.setSelected(preferences.getBoolean(REPLACE_SPEC_CHARS, false));
+		useBinnerAnnotationsCheckBox.setSelected(preferences.getBoolean(USE_BINNER_ANNOTATIONS, false));
 	}
 
 	@Override
@@ -462,7 +480,8 @@ public class DataExportDialog extends JDialog
 		prefs.put(EXPORT_TYPE, getExportType().name());
 		prefs.putBoolean(EXPORT_MANIFEST, exportManifestCheckBox.isSelected());
 		prefs.put(SAMPLE_NAMING_FIELD, getNamingField().name());
-		prefs.put(EXPORT_MISSING_TYPE, getMissingExportType().name());
+		prefs.put(EXPORT_MISSING_TYPE, getMissingExportType().name());		
+		prefs.putBoolean(USE_BINNER_ANNOTATIONS, useBinnerAnnotationsCheckBox.isSelected());
 		prefs.putBoolean(REPLACE_SPEC_CHARS, replaceSpecCharsCheckBox.isSelected());
 	}
 	

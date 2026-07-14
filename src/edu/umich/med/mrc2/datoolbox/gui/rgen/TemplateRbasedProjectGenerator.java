@@ -29,13 +29,13 @@ import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class TemplareRbasedProjectGenerator {
+public abstract class TemplateRbasedProjectGenerator {
 
 	protected File projectFolder;
 	protected File scriptFile;
 	protected List<String>rscriptParts;
 	
-	public TemplareRbasedProjectGenerator() {
+	public TemplateRbasedProjectGenerator() {
 		super();
 		rscriptParts = new ArrayList<>();
 	}

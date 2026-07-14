@@ -29,12 +29,12 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 
-import edu.umich.med.mrc2.datoolbox.gui.rgen.TemplareRbasedProjectGenerator;
+import edu.umich.med.mrc2.datoolbox.gui.rgen.TemplateRbasedProjectGenerator;
 import edu.umich.med.mrc2.datoolbox.gui.rgen.mcr.RMultibatchAnalysisInputObject;
 import edu.umich.med.mrc2.datoolbox.gui.rgen.modality.ModalityAnalysisParametersObject;
 import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
 
-public class ModalityAnalysisScriptGenerator extends TemplareRbasedProjectGenerator {
+public class ModalityAnalysisScriptGenerator extends TemplateRbasedProjectGenerator {
 	
 	public static final String MODALITY_ANALYSIS_PROJECT_BASE_NAME = "ModalityAnalysis-";
 	public static final String SCRIPT_FILE_PREFIX = "ModalityAnalysisScript_";

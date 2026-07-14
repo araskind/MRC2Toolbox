@@ -46,7 +46,8 @@ public class EX01572andEX01573RQCgenerator3 {
 		MRC2ToolBoxConfiguration.initConfiguration();
 
 		try {
-			generateSummaryQcScriptForEX01572and1573rppos(false);
+			//	generateSummaryQcScriptForEX01573rppos(false);
+			generateSummaryQcScriptForEX01573rpneg(false);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -86,10 +87,10 @@ public class EX01572andEX01573RQCgenerator3 {
 		String assayType = "RP-NEG";
 		String assayType4R = "rpneg";
 		File xlQc = xlQCfile;
-		File rWorkingDir = new File("Y:\\DataAnalysis\\_Reports\\EX01572 - Human Tranche 2 Muscle G20001069S\\"
+		File rWorkingDir = new File("Y:\\DataAnalysis\\_Reports\\EX01573 - Human Tranche 3 Muscle Z20001532M\\"
 				+ "A003 - Untargeted\\Documents\\NEG\\CO300-Pk1000\\All\\QC");	
 		if(highCutoffData) {
-			rWorkingDir = new File("Y:\\DataAnalysis\\_Reports\\EX01572 - Human Tranche 2 Muscle G20001069S\\"
+			rWorkingDir = new File("Y:\\DataAnalysis\\_Reports\\EX01573 - Human Tranche 3 Muscle Z20001532M\\"
 					+ "A003 - Untargeted\\Documents\\NEG\\CO900-Pk3000\\All\\QC");
 			xlQc = xlHighCutoffQCfile;
 		}	

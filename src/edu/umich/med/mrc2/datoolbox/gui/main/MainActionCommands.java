@@ -440,7 +440,10 @@ public enum MainActionCommands {
 	IMPORT_METAB_COMBINER_INPUTS_FROM_FILE_COMMAND("Import MetabCombiner inputs from file"),
 	CLEAR_METAB_COMBINER_INPUT_FILES_COMMAND("Clear MetabCombiner input files"),
 	SELECT_EXISTING_MC_ALIGNMENT_PROJECT_COMMAND("Select existing MetabCombiner alignment project"),
-	
+	SELECT_EXP_DESIGN_4MC_ALIGNMENT_COMMAND("Select experiment design file for MetabCombiner alignment"),
+	SELECT_EXP_FACTORS_4MC_ALIGNMENT_IMPUTE_COMMAND("Select experiment design factors for aligned data imputation"),
+	ACCEPT_EXP_FACTORS_4MC_ALIGNMENT_IMPUTE_COMMAND("Accept experiment design factors for aligned data imputation"),
+		
 	GENERATE_MODALITY_ANALYSIS_SCRIPT_COMMAND("Generate modality analysis script"),
 	SELECT_MODALITY_ANALYSIS_INPUT_FILES_COMMAND("Select modality analysis input files"),
 	IMPORT_MODALITY_ANALYSIS_INPUTS_FROM_FILE_COMMAND("Import modality analysis inputs from file"),
@@ -1474,6 +1477,8 @@ public enum MainActionCommands {
 		
 	SHOW_ADDUCT_SELECTOR("Show adduct selector"),
 	SELECT_ADDUCTS("Select adducts"),
+	
+	//	
 	
 	//	Debug 
 	GET_DATA_MATRIX_FOR_FEATURE_SET_AND_DESIGN("Get matrix for feature subset"),

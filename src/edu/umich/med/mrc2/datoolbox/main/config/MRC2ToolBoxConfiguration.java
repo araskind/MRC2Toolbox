@@ -49,6 +49,10 @@ import edu.umich.med.mrc2.datoolbox.main.StartupConfiguration;
 
 public class MRC2ToolBoxConfiguration {
 	
+	private MRC2ToolBoxConfiguration() {
+		/* This utility class should not be instantiated */
+	}
+	
 	private static Properties properties;
 	private static String PWD_ENCRYPTION_KEY;
 
@@ -824,12 +828,14 @@ public class MRC2ToolBoxConfiguration {
 		
 		Properties prop = new Properties();
 		InputStream inputStream = null;
-		String configFileName = "config.properties";
+		String configFileName = "config/config.properties";
 		if(BuildInformation.getStartupConfiguration().equals(StartupConfiguration.IDTRACKER))
-			configFileName = "idtracker_config.properties";
+			configFileName = "config/idtracker_config.properties";
+		
+		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 		
 		try {
-			inputStream = MRC2ToolBoxConfiguration.class.getClassLoader().getResourceAsStream(configFileName);
+			inputStream = classLoader.getResourceAsStream(configFileName);
 			if (inputStream != null) {
 				prop.load(inputStream);
 			} else {

@@ -114,6 +114,7 @@ public class DataExportTask extends AbstractTask {
 	private ExperimentDesignSubset experimentDesignSubset;
 	private TreeSet<ExperimentalSample>activeSamples;
 	private boolean exportManifest;
+	private boolean useBinnerAnnotations;
 	private boolean replaceSpecialCharacters;
 	
 	private int metadataColumnCount;
@@ -134,6 +135,7 @@ public class DataExportTask extends AbstractTask {
 			double pooledFrequencyCutoff,
 			DataExportFields namingField,
 			boolean exportManifest,
+			boolean useBinnerAnnotations,
 			boolean replaceSpecialCharacters) {
 		
 		this.currentExperiment = experiment;
@@ -146,6 +148,7 @@ public class DataExportTask extends AbstractTask {
 		this.minPooledFrequency = pooledFrequencyCutoff;
 		this.namingField = namingField;
 		this.exportManifest = exportManifest;
+		this.useBinnerAnnotations = useBinnerAnnotations;
 		this.replaceSpecialCharacters = replaceSpecialCharacters;
 		
 		columnSeparator = MRC2ToolBoxConfiguration.getTabDelimiter();
@@ -804,7 +807,7 @@ public class DataExportTask extends AbstractTask {
 		line[++columnCount] = mzFormat.format(msf.getMonoisotopicMz());
 		line[++columnCount] = rtFormat.format(msf.getStatsSummary().getMedianObservedRetention());
 		String adductName = "";
-		if(msf.getBinnerAnnotation() != null)
+		if(useBinnerAnnotations && msf.getBinnerAnnotation() != null)
 			adductName = msf.getBinnerAnnotation().getCleanAnnotation();
 		
 		if((adductName == null || adductName.isBlank()) && msf.getSpectrum().getPrimaryAdduct() != null)
@@ -1107,6 +1110,7 @@ public class DataExportTask extends AbstractTask {
 				minPooledFrequency,
 				namingField,
 				exportManifest,
+				useBinnerAnnotations,
 				replaceSpecialCharacters);
 	}
 

@@ -24,23 +24,29 @@ package edu.umich.med.mrc2.datoolbox.dmutils;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardOpenOption;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.compress.utils.FileNameUtils;
+import org.apache.commons.io.FileUtils;
 
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.FilePreferencesFactory;
@@ -74,12 +80,59 @@ public class CoreDataBackupUtils {
 			
 			//	createRoboCopyNewExperimentsScript20260519();
 			
-			File sourceFolder = new File("Z:\\Raw Data\\TM\\TM-5600_D drive backup\\2026");
+			File sourceFolder = new File("Z:\\Raw Data\\Lipidomics\\2019");
 			deleteMiscLipidomicsRawData(sourceFolder);
+			
+//			File expDir = new File("Z:\\Personal Directories- For CORE only\\Maureen");
+//            File reportFile = new File("Y:\\DataAnalysis\\_Reports\\EX01573 - Human Tranche 3 Muscle Z20001532M\\MaureenMaizeAgilentRawData.txt");
+//            summarizeAgilentRawDataByFolder(expDir, reportFile);
 			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+	
+	private static void summarizeAgilentRawDataByFolder(File folderToScan, File reportFile) throws IOException {
+
+		List<String> reportLines = new ArrayList<>();	
+	    Set<Path> dirPathList = new TreeSet<>();
+		String ext = "d";
+	    Files.walkFileTree(folderToScan.toPath(), new SimpleFileVisitor<Path>() {
+	    	
+	        @Override
+	        public FileVisitResult preVisitDirectory(Path dirPath, BasicFileAttributes attrs) {
+	        	
+	            if (dirPath.toString().toLowerCase().endsWith(ext)) {
+	                return FileVisitResult.SKIP_SUBTREE; // Prevents entering the directory	                
+	            }
+				else {
+					dirPathList.add(dirPath);
+					return FileVisitResult.CONTINUE;
+				}	            
+	        }
+        });
+		String header = "Folder path\t# of " + ext + " files\tTotal size of " + ext + " files";
+		reportLines.add(header);
+		for (Path dirPath : dirPathList) {
+
+			long totalSize = 0;
+			List<Path>rawFilesList = FIOUtils.findDirectoriesByExtensionsNonRecursive(dirPath, ext);
+			
+			if (!rawFilesList.isEmpty()) {
+				
+				for (Path rawFilePath : rawFilesList)
+					totalSize += FileUtils.sizeOfDirectory(rawFilePath.toFile());
+				
+				String reportLine = dirPath.toString() + "\t" + rawFilesList.size() + "\t"
+						+ Long.toString(Math.round(totalSize / 1024.0d / 1024.0d)) + "MB";
+				reportLines.add(reportLine);
+			}
+		}
+		try {
+			Files.write(reportFile.toPath(), reportLines, StandardCharsets.UTF_8, StandardOpenOption.CREATE);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}		
 	}
 	
 	private static void deleteMiscLipidomicsRawData(File sourceFolder) {
@@ -100,6 +153,11 @@ public class CoreDataBackupUtils {
 			convertedFilesList.addAll(FIOUtils.findFilesByExtension(dirPath, "mgf"));
 			convertedFilesList.addAll(FIOUtils.findFilesByExtension(dirPath, "tsv"));
 			convertedFilesList.addAll(FIOUtils.findFilesByExtension(dirPath, "mzml"));
+			convertedFilesList.addAll(FIOUtils.findFilesByExtension(dirPath, "abf"));
+			convertedFilesList.addAll(FIOUtils.findFilesByExtension(dirPath, "arf"));
+			convertedFilesList.addAll(FIOUtils.findFilesByExtension(dirPath, "dcl"));
+			convertedFilesList.addAll(FIOUtils.findFilesByExtension(dirPath, "pai"));
+			convertedFilesList.addAll(FIOUtils.findFilesByExtension(dirPath, "mtd"));
 			if (!convertedFilesList.isEmpty()) {
 
 				for (Path convertedFilePath : convertedFilesList) {
