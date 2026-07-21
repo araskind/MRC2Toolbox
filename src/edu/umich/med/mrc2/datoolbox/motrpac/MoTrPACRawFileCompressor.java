@@ -30,7 +30,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.apache.commons.compress.archivers.ArchiveException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 
@@ -118,9 +117,6 @@ public class MoTrPACRawFileCompressor {
 					try {
 						CompressionUtils.zipFolder(rdp.toFile(), destination);
 					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					} catch (ArchiveException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}								

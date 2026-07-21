@@ -33,12 +33,18 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.prefs.Preferences;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 import java.util.stream.Collectors;
 
 public class TextUtils {
+	
+	private TextUtils() {
+		/* This utility class should not be instantiated */
+	}
 	
 	private static final DecimalFormat sciFormatter = new DecimalFormat("0.###E0");
 	private static final DecimalFormat threeDigitsFormatter = new DecimalFormat("###.###");
@@ -83,7 +89,7 @@ public class TextUtils {
 
 		List<String> toImplode = Arrays.asList(pieces);
 
-		String output = TextUtils.implode(glue, toImplode);
+		String output = implode(glue, toImplode);
 
 		return output;
 	}
@@ -248,6 +254,14 @@ public class TextUtils {
             return false; // Regex is not syntactically valid
         }
     }
+    
+	public static Set<String> findDuplicateNames(Collection<String> names) {
+
+		Set<String> seen = new TreeSet<>();
+		return names.stream()
+                .filter(n -> !seen.add(n))
+                .collect(Collectors.toSet());
+	}
 }
 
 

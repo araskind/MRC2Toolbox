@@ -73,7 +73,8 @@ public class MetabCombinerAlignmentScriptGenerator extends TemplateRbasedProject
 			Arrays.asList(
 					SummaryInputColumns.EXPERIMENT, 
 					SummaryInputColumns.BATCH,
-					SummaryInputColumns.PEAK_AREAS);
+					SummaryInputColumns.PEAK_AREAS,
+					SummaryInputColumns.MANIFEST);
 	
 	private MetabCombinerParametersObject parametersObject;
 	private Map<RMultibatchAnalysisInputObject,String>metabDataObjectMap;

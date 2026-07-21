@@ -54,7 +54,6 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.compress.archivers.ArchiveException;
 import org.apache.commons.compress.utils.FileNameUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -1492,9 +1491,6 @@ public class MoTrPACUtils {
 					} catch (IOException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
-					} catch (ArchiveException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
 					}								
 				}
 			}
@@ -1740,9 +1736,6 @@ public class MoTrPACUtils {
 					try {
 						CompressionUtils.zipFolder(rdp.toFile(), destination);
 					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					} catch (ArchiveException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}

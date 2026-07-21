@@ -38,7 +38,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.compress.archivers.ArchiveException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 
@@ -183,9 +182,6 @@ public class AgilentDataCompressionTask extends AbstractTask {
 				try {
 					CompressionUtils.zipFolder(rawFilePath.toFile(), destination);
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (ArchiveException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}

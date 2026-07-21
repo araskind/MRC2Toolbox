@@ -38,8 +38,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.prefs.Preferences;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.Icon;
@@ -60,15 +65,21 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang3.StringUtils;
 
 import bibliothek.gui.dock.common.DefaultSingleCDockable;
 import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
+import edu.umich.med.mrc2.datoolbox.data.enums.MoTrPACRawDataManifestFields;
 import edu.umich.med.mrc2.datoolbox.data.enums.PeakAbundanceMeasure;
 import edu.umich.med.mrc2.datoolbox.data.enums.RtFittingModelType;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
+import edu.umich.med.mrc2.datoolbox.gui.utils.DelimitedTextParserUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
+import edu.umich.med.mrc2.datoolbox.gui.utils.IndeterminateProgressDialog;
+import edu.umich.med.mrc2.datoolbox.gui.utils.LongUpdateTask;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
@@ -77,6 +88,7 @@ import edu.umich.med.mrc2.datoolbox.rqc.RAnalysisUtils;
 import edu.umich.med.mrc2.datoolbox.rqc.SummaryInputColumns;
 import edu.umich.med.mrc2.datoolbox.utils.DelimitedTextParser;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
+import edu.umich.med.mrc2.datoolbox.utils.TextUtils;
 
 public class DockableMetabCombinerScriptGenerator extends DefaultSingleCDockable 
 	implements ActionListener, BackedByPreferences {
@@ -157,12 +169,15 @@ public class DockableMetabCombinerScriptGenerator extends DefaultSingleCDockable
 	private JTextField existingAlignmentFolderField;
 	private JCheckBox imputeInAlignedCheckBox;
 	private JTextField designFileTextField;
-
 	private JButton selectDesignFileButton;
-
 	private JButton selectImputeFactorsButton;
-
 	private JSpinner maxPercentMissingInRegularSpinner;
+
+	private File designFile;
+	private Set<String>designFactors;
+	
+	private Pattern sampleIdPattern;
+	private Pattern fileNamePattern;
 	
 	public DockableMetabCombinerScriptGenerator() {
 		
@@ -992,11 +1007,6 @@ public class DockableMetabCombinerScriptGenerator extends DefaultSingleCDockable
 			generateMetabCombinerScript();
 	}	
 
-	private void selectDesignFileForDataImputation() {
-		// TODO Auto-generated method stub
-		
-	}
-
 	private void selectDesignFactorsForDataImputation() {
 		// TODO Auto-generated method stub
 		
@@ -1047,6 +1057,40 @@ public class DockableMetabCombinerScriptGenerator extends DefaultSingleCDockable
 		else {
 			fileListingTable.setModelFromInputObjects(mcioSet);
 		}
+	}
+	
+
+	private void selectDesignFileForDataImputation() {
+
+		JnaFileChooser fc = new JnaFileChooser(workDirectory);
+		fc.setMode(JnaFileChooser.Mode.Files);
+		fc.addFilter("Text files", "txt", "TXT");
+		fc.setMultiSelectionEnabled(false);
+		if (fc.showOpenDialog(SwingUtilities.getWindowAncestor(this.getContentPane()))) {
+			
+			designFile = fc.getSelectedFile();
+			designFileTextField.setText(designFile.getAbsolutePath());
+			extractDesignFactors(designFile);
+		}
+	}
+
+	private void extractDesignFactors(File designInputFile) {
+		
+		if(workDirectory == null || !workDirectory.exists()) {
+			
+			MessageDialog.showErrorMsg(
+					"Work directory containing the input files for alignment must be specified first", 
+					SwingUtilities.getWindowAncestor(this.getContentPane()));
+			return;
+		}
+		String[][] mcInputData = DelimitedTextParser.parseTextFile(
+				designInputFile, MRC2ToolBoxConfiguration.getTabDelimiter());
+		designFactors = new TreeSet<>();
+		for(int i=1; i<mcInputData[0].length; i++) {
+			
+			if(!mcInputData[0][i].isBlank())
+				designFactors.add(mcInputData[0][i]);
+		}		
 	}
 
 	private void selectExistingMcAlignmentFolder() {
@@ -1300,13 +1344,52 @@ public class DockableMetabCombinerScriptGenerator extends DefaultSingleCDockable
 	}
 	
 	private void generateMetabCombinerScript() {
+		
+		ValidateFormDataAndGenerateScriptTask task = new ValidateFormDataAndGenerateScriptTask();
+		IndeterminateProgressDialog idp = 
+				new IndeterminateProgressDialog(
+						"Validating form data ...", this.getContentPane(), task);
+		idp.setLocationRelativeTo(this.getContentPane());
+		idp.setVisible(true);	
+	}
 
-		Collection<String>errors = validateFormData();
-		if(!errors.isEmpty()){
-		    MessageDialog.showErrorMsg(StringUtils.join(errors, "\n"), 
-		    		SwingUtilities.getWindowAncestor(this.getContentPane()));
-		    return;
+	class ValidateFormDataAndGenerateScriptTask extends LongUpdateTask {
+
+		private Collection<String>errors;
+		
+		public ValidateFormDataAndGenerateScriptTask() {
+			this.errors = new ArrayList<>();
 		}
+
+		@Override
+		public Void doInBackground() {
+
+			try {
+				errors = validateFormData();
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			return null;
+		}
+		
+		@Override
+		public void done() {
+			
+			super.done();
+			if(!errors.isEmpty()){
+			    MessageDialog.showErrorMsg(StringUtils.join(errors, "\n"), 
+			    		SwingUtilities.getWindowAncestor(DockableMetabCombinerScriptGenerator.this.getContentPane()));
+			    return;
+			}
+			else {
+				createMetabCombinerProject();
+			}
+		}
+	}
+	
+	private void createMetabCombinerProject() {
+		
 		MetabCombinerParametersObject mcpo = new MetabCombinerParametersObject();
 		mcpo.setProjectParentDirectory(workDirectory);		
 		mcpo.setUseExistingAlignment(useExistingAlignment());
@@ -1359,6 +1442,9 @@ public class DockableMetabCombinerScriptGenerator extends DefaultSingleCDockable
 	}
 	
 	private Collection<String>validateFormData(){
+		
+		sampleIdPattern = Pattern.compile(MRC2ToolBoxConfiguration.CORE_SAMPLE_ID_MASK_DEFAULT);
+		fileNamePattern = Pattern.compile(MRC2ToolBoxConfiguration.CORE_DATA_FILE_MASK_DEFAULT);
 	    
 	    Collection<String>errors = new ArrayList<>();
 	    if(workDirectory == null || !workDirectory.exists())
@@ -1382,6 +1468,9 @@ public class DockableMetabCombinerScriptGenerator extends DefaultSingleCDockable
 	    }
 	    if(limitRtSpanCheckBox.isSelected() && getAlignmentRTRange() == null)
 	    	errors.add("Invalid RT range for data alignment is selected");
+	    
+	    if(imputeInAligned() && (designFile == null || !designFile.exists()))
+	    	errors.add("Experiment design file is missing, required for data imputation");
 	    
 	    if(getBinGap() <= 0.0d)
 	    	errors.add("M/Z window for feature grouping must be > 0");
@@ -1413,9 +1502,117 @@ public class DockableMetabCombinerScriptGenerator extends DefaultSingleCDockable
 	    if(getMaxRTerrorForAlignedFeatures() <= 0.0d)
 	    	errors.add("Max RT error for output filtering must be > 0");
 	    
+	    if(errors.isEmpty()) {
+	    	
+	    	verifyMatchBetweenManifestsDesignRawData(ioList, errors);
+	    	
+	    }	    
 	    return errors;
 	}
 	
+	private void verifyMatchBetweenManifestsDesignRawData(
+			Collection<RMultibatchAnalysisInputObject> ioList, 
+			Collection<String> errors) {
+		// Check that raw data files match exactly between raw data and manifest
+		for(RMultibatchAnalysisInputObject ioObject : ioList) {
+			
+			File peakAreaFile = ioObject.getFile(SummaryInputColumns.PEAK_AREAS);
+			File manifestFile = ioObject.getFile(SummaryInputColumns.MANIFEST);
+			checkFileNameDiscrepancies(peakAreaFile, manifestFile, errors);
+		}		
+	}
+
+	private void checkFileNameDiscrepancies(File peakAreasFile, File manifestFile, Collection<String> errors) {
+
+		Collection<String>fileNamesFromPeakAreasFile = getRawFileNamesFromPeakAreasFile(peakAreasFile, errors);
+		Collection<String>fileNamesFromManifest = getRawFileNamesFromManifestFile(manifestFile, errors);
+		
+		List<String> inPeakAreasButNotInManifest = fileNamesFromPeakAreasFile.stream()
+			    .filter(element -> !fileNamesFromManifest.contains(element))
+			    .collect(Collectors.toList());
+		List<String> inManifestButNotInPeakAreas = fileNamesFromManifest.stream()
+			    .filter(element -> !fileNamesFromPeakAreasFile.contains(element))
+			    .collect(Collectors.toList());
+		
+		if(!inPeakAreasButNotInManifest.isEmpty()) {
+			
+			errors.add("The following files are listed in peak areas file\n" + peakAreasFile.getName() + 
+					"\nbut are absent from  manifest\n" + manifestFile.getName() + ":\n");
+			for(String fn : inPeakAreasButNotInManifest)
+				errors.add(fn);
+		}
+		if(!inManifestButNotInPeakAreas.isEmpty()) {
+			
+			errors.add("The following files are listed in manifest\n" + manifestFile.getName() + 
+					"\nbut are absent from peak areas file\n" + peakAreasFile.getName() + ":\n");
+			for(String fn : inManifestButNotInPeakAreas)
+				errors.add(fn);
+		}		
+	}
+	
+	private Collection<String> getRawFileNamesFromPeakAreasFile(File peakAreasFile, Collection<String> errors) {
+
+		Collection<String>rawFileNames = new ArrayList<>();
+		CSVParser parser = DelimitedTextParserUtils.parseTabDelimitedFile(peakAreasFile);
+		if(parser == null) {
+			errors.add("Unable to parse peak areas file " + peakAreasFile.getName());
+			return rawFileNames;
+		}
+		//	Check for duplicate file names		
+		rawFileNames = parser.getHeaderNames().stream().
+				filter(h -> fileNamePattern.matcher(h).matches()).collect(Collectors.toList());
+		Set<String> duplicates = TextUtils.findDuplicateNames(rawFileNames);
+		if(!duplicates.isEmpty()) {
+			errors.add("Duplicate file names found in peak areas file " + peakAreasFile.getName());
+			duplicates.forEach(errors::add);
+		}	
+		//	Check for duplicate sample IDs
+		List<String>sampleIds =  rawFileNames.stream().
+				map(this::getCoreSampleIdFromFileName).
+				filter(Objects::nonNull).collect(Collectors.toList());
+		Set<String> sampleDuplicates = TextUtils.findDuplicateNames(sampleIds);
+		if(!sampleDuplicates.isEmpty()) {
+			errors.add("Duplicate core sample IDs found in peak areas file " + peakAreasFile.getName());
+			sampleDuplicates.forEach(errors::add);
+		}	
+		return rawFileNames;
+	}
+
+	private Collection<String>getRawFileNamesFromManifestFile(File manifestFile, Collection<String> errors){
+		
+		Collection<String>rawFileNames = new ArrayList<>();
+		List<CSVRecord> records = DelimitedTextParserUtils.getRecordsFromTabDelimitedFile(manifestFile);
+		if(records.isEmpty()) {
+			errors.add("Unable to parse manifest file " + manifestFile.getName() + " or file is empty");
+			return rawFileNames;
+		}
+		records.forEach(r -> rawFileNames.add(r.get(MoTrPACRawDataManifestFields.MOTRPAC_RAW_FILE.getName())));		
+		Set<String> duplicates = TextUtils.findDuplicateNames(rawFileNames);
+		if(!duplicates.isEmpty()) {
+			errors.add("Duplicate file names found in manifest file " + manifestFile.getName());
+			duplicates.forEach(errors::add);
+		}	
+		//	Check for duplicate sample IDs
+		List<String>sampleIds =  rawFileNames.stream().
+				map(this::getCoreSampleIdFromFileName).
+				filter(Objects::nonNull).collect(Collectors.toList());
+		Set<String> sampleDuplicates = TextUtils.findDuplicateNames(sampleIds);
+		if(!sampleDuplicates.isEmpty()) {
+			errors.add("Duplicate core sample IDs found in manifest file " + manifestFile.getName());
+			sampleDuplicates.forEach(errors::add);
+		}		
+		return rawFileNames;		
+	}
+	 
+	private String getCoreSampleIdFromFileName(String fileName) {
+			
+		Matcher m = sampleIdPattern.matcher(fileName);
+		if (m.find())
+			return m.group();
+		else
+			return null;
+	}
+
 	@Override
 	public void loadPreferences() {
 		loadPreferences(Preferences.userNodeForPackage(this.getClass()));		

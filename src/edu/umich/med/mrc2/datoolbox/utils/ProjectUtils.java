@@ -35,7 +35,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.apache.commons.compress.archivers.ArchiveException;
 import org.apache.commons.lang.StringUtils;
 import org.jdom2.Document;
 import org.jdom2.Element;
@@ -138,7 +137,7 @@ public class ProjectUtils {
 		XmlUtils.writeCompactXMLtoFile(document, xmlFile);
 		try {
 			CompressionUtils.zipFile(xmlFile, experimentToSave.getExperimentFile());
-		} catch (IOException | ArchiveException e) {
+		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} 

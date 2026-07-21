@@ -32,7 +32,6 @@ import java.nio.file.Paths;
 import java.util.Iterator;
 
 import org.apache.commons.compress.archivers.ArchiveEntry;
-import org.apache.commons.compress.archivers.ArchiveException;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
 import org.apache.commons.compress.archivers.ArchiveStreamFactory;
 import org.apache.commons.compress.archivers.zip.Zip64Mode;
@@ -108,8 +107,6 @@ public class ParallelZip {
                 }
             }
         } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ArchiveException e) {
             e.printStackTrace();
         }
     }   

@@ -149,8 +149,6 @@ public class CompressionUtils {
             }
         } catch (IOException e) {
             e.printStackTrace();
-        } catch (ArchiveException e) {
-            e.printStackTrace();
         }
     }
 
