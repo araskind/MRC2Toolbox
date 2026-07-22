@@ -37,10 +37,12 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jdom2.Document;
 import org.jdom2.Element;
 
+import edu.umich.med.mrc2.datoolbox.data.enums.MoTrPACRawDataManifestFields;
 import edu.umich.med.mrc2.datoolbox.gui.rgen.TemplateRbasedProjectGenerator;
 import edu.umich.med.mrc2.datoolbox.gui.rgen.mcr.MetabCombinerParametersObject;
 import edu.umich.med.mrc2.datoolbox.gui.rgen.mcr.RMultibatchAnalysisInputObject;
@@ -81,6 +83,8 @@ public class MetabCombinerAlignmentScriptGenerator extends TemplateRbasedProject
 	
 	public enum McAlignmentProjectSubfolders{
 		
+		RawData,
+		Manifests,
 		CleanData,
 		Anchors,
 		Plots,
@@ -125,6 +129,10 @@ public class MetabCombinerAlignmentScriptGenerator extends TemplateRbasedProject
 		if(parametersObject.isImputeMissingValuesInAlignedData())
 			createImputationBlock();
 		
+		createCombinedManifestBlock();
+		
+		createQCANVASoutputBlock();
+		
 		writeScriptToFile();
 		
 		saveAlignmentParameters();
@@ -162,9 +170,9 @@ public class MetabCombinerAlignmentScriptGenerator extends TemplateRbasedProject
 				
 		rscriptParts.add("# MetabCombiner alignment of multiple batches of untargeted data " + 
 				MRC2ToolBoxConfiguration.defaultTimeStampFormat.format(new Date())+ " ####\n");
-		rscriptParts.add("setwd(r'(" + projectFolder.getAbsolutePath() + ")')\n");	
+		rscriptParts.add("setwd(dirname(rstudioapi::getActiveDocumentContext()$path))\n");	
 		rscriptParts.add("library(metabCombiner)");
-		rscriptParts.add("library(reshape2)");
+		//rscriptParts.add("library(reshape2)");
 		rscriptParts.add("library(dplyr)");
 		rscriptParts.add("library(purrr)");
 		rscriptParts.add("library(ggplot2)\n");
@@ -179,9 +187,9 @@ public class MetabCombinerAlignmentScriptGenerator extends TemplateRbasedProject
 			String dataObjectPrefix = mcio.getExperimentId() + "." + mcio.getBatchId();			
 			String dataObject = dataObjectPrefix + ".data";
 
-			rscriptParts.add(dataObject + " <- read.delim(r'(" 
-					+ mcio.getDataFile(SummaryInputColumns.PEAK_AREAS).getAbsolutePath() 
-					+ ")', check.names=FALSE)");
+			rscriptParts.add(dataObject + " <- read.delim(\"." + R_FOLDER_SEPARATOR + McAlignmentProjectSubfolders.RawData.name() +
+					R_FOLDER_SEPARATOR + mcio.getDataFile(SummaryInputColumns.PEAK_AREAS).getName() + "\", check.names=FALSE)");
+
 			//    Remove rows with missing RT values
 			rscriptParts.add(dataObject + " <- " + dataObject + "[!(" + dataObject + "$rt == \"NaN\"),]");
 			
@@ -211,8 +219,7 @@ public class MetabCombinerAlignmentScriptGenerator extends TemplateRbasedProject
 					+ R_FOLDER_SEPARATOR + dataObjectPrefix + CLEAN_DATA_FILE_SUFFIX;
 			rscriptParts.add("write.table(" + filteredDataObject + "[,-c(2:4)], "
 					+ "file = \"" + data4join + "\", quote = F, sep = \"\\t\", na = \"\", row.names = FALSE)");			
-			
-			
+						
 			String metabDataObject = dataObjectPrefix + ".metabData";			
 			String metabDataCommand = 
 					metabDataObject + " <- metabData(" + filteredDataObject 
@@ -638,8 +645,66 @@ public class MetabCombinerAlignmentScriptGenerator extends TemplateRbasedProject
 		
 		
 		//merged.data.union
+	}	
+
+	private void createQCANVASoutputBlock() {
+		
+		rscriptParts.add("\n# Format output for QCANVAS ####\n");
+		
+		rscriptParts.add("qcanvas.header <- data.frame(A1 = character(),");
+		rscriptParts.add("\t\tA2 = character(),");
+		rscriptParts.add("\t\tA3 = character(),");
+		rscriptParts.add("\t\tA4  = character(),");
+		rscriptParts.add("\t\tA5  = character(),");
+		rscriptParts.add("\t\tA6  = character(),");
+		rscriptParts.add("\t\tA7  = character(),");
+		rscriptParts.add("\t\tA8  = character(),");
+		rscriptParts.add("\t\tA9  = character(),");
+		rscriptParts.add("\t\tstringsAsFactors=FALSE)");
+		rscriptParts.add("colnames(qcanvas.header) <- c(\"Match Group\",\"# Batches Covered\",\"# Features\",\"Feature\","
+				+ "\"Average Monoisotopic M/Z\",\"Average RT\",\"Average Old RT\",\"Median Median Intensity\",\" \")");
+		
+		//	Without missing batches		
+		rscriptParts.add("merged.data.4qcanvas <- merged.data[,-c(1,2)]");
+		rscriptParts.add("colnames(merged.data.4qcanvas)[1] <- \"Feature\"");
+		rscriptParts.add("combined.4qcanvas <- bind_rows(qcanvas.header, merged.data.4qcanvas)");
+		
+		String exportFileName = FilenameUtils.getBaseName(MERGED_ALIGNED_DATA_FILE_NAME) + "_4QCANVAS.txt";
+		rscriptParts.add("write.table(combined.4qcanvas, file = \"" + exportFileName + "\", quote = F, sep = \"\\t\", na = \"\", row.names = FALSE)");
+		
+		//	With missing batches
+		if(parametersObject.getMaxMissingBatchCount() > 0) {
+			
+			rscriptParts.add("merged.data.union.4qcanvas <- merged.data.union[,-c(1,2)]");
+			rscriptParts.add("colnames(merged.data.union.4qcanvas)[1] <- \"Feature\"");
+			rscriptParts.add("combined.union.4qcanvas <- bind_rows(qcanvas.header, merged.data.union.4qcanvas)");
+			
+			String extendedExportFileName= FilenameUtils.getBaseName(MERGED_ALIGNED_DATA_EXTENDED_FILE_NAME) + "_4QCANVAS.txt";
+			rscriptParts.add("write.table(combined.union.4qcanvas, file = \"" + extendedExportFileName + "\", quote = F, sep = \"\\t\", na = \"\", row.names = FALSE)");
+		}
 	}
 
+	private void createCombinedManifestBlock() {
+		// TODO Auto-generated method stub
+		rscriptParts.add("\n# Create cobined clean manifest ####");
+		rscriptParts.add("\n## Read and combine original batch manifests ####\n");
+		rscriptParts.add("manifest_file_list <- list.files(path=\"./" + McAlignmentProjectSubfolders.Manifests.name() + "\")");
+		rscriptParts.add("manifest_dataset <- data.frame()");
+		rscriptParts.add("for (i in 1:length(manifest_file_list)){");
+		rscriptParts.add("\tmanifest_file <- paste(\"./Manifests/\", manifest_file_list[i], sep = \"\")");
+		rscriptParts.add("\ttemp_data <- read.delim(manifest_file, check.names=F, stringsAsFactors = F)");
+		rscriptParts.add("\ttemp_data[] <- lapply(temp_data, function(x) as.character(x))");
+		rscriptParts.add("\ttemp_data$batch_override <- paste(\"Batch\", i)");
+		rscriptParts.add("\tmanifest_dataset <- bind_rows(manifest_dataset, temp_data)");
+		rscriptParts.add("}\n");
+		rscriptParts.add("## Remove files not present in aligned data from manifest, "
+				+ "Sort manifest by injection time and populate run_order column with incremental numbers ####\n");
+		rscriptParts.add("merged.data.files <- data.frame(" + MoTrPACRawDataManifestFields.MOTRPAC_RAW_FILE.getName() + " = colnames(merged.data[-c(1:3)]))");
+		rscriptParts.add("manifest_dataset.clean <- left_join(merged.data.files, manifest_dataset) %>% arrange(`Injection time`)");
+		rscriptParts.add("manifest_dataset.clean$" + MoTrPACRawDataManifestFields.MOTRPAC_SAMPLE_ORDER.getName() + " <- 1:nrow(manifest_dataset.clean)");
+		rscriptParts.add("write.table(manifest_dataset.clean, file = \"MergedCleanManifest.txt\", quote = F, sep = \"\\t\", na = \"\", row.names = FALSE)");
+		rscriptParts.add("");
+	}
 
 	private void saveAlignmentParameters() {
 

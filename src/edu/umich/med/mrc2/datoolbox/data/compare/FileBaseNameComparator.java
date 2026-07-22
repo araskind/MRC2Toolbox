@@ -25,7 +25,8 @@ import java.io.File;
 import java.io.Serializable;
 import java.util.Comparator;
 
-import org.apache.commons.compress.utils.FileNameUtils;
+import org.apache.commons.io.FilenameUtils;
+
 
 public class FileBaseNameComparator implements Serializable, Comparator<File> {
 
@@ -37,8 +38,8 @@ public class FileBaseNameComparator implements Serializable, Comparator<File> {
 	@Override
 	public int compare(File o1, File o2) {
 		
-		String bnOne = FileNameUtils.getBaseName(o1.getName());
-		String bnTwo = FileNameUtils.getBaseName(o2.getName());
+		String bnOne = FilenameUtils.getBaseName(o1.getName());
+		String bnTwo = FilenameUtils.getBaseName(o2.getName());
 		return bnOne.compareTo(bnTwo);
 	}
 }

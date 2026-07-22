@@ -33,7 +33,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -84,6 +87,7 @@ import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.rqc.MetabCombinerAlignmentScriptGenerator;
+import edu.umich.med.mrc2.datoolbox.rqc.MetabCombinerAlignmentScriptGenerator.McAlignmentProjectSubfolders;
 import edu.umich.med.mrc2.datoolbox.rqc.RAnalysisUtils;
 import edu.umich.med.mrc2.datoolbox.rqc.SummaryInputColumns;
 import edu.umich.med.mrc2.datoolbox.utils.DelimitedTextParser;
@@ -175,6 +179,7 @@ public class DockableMetabCombinerScriptGenerator extends DefaultSingleCDockable
 
 	private File designFile;
 	private Set<String>designFactors;
+	private Set<String>designFactorsSelectedForImputation;
 	
 	private Pattern sampleIdPattern;
 	private Pattern fileNamePattern;
@@ -972,6 +977,8 @@ public class DockableMetabCombinerScriptGenerator extends DefaultSingleCDockable
 		buttonPanel.add(btnSave);
 
 		loadPreferences();
+		designFactors = new TreeSet<>();
+		designFactorsSelectedForImputation = new TreeSet<>();
 	}
 
 	@Override
@@ -1008,8 +1015,14 @@ public class DockableMetabCombinerScriptGenerator extends DefaultSingleCDockable
 	}	
 
 	private void selectDesignFactorsForDataImputation() {
-		// TODO Auto-generated method stub
+
+		if (designFactors == null || designFactors.isEmpty())
+			return;
 		
+		ImputationFactorSelectorDialog dialog = new ImputationFactorSelectorDialog(
+				designFactors, designFactorsSelectedForImputation, this);
+		dialog.setLocationRelativeTo(this.getContentPane());
+		dialog.setVisible(true);
 	}
 
 	private void acceptDesignFactorsForDataImputation() {
@@ -1083,14 +1096,16 @@ public class DockableMetabCombinerScriptGenerator extends DefaultSingleCDockable
 					SwingUtilities.getWindowAncestor(this.getContentPane()));
 			return;
 		}
-		String[][] mcInputData = DelimitedTextParser.parseTextFile(
-				designInputFile, MRC2ToolBoxConfiguration.getTabDelimiter());
-		designFactors = new TreeSet<>();
-		for(int i=1; i<mcInputData[0].length; i++) {
-			
-			if(!mcInputData[0][i].isBlank())
-				designFactors.add(mcInputData[0][i]);
-		}		
+
+		CSVParser parser = DelimitedTextParserUtils.parseTabDelimitedFile(designInputFile);
+		if (parser == null) {
+			MessageDialog.showErrorMsg("Could not parse design file " + designInputFile.getName(),
+					SwingUtilities.getWindowAncestor(this.getContentPane()));
+			return;
+		}
+		designFactors.addAll(parser.getHeaderNames());
+		if(!designFactors.isEmpty())
+			selectDesignFactorsForDataImputation();
 	}
 
 	private void selectExistingMcAlignmentFolder() {
@@ -1432,6 +1447,7 @@ public class DockableMetabCombinerScriptGenerator extends DefaultSingleCDockable
 		MetabCombinerAlignmentScriptGenerator mcsg = 
 				new MetabCombinerAlignmentScriptGenerator(mcpo);
 		mcsg.createMetabCombinerAlignmentScript();
+		copyInputFilesToProject(mcpo);
 		if (Desktop.isDesktopSupported()) {
 		    try {
 		        Desktop.getDesktop().open(mcpo.getProjectParentDirectory());
@@ -1441,6 +1457,31 @@ public class DockableMetabCombinerScriptGenerator extends DefaultSingleCDockable
 		}
 	}
 	
+	private void copyInputFilesToProject(MetabCombinerParametersObject mcpo) {
+				
+		for(RMultibatchAnalysisInputObject ioObject : mcpo.getMetabCombinerFileInputObjectSet()) {
+			
+			File peakAreaFile = ioObject.getFile(SummaryInputColumns.PEAK_AREAS);
+			Path newPeakAreaPath = Paths.get(mcpo.getProjectDirectory().toPath().toString(), 
+					McAlignmentProjectSubfolders.RawData.name(), peakAreaFile.getName());
+			try {
+				Files.copy(peakAreaFile.toPath(), newPeakAreaPath, StandardCopyOption.REPLACE_EXISTING);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			File manifestFile = ioObject.getFile(SummaryInputColumns.MANIFEST);
+			Path newManifestPath = Paths.get(mcpo.getProjectDirectory().toPath().toString(), 
+					McAlignmentProjectSubfolders.Manifests.name(), manifestFile.getName());
+			try {
+				Files.copy(manifestFile.toPath(), newManifestPath, StandardCopyOption.REPLACE_EXISTING);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}	
+	}
+
 	private Collection<String>validateFormData(){
 		
 		sampleIdPattern = Pattern.compile(MRC2ToolBoxConfiguration.CORE_SAMPLE_ID_MASK_DEFAULT);
@@ -1513,7 +1554,7 @@ public class DockableMetabCombinerScriptGenerator extends DefaultSingleCDockable
 	private void verifyMatchBetweenManifestsDesignRawData(
 			Collection<RMultibatchAnalysisInputObject> ioList, 
 			Collection<String> errors) {
-		// Check that raw data files match exactly between raw data and manifest
+		
 		for(RMultibatchAnalysisInputObject ioObject : ioList) {
 			
 			File peakAreaFile = ioObject.getFile(SummaryInputColumns.PEAK_AREAS);
@@ -1521,8 +1562,16 @@ public class DockableMetabCombinerScriptGenerator extends DefaultSingleCDockable
 			checkFileNameDiscrepancies(peakAreaFile, manifestFile, errors);
 		}		
 	}
-
-	private void checkFileNameDiscrepancies(File peakAreasFile, File manifestFile, Collection<String> errors) {
+	
+	/**
+	 * Check that all raw data files present in peak area file are also present in manifest
+	 * 
+	 * @param peakAreasFile
+	 * @param manifestFile
+	 * @param errors
+	 * @return the list of files to exclude from the manifest to make it compatible with QCANVAS
+	 */
+	private List<String> checkFileNameDiscrepancies(File peakAreasFile, File manifestFile, Collection<String> errors) {
 
 		Collection<String>fileNamesFromPeakAreasFile = getRawFileNamesFromPeakAreasFile(peakAreasFile, errors);
 		Collection<String>fileNamesFromManifest = getRawFileNamesFromManifestFile(manifestFile, errors);
@@ -1541,13 +1590,14 @@ public class DockableMetabCombinerScriptGenerator extends DefaultSingleCDockable
 			for(String fn : inPeakAreasButNotInManifest)
 				errors.add(fn);
 		}
-		if(!inManifestButNotInPeakAreas.isEmpty()) {
-			
-			errors.add("The following files are listed in manifest\n" + manifestFile.getName() + 
-					"\nbut are absent from peak areas file\n" + peakAreasFile.getName() + ":\n");
-			for(String fn : inManifestButNotInPeakAreas)
-				errors.add(fn);
-		}		
+//		if(!inManifestButNotInPeakAreas.isEmpty()) {
+//			
+//			errors.add("The following files are listed in manifest\n" + manifestFile.getName() + 
+//					"\nbut are absent from peak areas file\n" + peakAreasFile.getName() + ":\n");
+//			for(String fn : inManifestButNotInPeakAreas)
+//				errors.add(fn);
+//		}
+		return inManifestButNotInPeakAreas;
 	}
 	
 	private Collection<String> getRawFileNamesFromPeakAreasFile(File peakAreasFile, Collection<String> errors) {
