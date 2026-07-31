@@ -27,8 +27,8 @@ import java.awt.FlowLayout;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -117,7 +117,7 @@ public class ImputationFactorSelectorDialog extends JDialog {
         factorList.setSelectedIndices(indicesToSelect);
 	}
 	
-	public List<String> getUserSelectedFactors() {
-		return factorList.getSelectedValuesList();
+	public Set<String> getUserSelectedFactors() {
+		return factorList.getSelectedValuesList().stream().collect(Collectors.toSet());
 	}
 }

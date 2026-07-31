@@ -1,0 +1,56 @@
+---
+title: "MetabCombiner Multibatch Alignment Report"
+output: html_document
+params:
+  project_name: ""
+  input_stats: ""
+  filter_plot: ""
+  alignment_heatmap: ""
+  percent_aligned_plot: ""
+  percent_aligned_filtered_plot: ""
+  adduct_plot:
+  max_missing_in_pools: 30,
+  max_missing_in_samples: 50
+---
+
+## **`r params$project_name`**.
+
+#### Input data are filtered based on the following parameters:
+* Max. % missing in pools: **`r params$max_missing_in_pools`%**
+* Max. % missing in samples: **`r params$max_missing_in_samples`%**
+
+```{r setup, include=FALSE}
+# This globally prevents R code from appearing in the final document
+knitr::opts_chunk$set(echo = FALSE)
+```
+##### Table key:
+* input_size - number of features after pre-filtering based on max. % missing allowed in pools and samples
+* missing_prefilter - number of features removed by pre-filtering based on max. % missing allowed in pools and samples
+* filtered_by_rt -  number of features removed based on retention time if RT range is specified
+* filtered_as_duplicates - number of duplicate features removed based on narrow M/Z and RT windows
+* filtered_by_missingness - number of features removed from pre-filtered input based on % missing
+* final_count - number of features in the dataset to be used for alignmnent
+
+```{r}
+kable(params$input_stats, caption = "Input data filtering results barchart")
+```
+
+```{r echo=FALSE, , fig.width=7, fig.height=5, fig.align='center', fig.cap="Data filtering barchart."}
+params$filter_plot
+```
+
+```{r echo=FALSE, , fig.width=7, fig.height=5, fig.align='center', fig.cap="Batch-to-batch # of aligned features map."}
+params$alignment_heatmap
+```
+
+```{r echo=FALSE, , fig.width=7, fig.height=5, fig.align='center', fig.cap="Adduct reproducibility in aligned data set"}
+params$adduct_plot
+```
+
+```{r echo=FALSE, , fig.width=7, fig.height=5, fig.align='center', fig.cap="Aligned vs unaligned features in each batch based on UNFILTERED data sets."}
+params$percent_aligned_plot
+```
+
+```{r echo=FALSE, , fig.width=7, fig.height=5, fig.align='center', fig.cap="Aligned vs unaligned features in each batch based on FILTERED data sets."}
+params$percent_aligned_filtered_plot
+```

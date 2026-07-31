@@ -27,6 +27,7 @@ public enum MetabCombinerAlignmentSettingsFields {
 	MetabCombinerFileIO,
 	MetabCombinerFileIOList,
 	projectParentDirectory,
+	projectTitle,
 	projectDirectory,
 	useExistingAlignment,
 	alignmentRTRange,

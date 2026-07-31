@@ -31,6 +31,7 @@ public enum MoTrPACRawDataManifestFields {
 	MOTRPAC_EXTRACTION_DATE	("extraction_date"),
 	MOTRPAC_ACQUISITION_DATE("acquisition_date"),	
 	MOTRPAC_LC_COLUMN_ID("lc_column_id"),
+	MOTRPAC_BATCH_OVERRIDE("batch_override"),
 	;
 		
 	private final String uiName;

@@ -45,6 +45,7 @@ public class MetabCombinerParametersObject implements XmlStorable{
 	
 	private File projectParentDirectory;
 	private File projectDirectory;
+	private String projectTitle;
 	private boolean useExistingAlignment;
 	private Set<RMultibatchAnalysisInputObject>metabCombinerFileInputObjectSet;
 	private Range alignmentRTRange;
@@ -79,7 +80,7 @@ public class MetabCombinerParametersObject implements XmlStorable{
 
 	public MetabCombinerParametersObject() {
 		super();
-		// TODO Auto-generated constructor stub
+		factorsForImputation = new TreeSet<>();
 	}
 
 	public File getProjectParentDirectory() {
@@ -365,6 +366,11 @@ public class MetabCombinerParametersObject implements XmlStorable{
 				&& !projectDirectoryElement.getText().isEmpty())
 			projectDirectory = new File(projectDirectoryElement.getText());
 		
+		Element projectTitleElement = metabCombinerParametersElement
+				.getChild(MetabCombinerAlignmentSettingsFields.projectTitle.name());
+		if(projectTitleElement != null && !projectTitleElement.getText().isEmpty())
+			projectTitle = projectTitleElement.getText();
+		
 		metabCombinerFileInputObjectSet = new TreeSet<>();
 		List<Element> ioFieldList = metabCombinerParametersElement.getChild(
 				MetabCombinerAlignmentSettingsFields.MetabCombinerFileIOList.name()).getChildren(
@@ -530,6 +536,11 @@ public class MetabCombinerParametersObject implements XmlStorable{
 		projectDirectoryElement.setText(getProjectDirectory().getAbsolutePath());
 		metabCombinerParametersElement.addContent(projectDirectoryElement);
 		
+		Element projectTitleElement = new Element(MetabCombinerAlignmentSettingsFields.projectTitle.name());
+		if (projectTitle != null)
+			projectTitleElement.setText(projectTitle);
+		metabCombinerParametersElement.addContent(projectTitleElement);
+		
 		metabCombinerParametersElement.setAttribute(
 				MetabCombinerAlignmentSettingsFields.useExistingAlignment.name(), 
 				Boolean.toString(useExistingAlignment));
@@ -638,5 +649,13 @@ public class MetabCombinerParametersObject implements XmlStorable{
 			}
 		}
 		return metabCombinerParametersElement;
+	}
+
+	public String getProjectTitle() {
+		return projectTitle;
+	}
+
+	public void setProjectTitle(String projectTitle) {
+		this.projectTitle = projectTitle;
 	}
 }

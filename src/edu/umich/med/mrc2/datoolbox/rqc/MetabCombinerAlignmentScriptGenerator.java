@@ -42,25 +42,30 @@ import org.apache.commons.lang.StringUtils;
 import org.jdom2.Document;
 import org.jdom2.Element;
 
+import edu.umich.med.mrc2.datoolbox.data.enums.MoTrPACQCSampleType;
 import edu.umich.med.mrc2.datoolbox.data.enums.MoTrPACRawDataManifestFields;
 import edu.umich.med.mrc2.datoolbox.gui.rgen.TemplateRbasedProjectGenerator;
 import edu.umich.med.mrc2.datoolbox.gui.rgen.mcr.MetabCombinerParametersObject;
 import edu.umich.med.mrc2.datoolbox.gui.rgen.mcr.RMultibatchAnalysisInputObject;
+import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
 import edu.umich.med.mrc2.datoolbox.utils.XmlUtils;
 
 public class MetabCombinerAlignmentScriptGenerator extends TemplateRbasedProjectGenerator {
 	
-	public static final String MC_ALIGNMENT_PROJECT_BASE_NAME = "MetabCombinerMultyBatchAlignment-";
-	public static final String SCRIPT_FILE_PREFIX = "MetabCombinerMultyBatchAlignmentScript_";
+	public static final String MC_ALIGNMENT_PROJECT_BASE_NAME = "MetabCombinerMultiBatchAlignment-";
+	public static final String SCRIPT_FILE_PREFIX = "MetabCombinerMultiBatchAlignmentScript_";
 	public static final String ALIGNMENT_SUMMARY_TABLE_FILE_NAME = "AlignmentSummaryTable.txt";
 	public static final String MERGED_ALIGNED_DATA_FILE_NAME = "MergedAlignedData.txt";
+	public static final String MERGED_ALIGNED_IMPUTED_DATA_FILE_NAME = "MergedAlignedImputedData.txt";
 	public static final String CLEAN_DATA_FILE_SUFFIX= "-cleanData.txt";
 	public static final String INPUT_STATS_FILE_PREFIX = "MetabCombinerMultiAlignmentInputStats_";
 	public static final String CUMMULATIVE_METADATA_FILE_NAME = "CummulativeMetaData.txt";
 	public static final String EXTENDED_CUMMULATIVE_METADATA_FILE_NAME = "CummulativeMetaDataEFS.txt";
 	public static final String ADDUCT_REPRODUCIBILITY_FILE_NAME = "AdductReproducibility.pdf";
+	public static final String ALIGNMENT_HEATMAP_FILE_NAME = "AlignmentHeatmap.pdf";
+	public static final String INPUT_FILTERING_PLOT_FILE_NAME = "InputFilteringPlot.pdf";
 	public static final String ADDUCT_REPRODUCIBILITY_EXTENDED_FILE_NAME = "AdductReproducibilityEFS.pdf";
 	public static final String MERGED_ALIGNED_DATA_EXTENDED_FILE_NAME = "MergedAlignedDataEFS.txt";
 	public static final String ALIGNMENT_METADATA_SUFFIX = ".alignmentMetaData";
@@ -70,6 +75,9 @@ public class MetabCombinerAlignmentScriptGenerator extends TemplateRbasedProject
 	public static final String COMPLETE_ALIGNMENT_REPORT_NAME_PREFIX = "CompleteAlignmentReport-";
 	public static final String R_FOLDER_SEPARATOR = "/";
 	public static final String ALIGNMENT_SETTINGS_FILE = "MetabCombinerAlignmentSettings.xml";
+	public static final String EXPERIMENT_DESIGN_FILE_NAME = "ExperimentDesign.txt";
+	public static final String MISSING_PREFILTER_COLUMN = "missing_prefilter";
+	public static final String ALIGNMENT_REPORT_FILE_NAME = "MultiBatchMCAlignmentReport";
 	
 	public static final List<SummaryInputColumns> requiredProperties = 
 			Arrays.asList(
@@ -126,12 +134,22 @@ public class MetabCombinerAlignmentScriptGenerator extends TemplateRbasedProject
 		if(parametersObject.getMaxMissingBatchCount() > 0)
 			createFuzzyMatchingBlock();
 		
+		createCombinedManifestBlock();
+		
 		if(parametersObject.isImputeMissingValuesInAlignedData())
 			createImputationBlock();
 		
-		createCombinedManifestBlock();
-		
 		createQCANVASoutputBlock();
+		
+		createAlignmentHeatMapBlock();
+		
+		crerateInputFilteringPlotBlock();
+		
+		createPercentAlignedPlots();
+		 
+		generateHTMLreport();
+			
+		rscriptParts.add("\n# End of script ####\n");
 		
 		writeScriptToFile();
 		
@@ -162,6 +180,14 @@ public class MetabCombinerAlignmentScriptGenerator extends TemplateRbasedProject
 				e.printStackTrace();
 			}
 		}
+		Path rmdReportTemplatePath = Paths.get(MRC2ToolBoxCore.configDir, ALIGNMENT_REPORT_FILE_NAME + ".Rmd");
+        Path rmdReportPath = Paths.get(newProjectPath.toString(), ALIGNMENT_REPORT_FILE_NAME + ".Rmd");
+        try {
+			Files.copy(rmdReportTemplatePath, rmdReportPath);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		scriptFile = Paths.get(newProjectPath.toString(), 
 				SCRIPT_FILE_PREFIX + FIOUtils.getTimestamp() + ".R" ).toFile();
 	}
@@ -172,10 +198,11 @@ public class MetabCombinerAlignmentScriptGenerator extends TemplateRbasedProject
 				MRC2ToolBoxConfiguration.defaultTimeStampFormat.format(new Date())+ " ####\n");
 		rscriptParts.add("setwd(dirname(rstudioapi::getActiveDocumentContext()$path))\n");	
 		rscriptParts.add("library(metabCombiner)");
-		//rscriptParts.add("library(reshape2)");
 		rscriptParts.add("library(dplyr)");
 		rscriptParts.add("library(purrr)");
 		rscriptParts.add("library(ggplot2)\n");
+		
+		rscriptParts.add("project_name <- \"" + parametersObject.getProjectTitle() + "\"");
 	}
 	
 	private void createDataImportBlock() {
@@ -194,19 +221,27 @@ public class MetabCombinerAlignmentScriptGenerator extends TemplateRbasedProject
 			rscriptParts.add(dataObject + " <- " + dataObject + "[!(" + dataObject + "$rt == \"NaN\"),]");
 			
 			//	Filter data based on missingness in drift correction and regular samples
+			String maxPercentMissingInRegularSamples = 
+					Double.toString(parametersObject.getMaxPercentMissingInRegularSamples());
+			String maxPercentMissingInDriftCorrSamples = 
+					Double.toString(parametersObject.getmaxPercentMissingInDriftCorrSamples());
+			
+			rscriptParts.add("max_missing_in_samples" + " <- " + maxPercentMissingInRegularSamples);
+			rscriptParts.add("max_missing_in_pools" + " <- " + maxPercentMissingInDriftCorrSamples);
+		
 			String sampleDataObject = dataObject + ".samples";			
 			rscriptParts.add(sampleDataObject + " <- " + dataObject + " %>% select(1,contains(\"-S00\"))");
 			rscriptParts.add(sampleDataObject + "$pcMissing <- rowMeans(is.na(" + sampleDataObject + "[,-1]) * 100, na.rm = T)");			
 			String sampleFeaturesDataObject = sampleDataObject + ".features";
 			rscriptParts.add(sampleFeaturesDataObject + " <- " + sampleDataObject + "  %>% filter(pcMissing < " + 
-					Double.toString(parametersObject.getMaxPercentMissingInRegularSamples()) + ") %>% pull(1) %>% as.list()");
+					maxPercentMissingInRegularSamples + ") %>% pull(1) %>% as.list()");
 			
 			String driftCorrDataObject = dataObject + ".driftcorr";			
 			rscriptParts.add(driftCorrDataObject + " <- " + dataObject + " %>% select(1,contains(\"CS00000MP\"))");
 			rscriptParts.add(driftCorrDataObject + "$pcMissing <- rowMeans(is.na(" + driftCorrDataObject + "[,-1]) * 100, na.rm = T)");			
 			String driftCorrFeaturesDataObject = driftCorrDataObject + ".features";
 			rscriptParts.add(driftCorrFeaturesDataObject + " <- " + driftCorrDataObject + "  %>% filter(pcMissing < " + 
-					Double.toString(parametersObject.getmaxPercentMissingInDriftCorrSamples()) + ") %>% pull(1) %>% as.list()");
+					maxPercentMissingInDriftCorrSamples + ") %>% pull(1) %>% as.list()");
 			
 			String filterFeaturesListObject = dataObjectPrefix + ".filtered.features";
 			rscriptParts.add(filterFeaturesListObject +
@@ -238,10 +273,14 @@ public class MetabCombinerAlignmentScriptGenerator extends TemplateRbasedProject
 			
 			String statsObject = dataObjectPrefix + ".stats";
 			rscriptParts.add(statsObject + " <- as.data.frame(getStats(" + metabDataObject + "))");
+			
+			rscriptParts.add(statsObject + "$" + MISSING_PREFILTER_COLUMN 
+					+ " <- nrow(" + dataObject + ") - rowSums(" + statsObject + "[, -1], na.rm = TRUE)[[1]]");
 			rscriptParts.add(statsObject + "$" + SummaryInputColumns.EXPERIMENT.getRName() 
 				+ " <- \"" + mcio.getExperimentId() + "\"");
 			rscriptParts.add(statsObject + "$" + SummaryInputColumns.BATCH.getRName() 
 				+ " <- \"" + mcio.getBatchId() + "\"");
+			
 			rscriptParts.add("stats.all <- bind_rows(stats.all, " + statsObject + ")");
 		}
 		//	Write out statistics for all metabData objects
@@ -289,8 +328,9 @@ public class MetabCombinerAlignmentScriptGenerator extends TemplateRbasedProject
 				+ "matched.features = character(), num.matched = integer())");
 		rscriptParts.add("overlap.list.collection <- list()");
 		rscriptParts.add("stats.all <- data.frame(");
-		rscriptParts.add("\tinput_size = integer(), filtered_by_rt = integer(), filtered_as_duplicates = integer(),");
-		rscriptParts.add("\tfiltered_by_missingness = integer(), final_count = integer(), exp = character(), batch = character())");
+		rscriptParts.add("\texp = character(), batch = character(), input_size = integer(), filtered_by_rt = integer(), ");
+		rscriptParts.add("\tfiltered_as_duplicates = integer(), filtered_by_missingness = integer(), final_count = integer(), "
+				+ MISSING_PREFILTER_COLUMN + " = integer())");
 	}
 	
 	private void createDataAlignmentBlock() {
@@ -641,10 +681,48 @@ public class MetabCombinerAlignmentScriptGenerator extends TemplateRbasedProject
 		
 		rscriptParts.add("\n# Impute missing values in aligned data ####");
 		
-		//merged.data
+		String designSelectString = MoTrPACRawDataManifestFields.MOTRPAC_RAW_FILE.getName();
+		if(!parametersObject.getFactorsForImputation().isEmpty())
+			designSelectString += ", " + StringUtils.join(parametersObject.getFactorsForImputation(), ", ");
 		
+		String manifestSelectString = MoTrPACRawDataManifestFields.MOTRPAC_RAW_FILE.getName() + ", "
+				+ MoTrPACRawDataManifestFields.MOTRPAC_SAMPLE_TYPE.getName() + ", "
+				+ MoTrPACRawDataManifestFields.MOTRPAC_BATCH_OVERRIDE.getName();
 		
-		//merged.data.union
+		String factorString = "imputation.design.with.controls$"+ MoTrPACRawDataManifestFields.MOTRPAC_BATCH_OVERRIDE.getName();
+		if(!parametersObject.getFactorsForImputation().isEmpty()) {
+							
+			for (String factor : parametersObject.getFactorsForImputation())
+				factorString += ", imputation.design.with.controls$" + factor;
+			
+			rscriptParts.add("imputation.design.with.controls <- read.delim(\"" + EXPERIMENT_DESIGN_FILE_NAME + "\", check.names=FALSE ) %>% ");
+			rscriptParts.add("  select(" + designSelectString + ") %>% ");
+			rscriptParts.add("  right_join(manifest_dataset.clean %>% select(" + manifestSelectString + ")) %>% ");
+			rscriptParts.add("  filter(!" + MoTrPACRawDataManifestFields.MOTRPAC_SAMPLE_TYPE.getName() + " == \"" + MoTrPACQCSampleType.QC_BLANK.getName() + "\") %>% ");
+			rscriptParts.add("  mutate(across(everything(), ~ na_if(., \"\"))) %>%");
+			rscriptParts.add("  mutate(across(everything(), ~ coalesce(.x, " + MoTrPACRawDataManifestFields.MOTRPAC_SAMPLE_TYPE.getName() + ")))");
+		}
+		else {
+			factorString += ", imputation.design.with.controls$" + MoTrPACRawDataManifestFields.MOTRPAC_SAMPLE_TYPE.getName();
+			rscriptParts.add("imputation.design.with.controls <- manifest_dataset.clean %>% select(" + manifestSelectString + ") %>% ");
+			rscriptParts.add("  filter(!" + MoTrPACRawDataManifestFields.MOTRPAC_SAMPLE_TYPE.getName() + " == \"" + MoTrPACQCSampleType.QC_BLANK.getName() + "\")");
+		}
+		//	factorString += ")";					
+
+		rscriptParts.add("library(bnstruct)");
+		rscriptParts.add("data.with.controls_imputed <- knn.impute(");
+		rscriptParts.add("  data.matrix(merged.data[,imputation.design.with.controls$" + MoTrPACRawDataManifestFields.MOTRPAC_RAW_FILE.getName() + "]),");
+		rscriptParts.add("  k = 10,");
+		rscriptParts.add("  cat.var = as.character(" + factorString + "),");
+		rscriptParts.add("  to.impute = 1:nrow(merged.data),");
+		rscriptParts.add("  using = 1:nrow(merged.data)");
+		rscriptParts.add(")");
+		rscriptParts.add("blanks <- manifest_dataset.clean %>% filter(" + MoTrPACRawDataManifestFields.MOTRPAC_SAMPLE_TYPE.getName() + 
+				" == \"" + MoTrPACQCSampleType.QC_BLANK.getName() + "\") %>% select(raw_file)");
+		rscriptParts.add("merged.data.imputed <- cbind(merged.data[,c(1:3)], data.with.controls_imputed, merged.data[,blanks$" + 
+				MoTrPACRawDataManifestFields.MOTRPAC_RAW_FILE.getName() + "])");
+		rscriptParts.add("write.table(merged.data.imputed, file = \"" + MERGED_ALIGNED_IMPUTED_DATA_FILE_NAME + "\", "
+				+ "quote = F, sep = \"\\t\", na = \"\", row.names = FALSE)");
 	}	
 
 	private void createQCANVASoutputBlock() {
@@ -682,11 +760,21 @@ public class MetabCombinerAlignmentScriptGenerator extends TemplateRbasedProject
 			String extendedExportFileName= FilenameUtils.getBaseName(MERGED_ALIGNED_DATA_EXTENDED_FILE_NAME) + "_4QCANVAS.txt";
 			rscriptParts.add("write.table(combined.union.4qcanvas, file = \"" + extendedExportFileName + "\", quote = F, sep = \"\\t\", na = \"\", row.names = FALSE)");
 		}
+		//	With imputed data
+		if(parametersObject.isImputeMissingValuesInAlignedData()) {
+
+			rscriptParts.add("merged.data.imputed.4qcanvas <- merged.data.imputed[,-c(1,2)]");
+			rscriptParts.add("colnames(merged.data.imputed.4qcanvas)[1] <- \"Feature\"");
+			rscriptParts.add("combined.imputed.4qcanvas <- bind_rows(qcanvas.header, merged.data.imputed.4qcanvas)");
+			
+			String imputedExportFileName= FilenameUtils.getBaseName(MERGED_ALIGNED_IMPUTED_DATA_FILE_NAME) + "_4QCANVAS.txt";
+			rscriptParts.add("write.table(combined.imputed.4qcanvas, file = \"" + imputedExportFileName + "\", quote = F, sep = \"\\t\", na = \"\", row.names = FALSE)");
+		}
 	}
 
 	private void createCombinedManifestBlock() {
-		// TODO Auto-generated method stub
-		rscriptParts.add("\n# Create cobined clean manifest ####");
+
+		rscriptParts.add("\n# Create combined clean manifest ####");
 		rscriptParts.add("\n## Read and combine original batch manifests ####\n");
 		rscriptParts.add("manifest_file_list <- list.files(path=\"./" + McAlignmentProjectSubfolders.Manifests.name() + "\")");
 		rscriptParts.add("manifest_dataset <- data.frame()");
@@ -705,6 +793,93 @@ public class MetabCombinerAlignmentScriptGenerator extends TemplateRbasedProject
 		rscriptParts.add("write.table(manifest_dataset.clean, file = \"MergedCleanManifest.txt\", quote = F, sep = \"\\t\", na = \"\", row.names = FALSE)");
 		rscriptParts.add("");
 	}
+	
+	private void crerateInputFilteringPlotBlock() {
+		
+		rscriptParts.add("mc.input.stats <- stats.all %>% ");
+		rscriptParts.add("\tmutate(ExperimentBatch = paste(exp, batch, sep = \"_\")) %>% ");
+		rscriptParts.add("\tselect(-c(\"input_size\", \"exp\", \"batch\")) %>%");
+		rscriptParts.add("\tas.data.table() %>% data.table::melt(id = c(\"ExperimentBatch\"), variable.name = \"Filter\", value.name = \"Counts\", na.rm = T)");
+		rscriptParts.add("mc.input.stats$Filter <- relevel(mc.input.stats$Filter, ref = \"" + MISSING_PREFILTER_COLUMN + "\")");
+		rscriptParts.add("");
+		rscriptParts.add("input.filtering.plot <- ggplot(mc.input.stats, aes(x = ExperimentBatch, y = Counts, fill = Filter)) +");
+		rscriptParts.add("\tgeom_col() + theme(axis.text.x = element_text(angle = 45, hjust = 1))");
+		
+//		rscriptParts.add("ggsave(\"" + INPUT_FILTERING_PLOT_FILE_NAME 
+//				+ "\", plot = input.filtering.plot,  width = 8, height = 6, device = \"pdf\")");
+		
+		rscriptParts.add("");
+	}
+
+	private void createAlignmentHeatMapBlock() {
+		
+		rscriptParts.add("\n# Create heatamap for the number of features aligned between batches ####");
+		rscriptParts.add("alignment.summary.4hm <- alignment.summary.df %>% select(dsx,dsy,num.matched) %>% ");
+		rscriptParts.add("	mutate(across(where(is.character), as.factor)) %>% filter(as.numeric(dsx) >= as.numeric(dsy))");
+		rscriptParts.add("");
+		rscriptParts.add("align.heatmap <- ggplot(alignment.summary.4hm, aes(x = dsx, y = dsy, fill = num.matched)) +");
+		rscriptParts.add("	geom_tile(color = \"white\", lwd = 0.5) +");
+		rscriptParts.add("	scale_fill_viridis_c() +");
+		rscriptParts.add("	theme_minimal() +");
+		rscriptParts.add("	labs(title = \"Heatmap of aligned feature numbers between batches\", x = \"First batch\", y = \"Second batch\") +");		
+		rscriptParts.add("	theme(axis.text.x = element_text(angle = 45, hjust = 1))");
+		
+//		rscriptParts.add("ggsave(\"" + ALIGNMENT_HEATMAP_FILE_NAME 
+//				+ "\", plot = align.heatmap,  width = 8, height = 6, device = \"pdf\")");
+		
+		rscriptParts.add("");
+	}
+	
+	private void createPercentAlignedPlots() {
+		
+		rscriptParts.add("\n# Create % aligned barchart for all batches ####");
+		rscriptParts.add("mc.aligned.stats <- stats.all %>% ");
+		rscriptParts.add("  mutate(ExperimentBatch = paste(exp, batch, sep = \"_\")) %>% ");
+		rscriptParts.add("  mutate(original_count = final_count + missing_prefilter) %>% ");
+		rscriptParts.add("  mutate(Aligned = nrow(merged.data) / original_count * 100) %>% ");
+		rscriptParts.add("  mutate(Unaligned = 100 - Aligned) %>% ");
+		rscriptParts.add("  select(c(\"ExperimentBatch\", \"Unaligned\", \"Aligned\")) %>%");
+		rscriptParts.add("  as.data.table() %>% data.table::melt(id = c(\"ExperimentBatch\"), variable.name = \"Subset\", value.name = \"Percent\", na.rm = T)");
+		rscriptParts.add("");
+		rscriptParts.add("percent.aligned.plot <- ggplot(mc.aligned.stats, aes(x = ExperimentBatch, y = Percent, fill = Subset)) +");
+		rscriptParts.add("  geom_col() + theme(axis.text.x = element_text(angle = 45, hjust = 1))");
+		rscriptParts.add("");
+		rscriptParts.add("mc.aligned.stats.filtered <- stats.all %>% ");
+		rscriptParts.add("  mutate(ExperimentBatch = paste(exp, batch, sep = \"_\")) %>% ");
+		rscriptParts.add("  mutate(Aligned = nrow(merged.data) / final_count * 100) %>% ");
+		rscriptParts.add("  mutate(Unaligned = 100 - Aligned) %>% ");
+		rscriptParts.add("  select(c(\"ExperimentBatch\", \"Unaligned\", \"Aligned\")) %>%");
+		rscriptParts.add("  as.data.table() %>% data.table::melt(id = c(\"ExperimentBatch\"), variable.name = \"Subset\", value.name = \"Percent\", na.rm = T)");
+		rscriptParts.add("");
+		rscriptParts.add("percent.aligned.filtered.plot <- ggplot(mc.aligned.stats.filtered, aes(x = ExperimentBatch, y = Percent, fill = Subset)) +");
+		rscriptParts.add("  geom_col() + theme(axis.text.x = element_text(angle = 45, hjust = 1))");
+		rscriptParts.add("");
+	}
+	
+	private void generateHTMLreport() {
+
+		rscriptParts.add("\n# Generate HTML report ####");
+		rscriptParts.add("");
+		rscriptParts.add("library(rmarkdown)");
+		rscriptParts.add("library(knitr)");
+		rscriptParts.add("rmarkdown::render(");
+		rscriptParts.add("  input = \"" + ALIGNMENT_REPORT_FILE_NAME + ".Rmd\",");
+		rscriptParts.add("  output_file = \"" + ALIGNMENT_REPORT_FILE_NAME + ".html\",");
+		rscriptParts.add("  params = list(");
+		rscriptParts.add("    project_name = project_name,");
+		rscriptParts.add("    input_stats = stats.all,");
+		rscriptParts.add("    filter_plot = input.filtering.plot,");
+		rscriptParts.add("    alignment_heatmap = align.heatmap,");
+		rscriptParts.add("    percent_aligned_plot = percent.aligned.plot,");
+		rscriptParts.add("    percent_aligned_filtered_plot = percent.aligned.filtered.plot,");
+		rscriptParts.add("    adduct_plot = adduct.plot,");		
+		rscriptParts.add("    max_missing_in_pools = max_missing_in_pools,");
+		rscriptParts.add("    max_missing_in_samples = max_missing_in_samples");
+		rscriptParts.add("  )");
+		rscriptParts.add(")");
+		rscriptParts.add("");
+	}
+    
 
 	private void saveAlignmentParameters() {
 
