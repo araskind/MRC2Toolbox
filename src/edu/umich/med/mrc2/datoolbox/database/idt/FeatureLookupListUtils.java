@@ -29,6 +29,9 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.TreeSet;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+
 import edu.umich.med.mrc2.datoolbox.data.MinimalMSOneFeature;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.msclust.FeatureLookupList;
@@ -36,10 +39,15 @@ import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.utils.SQLUtils;
 
 public class FeatureLookupListUtils {
+	
+	private static final Logger logger = LogManager.getLogger(FeatureLookupListUtils.class);
 
+	 private FeatureLookupListUtils() {
+	   /* This utility class should not be instantiated */
+	 }
 	
 	public static void addFeatureLookupList(
-			FeatureLookupList newDataSet) throws Exception {
+			FeatureLookupList newDataSet) throws SQLException {
 		
 		Connection conn = ConnectionManager.getConnection();
 		addFeatureLookupDataSet(newDataSet, conn);
@@ -60,170 +68,174 @@ public class FeatureLookupListUtils {
 			"INSERT INTO FEATURE_LOOKUP_DATA_SET " +
 			"(FLDS_ID, NAME, DESCRIPTION, CREATED_BY,  " +
 			"DATE_CREATED, LAST_MODIFIED) VALUES (?, ?, ?, ?, ?, ?)";
-		PreparedStatement ps = conn.prepareStatement(query);
+		try(PreparedStatement ps = conn.prepareStatement(query)){
 		
-		ps.setString(1, dataSet.getId());
-		ps.setString(2, dataSet.getName());
-		if(dataSet.getDescription() != null)
-			ps.setString(3, dataSet.getDescription());
-		else
-			ps.setNull(3, java.sql.Types.NULL);
-		
-		ps.setString(4, dataSet.getCreatedBy().getId());
-		ps.setTimestamp(5, new java.sql.Timestamp(
-				dataSet.getDateCreated().getTime()));
-		ps.setTimestamp(6, new java.sql.Timestamp(
-				dataSet.getLastModified().getTime()));	
-		ps.executeUpdate();
-		
+			ps.setString(1, dataSet.getId());
+			ps.setString(2, dataSet.getName());
+			if(dataSet.getDescription() != null)
+				ps.setString(3, dataSet.getDescription());
+			else
+				ps.setNull(3, java.sql.Types.NULL);
+			
+			ps.setString(4, dataSet.getCreatedBy().getId());
+			ps.setTimestamp(5, new java.sql.Timestamp(
+					dataSet.getDateCreated().getTime()));
+			ps.setTimestamp(6, new java.sql.Timestamp(
+					dataSet.getLastModified().getTime()));	
+			ps.executeUpdate();
+		}
 		//	Add features
 		query = "INSERT INTO FEATURE_LOOKUP_DATA_SET_COMPONENT "
 				+ "(COMPONENT_ID, FLDS_ID, NAME, MZ, RT, RANK, "
 				+ "SMILES, INCHI_KEY, FOLD_CHANGE, P_VALUE) "
 				+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 		
-		ps = conn.prepareStatement(query);
-		ps.setString(2, dataSet.getId());
-		int counter = 0;
-		for(MinimalMSOneFeature f : dataSet.getFeatures()) {
+		try(PreparedStatement ps = conn.prepareStatement(query)){
 			
-			String fId = SQLUtils.getNextIdFromSequence(conn, 
-					"FEATURE_LOOKUP_DATA_SET_COMPONENT_SEQ",
-					DataPrefix.LOOKUP_FEATURE,
-					"0",
-					12);
-			f.setId(fId);
-			ps.setString(1, fId);
-			ps.setString(3, f.getName());
-			ps.setDouble(4, f.getMz());
-			ps.setDouble(5, f.getRt());
-			ps.setDouble(6, f.getRank());
-			
-			if(f.getSmiles() != null)
-				ps.setString(7, f.getSmiles());
-			else
-				ps.setNull(7,  java.sql.Types.NULL);
-			
-			if(f.getInchiKey() != null)
-				ps.setString(8, f.getInchiKey());
-			else
-				ps.setNull(8,  java.sql.Types.NULL);
-			
-			ps.setDouble(9, f.getFoldChange());
-			ps.setDouble(10, f.getpValue());
-			ps.addBatch();
-			counter++;
-			
-			if(counter % 100 == 0)
-				ps.executeBatch();
-		}
-		ps.executeBatch();
-		ps.close();		
+			ps.setString(2, dataSet.getId());
+			int counter = 0;
+			for(MinimalMSOneFeature f : dataSet.getFeatures()) {
+				
+				String fId = SQLUtils.getNextIdFromSequence(conn, 
+						"FEATURE_LOOKUP_DATA_SET_COMPONENT_SEQ",
+						DataPrefix.LOOKUP_FEATURE,
+						"0",
+						12);
+				f.setId(fId);
+				ps.setString(1, fId);
+				ps.setString(3, f.getName());
+				ps.setDouble(4, f.getMz());
+				ps.setDouble(5, f.getRt());
+				ps.setDouble(6, f.getRank());
+				
+				if(f.getSmiles() != null)
+					ps.setString(7, f.getSmiles());
+				else
+					ps.setNull(7,  java.sql.Types.NULL);
+				
+				if(f.getInchiKey() != null)
+					ps.setString(8, f.getInchiKey());
+				else
+					ps.setNull(8,  java.sql.Types.NULL);
+				
+				ps.setDouble(9, f.getFoldChange());
+				ps.setDouble(10, f.getpValue());
+				ps.addBatch();
+				counter++;
+				
+				if(counter % 100 == 0)
+					ps.executeBatch();
+			}
+			ps.executeBatch();
+		}		
 	}
 	
 	public static void editFeatureLookupListMetadata(
-			FeatureLookupList dataSet) throws Exception {
+			FeatureLookupList dataSet) throws SQLException {
 		
 		Connection conn = ConnectionManager.getConnection();
 		String query = 
 				"UPDATE FEATURE_LOOKUP_DATA_SET " +
 				"SET NAME = ?, DESCRIPTION = ?, LAST_MODIFIED = ? "
 				+ "WHERE FLDS_ID = ?";
-		PreparedStatement ps = conn.prepareStatement(query);
-		ps.setString(1, dataSet.getName());
-		ps.setString(2, dataSet.getDescription());
-		ps.setTimestamp(3, new java.sql.Timestamp(new Date().getTime()));
-		ps.setString(4, dataSet.getId());	
-		ps.executeUpdate();
+		try(PreparedStatement ps = conn.prepareStatement(query)){
+			ps.setString(1, dataSet.getName());
+			ps.setString(2, dataSet.getDescription());
+			ps.setTimestamp(3, new java.sql.Timestamp(new Date().getTime()));
+			ps.setString(4, dataSet.getId());	
+			ps.executeUpdate();
+		}
 		ConnectionManager.releaseConnection(conn);	
 	}
 	
 	public static void deleteFeatureLookupList(
-			FeatureLookupList dataSet) throws Exception {
+			FeatureLookupList dataSet) throws SQLException {
 		
 		Connection conn = ConnectionManager.getConnection();
 		String query = 
 				"DELETE FROM FEATURE_LOOKUP_DATA_SET WHERE FLDS_ID = ?";
-		PreparedStatement ps = conn.prepareStatement(query);
-		ps.setString(1, dataSet.getId());	
-		ps.executeUpdate();
+		try(PreparedStatement ps = conn.prepareStatement(query)){
+			ps.setString(1, dataSet.getId());	
+			ps.executeUpdate();
+		}
 		ConnectionManager.releaseConnection(conn);	
 	}
 	
 	public static void addFeaturesToFeatureLookupList(
-			FeatureLookupList dataSet, Collection<MinimalMSOneFeature>featuresToAdd) throws Exception {
+			FeatureLookupList dataSet, Collection<MinimalMSOneFeature>featuresToAdd) throws SQLException {
 		
 		Connection conn = ConnectionManager.getConnection();
 		String query = "INSERT INTO FEATURE_LOOKUP_DATA_SET_COMPONENT "
 				+ "(COMPONENT_ID, FLDS_ID, NAME, MZ, RT, RANK, "
 				+ "SMILES, INCHI_KEY, FOLD_CHANGE, P_VALUE) "
 				+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-		PreparedStatement ps = conn.prepareStatement(query);
-		ps.setString(2, dataSet.getId());
-		int counter = 0;
-		for(MinimalMSOneFeature f : featuresToAdd) {
+		try(PreparedStatement ps = conn.prepareStatement(query)){
 			
-			String fId = SQLUtils.getNextIdFromSequence(conn, 
-					"FEATURE_LOOKUP_DATA_SET_COMPONENT_SEQ",
-					DataPrefix.LOOKUP_FEATURE,
-					"0",
-					12);
-			f.setId(fId);
-			ps.setString(1, fId);
-			ps.setString(3, f.getName());
-			ps.setDouble(4, f.getMz());
-			ps.setDouble(5, f.getRt());
-			ps.setDouble(6, f.getRank());
-			
-			if(f.getSmiles() != null)
-				ps.setString(7, f.getSmiles());
-			else
-				ps.setNull(7,  java.sql.Types.NULL);
-			
-			if(f.getInchiKey() != null)
-				ps.setString(8, f.getInchiKey());
-			else
-				ps.setNull(8,  java.sql.Types.NULL);
-			
-			ps.setDouble(9, f.getFoldChange());
-			ps.setDouble(10, f.getpValue());
-			ps.addBatch();
-			counter++;
-			
-			if(counter % 100 == 0)
-				ps.executeBatch();
+			ps.setString(2, dataSet.getId());
+			int counter = 0;
+			for(MinimalMSOneFeature f : featuresToAdd) {
+				
+				String fId = SQLUtils.getNextIdFromSequence(conn, 
+						"FEATURE_LOOKUP_DATA_SET_COMPONENT_SEQ",
+						DataPrefix.LOOKUP_FEATURE,
+						"0",
+						12);
+				f.setId(fId);
+				ps.setString(1, fId);
+				ps.setString(3, f.getName());
+				ps.setDouble(4, f.getMz());
+				ps.setDouble(5, f.getRt());
+				ps.setDouble(6, f.getRank());
+				
+				if(f.getSmiles() != null)
+					ps.setString(7, f.getSmiles());
+				else
+					ps.setNull(7,  java.sql.Types.NULL);
+				
+				if(f.getInchiKey() != null)
+					ps.setString(8, f.getInchiKey());
+				else
+					ps.setNull(8,  java.sql.Types.NULL);
+				
+				ps.setDouble(9, f.getFoldChange());
+				ps.setDouble(10, f.getpValue());
+				ps.addBatch();
+				counter++;
+				
+				if(counter % 100 == 0)
+					ps.executeBatch();
+			}
+			ps.executeBatch();
 		}
-		ps.executeBatch();
-		ps.close();	
 		dataSet.getFeatures().addAll(featuresToAdd);
 		ConnectionManager.releaseConnection(conn);	
 	}
 	
 	public static void removeFeaturesFromFeatureLookupList(
 			FeatureLookupList dataSet, 
-			Collection<MinimalMSOneFeature>featuresToRemove) throws Exception {
+			Collection<MinimalMSOneFeature>featuresToRemove) throws SQLException {
 		
 		Connection conn = ConnectionManager.getConnection();
 		String query = 
 				"DELETE FROM FEATURE_LOOKUP_DATA_SET_COMPONENT WHERE COMPONENT_ID = ?";
-		PreparedStatement ps = conn.prepareStatement(query);
-		int counter = 0;
-		for(MinimalMSOneFeature f : featuresToRemove) {
-			
-			ps.setString(1, f.getId());
-			ps.addBatch();
-			counter++;
-			
-			if(counter % 100 == 0)
-				ps.executeBatch();
+		try(PreparedStatement ps = conn.prepareStatement(query)){
+			int counter = 0;
+			for(MinimalMSOneFeature f : featuresToRemove) {
+				
+				ps.setString(1, f.getId());
+				ps.addBatch();
+				counter++;
+				
+				if(counter % 100 == 0)
+					ps.executeBatch();
+			}
+			ps.executeBatch();
 		}
-		ps.executeBatch();
-		ps.close();	
 		dataSet.getFeatures().removeAll(featuresToRemove);
 		ConnectionManager.releaseConnection(conn);	
 	}
 	
-	public static Collection<FeatureLookupList>getFeatureLookupListCollection() throws Exception {
+	public static Collection<FeatureLookupList>getFeatureLookupListCollection() throws SQLException {
 		
 		Connection conn = ConnectionManager.getConnection();
 		Collection<FeatureLookupList>dataSets = getFeatureLookupListCollection(conn);
@@ -231,34 +243,33 @@ public class FeatureLookupListUtils {
 		return dataSets;
 	}
 	
-	public static Collection<FeatureLookupList>getFeatureLookupListCollection(Connection conn) throws Exception {
+	public static Collection<FeatureLookupList>getFeatureLookupListCollection(Connection conn) throws SQLException {
 	
 		Collection<FeatureLookupList>dataSets = new TreeSet<FeatureLookupList>();
 		String query = 
 				"SELECT FLDS_ID, NAME, DESCRIPTION, CREATED_BY, "
 				+ "DATE_CREATED, LAST_MODIFIED "
 				+ "FROM FEATURE_LOOKUP_DATA_SET ORDER BY 1";
-		PreparedStatement ps = conn.prepareStatement(query);		
-		ResultSet rs = ps.executeQuery();
-		while(rs.next()) {
-			FeatureLookupList ds = new FeatureLookupList(
-					rs.getString("FLDS_ID"), 
-					rs.getString("NAME"), 
-					rs.getString("DESCRIPTION"), 
-					IDTDataCache.getUserById(rs.getString("CREATED_BY")), 
-					new Date(rs.getTimestamp("DATE_CREATED").getTime()),
-					new Date(rs.getTimestamp("LAST_MODIFIED").getTime()));
+		try(PreparedStatement ps = conn.prepareStatement(query)){
 			
-//			getFeaturesForFeatureLookupDataSet(ds, conn);			
-			dataSets.add(ds);
+			ResultSet rs = ps.executeQuery();
+			while(rs.next()) {
+				FeatureLookupList ds = new FeatureLookupList(
+						rs.getString("FLDS_ID"), 
+						rs.getString("NAME"), 
+						rs.getString("DESCRIPTION"), 
+						IDTDataCache.getUserById(rs.getString("CREATED_BY")), 
+						new Date(rs.getTimestamp("DATE_CREATED").getTime()),
+						new Date(rs.getTimestamp("LAST_MODIFIED").getTime()));			
+				dataSets.add(ds);
+			}
+			rs.close();
 		}
-		rs.close();
-		ps.close();
 		return dataSets;
 	}
 	
 	public static void getFeaturesForFeatureLookupList(
-			FeatureLookupList dataSet) throws Exception {
+			FeatureLookupList dataSet) throws SQLException {
 		
 		Connection conn = ConnectionManager.getConnection();
 		getFeaturesForFeatureLookupList(dataSet, conn);
@@ -267,32 +278,33 @@ public class FeatureLookupListUtils {
 	}
 	
 	public static void getFeaturesForFeatureLookupList(
-			FeatureLookupList dataSet, Connection conn) throws Exception {
+			FeatureLookupList dataSet, Connection conn) throws SQLException {
 		
 		String query = 
 				"SELECT COMPONENT_ID, NAME, MZ, RT, RANK, "
 				+ "SMILES, INCHI_KEY, FOLD_CHANGE, P_VALUE "
 				+ "FROM FEATURE_LOOKUP_DATA_SET_COMPONENT "
 				+ "WHERE FLDS_ID = ?";
-		PreparedStatement ps = conn.prepareStatement(query);	
-		ps.setString(1, dataSet.getId());
-		ResultSet rs = ps.executeQuery();
-		while(rs.next()) {
-			MinimalMSOneFeature feature = 
-					new MinimalMSOneFeature(
-							rs.getString("COMPONENT_ID"), 
-							rs.getString("NAME"), 
-							rs.getDouble("MZ"), 
-							rs.getDouble("RT"), 
-							rs.getDouble("RANK"),
-							rs.getString("SMILES"),
-							rs.getString("INCHI_KEY"));	
+		try(PreparedStatement ps = conn.prepareStatement(query)){
 			
-			feature.setFoldChange(rs.getDouble("FOLD_CHANGE"));
-			feature.setpValue(rs.getDouble("P_VALUE"));
-			dataSet.getFeatures().add(feature);
+			ps.setString(1, dataSet.getId());
+			ResultSet rs = ps.executeQuery();
+			while(rs.next()) {
+				MinimalMSOneFeature feature = 
+						new MinimalMSOneFeature(
+								rs.getString("COMPONENT_ID"), 
+								rs.getString("NAME"), 
+								rs.getDouble("MZ"), 
+								rs.getDouble("RT"), 
+								rs.getDouble("RANK"),
+								rs.getString("SMILES"),
+								rs.getString("INCHI_KEY"));	
+				
+				feature.setFoldChange(rs.getDouble("FOLD_CHANGE"));
+				feature.setpValue(rs.getDouble("P_VALUE"));
+				dataSet.getFeatures().add(feature);
+			}
+			rs.close();
 		}
-		rs.close();
-		ps.close();
 	}
 }

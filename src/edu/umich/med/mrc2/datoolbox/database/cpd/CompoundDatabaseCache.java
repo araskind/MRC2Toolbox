@@ -21,9 +21,13 @@
 
 package edu.umich.med.mrc2.datoolbox.database.cpd;
 
+import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Map;
 import java.util.TreeMap;
+
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
 import edu.umich.med.mrc2.datoolbox.data.CompoundConcentration;
 import edu.umich.med.mrc2.datoolbox.data.CompoundIdentity;
@@ -33,6 +37,12 @@ import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.database.idt.MSMSLibraryUtils;
 
 public class CompoundDatabaseCache {
+	
+	private static final Logger logger = LogManager.getLogger(CompoundDatabaseCache.class);
+
+	private CompoundDatabaseCache() {
+		/* This utility class should not be instantiated */
+	}
 
 	private static Map<CompoundIdentity,Collection<CompoundConcentration>>compoundConcentrationCache = 
 			new TreeMap<CompoundIdentity,Collection<CompoundConcentration>>(
@@ -65,9 +75,8 @@ public class CompoundDatabaseCache {
 			Collection<CompoundConcentration>concentrations = null;
 			try {
 				concentrations = CompoundDatabaseUtils.getConcentrationsForCompound(id);
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			} catch (SQLException e) {
+				logger.error(String.format("%s %s", "Failed to get concentrations for compound ID", id.getCommonName()), e);
 			}
 			if(concentrations != null)
 				compoundConcentrationCache.put(id, concentrations);
@@ -96,15 +105,11 @@ public class CompoundDatabaseCache {
 			Collection<MsMsLibraryFeature>msmsLibEntries = null;
 			try {
 				msmsLibEntries = MSMSLibraryUtils.getMsMsLibraryFeaturesForCompound(id.getPrimaryDatabaseId());
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			} catch (SQLException e) {
+				logger.error(String.format("%s %s", "Failed to get MSMS library entries for compound ", id.getCommonName()), e);
 			}
-			if(msmsLibEntries != null) {
-				
-				if(!msmsLibEntries.isEmpty())
-					compoundMMSMSCache.put(id, msmsLibEntries);
-			}
+			if(msmsLibEntries != null && !msmsLibEntries.isEmpty())
+				compoundMMSMSCache.put(id, msmsLibEntries);			
 		}	
 		return compoundMMSMSCache.get(id);
 	}

@@ -30,6 +30,9 @@ import java.util.Date;
 import java.util.Map.Entry;
 import java.util.TreeSet;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+
 import edu.umich.med.mrc2.datoolbox.data.Adduct;
 import edu.umich.med.mrc2.datoolbox.data.AdductExchange;
 import edu.umich.med.mrc2.datoolbox.data.BinnerAdduct;
@@ -48,63 +51,68 @@ import edu.umich.med.mrc2.datoolbox.utils.SQLUtils;
 
 public class BinnerUtils {
 	
+	private static final Logger logger = LogManager.getLogger(BinnerUtils.class);
+
+	private BinnerUtils() {
+		/* This utility class should not be instantiated */
+	}
+
 	/*
 	 * Binner annotations
 	 * */
-	public static Collection<BinnerAdduct> getBinnerAdducts() throws Exception {
+	public static Collection<BinnerAdduct> getBinnerAdducts() throws SQLException {
 
 		Collection<BinnerAdduct>binAdductList = new TreeSet<BinnerAdduct>();
 		Connection conn = ConnectionManager.getConnection();
 		String query  =
 			"SELECT ANNOTATION_ID, ANNOTATION_NAME, CHARGE, TIER, CHARGE_CARRIER_ID, "
 			+ "ADDUCT_EXCHANGE_ID, MASS_DIFF_ID, MASS FROM BINNER_ANNOTATIONS";
-		PreparedStatement ps = conn.prepareStatement(query);		
-		ResultSet rs = ps.executeQuery();
-		while (rs.next()) {
-			
-			Adduct chargeCarrier = null;
-			String chargeCarrierId = rs.getString("CHARGE_CARRIER_ID");
-			if(chargeCarrierId != null) {
+		try(PreparedStatement ps = conn.prepareStatement(query)){
+			ResultSet rs = ps.executeQuery();
+			while (rs.next()) {
 				
-				chargeCarrier = AdductManager.getAdductById(chargeCarrierId);				
-				if(chargeCarrier == null)
-					System.out.println("Could not find adduct for ID " + chargeCarrierId);			
+				Adduct chargeCarrier = null;
+				String chargeCarrierId = rs.getString("CHARGE_CARRIER_ID");
+				if(chargeCarrierId != null) {
+					
+					chargeCarrier = AdductManager.getAdductById(chargeCarrierId);				
+					if(chargeCarrier == null)
+						logger.error(String.format("%s %s", "Could not find adduct for ID", chargeCarrierId));
+				}				
+				AdductExchange exchange = null;
+				String exchangeId = rs.getString("ADDUCT_EXCHANGE_ID");
+				if(exchangeId != null) {
+					exchange = AdductManager.getAdductExchangeById(exchangeId);
+					if(exchange == null) 
+						logger.error(String.format("%s %s", "Could not find exchange for ID", exchangeId));
+				}
+				BinnerNeutralMassDifference bmd = null;
+				String bmdId  = rs.getString("MASS_DIFF_ID");
+				if(bmdId != null) {
+					bmd = AdductManager.getBinnerNeutralMassDifferenceById(bmdId);
+					if(bmd == null)
+						logger.error(String.format("%s %s", "Could not find MassDiff for ID", bmdId));
+				}
+				BinnerAdduct newAdduct = new BinnerAdduct(
+							rs.getString("ANNOTATION_ID"),
+							rs.getString("ANNOTATION_NAME"),
+							rs.getInt("CHARGE"),
+							rs.getInt("TIER"),
+							chargeCarrier,
+							exchange,
+							bmd);
+				if(newAdduct.getMass() == null)
+					newAdduct.setMass(rs.getDouble("MASS"));
+					
+				binAdductList.add(newAdduct);			
 			}
-			
-			AdductExchange exchange = null;
-			String exchangeId = rs.getString("ADDUCT_EXCHANGE_ID");
-			if(exchangeId != null) {
-				exchange = AdductManager.getAdductExchangeById(exchangeId);
-				if(exchange == null)
-						System.out.println("Could not find exchange for ID " + exchangeId);
-			}
-			BinnerNeutralMassDifference bmd = null;
-			String bmdId  = rs.getString("MASS_DIFF_ID");
-			if(bmdId != null) {
-				bmd = AdductManager.getBinnerNeutralMassDifferenceById(bmdId);
-				if(bmd == null)
-					System.out.println("Could not find MassDiff for ID " + bmdId);
-			}
-			BinnerAdduct newAdduct = new BinnerAdduct(
-						rs.getString("ANNOTATION_ID"),
-						rs.getString("ANNOTATION_NAME"),
-						rs.getInt("CHARGE"),
-						rs.getInt("TIER"),
-						chargeCarrier,
-						exchange,
-						bmd);
-			if(newAdduct.getMass() == null)
-				newAdduct.setMass(rs.getDouble("MASS"));
-				
-			binAdductList.add(newAdduct);			
+			rs.close();
 		}
-		rs.close();
-		ps.close();
 		ConnectionManager.releaseConnection(conn);
 		return binAdductList;
 	}
 	
-	public static void addNewBinnerAdduct(BinnerAdduct newAdduct) throws Exception {
+	public static void addNewBinnerAdduct(BinnerAdduct newAdduct) throws SQLException {
 		
 		Connection conn = ConnectionManager.getConnection();
 		String id = SQLUtils.getNextIdFromSequence(conn, 
@@ -119,40 +127,40 @@ public class BinnerUtils {
 			+ "(ANNOTATION_ID, ANNOTATION_NAME, MASS, POLARITY, CHARGE, TIER, "
 			+ "CHARGE_CARRIER_ID, ADDUCT_EXCHANGE_ID, MASS_DIFF_ID) "
 			+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-		PreparedStatement ps = conn.prepareStatement(query);		
+		try(PreparedStatement ps = conn.prepareStatement(query)){		
 
-		String chargeCarrierId = null;
-		if(newAdduct.getChargeCarrier() != null)
-			chargeCarrierId = newAdduct.getChargeCarrier().getId();
-
-		String exchangeId = null;
-		if(newAdduct.getAdductExchange() != null)
-			exchangeId = newAdduct.getAdductExchange().getId();
-		
-		String bmdId  = null;
-		if(newAdduct.getBinnerNeutralMassDifference() != null)
-			bmdId = newAdduct.getBinnerNeutralMassDifference().getId();
-		
-		String polarityCode = newAdduct.getPolarity().getCode();
-		if(newAdduct.getPolarity().equals(Polarity.Neutral))
-			polarityCode = null;
+			String chargeCarrierId = null;
+			if(newAdduct.getChargeCarrier() != null)
+				chargeCarrierId = newAdduct.getChargeCarrier().getId();
+	
+			String exchangeId = null;
+			if(newAdduct.getAdductExchange() != null)
+				exchangeId = newAdduct.getAdductExchange().getId();
 			
-		ps.setString(1, newAdduct.getId());
-		ps.setString(2, newAdduct.getBinnerName());	
-		ps.setDouble(3, newAdduct.getMass());
-		ps.setString(4, polarityCode);
-		ps.setInt(5, newAdduct.getCharge());
-		ps.setInt(6, newAdduct.getTier());
-		ps.setString(7, chargeCarrierId);
-		ps.setString(8, exchangeId);
-		ps.setString(9, bmdId);
-		
-		ps.executeUpdate();
-		ps.close();
+			String bmdId  = null;
+			if(newAdduct.getBinnerNeutralMassDifference() != null)
+				bmdId = newAdduct.getBinnerNeutralMassDifference().getId();
+			
+			String polarityCode = newAdduct.getPolarity().getCode();
+			if(newAdduct.getPolarity().equals(Polarity.Neutral))
+				polarityCode = null;
+				
+			ps.setString(1, newAdduct.getId());
+			ps.setString(2, newAdduct.getBinnerName());	
+			ps.setDouble(3, newAdduct.getMass());
+			ps.setString(4, polarityCode);
+			ps.setInt(5, newAdduct.getCharge());
+			ps.setInt(6, newAdduct.getTier());
+			ps.setString(7, chargeCarrierId);
+			ps.setString(8, exchangeId);
+			ps.setString(9, bmdId);
+			
+			ps.executeUpdate();
+		}
 		ConnectionManager.releaseConnection(conn);
 	}
 	
-	public static void editBinnerAdduct(BinnerAdduct toEdit) throws Exception {
+	public static void editBinnerAdduct(BinnerAdduct toEdit) throws SQLException {
 
 		Connection conn = ConnectionManager.getConnection();
 		String query  =
@@ -160,47 +168,47 @@ public class BinnerUtils {
 			+ "ANNOTATION_NAME = ?, MASS = ?, POLARITY = ?, CHARGE = ?, TIER = ?, "
 			+ "CHARGE_CARRIER_ID = ?, ADDUCT_EXCHANGE_ID = ?, MASS_DIFF_ID = ? "
 			+ "WHERE ANNOTATION_ID = ?";
-		PreparedStatement ps = conn.prepareStatement(query);		
+		try(PreparedStatement ps = conn.prepareStatement(query)){
 
-		String chargeCarrierId = null;
-		if(toEdit.getChargeCarrier() != null)
-			chargeCarrierId = toEdit.getChargeCarrier().getId();
-
-		String exchangeId = null;
-		if(toEdit.getAdductExchange() != null)
-			exchangeId = toEdit.getAdductExchange().getId();
-		
-		String bmdId  = null;
-		if(toEdit.getBinnerNeutralMassDifference() != null)
-			bmdId = toEdit.getBinnerNeutralMassDifference().getId();
-		
-		String polarityCode = toEdit.getPolarity().getCode();
-		if(toEdit.getPolarity().equals(Polarity.Neutral))
-			polarityCode = null;
-					
-		ps.setString(1, toEdit.getBinnerName());	
-		ps.setDouble(2, toEdit.getMass());
-		ps.setString(3, polarityCode);
-		ps.setInt(4, toEdit.getCharge());
-		ps.setInt(5, toEdit.getTier());
-		ps.setString(6, chargeCarrierId);
-		ps.setString(7, exchangeId);
-		ps.setString(8, bmdId);
-		ps.setString(9, toEdit.getId());
-		
-		ps.executeUpdate();
-		ps.close();
+			String chargeCarrierId = null;
+			if(toEdit.getChargeCarrier() != null)
+				chargeCarrierId = toEdit.getChargeCarrier().getId();
+	
+			String exchangeId = null;
+			if(toEdit.getAdductExchange() != null)
+				exchangeId = toEdit.getAdductExchange().getId();
+			
+			String bmdId  = null;
+			if(toEdit.getBinnerNeutralMassDifference() != null)
+				bmdId = toEdit.getBinnerNeutralMassDifference().getId();
+			
+			String polarityCode = toEdit.getPolarity().getCode();
+			if(toEdit.getPolarity().equals(Polarity.Neutral))
+				polarityCode = null;
+						
+			ps.setString(1, toEdit.getBinnerName());	
+			ps.setDouble(2, toEdit.getMass());
+			ps.setString(3, polarityCode);
+			ps.setInt(4, toEdit.getCharge());
+			ps.setInt(5, toEdit.getTier());
+			ps.setString(6, chargeCarrierId);
+			ps.setString(7, exchangeId);
+			ps.setString(8, bmdId);
+			ps.setString(9, toEdit.getId());
+			
+			ps.executeUpdate();
+		}
 		ConnectionManager.releaseConnection(conn);
 	}
 	
-	public static void deleteBinnerAdduct(BinnerAdduct toDelete) throws Exception {
+	public static void deleteBinnerAdduct(BinnerAdduct toDelete) throws SQLException {
 		
 		Connection conn = ConnectionManager.getConnection();
 		String query  = "DELETE FROM BINNER_ANNOTATIONS WHERE ANNOTATION_ID = ?";
-		PreparedStatement ps = conn.prepareStatement(query);
-		ps.setString(1, toDelete.getId());
-		ps.executeUpdate();
-		ps.close();	
+		try(PreparedStatement ps = conn.prepareStatement(query)){
+			ps.setString(1, toDelete.getId());
+			ps.executeUpdate();
+		}
 		ConnectionManager.releaseConnection(conn);
 	}
 	
@@ -208,64 +216,64 @@ public class BinnerUtils {
 	 * Binner mass differences - for now essentially salt clusters and similar
 	 * */
 	
-	public static Collection<BinnerNeutralMassDifference>getBinnerNeutralMassDifferences() throws Exception {
+	public static Collection<BinnerNeutralMassDifference>getBinnerNeutralMassDifferences() throws SQLException {
 		
 		Collection<BinnerNeutralMassDifference>binMdList = new TreeSet<BinnerNeutralMassDifference>();
 		Connection conn = ConnectionManager.getConnection();
 		String query  =
 			"SELECT MASS_DIFF_ID, BINNER_MD_NAME FROM BINNER_MASS_DIFFERENCE ORDER BY 1";
-		PreparedStatement ps = conn.prepareStatement(query);
+		try(PreparedStatement ps = conn.prepareStatement(query)){
 		
-		String compQuery  =
-				"SELECT COMPONENT_ID, COMPONENT_COUNT, COMPONENT_TYPE FROM "
-				+ "BINNER_MASS_DIFFERENCE_COMPONENT WHERE MASS_DIFF_ID = ?";
-		PreparedStatement compPs = conn.prepareStatement(compQuery);
-			
-		ResultSet rs = ps.executeQuery();
-		ResultSet compRs = null;
-		while (rs.next()) {
-			
-			BinnerNeutralMassDifference newDiff 
-				= new BinnerNeutralMassDifference(
-						rs.getString("MASS_DIFF_ID"),
-						rs.getString("BINNER_MD_NAME"));
-			
-			compPs.setString(1, newDiff.getId());
-			compRs = compPs.executeQuery();
-			while(compRs.next()) {
+			String compQuery  =
+					"SELECT COMPONENT_ID, COMPONENT_COUNT, COMPONENT_TYPE FROM "
+					+ "BINNER_MASS_DIFFERENCE_COMPONENT WHERE MASS_DIFF_ID = ?";
+			try(PreparedStatement compPs = conn.prepareStatement(compQuery)){
 				
-				String componentId = compRs.getString("COMPONENT_ID");
-				String componentType = compRs.getString("COMPONENT_TYPE");
-				int componentCount = compRs.getInt("COMPONENT_COUNT");
-				Adduct adduct = AdductManager.getAdductById(componentId);
-				if(adduct == null) {
-					System.out.println("Could not find adduct for ID " + componentId);
-					continue;
-				}
-				if(componentType.equals(CompositeAdductComponentType.REPEAT.name())) {
-						
-					for(int i=0; i<componentCount; i++)
-						newDiff.addNeutralAdduct((SimpleAdduct) adduct);				
-				}
-				if(componentType.equals(CompositeAdductComponentType.LOSS.name())) {
+				ResultSet rs = ps.executeQuery();
+				ResultSet compRs = null;
+				while (rs.next()) {
 					
-					for(int i=0; i<componentCount; i++)
-						newDiff.addNeutralLoss((SimpleAdduct) adduct);
+					BinnerNeutralMassDifference newDiff 
+						= new BinnerNeutralMassDifference(
+								rs.getString("MASS_DIFF_ID"),
+								rs.getString("BINNER_MD_NAME"));
+					
+					compPs.setString(1, newDiff.getId());
+					compRs = compPs.executeQuery();
+					while(compRs.next()) {
+						
+						String componentId = compRs.getString("COMPONENT_ID");
+						String componentType = compRs.getString("COMPONENT_TYPE");
+						int componentCount = compRs.getInt("COMPONENT_COUNT");
+						Adduct adduct = AdductManager.getAdductById(componentId);
+						if(adduct == null) {
+							logger.error(String.format("%s %s", "Could not find adduct for ID", componentId));
+							continue;
+						}
+						if(componentType.equals(CompositeAdductComponentType.REPEAT.name())) {
+								
+							for(int i=0; i<componentCount; i++)
+								newDiff.addNeutralAdduct((SimpleAdduct) adduct);				
+						}
+						if(componentType.equals(CompositeAdductComponentType.LOSS.name())) {
+							
+							for(int i=0; i<componentCount; i++)
+								newDiff.addNeutralLoss((SimpleAdduct) adduct);
+						}
+					}	
+					compRs.close();
+					binMdList.add(newDiff);
 				}
-			}	
-			compRs.close();
-			binMdList.add(newDiff);
+				rs.close();
+			}
 		}
-		rs.close();
-		ps.close();
-		compPs.close();
 		ConnectionManager.releaseConnection(conn);
 		
 		return binMdList;
 	}
 	
 	public static void addNewBinnerNeutralMassDifference(
-			BinnerNeutralMassDifference newDiff) throws Exception {
+			BinnerNeutralMassDifference newDiff) throws SQLException {
 		
 		Connection conn = ConnectionManager.getConnection();
 		String id = SQLUtils.getNextIdFromSequence(conn, 
@@ -278,91 +286,91 @@ public class BinnerUtils {
 		String query  =
 			"INSERT INTO BINNER_MASS_DIFFERENCE "
 			+ "(MASS_DIFF_ID, BINNER_MD_NAME) VALUES (?, ?)";
-		PreparedStatement ps = conn.prepareStatement(query);
+		try(PreparedStatement ps = conn.prepareStatement(query)){
+		
+			ps.setString(1, newDiff.getId());
+			ps.setString(2, newDiff.getBinnerName());
+			ps.executeUpdate();
+		}
 		
 		String compQuery  =
 				"INSERT INTO BINNER_MASS_DIFFERENCE_COMPONENT "
 				+ "(MASS_DIFF_ID, COMPONENT_ID, COMPONENT_COUNT, "
 				+ "COMPONENT_TYPE) VALUES (?, ?, ?, ?)";
-		PreparedStatement compPs = conn.prepareStatement(compQuery);
+		try(PreparedStatement compPs = conn.prepareStatement(compQuery)){
 		
-		ps.setString(1, newDiff.getId());
-		ps.setString(2, newDiff.getBinnerName());
-		ps.executeUpdate();
-		ps.close();
-		
-		compPs.setString(1, newDiff.getId());
-		for(Entry<SimpleAdduct, Long> counts : newDiff.getNeutralAdductCounts().entrySet()) {
-			
-			compPs.setString(2, counts.getKey().getId());
-			compPs.setLong(3, counts.getValue());
-			compPs.setString(4, CompositeAdductComponentType.REPEAT.name());
-			compPs.addBatch();
+			compPs.setString(1, newDiff.getId());
+			for(Entry<SimpleAdduct, Long> counts : newDiff.getNeutralAdductCounts().entrySet()) {
+				
+				compPs.setString(2, counts.getKey().getId());
+				compPs.setLong(3, counts.getValue());
+				compPs.setString(4, CompositeAdductComponentType.REPEAT.name());
+				compPs.addBatch();
+			}
+			for(Entry<SimpleAdduct, Long> nlcounts : newDiff.getNeutralLossCounts().entrySet()) {
+				
+				compPs.setString(2, nlcounts.getKey().getId());
+				compPs.setLong(3, nlcounts.getValue());
+				compPs.setString(4, CompositeAdductComponentType.LOSS.name());
+				compPs.addBatch();
+			}		
+			compPs.executeBatch();
 		}
-		for(Entry<SimpleAdduct, Long> nlcounts : newDiff.getNeutralLossCounts().entrySet()) {
-			
-			compPs.setString(2, nlcounts.getKey().getId());
-			compPs.setLong(3, nlcounts.getValue());
-			compPs.setString(4, CompositeAdductComponentType.LOSS.name());
-			compPs.addBatch();
-		}		
-		compPs.executeBatch();
-		compPs.close();
 		ConnectionManager.releaseConnection(conn);
 	}
 	
 	public static void editBinnerNeutralMassDifference(
-			BinnerNeutralMassDifference toEdit) throws Exception {
+			BinnerNeutralMassDifference toEdit) throws SQLException {
 				
 		Connection conn = ConnectionManager.getConnection();		
 		String compDelQuery  =
 				"DELETE FROM BINNER_MASS_DIFFERENCE_COMPONENT WHERE MASS_DIFF_ID = ?";
-		PreparedStatement compPs = conn.prepareStatement(compDelQuery);
-		compPs.setString(1, toEdit.getId());
-		compPs.executeUpdate();
-		compPs.close();
+		try(PreparedStatement compPs = conn.prepareStatement(compDelQuery)){
+			compPs.setString(1, toEdit.getId());
+			compPs.executeUpdate();
+		}
 		
 		String query  =
 			"UPDATE BINNER_MASS_DIFFERENCE SET BINNER_MD_NAME = ? WHERE MASS_DIFF_ID = ?";
-		PreparedStatement ps = conn.prepareStatement(query);
-		ps.setString(1, toEdit.getBinnerName());
-		ps.setString(2, toEdit.getId());		
-		ps.executeUpdate();
-		ps.close();
+		try(PreparedStatement ps = conn.prepareStatement(query)){
+			ps.setString(1, toEdit.getBinnerName());
+			ps.setString(2, toEdit.getId());		
+			ps.executeUpdate();
+		}
 		
 		String compQuery  =
 				"INSERT INTO BINNER_MASS_DIFFERENCE_COMPONENT "
 				+ "(MASS_DIFF_ID, COMPONENT_ID, COMPONENT_COUNT, COMPONENT_TYPE) VALUES (?, ?, ?, ?)";
-		compPs = conn.prepareStatement(compQuery);
+		try(PreparedStatement compPs = conn.prepareStatement(compQuery)){
 
-		compPs.setString(1, toEdit.getId());
-		for(Entry<SimpleAdduct, Long> counts : toEdit.getNeutralAdductCounts().entrySet()) {
-			
-			compPs.setString(2, counts.getKey().getId());
-			compPs.setLong(3, counts.getValue());
-			compPs.setString(4, CompositeAdductComponentType.REPEAT.name());
-			compPs.addBatch();
+			compPs.setString(1, toEdit.getId());
+			for(Entry<SimpleAdduct, Long> counts : toEdit.getNeutralAdductCounts().entrySet()) {
+				
+				compPs.setString(2, counts.getKey().getId());
+				compPs.setLong(3, counts.getValue());
+				compPs.setString(4, CompositeAdductComponentType.REPEAT.name());
+				compPs.addBatch();
+			}
+			for(Entry<SimpleAdduct, Long> nlcounts : toEdit.getNeutralLossCounts().entrySet()) {
+				
+				compPs.setString(2, nlcounts.getKey().getId());
+				compPs.setLong(3, nlcounts.getValue());
+				compPs.setString(4, CompositeAdductComponentType.LOSS.name());
+				compPs.addBatch();
+			}		
+			compPs.executeBatch();
 		}
-		for(Entry<SimpleAdduct, Long> nlcounts : toEdit.getNeutralLossCounts().entrySet()) {
-			
-			compPs.setString(2, nlcounts.getKey().getId());
-			compPs.setLong(3, nlcounts.getValue());
-			compPs.setString(4, CompositeAdductComponentType.LOSS.name());
-			compPs.addBatch();
-		}		
-		compPs.executeBatch();
-		compPs.close();
 		ConnectionManager.releaseConnection(conn);
 	}
 	
-	public static void deleteBinnerNeutralMassDifference(BinnerNeutralMassDifference toDelete) throws Exception {
+	public static void deleteBinnerNeutralMassDifference(BinnerNeutralMassDifference toDelete) throws SQLException {
 		
 		Connection conn = ConnectionManager.getConnection();
 		String query  = "DELETE FROM BINNER_MASS_DIFFERENCE WHERE MASS_DIFF_ID = ?";
-		PreparedStatement ps = conn.prepareStatement(query);
-		ps.setString(1, toDelete.getId());
-		ps.executeUpdate();
-		ps.close();	
+		try(PreparedStatement ps = conn.prepareStatement(query)){
+			ps.setString(1, toDelete.getId());
+			ps.executeUpdate();
+		}
 		ConnectionManager.releaseConnection(conn);
 	}
 	
@@ -372,7 +380,7 @@ public class BinnerUtils {
 	 * */
 	
 	public static void addBinnerAnnotationLookupDataSet(
-			BinnerAnnotationLookupDataSet newDataSet) throws Exception {
+			BinnerAnnotationLookupDataSet newDataSet) throws SQLException {
 		
 		Connection conn = ConnectionManager.getConnection();
 		addBinnerAnnotationLookupDataSet(newDataSet, conn);
@@ -393,27 +401,27 @@ public class BinnerUtils {
 			"INSERT INTO BINNER_ANNOTATION_LOOKUP_DATA_SET " +
 			"(BALDS_ID, NAME, DESCRIPTION, CREATED_BY,  " +
 			"DATE_CREATED, LAST_MODIFIED) VALUES (?, ?, ?, ?, ?, ?)";
-		PreparedStatement ps = conn.prepareStatement(query);
+		try(PreparedStatement ps = conn.prepareStatement(query)){
 		
-		ps.setString(1, newDataSet.getId());
-		ps.setString(2, newDataSet.getName());
-		if(newDataSet.getDescription() != null)
-			ps.setString(3, newDataSet.getDescription());
-		else
-			ps.setNull(3, java.sql.Types.NULL);
-		
-		ps.setString(4, newDataSet.getCreatedBy().getId());
-		ps.setTimestamp(5, new java.sql.Timestamp(
-				newDataSet.getDateCreated().getTime()));
-		ps.setTimestamp(6, new java.sql.Timestamp(
-				newDataSet.getLastModified().getTime()));	
-		ps.executeUpdate();
-		
+			ps.setString(1, newDataSet.getId());
+			ps.setString(2, newDataSet.getName());
+			if(newDataSet.getDescription() != null)
+				ps.setString(3, newDataSet.getDescription());
+			else
+				ps.setNull(3, java.sql.Types.NULL);
+			
+			ps.setString(4, newDataSet.getCreatedBy().getId());
+			ps.setTimestamp(5, new java.sql.Timestamp(
+					newDataSet.getDateCreated().getTime()));
+			ps.setTimestamp(6, new java.sql.Timestamp(
+					newDataSet.getLastModified().getTime()));	
+			ps.executeUpdate();
+		}
 		query = 
 			"INSERT INTO BINNER_ANNOTATION_CLUSTER "
 			+ "(BA_CLUSTER_ID, BALDS_ID, MOL_ION_NUMBER) "
 			+ "VALUES (?, ?, ?)";
-		ps = conn.prepareStatement(query);
+		try(PreparedStatement ps = conn.prepareStatement(query)){
 		ps.setString(2, newDataSet.getId());
 		
 		String bccQuery = 
@@ -424,101 +432,103 @@ public class BinnerUtils {
 				"CHARGE_CARRIER, ADDITIONAL_ADDUCTS, BIN_NUMBER, CORR_CLUSTER_NUMBER,  " +
 				"REBIN_SUBCLUSTER_NUMBER, RT_SUBCLUSTER_NUMBER, MASS_ERROR, RMD) "
 				+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-		PreparedStatement bccPs = conn.prepareStatement(bccQuery);
-		
-		int counter = 0;
-		for(BinnerAnnotationCluster bac : newDataSet.getBinnerAnnotationClusters()) {
+			try(PreparedStatement bccPs = conn.prepareStatement(bccQuery)){
 			
-			String cId = SQLUtils.getNextIdFromSequence(conn, 
-					"BINNER_ANNOTATION_CLUSTER_SEQ",
-					DataPrefix.BINNER_ANNOTATIONS_CLUSTER,
-					"0",
-					9);
-			bac.setId(cId);
-			ps.setString(1, cId);
-			ps.setInt(3, bac.getMolIonNumber());
-			ps.addBatch();
-			
-			bccPs.setString(2, cId);
-			for(BinnerAnnotation ba : bac.getAnnotations()) {
-				
-				String bccId = SQLUtils.getNextIdFromSequence(conn, 
-						"BA_CLUSTER_COMPONENT_SEQ",
-						DataPrefix.BINNER_ANNOTATIONS_CLUSTER_COMPONENT,
-						"0",
-						11);
-				ba.setId(bccId);
-				bccPs.setString(1, bccId);
-				bccPs.setInt(3, ba.getMolIonNumber());	//MOL_ION_NUMBER
-				bccPs.setString(4, ba.getFeatureName());	//FEATURE_NAME
-				bccPs.setDouble(5, ba.getBinnerMz());	//BINNER_MZ
-				bccPs.setDouble(6, ba.getBinnerRt());	//BINNER_RT
-				bccPs.setString(7, ba.getAnnotation());	//ANNOTATION
-				if(ba.isPrimary())
-					bccPs.setString(8, "Y");	//IS_PRIMARY
-				else
-					bccPs.setNull(8, java.sql.Types.NULL);
+				int counter = 0;
+				for(BinnerAnnotationCluster bac : newDataSet.getBinnerAnnotationClusters()) {
 					
-				bccPs.setString(9, ba.getAdditionalGroupAnnotations()); //ADDITIONAL_GROUP_ANNOTATIONS
-				bccPs.setString(10, ba.getFurtherAnnotations()); //FURTHER_ANNOTATIONS
-				bccPs.setString(11, ba.getDerivations()); //DERIVATIONS
-				bccPs.setString(12, ba.getIsotopes()); //ISOTOPES
-				bccPs.setString(13, ba.getAdditionalIsotopes()); //ADDITIONAL_ISOTOPES
-				bccPs.setString(14, ba.getChargeCarrier());	//CHARGE_CARRIER
-				bccPs.setString(15, ba.getAdditionalAdducts());	//ADDITIONAL_ADDUCTS
-				bccPs.setInt(16, ba.getBinNumber()); //BIN_NUMBER
-				bccPs.setInt(17, ba.getCorrClusterNumber()); //CORR_CLUSTER_NUMBER
-				bccPs.setInt(18, ba.getRebinSubclusterNumber()); //REBIN_SUBCLUSTER_NUMBER
-				bccPs.setInt(19, ba.getRtSubclusterNumber()); //RT_SUBCLUSTER_NUMBER
-				bccPs.setDouble(20, ba.getMassError()); //MASS_ERROR
-				bccPs.setDouble(21, ba.getRmd()); //RMD
-				
-				bccPs.addBatch();
-			}
-			counter++;			
-			if(counter % 100 == 0) {
+					String cId = SQLUtils.getNextIdFromSequence(conn, 
+							"BINNER_ANNOTATION_CLUSTER_SEQ",
+							DataPrefix.BINNER_ANNOTATIONS_CLUSTER,
+							"0",
+							9);
+					bac.setId(cId);
+					ps.setString(1, cId);
+					ps.setInt(3, bac.getMolIonNumber());
+					ps.addBatch();
+					
+					bccPs.setString(2, cId);
+					for(BinnerAnnotation ba : bac.getAnnotations()) {
+						
+						String bccId = SQLUtils.getNextIdFromSequence(conn, 
+								"BA_CLUSTER_COMPONENT_SEQ",
+								DataPrefix.BINNER_ANNOTATIONS_CLUSTER_COMPONENT,
+								"0",
+								11);
+						ba.setId(bccId);
+						bccPs.setString(1, bccId);
+						bccPs.setInt(3, ba.getMolIonNumber());	//MOL_ION_NUMBER
+						bccPs.setString(4, ba.getFeatureName());	//FEATURE_NAME
+						bccPs.setDouble(5, ba.getBinnerMz());	//BINNER_MZ
+						bccPs.setDouble(6, ba.getBinnerRt());	//BINNER_RT
+						bccPs.setString(7, ba.getAnnotation());	//ANNOTATION
+						if(ba.isPrimary())
+							bccPs.setString(8, "Y");	//IS_PRIMARY
+						else
+							bccPs.setNull(8, java.sql.Types.NULL);
+							
+						bccPs.setString(9, ba.getAdditionalGroupAnnotations()); //ADDITIONAL_GROUP_ANNOTATIONS
+						bccPs.setString(10, ba.getFurtherAnnotations()); //FURTHER_ANNOTATIONS
+						bccPs.setString(11, ba.getDerivations()); //DERIVATIONS
+						bccPs.setString(12, ba.getIsotopes()); //ISOTOPES
+						bccPs.setString(13, ba.getAdditionalIsotopes()); //ADDITIONAL_ISOTOPES
+						bccPs.setString(14, ba.getChargeCarrier());	//CHARGE_CARRIER
+						bccPs.setString(15, ba.getAdditionalAdducts());	//ADDITIONAL_ADDUCTS
+						bccPs.setInt(16, ba.getBinNumber()); //BIN_NUMBER
+						bccPs.setInt(17, ba.getCorrClusterNumber()); //CORR_CLUSTER_NUMBER
+						bccPs.setInt(18, ba.getRebinSubclusterNumber()); //REBIN_SUBCLUSTER_NUMBER
+						bccPs.setInt(19, ba.getRtSubclusterNumber()); //RT_SUBCLUSTER_NUMBER
+						bccPs.setDouble(20, ba.getMassError()); //MASS_ERROR
+						bccPs.setDouble(21, ba.getRmd()); //RMD
+						
+						bccPs.addBatch();
+					}
+					counter++;			
+					if(counter % 100 == 0) {
+						ps.executeBatch();
+						bccPs.executeBatch();
+					}
+				}
 				ps.executeBatch();
 				bccPs.executeBatch();
 			}
 		}
-		ps.executeBatch();
-		bccPs.executeBatch();
-		bccPs.close();
-		ps.close();
 	}
 	
 	public static void editBinnerAnnotationLookupDataSetMetadata(
-			BinnerAnnotationLookupDataSet dataSet) throws Exception {
+			BinnerAnnotationLookupDataSet dataSet) throws SQLException {
 		
 		Connection conn = ConnectionManager.getConnection();
 		String query = 
 				"UPDATE BINNER_ANNOTATION_LOOKUP_DATA_SET " +
 				"SET NAME = ?, DESCRIPTION = ?, LAST_MODIFIED = ? "
 				+ "WHERE BALDS_ID = ?";
-		PreparedStatement ps = conn.prepareStatement(query);
-		ps.setString(1, dataSet.getName());
-		ps.setString(2, dataSet.getDescription());
-		ps.setTimestamp(3, new java.sql.Timestamp(new Date().getTime()));
-		ps.setString(4, dataSet.getId());	
-		ps.executeUpdate();
+		try(PreparedStatement ps = conn.prepareStatement(query)){
+			ps.setString(1, dataSet.getName());
+			ps.setString(2, dataSet.getDescription());
+			ps.setTimestamp(3, new java.sql.Timestamp(new Date().getTime()));
+			ps.setString(4, dataSet.getId());	
+			ps.executeUpdate();
+		}
 		ConnectionManager.releaseConnection(conn);	
 	}
 	
 	public static void deleteBinnerAnnotationLookupDataSet(
-			BinnerAnnotationLookupDataSet dataSet) throws Exception {
+			BinnerAnnotationLookupDataSet dataSet) throws SQLException {
 		
 		Connection conn = ConnectionManager.getConnection();
 		String query = 
 				"DELETE FROM BINNER_ANNOTATION_LOOKUP_DATA_SET "
 				+ "WHERE BALDS_ID = ?";
-		PreparedStatement ps = conn.prepareStatement(query);
-		ps.setString(1, dataSet.getId());	
-		ps.executeUpdate();
+		try(PreparedStatement ps = conn.prepareStatement(query)){
+			ps.setString(1, dataSet.getId());	
+			ps.executeUpdate();
+		}
 		ConnectionManager.releaseConnection(conn);	
 	}
 	
 	public static Collection<BinnerAnnotationLookupDataSet>
-			getBinnerAnnotationLookupDataSetList() throws Exception {
+			getBinnerAnnotationLookupDataSetList() throws SQLException {
 		
 		Connection conn = ConnectionManager.getConnection();
 		Collection<BinnerAnnotationLookupDataSet>dataSets = 
@@ -528,7 +538,7 @@ public class BinnerUtils {
 	}
 	
 	public static Collection<BinnerAnnotationLookupDataSet>
-			getBinnerAnnotationLookupDataSetList(Connection conn) throws Exception {
+			getBinnerAnnotationLookupDataSetList(Connection conn) throws SQLException {
 	
 		Collection<BinnerAnnotationLookupDataSet>dataSets = 
 				new TreeSet<BinnerAnnotationLookupDataSet>();
@@ -536,26 +546,26 @@ public class BinnerUtils {
 				"SELECT BALDS_ID, NAME, DESCRIPTION, CREATED_BY, "
 				+ "DATE_CREATED, LAST_MODIFIED "
 				+ "FROM BINNER_ANNOTATION_LOOKUP_DATA_SET ORDER BY 1";
-		PreparedStatement ps = conn.prepareStatement(query);		
-		ResultSet rs = ps.executeQuery();
-		while(rs.next()) {
-			BinnerAnnotationLookupDataSet ds = 
-					new BinnerAnnotationLookupDataSet(
-					rs.getString("BALDS_ID"), 
-					rs.getString("NAME"), 
-					rs.getString("DESCRIPTION"), 
-					IDTDataCache.getUserById(rs.getString("CREATED_BY")), 
-					new Date(rs.getTimestamp("DATE_CREATED").getTime()),
-					new Date(rs.getTimestamp("LAST_MODIFIED").getTime()));			
-			dataSets.add(ds);
+		try(PreparedStatement ps = conn.prepareStatement(query)){
+			ResultSet rs = ps.executeQuery();
+			while(rs.next()) {
+				BinnerAnnotationLookupDataSet ds = 
+						new BinnerAnnotationLookupDataSet(
+						rs.getString("BALDS_ID"), 
+						rs.getString("NAME"), 
+						rs.getString("DESCRIPTION"), 
+						IDTDataCache.getUserById(rs.getString("CREATED_BY")), 
+						new Date(rs.getTimestamp("DATE_CREATED").getTime()),
+						new Date(rs.getTimestamp("LAST_MODIFIED").getTime()));			
+				dataSets.add(ds);
+			}
+			rs.close();
 		}
-		rs.close();
-		ps.close();
 		return dataSets;
 	}
 	
 	public static void getClustersForBinnerAnnotationLookupDataSet(
-			BinnerAnnotationLookupDataSet dataSet) throws Exception {
+			BinnerAnnotationLookupDataSet dataSet) throws SQLException {
 		
 		Connection conn = ConnectionManager.getConnection();
 		getClustersForBinnerAnnotationLookupDataSet(dataSet, conn);
@@ -563,66 +573,67 @@ public class BinnerUtils {
 	}
 	
 	public static void getClustersForBinnerAnnotationLookupDataSet(
-			BinnerAnnotationLookupDataSet dataSet, Connection conn) throws Exception {
+			BinnerAnnotationLookupDataSet dataSet, Connection conn) throws SQLException {
 		
 		String query = 
 				"SELECT BA_CLUSTER_ID, MOL_ION_NUMBER "
 				+ "FROM BINNER_ANNOTATION_CLUSTER WHERE BALDS_ID = ?";
-		PreparedStatement ps = conn.prepareStatement(query);
+		try(PreparedStatement ps = conn.prepareStatement(query)){
 		
-		String baQuery = 
-				"SELECT BCC_ID, MOL_ION_NUMBER, FEATURE_NAME, BINNER_MZ, " +
-				"BINNER_RT, ANNOTATION, IS_PRIMARY, ADDITIONAL_GROUP_ANNOTATIONS, " +
-				"FURTHER_ANNOTATIONS, DERIVATIONS, ISOTOPES, ADDITIONAL_ISOTOPES, " +
-				"CHARGE_CARRIER, ADDITIONAL_ADDUCTS, BIN_NUMBER, CORR_CLUSTER_NUMBER, " +
-				"REBIN_SUBCLUSTER_NUMBER, RT_SUBCLUSTER_NUMBER, MASS_ERROR, RMD " +
-				"FROM BINNER_ANNOTATION_CLUSTER_COMPONENT " +
-				"WHERE BA_CLUSTER_ID = ? ";
-		PreparedStatement baPs = conn.prepareStatement(baQuery);
-		ResultSet baRs;
+			String baQuery = 
+					"SELECT BCC_ID, MOL_ION_NUMBER, FEATURE_NAME, BINNER_MZ, " +
+					"BINNER_RT, ANNOTATION, IS_PRIMARY, ADDITIONAL_GROUP_ANNOTATIONS, " +
+					"FURTHER_ANNOTATIONS, DERIVATIONS, ISOTOPES, ADDITIONAL_ISOTOPES, " +
+					"CHARGE_CARRIER, ADDITIONAL_ADDUCTS, BIN_NUMBER, CORR_CLUSTER_NUMBER, " +
+					"REBIN_SUBCLUSTER_NUMBER, RT_SUBCLUSTER_NUMBER, MASS_ERROR, RMD " +
+					"FROM BINNER_ANNOTATION_CLUSTER_COMPONENT " +
+					"WHERE BA_CLUSTER_ID = ? ";
+			try(PreparedStatement baPs = conn.prepareStatement(baQuery)){
+				ResultSet baRs;
+				
+				ps.setString(1, dataSet.getId());
+				ResultSet rs = ps.executeQuery();
+				while(rs.next()) {
+					
+					BinnerAnnotationCluster bac =
+							new BinnerAnnotationCluster(
+									rs.getString("BA_CLUSTER_ID"), 
+									rs.getInt("MOL_ION_NUMBER"));
+					baPs.setString(1, bac.getId());
+					baRs = baPs.executeQuery();
+					while(baRs.next()) {
+						
+						BinnerAnnotation ba = new BinnerAnnotation(
+								baRs.getString("BCC_ID"), 
+								baRs.getString("FEATURE_NAME"), 
+								baRs.getString("ANNOTATION"));
+						ba.setMolIonNumber(baRs.getInt("MOL_ION_NUMBER"));
+						ba.setBinnerMz(baRs.getDouble("BINNER_MZ"));
+						ba.setBinnerRt(baRs.getDouble("BINNER_RT"));
+						if(baRs.getString("IS_PRIMARY") != null) 
+							ba.setPrimary(true);
 		
-		ps.setString(1, dataSet.getId());
-		ResultSet rs = ps.executeQuery();
-		while(rs.next()) {
-			
-			BinnerAnnotationCluster bac =
-					new BinnerAnnotationCluster(
-							rs.getString("BA_CLUSTER_ID"), 
-							rs.getInt("MOL_ION_NUMBER"));
-			baPs.setString(1, bac.getId());
-			baRs = baPs.executeQuery();
-			while(baRs.next()) {
-				
-				BinnerAnnotation ba = new BinnerAnnotation(
-						baRs.getString("BCC_ID"), 
-						baRs.getString("FEATURE_NAME"), 
-						baRs.getString("ANNOTATION"));
-				ba.setMolIonNumber(baRs.getInt("MOL_ION_NUMBER"));
-				ba.setBinnerMz(baRs.getDouble("BINNER_MZ"));
-				ba.setBinnerRt(baRs.getDouble("BINNER_RT"));
-				if(baRs.getString("IS_PRIMARY") != null) 
-					ba.setPrimary(true);
-
-				ba.setAdditionalGroupAnnotations(baRs.getString("ADDITIONAL_GROUP_ANNOTATIONS"));
-				ba.setFurtherAnnotations(baRs.getString("FURTHER_ANNOTATIONS"));
-				ba.setDerivations(baRs.getString("DERIVATIONS"));
-				ba.setIsotopes(baRs.getString("ISOTOPES"));
-				ba.setAdditionalIsotopes(baRs.getString("ADDITIONAL_ISOTOPES"));
-				ba.setChargeCarrier(baRs.getString("CHARGE_CARRIER"));
-				ba.setAdditionalAdducts(baRs.getString("ADDITIONAL_ADDUCTS"));
-				ba.setBinNumber(baRs.getInt("BIN_NUMBER"));
-				ba.setRebinSubclusterNumber(baRs.getInt("REBIN_SUBCLUSTER_NUMBER"));
-				ba.setRtSubclusterNumber(baRs.getInt("RT_SUBCLUSTER_NUMBER"));
-				ba.setMassError(baRs.getDouble("MASS_ERROR"));
-				ba.setRmd(baRs.getDouble("RMD"));
-				
-				bac.getAnnotations().add(ba);
+						ba.setAdditionalGroupAnnotations(baRs.getString("ADDITIONAL_GROUP_ANNOTATIONS"));
+						ba.setFurtherAnnotations(baRs.getString("FURTHER_ANNOTATIONS"));
+						ba.setDerivations(baRs.getString("DERIVATIONS"));
+						ba.setIsotopes(baRs.getString("ISOTOPES"));
+						ba.setAdditionalIsotopes(baRs.getString("ADDITIONAL_ISOTOPES"));
+						ba.setChargeCarrier(baRs.getString("CHARGE_CARRIER"));
+						ba.setAdditionalAdducts(baRs.getString("ADDITIONAL_ADDUCTS"));
+						ba.setBinNumber(baRs.getInt("BIN_NUMBER"));
+						ba.setRebinSubclusterNumber(baRs.getInt("REBIN_SUBCLUSTER_NUMBER"));
+						ba.setRtSubclusterNumber(baRs.getInt("RT_SUBCLUSTER_NUMBER"));
+						ba.setMassError(baRs.getDouble("MASS_ERROR"));
+						ba.setRmd(baRs.getDouble("RMD"));
+						
+						bac.getAnnotations().add(ba);
+					}
+					baRs.close();			
+					dataSet.getBinnerAnnotationClusters().add(bac);
+				}
+				rs.close();
 			}
-			baRs.close();			
-			dataSet.getBinnerAnnotationClusters().add(bac);
 		}
-		rs.close();
-		ps.close();
 	}
 
 	public static void addNewBinnerNeutralMassDifferenceAsAnnotation(BinnerNeutralMassDifference massDiff) {
@@ -639,13 +650,12 @@ public class BinnerUtils {
 		try {
 			addNewBinnerAdduct(newAdduct);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error(String.format("%s %s", "Failed to add to the database new Binner adduct", massDiff.getBinnerName()), e);
 		}
 	}
 	
 	//	BinnerAdductList
-	public static void addNewBinnerAdductList(BinnerAdductList newList) throws Exception {
+	public static void addNewBinnerAdductList(BinnerAdductList newList) throws SQLException {
 		
 		Connection conn = ConnectionManager.getConnection();
 		String id = SQLUtils.getNextIdFromSequence(conn, 
@@ -659,21 +669,21 @@ public class BinnerUtils {
 				"INSERT INTO BINNER_ANNOTATION_LIST  " +
 				"(LIST_ID, LIST_NAME, DESCRIPTION, OWNER, DATE_CREATED, DATE_MODIFIED) " +
 				"VALUES(?, ?, ?, ?, ?, ?) ";
-		PreparedStatement ps = conn.prepareStatement(query);		
+		try(PreparedStatement ps = conn.prepareStatement(query)){		
 
-		ps.setString(1, newList.getId());
-		ps.setString(2, newList.getName());
-		if(newList.getDescription() != null)
-			ps.setString(3, newList.getDescription());
-		else
-			ps.setNull(3, java.sql.Types.NULL);
+			ps.setString(1, newList.getId());
+			ps.setString(2, newList.getName());
+			if(newList.getDescription() != null)
+				ps.setString(3, newList.getDescription());
+			else
+				ps.setNull(3, java.sql.Types.NULL);
+				
+			ps.setString(4, newList.getOwner().getId());
+			ps.setTimestamp(5, new java.sql.Timestamp(new Date().getTime()));
+			ps.setTimestamp(6, new java.sql.Timestamp(new Date().getTime()));
 			
-		ps.setString(4, newList.getOwner().getId());
-		ps.setTimestamp(5, new java.sql.Timestamp(new Date().getTime()));
-		ps.setTimestamp(6, new java.sql.Timestamp(new Date().getTime()));
-		
-		ps.executeUpdate();
-		ps.close();
+			ps.executeUpdate();
+		}
 		insertBinnerAdductListComponents(newList, conn);		
 		ConnectionManager.releaseConnection(conn);
 	}
@@ -695,11 +705,12 @@ public class BinnerUtils {
 			ps.executeBatch();
 		}
 		catch(SQLException e) {
-			e.printStackTrace();
+			logger.error(String.format("%s %s", 
+					"Failed to upload to the database components for BinnerAdductList", baList.getName()), e);
 		}
 	}
 	
-	public static void editBinnerAdductList(BinnerAdductList listToEdit) throws Exception {
+	public static void editBinnerAdductList(BinnerAdductList listToEdit) throws SQLException {
 		
 		Connection conn = ConnectionManager.getConnection();		
 		String query  =
@@ -707,22 +718,21 @@ public class BinnerUtils {
 				"SET LIST_NAME = ?, DESCRIPTION = ?, OWNER = ?, " +
 				"DATE_CREATED = ?, DATE_MODIFIED = ? " +
 				"WHERE LIST_ID = ?";
-		PreparedStatement ps = conn.prepareStatement(query);		
+		try(PreparedStatement ps = conn.prepareStatement(query)){		
 
-		ps.setString(1, listToEdit.getName());
-		if(listToEdit.getDescription() != null)
-			ps.setString(2, listToEdit.getDescription());
-		else
-			ps.setNull(2, java.sql.Types.NULL);
+			ps.setString(1, listToEdit.getName());
+			if(listToEdit.getDescription() != null)
+				ps.setString(2, listToEdit.getDescription());
+			else
+				ps.setNull(2, java.sql.Types.NULL);
+				
+			ps.setString(3, listToEdit.getOwner().getId());
+			ps.setTimestamp(4, new java.sql.Timestamp(listToEdit.getDateCreated().getTime()));
+			ps.setTimestamp(5, new java.sql.Timestamp(new Date().getTime()));
+			ps.setString(6, listToEdit.getId());
 			
-		ps.setString(3, listToEdit.getOwner().getId());
-		ps.setTimestamp(4, new java.sql.Timestamp(listToEdit.getDateCreated().getTime()));
-		ps.setTimestamp(5, new java.sql.Timestamp(new Date().getTime()));
-		ps.setString(6, listToEdit.getId());
-		
-		ps.executeUpdate();
-		ps.close();
-		
+			ps.executeUpdate();
+		}	
 		clearBinnerAdductListComponents(listToEdit, conn);
 		insertBinnerAdductListComponents(listToEdit, conn);		
 		ConnectionManager.releaseConnection(conn);
@@ -736,14 +746,13 @@ public class BinnerUtils {
 		try(PreparedStatement ps = conn.prepareStatement(query)){
 			ps.setString(1, baList.getId());
 			ps.executeUpdate();
-			ps.close();	
 		}
 		catch(SQLException e) {
-			e.printStackTrace();
+			logger.error(String.format("%s %s", "Failed to clear Binner annotation list", baList.getName()), e);
 		}
 	}
 	
-	public static void deleteBinnerAdductList(BinnerAdductList listToDelete) throws Exception {
+	public static void deleteBinnerAdductList(BinnerAdductList listToDelete) throws SQLException {
 		
 		Connection conn = ConnectionManager.getConnection();	
 		String query  = "DELETE FROM BINNER_ANNOTATION_LIST WHERE LIST_ID = ?";
@@ -755,7 +764,7 @@ public class BinnerUtils {
 	}
 	
 	public static Collection<BinnerAdductList>
-			getBinnerAdductListCollection() throws Exception {
+			getBinnerAdductListCollection() throws SQLException {
 
 		Connection conn = ConnectionManager.getConnection();
 		Collection<BinnerAdductList>dataSets = 
@@ -771,23 +780,23 @@ public class BinnerUtils {
 		String query = 
 				"SELECT LIST_ID, LIST_NAME, DESCRIPTION, OWNER, DATE_CREATED, DATE_MODIFIED "
 				+ "FROM BINNER_ANNOTATION_LIST ORDER BY 1";
-		PreparedStatement ps = conn.prepareStatement(query);
+		try(PreparedStatement ps = conn.prepareStatement(query)){
 		
-		ResultSet rs = ps.executeQuery();
-		while(rs.next()) {
-			BinnerAdductList ds = 
-					new BinnerAdductList(
-					rs.getString("LIST_ID"), 
-					rs.getString("LIST_NAME"), 
-					rs.getString("DESCRIPTION"), 
-					IDTDataCache.getUserById(rs.getString("OWNER")), 
-					new Date(rs.getTimestamp("DATE_CREATED").getTime()),
-					new Date(rs.getTimestamp("DATE_MODIFIED").getTime()));
-			populateBinnerAdductList(ds, conn);
-			dataSets.add(ds);
+			ResultSet rs = ps.executeQuery();
+			while(rs.next()) {
+				BinnerAdductList ds = 
+						new BinnerAdductList(
+						rs.getString("LIST_ID"), 
+						rs.getString("LIST_NAME"), 
+						rs.getString("DESCRIPTION"), 
+						IDTDataCache.getUserById(rs.getString("OWNER")), 
+						new Date(rs.getTimestamp("DATE_CREATED").getTime()),
+						new Date(rs.getTimestamp("DATE_MODIFIED").getTime()));
+				populateBinnerAdductList(ds, conn);
+				dataSets.add(ds);
+			}
+			rs.close();
 		}
-		rs.close();
-		ps.close();
 		return dataSets;
 	}
 	

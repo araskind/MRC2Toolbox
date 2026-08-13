@@ -24,6 +24,7 @@ package edu.umich.med.mrc2.datoolbox.database.cpd;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -311,7 +312,7 @@ public class CompoundDatabaseUtils {
 	}
 
 	public static CompoundIdentity getCompoundById(
-			String accession, Connection conn) throws Exception{
+			String accession, Connection conn) throws SQLException{
 
 		CompoundIdentity identity = DiskCacheUtils.retrieveCompoundIdentityFromCache(accession);
 		if(identity != null)
@@ -787,7 +788,7 @@ public class CompoundDatabaseUtils {
 		return idList;
 	}
 	
-	public static Collection<CompoundConcentration>getConcentrationsForCompound(CompoundIdentity id) throws Exception {
+	public static Collection<CompoundConcentration>getConcentrationsForCompound(CompoundIdentity id) throws SQLException {
 		
 		Connection conn = ConnectionManager.getConnection();
 		Collection<CompoundConcentration>concentrations = getConcentrationsForCompound(id, conn);
@@ -796,7 +797,7 @@ public class CompoundDatabaseUtils {
 	}
 	
 	public static Collection<CompoundConcentration>getConcentrationsForCompound(
-			CompoundIdentity id, Connection conn) throws Exception {
+			CompoundIdentity id, Connection conn) throws SQLException {
 		
 		Collection<CompoundConcentration>concentrations = new ArrayList<CompoundConcentration>();
 		String sql = 

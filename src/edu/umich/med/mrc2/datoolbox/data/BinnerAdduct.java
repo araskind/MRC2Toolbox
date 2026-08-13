@@ -169,26 +169,17 @@ public class BinnerAdduct implements Serializable, Comparable<BinnerAdduct>{
 		if (obj == this)
 			return true;
 
-        if (obj == null)
-            return false;
-
-        if (!BinnerAdduct.class.isAssignableFrom(obj.getClass()))
+        if (obj == null || !BinnerAdduct.class.isAssignableFrom(obj.getClass()))
             return false;
 
         final BinnerAdduct other = (BinnerAdduct) obj;
         
-        if(!this.id.equals(other.getId()))
-        	return false;
-        
-        return true;
+        return this.id.equals(other.getId());
     }
 
     @Override
     public int hashCode() {
-
-        int hash = 3;
-        hash = 53 * hash + (this.id != null ? this.id.hashCode() : 0);
-        return hash;
+        return 53 * 3 + (this.id != null ? this.id.hashCode() : 0);
     } 
     
 	@Override
