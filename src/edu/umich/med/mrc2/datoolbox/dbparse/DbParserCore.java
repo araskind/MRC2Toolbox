@@ -98,12 +98,6 @@ public class DbParserCore {
 		((LoggerContext) LogManager.getContext(false)).setConfigLocation(file.toURI());			
 		logger = LoggerFactory.getLogger(MRC2ToolBoxCore.class);
 		logger.info("Statring the program");
-		
-		//	Stop all logs from printing to stdout
-//		SysStreamsLogger.bindSystemStreams();
-		
-		//	Stop stdout printing but keep errors
-//		SysStreamsLogger.bindOutputStream();
 				
 		MRC2ToolBoxConfiguration.initConfiguration();
 		boolean conectionSetupTried = false;
@@ -162,18 +156,17 @@ public class DbParserCore {
 	private static void initCacheSysytem() {
 		
 		compositeCacheManager = CompositeCacheManager.getUnconfiguredInstance();
-		cacheProps = new Properties(); 
-		try {
-			FileReader pfr = new FileReader(configDir + "cache.ccf");
+		Properties cacheProps = new Properties(); 
+		try (FileReader pfr = new FileReader(configDir + "cache.ccf")){
+
 			cacheProps.load(pfr); 
 			File tmp = new File(tmpDir);
 			cacheProps.put("jcs.auxiliary.DC.attributes.DiskPath", tmp.getAbsolutePath());
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("Failed to read cache configuration file!", e);
 		}
-		compositeCacheManager.configure(cacheProps);	
-		dbUploadCache = JCS.getInstance("dbUploadCache");
+		compositeCacheManager.configure(cacheProps);
+		dbUploadCache = new CacheAccess<>(compositeCacheManager.getCache("dbUploadCache"));
 		dbUploadCache.clear();
 	}
 	

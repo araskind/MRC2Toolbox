@@ -27,7 +27,7 @@ import java.text.NumberFormat;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
 
-import edu.umich.med.mrc2.datoolbox.main.config.NumberFormatStore;
+import edu.umich.med.mrc2.datoolbox.main.config.DefaultFormatStore;
 
 public class FormattedDecimalRenderer extends DefaultTableCellRenderer {
 
@@ -53,7 +53,7 @@ public class FormattedDecimalRenderer extends DefaultTableCellRenderer {
 		this.doubleFormat = doubleFormat;
 		this.hideZeros = hideZeros;
 		this.switchToScientificNotation = switchToScientificNotation;
-		this.sciFormatter = NumberFormatStore.getDefaultScientificFormat();
+		this.sciFormatter = DefaultFormatStore.getDefaultScientificFormat();
 	}
 
 	@Override

@@ -31,6 +31,7 @@ import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.AutoChoices;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.TableFilterHeader;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.FormattedDecimalRenderer;
+import edu.umich.med.mrc2.datoolbox.main.config.DefaultFormatStore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 
 public class LookupFeatureListTable extends BasicTable {
@@ -54,7 +55,7 @@ public class LookupFeatureListTable extends BasicTable {
 					MRC2ToolBoxConfiguration.getPpmFormat(), true));
 		columnModel.getColumnById(LookupFeatureListTableModel.P_VALUE_COLUMN).
 			setCellRenderer(new FormattedDecimalRenderer(
-					MRC2ToolBoxConfiguration.defaultMzFormat, true, true));
+					DefaultFormatStore.getDefaultMZformat(), true, true));
 		
 		thf = new TableFilterHeader(this, AutoChoices.ENABLED);	
 		finalizeLayout();

@@ -65,7 +65,7 @@ public class ImportBinnerAnnotationsForUntargetedDataTask extends BinnerReportPa
 				e.printStackTrace();
 			}			
 		}
-		if(binnerAnnotations == null || binnerAnnotations.isEmpty()) {
+		if(binnerAnnotations == null || binnerAnnotations.isEmpty() || !parsingErrors.isEmpty()) {
 			setStatus(TaskStatus.FINISHED);
 			return;
 		}

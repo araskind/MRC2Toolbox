@@ -40,7 +40,7 @@ import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusterDataSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusteringParameterSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
-import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
+import edu.umich.med.mrc2.datoolbox.main.config.DefaultFormatStore;
 import edu.umich.med.mrc2.datoolbox.msmsscore.MSMSScoreCalculator;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
@@ -74,7 +74,7 @@ public class MSMSFeatureClusteringTask extends AbstractTask {
 				&& !featureLookupDataSet.getFeatures().isEmpty())
 			description = "Based on feature lookup data set \"" + 
 				featureLookupDataSet.getName() + 
-				"\" (Created " + MRC2ToolBoxConfiguration.defaultTimeStampFormat.format(new Date()) + ")";
+				"\" (Created " + DefaultFormatStore.getDefaultTimeStampFormat().format(new Date()) + ")";
 		 
 		msmsClusterDataSet = new MSMSClusterDataSet(
 				"MSMS clusters data set", 

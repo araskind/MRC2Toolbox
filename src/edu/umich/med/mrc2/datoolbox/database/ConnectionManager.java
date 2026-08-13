@@ -27,10 +27,18 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import edu.umich.med.mrc2.datoolbox.data.enums.DatabseDialect;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 
 public class ConnectionManager {
+	
+	private static final Logger logger = LogManager.getLogger(ConnectionManager.class);
+	
+	private ConnectionManager() {
+		/* This utility class should not be instantiated */
+	}
 
 	private static ThreadLocal<Connection> tranConnection = new ThreadLocal<>();
 
@@ -40,13 +48,7 @@ public class ConnectionManager {
 		return PooledConnectionManager.getConnection();
 	}
 	
-	public static Connection getTestConnection() throws ClassNotFoundException, SQLException {
-		
-		if(MRC2ToolBoxConfiguration.getDatabaseType().equals(DatabseDialect.Oracle))
-			Class.forName("oracle.jdbc.driver.OracleDriver");
-	
-		if(MRC2ToolBoxConfiguration.getDatabaseType().equals(DatabseDialect.PostgreSQL))
-			Class.forName("org.postgresql.Driver");
+	public static Connection getTestConnection() throws SQLException {
 		
 		return DriverManager.getConnection(
 				MRC2ToolBoxConfiguration.getDatabaseConnectionString(),
@@ -56,35 +58,32 @@ public class ConnectionManager {
 
 	public static boolean connectionDefined() {
 
-		if(!MRC2ToolBoxConfiguration.getDatabaseConnectionString().isEmpty()
+		return (!MRC2ToolBoxConfiguration.getDatabaseConnectionString().isEmpty()
 				&& !MRC2ToolBoxConfiguration.getDatabaseUserName().isEmpty()
-				&& !MRC2ToolBoxConfiguration.getDatabasePassword().isEmpty()) {
-			return true;
-		}
-		return false;
+				&& !MRC2ToolBoxConfiguration.getDatabasePassword().isEmpty());
 	}
 	
 	public static void closeDataSource() {
 		PooledConnectionManager.closeDataSource();
 	}
 
-	public static synchronized void beginTransaction() throws Exception {
+	public static synchronized void beginTransaction() throws SQLException {
 
 		if (tranConnection.get() != null)
-			throw new Exception("This thread is already in a transaction");
+			throw new SQLException("This thread is already in a transaction");
 
 		Connection conn = getConnection();
 		conn.setAutoCommit(false);
 		tranConnection.set(conn);
 	}
 
-	public static void commitTransaction() throws Exception {
+	public static void commitTransaction() throws SQLException {
 
 		if (tranConnection.get() == null)
-			throw new Exception("Can't commit: this thread isn't currently in a " + "transaction");
+			throw new SQLException("Can't commit: this thread isn't currently in a transaction");
 
 		tranConnection.get().commit();
-		tranConnection.set(null);
+		tranConnection.remove();
 	}
 
 	/**
@@ -93,11 +92,13 @@ public class ConnectionManager {
 	 * (you're on your own if you're binding parameters).
 	 *
 	 * @return the results from the query
+	 * @throws SQLException 
 	 */
-	public static ResultSet executeQueryNoParams(Connection conn, String statement) throws Exception {
+	public static ResultSet executeQueryNoParams(Connection conn, String statement) throws SQLException {
 
-		PreparedStatement ps = conn.prepareStatement(statement);
-		return ps.executeQuery();
+		try(PreparedStatement ps = conn.prepareStatement(statement)){
+			return ps.executeQuery();
+		}	
 	}
 
 	/**
@@ -105,28 +106,27 @@ public class ConnectionManager {
 	 * doesn't return results using a PreparedStatment, and returns the number
 	 * of rows affected
 	 */
-	public static int executeUpdate(String statement) throws Exception {
+	public static int executeUpdate(String statement) throws SQLException {
 		Connection conn = getConnection();
-		try {
-			PreparedStatement ps = conn.prepareStatement(statement);
+		try (PreparedStatement ps = conn.prepareStatement(statement)){
 			return ps.executeUpdate();
 		} finally {
 			releaseConnection(conn);
 		}
 	}
 
-	public static void releaseConnection(Connection conn) throws Exception {
+	public static void releaseConnection(Connection conn) throws SQLException {
 
 		if (tranConnection.get() == null)
 			conn.close();
 	}
 
-	public static void rollbackTransaction() throws Exception {
+	public static void rollbackTransaction() throws SQLException {
 
 		if (tranConnection.get() == null)
-			throw new Exception("Can't rollback: this thread isn't currently in a " + "transaction");
+			throw new SQLException("Can't rollback: this thread isn't currently in a transaction");
 
 		tranConnection.get().rollback();
-		tranConnection.set(null);
+		tranConnection.remove();
 	}
 }

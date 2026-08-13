@@ -32,6 +32,7 @@ import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.AutoChoices;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.TableFilterHeader;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.FormattedDecimalRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.WordWrapCellRenderer;
+import edu.umich.med.mrc2.datoolbox.main.config.DefaultFormatStore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 
 public class MinimalMSOneFeatureTable extends BasicTable {
@@ -59,7 +60,7 @@ public class MinimalMSOneFeatureTable extends BasicTable {
 				MRC2ToolBoxConfiguration.getPpmFormat(), true));
 		columnModel.getColumnById(MinimalMSOneFeatureTableModel.P_VALUE_COLUMN).
 			setCellRenderer(new FormattedDecimalRenderer(
-					MRC2ToolBoxConfiguration.defaultMzFormat, true, true));
+					DefaultFormatStore.getDefaultMZformat(), true, true));
 	
 		thf = new TableFilterHeader(this, AutoChoices.ENABLED);	
 		finalizeLayout();

@@ -27,7 +27,7 @@ import java.util.List;
 
 import org.jdom2.Element;
 
-import edu.umich.med.mrc2.datoolbox.main.config.NumberFormatStore;
+import edu.umich.med.mrc2.datoolbox.main.config.DefaultFormatStore;
 import edu.umich.med.mrc2.datoolbox.project.store.ChromatographicGradientStepFields;
 import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
 import edu.umich.med.mrc2.datoolbox.project.store.XmlStorable;
@@ -145,7 +145,7 @@ public class ChromatographicGradientStep implements Serializable, Comparable<Chr
 	@Override
 	public Element getXmlElement() {
 		
-		NumberFormat formatter = NumberFormatStore.getDecimalFormatWithPrecision(3);
+		NumberFormat formatter = DefaultFormatStore.getDecimalFormatWithPrecision(3);
 
 		Element gradientStepElement = 
 				new Element(ObjectNames.ChromatographicGradientStep.name());

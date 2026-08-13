@@ -42,5 +42,6 @@ public enum BinnerAnnotationFields {
 	IsPrimary,
 	BinnerMz,
 	BinnerRt,
+	BinnerAdductId,
 	;
 }

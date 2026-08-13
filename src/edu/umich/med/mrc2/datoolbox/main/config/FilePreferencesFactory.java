@@ -22,9 +22,11 @@
 package edu.umich.med.mrc2.datoolbox.main.config;
 
 import java.io.File;
-import java.util.logging.Logger;
 import java.util.prefs.Preferences;
 import java.util.prefs.PreferencesFactory;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 
@@ -41,7 +43,8 @@ import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
  * @version $Id: FilePreferencesFactory.java 282 2009-06-18 17:05:18Z david $
  */
 public class FilePreferencesFactory implements PreferencesFactory {
-	private static final Logger log = Logger.getLogger(FilePreferencesFactory.class.getName());
+	
+	private static final Logger logger = LogManager.getLogger(FilePreferencesFactory.class);
 
 	Preferences rootPreferences;
 	public static final String SYSTEM_PROPERTY_FILE = 
@@ -55,7 +58,7 @@ public class FilePreferencesFactory implements PreferencesFactory {
 
 		if (rootPreferences == null) {
 
-			log.finer("Instantiating root preferences");
+			logger.trace("Instantiating root preferences");
 			rootPreferences = new FilePreferences(null, "");
 		}
 		return rootPreferences;
@@ -69,11 +72,11 @@ public class FilePreferencesFactory implements PreferencesFactory {
 
 			String prefsFile = System.getProperty(SYSTEM_PROPERTY_FILE);
 
-			if (prefsFile == null || prefsFile.length() == 0)
+			if (prefsFile == null || prefsFile.isEmpty())
 				prefsFile = MRC2ToolBoxCore.configDir + "MRC2ToolBoxPrefs.txt";
 
 			preferencesFile = new File(prefsFile).getAbsoluteFile();
-			log.finer("Preferences file is " + preferencesFile);
+			logger.trace(String.format(FilePreferences.errorFormat, "Preferences file is", preferencesFile));
 		}
 		return preferencesFile;
 	}

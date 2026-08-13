@@ -26,9 +26,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
-import java.text.DateFormat;
 import java.text.DecimalFormat;
-import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -45,6 +43,7 @@ import edu.umich.med.mrc2.datoolbox.data.enums.MsLibraryFormat;
 import edu.umich.med.mrc2.datoolbox.data.enums.SpectrumSource;
 import edu.umich.med.mrc2.datoolbox.data.lims.Injection;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
+import edu.umich.med.mrc2.datoolbox.main.config.DefaultFormatStore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.sirius.SiriusMsField;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
@@ -59,8 +58,6 @@ public class SiriusMsExportTask extends AbstractTask {
 	private File exportFile;
 	private boolean instrumentOnly;
 	private static final DecimalFormat intensityFormat = new DecimalFormat("###");
-	private static final DateFormat dateFormat = 
-			new SimpleDateFormat(MRC2ToolBoxConfiguration.DATE_TIME_FORMAT_DEFAULT);
 	private Map<String,Injection>injectionMap;
 
 	public SiriusMsExportTask(
@@ -221,7 +218,7 @@ public class SiriusMsExportTask extends AbstractTask {
 			Injection injection = injectionMap.get(injId);
 			if(injection != null) {
 				comment += "Data file: " + injection.getDataFileName() + "; ";
-				comment += "Timestamp: " + dateFormat.format(injection.getTimeStamp()) + "; ";
+				comment += "Timestamp: " + DefaultFormatStore.getDefaultTimeStampFormat().format(injection.getTimeStamp()) + "; ";
 			}
 		}
 		comment += "Acq. method: " + bundle.getAcquisitionMethod().getName() + "; ";

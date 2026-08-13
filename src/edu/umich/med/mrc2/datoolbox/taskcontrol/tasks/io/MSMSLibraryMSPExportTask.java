@@ -27,9 +27,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.sql.Connection;
-import java.text.DateFormat;
-import java.text.DecimalFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
@@ -46,6 +43,7 @@ import edu.umich.med.mrc2.datoolbox.data.enums.SpectrumSource;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.database.idt.MSMSLibraryUtils;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.nist.NISTReferenceLibraries;
+import edu.umich.med.mrc2.datoolbox.main.config.DefaultFormatStore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
@@ -56,9 +54,6 @@ public class MSMSLibraryMSPExportTask extends AbstractTask {
 
 	private Collection<MsMsLibraryFeature>featuresToExport;
 	private File exportFile;
-	private static final DecimalFormat intensityFormat = new DecimalFormat("###");
-	private static final DateFormat dateFormat = 
-			new SimpleDateFormat(MRC2ToolBoxConfiguration.DATE_TIME_FORMAT_DEFAULT);
 	
 	private String libraryId;
 	private Polarity polarity;
@@ -195,7 +190,7 @@ public class MSMSLibraryMSPExportTask extends AbstractTask {
 
 				writer.append(
 					MRC2ToolBoxConfiguration.getMzFormat().format(point.getMz())
-					+ " " + intensityFormat.format(point.getIntensity())) ;
+					+ " " + DefaultFormatStore.getIntegerFormat().format(point.getIntensity())) ;
 				
 				String annotation = feature.getMassAnnotations().get(point);
 				if(annotation != null)

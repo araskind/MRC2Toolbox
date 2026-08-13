@@ -106,6 +106,7 @@ import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.RawDataManager;
 import edu.umich.med.mrc2.datoolbox.main.RecentDataManager;
+import edu.umich.med.mrc2.datoolbox.main.config.DefaultFormatStore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.ProjectType;
 import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisProject;
@@ -711,7 +712,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 		    	if(sameNameDeMethod != null) {
 
 		    		String newName = "MSMS extraction method V-" + 
-		    				MRC2ToolBoxConfiguration.defaultTimeStampFormat.format(new Date());
+		    				DefaultFormatStore.getDefaultTimeStampFormat().format(new Date());
 		    		String newDescription = "Modified from " + ps.getName() + " (" + ps.getId() +
 		    				") by "+ MRC2ToolBoxCore.getIdTrackerUser().getFullName();	    		
 		    		ps.setName(newName);

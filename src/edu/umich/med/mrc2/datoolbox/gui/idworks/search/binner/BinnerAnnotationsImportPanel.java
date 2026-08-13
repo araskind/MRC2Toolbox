@@ -32,6 +32,7 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.prefs.Preferences;
@@ -63,6 +64,8 @@ import edu.umich.med.mrc2.datoolbox.gui.idworks.fcolls.binner.BinnerAnnotationLo
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.IndeterminateProgressDialog;
+import edu.umich.med.mrc2.datoolbox.gui.utils.InfoDialogType;
+import edu.umich.med.mrc2.datoolbox.gui.utils.InformationDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.LongUpdateTask;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
@@ -318,8 +321,25 @@ public class BinnerAnnotationsImportPanel extends JPanel
 
 			((AbstractTask)e.getSource()).removeTaskListener(this);
 			
-			if (e.getSource().getClass().equals(ExtractBinnerAnnotationsForMSMSFeatureClusteringTask.class))
-				finalizeBinnerImportTask((ExtractBinnerAnnotationsForMSMSFeatureClusteringTask)e.getSource());			
+			if (e.getSource().getClass().equals(ExtractBinnerAnnotationsForMSMSFeatureClusteringTask.class)) {
+				
+				ExtractBinnerAnnotationsForMSMSFeatureClusteringTask task = 
+						(ExtractBinnerAnnotationsForMSMSFeatureClusteringTask)e.getSource();
+				
+				List<String> parsingErrors = task.getParsingErrors();
+				if(!parsingErrors.isEmpty()) {
+					
+					InformationDialog errorDialog = new InformationDialog(
+							"Binner annotation parsing errors",
+							"The following errors detected while parsing the file " + task.getBinnerDataFile().getName() + ":\n",
+							StringUtils.join(parsingErrors, "\n"), 
+							InfoDialogType.ERROR);
+					errorDialog.setLocationRelativeTo(this);
+					errorDialog.setVisible(true);
+                }
+				else
+					finalizeBinnerImportTask((ExtractBinnerAnnotationsForMSMSFeatureClusteringTask)e.getSource());		
+			}
 		}		
 	}
 

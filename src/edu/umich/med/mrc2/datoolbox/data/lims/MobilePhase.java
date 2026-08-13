@@ -30,7 +30,7 @@ import java.util.UUID;
 import org.jdom2.Element;
 
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
-import edu.umich.med.mrc2.datoolbox.main.config.NumberFormatStore;
+import edu.umich.med.mrc2.datoolbox.main.config.DefaultFormatStore;
 import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
 import edu.umich.med.mrc2.datoolbox.project.store.MobilePhaseFields;
 import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
@@ -169,7 +169,7 @@ public class MobilePhase implements Serializable, Comparable<MobilePhase>, XmlSt
 
 		mobilePhaseElement.setAttribute(
 				MobilePhaseFields.starPcnt.name(), 
-				NumberFormatStore.getDecimalFormatWithPrecision(3).format(startingPercentage));
+				DefaultFormatStore.getDecimalFormatWithPrecision(3).format(startingPercentage));
 		
 		Element synonymsListList = 
 				new Element(MobilePhaseFields.SynonymList.name());

@@ -334,7 +334,7 @@ public class DockableFeatureCollectionsManager extends DefaultSingleCDockable im
 				newCollection.getFeatureIds().addAll(featureIdsToAdd);
 				newCollection.setCollectionSize(newCollection.getFeatureIds().size());
 			}
-			FeatureCollectionManager.getfeatureCollectionsMSIDSet().add(newCollection);			
+			FeatureCollectionManager.getMsFeatureInfoBundleCollections().add(newCollection);			
 			
 			if(msFeatureCollectionEditorDialog.loadCollectionIntoWorkBench()) {
 				loadCollectionIntoWorkBench(newCollection);

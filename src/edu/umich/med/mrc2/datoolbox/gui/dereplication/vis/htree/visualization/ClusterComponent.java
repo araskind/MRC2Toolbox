@@ -31,7 +31,7 @@ import java.util.List;
 import java.util.Map;
 
 import edu.umich.med.mrc2.datoolbox.gui.dereplication.vis.htree.Cluster;
-import edu.umich.med.mrc2.datoolbox.main.config.NumberFormatStore;
+import edu.umich.med.mrc2.datoolbox.main.config.DefaultFormatStore;
 
 public class ClusterComponent implements Paintable {
 
@@ -188,7 +188,7 @@ public class ClusterComponent implements Paintable {
 		}
 		if (decorated && cluster.getDistance() != null && !cluster.getDistance().isNaN()
 				&& cluster.getDistance().getDistance() > 0) {
-			String s = NumberFormatStore.getDecimalFormatWithPrecision(2).format(cluster.getDistance());
+			String s = DefaultFormatStore.getDecimalFormatWithPrecision(2).format(cluster.getDistance());
 			rect = fontMetrics.getStringBounds(s, g);
 			g.drawString(s, x1 - (int) rect.getWidth(), y1 - 2);
 		}

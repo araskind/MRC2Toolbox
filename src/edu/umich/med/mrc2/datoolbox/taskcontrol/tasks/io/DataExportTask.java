@@ -78,6 +78,7 @@ import edu.umich.med.mrc2.datoolbox.data.enums.MissingExportType;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.main.AdductManager;
+import edu.umich.med.mrc2.datoolbox.main.config.DefaultFormatStore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
@@ -345,12 +346,12 @@ public class DataExportTask extends AbstractTask {
 					String qualString = "";
 					
 					if(value != null) {
-						mzString = MRC2ToolBoxConfiguration.defaultMzFormat.format(
+						mzString = DefaultFormatStore.getDefaultMZformat().format(
 								value.getObservedSpectrum().getMonoisotopicMz());
-						rtString = MRC2ToolBoxConfiguration.defaultRtFormat.format(
+						rtString = DefaultFormatStore.getDefaultRTformat().format(
 								value.getRetentionTime());
 						if(value.getRtRange() != null) 
-							pwString = MRC2ToolBoxConfiguration.defaultRtFormat.format(value.getRtRange().getSize());
+							pwString = DefaultFormatStore.getDefaultRTformat().format(value.getRtRange().getSize());
 						
 						if(value.getQualityScore() > 0)
 							qualString = MRC2ToolBoxConfiguration.getPpmFormat().format(value.getQualityScore());

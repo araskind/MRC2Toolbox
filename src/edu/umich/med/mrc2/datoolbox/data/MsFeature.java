@@ -51,6 +51,7 @@ import edu.umich.med.mrc2.datoolbox.data.enums.SpectrumSource;
 import edu.umich.med.mrc2.datoolbox.data.lims.ObjectAnnotation;
 import edu.umich.med.mrc2.datoolbox.gui.communication.MsFeatureEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.MsFeatureListener;
+import edu.umich.med.mrc2.datoolbox.main.config.DefaultFormatStore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.msmsscore.MSMSScoreCalculator;
 import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
@@ -870,9 +871,9 @@ public class MsFeature implements AnnotatedObject, Serializable, XmlStorable {
 			
 			double rt  = spectrum.getExperimentalTandemSpectrum().getParentScanRetentionTime();			
 			newName = DataPrefix.MS_LIBRARY_UNKNOWN_TARGET.getName() +
-					MRC2ToolBoxConfiguration.defaultMzFormat.format(
+					DefaultFormatStore.getDefaultMZformat().format(
 							spectrum.getExperimentalTandemSpectrum().getParent().getMz()) + "_" + 
-					MRC2ToolBoxConfiguration.defaultRtFormat.format(rt);
+							DefaultFormatStore.getDefaultRTformat().format(rt);
 			primaryIdentity.setIdentityName(newName);
 			primaryIdentity.setConfidenceLevel(
 					CompoundIdentificationConfidence.UNKNOWN_MSMS_RT);
@@ -924,9 +925,9 @@ public class MsFeature implements AnnotatedObject, Serializable, XmlStorable {
 					rt = retentionTime;
 				
 				String newName = DataPrefix.MS_LIBRARY_UNKNOWN_TARGET.getName() +
-						MRC2ToolBoxConfiguration.defaultMzFormat.format(
+						DefaultFormatStore.getDefaultMZformat().format(
 								spectrum.getExperimentalTandemSpectrum().getParent().getMz()) + "_" + 
-						MRC2ToolBoxConfiguration.defaultRtFormat.format(rt);
+								DefaultFormatStore.getDefaultRTformat().format(rt);
 				primaryIdentity.setIdentityName(newName);
 				primaryIdentity.setConfidenceLevel(
 						CompoundIdentificationConfidence.UNKNOWN_MSMS_RT);

@@ -22,47 +22,47 @@
 package edu.umich.med.mrc2.datoolbox.main;
 
 import java.util.Collection;
-import java.util.Optional;
+
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
 import edu.umich.med.mrc2.datoolbox.data.ExternalDatabase;
 import edu.umich.med.mrc2.datoolbox.database.idt.ExternalDatabaseUtils;
 
 public class ExternalDatabasesManager {
 
+	private static final Logger logger = LogManager.getLogger(ExternalDatabasesManager.class);
+	
 	private static Collection<ExternalDatabase> externalDatabases;
 
-	public ExternalDatabasesManager() {
-		super();
-		try {
-			externalDatabases = ExternalDatabaseUtils.getExternalDatabaseList();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+	private ExternalDatabasesManager() {
+
 	}
 
 	/**
 	 * @return the externalDatabases
 	 */
 	public static Collection<ExternalDatabase> getExternalDatabases() {
+		
+		if(externalDatabases == null || externalDatabases.isEmpty()) {
+			try {
+				externalDatabases = ExternalDatabaseUtils.getExternalDatabaseList();
+			} catch (Exception e) {
+				logger.error("Failed to read external databases list", e);
+			}
+		}
 		return externalDatabases;
 	}
 
 	public static ExternalDatabase getDatabaseByName(String name) {
 
-		Optional<ExternalDatabase> edb = externalDatabases.stream().filter(d -> d.getName().equals(name)).findFirst();
-		if(edb.isPresent())
-			return edb.get();
-		else
-			return null;
+		return getExternalDatabases().stream().
+				filter(d -> d.getName().equals(name)).findFirst().orElse(null);
 	}
 
 	public static ExternalDatabase getDatabaseById(String id) {
 
-		Optional<ExternalDatabase> edb = externalDatabases.stream().filter(d -> d.getId().equals(id)).findFirst();
-		if(edb.isPresent())
-			return edb.get();
-		else
-			return null;
+		return getExternalDatabases().stream().
+				filter(d -> d.getId().equals(id)).findFirst().orElse(null);
 	}
 }

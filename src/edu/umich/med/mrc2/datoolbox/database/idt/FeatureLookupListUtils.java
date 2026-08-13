@@ -24,6 +24,7 @@ package edu.umich.med.mrc2.datoolbox.database.idt;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Date;
 import java.util.TreeSet;
@@ -46,7 +47,7 @@ public class FeatureLookupListUtils {
 	}
 	
 	public static void addFeatureLookupDataSet(
-			FeatureLookupList dataSet, Connection conn) throws Exception {
+			FeatureLookupList dataSet, Connection conn) throws SQLException {
 		
 		String newId = SQLUtils.getNextIdFromSequence(conn, 
 				"FEATURE_LOOKUP_DATA_SET_SEQ",

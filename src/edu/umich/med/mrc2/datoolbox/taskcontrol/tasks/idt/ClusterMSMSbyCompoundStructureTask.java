@@ -41,7 +41,7 @@ import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusteringParameterSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.nist.pepsearch.HiResSearchOption;
 import edu.umich.med.mrc2.datoolbox.main.MSMSClusterDataSetManager;
-import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
+import edu.umich.med.mrc2.datoolbox.main.config.DefaultFormatStore;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
@@ -85,7 +85,7 @@ public class ClusterMSMSbyCompoundStructureTask extends AbstractTask {
 		if(existingParamsSet == null) {
 			
 			params.setName("Clustering by structure parameters (" + 
-					MRC2ToolBoxConfiguration.defaultTimeStampFormat.format(new Date()) +")");
+					DefaultFormatStore.getDefaultTimeStampFormat().format(new Date()) +")");
 			params.setMd5(md5);
 			clusterDataSet.setParameters(params);
 		}

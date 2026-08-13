@@ -34,6 +34,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
+import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -43,15 +44,13 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.TreeSet;
 
-import org.apache.commons.jcs3.JCS;
 import org.apache.commons.jcs3.access.CacheAccess;
-import org.apache.commons.jcs3.access.exception.CacheException;
 import org.apache.commons.jcs3.engine.control.CompositeCacheManager;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.renjin.script.RenjinScriptEngine;
 import org.renjin.script.RenjinScriptEngineFactory;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import edu.umich.med.mrc2.datoolbox.data.CompoundLibrary;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
@@ -86,7 +85,7 @@ public final class MRC2ToolBoxCore {
 	public static String tmpDir = dataDir + "tmp" + File.separator;
 	
 	private static final String classyFireOntology = dataDir  + "/obo/ChemOnt_2_1.obo";
-	private static OWLGraphWrapper graph;
+	private static OWLGraphWrapper  graph = null;
 	
 	private static MainWindow mainWindow;
 	private static TaskControllerImpl taskController;
@@ -95,19 +94,15 @@ public final class MRC2ToolBoxCore {
 	private static RenjinScriptEngine rScriptEngine;
 
 	private static LIMSUser idTrackerUser;
-	
+		
 	private static CompositeCacheManager compositeCacheManager;
-	private static Properties cacheProps;
 	public static CacheAccess<Object, Object> msFeatureCache;
 	public static CacheAccess<Object, Object> featureChromatogramCache;
 	public static CacheAccess<Object, Object> compoundIdCache;
 	public static CacheAccess<Object, Object> msmsLibraryCache;
 	
-	private static Collection<CompoundLibrary>activeMsLibraries;
-	
+	private static Collection<CompoundLibrary>activeMsLibraries;	
 	public static String COMPONENT_IDENTIFIER ="COMPONENT_IDENTIFIER";
-
-	@SuppressWarnings("rawtypes")
 	private static Map<DataFile, LCMSData>rawDataMap;
 
 	public static DataAnalysisProject getActiveMetabolomicsExperiment() {
@@ -122,82 +117,23 @@ public final class MRC2ToolBoxCore {
 		return taskController;
 	}	
 	
-	private static Logger logger;
+	private static final Logger logger= LogManager.getLogger(MRC2ToolBoxCore.class);
 
 	public static void main(String[] args) {
 		
-		//	Prevent second copy running
-		FileLock lock = null;
-		try {
-		    FileChannel fc = FileChannel.open(lockFile.toPath(),
-		            StandardOpenOption.CREATE,
-		            StandardOpenOption.WRITE);
-		    lock = fc.tryLock();
-		} catch (IOException e) {
-		    throw new Error(e);
-		}
-	    if (lock == null) {
-	        System.out.println("Another instance of the software is already running");
-	        System.exit(1);
-	    }
+		logger.info("Statring the program");
 		
+		//	Prevent second copy running
+		createFileLock();
+	
 		System.setProperty("java.util.prefs.PreferencesFactory", 
 				FilePreferencesFactory.class.getName());
 		System.setProperty(FilePreferencesFactory.SYSTEM_PROPERTY_FILE, 
 				MRC2ToolBoxCore.configDir + "MRC2ToolBoxPrefs.txt");
-		
-		//	Configure logging
-//		File file = new File(configDir + "log4j2.xml");
-//		((LoggerContext) LogManager.getContext(false)).setConfigLocation(file.toURI());		
-		System.setProperty("logback.configurationFile", 
-				MRC2ToolBoxCore.configDir + "logback-config.xml");
-		System.setProperty("logback.statusListenerClass", 
-				"ch.qos.logback.core.status.OnConsoleStatusListener"); 
-		
-		
-		logger = LoggerFactory.getLogger(MRC2ToolBoxCore.class);
-		logger.info("Statring the program");
-		
-		//	Stop all logs from printing to stdout
-//		SysStreamsLogger.bindSystemStreams();
-		
-		//	Stop stdout printing but keep errors
-//		SysStreamsLogger.bindOutputStream();
-				
 		MRC2ToolBoxConfiguration.initConfiguration();
-		boolean conectionSetupTried = false;
-		if(!ConnectionManager.connectionDefined()) {
-			conectionSetupTried = true;
-			showDatabaseSetup();
-		}		
-		Connection conn = null;
-		try {
-			conn = ConnectionManager.getTestConnection();
-		} catch (Exception e2) {
-			// TODO Auto-generated catch block
-			e2.printStackTrace();
-		}
-		if(conn == null && !conectionSetupTried)
-			showDatabaseSetup();
+	
+		initDatabaseConnection();
 		
-		try {
-			conn = ConnectionManager.getConnection();
-		} catch (Exception e1) {
-			// TODO Auto-generated catch block
-			//	e1.printStackTrace();
-		}
-		if(conn == null) {
-			MessageDialog.showErrorMsg(
-					"Database connection can not be established, exiting the program");
-			System.exit(1);
-		} else {
-			try {
-				conn.close();
-			} catch (SQLException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-		}
         final SplashScreen splash = SplashScreen.getSplashScreen();
         Graphics2D g = null;
         if (splash != null)
@@ -214,6 +150,83 @@ public final class MRC2ToolBoxCore {
 		rawDataMap = new HashMap<>();
 		activeMsLibraries = new TreeSet<>();
 	    
+		populateDataCashFromDatabase(splash, g);
+		
+		mainWindow = new MainWindow();
+		mainWindow.loadPreferences();
+		mainWindow.setVisible(true);
+        if (splash != null){
+        	try {
+				splash.close();
+			} catch (IllegalStateException e) {
+				//	logger.error("Failed to create GUI!", e);
+			}
+        }
+        mainWindow.showIdTrackerLogin();
+	}
+	
+	public static void startClassyFireOntology() {		
+		
+	    ClassyFireOntologyLoader ontologyLoader = 
+	    		new ClassyFireOntologyLoader();
+	    Thread t = new Thread(ontologyLoader);
+	    t.start();
+	}
+	
+	private static void createFileLock() {
+		
+		FileLock lock = null;
+		try (FileChannel fc = FileChannel.open(lockFile.toPath(),
+	            StandardOpenOption.CREATE,
+	            StandardOpenOption.WRITE)){
+		    lock = fc.tryLock();
+		} catch (IOException e) {
+		    logger.error("Failed to create the lock file!", e);
+		}
+	    if (lock == null) {
+	        logger.error("Another instance of the software is already running!");
+	        System.exit(1);
+	    }
+	}
+	
+	private static void initDatabaseConnection() {
+		
+		boolean conectionSetupTried = false;
+		if(!ConnectionManager.connectionDefined()) {
+			conectionSetupTried = true;
+			showDatabaseSetup();
+		}			
+		Connection conn = null;
+		try {
+			conn = ConnectionManager.getTestConnection();
+		} catch (Exception e2) {
+			 logger.error("Failed to establish database connection!", e2);
+		}
+		if(conn == null && !conectionSetupTried)
+			showDatabaseSetup();
+		
+		try {
+			conn = ConnectionManager.getConnection();
+		} catch (Exception e1) {
+			logger.error("Failed to establish database connection!", e1);
+		}
+		if(conn == null) {
+			MessageDialog.showErrorMsg(
+					"Database connection can not be established, exiting the program");
+			System.exit(1);
+		} else {
+			try {
+				conn.close();
+			} catch (SQLException e1) {
+				logger.error("Failed to close database connection properly!", e1);
+			}
+		}
+	}
+	
+	private static void populateDataCashFromDatabase(SplashScreen splash, Graphics2D g) {
+
+		initCacheSysytem();
+		
         if (g != null) {
         	renderSplashFrame(g, "                                              ");
         	splash.update();
@@ -227,64 +240,27 @@ public final class MRC2ToolBoxCore {
             renderSplashFrame(g, "Initializing user interface");
             splash.update();
         }
-        initCacheSysytem();
-        
-//        if (g != null) {
-//        	renderSplashFrame(g, "                                              ");
-//        	splash.update();
-//            renderSplashFrame(g, "Reading ClasyFire compound ontology");
-//            splash.update();
-//        }
-		//initClassyFireOntology();
-		
-		mainWindow = new MainWindow();
-		mainWindow.loadPreferences();
-		mainWindow.setVisible(true);
-        if (splash != null){
-        	try {
-				splash.close();
-			} catch (IllegalStateException e) {
-				//e.printStackTrace();
-			}
-        }
-        mainWindow.showIdTrackerLogin();
-	}
-	
-	private static void startClassyFireOntology() {		
-		
-	    ClassyFireOntologyLoader ontologyLoader = 
-	    		new ClassyFireOntologyLoader();
-	    Thread t = new Thread(ontologyLoader);
-	    t.start();
 	}
 
 	public static void shutDown() {
 
 		RawDataManager.releaseAllDataSources();		
-		try {
-			msFeatureCache.clear();
-			featureChromatogramCache.clear();		
-			compoundIdCache.clear();
-			msmsLibraryCache.clear();
-		} catch (CacheException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-		try {
-			JCS.shutdown();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}		
+
+		compositeCacheManager.shutDown();
+		
 		RecentDataManager.saveDataToFile();
 		mainWindow.saveApplicationLayout();
 		mainWindow.savePreferences();
 		mainWindow.dispose();
 		
-		if(lockFile != null)
-			lockFile.delete();
-		
+		if(lockFile.exists()) {
+			try {
+				Files.delete(lockFile.toPath());
+			} catch (IOException e) {
+				logger.error("Failed to delete lock file!", e);
+			}
+		}
 		ConnectionManager.closeDataSource();
-		System.gc();
 		System.exit(0);
 	}
 	
@@ -324,19 +300,19 @@ public final class MRC2ToolBoxCore {
     
     private static class ClassyFireOntologyLoader implements Runnable {
 
-        public ClassyFireOntologyLoader() {
+        private ClassyFireOntologyLoader() {
 
         }
 
         public void run() {
-    		ParserWrapper pw = new ParserWrapper();
-    		graph = null;		
+        	
+    		ParserWrapper pw = new ParserWrapper();	
     		try {
     			graph = pw.parseToOWLGraph(classyFireOntology);
     		} catch (OWLOntologyCreationException e) {
-    			e.printStackTrace();
+    			logger.error("Failed to parse compound ontology file!", e);
     		} catch (IOException e) {
-    			e.printStackTrace();
+    			logger.error("Failed to read compound ontology file!", e);
     		}
         }
     }
@@ -395,32 +371,31 @@ public final class MRC2ToolBoxCore {
 	public static void setIdTrackerUser(LIMSUser idTrackerUser) {
 		MRC2ToolBoxCore.idTrackerUser = idTrackerUser;
 	}
-	
+
 	private static void initCacheSysytem() {
 		
 		compositeCacheManager = CompositeCacheManager.getUnconfiguredInstance();
-		cacheProps = new Properties(); 
-		try {
-			FileReader pfr = new FileReader(configDir + "cache.ccf");
+		Properties cacheProps = new Properties(); 
+		try (FileReader pfr = new FileReader(configDir + "cache.ccf")){
+
 			cacheProps.load(pfr); 
 			File tmp = new File(tmpDir);
 			cacheProps.put("jcs.auxiliary.DC.attributes.DiskPath", tmp.getAbsolutePath());
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("Failed to read cache configuration file!", e);
 		}
 		compositeCacheManager.configure(cacheProps);
 		
-		msFeatureCache = JCS.getInstance("msFeatureCache");
+		msFeatureCache = new CacheAccess<>(compositeCacheManager.getCache("msFeatureCache"));
 		msFeatureCache.clear();
-		
-		featureChromatogramCache = JCS.getInstance("featureChromatogramCache");
+			
+		featureChromatogramCache = new CacheAccess<>(compositeCacheManager.getCache("featureChromatogramCache"));
 		featureChromatogramCache.clear();
 		
-		compoundIdCache = JCS.getInstance("compoundIdCache");
+		compoundIdCache = new CacheAccess<>(compositeCacheManager.getCache("compoundIdCache"));
 		compoundIdCache.clear();
 		
-		msmsLibraryCache = JCS.getInstance("msmsLibraryCache");
+		msmsLibraryCache = new CacheAccess<>(compositeCacheManager.getCache("msmsLibraryCache"));
 		msmsLibraryCache.clear();
 	}
 

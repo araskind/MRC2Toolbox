@@ -38,6 +38,9 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import edu.umich.med.mrc2.datoolbox.data.enums.DatabseDialect;
 import edu.umich.med.mrc2.datoolbox.data.enums.IntensityFormat;
 import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
@@ -48,6 +51,8 @@ import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.StartupConfiguration;
 
 public class MRC2ToolBoxConfiguration {
+	
+	private static final Logger logger = LogManager.getLogger(MRC2ToolBoxConfiguration.class);
 	
 	private MRC2ToolBoxConfiguration() {
 		/* This utility class should not be instantiated */
@@ -102,37 +107,22 @@ public class MRC2ToolBoxConfiguration {
 	public static final String MAX_THREADS = "maxThreadNumber";
 	public static final int MAX_THREADS_DEFAULT = 6;
 
+    public static final String PPM_FORMAT = "ppmFormat";      
     public static final String MZ_FORMAT = "mzFormat";
-    public static final String MZ_FORMAT_DEFAULT = "#.####";
-    public static final NumberFormat defaultMzFormat = new DecimalFormat(MZ_FORMAT_DEFAULT);
 
+    public static final String RT_FORMAT = "rtFormat";
     public static final String RETENTION_UNITS = "retentionUnits";
     public static final String RETENTION_UNITS_DEFAULT = RetentionUnits.MINUTES.getName();
 
-    public static final String RT_FORMAT = "rtFormat";
-    public static final String RT_FORMAT_DEFAULT = "#.###";
-    public static final NumberFormat defaultRtFormat = new DecimalFormat(RT_FORMAT_DEFAULT);
-
-    public static final String PPM_FORMAT = "ppmFormat";
-    public static final String PPM_FORMAT_DEFAULT = "#.#";
-
     public static final String INTENSITY_FORMAT = "intensityFormat";
-    public static final String INTENSITY_FORMAT_DEFAULT = "#,###";
-
     public static final String INTENSITY_NOTATION = "intensityNotation";
     public static final String INTENSITY_NOTATION_DEFAULT = IntensityFormat.DECIMAL.getName();
-
     public static final String INTENSITY_DECIMALS = "intensityDecimals";
     public static final Integer INTENSITY_DECIMALS_DEFAULT = 4;
 
     public static final String SPECTRUM_INTENSITY_FORMAT = "spectrumIntensityFormat";
-    public static final String SPECTRUM_INTENSITY_FORMAT_DEFAULT = "#.#";
-
     public static final String DATE_TIME_FORMAT = "dateTimeFormat";
-    public static final String DATE_TIME_FORMAT_DEFAULT = "yyyy-MM-dd HH:mm:ss";
-
     public static final String FILE_TIMESTAMP_FORMAT = "fileTimeStampFormat";
-    public static final String FILE_TIMESTAMP_FORMAT_DEFAULT = "yyyyMMdd_HHmmss";
 
     public static final String QUAL_AUTOMATION_EXECUTABLE_FILE = "qualAutomationExecutableFile";
     public static final String QUAL_AUTOMATION_EXECUTABLE_FILE_DEFAULT = "";
@@ -191,9 +181,6 @@ public class MRC2ToolBoxConfiguration {
     public static final String RT_WINDOW = "rtWindow";
     public static final Double RT_WINDOW_DEFAULT = 0.05d;
 
-    /*
-     *
-     * */
     public static final String CORRELATION_CUTOFF = "correlationCutoff";
     public static final Double CORRELATION_CUTOFF_DEFAULT =  0.5d;
 
@@ -248,30 +235,31 @@ public class MRC2ToolBoxConfiguration {
     private static double rtWindow;
 	private static double massAccuracy;
 	
-	public static final DateFormat defaultTimeStampFormat = 
-			new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-	
 	public static void initConfiguration() {
 		
-		mzFormat = new DecimalFormat(prefs.get(MZ_FORMAT, MZ_FORMAT_DEFAULT));
+		mzFormat = new DecimalFormat(prefs.get(MZ_FORMAT, DefaultFormatStore.MZ_FORMAT_DEFAULT));
 		String rtu = prefs.get(RETENTION_UNITS, RETENTION_UNITS_DEFAULT);
 		for(RetentionUnits ru : RetentionUnits.values()) {
 
 			if(ru.getName().equals(rtu))
 				rtUnits = ru;
 		}
-		rtFormat = new DecimalFormat(prefs.get(RT_FORMAT, RT_FORMAT_DEFAULT));
-		ppmFormat = new DecimalFormat(prefs.get(PPM_FORMAT, PPM_FORMAT_DEFAULT));
+		rtFormat = new DecimalFormat(prefs.get(RT_FORMAT, DefaultFormatStore.RT_FORMAT_DEFAULT));
+		ppmFormat = new DecimalFormat(prefs.get(PPM_FORMAT, DefaultFormatStore.PPM_FORMAT_DEFAULT));
 		String intNotation = prefs.get(INTENSITY_NOTATION, INTENSITY_NOTATION_DEFAULT);
 		for(IntensityFormat inot : IntensityFormat.values()) {
 
 			if(inot.getName().equals(intNotation))
 				intensityNotation = inot;
 		}
-		intensityFormat = new DecimalFormat(prefs.get(INTENSITY_FORMAT, INTENSITY_FORMAT_DEFAULT));
-		spectrumIntensityFormat = new DecimalFormat(prefs.get(SPECTRUM_INTENSITY_FORMAT, SPECTRUM_INTENSITY_FORMAT_DEFAULT));
-		dateTimeFormat = new SimpleDateFormat(prefs.get(DATE_TIME_FORMAT, DATE_TIME_FORMAT_DEFAULT));
-		fileTimeStampFormat = new SimpleDateFormat(prefs.get(FILE_TIMESTAMP_FORMAT, FILE_TIMESTAMP_FORMAT_DEFAULT));
+		intensityFormat = new DecimalFormat(
+				prefs.get(INTENSITY_FORMAT, DefaultFormatStore.INTENSITY_FORMAT_DEFAULT));
+		spectrumIntensityFormat = new DecimalFormat(
+				prefs.get(SPECTRUM_INTENSITY_FORMAT, DefaultFormatStore.SPECTRUM_INTENSITY_FORMAT_DEFAULT));
+		dateTimeFormat = new SimpleDateFormat(
+				prefs.get(DATE_TIME_FORMAT, DefaultFormatStore.TIME_STAMP_FORMAT_DEFAULT));
+		fileTimeStampFormat = new SimpleDateFormat(
+				prefs.get(FILE_TIMESTAMP_FORMAT, DefaultFormatStore.FILE_TIMESTAMP_FORMAT_DEFAULT));
 		xicMassAcuracy = prefs.getDouble(XIC_MASS_ACURACY, XIC_MASS_ACURACY_DEFAULT);
 		massAccuracy = prefs.getDouble(MASS_ACCURACY, MASS_ACCURACY_DEFAULT);
 		rtWindow = prefs.getDouble(RT_WINDOW, RT_WINDOW_DEFAULT);
@@ -279,8 +267,7 @@ public class MRC2ToolBoxConfiguration {
 		try {
 			properties = getPropertyValues();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("Failed to load configuration properties", e);
 		}
 		if(properties != null) {
 			
@@ -316,8 +303,7 @@ public class MRC2ToolBoxConfiguration {
 			connectionString = UserUtils.decryptString(encrypted);
 		} catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException
 				| BadPaddingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("Failed to read database connection string", e);
 		}		
 		return connectionString;
 	}
@@ -329,8 +315,7 @@ public class MRC2ToolBoxConfiguration {
 			encrypted = UserUtils.encryptString(connectionString);
 		} catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException
 				| BadPaddingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("Failed to save database connection string", e);
 		}		
 		prefs.put(DATABASE_CONNECTION_STRING, encrypted);
 	}
@@ -343,8 +328,7 @@ public class MRC2ToolBoxConfiguration {
 			userName = UserUtils.decryptString(encrypted);
 		} catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException
 				| BadPaddingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("Failed to read database user", e);
 		}	
 		return userName;
 	}
@@ -356,8 +340,7 @@ public class MRC2ToolBoxConfiguration {
 			encrypted = UserUtils.encryptString(userName);
 		} catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException
 				| BadPaddingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("Failed to save database user", e);
 		}		
 		prefs.put(DATABASE_USER, encrypted);
 	}
@@ -370,8 +353,7 @@ public class MRC2ToolBoxConfiguration {
 			password = UserUtils.decryptString(encrypted);
 		} catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException
 				| BadPaddingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("Failed to read database password", e);
 		}		
 		return password;
 	}
@@ -383,8 +365,7 @@ public class MRC2ToolBoxConfiguration {
 			encrypted = UserUtils.encryptString(password);
 		} catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException
 				| BadPaddingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("Failed to save database password", e);
 		}		
 		prefs.put(DATABASE_PASSWORD, encrypted);
 	}
@@ -468,32 +449,38 @@ public class MRC2ToolBoxConfiguration {
 
 	public static void setDateTimeFormat(String dtf) {
 		prefs.put(DATE_TIME_FORMAT, dtf);
-		dateTimeFormat = new SimpleDateFormat(prefs.get(DATE_TIME_FORMAT, DATE_TIME_FORMAT_DEFAULT));
+		dateTimeFormat = new SimpleDateFormat(
+				prefs.get(DATE_TIME_FORMAT, DefaultFormatStore.TIME_STAMP_FORMAT_DEFAULT));
 	}
 
 	public static void setIntensityFormat(String intensityFormatNew) {
 		prefs.put(INTENSITY_FORMAT, intensityFormatNew);
-		intensityFormat = new DecimalFormat(prefs.get(INTENSITY_FORMAT, INTENSITY_FORMAT_DEFAULT));
+		intensityFormat = new DecimalFormat(
+				prefs.get(INTENSITY_FORMAT, DefaultFormatStore.INTENSITY_FORMAT_DEFAULT));
 	}
 
 	public static void setMzFormat(String mzFormatNew) {
 		prefs.put(MZ_FORMAT, mzFormatNew);
-		mzFormat = new DecimalFormat(prefs.get(MZ_FORMAT, MZ_FORMAT_DEFAULT));
+		mzFormat = new DecimalFormat(
+				prefs.get(MZ_FORMAT, DefaultFormatStore.MZ_FORMAT_DEFAULT));
 	}
 
 	public static void setRtFormat(String rtFormatNew) {
 		prefs.put(RT_FORMAT, rtFormatNew);
-		rtFormat = new DecimalFormat(prefs.get(RT_FORMAT, RT_FORMAT_DEFAULT));
+		rtFormat = new DecimalFormat(
+				prefs.get(RT_FORMAT, DefaultFormatStore.RT_FORMAT_DEFAULT));
 	}
 
 	public static void setSpectrumIntensityFormat(String spectrumIntensityFormatNew) {
 		prefs.put(SPECTRUM_INTENSITY_FORMAT, spectrumIntensityFormatNew);
-		rtFormat = new DecimalFormat(prefs.get(SPECTRUM_INTENSITY_FORMAT, SPECTRUM_INTENSITY_FORMAT_DEFAULT));
+		rtFormat = new DecimalFormat(
+				prefs.get(SPECTRUM_INTENSITY_FORMAT, DefaultFormatStore.SPECTRUM_INTENSITY_FORMAT_DEFAULT));
 	}
 
 	public static void setPpmFormat(String ppmFormatNew) {
 		prefs.put(PPM_FORMAT, ppmFormatNew);
-		ppmFormat = new DecimalFormat(prefs.get(PPM_FORMAT, PPM_FORMAT_DEFAULT));
+		ppmFormat = new DecimalFormat(
+				prefs.get(PPM_FORMAT, DefaultFormatStore.PPM_FORMAT_DEFAULT));
 	}
 
 	/**

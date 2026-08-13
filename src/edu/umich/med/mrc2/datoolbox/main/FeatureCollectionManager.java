@@ -27,6 +27,9 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundleCollection;
 import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureInfoBundleCollectionComparator;
@@ -36,6 +39,12 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.IDTMSMSFeatureDataPull
 import edu.umich.med.mrc2.datoolbox.utils.DiskCacheUtils;
 
 public class FeatureCollectionManager {
+	
+	private static final Logger logger = LogManager.getLogger(FeatureCollectionManager.class);
+	
+	private FeatureCollectionManager() {
+		/* This utility class should not be instantiated */
+	}
 	
 	public static final String CURRENT_MSMS_FEATURE_SEARCH_RESULT = "Current MSMS feature search";
 	public static final String CURRENT_MS1_FEATURE_SEARCH_RESULT = "Current MS1 feature search";
@@ -54,7 +63,7 @@ public class FeatureCollectionManager {
 					ACTIVE_EXPERIMENT_FEATURE_SET,
 					ACTIVE_EXPERIMENT_FEATURE_SET);
 	
-	public static final Set<MsFeatureInfoBundleCollection>featureCollectionsMSIDSet = 
+	private static final Set<MsFeatureInfoBundleCollection>featureCollectionsMSIDSet = 
 			new TreeSet<MsFeatureInfoBundleCollection>(
 					new MsFeatureInfoBundleCollectionComparator(SortProperty.Name));
 
@@ -73,7 +82,7 @@ public class FeatureCollectionManager {
 			featureCollectionsMSIDSet.addAll(
 					FeatureCollectionUtils.getMsFeatureInformationBundleCollections());
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error("Failed to read feature collection list from database", e);
 		}
 	}
 	
@@ -102,19 +111,17 @@ public class FeatureCollectionManager {
 		if(!featureCollectionsMSIDSet.contains(mbColl))
 			return null;
 
-//		if(mbColl.getFeatureIds().isEmpty()) {
-			Set<String>idList = null;
-			try {
-				idList = 
-					FeatureCollectionUtils.getFeatureIdsForMsFeatureInfoBundleCollection(
-							mbColl.getId());
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			if(idList != null)
-				mbColl.getFeatureIds().addAll(idList);
-//		}
+		Set<String>idList = null;
+		try {
+			idList = 
+				FeatureCollectionUtils.getFeatureIdsForMsFeatureInfoBundleCollection(
+						mbColl.getId());
+		} catch (Exception e) {
+			logger.error(String.format("%s %s", "Failed to read feature IDs for collection", mbColl.getName()), e);
+		}
+		if(idList != null)
+			mbColl.getFeatureIds().addAll(idList);
+
 		if(mbColl.getFeatureIds().isEmpty())
 			return null;
 		
@@ -140,8 +147,8 @@ public class FeatureCollectionManager {
 
 	public static Collection<MSFeatureInfoBundle>getLoadedMSMSFeaturesByIds(Collection<String>msmsIds){
 		return msmsIds.stream().
-				map(id -> DiskCacheUtils.retrieveMSFeatureInfoBundleFromCache(id)).
-				filter(f -> Objects.nonNull(f)).collect(Collectors.toSet());
+				map(DiskCacheUtils::retrieveMSFeatureInfoBundleFromCache).
+				filter(Objects::nonNull).collect(Collectors.toSet());
 	}
 	
 	public static void addFeaturesToCollection(
@@ -155,11 +162,9 @@ public class FeatureCollectionManager {
 			
 			Set<String>dbIds = new TreeSet<String>();
 			try {
-				dbIds = 
-						FeatureCollectionUtils.getFeatureIdsForMsFeatureInfoBundleCollection(collection.getId());
+				dbIds = FeatureCollectionUtils.getFeatureIdsForMsFeatureInfoBundleCollection(collection.getId());
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.error(String.format("%s %s", "Failed to read feature IDs for collection", collection.getName()), e);
 			}
 			if(!dbIds.isEmpty())
 				collection.getFeatureIds().addAll(dbIds);
@@ -176,8 +181,7 @@ public class FeatureCollectionManager {
 		try {
 			FeatureCollectionUtils.addFeaturesToCollection(collection.getId(), featureIdsToAdd);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error(String.format("%s %s", "Failed to add new features to collection", collection.getName()), e);
 		}
 		collection.addFeatures(featuresToAdd);		
 	}
@@ -192,7 +196,7 @@ public class FeatureCollectionManager {
 		Set<String>existingIds = collection.getFeatureIds();
 		Set<String>featureIdsToRemove = featuresToRemove.stream().
 				map(f -> f.getMSFeatureId()).
-				filter(id -> existingIds.contains(id)).
+				filter(existingIds::contains).
 				collect(Collectors.toSet());
 
 		if(featureIdsToRemove.isEmpty())
@@ -201,14 +205,9 @@ public class FeatureCollectionManager {
 		try {
 			FeatureCollectionUtils.removeFeaturesFromCollection(collection.getId(), featureIdsToRemove);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error(String.format("%s %s", "Failed to remove features from collection", collection.getName()), e);
 		}
 		collection.removeFeatures(featuresToRemove);
-	}
-
-	public static Set<MsFeatureInfoBundleCollection> getfeatureCollectionsMSIDSet() {
-		return featureCollectionsMSIDSet;
 	}
 }
 

@@ -33,10 +33,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -70,8 +68,6 @@ public class PassatuttoDecoyGeneratorTask extends AbstractTask {
 	
 	private static final DecimalFormat intensityFormat = new DecimalFormat("###");
 	private static final NumberFormat mzFormat =  MRC2ToolBoxConfiguration.getMzFormat();
-	private static final DateFormat dateFormat = 
-			new SimpleDateFormat(MRC2ToolBoxConfiguration.DATE_TIME_FORMAT_DEFAULT);
 	
 	private Semaphore outputSem;
 	private Semaphore errorSem;

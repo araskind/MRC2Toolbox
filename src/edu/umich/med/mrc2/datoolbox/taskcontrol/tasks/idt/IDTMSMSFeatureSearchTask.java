@@ -1607,7 +1607,7 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 	
 	protected void putDataInCache() {		
 		features.stream().
-			forEach(f -> DiskCacheUtils.putMSFeatureInfoBundleInCache(f));
+			forEach(DiskCacheUtils::putMSFeatureInfoBundleInCache);
 	}
 	
 	protected void applyAdditionalFilters() {

@@ -41,7 +41,7 @@ import edu.umich.med.mrc2.datoolbox.data.msclust.MsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.main.FeatureCollectionManager;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.RecentDataManager;
-import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
+import edu.umich.med.mrc2.datoolbox.main.config.DefaultFormatStore;
 import edu.umich.med.mrc2.datoolbox.msmsscore.MSMSScoreCalculator;
 import edu.umich.med.mrc2.datoolbox.msmsscore.MSMSSearchParameterSet;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
@@ -117,7 +117,7 @@ public class FeatureVsFeatureMSMSSearchTask extends AbstractTask implements Task
 		searchResultsDataSet = new MSMSClusterDataSet(
 					"MSMS search against " + featureLib.getName(), 
 					"MSMS search against " + featureLib.getName() +" (Created " + 
-							MRC2ToolBoxConfiguration.defaultTimeStampFormat.format(new Date()) + ")\n"
+							DefaultFormatStore.getDefaultTimeStampFormat().format(new Date()) + ")\n"
 							+ "Search direction: " + searchParameters.getMsmsSearchDirection().getName(), 
 					MRC2ToolBoxCore.getIdTrackerUser());
 		searchResultsDataSet.setDataSetType(MSMSClusterDataSetType.MSMS_SEARCH_BASED);

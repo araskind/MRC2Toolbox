@@ -33,7 +33,7 @@ public class DiskCacheUtils {
     public static void putMSFeatureInfoBundleInCache( MSFeatureInfoBundle bundle ) {
         String key = bundle.getMSFeatureId();
         try {
-        	MRC2ToolBoxCore.msFeatureCache.put(key, bundle );
+        	MRC2ToolBoxCore.msFeatureCache.put(bundle.getMSFeatureId(), bundle );
         }
         catch ( CacheException e ) {
             System.err.println( String.format( "Problem putting feature info bundle %s in the cache, for key %s%n%s",

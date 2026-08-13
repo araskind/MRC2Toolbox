@@ -24,10 +24,19 @@ package edu.umich.med.mrc2.datoolbox.main;
 import java.util.Collection;
 import java.util.TreeSet;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+
 import edu.umich.med.mrc2.datoolbox.data.msclust.FeatureLookupList;
 import edu.umich.med.mrc2.datoolbox.database.idt.FeatureLookupListUtils;
 
 public class FeatureLookupListManager {
+	
+	private static final Logger logger = LogManager.getLogger(FeatureLookupListManager.class);
+	
+	private FeatureLookupListManager() {
+		/* This utility class should not be instantiated */
+	}
 
 	private static final Collection<FeatureLookupList> featureLookupLists = 
 			new TreeSet<FeatureLookupList>();
@@ -39,8 +48,7 @@ public class FeatureLookupListManager {
 			featureLookupLists.addAll(
 					FeatureLookupListUtils.getFeatureLookupListCollection());
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("Failed to load Feature Lookup Lists from database", e);
 		}
 	}
 	

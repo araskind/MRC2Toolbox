@@ -124,6 +124,10 @@ public final class BuildInformation {
 	public static final StartupConfiguration programConfiguration = 
 			StartupConfiguration.COMPLETE_TOOLBOX;
 	
+	private BuildInformation() {
+		/* This utility class should not be instantiated */
+	}
+	
 	public static String getProgramName() {
 		return programConfiguration.getName() + " Version " + revisionNumber + " (" + timeStamp + ")";
 	}
@@ -195,19 +199,6 @@ public final class BuildInformation {
 			<name>Maven Repository Switchboard</name>
 			<url>https://repo1.maven.org/maven2</url>
 		</repository>
-		<!--
-		<repository>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-			<id>Gluu</id>
-			<name>Gluu Repository</name>
-			<url>https://ox.gluu.org/maven/</url>
-		</repository>		
-		-->
 		<repository>
 			<id>org.geotools</id>
 			<url>https://repo.osgeo.org/repository/release/</url>
@@ -223,19 +214,6 @@ public final class BuildInformation {
 			<name>bedatadriven public repo</name>
 			<url>https://nexus.bedatadriven.com/content/groups/public/</url>
 		</repository>
-		<!--  
-		<repository>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-			<id>jcenter</id>
-			<name>jcenter public repo</name>
-			<url>http://jcenter.bintray.com/</url>
-		</repository>
-		-->
 		<repository>
 			<id>w3c</id>
 			<url>http://dist.wso2.org/maven2/</url>
@@ -247,11 +225,18 @@ public final class BuildInformation {
 		</repository>
 	</repositories>
 	<dependencies>
-		<dependency>
-		    <groupId>ch.qos.logback</groupId>
-		    <artifactId>logback-classic</artifactId>
-		    <version>1.2.6</version>
-		</dependency>
+   		 <!-- Log4j 2 API -->
+	    <dependency>
+	        <groupId>org.apache.logging.log4j</groupId>
+	        <artifactId>log4j-api</artifactId>
+	        <version>2.26.1</version>
+	    </dependency>
+	    <!-- Log4j 2 Core Implementation -->
+	    <dependency>
+	        <groupId>org.apache.logging.log4j</groupId>
+	        <artifactId>log4j-core</artifactId>
+	        <version>2.26.1</version>
+	    </dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-math3</artifactId>

@@ -48,6 +48,7 @@ import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.ReferenceSamplesManager;
+import edu.umich.med.mrc2.datoolbox.main.config.DefaultFormatStore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 
@@ -136,7 +137,7 @@ public class WorklistUtils {
 					manifestData.append(sample.getId());
 
 				else if(colName.equals(DataExportFields.INJECTION_TIME.getName()))
-					manifestData.append(MRC2ToolBoxConfiguration.defaultTimeStampFormat.format(item.getTimeStamp()));
+					manifestData.append(DefaultFormatStore.getDefaultTimeStampFormat().format(item.getTimeStamp()));
 				else {
 					String value = item.getProperty(colName);
 					if(value == null)
@@ -157,7 +158,7 @@ public class WorklistUtils {
 	public static List<String> createManifestColumns(Worklist worklist) {
 
 		Set<String> allColumnNames = new TreeSet<>();
-		worklist.getTimeSortedWorklistItems().stream().
+		worklist.getTimeSortedWorklistItems().
 			forEach(i -> allColumnNames.addAll(i.getProperties().keySet()));
 
 		HashMap<String, Integer> valueCount = new HashMap<>();

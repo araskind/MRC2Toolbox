@@ -59,7 +59,7 @@ import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.gui.rawdata.msms.MSMSFeatureExtractionParametersPanel;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.RawDataManager;
-import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
+import edu.umich.med.mrc2.datoolbox.main.config.DefaultFormatStore;
 import edu.umich.med.mrc2.datoolbox.rawdata.MSMSExtractionParameterSet;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
@@ -669,8 +669,8 @@ return;
 				continue;
 			}
 			String name = DataPrefix.MS_LIBRARY_UNKNOWN_TARGET.getName() +
-					MRC2ToolBoxConfiguration.defaultMzFormat.format(msOneParent.getMz()) + "_" + 
-					MRC2ToolBoxConfiguration.defaultRtFormat.format(parentScan.getRt());
+					DefaultFormatStore.getDefaultMZformat().format(msOneParent.getMz()) + "_" + 
+					DefaultFormatStore.getDefaultRTformat().format(parentScan.getRt());
 			f.setName(name);
 			Collection<MsPoint> msmsPoints = RawDataUtils.getScanPoints(s);
 			if(!msmsPoints.isEmpty()) {

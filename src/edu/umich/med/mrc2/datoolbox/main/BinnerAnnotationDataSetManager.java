@@ -24,10 +24,19 @@ package edu.umich.med.mrc2.datoolbox.main;
 import java.util.Collection;
 import java.util.TreeSet;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+
 import edu.umich.med.mrc2.datoolbox.data.msclust.BinnerAnnotationLookupDataSet;
 import edu.umich.med.mrc2.datoolbox.database.idt.BinnerUtils;
 
 public class BinnerAnnotationDataSetManager {
+
+	private static final Logger logger = LogManager.getLogger(BinnerAnnotationDataSetManager.class);
+	
+	private BinnerAnnotationDataSetManager() {
+		/* This utility class should not be instantiated */
+	}
 
 	private static final Collection<BinnerAnnotationLookupDataSet> binnerAnnotationLookupDataSets = 
 			new TreeSet<BinnerAnnotationLookupDataSet>();
@@ -39,8 +48,7 @@ public class BinnerAnnotationDataSetManager {
 			binnerAnnotationLookupDataSets.addAll(
 					BinnerUtils.getBinnerAnnotationLookupDataSetList());
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("Failed to read Binner Annotation Lookup Data Sets from the database", e);
 		}
 	}
 	

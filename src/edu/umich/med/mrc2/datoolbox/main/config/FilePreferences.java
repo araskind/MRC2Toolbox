@@ -29,12 +29,14 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.TreeMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.prefs.AbstractPreferences;
 import java.util.prefs.BackingStoreException;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Preferences implementation that stores to a user-defined file. See
@@ -44,24 +46,25 @@ import java.util.prefs.BackingStoreException;
  * @version $Id: FilePreferences.java 283 2009-06-18 17:06:58Z david $
  */
 public class FilePreferences extends AbstractPreferences {
-	private static final Logger log = Logger.getLogger(FilePreferences.class.getName());
+	
+	private static final Logger logger = LogManager.getLogger(FilePreferences.class);
 
 	private Map<String, String> root;
 	private Map<String, FilePreferences> children;
 	private boolean isRemoved = false;
+	public static final String errorFormat	= "%s %s";
 
 	public FilePreferences(AbstractPreferences parent, String name) {
+		
 		super(parent, name);
-
-		log.finest("Instantiating node " + name);
-
+		logger.trace(String.format(errorFormat, "Instantiating node", name));
 		root = new TreeMap<String, String>();
 		children = new TreeMap<String, FilePreferences>();
 
 		try {
 			sync();
 		} catch (BackingStoreException e) {
-			log.log(Level.SEVERE, "Unable to sync on creation of node " + name, e);
+			logger.fatal(String.format(errorFormat, "Unable to sync on creation of node", name), e);
 		}
 	}
 
@@ -70,7 +73,7 @@ public class FilePreferences extends AbstractPreferences {
 		try {
 			flush();
 		} catch (BackingStoreException e) {
-			log.log(Level.SEVERE, "Unable to flush after putting " + key, e);
+			logger.fatal(String.format(errorFormat, "Unable to flush after putting", key), e);
 		}
 	}
 
@@ -83,7 +86,7 @@ public class FilePreferences extends AbstractPreferences {
 		try {
 			flush();
 		} catch (BackingStoreException e) {
-			log.log(Level.SEVERE, "Unable to flush after removing " + key, e);
+			logger.fatal(String.format(errorFormat, "Unable to flush after removing", key), e);
 		}
 	}
 
@@ -120,8 +123,8 @@ public class FilePreferences extends AbstractPreferences {
 
 		synchronized (file) {
 			Properties p = new Properties();
-			try {
-				p.load(new FileInputStream(file));
+			try (FileInputStream fs = new FileInputStream(file)){
+				p.load(fs);
 
 				StringBuilder sb = new StringBuilder();
 				getPath(sb);
@@ -154,48 +157,47 @@ public class FilePreferences extends AbstractPreferences {
 	}
 
 	protected void flushSpi() throws BackingStoreException {
+		
 		final File file = FilePreferencesFactory.getPreferencesFile();
-
 		synchronized (file) {
 			Properties p = new Properties();
 			try {
-
 				StringBuilder sb = new StringBuilder();
 				getPath(sb);
 				String path = sb.toString();
-
 				if (file.exists()) {
-					p.load(new FileInputStream(file));
-
-					List<String> toRemove = new ArrayList<String>();
-
-					// Make a list of all direct children of this node to be removed
-					final Enumeration<?> pnen = p.propertyNames();
-					while (pnen.hasMoreElements()) {
-						String propKey = (String) pnen.nextElement();
-						if (propKey.startsWith(path)) {
-							String subKey = propKey.substring(path.length());
-							// Only do immediate descendants
-							if (subKey.indexOf('.') == -1) {
-								toRemove.add(propKey);
+					
+					try(FileInputStream fs = new FileInputStream(file)){						
+						p.load(fs);	
+						List<String> toRemove = new ArrayList<String>();
+	
+						// Make a list of all direct children of this node to be removed
+						final Enumeration<?> pnen = p.propertyNames();						
+						while (pnen.hasMoreElements()) {
+							
+							String propKey = (String) pnen.nextElement();							
+							if (propKey.startsWith(path)) {								
+								String subKey = propKey.substring(path.length());
+								
+								// Only do immediate descendants
+								if (subKey.indexOf('.') == -1) 
+									toRemove.add(propKey);							
 							}
 						}
-					}
-
-					// Remove them now that the enumeration is done with
-					for (String propKey : toRemove) {
-						p.remove(propKey);
-					}
+						// Remove them now that the enumeration is done with
+						for (String propKey : toRemove) 
+							p.remove(propKey);					
+					}					
 				}
-
 				// If this node hasn't been removed, add back in any values
 				if (!isRemoved) {
-					for (String s : root.keySet()) {
-						p.setProperty(path + s, root.get(s));
-					}
+					
+					for (Entry<String, String> rootEntry : root.entrySet())
+						p.setProperty(path + rootEntry.getKey(), rootEntry.getValue());
 				}
-
-				p.store(new FileOutputStream(file), "FilePreferences");
+				try(FileOutputStream fos = new FileOutputStream(file)){
+					p.store(fos, "FilePreferences");
+				}				
 			} catch (IOException e) {
 				throw new BackingStoreException(e);
 			}

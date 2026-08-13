@@ -100,7 +100,7 @@
 									<content delegate="SplitDockStationFactory">
 										<fullscreen-action>false</fullscreen-action>
 										<node nodeId="1600391373263" orientation="VERTICAL" divider="0.5252621544327931">
-											<leaf id="1" nodeId="1600213789536">
+											<leaf id="0" nodeId="1600213789536">
 												<placeholders>
 													<placeholder>dock.single.DesignEditorPanel</placeholder>
 												</placeholders>
@@ -114,7 +114,7 @@
 													</entry>
 												</placeholder-map>
 											</leaf>
-											<leaf id="0" nodeId="1600391373261">
+											<leaf id="1" nodeId="1600391373261">
 												<placeholders>
 													<placeholder>dock.single.AssayDesignPanel</placeholder>
 												</placeholders>
@@ -130,20 +130,20 @@
 							</adjacent>
 							<children ignore="false">
 								<child>
-									<layout factory="predefined" placeholder="dock.single.AssayDesignPanel">
-										<replacement id="dockablesingle AssayDesignPanel"/>
+									<layout factory="predefined" placeholder="dock.single.DesignEditorPanel">
+										<replacement id="dockablesingle DesignEditorPanel"/>
 										<delegate id="delegate_ccontrol backup factory id">
-											<id>AssayDesignPanel</id>
+											<id>DesignEditorPanel</id>
 											<area/>
 										</delegate>
 									</layout>
 									<children ignore="false"/>
 								</child>
 								<child>
-									<layout factory="predefined" placeholder="dock.single.DesignEditorPanel">
-										<replacement id="dockablesingle DesignEditorPanel"/>
+									<layout factory="predefined" placeholder="dock.single.AssayDesignPanel">
+										<replacement id="dockablesingle AssayDesignPanel"/>
 										<delegate id="delegate_ccontrol backup factory id">
-											<id>DesignEditorPanel</id>
+											<id>AssayDesignPanel</id>
 											<area/>
 										</delegate>
 									</layout>

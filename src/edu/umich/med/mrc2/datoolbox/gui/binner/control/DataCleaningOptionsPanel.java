@@ -41,7 +41,7 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 
 import edu.umich.med.mrc2.datoolbox.gui.utils.ValidatableForm;
-import edu.umich.med.mrc2.datoolbox.main.config.NumberFormatStore;
+import edu.umich.med.mrc2.datoolbox.main.config.DefaultFormatStore;
 
 public class DataCleaningOptionsPanel extends JPanel implements ItemListener, ValidatableForm{
 
@@ -76,7 +76,7 @@ public class DataCleaningOptionsPanel extends JPanel implements ItemListener, Va
 		add(lblNewLabel, gbc_lblNewLabel);
 		
 		outlierSDdeviationField = new JFormattedTextField(
-				NumberFormatStore.getDecimalFormatWithPrecision(1));
+				DefaultFormatStore.getDecimalFormatWithPrecision(1));
 		outlierSDdeviationField.setMinimumSize(new Dimension(80, 20));
 		outlierSDdeviationField.setPreferredSize(new Dimension(80, 20));
 		outlierSDdeviationField.setColumns(10);
@@ -103,7 +103,7 @@ public class DataCleaningOptionsPanel extends JPanel implements ItemListener, Va
 		add(lblRemoveFeatureIf, gbc_lblRemoveFeatureIf);
 		
 		missingRemovalThresholdField = new JFormattedTextField(
-				NumberFormatStore.getDecimalFormatWithPrecision(1));
+				DefaultFormatStore.getDecimalFormatWithPrecision(1));
 		missingRemovalThresholdField.setPreferredSize(new Dimension(80, 20));
 		missingRemovalThresholdField.setMinimumSize(new Dimension(80, 20));
 		missingRemovalThresholdField.setColumns(10);
@@ -183,7 +183,7 @@ public class DataCleaningOptionsPanel extends JPanel implements ItemListener, Va
 		panel.add(lblNewLabel_3, gbc_lblNewLabel_3);
 		
 		deisotopingMassToleranceField = 
-				new JFormattedTextField(NumberFormatStore.getDefaultMZformat());
+				new JFormattedTextField(DefaultFormatStore.getDefaultMZformat());
 		deisotopingMassToleranceField.setColumns(10);
 		deisotopingMassToleranceField.setPreferredSize(new Dimension(80, 20));
 		deisotopingMassToleranceField.setMinimumSize(new Dimension(80, 20));
@@ -211,7 +211,7 @@ public class DataCleaningOptionsPanel extends JPanel implements ItemListener, Va
 		panel.add(lblNewLabel_5, gbc_lblNewLabel_5);
 		
 		deisotopingRTtoleranceField = 
-				new JFormattedTextField(NumberFormatStore.getDefaultRTformat());
+				new JFormattedTextField(DefaultFormatStore.getDefaultRTformat());
 		deisotopingRTtoleranceField.setColumns(10);
 		deisotopingRTtoleranceField.setPreferredSize(new Dimension(80, 20));
 		deisotopingRTtoleranceField.setMinimumSize(new Dimension(80, 20));
@@ -239,7 +239,7 @@ public class DataCleaningOptionsPanel extends JPanel implements ItemListener, Va
 		panel.add(lblNewLabel_7, gbc_lblNewLabel_7);
 		
 		deisotopingCorrCutoffField = new JFormattedTextField(
-				NumberFormatStore.getDecimalFormatWithPrecision(2));
+				DefaultFormatStore.getDecimalFormatWithPrecision(2));
 		deisotopingCorrCutoffField.setPreferredSize(new Dimension(80, 20));
 		deisotopingCorrCutoffField.setColumns(10);
 		GridBagConstraints gbc_formattedTextField = new GridBagConstraints();

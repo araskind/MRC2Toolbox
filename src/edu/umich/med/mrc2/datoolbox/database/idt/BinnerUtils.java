@@ -380,7 +380,7 @@ public class BinnerUtils {
 	}
 
 	public static void addBinnerAnnotationLookupDataSet(
-			BinnerAnnotationLookupDataSet newDataSet, Connection conn) throws Exception {
+			BinnerAnnotationLookupDataSet newDataSet, Connection conn) throws SQLException {
 
 		String newId = SQLUtils.getNextIdFromSequence(conn, 
 				"BINNER_ANNOTATION_DATA_SET_SEQ",

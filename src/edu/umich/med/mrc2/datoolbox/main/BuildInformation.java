@@ -1,6 +1,10 @@
 package edu.umich.med.mrc2.datoolbox.main;
 
 public final class BuildInformation {
+	
+	private BuildInformation() {
+		/* This utility class should not be instantiated */
+	}
 
 	public static final String versionNumber = "2";
 	public static final String revisionNumber = "2.0.06";

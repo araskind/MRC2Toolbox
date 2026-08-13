@@ -48,7 +48,7 @@ import edu.umich.med.mrc2.datoolbox.gui.rgen.TemplateRbasedProjectGenerator;
 import edu.umich.med.mrc2.datoolbox.gui.rgen.mcr.MetabCombinerParametersObject;
 import edu.umich.med.mrc2.datoolbox.gui.rgen.mcr.RMultibatchAnalysisInputObject;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
-import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
+import edu.umich.med.mrc2.datoolbox.main.config.DefaultFormatStore;
 import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
 import edu.umich.med.mrc2.datoolbox.utils.XmlUtils;
 
@@ -195,7 +195,7 @@ public class MetabCombinerAlignmentScriptGenerator extends TemplateRbasedProject
 	protected void initRscript() {
 				
 		rscriptParts.add("# MetabCombiner alignment of multiple batches of untargeted data " + 
-				MRC2ToolBoxConfiguration.defaultTimeStampFormat.format(new Date())+ " ####\n");
+				DefaultFormatStore.getDefaultTimeStampFormat().format(new Date())+ " ####\n");
 		rscriptParts.add("setwd(dirname(rstudioapi::getActiveDocumentContext()$path))\n");	
 		rscriptParts.add("library(metabCombiner)");
 		rscriptParts.add("library(dplyr)");

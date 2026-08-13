@@ -48,6 +48,7 @@ import edu.umich.med.mrc2.datoolbox.data.enums.IntensityFormat;
 import edu.umich.med.mrc2.datoolbox.data.enums.RetentionUnits;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
+import edu.umich.med.mrc2.datoolbox.main.config.DefaultFormatStore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 
 public class DockableGeneralPreferencesPanel extends DefaultSingleCDockable implements BackedByPreferences{
@@ -280,22 +281,25 @@ public class DockableGeneralPreferencesPanel extends DefaultSingleCDockable impl
 
 	@Override
 	public void loadPreferences(Preferences preferences) {
-		// TODO Auto-generated method stub
+
 		prefs = preferences;
 
 		taskNumberSpinner.setValue(MRC2ToolBoxConfiguration.getMaxThreadNumber());
 
 		rtFormatComboBox.setSelectedItem(MRC2ToolBoxConfiguration.getRtUnits());
-		int rtDecimals = getDecimals(prefs.get(MRC2ToolBoxConfiguration.RT_FORMAT, MRC2ToolBoxConfiguration.RT_FORMAT_DEFAULT));
+		int rtDecimals = getDecimals(
+				prefs.get(MRC2ToolBoxConfiguration.RT_FORMAT, DefaultFormatStore.RT_FORMAT_DEFAULT));
 		rtFormatSpiner.setValue(rtDecimals);
 
-		int mzDecimals = getDecimals(prefs.get(MRC2ToolBoxConfiguration.MZ_FORMAT, MRC2ToolBoxConfiguration.MZ_FORMAT_DEFAULT));
+		int mzDecimals = getDecimals(
+				prefs.get(MRC2ToolBoxConfiguration.MZ_FORMAT, DefaultFormatStore.MZ_FORMAT_DEFAULT));
 		massFormatSpinner.setValue(mzDecimals);
 
 		intensityFormatComboBox.setSelectedItem(MRC2ToolBoxConfiguration.getIntensityNotation());
 		sciNotationDecimalsSpinner.setValue(MRC2ToolBoxConfiguration.getIntensityDecimals());
 
-		timeStampPatternTextField.setText(prefs.get(MRC2ToolBoxConfiguration.FILE_TIMESTAMP_FORMAT, MRC2ToolBoxConfiguration.FILE_TIMESTAMP_FORMAT_DEFAULT));
+		timeStampPatternTextField.setText(
+				prefs.get(MRC2ToolBoxConfiguration.FILE_TIMESTAMP_FORMAT, DefaultFormatStore.FILE_TIMESTAMP_FORMAT_DEFAULT));
 
 		massErrorTextField.setText(Double.toString(MRC2ToolBoxConfiguration.getMassAccuracy()));
 		rtErrorTextField.setText(Double.toString(MRC2ToolBoxConfiguration.getRtWindow()));
@@ -333,19 +337,22 @@ public class DockableGeneralPreferencesPanel extends DefaultSingleCDockable impl
 		String ftString = timeStampPatternTextField.getText().trim();
 		if(!ftString.isEmpty()) {
 
+			SimpleDateFormat fileTimeStampFormat = null;
 			try {
-				SimpleDateFormat fileTimeStampFormat = new SimpleDateFormat(ftString);
-				MRC2ToolBoxConfiguration.setFileTimeStampFormat(ftString);
+				fileTimeStampFormat = new SimpleDateFormat(ftString);				
 			}
 			catch (Exception e) {
 
-				timeStampPatternTextField.setText(prefs.get(MRC2ToolBoxConfiguration.FILE_TIMESTAMP_FORMAT, MRC2ToolBoxConfiguration.FILE_TIMESTAMP_FORMAT_DEFAULT));
-				MessageDialog.showErrorMsg("Invalid timestamp format!", this.getContentPane());
+				timeStampPatternTextField.setText(
+						prefs.get(MRC2ToolBoxConfiguration.FILE_TIMESTAMP_FORMAT, DefaultFormatStore.FILE_TIMESTAMP_FORMAT_DEFAULT));
+				MessageDialog.showErrorMsg(ftString + " is invalid timestamp format!", this.getContentPane());
 				return;
 			}
+			MRC2ToolBoxConfiguration.setFileTimeStampFormat(ftString);			
 		}
 		else {
-			timeStampPatternTextField.setText(prefs.get(MRC2ToolBoxConfiguration.FILE_TIMESTAMP_FORMAT, MRC2ToolBoxConfiguration.FILE_TIMESTAMP_FORMAT_DEFAULT));
+			timeStampPatternTextField.setText(
+					prefs.get(MRC2ToolBoxConfiguration.FILE_TIMESTAMP_FORMAT, DefaultFormatStore.FILE_TIMESTAMP_FORMAT_DEFAULT));
 		}
 		MRC2ToolBoxConfiguration.setMassAccuracy(Double.parseDouble(massErrorTextField.getText()));
 		MRC2ToolBoxConfiguration.setRtWindow(Double.parseDouble(rtErrorTextField.getText()));
@@ -354,5 +361,4 @@ public class DockableGeneralPreferencesPanel extends DefaultSingleCDockable impl
 	private int getDecimals(String numberFormat) {
 		return numberFormat.substring(numberFormat.lastIndexOf(".") + 1).length();
 	}
-
 }

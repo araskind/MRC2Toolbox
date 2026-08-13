@@ -57,6 +57,7 @@ import edu.umich.med.mrc2.datoolbox.data.enums.SpectrumSource;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.main.AdductManager;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
+import edu.umich.med.mrc2.datoolbox.main.config.DefaultFormatStore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.msmsscore.MSMSScoreCalculator;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
@@ -799,8 +800,8 @@ public class MsFeatureCluster implements Serializable, XmlStorable {
 		MsFeature averaged = new MsFeature(primaryFeature.getRetentionTime(), polarity);
 		averaged.setRtRange(getRtRange());
 		String name = DataPrefix.MS_LIBRARY_UNKNOWN_TARGET.getName() +
-			MRC2ToolBoxConfiguration.defaultMzFormat.format(parent.getMz()) + "_" + 
-			MRC2ToolBoxConfiguration.defaultRtFormat.format(averaged.getRetentionTime());
+				DefaultFormatStore.getDefaultMZformat().format(parent.getMz()) + "_" + 
+				DefaultFormatStore.getDefaultRTformat().format(averaged.getRetentionTime());
 		averaged.setName(name);
 		averaged.setSpectrum(spectrum);
 		return averaged;

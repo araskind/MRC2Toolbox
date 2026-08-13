@@ -47,8 +47,8 @@ import edu.umich.med.mrc2.datoolbox.data.BinnerAdductList;
 import edu.umich.med.mrc2.datoolbox.gui.adducts.bindif.BinnerAnnotationsTable;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.ValidatableForm;
+import edu.umich.med.mrc2.datoolbox.main.config.DefaultFormatStore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
-import edu.umich.med.mrc2.datoolbox.main.config.NumberFormatStore;
 
 public class AnnotationsSelectorPanel extends JPanel implements ValidatableForm, ActionListener{
 
@@ -93,7 +93,7 @@ public class AnnotationsSelectorPanel extends JPanel implements ValidatableForm,
 		panel.add(lblNewLabel, gbc_lblNewLabel);
 		
 		annotMassToleranceField = 
-				new JFormattedTextField(NumberFormatStore.getDefaultMZformat());
+				new JFormattedTextField(DefaultFormatStore.getDefaultMZformat());
 		annotMassToleranceField.setColumns(10);
 		annotMassToleranceField.setPreferredSize(new Dimension(80, 20));
 		annotMassToleranceField.setMinimumSize(new Dimension(80, 20));
@@ -121,7 +121,7 @@ public class AnnotationsSelectorPanel extends JPanel implements ValidatableForm,
 		panel.add(lblNewLabel_1, gbc_lblNewLabel_1);
 		
 		annotRTToleranceField = 
-				new JFormattedTextField(NumberFormatStore.getDefaultRTformat());
+				new JFormattedTextField(DefaultFormatStore.getDefaultRTformat());
 		annotRTToleranceField.setPreferredSize(new Dimension(80, 20));
 		annotRTToleranceField.setMinimumSize(new Dimension(80, 20));
 		annotRTToleranceField.setColumns(10);

@@ -56,6 +56,7 @@ import edu.umich.med.mrc2.datoolbox.gui.utils.BasicDialogWithPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.FormUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
+import edu.umich.med.mrc2.datoolbox.main.config.DefaultFormatStore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.utils.DelimitedTextParser;
@@ -111,7 +112,7 @@ public class FilterFeaturesByMzRtListDialog extends BasicDialogWithPreferences {
 		
 		dataSetNameField = new JTextField();
 		dataSetNameField.setText("MZ/RT filtered feature set " + 
-				MRC2ToolBoxConfiguration.defaultTimeStampFormat.format(new Date()));
+				DefaultFormatStore.getDefaultTimeStampFormat().format(new Date()));
 		GridBagConstraints gbc_dataSetNameField = new GridBagConstraints();
 		gbc_dataSetNameField.gridwidth = 2;
 		gbc_dataSetNameField.insets = new Insets(0, 0, 5, 5);

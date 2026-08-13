@@ -29,6 +29,9 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+
 import edu.umich.med.mrc2.datoolbox.data.compare.MSMSClusterDataSetComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.msclust.IMSMSClusterDataSet;
@@ -39,6 +42,12 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.IDTMSMSClusterDataPull
 
 public class MSMSClusterDataSetManager {
 	
+	private static final Logger logger = LogManager.getLogger(MSMSClusterDataSetManager.class);
+	
+	private MSMSClusterDataSetManager() {
+		/* This utility class should not be instantiated */
+	}
+	
 	public static final String CURRENT_MSMS_CLUSTER_SEARCH_RESULT = 
 			"Current MSMS cluster search";
 	public static final String CURRENT_MS1_CLUSTER_SEARCH_RESULT = 
@@ -47,11 +56,10 @@ public class MSMSClusterDataSetManager {
 			new MSMSClusterDataSet(CURRENT_MSMS_CLUSTER_SEARCH_RESULT);	
 	public static final IMSMSClusterDataSet msOneClusterSearchResults = 
 			new MSMSClusterDataSet(CURRENT_MS1_CLUSTER_SEARCH_RESULT);	
-	public static final Map<IMSMSClusterDataSet, Set<String>>clusterDataSetsToClusterIdsMap = 
-			new TreeMap<IMSMSClusterDataSet, Set<String>>(
-					new MSMSClusterDataSetComparator(SortProperty.Name));
 	
-	public static Collection<MSMSClusteringParameterSet>msmsClusteringParameters = 
+	private static final Map<IMSMSClusterDataSet, Set<String>>clusterDataSetsToClusterIdsMap = 
+			new TreeMap<IMSMSClusterDataSet, Set<String>>(new MSMSClusterDataSetComparator(SortProperty.Name));	
+	private static Collection<MSMSClusteringParameterSet>msmsClusteringParameters = 
 			new HashSet<MSMSClusteringParameterSet>();
 
 	public static void clearDefaultCollections() {		
@@ -69,7 +77,7 @@ public class MSMSClusterDataSetManager {
 			clusterDataSetsToClusterIdsMap.putAll(
 					MSMSClusteringDBUtils.getMSMSClusterDataSets());		
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error("Failed to refresh MSMS Cluster Data set list", e);
 		}
 	}
 	
@@ -138,7 +146,7 @@ public class MSMSClusterDataSetManager {
 			try {
 				msmsClusteringParameters.addAll(MSMSClusteringDBUtils.getMSMSClusteringParameterSets());
 			} catch (Exception e) {
-				e.printStackTrace();
+				logger.error("Failed to read MSMS Clustering Parameter Sets list from the database", e);
 			}
 		}
 		return msmsClusteringParameters;

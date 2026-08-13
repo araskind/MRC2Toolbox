@@ -44,6 +44,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 
 import com.github.pjfanning.xlsx.StreamingReader;
 
+import edu.umich.med.mrc2.datoolbox.data.BinnerAdduct;
 import edu.umich.med.mrc2.datoolbox.data.BinnerAnnotation;
 import edu.umich.med.mrc2.datoolbox.data.CompoundClassifier;
 import edu.umich.med.mrc2.datoolbox.data.CompoundIdentity;
@@ -56,6 +57,7 @@ import edu.umich.med.mrc2.datoolbox.data.enums.BinnerPostProcessorPageNames;
 import edu.umich.med.mrc2.datoolbox.data.enums.CompoundDatabaseEnum;
 import edu.umich.med.mrc2.datoolbox.data.enums.CompoundIdentificationConfidence;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
+import edu.umich.med.mrc2.datoolbox.main.AdductManager;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
@@ -68,10 +70,16 @@ public abstract class BinnerReportParserTask extends AbstractTask {
 	protected Collection<MsFeature>clusteredFeatures;
 	protected Collection<PostProcessorAnnotation> ppAnnotations;
 	protected Collection<BinnerAnnotation> binnerAnnotations;
+	protected List<String> parsingErrors;
+
+	public BinnerReportParserTask() {
+		super();
+		parsingErrors = new ArrayList<>();
+		binnerAnnotations = new HashSet<BinnerAnnotation>();
+	}
 
 	protected void parseBinnerResults() throws IOException {
 
-		binnerAnnotations = new HashSet<BinnerAnnotation>();
 		if (!binnerDataFile.exists() || !binnerDataFile.canRead()) {
 
 			MessageDialog.showErrorMsg("Can not read Binner results file!");
@@ -81,7 +89,6 @@ public abstract class BinnerReportParserTask extends AbstractTask {
 			taskDescription = "Parsing Binner output file ...";
 			total = 100;
 			processed = 20;
-			//	InputStream is = new FileInputStream(binnerDataFile);
 			List<Sheet> sheetsToParse = new ArrayList<Sheet>();
 			try(Workbook workbook = StreamingReader.builder()
 			        .rowCacheSize(100)    // number of rows to keep in memory (defaults to 10)
@@ -106,7 +113,7 @@ public abstract class BinnerReportParserTask extends AbstractTask {
 				}
 				if(sheetsToParse.isEmpty()) {
 					
-					MessageDialog.showErrorMsg("Worksheets not found:\n \"" 
+					parsingErrors.add("Worksheets not found:\n \"" 
 							+ BinnerPageNames.CORRELATIONS_BY_CLUSTER_LOC.getName() + "\n"
 							+ BinnerPageNames.PRINCIPAL_IONS.getName() + "\n"
 							+ BinnerPageNames.DEGENERATE_FEATURES.getName() + "\n");
@@ -126,6 +133,21 @@ public abstract class BinnerReportParserTask extends AbstractTask {
 				e.printStackTrace();
 			}
 		}
+		if (!binnerAnnotations.isEmpty())
+			attachBinnerAdducts();		
+	}
+
+	private void attachBinnerAdducts() {
+		
+		for(BinnerAnnotation ba : binnerAnnotations) {
+            
+			BinnerAdduct bAdduct = AdductManager.getBinnerAdductByCleanBinnerName(ba.getCleanAnnotation());
+            if(bAdduct != null)               
+                ba.setBinnerAdduct(bAdduct);
+            else {
+            	parsingErrors.add("Binner adduct not found for annotation: " + ba.getCleanAnnotation());
+            }
+        }		
 	}
 
 	protected Collection<BinnerAnnotation> parseClusterCorrelationWorksheet(Sheet sheet) {
@@ -656,6 +678,10 @@ public abstract class BinnerReportParserTask extends AbstractTask {
 
 	public Collection<BinnerAnnotation> getBinnerAnnotations() {
 		return binnerAnnotations;
+	}
+
+	public List<String> getParsingErrors() {
+		return parsingErrors;
 	}	
 }
 

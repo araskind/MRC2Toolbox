@@ -121,11 +121,13 @@ import edu.umich.med.mrc2.datoolbox.gui.structure.DockableMolStructurePanel;
 import edu.umich.med.mrc2.datoolbox.gui.tables.ms.DockableMsTable;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.IndeterminateProgressDialog;
+import edu.umich.med.mrc2.datoolbox.gui.utils.InfoDialogType;
 import edu.umich.med.mrc2.datoolbox.gui.utils.InformationDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.LongUpdateTask;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
+import edu.umich.med.mrc2.datoolbox.main.config.DefaultFormatStore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
@@ -1951,7 +1953,7 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 
 		MsFeatureClusterSet mzDeltaAnalysisClusterDataSet = 
 				new MsFeatureClusterSet("M/Z delta analysis results - " 
-						+ MRC2ToolBoxConfiguration.defaultTimeStampFormat.format(new Date()), 
+						+ DefaultFormatStore.getDefaultTimeStampFormat().format(new Date()), 
 				task.getFeatureClusters());
 		mzDeltaAnalysisClusterDataSet.setActive(true);
 		currentExperiment.addFeatureClusterSet(mzDeltaAnalysisClusterDataSet);
@@ -2015,6 +2017,17 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 
 	private synchronized void finalizeBinnerAnnotationsImportTask(ImportBinnerAnnotationsForUntargetedDataTask task) {
 		
+		if (!task.getParsingErrors().isEmpty()) {
+
+			InformationDialog id = new InformationDialog(
+					"Binner Annotations Import Errors",
+					"Some errors were encountered while parsing the Binner output file:", 
+					 StringUtils.join(task.getParsingErrors(), "\n"), 
+					InfoDialogType.ERROR);
+			id.setLocationRelativeTo(this.getContentPane());
+			id.setVisible(true);
+			return;
+		}		
 		Collection<BinnerAnnotation>unassignedAnnotations = task.getUnassignedAnnotations();
 		if(unassignedAnnotations.isEmpty()) {
 			MessageDialog.showInfoMsg(

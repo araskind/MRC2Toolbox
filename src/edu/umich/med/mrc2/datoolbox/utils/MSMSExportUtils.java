@@ -21,8 +21,6 @@
 
 package edu.umich.med.mrc2.datoolbox.utils;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -43,12 +41,10 @@ import edu.umich.med.mrc2.datoolbox.data.enums.SpectrumSource;
 import edu.umich.med.mrc2.datoolbox.data.lims.Injection;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
 import edu.umich.med.mrc2.datoolbox.main.AdductManager;
+import edu.umich.med.mrc2.datoolbox.main.config.DefaultFormatStore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 
 public class MSMSExportUtils {
-	
-	private static final DateFormat dateFormat = 
-			new SimpleDateFormat(MRC2ToolBoxConfiguration.DATE_TIME_FORMAT_DEFAULT);
 
 	public static Collection<String>createFeatureMSPBlock(
 			MSFeatureInfoBundle bundle, Injection injection){
@@ -127,7 +123,7 @@ public class MSMSExportUtils {
 
 		if(injection != null) {
 			comment += "Data file: " + injection.getDataFileName() + "; ";
-			comment += "Timestamp: " + dateFormat.format(injection.getTimeStamp()) + "; ";
+			comment += "Timestamp: " + DefaultFormatStore.getDefaultTimeStampFormat().format(injection.getTimeStamp()) + "; ";
 		}	
 		if(bundle.getAcquisitionMethod() != null)
 			comment += "Acq. method: " + bundle.getAcquisitionMethod().getName() + "; ";

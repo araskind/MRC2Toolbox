@@ -66,7 +66,7 @@ import edu.umich.med.mrc2.datoolbox.data.msclust.IMsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.search.byexp.MinimalMSOneFeatureTable;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
-import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
+import edu.umich.med.mrc2.datoolbox.main.config.DefaultFormatStore;
 
 public class MSMSCLusterDataSetSummaryDialog extends JDialog implements ActionListener{
 
@@ -430,9 +430,9 @@ public class MSMSCLusterDataSetSummaryDialog extends JDialog implements ActionLi
 		clusterSetNameTextField.setText(dataSet.getName());
 		clusterSetDescriptionTextArea.setText(dataSet.getDescription());
 		dateCreatedLabel.setText(
-				MRC2ToolBoxConfiguration.defaultTimeStampFormat.format(dataSet.getDateCreated()));
+				DefaultFormatStore.getDefaultTimeStampFormat().format(dataSet.getDateCreated()));
 		lastModifedLabel.setText(
-				MRC2ToolBoxConfiguration.defaultTimeStampFormat.format(dataSet.getLastModified()));
+				DefaultFormatStore.getDefaultTimeStampFormat().format(dataSet.getLastModified()));
 		dataSetCreatedByLabel.setText(dataSet.getCreatedBy().getInfo());
 		
 		numClustersLabel.setText(Integer.toString(dataSet.getClusters().size()));
@@ -447,9 +447,9 @@ public class MSMSCLusterDataSetSummaryDialog extends JDialog implements ActionLi
 			flSetNameTextField.setText(lookupSet.getName());
 			flSetDescriptionTextArea.setText(lookupSet.getDescription());
 			flSetDateCreatedLabel.setText(
-					MRC2ToolBoxConfiguration.defaultTimeStampFormat.format(lookupSet.getDateCreated()));
+					DefaultFormatStore.getDefaultTimeStampFormat().format(lookupSet.getDateCreated()));
 			flSetLastModifiedLabel.setText(
-					MRC2ToolBoxConfiguration.defaultTimeStampFormat.format(lookupSet.getLastModified()));
+					DefaultFormatStore.getDefaultTimeStampFormat().format(lookupSet.getLastModified()));
 			flSetCreatedByLabel.setText(lookupSet.getCreatedBy().getInfo());
 			
 			Set<MinimalMSOneFeature> foundLookupFeatures = 

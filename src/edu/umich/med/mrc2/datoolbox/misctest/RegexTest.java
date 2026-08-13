@@ -172,6 +172,7 @@ import edu.umich.med.mrc2.datoolbox.gui.idworks.nist.NISTPepSearchOutputFields;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.nist.NISTReferenceLibraries;
 import edu.umich.med.mrc2.datoolbox.main.AdductManager;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
+import edu.umich.med.mrc2.datoolbox.main.config.DefaultFormatStore;
 import edu.umich.med.mrc2.datoolbox.main.config.FilePreferencesFactory;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.msmsfdr.NISTPepSearchResultManipulator;
@@ -523,7 +524,7 @@ public class RegexTest {
 				
 			Adduct adduct = AdductManager.getAdductByName(adductName);
 			double mz = MsUtils.calculateModifiedMz(mass, adduct);
-			String newLine = MRC2ToolBoxConfiguration.defaultMzFormat.format(mz)  + "_" + renameMapData[i][1];
+			String newLine = DefaultFormatStore.getDefaultMZformat().format(mz)  + "_" + renameMapData[i][1];
 			lines.add(newLine);
 		}	
 		Path output = Paths.get(renameMapFile.getParentFile().getAbsolutePath(), "new_feature_names.txt");

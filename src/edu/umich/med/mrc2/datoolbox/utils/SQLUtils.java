@@ -24,6 +24,10 @@ package edu.umich.med.mrc2.datoolbox.utils;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
+
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.enums.DatabseDialect;
@@ -31,12 +35,19 @@ import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 
 public class SQLUtils {
+
+	private static final Logger logger = LogManager.getLogger(SQLUtils.class);
+	
+	private SQLUtils() {
+		/* This utility class should not be instantiated */
+	}
+
 	
 	public static String getNextIdFromSequence(
 			String sequenceName,
 			DataPrefix prefix,
 			String padChar,
-			int padLength) throws Exception {
+			int padLength) throws SQLException {
 		
 		Connection conn = ConnectionManager.getConnection();
 		String nextId = getNextIdFromSequence(
@@ -54,16 +65,15 @@ public class SQLUtils {
 			String sequenceName,
 			DataPrefix prefix,
 			String padChar,
-			int padLength) throws Exception {
-		
-		String nextId = getNextIdFromSequence(
-					conn, 
-					MRC2ToolBoxConfiguration.getDatabaseType(),
-					sequenceName,
-					prefix,
-					padChar,
-					padLength);
-		return nextId;
+			int padLength) throws SQLException {
+
+		return getNextIdFromSequence(
+				conn, 
+				MRC2ToolBoxConfiguration.getDatabaseType(),
+				sequenceName,
+				prefix,
+				padChar,
+				padLength);
 	}
 	
 	public static String getNextIdFromSequence(
@@ -72,7 +82,7 @@ public class SQLUtils {
 			String sequenceName,
 			DataPrefix prefix,
 			String padChar,
-			int padLength) throws Exception {
+			int padLength) throws SQLException {
 		
 		String nexId = null;
 		if(dialect.equals(DatabseDialect.Oracle) ) {

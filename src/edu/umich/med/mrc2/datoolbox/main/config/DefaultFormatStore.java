@@ -26,22 +26,34 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 
-public class NumberFormatStore {
+public class DefaultFormatStore {
 
-	private NumberFormatStore() {
+	public static final String MZ_FORMAT_DEFAULT = "#.####";
+    public static final String RT_FORMAT_DEFAULT = "#.###";
+    public static final String INTENSITY_FORMAT_DEFAULT = "#,###";
+    public static final String SPECTRUM_INTENSITY_FORMAT_DEFAULT = "#.#";
+    public static final String PPM_FORMAT_DEFAULT = "#.#";
+	public static final String TIME_STAMP_FORMAT_DEFAULT = "yyyy-MM-dd HH:mm:ss";
+	public static final String FILE_TIMESTAMP_FORMAT_DEFAULT = "yyyyMMdd_HHmmss";
+	
+	private DefaultFormatStore() {
 			
 	}
 	
 	public static NumberFormat getDefaultMZformat() {
-		return new DecimalFormat("#.####");
+		return new DecimalFormat(MZ_FORMAT_DEFAULT);
 	}
 	
 	public static NumberFormat getDefaultRTformat() {
-		return new DecimalFormat("#.###");
+		return new DecimalFormat(RT_FORMAT_DEFAULT);
 	}
 	
 	public static NumberFormat getDefaultIntensityFormat() {
-		return new DecimalFormat("#,###");
+		return new DecimalFormat(INTENSITY_FORMAT_DEFAULT);
+	}
+	
+	public static NumberFormat getDefaultSpectrumIntensityFormat() {
+		return new DecimalFormat(SPECTRUM_INTENSITY_FORMAT_DEFAULT);
 	}
 	
 	public static NumberFormat getIntegerFormat() {
@@ -56,12 +68,16 @@ public class NumberFormatStore {
 		return new DecimalFormat("0.###E0");
 	}
 	
+	public static NumberFormat getDefaultPpmFormat() {
+		return new DecimalFormat(PPM_FORMAT_DEFAULT);
+	}
+	
 	public static DateFormat getDefaultTimeStampFormat() {		
-		return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		return new SimpleDateFormat(TIME_STAMP_FORMAT_DEFAULT);
 	}
 	
 	public static DateFormat getDefaultFileNameTimeStampFormat() {		
-		return new SimpleDateFormat("yyyyMMdd_HHmmss");
+		return new SimpleDateFormat(FILE_TIMESTAMP_FORMAT_DEFAULT);
 	}
 	
 }

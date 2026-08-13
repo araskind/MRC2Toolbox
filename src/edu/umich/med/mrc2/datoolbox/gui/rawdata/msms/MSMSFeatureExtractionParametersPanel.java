@@ -54,6 +54,7 @@ import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
 import edu.umich.med.mrc2.datoolbox.data.enums.MsFeatureChromatogramExtractionTarget;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
 import edu.umich.med.mrc2.datoolbox.gui.plot.lcms.chromatogram.ChromatogramPlotMode;
+import edu.umich.med.mrc2.datoolbox.main.config.DefaultFormatStore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.rawdata.MSMSExtractionParameterSet;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
@@ -69,9 +70,7 @@ public class MSMSFeatureExtractionParametersPanel extends JPanel {
 	private static final NumberFormat twoDecFormat = new DecimalFormat("###.##");
 
 	public static final String DESCRIPTION_DEFAULT = "MSMS extraction method " + 
-			MRC2ToolBoxConfiguration.defaultTimeStampFormat.format(new Date());
-	
-//	private static final Polarity POLARITY_DEFAULT = Polarity.Positive;
+			DefaultFormatStore.getDefaultTimeStampFormat().format(new Date());
 	
 	public static final double MIN_PRECURSOR_INTENSITY_DEFAULT = 0.0d;
 	public static final boolean USE_RT_RANGE_DEFAULT = false;

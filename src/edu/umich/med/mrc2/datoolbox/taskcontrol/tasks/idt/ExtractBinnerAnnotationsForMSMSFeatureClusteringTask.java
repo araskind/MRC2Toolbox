@@ -64,7 +64,9 @@ public class ExtractBinnerAnnotationsForMSMSFeatureClusteringTask extends Binner
 				e.printStackTrace();
 			}			
 		}
-		if(binnerAnnotations == null || binnerAnnotations.isEmpty()) {
+		if(binnerAnnotations == null || binnerAnnotations.isEmpty() || !parsingErrors.isEmpty()) {
+			
+			
 			setStatus(TaskStatus.FINISHED);
 			return;
 		}		

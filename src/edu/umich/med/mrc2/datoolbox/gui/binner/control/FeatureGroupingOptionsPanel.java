@@ -44,7 +44,7 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 
 import edu.umich.med.mrc2.datoolbox.gui.utils.ValidatableForm;
-import edu.umich.med.mrc2.datoolbox.main.config.NumberFormatStore;
+import edu.umich.med.mrc2.datoolbox.main.config.DefaultFormatStore;
 
 public class FeatureGroupingOptionsPanel extends JPanel implements ItemListener, ValidatableForm{
 
@@ -100,7 +100,7 @@ public class FeatureGroupingOptionsPanel extends JPanel implements ItemListener,
 		add(lblNewLabel, gbc_lblNewLabel);
 		
 		rtGapField = new JFormattedTextField(
-				NumberFormatStore.getDefaultRTformat());
+				DefaultFormatStore.getDefaultRTformat());
 		rtGapField.setPreferredSize(new Dimension(80, 20));
 		rtGapField.setMinimumSize(new Dimension(80, 20));
 		rtGapField.setColumns(10);
@@ -178,7 +178,7 @@ public class FeatureGroupingOptionsPanel extends JPanel implements ItemListener,
 		panel.add(lblNewLabel_3, gbc_lblNewLabel_3);
 		
 		minSubclusterRTgapField = 
-				new JFormattedTextField(NumberFormatStore.getDefaultRTformat());
+				new JFormattedTextField(DefaultFormatStore.getDefaultRTformat());
 		minSubclusterRTgapField.setMinimumSize(new Dimension(80, 20));
 		minSubclusterRTgapField.setPreferredSize(new Dimension(80, 20));
 		minSubclusterRTgapField.setColumns(10);
@@ -206,7 +206,7 @@ public class FeatureGroupingOptionsPanel extends JPanel implements ItemListener,
 		panel.add(lblNewLabel_5, gbc_lblNewLabel_5);
 		
 		maxSubclusterRTgapField = 
-				new JFormattedTextField(NumberFormatStore.getDefaultRTformat());
+				new JFormattedTextField(DefaultFormatStore.getDefaultRTformat());
 		maxSubclusterRTgapField.setPreferredSize(new Dimension(80, 20));
 		maxSubclusterRTgapField.setMinimumSize(new Dimension(80, 20));
 		maxSubclusterRTgapField.setColumns(10);
@@ -313,7 +313,7 @@ public class FeatureGroupingOptionsPanel extends JPanel implements ItemListener,
 		panel_2.add(limitBinSizeForAnalysisCheckBox, gbc_limitBinSizeForAnalysisCheckBox);
 		limitBinSizeForAnalysisCheckBox.addItemListener(this);
 		binSizeLimitForAnalysisField = 
-				new JFormattedTextField(NumberFormatStore.getIntegerFormat());
+				new JFormattedTextField(DefaultFormatStore.getIntegerFormat());
 		binSizeLimitForAnalysisField.setColumns(15);
 		binSizeLimitForAnalysisField.setMinimumSize(new Dimension(100, 20));
 		binSizeLimitForAnalysisField.setPreferredSize(new Dimension(100, 20));
@@ -344,7 +344,7 @@ public class FeatureGroupingOptionsPanel extends JPanel implements ItemListener,
 		limitBinSizeForOutputCheckBox.addItemListener(this);
 		
 		binSizeLimitForOutputField = 
-				new JFormattedTextField(NumberFormatStore.getIntegerFormat());
+				new JFormattedTextField(DefaultFormatStore.getIntegerFormat());
 		GridBagConstraints gbc_formattedTextField_1 = new GridBagConstraints();
 		gbc_formattedTextField_1.insets = new Insets(0, 0, 0, 5);
 		gbc_formattedTextField_1.fill = GridBagConstraints.HORIZONTAL;

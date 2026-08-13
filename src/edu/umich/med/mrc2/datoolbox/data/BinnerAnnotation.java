@@ -28,6 +28,7 @@ import java.util.UUID;
 import org.jdom2.Element;
 
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
+import edu.umich.med.mrc2.datoolbox.main.AdductManager;
 import edu.umich.med.mrc2.datoolbox.project.store.BinnerAnnotationFields;
 import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
 import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
@@ -64,6 +65,8 @@ public class BinnerAnnotation implements Serializable, Comparable<BinnerAnnotati
 	private double rmd;
 	private double binnerMz;
 	private double binnerRt;
+	
+	private BinnerAdduct binnerAdduct;
 
 	public BinnerAnnotation(String id, String featureName, String annotation) {
 		super();
@@ -354,6 +357,10 @@ public class BinnerAnnotation implements Serializable, Comparable<BinnerAnnotati
 				BinnerAnnotationFields.BinnerMz.name(), Double.toString(binnerMz));
 			binnerAnnotationElement.setAttribute(
 				BinnerAnnotationFields.BinnerRt.name(), Double.toString(binnerRt));
+			
+			if (binnerAdduct != null)
+				binnerAnnotationElement.setAttribute(BinnerAnnotationFields.BinnerAdductId.name(),
+						binnerAdduct.getId());
 		
 		return binnerAnnotationElement;
 	}
@@ -399,7 +406,11 @@ public class BinnerAnnotation implements Serializable, Comparable<BinnerAnnotati
 		this.binnerMz = Double.parseDouble(
 				xmlElement.getAttributeValue(BinnerAnnotationFields.BinnerMz.name()));
 		this.binnerRt = Double.parseDouble(
-				xmlElement.getAttributeValue(BinnerAnnotationFields.BinnerRt.name()));		
+				xmlElement.getAttributeValue(BinnerAnnotationFields.BinnerRt.name()));
+
+		String binnerAdductId = xmlElement.getAttributeValue(BinnerAnnotationFields.BinnerAdductId.name());
+		if (binnerAdductId != null)
+			this.binnerAdduct = AdductManager.getBinnerAdductById(binnerAdductId);
 	}
 
 	public String getId() {
@@ -408,6 +419,14 @@ public class BinnerAnnotation implements Serializable, Comparable<BinnerAnnotati
 
 	public void setId(String id) {
 		this.id = id;
+	}
+
+	public BinnerAdduct getBinnerAdduct() {
+		return binnerAdduct;
+	}
+
+	public void setBinnerAdduct(BinnerAdduct binnerAdduct) {
+		this.binnerAdduct = binnerAdduct;
 	}
 }
 

@@ -38,7 +38,7 @@ import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.thermo.raw.ThermoRawMetadata;
 import edu.umich.med.mrc2.datoolbox.data.thermo.raw.ThermoRawMetadataComparator;
 import edu.umich.med.mrc2.datoolbox.data.thermo.raw.ThermoUtils;
-import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
+import edu.umich.med.mrc2.datoolbox.main.config.DefaultFormatStore;
 import edu.umich.med.mrc2.datoolbox.utils.JSONUtils;
 
 public class ThermoMetadataExtractor {
@@ -98,7 +98,7 @@ public class ThermoMetadataExtractor {
 			line.add(""); //"MRC2 sample ID",	
 			line.add(md.getSampleName()); //"sample_id",	
 			line.add(md.getFileName()); //"raw_file",	
-			line.add(MRC2ToolBoxConfiguration.defaultTimeStampFormat.format(md.getInjectionTime())); //"Injection time",	
+			line.add(DefaultFormatStore.getDefaultTimeStampFormat().format(md.getInjectionTime())); //"Injection time",	
 			line.add(md.getSamplePosition()); //"Sample Position",	
 			line.add(md.getSampleName()); //"Sample Name",	
 			line.add(""); //"sample_type",	

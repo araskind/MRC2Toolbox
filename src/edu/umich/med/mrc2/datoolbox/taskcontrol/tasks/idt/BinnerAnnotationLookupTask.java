@@ -42,7 +42,7 @@ import edu.umich.med.mrc2.datoolbox.data.msclust.IMsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusterDataSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusteringParameterSet;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
-import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
+import edu.umich.med.mrc2.datoolbox.main.config.DefaultFormatStore;
 import edu.umich.med.mrc2.datoolbox.msmsscore.MSMSScoreCalculator;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
@@ -73,7 +73,7 @@ public class BinnerAnnotationLookupTask extends AbstractTask {
 		this.binnerAnnotationsDataSet = balds;
 		String description  = "Based on Binner annotations data set \"" + 
 				binnerAnnotationsDataSet.getName() + 
-				" (Created " + MRC2ToolBoxConfiguration.defaultTimeStampFormat.format(new Date()) + ")";
+				" (Created " + DefaultFormatStore.getDefaultTimeStampFormat().format(new Date()) + ")";
 		 
 		msmsClusterDataSet = new MSMSClusterDataSet(
 				"Binner based MSMS clusters data set", 

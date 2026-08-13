@@ -21,6 +21,7 @@
 
 package edu.umich.med.mrc2.datoolbox.main;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -28,6 +29,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import edu.umich.med.mrc2.datoolbox.data.Adduct;
 import edu.umich.med.mrc2.datoolbox.data.AdductExchange;
@@ -46,6 +50,13 @@ import edu.umich.med.mrc2.datoolbox.database.idt.AdductDatabaseUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.BinnerUtils;
 
 public class AdductManager {
+ 
+	private static final Logger logger = LogManager.getLogger(AdductManager.class);
+	public static final String errorFormat	= "%s: %s";
+	
+	private AdductManager() {
+   /* This utility class should not be instantiated */
+	}
 
 	/*
 	 * Adduct related functions
@@ -69,25 +80,27 @@ public class AdductManager {
 	public static Collection<Adduct> getAdductList() {
 
 		if(adductList == null || adductList.isEmpty()) {
+			
+			adductList = new ArrayList<>();
 			try {
 				adductList = AdductDatabaseUtils.getAdductList();				
 			} catch (Exception e) {
-				e.printStackTrace();
+				logger.error("Failed to get adduct list from the database", e);
 			}
 			try {
 				adductList.addAll(AdductDatabaseUtils.getNeutralLossList());
 			} catch (Exception e) {
-				e.printStackTrace();
+				logger.error("Failed to get neutral loss list from the database", e);
 			}
 			try {
 				adductList.addAll(AdductDatabaseUtils.getNeutralAdductList());
 			} catch (Exception e) {
-				e.printStackTrace();
+				logger.error("Failed to get neutral addduct list from the database", e);
 			}
 			try {
 				adductList.addAll(AdductDatabaseUtils.getCompositeAdductList());
 			} catch (Exception e) {
-				e.printStackTrace();
+				logger.error("Failed to get composite adduct list from the database", e);
 			}
 		}
 		return adductList;
@@ -117,29 +130,28 @@ public class AdductManager {
 	public static void addAdduct(Adduct newAdduct) {
 				
 		if(newAdduct instanceof SimpleAdduct) {
+			
 			SimpleAdduct adduct = (SimpleAdduct)newAdduct;
+			
 			if(adduct.getModificationType().equals(ModificationType.ADDUCT)) {
 				try {
 					AdductDatabaseUtils.addNewAdduct(adduct);
 				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					logger.error(String.format(errorFormat, "Failed to add new adduct ", newAdduct.getName()), e);
 				}
 			}
 			if(adduct.getModificationType().equals(ModificationType.LOSS)) {
 				try {
 					AdductDatabaseUtils.addNewNeutralLoss(adduct);
 				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					logger.error(String.format(errorFormat, "Failed to add new adduct ", newAdduct.getName()), e);
 				}
 			}
 			if(adduct.getModificationType().equals(ModificationType.REPEAT)) {
 				try {
 					AdductDatabaseUtils.addNewNeutralAdduct(adduct);
 				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					logger.error(String.format(errorFormat, "Failed to add new adduct ", newAdduct.getName()), e);
 				}
 			}
 		}
@@ -147,12 +159,11 @@ public class AdductManager {
 			try {
 				AdductDatabaseUtils.addNewCompositeAdduct((CompositeAdduct)newAdduct);
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.error(String.format(errorFormat, "Failed to add new adduct ", newAdduct.getName()), e);
 			}
 		}
 		getAdductList().add(newAdduct);
-		Collections.sort((List)adductList, adductTypeNameSorter);
+		Collections.sort((List<Adduct>)adductList, adductTypeNameSorter);
 	}
 	
 	public static void deleteAdduct(Adduct adductToDelete) {
@@ -164,24 +175,21 @@ public class AdductManager {
 				try {
 					AdductDatabaseUtils.deleteAdduct(adduct);
 				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					logger.error(String.format(errorFormat, "Failed to delete adduct ", adductToDelete.getName()), e);
 				}
 			}
 			if(adduct.getModificationType().equals(ModificationType.LOSS)) {
 				try {
 					AdductDatabaseUtils.deleteNeutralLoss(adduct);
 				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					logger.error(String.format(errorFormat, "Failed to delete adduct ", adductToDelete.getName()), e);
 				}
 			}
 			if(adduct.getModificationType().equals(ModificationType.REPEAT)) {
 				try {
 					AdductDatabaseUtils.deleteNeutralAdduct(adduct);
 				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					logger.error(String.format(errorFormat, "Failed to delete adduct ", adductToDelete.getName()), e);
 				}
 			}
 		}
@@ -189,8 +197,7 @@ public class AdductManager {
 			try {
 				AdductDatabaseUtils.deleteCompositeAdduct((CompositeAdduct)adductToDelete);
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.error(String.format(errorFormat, "Failed to delete adduct ", adductToDelete.getName()), e);
 			}
 		}
 	}
@@ -203,24 +210,21 @@ public class AdductManager {
 				try {
 					AdductDatabaseUtils.updateAdduct(adduct);
 				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					logger.error(String.format(errorFormat, "Failed to update adduct ", adductToUpdate.getName()), e);
 				}
 			}
 			if(adduct.getModificationType().equals(ModificationType.LOSS)) {
 				try {
 					AdductDatabaseUtils.updateNeutralLoss(adduct);
 				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					logger.error(String.format(errorFormat, "Failed to update adduct ", adductToUpdate.getName()), e);
 				}
 			}
 			if(adduct.getModificationType().equals(ModificationType.REPEAT)) {
 				try {
 					AdductDatabaseUtils.updateNeutralAdduct(adduct);
 				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					logger.error(String.format(errorFormat, "Failed to update adduct ", adductToUpdate.getName()), e);
 				}
 			}
 		}
@@ -228,18 +232,15 @@ public class AdductManager {
 			try {
 				AdductDatabaseUtils.updateCompositeAdduct((CompositeAdduct)adductToUpdate);
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.error(String.format(errorFormat, "Failed to update adduct ", adductToUpdate.getName()), e);
 			}
 		}
 		refreshAdductList();
 	}
 	
 	public static boolean adductNameExists(String newName) {
-
 		return getAdductList().stream().
-			filter(a -> a.getName().equals(newName)).
-			findFirst().isPresent();
+				anyMatch(a -> a.getName().equals(newName));
 	}
 	
 	public static Collection<Adduct>getAdductsForType(ModificationType type){
@@ -381,17 +382,14 @@ public class AdductManager {
 	public static Collection<AdductExchange> getAdductExchangeList() {
 
 		if(adductExchangeList == null || adductExchangeList.isEmpty()) {
+			
+			adductExchangeList = new ArrayList<>();
 			try {
 				adductExchangeList = AdductDatabaseUtils.getAdductExchangeList();
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.error("Failed to get adduct exchange list from the database", e);
 			}
 		}
-		//	Debug only
-//		for(AdductExchange ex : adductExchangeList) 
-//			System.out.println(ex.getId() + "\\t" + ex.getComingAdduct().getName() + "\\t" + ex.getLeavingAdduct().getName());
-		
 		return adductExchangeList;
 	}
 	
@@ -414,11 +412,12 @@ public class AdductManager {
 	public static Collection<BinnerNeutralMassDifference> getBinnerNeutralMassDifferenceList() {
 
 		if(binnerNeutralMassDifferenceList == null || binnerNeutralMassDifferenceList.isEmpty()) {
+			
+			binnerNeutralMassDifferenceList = new ArrayList<>();
 			try {
 				binnerNeutralMassDifferenceList = BinnerUtils.getBinnerNeutralMassDifferences();
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.error("Failed to get Binner mass differences list from the database", e);
 			}
 		}		
 		return binnerNeutralMassDifferenceList;
@@ -435,11 +434,12 @@ public class AdductManager {
 	public static Collection<BinnerAdduct> getBinnerAdductList() {
 
 		if(binnerAdductList == null || binnerAdductList.isEmpty()) {
+			
+			binnerAdductList = new ArrayList<>();
 			try {
 				binnerAdductList = BinnerUtils.getBinnerAdducts();
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.error("Failed to get Binner adduct list from the database", e);
 			}
 		}		
 		return binnerAdductList;
@@ -451,8 +451,15 @@ public class AdductManager {
 		try {
 			BinnerUtils.deleteBinnerAdduct(adductToDelete);
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error(String.format(errorFormat, "Failed to delete Binner adduct ", adductToDelete.getName()), e);
 		}
+	}
+	
+	public static BinnerAdduct getBinnerAdductForBinnerAnnotation(BinnerAnnotation ba) {
+
+		return getBinnerAdductList().stream().
+				filter(a -> a.getBinnerName().equals(ba.getCleanAnnotation())).
+				findFirst().orElse(null);
 	}
 	
 	public static List<AdductExchange> getAdductExchangeListForPolarity(Polarity adductPolarity) {
@@ -468,7 +475,7 @@ public class AdductManager {
 		try {
 			AdductDatabaseUtils.addNewAdductExchange(newExchange);
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error(String.format(errorFormat, "Failed to add new adduct exchange ", newExchange.getName()), e);
 		}
 		getAdductExchangeList().add(newExchange);
 	}
@@ -478,7 +485,7 @@ public class AdductManager {
 			AdductDatabaseUtils.updateAdductExchange(originalExchange, modifiedExchange);
 		}
 		catch (Exception e) {
-			e.printStackTrace();
+			logger.error(String.format(errorFormat, "Failed to update adduct exchange ", originalExchange.getName()), e);
 		}		
 		getAdductExchangeList().remove(originalExchange);
 		modifiedExchange.setId(originalExchange.getId());
@@ -491,30 +498,27 @@ public class AdductManager {
 		try {
 			AdductDatabaseUtils.deleteAdductExchange(exchangeToRemove);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error(String.format(errorFormat, "Failed to delete adduct exchange ", exchangeToRemove.getName()), e);
 		}
 	}
 	
 	public static boolean adductExchangeExists(AdductExchange newExchange) {
 
 		return getAdductExchangeList().stream().
-			filter(e -> (e.getComingAdduct().equals(newExchange.getComingAdduct()) 
+			anyMatch(e -> (e.getComingAdduct().equals(newExchange.getComingAdduct()) 
 							&& e.getLeavingAdduct().equals(newExchange.getLeavingAdduct())) 
 					|| (e.getLeavingAdduct().equals(newExchange.getComingAdduct()) 
-							&& e.getComingAdduct().equals(newExchange.getLeavingAdduct()))).
-			findFirst().isPresent();
+							&& e.getComingAdduct().equals(newExchange.getLeavingAdduct())));
 	}
 	
 	public static boolean adductExchangeExists(String editedExchangeId, Adduct newComingAdduct, Adduct newLeavingAduct) {
 
 		return getAdductExchangeList().stream().
 			filter(e -> !e.getId().equals(editedExchangeId)).
-			filter(e -> (e.getComingAdduct().equals(newComingAdduct) 
+			anyMatch(e -> (e.getComingAdduct().equals(newComingAdduct) 
 					&& e.getLeavingAdduct().equals(newLeavingAduct)) 
 			|| (e.getLeavingAdduct().equals(newComingAdduct) 
-					&& e.getComingAdduct().equals(newLeavingAduct))).
-			findFirst().isPresent();
+					&& e.getComingAdduct().equals(newLeavingAduct)));
 	}
 	
 	public static AdductExchange getAdductExchangeById(String id) {
@@ -535,6 +539,13 @@ public class AdductManager {
 		
 		return getBinnerAdductList().stream().
 				filter(a -> a.getId().equals(id)).
+				findFirst().orElse(null);
+	}
+	
+	public static BinnerAdduct getBinnerAdductByCleanBinnerName(String cleanBinnerName) {
+		
+		return getBinnerAdductList().stream().
+				filter(a -> a.getBinnerName().equals(cleanBinnerName)).
 				findFirst().orElse(null);
 	}
 	

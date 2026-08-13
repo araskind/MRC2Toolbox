@@ -76,6 +76,7 @@ import edu.umich.med.mrc2.datoolbox.data.enums.MoTrPACRawDataManifestFields;
 import edu.umich.med.mrc2.datoolbox.data.enums.MoTrPACmetaboliteMetaDataFields;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.ReferenceSamplesManager;
+import edu.umich.med.mrc2.datoolbox.main.config.DefaultFormatStore;
 import edu.umich.med.mrc2.datoolbox.main.config.FilePreferencesFactory;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.utils.CompressionUtils;
@@ -583,7 +584,7 @@ public class MoTrPACUtils {
 					
 					Date injTs = new Date();
 					try {
-						injTs = MRC2ToolBoxConfiguration.defaultTimeStampFormat.parse(completeManifestData[i][j]);
+						injTs = DefaultFormatStore.getDefaultTimeStampFormat().parse(completeManifestData[i][j]);
 					} catch (ParseException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -645,7 +646,7 @@ public class MoTrPACUtils {
 			}
 			else
 				System.err.println("No column id found for date "
-						+ MRC2ToolBoxConfiguration.defaultTimeStampFormat.format(injDate));
+						+ DefaultFormatStore.getDefaultTimeStampFormat().format(injDate));
 		}
 	}
 	
@@ -698,8 +699,8 @@ public class MoTrPACUtils {
 			line.add(bmo.getExperimentId());
 			line.add(bmo.getAssay());
 			line.add(bmo.getBatchName());
-			line.add(MRC2ToolBoxConfiguration.defaultTimeStampFormat.format(bmo.getRunStart()));
-			line.add(MRC2ToolBoxConfiguration.defaultTimeStampFormat.format(bmo.getRunEnd()));
+			line.add(DefaultFormatStore.getDefaultTimeStampFormat().format(bmo.getRunStart()));
+			line.add(DefaultFormatStore.getDefaultTimeStampFormat().format(bmo.getRunEnd()));
 			dataListOutput.add(StringUtils.join(line, "\t"));		
 		}
 		Path outputPath = Paths.get("Y:\\DataAnalysis\\_Reports\\_MoTrPAC\\BatchRunDates.txt");
@@ -737,7 +738,7 @@ public class MoTrPACUtils {
 			String dateString = manifestMapData[i][timeColumnIndex];
 			Date injTime = null;
 	        try {
-	        	injTime = MRC2ToolBoxConfiguration.defaultTimeStampFormat.parse(dateString);
+	        	injTime = DefaultFormatStore.getDefaultTimeStampFormat().parse(dateString);
 
 	        } catch (ParseException e) {
 	            System.err.println("Error parsing date: " + e.getMessage());
