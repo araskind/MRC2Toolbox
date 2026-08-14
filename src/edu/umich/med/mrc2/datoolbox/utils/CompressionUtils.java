@@ -28,6 +28,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -49,11 +50,16 @@ import org.apache.commons.compress.archivers.ArchiveInputStream;
 import org.apache.commons.compress.archivers.ArchiveOutputStream;
 import org.apache.commons.compress.archivers.ArchiveStreamFactory;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
+import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
 public class CompressionUtils {
+
+	private static final Logger logger = LogManager.getLogger(CompressionUtils.class);
 
 	/**
 	 * Decompress the zlib-compressed bytes and return an array of decompressed
@@ -152,6 +158,42 @@ public class CompressionUtils {
         }
     }
 
+	//	Extract archive and delete zip
+	public static void extractArchiveAndCleanUp(File archive, File destinationFolder) {
+		
+		if(archive == null || !archive.exists())
+			return;
+
+        if (!destinationFolder.exists())
+        	destinationFolder.mkdirs();
+        
+        try(ZipArchiveInputStream zipStream = 
+        		new ZipArchiveInputStream(
+        				new BufferedInputStream(new FileInputStream(archive)))){
+            ZipArchiveEntry entry;            
+            while ((entry = zipStream.getNextEntry()) != null) {
+                
+                if (entry.isDirectory())
+                	continue;
+
+                File curfile = new File(destinationFolder, entry.getName());
+                try(FileOutputStream fos = new FileOutputStream(curfile)){
+                	IOUtils.copy(zipStream, fos);
+                }
+            }
+        } catch (FileNotFoundException e) {
+        	logger.error(String.format("%s %s", "Failed to extract data from", archive.getAbsolutePath()), e);
+		} catch (IOException e1) {
+			logger.error(String.format("%s %s", "Failed to extract  data from", archive.getAbsolutePath()), e1);
+		}
+		Path path = Paths.get(archive.getAbsolutePath());
+	    try {
+			Files.delete(path);
+		} catch (IOException e2) {
+			logger.error(String.format("%s %s", "Failed to delete archive", archive.getAbsolutePath()), e2);
+		}		
+	}
+	
     public static void zipFile(File source, File destination) 
     		throws IOException, ArchiveException {
 

@@ -26,6 +26,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -34,6 +35,7 @@ import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.TreeSet;
@@ -41,6 +43,8 @@ import java.util.UUID;
 
 import javax.swing.text.Document;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.openscience.cdk.ChemFile;
 import org.openscience.cdk.ChemModel;
 import org.openscience.cdk.exception.CDKException;
@@ -63,6 +67,12 @@ import rtf.AdvancedRTFDocument;
 import rtf.AdvancedRTFEditorKit;
 
 public class AnnotationUtils {
+	
+	private static final Logger logger = LogManager.getLogger(AnnotationUtils.class);
+
+	private AnnotationUtils() {
+		/* This utility class should not be instantiated */
+	}
 
 	public static void insertNewAnnotation(
 			ObjectAnnotation annotation) throws Exception {
@@ -109,7 +119,6 @@ public class AnnotationUtils {
 		}
 		if(annotation.getChemModel() != null) {
 			insertStructuralAnnotation(annotation, conn);
-			return;
 		}
 	}
 	
@@ -163,84 +172,85 @@ public class AnnotationUtils {
 			editor.write(tmpRtf.getAbsolutePath(), rtfDocument);
 			return tmpRtf;
 		} catch (Exception ex) {
-			ex.printStackTrace();
+			logger.error("Failed to write RTF file", ex);
 		}
 		return null;		
 	}
 	
 	private static void insertStructuralAnnotation(
 			ObjectAnnotation annotation, 
-			Connection conn) throws Exception{
+			Connection conn) throws SQLException{
 
 		if(annotation.getChemModel() == null)
 			return;
 		
-		// Create CML
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		CMLWriter cmlwriter = new CMLWriter(baos);
-		try {
-			cmlwriter.write(annotation.getChemModel());
-		} catch (Exception ex) {
-			ex.printStackTrace();
-		}
-		if(baos.size() == 0) {
-			baos.close();
-			cmlwriter.close();
-			throw new Exception("Can not create CML markup from structure!");
-		}		
-		ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());	
 		String query =
 				"INSERT INTO OBJECT_ANNOTATIONS (ANNOTATION_ID, OBJECT_TYPE, OBJECT_ID, "
 				+ "CML, CREATED_BY, CREATED_ON, LAST_EDITED_BY, LAST_EDITED_ON, CML_NOTE) " +
 				"VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-			 
-		PreparedStatement ps = conn.prepareStatement(query);
-		ps.setString(1, annotation.getUniqueId());
-		ps.setString(2, annotation.getAnnotatedObjectType().name());
-		ps.setString(3, annotation.getAnnotatedObjectId());
-
-		// Add CML BLOB
-		ps.setBinaryStream(4, bais, baos.size());
-		ps.setString(5, annotation.getCreateBy().getId());
-		ps.setDate(6, new java.sql.Date(new java.util.Date().getTime()));	
-		ps.setString(7, annotation.getLastModifiedBy().getId());
-		ps.setDate(8, new java.sql.Date(new java.util.Date().getTime()));
-		ps.setString(9, annotation.getChemModelNotes());
-		ps.executeUpdate();
-		ps.close();
-
-		baos.close();
-		bais.close();
-		cmlwriter.close();
+		
+		// Create CML
+		try(ByteArrayOutputStream baos = new ByteArrayOutputStream()){
+			
+			try(CMLWriter cmlwriter = new CMLWriter(baos)){
+				try {
+					cmlwriter.write(annotation.getChemModel());
+				} catch (CDKException ex) {
+					logger.error("CDK failed to parse Structural Annotation", ex);
+				}
+				if(baos.size() == 0) {
+					logger.error("Structural Annotation is empty");					
+				}
+				else {
+					try(ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray())){
+						
+						try(PreparedStatement ps = conn.prepareStatement(query)){
+							ps.setString(1, annotation.getUniqueId());
+							ps.setString(2, annotation.getAnnotatedObjectType().name());
+							ps.setString(3, annotation.getAnnotatedObjectId());
+		
+							// Add CML BLOB
+							ps.setBinaryStream(4, bais, baos.size());
+							ps.setString(5, annotation.getCreateBy().getId());
+							ps.setDate(6, new java.sql.Date(new java.util.Date().getTime()));	
+							ps.setString(7, annotation.getLastModifiedBy().getId());
+							ps.setDate(8, new java.sql.Date(new java.util.Date().getTime()));
+							ps.setString(9, annotation.getChemModelNotes());
+							ps.executeUpdate();
+						}
+					}
+				}
+			} catch (IOException e) {
+				logger.error("CDK failed to parse Structural Annotation", e);
+			}		
+		} catch (IOException e1) {
+			logger.error("CDK failed to parse Structural Annotation", e1);
+		}
 	}
 	
 	private static void insertAnnotationWithDocumentFile(
 			ObjectAnnotation annotation,
-			Connection conn) throws Exception{
+			Connection conn) throws SQLException{
 		
 		if(annotation.getLinkedDocumentFile() == null)
 			return;
 		
 		// Upload new document to get linked document ID
-		String linkedDocumentId =  null;			
-		try {
-			linkedDocumentId = DocumentUtils.insertDocument(
+		String linkedDocumentId = DocumentUtils.insertDocument(
 							annotation.getLinkedDocumentFile(), 
 							annotation.getLinkedDocumentName(), 
 							annotation.getLinkedDocumentFormat(), 
 							conn);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		if(linkedDocumentId != null) {
+
+		if(linkedDocumentId == null) 
+			return;
 			
-			String query =
-				"INSERT INTO OBJECT_ANNOTATIONS (ANNOTATION_ID, OBJECT_TYPE, OBJECT_ID, "
-				+ "CREATED_BY, CREATED_ON, LAST_EDITED_BY, LAST_EDITED_ON, LINKED_DOCUMENT_ID) " +
-				"VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-				
-			PreparedStatement ps = conn.prepareStatement(query);
+		String query =
+			"INSERT INTO OBJECT_ANNOTATIONS (ANNOTATION_ID, OBJECT_TYPE, OBJECT_ID, "
+			+ "CREATED_BY, CREATED_ON, LAST_EDITED_BY, LAST_EDITED_ON, LINKED_DOCUMENT_ID) " +
+			"VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+			
+		try(PreparedStatement ps = conn.prepareStatement(query)){
 			ps.setString(1, annotation.getUniqueId());
 			ps.setString(2, annotation.getAnnotatedObjectType().name());
 			ps.setString(3, annotation.getAnnotatedObjectId());
@@ -250,9 +260,8 @@ public class AnnotationUtils {
 			ps.setDate(7, new java.sql.Date(new java.util.Date().getTime()));
 			ps.setString(8, linkedDocumentId);			
 			ps.executeUpdate();
-			ps.close();		
-			annotation.setLinkedDocumentId(linkedDocumentId);
-		}
+		}	
+		annotation.setLinkedDocumentId(linkedDocumentId);		
 	}
 
 	public static void updateAnnotation(
@@ -303,45 +312,49 @@ public class AnnotationUtils {
 		//	Update CML annotation
 		if(annotation.getChemModel() != null) {
 			updateStructuralAnnotation(annotation, conn);
-			return;
 		}
 	}
 	
 	private static void updateRTFAnnotation(
-			ObjectAnnotation annotation, Connection conn) throws Exception{
+			ObjectAnnotation annotation, Connection conn) throws SQLException{
 		
 		if(annotation.getRtfDocument() == null)
 			return;
 		
 		File tmpRtf =  writeTemporaryRtfFile(annotation);
 		if (tmpRtf == null)
-			throw new Exception("Could not write temporary RTF file!");
+			return;
 		
 		 String query =
 			"UPDATE OBJECT_ANNOTATIONS SET LAST_EDITED_BY = ?, "
 			+ "LAST_EDITED_ON = ?, ANNOTATION_RTF_DOCUMENT = ? " +
 			"WHERE ANNOTATION_ID = ?";
 		 
-		PreparedStatement ps = conn.prepareStatement(query);			
-		ps.setString(1, annotation.getLastModifiedBy().getId());
-		ps.setDate(2, new java.sql.Date(new java.util.Date().getTime()));
-
-		//	Add RTF BLOB
-		FileInputStream fis = new FileInputStream(tmpRtf);
-		ps.setBinaryStream(3, fis, (int) tmpRtf.length());
-		ps.setString(4, annotation.getUniqueId());
-		ps.executeUpdate();
-		ps.close();
-
-		fis.close();
+		try(PreparedStatement ps = conn.prepareStatement(query)){
+			ps.setString(1, annotation.getLastModifiedBy().getId());
+			ps.setDate(2, new java.sql.Date(new java.util.Date().getTime()));
+			try(FileInputStream fis = new FileInputStream(tmpRtf)){
+				ps.setBinaryStream(3, fis, (int) tmpRtf.length());
+				ps.setString(4, annotation.getUniqueId());
+				ps.executeUpdate();
+			} catch (FileNotFoundException e) {
+				logger.error("Failed to upload RTF annotation", e);
+			} catch (IOException e) {
+				logger.error("Failed to upload RTF annotation", e);
+			}
+		}
 		Path path = Paths.get(tmpRtf.getAbsolutePath());
-        Files.delete(path);    
+        try {
+			Files.delete(path);
+		} catch (IOException e) {
+			logger.error("Failed to delete temporary RTF file", e);
+		}    
 	}
 	
 	private static void updateAnnotationWithDocumentFile(
 			ObjectAnnotation annotation, 
 			File linkedDocumentFile, 
-			Connection conn) throws Exception{
+			Connection conn) throws SQLException{
 		
 		if(linkedDocumentFile == null)
 			return;
@@ -349,31 +362,26 @@ public class AnnotationUtils {
 		if(!linkedDocumentFile.exists())
 			return;
 		
-		String linkedDocumentId =  null;			
-		try {
-			linkedDocumentId = DocumentUtils.insertDocument(
+		String linkedDocumentId = DocumentUtils.insertDocument(
 							linkedDocumentFile, 
 							annotation.getLinkedDocumentName(), 
 							annotation.getLinkedDocumentFormat(), 
 							conn);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		if(linkedDocumentId != null) {
 
-			String query =
-				"UPDATE OBJECT_ANNOTATIONS SET LAST_EDITED_BY = ?, "
-				+ "LAST_EDITED_ON = ?, LINKED_DOCUMENT_ID = ? " +
-				"WHERE ANNOTATION_ID= ?";
-			
-			PreparedStatement ps = conn.prepareStatement(query);
+		if(linkedDocumentId == null)
+			return;
+
+		String query =
+			"UPDATE OBJECT_ANNOTATIONS SET LAST_EDITED_BY = ?, "
+			+ "LAST_EDITED_ON = ?, LINKED_DOCUMENT_ID = ? " +
+			"WHERE ANNOTATION_ID= ?";
+		
+		try(PreparedStatement ps = conn.prepareStatement(query)){
 			ps.setString(1, annotation.getLastModifiedBy().getId());
 			ps.setDate(2, new java.sql.Date(new java.util.Date().getTime()));
 			ps.setString(3, linkedDocumentId);
 			ps.setString(4, annotation.getUniqueId());
 			ps.executeUpdate();
-			ps.close();					
 		}
 	}
 	
@@ -385,41 +393,42 @@ public class AnnotationUtils {
 			return;
 		
 		// Create CML
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		CMLWriter cmlwriter = new CMLWriter(baos);
-		try {
-			cmlwriter.write(annotation.getChemModel());
-		} catch (Exception ex) {
-			ex.printStackTrace();
+		try(ByteArrayOutputStream baos = new ByteArrayOutputStream()){
+			
+			try(CMLWriter cmlwriter = new CMLWriter(baos)){
+				try {
+					cmlwriter.write(annotation.getChemModel());
+				} catch (CDKException ex) {
+					logger.error("CDK failed to parse Structural Annotation", ex);
+				}
+				if(baos.size() == 0) {
+					logger.error("Structural Annotation is empty");					
+				}
+				else {
+					String query =
+							"UPDATE OBJECT_ANNOTATIONS SET LAST_EDITED_BY = ?, "
+							+ "LAST_EDITED_ON = ?, CML = ?, CML_NOTE = ? " +
+							"WHERE ANNOTATION_ID= ?";
+					try(ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray())){
+						
+						try(PreparedStatement ps = conn.prepareStatement(query)){
+							
+							ps.setString(1, annotation.getLastModifiedBy().getId());
+							ps.setDate(2, new java.sql.Date(new java.util.Date().getTime()));
+							// Add CML BLOB
+							ps.setBinaryStream(3, bais, baos.size());
+							ps.setString(4, annotation.getChemModelNotes());
+							ps.setString(5, annotation.getUniqueId());
+							ps.executeUpdate();
+						}
+					}
+				}
+			}
 		}
-		if(baos.size() == 0) {
-			baos.close();
-			cmlwriter.close();
-			throw new Exception("Can not create CML markup from structure!");
-		}		
-		ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());	
-		String query =
-				"UPDATE OBJECT_ANNOTATIONS SET LAST_EDITED_BY = ?, "
-				+ "LAST_EDITED_ON = ?, CML = ?, CML_NOTE = ? " +
-				"WHERE ANNOTATION_ID= ?";
-			 
-		PreparedStatement ps = conn.prepareStatement(query);
-		ps.setString(1, annotation.getLastModifiedBy().getId());
-		ps.setDate(2, new java.sql.Date(new java.util.Date().getTime()));
-		// Add CML BLOB
-		ps.setBinaryStream(3, bais, baos.size());
-		ps.setString(4, annotation.getChemModelNotes());
-		ps.setString(5, annotation.getUniqueId());
-		ps.executeUpdate();
-		ps.close();
-
-		baos.close();
-		bais.close();
-		cmlwriter.close();
 	}
 
 	public static void deleteAnnotation(
-			ObjectAnnotation annotation) throws Exception {
+			ObjectAnnotation annotation) throws SQLException {
 
 		Connection conn = ConnectionManager.getConnection();
 		deleteAnnotation(annotation, conn);
@@ -427,15 +436,15 @@ public class AnnotationUtils {
 	}
 
 	public static void deleteAnnotation(
-			ObjectAnnotation annotation, Connection conn) throws Exception {
+			ObjectAnnotation annotation, Connection conn) throws SQLException {
 
 		String query =
 			"DELETE FROM OBJECT_ANNOTATIONS WHERE ANNOTATION_ID = ?";
 
-		PreparedStatement  stmt = conn.prepareStatement(query);
-		stmt.setString(1, annotation.getUniqueId());
-		stmt.executeUpdate();
-		stmt.close();
+		try(PreparedStatement  stmt = conn.prepareStatement(query)){
+			stmt.setString(1, annotation.getUniqueId());
+			stmt.executeUpdate();
+		}
 	}
 
 	public static Collection<ObjectAnnotation>getObjetAnnotations(
@@ -457,45 +466,44 @@ public class AnnotationUtils {
 			+ "LAST_EDITED_BY, LAST_EDITED_ON, LINKED_DOCUMENT_ID, CML, CML_NOTE " +
 			"FROM OBJECT_ANNOTATIONS WHERE OBJECT_TYPE = ? AND OBJECT_ID = ? ";
 		
-		PreparedStatement ps = conn.prepareStatement(query);
-		ps.setString(1, objectType.name());
-		ps.setString(2, objectId);
-		ResultSet rs = ps.executeQuery();
-		while (rs.next()) {
-
-			ObjectAnnotation annotation = new ObjectAnnotation(
-					rs.getString("ANNOTATION_ID"), 
-					objectType, 
-					objectId,
-					rs.getDate("CREATED_ON"), 
-					rs.getDate("LAST_EDITED_ON"),
-					IDTDataCache.getUserById(rs.getString("CREATED_BY")),
-					IDTDataCache.getUserById(rs.getString("LAST_EDITED_BY")),
-					null);
-
-			InputStream dbs = rs.getBinaryStream("ANNOTATION_RTF_DOCUMENT");
-			if (dbs != null) {
-				BufferedInputStream is = new BufferedInputStream(dbs);
-				AdvancedRTFDocument doc = (AdvancedRTFDocument) editor.createDefaultDocument();
-				editor.read(is, doc, 0);
-				is.close();
-				annotation.setRtfDocument(doc);
+		try(PreparedStatement ps = conn.prepareStatement(query)){
+			ps.setString(1, objectType.name());
+			ps.setString(2, objectId);
+			ResultSet rs = ps.executeQuery();
+			while (rs.next()) {
+	
+				ObjectAnnotation annotation = new ObjectAnnotation(
+						rs.getString("ANNOTATION_ID"), 
+						objectType, 
+						objectId,
+						rs.getDate("CREATED_ON"), 
+						rs.getDate("LAST_EDITED_ON"),
+						IDTDataCache.getUserById(rs.getString("CREATED_BY")),
+						IDTDataCache.getUserById(rs.getString("LAST_EDITED_BY")),
+						null);
+	
+				InputStream dbs = rs.getBinaryStream("ANNOTATION_RTF_DOCUMENT");
+				if (dbs != null) {
+					try(BufferedInputStream is = new BufferedInputStream(dbs)){
+						AdvancedRTFDocument doc = (AdvancedRTFDocument) editor.createDefaultDocument();
+						editor.read(is, doc, 0);
+						annotation.setRtfDocument(doc);
+					}				
+				}
+				InputStream cmls = rs.getBinaryStream("CML");
+				if (cmls != null) {			
+					try(BufferedInputStream is = new BufferedInputStream(cmls)){
+						IChemModel chemModel = getChemModelFromStream(is);		
+						annotation.setChemModel(chemModel );				
+						annotation.setChemModelNotes(rs.getString("CML_NOTE"));
+					}
+				}
+				annotation.setLinkedDocumentId(rs.getString("LINKED_DOCUMENT_ID"));
+				attachLinkedDocumentMetaData(annotation, conn);
+				annotations.add(annotation);
 			}
-			InputStream cmls = rs.getBinaryStream("CML");
-			if (cmls != null) {
-				
-				BufferedInputStream is = new BufferedInputStream(cmls);
-				IChemModel chemModel = getChemModelFromStream(is);
-				is.close();			
-				annotation.setChemModel(chemModel );				
-				annotation.setChemModelNotes(rs.getString("CML_NOTE"));
-			}
-			annotation.setLinkedDocumentId(rs.getString("LINKED_DOCUMENT_ID"));
-			attachLinkedDocumentMetaData(annotation, conn);
-			annotations.add(annotation);
+			rs.close();
 		}
-		rs.close();
-		ps.close();
 		return annotations;
 	}
 	
@@ -509,17 +517,17 @@ public class AnnotationUtils {
 	public static void updateObjectAnnotationsList(
 			AnnotatedObject annotatedObject, Connection conn) throws Exception{
 		
+		TreeSet<String>annotationIds = new TreeSet<String>();
 		String query =
 				"SELECT ANNOTATION_ID FROM OBJECT_ANNOTATIONS "
 				+ "WHERE OBJECT_TYPE = ? AND OBJECT_ID = ? ";			
-		PreparedStatement ps = conn.prepareStatement(query);
-		ps.setString(1, annotatedObject.getAnnotatedObjectType().name());
-		ps.setString(2, annotatedObject.getId());
-		TreeSet<String>annotationIds = new TreeSet<String>();
-		ResultSet rs = ps.executeQuery();
-		while(rs.next())
-			annotationIds.add(rs.getString("ANNOTATION_ID"));
-		
+		try(PreparedStatement ps = conn.prepareStatement(query)){
+			ps.setString(1, annotatedObject.getAnnotatedObjectType().name());
+			ps.setString(2, annotatedObject.getId());		
+			ResultSet rs = ps.executeQuery();
+			while(rs.next())
+				annotationIds.add(rs.getString("ANNOTATION_ID"));
+		}
 		TreeSet<String>objectAnnotationIds = new TreeSet<String>();
 		for(ObjectAnnotation annotation : annotatedObject.getAnnotations()) {
 			
@@ -532,15 +540,15 @@ public class AnnotationUtils {
 			}
 		}		
 		query = "DELETE FROM OBJECT_ANNOTATIONS WHERE ANNOTATION_ID = ?";			
-		ps = conn.prepareStatement(query);
-		for(String id : annotationIds) {
-			
-			if(!objectAnnotationIds.contains(id)) {
-				ps.setString(1, id);
-				ps.executeUpdate();
+		try(PreparedStatement ps = conn.prepareStatement(query)){
+			for(String id : annotationIds) {
+				
+				if(!objectAnnotationIds.contains(id)) {
+					ps.setString(1, id);
+					ps.executeUpdate();
+				}
 			}
 		}
-		ps.close();
 	}	
 	
 	public static IChemModel getChemModelFromStream(InputStream is) throws CDKException, IOException {
@@ -556,9 +564,9 @@ public class AnnotationUtils {
                 if (chemFile == null) {
                     error = "The object chemFile was empty unexpectedly!";
                 }
-            } catch (Exception exception) {
-                error = "Error while reading file: " + exception.getMessage();
-                exception.printStackTrace();
+            } catch (CDKException e) {
+                error = "Error while reading file: " + e.getMessage();
+                e.printStackTrace();
             }
         }
         if (error != null)
@@ -583,7 +591,7 @@ public class AnnotationUtils {
 	}
 	
 	public static void attachLinkedDocumentMetaData(
-			ObjectAnnotation annotation) throws Exception{
+			ObjectAnnotation annotation) throws SQLException{
 		
 		if(annotation.getLinkedDocumentId() == null)
 			return;
@@ -594,24 +602,24 @@ public class AnnotationUtils {
 	}
 		
 	private static void attachLinkedDocumentMetaData(
-			ObjectAnnotation annotation, Connection conn) throws Exception{
+			ObjectAnnotation annotation, Connection conn) throws SQLException{
 
 		if(annotation.getLinkedDocumentId() == null)
 			return;
 	
 		String query = 
 				"SELECT DOCUMENT_NAME, DOCUMENT_FORMAT FROM DOCUMENTS WHERE DOCUMENT_ID = ?";
-		PreparedStatement  ps = conn.prepareStatement(query);
-		ps.setString(1, annotation.getLinkedDocumentId());
-		ResultSet rs = ps.executeQuery();
-		while(rs.next()) {
-
-			annotation.setLinkedDocumentFormat(
-					DocumentFormat.getFormatByFileExtension(rs.getString("DOCUMENT_FORMAT")));
-			annotation.setLinkedDocumentName(rs.getString("DOCUMENT_NAME"));
+		try(PreparedStatement  ps = conn.prepareStatement(query)){
+			ps.setString(1, annotation.getLinkedDocumentId());
+			ResultSet rs = ps.executeQuery();
+			while(rs.next()) {
+	
+				annotation.setLinkedDocumentFormat(
+						DocumentFormat.getFormatByFileExtension(rs.getString("DOCUMENT_FORMAT")));
+				annotation.setLinkedDocumentName(rs.getString("DOCUMENT_NAME"));
+			}
+			rs.close();
 		}
-		rs.close();
-		ps.close();
 	}
 
 	public static Document getAnnotationDocument(String annotationId) throws Exception{

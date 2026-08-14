@@ -21,15 +21,18 @@
 
 package edu.umich.med.mrc2.datoolbox.database.idt;
 
-import java.io.BufferedInputStream;
 import java.io.File;
-import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
+
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.enums.DocumentFormat;
@@ -38,11 +41,17 @@ import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
 import edu.umich.med.mrc2.datoolbox.utils.SQLUtils;
 
 public class DocumentUtils {
+	
+	private static final Logger logger = LogManager.getLogger(DocumentUtils.class);
+
+	private DocumentUtils() {
+		/* This utility class should not be instantiated */
+	}
 
 	public static String insertDocument(
 			File documentFile, 
 			String documentTitle, 
-			DocumentFormat format) throws Exception {
+			DocumentFormat format) throws SQLException {
 		
 		if(!documentFile.exists())
 			return null;
@@ -57,7 +66,7 @@ public class DocumentUtils {
 			File documentFile, 
 			String documentTitle, 
 			DocumentFormat format, 
-			Connection conn) throws Exception {
+			Connection conn) throws SQLException {
 		
 		if(!documentFile.exists())
 			return null;
@@ -68,60 +77,42 @@ public class DocumentUtils {
 		String md5hash = FIOUtils.calculateFileChecksum(documentFile);
 		
 		String query  = "SELECT DOCUMENT_ID FROM DOCUMENTS WHERE DOCUMENT_HASH = ?";
-		PreparedStatement ps = conn.prepareStatement(query);
-		ps.setString(1, md5hash);
-		ResultSet rs = ps.executeQuery();
-		while(rs.next()) {
-			documentId = rs.getString("DOCUMENT_ID");
-			break;
+		try(PreparedStatement ps = conn.prepareStatement(query)){
+			ps.setString(1, md5hash);
+			ResultSet rs = ps.executeQuery();
+			while(rs.next())
+				documentId = rs.getString("DOCUMENT_ID");
+
+			rs.close();
 		}
-		rs.close();
-		ps.close();
 		if(documentId != null)
 			return documentId;
-			
-		//	Get new document ID	
-//		query  =
-//			"SELECT '" + DataPrefix.DOCUMENT.getName() +
-//			"' || LPAD(DOCUMENTS_SEQ.NEXTVAL, 12, '0') AS DOCUMENT_ID FROM DUAL";
-//		
-//		ps = conn.prepareStatement(query);
-//		rs = ps.executeQuery();
-//		while (rs.next()) {
-//			documentId = rs.getString("DOCUMENT_ID");
-//			break;
-//		}
-//		rs.close();
-//		ps.close();
-//		
+	
+		//	Insert new document record
 		documentId = SQLUtils.getNextIdFromSequence(conn, 
 				"DOCUMENTS_SEQ",
 				DataPrefix.DOCUMENT,
 				"0",
 				12);
-				
-		//	Insert document record
 		query = 
 			"INSERT INTO DOCUMENTS (DOCUMENT_ID, DOCUMENT_NAME, DOCUMENT_FORMAT, "
 			+ "DOCUMENT_CONTENTS, DOCUMENT_HASH) VALUES (?, ?, ?, ?, ?)";
-		ps = conn.prepareStatement(query);
-		ps.setString(1, documentId);
-		ps.setString(2, documentTitle);
-		ps.setString(3, format.name());
-		
-		//	Add document
-		InputStream fis = Files.newInputStream(Paths.get(documentFile.getAbsolutePath()));
-		ps.setBinaryStream(4, fis, (int) documentFile.length());
-		ps.setString(5, md5hash);		
-		ps.executeUpdate();
-		ps.close();
-		
-//		dis.close();
-		fis.close();			
+		try(PreparedStatement ps = conn.prepareStatement(query)){
+			ps.setString(1, documentId);
+			ps.setString(2, documentTitle);
+			ps.setString(3, format.name());
+			try(InputStream fis = Files.newInputStream(Paths.get(documentFile.getAbsolutePath()))){
+				ps.setBinaryStream(4, fis, (int) documentFile.length());
+				ps.setString(5, md5hash);		
+				ps.executeUpdate();
+			} catch (IOException e) {
+				logger.error(String.format("%s %s", "Failed to upload file", documentFile.getAbsolutePath()), e);
+			}
+		}			
 		return documentId;
 	}
 	
-	public static String getDocumentIdByFileHash(File documentFile) throws Exception {	
+	public static String getDocumentIdByFileHash(File documentFile) throws SQLException {	
 		
 		String documentId = null;
 		Connection conn = ConnectionManager.getConnection();
@@ -130,24 +121,23 @@ public class DocumentUtils {
 		return documentId;
 	}			
 	
-	public static String getDocumentIdByFileHash(File documentFile, Connection conn) throws Exception {	
+	public static String getDocumentIdByFileHash(File documentFile, Connection conn) throws SQLException {	
 		
 		String documentId = null;
 		String md5hash = FIOUtils.calculateFileChecksum(documentFile);		
 		String query  = "SELECT DOCUMENT_ID FROM DOCUMENTS WHERE DOCUMENT_HASH = ?";
-		PreparedStatement ps = conn.prepareStatement(query);
-		ps.setString(1, md5hash);
-		ResultSet rs = ps.executeQuery();
-		while(rs.next()) {
-			documentId = rs.getString("DOCUMENT_ID");
-			break;
+		try(PreparedStatement ps = conn.prepareStatement(query)){
+			ps.setString(1, md5hash);
+			ResultSet rs = ps.executeQuery();
+			while(rs.next())
+				documentId = rs.getString("DOCUMENT_ID");
+	
+			rs.close();
 		}
-		rs.close();
-		ps.close();
 		return documentId;
 	}
 		
-	public static String getDocumentFileNameIdById(String documentId) throws Exception {	
+	public static String getDocumentFileNameIdById(String documentId) throws SQLException {	
 		
 		String documentFileName = null;
 		Connection conn = ConnectionManager.getConnection();
@@ -156,25 +146,24 @@ public class DocumentUtils {
 		return documentFileName;
 	}			
 	
-	public static String getDocumentFileNameIdById(String documentId, Connection conn) throws Exception {	
+	public static String getDocumentFileNameIdById(String documentId, Connection conn) throws SQLException {	
 		
 		String documentFileName = null;
 		String query  = "SELECT DOCUMENT_NAME, DOCUMENT_FORMAT FROM DOCUMENTS WHERE DOCUMENT_ID = ?";
-		PreparedStatement ps = conn.prepareStatement(query);
-		ps.setString(1, documentId);
-		ResultSet rs = ps.executeQuery();
-		while(rs.next()) {
-			documentFileName = rs.getString("DOCUMENT_NAME") + "." + rs.getString("DOCUMENT_FORMAT");
-			break;
+		try(PreparedStatement ps = conn.prepareStatement(query)){
+			ps.setString(1, documentId);
+			ResultSet rs = ps.executeQuery();
+			while(rs.next())
+				documentFileName = rs.getString("DOCUMENT_NAME") + "." + rs.getString("DOCUMENT_FORMAT");
+
+			rs.close();
 		}
-		rs.close();
-		ps.close();
 		return documentFileName;
 	}
 	
 	public static void updateDocumentTitle(
 			String documentTitle, 
-			String documentId) throws Exception {		
+			String documentId) throws SQLException {		
 
 		Connection conn = ConnectionManager.getConnection();
 		updateDocumentTitle(documentTitle, documentId, conn);
@@ -184,17 +173,17 @@ public class DocumentUtils {
 	public static void updateDocumentTitle(
 			String documentTitle, 
 			String documentId, 
-			Connection conn) throws Exception {
+			Connection conn) throws SQLException {
 		
 		String query = "UPDATE DOCUMENTS SET DOCUMENT_NAME = ? WHERE DOCUMENT_ID = ?";
-		PreparedStatement ps = conn.prepareStatement(query);
-		ps.setString(1, documentTitle);
-		ps.setString(2, documentId);
-		ps.executeUpdate();
-		ps.close();
+		try(PreparedStatement ps = conn.prepareStatement(query)){
+			ps.setString(1, documentTitle);
+			ps.setString(2, documentId);
+			ps.executeUpdate();
+		}
 	}
 	
-	public static void deleteDocument(String documentId) throws Exception {		
+	public static void deleteDocument(String documentId) throws SQLException {		
 
 		Connection conn = ConnectionManager.getConnection();
 		deleteDocument(documentId, conn);
@@ -203,44 +192,32 @@ public class DocumentUtils {
 	
 	public static void deleteDocument(
 			String documentId, 
-			Connection conn) throws Exception {
+			Connection conn) throws SQLException {
 		
 		String query = "DELETE FROM DOCUMENTS WHERE DOCUMENT_ID = ?";
-		PreparedStatement ps = conn.prepareStatement(query);
-		ps.setString(1, documentId);
-		ps.executeUpdate();
-		ps.close();
+		try(PreparedStatement ps = conn.prepareStatement(query)){
+			ps.setString(1, documentId);
+			ps.executeUpdate();
+		}
 	}
 
-	public static void saveDocumentToFile(String linkedDocumentId, File destinationFolder) throws Exception {
+	public static void saveDocumentToFile(String linkedDocumentId, File destinationFolder) throws SQLException {
 
 		Connection conn = ConnectionManager.getConnection();
 		String query = "SELECT DOCUMENT_NAME, DOCUMENT_FORMAT, "
 				+ "DOCUMENT_CONTENTS FROM DOCUMENTS WHERE DOCUMENT_ID = ?";
-		PreparedStatement ps = conn.prepareStatement(query);
-		ps.setString(1, linkedDocumentId);
-		ResultSet rs = ps.executeQuery();
-		while(rs.next()) {
-
-		   File documentFile = Paths.get(destinationFolder.getAbsolutePath(),
-				   rs.getString("DOCUMENT_NAME") + "." +
-				   rs.getString("DOCUMENT_FORMAT")).toFile();
-
-//		   Blob blob = rs.getBlob("DOCUMENT_CONTENTS");		  		   
-		   BufferedInputStream is = new BufferedInputStream(rs.getBinaryStream("DOCUMENT_CONTENTS"));
-		   FileOutputStream fos = new FileOutputStream(documentFile);
-		   byte[] buffer = new byte[2048];
-		   int r = 0;
-		   while((r = is.read(buffer))!=-1)
-		      fos.write(buffer, 0, r);
-
-		   fos.flush();
-		   fos.close();
-		   is.close();
-//		   blob.free();
+		try(PreparedStatement ps = conn.prepareStatement(query)){
+			ps.setString(1, linkedDocumentId);
+			ResultSet rs = ps.executeQuery();
+			while(rs.next()) {
+	
+			   File documentFile = Paths.get(destinationFolder.getAbsolutePath(),
+					   rs.getString("DOCUMENT_NAME") + "." +
+					   rs.getString("DOCUMENT_FORMAT")).toFile();
+			   DatabaseUtils.writeBlobStreamToFile(documentFile, rs.getBinaryStream("DOCUMENT_CONTENTS"));
+			}
+			rs.close();
 		}
-		rs.close();
-		ps.close();
 		ConnectionManager.releaseConnection(conn);
 	}
 }
