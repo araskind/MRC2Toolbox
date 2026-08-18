@@ -24,8 +24,12 @@ package edu.umich.med.mrc2.datoolbox.database.idt;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Collection;
 import java.util.TreeSet;
+
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureIdentificationFollowupStep;
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
@@ -35,13 +39,18 @@ import edu.umich.med.mrc2.datoolbox.utils.SQLUtils;
 
 public class IdFollowupUtils {
 	
+	private static final Logger logger = LogManager.getLogger(IdFollowupUtils.class);
+
+	private IdFollowupUtils() {
+		/* This utility class should not be instantiated */
+	}	
 	
 	/*
 	 * Followup steps
 	 * */
 	
 	public static Collection<MSFeatureIdentificationFollowupStep> getMSFeatureIdentificationFollowupStepList() 
-			throws Exception {
+			throws SQLException {
 
 		Connection conn = ConnectionManager.getConnection();
 		Collection<MSFeatureIdentificationFollowupStep> stepList
@@ -51,28 +60,28 @@ public class IdFollowupUtils {
 	}
 	
 	private static Collection<MSFeatureIdentificationFollowupStep> getMSFeatureIdentificationFollowupStepList(
-			Connection conn) throws Exception {
+			Connection conn) throws SQLException {
 
 		Collection<MSFeatureIdentificationFollowupStep>stepList = 
 				new TreeSet<MSFeatureIdentificationFollowupStep>();
 		String query =
 				"SELECT FOLLOWUP_STEP_ID, NAME FROM IDENTIFICATION_FOLLOWUP_STEP ORDER BY NAME";
-		PreparedStatement ps = conn.prepareStatement(query);
-		ResultSet rs = ps.executeQuery();
-		while(rs.next()) {
-			
-			MSFeatureIdentificationFollowupStep status = new MSFeatureIdentificationFollowupStep(
-					rs.getString("FOLLOWUP_STEP_ID"),
-					rs.getString("NAME"));
-			stepList.add(status);
+		try(PreparedStatement ps = conn.prepareStatement(query)){
+			ResultSet rs = ps.executeQuery();
+			while(rs.next()) {
+				
+				MSFeatureIdentificationFollowupStep status = new MSFeatureIdentificationFollowupStep(
+						rs.getString("FOLLOWUP_STEP_ID"),
+						rs.getString("NAME"));
+				stepList.add(status);
+			}
+			rs.close();
 		}
-		rs.close();
-		ps.close();
 		return stepList;
 	}
 
 	public static void addNewMSFeatureIdentificationFollowupStep(
-			MSFeatureIdentificationFollowupStep step) throws Exception {
+			MSFeatureIdentificationFollowupStep step) throws SQLException {
 
 		Connection conn = ConnectionManager.getConnection();
 		String nextId = SQLUtils.getNextIdFromSequence(conn, 
@@ -85,62 +94,45 @@ public class IdFollowupUtils {
 			"INSERT INTO IDENTIFICATION_FOLLOWUP_STEP " + 
 			"(FOLLOWUP_STEP_ID, NAME) VALUES(?, ?)";
 
-		PreparedStatement ps = conn.prepareStatement(query);
-		ps.setString(1, step.getId());
-		ps.setString(2, step.getName());
-		ps.executeUpdate();
-		ps.close();
+		try(PreparedStatement ps = conn.prepareStatement(query)){
+			ps.setString(1, step.getId());
+			ps.setString(2, step.getName());
+			ps.executeUpdate();
+		}
 		ConnectionManager.releaseConnection(conn);
 	}
-	
-//	private static String getNextMSFeatureIdentificationFollowupStepId(
-//			Connection conn) throws SQLException {
-//
-//		String stepId = null;
-//		String query = "SELECT '" + DataPrefix.IDENTIFICATION_FOLLOWUP_STEP.getName() +
-//				"' || LPAD(ID_FOLLOWUP_STEP_SEQ.NEXTVAL, 3, '0') AS STEP_ID FROM DUAL";
-//		PreparedStatement ps = conn.prepareStatement(query);
-//		ResultSet rs = ps.executeQuery();
-//		while(rs.next()) {
-//			stepId = rs.getString("STEP_ID");
-//			break;
-//		}
-//		rs.close();
-//		ps.close();
-//		return stepId;
-//	}
 
 	public static void editMSFeatureIdentificationFollowupStep(
-			MSFeatureIdentificationFollowupStep step) throws Exception {
+			MSFeatureIdentificationFollowupStep step) throws SQLException {
 
 		Connection conn = ConnectionManager.getConnection();
 		String query =
 				"UPDATE IDENTIFICATION_FOLLOWUP_STEP SET NAME = ? "
 				+ "WHERE FOLLOWUP_STEP_ID = ?";
 
-		PreparedStatement ps = conn.prepareStatement(query);
-		ps.setString(1, step.getName());
-		ps.setString(2, step.getId());
-		ps.executeUpdate();
-		ps.close();
+		try(PreparedStatement ps = conn.prepareStatement(query)){
+			ps.setString(1, step.getName());
+			ps.setString(2, step.getId());
+			ps.executeUpdate();
+		}
 		ConnectionManager.releaseConnection(conn);
 	}
 	
 	public static void deleteMSFeatureIdentificationFollowupStep(
-			MSFeatureIdentificationFollowupStep step) throws Exception {
+			MSFeatureIdentificationFollowupStep step) throws SQLException {
 
 		//	References will cascade, so no need to clear them first
 		Connection conn = ConnectionManager.getConnection();
 		String query =
 				"DELETE FROM IDENTIFICATION_FOLLOWUP_STEP WHERE FOLLOWUP_STEP_ID = ?";
-		PreparedStatement ps = conn.prepareStatement(query);
-		ps.setString(1, step.getId());
-		ps.executeUpdate();
-		ps.close();
+		try(PreparedStatement ps = conn.prepareStatement(query)){
+			ps.setString(1, step.getId());
+			ps.executeUpdate();
+		}
 		ConnectionManager.releaseConnection(conn);
 	}
 
-	public static void attachIdFollowupStepsToMSMSFeature(MSFeatureInfoBundle fib) throws Exception {
+	public static void attachIdFollowupStepsToMSMSFeature(MSFeatureInfoBundle fib) throws SQLException {
 
 		Connection conn = ConnectionManager.getConnection();
 		attachIdFollowupStepsToMSMSFeature(fib, conn);
@@ -148,113 +140,122 @@ public class IdFollowupUtils {
 	}
 	
 	public static void attachIdFollowupStepsToMSMSFeature(
-			MSFeatureInfoBundle fib, Connection conn) throws Exception {
+			MSFeatureInfoBundle fib, Connection conn) throws SQLException {
 
 		String query =
 				"SELECT FOLLOWUP_STEP_ID FROM MSMS_FEATURE_FOLLOWUP_STEPS " +
 				"WHERE MSMS_PARENT_FEATURE_ID = ? ";
 		
-		PreparedStatement ps = conn.prepareStatement(query);
-		ps.setString(1, fib.getMsFeature().getId());
-		ResultSet rs = ps.executeQuery();
-		while(rs.next()) {
-			 MSFeatureIdentificationFollowupStep newStep = 
-					 IDTDataCache.getMSFeatureIdentificationFollowupStepById(rs.getString("FOLLOWUP_STEP_ID"));
-			 if(newStep != null)
-				 fib.addIdFollowupStep(newStep);
+		try(PreparedStatement ps = conn.prepareStatement(query)){
+			ps.setString(1, fib.getMsFeature().getId());
+			ResultSet rs = ps.executeQuery();
+			while(rs.next()) {
+				 MSFeatureIdentificationFollowupStep newStep = 
+						 IDTDataCache.getMSFeatureIdentificationFollowupStepById(rs.getString("FOLLOWUP_STEP_ID"));
+				 if(newStep != null)
+					 fib.addIdFollowupStep(newStep);
+			}
+			rs.close();
 		}
-		rs.close();
-		ps.close();
 	}
 	
-	public static void setIdFollowupStepsForMSMSFeature(MSFeatureInfoBundle fib) throws Exception {
+	public static void setIdFollowupStepsForMSMSFeature(MSFeatureInfoBundle fib) throws SQLException {
 
 		Connection conn = ConnectionManager.getConnection();
 		setIdFollowupStepsForMSMSFeature(fib, conn);
 		ConnectionManager.releaseConnection(conn);
 	}
 	
-	public static void setIdFollowupStepsForMSMSFeature(MSFeatureInfoBundle fib, Connection conn) throws Exception {
+	public static void setIdFollowupStepsForMSMSFeature(MSFeatureInfoBundle fib, Connection conn) throws SQLException {
 
 		String query =
 				"DELETE FROM MSMS_FEATURE_FOLLOWUP_STEPS " +
 				"WHERE MSMS_PARENT_FEATURE_ID = ? ";
-		PreparedStatement ps = conn.prepareStatement(query);
-		ps.setString(1, fib.getMsFeature().getId());
-		ps.executeUpdate();
-		
+		try(PreparedStatement ps = conn.prepareStatement(query)){
+			ps.setString(1, fib.getMsFeature().getId());
+			ps.executeUpdate();
+		}
 		if(!fib.getIdFollowupSteps().isEmpty()) {
 			
-			query =
-					"INSERT INTO MSMS_FEATURE_FOLLOWUP_STEPS(MSMS_PARENT_FEATURE_ID, FOLLOWUP_STEP_ID) " +
+			query = "INSERT INTO MSMS_FEATURE_FOLLOWUP_STEPS(MSMS_PARENT_FEATURE_ID, FOLLOWUP_STEP_ID) " +
 					"VALUES(?, ?)";
-			ps = conn.prepareStatement(query);
-			ps.setString(1, fib.getMsFeature().getId());
-			for(MSFeatureIdentificationFollowupStep step : fib.getIdFollowupSteps()) {
-				ps.setString(2, step.getId());
-				ps.addBatch();
+			try(PreparedStatement ps = conn.prepareStatement(query)){
+				ps.setString(1, fib.getMsFeature().getId());
+				for(MSFeatureIdentificationFollowupStep step : fib.getIdFollowupSteps()) {
+					ps.setString(2, step.getId());
+					ps.addBatch();
+				}
+				ps.executeBatch();
 			}
-			ps.executeBatch();
-		}
-		ps.close();
-	}
+		}	
+	}	
 	
-	
-	public static void attachIdFollowupStepsToMS1Feature(MSFeatureInfoBundle fib) throws Exception {
+	public static void attachIdFollowupStepsToMS1Feature(MSFeatureInfoBundle fib) throws SQLException {
 
 		Connection conn = ConnectionManager.getConnection();
 		attachIdFollowupStepsToMS1Feature(fib, conn);
 		ConnectionManager.releaseConnection(conn);
 	}
 	
-	public static void attachIdFollowupStepsToMS1Feature(MSFeatureInfoBundle fib, Connection conn) throws Exception {
+	public static void attachIdFollowupStepsToMS1Feature(MSFeatureInfoBundle fib, Connection conn) throws SQLException {
 
 		String query =
 			"SELECT FOLLOWUP_STEP_ID FROM POOLED_MS1_FEATURE_FOLLOWUP_STEPS " +
 			"WHERE POOLED_MS_FEATURE_ID = ? ";
 		
-		PreparedStatement ps = conn.prepareStatement(query);
-		ps.setString(1, fib.getMsFeature().getId());
-		ResultSet rs = ps.executeQuery();
-		while(rs.next()) {
-			 MSFeatureIdentificationFollowupStep newStep = 
-					 IDTDataCache.getMSFeatureIdentificationFollowupStepById(rs.getString("FOLLOWUP_STEP_ID"));
-			 if(newStep != null)
-				 fib.addIdFollowupStep(newStep);
+		try(PreparedStatement ps = conn.prepareStatement(query)){
+			ps.setString(1, fib.getMsFeature().getId());
+			ResultSet rs = ps.executeQuery();
+			while(rs.next()) {
+				 MSFeatureIdentificationFollowupStep newStep = 
+						 IDTDataCache.getMSFeatureIdentificationFollowupStepById(rs.getString("FOLLOWUP_STEP_ID"));
+				 if(newStep != null)
+					 fib.addIdFollowupStep(newStep);
+			}
+			rs.close();
 		}
-		rs.close();
-		ps.close();
 	}
 	
-	public static void setIdFollowupStepsForMS1Feature(MSFeatureInfoBundle fib) throws Exception {
+	public static void setIdFollowupStepsForMS1Feature(MSFeatureInfoBundle fib) throws SQLException {
 
 		Connection conn = ConnectionManager.getConnection();
 		setIdFollowupStepsForMS1Feature(fib, conn);
 		ConnectionManager.releaseConnection(conn);
 	}	
 
-	public static void setIdFollowupStepsForMS1Feature(MSFeatureInfoBundle fib, Connection conn) throws Exception {
+	public static void setIdFollowupStepsForMS1Feature(MSFeatureInfoBundle fib, Connection conn) throws SQLException {
 
 		String query =
 				"DELETE FROM POOLED_MS1_FEATURE_FOLLOWUP_STEPS " +
 				"WHERE POOLED_MS_FEATURE_ID = ? ";
-		PreparedStatement ps = conn.prepareStatement(query);
-		ps.setString(1, fib.getMsFeature().getId());
-		ps.executeUpdate();
-		
+		try(PreparedStatement ps = conn.prepareStatement(query)){
+			ps.setString(1, fib.getMsFeature().getId());
+			ps.executeUpdate();
+		}
 		if(!fib.getIdFollowupSteps().isEmpty()) {
 			
 			query =
 					"INSERT INTO POOLED_MS1_FEATURE_FOLLOWUP_STEPS (POOLED_MS_FEATURE_ID, FOLLOWUP_STEP_ID) " +
 					"VALUES(?, ?)";
-			ps = conn.prepareStatement(query);
-			ps.setString(1, fib.getMsFeature().getId());
-			for(MSFeatureIdentificationFollowupStep step : fib.getIdFollowupSteps()) {
-				ps.setString(2, step.getId());
-				ps.addBatch();
+			try(PreparedStatement ps = conn.prepareStatement(query)){
+				ps.setString(1, fib.getMsFeature().getId());
+				for(MSFeatureIdentificationFollowupStep step : fib.getIdFollowupSteps()) {
+					ps.setString(2, step.getId());
+					ps.addBatch();
+				}
+				ps.executeBatch();
 			}
-			ps.executeBatch();
 		}
-		ps.close();
 	}
 }
+
+
+
+
+
+
+
+
+
+
+

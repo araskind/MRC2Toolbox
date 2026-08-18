@@ -188,11 +188,7 @@ public class ChromatographicGradient implements Serializable, XmlStorable {
 	}
 	
 	public boolean isTimeTableDefined() {
-		
-		if(gradientSteps.isEmpty())
-			return false;
-		else
-			return true;
+		return !gradientSteps.isEmpty();
 	}
 	
 	public boolean areMobilePhasesDefined() {

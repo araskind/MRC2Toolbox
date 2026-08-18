@@ -22,7 +22,11 @@
 package edu.umich.med.mrc2.datoolbox.database.idt;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Collection;
+
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
 import edu.umich.med.mrc2.datoolbox.data.CompoundLibrary;
 import edu.umich.med.mrc2.datoolbox.data.LibraryMsFeature;
@@ -32,6 +36,12 @@ import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 
 public class BasePCDLutils {
+	
+	private static final Logger logger = LogManager.getLogger(BasePCDLutils.class);
+	
+	private BasePCDLutils() {
+		/* This utility class should not be instantiated */
+	}
 
 	public static CompoundLibrary getPCDLbaseLibrary() {
 		
@@ -43,42 +53,59 @@ public class BasePCDLutils {
 		
 		try {
 			basePCDLlibrary = MSRTLibraryUtils.getLibrary(MRC2ToolBoxConfiguration.BASE_PCDL_LIBRARY_ID);
-		} catch (Exception e1) {
-			e1.printStackTrace();
-			return null;
+		} catch (SQLException e) {
+			logger.error("Failed to get base PCDL library from the database", e);
 		}
 		if (basePCDLlibrary == null) 
 			return null;
 
 		try {
-			Connection conn = ConnectionManager.getConnection();
-			Collection<LibraryMsFeatureDbBundle>bundles =
-					MSRTLibraryUtils.createFeatureBundlesForLibrary(basePCDLlibrary.getLibraryId(), conn);
-
-			for(LibraryMsFeatureDbBundle fBundle : bundles) {
-
-				if(fBundle.getConmpoundDatabaseAccession() != null) {
-
-					LibraryMsFeature newTarget = fBundle.getFeature();
-					MSRTLibraryUtils.attachIdentity(
-							newTarget, fBundle.getConmpoundDatabaseAccession(), false, conn);
-
-					if(newTarget.getPrimaryIdentity() != null) {
-
-						newTarget.getPrimaryIdentity().setConfidenceLevel(fBundle.getIdConfidence());
-						basePCDLlibrary.addFeature(newTarget);
-					}
-				}
-			}
-			ConnectionManager.releaseConnection(conn);
+			populateBasePCDLlibrary(basePCDLlibrary);
 		}
 		catch (Exception e) {
-			e.printStackTrace();
+			logger.error("Failed to populate base PCDL library from the database", e);
 			return null;
 		}	
-		if(basePCDLlibrary != null)
+		if(!basePCDLlibrary.getFeatures().isEmpty())
 			MRC2ToolBoxCore.getActiveMsLibraries().add(basePCDLlibrary);
 		
 		return basePCDLlibrary;
 	}
+	
+	private static void populateBasePCDLlibrary(CompoundLibrary basePCDLlibrary) throws SQLException {
+		
+		Connection conn = ConnectionManager.getConnection();
+		Collection<LibraryMsFeatureDbBundle>bundles =
+				MSRTLibraryUtils.createFeatureBundlesForLibrary(basePCDLlibrary.getLibraryId(), conn);
+
+		for(LibraryMsFeatureDbBundle fBundle : bundles) {
+
+			if(fBundle.getConmpoundDatabaseAccession() != null) {
+
+				LibraryMsFeature newTarget = fBundle.getFeature();
+				MSRTLibraryUtils.attachIdentity(
+						newTarget, fBundle.getConmpoundDatabaseAccession(), false, conn);
+
+				if(newTarget.getPrimaryIdentity() != null) {
+
+					newTarget.getPrimaryIdentity().setConfidenceLevel(fBundle.getIdConfidence());
+					basePCDLlibrary.addFeature(newTarget);
+				}
+			}
+		}
+		ConnectionManager.releaseConnection(conn);
+	}
 }
+
+
+
+
+
+
+
+
+
+
+
+
+

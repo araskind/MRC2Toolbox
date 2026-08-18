@@ -23,7 +23,6 @@ package edu.umich.med.mrc2.datoolbox.database.idt;
 
 import java.io.BufferedInputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -41,24 +40,36 @@ public class DatabaseUtils {
 	
 	public static void writeBlobStreamToFile(File destination, InputStream blobStream) {
 
-		try(BufferedInputStream is = new BufferedInputStream(blobStream)){
-			
-			try(FileOutputStream fos = new FileOutputStream(destination)){
-				byte[] buffer = new byte[2048];
-				int r = 0;
-				try {
-					while ((r = is.read(buffer)) != -1) {
-						fos.write(buffer, 0, r);
-					}
-				} catch (IOException e) {
-					logger.error(String.format("%s %s", "Failed to write data to", destination.getAbsolutePath()), e);
-				}
-				fos.flush();
-			} catch (FileNotFoundException e1) {
-				logger.error(String.format("%s %s", "Failed to write data to", destination.getAbsolutePath()), e1);
-			}
+		try(BufferedInputStream is = new BufferedInputStream(blobStream)){		
+			inputToOutput(is, destination);
 		} catch (IOException e2) {
 			logger.error(String.format("%s %s", "Failed to write data to", destination.getAbsolutePath()), e2);
+		}
+	}
+	
+	private static void inputToOutput(BufferedInputStream is, File destination) {
+		
+		try(FileOutputStream fos = new FileOutputStream(destination)){
+			writeBufferToFile(fos, is, destination);
+		} catch (IOException e1) {
+			logger.error(String.format("%s %s", "Failed to write data to", destination.getAbsolutePath()), e1);
+		}
+	}
+	
+	private static void writeBufferToFile(FileOutputStream fos, BufferedInputStream is, File destination) {
+		byte[] buffer = new byte[2048];
+		int r = 0;
+		try {
+			while ((r = is.read(buffer)) != -1) {
+				fos.write(buffer, 0, r);
+			}
+		} catch (IOException e) {
+			logger.error(String.format("%s %s", "Failed to write data to", destination.getAbsolutePath()), e);
+		}
+		try {
+			fos.flush();
+		} catch (IOException e) {
+			logger.error(String.format("%s %s", "Failed to write data to", destination.getAbsolutePath()), e);
 		}
 	}
 }

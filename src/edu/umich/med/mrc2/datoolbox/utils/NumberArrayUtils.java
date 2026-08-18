@@ -99,12 +99,12 @@ public class NumberArrayUtils {
     
     public static double[] decodeNumberArray(String encodedValues) throws UnsupportedEncodingException {
     	
-    	byte[] compressed = encodedValues.getBytes("ASCII");
+    	byte[] compressed = encodedValues.getBytes(StandardCharsets.US_ASCII);
     	byte[]decoded = new Base64().decode(compressed); 	
     	byte[] uncompressed = gzipUncompress(decoded);   	
     	Number[]dataArray = convertData(uncompressed, Precision.FLOAT64BIT);
         return Arrays.asList(dataArray).stream().
-        		mapToDouble(v -> v.doubleValue()).toArray();
+        		mapToDouble(Number::doubleValue).toArray();
     }
     
     private static Number[] convertData(byte[] data, Precision prec) {

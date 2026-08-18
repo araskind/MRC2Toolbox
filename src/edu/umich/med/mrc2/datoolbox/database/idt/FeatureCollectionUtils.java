@@ -24,10 +24,14 @@ package edu.umich.med.mrc2.datoolbox.database.idt;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.Set;
 import java.util.TreeSet;
+
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundleCollection;
@@ -40,9 +44,15 @@ import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.utils.SQLUtils;
 
 public class FeatureCollectionUtils {
+	
+	private static final Logger logger = LogManager.getLogger(FeatureCollectionUtils.class);
+
+	private FeatureCollectionUtils() {
+		/* This utility class should not be instantiated */
+	}
 
 	public static Set<MsFeatureInfoBundleCollection>
-			getMsFeatureInformationBundleCollections() throws Exception {
+			getMsFeatureInformationBundleCollections() throws SQLException {
 
 		Connection conn = ConnectionManager.getConnection();
 		Set<MsFeatureInfoBundleCollection> featureCollectionsSet = 
@@ -52,7 +62,7 @@ public class FeatureCollectionUtils {
 	}
 	
 	private static Set<MsFeatureInfoBundleCollection> 
-			getMsFeatureInformationBundleCollections(Connection conn) throws Exception {
+			getMsFeatureInformationBundleCollections(Connection conn) throws SQLException {
 
 		Set<MsFeatureInfoBundleCollection>featureCollectionsSet = 
 				new TreeSet<MsFeatureInfoBundleCollection>(
@@ -66,33 +76,33 @@ public class FeatureCollectionUtils {
 				+ "GROUP BY C.COLLECTION_ID, C.COLLECTION_NAME, "
 				+ "C.DESCRIPTION, C.OWNER, C.DATE_CREATED, C.DATE_MODIFIED "
 				+ "ORDER BY C.COLLECTION_ID";
-		PreparedStatement ps = conn.prepareStatement(query);
-		ResultSet rs = ps.executeQuery();
-		while(rs.next()) {
+		try(PreparedStatement ps = conn.prepareStatement(query)){
+			ResultSet rs = ps.executeQuery();
+			while(rs.next()) {
+				
+				LIMSUser owner = null;
+				if(rs.getString("OWNER") != null)
+					owner = IDTDataCache.getUserById(rs.getString("OWNER"));
+				
+				MsFeatureInfoBundleCollection newCollection = 
+						new MsFeatureInfoBundleCollection(
+							rs.getString("COLLECTION_ID"),
+							rs.getString("COLLECTION_NAME"),
+							rs.getString("DESCRIPTION"),
+							new Date(rs.getDate("DATE_CREATED").getTime()),
+							new Date(rs.getDate("DATE_MODIFIED").getTime()),
+							owner);
+				newCollection.setCollectionSize(rs.getInt("COLLECTION_SIZE"));
 			
-			LIMSUser owner = null;
-			if(rs.getString("OWNER") != null)
-				owner = IDTDataCache.getUserById(rs.getString("OWNER"));
-			
-			MsFeatureInfoBundleCollection newCollection = 
-					new MsFeatureInfoBundleCollection(
-						rs.getString("COLLECTION_ID"),
-						rs.getString("COLLECTION_NAME"),
-						rs.getString("DESCRIPTION"),
-						new Date(rs.getDate("DATE_CREATED").getTime()),
-						new Date(rs.getDate("DATE_MODIFIED").getTime()),
-						owner);
-			newCollection.setCollectionSize(rs.getInt("COLLECTION_SIZE"));
-		
-			featureCollectionsSet.add(newCollection);
+				featureCollectionsSet.add(newCollection);
+			}
+			rs.close();
 		}
-		rs.close();
-		ps.close();
 		return featureCollectionsSet;
 	}
 	
 	public static Set<String>getFeatureIdsForMsFeatureInfoBundleCollection(
-			String collectionId) throws Exception {
+			String collectionId) throws SQLException {
 		
 		Connection conn = ConnectionManager.getConnection();
 		Set<String>idSet = getFeatureIdsForMsFeatureInfoBundleCollection(collectionId, conn);
@@ -101,25 +111,26 @@ public class FeatureCollectionUtils {
 	}
 	
 	public static Set<String>getFeatureIdsForMsFeatureInfoBundleCollection(
-			String collectionId, Connection conn) throws Exception {
+			String collectionId, Connection conn) throws SQLException {
 		
 		Set<String>featureIdSet = new TreeSet<String>();
 		String compQuery = 
 				"SELECT MS_FEATURE_ID FROM MSMS_FEATURE_COLLECTION_COMPONENT "
 				+ "WHERE COLLECTION_ID = ?";
 		
-		PreparedStatement compPs = conn.prepareStatement(compQuery);
-		compPs.setString(1, collectionId);
-		ResultSet compRs = compPs.executeQuery();
-		while(compRs.next())
-			featureIdSet.add(compRs.getString("MS_FEATURE_ID"));
-		
-		compRs.close();	
+		try(PreparedStatement compPs = conn.prepareStatement(compQuery)){
+			compPs.setString(1, collectionId);
+			ResultSet compRs = compPs.executeQuery();
+			while(compRs.next())
+				featureIdSet.add(compRs.getString("MS_FEATURE_ID"));
+			
+			compRs.close();	
+		}
 		return featureIdSet;
 	}
 	
 	public static String addNewMsFeatureInformationBundleCollection(
-			MsFeatureInfoBundleCollection newCollection) throws Exception {
+			MsFeatureInfoBundleCollection newCollection) throws SQLException {
 		
 		Connection conn = ConnectionManager.getConnection();
 		String newId = addNewMsFeatureInformationBundleCollection(newCollection, conn);
@@ -128,7 +139,7 @@ public class FeatureCollectionUtils {
 	}
 	
 	public static String addNewMsFeatureInformationBundleCollection(
-			MsFeatureInfoBundleCollection newCollection, Connection conn) throws Exception {
+			MsFeatureInfoBundleCollection newCollection, Connection conn) throws SQLException {
 		
 		String nextId = SQLUtils.getNextIdFromSequence(conn, 
 				"MSMS_FEATURE_COLLECTION_SEQ",
@@ -142,49 +153,47 @@ public class FeatureCollectionUtils {
 				+ "COLLECTION_ID, COLLECTION_NAME, DESCRIPTION, "
 				+ "OWNER, DATE_CREATED, DATE_MODIFIED) "
 				+ "VALUES (?,?,?,?,?,?)";
-		PreparedStatement ps = conn.prepareStatement(query);
-		ps.setString(1, newCollection.getId());
-		ps.setString(2, newCollection.getName());
-		ps.setString(3, newCollection.getDescription());
-		ps.setString(4, MRC2ToolBoxCore.getIdTrackerUser().getId());
-		ps.setTimestamp(5, new Timestamp(newCollection.getDateCreated().getTime()));
-		ps.setTimestamp(6, new Timestamp(newCollection.getLastModified().getTime()));		
-		ps.executeUpdate();
-		ps.close();
-		
+		try(PreparedStatement ps = conn.prepareStatement(query)){
+			ps.setString(1, newCollection.getId());
+			ps.setString(2, newCollection.getName());
+			ps.setString(3, newCollection.getDescription());
+			ps.setString(4, MRC2ToolBoxCore.getIdTrackerUser().getId());
+			ps.setTimestamp(5, new Timestamp(newCollection.getDateCreated().getTime()));
+			ps.setTimestamp(6, new Timestamp(newCollection.getLastModified().getTime()));		
+			ps.executeUpdate();
+		}		
 		if(!newCollection.getFeatures().isEmpty()) {
 			
-			query =
-					"INSERT INTO MSMS_FEATURE_COLLECTION_COMPONENT ("
+			query = "INSERT INTO MSMS_FEATURE_COLLECTION_COMPONENT ("
 					+ "COLLECTION_ID, MS_FEATURE_ID) "
 					+ "VALUES (?,?)";
-			ps = conn.prepareStatement(query);
-			ps.setString(1, nextId);
-			for(MSFeatureInfoBundle feature : newCollection.getFeatures()) {
-				ps.setString(2, feature.getMSFeatureId());
-				ps.addBatch();
-			}
-			ps.executeBatch();
-			ps.close();		
+			try(PreparedStatement ps = conn.prepareStatement(query)){
+				ps.setString(1, nextId);
+				for(MSFeatureInfoBundle feature : newCollection.getFeatures()) {
+					ps.setString(2, feature.getMSFeatureId());
+					ps.addBatch();
+				}
+				ps.executeBatch();
+			}	
 		}		
 		return nextId;
 	}
 	
 	public static void deleteMsFeatureInformationBundleCollection(
-			MsFeatureInfoBundleCollection toDelete) throws Exception {
+			MsFeatureInfoBundleCollection toDelete) throws SQLException {
 		
 		Connection conn = ConnectionManager.getConnection();
 		String query =
 				"DELETE FROM MSMS_FEATURE_COLLECTION WHERE COLLECTION_ID = ?";
-		PreparedStatement ps = conn.prepareStatement(query);
-		ps.setString(1, toDelete.getId());
-		ps.executeUpdate();
-		ps.close();
+		try(PreparedStatement ps = conn.prepareStatement(query)){
+			ps.setString(1, toDelete.getId());
+			ps.executeUpdate();
+		}
 		ConnectionManager.releaseConnection(conn);
 	}
 	
 	public static void updateMsFeatureInformationBundleCollectionMetadata(
-			MsFeatureInfoBundleCollection toUpdate) throws Exception {
+			MsFeatureInfoBundleCollection toUpdate) throws SQLException {
 		
 		Connection conn = ConnectionManager.getConnection();
 		updateMsFeatureInformationBundleCollectionMetadata(toUpdate, conn);
@@ -192,24 +201,24 @@ public class FeatureCollectionUtils {
 	}
 	
 	public static void updateMsFeatureInformationBundleCollectionMetadata(
-			MsFeatureInfoBundleCollection toUpdate, Connection conn) throws Exception {
+			MsFeatureInfoBundleCollection toUpdate, Connection conn) throws SQLException {
 		
 		String query =
 				"UPDATE MSMS_FEATURE_COLLECTION "
 				+ "SET COLLECTION_NAME = ?, DESCRIPTION = ?, DATE_MODIFIED = ? "
 				+ "WHERE COLLECTION_ID = ?";
-		PreparedStatement ps = conn.prepareStatement(query);
-		ps.setString(1, toUpdate.getName());
-		ps.setString(2, toUpdate.getDescription());
-		ps.setTimestamp(3, new Timestamp(new Date().getTime()));
-		ps.setString(4, toUpdate.getId());
-		ps.executeUpdate();
-		ps.close();
+		try(PreparedStatement ps = conn.prepareStatement(query)){
+			ps.setString(1, toUpdate.getName());
+			ps.setString(2, toUpdate.getDescription());
+			ps.setTimestamp(3, new Timestamp(new Date().getTime()));
+			ps.setString(4, toUpdate.getId());
+			ps.executeUpdate();
+		}
 	}
 	
 	public static void addFeaturesToCollection(
 			String collectionId, 
-			Set<String>featureIdsToAdd) throws Exception {
+			Set<String>featureIdsToAdd) throws SQLException {
 
 		Connection conn = ConnectionManager.getConnection();
 		addFeaturesToCollection(collectionId, featureIdsToAdd, conn);
@@ -219,7 +228,7 @@ public class FeatureCollectionUtils {
 	public static void addFeaturesToCollection(
 			String collectionId, 
 			Set<String>featureIdsToAdd,
-			Connection conn) throws Exception {
+			Connection conn) throws SQLException {
 
 		if(collectionId == null || featureIdsToAdd.isEmpty())
 			return;
@@ -227,27 +236,27 @@ public class FeatureCollectionUtils {
 		String 	query = 
 				"INSERT INTO MSMS_FEATURE_COLLECTION_COMPONENT "
 				+ "(COLLECTION_ID, MS_FEATURE_ID) VALUES (?,?)";		
-		PreparedStatement ps = conn.prepareStatement(query);
-		ps.setString(1, collectionId);		
-		for(String id : featureIdsToAdd) {
-			ps.setString(2, id);
-			ps.addBatch();
-		}
-		ps.executeBatch();
-		ps.close();		
+		try(PreparedStatement ps = conn.prepareStatement(query)){
+			ps.setString(1, collectionId);		
+			for(String id : featureIdsToAdd) {
+				ps.setString(2, id);
+				ps.addBatch();
+			}
+			ps.executeBatch();
+		}	
 		query =
 			"UPDATE MSMS_FEATURE_COLLECTION " +
 			"SET DATE_MODIFIED = ? WHERE COLLECTION_ID = ?";
-		ps = conn.prepareStatement(query);
-		ps.setTimestamp(1, new Timestamp(new Date().getTime()));
-		ps.setString(2, collectionId);	
-		ps.executeUpdate();
-		ps.close();		
+		try(PreparedStatement ps = conn.prepareStatement(query)){
+			ps.setTimestamp(1, new Timestamp(new Date().getTime()));
+			ps.setString(2, collectionId);	
+			ps.executeUpdate();
+		}	
 	}
 	
 	public static void removeFeaturesFromCollection(
 			String collectionId, 
-			Set<String>featureIdsToRemove) throws Exception {
+			Set<String>featureIdsToRemove) throws SQLException {
 
 		if(collectionId == null || featureIdsToRemove.isEmpty())
 			return;
@@ -256,26 +265,26 @@ public class FeatureCollectionUtils {
 		String 	query = 
 				"DELETE FROM MSMS_FEATURE_COLLECTION_COMPONENT "
 				+ "WHERE COLLECTION_ID = ? AND MS_FEATURE_ID = ?";		
-		PreparedStatement ps = conn.prepareStatement(query);
-		ps.setString(1, collectionId);		
-		for(String id : featureIdsToRemove) {
-			ps.setString(2, id);
-			ps.addBatch();
+		try(PreparedStatement ps = conn.prepareStatement(query)){
+			ps.setString(1, collectionId);		
+			for(String id : featureIdsToRemove) {
+				ps.setString(2, id);
+				ps.addBatch();
+			}
+			ps.executeBatch();
 		}
-		ps.executeBatch();
-		ps.close();
 		query =
 			"UPDATE MSMS_FEATURE_COLLECTION " +
 			"SET DATE_MODIFIED = ? WHERE COLLECTION_ID = ?";
-		ps = conn.prepareStatement(query);
-		ps.setTimestamp(1, new Timestamp(new Date().getTime()));
-		ps.setString(2, collectionId);		
-		ps.executeUpdate();
-		ps.close();		
+		try(PreparedStatement ps = conn.prepareStatement(query)){
+			ps.setTimestamp(1, new Timestamp(new Date().getTime()));
+			ps.setString(2, collectionId);		
+			ps.executeUpdate();
+		}
 		ConnectionManager.releaseConnection(conn);
 	}
     
-	public static Set<String>validateMSMSIDlist(Set<String>idsToValidate) throws Exception {
+	public static Set<String>validateMSMSIDlist(Set<String>idsToValidate) throws SQLException {
 
 		Connection conn = ConnectionManager.getConnection();
 		Set<String>validIds = validateMSMSIDlist(idsToValidate, conn);
@@ -283,21 +292,21 @@ public class FeatureCollectionUtils {
 		return validIds;
 	}
 	
-	public static Set<String>validateMSMSIDlist(Set<String>idsToValidate, Connection conn) throws Exception {
+	public static Set<String>validateMSMSIDlist(Set<String>idsToValidate, Connection conn) throws SQLException {
 
 		Set<String>validIds = new TreeSet<String>();
 		String query = "SELECT PARENT_FEATURE_ID FROM MSMS_FEATURE WHERE MSMS_FEATURE_ID = ?";
-		PreparedStatement ps = conn.prepareStatement(query);
-		for(String id : idsToValidate) {
-			
-			ps.setString(1, id);
-			ResultSet rs = ps.executeQuery();
-			while(rs.next())
-				validIds.add(rs.getString("PARENT_FEATURE_ID"));
-			
-			rs.close();
+		try(PreparedStatement ps = conn.prepareStatement(query)){
+			for(String id : idsToValidate) {
+				
+				ps.setString(1, id);
+				ResultSet rs = ps.executeQuery();
+				while(rs.next())
+					validIds.add(rs.getString("PARENT_FEATURE_ID"));
+				
+				rs.close();
+			}
 		}
-		ps.close();
 		return validIds;
 	}
 }

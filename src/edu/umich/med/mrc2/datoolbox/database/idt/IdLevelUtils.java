@@ -28,6 +28,9 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.TreeSet;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureIdentificationLevel;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
 import edu.umich.med.mrc2.datoolbox.data.enums.CompoundIdSource;
@@ -37,8 +40,14 @@ import edu.umich.med.mrc2.datoolbox.utils.SQLUtils;
 
 public class IdLevelUtils {
 	
+	private static final Logger logger = LogManager.getLogger(IdLevelUtils.class);
+
+	private IdLevelUtils() {
+		/* This utility class should not be instantiated */
+	}
+	
 	public static Collection<MSFeatureIdentificationLevel> 
-			getMSFeatureIdentificationLevelList() throws Exception {
+			getMSFeatureIdentificationLevelList() throws SQLException {
 
 		Connection conn = ConnectionManager.getConnection();
 		Collection<MSFeatureIdentificationLevel> statusList = 
@@ -48,7 +57,7 @@ public class IdLevelUtils {
 	}
 	
 	private static Collection<MSFeatureIdentificationLevel> 
-			getMSFeatureIdentificationLevelList(Connection conn) throws Exception {
+			getMSFeatureIdentificationLevelList(Connection conn) throws SQLException {
 
 		Collection<MSFeatureIdentificationLevel>levelList = 
 				new TreeSet<MSFeatureIdentificationLevel>();
@@ -56,28 +65,28 @@ public class IdLevelUtils {
 				"SELECT IDENTIFICATION_LEVEL_ID, NAME, RANK_ORDER, "
 				+ "COLOR_CODE, ALLOW_TO_REPLACE_AS_DEFAULT, SHORTCUT, IS_LOCKED "
 				+ "FROM IDENTIFICATION_LEVEL ORDER BY RANK_ORDER";
-		PreparedStatement ps = conn.prepareStatement(query);
-		ResultSet rs = ps.executeQuery();
-		while(rs.next()) {
-			
-			MSFeatureIdentificationLevel level = new MSFeatureIdentificationLevel(
-					rs.getString("IDENTIFICATION_LEVEL_ID"),
-					rs.getString("NAME"),
-					rs.getInt("RANK_ORDER"),
-					rs.getString("COLOR_CODE"),
-					rs.getBoolean("ALLOW_TO_REPLACE_AS_DEFAULT"),
-					(rs.getString("IS_LOCKED") != null));
-			
-			level.setShorcut(rs.getString("SHORTCUT"));
-			levelList.add(level);
+		try(PreparedStatement ps = conn.prepareStatement(query)){
+			ResultSet rs = ps.executeQuery();
+			while(rs.next()) {
+				
+				MSFeatureIdentificationLevel level = new MSFeatureIdentificationLevel(
+						rs.getString("IDENTIFICATION_LEVEL_ID"),
+						rs.getString("NAME"),
+						rs.getInt("RANK_ORDER"),
+						rs.getString("COLOR_CODE"),
+						rs.getBoolean("ALLOW_TO_REPLACE_AS_DEFAULT"),
+						(rs.getString("IS_LOCKED") != null));
+				
+				level.setShorcut(rs.getString("SHORTCUT"));
+				levelList.add(level);
+			}
+			rs.close();
 		}
-		rs.close();
-		ps.close();
 		return levelList;
 	}
 
 	public static void addNewMSFeatureIdentificationLevel(
-			MSFeatureIdentificationLevel newLevel) throws Exception {
+			MSFeatureIdentificationLevel newLevel) throws SQLException {
 
 		Connection conn = ConnectionManager.getConnection();
 		String nextId = SQLUtils.getNextIdFromSequence(conn, 
@@ -95,30 +104,30 @@ public class IdLevelUtils {
 			"(IDENTIFICATION_LEVEL_ID, NAME, RANK_ORDER, COLOR_CODE, "
 			+ "ALLOW_TO_REPLACE_AS_DEFAULT, SHORTCUT) VALUES(?, ?, ?, ?, ?, ?)";
 
-		PreparedStatement ps = conn.prepareStatement(query);
-		ps.setString(1, newLevel.getId());
-		ps.setString(2, newLevel.getName());
-		ps.setInt(3, newLevel.getRank());
-		ps.setString(4, newLevel.getHexColorCode());
-		
-		String allowRepDefault = "0";
-		if(newLevel.isAllowToReplaceAsDefault())
-			allowRepDefault = "1";
-		
-		ps.setString(5, allowRepDefault);
-		
-		if(newLevel.getShorcut() != null && !newLevel.getShorcut().isEmpty())
-			ps.setString(6, newLevel.getShorcut());
-		else
-			ps.setNull(6, java.sql.Types.NULL);
-		
-		ps.executeUpdate();
-		ps.close();
+		try(PreparedStatement ps = conn.prepareStatement(query)){
+			ps.setString(1, newLevel.getId());
+			ps.setString(2, newLevel.getName());
+			ps.setInt(3, newLevel.getRank());
+			ps.setString(4, newLevel.getHexColorCode());
+			
+			String allowRepDefault = "0";
+			if(newLevel.isAllowToReplaceAsDefault())
+				allowRepDefault = "1";
+			
+			ps.setString(5, allowRepDefault);
+			
+			if(newLevel.getShorcut() != null && !newLevel.getShorcut().isEmpty())
+				ps.setString(6, newLevel.getShorcut());
+			else
+				ps.setNull(6, java.sql.Types.NULL);
+			
+			ps.executeUpdate();
+		}
 		ConnectionManager.releaseConnection(conn);
 	}
 	
 	public static void editMSFeatureIdentificationLevel(
-			MSFeatureIdentificationLevel levelToUpdate) throws Exception {
+			MSFeatureIdentificationLevel levelToUpdate) throws SQLException {
 
 		Connection conn = ConnectionManager.getConnection();
 		String query =
@@ -126,24 +135,24 @@ public class IdLevelUtils {
 				+ "COLOR_CODE = ?, ALLOW_TO_REPLACE_AS_DEFAULT = ?, SHORTCUT = ? "
 				+ "WHERE IDENTIFICATION_LEVEL_ID = ?";
 
-		PreparedStatement ps = conn.prepareStatement(query);
-		ps.setString(1, levelToUpdate.getName());
-		ps.setInt(2, levelToUpdate.getRank());
-		ps.setString(3, levelToUpdate.getHexColorCode());
-		String allowRepDefault = "0";
-		if(levelToUpdate.isAllowToReplaceAsDefault())
-			allowRepDefault = "1";
-		
-		ps.setString(4, allowRepDefault);
-		
-		if(levelToUpdate.getShorcut() != null && !levelToUpdate.getShorcut().isEmpty())
-			ps.setString(5, levelToUpdate.getShorcut());
-		else
-			ps.setNull(5, java.sql.Types.NULL);
-		
-		ps.setString(6, levelToUpdate.getId());
-		ps.executeUpdate();
-		ps.close();
+		try(PreparedStatement ps = conn.prepareStatement(query)){
+			ps.setString(1, levelToUpdate.getName());
+			ps.setInt(2, levelToUpdate.getRank());
+			ps.setString(3, levelToUpdate.getHexColorCode());
+			String allowRepDefault = "0";
+			if(levelToUpdate.isAllowToReplaceAsDefault())
+				allowRepDefault = "1";
+			
+			ps.setString(4, allowRepDefault);
+			
+			if(levelToUpdate.getShorcut() != null && !levelToUpdate.getShorcut().isEmpty())
+				ps.setString(5, levelToUpdate.getShorcut());
+			else
+				ps.setNull(5, java.sql.Types.NULL);
+			
+			ps.setString(6, levelToUpdate.getId());
+			ps.executeUpdate();
+		}
 		ConnectionManager.releaseConnection(conn);
 	}
 	
@@ -151,70 +160,67 @@ public class IdLevelUtils {
 
 		Integer nextRank = null;
 		String query = "SELECT MAX(RANK_ORDER) + 10 AS NEW_RANK FROM IDENTIFICATION_LEVEL";
-		PreparedStatement ps = conn.prepareStatement(query);
-		ResultSet rs = ps.executeQuery();
-		while(rs.next()) {
-			nextRank = rs.getInt("NEW_RANK");
-			break;
+		try(PreparedStatement ps = conn.prepareStatement(query)){
+			ResultSet rs = ps.executeQuery();
+			while(rs.next())
+				nextRank = rs.getInt("NEW_RANK");
+			
+			rs.close();
 		}
-		rs.close();
-		ps.close();
 		return nextRank;
 	}
 
-	public static void deleteMSFeatureIdentificationLevel(MSFeatureIdentificationLevel level) throws Exception {
+	public static void deleteMSFeatureIdentificationLevel(MSFeatureIdentificationLevel level) throws SQLException {
 		
 		// Clear all references first
 		Connection conn = ConnectionManager.getConnection();
 		String query = 
 				"UPDATE MSMS_FEATURE_ALTERNATIVE_ID SET IDENTIFICATION_LEVEL_ID = NULL "
 				+ "WHERE IDENTIFICATION_LEVEL_ID = ?";
-		PreparedStatement ps = conn.prepareStatement(query);
-		ps.setString(1, level.getId());
-		ps.executeUpdate();
-		
+		try(PreparedStatement ps = conn.prepareStatement(query)){
+			ps.setString(1, level.getId());
+			ps.executeUpdate();
+		}
 		query = 
 			"UPDATE MSMS_FEATURE_LIBRARY_MATCH SET IDENTIFICATION_LEVEL_ID = NULL "
 			+ "WHERE IDENTIFICATION_LEVEL_ID = ?";
-		ps = conn.prepareStatement(query);
-		ps.setString(1, level.getId());
-		ps.executeUpdate();
-
+		try(PreparedStatement ps = conn.prepareStatement(query)){
+			ps.setString(1, level.getId());
+			ps.executeUpdate();
+		}
 		query = 
 			"UPDATE POOLED_MS1_FEATURE_ALTERNATIVE_ID SET IDENTIFICATION_LEVEL_ID = NULL "
 			+ "WHERE IDENTIFICATION_LEVEL_ID = ?";
-		ps = conn.prepareStatement(query);
-		ps.setString(1, level.getId());
-		ps.executeUpdate();
-			
+		try(PreparedStatement ps = conn.prepareStatement(query)){
+			ps.setString(1, level.getId());
+			ps.executeUpdate();
+		}
 		query = 
 			"UPDATE POOLED_MS1_FEATURE_LIBRARY_MATCH SET IDENTIFICATION_LEVEL_ID = NULL "
 			+ "WHERE IDENTIFICATION_LEVEL_ID = ?";
-		ps = conn.prepareStatement(query);
-		ps.setString(1, level.getId());
-		ps.executeUpdate();
-		
+		try(PreparedStatement ps = conn.prepareStatement(query)){
+			ps.setString(1, level.getId());
+			ps.executeUpdate();
+		}
 		//	Delete status
 		query = 
 			"DELETE FROM IDENTIFICATION_LEVEL WHERE IDENTIFICATION_LEVEL_ID = ?";
-		ps = conn.prepareStatement(query);
-		ps.setString(1, level.getId());
-		ps.executeUpdate();
-				
-		ps.close();
+		try(PreparedStatement ps = conn.prepareStatement(query)){
+			ps.setString(1, level.getId());
+			ps.executeUpdate();
+		}
 		ConnectionManager.releaseConnection(conn);
 	}
 	
 	public static void setIdLevelForReferenceMS1FeatureIdentification(
-			MsFeatureIdentity newIdentity) throws Exception {
+			MsFeatureIdentity newIdentity) throws SQLException {
 		
 		Connection conn = ConnectionManager.getConnection();
 		
 		//	TODO deal with unknowns
 		if(newIdentity.getCompoundIdentity() == null) {
 			
-		}
-		
+		}		
 		//	Modify manuallu assigned
 		if(newIdentity.getIdSource().equals(CompoundIdSource.LIBRARY))
 			setIdLevelForReferenceMS1FeatureMSRTLibraryMatch(newIdentity, conn);
@@ -227,13 +233,12 @@ public class IdLevelUtils {
 	}
 	
 	public static void setIdLevelForReferenceMS1FeatureIdentification(
-			MsFeatureIdentity newIdentity, Connection conn) throws Exception {
+			MsFeatureIdentity newIdentity, Connection conn) throws SQLException {
 
 		//	TODO deal with unknowns
 		if(newIdentity.getCompoundIdentity() == null) {
 			
-		}
-		
+		}		
 		//	Modify manually assigned
 		if(newIdentity.getIdSource().equals(CompoundIdSource.LIBRARY))
 			setIdLevelForReferenceMS1FeatureMSRTLibraryMatch(newIdentity, conn);
@@ -244,49 +249,49 @@ public class IdLevelUtils {
 	}
 	
 	public static void setIdLevelForReferenceMS1FeatureMSRTLibraryMatch(
-			MsFeatureIdentity newIdentity, Connection conn) throws Exception {
+			MsFeatureIdentity newIdentity, Connection conn) throws SQLException {
 		
 		String query = "UPDATE POOLED_MS1_FEATURE_LIBRARY_MATCH "
 				+ "SET IDENTIFICATION_LEVEL_ID = ? WHERE MATCH_ID = ?";
-		PreparedStatement ps = conn.prepareStatement(query);
-		MSFeatureIdentificationLevel level = newIdentity.getIdentificationLevel();
-		String levelId = null;
-		if(level != null)
-			levelId = level.getId();
-		
-		if(levelId != null)
-			ps.setString(1, levelId);
-		else
-			ps.setNull(1, java.sql.Types.NULL);
-		
-		ps.setString(2, newIdentity.getUniqueId());
-		ps.executeUpdate();
-		ps.close();		
+		try(PreparedStatement ps = conn.prepareStatement(query)){
+			MSFeatureIdentificationLevel level = newIdentity.getIdentificationLevel();
+			String levelId = null;
+			if(level != null)
+				levelId = level.getId();
+			
+			if(levelId != null)
+				ps.setString(1, levelId);
+			else
+				ps.setNull(1, java.sql.Types.NULL);
+			
+			ps.setString(2, newIdentity.getUniqueId());
+			ps.executeUpdate();
+		}	
 	}
 	
 	public static void setIdLevelForReferenceMS1FeatureManualId(
-			MsFeatureIdentity newIdentity, Connection conn) throws Exception {
+			MsFeatureIdentity newIdentity, Connection conn) throws SQLException {
 		
 		String query = "UPDATE POOLED_MS1_FEATURE_ALTERNATIVE_ID "
 				+ "SET IDENTIFICATION_LEVEL_ID = ? WHERE IDENTIFICATION_ID = ?";
-		PreparedStatement ps = conn.prepareStatement(query);
-		MSFeatureIdentificationLevel level = newIdentity.getIdentificationLevel();
-		String levelId = null;
-		if(level != null)
-			levelId = level.getId();
-		
-		if(levelId != null)
-			ps.setString(1, levelId);
-		else
-			ps.setNull(1, java.sql.Types.NULL);
-		
-		ps.setString(2, newIdentity.getUniqueId());
-		ps.executeUpdate();
-		ps.close();	
+		try(PreparedStatement ps = conn.prepareStatement(query)){
+			MSFeatureIdentificationLevel level = newIdentity.getIdentificationLevel();
+			String levelId = null;
+			if(level != null)
+				levelId = level.getId();
+			
+			if(levelId != null)
+				ps.setString(1, levelId);
+			else
+				ps.setNull(1, java.sql.Types.NULL);
+			
+			ps.setString(2, newIdentity.getUniqueId());
+			ps.executeUpdate();
+		}
 	}
 	
 	public static void setIdLevelForMSMSFeatureIdentification(
-			MsFeatureIdentity newIdentity, String msmsFeatureId) throws Exception {
+			MsFeatureIdentity newIdentity, String msmsFeatureId) throws SQLException {
 		
 		Connection conn = ConnectionManager.getConnection();
 		
@@ -307,7 +312,7 @@ public class IdLevelUtils {
 	}
 	
 	public static void setIdLevelForMSMSFeatureIdentification(
-			MsFeatureIdentity newIdentity, String msmsFeatureId, Connection conn) throws Exception {
+			MsFeatureIdentity newIdentity, String msmsFeatureId, Connection conn) throws SQLException {
 		
 		//	If unknown
 		if(newIdentity.getCompoundIdentity() == null) {
@@ -325,67 +330,67 @@ public class IdLevelUtils {
 	}
 	
 	private static void setIdLevelForUnknownMSMSIdentity(
-			MsFeatureIdentity newIdentity, String msmsFeatureId, Connection conn)  throws Exception {
+			MsFeatureIdentity newIdentity, String msmsFeatureId, Connection conn)  throws SQLException {
 		
 		String query = "UPDATE MSMS_FEATURE "
 				+ "SET IDENTIFICATION_LEVEL_ID = ? "
 				+ "WHERE MSMS_FEATURE_ID = ?";
-		PreparedStatement ps = conn.prepareStatement(query);
-		MSFeatureIdentificationLevel level = newIdentity.getIdentificationLevel();
-		String levelId = null;
-		if(level != null)
-			levelId = level.getId();
-		
-		if(levelId != null)
-			ps.setString(1, levelId);
-		else
-			ps.setNull(1, java.sql.Types.NULL);
-		
-		ps.setString(2, msmsFeatureId);
-		ps.executeUpdate();
-		ps.close();		
+		try(PreparedStatement ps = conn.prepareStatement(query)){
+			MSFeatureIdentificationLevel level = newIdentity.getIdentificationLevel();
+			String levelId = null;
+			if(level != null)
+				levelId = level.getId();
+			
+			if(levelId != null)
+				ps.setString(1, levelId);
+			else
+				ps.setNull(1, java.sql.Types.NULL);
+			
+			ps.setString(2, msmsFeatureId);
+			ps.executeUpdate();
+		}
 	}
 
 	public static void setIdLevelForMSMSFeatureLibraryMatch(
-			MsFeatureIdentity newIdentity, Connection conn) throws Exception {
+			MsFeatureIdentity newIdentity, Connection conn) throws SQLException {
 		
 		String query = "UPDATE MSMS_FEATURE_LIBRARY_MATCH "
 				+ "SET IDENTIFICATION_LEVEL_ID = ? WHERE MATCH_ID = ?";
-		PreparedStatement ps = conn.prepareStatement(query);
-		MSFeatureIdentificationLevel level = newIdentity.getIdentificationLevel();
-		String levelId = null;
-		if(level != null)
-			levelId = level.getId();
-		
-		if(levelId != null)
-			ps.setString(1, levelId);
-		else
-			ps.setNull(1, java.sql.Types.NULL);
-		
-		ps.setString(2, newIdentity.getUniqueId());
-		ps.executeUpdate();
-		ps.close();		
+		try(PreparedStatement ps = conn.prepareStatement(query)){
+			MSFeatureIdentificationLevel level = newIdentity.getIdentificationLevel();
+			String levelId = null;
+			if(level != null)
+				levelId = level.getId();
+			
+			if(levelId != null)
+				ps.setString(1, levelId);
+			else
+				ps.setNull(1, java.sql.Types.NULL);
+			
+			ps.setString(2, newIdentity.getUniqueId());
+			ps.executeUpdate();
+		}
 	}
 	
 	public static void setIdLevelForMSMSFeatureManualId(
-			MsFeatureIdentity newIdentity, Connection conn) throws Exception {
+			MsFeatureIdentity newIdentity, Connection conn) throws SQLException {
 		
 		String query = "UPDATE MSMS_FEATURE_ALTERNATIVE_ID "
 				+ "SET IDENTIFICATION_LEVEL_ID = ? WHERE IDENTIFICATION_ID = ?";
-		PreparedStatement ps = conn.prepareStatement(query);
-		MSFeatureIdentificationLevel level = newIdentity.getIdentificationLevel();
-		String levelId = null;
-		if(level != null)
-			levelId = level.getId();
-		
-		if(levelId != null)
-			ps.setString(1, levelId);
-		else
-			ps.setNull(1, java.sql.Types.NULL);
-		
-		ps.setString(2, newIdentity.getUniqueId());
-		ps.executeUpdate();
-		ps.close();	
+		try(PreparedStatement ps = conn.prepareStatement(query)){
+			MSFeatureIdentificationLevel level = newIdentity.getIdentificationLevel();
+			String levelId = null;
+			if(level != null)
+				levelId = level.getId();
+			
+			if(levelId != null)
+				ps.setString(1, levelId);
+			else
+				ps.setNull(1, java.sql.Types.NULL);
+			
+			ps.setString(2, newIdentity.getUniqueId());
+			ps.executeUpdate();
+		}
 	}
 }
 

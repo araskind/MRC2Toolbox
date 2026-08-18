@@ -107,17 +107,8 @@ public class FeatureLookupListUtils {
 				ps.setDouble(4, f.getMz());
 				ps.setDouble(5, f.getRt());
 				ps.setDouble(6, f.getRank());
-				
-				if(f.getSmiles() != null)
-					ps.setString(7, f.getSmiles());
-				else
-					ps.setNull(7,  java.sql.Types.NULL);
-				
-				if(f.getInchiKey() != null)
-					ps.setString(8, f.getInchiKey());
-				else
-					ps.setNull(8,  java.sql.Types.NULL);
-				
+				ps.setString(7, f.getSmiles());
+				ps.setString(8, f.getInchiKey());			
 				ps.setDouble(9, f.getFoldChange());
 				ps.setDouble(10, f.getpValue());
 				ps.addBatch();
@@ -186,17 +177,8 @@ public class FeatureLookupListUtils {
 				ps.setDouble(4, f.getMz());
 				ps.setDouble(5, f.getRt());
 				ps.setDouble(6, f.getRank());
-				
-				if(f.getSmiles() != null)
-					ps.setString(7, f.getSmiles());
-				else
-					ps.setNull(7,  java.sql.Types.NULL);
-				
-				if(f.getInchiKey() != null)
-					ps.setString(8, f.getInchiKey());
-				else
-					ps.setNull(8,  java.sql.Types.NULL);
-				
+				ps.setString(7, f.getSmiles());
+				ps.setString(8, f.getInchiKey());			
 				ps.setDouble(9, f.getFoldChange());
 				ps.setDouble(10, f.getpValue());
 				ps.addBatch();

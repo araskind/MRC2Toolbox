@@ -32,6 +32,8 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.FilenameUtils;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
 import edu.umich.med.mrc2.datoolbox.data.BinnerAdductList;
 import edu.umich.med.mrc2.datoolbox.data.CompoundLibrary;
@@ -74,6 +76,12 @@ import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.rawdata.MSMSExtractionParameterSet;
 
 public class IDTDataCache {
+	
+	private static final Logger logger = LogManager.getLogger(IDTDataCache.class);
+
+	private IDTDataCache() {
+		/* This utility class should not be instantiated */
+	}
 
 	private static Collection<LIMSUser> users = 
 			new TreeSet<LIMSUser>();
@@ -204,7 +212,6 @@ public class IDTDataCache {
 	public static void refreshMobilePhaseList() {
 		mobilePhaseList.clear();
 		getMobilePhaseList();
-		//Collection<MobilePhase>mobilePhaseList;
 	}
 
 	public static void refreshReferenceMsMsLibraryList() {
@@ -332,7 +339,7 @@ public class IDTDataCache {
 	}
 
 	public static Map<LIMSExperiment, Collection<StockSample>> getExperimentStockSampleMap() {
-		// TODO Auto-generated method stub
+
 		if(experimentStockSampleMap == null)
 			experimentStockSampleMap =
 				new TreeMap<LIMSExperiment, Collection<StockSample>>();
@@ -341,8 +348,7 @@ public class IDTDataCache {
 			try {
 				experimentStockSampleMap.putAll(IDTUtils.getExperimentStockSampleMap());
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.error("Failed to load Experiment Stock Sample Map from the database", e);
 			}
 		}
 		return experimentStockSampleMap;
@@ -356,7 +362,7 @@ public class IDTDataCache {
 		
 		Collection<StockSample>ss = getStockSamplesForExperiment(e);
 		if(ss == null)
-			return null;
+			return new ArrayList<>();
 		else {
 			return ss.stream().
 					filter(s -> Objects.nonNull(s.getLimsExperiment())).
@@ -375,13 +381,11 @@ public class IDTDataCache {
 			try {
 				experimentSamplePrepMap.putAll(IDTUtils.getExperimentSamplePrepMap());
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.error("Failed to load Experiment Sample Prep Map from the database", e);
 			}
 		}
 		return experimentSamplePrepMap;
-	}
-	
+	}	
 	
 	public static Collection<DataPipeline> getDataPipelinesForExperiment(LIMSExperiment experiment){
 		
@@ -402,52 +406,7 @@ public class IDTDataCache {
 		}		
 		return pipelines;
 	}
-	
-//
-//	public static void refreshSamplePrepAcquisitionMethodMap() {
-//		samplePrepAcquisitionMethodMap.clear();
-//		getSamplePrepAcquisitionMethodMap();
-//	}
-//
-//	public static Map<LIMSSamplePreparation, Collection<DataAcquisitionMethod>> getSamplePrepAcquisitionMethodMap() {
-//
-//		if(samplePrepAcquisitionMethodMap == null)
-//			samplePrepAcquisitionMethodMap =
-//				new TreeMap<LIMSSamplePreparation, Collection<DataAcquisitionMethod>>();
-//
-//		if(samplePrepAcquisitionMethodMap.isEmpty()) {
-//			try {
-//				samplePrepAcquisitionMethodMap.putAll(IDTUtils.getSamplePrepAcquisitionMethodMap());
-//			} catch (Exception e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
-//		}
-//		return samplePrepAcquisitionMethodMap;
-//	}
-//
-//	public static void refreshAcquisitionDataExtractionMethodMap() {
-//		acquisitionDataExtractionMethodMap.clear();
-//		getAcquisitionDataExtractionMethodMap();
-//	}
-//
-//	public static Map<DataAcquisitionMethod, Collection<DataExtractionMethod>> getAcquisitionDataExtractionMethodMap() {
-//
-//		if(acquisitionDataExtractionMethodMap == null)
-//			acquisitionDataExtractionMethodMap =
-//				new TreeMap<DataAcquisitionMethod, Collection<DataExtractionMethod>>();
-//
-//		if(acquisitionDataExtractionMethodMap.isEmpty()) {
-//			try {
-//				acquisitionDataExtractionMethodMap.putAll(IDTUtils.getAcquisitionDataExtractionMethodMap());
-//			} catch (Exception e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
-//		}
-//		return acquisitionDataExtractionMethodMap;
-//	}
-	
+
 	public static void refreshSamplePrepDataPipelineMap() {
 		
 		samplePrepDataPipelineMap.clear();
@@ -464,8 +423,7 @@ public class IDTDataCache {
 			try {
 				samplePrepDataPipelineMap.putAll(IDTUtils.getSamplePrepDataPipelineMap());
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.error("Failed to load Sample Prep to Data Pipeline Map from the database", e);
 			}
 		}
 		return samplePrepDataPipelineMap;
@@ -475,9 +433,6 @@ public class IDTDataCache {
 		return getSamplePrepDataPipelineMap().get(prep);
 	}
 
-	/**
-	 * @return the users
-	 */
 	public static Collection<LIMSUser> getUsers() {
 
 		if(users == null)
@@ -487,8 +442,7 @@ public class IDTDataCache {
 			try {
 				users.addAll(UserUtils.getUserList());
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.error("Failed to load User List from the database", e);
 			}
 		}
 		return users;
@@ -504,11 +458,7 @@ public class IDTDataCache {
 					filter(u -> u.getAffiliation().equals(affiliation.name())).
 					collect(Collectors.toCollection(TreeSet::new));
 	}
-	
 
-	/**
-	 * @return the organizations
-	 */
 	public static Collection<IdTrackerOrganization> getOrganizations() {
 
 		if(organizations == null)
@@ -518,16 +468,12 @@ public class IDTDataCache {
 			try {
 				organizations.addAll(LIMSUtils.getOrganizationList());
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.error("Failed to load Organization List from the database", e);
 			}
 		}
 		return organizations;
 	}
 
-	/**
-	 * @return the projects
-	 */
 	public static Collection<LIMSProject> getProjects() {
 
 		if(projects == null)
@@ -537,8 +483,7 @@ public class IDTDataCache {
 			try {
 				projects.addAll(IDTUtils.getProjectList());
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.error("Failed to load Project List from the database", e);
 			}
 		}
 		return projects;
@@ -568,16 +513,12 @@ public class IDTDataCache {
 			try {
 				experiments.addAll(IDTUtils.getExperimentList());
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.error("Failed to load Experiment List from the database", e);
 			}
 		}
 		return experiments;
 	}
 
-	/**
-	 * @return the experiments
-	 */
 	public static Collection<StockSample> getStockSamples() {
 
 		if(stockSamples == null)
@@ -587,8 +528,7 @@ public class IDTDataCache {
 			try {
 				stockSamples.addAll(IDTUtils.getStockSampleList());
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.error("Failed to load Stock Sample List from the database", e);
 			}
 		}
 		return stockSamples;
@@ -605,8 +545,7 @@ public class IDTDataCache {
 				chromatographicGradientList.addAll(
 						ChromatographyDatabaseUtils.getChromatographicGradientList());
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.error("Failed to load Chromatographic Gradient List from the database", e);
 			}
 		}		
 		return chromatographicGradientList;
@@ -623,8 +562,7 @@ public class IDTDataCache {
 				binnerAdductListCollection.addAll(
 						BinnerUtils.getBinnerAdductListCollection());
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.error("Failed to load Binner Adduct List from the database", e);
 			}
 		}		
 		return binnerAdductListCollection;
@@ -660,8 +598,7 @@ public class IDTDataCache {
 			try {
 				chromatographicColumns.addAll(AcquisitionMethodUtils.getChromatographicColumnList());
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.error("Failed to load Chromatographic Columns List from the database", e);
 			}
 		}
 		return chromatographicColumns;
@@ -676,8 +613,7 @@ public class IDTDataCache {
 			try {
 				acquisitionMethods.addAll(AcquisitionMethodUtils.getAcquisitionMethodList());
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.error("Failed to load Acquisition Methods List from the database", e);
 			}
 		}
 		return acquisitionMethods;
@@ -692,8 +628,7 @@ public class IDTDataCache {
 			try {
 				dataExtractionMethods.addAll(IDTUtils.getDataExtractionMethodList());
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.error("Failed to load Data Extraction Methods List from the database", e);
 			}
 		}
 		return dataExtractionMethods;
@@ -708,8 +643,7 @@ public class IDTDataCache {
 			try {
 				chromatographicSeparationTypes.addAll(AcquisitionMethodUtils.getChromatographicSeparationTypes());
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.error("Failed to load Chromatographic Separation Types List from the database", e);
 			}
 		}
 		return chromatographicSeparationTypes;
@@ -724,8 +658,7 @@ public class IDTDataCache {
 			try {
 				manufacturers.addAll(IDTUtils.getManufacturerList());
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.error("Failed to load Manufacturers List from the database", e);
 			}			
 		}
 		return manufacturers;
@@ -752,7 +685,7 @@ public class IDTDataCache {
 			try {
 				softwareList.addAll(IDTUtils.getSoftwareList());
 			} catch (Exception e) {
-				e.printStackTrace();
+				logger.error("Failed to load Software List from the database", e);
 			}
 		}		
 		return softwareList;
@@ -780,8 +713,7 @@ public class IDTDataCache {
 			try {
 				ionizationTypes.addAll(AcquisitionMethodUtils.getIonizationTypes());
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.error("Failed to load Ionization Types List from the database", e);
 			}
 		}
 		return ionizationTypes;
@@ -797,8 +729,7 @@ public class IDTDataCache {
 			try {
 				massAnalyzerTypes.addAll(AcquisitionMethodUtils.getMassAnalyzerTypes());
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.error("Failed to load Mass Analyzer Types List from the database", e);
 			}
 		}
 		return massAnalyzerTypes;
@@ -814,8 +745,7 @@ public class IDTDataCache {
 			try {
 				msTypes.addAll(AcquisitionMethodUtils.getMsTypes());
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.error("Failed to load MS Types List from the database", e);
 			}
 		}
 		return msTypes;
@@ -831,8 +761,7 @@ public class IDTDataCache {
 			try {
 				protocols = IDTUtils.getProtocols();
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.error("Failed to load Protocols List from the database", e);
 			}
 		}
 		return protocols;
@@ -848,8 +777,7 @@ public class IDTDataCache {
 			try {
 				samplePreps = IDTUtils.getSamplePreps();
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.error("Failed to load Sample Preparations List from the database", e);
 			}
 		}
 		return samplePreps;
@@ -864,8 +792,7 @@ public class IDTDataCache {
 			try {
 				sopCategories.addAll(IDTUtils.getSopCategories());
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.error("Failed to load SOP Categories List from the database", e);
 			}
 		}
 		return sopCategories;
@@ -880,8 +807,7 @@ public class IDTDataCache {
 			try {
 				resultValueUnits.addAll(IDTUtils.getResultValueUnits());
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.error("Failed to load Value Units List from the database", e);
 			}
 		}
 		return resultValueUnits;
@@ -896,8 +822,7 @@ public class IDTDataCache {
 			try {
 				sampleQuantityUnits.addAll(IDTUtils.getSampleQuantityUnits());
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.error("Failed to load Sample Quantity Units List from the database", e);
 			}
 		}
 		return sampleQuantityUnits;
@@ -912,7 +837,7 @@ public class IDTDataCache {
 			try {
 				instruments.addAll(AcquisitionMethodUtils.getInstrumentList());
 			} catch (Exception e) {
-				e.printStackTrace();
+				logger.error("Failed to load Instrument List from the database", e);
 			}
 		}
 		return instruments;
@@ -927,7 +852,7 @@ public class IDTDataCache {
 			try {
 				experimentInstrumentMap.putAll(IDTUtils.getExperimentInstrumentMap());
 			} catch (Exception e) {
-				e.printStackTrace();
+				logger.error("Failed to load Experiment to Instrument Map from the database", e);
 			}
 		}
 		return experimentInstrumentMap;
@@ -946,7 +871,7 @@ public class IDTDataCache {
 			try {
 				referenceMsMsLibraries.addAll(MSMSLibraryUtils.getReferenceMsMsLibraries());
 			} catch (Exception e) {
-				e.printStackTrace();
+				logger.error("Failed to load Reference MSMS Library List from the database", e);
 			}
 		}
 		return referenceMsMsLibraries;
@@ -957,7 +882,7 @@ public class IDTDataCache {
 		if(decoyLibraryMap == null || decoyLibraryMap.isEmpty()) {
 			
 			decoyLibraryMap = new TreeMap<String, Boolean>();
-			getReferenceMsMsLibraryList().stream().
+			getReferenceMsMsLibraryList().
 				forEach(e -> decoyLibraryMap.put(e.getUniqueId(), e.isDecoy()));
 		}
 		return decoyLibraryMap;
@@ -979,7 +904,7 @@ public class IDTDataCache {
 			try {
 				mobilePhaseList.addAll(ChromatographyDatabaseUtils.getMobilePhaseList());
 			} catch (Exception e) {
-				e.printStackTrace();
+				logger.error("Failed to load Mobile Phase List from the database", e);
 			}
 		}
 		return mobilePhaseList;
@@ -1000,19 +925,10 @@ public class IDTDataCache {
 				findFirst().orElse(null);
 		if(mp != null)
 			return mp;
-		else {							
-			for(MobilePhase p : mobilePhaseList) {
-				
-				if(!p.getSynonyms().isEmpty()) {
-					
-					for(String synonym : p.getSynonyms()) {
-						
-						if(synonym.equalsIgnoreCase(query))
-							return p;
-					}
-				}
-			}
-			return null;
+		else {	
+			return mobilePhaseList.stream().
+				filter(p -> p.getSynonyms().stream().anyMatch(s -> s.equalsIgnoreCase(query))).
+				findFirst().orElse(null);
 		}
 	}
 	
@@ -1026,7 +942,7 @@ public class IDTDataCache {
 				msFeatureIdentificationLevelList.addAll(
 						IdLevelUtils.getMSFeatureIdentificationLevelList());
 			} catch (Exception e) {
-				e.printStackTrace();
+				logger.error("Failed to load MSFeature Identification Level List from the database", e);
 			}
 		}
 		return msFeatureIdentificationLevelList;
@@ -1046,7 +962,7 @@ public class IDTDataCache {
 				msFeatureIdentificationFollowupStepList.addAll(
 						IdFollowupUtils.getMSFeatureIdentificationFollowupStepList());
 			} catch (Exception e) {
-				e.printStackTrace();
+				logger.error("Failed to load MSFeature Identification Followup Step List from the database", e);
 			}
 		}
 		return msFeatureIdentificationFollowupStepList;
@@ -1062,7 +978,7 @@ public class IDTDataCache {
 				standardFeatureAnnotationList.addAll(
 						StandardAnnotationUtils.getStandardFeatureAnnotationList());
 			} catch (Exception e) {
-				e.printStackTrace();
+				logger.error("Failed to load MSFeature Standard Annotation List from the database", e);
 			}
 		}
 		return standardFeatureAnnotationList;
@@ -1078,7 +994,7 @@ public class IDTDataCache {
 				msmsDecoyGenerationMethods.addAll(
 						MSMSDecoyUtils.getMSMSDecoyGenerationMethods());
 			} catch (Exception e) {
-				e.printStackTrace();
+				logger.error("Failed to load MSMS Decoy Generation Methods List from the database", e);
 			}
 		}
 		return msmsDecoyGenerationMethods;
@@ -1093,7 +1009,7 @@ public class IDTDataCache {
 			try {
 				sampleTypes.addAll(IDTUtils.getAvailableSampleTypes());
 			} catch (Exception e) {
-				e.printStackTrace();
+				logger.error("Failed to load Sample Types List from the database", e);
 			}
 		}
 		return sampleTypes;
@@ -1108,7 +1024,7 @@ public class IDTDataCache {
 			try {
 				collisionEnergies.addAll(IDTUtils.getAvailableMsMsCollisionEnergies());
 			} catch (Exception e) {
-				e.printStackTrace();
+				logger.error("Failed to load Available MSMS Collision Energies List from the database", e);
 			}
 		}
 		return collisionEnergies;
@@ -1123,8 +1039,7 @@ public class IDTDataCache {
 			try {
 				experimentPolarityMap.putAll(IDTUtils.getExperimentPolarityMap());
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.error("Failed to load Experiment Polarity Map from the database", e);
 			}
 		}
 		return experimentPolarityMap;
@@ -1318,7 +1233,7 @@ public class IDTDataCache {
 			try {
 				pepSearchParameters.addAll(DatabaseIdentificationUtils.getNISTPepSearchParameterObjects());
 			} catch (Exception e) {
-				e.printStackTrace();
+				logger.error("Failed to load Experiment NIST PepSearch Parameters List from the database", e);
 			}
 		}		
 		return pepSearchParameters;
@@ -1378,7 +1293,7 @@ public class IDTDataCache {
 			try {
 				msmsExtractionParameters.addAll(IDTUtils.getMSMSExtractionParameters());
 			} catch (Exception e) {
-				e.printStackTrace();
+				logger.error("Failed to load MSMS Extraction Parameters List from the database", e);
 			}
 		}
 		return msmsExtractionParameters;
@@ -1399,7 +1314,7 @@ public class IDTDataCache {
 			try {
 				msRtLibraryList.addAll(MSRTLibraryUtils.getAllLibraries());
 			} catch (Exception e) {
-				e.printStackTrace();
+				logger.error("Failed to load MS/RT Library List from the database", e);
 			}
 		}
 		return msRtLibraryList;
@@ -1414,7 +1329,7 @@ public class IDTDataCache {
 			try {
 				msRtLibraryEntryCounts.putAll(MSRTLibraryUtils.getLibraryEntryCount());
 			} catch (Exception e) {
-				e.printStackTrace();
+				logger.error("Failed to load MS/RT Library entry counts Map from the database", e);
 			}
 		}
 		return msRtLibraryEntryCounts;

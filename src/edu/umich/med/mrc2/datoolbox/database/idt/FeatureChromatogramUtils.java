@@ -22,14 +22,18 @@
 package edu.umich.med.mrc2.datoolbox.database.idt;
 
 import java.io.BufferedInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Collections;
 
 import org.apache.commons.jcs3.access.exception.CacheException;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
 import edu.umich.med.mrc2.datoolbox.data.ChromatogramDefinition;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
@@ -41,6 +45,12 @@ import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.utils.NumberArrayUtils;
 
 public class FeatureChromatogramUtils {
+	
+	private static final Logger logger = LogManager.getLogger(FeatureChromatogramUtils.class);
+	
+	private FeatureChromatogramUtils() {
+		/* This utility class should not be instantiated */
+	}
 
 	public static void putFeatureChromatogramBundleInCache(MsFeatureChromatogramBundle bundle) {
 
@@ -48,9 +58,9 @@ public class FeatureChromatogramUtils {
 		try {
 			MRC2ToolBoxCore.featureChromatogramCache.put(key, bundle);
 		} catch (CacheException e) {
-			System.err.println(String.format(
+			logger.error(String.format(
 					"Problem putting feature chromatogram bundle in the cache, for key %s%n%s",
-					key, e.getMessage()));
+					key, e.getMessage()), e);
 		}
 	}
 
@@ -60,7 +70,7 @@ public class FeatureChromatogramUtils {
 	}
 	
 	public static MsFeatureChromatogramBundle getMsFeatureChromatogramBundleForFeature(
-			String featureId, DataFile dataFile) throws Exception {
+			String featureId, DataFile dataFile) throws SQLException {
 		
 		Connection conn = ConnectionManager.getConnection();
 		MsFeatureChromatogramBundle fcb = 
@@ -70,7 +80,7 @@ public class FeatureChromatogramUtils {
 	}
 	
 	public static MsFeatureChromatogramBundle getMsFeatureChromatogramBundleForFeature(
-			String featureId, DataFile dataFile, Connection conn) throws Exception {
+			String featureId, DataFile dataFile, Connection conn) throws SQLException {
 		
 		MsFeatureChromatogramBundle chromatogramBundle = null;
 		String query = 
@@ -79,56 +89,69 @@ public class FeatureChromatogramUtils {
 				"TITLE, TIME_VALUES, INTENSITY_VALUES " +
 				"FROM MSMS_PARENT_FEATURE_CHROMATOGRAM  " +
 				"WHERE FEATURE_ID = ? ";
-		PreparedStatement ps = conn.prepareStatement(query);
-		ps.setString(1, featureId);
-		ResultSet rs = ps.executeQuery();
-		ps.setString(1, featureId);
-		rs = ps.executeQuery();
-		while (rs.next()) {
-
-			double[] timeValues = new double[0];
-			double[] intensityValues = new double[0];
-			InputStream its = rs.getBinaryStream("TIME_VALUES");
-			if (its != null) {
-				BufferedInputStream itbis = new BufferedInputStream(its);
-				String encodedTime = new String(itbis.readAllBytes(), StandardCharsets.US_ASCII);
-				timeValues = NumberArrayUtils.decodeNumberArray(encodedTime);
-				its.close();
+		try(PreparedStatement ps = conn.prepareStatement(query)){
+			ps.setString(1, featureId);
+			ResultSet rs = ps.executeQuery();
+			ps.setString(1, featureId);
+			rs = ps.executeQuery();
+			while (rs.next()) {
+	
+				double[] timeValues = decodeDoubleArray(rs.getBinaryStream("TIME_VALUES"));
+				double[] intensityValues = decodeDoubleArray(rs.getBinaryStream("INTENSITY_VALUES"));
+				if(timeValues.length == 0 || intensityValues.length == 0) {
+					logger.error(String.format(
+							"Failed to read chromatogram for feature %s in data file %s", 
+							featureId, dataFile.getName()));
+					continue;
+				}
+				if(timeValues.length != intensityValues.length) {
+					logger.error(String.format(
+							"Time/Intensity array length mismatch for feature %s in data file %s", 
+							featureId, dataFile.getName()));
+					continue;
+				}
+				StoredExtractedIonData seid = new StoredExtractedIonData(
+						rs.getString("TITLE"),
+						rs.getDouble("EXTRACTED_MASS"), 
+						timeValues, 
+						intensityValues, 
+						featureId,
+						rs.getString("INJECTION_ID"), 
+						rs.getInt("MS_LEVEL"), 
+						rs.getDouble("MASS_ERROR_VALUE"),
+						MassErrorType.getTypeByName(rs.getString("MASS_ERROR_TYPE")), 
+						rs.getDouble("START_RT"),
+						rs.getDouble("END_RT"));
+	
+				ChromatogramDefinition chromDef = new ChromatogramDefinition(
+							null, 
+							seid.getMsLevel(), 
+							Collections.singleton(seid.getExtractedMass()),
+							seid.getMassErrorValue(), 
+							seid.getMassErrorType(), 
+							seid.getRtRange());
+				chromatogramBundle = 
+						new MsFeatureChromatogramBundle(featureId, chromDef);
+				
+				chromatogramBundle.addChromatogramForDataFile(dataFile, seid);	
 			}
-			its = rs.getBinaryStream("INTENSITY_VALUES");
-			if (its != null) {
-				BufferedInputStream itbis = new BufferedInputStream(its);
-				String encodedIntensity = new String(itbis.readAllBytes(), StandardCharsets.US_ASCII);
-				intensityValues = NumberArrayUtils.decodeNumberArray(encodedIntensity);
-			}
-			StoredExtractedIonData seid = new StoredExtractedIonData(
-					rs.getString("TITLE"),
-					rs.getDouble("EXTRACTED_MASS"), 
-					timeValues, 
-					intensityValues, 
-					featureId,
-					rs.getString("INJECTION_ID"), 
-					rs.getInt("MS_LEVEL"), 
-					rs.getDouble("MASS_ERROR_VALUE"),
-					MassErrorType.getTypeByName(rs.getString("MASS_ERROR_TYPE")), 
-					rs.getDouble("START_RT"),
-					rs.getDouble("END_RT"));
-
-			ChromatogramDefinition chromDef = new ChromatogramDefinition(
-						null, 
-						seid.getMsLevel(), 
-						Collections.singleton(seid.getExtractedMass()),
-						seid.getMassErrorValue(), 
-						seid.getMassErrorType(), 
-						seid.getRtRange());
-			chromatogramBundle = 
-					new MsFeatureChromatogramBundle(featureId, chromDef);
-			
-			chromatogramBundle.addChromatogramForDataFile(dataFile, seid);	
+			rs.close();
 		}
-		rs.close();
-		ps.close();
 		return chromatogramBundle;
+	}
+	
+	private static double[] decodeDoubleArray(InputStream its) {
+		
+		double[] values = new double[0];
+		if (its != null) {
+			try(BufferedInputStream itbis = new BufferedInputStream(its)){
+				String encoded = new String(itbis.readAllBytes(), StandardCharsets.US_ASCII);
+				values = NumberArrayUtils.decodeNumberArray(encoded);
+			} catch (IOException e) {
+				logger.error("Failed to read", e);
+			}
+		}		
+		return values;
 	}
 }
 
