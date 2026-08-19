@@ -23,7 +23,6 @@ package edu.umich.med.mrc2.datoolbox.utils;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -39,6 +38,8 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.stax.StAXSource;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.jdom2.Document;
 import org.jdom2.JDOMException;
 import org.jdom2.input.SAXBuilder;
@@ -48,15 +49,34 @@ import org.jdom2.output.XMLOutputter;
 import org.xml.sax.InputSource;
 
 public class XmlUtils {
+	
+	private static final Logger logger = LogManager.getLogger(XmlUtils.class);
+
+	private XmlUtils() {
+		/* This utility class should not be instantiated */
+	}
+	
+	private static SAXBuilder getSAXBuilder() {
+		
+		SAXBuilder sax = new SAXBuilder();
+		sax.setXMLReaderFactory(XMLReaders.NONVALIDATING);
+		sax.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+		sax.setFeature("http://xml.org/sax/features/external-general-entities", false);
+		sax.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+		sax.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+		sax.setFeature("http://xml.org/sax/features/namespaces", true);
+		sax.setFeature("http://xml.org/sax/features/namespace-prefixes", true);
+		return sax;
+	}
 
 	public static Document readXmlFile(File file) {
 
 		Document xmlDocument = null;
+		SAXBuilder sax = getSAXBuilder();
 		try {
-			SAXBuilder sax = new SAXBuilder();
 			xmlDocument = sax.build(file);
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error(String.format("Failed to parse XML file %s", file.getAbsolutePath()), e);
 		}
 		return xmlDocument;
 	}
@@ -64,11 +84,11 @@ public class XmlUtils {
 	public static Document readXmlString(String input) {
 		
 		Document xmlDocument = null;
+		SAXBuilder sax = getSAXBuilder();
 		try {
-			SAXBuilder sax = new SAXBuilder();
 			xmlDocument = sax.build(new InputSource(input));
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error("Failed to create XML document from string", e);
 		}
 		return xmlDocument;
 	}
@@ -76,80 +96,54 @@ public class XmlUtils {
 	public static Document readXmlStream(InputStream stream) {
 
 		Document xmlDocument = null;
+		SAXBuilder sax = getSAXBuilder();
 		try {
-			SAXBuilder sax = new SAXBuilder();
 			xmlDocument = sax.build(stream);
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error("Failed to load read XML stream", e);
 		}
 		return xmlDocument;
-	}
-	
-	public static Document readXmlFromString(String input) {
-		
-		Document xmlDocument = null;
-		SAXBuilder sax = new SAXBuilder();
-		sax.setXMLReaderFactory(XMLReaders.NONVALIDATING);
-		sax.setFeature("http://xml.org/sax/features/namespaces", true);
-		sax.setFeature("http://xml.org/sax/features/namespace-prefixes", true);
-		
-	    InputSource lSource = new InputSource(new java.io.StringReader(input));
-        lSource.setEncoding("UTF-8");
-        try {
-			xmlDocument = sax.build(lSource);
-		} catch (JDOMException | IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	    return xmlDocument;
 	}
 	
 	public static Document readXmlFileWithEncoding(File file, Charset encoding) {
 
 		Document xmlDocument = null;
-		SAXBuilder sax = new SAXBuilder();
-		sax.setXMLReaderFactory(XMLReaders.NONVALIDATING);
-		sax.setFeature("http://xml.org/sax/features/namespaces", true);
-		sax.setFeature("http://xml.org/sax/features/namespace-prefixes", true);
-		
-		InputStream inputStream = null;
-		try {
-			inputStream = new FileInputStream(file);
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}		
-	    InputSource lSource = new InputSource(inputStream);
-        lSource.setEncoding(encoding.displayName());
-        try {
+		SAXBuilder sax = getSAXBuilder();
+		try (InputStream inputStream = new FileInputStream(file)){
+			
+		    InputSource lSource = new InputSource(new FileInputStream(file));
+	        lSource.setEncoding(encoding.displayName());
 			xmlDocument = sax.build(lSource);
 		} catch (JDOMException | IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+			logger.error(String.format("Failed to parse XML file %s", file.getAbsolutePath()), e);
+		}		
 	    return xmlDocument;
 	}
 	
 	public static int countRecords(File inputFile, String rootNodeName) {
 
 		int recordNumber = 0;
-
-        try {
-			XMLInputFactory xif = XMLInputFactory.newInstance();
-			XMLStreamReader xsr = xif.createXMLStreamReader(new FileReader(inputFile));
+		XMLInputFactory xif = XMLInputFactory.newInstance();
+		xif.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, false);
+		xif.setProperty(XMLInputFactory.SUPPORT_DTD, false);
+		
+		TransformerFactory tf = TransformerFactory.newInstance();
+		tf.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+		tf.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
+        try (FileReader fr = new FileReader(inputFile)){
+        	
+        	Transformer t = tf.newTransformer();
+			XMLStreamReader xsr = xif.createXMLStreamReader(fr);
 			xsr.nextTag();
-			TransformerFactory tf = TransformerFactory.newInstance();
-			Transformer t = tf.newTransformer();
-
 			while(xsr.nextTag() == XMLStreamConstants.START_ELEMENT) {
-
 			    DOMResult result = new DOMResult();
 			    t.transform(new StAXSource(xsr), result);
 			    if(result.getNode().getFirstChild().getNodeName().equals(rootNodeName))
 			    	recordNumber++;
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error(String.format("Failed to count '%s' records in XML file %s", 
+					rootNodeName, inputFile.getAbsolutePath()), e);
 		}
         return recordNumber;
 	}
@@ -182,8 +176,8 @@ public class XmlUtils {
 			XMLOutputter outputter = new XMLOutputter();
 			outputter.setFormat(outputFormat);
 			outputter.output(xmlDocument, writer);
-		} catch (Exception e) {
-			e.printStackTrace();
+		} catch (IOException e) {
+			logger.error(String.format("Failed to output XML file %s", xmlFile.getAbsolutePath()), e);
 		}
 	}
 }

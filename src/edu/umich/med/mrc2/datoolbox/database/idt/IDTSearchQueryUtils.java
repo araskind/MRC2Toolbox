@@ -24,9 +24,13 @@ package edu.umich.med.mrc2.datoolbox.database.idt;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
 import edu.umich.med.mrc2.datoolbox.data.IDTSearchQuery;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
@@ -35,8 +39,14 @@ import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.utils.SQLUtils;
 
 public class IDTSearchQueryUtils {
+	
+	private static final Logger logger = LogManager.getLogger(IDTSearchQueryUtils.class);
 
-	public static Collection<IDTSearchQuery> getSearchQueryList() throws Exception{
+	private IDTSearchQueryUtils() {
+		/* This utility class should not be instantiated */
+	}
+
+	public static Collection<IDTSearchQuery> getSearchQueryList() throws SQLException{
 
 		Collection<IDTSearchQuery> queries = new ArrayList<IDTSearchQuery>();
 		Connection conn = ConnectionManager.getConnection();
@@ -44,76 +54,59 @@ public class IDTSearchQueryUtils {
 				"SELECT QUERY_ID, CREATED_BY, CREATED_ON, DESCRIPTION, QUERY_PARAMETERS  " +
 				"FROM IDTRACKER_SEARCH_QUERIES  " +
 				"ORDER BY CREATED_ON DESC ";
-		PreparedStatement ps = conn.prepareStatement(query);
-		ResultSet rs = ps.executeQuery();			
-		while (rs.next()) {
-			
-			LIMSUser user = IDTDataCache.getUserById(rs.getString("CREATED_BY"));
-			IDTSearchQuery idtquery = new IDTSearchQuery(
-					rs.getString("QUERY_ID"),
-					rs.getString("DESCRIPTION"),
-					user,
-					new Date(rs.getDate("CREATED_ON").getTime()),					
-					rs.getString("QUERY_PARAMETERS"));
-
-			queries.add(idtquery);
+		try(PreparedStatement ps = conn.prepareStatement(query)){
+			ResultSet rs = ps.executeQuery();			
+			while (rs.next()) {
+				
+				LIMSUser user = IDTDataCache.getUserById(rs.getString("CREATED_BY"));
+				IDTSearchQuery idtquery = new IDTSearchQuery(
+						rs.getString("QUERY_ID"),
+						rs.getString("DESCRIPTION"),
+						user,
+						new Date(rs.getDate("CREATED_ON").getTime()),					
+						rs.getString("QUERY_PARAMETERS"));
+	
+				queries.add(idtquery);
+			}
+			rs.close();
 		}
-		rs.close();
-		ps.close();
 		ConnectionManager.releaseConnection(conn);
 		return queries;
 	}
 	
-	public static void insertNewQuery(IDTSearchQuery newQuery) throws Exception{
+	public static void insertNewQuery(IDTSearchQuery newQuery) throws SQLException{
 
 		Connection conn = ConnectionManager.getConnection();
-		String sql  =
-				"INSERT INTO IDTRACKER_SEARCH_QUERIES "
-				+ "(QUERY_ID, CREATED_BY, CREATED_ON, DESCRIPTION, QUERY_PARAMETERS)  " +
-				"VALUES (?, ?, ?, ?, ?) ";
-		PreparedStatement ps = conn.prepareStatement(sql);
 		String queryId = SQLUtils.getNextIdFromSequence(conn, 
 				"ID_TRACKER_SEARCH_QUERY_SEQ",
 				DataPrefix.ID_TRACKER_SEARCH_QUERY,
 				"0",
 				9);
-		newQuery.setId(queryId);
-		ps.setString(1, queryId);
-		ps.setString(2, newQuery.getAuthor().getId());
-		ps.setDate(3, new java.sql.Date(newQuery.getCreatedOn().getTime()));
-		ps.setString(4, newQuery.getDescription());
-		ps.setString(5, newQuery.getQueryParameters());
-		ps.executeUpdate();
-		ps.close();
+		String sql  =
+				"INSERT INTO IDTRACKER_SEARCH_QUERIES "
+				+ "(QUERY_ID, CREATED_BY, CREATED_ON, DESCRIPTION, QUERY_PARAMETERS)  " +
+				"VALUES (?, ?, ?, ?, ?) ";
+		try(PreparedStatement ps = conn.prepareStatement(sql)){
+			newQuery.setId(queryId);
+			ps.setString(1, queryId);
+			ps.setString(2, newQuery.getAuthor().getId());
+			ps.setDate(3, new java.sql.Date(newQuery.getCreatedOn().getTime()));
+			ps.setString(4, newQuery.getDescription());
+			ps.setString(5, newQuery.getQueryParameters());
+			ps.executeUpdate();
+		}
 		ConnectionManager.releaseConnection(conn);
 	}
 	
-	public static void deleteQuery(IDTSearchQuery queryToDelete) throws Exception{
+	public static void deleteQuery(IDTSearchQuery queryToDelete) throws SQLException{
 		
 		Connection conn = ConnectionManager.getConnection();
 		String sql  =
 				"DELETE FROM IDTRACKER_SEARCH_QUERIES WHERE QUERY_ID = ?";
-		PreparedStatement ps = conn.prepareStatement(sql);
-		ps.setString(1, queryToDelete.getId());
-		ps.executeUpdate();
-		ps.close();
+		try(PreparedStatement ps = conn.prepareStatement(sql)){
+			ps.setString(1, queryToDelete.getId());
+			ps.executeUpdate();
+		}
 		ConnectionManager.releaseConnection(conn);
 	}
-	
-//	public static String getNextQueryId(Connection conn) throws Exception{
-//		
-//		String annotationId = null;
-//		String query = "SELECT '" + DataPrefix.ID_TRACKER_SEARCH_QUERY.getName()
-//				+ "' || LPAD(ID_TRACKER_SEARCH_QUERY_SEQ.NEXTVAL, 9, '0') AS QUERY_ID FROM DUAL";
-//
-//		PreparedStatement ps = conn.prepareStatement(query);
-//		ResultSet rs = ps.executeQuery();
-//		while (rs.next()) {
-//			annotationId = rs.getString("QUERY_ID");
-//			break;
-//		}
-//		rs.close();
-//		ps.close();
-//		return annotationId;
-//	}
 }

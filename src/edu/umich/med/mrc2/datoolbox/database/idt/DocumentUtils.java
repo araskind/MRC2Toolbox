@@ -214,7 +214,7 @@ public class DocumentUtils {
 			   File documentFile = Paths.get(destinationFolder.getAbsolutePath(),
 					   rs.getString("DOCUMENT_NAME") + "." +
 					   rs.getString("DOCUMENT_FORMAT")).toFile();
-			   DatabaseUtils.writeBlobStreamToFile(documentFile, rs.getBinaryStream("DOCUMENT_CONTENTS"));
+			   DatabaseUtils.writeBlobToFile(documentFile, rs.getBinaryStream("DOCUMENT_CONTENTS"));
 			}
 			rs.close();
 		}

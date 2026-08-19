@@ -22,13 +22,23 @@
 package edu.umich.med.mrc2.datoolbox.database.idt;
 
 import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
+
+import edu.umich.med.mrc2.datoolbox.utils.CompressionUtils;
+import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
 
 public class DatabaseUtils {
 	
@@ -38,12 +48,12 @@ public class DatabaseUtils {
 		/* This utility class should not be instantiated */
 	}
 	
-	public static void writeBlobStreamToFile(File destination, InputStream blobStream) {
+	public static void writeBlobToFile(File destination, InputStream blobStream) {
 
 		try(BufferedInputStream is = new BufferedInputStream(blobStream)){		
 			inputToOutput(is, destination);
 		} catch (IOException e2) {
-			logger.error(String.format("%s %s", "Failed to write data to", destination.getAbsolutePath()), e2);
+			logger.error(String.format("Failed to write data to %s", destination.getAbsolutePath()), e2);
 		}
 	}
 	
@@ -52,7 +62,7 @@ public class DatabaseUtils {
 		try(FileOutputStream fos = new FileOutputStream(destination)){
 			writeBufferToFile(fos, is, destination);
 		} catch (IOException e1) {
-			logger.error(String.format("%s %s", "Failed to write data to", destination.getAbsolutePath()), e1);
+			logger.error(String.format("Failed to write data to %s", destination.getAbsolutePath()), e1);
 		}
 	}
 	
@@ -64,12 +74,120 @@ public class DatabaseUtils {
 				fos.write(buffer, 0, r);
 			}
 		} catch (IOException e) {
-			logger.error(String.format("%s %s", "Failed to write data to", destination.getAbsolutePath()), e);
+			logger.error(String.format("Failed to write data to %s", destination.getAbsolutePath()), e);
 		}
 		try {
 			fos.flush();
 		} catch (IOException e) {
-			logger.error(String.format("%s %s", "Failed to write data to", destination.getAbsolutePath()), e);
+			logger.error(String.format("Failed to write data to %s", destination.getAbsolutePath()), e);
 		}
 	}
+	
+	public static FileInputStream compressAndSetBlob(
+			File inputFile,			
+			PreparedStatement ps,
+			int blobPosition) throws IOException, SQLException {
+		
+		int streamLength = 0;
+		FileInputStream fis = null;
+		if(inputFile != null && inputFile.exists()) {
+			
+			File archive = FIOUtils.changeExtension(inputFile, "zip");
+			if(inputFile.isDirectory())
+				CompressionUtils.zipFolder(inputFile, archive);
+			else
+				CompressionUtils.zipFile(inputFile, archive);
+
+			if(archive.exists()) {
+				fis = new FileInputStream(archive);
+				streamLength = (int) archive.length();
+			}
+			if(fis != null)
+				ps.setBinaryStream(blobPosition, fis, streamLength);
+			else
+				ps.setBinaryStream(blobPosition, null, 0);
+		} else {
+			ps.setBinaryStream(blobPosition, null, 0);
+		}
+		return fis;
+	}
+	
+	public static void deleteTemporaryArchive(File inputFile) {
+		File archive = FIOUtils.changeExtension(inputFile, "zip");
+		if(archive.exists()) {
+			Path path = Paths.get(archive.getAbsolutePath());
+	        try {
+				Files.delete(path);
+			} catch (IOException e) {
+				logger.error(String.format("Failed to delete temporary archive %s", archive.getAbsolutePath()));
+			}
+		}
+	}
+	
+	public static FileInputStream setBlob(
+			File inputFile,			
+			PreparedStatement ps,
+			int blobPosition) throws IOException, SQLException {
+		
+		int streamLength = 0;
+		FileInputStream fis = null;
+		if(inputFile != null && inputFile.exists()) {
+			fis = new FileInputStream(inputFile);
+			streamLength = (int) inputFile.length();
+			ps.setBinaryStream(blobPosition, fis, streamLength);
+		} else {
+			ps.setBinaryStream(blobPosition, null, 0);
+		}
+		return fis;
+	}
+	
+	public static InputStream setBlobFromCompressedString(
+			String inputString, 
+			PreparedStatement ps,
+			int blobPosition) throws IOException, SQLException {
+		
+		byte[] compressedMethod = CompressionUtils.compressString(inputString);
+		InputStream is = null;
+		try {
+			is = new ByteArrayInputStream(compressedMethod);
+		} catch (Exception e) {
+			logger.error("Failed to create input stream", e);
+		}
+		if(is != null)
+			ps.setBinaryStream(blobPosition, is, compressedMethod.length);
+		else
+			ps.setBinaryStream(blobPosition, null, 0);
+		
+		return is;
+	}
+	
+	public static String decompressStringFromBlob(InputStream blobInputStream) throws IOException {
+		
+		String outputString = null;
+		try(InputStream its = blobInputStream){
+			if (its != null) {
+				try(BufferedInputStream itbis = new BufferedInputStream(its)){
+					outputString = CompressionUtils.decompressString(itbis.readAllBytes());
+				}
+			}
+		}
+		return outputString;
+	}
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

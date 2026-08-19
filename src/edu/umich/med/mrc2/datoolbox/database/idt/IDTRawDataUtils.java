@@ -24,11 +24,15 @@ package edu.umich.med.mrc2.datoolbox.database.idt;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
+
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.IDTExperimentalSample;
@@ -38,8 +42,14 @@ import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 
 public class IDTRawDataUtils {
-
-	public static Injection getInjectionForId(String injectionId) throws Exception {
+	
+	private static final Logger logger = LogManager.getLogger(IDTRawDataUtils.class);
+	
+	private IDTRawDataUtils() {
+		/* This utility class should not be instantiated */
+	}
+	
+	public static Injection getInjectionForId(String injectionId) throws SQLException {
 
 		Connection conn = ConnectionManager.getConnection();		
 		Injection inj = getInjectionForId(injectionId, conn);
@@ -48,7 +58,7 @@ public class IDTRawDataUtils {
 	}
 
 	public static Injection getInjectionForId(
-			String injectionId, Connection conn) throws Exception {
+			String injectionId, Connection conn) throws SQLException {
 		
 		Injection inj = null;
 		String query =
@@ -56,24 +66,24 @@ public class IDTRawDataUtils {
 			+ "ACQUISITION_METHOD_ID, INJECTION_VOLUME FROM INJECTION "
 			+ "WHERE INJECTION_ID = ?";
 		
-		PreparedStatement ps = conn.prepareStatement(query);
-		ps.setString(1, injectionId);
-		ResultSet rs = ps.executeQuery();
-		while(rs.next())
-			 inj = new Injection(
-					 injectionId,
-					 rs.getString("DATA_FILE_NAME"),
-					 new Date(rs.getDate("INJECTION_TIMESTAMP").getTime()),
-					 rs.getString("PREP_ITEM_ID"),
-					 rs.getString("ACQUISITION_METHOD_ID"),
-					 rs.getDouble("INJECTION_VOLUME"));
-		rs.close();
-		ps.close();
+		try(PreparedStatement ps = conn.prepareStatement(query)){
+			ps.setString(1, injectionId);
+			ResultSet rs = ps.executeQuery();
+			while(rs.next())
+				 inj = new Injection(
+						 injectionId,
+						 rs.getString("DATA_FILE_NAME"),
+						 new Date(rs.getDate("INJECTION_TIMESTAMP").getTime()),
+						 rs.getString("PREP_ITEM_ID"),
+						 rs.getString("ACQUISITION_METHOD_ID"),
+						 rs.getDouble("INJECTION_VOLUME"));
+			rs.close();
+		}
 		return inj;
 	}
 	
 	public static Map<LIMSExperiment,Collection<DataFile>>getExistingDataFiles(
-			Collection<DataFile>filesToCheck) throws Exception {
+			Collection<DataFile>filesToCheck) throws SQLException {
 
 		Connection conn = ConnectionManager.getConnection();		
 		Map<LIMSExperiment,Collection<DataFile>>existingDataFiles = 
@@ -83,7 +93,7 @@ public class IDTRawDataUtils {
 	}
 	
 	public static Map<LIMSExperiment,Collection<DataFile>>getExistingDataFiles(
-			Collection<DataFile>filesToCheck, Connection conn) throws Exception {
+			Collection<DataFile>filesToCheck, Connection conn) throws SQLException {
 		
 		Map<LIMSExperiment,Collection<DataFile>>existingDataFiles = 
 				new TreeMap<LIMSExperiment,Collection<DataFile>>();
@@ -96,34 +106,33 @@ public class IDTRawDataUtils {
 				"WHERE I.PREP_ITEM_ID = P.PREP_ITEM_ID " +
 				"AND P.SAMPLE_ID= S.SAMPLE_ID " +
 				"AND I.DATA_FILE_NAME LIKE ?";
-		PreparedStatement ps = conn.prepareStatement(query);
-		for(DataFile df : filesToCheck) {
+		try(PreparedStatement ps = conn.prepareStatement(query)){
 			
-			ps.setString(1, df.getBaseName() + "%");
-			ResultSet rs = ps.executeQuery();
-			while(rs.next()) {
+			for(DataFile df : filesToCheck) {
 				
-				LIMSExperiment experiment = 
-						IDTDataCache.getExperimentById(rs.getString("EXPERIMENT_ID"));
-				if(experiment != null) {
+				ps.setString(1, df.getBaseName() + "%");
+				ResultSet rs = ps.executeQuery();
+				while(rs.next()) {
 					
-					if(!existingDataFiles.containsKey(experiment))
-						existingDataFiles.put(experiment, new TreeSet<DataFile>());
-					
-					DataAcquisitionMethod acqMethod = IDTDataCache.getAcquisitionMethodById(
-							rs.getString("ACQUISITION_METHOD_ID"));
-					
-					DataFile existingDataFile = 
-							new DataFile(rs.getString("DATA_FILE_NAME"), acqMethod);
-					existingDataFile.setInjectionTime(
-							new Date(rs.getDate("INJECTION_TIMESTAMP").getTime()));
-					
-					IDTExperimentalSample sample = IDTUtils.getExperimentalSampleById(
-							rs.getString("SAMPLE_ID"), conn);
-					existingDataFile.setParentSample(sample);
-					existingDataFiles.get(experiment).add(existingDataFile);
-				}				
-			}		
+					LIMSExperiment experiment = 
+							IDTDataCache.getExperimentById(rs.getString("EXPERIMENT_ID"));
+					if(experiment != null) {
+												
+						existingDataFiles.computeIfAbsent(experiment, v -> new TreeSet<DataFile>());						
+						DataAcquisitionMethod acqMethod = IDTDataCache.getAcquisitionMethodById(
+								rs.getString("ACQUISITION_METHOD_ID"));					
+						DataFile existingDataFile = 
+								new DataFile(rs.getString("DATA_FILE_NAME"), acqMethod);
+						existingDataFile.setInjectionTime(
+								new Date(rs.getDate("INJECTION_TIMESTAMP").getTime()));						
+						IDTExperimentalSample sample = 
+								IDTUtils.getExperimentalSampleById(rs.getString("SAMPLE_ID"), conn);
+						existingDataFile.setParentSample(sample);
+						existingDataFiles.get(experiment).add(existingDataFile);
+					}				
+				}
+				rs.close();
+			}
 		}
 		return existingDataFiles;
 	}

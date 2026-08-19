@@ -295,7 +295,7 @@ public class AcquisitionMethodUtils {
 				} catch (InterruptedException e) {
 					logger.debug("Failed to interrupt the thread", e);
 				}
-				DatabaseUtils.writeBlobStreamToFile(zipFile, rs.getBinaryStream("METHOD_CONTAINER"));
+				DatabaseUtils.writeBlobToFile(zipFile, rs.getBinaryStream("METHOD_CONTAINER"));
 			}
 			rs.close();
 		}

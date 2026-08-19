@@ -24,8 +24,12 @@ package edu.umich.med.mrc2.datoolbox.database.idt;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Collection;
 import java.util.TreeSet;
+
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
 import edu.umich.med.mrc2.datoolbox.data.MSMSDecoyGenerationMethod;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
@@ -34,7 +38,13 @@ import edu.umich.med.mrc2.datoolbox.utils.SQLUtils;
 
 public class MSMSDecoyUtils {
 	
-	public static Collection<MSMSDecoyGenerationMethod> getMSMSDecoyGenerationMethods() throws Exception {
+	private static final Logger logger = LogManager.getLogger(MSMSDecoyUtils.class);
+
+	private MSMSDecoyUtils() {
+		/* This utility class should not be instantiated */
+	}
+	
+	public static Collection<MSMSDecoyGenerationMethod> getMSMSDecoyGenerationMethods() throws SQLException {
 
 		Collection<MSMSDecoyGenerationMethod> methodList = 
 				new TreeSet<MSMSDecoyGenerationMethod>();
@@ -42,24 +52,23 @@ public class MSMSDecoyUtils {
 		String query = 
 				"SELECT METHOD_ID, METHOD_NAME, NOTES "
 				+ "FROM MSMS_DECOY_GENERATION_METHOD ORDER BY 1";
-		PreparedStatement ps = conn.prepareStatement(query);
-		ResultSet rs = ps.executeQuery();
-		while (rs.next()) {
-
-			MSMSDecoyGenerationMethod newMethod = new MSMSDecoyGenerationMethod(
-					rs.getString("METHOD_ID"), 
-					rs.getString("METHOD_NAME"), 
-					rs.getString("NOTES"));
-
-			methodList.add(newMethod);
+		try(PreparedStatement ps = conn.prepareStatement(query)){
+			ResultSet rs = ps.executeQuery();
+			while (rs.next()) {	
+				MSMSDecoyGenerationMethod newMethod = new MSMSDecoyGenerationMethod(
+						rs.getString("METHOD_ID"), 
+						rs.getString("METHOD_NAME"), 
+						rs.getString("NOTES"));
+	
+				methodList.add(newMethod);
+			}
+			rs.close();
 		}
-		rs.close();
-		ps.close();
 		ConnectionManager.releaseConnection(conn);
 		return methodList;
 	}
 	
-	public static void addNewMethod(MSMSDecoyGenerationMethod newMethod) throws Exception {
+	public static void addNewMethod(MSMSDecoyGenerationMethod newMethod) throws SQLException {
 
 		Connection conn = ConnectionManager.getConnection();
 		String id = SQLUtils.getNextIdFromSequence(conn, 
@@ -72,53 +81,38 @@ public class MSMSDecoyUtils {
 				"INSERT INTO MSMS_DECOY_GENERATION_METHOD "
 				+ "(METHOD_ID, METHOD_NAME, NOTES) "
 				+ "VALUES (?, ?, ?) " ;
-		PreparedStatement stmt = conn.prepareStatement(query);
-		stmt.setString(1, id);
-		stmt.setString(2, newMethod.getMethodName());
-		stmt.setString(3, newMethod.getMethodNotes());
-		stmt.executeUpdate();
-		stmt.close();
+		try(PreparedStatement ps = conn.prepareStatement(query)){
+			ps.setString(1, id);
+			ps.setString(2, newMethod.getMethodName());
+			ps.setString(3, newMethod.getMethodNotes());
+			ps.executeUpdate();
+		}
 		ConnectionManager.releaseConnection(conn);
 	}
 	
-//	public static String getMethodId(Connection conn) throws Exception {
-//		
-//		String id = null;
-//		String query = "SELECT '" + DataPrefix.MSMS_DECOY_GENERATION_METHOD.getName() + 
-//				"' || LPAD(MSMS_DECOY_METHOD_SEQ.NEXTVAL, 3, '0') AS NEXT_ID FROM DUAL";
-//		PreparedStatement ps = conn.prepareStatement(query);
-//		ResultSet rs = ps.executeQuery();
-//		while (rs.next()) 
-//			id = rs.getString("NEXT_ID");			
-//		
-//		rs.close();
-//		ps.close();
-//		return id;
-//	}
-	
-	public static void updateMethod(MSMSDecoyGenerationMethod method) throws Exception {
+	public static void updateMethod(MSMSDecoyGenerationMethod method) throws SQLException {
 
 		Connection conn = ConnectionManager.getConnection();
 		String query = 
 				"UPDATE MSMS_DECOY_GENERATION_METHOD "
 				+ "SET METHOD_NAME = ?, NOTES = ? WHERE METHOD_ID = ?";
-		PreparedStatement stmt = conn.prepareStatement(query);
-		stmt.setString(1, method.getMethodName());
-		stmt.setString(2, method.getMethodNotes());
-		stmt.setString(3, method.getMethodId());
-		stmt.executeUpdate();
-		stmt.close();
+		try(PreparedStatement ps = conn.prepareStatement(query)){
+			ps.setString(1, method.getMethodName());
+			ps.setString(2, method.getMethodNotes());
+			ps.setString(3, method.getMethodId());
+			ps.executeUpdate();
+		}
 		ConnectionManager.releaseConnection(conn);
 	}
 	
-	public static void deleteMethod(MSMSDecoyGenerationMethod toDelete) throws Exception {
+	public static void deleteMethod(MSMSDecoyGenerationMethod toDelete) throws SQLException {
 
 		Connection conn = ConnectionManager.getConnection();
 		String query = "DELETE FROM MSMS_DECOY_GENERATION_METHOD WHERE METHOD_ID = ?";
-		PreparedStatement stmt = conn.prepareStatement(query);
-		stmt.setString(1, toDelete.getMethodId());
-		stmt.executeUpdate();
-		stmt.close();
+		try(PreparedStatement ps = conn.prepareStatement(query)){
+			ps.setString(1, toDelete.getMethodId());
+			ps.executeUpdate();
+		}
 		ConnectionManager.releaseConnection(conn);
 	}
 }

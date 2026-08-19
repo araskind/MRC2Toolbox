@@ -21,7 +21,6 @@
 
 package edu.umich.med.mrc2.datoolbox.database.idt;
 
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -44,8 +43,6 @@ import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.jdom2.Document;
 import org.jdom2.Element;
-import org.jdom2.JDOMException;
-import org.jdom2.input.SAXBuilder;
 import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
 
@@ -72,6 +69,7 @@ import edu.umich.med.mrc2.datoolbox.project.store.MSMSClusteringParameterSetFiel
 import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
 import edu.umich.med.mrc2.datoolbox.utils.MSMSClusteringUtils;
 import edu.umich.med.mrc2.datoolbox.utils.SQLUtils;
+import edu.umich.med.mrc2.datoolbox.utils.XmlUtils;
 
 public class MSMSClusteringDBUtils {
 	
@@ -778,20 +776,12 @@ public class MSMSClusteringDBUtils {
 	public static MSMSClusteringParameterSet createMSMSClusteringParameterSetFromXML(String xmlString) {
 		
 		MSMSClusteringParameterSet params = null;
-		
-		SAXBuilder sax = new SAXBuilder();
-		Document doc = null;
-		try {
-			doc = sax.build(IOUtils.toInputStream(xmlString, StandardCharsets.UTF_8));
-		} catch (JDOMException e1) {
-			logger.error("Failed to create MSMSClusteringParameterSet from XML", e1);
-		} catch (IOException e1) {
-			logger.error("Failed to read XML for MSMSClusteringParameterSet", e1);
-			return null;						
-		}
-		if(doc == null)
+		Document doc = XmlUtils.readXmlStream(
+				IOUtils.toInputStream(xmlString, StandardCharsets.UTF_8));
+		if(doc == null) {
+			logger.error("Failed to create MSMSClusteringParameterSet from XML");
 			return null;
-		
+		}		
 		Element rootElement = doc.getRootElement();
 		Element paramsElement = rootElement.getChild(
 				ObjectNames.MSMSClusteringParameterSet.name());

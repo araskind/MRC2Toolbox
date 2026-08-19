@@ -23,11 +23,20 @@ package edu.umich.med.mrc2.datoolbox.database.idt;
 
 import java.sql.Connection;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureChromatogramBundle;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 
 public class IDTRawDataProjectUtils {
+	
+	private static final Logger logger = LogManager.getLogger(IDTRawDataProjectUtils.class);
+
+	private IDTRawDataProjectUtils() {
+		/* This utility class should not be instantiated */
+	}
 
 	public static String insertFeatureData(
 			MSFeatureInfoBundle bundle, 

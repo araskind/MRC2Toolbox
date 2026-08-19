@@ -24,12 +24,21 @@ package edu.umich.med.mrc2.datoolbox.database.idt;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+
 import edu.umich.med.mrc2.datoolbox.data.CompoundIdentity;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentalSample;
 import edu.umich.med.mrc2.datoolbox.data.LibraryMsFeatureDbBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsMsLibraryFeature;
 
 public class OfflineExperimentLoadCache {
+	
+	private static final Logger logger = LogManager.getLogger(OfflineExperimentLoadCache.class);
+
+	private OfflineExperimentLoadCache() {
+		/* This utility class should not be instantiated */
+	}
 
 	private static Map<String,ExperimentalSample> experimentalSamples = 
 			new TreeMap<String,ExperimentalSample>();
