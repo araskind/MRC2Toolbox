@@ -27,6 +27,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringReader;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
@@ -85,8 +86,9 @@ public class XmlUtils {
 		
 		Document xmlDocument = null;
 		SAXBuilder sax = getSAXBuilder();
+		InputSource source = new InputSource(new StringReader(input));
 		try {
-			xmlDocument = sax.build(new InputSource(input));
+			xmlDocument = sax.build(source);
 		} catch (Exception e) {
 			logger.error("Failed to create XML document from string", e);
 		}
@@ -97,8 +99,9 @@ public class XmlUtils {
 
 		Document xmlDocument = null;
 		SAXBuilder sax = getSAXBuilder();
+		InputSource source = new InputSource(stream);
 		try {
-			xmlDocument = sax.build(stream);
+			xmlDocument = sax.build(source);
 		} catch (Exception e) {
 			logger.error("Failed to load read XML stream", e);
 		}

@@ -78,6 +78,7 @@ import edu.umich.med.mrc2.datoolbox.data.lims.Manufacturer;
 import edu.umich.med.mrc2.datoolbox.data.lims.ObjectAnnotation;
 import edu.umich.med.mrc2.datoolbox.data.lims.SopCategory;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
+import edu.umich.med.mrc2.datoolbox.database.DatabaseUtils;
 import edu.umich.med.mrc2.datoolbox.database.lims.LIMSDataCache;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;

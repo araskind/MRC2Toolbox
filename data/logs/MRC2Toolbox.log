@@ -1,1 +1,51 @@
-2026-08-13 10:00:50.807 [main] INFO  edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore - Statring the program
+2026-08-20 11:09:20.733 [main] INFO  edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore - Statring the program
+2026-08-20 11:10:34.558 [Thread executing task null] ERROR edu.umich.med.mrc2.datoolbox.utils.XmlUtils - Failed to create XML document from string
+java.net.MalformedURLException: no protocol: <?xml version="1.0" encoding="UTF-8"?><MSMSExtractionParameterSet ID="MS2EPSe390e380-905" MinPrecursorIntensity="0.0" RemoveAllMassesAboveParent="true" MsMsCountsCutoff="1.0" MaxFragmentsCutoff="-1" FilterIntensityMeasure="RELATIVE" MsmsIsolationWindowLowerBorder="0.65" MsmsIsolationWindowUpperBorder="0.65" MsmsGroupingRtWindow="0.1" PrecursorGroupingMassError="15.0" PrecursorGroupingMassErrorType="ppm" FlagMinorIsotopesPrecursors="true" MaxPrecursorCharge="2" MergeCollisionEnergies="false" SpectrumSimilarityCutoffForMerging="0.7" ChromatogramExtractionWindow="0.3" MsFeatureChromatogramExtractionTarget="MSMSParentIon"><Name>MSMS extraction method 2023-02-22 19:42:55 V-2023-02-22 19:43:00</Name><Description>Modified from MSMS extraction method 2022-07-13 13:17:31 V-2022-07-13 13:33:46 V-2022-07-20 09:46:02 (MS2EPSe390e380-905) by Raskind, Sasha</Description><XICDefinition Mode="XIC" MsLevel="1" SumAll="false" MzWindow="15.0" METype="ppm" RTRange="2.7_3.3" Smooth="false" /></MSMSExtractionParameterSet>
+	at java.base/java.net.URL.<init>(URL.java:736)
+	at java.base/java.net.URL.<init>(URL.java:631)
+	at java.base/java.net.URL.<init>(URL.java:567)
+	at org.apache.xerces.impl.XMLEntityManager.setupCurrentEntity(Unknown Source)
+	at org.apache.xerces.impl.XMLVersionDetector.determineDocVersion(Unknown Source)
+	at org.apache.xerces.parsers.XML11Configuration.parse(Unknown Source)
+	at org.apache.xerces.parsers.XML11Configuration.parse(Unknown Source)
+	at org.apache.xerces.parsers.XMLParser.parse(Unknown Source)
+	at org.apache.xerces.parsers.AbstractSAXParser.parse(Unknown Source)
+	at org.apache.xerces.jaxp.SAXParserImpl$JAXPSAXParser.parse(Unknown Source)
+	at org.jdom2.input.sax.SAXBuilderEngine.build(SAXBuilderEngine.java:217)
+	at org.jdom2.input.SAXBuilder.build(SAXBuilder.java:1053)
+	at edu.umich.med.mrc2.datoolbox.utils.XmlUtils.readXmlString(XmlUtils.java:89)
+	at edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils.extractMSMSExtractionParameterSetfromXML(IDTUtils.java:2362)
+	at edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils.getMSMSExtractionParameters(IDTUtils.java:2345)
+	at edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils.getMSMSExtractionParameters(IDTUtils.java:2319)
+	at edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache.getMsmsExtractionParameters(IDTDataCache.java:1294)
+	at edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache.refreshMSMSExtractionParameters(IDTDataCache.java:1284)
+	at edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.IDTrackerMetadataPullTask.run(IDTrackerMetadataPullTask.java:204)
+	at edu.umich.med.mrc2.datoolbox.taskcontrol.impl.WorkerThread.run(WorkerThread.java:53)
+2026-08-20 11:10:34.573 [Thread executing task null] ERROR edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache - Failed to load MSMS Extraction Parameters List from the database
+java.lang.NullPointerException: Cannot invoke "org.jdom2.Document.getRootElement()" because "doc" is null
+	at edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils.extractMSMSExtractionParameterSetfromXML(IDTUtils.java:2363)
+	at edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils.getMSMSExtractionParameters(IDTUtils.java:2345)
+	at edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils.getMSMSExtractionParameters(IDTUtils.java:2319)
+	at edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache.getMsmsExtractionParameters(IDTDataCache.java:1294)
+	at edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache.refreshMSMSExtractionParameters(IDTDataCache.java:1284)
+	at edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.IDTrackerMetadataPullTask.run(IDTrackerMetadataPullTask.java:204)
+	at edu.umich.med.mrc2.datoolbox.taskcontrol.impl.WorkerThread.run(WorkerThread.java:53)
+2026-08-20 11:18:43.067 [main] INFO  edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore - Statring the program
+2026-08-20 15:32:30.986 [main] DEBUG org.apache.poi.openxml4j.opc.PackageRelationshipCollection - Parsing relationship: /xl/_rels/workbook.xml.rels
+2026-08-20 15:32:30.998 [main] DEBUG org.apache.poi.openxml4j.opc.PackageRelationshipCollection - Parsing relationship: /_rels/.rels
+2026-08-20 15:34:55.738 [main] DEBUG org.apache.poi.openxml4j.opc.PackageRelationshipCollection - Parsing relationship: /xl/_rels/workbook.xml.rels
+2026-08-20 15:34:55.752 [main] DEBUG org.apache.poi.openxml4j.opc.PackageRelationshipCollection - Parsing relationship: /_rels/.rels
+2026-08-20 15:36:16.669 [main] DEBUG org.apache.poi.openxml4j.opc.PackageRelationshipCollection - Parsing relationship: /xl/_rels/workbook.xml.rels
+2026-08-20 15:36:16.683 [main] DEBUG org.apache.poi.openxml4j.opc.PackageRelationshipCollection - Parsing relationship: /_rels/.rels
+2026-08-20 15:48:14.401 [main] DEBUG org.apache.poi.openxml4j.opc.PackageRelationshipCollection - Parsing relationship: /xl/_rels/workbook.xml.rels
+2026-08-20 15:48:14.417 [main] DEBUG org.apache.poi.openxml4j.opc.PackageRelationshipCollection - Parsing relationship: /_rels/.rels
+2026-08-20 16:12:21.730 [main] DEBUG org.apache.poi.openxml4j.opc.PackageRelationshipCollection - Parsing relationship: /xl/_rels/workbook.xml.rels
+2026-08-20 16:12:21.740 [main] DEBUG org.apache.poi.openxml4j.opc.PackageRelationshipCollection - Parsing relationship: /_rels/.rels
+2026-08-20 16:13:23.097 [main] DEBUG org.apache.poi.openxml4j.opc.PackageRelationshipCollection - Parsing relationship: /xl/_rels/workbook.xml.rels
+2026-08-20 16:13:23.107 [main] DEBUG org.apache.poi.openxml4j.opc.PackageRelationshipCollection - Parsing relationship: /_rels/.rels
+2026-08-20 16:35:51.258 [main] DEBUG org.apache.poi.openxml4j.opc.PackageRelationshipCollection - Parsing relationship: /xl/_rels/workbook.xml.rels
+2026-08-20 16:35:51.271 [main] DEBUG org.apache.poi.openxml4j.opc.PackageRelationshipCollection - Parsing relationship: /_rels/.rels
+2026-08-20 16:36:45.227 [main] DEBUG org.apache.poi.openxml4j.opc.PackageRelationshipCollection - Parsing relationship: /xl/_rels/workbook.xml.rels
+2026-08-20 16:36:45.243 [main] DEBUG org.apache.poi.openxml4j.opc.PackageRelationshipCollection - Parsing relationship: /_rels/.rels
+2026-08-20 16:41:28.815 [main] DEBUG org.apache.poi.openxml4j.opc.PackageRelationshipCollection - Parsing relationship: /xl/_rels/workbook.xml.rels
+2026-08-20 16:41:28.826 [main] DEBUG org.apache.poi.openxml4j.opc.PackageRelationshipCollection - Parsing relationship: /_rels/.rels

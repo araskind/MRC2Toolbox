@@ -19,7 +19,7 @@
  *
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.database.idt;
+package edu.umich.med.mrc2.datoolbox.database;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;

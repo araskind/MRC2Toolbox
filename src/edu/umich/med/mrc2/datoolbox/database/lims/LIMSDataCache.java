@@ -25,6 +25,9 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.TreeSet;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+
 import edu.umich.med.mrc2.datoolbox.data.Assay;
 import edu.umich.med.mrc2.datoolbox.data.InstrumentPlatform;
 import edu.umich.med.mrc2.datoolbox.data.compare.LIMSExperimentComparator;
@@ -43,6 +46,12 @@ import edu.umich.med.mrc2.datoolbox.database.idt.AssayDatabaseUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.UserUtils;
 
 public class LIMSDataCache {
+	
+	private static final Logger logger = LogManager.getLogger(LIMSDataCache.class);
+
+	private LIMSDataCache() {
+		/* This utility class should not be instantiated */
+	}
 
 	private static Collection<LIMSUser>users = new TreeSet<>();
 	private static Collection<IdTrackerOrganization>organizations = new TreeSet<>();
@@ -53,8 +62,8 @@ public class LIMSDataCache {
 			new TreeSet<>(new LIMSExperimentComparator(SortProperty.ID, SortDirection.DESC));
 	private static Collection<Assay>assays = new TreeSet<>();
 	private static Collection<InstrumentPlatform>instrumentPlatforms = new TreeSet<>();
-	public static Collection<ChromatographicSeparationType>chromatographicSeparationTypes = new TreeSet<>();
-	public static Collection<LIMSInstrument>analyticalInstruments = new TreeSet<>();
+	private static Collection<ChromatographicSeparationType>chromatographicSeparationTypes = new TreeSet<>();
+	private static Collection<LIMSInstrument>analyticalInstruments = new TreeSet<>();
 
 	public static void refreshUserList() {
 		users.clear();
@@ -115,8 +124,7 @@ public class LIMSDataCache {
 			try {
 				analyticalInstruments.addAll(AcquisitionMethodUtils.getInstrumentList());
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.error("Failed to get Analytical Instruments List", e);
 			}
 		}
 		return analyticalInstruments;
@@ -139,8 +147,7 @@ public class LIMSDataCache {
 				chromatographicSeparationTypes.addAll(
 						AcquisitionMethodUtils.getChromatographicSeparationTypes());
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.error("Failed to get Chromatographic Separation Types List", e);
 			}
 		}
 		return chromatographicSeparationTypes;
@@ -160,8 +167,7 @@ public class LIMSDataCache {
 			try {
 				instrumentPlatforms.addAll(LIMSUtils.getInstrumentPlatformList());
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.error("Failed to get Instrument Platforms Types List", e);
 			}
 		}
 		return instrumentPlatforms;
@@ -186,8 +192,7 @@ public class LIMSDataCache {
 			try {
 				projects.addAll(LIMSUtils.getLimsProjectList());
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.error("Failed to get LIMS Projects List", e);
 			}
 		}
 		return projects;
@@ -202,7 +207,7 @@ public class LIMSDataCache {
 			try {
 				users.addAll(UserUtils.getCompleteUserList());
 			} catch (Exception e) {
-				e.printStackTrace();
+				logger.error("Failed to get LIMS Users List", e);
 			}
 		}
 		return users;
@@ -217,8 +222,7 @@ public class LIMSDataCache {
 			try {
 				organizations.addAll(LIMSUtils.getOrganizationList());
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.error("Failed to get IdTracker Organizations List", e);
 			}
 		}
 		return organizations;
@@ -233,7 +237,7 @@ public class LIMSDataCache {
 			try {
 				limsOrganizations.addAll(LIMSUtils.getLimsOrganizationList());
 			} catch (Exception e) {
-				e.printStackTrace();
+				logger.error("Failed to get LIMS Organizations List", e);
 			}
 		}
 		return limsOrganizations;
@@ -253,7 +257,7 @@ public class LIMSDataCache {
 			try {
 				limsClients.addAll(LIMSUtils.getClientList());
 			} catch (Exception e) {
-				e.printStackTrace();
+				logger.error("Failed to get LIMS Clients List", e);
 			}
 		}
 		return limsClients;		
@@ -286,8 +290,7 @@ public class LIMSDataCache {
 			try {
 				experiments.addAll(LIMSUtils.getExperimentList("EX00256"));
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.error("Failed to get LIMS Experiments List", e);
 			}
 		}
 		return experiments;
@@ -302,8 +305,7 @@ public class LIMSDataCache {
 			try {
 				assays.addAll(AssayDatabaseUtils.getLimsAssayList());
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.error("Failed to get LIMS Assays List", e);
 			}
 		}
 		return assays;
@@ -318,12 +320,9 @@ public class LIMSDataCache {
 	
 	public static LIMSProject getProjectByExperimentId(String experimentId) {
 		
-		LIMSExperiment experiment = getExperimentById(experimentId);
-		//	if(experiment == null)
-
 		return getProjects().stream().
-				filter(p -> Objects.nonNull(p.getExperimentById(experimentId))).
-				findFirst().orElse(null);
+			filter(p -> Objects.nonNull(p.getExperimentById(experimentId))).
+			findFirst().orElse(null);
 	}
 	
 	public static LIMSExperiment getExperimentById(String experimentId) {

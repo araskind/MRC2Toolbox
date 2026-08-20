@@ -100,7 +100,7 @@
 									<content delegate="SplitDockStationFactory">
 										<fullscreen-action>false</fullscreen-action>
 										<node nodeId="1600213995646" orientation="HORIZONTAL" divider="0.7621127879269262">
-											<leaf id="0" nodeId="1600213797617">
+											<leaf id="1" nodeId="1600213797617">
 												<placeholders>
 													<placeholder>dock.single.DockableMSOneDataEditorPanel</placeholder>
 													<placeholder>dock.single.DockableMsMsDataEditorPanel</placeholder>
@@ -124,7 +124,7 @@
 													</entry>
 												</placeholder-map>
 											</leaf>
-											<leaf id="1" nodeId="1600213995644">
+											<leaf id="0" nodeId="1600213995644">
 												<placeholders>
 													<placeholder>dock.single.DockableLibraryFeatureEditorPanelAnnotations</placeholder>
 												</placeholders>
@@ -139,6 +139,16 @@
 								</layout>
 							</adjacent>
 							<children ignore="false">
+								<child>
+									<layout factory="predefined" placeholder="dock.single.DockableLibraryFeatureEditorPanelAnnotations">
+										<replacement id="dockablesingle DockableLibraryFeatureEditorPanelAnnotations"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>DockableLibraryFeatureEditorPanelAnnotations</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
+								</child>
 								<child>
 									<layout factory="delegate_StackDockStationFactory">
 										<selected>0</selected>
@@ -202,16 +212,6 @@
 											<children ignore="false"/>
 										</child>
 									</children>
-								</child>
-								<child>
-									<layout factory="predefined" placeholder="dock.single.DockableLibraryFeatureEditorPanelAnnotations">
-										<replacement id="dockablesingle DockableLibraryFeatureEditorPanelAnnotations"/>
-										<delegate id="delegate_ccontrol backup factory id">
-											<id>DockableLibraryFeatureEditorPanelAnnotations</id>
-											<area/>
-										</delegate>
-									</layout>
-									<children ignore="false"/>
 								</child>
 							</children>
 						</root>

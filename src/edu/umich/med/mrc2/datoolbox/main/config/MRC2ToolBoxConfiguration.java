@@ -25,8 +25,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -34,10 +32,7 @@ import java.text.SimpleDateFormat;
 import java.util.Properties;
 import java.util.prefs.Preferences;
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
-
+import org.apache.commons.jcs3.access.exception.InvalidArgumentException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -301,8 +296,7 @@ public class MRC2ToolBoxConfiguration {
 		String connectionString = "";
 		try {
 			connectionString = UserUtils.decryptString(encrypted);
-		} catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException
-				| BadPaddingException e) {
+		} catch (InvalidArgumentException e) {
 			logger.error("Failed to read database connection string", e);
 		}		
 		return connectionString;
@@ -313,8 +307,7 @@ public class MRC2ToolBoxConfiguration {
 		String encrypted = "";
 		try {
 			encrypted = UserUtils.encryptString(connectionString);
-		} catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException
-				| BadPaddingException e) {
+		} catch (InvalidArgumentException e) {
 			logger.error("Failed to save database connection string", e);
 		}		
 		prefs.put(DATABASE_CONNECTION_STRING, encrypted);
@@ -326,8 +319,7 @@ public class MRC2ToolBoxConfiguration {
 		String userName = "";
 		try {
 			userName = UserUtils.decryptString(encrypted);
-		} catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException
-				| BadPaddingException e) {
+		} catch (InvalidArgumentException e) {
 			logger.error("Failed to read database user", e);
 		}	
 		return userName;
@@ -338,8 +330,7 @@ public class MRC2ToolBoxConfiguration {
 		String encrypted = "";
 		try {
 			encrypted = UserUtils.encryptString(userName);
-		} catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException
-				| BadPaddingException e) {
+		} catch (InvalidArgumentException e) {
 			logger.error("Failed to save database user", e);
 		}		
 		prefs.put(DATABASE_USER, encrypted);
@@ -351,8 +342,7 @@ public class MRC2ToolBoxConfiguration {
 		String password = "";
 		try {
 			password = UserUtils.decryptString(encrypted);
-		} catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException
-				| BadPaddingException e) {
+		} catch (InvalidArgumentException e) {
 			logger.error("Failed to read database password", e);
 		}		
 		return password;
@@ -363,8 +353,7 @@ public class MRC2ToolBoxConfiguration {
 		String encrypted = "";
 		try {
 			encrypted = UserUtils.encryptString(password);
-		} catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException
-				| BadPaddingException e) {
+		} catch (InvalidArgumentException e) {
 			logger.error("Failed to save database password", e);
 		}		
 		prefs.put(DATABASE_PASSWORD, encrypted);

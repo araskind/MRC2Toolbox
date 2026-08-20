@@ -25,48 +25,57 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
+
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 
 public class MetLIMSConnectionManager {
+	
+	private static final Logger logger = LogManager.getLogger(MetLIMSConnectionManager.class);
+
+	private MetLIMSConnectionManager() {
+		/* This utility class should not be instantiated */
+	}
 
 	private static ThreadLocal<Connection> tranConnection = new ThreadLocal<Connection>();
 
 	/** get a connection */
-	public static Connection getConnection() throws Exception {
+	public static Connection getConnection() throws SQLException {
 
 		if (tranConnection.get() != null) {
 			return tranConnection.get();
-		} else {
-			Class.forName("oracle.jdbc.driver.OracleDriver");
-			Connection connection = null;
+		} 
+		else {			
+//			Class.forName("oracle.jdbc.driver.OracleDriver");
 			//jdbc:oracle:thin:@//oracle.hostserver2.mydomain.ca:1522/ABCD
-			connection = DriverManager.getConnection(
+			return DriverManager.getConnection(
 				"jdbc:oracle:thin:@"+ MRC2ToolBoxConfiguration.metLimsHost + 
 					":1521/" + MRC2ToolBoxConfiguration.metLimsServiceName,
 				MRC2ToolBoxConfiguration.metLimsUser, 
 				MRC2ToolBoxConfiguration.metLimsPassword);
-			return connection;
 		}
 	}
 
-	public static synchronized void beginTransaction() throws Exception {
+	public static synchronized void beginTransaction() throws SQLException {
 
 		if (tranConnection.get() != null)
-			throw new Exception("This thread is already in a transaction");
+			throw new SQLException("This thread is already in a transaction");
 
 		Connection conn = getConnection();
 		conn.setAutoCommit(false);
 		tranConnection.set(conn);
 	}
 
-	public static void commitTransaction() throws Exception {
+	public static void commitTransaction() throws SQLException {
 
 		if (tranConnection.get() == null)
-			throw new Exception("Can't commit: this thread isn't currently in a " + "transaction");
+			throw new SQLException("Can't commit: this thread isn't currently in a " + "transaction");
 
 		tranConnection.get().commit();
-		tranConnection.set(null);
+		tranConnection.remove();
 	}
 
 	/**
@@ -76,7 +85,7 @@ public class MetLIMSConnectionManager {
 	 *
 	 * @return the results from the query
 	 */
-	public static ResultSet executeQueryNoParams(Connection conn, String statement) throws Exception {
+	public static ResultSet executeQueryNoParams(Connection conn, String statement) throws SQLException {
 
 		PreparedStatement ps = conn.prepareStatement(statement);
 		return ps.executeQuery();
@@ -87,7 +96,7 @@ public class MetLIMSConnectionManager {
 	 * doesn't return results using a PreparedStatment, and returns the number
 	 * of rows affected
 	 */
-	public static int executeUpdate(String statement) throws Exception {
+	public static int executeUpdate(String statement) throws SQLException {
 		Connection conn = getConnection();
 		try {
 			PreparedStatement ps = conn.prepareStatement(statement);
@@ -97,18 +106,18 @@ public class MetLIMSConnectionManager {
 		}
 	}
 
-	public static void releaseConnection(Connection conn) throws Exception {
+	public static void releaseConnection(Connection conn) throws SQLException {
 
 		if (tranConnection.get() == null)
 			conn.close();
 	}
 
-	public static void rollbackTransaction() throws Exception {
+	public static void rollbackTransaction() throws SQLException {
 
 		if (tranConnection.get() == null)
-			throw new Exception("Can't rollback: this thread isn't currently in a " + "transaction");
+			throw new SQLException("Can't rollback: this thread isn't currently in a " + "transaction");
 
 		tranConnection.get().rollback();
-		tranConnection.set(null);
+		tranConnection.remove();
 	}
 }

@@ -24,8 +24,12 @@ package edu.umich.med.mrc2.datoolbox.database.idt;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Collection;
 import java.util.TreeSet;
+
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
@@ -36,8 +40,14 @@ import edu.umich.med.mrc2.datoolbox.utils.SQLUtils;
 
 public class StandardAnnotationUtils {
 	
+	private static final Logger logger = LogManager.getLogger(StandardAnnotationUtils.class);
+
+	private StandardAnnotationUtils() {
+		/* This utility class should not be instantiated */
+	}
+	
 	public static Collection<StandardFeatureAnnotation> getStandardFeatureAnnotationList() 
-			throws Exception {
+			throws SQLException {
 
 		Connection conn = ConnectionManager.getConnection();
 		Collection<StandardFeatureAnnotation> stepList
@@ -47,29 +57,29 @@ public class StandardAnnotationUtils {
 	}
 	
 	public static Collection<StandardFeatureAnnotation> getStandardFeatureAnnotationList(
-			Connection conn) throws Exception {
+			Connection conn) throws SQLException {
 
 		Collection<StandardFeatureAnnotation>annotationList = 
 				new TreeSet<StandardFeatureAnnotation>();
 		String query =
 				"SELECT STANDARD_ANNOTATION_ID, CODE, TEXT FROM FEATURE_STANDARD_ANNOTATION";
-		PreparedStatement ps = conn.prepareStatement(query);
-		ResultSet rs = ps.executeQuery();
-		while(rs.next()) {
-			
-			StandardFeatureAnnotation annotation = new StandardFeatureAnnotation(
-					rs.getString("STANDARD_ANNOTATION_ID"),
-					rs.getString("CODE"),
-					rs.getString("TEXT"));
-			annotationList.add(annotation);
+		try(PreparedStatement ps = conn.prepareStatement(query)){
+			ResultSet rs = ps.executeQuery();
+			while(rs.next()) {
+				
+				StandardFeatureAnnotation annotation = new StandardFeatureAnnotation(
+						rs.getString("STANDARD_ANNOTATION_ID"),
+						rs.getString("CODE"),
+						rs.getString("TEXT"));
+				annotationList.add(annotation);
+			}
+			rs.close();
 		}
-		rs.close();
-		ps.close();
 		return annotationList;
 	}
 
 	public static void addNewStandardFeatureAnnotation(
-			StandardFeatureAnnotation annotation) throws Exception {
+			StandardFeatureAnnotation annotation) throws SQLException {
 
 		Connection conn = ConnectionManager.getConnection();
 		String newId = SQLUtils.getNextIdFromSequence(conn, 
@@ -82,65 +92,48 @@ public class StandardAnnotationUtils {
 			"INSERT INTO FEATURE_STANDARD_ANNOTATION " + 
 			"(STANDARD_ANNOTATION_ID, CODE, TEXT) VALUES(?, ?, ?)";
 
-		PreparedStatement ps = conn.prepareStatement(query);
-		ps.setString(1, annotation.getId());
-		ps.setString(2, annotation.getCode());
-		ps.setString(3, annotation.getText());
-		ps.executeUpdate();
-		ps.close();
+		try(PreparedStatement ps = conn.prepareStatement(query)){
+			ps.setString(1, annotation.getId());
+			ps.setString(2, annotation.getCode());
+			ps.setString(3, annotation.getText());
+			ps.executeUpdate();
+		}
 		ConnectionManager.releaseConnection(conn);
 	}
 	
-//	private static String getNextStandardFeatureAnnotationId(
-//			Connection conn) throws SQLException {
-//
-//		String stepId = null;
-//		String query = "SELECT '" + DataPrefix.STANDARD_FEATURE_ANNOTATION.getName() +
-//				"' || LPAD(STANDARD_FEATURE_ANNOTATION_SEQ.NEXTVAL, 4, '0') AS STAN_ID FROM DUAL";
-//		PreparedStatement ps = conn.prepareStatement(query);
-//		ResultSet rs = ps.executeQuery();
-//		while(rs.next()) {
-//			stepId = rs.getString("STAN_ID");
-//			break;
-//		}
-//		rs.close();
-//		ps.close();
-//		return stepId;
-//	}
-
 	public static void editStandardFeatureAnnotation(
-			StandardFeatureAnnotation annotation) throws Exception {
+			StandardFeatureAnnotation annotation) throws SQLException {
 
 		Connection conn = ConnectionManager.getConnection();
 		String query =
 				"UPDATE FEATURE_STANDARD_ANNOTATION SET CODE = ?, TEXT = ? "
 				+ "WHERE STANDARD_ANNOTATION_ID = ?";
 
-		PreparedStatement ps = conn.prepareStatement(query);
-		ps.setString(1, annotation.getCode());
-		ps.setString(2, annotation.getText());
-		ps.setString(3, annotation.getId());
-		ps.executeUpdate();
-		ps.close();
+		try(PreparedStatement ps = conn.prepareStatement(query)){
+			ps.setString(1, annotation.getCode());
+			ps.setString(2, annotation.getText());
+			ps.setString(3, annotation.getId());
+			ps.executeUpdate();
+		}
 		ConnectionManager.releaseConnection(conn);
 	}
 	
 	public static void deleteStandardFeatureAnnotation(
-			StandardFeatureAnnotation annotation) throws Exception {
+			StandardFeatureAnnotation annotation) throws SQLException {
 
 		//	References will cascade, so no need to clear them first
 		Connection conn = ConnectionManager.getConnection();
 		String query =
 				"DELETE FROM FEATURE_STANDARD_ANNOTATION WHERE STANDARD_ANNOTATION_ID = ?";
-		PreparedStatement ps = conn.prepareStatement(query);
-		ps.setString(1, annotation.getId());
-		ps.executeUpdate();
-		ps.close();
+		try(PreparedStatement ps = conn.prepareStatement(query)){
+			ps.setString(1, annotation.getId());
+			ps.executeUpdate();
+		}
 		ConnectionManager.releaseConnection(conn);
 	}
 
 	public static void attachStandardFeatureAnnotationToMSMSFeature(
-				MSFeatureInfoBundle fib) throws Exception {
+				MSFeatureInfoBundle fib) throws SQLException {
 
 		Connection conn = ConnectionManager.getConnection();
 		attachStandardFeatureAnnotationToMSMSFeature(fib, conn);
@@ -148,27 +141,27 @@ public class StandardAnnotationUtils {
 	}
 	
 	public static void attachStandardFeatureAnnotationToMSMSFeature(
-			MSFeatureInfoBundle fib, Connection conn) throws Exception {
+			MSFeatureInfoBundle fib, Connection conn) throws SQLException {
 
 		String query =
 				"SELECT STANDARD_ANNOTATION_ID FROM MSMS_FEATURE_STANDARD_ANNOTATIONS " +
 				"WHERE MSMS_PARENT_FEATURE_ID = ? ";
 		
-		PreparedStatement ps = conn.prepareStatement(query);
+		try(PreparedStatement ps = conn.prepareStatement(query)){
 		ps.setString(1, fib.getMsFeature().getId());
-		ResultSet rs = ps.executeQuery();
-		while(rs.next()) {
-			StandardFeatureAnnotation newAnnotation = 
-					 IDTDataCache.getStandardFeatureAnnotationById(rs.getString("STANDARD_ANNOTATION_ID"));
-			 if(newAnnotation != null)
-				 fib.addStandardFeatureAnnotation(newAnnotation);
+			ResultSet rs = ps.executeQuery();
+			while(rs.next()) {
+				StandardFeatureAnnotation newAnnotation = 
+						 IDTDataCache.getStandardFeatureAnnotationById(rs.getString("STANDARD_ANNOTATION_ID"));
+				 if(newAnnotation != null)
+					 fib.addStandardFeatureAnnotation(newAnnotation);
+			}
+			rs.close();
 		}
-		rs.close();
-		ps.close();
 	}
 	
 	public static void setStandardFeatureAnnotationsForMSMSFeature(
-			MSFeatureInfoBundle fib) throws Exception {
+			MSFeatureInfoBundle fib) throws SQLException {
 
 		Connection conn = ConnectionManager.getConnection();
 		setStandardFeatureAnnotationsForMSMSFeature(fib, conn);
@@ -176,33 +169,33 @@ public class StandardAnnotationUtils {
 	}
 	
 	public static void setStandardFeatureAnnotationsForMSMSFeature(
-			MSFeatureInfoBundle fib, Connection conn) throws Exception {
+			MSFeatureInfoBundle fib, Connection conn) throws SQLException {
 
 		String query =
 				"DELETE FROM MSMS_FEATURE_STANDARD_ANNOTATIONS " +
 				"WHERE MSMS_PARENT_FEATURE_ID = ? ";
-		PreparedStatement ps = conn.prepareStatement(query);
-		ps.setString(1, fib.getMsFeature().getId());
-		ps.executeUpdate();
-		
+		try(PreparedStatement ps = conn.prepareStatement(query)){
+			ps.setString(1, fib.getMsFeature().getId());
+			ps.executeUpdate();
+		}
 		if(!fib.getStandadAnnotations().isEmpty()) {
 			
 			query =
 					"INSERT INTO MSMS_FEATURE_STANDARD_ANNOTATIONS ("
 					+ "MSMS_PARENT_FEATURE_ID, STANDARD_ANNOTATION_ID) VALUES(?, ?)";
-			ps = conn.prepareStatement(query);
-			ps.setString(1, fib.getMsFeature().getId());
-			for(StandardFeatureAnnotation annotation : fib.getStandadAnnotations()) {
-				ps.setString(2, annotation.getId());
-				ps.addBatch();
+			try(PreparedStatement ps = conn.prepareStatement(query)){
+				ps.setString(1, fib.getMsFeature().getId());
+				for(StandardFeatureAnnotation annotation : fib.getStandadAnnotations()) {
+					ps.setString(2, annotation.getId());
+					ps.addBatch();
+				}
+				ps.executeBatch();
 			}
-			ps.executeBatch();
-		}
-		ps.close();
+		}		
 	}
 	
 	public static void setStandardFeatureAnnotationsForMSMSFeature(
-			MsFeature msf, Collection<StandardFeatureAnnotation>annotations) throws Exception {
+			MsFeature msf, Collection<StandardFeatureAnnotation>annotations) throws SQLException {
 
 		Connection conn = ConnectionManager.getConnection();
 		setStandardFeatureAnnotationsForMSMSFeature(msf, annotations, conn);
@@ -210,32 +203,33 @@ public class StandardAnnotationUtils {
 	}
 	
 	public static void setStandardFeatureAnnotationsForMSMSFeature(
-			MsFeature msf, Collection<StandardFeatureAnnotation>annotations, Connection conn) throws Exception {
+			MsFeature msf, Collection<StandardFeatureAnnotation>annotations, Connection conn) throws SQLException {
 
 		String query =
 				"DELETE FROM MSMS_FEATURE_STANDARD_ANNOTATIONS " +
 				"WHERE MSMS_PARENT_FEATURE_ID = ? ";
-		PreparedStatement ps = conn.prepareStatement(query);
-		ps.setString(1, msf.getId());
-		ps.executeUpdate();
-		
+		try(PreparedStatement ps = conn.prepareStatement(query)){
+			ps.setString(1, msf.getId());
+			ps.executeUpdate();
+		}
 		if(!annotations.isEmpty()) {
 			
 			query =
 					"INSERT INTO MSMS_FEATURE_STANDARD_ANNOTATIONS ("
 					+ "MSMS_PARENT_FEATURE_ID, STANDARD_ANNOTATION_ID) VALUES(?, ?)";
-			ps = conn.prepareStatement(query);
-			ps.setString(1, msf.getId());
-			for(StandardFeatureAnnotation annotation : annotations) {
-				ps.setString(2, annotation.getId());
-				ps.addBatch();
+			try(PreparedStatement ps = conn.prepareStatement(query)){
+				ps.setString(1, msf.getId());
+				for(StandardFeatureAnnotation annotation : annotations) {
+					ps.setString(2, annotation.getId());
+					ps.addBatch();
+				}
+				ps.executeBatch();
 			}
-			ps.executeBatch();
-		}
-		ps.close();
+		}		
 	}
+	
 	public static void attachStandardFeatureAnnotationsToMS1Feature(
-			MSFeatureInfoBundle fib) throws Exception {
+			MSFeatureInfoBundle fib) throws SQLException {
 
 		Connection conn = ConnectionManager.getConnection();
 		attachStandardFeatureAnnotationsToMS1Feature(fib, conn);
@@ -243,27 +237,27 @@ public class StandardAnnotationUtils {
 	}
 	
 	public static void attachStandardFeatureAnnotationsToMS1Feature(
-			MSFeatureInfoBundle fib, Connection conn) throws Exception {
+			MSFeatureInfoBundle fib, Connection conn) throws SQLException {
 
 		String query =
 			"SELECT STANDARD_ANNOTATION_ID FROM POOLED_MS1_FEATURE_STANDARD_ANNOTATIONS " +
 			"WHERE POOLED_MS_FEATURE_ID = ? ";
 		
-		PreparedStatement ps = conn.prepareStatement(query);
-		ps.setString(1, fib.getMsFeature().getId());
-		ResultSet rs = ps.executeQuery();
-		while(rs.next()) {
-			StandardFeatureAnnotation newAnnotation = 
-					 IDTDataCache.getStandardFeatureAnnotationById(rs.getString("STANDARD_ANNOTATION_ID"));
-			 if(newAnnotation != null)
-				 fib.addStandardFeatureAnnotation(newAnnotation);
+		try(PreparedStatement ps = conn.prepareStatement(query)){
+			ps.setString(1, fib.getMsFeature().getId());
+			ResultSet rs = ps.executeQuery();
+			while(rs.next()) {
+				StandardFeatureAnnotation newAnnotation = 
+						 IDTDataCache.getStandardFeatureAnnotationById(rs.getString("STANDARD_ANNOTATION_ID"));
+				 if(newAnnotation != null)
+					 fib.addStandardFeatureAnnotation(newAnnotation);
+			}
+			rs.close();
 		}
-		rs.close();
-		ps.close();
 	}
 	
 	public static void setStandardFeatureAnnotationsForMS1Feature(
-			MSFeatureInfoBundle fib) throws Exception {
+			MSFeatureInfoBundle fib) throws SQLException {
 
 		Connection conn = ConnectionManager.getConnection();
 		setStandardFeatureAnnotationsForMS1Feature(fib, conn);
@@ -271,29 +265,29 @@ public class StandardAnnotationUtils {
 	}	
 
 	public static void setStandardFeatureAnnotationsForMS1Feature(
-			MSFeatureInfoBundle fib, Connection conn) throws Exception {
+			MSFeatureInfoBundle fib, Connection conn) throws SQLException {
 
 		String query =
 				"DELETE FROM POOLED_MS1_FEATURE_STANDARD_ANNOTATIONS " +
 				"WHERE POOLED_MS_FEATURE_ID = ? ";
-		PreparedStatement ps = conn.prepareStatement(query);
-		ps.setString(1, fib.getMsFeature().getId());
-		ps.executeUpdate();
-		
+		try(PreparedStatement ps = conn.prepareStatement(query)){
+			ps.setString(1, fib.getMsFeature().getId());
+			ps.executeUpdate();
+		}
 		if(!fib.getStandadAnnotations().isEmpty()) {
 			
 			query =
 					"INSERT INTO POOLED_MS1_FEATURE_STANDARD_ANNOTATIONS "
 					+ "(POOLED_MS_FEATURE_ID, STANDARD_ANNOTATION_ID) " +
 					"VALUES(?, ?)";
-			ps = conn.prepareStatement(query);
-			ps.setString(1, fib.getMsFeature().getId());
-			for(StandardFeatureAnnotation newAnnotation : fib.getStandadAnnotations()) {
-				ps.setString(2, newAnnotation.getId());
-				ps.addBatch();
+			try(PreparedStatement ps = conn.prepareStatement(query)){
+				ps.setString(1, fib.getMsFeature().getId());
+				for(StandardFeatureAnnotation newAnnotation : fib.getStandadAnnotations()) {
+					ps.setString(2, newAnnotation.getId());
+					ps.addBatch();
+				}
+				ps.executeBatch();
 			}
-			ps.executeBatch();
 		}
-		ps.close();
 	}
 }
