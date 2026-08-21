@@ -21,7 +21,13 @@
 
 package edu.umich.med.mrc2.datoolbox.utils;
 
+import java.util.Collection;
+
 public class StringProcessingUtils {
+	
+	private StringProcessingUtils() {
+		/* This utility class should not be instantiated */
+	}
 
 	public static String longestSubstring(String str1, String str2) {
 
@@ -65,4 +71,38 @@ public class StringProcessingUtils {
 		}
 		return sb.toString();
 	}
+	
+	public static String findLongestOverlap(Collection<String> strings) {
+		
+        if (strings == null || strings.isEmpty()) return "";
+        
+        // Step 1: Find the shortest string to minimize substring comparisons
+        String shortest = strings.stream()
+                .min((s1, s2) -> Integer.compare(s1.length(), s2.length()))
+                .orElse("");
+        
+        int n = shortest.length();
+        String longestOverlap = "";
+
+        // Step 2: Generate substrings of the shortest string from longest to shortest
+        for (int len = n; len > 0; len--) {
+            for (int start = 0; start <= n - len; start++) {
+                String substring = shortest.substring(start, start + len);
+                
+                // Step 3: Check if this substring exists in all other strings
+                boolean matchAll = true;
+                for (String str : strings) {
+                    if (!str.contains(substring)) {
+                        matchAll = false;
+                        break;
+                    }
+                }              
+                // Because we check larger lengths first, the first match is the longest
+                if (matchAll) {
+                    return substring;
+                }
+            }
+        }        
+        return longestOverlap;
+    }
 }

@@ -24,6 +24,10 @@ package edu.umich.med.mrc2.datoolbox.rqc;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.StandardOpenOption;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -31,7 +35,9 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
@@ -40,7 +46,11 @@ import org.apache.poi.ss.usermodel.Workbook;
 
 import com.github.pjfanning.xlsx.StreamingReader;
 
+import edu.umich.med.mrc2.datoolbox.data.compare.CompoundMatchGroupObjectComparator;
+import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.enums.CompoundMatcherField;
+import edu.umich.med.mrc2.datoolbox.data.enums.QCANVASInputField;
+import edu.umich.med.mrc2.datoolbox.main.config.DefaultFormatStore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.utils.TextUtils;
 
@@ -53,10 +63,11 @@ public class CompoundMatchDataExtractor {
 	public static void main(String[] args) {
 
 		File inputFile = new File("Y:\\DataAnalysis\\CPDMatch\\EX01426_RP_Neg_Data-Integrator-original-format.xlsx");
-		parseCompoundMatchFile(inputFile);
+		File outputFile = new File("Y:\\DataAnalysis\\CPDMatch\\EX01426_RP_Neg_Data-Integrator-exported.txt");
+		parseCompoundMatchFile(inputFile, outputFile);
 	}
 	
-	private static void parseCompoundMatchFile(File inputFile) {
+	private static void parseCompoundMatchFile(File inputFile, File outputFile) {
 
 		try (Workbook workbook = StreamingReader.builder().rowCacheSize(100) // number of rows to keep in memory
 				.bufferSize(4096) // buffer size to use when reading InputStream to file
@@ -65,7 +76,9 @@ public class CompoundMatchDataExtractor {
 			for (Sheet sheet : workbook) {
 
 				if (sheet.getSheetName().equalsIgnoreCase(TARGET_SHEET)) {
-					parseMatchGroupsSheet(sheet);
+					List<CompoundMatchGroupObject>matchGroupsList = parseMatchGroupsSheet(sheet);
+					if(matchGroupsList != null && !matchGroupsList.isEmpty())
+						exportResults(matchGroupsList, outputFile);
 				}
 			}
 		} catch (IOException e) {
@@ -73,12 +86,12 @@ public class CompoundMatchDataExtractor {
 		}
 	}
 
-	private static void parseMatchGroupsSheet(Sheet sheet) {
+	private static List<CompoundMatchGroupObject> parseMatchGroupsSheet(Sheet sheet) {
 		
 		Row header = sheet.iterator().next();
 		int headerLength = header.getPhysicalNumberOfCells();
 		if(hasDuplicateFileNames(header))
-			return;
+			return null;
 		
 		Map<CompoundMatcherField, Integer> columnMap = getColumnMap(header);
 		Map<String,Integer>rawFileMap = extractDataFileMap(header);	
@@ -89,19 +102,30 @@ public class CompoundMatchDataExtractor {
 			
 			if(r.getRowNum() > 0 
 					&& !r.getCell(columnMap.get(CompoundMatcherField.FEATURE)).getStringCellValue().trim().isEmpty()) {
+				
+				if(!r.getCell(columnMap.get(CompoundMatcherField.MATCH_GROUP)).getCellType().equals(CellType.NUMERIC)) {
+					System.out.println("Non-numeric MATCH_GROUP in row " + r.getRowNum());
+					if(cmgo != null) {
+						cmgo.finalizeObjectParameters();
+						matchGroupsList.add(cmgo);						
+					}
+					break;
+				}			
 				Integer matchGroup =  
 						Double.valueOf(r.getCell(columnMap.get(CompoundMatcherField.MATCH_GROUP)).getNumericCellValue()).intValue();
 				if(matchGroup != null && !matchGroup.equals(currentMatchGroup)) {
 					
-					if(cmgo != null)
-						matchGroupsList.add(cmgo);
+					if(cmgo != null) {
+						cmgo.finalizeObjectParameters();
+						matchGroupsList.add(cmgo);						
+					}
 					
 					currentMatchGroup = matchGroup;
 					cmgo = new CompoundMatchGroupObject(currentMatchGroup, rawFileMap.keySet());
 				}
 				if(cmgo != null) {
 					
-					String featureName = r.getCell(columnMap.get(CompoundMatcherField.FEATURE)).getStringCellValue();
+					String featureName = r.getCell(columnMap.get(CompoundMatcherField.FEATURE)).getStringCellValue().trim();
 					double mz = r.getCell(columnMap.get(CompoundMatcherField.MONOISOTOPIC_MZ)).getNumericCellValue();
 					double rt = r.getCell(columnMap.get(CompoundMatcherField.RT)).getNumericCellValue();
 					cmgo.getFeatureNames().add(featureName);
@@ -118,8 +142,69 @@ public class CompoundMatchDataExtractor {
 				}
 			}
 		}
+		return matchGroupsList;
 	}
 	
+	private static void exportResults(List<CompoundMatchGroupObject> matchGroupsList, File outputFile) {
+		
+		List<CompoundMatchGroupObject>sortedList = matchGroupsList.stream().
+				sorted(new CompoundMatchGroupObjectComparator(SortProperty.RT)).
+				collect(Collectors.toList());		
+		
+		NumberFormat intensityFormatter = DefaultFormatStore.getDefaultSpectrumIntensityFormat();
+		List<String> lines = new ArrayList<>();
+		String header = createExportHeader(sortedList.get(0));
+		lines.add(header);
+		List<String> line = new ArrayList<>();
+		for(CompoundMatchGroupObject cmgo : sortedList) {
+			
+			line.clear();
+			for(QCANVASInputField f : QCANVASInputField.values()) {
+				
+				if(f.equals(QCANVASInputField.FEATURE)) {
+					line.add(cmgo.getFeature());
+				}
+				else if(f.equals(QCANVASInputField.AVERAGE_MONOISOTOPIC_MZ)) {
+					line.add(Double.toString(cmgo.getMz()));
+				}
+				else if(f.equals(QCANVASInputField.AVERAGE_RT)) {
+					line.add(Double.toString(cmgo.getRt()));
+				}
+				else
+					line.add("");
+			}
+			line.add("");
+			for(Entry<String,Double>peakAreaEntry : cmgo.getPeakAreas().entrySet()) {
+				
+				if(peakAreaEntry.getValue() == null)
+					line.add("");
+				else
+					line.add(intensityFormatter.format(peakAreaEntry.getValue()));
+			}			
+			lines.add(StringUtils.join(line, "\t"));
+		}
+		try {
+		    Files.write(outputFile.toPath(), 
+		    		lines,
+		            StandardCharsets.UTF_8,
+		            StandardOpenOption.CREATE, 
+		            StandardOpenOption.TRUNCATE_EXISTING);
+		} catch (IOException e) {
+		    e.printStackTrace();
+		}
+	}
+
+	private static String createExportHeader(CompoundMatchGroupObject compoundMatchGroupObject) {
+		
+		List<String>parts = new ArrayList<>();
+		for(QCANVASInputField f : QCANVASInputField.values())
+			parts.add(f.getName());
+		
+		parts.add("");
+		compoundMatchGroupObject.getPeakAreas().keySet().forEach(e -> parts.add(e));	
+		return StringUtils.join(parts, "\t");
+	}
+
 	private static Map<CompoundMatcherField,Integer>getColumnMap(Row header){
 
 		Map<CompoundMatcherField,Integer>columnMap = new TreeMap<CompoundMatcherField,Integer>();
