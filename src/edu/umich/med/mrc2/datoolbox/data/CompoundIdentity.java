@@ -150,7 +150,7 @@ public class CompoundIdentity implements Serializable, Comparable<CompoundIdenti
 			exactMass = MolecularFormulaManipulator.getMass(
 					mf, MolecularFormulaManipulator.MonoIsotopic);
 			
-			this.formula = MolecularFormulaManipulator.getString(mf);
+			this.formula = MolecularFormulaManipulator.getString(mf, true, true);
 		}
 		dbIdMap = new HashMap<>();
 	}

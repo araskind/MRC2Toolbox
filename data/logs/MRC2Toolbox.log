@@ -1,71 +1,30 @@
-2026-08-20 11:09:20.733 [main] INFO  edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore - Statring the program
-2026-08-20 11:10:34.558 [Thread executing task null] ERROR edu.umich.med.mrc2.datoolbox.utils.XmlUtils - Failed to create XML document from string
-java.net.MalformedURLException: no protocol: <?xml version="1.0" encoding="UTF-8"?><MSMSExtractionParameterSet ID="MS2EPSe390e380-905" MinPrecursorIntensity="0.0" RemoveAllMassesAboveParent="true" MsMsCountsCutoff="1.0" MaxFragmentsCutoff="-1" FilterIntensityMeasure="RELATIVE" MsmsIsolationWindowLowerBorder="0.65" MsmsIsolationWindowUpperBorder="0.65" MsmsGroupingRtWindow="0.1" PrecursorGroupingMassError="15.0" PrecursorGroupingMassErrorType="ppm" FlagMinorIsotopesPrecursors="true" MaxPrecursorCharge="2" MergeCollisionEnergies="false" SpectrumSimilarityCutoffForMerging="0.7" ChromatogramExtractionWindow="0.3" MsFeatureChromatogramExtractionTarget="MSMSParentIon"><Name>MSMS extraction method 2023-02-22 19:42:55 V-2023-02-22 19:43:00</Name><Description>Modified from MSMS extraction method 2022-07-13 13:17:31 V-2022-07-13 13:33:46 V-2022-07-20 09:46:02 (MS2EPSe390e380-905) by Raskind, Sasha</Description><XICDefinition Mode="XIC" MsLevel="1" SumAll="false" MzWindow="15.0" METype="ppm" RTRange="2.7_3.3" Smooth="false" /></MSMSExtractionParameterSet>
-	at java.base/java.net.URL.<init>(URL.java:736)
-	at java.base/java.net.URL.<init>(URL.java:631)
-	at java.base/java.net.URL.<init>(URL.java:567)
-	at org.apache.xerces.impl.XMLEntityManager.setupCurrentEntity(Unknown Source)
-	at org.apache.xerces.impl.XMLVersionDetector.determineDocVersion(Unknown Source)
-	at org.apache.xerces.parsers.XML11Configuration.parse(Unknown Source)
-	at org.apache.xerces.parsers.XML11Configuration.parse(Unknown Source)
-	at org.apache.xerces.parsers.XMLParser.parse(Unknown Source)
-	at org.apache.xerces.parsers.AbstractSAXParser.parse(Unknown Source)
-	at org.apache.xerces.jaxp.SAXParserImpl$JAXPSAXParser.parse(Unknown Source)
-	at org.jdom2.input.sax.SAXBuilderEngine.build(SAXBuilderEngine.java:217)
-	at org.jdom2.input.SAXBuilder.build(SAXBuilder.java:1053)
-	at edu.umich.med.mrc2.datoolbox.utils.XmlUtils.readXmlString(XmlUtils.java:89)
-	at edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils.extractMSMSExtractionParameterSetfromXML(IDTUtils.java:2362)
-	at edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils.getMSMSExtractionParameters(IDTUtils.java:2345)
-	at edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils.getMSMSExtractionParameters(IDTUtils.java:2319)
-	at edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache.getMsmsExtractionParameters(IDTDataCache.java:1294)
-	at edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache.refreshMSMSExtractionParameters(IDTDataCache.java:1284)
-	at edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.IDTrackerMetadataPullTask.run(IDTrackerMetadataPullTask.java:204)
-	at edu.umich.med.mrc2.datoolbox.taskcontrol.impl.WorkerThread.run(WorkerThread.java:53)
-2026-08-20 11:10:34.573 [Thread executing task null] ERROR edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache - Failed to load MSMS Extraction Parameters List from the database
-java.lang.NullPointerException: Cannot invoke "org.jdom2.Document.getRootElement()" because "doc" is null
-	at edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils.extractMSMSExtractionParameterSetfromXML(IDTUtils.java:2363)
-	at edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils.getMSMSExtractionParameters(IDTUtils.java:2345)
-	at edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils.getMSMSExtractionParameters(IDTUtils.java:2319)
-	at edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache.getMsmsExtractionParameters(IDTDataCache.java:1294)
-	at edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache.refreshMSMSExtractionParameters(IDTDataCache.java:1284)
-	at edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.IDTrackerMetadataPullTask.run(IDTrackerMetadataPullTask.java:204)
-	at edu.umich.med.mrc2.datoolbox.taskcontrol.impl.WorkerThread.run(WorkerThread.java:53)
-2026-08-20 11:18:43.067 [main] INFO  edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore - Statring the program
-2026-08-20 15:32:30.986 [main] DEBUG org.apache.poi.openxml4j.opc.PackageRelationshipCollection - Parsing relationship: /xl/_rels/workbook.xml.rels
-2026-08-20 15:32:30.998 [main] DEBUG org.apache.poi.openxml4j.opc.PackageRelationshipCollection - Parsing relationship: /_rels/.rels
-2026-08-20 15:34:55.738 [main] DEBUG org.apache.poi.openxml4j.opc.PackageRelationshipCollection - Parsing relationship: /xl/_rels/workbook.xml.rels
-2026-08-20 15:34:55.752 [main] DEBUG org.apache.poi.openxml4j.opc.PackageRelationshipCollection - Parsing relationship: /_rels/.rels
-2026-08-20 15:36:16.669 [main] DEBUG org.apache.poi.openxml4j.opc.PackageRelationshipCollection - Parsing relationship: /xl/_rels/workbook.xml.rels
-2026-08-20 15:36:16.683 [main] DEBUG org.apache.poi.openxml4j.opc.PackageRelationshipCollection - Parsing relationship: /_rels/.rels
-2026-08-20 15:48:14.401 [main] DEBUG org.apache.poi.openxml4j.opc.PackageRelationshipCollection - Parsing relationship: /xl/_rels/workbook.xml.rels
-2026-08-20 15:48:14.417 [main] DEBUG org.apache.poi.openxml4j.opc.PackageRelationshipCollection - Parsing relationship: /_rels/.rels
-2026-08-20 16:12:21.730 [main] DEBUG org.apache.poi.openxml4j.opc.PackageRelationshipCollection - Parsing relationship: /xl/_rels/workbook.xml.rels
-2026-08-20 16:12:21.740 [main] DEBUG org.apache.poi.openxml4j.opc.PackageRelationshipCollection - Parsing relationship: /_rels/.rels
-2026-08-20 16:13:23.097 [main] DEBUG org.apache.poi.openxml4j.opc.PackageRelationshipCollection - Parsing relationship: /xl/_rels/workbook.xml.rels
-2026-08-20 16:13:23.107 [main] DEBUG org.apache.poi.openxml4j.opc.PackageRelationshipCollection - Parsing relationship: /_rels/.rels
-2026-08-20 16:35:51.258 [main] DEBUG org.apache.poi.openxml4j.opc.PackageRelationshipCollection - Parsing relationship: /xl/_rels/workbook.xml.rels
-2026-08-20 16:35:51.271 [main] DEBUG org.apache.poi.openxml4j.opc.PackageRelationshipCollection - Parsing relationship: /_rels/.rels
-2026-08-20 16:36:45.227 [main] DEBUG org.apache.poi.openxml4j.opc.PackageRelationshipCollection - Parsing relationship: /xl/_rels/workbook.xml.rels
-2026-08-20 16:36:45.243 [main] DEBUG org.apache.poi.openxml4j.opc.PackageRelationshipCollection - Parsing relationship: /_rels/.rels
-2026-08-20 16:41:28.815 [main] DEBUG org.apache.poi.openxml4j.opc.PackageRelationshipCollection - Parsing relationship: /xl/_rels/workbook.xml.rels
-2026-08-20 16:41:28.826 [main] DEBUG org.apache.poi.openxml4j.opc.PackageRelationshipCollection - Parsing relationship: /_rels/.rels
-2026-08-20 19:25:27.761 [main] DEBUG org.apache.poi.openxml4j.opc.PackageRelationshipCollection - Parsing relationship: /xl/_rels/workbook.xml.rels
-2026-08-20 19:25:27.779 [main] DEBUG org.apache.poi.openxml4j.opc.PackageRelationshipCollection - Parsing relationship: /_rels/.rels
-2026-08-20 19:33:25.376 [main] DEBUG org.apache.poi.openxml4j.opc.PackageRelationshipCollection - Parsing relationship: /xl/_rels/workbook.xml.rels
-2026-08-20 19:33:25.387 [main] DEBUG org.apache.poi.openxml4j.opc.PackageRelationshipCollection - Parsing relationship: /_rels/.rels
-2026-08-20 19:39:57.335 [main] DEBUG org.apache.poi.openxml4j.opc.PackageRelationshipCollection - Parsing relationship: /xl/_rels/workbook.xml.rels
-2026-08-20 19:39:57.352 [main] DEBUG org.apache.poi.openxml4j.opc.PackageRelationshipCollection - Parsing relationship: /_rels/.rels
-2026-08-20 19:41:15.411 [main] DEBUG org.apache.poi.openxml4j.opc.PackageRelationshipCollection - Parsing relationship: /xl/_rels/workbook.xml.rels
-2026-08-20 19:41:15.426 [main] DEBUG org.apache.poi.openxml4j.opc.PackageRelationshipCollection - Parsing relationship: /_rels/.rels
-2026-08-20 19:42:47.395 [main] DEBUG org.apache.poi.openxml4j.opc.PackageRelationshipCollection - Parsing relationship: /xl/_rels/workbook.xml.rels
-2026-08-20 19:42:47.407 [main] DEBUG org.apache.poi.openxml4j.opc.PackageRelationshipCollection - Parsing relationship: /_rels/.rels
-2026-08-20 19:44:10.023 [main] DEBUG org.apache.poi.openxml4j.opc.PackageRelationshipCollection - Parsing relationship: /xl/_rels/workbook.xml.rels
-2026-08-20 19:44:10.032 [main] DEBUG org.apache.poi.openxml4j.opc.PackageRelationshipCollection - Parsing relationship: /_rels/.rels
-2026-08-20 19:45:17.474 [main] DEBUG org.apache.poi.openxml4j.opc.PackageRelationshipCollection - Parsing relationship: /xl/_rels/workbook.xml.rels
-2026-08-20 19:45:17.485 [main] DEBUG org.apache.poi.openxml4j.opc.PackageRelationshipCollection - Parsing relationship: /_rels/.rels
-2026-08-20 20:29:21.821 [main] DEBUG org.apache.poi.openxml4j.opc.PackageRelationshipCollection - Parsing relationship: /xl/_rels/workbook.xml.rels
-2026-08-20 20:29:21.832 [main] DEBUG org.apache.poi.openxml4j.opc.PackageRelationshipCollection - Parsing relationship: /_rels/.rels
-2026-08-20 20:42:23.331 [main] DEBUG org.apache.poi.openxml4j.opc.PackageRelationshipCollection - Parsing relationship: /xl/_rels/workbook.xml.rels
-2026-08-20 20:42:23.340 [main] DEBUG org.apache.poi.openxml4j.opc.PackageRelationshipCollection - Parsing relationship: /_rels/.rels
-2026-08-20 20:52:36.297 [main] DEBUG org.apache.poi.openxml4j.opc.PackageRelationshipCollection - Parsing relationship: /xl/_rels/workbook.xml.rels
-2026-08-20 20:52:36.308 [main] DEBUG org.apache.poi.openxml4j.opc.PackageRelationshipCollection - Parsing relationship: /_rels/.rels
+2026-08-24 15:35:11.291 [main] DEBUG org.apache.poi.openxml4j.opc.PackageRelationshipCollection - Parsing relationship: /xl/_rels/workbook.xml.rels
+2026-08-24 15:35:11.325 [main] DEBUG org.apache.poi.openxml4j.opc.PackageRelationshipCollection - Parsing relationship: /xl/worksheets/_rels/sheet3.xml.rels
+2026-08-24 15:35:11.330 [main] DEBUG org.apache.poi.openxml4j.opc.PackageRelationshipCollection - Parsing relationship: /_rels/.rels
+2026-08-24 15:37:44.288 [main] DEBUG org.apache.poi.openxml4j.opc.PackageRelationshipCollection - Parsing relationship: /xl/_rels/workbook.xml.rels
+2026-08-24 15:37:44.298 [main] DEBUG org.apache.poi.openxml4j.opc.PackageRelationshipCollection - Parsing relationship: /xl/worksheets/_rels/sheet3.xml.rels
+2026-08-24 15:37:44.305 [main] DEBUG org.apache.poi.openxml4j.opc.PackageRelationshipCollection - Parsing relationship: /_rels/.rels
+2026-08-24 15:41:53.380 [main] DEBUG org.apache.poi.openxml4j.opc.PackageRelationshipCollection - Parsing relationship: /xl/_rels/workbook.xml.rels
+2026-08-24 15:41:53.393 [main] DEBUG org.apache.poi.openxml4j.opc.PackageRelationshipCollection - Parsing relationship: /xl/worksheets/_rels/sheet3.xml.rels
+2026-08-24 15:41:53.400 [main] DEBUG org.apache.poi.openxml4j.opc.PackageRelationshipCollection - Parsing relationship: /_rels/.rels
+2026-08-24 15:56:25.601 [main] DEBUG org.apache.poi.openxml4j.opc.PackageRelationshipCollection - Parsing relationship: /xl/_rels/workbook.xml.rels
+2026-08-24 15:56:25.612 [main] DEBUG org.apache.poi.openxml4j.opc.PackageRelationshipCollection - Parsing relationship: /xl/worksheets/_rels/sheet3.xml.rels
+2026-08-24 15:56:25.618 [main] DEBUG org.apache.poi.openxml4j.opc.PackageRelationshipCollection - Parsing relationship: /_rels/.rels
+2026-08-24 16:04:52.787 [main] DEBUG org.apache.poi.openxml4j.opc.PackageRelationshipCollection - Parsing relationship: /xl/_rels/workbook.xml.rels
+2026-08-24 16:04:52.796 [main] DEBUG org.apache.poi.openxml4j.opc.PackageRelationshipCollection - Parsing relationship: /xl/worksheets/_rels/sheet3.xml.rels
+2026-08-24 16:04:52.801 [main] DEBUG org.apache.poi.openxml4j.opc.PackageRelationshipCollection - Parsing relationship: /_rels/.rels
+2026-08-24 16:10:23.135 [main] DEBUG org.apache.poi.openxml4j.opc.PackageRelationshipCollection - Parsing relationship: /xl/_rels/workbook.xml.rels
+2026-08-24 16:10:23.146 [main] DEBUG org.apache.poi.openxml4j.opc.PackageRelationshipCollection - Parsing relationship: /xl/worksheets/_rels/sheet3.xml.rels
+2026-08-24 16:10:23.150 [main] DEBUG org.apache.poi.openxml4j.opc.PackageRelationshipCollection - Parsing relationship: /_rels/.rels
+2026-08-24 16:14:18.667 [main] DEBUG org.apache.poi.openxml4j.opc.PackageRelationshipCollection - Parsing relationship: /xl/_rels/workbook.xml.rels
+2026-08-24 16:14:18.678 [main] DEBUG org.apache.poi.openxml4j.opc.PackageRelationshipCollection - Parsing relationship: /xl/worksheets/_rels/sheet3.xml.rels
+2026-08-24 16:14:18.682 [main] DEBUG org.apache.poi.openxml4j.opc.PackageRelationshipCollection - Parsing relationship: /_rels/.rels
+2026-08-24 16:25:06.803 [main] DEBUG org.apache.poi.openxml4j.opc.PackageRelationshipCollection - Parsing relationship: /xl/_rels/workbook.xml.rels
+2026-08-24 16:25:06.814 [main] DEBUG org.apache.poi.openxml4j.opc.PackageRelationshipCollection - Parsing relationship: /xl/worksheets/_rels/sheet3.xml.rels
+2026-08-24 16:25:06.819 [main] DEBUG org.apache.poi.openxml4j.opc.PackageRelationshipCollection - Parsing relationship: /_rels/.rels
+2026-08-24 16:26:50.112 [main] DEBUG org.apache.poi.openxml4j.opc.PackageRelationshipCollection - Parsing relationship: /xl/_rels/workbook.xml.rels
+2026-08-24 16:26:50.123 [main] DEBUG org.apache.poi.openxml4j.opc.PackageRelationshipCollection - Parsing relationship: /xl/worksheets/_rels/sheet3.xml.rels
+2026-08-24 16:26:50.127 [main] DEBUG org.apache.poi.openxml4j.opc.PackageRelationshipCollection - Parsing relationship: /_rels/.rels
+2026-08-24 16:28:18.303 [main] DEBUG org.apache.poi.openxml4j.opc.PackageRelationshipCollection - Parsing relationship: /xl/_rels/workbook.xml.rels
+2026-08-24 16:28:18.313 [main] DEBUG org.apache.poi.openxml4j.opc.PackageRelationshipCollection - Parsing relationship: /xl/worksheets/_rels/sheet3.xml.rels
+2026-08-24 16:28:18.318 [main] DEBUG org.apache.poi.openxml4j.opc.PackageRelationshipCollection - Parsing relationship: /_rels/.rels

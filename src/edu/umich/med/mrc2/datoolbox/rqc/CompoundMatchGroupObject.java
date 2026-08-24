@@ -107,6 +107,10 @@ public class CompoundMatchGroupObject {
 	public Map<String, Double> getPeakAreas() {
 		return peakAreas;
 	}
+
+	public void setFeature(String feature) {
+		this.feature = feature;
+	}
 	
 	
 }
