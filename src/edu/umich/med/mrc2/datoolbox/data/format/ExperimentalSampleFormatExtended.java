@@ -37,7 +37,6 @@ public class ExperimentalSampleFormatExtended extends Format {
 
 	public ExperimentalSampleFormatExtended() {
 		super();
-		// TODO Auto-generated constructor stub
 	}
 
 	@Override
@@ -48,7 +47,7 @@ public class ExperimentalSampleFormatExtended extends Format {
 			sample = (ExperimentalSample)obj;
 			return toAppendTo.append(sample.getId() + " (" + sample.getName() + ")");
 		}
-		return toAppendTo.append("");
+		return toAppendTo;
 	}
 
 	@Override

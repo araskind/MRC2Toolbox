@@ -48,7 +48,7 @@ public class MsFeatureIdentityMSMSScoreComparator extends ObjectCompatrator<MsFe
 		if(matchOne != null && matchTwo == null)
 			return -1;	
 		
-		if(matchOne == null && matchTwo != null)
+		if(matchOne == null)
 			return 1;
 				
 		return Double.compare(matchTwo.getScore(), matchOne.getScore());

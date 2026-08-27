@@ -57,7 +57,7 @@ public class DataPipelineFormat extends Format {
 			if(field.equals(SortProperty.Description))
 				return toAppendTo.append(pl.getDescription());
 		}
-		return toAppendTo.append("");
+		return toAppendTo;
 	}
 
 	@Override

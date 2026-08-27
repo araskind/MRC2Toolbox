@@ -92,6 +92,18 @@ public class CompoundMultiplexMixtureComponent implements Comparable<CompoundMul
 	public void setConcentrationMkMol(double concentrationMkMol) {
 		this.concentrationMkMol = concentrationMkMol;
 	}
+	
+	public Map<String, String> getCompoundProperties() {
+		return compoundProperties;
+	}
+	
+	public void setProperty(String property, String value) {
+		compoundProperties.put(property, value);
+	}
+	
+	public void getProperty(String property) {
+		compoundProperties.get(property);
+	}
 
 	@Override
 	public boolean equals(Object obj) {
@@ -120,4 +132,5 @@ public class CompoundMultiplexMixtureComponent implements Comparable<CompoundMul
         hash = 53 * hash + (this.id != null ? this.id.hashCode() : 0);
         return hash;
     }
+
 }

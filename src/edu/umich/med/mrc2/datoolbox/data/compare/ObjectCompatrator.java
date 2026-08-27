@@ -23,8 +23,9 @@ package edu.umich.med.mrc2.datoolbox.data.compare;
 
 import java.io.Serializable;
 import java.util.Comparator;
+import java.util.Objects;
 
-public class ObjectCompatrator<T> implements Comparator<T> , Serializable {
+public abstract class ObjectCompatrator<T> implements Comparator<T> , Serializable {
 
 	/**
 	 *
@@ -34,21 +35,15 @@ public class ObjectCompatrator<T> implements Comparator<T> , Serializable {
 	protected SortProperty property;
 	protected SortDirection direction;
 
-	@Override
-	public int compare(T o1, T o2) {
-		// TODO Auto-generated method stub
-		return 0;
+	protected ObjectCompatrator(SortProperty property, SortDirection direction) {
+		super();
+		this.property = Objects.requireNonNull(property, "Sort property cannot be null");
+		this.direction = Objects.requireNonNull(direction, "Sort direction cannot be null");
 	}
 
-	public ObjectCompatrator(SortProperty property, SortDirection direction) {
+	protected ObjectCompatrator(SortProperty property) {
 		super();
-		this.property = property;
-		this.direction = direction;
-	}
-
-	public ObjectCompatrator(SortProperty property) {
-		super();
-		this.property = property;
+		this.property = Objects.requireNonNull(property, "Sort property cannot be null");
 		this.direction = SortDirection.ASC;
 	}
 }

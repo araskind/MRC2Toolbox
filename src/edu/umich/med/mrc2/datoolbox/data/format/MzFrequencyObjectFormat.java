@@ -52,7 +52,7 @@ public class MzFrequencyObjectFormat extends Format {
 				return toAppendTo.append(
 						MRC2ToolBoxConfiguration.getMzFormat().format(mzfo.getMzRange().getAverage()));
 		}
-		return toAppendTo.append("");
+		return toAppendTo;
 	}
 
 	@Override

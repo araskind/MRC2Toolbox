@@ -56,7 +56,7 @@ public class InstrumentFormat extends Format {
 			if(field.equals(SortProperty.Description))
 				return toAppendTo.append(instrument.toString());
 		}
-		return toAppendTo.append("");
+		return toAppendTo;
 	}
 
 	@Override

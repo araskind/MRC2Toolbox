@@ -19,7 +19,7 @@
  *
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.data.compare;
+package edu.umich.med.mrc2.datoolbox.data.enums;
 
 public enum ChartColorOption {
 

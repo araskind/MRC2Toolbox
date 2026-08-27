@@ -83,13 +83,6 @@ public class AnalysisQcEventAnnotation implements Comparable<AnalysisQcEventAnno
 		id = DataPrefix.ANNOTATION.getName() + UUID.randomUUID().toString();
 	}
 
-	public AnalysisQcEventAnnotation(String uid, String contents, long created, long modified) {
-
-		id = uid;
-		dateCreated = new Date(created);
-		lastModified = new Date(modified);
-	}
-
 	public AnalysisQcEventAnnotation(String uid, String contents) {
 
 		id = uid;

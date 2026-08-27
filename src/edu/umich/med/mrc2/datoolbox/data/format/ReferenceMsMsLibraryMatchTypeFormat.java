@@ -52,7 +52,7 @@ public class ReferenceMsMsLibraryMatchTypeFormat  extends Format {
  
 			return toAppendTo.append(label);
 		}
-		return toAppendTo.append("");
+		return toAppendTo;
 	}
 
 	@Override

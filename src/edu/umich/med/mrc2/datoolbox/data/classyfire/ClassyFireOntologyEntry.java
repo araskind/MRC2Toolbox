@@ -30,14 +30,12 @@ public class ClassyFireOntologyEntry {
 	
 	public ClassyFireOntologyEntry() {
 		super();
-		// TODO Auto-generated constructor stub
 	}
 
 	public ClassyFireOntologyEntry(
 			String id, 
 			String name, 
 			String description, 
-			String url,
 			ClassyFireOntologyLevel level) {
 		super();
 		this.id = id;

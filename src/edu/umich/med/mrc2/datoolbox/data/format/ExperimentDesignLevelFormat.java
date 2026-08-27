@@ -57,7 +57,7 @@ public class ExperimentDesignLevelFormat extends Format {
 			if(field.equals(SortProperty.ID))
 				return toAppendTo.append(level.getLevelId());
 		}
-		return toAppendTo.append("");
+		return toAppendTo;
 	}
 
 	@Override

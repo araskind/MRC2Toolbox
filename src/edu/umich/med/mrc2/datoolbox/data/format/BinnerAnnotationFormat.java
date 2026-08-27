@@ -43,7 +43,7 @@ public class BinnerAnnotationFormat extends Format {
 			annotation = (BinnerAnnotation)obj;
 			return toAppendTo.append(annotation.getAnnotation());
 		}
-		return toAppendTo.append("");
+		return toAppendTo;
 	}
 
 	@Override

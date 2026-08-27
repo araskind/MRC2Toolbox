@@ -73,4 +73,32 @@ public class LIMSStorageLocation implements Serializable {
 	public void setUnit(String unit) {
 		this.unit = unit;
 	}
+	
+    @Override
+    public boolean equals(Object obj) {
+
+		if (obj == this)
+			return true;
+
+        if (obj == null)
+            return false;
+
+        if (!LIMSStorageLocation.class.isAssignableFrom(obj.getClass()))
+            return false;
+
+        final LIMSStorageLocation other = (LIMSStorageLocation) obj;
+
+        if ((this.id == null) ? (other.getId() != null) : !this.id.equals(other.getId()))
+            return false;
+
+        return true;
+    }
+	
+    @Override
+    public int hashCode() {
+
+        int hash = 3;
+        hash = 53 * hash + (this.id != null ? this.id.hashCode() : 0);
+        return hash;
+    }
 }

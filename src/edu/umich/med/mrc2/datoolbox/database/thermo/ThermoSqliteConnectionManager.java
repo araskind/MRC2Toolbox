@@ -28,18 +28,27 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+
 public class ThermoSqliteConnectionManager {
+	
+	private static final Logger logger = LogManager.getLogger(ThermoSqliteConnectionManager.class);
 
-	public static Connection getConnection(File sqliteDatabase) throws Exception {
+	private ThermoSqliteConnectionManager() {
+		/* This utility class should not be instantiated */
+	}
 
-		Class.forName("org.sqlite.JDBC");		
+	public static Connection getConnection(File sqliteDatabase) throws SQLException {
+
+		//	Class.forName("org.sqlite.JDBC");		
 		String url = "jdbc:sqlite:" + sqliteDatabase.getAbsolutePath().replaceAll("\\\\", "/");
 		Connection connection = null;
 		try {
 			connection = DriverManager.getConnection(url);
-			System.out.println("Connection to SQLite has been established.");
+			logger.debug("Connection to SQLite has been established.");
 		} catch (SQLException e) {
-			System.out.println(e.getMessage());
+			logger.error("Failed to establish connection to SQLite", e);
 		}
 		return connection;		
 	}
@@ -51,7 +60,7 @@ public class ThermoSqliteConnectionManager {
 	 *
 	 * @return the results from the query
 	 */
-	public static ResultSet executeQueryNoParams(Connection conn, String statement) throws Exception {
+	public static ResultSet executeQueryNoParams(Connection conn, String statement) throws SQLException {
 		PreparedStatement ps = conn.prepareStatement(statement);
 		return ps.executeQuery();
 	}
@@ -66,7 +75,7 @@ public class ThermoSqliteConnectionManager {
 			PreparedStatement ps = conn.prepareStatement(statement);
 			return ps.executeUpdate();
 		} catch (SQLException e) {
-			System.out.println(e.getMessage());
+			logger.error("Failed to Execute Update", e);
 		}
 		return 0;
 	}
@@ -76,8 +85,8 @@ public class ThermoSqliteConnectionManager {
             if (connection != null) {  
             	connection.close();  
             }  
-        } catch (SQLException ex) {  
-            System.out.println(ex.getMessage());  
+        } catch (SQLException e) {  
+        	logger.error("Failed to release connection", e);
         } 
 	}
 }

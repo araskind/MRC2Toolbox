@@ -39,45 +39,37 @@ public class AdductRankComparator implements Comparator<Adduct>{
 	@Override
 	public int compare(Adduct a1, Adduct a2) {
 
-		int result = 0;
 		if(a1 == null && a2 == null)
 			return 0;
 		
-		if(a1 == null && a2 != null)
+		if(a1 == null)
 			return 1;
 		
-		if(a1 != null && a2 == null)
+		if(a2 == null)
 			return -1;
 		
 		if(!a1.getPolarity().equals(a2.getPolarity()))
 			return 0;
 		
 		Integer a1rank = null;
-		Integer a2rank = null;
-		
-		if(a1.getPolarity().equals(Polarity.Positive)) {
-			
+		Integer a2rank = null;	
+		if(a1.getPolarity().equals(Polarity.Positive)) {			
 			a1rank = rankedPosAdducts.get(a1);
 			a2rank = rankedPosAdducts.get(a2);
 		}
-		if(a1.getPolarity().equals(Polarity.Negative)) {
-			
+		if(a1.getPolarity().equals(Polarity.Negative)) {			
 			a1rank = rankedNegAdducts.get(a1);
 			a2rank = rankedNegAdducts.get(a2);
 		}
-		if(a1rank == null && a2rank != null)
-			return 1;
-		
-		if(a1rank != null && a2rank == null)
-			return -1;
-		
-		if(a1rank != null && a2rank != null)
-			return Integer.compare(a1rank, a2rank);
-			
 		if(a1rank == null && a2rank == null)
 			return adductSorter.compare(a1, a2);
 		
-		return result;
+		if(a1rank == null)	//	?? check this comparison
+			return 1;
+		
+		if(a2rank == null)
+			return -1;
+		
+		return Integer.compare(a1rank, a2rank);					
 	}
-
 }

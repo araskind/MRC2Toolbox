@@ -219,7 +219,7 @@ public class LIMSUtils {
 			"ORDER BY 1";
 		try(PreparedStatement ps = conn.prepareStatement(query)){
 			ps.setString(1, experimentId);
-			ResultSet rs = ps.executeQuery();				;
+			ResultSet rs = ps.executeQuery();
 			while (rs.next()) {
 				ExperimentalSubject subject = new ExperimentalSubject(
 						rs.getString("SUBJECT_ID"),
@@ -348,9 +348,9 @@ public class LIMSUtils {
 		if(!bioMaterialTypes.isEmpty()) {
 
 			ExperimentDesignFactor bioMaterialFactor = new ExperimentDesignFactor(StandardFactors.BIOLOGICAL_MATERIAL.getName());
-			bioMaterialTypes.stream().forEach(t -> bioMaterialFactor.addLevel(new ExperimentDesignLevel(t)));
+			bioMaterialTypes.forEach(t -> bioMaterialFactor.addLevel(new ExperimentDesignLevel(t)));
 			design.addFactor(bioMaterialFactor,false);
-			design.getSamples().stream().forEach(s -> s.addDesignLevel(design.getLevelByName(s.getLimsSampleType())));
+			design.getSamples().forEach(s -> s.addDesignLevel(design.getLevelByName(s.getLimsSampleType())));
 		}
 		//	Get subjects data
 		Collection<ExperimentalSubject> subjects = new TreeSet<ExperimentalSubject>();
@@ -683,38 +683,21 @@ public class LIMSUtils {
 				"INSERT INTO ORGANIZATION (ORGANIZATION_ID, NAME, ADDRESS, "
 				+ "DEPARTMENT_OR_DIVISION, LABORATORY, PRINCIPAL_INVESTIGATOR_ID, "
 				+ "CONTACT_PERSON_ID, MAILING_ADDRESS, CLIENT_ID_TMP) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-		PreparedStatement ps = conn.prepareStatement(sql);
-		ps.setString(1, nextId);
-		ps.setString(2, organization.getName());
-		ps.setString(3, organization.getAddress());
-		ps.setString(4, organization.getDepartment());
-		ps.setString(5, organization.getLaboratory());		
-		ps.setString(6, organization.getPrincipalInvestigator().getId());
-		ps.setString(7, organization.getContactPerson().getId());
-		ps.setString(8, organization.getMailingAddress());	
-		ps.setString(9, organization.getMetlimsClientId());
-		ps.executeUpdate();
-		ps.close();
+		try(PreparedStatement ps = conn.prepareStatement(sql)){
+			ps.setString(1, nextId);
+			ps.setString(2, organization.getName());
+			ps.setString(3, organization.getAddress());
+			ps.setString(4, organization.getDepartment());
+			ps.setString(5, organization.getLaboratory());		
+			ps.setString(6, organization.getPrincipalInvestigator().getId());
+			ps.setString(7, organization.getContactPerson().getId());
+			ps.setString(8, organization.getMailingAddress());	
+			ps.setString(9, organization.getMetlimsClientId());
+			ps.executeUpdate();
+		}
 		return nextId;	
 	}
-	
-//	public static String getNextOrganizationId(Connection conn) throws SQLException{
-//		
-//		String nextId = null;
-//		String query  =
-//				"SELECT '" + DataPrefix.LIMS_ORGANIZATION.getName() + 
-//				"' || LPAD(ORGANIZATION_SEQ.NEXTVAL, 4, '0') AS NEXT_ID FROM DUAL";
-//		
-//		PreparedStatement ps = conn.prepareStatement(query);
-//		ResultSet rs = ps.executeQuery();
-//		while(rs.next()) {
-//			nextId = rs.getString("NEXT_ID");
-//		}
-//		rs.close();
-//		ps.close();	
-//		return nextId;
-//	}
-	
+
 	public static void editOrganization(IdTrackerOrganization organization) throws SQLException{
 		
 		Connection conn = ConnectionManager.getConnection();
@@ -729,29 +712,28 @@ public class LIMSUtils {
 				+ "DEPARTMENT_OR_DIVISION = ?, LABORATORY = ?, PRINCIPAL_INVESTIGATOR_ID = ?, "
 				+ "CONTACT_PERSON_ID = ?, MAILING_ADDRESS = ?, CLIENT_ID_TMP = ? "
 				+ "WHERE ORGANIZATION_ID = ?";
-		PreparedStatement ps = conn.prepareStatement(sql);
-		
-		ps.setString(1, organization.getName());
-		ps.setString(2, organization.getAddress());
-		ps.setString(3, organization.getDepartment());
-		ps.setString(4, organization.getLaboratory());		
-		ps.setString(5, organization.getPrincipalInvestigator().getId());
-		ps.setString(6, organization.getContactPerson().getId());
-		ps.setString(7, organization.getMailingAddress());	
-		ps.setString(8, organization.getMetlimsClientId());
-		ps.setString(9, organization.getId());
-		ps.executeUpdate();
-		ps.close();	
+		try(PreparedStatement ps = conn.prepareStatement(sql)){		
+			ps.setString(1, organization.getName());
+			ps.setString(2, organization.getAddress());
+			ps.setString(3, organization.getDepartment());
+			ps.setString(4, organization.getLaboratory());		
+			ps.setString(5, organization.getPrincipalInvestigator().getId());
+			ps.setString(6, organization.getContactPerson().getId());
+			ps.setString(7, organization.getMailingAddress());	
+			ps.setString(8, organization.getMetlimsClientId());
+			ps.setString(9, organization.getId());
+			ps.executeUpdate();
+		}
 	}
 	
 	public static void deleteOrganization(IdTrackerOrganization organization) throws SQLException{
 		
 		Connection conn = ConnectionManager.getConnection();
 		String sql = "DELETE FROM ORGANIZATION WHERE ORGANIZATION_ID = ?";
-		PreparedStatement ps = conn.prepareStatement(sql);	
-		ps.setString(1, organization.getId());
-		ps.executeUpdate();
-		ps.close();	
+		try(PreparedStatement ps = conn.prepareStatement(sql)){
+			ps.setString(1, organization.getId());
+			ps.executeUpdate();
+		}
 		ConnectionManager.releaseConnection(conn);
 	}
 	
@@ -767,16 +749,16 @@ public class LIMSUtils {
 		
 		Collection<InstrumentPlatform>platforms = new TreeSet<InstrumentPlatform>();
 		String sql = "SELECT PLATFORM_ID, PLATFORM_DESCRIPTION FROM INSTRUMENT_PLATFORM ORDER BY 1";
-		PreparedStatement ps = conn.prepareStatement(sql);
-		ResultSet rs = ps.executeQuery();
-		while(rs.next()) {
-			InstrumentPlatform platform = new InstrumentPlatform(
-					rs.getString("PLATFORM_ID"), 
-					rs.getString("PLATFORM_DESCRIPTION"));
-			platforms.add(platform);
+		try(PreparedStatement ps = conn.prepareStatement(sql)){
+			ResultSet rs = ps.executeQuery();
+			while(rs.next()) {
+				InstrumentPlatform platform = new InstrumentPlatform(
+						rs.getString("PLATFORM_ID"), 
+						rs.getString("PLATFORM_DESCRIPTION"));
+				platforms.add(platform);
+			}
+			rs.close();
 		}
-		rs.close();
-		ps.close();	
 		return platforms;
 	}
 	
@@ -797,36 +779,38 @@ public class LIMSUtils {
 			"SELECT CLIENT_ID, NAME, ADDRESS, DEPARTMENT_OR_DIVISION, LABORATORY, "
 			+ "PRINCIPAL_INVESTIGATOR_ID, CONTACT_PERSON_ID, ORGANIZATION_ID "
 			+ "FROM LIMS_CLIENT ORDER BY CLIENT_ID";
-		PreparedStatement ps = conn.prepareStatement(sql);
-		ResultSet rs = ps.executeQuery();
-		while (rs.next()) {
-
-			LIMSClient client = new LIMSClient(
-					rs.getString("CLIENT_ID"),
-					rs.getString("DEPARTMENT_OR_DIVISION"),
-					rs.getString("LABORATORY"),
-					rs.getString("ADDRESS"));
-								
-			client.setOrganization(LIMSDataCache.getLIMSOrganizationById(rs.getString("ORGANIZATION_ID")));
-			String piId = rs.getString("PRINCIPAL_INVESTIGATOR_ID");
-			LIMSUser pi = userList.stream().
-					filter(e -> e.getId().equals(piId)).findFirst().orElse(null);
-			if (pi == null)
-				System.out.println("Can not find PI for user ID " + rs.getString("PRINCIPAL_INVESTIGATOR_ID"));
-			
-			client.setPrincipalInvestigator(pi);
-			
-			String cpId = rs.getString("CONTACT_PERSON_ID");
-			LIMSUser cp = userList.stream().
-					filter(e -> e.getId().equals(cpId)).findFirst().orElse(null);
-			if (cp == null)
-				System.out.println("Can not find contact person for user ID " + rs.getString("CONTACT_PERSON_ID"));
-						
-			client.setContactPerson(cp);
-			clients.add(client);
+		try(PreparedStatement ps = conn.prepareStatement(sql)){
+			ResultSet rs = ps.executeQuery();
+			while (rs.next()) {
+	
+				LIMSClient client = new LIMSClient(
+						rs.getString("CLIENT_ID"),
+						rs.getString("DEPARTMENT_OR_DIVISION"),
+						rs.getString("LABORATORY"),
+						rs.getString("ADDRESS"));
+									
+				client.setOrganization(LIMSDataCache.getLIMSOrganizationById(rs.getString("ORGANIZATION_ID")));
+				String piId = rs.getString("PRINCIPAL_INVESTIGATOR_ID");
+				LIMSUser pi = userList.stream().
+						filter(e -> e.getId().equals(piId)).findFirst().orElse(null);
+				if (pi == null)
+					logger.error(String.format("Can not find PI for user ID %s", 
+							rs.getString("PRINCIPAL_INVESTIGATOR_ID")));
+				
+				client.setPrincipalInvestigator(pi);
+				
+				String cpId = rs.getString("CONTACT_PERSON_ID");
+				LIMSUser cp = userList.stream().
+						filter(e -> e.getId().equals(cpId)).findFirst().orElse(null);
+				if (cp == null)
+					logger.error(String.format("Can not find contact person for user ID %s", 
+						rs.getString("CONTACT_PERSON_ID")));
+							
+				client.setContactPerson(cp);
+				clients.add(client);
+			}
+			rs.close();
 		}
-		rs.close();
-		ps.close();	
 		return clients;
 	}
 	
@@ -838,42 +822,41 @@ public class LIMSUtils {
 		
 		//	Get subject IDs for experiment that do not overlap with other experiments	
 		String query = "SELECT DISTINCT S.SUBJECT_ID FROM LIMS_SAMPLE S WHERE S.EXPERIMENT_ID = ?";
-		PreparedStatement ps = conn.prepareStatement(query);
-		ps.setString(1, experimentId);
-		ResultSet rs = ps.executeQuery();
-		while (rs.next())
-			subjectIds.add(rs.getString("SUBJECT_ID"));
-
-		rs.close();
-		
+		try(PreparedStatement ps = conn.prepareStatement(query)){
+			ps.setString(1, experimentId);
+			ResultSet rs = ps.executeQuery();
+			while (rs.next())
+				subjectIds.add(rs.getString("SUBJECT_ID"));
+	
+			rs.close();
+		}
 		query = "SELECT DISTINCT S.SUBJECT_ID FROM LIMS_SAMPLE S WHERE S.EXPERIMENT_ID = ?";
-		ps = conn.prepareStatement(query);
-		ps.setString(1, experimentId);
-		rs = ps.executeQuery();
-		while (rs.next())
-			subjectIdsToKeep.add(rs.getString("SUBJECT_ID"));
-
-		rs.close();
-		
+		try(PreparedStatement ps = conn.prepareStatement(query)){
+			ps.setString(1, experimentId);
+			ResultSet rs = ps.executeQuery();
+			while (rs.next())
+				subjectIdsToKeep.add(rs.getString("SUBJECT_ID"));
+	
+			rs.close();
+		}
 		if(!subjectIdsToKeep.isEmpty()) {
 			subjectIds  = subjectIds.stream().
 				filter(s -> !subjectIdsToKeep.contains(s)).
 				collect(Collectors.toSet());
 		}
 		query = "DELETE FROM LIMS_EXPERIMENTAL_SUBJECT S WHERE S.SUBJECT_ID = ?";
-		ps = conn.prepareStatement(query);
-		for(String subjectId : subjectIds) {		
-			ps.setString(1, subjectId);
-			ps.addBatch();
+		try(PreparedStatement ps = conn.prepareStatement(query)){
+			for(String subjectId : subjectIds) {		
+				ps.setString(1, subjectId);
+				ps.addBatch();
+			}
+			ps.executeBatch();
 		}
-		ps.executeBatch();
-		
 		query = "DELETE FROM LIMS_EXPERIMENT WHERE EXPERIMENT_ID = ?";
-		ps = conn.prepareStatement(query);
-		ps.setString(1, experimentId);
-		ps.executeUpdate();
-		ps.close();
-		
+		try(PreparedStatement ps = conn.prepareStatement(query)){
+			ps.setString(1, experimentId);
+			ps.executeUpdate();
+		}		
 		ConnectionManager.releaseConnection(conn);
 	}
 }

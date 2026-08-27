@@ -24,6 +24,7 @@ package edu.umich.med.mrc2.datoolbox.database.lims;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -31,6 +32,7 @@ import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -40,7 +42,11 @@ import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.UUID;
 
+import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
+
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
 import edu.umich.med.mrc2.datoolbox.data.Assay;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentalSample;
@@ -52,6 +58,7 @@ import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSInstrument;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
+import edu.umich.med.mrc2.datoolbox.database.DatabaseUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.utils.SQLUtils;
@@ -59,11 +66,17 @@ import rtf.AdvancedRTFDocument;
 import rtf.AdvancedRTFEditorKit;
 
 public class QCAnnotationUtils {
+	
+	private static final Logger logger = LogManager.getLogger(QCAnnotationUtils.class);
+
+	private QCAnnotationUtils() {
+		/* This utility class should not be instantiated */
+	}
 
 	//	TODO rewire to current database
 	public static void insertAnnotation(
 			AnalysisQcEventAnnotation annotation,
-			Document rtfDocument) throws Exception {
+			Document rtfDocument) throws SQLException, IOException {
 
 		LIMSUser sysUser = annotation.getCreateBy();
 		if(sysUser == null) {
@@ -73,22 +86,7 @@ public class QCAnnotationUtils {
 		if(sysUser == null)
 			return;
 
-		annotation.setLastModifiedBy(sysUser);
-		
-//		String annotationId = null;
-//		Connection conn = MetLIMSConnectionManager.getConnection();
-//		String query  =
-//				"SELECT '" + DataPrefix.OBJECT_ANNOTATION.getName() +
-//				"' || LPAD(ID_ANNOTATION_SEQ.NEXTVAL, 9, '0') AS ANNOTATION_ID FROM DUAL";
-//		PreparedStatement ps = conn.prepareStatement(query);
-//		ResultSet rs = ps.executeQuery();
-//		while (rs.next()) {
-//			annotationId = rs.getString("ANNOTATION_ID");
-//			break;
-//		}
-//		annotation.setId(annotationId);
-//		rs.close();
-		
+		annotation.setLastModifiedBy(sysUser);	
 		Connection conn = ConnectionManager.getConnection();
 		String annotationId = SQLUtils.getNextIdFromSequence(conn, 
 				"ID_ANNOTATION_SEQ",
@@ -102,56 +100,42 @@ public class QCAnnotationUtils {
 			+ "CREATED_ON, LAST_EDITED_BY, LAST_EDITED_ON, EVENT_TYPE, FORMATTED_ANNOTATION) " +
 			"VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-		PreparedStatement ps = conn.prepareStatement(query);
-		ps.setString(1, annotationId);
-		ps.setString(2, annotation.getExperimentId());
-		ps.setString(3, annotation.getSampleId());
-		ps.setString(4, annotation.getAssayId());
-		ps.setString(5, annotation.getInstrumentId());
-		ps.setString(6, annotation.getText());
-		ps.setString(7, annotation.getCreateBy().getId());
-		ps.setDate(8, new java.sql.Date(new java.util.Date().getTime()));		
-		ps.setString(9, annotation.getLastModifiedBy().getId());
-		ps.setDate(10, new java.sql.Date(new java.util.Date().getTime()));	
-		ps.setString(11, annotation.getQcEventType().name());
-
-		FileInputStream fis = null;
-		File tmpRtf = null;
-		if(rtfDocument == null) {
-			ps.setBinaryStream(12, null, 0);
-		}
-		else {
-			//	Write temp RTF file
-			AdvancedRTFEditorKit editor = new AdvancedRTFEditorKit();
-			tmpRtf = new File(MRC2ToolBoxCore.tmpDir + UUID.randomUUID().toString() + ".rtf");
-			try {
-				editor.write(tmpRtf.getAbsolutePath(), rtfDocument);
-			} catch (Exception ex) {
-				ex.printStackTrace();
-			}
-			if(tmpRtf.exists()) {
-				fis = new FileInputStream(tmpRtf);
-				ps.setBinaryStream(12, fis, (int) tmpRtf.length());
-			}
-			else {
+		try(PreparedStatement ps = conn.prepareStatement(query)){
+			ps.setString(1, annotationId);
+			ps.setString(2, annotation.getExperimentId());
+			ps.setString(3, annotation.getSampleId());
+			ps.setString(4, annotation.getAssayId());
+			ps.setString(5, annotation.getInstrumentId());
+			ps.setString(6, annotation.getText());
+			ps.setString(7, annotation.getCreateBy().getId());
+			ps.setDate(8, new java.sql.Date(new java.util.Date().getTime()));		
+			ps.setString(9, annotation.getLastModifiedBy().getId());
+			ps.setDate(10, new java.sql.Date(new java.util.Date().getTime()));	
+			ps.setString(11, annotation.getQcEventType().name());
+			
+			File tmpRtf = null;
+			if(rtfDocument == null) {
 				ps.setBinaryStream(12, null, 0);
+				ps.executeUpdate();
 			}
+			else {	
+				tmpRtf = new File(MRC2ToolBoxCore.tmpDir + UUID.randomUUID().toString() + ".rtf");
+				try(FileInputStream fis = DatabaseUtils.setBlobFromRTFdocument(rtfDocument, tmpRtf, ps, 12)){
+					ps.executeUpdate();
+				}
+			}		
+			if(tmpRtf != null && tmpRtf.exists()) {
+				Path path = Paths.get(tmpRtf.getAbsolutePath());
+		        Files.delete(path);
+		    }			
 		}
-		ps.executeUpdate();
-		ps.close();
 		ConnectionManager.releaseConnection(conn);
-
-		if(fis != null)
-			fis.close();
-
-		if(tmpRtf != null) {
-			Path path = Paths.get(tmpRtf.getAbsolutePath());
-	        Files.delete(path);
-	    }		
 	}
 
 	public static void updateAnnotation(
-			AnalysisQcEventAnnotation annotation, Document rtfDocument, LIMSUser noteEditor) throws Exception {
+			AnalysisQcEventAnnotation annotation, 
+			Document rtfDocument, 
+			LIMSUser noteEditor) throws SQLException, IOException {
 
 		Connection conn = ConnectionManager.getConnection();
 		annotation.setLastModifiedBy(noteEditor);
@@ -163,60 +147,45 @@ public class QCAnnotationUtils {
 			+ "LAST_EDITED_BY = ?, LAST_EDITED_ON = ?, EVENT_TYPE = ?, "
 			+ "FORMATTED_ANNOTATION = ? WHERE ANNOTATION_ID = ?";
 
-		PreparedStatement ps = conn.prepareStatement(query);
-		ps.setString(1, annotation.getId());
-		ps.setString(2, annotation.getSampleId());
-		ps.setString(3, annotation.getAssayId());
-		ps.setString(4, annotation.getInstrumentId());
-		ps.setString(5, annotation.getText());
-		ps.setString(6, annotation.getLastModifiedBy().getId());
-		ps.setDate(7, new java.sql.Date(annotation.getLastModified().getTime()));
-		ps.setString(8, annotation.getQcEventType().name());
-
-		FileInputStream fis = null;
-		File tmpRtf = null;
-		if (rtfDocument == null) {
-			ps.setBinaryStream(9, null, 0);
-		} else {
-			// Write temp RTF file
-			AdvancedRTFEditorKit editor = new AdvancedRTFEditorKit();			
-			tmpRtf = new File(MRC2ToolBoxCore.tmpDir + UUID.randomUUID().toString() + ".rtf");
-			try {
-				editor.write(tmpRtf.getAbsolutePath(), rtfDocument);
-			} catch (Exception ex) {
-				ex.printStackTrace();
-			}
-			if (tmpRtf.exists()) {
-				fis = new FileInputStream(tmpRtf);
-				ps.setBinaryStream(9, fis, (int) tmpRtf.length());
-			} else {
+		try(PreparedStatement ps = conn.prepareStatement(query)){
+			ps.setString(1, annotation.getId());
+			ps.setString(2, annotation.getSampleId());
+			ps.setString(3, annotation.getAssayId());
+			ps.setString(4, annotation.getInstrumentId());
+			ps.setString(5, annotation.getText());
+			ps.setString(6, annotation.getLastModifiedBy().getId());
+			ps.setDate(7, new java.sql.Date(annotation.getLastModified().getTime()));
+			ps.setString(8, annotation.getQcEventType().name());
+			ps.setString(10, annotation.getId());
+			File tmpRtf = null;
+			if(rtfDocument == null) {
 				ps.setBinaryStream(9, null, 0);
+				ps.executeUpdate();
 			}
+			else {	
+				tmpRtf = new File(MRC2ToolBoxCore.tmpDir + UUID.randomUUID().toString() + ".rtf");
+				try(FileInputStream fis = DatabaseUtils.setBlobFromRTFdocument(rtfDocument, tmpRtf, ps, 9)){
+					ps.executeUpdate();
+				}
+			}		
+			if(tmpRtf != null && tmpRtf.exists()) {
+				Path path = Paths.get(tmpRtf.getAbsolutePath());
+		        Files.delete(path);
+		    }
 		}
-		ps.setString(10, annotation.getId());
-		ps.executeUpdate();
-		ps.close();
 		ConnectionManager.releaseConnection(conn);
-
-		if (fis != null)
-			fis.close();
-	
-		if (tmpRtf != null) {
-			Path path = Paths.get(tmpRtf.getAbsolutePath());
-			Files.delete(path);
-		}	
 	}
 
-	public static void deleteAnnotation(AnalysisQcEventAnnotation annotation) throws Exception {
+	public static void deleteAnnotation(AnalysisQcEventAnnotation annotation) throws SQLException {
 
 		Connection conn = ConnectionManager.getConnection();
 		String query =
 			"DELETE FROM ANALYSIS_QC_LOG WHERE ANNOTATION_ID = ?";
 
-		PreparedStatement  stmt = conn.prepareStatement(query);
-		stmt.setString(1, annotation.getId());
-		stmt.executeUpdate();
-		stmt.close();
+		try(PreparedStatement  ps = conn.prepareStatement(query)){
+			ps.setString(1, annotation.getId());
+			ps.executeUpdate();
+		}
 		ConnectionManager.releaseConnection(conn);
 	}
 
@@ -228,7 +197,7 @@ public class QCAnnotationUtils {
 			ExperimentalSample sample,
 			Date startDate,
 			Date endDate,
-			LIMSUser author) throws Exception {
+			LIMSUser author) throws SQLException {
 
 		Collection<AnalysisQcEventAnnotation> annotations =
 				new ArrayList<AnalysisQcEventAnnotation>();
@@ -266,103 +235,98 @@ public class QCAnnotationUtils {
 			parameterMap.put(paramCount++, new SQLParameter(String.class, author.getId()));
 			query += "AND CREATED_BY = ? ";
 		}
-		//	System.out.println(query);
-
 		Calendar c = Calendar.getInstance();
 		c.setTime(endDate);
 		c.add(Calendar.DATE, 1);
 
-		PreparedStatement  ps = conn.prepareStatement(query);
-		ps.setDate(1, new java.sql.Date(startDate.getTime()));
-		ps.setDate(2, new java.sql.Date(c.getTime().getTime()));
-
-		for(Entry<Integer, SQLParameter> entry : parameterMap.entrySet()) {
-
-			if(entry.getValue().getClazz().equals(String.class))
-				ps.setString(entry.getKey(), (String)entry.getValue().getValue());
-
-			if(entry.getValue().getClazz().equals(Double.class))
-				ps.setDouble(entry.getKey(), (Double)entry.getValue().getValue());
+		try(PreparedStatement  ps = conn.prepareStatement(query)){
+			ps.setDate(1, new java.sql.Date(startDate.getTime()));
+			ps.setDate(2, new java.sql.Date(c.getTime().getTime()));
+	
+			for(Entry<Integer, SQLParameter> entry : parameterMap.entrySet()) {
+	
+				if(entry.getValue().getClazz().equals(String.class))
+					ps.setString(entry.getKey(), (String)entry.getValue().getValue());
+	
+				if(entry.getValue().getClazz().equals(Double.class))
+					ps.setDouble(entry.getKey(), (Double)entry.getValue().getValue());
+			}
+			ResultSet rs = ps.executeQuery();
+			while(rs.next()) {
+	
+				String uniqueId = rs.getString("ANNOTATION_ID");
+				String text = rs.getString("ANNOTATION_TEXT");
+				Date dateCreated = new Date(rs.getDate("CREATED_ON").getTime());
+				Date lastModified = dateCreated;
+				if(rs.getDate("LAST_EDITED_ON") != null)
+					lastModified = new Date(rs.getDate("LAST_EDITED_ON").getTime());
+	
+				LIMSUser createdBy = IDTDataCache.getUserById(rs.getString("CREATED_BY"));
+				LIMSUser lastModifiedBy = createdBy;
+				if(rs.getString("LAST_EDITED_BY") != null)
+					lastModifiedBy = IDTDataCache.getUserById(rs.getString("LAST_EDITED_BY"));
+	
+				LIMSInstrument limsInstrument = null;
+				if(rs.getString("INSTRUMENT_ID") != null)
+					limsInstrument = IDTDataCache.getInstrumentById(rs.getString("INSTRUMENT_ID"));
+	
+				LIMSExperiment limsExperiment = null;
+				if(rs.getString("EXPERIMENT_ID") != null)
+					limsExperiment = LIMSDataCache.getExperimentById(rs.getString("EXPERIMENT_ID"));
+	
+				ExperimentalSample limsSample = null;
+				if(rs.getString("SAMPLE_ID") != null)
+					limsSample = new ExperimentalSample(rs.getString("SAMPLE_ID"), rs.getString("SAMPLE_ID"));
+	
+				Assay limsAssay = null;
+				if(rs.getString("ASSAY_ID") != null)
+					limsAssay = LIMSDataCache.getAssayById(rs.getString("ASSAY_ID"));
+	
+				QcEventType limsCategory = null;
+				if(rs.getString("EVENT_TYPE") != null)
+					limsCategory = QcEventType.getOptionByName(rs.getString("EVENT_TYPE"));
+	
+				AnalysisQcEventAnnotation annotation = new AnalysisQcEventAnnotation(
+						 uniqueId,
+						 text,
+						 dateCreated,
+						 lastModified,
+						 createdBy,
+						 lastModifiedBy,
+						 limsInstrument,
+						 limsExperiment,
+						 limsSample,
+						 limsAssay,
+						 limsCategory);
+	
+				annotations.add(annotation);
+			}
+			rs.close();
 		}
-		ResultSet rs = ps.executeQuery();
-		while(rs.next()) {
-
-			String uniqueId = rs.getString("ANNOTATION_ID");
-			String text = rs.getString("ANNOTATION_TEXT");
-			Date dateCreated = new Date(rs.getDate("CREATED_ON").getTime());
-			Date lastModified = dateCreated;
-			if(rs.getDate("LAST_EDITED_ON") != null)
-				lastModified = new Date(rs.getDate("LAST_EDITED_ON").getTime());
-
-			LIMSUser createdBy = IDTDataCache.getUserById(rs.getString("CREATED_BY"));
-			LIMSUser lastModifiedBy = createdBy;
-			if(rs.getString("LAST_EDITED_BY") != null)
-				lastModifiedBy = IDTDataCache.getUserById(rs.getString("LAST_EDITED_BY"));
-
-			LIMSInstrument limsInstrument = null;
-			if(rs.getString("INSTRUMENT_ID") != null)
-				limsInstrument = IDTDataCache.getInstrumentById(rs.getString("INSTRUMENT_ID"));
-
-			LIMSExperiment limsExperiment = null;
-			if(rs.getString("EXPERIMENT_ID") != null)
-				limsExperiment = LIMSDataCache.getExperimentById(rs.getString("EXPERIMENT_ID"));
-
-			ExperimentalSample limsSample = null;
-			if(rs.getString("SAMPLE_ID") != null)
-				limsSample = new ExperimentalSample(rs.getString("SAMPLE_ID"), rs.getString("SAMPLE_ID"));
-
-			Assay limsAssay = null;
-			if(rs.getString("ASSAY_ID") != null)
-				limsAssay = LIMSDataCache.getAssayById(rs.getString("ASSAY_ID"));
-
-			QcEventType limsCategory = null;
-			if(rs.getString("EVENT_TYPE") != null)
-				limsCategory = QcEventType.getOptionByName(rs.getString("EVENT_TYPE"));
-
-			AnalysisQcEventAnnotation annotation = new AnalysisQcEventAnnotation(
-					 uniqueId,
-					 text,
-					 dateCreated,
-					 lastModified,
-					 createdBy,
-					 lastModifiedBy,
-					 limsInstrument,
-					 limsExperiment,
-					 limsSample,
-					 limsAssay,
-					 limsCategory);
-
-			annotations.add(annotation);
-		}
-		rs.close();
-		ps.close();
 		ConnectionManager.releaseConnection(conn);
 		return annotations;
 	}
 
-	public static Document getAnnotationDocument(String annotationId) throws Exception{
+	public static Document getAnnotationDocument(String annotationId) throws SQLException, IOException, BadLocationException{
 
 		Connection conn = ConnectionManager.getConnection();
 		AdvancedRTFEditorKit editor = new  AdvancedRTFEditorKit();
 		AdvancedRTFDocument doc = null;
 		String query =
 			"SELECT FORMATTED_ANNOTATION FROM ANALYSIS_QC_LOG WHERE ANNOTATION_ID = ?";
-		PreparedStatement  ps = conn.prepareStatement(query);
-		ps.setString(1, annotationId);
-		ResultSet rs = ps.executeQuery();
-		while(rs.next()) {
-//		   Blob blob = rs.getBlob("FORMATTED_ANNOTATION");
-		   InputStream fas = rs.getBinaryStream("FORMATTED_ANNOTATION");
-		   if(fas != null) {
-			   BufferedInputStream is = new BufferedInputStream(fas);
-			   doc = (AdvancedRTFDocument) editor.createDefaultDocument();
-			   editor.read(is, doc, 0);
-			   is.close();
-//			   blob.free();
-		   }
+		try(PreparedStatement  ps = conn.prepareStatement(query)){
+			ps.setString(1, annotationId);
+			ResultSet rs = ps.executeQuery();
+			while(rs.next()) {
+			   try(InputStream fas = rs.getBinaryStream("FORMATTED_ANNOTATION")){
+				   try( BufferedInputStream is = new BufferedInputStream(fas)) {
+					   doc = (AdvancedRTFDocument) editor.createDefaultDocument();
+					   editor.read(is, doc, 0);
+				   }
+			   }
+			}
+			rs.close();
 		}
-		rs.close();
-		ps.close();
 		ConnectionManager.releaseConnection(conn);
 		return doc;
 	}

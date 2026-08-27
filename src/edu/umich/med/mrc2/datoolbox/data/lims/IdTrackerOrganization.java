@@ -115,6 +115,7 @@ public class IdTrackerOrganization extends LIMSOrganization implements Serializa
 		this.contactPerson = contactPerson;
 	}
 
+	@Override
 	public String getOrganizationInfo() {
 
 		return
@@ -143,6 +144,26 @@ public class IdTrackerOrganization extends LIMSOrganization implements Serializa
 	public void setMailingAddress(String mailingAddress) {
 		this.mailingAddress = mailingAddress;
 	}
+	
+    @Override
+    public boolean equals(Object obj) {
+
+        if (obj == null)
+            return false;
+        
+		if (obj == this)
+			return true;
+
+        if (!IdTrackerOrganization.class.isAssignableFrom(obj.getClass()))
+            return false;
+
+        final IdTrackerOrganization other = (IdTrackerOrganization) obj;
+
+        if ((this.id == null) ? (other.getId() != null) : !this.id.equals(other.getId()))
+            return false;
+
+        return true;
+    }
 }
 
 

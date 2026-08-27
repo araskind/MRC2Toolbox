@@ -54,7 +54,7 @@ public class AdductFormat extends Format {
 			if(field.equals(SortProperty.ID))
 				return toAppendTo.append(adduct.getId());
 		}
-		return toAppendTo.append("");
+		return toAppendTo;
 	}
 
 	@Override

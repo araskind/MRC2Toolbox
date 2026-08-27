@@ -57,7 +57,7 @@ public class SampleDataResultObjectFormat  extends Format {
 			if(field.equals(SortProperty.resultFile))
 				return toAppendTo.append(sdro.getResultFile().getName());
 		}
-		return toAppendTo.append("");
+		return toAppendTo;
 	}
 
 	@Override

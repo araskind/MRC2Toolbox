@@ -56,7 +56,6 @@ public class ChromatographicGradient implements Serializable, XmlStorable {
 		super();
 		id = DataPrefix.CROMATOGRAPHIC_GRADIENT.getName() + 
 				UUID.randomUUID().toString().substring(0, 6);
-		//	name = "ChromGradient-" + FIOUtils.getTimestamp();
 		mobilePhases = new MobilePhase[4];
 		gradientSteps = new TreeSet<ChromatographicGradientStep>();
 	}
@@ -199,10 +198,7 @@ public class ChromatographicGradient implements Serializable, XmlStorable {
 			if(m != null)
 				mpCount++;
 		}
-		if(mpCount == 0)
-			return false;
-		
-		return true;
+		return (mpCount != 0);
 	}
 	
 	@Override

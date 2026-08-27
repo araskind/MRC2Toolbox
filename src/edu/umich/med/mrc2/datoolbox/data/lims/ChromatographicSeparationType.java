@@ -48,7 +48,6 @@ public class ChromatographicSeparationType implements Serializable,
 
 	@Override
 	public int compareTo(ChromatographicSeparationType o) {
-		// TODO Auto-generated method stub
 		return this.id.compareTo(o.getId());
 	}
 

@@ -53,7 +53,7 @@ public class StockSampleFormat extends Format {
 			if(field.equals(SortProperty.ID))
 				return toAppendTo.append(sample.getSampleId());
 		}
-		return toAppendTo.append("");
+		return toAppendTo;
 	}
 
 	@Override

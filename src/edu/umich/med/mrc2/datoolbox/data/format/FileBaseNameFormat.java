@@ -26,7 +26,7 @@ import java.text.FieldPosition;
 import java.text.Format;
 import java.text.ParsePosition;
 
-import org.apache.commons.compress.utils.FileNameUtils;
+import org.apache.commons.io.file.PathUtils;
 
 public class FileBaseNameFormat extends Format {
 
@@ -42,9 +42,10 @@ public class FileBaseNameFormat extends Format {
 
 		if(obj instanceof File) {
 			file = (File)obj;
-			return toAppendTo.append(FileNameUtils.getBaseName(file.getName()));
+			return toAppendTo.append(PathUtils.getBaseName(file.toPath()));
 		}
-		return toAppendTo.append("");
+		else
+			return toAppendTo;
 	}
 
 	@Override

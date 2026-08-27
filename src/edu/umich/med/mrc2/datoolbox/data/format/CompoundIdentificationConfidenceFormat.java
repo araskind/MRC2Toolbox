@@ -43,12 +43,11 @@ public class CompoundIdentificationConfidenceFormat extends Format {
 			idc = (CompoundIdentificationConfidence)obj;
 				return toAppendTo.append(idc.getLevelId());
 		}
-		return toAppendTo.append("");
+		return toAppendTo;
 	}
 
 	@Override
 	public Object parseObject(String source, ParsePosition pos) {
-
 		return idc;
 	}
 

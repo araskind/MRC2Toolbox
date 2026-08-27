@@ -23,6 +23,7 @@ package edu.umich.med.mrc2.datoolbox.data.lims;
 
 import java.io.Serializable;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.TreeMap;
 
 public class BioSpecies implements Serializable, Comparable<BioSpecies>{
@@ -51,18 +52,22 @@ public class BioSpecies implements Serializable, Comparable<BioSpecies>{
 
 		if(nameMap.isEmpty())
 			return null;
+		
+		Entry<String, String> commonPair = 
+				nameMap.entrySet().stream().
+				filter(e -> e.getValue().equals(COMMON_NAME)).
+				findFirst().orElse(null);
+		if(commonPair != null)
+			return commonPair.getKey();
+		
+		Entry<String, String> sciPair = 
+				nameMap.entrySet().stream().
+				filter(e -> e.getValue().equals(SCIENTIFIC_NAME)).
+				findFirst().orElse(null);
+		if(sciPair != null)
+			return sciPair.getKey();
 
-		if(nameMap.containsValue(COMMON_NAME))
-			return nameMap.entrySet().stream().
-					filter(e -> e.getValue().equals(COMMON_NAME)).
-					findFirst().get().getKey();
-
-		if(nameMap.containsValue(SCIENTIFIC_NAME))
-			return nameMap.entrySet().stream().
-					filter(e -> e.getValue().equals(SCIENTIFIC_NAME)).
-					findFirst().get().getKey();
-
-		return nameMap.entrySet().stream().findFirst().get().getKey();
+		return nameMap.entrySet().iterator().next().getKey();
 	}
 
 	/**

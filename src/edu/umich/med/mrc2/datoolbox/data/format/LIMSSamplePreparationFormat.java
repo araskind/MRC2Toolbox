@@ -54,7 +54,7 @@ public class LIMSSamplePreparationFormat  extends Format {
 			if(field.equals(SortProperty.ID))
 				return toAppendTo.append(prep.getId());
 		}
-		return toAppendTo.append("");
+		return toAppendTo;
 	}
 
 	@Override

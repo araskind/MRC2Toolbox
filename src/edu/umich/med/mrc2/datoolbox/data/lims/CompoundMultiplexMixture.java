@@ -98,6 +98,10 @@ public class CompoundMultiplexMixture implements Comparable<CompoundMultiplexMix
 		mixComponents.remove(toRemove);
 	}
 	
+	public Set<CompoundMultiplexMixtureComponent> getMixComponents() {
+		return mixComponents;
+	}
+	
 	@Override
 	public boolean equals(Object obj) {
 
@@ -125,8 +129,4 @@ public class CompoundMultiplexMixture implements Comparable<CompoundMultiplexMix
         hash = 53 * hash + (this.id != null ? this.id.hashCode() : 0);
         return hash;
     }
-
-	public Set<CompoundMultiplexMixtureComponent> getMixComponents() {
-		return mixComponents;
-	}
 }

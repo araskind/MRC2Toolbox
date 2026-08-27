@@ -53,7 +53,7 @@ public class ChromatographicColumnFormat extends Format {
 			if(field.equals(SortProperty.ID))
 				return toAppendTo.append(column.getColumnId());
 		}
-		return toAppendTo.append("");
+		return toAppendTo;
 	}
 
 	@Override

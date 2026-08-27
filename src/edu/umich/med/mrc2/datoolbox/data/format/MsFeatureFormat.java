@@ -65,7 +65,7 @@ public class MsFeatureFormat  extends Format {
 			}
 			return toAppendTo.append(text);
 		}
-		return toAppendTo.append("");
+		return toAppendTo;
 	}
 
 	@Override

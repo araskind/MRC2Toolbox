@@ -54,7 +54,7 @@ public class MsFeatureInformationBundleCollectionFormat extends Format {
 			if(field.equals(SortProperty.ID))
 				return toAppendTo.append(featureCollection.getId());
 		}
-		return toAppendTo.append("");
+		return toAppendTo;
 	}
 
 	@Override

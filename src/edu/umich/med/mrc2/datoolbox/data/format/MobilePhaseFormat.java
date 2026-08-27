@@ -53,7 +53,7 @@ public class MobilePhaseFormat extends Format {
 			if(field.equals(SortProperty.ID))
 				return toAppendTo.append(mobilePhase.getId());
 		}
-		return toAppendTo.append("");
+		return toAppendTo;
 	}
 
 	@Override

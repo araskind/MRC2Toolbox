@@ -28,6 +28,10 @@ import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
+import javax.swing.text.BadLocationException;
+
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.lims.ObjectAnnotation;
@@ -38,7 +42,8 @@ public class ObjectAnnotationRenderer extends JTextArea implements TableCellRend
 	 *
 	 */
 	private static final long serialVersionUID = -5574529780890867665L;
-	
+	private static final Logger logger = LogManager.getLogger(ObjectAnnotationRenderer.class);
+
 	private int maxLength;
 
 	private SortProperty idField;
@@ -71,8 +76,13 @@ public class ObjectAnnotationRenderer extends JTextArea implements TableCellRend
 			if(idField.equals(SortProperty.ID))
 				setText(annotation.getUniqueId());
 
-			if(idField.equals(SortProperty.Name))
-				setText(annotation.getText(maxLength));			
+			if(idField.equals(SortProperty.Name)) {
+				try {
+					setText(annotation.getText(maxLength));
+				} catch (BadLocationException e) {
+					logger.error("Failed to parse annotation text", e);
+				}	
+			}	
 		}
         setSize(table.getColumnModel().getColumn(column).getWidth(), getPreferredSize().height);
         if (table.getRowHeight(row) != getPreferredSize().height)

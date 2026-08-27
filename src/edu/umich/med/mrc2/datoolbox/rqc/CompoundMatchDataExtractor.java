@@ -63,6 +63,7 @@ import edu.umich.med.mrc2.datoolbox.data.compare.CompoundMatchGroupObjectCompara
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.enums.CompoundDatabaseEnum;
 import edu.umich.med.mrc2.datoolbox.data.enums.CompoundIdentificationConfidence;
+import edu.umich.med.mrc2.datoolbox.data.enums.CompoundMatchFullPicksFields;
 import edu.umich.med.mrc2.datoolbox.data.enums.CompoundMatcherField;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
@@ -110,36 +111,20 @@ public class CompoundMatchDataExtractor {
 	private static void processEX01426RPNeg() {
 		
 		File inputFile = new File("Y:\\DataAnalysis\\CPDMatch\\EX01426_RP_Neg_Data-Integrator-original-format.xlsx");
+		File fullPicksFile = new File("Y:\\DataAnalysis\\CPDMatch\\1426 RP Neg named full picks.xlsx");
 		File outputFile = new File("Y:\\DataAnalysis\\CPDMatch\\EX01426_RP_Neg_Data-Integrator-exported.txt");
 		File libraryFile = new File("Y:\\DataAnalysis\\CPDMatch\\RP-Neg with 1C IS MIx - Complete Library.txt"); //-CDK-compatible
-		
 		rtError = 0.05d;
 		mzError = 7.00d;
 		adductList = new ArrayList<>();
 		adductList.add(AdductManager.getAdductByName("[M-H]-"));
-		parseCompoundMatchFile(inputFile, outputFile, libraryFile);
-	}
-	
-	private static void initDatabaseConnection() {
+		parseCompoundMatchFile(inputFile, outputFile, libraryFile, fullPicksFile);
 		
-		Connection conn = null;
-		try {
-			conn = ConnectionManager.getConnection();
-		} catch (Exception e1) {
-			logger.error("Failed to establish database connection!", e1);
-		}
-		if(conn == null) {
-			System.exit(1);
-		} else {
-			try {
-				conn.close();
-			} catch (SQLException e1) {
-				logger.error("Failed to close database connection properly!", e1);
-			}
-		}
 	}
+
 	
-	private static void parseCompoundMatchFile(File inputFile, File outputFile, File libraryFile) {
+	private static void parseCompoundMatchFile(
+			File inputFile, File outputFile, File libraryFile, File fullPicksFile) {
 
 		List<CompoundMatchGroupObject>matchGroupsList = new ArrayList<>();
 		try (Workbook workbook = StreamingReader.builder().rowCacheSize(100) // number of rows to keep in memory
@@ -161,8 +146,47 @@ public class CompoundMatchDataExtractor {
 					Paths.get(inputFile.toPath().getParent().toString(), 
 							PathUtils.getBaseName(inputFile.toPath()) + "_unk_match_report.txt");
 			
-			matchUnknowns(matchGroupsList, libraryFile, reportPath);
+			//	matchUnknowns(matchGroupsList, libraryFile, reportPath);
+			matchByFullPicks(matchGroupsList, fullPicksFile, reportPath);
 			exportResults(matchGroupsList, outputFile);
+		}
+	}
+
+	private static void matchByFullPicks(
+			List<CompoundMatchGroupObject> matchGroupsList, File fullPicksFile, Path reportPath) {
+
+		Map<Integer,String>matchGroupCompoundMap = 
+				extractMatchGroupCompoundMap(fullPicksFile);
+		List<String>unambiguousMatches = new ArrayList<>();
+		List<String>umatched = new ArrayList<>();
+		for(CompoundMatchGroupObject cmgo : matchGroupsList) {
+			
+			if(cmgo.getFeature().startsWith(DataPrefix.MS_LIBRARY_UNKNOWN_TARGET.getName())) {
+				
+				String originalName = cmgo.getFeature();
+				String fullPicksMatch = matchGroupCompoundMap.get(cmgo.getGroupId());
+				if(fullPicksMatch == null)
+					umatched.add(cmgo.getFeature());
+				else {
+					cmgo.setFeature(fullPicksMatch);
+					unambiguousMatches.add(originalName + "\t" + fullPicksMatch);
+				}
+			}
+		}
+		List<String>reportParts = new ArrayList<>();
+		reportParts.add("UNAMBIGUOUS MATCHES\n");
+		reportParts.addAll(unambiguousMatches);
+		reportParts.add("\n********************\n");
+		reportParts.add("UNMATCHED UNKNOWNS\n");
+		reportParts.addAll(umatched);
+		try {
+		    Files.write(reportPath, 
+		    		reportParts,
+		            StandardCharsets.UTF_8,
+		            StandardOpenOption.CREATE, 
+		            StandardOpenOption.TRUNCATE_EXISTING);
+		} catch (IOException e) {
+		    e.printStackTrace();
 		}
 	}
 
@@ -392,12 +416,17 @@ public class CompoundMatchDataExtractor {
 		Integer currentMatchGroup = null;
 		List<CompoundMatchGroupObject>matchGroupsList = new ArrayList<>();
 		CompoundMatchGroupObject cmgo = null;
+		int featureColumn = columnMap.get(CompoundMatcherField.FEATURE);
+		int matchGroupColumn = columnMap.get(CompoundMatcherField.MATCH_GROUP);
+		int mzColumn = columnMap.get(CompoundMatcherField.MONOISOTOPIC_MZ);
+		int rtColumn = columnMap.get(CompoundMatcherField.RT);
+		
 		for (Row r : sheet) {			
 			
 			if(r.getRowNum() > 0 
-					&& !r.getCell(columnMap.get(CompoundMatcherField.FEATURE)).getStringCellValue().trim().isEmpty()) {
+					&& !r.getCell(featureColumn).getStringCellValue().trim().isEmpty()) {
 				
-				if(!r.getCell(columnMap.get(CompoundMatcherField.MATCH_GROUP)).getCellType().equals(CellType.NUMERIC)) {
+				if(!r.getCell(matchGroupColumn).getCellType().equals(CellType.NUMERIC)) {
 					System.out.println("Non-numeric MATCH_GROUP in row " + r.getRowNum());
 					if(cmgo != null) {
 						cmgo.finalizeObjectParameters();
@@ -405,7 +434,7 @@ public class CompoundMatchDataExtractor {
 					}
 					break;
 				}			
-				Integer matchGroup = (int)r.getCell(columnMap.get(CompoundMatcherField.MATCH_GROUP)).getNumericCellValue();
+				Integer matchGroup = (int)r.getCell(matchGroupColumn).getNumericCellValue();
 				if(matchGroup != null && !matchGroup.equals(currentMatchGroup)) {
 					
 					if(cmgo != null) {
@@ -417,9 +446,9 @@ public class CompoundMatchDataExtractor {
 				}
 				if(cmgo != null) {
 					
-					String featureName = r.getCell(columnMap.get(CompoundMatcherField.FEATURE)).getStringCellValue().trim();
-					double mz = r.getCell(columnMap.get(CompoundMatcherField.MONOISOTOPIC_MZ)).getNumericCellValue();
-					double rt = r.getCell(columnMap.get(CompoundMatcherField.RT)).getNumericCellValue();
+					String featureName = r.getCell(featureColumn).getStringCellValue().trim();
+					double mz = r.getCell(mzColumn).getNumericCellValue();
+					double rt = r.getCell(rtColumn).getNumericCellValue();
 					cmgo.getFeatureNames().add(featureName);
 					cmgo.getMzValues().add(mz);
 					cmgo.getRtValues().add(rt);
@@ -544,6 +573,78 @@ public class CompoundMatchDataExtractor {
 		}
 		else
 			return false;
+	}
+	
+	private static Map<Integer,String>extractMatchGroupCompoundMap(File fullPicksFile){
+		
+		Map<Integer,String>matchGroupCompoundMap = new TreeMap<>();
+		String nameTrimPattern = "-\\d+_\\d+.\\d+$";
+		try (Workbook workbook = StreamingReader.builder().rowCacheSize(100) // number of rows to keep in memory
+				.bufferSize(4096) // buffer size to use when reading InputStream to file
+				.open(new FileInputStream(fullPicksFile))) { // InputStream or File for XLSX file (required)
+
+			Sheet sheet = workbook.getSheetAt(0);
+			Map<CompoundMatchFullPicksFields,Integer>columnMap = new TreeMap<>();
+			for (Row r : sheet) {			
+				if(r.getRowNum() == 1) {
+					columnMap = createFullPicksColumnMap(r);
+					break;
+				}
+			}
+			int matchGroupColumn = columnMap.get(CompoundMatchFullPicksFields.MATCH_GROUP);
+			int compoundNameColumn = columnMap.get(CompoundMatchFullPicksFields.MAPPED_COMPOUND);
+			
+			for (Row r : sheet) {			
+				if(r.getRowNum() > 1 && r.getCell(compoundNameColumn) != null && r.getCell(matchGroupColumn) != null) {
+					String cpdName = r.getCell(compoundNameColumn).getStringCellValue().trim().replaceFirst(nameTrimPattern, "");
+					if(!cpdName.isEmpty()) {
+						int matchGroup = (int)r.getCell(matchGroupColumn).getNumericCellValue();
+						matchGroupCompoundMap.put(matchGroup, cpdName);
+					}
+				}
+			}		
+		} catch (IOException e) {
+			e.printStackTrace();
+		}		
+		return matchGroupCompoundMap;
+	}
+	
+	private static Map<CompoundMatchFullPicksFields, Integer> createFullPicksColumnMap(Row row) {
+
+		Map<CompoundMatchFullPicksFields, Integer>columnMap = new TreeMap<>();
+		for (int i=0; i<row.getPhysicalNumberOfCells(); i++) {
+
+			if(row.getCell(i) != null) {
+				
+				String colName = row.getCell(i).getStringCellValue();
+				if(!colName.isBlank()) {
+					CompoundMatchFullPicksFields field = 
+							CompoundMatchFullPicksFields.getOptionByUIName(colName);
+					if(field != null)
+						columnMap.put(field, i);
+				}
+			}
+		}
+		return columnMap;
+	}
+
+	private static void initDatabaseConnection() {
+		
+		Connection conn = null;
+		try {
+			conn = ConnectionManager.getConnection();
+		} catch (Exception e1) {
+			logger.error("Failed to establish database connection!", e1);
+		}
+		if(conn == null) {
+			System.exit(1);
+		} else {
+			try {
+				conn.close();
+			} catch (SQLException e1) {
+				logger.error("Failed to close database connection properly!", e1);
+			}
+		}
 	}
 
 }

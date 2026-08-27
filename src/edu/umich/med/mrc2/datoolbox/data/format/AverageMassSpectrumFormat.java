@@ -45,7 +45,7 @@ public class AverageMassSpectrumFormat extends Format {
 	public StringBuffer format(Object obj, StringBuffer toAppendTo, FieldPosition pos) {
 
 		if(obj == null)
-			return toAppendTo.append("");
+			return toAppendTo;
 		
 		if(AverageMassSpectrum.class.isAssignableFrom(obj.getClass())) {
 
@@ -56,7 +56,7 @@ public class AverageMassSpectrumFormat extends Format {
 			if(field.equals(SortProperty.dataFile))
 				return toAppendTo.append(spectrum.getDataFile().getName());
 		}
-		return toAppendTo.append("");
+		return toAppendTo;
 	}
 
 	@Override

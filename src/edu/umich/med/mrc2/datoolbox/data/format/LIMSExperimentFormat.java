@@ -43,7 +43,7 @@ public class LIMSExperimentFormat extends Format {
 			experiment = (LIMSExperiment)obj;
 			return toAppendTo.append(experiment.getId());
 		}
-		return toAppendTo.append("");
+		return toAppendTo;
 	}
 
 	@Override

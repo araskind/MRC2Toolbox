@@ -25,6 +25,9 @@ import java.util.Collection;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.data.motrpac.MoTrPACAssay;
 import edu.umich.med.mrc2.datoolbox.data.motrpac.MoTrPACReport;
@@ -35,8 +38,13 @@ import edu.umich.med.mrc2.datoolbox.data.motrpac.MotracSubjectType;
 import edu.umich.med.mrc2.datoolbox.data.motrpac.MotrpacSampleType;
 
 public class MoTrPACDatabaseCache {
+	
+	private static final Logger logger = LogManager.getLogger(MoTrPACDatabaseCache.class);
 
-	@SuppressWarnings("unused")
+	private MoTrPACDatabaseCache() {
+		/* This utility class should not be instantiated */
+	}
+
 	private static Collection<MotracSubjectType> motrpacSubjetTypes = 
 	new TreeSet<MotracSubjectType>();
 	private static Collection<MotrpacSampleType> motrpacSampleTypes = 
@@ -66,7 +74,7 @@ public class MoTrPACDatabaseCache {
 			try {
 				motrpacSubjetTypes.addAll(MoTrPACDbUtils.getMotrpacSubjectTypes());
 			} catch (Exception e) {
-				e.printStackTrace();
+				logger.error("Failed to load Motrac Subject Type list", e);
 			}
 		}
 		return motrpacSubjetTypes;
@@ -97,7 +105,7 @@ public class MoTrPACDatabaseCache {
 			try {
 				motracReportCodeBlocks.addAll(MoTrPACDbUtils.getMotrpacReportCodeBlocks());
 			} catch (Exception e) {
-				e.printStackTrace();
+				logger.error("Failed to load MoTrPAC Report Code Block list", e);
 			}
 		}
 		return motracReportCodeBlocks;
@@ -117,7 +125,7 @@ public class MoTrPACDatabaseCache {
 			try {
 				motrpacAssays.addAll(MoTrPACDbUtils.getMotrpacAssays());
 			} catch (Exception e) {
-				e.printStackTrace();
+				logger.error("Failed to load MoTrPAC Assay list", e);
 			}
 		}
 		return motrpacAssays;
@@ -143,7 +151,7 @@ public class MoTrPACDatabaseCache {
 			try {
 				motrpacStudies.addAll(MoTrPACDbUtils.getMotrpacStudies());
 			} catch (Exception e) {
-				e.printStackTrace();
+				logger.error("Failed to load MoTrPAC Study list", e);
 			}
 		}
 		return motrpacStudies;
@@ -168,7 +176,7 @@ public class MoTrPACDatabaseCache {
 			try {
 				motrpacSampleTypes.addAll(MoTrPACDbUtils.getMotrpacSampleTypes());
 			} catch (Exception e) {
-				e.printStackTrace();
+				logger.error("Failed to load MoTrPAC Sample Type list", e);
 			}
 		}
 		return motrpacSampleTypes;
@@ -188,7 +196,7 @@ public class MoTrPACDatabaseCache {
 			try {
 				motrpacTissueCodes.addAll(MoTrPACDbUtils.getMotrpacTissueCodes());
 			} catch (Exception e) {
-				e.printStackTrace();
+				logger.error("Failed to load MoTrPAC Tissue Codes list", e);
 			}
 		}
 		return motrpacTissueCodes;
@@ -214,7 +222,7 @@ public class MoTrPACDatabaseCache {
 			try {
 				reports.addAll(MoTrPACDbUtils.getMoTrPACReports());
 			} catch (Exception e) {
-				e.printStackTrace();
+				logger.error("Failed to load MoTrPAC Reports list", e);
 			}
 		}		
 		return reports;

@@ -24,6 +24,7 @@ package edu.umich.med.mrc2.datoolbox.database.lipid;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
@@ -32,29 +33,40 @@ import java.util.Objects;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+
 import edu.umich.med.mrc2.datoolbox.data.LipidMapsClassifier;
 import edu.umich.med.mrc2.datoolbox.data.compare.LipidMapsClassifierComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortDirection;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 
 public class LipidOntologyUtils {
+	
+	private static final Logger logger = LogManager.getLogger(LipidOntologyUtils.class);
+	private static final LipidMapsClassifierComparator lcComparator = 
+			new LipidMapsClassifierComparator(SortProperty.featureCount, SortDirection.DESC);
+	
+	private LipidOntologyUtils() {
+		/* This utility class should not be instantiated */
+	}
 
-	public static Collection<String>getUniqueLipidMapsSubFingerprints(Connection conn) throws Exception {
+	public static Collection<String>getUniqueLipidMapsSubFingerprints(Connection conn) throws SQLException {
 		
 		Collection<String>subFp = new TreeSet<String>();
 		String sql = "SELECT DISTINCT SUB_FINGERPRINT FROM LIPIDMAPS_ONTOLOGY ORDER BY 1";
-		PreparedStatement ps = conn.prepareStatement(sql);
-		ResultSet rs = ps.executeQuery();
-		while(rs.next())
-			subFp.add(rs.getString(1));		
-		
-		rs.close();
-		ps.close();
+		try(PreparedStatement ps = conn.prepareStatement(sql)){
+			ResultSet rs = ps.executeQuery();
+			while(rs.next())
+				subFp.add(rs.getString(1));		
+			
+			rs.close();
+		}
 		return subFp;
 	}
 	
 	public static Map<String, Collection<LipidMapsClassifier>>mapLipidMapsSubFingerprintsToClassifiers(
-			Collection<String>subFingerprints, Connection conn) throws Exception {
+			Collection<String>subFingerprints, Connection conn) throws SQLException {
 		
 		Map<String, Collection<LipidMapsClassifier>>fpMap = new TreeMap<String, Collection<LipidMapsClassifier>>();
 		String sql = 
@@ -67,27 +79,27 @@ public class LipidOntologyUtils {
 				"GROUP BY D.CATEGORY, D.MAIN_CLASS,  " +
 				"D.SUB_CLASS, D.CLASS_LEVEL4, D.ABBREVIATION " +
 				"ORDER BY COUNT(D.LM_ID) DESC";
-		PreparedStatement ps = conn.prepareStatement(sql);
-		ResultSet rs = null;
-		for(String fp : subFingerprints) {
-			
-			Collection<LipidMapsClassifier>fpClassifiers = new ArrayList<LipidMapsClassifier>();
-			ps.setString(1, fp);
-			rs = ps.executeQuery();
-			while(rs.next()) {
+		try(PreparedStatement ps = conn.prepareStatement(sql)){
+			for(String fp : subFingerprints) {
 				
-				LipidMapsClassifier lc = new LipidMapsClassifier(
-						rs.getString("CATEGORY"), 
-						rs.getString("MAIN_CLASS"), 
-						rs.getString("SUB_CLASS"), 
-						rs.getString("CLASS_LEVEL4"), 
-						rs.getString("ABBREVIATION"), 
-						rs.getInt("REPS"));
-				fpClassifiers.add(lc);
+				Collection<LipidMapsClassifier>fpClassifiers = new ArrayList<LipidMapsClassifier>();
+				ps.setString(1, fp);
+				ResultSet rs = ps.executeQuery();
+				while(rs.next()) {
+					
+					LipidMapsClassifier lc = new LipidMapsClassifier(
+							rs.getString("CATEGORY"), 
+							rs.getString("MAIN_CLASS"), 
+							rs.getString("SUB_CLASS"), 
+							rs.getString("CLASS_LEVEL4"), 
+							rs.getString("ABBREVIATION"), 
+							rs.getInt("REPS"));
+					fpClassifiers.add(lc);
+				}
+				rs.close();
+				if(!fpClassifiers.isEmpty())
+					fpMap.put(fp, fpClassifiers);
 			}
-			rs.close();
-			if(!fpClassifiers.isEmpty())
-				fpMap.put(fp, fpClassifiers);
 		}
 		return fpMap;
 	}
@@ -95,45 +107,48 @@ public class LipidOntologyUtils {
 	public static Map<String, LipidMapsClassifier>findBestLipidMapsClassifiers(
 			Map<String, Collection<LipidMapsClassifier>>classifiersMap) {
 		
-		Map<String, LipidMapsClassifier>bestClassMap = 
-				new TreeMap<String, LipidMapsClassifier>();
-		LipidMapsClassifierComparator lcComparator = 
-				new LipidMapsClassifierComparator(SortProperty.featureCount, SortDirection.DESC);
-		for (Entry<String, Collection<LipidMapsClassifier>> entry : classifiersMap.entrySet()) {
+		Map<String, LipidMapsClassifier>bestClassMap = new TreeMap<String, LipidMapsClassifier>();
+		for(Entry<String, Collection<LipidMapsClassifier>> entry : classifiersMap.entrySet()) {
 			
-			if(entry.getValue().size() == 1) {
-				bestClassMap.put(entry.getKey(), entry.getValue().iterator().next());
-				continue;
-			}
-			LipidMapsClassifier[] lcList = entry.getValue().stream().
-					sorted(lcComparator).toArray(size -> new LipidMapsClassifier[size]);
-			if(lcList[0].getAbbreviation() != null) {
-				bestClassMap.put(entry.getKey(), lcList[0]);
-				continue;
-			}
-			if(lcList[0].getClassLevel4()!= null) {
-				bestClassMap.put(entry.getKey(), lcList[0]);
-				continue;
-			}
-			LipidMapsClassifier[] lcListSc = entry.getValue().stream().
-					filter(c -> Objects.nonNull(c.getSubClass())).
-					sorted(lcComparator).toArray(size -> new LipidMapsClassifier[size]);
-			if(lcListSc.length > 0) {
-				bestClassMap.put(entry.getKey(), lcList[0]);
-				continue;
-			}	
-			LipidMapsClassifier[] mcListSc = entry.getValue().stream().
-					filter(c -> Objects.nonNull(c.getMainClass())).
-					sorted(lcComparator).toArray(size -> new LipidMapsClassifier[size]);
-			if(mcListSc.length > 0) {
-				bestClassMap.put(entry.getKey(), mcListSc[0]);
-				continue;
-			}
+			LipidMapsClassifier bestClassifier = getBestClassifier(entry.getValue());
+			if(bestClassifier != null)
+				bestClassMap.put(entry.getKey(), bestClassifier);
 		}
 		return bestClassMap;
 	}
 	
-	//	
+	private static LipidMapsClassifier getBestClassifier(Collection<LipidMapsClassifier>classifierList) {
+		
+		if(classifierList.isEmpty())
+			return null;
+		
+		else if(classifierList.size() == 1)
+			return classifierList.iterator().next();
+		
+		else {
+			LipidMapsClassifier[] lcList = classifierList.stream().
+					sorted(lcComparator).toArray(size -> new LipidMapsClassifier[size]);
+			if(lcList[0].getClassLevel4()!= null)
+				return lcList[0];
+			
+			if(lcList[0].getClassLevel4()!= null)
+				return lcList[0];
+			
+			LipidMapsClassifier[] lcListSc = classifierList.stream().
+					filter(c -> Objects.nonNull(c.getSubClass())).
+					sorted(lcComparator).toArray(size -> new LipidMapsClassifier[size]);
+			if(lcListSc.length > 0)				
+				return lcListSc[0];
+			
+			LipidMapsClassifier[] mcListSc = classifierList.stream().
+					filter(c -> Objects.nonNull(c.getMainClass())).
+					sorted(lcComparator).toArray(size -> new LipidMapsClassifier[size]);
+			if(mcListSc.length > 0)
+				return mcListSc[0];
+				
+			return null;
+		}
+	}
 }
 
 

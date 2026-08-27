@@ -206,7 +206,7 @@ public class LIMSSamplePreparation implements
 
     public boolean hasRedundantSamples() {
     	return
-    		(!(prepItemMap.values().stream().distinct().count() == prepItemMap.size()));
+    		(prepItemMap.values().stream().distinct().count() != prepItemMap.size());
     }
 
 	/**
@@ -238,7 +238,6 @@ public class LIMSSamplePreparation implements
 
 	@Override
 	public void removeAnnotation(ObjectAnnotation annotation) {
-		// TODO Auto-generated method stub
 		getAnnotations().remove(annotation);
 	}
 
@@ -333,7 +332,6 @@ public class LIMSSamplePreparation implements
 			try {
 				prepDate = ProjectUtils.dateTimeFormat.parse(startDateString);
 			} catch (ParseException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} 
 		}

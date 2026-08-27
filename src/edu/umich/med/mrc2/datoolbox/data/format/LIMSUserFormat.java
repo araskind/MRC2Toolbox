@@ -43,7 +43,7 @@ public class LIMSUserFormat extends Format {
 			user = (LIMSUser)obj;
 			return toAppendTo.append(user.getFullName());
 		}
-		return toAppendTo.append("");
+		return toAppendTo;
 	}
 
 	@Override

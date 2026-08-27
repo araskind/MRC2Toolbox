@@ -24,6 +24,7 @@ package edu.umich.med.mrc2.datoolbox.data.lims;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Objects;
 
 import org.apache.commons.lang.StringUtils;
 import org.jdom2.Element;
@@ -69,13 +70,10 @@ public class DataPipeline implements Serializable, Comparable<DataPipeline>, Xml
 			DataAcquisitionMethod acquisitionMethod,
 			DataExtractionMethod dataExtractionMethod) {
 		super();
-//		if(assay == null || acquisitionMethod == null || dataExtractionMethod == null)
-//			throw new IllegalArgumentException("All values should be not NULL!");
-		
-		this.name = name;
-		this.assay = assay;
-		this.acquisitionMethod = acquisitionMethod;
-		this.dataExtractionMethod = dataExtractionMethod;
+		this.name = Objects.requireNonNull(name, "Name cannot be null");
+		this.assay = Objects.requireNonNull(assay, "Assay cannot be null");
+		this.acquisitionMethod = Objects.requireNonNull(acquisitionMethod, "Acquisition Method cannot be null");
+		this.dataExtractionMethod = Objects.requireNonNull(dataExtractionMethod, "Data Extraction Method cannot be null");
 	}
 	
 	//	Mock pipeline for feature clusters
@@ -130,16 +128,14 @@ public class DataPipeline implements Serializable, Comparable<DataPipeline>, Xml
             return false;
 
         final DataPipeline other = (DataPipeline) obj;
-//        if(name.equalsIgnoreCase(other.getName()))
-//        	return true;
-        
+
         if ((this.assay == null) ? (other.getAssay() != null) : !this.assay.equals(other.getAssay()))
             return false;
               
         if ((this.acquisitionMethod == null) ? (other.getAcquisitionMethod() != null) : 
         		!this.acquisitionMethod.equals(other.getAcquisitionMethod()))
             return false;
-        
+       
         if ((this.dataExtractionMethod == null) ? (other.getDataExtractionMethod() != null) : 
         		!this.dataExtractionMethod.equals(other.getDataExtractionMethod()))
         	return false;

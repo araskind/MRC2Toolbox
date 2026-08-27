@@ -21,9 +21,6 @@
 
 package edu.umich.med.mrc2.datoolbox.data.compare;
 
-import java.util.Map;
-import java.util.TreeMap;
-
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.enums.FileSortingOrder;
 
@@ -33,22 +30,14 @@ public class DataFileComparator extends ObjectCompatrator<DataFile> {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	
-	@SuppressWarnings("serial")
-	private static final Map<FileSortingOrder,SortProperty>sortPropertyMap = 
-			new TreeMap<FileSortingOrder,SortProperty>(){{
-			    put(FileSortingOrder.NAME, SortProperty.Name);
-			    put(FileSortingOrder.TIMESTAMP, SortProperty.injectionTime);
-			    put(FileSortingOrder.SAMPLE_ID, SortProperty.sample);
-			    put(FileSortingOrder.SAMPLE_NAME, SortProperty.sampleName);
-			}};
+
 			
-	public DataFileComparator(FileSortingOrder property) {
-		super(sortPropertyMap.get(property));
+	public DataFileComparator(FileSortingOrder property) {		
+		super(SortProperty.getSortPropertyForFileSortingOrder(property));		
 	}
 	
 	public DataFileComparator(FileSortingOrder property, SortDirection direction) {
-		super(sortPropertyMap.get(property), direction);
+		super(SortProperty.getSortPropertyForFileSortingOrder(property), direction);
 	}
 	
 	@Override

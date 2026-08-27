@@ -53,7 +53,7 @@ public class AnalysisMethodFormat extends Format {
 			if(field.equals(SortProperty.ID))
 				return toAppendTo.append(assay.getId());
 		}
-		return toAppendTo.append("");
+		return toAppendTo;
 	}
 
 	@Override

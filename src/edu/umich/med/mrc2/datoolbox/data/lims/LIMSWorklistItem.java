@@ -42,7 +42,6 @@ public class LIMSWorklistItem extends WorklistItem implements Serializable {
 
 	public LIMSWorklistItem(DataFile dataFile) {
 		super(dataFile);
-		// TODO Auto-generated constructor stub
 	}
 
 	public LIMSWorklistItem(

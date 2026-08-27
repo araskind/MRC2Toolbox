@@ -42,7 +42,7 @@ import javax.swing.JPopupMenu;
 
 import org.jfree.chart.ChartPanel;
 
-import edu.umich.med.mrc2.datoolbox.data.compare.ChartColorOption;
+import edu.umich.med.mrc2.datoolbox.data.enums.ChartColorOption;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataScale;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataSetQcField;
 import edu.umich.med.mrc2.datoolbox.data.enums.FileSortingOrder;

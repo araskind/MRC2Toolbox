@@ -51,11 +51,11 @@ public class ObjectAnnotation implements Comparable<ObjectAnnotation>, Serializa
 	private Date lastModified;
 	private LIMSUser createBy;
 	private LIMSUser lastModifiedBy;
-	private Document rtfDocument;
+	private transient Document rtfDocument;
 	private String linkedDocumentId;
 	private String linkedDocumentName;
 	private DocumentFormat linkedDocumentFormat;
-	private IChemModel chemModel;
+	private transient IChemModel chemModel;
 	private String chemModelNotes;
 	private File linkedDocumentFile;
 	
@@ -301,24 +301,20 @@ public class ObjectAnnotation implements Comparable<ObjectAnnotation>, Serializa
 	 * Set maxLength to negative number to get complete text
 	 * @param maxLength
 	 * @return
+	 * @throws BadLocationException 
 	 */
-	public String getText(int maxLength) {
+	public String getText(int maxLength) throws BadLocationException {
 		
 		String text = "";
 		String trailing = "";
 		if(rtfDocument != null) {
 		
 			int length = rtfDocument.getLength();
-			if(length > maxLength && maxLength > 0) {
+			if(maxLength > 0 && length > maxLength) {
 				length = maxLength;
 				trailing = " ...";
 			}			
-			try {
-				text = rtfDocument.getText(0, length);
-			} catch (BadLocationException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			text = rtfDocument.getText(0, length);
 			return text + trailing;
 		}
 		if(linkedDocumentId != null)

@@ -56,7 +56,7 @@ public class LIMSSopFormat extends Format {
 			if(field.equals(SortProperty.Version))
 				return toAppendTo.append(sop.getSopVersion());
 		}
-		return toAppendTo.append("");
+		return toAppendTo;
 	}
 
 	@Override

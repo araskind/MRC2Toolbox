@@ -37,8 +37,6 @@ public class ReferenceMsMsLibraryMatchTypeComparator  extends ObjectCompatrator<
 	@Override
 	public int compare(ReferenceMsMsLibraryMatch m1, ReferenceMsMsLibraryMatch m2) {
 
-		//		int result = 0;
-		
 		//	Push decoys down
 		if(!m1.isDecoyMatch() && m2.isDecoyMatch())
 			return 1;

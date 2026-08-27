@@ -26,19 +26,17 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
+import javax.swing.text.BadLocationException;
+
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
 import edu.umich.med.mrc2.datoolbox.data.lims.ObjectAnnotation;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTableModel;
 import edu.umich.med.mrc2.datoolbox.gui.tables.ColumnContext;
 
+//TODO - make this annotations table
 public class PrepDocumentsTableModel extends BasicTableModel {
 
-	/**
-	 *
-	 */
 	private static final long serialVersionUID = 1754650081223640461L;
-
-	//	TODO - make this annotations table
 	
 	public static final String ANNOTATION_ID_COLUMN = "ID";
 	public static final String DOCUMENT_DESCRIPTION_COLUMN = "Description";	
@@ -69,7 +67,12 @@ public class PrepDocumentsTableModel extends BasicTableModel {
 		List<Object[]>rowData = new ArrayList<Object[]>();
 		for(ObjectAnnotation annotation : annotations) {
 			
-			String text = annotation.getText(100);
+			String text = "";
+			try {
+				text = annotation.getText(100);
+			} catch (BadLocationException e) {
+				e.printStackTrace();
+			}
 			if(text.isEmpty())
 				text = annotation.getLinkedDocumentName();
 			

@@ -44,7 +44,7 @@ public class FeatureIdentificationStateFormat extends Format {
 		}
 		else {
 			state = null;
-			return toAppendTo.append("");
+			return toAppendTo;
 		}
 	}
 

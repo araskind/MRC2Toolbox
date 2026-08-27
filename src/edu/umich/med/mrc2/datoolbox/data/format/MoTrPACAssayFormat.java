@@ -56,7 +56,7 @@ public class MoTrPACAssayFormat extends Format {
 			if(field.equals(SortProperty.Description))
 				return toAppendTo.append(assay.getDescription());
 		}
-		return toAppendTo.append("");
+		return toAppendTo;
 	}
 
 	@Override

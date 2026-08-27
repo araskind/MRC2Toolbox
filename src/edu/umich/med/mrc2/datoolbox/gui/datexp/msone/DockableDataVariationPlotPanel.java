@@ -29,7 +29,7 @@ import java.util.Map;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.SimpleMsFeature;
-import edu.umich.med.mrc2.datoolbox.data.compare.ChartColorOption;
+import edu.umich.med.mrc2.datoolbox.data.enums.ChartColorOption;
 import edu.umich.med.mrc2.datoolbox.data.enums.FileSortingOrder;
 import edu.umich.med.mrc2.datoolbox.gui.plot.stats.DataPlotControlsPanel;
 

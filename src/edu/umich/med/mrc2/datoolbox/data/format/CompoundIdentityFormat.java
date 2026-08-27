@@ -46,14 +46,14 @@ public class CompoundIdentityFormat extends Format {
 	@Override
 	public StringBuffer format(Object obj, StringBuffer toAppendTo, FieldPosition pos) {
 
+		if(obj == null)
+			return toAppendTo;
+				
 		if(obj instanceof MsFeatureIdentity) {
 
 			cid = (CompoundIdentity)obj;
 
 			String text = "";
-			if(cid == null)
-				return toAppendTo.append(text);
-
 			if (idField.equals(CompoundIdentityField.DB_ID))
 				text = cid.getPrimaryDatabaseId();
 
@@ -77,12 +77,11 @@ public class CompoundIdentityFormat extends Format {
 
 			return toAppendTo.append(text);
 		}
-		return toAppendTo.append("");
+		return toAppendTo;
 	}
 
 	@Override
 	public Object parseObject(String source, ParsePosition pos) {
-
 		return cid;
 	}
 }

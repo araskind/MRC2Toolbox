@@ -37,6 +37,10 @@ import javax.swing.JTextArea;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
+import javax.swing.text.BadLocationException;
+
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
 import edu.umich.med.mrc2.datoolbox.data.lims.ObjectAnnotation;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
@@ -48,6 +52,8 @@ public class AnnotationTextEditor extends JDialog {
 	 *
 	 */
 	private static final long serialVersionUID = -8499142430512415429L;
+	private static final Logger logger = LogManager.getLogger(AnnotationTextEditor.class);
+
 	private JButton saveButton, cancelButton;
 	private JTextArea textArea;
 	private ObjectAnnotation currentAnnotation;
@@ -90,26 +96,12 @@ public class AnnotationTextEditor extends JDialog {
 		rootPane.setDefaultButton(saveButton);
 		pack();
 	}
-
-
 	
 	public synchronized void clearPanel() {
-
 		textArea.setText("");
 	}
 
 	public ObjectAnnotation getAnnotation() {
-
-//		if (currentAnnotation != null) {
-//
-//			if (!textArea.getText().trim().equals(currentAnnotation.getText())) {
-//
-//				currentAnnotation.setText(textArea.getText().trim());
-//				currentAnnotation.setLastModified(new Date());
-//			}
-//		} else {
-//			currentAnnotation = new ObjectAnnotation(textArea.getText().trim());
-//		}
 		return currentAnnotation;
 	}
 
@@ -117,9 +109,15 @@ public class AnnotationTextEditor extends JDialog {
 
 		textArea.setText("");
 		currentAnnotation = annotation;
-
-		if (annotation != null)
-			textArea.setText(annotation.getText(-1));
+		if (annotation != null) {
+			String text = "";
+			try {
+				text = annotation.getText(-1);
+			} catch (BadLocationException e) {
+				logger.error("Failed to load annotation text", e);;
+			}
+			textArea.setText(text);
+		}
 	}
 
 	@Override

@@ -54,7 +54,7 @@ public class CompoundLibraryFormat extends Format {
 			if(field.equals(SortProperty.ID))
 				return toAppendTo.append(library.getLibraryId());
 		}
-		return toAppendTo.append("");
+		return toAppendTo;
 	}
 
 	@Override

@@ -53,7 +53,7 @@ public class AnalysisQcEventAnnotationFormat extends Format {
 			if(field.equals(SortProperty.ID))
 				return toAppendTo.append(annotation.getId());
 		}
-		return toAppendTo.append("");
+		return toAppendTo;
 	}
 
 	@Override

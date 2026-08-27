@@ -53,7 +53,7 @@ public class BioSpeciesFormat extends Format {
 			if(field.equals(SortProperty.ID))
 				return toAppendTo.append(Integer.toString(species.getTaxonomyId()));
 		}
-		return toAppendTo.append("");
+		return toAppendTo;
 	}
 
 	@Override

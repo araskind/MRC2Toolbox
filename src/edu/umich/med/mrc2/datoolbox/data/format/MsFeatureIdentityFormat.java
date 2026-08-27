@@ -52,10 +52,10 @@ public class MsFeatureIdentityFormat extends Format {
 			String text = "";
 			if(msfid.getCompoundIdentity() == null) {
 				
-				if (idField.equals(CompoundIdentityField.NAME) 
-						|| idField.equals(CompoundIdentityField.COMMON_NAME)) {
-					if(msfid.getIdentityName() != null)
-						text = msfid.getIdentityName();
+				if ((idField.equals(CompoundIdentityField.NAME) 
+						|| idField.equals(CompoundIdentityField.COMMON_NAME)) 
+						&& msfid.getIdentityName() != null) {
+					text = msfid.getIdentityName();
 				}					
 				return toAppendTo.append(text);
 			}
@@ -82,7 +82,7 @@ public class MsFeatureIdentityFormat extends Format {
 
 			return toAppendTo.append(text);
 		}
-		return toAppendTo.append("");
+		return toAppendTo;
 	}
 
 	@Override

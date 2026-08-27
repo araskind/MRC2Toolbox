@@ -53,7 +53,7 @@ public class ExperimentalSampleFormat extends Format {
 			if(field.equals(SortProperty.ID))
 				return toAppendTo.append(sample.getId());
 		}
-		return toAppendTo.append("");
+		return toAppendTo;
 	}
 
 	@Override

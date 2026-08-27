@@ -45,7 +45,7 @@ public class ExtractedChromatogramFormat extends Format {
 	public StringBuffer format(Object obj, StringBuffer toAppendTo, FieldPosition pos) {
 
 		if(obj == null)
-			return toAppendTo.append("");
+			return toAppendTo;
 		
 		if(ExtractedChromatogram.class.isAssignableFrom(obj.getClass())) {
 
@@ -56,7 +56,7 @@ public class ExtractedChromatogramFormat extends Format {
 			if(field.equals(SortProperty.dataFile))
 				return toAppendTo.append(chromatogram.getDataFile().getName());
 		}
-		return toAppendTo.append("");
+		return toAppendTo;
 	}
 
 	@Override

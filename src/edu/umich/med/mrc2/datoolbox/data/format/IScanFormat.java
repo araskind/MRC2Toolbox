@@ -55,7 +55,7 @@ public class IScanFormat extends Format {
 			if(field.equals(SortProperty.scanNumber))
 				return toAppendTo.append(Integer.toString(scan.getNum()));
 		}
-		return toAppendTo.append("");
+		return toAppendTo;
 	}
 
 	@Override

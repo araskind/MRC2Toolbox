@@ -45,12 +45,12 @@ public class RangeFormat extends Format {
 	public StringBuffer format(Object obj, StringBuffer toAppendTo, FieldPosition pos) {
 
 		if(obj == null)
-			return toAppendTo.append("");
+			return toAppendTo;
 		
 		if(Range.class.isAssignableFrom(obj.getClass()))
 			return toAppendTo.append(((Range) obj).getFormattedString(numFormat));
 		
-		return toAppendTo.append("");
+		return toAppendTo;
 	}
 
 	@Override

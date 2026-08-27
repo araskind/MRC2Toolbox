@@ -24,6 +24,7 @@ package edu.umich.med.mrc2.datoolbox.database.thermo;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -33,6 +34,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
+
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
 import edu.umich.med.mrc2.datoolbox.data.thermo.ThermoActivationType;
 import edu.umich.med.mrc2.datoolbox.data.thermo.ThermoBestHitType;
@@ -48,9 +52,15 @@ import edu.umich.med.mrc2.datoolbox.data.thermo.ThermoScanType;
 
 public class CompoundDiscovererUtils {
 	
+	private static final Logger logger = LogManager.getLogger(CompoundDiscovererUtils.class);
+
+	private CompoundDiscovererUtils() {
+		/* This utility class should not be instantiated */
+	}
+	
 	public static final DateFormat cdTimeStampFormat = new SimpleDateFormat("MM/dd/yyyy hh:mm:ss a");
 
-	public static ThermoCDStudy parseAnalysisDefinition(Connection conn) throws Exception {
+	public static ThermoCDStudy parseAnalysisDefinition(Connection conn) throws SQLException {
 		
 		ThermoCDStudy study = null;
 		
@@ -102,7 +112,7 @@ public class CompoundDiscovererUtils {
 		return study;
 	}
 	
-//	public static Document getAnalysisDefinitionDocument(Connection conn) throws Exception {
+//	public static Document getAnalysisDefinitionDocument(Connection conn) throws SQLException {
 //		
 //		String sql = "SELECT ANALYSISDEFINITIONXML FROM ANALYSISDEFINITION";
 //		PreparedStatement ps = conn.prepareStatement(sql);
@@ -128,7 +138,7 @@ public class CompoundDiscovererUtils {
 //		return xmlDocument;		
 //	}
 	
-	public static Collection<ThermoCDWorkflow> getAnalysisWorkflows(Connection conn) throws Exception {
+	public static Collection<ThermoCDWorkflow> getAnalysisWorkflows(Connection conn) throws SQLException {
 		
 		Collection<ThermoCDWorkflow>workflows = new ArrayList<ThermoCDWorkflow>();
 		String sql = 
@@ -136,34 +146,32 @@ public class CompoundDiscovererUtils {
 				+ "WORKFLOWSTARTDATE, VERSION, SOFTWAREVERSION, "
 				+ "WORKFLOWXML, MACHINENAME, WORKFLOWTYPE, STUDY "
 				+ "FROM WORKFLOWS ORDER BY WORKFLOWID";
-		PreparedStatement ps = conn.prepareStatement(sql);		
-		ResultSet rs = ps.executeQuery();
-		while(rs.next()) {
-			
-			ThermoCDWorkflow workflow = new ThermoCDWorkflow();
-			workflow.setAnalysisWorkflowId(rs.getInt("WORKFLOWID"));
-			workflow.setWorkflowLevel(rs.getInt("LEVEL"));
-			workflow.setName(rs.getString("WORKFLOWNAME"));
-			workflow.setDescription(rs.getString("WORKFLOWDESCRIPTION"));
-			workflow.setStartDate(new Date(rs.getDate("WORKFLOWSTARTDATE").getTime()));
-			workflow.setWorkflowVersion(rs.getInt("VERSION"));
-			workflow.setSoftwareVersion(rs.getString("SOFTWAREVERSION"));			
-			workflow.setWorkflowXml(rs.getString("WORKFLOWXML"));
-			workflow.setMachineName(rs.getString("MACHINENAME"));
-			workflow.setWorkflowType(rs.getString("WORKFLOWTYPE"));
-			workflow.setStudy(rs.getString("STUDY"));			
-			workflows.add(workflow);
-		}		
-		rs.close();
-		ps.close();
+		try(PreparedStatement ps = conn.prepareStatement(sql)){	
+			ResultSet rs = ps.executeQuery();
+			while(rs.next()) {				
+				ThermoCDWorkflow workflow = new ThermoCDWorkflow();
+				workflow.setAnalysisWorkflowId(rs.getInt("WORKFLOWID"));
+				workflow.setWorkflowLevel(rs.getInt("LEVEL"));
+				workflow.setName(rs.getString("WORKFLOWNAME"));
+				workflow.setDescription(rs.getString("WORKFLOWDESCRIPTION"));
+				workflow.setStartDate(new Date(rs.getDate("WORKFLOWSTARTDATE").getTime()));
+				workflow.setWorkflowVersion(rs.getInt("VERSION"));
+				workflow.setSoftwareVersion(rs.getString("SOFTWAREVERSION"));			
+				workflow.setWorkflowXml(rs.getString("WORKFLOWXML"));
+				workflow.setMachineName(rs.getString("MACHINENAME"));
+				workflow.setWorkflowType(rs.getString("WORKFLOWTYPE"));
+				workflow.setStudy(rs.getString("STUDY"));			
+				workflows.add(workflow);
+			}		
+			rs.close();
+		}
 		return workflows;
 	}
 	
 	public static void mapStudyFilesForWorkflows(
 			Collection<ThermoCDWorkflow>workflows, 
 			ThermoCDStudy study, 
-			Connection conn) throws Exception {
-		
+			Connection conn) throws SQLException {	
 		String sql = 
 				"SELECT I.ID, I.SAMPLE, I.SAMPLEIDENTIFIER, I.STUDYFILEID, I.FILENAME, " +
 				"I.SAMPLETYPE, F.WORKFLOWINPUTFILESFILEID " +
@@ -171,34 +179,33 @@ public class CompoundDiscovererUtils {
 				"STUDYINFORMATIONWORKFLOWINPUTFILES F " +
 				"WHERE I.ID = F.STUDYINFORMATIONID " +
 				"AND WORKFLOWINPUTFILESWORKFLOWID = ?";
-		PreparedStatement ps = conn.prepareStatement(sql);	
-		for(ThermoCDWorkflow workflow : workflows) {
-			
-			ps.setInt(1, workflow.getAnalysisWorkflowId());			
-			ResultSet rs = ps.executeQuery();
-			while(rs.next()) {
-				
-				String fileName = rs.getString("FILENAME");
-				int wfFileId = rs.getInt("WORKFLOWINPUTFILESFILEID");
-				ThermoCDRawDatFile file = study.getFileByName(fileName);
-				if(file != null) {
-					workflow.addDataFile(file, wfFileId);
-				}
-				else {
-					System.out.println("Couldn't find the file " + fileName + " in the study data.");
-				}
-			}			
-			rs.close();
+		try(PreparedStatement ps = conn.prepareStatement(sql)){
+			for(ThermoCDWorkflow workflow : workflows) {			
+				ps.setInt(1, workflow.getAnalysisWorkflowId());			
+				ResultSet rs = ps.executeQuery();
+				while(rs.next()) {				
+					String fileName = rs.getString("FILENAME");
+					int wfFileId = rs.getInt("WORKFLOWINPUTFILESFILEID");
+					ThermoCDRawDatFile file = study.getFileByName(fileName);
+					if(file != null) {
+						workflow.addDataFile(file, wfFileId);
+					}
+					else {
+						logger.error(String.format("Couldn't find the file %s in the study data.", fileName));
+					}
+				}			
+				rs.close();
+			}
 		}
-		ps.close();
 	}
 	
 	public static void getMsFeaturesForWorkflow(
 			ThermoCDWorkflow workflow, 
-			Connection conn) throws Exception {
+			Connection conn) throws SQLException {
 		
 		Map<Integer, Collection<ThermoMSFeature>>dataMap = new TreeMap<Integer, Collection<ThermoMSFeature>>();
-		workflow.getFileIdMap().values().stream().forEach(i -> dataMap.put(i, new HashSet<ThermoMSFeature>()));
+		workflow.getFileIdMap().values().
+			forEach(i -> dataMap.put(i, new HashSet<ThermoMSFeature>()));
 		String sql = 
 				"SELECT H.ID AS BHID, M.ID AS MSID, H.BESTHITTYPE,  " +
 				"H.IONDESCRIPTION, H.CHARGE, H.MOLECULARWEIGHT, H.MASS, H.RETENTIONTIME AS BHRT, " +
@@ -214,39 +221,38 @@ public class CompoundDiscovererUtils {
 				"AND H.ID = L.BESTHITIONINSTANCEITEMSID " +
 				"AND M.ID = L.MASSSPECTRUMITEMSID " +
 				"ORDER BY H.ID ";
-		PreparedStatement ps = conn.prepareStatement(sql);	
-		ps.setInt(1, workflow.getAnalysisWorkflowId());
-		ResultSet rs = ps.executeQuery();
-		while(rs.next()) {
-			
-			ThermoMSFeature feature = new ThermoMSFeature();
-			feature.setActivationType(ThermoActivationType.getThermoActivationTypeByCode(rs.getInt("ACTIVATIONTYPE")));
-			feature.setAdduct(rs.getString("IONDESCRIPTION"));
-			feature.setArea(rs.getDouble("AREA"));
-			feature.setBestHitId(rs.getInt("BHID"));
-			feature.setBestHitRt(rs.getDouble("BHRT"));
-			feature.setBestHitType(ThermoBestHitType.getThermoBestHitTypeByCode(rs.getInt("BESTHITTYPE")));
-			feature.setCharge(rs.getInt("CHARGE"));
-			feature.setFileId(rs.getInt("FILEID"));
-			feature.setIntensity(rs.getDouble("INTENSITY"));
-			feature.setIonization(ThermoIonizationType.getThermoIonizationTypeByCode(rs.getInt("IONIZATION")));
-			feature.setIsolationWidth(rs.getDouble("ISOLATIONWIDTH"));
-			feature.setMassAnalyzer(ThermoMassAnalyzerType.getThermoMassAnalyzerTypeByCode(rs.getInt("MASSANALYZER")));
-			feature.setMsId(rs.getInt("MSORDER"));
-			feature.setMsOrder(ThermoMSOrderType.getThermoMSOrderTypeByCode(rs.getInt("MSORDER")));
-			feature.setMw(rs.getDouble("MOLECULARWEIGHT"));
-			feature.setMz(rs.getDouble("MASS"));
-			feature.setPolarity(ThermoPolarityType.getThermoPolarityTypeByCode(rs.getInt("POLARITY")));
-			feature.setResolutionAsMass200(rs.getInt("RESOLUTIONATMASS200"));
-			feature.setRt(rs.getDouble("MSRT"));
-			feature.setScanType(ThermoScanType.getThermoScanTypeByCode(rs.getInt("SCANTYPE")));
-
-			dataMap.get(feature.getFileId()).add(feature);
-			
-			System.out.println(feature.toString());
-		}
-		rs.close();
-		ps.close();		
+		try(PreparedStatement ps = conn.prepareStatement(sql)){
+			ps.setInt(1, workflow.getAnalysisWorkflowId());
+			ResultSet rs = ps.executeQuery();
+			while(rs.next()) {				
+				ThermoMSFeature feature = new ThermoMSFeature();
+				feature.setActivationType(ThermoActivationType.getThermoActivationTypeByCode(rs.getInt("ACTIVATIONTYPE")));
+				feature.setAdduct(rs.getString("IONDESCRIPTION"));
+				feature.setArea(rs.getDouble("AREA"));
+				feature.setBestHitId(rs.getInt("BHID"));
+				feature.setBestHitRt(rs.getDouble("BHRT"));
+				feature.setBestHitType(ThermoBestHitType.getThermoBestHitTypeByCode(rs.getInt("BESTHITTYPE")));
+				feature.setCharge(rs.getInt("CHARGE"));
+				feature.setFileId(rs.getInt("FILEID"));
+				feature.setIntensity(rs.getDouble("INTENSITY"));
+				feature.setIonization(ThermoIonizationType.getThermoIonizationTypeByCode(rs.getInt("IONIZATION")));
+				feature.setIsolationWidth(rs.getDouble("ISOLATIONWIDTH"));
+				feature.setMassAnalyzer(ThermoMassAnalyzerType.getThermoMassAnalyzerTypeByCode(rs.getInt("MASSANALYZER")));
+				feature.setMsId(rs.getInt("MSORDER"));
+				feature.setMsOrder(ThermoMSOrderType.getThermoMSOrderTypeByCode(rs.getInt("MSORDER")));
+				feature.setMw(rs.getDouble("MOLECULARWEIGHT"));
+				feature.setMz(rs.getDouble("MASS"));
+				feature.setPolarity(ThermoPolarityType.getThermoPolarityTypeByCode(rs.getInt("POLARITY")));
+				feature.setResolutionAsMass200(rs.getInt("RESOLUTIONATMASS200"));
+				feature.setRt(rs.getDouble("MSRT"));
+				feature.setScanType(ThermoScanType.getThermoScanTypeByCode(rs.getInt("SCANTYPE")));
+	
+				dataMap.get(feature.getFileId()).add(feature);
+				
+				System.out.println(feature.toString());
+			}
+			rs.close();
+		}	
 		for(Entry<ThermoCDRawDatFile, Integer> entry: workflow.getFileIdMap().entrySet())			
 			workflow.addFeaturesForFile(entry.getKey(), dataMap.get(entry.getValue()));	
 		

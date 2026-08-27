@@ -82,6 +82,26 @@ public class AnalysisMethod implements Serializable, Comparable<AnalysisMethod>,
 	}
 	
     @Override
+    public boolean equals(Object obj) {
+
+		if (obj == this)
+			return true;
+
+        if (obj == null)
+            return false;
+
+        if (!AnalysisMethod.class.isAssignableFrom(obj.getClass()))
+            return false;
+
+        final AnalysisMethod other = (AnalysisMethod) obj;
+
+        if ((this.id == null) ? (other.getId() != null) : !this.id.equals(other.getId()))
+            return false;
+
+        return true;
+    }
+    
+    @Override
     public int hashCode() {
 
         int hash = 3;

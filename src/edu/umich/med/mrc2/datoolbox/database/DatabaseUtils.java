@@ -34,11 +34,14 @@ import java.nio.file.Paths;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
+import javax.swing.text.Document;
+
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
 import edu.umich.med.mrc2.datoolbox.utils.CompressionUtils;
 import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
+import rtf.AdvancedRTFEditorKit;
 
 public class DatabaseUtils {
 	
@@ -139,6 +142,25 @@ public class DatabaseUtils {
 			ps.setBinaryStream(blobPosition, null, 0);
 		}
 		return fis;
+	}
+	
+	public static FileInputStream setBlobFromRTFdocument(
+			Document rtfDocument,	
+			File tmpRtf,
+			PreparedStatement ps,
+			int blobPosition) throws IOException, SQLException {
+		AdvancedRTFEditorKit editor = new AdvancedRTFEditorKit();
+		
+		try {
+			editor.write(tmpRtf.getAbsolutePath(), rtfDocument);
+		} catch (Exception ex) {
+			logger.error("Failed to write RTF to file", ex);
+		}
+		if(tmpRtf.exists()) {
+			return setBlob(tmpRtf, ps, blobPosition);
+		}
+		else
+			throw new IOException("Failed to set BLOB from RTF document");
 	}
 	
 	public static InputStream setBlobFromCompressedString(

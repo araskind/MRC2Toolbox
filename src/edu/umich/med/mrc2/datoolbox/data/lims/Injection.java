@@ -25,6 +25,8 @@ import java.io.Serializable;
 import java.text.ParseException;
 import java.util.Date;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.jdom2.Element;
 
 import edu.umich.med.mrc2.datoolbox.project.store.CommonFields;
@@ -38,6 +40,8 @@ public class Injection  implements Serializable, Comparable<Injection>{
 	 * 
 	 */
 	private static final long serialVersionUID = 8052899216236967926L;
+	private static final Logger logger = LogManager.getLogger(Injection.class);
+
 	private String id;
 	private String dataFileName;
 	private Date timeStamp;
@@ -163,8 +167,7 @@ public class Injection  implements Serializable, Comparable<Injection>{
 			try {
 				timeStamp = ProjectUtils.dateTimeFormat.parse(injTime);
 			} catch (ParseException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.error(String.format("Failed to parse injection timestamp %s", injTime), e);
 			}
 		}
 		prepItemId = injectionElement.getAttributeValue(

@@ -21,6 +21,8 @@
 
 package edu.umich.med.mrc2.datoolbox.data.compare;
 
+import edu.umich.med.mrc2.datoolbox.data.enums.FileSortingOrder;
+
 public enum SortProperty {
 
 	MZ("M/Z"),
@@ -82,4 +84,26 @@ public enum SortProperty {
 		}
 		return null;
 	}
+	
+	public static SortProperty getSortPropertyForFileSortingOrder(FileSortingOrder fso) {
+		
+		if(fso.equals(FileSortingOrder.NAME))
+			return SortProperty.Name;
+		else if(fso.equals(FileSortingOrder.TIMESTAMP))
+			return SortProperty.injectionTime;
+		else if(fso.equals(FileSortingOrder.SAMPLE_ID))
+			return SortProperty.sample;
+		else if(fso.equals(FileSortingOrder.SAMPLE_NAME))
+			return SortProperty.sampleName;
+		else
+			return null;
+	}
 }
+
+
+
+
+
+
+
+

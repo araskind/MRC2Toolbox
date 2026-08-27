@@ -54,7 +54,7 @@ public class IDTrackerOrganizationFormat extends Format {
 			if(field.equals(SortProperty.ID))
 				return toAppendTo.append(organization.getId());
 		}
-		return toAppendTo.append("");
+		return toAppendTo;
 	}
 
 	@Override
