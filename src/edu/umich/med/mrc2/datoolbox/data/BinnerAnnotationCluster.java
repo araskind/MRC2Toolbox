@@ -166,7 +166,7 @@ public class BinnerAnnotationCluster {
 			if(ba.isPrimary())
 				merged.setPrimary(true);
 		}
-		double div = (double)matches.size();
+		double div = matches.size();
 		merged.setBinnerMz(mzSum / div);
 		merged.setBinnerRt(rtSum / div);
 		merged.setRmd(rmdSum / div);
@@ -225,8 +225,7 @@ public class BinnerAnnotationCluster {
 	public Map<Double,Double>getMZvalues(){
 		
 		Map<Double,Double>mzrtMap = new TreeMap<Double,Double>();
-		annotations.stream().forEach(
-				a -> mzrtMap.put(a.getBinnerMz(), a.getBinnerMz()));
+		annotations.forEach(a -> mzrtMap.put(a.getBinnerMz(), a.getBinnerMz()));
 		return mzrtMap;
 	}
 
@@ -241,11 +240,11 @@ public class BinnerAnnotationCluster {
     @Override
     public boolean equals(Object obj) {
 
+		if (obj == null)
+			return false;
+		
 		if (obj == this)
 			return true;
-
-        if (obj == null)
-            return false;
 
         if (!BinnerAnnotationCluster.class.isAssignableFrom(obj.getClass()))
             return false;
@@ -303,7 +302,7 @@ public class BinnerAnnotationCluster {
 		List<Element> annotationListElements = 
 				clusterElement.getChild(
 						BinnerAnnotationClusterFields.Annotations.name()).getChildren();
-		if(annotationListElements.size() > 0) {
+		if(!annotationListElements.isEmpty()) {
 			
 			for(Element annotationElement : annotationListElements) {
 				
@@ -315,7 +314,7 @@ public class BinnerAnnotationCluster {
 		List<Element> primaryListElements = 
 				clusterElement.getChild(
 						BinnerAnnotationClusterFields.PrimaryAnnotation.name()).getChildren();
-		if(primaryListElements.size() > 0) {
+		if(!primaryListElements.isEmpty()) {
 			
 			for(Element annotationElement : primaryListElements) {
 				
@@ -333,9 +332,7 @@ public class BinnerAnnotationCluster {
 	public String getAllAnnotationsAsString() {
 		
 		Collection<String>allAnnotations = new ArrayList<String>();
-		annotations.stream().
-			forEach(a -> allAnnotations.add(a.getCleanAnnotation()));
-		
+		annotations.forEach(a -> allAnnotations.add(a.getCleanAnnotation()));	
 		return StringUtils.join(allAnnotations, "; ");
 	}
 	

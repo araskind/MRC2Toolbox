@@ -24,7 +24,6 @@ package edu.umich.med.mrc2.datoolbox.data;
 import java.awt.Color;
 import java.io.File;
 import java.io.Serializable;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -222,11 +221,11 @@ public class DataFile implements Comparable<DataFile>, Serializable {
     @Override
     public boolean equals(Object obj) {
 
+		if (obj == null)
+			return false;
+		
 		if (obj == this)
 			return true;
-
-        if (obj == null)
-            return false;
 
         if (!DataFile.class.isAssignableFrom(obj.getClass()))
             return false;
@@ -356,17 +355,8 @@ public class DataFile implements Comparable<DataFile>, Serializable {
 		
 		injectionId = fileElement.getAttributeValue(DataFileFields.Injection.name());
 		prepItemId = fileElement.getAttributeValue(DataFileFields.PrepItem.name());
-				
-		String injTime = 
-				fileElement.getAttributeValue(DataFileFields.InjTimestamp.name());
-		if(injTime != null) {
-			try {
-				injectionTime = ProjectUtils.dateTimeFormat.parse(injTime);
-			} catch (ParseException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
+		injectionTime = ProjectUtils.parseDateString(
+				fileElement.getAttributeValue(DataFileFields.InjTimestamp.name()));
 		samplePosition = 
 				fileElement.getAttributeValue(DataFileFields.SamplePosition.name());
 		

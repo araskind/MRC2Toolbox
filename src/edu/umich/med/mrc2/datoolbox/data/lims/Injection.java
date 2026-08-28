@@ -22,7 +22,6 @@
 package edu.umich.med.mrc2.datoolbox.data.lims;
 
 import java.io.Serializable;
-import java.text.ParseException;
 import java.util.Date;
 
 import org.apache.log4j.LogManager;
@@ -92,11 +91,11 @@ public class Injection  implements Serializable, Comparable<Injection>{
    @Override
     public boolean equals(Object obj) {
 
+		if (obj == null)
+			return false;
+		
 		if (obj == this)
 			return true;
-
-        if (obj == null)
-            return false;
 
         if (!Injection.class.isAssignableFrom(obj.getClass()))
             return false;
@@ -158,22 +157,13 @@ public class Injection  implements Serializable, Comparable<Injection>{
 		//	TMP fix for old name
 		if(id == null)
 			injectionElement.getAttributeValue("InjId");
-			
-		dataFileName = injectionElement.getAttributeValue(
-				InjectionFields.DataFile.name());
-		String injTime = 
-				injectionElement.getAttributeValue(InjectionFields.Timestamp.name());
-		if(injTime != null) {
-			try {
-				timeStamp = ProjectUtils.dateTimeFormat.parse(injTime);
-			} catch (ParseException e) {
-				logger.error(String.format("Failed to parse injection timestamp %s", injTime), e);
-			}
-		}
-		prepItemId = injectionElement.getAttributeValue(
-				InjectionFields.PrepItem.name());
-		acquisitionMethodId = injectionElement.getAttributeValue(
-				InjectionFields.AcqMethod.name());
+		
+		dataFileName = injectionElement.getAttributeValue(InjectionFields.DataFile.name());
+
+		timeStamp = ProjectUtils.parseDateString(
+				injectionElement.getAttributeValue(InjectionFields.Timestamp.name()));
+		prepItemId = injectionElement.getAttributeValue(InjectionFields.PrepItem.name());
+		acquisitionMethodId = injectionElement.getAttributeValue(InjectionFields.AcqMethod.name());
 		String injVol = 
 				injectionElement.getAttributeValue(InjectionFields.InjVolume.name());
 		if(injVol != null)

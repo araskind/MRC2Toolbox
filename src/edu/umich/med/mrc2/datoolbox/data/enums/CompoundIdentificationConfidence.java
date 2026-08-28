@@ -97,6 +97,9 @@ public enum CompoundIdentificationConfidence {
 
 	public static CompoundIdentificationConfidence getLevelById(String id) {
 
+		if(id == null)
+			return null;
+		
 		for(CompoundIdentificationConfidence cl : CompoundIdentificationConfidence.values()) {
 			if(cl.getLevelId().equals(id))
 				return cl;
@@ -106,6 +109,9 @@ public enum CompoundIdentificationConfidence {
 	
 	public static CompoundIdentificationConfidence getLevelByName(String name) {
 
+		if(name == null)
+			return null;
+		
 		for(CompoundIdentificationConfidence cl : CompoundIdentificationConfidence.values()) {
 			if(cl.name().equals(name))
 				return cl;

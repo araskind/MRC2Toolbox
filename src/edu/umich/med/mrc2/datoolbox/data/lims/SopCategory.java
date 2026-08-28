@@ -63,6 +63,9 @@ public class SopCategory implements Serializable, Comparable<SopCategory>, XmlSt
         if (obj == null)
             return false;
 
+		if (obj == this)
+			return true;
+		
         if (!SopCategory.class.isAssignableFrom(obj.getClass()))
             return false;
 
@@ -70,9 +73,6 @@ public class SopCategory implements Serializable, Comparable<SopCategory>, XmlSt
 
         if ((this.categoryId == null) ? (other.getCategoryId() != null) : !this.categoryId.equals(other.getCategoryId()))
             return false;
-
-		if (obj == this)
-			return true;
 
         return true;
     }

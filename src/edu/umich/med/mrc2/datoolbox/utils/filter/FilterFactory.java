@@ -22,16 +22,29 @@
 package edu.umich.med.mrc2.datoolbox.utils.filter;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 
 import org.apache.commons.jcs3.access.exception.InvalidArgumentException;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.jdom2.Element;
 
 import edu.umich.med.mrc2.datoolbox.project.store.SmoothingFilterFields;
 
 public class FilterFactory {
+	
+	private static final Logger logger = LogManager.getLogger(FilterFactory.class);
 
-	public static Filter getFilter(Element filterElement) throws Exception {
+	private FilterFactory() {
+		/* This utility class should not be instantiated */
+	}
 
+	public static Filter getFilter(Element filterElement) {
+		
+		if(filterElement == null)
+			return null;
+
+		Filter filterInstance = null;
 		String filterCode = 
 				filterElement.getAttributeValue(SmoothingFilterFields.FilterCode.name());
 		if (filterCode == null)
@@ -41,11 +54,18 @@ public class FilterFactory {
 		if (filterClass == null)
 			throw new InvalidArgumentException("Unknown filter class");
 
-		Constructor<?> constructor = 
-				filterClass.getFilterClass().getConstructor(Element.class);
-		Filter filterInstance = 
-				(Filter) constructor.newInstance(filterElement);
-
+		Constructor<?> constructor = null;
+		try {
+			constructor = filterClass.getFilterClass().getConstructor(Element.class);
+		} catch (NoSuchMethodException e) {
+			logger.error("Failed to create filter from XML element", e);
+		}		
+		try {
+			filterInstance = (Filter) constructor.newInstance(filterElement);
+		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+				| InvocationTargetException e) {
+			logger.error("Failed to create filter from XML element", e);
+		}
 		return filterInstance;
 	}
 }

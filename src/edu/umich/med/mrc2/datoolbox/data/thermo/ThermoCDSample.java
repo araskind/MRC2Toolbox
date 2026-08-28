@@ -54,11 +54,11 @@ public class ThermoCDSample implements Comparable<ThermoCDSample> {
     @Override
     public boolean equals(Object obj) {
 
+		if (obj == null)
+			return false;
+		
 		if (obj == this)
 			return true;
-
-        if (obj == null)
-            return false;
 
         if (!ThermoCDSample.class.isAssignableFrom(obj.getClass()))
             return false;

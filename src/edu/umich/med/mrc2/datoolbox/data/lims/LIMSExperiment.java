@@ -127,8 +127,11 @@ public class LIMSExperiment implements Serializable, Comparable<LIMSExperiment>,
     @Override
     public boolean equals(Object obj) {
 
-        if (obj == null)
-            return false;
+		if (obj == null)
+			return false;
+		
+		if (obj == this)
+			return true;
 
         if (!LIMSExperiment.class.isAssignableFrom(obj.getClass()))
             return false;
@@ -137,9 +140,6 @@ public class LIMSExperiment implements Serializable, Comparable<LIMSExperiment>,
 
         if ((this.id == null) ? (other.getId() != null) : !this.id.equals(other.getId()))
             return false;
-
-		if (obj == this)
-			return true;
 
         return true;
     }

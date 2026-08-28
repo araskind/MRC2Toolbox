@@ -203,10 +203,13 @@ public class MoTrPACReport implements Comparable<MoTrPACReport>{
 		String reportDefinitionKey =
 				study.getId() + experiment.getId() + 
 				assay.getAssayId() + tissueCode.getCode();
-		for(Entry<MoTrPACReportCodeBlock, MoTrPACReportCode> stage : reportStage.entrySet()) 
-			reportDefinitionKey += stage.getKey().getBlockId() + stage.getValue().getOptionName();
-		
-		return reportDefinitionKey;
+		StringBuilder sb = new StringBuilder();
+		sb.append(reportDefinitionKey);
+		for(Entry<MoTrPACReportCodeBlock, MoTrPACReportCode> stage : reportStage.entrySet()) {
+			sb.append(stage.getKey().getBlockId());
+			sb.append(stage.getValue().getOptionName());
+		}
+		return sb.toString();
 	}	
 }
 

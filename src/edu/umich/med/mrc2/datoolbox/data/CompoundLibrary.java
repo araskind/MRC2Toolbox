@@ -139,7 +139,7 @@ public class CompoundLibrary implements Serializable, Comparable<CompoundLibrary
 	public Map<String, MsFeature>getNameMap(){
 
 		Map<String, MsFeature>idMap = new TreeMap<>();
-		libraryFeatures.stream().forEach(f -> idMap.put(f.getName(), f));
+		libraryFeatures.forEach(f -> idMap.put(f.getName(), f));
 		return idMap;
 	}
 
@@ -253,11 +253,11 @@ public class CompoundLibrary implements Serializable, Comparable<CompoundLibrary
     @Override
     public boolean equals(Object obj) {
 
+		if (obj == null)
+			return false;
+		
 		if (obj == this)
 			return true;
-
-        if (obj == null)
-            return false;
 
         if (!CompoundLibrary.class.isAssignableFrom(obj.getClass()))
             return false;
@@ -361,8 +361,7 @@ public class CompoundLibrary implements Serializable, Comparable<CompoundLibrary
 		
 		Element featureListElement = new Element(CommonFields.FeatureList.name());
 		if(libraryFeatures != null && !libraryFeatures.isEmpty())			
-			libraryFeatures.stream().
-				forEach(lf -> featureListElement.addContent(lf.getXmlElement()));		
+			libraryFeatures.forEach(lf -> featureListElement.addContent(lf.getXmlElement()));		
 		
 		compoundLibraryElement.addContent(featureListElement);
 		

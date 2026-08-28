@@ -215,16 +215,7 @@ public class MsMsLibraryFeature implements Serializable {
 		this.parent = parent;
 	}
 
-	public MsPoint[] getNormalizedMassSortedSpectrum() {
-
-//		double maxIntensity = spectrum.stream().
-//			sorted(new MsDataPointComparator(SortProperty.Intensity, SortDirection.DESC)).
-//			findFirst().get().getIntensity();
-//
-//		return spectrum.stream().sorted(MsUtils.mzSorter).
-//				map(p -> new MsPoint(p.getMz(), p.getIntensity()/maxIntensity * 100.0d)).
-//				toArray(size -> new MsPoint[size]);
-		
+	public MsPoint[] getNormalizedMassSortedSpectrum() {	
 		return MsUtils.normalizeAndSortMsPattern(spectrum);
 	}
 
@@ -250,18 +241,18 @@ public class MsMsLibraryFeature implements Serializable {
 	}
 
 	@Override
-	public boolean equals(Object msmsMatch) {
+	public boolean equals(Object obj) {
 
-        if (msmsMatch == this)
-            return true;
-
-		if(msmsMatch == null)
+		if (obj == null)
 			return false;
+		
+		if (obj == this)
+			return true;
 
-        if (!MsMsLibraryFeature.class.isAssignableFrom(msmsMatch.getClass()))
+        if (!MsMsLibraryFeature.class.isAssignableFrom(obj.getClass()))
             return false;
 
-        MsMsLibraryFeature cid = (MsMsLibraryFeature)msmsMatch;
+        MsMsLibraryFeature cid = (MsMsLibraryFeature)obj;
 
         if(this.uniqueId != cid.getUniqueId())
         	return false;

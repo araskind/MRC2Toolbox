@@ -70,13 +70,13 @@ public class SavitzkyGolayJdsp extends Filter {
 	}
 
 	@Override
-	public boolean equals(Filter otherFilter) {
+	public boolean equals(Object otherFilter) {
 		
-		if (otherFilter == this)
-			return true;
-
         if (otherFilter == null)
             return false;
+        
+		if (otherFilter == this)
+			return true;
         
         if (!SavitzkyGolayJdsp.class.isAssignableFrom(otherFilter.getClass()))
             return false;

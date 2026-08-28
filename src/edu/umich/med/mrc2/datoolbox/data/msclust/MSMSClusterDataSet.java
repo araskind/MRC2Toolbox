@@ -175,11 +175,11 @@ public class MSMSClusterDataSet implements IMSMSClusterDataSet {
    @Override
     public boolean equals(Object obj) {
 
+		if (obj == null)
+			return false;
+		
 		if (obj == this)
 			return true;
-
-        if (obj == null)
-            return false;
 
         if (!MSMSClusterDataSet.class.isAssignableFrom(obj.getClass()))
             return false;

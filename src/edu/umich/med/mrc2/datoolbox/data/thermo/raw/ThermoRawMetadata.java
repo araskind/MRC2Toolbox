@@ -21,17 +21,13 @@
 
 package edu.umich.med.mrc2.datoolbox.data.thermo.raw;
 
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 
-public class ThermoRawMetadata {
-	
-	private static final DateFormat dateTimeFormat = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
+import edu.umich.med.mrc2.datoolbox.utils.ProjectUtils;
 
+public class ThermoRawMetadata {
 
 	private String fileName;
 	private Collection<ThermoRawMetadataEntry>entries;
@@ -75,20 +71,11 @@ public class ThermoRawMetadata {
 	}
 	
 	public Date getInjectionTime() {
-		
-		Date timestamp = null;
+
 		ThermoRawMetadataEntry entry = 
 				entries.stream().
 				filter(e -> e.getCvParam().equals(ThermoCvParams.CREATION_DATE)).
 				findFirst().orElse(null);
-		if(entry != null) {
-			try {
-				timestamp = dateTimeFormat.parse(entry.getValue());
-			} catch (ParseException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-		}
-		return timestamp;
+		return ProjectUtils.parseDateString(entry.getValue());
 	}
 }

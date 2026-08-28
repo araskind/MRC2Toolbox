@@ -103,11 +103,11 @@ public class BinnerAnnotationLookupDataSet implements Comparable<BinnerAnnotatio
 	@Override
 	public boolean equals(Object obj) {
 
-		if (obj == this)
-			return true;
-		
 		if (obj == null)
 			return false;
+		
+		if (obj == this)
+			return true;
 
 		if (!BinnerAnnotationLookupDataSet.class.isAssignableFrom(obj.getClass()))
 			return false;
@@ -241,20 +241,16 @@ public class BinnerAnnotationLookupDataSet implements Comparable<BinnerAnnotatio
 		if(createdBy == null)
 			createdBy = MRC2ToolBoxCore.getIdTrackerUser();
 		
-		annotationClusters = new HashSet<BinnerAnnotationCluster>();
-		
+		annotationClusters = new HashSet<BinnerAnnotationCluster>();		
 		List<Element> bacListElements = 
 				xmlElement.getChildren(BinnerAnnotationLookupDataSetFields.BAList.name());
 		if(!bacListElements.isEmpty()) {
 			
 			List<Element> bacElementList = 
 					bacListElements.get(0).getChildren(ObjectNames.BinnerAnnotationCluster.name());
-			for(Element bacElement : bacElementList) {
-				
-				BinnerAnnotationCluster newCluster = 
-						new BinnerAnnotationCluster(bacElement);
-				if(newCluster != null)
-					annotationClusters.add(newCluster);
+			for(Element bacElement : bacElementList) {		
+				BinnerAnnotationCluster newCluster = new BinnerAnnotationCluster(bacElement);
+				annotationClusters.add(newCluster);
 			}
 		}
 	}

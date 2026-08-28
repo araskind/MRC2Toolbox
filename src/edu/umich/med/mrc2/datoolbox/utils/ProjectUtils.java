@@ -28,14 +28,17 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.text.DateFormat;
-import java.text.SimpleDateFormat;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.ujmp.core.Matrix;
@@ -49,8 +52,8 @@ import edu.umich.med.mrc2.datoolbox.data.MsFeatureClusterSet;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
-import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
+import edu.umich.med.mrc2.datoolbox.main.config.DefaultFormatStore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisProject;
@@ -63,17 +66,30 @@ import edu.umich.med.mrc2.datoolbox.project.store.ProjectStoreUtils;
 
 public class ProjectUtils {
 	
+	private static final Logger logger = LogManager.getLogger(ProjectUtils.class);
+
 	private ProjectUtils() {
 		
 	}
-	
-	public static final String dateFormatString = "yyyy-MM-dd HH:mm:ss";
-	public static final DateFormat dateTimeFormat = new SimpleDateFormat(dateFormatString);
+
+	public static final DateFormat dateTimeFormat = 
+			DefaultFormatStore.getDefaultTimeStampFormat();
 	public static final String tmpSuffix = "_TMP";
 	public static final String mergedSuffix = "_MERGED";
-	
-	public static DateFormat getDateFormat() {
-		return new SimpleDateFormat(dateFormatString);
+
+	public static Date parseDateString(String dateString) {
+		
+		if(dateString == null || dateString.isBlank())
+			return null;
+		
+		Date parsedDate = null;
+		try {
+			parsedDate = dateTimeFormat.parse(dateString);
+		} catch (ParseException e) {
+			logger.error(String.format("Unable to parse date string  %s using format %s", 
+					dateString, DefaultFormatStore.TIME_STAMP_FORMAT_DEFAULT), e);
+		}
+		return parsedDate;
 	}
 
 	public static void saveStorableRawDataAnalysisExperiment(
@@ -138,8 +154,7 @@ public class ProjectUtils {
 		try {
 			CompressionUtils.zipFile(xmlFile, experimentToSave.getExperimentFile());
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("Failed to load compress experiment file", e);
 		} 
 	}
 	
@@ -166,7 +181,8 @@ public class ProjectUtils {
 		try {
 			featureMatrix = Matrix.Factory.load(featureMatrixFile);
 		} catch (ClassNotFoundException | IOException e) {
-			e.printStackTrace();
+			logger.error(String.format("Failed to load feature matrix "
+					+ "from file for pipeline %s", dataPipeline.getName()), e);
 			return null;
 		}
 		if (featureMatrix != null) {
@@ -192,8 +208,7 @@ public class ProjectUtils {
 		try {
 			Files.createDirectories(dataDirectoryPath);
 		} catch (IOException e) {
-			e.printStackTrace();
-			MessageDialog.showWarningMsg("Failed to create data directory");
+			logger.error("Failed to create data directory", e);
 		}
 	}
 	
@@ -212,7 +227,8 @@ public class ProjectUtils {
 					Matrix.Factory.linkToArray(msFeatureMatrix.toObjectArray());
 			featureMatrix.save(featureMatrixFile);
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.error(String.format("Failed to save feature matrix "
+					+ "to file for pipeline %s", dataPipeline.getName()), e);
 		}		
 	}
 	
@@ -233,7 +249,8 @@ public class ProjectUtils {
 			dataMatrix.save(dataMatrixFile);
 
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.error(String.format("Failed to save data matrix "
+					+ "for pipeline %s", pipeline.getName()), e);
 		}
 	}
 
@@ -257,7 +274,8 @@ public class ProjectUtils {
 			dataMatrix.save(dataMatrixFile);
 
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.error(String.format("Failed to save Merged Data Matrix "
+					+ "For Data Integration Set %s", dataSetId), e);
 		}
 	}
 	
@@ -335,8 +353,8 @@ public class ProjectUtils {
 			try {
 				FIOUtils.replaceFile(tmpFeatureMatrixFile, featureMatrixFile);
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.error(String.format("Failed to save temporary feature matrix "
+						+ "for pipeline %s", dataPipeline.getName()), e);
 			}
 		}
 	}
@@ -389,8 +407,7 @@ public class ProjectUtils {
 				try {
 					Files.move(cefPath, newPath, StandardCopyOption.REPLACE_EXISTING);
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					logger.error("Failed to move CEF Library Files To New Default Location", e);
 				}
 			}
 		}
@@ -400,18 +417,13 @@ public class ProjectUtils {
 			DataAnalysisProject project, DataPipeline pipeline) {
 		
 		File dataMatrixFile = getDataMatrixFilePath(project,pipeline,false).toFile();
-		
-		//	TODO temp fix for current projects
-//		if(dataMatrixFile == null || !dataMatrixFile.exists())
-//			dataMatrixFile = Paths.get(project.getExperimentDirectory().getAbsolutePath(), 
-//					project.getDataMatrixFileNameForDataPipeline(pipeline)).toFile();
-
 		Matrix dataMatrix = null;
 		if (dataMatrixFile.exists()) {
 			try {
 				dataMatrix = Matrix.Factory.load(dataMatrixFile);
 			} catch (ClassNotFoundException | IOException e) {
-				e.printStackTrace();
+				logger.error(String.format("Failed to load data matrix "
+						+ "for pipeline %s", pipeline.getName()), e);
 				return;
 			}
 			if (dataMatrix != null) {
@@ -434,7 +446,8 @@ public class ProjectUtils {
 			try {
 				dataMatrix = Matrix.Factory.load(dataMatrixFile);
 			} catch (ClassNotFoundException | IOException e) {
-				e.printStackTrace();
+				logger.error(String.format("Failed to load data matrix without metadata "
+						+ "for pipeline %s", pipeline.getName()), e);
 				return null;
 			}
 		}
@@ -607,8 +620,9 @@ public class ProjectUtils {
 			try {
 				Files.move(oldPath, newPath);
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.error(String.format("Failed to rename %s to %s", 
+						oldPath.getFileName().toString(), 
+						newPath.getFileName().toString()), e);
 			}
 		}
 	}

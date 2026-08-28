@@ -168,10 +168,8 @@ public class DataProcessingSoftware implements Serializable, Comparable<DataProc
 			description = 
 				ProjectStoreUtils.getDescriptionFromElement(dataProcessingSoftwareElement);
 		
-		String softwareTypeName = dataProcessingSoftwareElement.getAttributeValue(
-				DataProcessingSoftwareFields.SoftwareType.name());
-		if(softwareTypeName != null)
-			softwareType = SoftwareType.getOptionByName(softwareTypeName);
+		softwareType = SoftwareType.getOptionByName(dataProcessingSoftwareElement.getAttributeValue(
+				DataProcessingSoftwareFields.SoftwareType.name()));
 		
 		Element vendorElement = dataProcessingSoftwareElement.getChild(
 				ObjectNames.Manufacturer.name());

@@ -41,8 +41,7 @@ public class BinnerAdduct implements Serializable, Comparable<BinnerAdduct>{
 	
 	public BinnerAdduct(
 			String id, 
-			String binnerName, 
-			int charge, 
+			String binnerName,
 			int tier, 
 			Adduct chargeCarrier,
 			AdductExchange adductExchange, 
@@ -166,10 +165,13 @@ public class BinnerAdduct implements Serializable, Comparable<BinnerAdduct>{
     @Override
     public boolean equals(Object obj) {
 
+		if (obj == null)
+			return false;
+		
 		if (obj == this)
 			return true;
 
-        if (obj == null || !BinnerAdduct.class.isAssignableFrom(obj.getClass()))
+        if (!BinnerAdduct.class.isAssignableFrom(obj.getClass()))
             return false;
 
         final BinnerAdduct other = (BinnerAdduct) obj;

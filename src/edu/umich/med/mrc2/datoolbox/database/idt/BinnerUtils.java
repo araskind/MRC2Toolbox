@@ -96,7 +96,6 @@ public class BinnerUtils {
 				BinnerAdduct newAdduct = new BinnerAdduct(
 							rs.getString("ANNOTATION_ID"),
 							rs.getString("ANNOTATION_NAME"),
-							rs.getInt("CHARGE"),
 							rs.getInt("TIER"),
 							chargeCarrier,
 							exchange,
@@ -641,7 +640,6 @@ public class BinnerUtils {
 		BinnerAdduct newAdduct = new BinnerAdduct(
 				null, 
 				massDiff.getBinnerName(),
-				0, 
 				1, 
 				null,
 				null, 

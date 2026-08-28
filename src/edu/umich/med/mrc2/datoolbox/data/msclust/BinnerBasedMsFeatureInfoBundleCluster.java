@@ -121,12 +121,9 @@ public class BinnerBasedMsFeatureInfoBundleCluster implements IMsFeatureInfoBund
 			name += " [" + Long.toString(fNumber) + "]";
 	}
 	
-	public boolean isIdentified() {
-		
-		if(primaryIdentity != null && primaryIdentity.getCompoundIdentity() != null)
-			return true;
-		else
-			return false;
+	public boolean isIdentified() {		
+		return(primaryIdentity != null 
+				&& primaryIdentity.getCompoundIdentity() != null);
 	}
 	
 	public void replaceStoredPrimaryIdentityFromFeatures() {
@@ -182,11 +179,11 @@ public class BinnerBasedMsFeatureInfoBundleCluster implements IMsFeatureInfoBund
    @Override
     public boolean equals(Object obj) {
 
+		if (obj == null)
+			return false;
+		
 		if (obj == this)
 			return true;
-
-        if (obj == null)
-            return false;
 
         if (!BinnerBasedMsFeatureInfoBundleCluster.class.isAssignableFrom(obj.getClass()))
             return false;
@@ -331,11 +328,6 @@ public class BinnerBasedMsFeatureInfoBundleCluster implements IMsFeatureInfoBund
 			
 		return featureIds;
 	}
-	
-//	public void setFeatures(Collection<MSFeatureInfoBundle> featureBundles) {
-//		components = new HashSet<MSFeatureInfoBundle>();
-//		components.addAll(featureBundles);
-//	}
 
 	public boolean hasAnnotations() {
 
@@ -374,17 +366,17 @@ public class BinnerBasedMsFeatureInfoBundleCluster implements IMsFeatureInfoBund
 		MsFeatureIdentity bestId = null;
 		List<MsFeatureIdentity> allIds =  getComponents().stream().
 				flatMap(c -> c.getMsFeature().getIdentifications().stream()).
-				filter(id -> Objects.nonNull(id.getReferenceMsMsLibraryMatch())).
+				filter(cid -> Objects.nonNull(cid.getReferenceMsMsLibraryMatch())).
 				collect(Collectors.toList());
 		if(includeInSourceHits) {
 			bestId = allIds.stream().
-				filter(id -> !id.getReferenceMsMsLibraryMatch().getMatchType().equals(MSMSMatchType.Hybrid)).
+				filter(cid -> !cid.getReferenceMsMsLibraryMatch().getMatchType().equals(MSMSMatchType.Hybrid)).
 				sorted(new MsFeatureIdentityComparator(SortProperty.msmsEntropyScore, SortDirection.DESC)).
 				findFirst().orElse(null);
 		}
 		else {
 			bestId = allIds.stream().
-					filter(id -> id.getReferenceMsMsLibraryMatch().getMatchType().equals(MSMSMatchType.Regular)).
+					filter(cid -> cid.getReferenceMsMsLibraryMatch().getMatchType().equals(MSMSMatchType.Regular)).
 					sorted(new MsFeatureIdentityComparator(SortProperty.msmsEntropyScore, SortDirection.DESC)).
 					findFirst().orElse(null);
 		}
@@ -475,10 +467,9 @@ public class BinnerBasedMsFeatureInfoBundleCluster implements IMsFeatureInfoBund
 	}
 
 	@Override
-	public void setFeatures(Collection<MSFeatureInfoBundle> featureBundlesForIds) {
-		// TODO Auto-generated method stub
-		
-	}
+		public void setFeatures(Collection<MSFeatureInfoBundle> featureBundlesForIds) {
+	   // TODO document why this method is empty
+	 }
 
 	public Map<BinnerAnnotation, Set<MSFeatureInfoBundle>> getComponentMap() {
 		return componentMap;
@@ -486,8 +477,7 @@ public class BinnerBasedMsFeatureInfoBundleCluster implements IMsFeatureInfoBund
 
 	@Override
 	public void setLookupFeature(MinimalMSOneFeature lf) {
-		// TODO Auto-generated method stub
-		
+		// TODO document why this method is empty
 	}
 	
 	public BinnerAnnotation getAnnotationForFeature(MSFeatureInfoBundle bundle) {

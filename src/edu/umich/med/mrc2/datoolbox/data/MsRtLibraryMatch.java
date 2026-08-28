@@ -118,18 +118,18 @@ public class MsRtLibraryMatch implements Serializable {
 	}
 
 	@Override
-	public boolean equals(Object msRtMatch) {
+	public boolean equals(Object obj) {
 
-        if (msRtMatch == this)
-            return true;
-
-		if(msRtMatch == null)
+		if (obj == null)
 			return false;
+		
+		if (obj == this)
+			return true;
 
-        if (!MsRtLibraryMatch.class.isAssignableFrom(msRtMatch.getClass()))
+        if (!MsRtLibraryMatch.class.isAssignableFrom(obj.getClass()))
             return false;
 
-        MsRtLibraryMatch cid = (MsRtLibraryMatch)msRtMatch;
+        MsRtLibraryMatch cid = (MsRtLibraryMatch)obj;
 
         if ((this.libraryTargetId == null) ? (cid.getLibraryTargetId() != null) :
         	!this.libraryTargetId.equals(cid.getLibraryTargetId()))

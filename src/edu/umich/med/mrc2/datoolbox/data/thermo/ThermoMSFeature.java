@@ -228,11 +228,11 @@ public class ThermoMSFeature implements Comparable<ThermoMSFeature> {
     @Override
     public boolean equals(Object obj) {
 
+		if (obj == null)
+			return false;
+		
 		if (obj == this)
 			return true;
-
-        if (obj == null)
-            return false;
 
         if (!ThermoMSFeature.class.isAssignableFrom(obj.getClass()))
             return false;
@@ -258,10 +258,4 @@ public class ThermoMSFeature implements Comparable<ThermoMSFeature> {
     	return Double.toString(mz) + "@" + Double.toString(rt) + 
     			" for file ID " + Integer.toString(fileId);
     }
-	
-//	H.ID AS BHID, M.ID AS MSID, H.BESTHITTYPE, 
-//	H.IONDESCRIPTION, H.CHARGE, H.MOLECULARWEIGHT, H.MASS, H.RETENTIONTIME AS BHRT,
-//	M.RETENTIONTIME AS MSRT, H.INTENSITY, H.AREA, H.STUDYFILEID, M.MSORDER, 
-//	M.POLARITY, M.RESOLUTIONATMASS200, M.ACTIVATIONTYPE, M.SCANTYPE, M.IONIZATION,
-//	M.MASSANALYZER, M.ISOLATIONWIDTH
 }

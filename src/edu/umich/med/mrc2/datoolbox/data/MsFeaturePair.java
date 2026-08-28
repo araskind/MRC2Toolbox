@@ -73,11 +73,11 @@ public class MsFeaturePair implements Comparable<MsFeaturePair> {
 	@Override
 	public boolean equals(Object obj) {
 
-		if (obj == this)
-			return true;
-
 		if (obj == null)
 			return false;
+		
+		if (obj == this)
+			return true;
 
 		if (!MsFeaturePair.class.isAssignableFrom(obj.getClass()))
 			return false;

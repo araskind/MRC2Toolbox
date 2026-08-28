@@ -22,20 +22,18 @@
 package edu.umich.med.mrc2.datoolbox.data;
 
 import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.apache.commons.lang3.StringUtils;
 import org.openscience.cdk.DefaultChemObjectBuilder;
 import org.openscience.cdk.interfaces.IMolecularFormula;
 import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator;
 
 import edu.umich.med.mrc2.datoolbox.data.enums.CompoundDatabaseEnum;
+import edu.umich.med.mrc2.datoolbox.utils.CompoundUtils;
 import edu.umich.med.mrc2.datoolbox.utils.IdentificationUtils;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 
@@ -53,16 +51,16 @@ public class CompoundIdentity implements Serializable, Comparable<CompoundIdenti
 	private String smiles;
 	private String inChi;
 	private String inChiKey;
-	private HashMap<CompoundDatabaseEnum, String> dbIdMap;
+	private EnumMap<CompoundDatabaseEnum, String> dbIdMap;
 	private CompoundDatabaseEnum primaryDatabase;	
 	private int charge;
 
 	public CompoundIdentity(){
-		dbIdMap = new HashMap<>();
+		dbIdMap = new EnumMap<>(CompoundDatabaseEnum.class);
 	}
 
 	public CompoundIdentity(CompoundDatabaseEnum dbSource, String dbId) {
-		dbIdMap = new HashMap<>();
+		dbIdMap = new EnumMap<>(CompoundDatabaseEnum.class);
 		dbIdMap.put(dbSource, dbId);
 		primaryDatabase = dbSource;
 	}
@@ -80,7 +78,7 @@ public class CompoundIdentity implements Serializable, Comparable<CompoundIdenti
 		this.formula = formula;
 		this.exactMass = exactMass;
 		this.smiles = smiles;
-		dbIdMap = new HashMap<>();
+		dbIdMap = new EnumMap<>(CompoundDatabaseEnum.class);
 		dbIdMap.put(dbSource, dbId);
 		primaryDatabase = dbSource;
 	}
@@ -99,7 +97,7 @@ public class CompoundIdentity implements Serializable, Comparable<CompoundIdenti
 		this.smiles = smiles;
 		this.inChiKey = inChiKey;
 
-		dbIdMap = new HashMap<>();
+		dbIdMap = new EnumMap<>(CompoundDatabaseEnum.class);
 		dbIdMap.put(dbSource, dbId);
 		primaryDatabase = dbSource;
 	}
@@ -117,7 +115,7 @@ public class CompoundIdentity implements Serializable, Comparable<CompoundIdenti
 		this.inChiKey = inChiKey;
 		this.exactMass = getExactMass();
 
-		dbIdMap = new HashMap<>();
+		dbIdMap = new EnumMap<>(CompoundDatabaseEnum.class);
 		dbIdMap.put(dbSource, dbId);
 		primaryDatabase = dbSource;
 	}
@@ -129,7 +127,7 @@ public class CompoundIdentity implements Serializable, Comparable<CompoundIdenti
 		this.formula = rs.getString(4);
 		this.exactMass = rs.getDouble(5);
 		this.smiles = rs.getString(6);
-		dbIdMap = new HashMap<>();
+		dbIdMap = new EnumMap<>(CompoundDatabaseEnum.class);
 		dbIdMap.put(dbSource, rs.getString(1));
 		primaryDatabase = dbSource;
 	}
@@ -152,7 +150,7 @@ public class CompoundIdentity implements Serializable, Comparable<CompoundIdenti
 			
 			this.formula = MolecularFormulaManipulator.getString(mf, true, true);
 		}
-		dbIdMap = new HashMap<>();
+		dbIdMap = new EnumMap<>(CompoundDatabaseEnum.class);
 	}
 	
 	public void addDbId(CompoundDatabaseEnum dbSource, String id) {
@@ -183,7 +181,7 @@ public class CompoundIdentity implements Serializable, Comparable<CompoundIdenti
 		return dbIdMap.get(dbSource);
 	}
 
-	public HashMap<CompoundDatabaseEnum, String> getDbIdMap() {
+	public Map<CompoundDatabaseEnum, String> getDbIdMap() {
 		return dbIdMap;
 	}
 
@@ -221,9 +219,7 @@ public class CompoundIdentity implements Serializable, Comparable<CompoundIdenti
 
 		String name = this.commonName;
 
-		if (name == null)
-			name = this.sysName;
-		else if (name.isEmpty())
+		if (name == null || name.isBlank())
 			name = this.sysName;
 
 		if (name == null)
@@ -236,40 +232,8 @@ public class CompoundIdentity implements Serializable, Comparable<CompoundIdenti
 		return primaryDatabase;
 	}
 
-	public String getPrimaryLinkAddress() {
-
-		String primaryLinkId = null;
-		String primaryLinkAddress = "";
-		if(primaryDatabase != null){
-
-			//	TODO handle ID cleanup in a more centralized way
-			primaryLinkId = dbIdMap.get(primaryDatabase).replace("METLIN:","").replace("ALDRICH:", "");
-			if(primaryLinkId != null) {
-
-				if(primaryDatabase.equals(CompoundDatabaseEnum.LIPIDMAPS_BULK)) {
-
-					String[] split = StringUtils.split(primaryLinkId, '-');
-					primaryLinkAddress =
-						primaryDatabase.getDbLinkPrefix() + split[0] +
-						"&Formula=" + split[1] +
-						"&ExactMass=" + this.getExactMass() +
-						"&ExactMassOffSet=0.1";
-					return primaryLinkAddress;
-				}
-				else if(primaryDatabase.equals(CompoundDatabaseEnum.REFMET)) {
-					try {
-						primaryLinkAddress = URLEncoder.encode(primaryLinkId, "UTF-8");
-					} catch (UnsupportedEncodingException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-					return primaryDatabase.getDbLinkPrefix() + primaryLinkAddress;
-				}
-				else
-					return primaryDatabase.getDbLinkPrefix() + primaryLinkId + primaryDatabase.getDbLinkSuffix();
-			}
-		}
-		return primaryLinkAddress;
+	public String getPrimaryLinkAddress() {		
+		return CompoundUtils.getPrimaryLinkAddress(this);
 	}
 
 	public String getPrimaryDatabaseId() {
@@ -283,11 +247,11 @@ public class CompoundIdentity implements Serializable, Comparable<CompoundIdenti
 	@Override
 	public boolean equals(Object cpdId) {
 
-        if (cpdId == this)
-            return true;
-
-		if(cpdId == null)
+		if (cpdId == null)
 			return false;
+		
+		if (cpdId == this)
+			return true;
 
         if (!CompoundIdentity.class.isAssignableFrom(cpdId.getClass()))
             return false;
@@ -394,8 +358,7 @@ public class CompoundIdentity implements Serializable, Comparable<CompoundIdenti
 	public void addDatabaseIds(Map<CompoundDatabaseEnum, String>extraIds, boolean replace) {
 
 		if(replace) {
-			extraIds.entrySet().stream().
-			forEach(e -> dbIdMap.put(e.getKey(), e.getValue()));
+			extraIds.entrySet().forEach(e -> dbIdMap.put(e.getKey(), e.getValue()));
 		}
 		else {
 			for(Entry<CompoundDatabaseEnum, String> entry : extraIds.entrySet()) {

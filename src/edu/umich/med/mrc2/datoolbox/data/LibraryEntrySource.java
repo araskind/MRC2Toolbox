@@ -75,11 +75,11 @@ public class LibraryEntrySource implements Serializable {
     @Override
     public boolean equals(Object obj) {
 
+		if (obj == null)
+			return false;
+		
 		if (obj == this)
 			return true;
-
-        if (obj == null)
-            return false;
 
         if (!LibraryEntrySource.class.isAssignableFrom(obj.getClass()))
             return false;

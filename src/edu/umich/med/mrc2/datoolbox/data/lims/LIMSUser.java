@@ -97,6 +97,9 @@ public class LIMSUser implements Serializable, Comparable<LIMSUser>{
         if (obj == null)
             return false;
 
+		if (obj == this)
+			return true;
+
         if (!LIMSUser.class.isAssignableFrom(obj.getClass()))
             return false;
 
@@ -104,9 +107,6 @@ public class LIMSUser implements Serializable, Comparable<LIMSUser>{
 
         if ((this.id == null) ? (other.getId() != null) : !this.id.equals(other.getId()))
             return false;
-
-		if (obj == this)
-			return true;
 
         return true;
     }

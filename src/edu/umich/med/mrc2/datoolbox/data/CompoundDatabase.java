@@ -64,11 +64,11 @@ public class CompoundDatabase implements Serializable, Comparable<CompoundDataba
    @Override
     public boolean equals(Object obj) {
 
+		if (obj == null)
+			return false;
+		
 		if (obj == this)
 			return true;
-
-        if (obj == null)
-            return false;
 
         if (!CompoundDatabase.class.isAssignableFrom(obj.getClass()))
             return false;

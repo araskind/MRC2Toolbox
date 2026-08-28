@@ -216,18 +216,18 @@ public class ReferenceMsMsLibraryMatch implements Serializable {
 	}
 
 	@Override
-	public boolean equals(Object msmsMatch) {
+	public boolean equals(Object obj) {
 
-        if (msmsMatch == this)
-            return true;
-
-		if(msmsMatch == null)
+		if (obj == null)
 			return false;
+		
+		if (obj == this)
+			return true;
 
-        if (!ReferenceMsMsLibraryMatch.class.isAssignableFrom(msmsMatch.getClass()))
+        if (!ReferenceMsMsLibraryMatch.class.isAssignableFrom(obj.getClass()))
             return false;
 
-        ReferenceMsMsLibraryMatch cid = (ReferenceMsMsLibraryMatch)msmsMatch;
+        ReferenceMsMsLibraryMatch cid = (ReferenceMsMsLibraryMatch)obj;
 
         if ((this.matchedLibraryFeature == null) ? (cid.getMatchedLibraryFeature() != null) :
         	!this.matchedLibraryFeature.equals(cid.getMatchedLibraryFeature()))

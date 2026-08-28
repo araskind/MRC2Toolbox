@@ -89,6 +89,9 @@ public class ChromatographicSeparationType implements Serializable,
 
         if (obj == null)
             return false;
+        
+		if (obj == this)
+			return true;
 
         if (!ChromatographicSeparationType.class.isAssignableFrom(obj.getClass()))
             return false;
@@ -97,9 +100,6 @@ public class ChromatographicSeparationType implements Serializable,
 
         if ((this.id == null) ? (other.getId() != null) : !this.id.equals(other.getId()))
             return false;
-
-		if (obj == this)
-			return true;
 
         return true;
     }

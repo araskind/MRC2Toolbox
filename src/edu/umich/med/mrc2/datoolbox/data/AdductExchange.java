@@ -71,11 +71,11 @@ public class AdductExchange implements Serializable, Comparable<AdductExchange> 
     @Override
     public boolean equals(Object obj) {
 
+		if (obj == null)
+			return false;
+		
 		if (obj == this)
 			return true;
-
-        if (obj == null)
-            return false;
 
         if (!AdductExchange.class.isAssignableFrom(obj.getClass()))
             return false;

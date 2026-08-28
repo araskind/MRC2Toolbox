@@ -58,11 +58,11 @@ public class MotracSubjectType implements Serializable, Comparable<MotracSubject
     @Override
     public boolean equals(Object obj) {
 
+		if (obj == null)
+			return false;
+		
 		if (obj == this)
 			return true;
-
-        if (obj == null)
-            return false;
 
         if (!MotracSubjectType.class.isAssignableFrom(obj.getClass()))
             return false;

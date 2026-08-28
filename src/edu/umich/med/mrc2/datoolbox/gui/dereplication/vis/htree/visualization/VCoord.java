@@ -21,6 +21,8 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.dereplication.vis.htree.visualization;
 
+import org.apache.commons.math3.util.Precision;
+
 /**
  * Virtual coordinates.
  */
@@ -36,9 +38,16 @@ public class VCoord {
 
 	@Override
 	public boolean equals(Object obj) {
+		
+		if (obj == null)
+			return false;
+		
+		if (obj == this)
+			return true;
+		
 		if (obj instanceof VCoord) {
 			VCoord other = (VCoord) obj;
-			return x == other.getX() && y == other.getY();
+			return Precision.equals(x, other.getX()) && Precision.equals(y, other.getY());
 		} else {
 			return false;
 		}
@@ -64,5 +73,4 @@ public class VCoord {
 	public String toString() {
 		return String.format("Coord(%.3f,%.3f)", x, y);
 	}
-
 }

@@ -48,11 +48,11 @@ public class IonizationType implements Serializable, Comparable<IonizationType>,
     @Override
     public boolean equals(Object obj) {
 
+		if (obj == null)
+			return false;
+		
 		if (obj == this)
 			return true;
-
-        if (obj == null)
-            return false;
 
         if (!IonizationType.class.isAssignableFrom(obj.getClass()))
             return false;

@@ -23,6 +23,8 @@ package edu.umich.med.mrc2.datoolbox.data;
 
 import java.io.Serializable;
 
+import org.apache.commons.math3.util.Precision;
+
 public class RawMsPoint implements Serializable {
 
 	/**
@@ -73,23 +75,23 @@ public class RawMsPoint implements Serializable {
 	}
 	
 	@Override
-	public boolean equals(Object p) {
+	public boolean equals(Object obj) {
 
-        if (p == this)
-            return true;
-
-		if(p == null)
+		if (obj == null)
 			return false;
+		
+		if (obj == this)
+			return true;
 
-        if (!RawMsPoint.class.isAssignableFrom(p.getClass()))
+        if (!RawMsPoint.class.isAssignableFrom(obj.getClass()))
             return false;
 
-        RawMsPoint op = (RawMsPoint)p;
+        RawMsPoint op = (RawMsPoint)obj;
 
-        if (this.mz != op.getMz())
+        if (!Precision.equals(this.mz, op.getMz()))
         	return false;
         
-        if (this.intensity != op.getIntensity())
+        if (!Precision.equals(this.intensity, op.getIntensity()))
         	return false;
 
         if (this.scan != op.getScan())

@@ -65,7 +65,11 @@ public class OfflineExperimentLoadCache {
 	}
 	
 	public static CompoundIdentity getCompoundIdentityByAccession(String accession) {
-		return compoundIdentities.get(accession);
+		
+		if(accession == null || accession.isBlank())
+			return null;
+		else
+			return compoundIdentities.get(accession);
 	}
 
 	public static void addMsMsLibraryFeature(MsMsLibraryFeature libFeature) {
@@ -73,7 +77,11 @@ public class OfflineExperimentLoadCache {
 	}
 	
 	public static MsMsLibraryFeature getMsMsLibraryFeatureById(String libId) {
-		return tandemMsLibraryEntriess.get(libId);
+		
+		if(libId == null || libId.isBlank())
+			return null;
+		else
+			return tandemMsLibraryEntriess.get(libId);
 	}
 	
 	public static void addLibraryMsFeatureDbBundle(LibraryMsFeatureDbBundle bundle) {
@@ -81,7 +89,11 @@ public class OfflineExperimentLoadCache {
 	}
 	
 	public static LibraryMsFeatureDbBundle getLibraryMsFeatureDbBundleById(String libId) {
-		return msRtLibraryEntriess.get(libId);
+		
+		if(libId == null || libId.isBlank())
+			return null;
+		else
+			return msRtLibraryEntriess.get(libId);
 	}
 	
 	public static void reset() {

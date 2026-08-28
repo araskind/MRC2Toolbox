@@ -81,11 +81,11 @@ public class MoTrPACReportCodeBlock implements Serializable, Comparable<MoTrPACR
     @Override
     public boolean equals(Object obj) {
 
+		if (obj == null)
+			return false;
+		
 		if (obj == this)
 			return true;
-
-        if (obj == null)
-            return false;
 
         if (!MoTrPACReportCodeBlock.class.isAssignableFrom(obj.getClass()))
             return false;

@@ -226,11 +226,11 @@ public class StockSample implements Serializable, Comparable<StockSample>{
     @Override
     public boolean equals(Object obj) {
 
+		if (obj == null)
+			return false;
+		
 		if (obj == this)
 			return true;
-
-        if (obj == null)
-            return false;
 
         if (!StockSample.class.isAssignableFrom(obj.getClass()))
             return false;

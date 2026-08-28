@@ -22,7 +22,6 @@
 package edu.umich.med.mrc2.datoolbox.data.lims;
 
 import java.io.Serializable;
-import java.text.ParseException;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -324,21 +323,14 @@ public class LIMSSamplePreparation implements
 		prepItemMap = new TreeMap<String,String>();		
 		assays = new TreeSet<DataAcquisitionMethod>(
 				new AnalysisMethodComparator(SortProperty.Name));
-		
-		prepDate = new Date();
-		String startDateString = 
-				prepElement.getAttributeValue(SamplePreparationFields.PrepDate.name());
-		if(startDateString != null) {
-			try {
-				prepDate = ProjectUtils.dateTimeFormat.parse(startDateString);
-			} catch (ParseException e) {
-				e.printStackTrace();
-			} 
-		}
-		String userId = 
-				prepElement.getAttributeValue(SamplePreparationFields.Creator.name());
-		if(userId != null)
-			creator = IDTDataCache.getUserById(userId);
+			
+		prepDate = ProjectUtils.parseDateString(
+				prepElement.getAttributeValue(SamplePreparationFields.PrepDate.name()));		
+		if(prepDate == null)
+			prepDate = new Date();
+
+		creator = IDTDataCache.getUserById(
+				prepElement.getAttributeValue(SamplePreparationFields.Creator.name()));
 
 		Element protocolsElement =
 				prepElement.getChild(SamplePreparationFields.Protocols.name());

@@ -257,6 +257,9 @@ public class Range implements Serializable, Comparable<Range> {
         if (obj == null)
             return false;
         
+		if (obj == this)
+			return true;
+		
         if (!Range.class.isAssignableFrom(obj.getClass()))
             return false;
         
@@ -264,9 +267,6 @@ public class Range implements Serializable, Comparable<Range> {
         
         if(min != other.getMin() || max != other.getMax())  
         	return false;
-        
-		if (obj == this)
-			return true;
 
         return true;
     }

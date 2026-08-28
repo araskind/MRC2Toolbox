@@ -43,11 +43,9 @@ public abstract class Filter
 	 * @param yvals		The y-values of the signal.
 	 * @return			The resulting smoothed version of the y-values.
 	 */
-	public abstract double[] filter(double xvals[], double yvals[]) throws IllegalArgumentException;
+	public abstract double[] filter(double[] xvals, double[] yvals) throws IllegalArgumentException;
 	
 	public abstract FilterClass getFilterClass();
-	
-	public abstract boolean equals(Filter otherFilter);
 	
 	public Element getXmlElement() {
 		
@@ -60,7 +58,7 @@ public abstract class Filter
 	
 	protected abstract void parseParameters(Element xmlElement);
 	
-	public Filter(Element xmlElement) {
+	protected Filter(Element xmlElement) {
 		parseParameters(xmlElement);
 	}
 }

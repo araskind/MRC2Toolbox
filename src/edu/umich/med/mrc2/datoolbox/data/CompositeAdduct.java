@@ -172,11 +172,11 @@ public class CompositeAdduct implements Adduct, Serializable {
     @Override
     public boolean equals(Object obj) {
 
+		if (obj == null)
+			return false;
+		
 		if (obj == this)
 			return true;
-
-        if (obj == null)
-            return false;
 
         if (!CompositeAdduct.class.isAssignableFrom(obj.getClass()))
             return false;
@@ -282,15 +282,13 @@ public class CompositeAdduct implements Adduct, Serializable {
 	}
 	
 	public Map<SimpleAdduct, Long> getNeutralLossCounts() {
-		Map<SimpleAdduct, Long> countedLosses = neutralLosses.stream().
+		return neutralLosses.stream().
 				collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
-		return countedLosses;
 	}
 
 	public Map<SimpleAdduct, Long> getNeutralAdductCounts() {
-		Map<SimpleAdduct, Long> countedAdducts = neutralAdducts.stream().
+		return neutralAdducts.stream().
 				collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
-		return countedAdducts;
 	}
 	
 	@Override

@@ -51,6 +51,9 @@ public class MsType implements Serializable, Comparable<MsType>, XmlStorable{
         if (obj == null)
             return false;
 
+		if (obj == this)
+			return true;
+		
         if (!MsType.class.isAssignableFrom(obj.getClass()))
             return false;
 
@@ -58,9 +61,6 @@ public class MsType implements Serializable, Comparable<MsType>, XmlStorable{
 
         if ((this.id == null) ? (other.getId() != null) : !this.id.equals(other.getId()))
             return false;
-
-		if (obj == this)
-			return true;
 
         return true;
     }

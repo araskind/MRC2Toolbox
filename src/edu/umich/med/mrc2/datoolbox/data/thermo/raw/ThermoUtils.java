@@ -26,6 +26,10 @@ import org.json.JSONObject;
 
 public class ThermoUtils {
 	
+	private ThermoUtils() {
+		/* This utility class should not be instantiated */
+	}
+	
 	public static ThermoRawMetadata parseMetadataObjectFromJson(String fileName, JSONObject jso){
 				
 		ThermoRawMetadata md = new ThermoRawMetadata(fileName);

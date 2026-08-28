@@ -169,9 +169,12 @@ public class AnalysisQcEventAnnotation implements Comparable<AnalysisQcEventAnno
 
     @Override
     public boolean equals(Object obj) {
-
-        if (obj == null)
-            return false;
+    	
+		if (obj == null)
+			return false;
+		
+		if (obj == this)
+			return true;
 
         if (!AnalysisQcEventAnnotation.class.isAssignableFrom(obj.getClass()))
             return false;
@@ -180,10 +183,7 @@ public class AnalysisQcEventAnnotation implements Comparable<AnalysisQcEventAnno
 
         if ((this.id == null) ? (other.getId() != null) : !this.id.equals(other.getId()))
             return false;
-
-		if (obj == this)
-			return true;
-
+        
         return true;
     }
 

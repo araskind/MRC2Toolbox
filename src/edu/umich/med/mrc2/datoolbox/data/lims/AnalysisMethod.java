@@ -84,11 +84,11 @@ public class AnalysisMethod implements Serializable, Comparable<AnalysisMethod>,
     @Override
     public boolean equals(Object obj) {
 
+		if (obj == null)
+			return false;
+		
 		if (obj == this)
 			return true;
-
-        if (obj == null)
-            return false;
 
         if (!AnalysisMethod.class.isAssignableFrom(obj.getClass()))
             return false;

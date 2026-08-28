@@ -213,11 +213,11 @@ public class LIMSInstrument implements Serializable, Comparable<LIMSInstrument>{
     @Override
     public boolean equals(Object obj) {
 
+		if (obj == null)
+			return false;
+		
 		if (obj == this)
 			return true;
-
-        if (obj == null)
-            return false;
 
         if (!LIMSInstrument.class.isAssignableFrom(obj.getClass()))
             return false;

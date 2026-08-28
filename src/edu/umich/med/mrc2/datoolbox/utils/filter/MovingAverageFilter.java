@@ -125,14 +125,14 @@ public class MovingAverageFilter extends Filter{
 	}
 	
 	@Override
-	public boolean equals(Filter obj) {
+	public boolean equals(Object obj) {
 		
-		if (obj == this)
-			return true;
-
         if (obj == null)
             return false;
         
+		if (obj == this)
+			return true;
+      
         if (!MovingAverageFilter.class.isAssignableFrom(obj.getClass()))
             return false;
 

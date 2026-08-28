@@ -93,23 +93,24 @@ public class Cluster {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj) {
+
+		if (obj == null)
+			return false;
+		
+		if (obj == this)
 			return true;
-		}
-		if (obj == null) {
-			return false;
-		}
-		if (getClass() != obj.getClass()) {
-			return false;
-		}
+		
+        if (!Cluster.class.isAssignableFrom(obj.getClass()))
+            return false;
+
 		Cluster other = (Cluster) obj;
-		if (name == null) {
-			if (other.name != null) {
-				return false;
-			}
-		} else if (!name.equals(other.name)) {
+		if ((name == null && other.name != null) || 
+				(name != null && other.name == null))
 			return false;
-		}
+			
+		if(name != null && !name.equals(other.name))
+			return false;
+		
 		return true;
 	}
 

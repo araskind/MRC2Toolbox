@@ -160,14 +160,14 @@ public class WeightedMovingAverageFilter extends Filter{
 	}
 	
 	@Override
-	public boolean equals(Filter obj) {
-		
-		if (obj == this)
-			return true;
+	public boolean equals(Object obj) {
 
         if (obj == null)
             return false;
-        
+       		
+		if (obj == this)
+			return true;
+ 
         if (!WeightedMovingAverageFilter.class.isAssignableFrom(obj.getClass()))
             return false;
 

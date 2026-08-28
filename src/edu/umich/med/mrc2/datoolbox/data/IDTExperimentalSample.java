@@ -22,7 +22,6 @@
 package edu.umich.med.mrc2.datoolbox.data;
 
 import java.io.Serializable;
-import java.text.ParseException;
 import java.util.Date;
 import java.util.Set;
 
@@ -139,17 +138,10 @@ public class IDTExperimentalSample extends ExperimentalSample implements Seriali
 		if(descriptionElement != null && !descriptionElement.getText().isEmpty())
 			description = descriptionElement.getText();
 		
-		dateCreated = new Date();
-		String startDateString = 
-				sampleElement.getAttributeValue(IDTExperimentalSampleFields.DateCreated.name());
-		if(startDateString != null) {
-			try {
-				dateCreated = ProjectUtils.dateTimeFormat.parse(startDateString);
-			} catch (ParseException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} 
-		}
+		dateCreated = ProjectUtils.parseDateString(
+				sampleElement.getAttributeValue(IDTExperimentalSampleFields.DateCreated.name()));
+		if(dateCreated == null)
+			dateCreated = new Date();
 	}
 
 	public IDTExperimentalSample(IDTExperimentalSample sample) {

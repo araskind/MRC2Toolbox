@@ -860,11 +860,11 @@ public class MsFeatureCluster implements Serializable, XmlStorable {
     @Override
     public boolean equals(Object obj) {
 
+		if (obj == null)
+			return false;
+		
 		if (obj == this)
 			return true;
-
-        if (obj == null)
-            return false;
 
         if (!MsFeatureCluster.class.isAssignableFrom(obj.getClass()))
             return false;

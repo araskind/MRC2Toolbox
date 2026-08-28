@@ -59,17 +59,6 @@ public class AverageMassSpectrum implements Serializable, Comparable<AverageMass
 		scanNumbers = new TreeSet<Integer>();
 	}
 
-	public AverageMassSpectrum(
-			DataFile dataFile, 
-			int msLlevel, 
-			Collection<Integer> scanNumbers2) {
-		super();
-		this.dataFile = dataFile;
-		this.msLevel = msLlevel;
-		this.scanNumbers = new TreeSet<Integer>(scanNumbers);
-		masSpectrum = new MassSpectrum();
-	}
-
 	public MassSpectrum getMasSpectrum() {
 		return masSpectrum;
 	}

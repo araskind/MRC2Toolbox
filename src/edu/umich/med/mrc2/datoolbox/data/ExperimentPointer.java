@@ -22,7 +22,6 @@
 package edu.umich.med.mrc2.datoolbox.data;
 
 import java.io.File;
-import java.text.ParseException;
 import java.util.Date;
 
 import org.jdom2.Element;
@@ -155,21 +154,10 @@ public class ExperimentPointer {
 		String expFilePath = pointerElement.getAttributeValue(EXPERIMENT_FILE);
 		if(expFilePath != null && !expFilePath.isEmpty())
 			this.experimentFile = new File(expFilePath);
-		
-		try {
-			this.dateCreated = ProjectUtils.dateTimeFormat.parse(
-					pointerElement.getAttributeValue(DATE_CREATED));
-		} catch (ParseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} 
-		try {
-			this.lastModified = ProjectUtils.dateTimeFormat.parse(
-					pointerElement.getAttributeValue(LAST_MODIFIED));
-		} catch (ParseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} 		
+		dateCreated = ProjectUtils.parseDateString(
+				pointerElement.getAttributeValue(DATE_CREATED));
+		lastModified = ProjectUtils.parseDateString(
+				pointerElement.getAttributeValue(LAST_MODIFIED));		
 		String userId = pointerElement.getAttributeValue(CREATED_BY); 
 		if(userId != null)
 			createdBy = IDTDataCache.getUserById(userId);
@@ -193,11 +181,11 @@ public class ExperimentPointer {
     @Override
     public boolean equals(Object obj) {
 
+		if (obj == null)
+			return false;
+		
 		if (obj == this)
 			return true;
-
-        if (obj == null)
-            return false;
 
         if (!ExperimentPointer.class.isAssignableFrom(obj.getClass()))
             return false;

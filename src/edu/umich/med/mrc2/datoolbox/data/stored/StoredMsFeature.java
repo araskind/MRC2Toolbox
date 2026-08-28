@@ -31,7 +31,6 @@ public class StoredMsFeature {
 
 	public StoredMsFeature(MsFeature feature) {
 		super();
-		// TODO Auto-generated constructor stub
 	}
 
 	public Element getXmlElement(Document parentDocument, Element parent) {

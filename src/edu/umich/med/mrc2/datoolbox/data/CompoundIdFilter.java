@@ -94,20 +94,20 @@ public class CompoundIdFilter {
 			return idsToFilter;
 		
 		Collection<MsFeatureIdentity>filteredIds = new HashSet<MsFeatureIdentity>();
-		for(MsFeatureIdentity id : idsToFilter){
+		for(MsFeatureIdentity mfid : idsToFilter){
 			
-			CompoundIdentity cid = id.getCompoundIdentity();
+			CompoundIdentity cid = mfid.getCompoundIdentity();
 			if(cid == null)
 				continue;
 			
 			if(filterType.equals(CompoundIdFilterType.COMPOUND_NAME) 
 					&& cid.getName() != null) {
 				
-				String name = cid.getName();
+				String cpdName = cid.getName();
 				String match = filterComponents.stream().
-						filter(n -> n.equalsIgnoreCase(name)).findAny().orElse(null);
+						filter(n -> n.equalsIgnoreCase(cpdName)).findAny().orElse(null);
 				if(match != null)
-					filteredIds.add(id);
+					filteredIds.add(mfid);
 			}
 			if(filterType.equals(CompoundIdFilterType.COMPOUND_DATABASE_ID) 
 					&& cid.getPrimaryDatabaseId() != null) {
@@ -116,7 +116,7 @@ public class CompoundIdFilter {
 				String match = filterComponents.stream().
 						filter(n -> n.equals(dbId)).findAny().orElse(null);
 				if(match != null)
-					filteredIds.add(id);
+					filteredIds.add(mfid);
 			}
 			if(filterType.equals(CompoundIdFilterType.SMILES) 
 					&& cid.getSmiles() != null) {
@@ -125,7 +125,7 @@ public class CompoundIdFilter {
 				String match = filterComponents.stream().
 						filter(n -> n.equalsIgnoreCase(smiles)).findAny().orElse(null);
 				if(match != null)
-					filteredIds.add(id);
+					filteredIds.add(mfid);
 			}
 			if(filterType.equals(CompoundIdFilterType.SMARTS) 
 					&& cid.getSmiles() != null) {
@@ -142,14 +142,14 @@ public class CompoundIdFilter {
 						}
 					}
 					if(allMatched)
-						filteredIds.add(id);
+						filteredIds.add(mfid);
 				}
 				else {
 					String match = filterComponents.stream().
 							filter(n -> ChemInfoUtils.doSMILESmatchSMATRSpattern(smiles, n)).
 							findAny().orElse(null);
 					if(match != null)
-						filteredIds.add(id);
+						filteredIds.add(mfid);
 				}
 			}
 			if(filterType.equals(CompoundIdFilterType.INCHI_KEY) 
@@ -159,7 +159,7 @@ public class CompoundIdFilter {
 				String match = filterComponents.stream().
 						filter(n -> n.equalsIgnoreCase(inchiKey)).findAny().orElse(null);
 				if(match != null)
-					filteredIds.add(id);
+					filteredIds.add(mfid);
 			}
 			if(filterType.equals(CompoundIdFilterType.INCHI_KEY2D) 
 					&& cid.getInChiKey() != null) {
@@ -168,7 +168,7 @@ public class CompoundIdFilter {
 				String match = filterComponents.stream().
 						filter(n -> n.equalsIgnoreCase(inchiKey2D)).findAny().orElse(null);
 				if(match != null)
-					filteredIds.add(id);
+					filteredIds.add(mfid);
 			}
 		}		
 		return filteredIds;

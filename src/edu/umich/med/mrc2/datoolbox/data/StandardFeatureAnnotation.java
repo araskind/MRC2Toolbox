@@ -72,11 +72,11 @@ public class StandardFeatureAnnotation implements Serializable, Comparable<Stand
     @Override
     public boolean equals(Object obj) {
 
+		if (obj == null)
+			return false;
+		
 		if (obj == this)
 			return true;
-
-        if (obj == null)
-            return false;
 
         if (!StandardFeatureAnnotation.class.isAssignableFrom(obj.getClass()))
             return false;

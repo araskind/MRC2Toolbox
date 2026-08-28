@@ -119,6 +119,9 @@ public class MinimalMSOneFeature implements Serializable, Comparable<MinimalMSOn
 		if (obj == null)
 			return false;
 
+		if (obj == this)
+			return true;
+		
 		if (!MinimalMSOneFeature.class.isAssignableFrom(obj.getClass()))
 			return false;
 
@@ -126,9 +129,6 @@ public class MinimalMSOneFeature implements Serializable, Comparable<MinimalMSOn
 
 		if ((this.name == null) ? (other.getName() != null) : !this.name.equals(other.getName()))
 			return false;
-
-		if (obj == this)
-			return true;
 
 		return true;
 	}

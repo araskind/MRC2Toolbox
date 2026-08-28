@@ -58,8 +58,11 @@ public class LIMSChromatographicColumn implements Serializable, Comparable<LIMSC
     @Override
     public boolean equals(Object obj) {
 
-        if (obj == null)
-            return false;
+		if (obj == null)
+			return false;
+		
+		if (obj == this)
+			return true;
 
         if (!LIMSChromatographicColumn.class.isAssignableFrom(obj.getClass()))
             return false;
@@ -68,9 +71,6 @@ public class LIMSChromatographicColumn implements Serializable, Comparable<LIMSC
 
         if ((this.columnId == null) ? (other.getColumnId() != null) : !this.columnId.equals(other.getColumnId()))
             return false;
-
-		if (obj == this)
-			return true;
 
         return true;
     }

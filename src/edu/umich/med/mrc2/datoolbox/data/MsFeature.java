@@ -707,20 +707,16 @@ public class MsFeature implements AnnotatedObject, Serializable, XmlStorable {
     @Override
     public boolean equals(Object obj) {
 
+		if (obj == null)
+			return false;
+		
 		if (obj == this)
 			return true;
-
-        if (obj == null)
-            return false;
 
         if (!MsFeature.class.isAssignableFrom(obj.getClass()))
             return false;
 
         final MsFeature other = (MsFeature) obj;
-
-//        if ((this.id == null) ? (other.getId() != null) : !this.id.equals(other.getId()))
-//            return false;
-
         return this.id.equals(other.getId());
     }
 

@@ -82,6 +82,9 @@ public class FeatureTextAnnotation implements Comparable<FeatureTextAnnotation>,
         if (obj == null)
             return false;
 
+		if (obj == this)
+			return true;
+		
         if (!FeatureTextAnnotation.class.isAssignableFrom(obj.getClass()))
             return false;
 
@@ -89,9 +92,6 @@ public class FeatureTextAnnotation implements Comparable<FeatureTextAnnotation>,
 
         if ((this.uniqueId == null) ? (other.getUniqueId() != null) : !this.uniqueId.equals(other.getUniqueId()))
             return false;
-
-		if (obj == this)
-			return true;
 
         return true;
     }

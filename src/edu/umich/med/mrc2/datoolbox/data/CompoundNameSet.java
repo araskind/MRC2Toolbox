@@ -23,6 +23,7 @@ package edu.umich.med.mrc2.datoolbox.data;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.TreeMap;
@@ -121,10 +122,7 @@ public class CompoundNameSet implements Serializable {
 		return compoundAccession;
 	}
 
-	public TreeMap<String, CompoundNameCategory> getSynonyms() {
-		if(synonyms == null)
-			synonyms = new TreeMap<String, CompoundNameCategory>();
-
+	public Map<String, CompoundNameCategory> getSynonyms() {
 		return synonyms;
 	}
 
@@ -163,8 +161,8 @@ public class CompoundNameSet implements Serializable {
 			if(name.equals(iupacName))
 				iupacName = null;
 		}
-		if(primaryName == null) {
-			primaryName = synonyms.keySet().stream().findFirst().get();
+		if(primaryName == null && !synonyms.isEmpty()) {
+			primaryName = synonyms.keySet().iterator().next();
 			synonyms.put(primaryName, CompoundNameCategory.PRI);
 		}
 	}

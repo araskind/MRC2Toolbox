@@ -72,11 +72,11 @@ public class MotrpacSampleType implements Serializable, Comparable<MotrpacSample
     @Override
     public boolean equals(Object obj) {
 
+		if (obj == null)
+			return false;
+		
 		if (obj == this)
 			return true;
-
-        if (obj == null)
-            return false;
 
         if (!MotrpacSampleType.class.isAssignableFrom(obj.getClass()))
             return false;

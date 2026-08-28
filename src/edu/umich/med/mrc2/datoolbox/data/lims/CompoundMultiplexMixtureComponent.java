@@ -101,18 +101,18 @@ public class CompoundMultiplexMixtureComponent implements Comparable<CompoundMul
 		compoundProperties.put(property, value);
 	}
 	
-	public void getProperty(String property) {
-		compoundProperties.get(property);
+	public String getProperty(String property) {
+		return compoundProperties.get(property);
 	}
 
 	@Override
 	public boolean equals(Object obj) {
 
-		if (obj == this)
-			return true;
-
 		if (obj == null)
 			return false;
+		
+		if (obj == this)
+			return true;
 
 		if (!CompoundMultiplexMixtureComponent.class.isAssignableFrom(obj.getClass()))
 			return false;

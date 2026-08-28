@@ -290,11 +290,11 @@ public class BinnerAnnotation implements Serializable, Comparable<BinnerAnnotati
     @Override
     public boolean equals(Object obj) {
 
+		if (obj == null)
+			return false;
+		
 		if (obj == this)
 			return true;
-
-        if (obj == null)
-            return false;
 
         if (!BinnerAnnotation.class.isAssignableFrom(obj.getClass()))
             return false;

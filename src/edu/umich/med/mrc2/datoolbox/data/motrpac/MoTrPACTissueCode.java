@@ -72,11 +72,11 @@ public class MoTrPACTissueCode implements Serializable, Comparable<MoTrPACTissue
     @Override
     public boolean equals(Object obj) {
 
+		if (obj == null)
+			return false;
+		
 		if (obj == this)
 			return true;
-
-        if (obj == null)
-            return false;
 
         if (!MoTrPACTissueCode.class.isAssignableFrom(obj.getClass()))
             return false;

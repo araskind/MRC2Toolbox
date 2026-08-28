@@ -21,16 +21,34 @@
 
 package edu.umich.med.mrc2.datoolbox.utils;
 
+import java.nio.charset.Charset;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
+import javax.xml.bind.DatatypeConverter;
+
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
+import edu.umich.med.mrc2.datoolbox.data.ChromatogramDefinition;
 import edu.umich.med.mrc2.datoolbox.data.XicDataBundle;
 import edu.umich.med.mrc2.datoolbox.data.compare.ExtractedIonDataComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 
 public class ChromatogramUtils {
+	
+	private static final Logger logger = LogManager.getLogger(ChromatogramUtils.class);
+
+	private ChromatogramUtils() {
+		/* This utility class should not be instantiated */
+	}
 	
 	private static final PearsonsCorrelation pearsonsCorrelation = 
 			new PearsonsCorrelation();
@@ -78,5 +96,40 @@ public class ChromatogramUtils {
 				corr = Double.valueOf(0.0d);
 		}	
 		return 0.0d;
+	}
+	
+	public static String getChromatogramDefinitionHash(ChromatogramDefinition cd){
+
+		List<String> chunks = new ArrayList<String>();
+		chunks.add(cd.getMode().name());
+		if(cd.getPolarity() != null)
+			chunks.add(cd.getPolarity().getCode());
+		
+		chunks.add(Integer.toString(cd.getMsLevel()));		
+		if(cd.getMzList() != null && !cd.getMzList().isEmpty()) {
+			List<String> stringList = cd.getMzList().stream().
+					map(MsUtils.spectrumMzExportFormat::format).
+					collect(Collectors.toList());
+			chunks.add(StringUtils.join(stringList));
+		}		
+		chunks.add(MsUtils.spectrumMzExportFormat.format(cd.getMzWindowValue()));
+		if(cd.getMassErrorType() != null)
+			chunks.add(cd.getMassErrorType().name());
+		
+		if(cd.getRtRange() != null)
+			chunks.add(cd.getRtRange().getStorableString());		
+		
+		//	TODO smoothing filter 
+		//	chunks.add("");
+		
+		chunks.add(Boolean.toString(cd.isDoSmooth()));
+	    try {
+			MessageDigest md = MessageDigest.getInstance("MD5");
+			md.update(StringUtils.join(chunks).getBytes(Charset.forName("windows-1252")));
+			return DatatypeConverter.printHexBinary(md.digest()).toUpperCase();
+		} catch (NoSuchAlgorithmException e) {
+			logger.error("Failed to encode Chromatogram Definition Hash", e);
+		}
+	    return null;
 	}
 }

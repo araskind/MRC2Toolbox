@@ -213,7 +213,7 @@ public class MsFeatureChromatogramBatchExtractionTask extends AbstractTask imple
 				}
 			}
 			if(!mzList.isEmpty()) {
-				ChromatogramDefinition cd = commonDefinition.clone();
+				ChromatogramDefinition cd = new ChromatogramDefinition(commonDefinition);
 				cd.setMzList(mzList);
 				cd.recenterRtRange(mfb.getMsFeature().getRetentionTime());
 				cd.setPolarity(mfb.getMsFeature().getPolarity());

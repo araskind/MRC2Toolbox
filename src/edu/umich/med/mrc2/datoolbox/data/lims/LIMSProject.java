@@ -93,6 +93,9 @@ public class LIMSProject implements Serializable, Comparable<LIMSProject>, XmlSt
         if (obj == null)
             return false;
 
+		if (obj == this)
+			return true;
+		
         if (!LIMSProject.class.isAssignableFrom(obj.getClass()))
             return false;
 
@@ -100,9 +103,6 @@ public class LIMSProject implements Serializable, Comparable<LIMSProject>, XmlSt
 
         if ((this.id == null) ? (other.getId() != null) : !this.id.equals(other.getId()))
             return false;
-
-		if (obj == this)
-			return true;
 
         return true;
     }

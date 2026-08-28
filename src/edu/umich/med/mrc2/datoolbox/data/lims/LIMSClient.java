@@ -56,8 +56,11 @@ public class LIMSClient implements Serializable, Comparable<LIMSClient>, XmlStor
     @Override
     public boolean equals(Object obj) {
 
-        if (obj == null)
-            return false;
+		if (obj == null)
+			return false;
+		
+		if (obj == this)
+			return true;
 
         if (!LIMSClient.class.isAssignableFrom(obj.getClass()))
             return false;
@@ -66,9 +69,6 @@ public class LIMSClient implements Serializable, Comparable<LIMSClient>, XmlStor
 
         if ((this.id == null) ? (other.getId() != null) : !this.id.equals(other.getId()))
             return false;
-
-		if (obj == this)
-			return true;
 
         return true;
     }

@@ -85,11 +85,11 @@ public class BinnerNeutralMassDifference implements Serializable, Comparable<Bin
 		massCorrection = 0.0d;
 		if(!neutralAdducts.isEmpty())
 			massCorrection += neutralAdducts.stream().
-				mapToDouble(l -> l.getMassCorrection()).sum();
+				mapToDouble(Adduct::getMassCorrection).sum();
 		
 		if(!neutralLosses.isEmpty())
 			massCorrection += neutralLosses.stream().
-				mapToDouble(l -> l.getMassCorrection()).sum();
+				mapToDouble(Adduct::getMassCorrection).sum();
 	}
 	
 	public String getId() {
@@ -161,11 +161,11 @@ public class BinnerNeutralMassDifference implements Serializable, Comparable<Bin
     @Override
     public boolean equals(Object obj) {
 
+		if (obj == null)
+			return false;
+		
 		if (obj == this)
 			return true;
-
-        if (obj == null)
-            return false;
 
         if (!BinnerNeutralMassDifference.class.isAssignableFrom(obj.getClass()))
             return false;
@@ -174,9 +174,6 @@ public class BinnerNeutralMassDifference implements Serializable, Comparable<Bin
         
         if(!this.id.equals(other.getId()))
         	return false;
-        
-//        if(!CollectionUtils.isEqualCollection(neutralAdducts, other.getNeutralAdducts()))
-//        	return false;
         
         return true;
     }
@@ -195,15 +192,14 @@ public class BinnerNeutralMassDifference implements Serializable, Comparable<Bin
     }
 
 	public Map<SimpleAdduct, Long> getNeutralAdductCounts() {
-		Map<SimpleAdduct, Long> countedAdducts = neutralAdducts.stream().
-				collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
-		return countedAdducts;
+		return neutralAdducts.stream().
+			collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
 	}
 	
 	public Map<SimpleAdduct, Long> getNeutralLossCounts() {
-		Map<SimpleAdduct, Long> countedAdducts = neutralLosses.stream().
-				collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
-		return countedAdducts;
+		return neutralLosses.stream().
+			collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+
 	}
 	
 	public double getMassCorrection() {

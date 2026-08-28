@@ -22,7 +22,6 @@
 package edu.umich.med.mrc2.datoolbox.data;
 
 import java.io.Serializable;
-import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
@@ -247,11 +246,11 @@ public class MsFeatureInfoBundleCollection implements Serializable {
    @Override
     public boolean equals(Object obj) {
 
+		if (obj == null)
+			return false;
+		
 		if (obj == this)
 			return true;
-
-        if (obj == null)
-            return false;
 
         if (!MsFeatureInfoBundleCollection.class.isAssignableFrom(obj.getClass()))
             return false;
@@ -325,17 +324,9 @@ public class MsFeatureInfoBundleCollection implements Serializable {
 	//	This is a temp fix for typo
 	private void fixDateCreated(Element xmlElement) {
 		
-		String dateCreatedString = xmlElement.getAttributeValue("DateCreataed");
-		if(dateCreatedString != null && !dateCreatedString.isBlank()) {
-			try {	
-				this.dateCreated = ProjectUtils.dateTimeFormat.parse(dateCreatedString);
-			} catch (ParseException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		if(this.dateCreated == null)
-			this.dateCreated = new Date();
+		dateCreated = ProjectUtils.parseDateString(xmlElement.getAttributeValue("DateCreataed"));
+		if(dateCreated == null)
+			dateCreated = new Date();
 	}
 
 	public MsFeatureInfoBundleCollection(Element xmlElement) {

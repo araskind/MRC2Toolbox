@@ -1416,9 +1416,13 @@ import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.VariableCategorySizeBarChar
 	     */
 	    @Override
 	    public boolean equals(Object obj) {
-	        if (obj == this) {
-	            return true;
-	        }
+	    	
+			if (obj == null)
+				return false;
+			
+			if (obj == this)
+				return true;
+			
 	        if (!(obj instanceof VariableCategorySizeCategoryAxis)) {
 	            return false;
 	        }

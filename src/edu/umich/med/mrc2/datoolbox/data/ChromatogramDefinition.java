@@ -22,16 +22,10 @@
 package edu.umich.med.mrc2.datoolbox.data;
 
 import java.io.Serializable;
-import java.nio.charset.Charset;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
-
-import javax.xml.bind.DatatypeConverter;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -43,7 +37,7 @@ import edu.umich.med.mrc2.datoolbox.gui.plot.lcms.chromatogram.ChromatogramPlotM
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
 import edu.umich.med.mrc2.datoolbox.project.store.XICDefinitionFields;
-import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
+import edu.umich.med.mrc2.datoolbox.utils.ChromatogramUtils;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
 import edu.umich.med.mrc2.datoolbox.utils.filter.Filter;
 import edu.umich.med.mrc2.datoolbox.utils.filter.FilterFactory;
@@ -180,6 +174,20 @@ public class ChromatogramDefinition  implements Serializable, Cloneable{
 		this.doSmooth = false;
 	}
 	
+
+	public ChromatogramDefinition(ChromatogramDefinition source) {
+
+		this.mode = source.getMode();
+		this.polarity = source.getPolarity();
+		this.msLevel = source.getMsLevel();
+		this.mzList = new TreeSet<>(source.getMzList());
+		this.sumAllMassChromatograms = source.getSumAllMassChromatograms();
+		this.mzWindowValue = source.getMzWindowValue();
+		this.massErrorType = source.getMassErrorType();
+		this.rtRange = new Range(source.getRtRange());
+		this.smoothingFilter = source.getSmoothingFilter();
+	}
+	
 	public ChromatogramPlotMode getMode() {
 		return mode;
 	}
@@ -255,29 +263,14 @@ public class ChromatogramDefinition  implements Serializable, Cloneable{
 		rtRange = new Range(newCenterRt - halfWidth, newCenterRt + halfWidth);
 	}
 	
-	@Override
-	public ChromatogramDefinition clone() {
-		
-		return new ChromatogramDefinition(
-				 mode, 
-				 polarity, 
-				 msLevel, 
-				 mzList,
-				 sumAllMassChromatograms, 
-				 mzWindowValue, 
-				 massErrorType, 
-				 rtRange,
-				 smoothingFilter);
-	}
-	
     @Override
     public boolean equals(Object obj) {
 
+		if (obj == null)
+			return false;
+		
 		if (obj == this)
 			return true;
-
-        if (obj == null)
-            return false;
 
         if (!ChromatogramDefinition.class.isAssignableFrom(obj.getClass()))
             return false;
@@ -367,38 +360,7 @@ public class ChromatogramDefinition  implements Serializable, Cloneable{
 	}
 	
 	public String getChromatogramDefinitionHash(){
-
-		List<String> chunks = new ArrayList<String>();
-		chunks.add(mode.name());
-		if(polarity != null)
-			chunks.add(polarity.getCode());
-		
-		chunks.add(Integer.toString(msLevel));		
-		if(mzList != null && !mzList.isEmpty()) {
-			List<String> stringList = mzList.stream().
-					map(mz -> MsUtils.spectrumMzExportFormat.format(mz)).
-					collect(Collectors.toList());
-			chunks.add(StringUtils.join(stringList));
-		}		
-		chunks.add(MsUtils.spectrumMzExportFormat.format(mzWindowValue));
-		if(massErrorType != null)
-			chunks.add(massErrorType.name());
-		
-		if(rtRange != null)
-			chunks.add(rtRange.getStorableString());		
-		
-		//	TODO smoothing filter 
-		//	chunks.add("");
-		
-		chunks.add(Boolean.toString(doSmooth));
-	    try {
-			MessageDigest md = MessageDigest.getInstance("MD5");
-			md.update(StringUtils.join(chunks).getBytes(Charset.forName("windows-1252")));
-			return DatatypeConverter.printHexBinary(md.digest()).toUpperCase();
-		} catch (NoSuchAlgorithmException e) {
-			e.printStackTrace();
-		}
-	    return null;
+	    return ChromatogramUtils.getChromatogramDefinitionHash(this);
 	}
 
 	public ChromatogramDefinition(Element cdElement) {
@@ -435,15 +397,8 @@ public class ChromatogramDefinition  implements Serializable, Cloneable{
 		
 		doSmooth = Boolean.parseBoolean(
 				cdElement.getAttributeValue(XICDefinitionFields.Smooth.name()));
-		Element filterElement = cdElement.getChild(ObjectNames.Filter.name());
-		if(filterElement != null) {
-			try {
-				smoothingFilter = FilterFactory.getFilter(filterElement);
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}	
-		}
+		smoothingFilter = 
+				FilterFactory.getFilter(cdElement.getChild(ObjectNames.Filter.name()));		
 	}
 
 	public void setMzList(Collection<Double> mzList) {

@@ -264,7 +264,6 @@ public class BinnerAnnotationEditorDialog extends JDialog {
 		BinnerAdduct edited = new BinnerAdduct(
 				null, 
 				getAdductName(), 
-				getCharge(), 
 				getTier(), 
 				getChargeCarrier(),
 				getAdductExchange(), 

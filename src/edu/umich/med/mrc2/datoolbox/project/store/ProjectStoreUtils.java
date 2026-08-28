@@ -21,7 +21,6 @@
 
 package edu.umich.med.mrc2.datoolbox.project.store;
 
-import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -44,26 +43,15 @@ public class ProjectStoreUtils {
 	public static void setDateAttribute(Date date, CommonFields field, Element element) {
 		
 		if(date != null && dateFields.contains(field))
-			element.setAttribute(field.name(), ProjectUtils.getDateFormat().format(date));
+			element.setAttribute(field.name(), ProjectUtils.dateTimeFormat.format(date));
 	}
 	
 	public static Date getDateFromAttribute(Element element, CommonFields field) {
 		
 		if(!dateFields.contains(field))
 			return null;
-		
-		String dateString = element.getAttributeValue(field.name());
-		Date date = null;
-		if(dateString != null && !dateString.isBlank()) {
-			try {
-				date = ProjectUtils.getDateFormat().parse(dateString);
-			} catch (ParseException e) {
-				// TODO Auto-generated catch block
-				System.out.println(dateString);
-				e.printStackTrace();
-			}
-		}
-		return date;
+
+		return ProjectUtils.parseDateString(element.getAttributeValue(field.name()));
 	}
 	
 	public static void setUserIdAttribute(LIMSUser user, Element element) {

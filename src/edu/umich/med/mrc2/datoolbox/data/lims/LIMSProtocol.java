@@ -194,6 +194,9 @@ public class LIMSProtocol implements Serializable, Comparable<LIMSProtocol>, Xml
         if (obj == null)
             return false;
 
+		if (obj == this)
+			return true;
+		
         if (!LIMSProtocol.class.isAssignableFrom(obj.getClass()))
             return false;
 
@@ -201,9 +204,6 @@ public class LIMSProtocol implements Serializable, Comparable<LIMSProtocol>, Xml
 
         if ((this.sopId == null) ? (other.getSopId() != null) : !this.sopId.equals(other.getSopId()))
             return false;
-
-		if (obj == this)
-			return true;
 
         return true;
     }

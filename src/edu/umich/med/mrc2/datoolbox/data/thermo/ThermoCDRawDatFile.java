@@ -44,11 +44,11 @@ public class ThermoCDRawDatFile  implements Comparable<ThermoCDRawDatFile> {
     @Override
     public boolean equals(Object obj) {
 
+		if (obj == null)
+			return false;
+		
 		if (obj == this)
 			return true;
-
-        if (obj == null)
-            return false;
 
         if (!ThermoCDRawDatFile.class.isAssignableFrom(obj.getClass()))
             return false;

@@ -225,11 +225,11 @@ public class MsFeatureInfoBundleCluster implements IMsFeatureInfoBundleCluster{
    @Override
     public boolean equals(Object obj) {
 
+		if (obj == null)
+			return false;
+		
 		if (obj == this)
 			return true;
-
-        if (obj == null)
-            return false;
 
         if (!MsFeatureInfoBundleCluster.class.isAssignableFrom(obj.getClass()))
             return false;
@@ -253,10 +253,6 @@ public class MsFeatureInfoBundleCluster implements IMsFeatureInfoBundleCluster{
 	public String getName() {
 		return name;
 	}
-
-//	public void setName(String name) {
-//		this.name = name;
-//	}
 	
 	@Override
 	public String toString() {
@@ -323,7 +319,6 @@ public class MsFeatureInfoBundleCluster implements IMsFeatureInfoBundleCluster{
 		Element msmsClusterElement = 
 				new Element(ObjectNames.MsFeatureInfoBundleCluster.name());
 		msmsClusterElement.setAttribute(CommonFields.Id.name(), id);	
-//		msmsClusterElement.setAttribute(CommonFields.Name.name(), name);
 		msmsClusterElement.setAttribute(CommonFields.MZ.name(), Double.toString(mz));
 		msmsClusterElement.setAttribute(CommonFields.RT.name(), Double.toString(rt));
 		msmsClusterElement.setAttribute(
@@ -346,7 +341,6 @@ public class MsFeatureInfoBundleCluster implements IMsFeatureInfoBundleCluster{
 	public MsFeatureInfoBundleCluster(Element clusterElement) {
 		
 		id = clusterElement.getAttributeValue(CommonFields.Id.name());
-		//	name = clusterElement.getAttributeValue(MsFeatureInfoBundleClusterFields.Name.name());
 		mz = Double.parseDouble(
 				clusterElement.getAttributeValue(CommonFields.MZ.name()));
 		rt = Double.parseDouble(
@@ -429,17 +423,17 @@ public class MsFeatureInfoBundleCluster implements IMsFeatureInfoBundleCluster{
 		MsFeatureIdentity bestId = null;
 		List<MsFeatureIdentity> allIds = components.stream().
 				flatMap(c -> c.getMsFeature().getIdentifications().stream()).
-				filter(id -> Objects.nonNull(id.getReferenceMsMsLibraryMatch())).
+				filter(cid -> Objects.nonNull(cid.getReferenceMsMsLibraryMatch())).
 				collect(Collectors.toList());
 		if(includeInSourceHits) {
 			bestId = allIds.stream().
-				filter(id -> !id.getReferenceMsMsLibraryMatch().getMatchType().equals(MSMSMatchType.Hybrid)).
+				filter(cid -> !cid.getReferenceMsMsLibraryMatch().getMatchType().equals(MSMSMatchType.Hybrid)).
 				sorted(new MsFeatureIdentityComparator(SortProperty.msmsEntropyScore, SortDirection.DESC)).
 				findFirst().orElse(null);
 		}
 		else {
 			bestId = allIds.stream().
-					filter(id -> id.getReferenceMsMsLibraryMatch().getMatchType().equals(MSMSMatchType.Regular)).
+					filter(cid -> cid.getReferenceMsMsLibraryMatch().getMatchType().equals(MSMSMatchType.Regular)).
 					sorted(new MsFeatureIdentityComparator(SortProperty.msmsEntropyScore, SortDirection.DESC)).
 					findFirst().orElse(null);
 		}
@@ -460,7 +454,7 @@ public class MsFeatureInfoBundleCluster implements IMsFeatureInfoBundleCluster{
 		if(lookupFeature == null)
 			return null;
 		
-		double mz = lookupFeature.getMz();		
+		double fmz = lookupFeature.getMz();		
 		double initError = 1000.0d;
 		MSFeatureInfoBundle bestHit = null;
 		for(MSFeatureInfoBundle b : components) {
@@ -469,7 +463,7 @@ public class MsFeatureInfoBundleCluster implements IMsFeatureInfoBundleCluster{
 					b.getMsFeature().getSpectrum().getExperimentalTandemSpectrum();
 			if(msms != null && msms.getParent() != null) {
 				
-				double error = Math.abs(msms.getParent().getMz() - mz);
+				double error = Math.abs(msms.getParent().getMz() - fmz);
 				if(error < initError) {
 					initError = error;
 					bestHit = b;

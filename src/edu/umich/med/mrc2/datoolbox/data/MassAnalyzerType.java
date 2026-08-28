@@ -51,6 +51,9 @@ public class MassAnalyzerType implements Serializable, Comparable<MassAnalyzerTy
         if (obj == null)
             return false;
 
+		if (obj == this)
+			return true;
+		
         if (!MassAnalyzerType.class.isAssignableFrom(obj.getClass()))
             return false;
 
@@ -58,9 +61,6 @@ public class MassAnalyzerType implements Serializable, Comparable<MassAnalyzerTy
 
         if ((this.id == null) ? (other.getId() != null) : !this.id.equals(other.getId()))
             return false;
-
-		if (obj == this)
-			return true;
 
         return true;
     }

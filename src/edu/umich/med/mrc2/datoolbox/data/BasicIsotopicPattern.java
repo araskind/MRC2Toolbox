@@ -57,11 +57,9 @@ public class BasicIsotopicPattern implements Serializable {
 		if(dataPoints.size() == 1) {
 
 			MsPoint seed = dataPoints.iterator().next();
-
 			diffRange = new Range(
-					seed.getMz() + 1.0d/(double)newCharge - 0.1d,
-					seed.getMz() + 1.0d/(double)newCharge + 0.1);
-
+					seed.getMz() + 1.0d/newCharge - 0.1d,
+					seed.getMz() + 1.0d/newCharge + 0.1);
 			if(!diffRange.contains(newPoint.getMz()))
 				return false;
 
@@ -75,11 +73,9 @@ public class BasicIsotopicPattern implements Serializable {
 		for(MsPoint p : dataPoints) {
 
 			diffRange = new Range(
-					p.getMz() + 1.0d/(double)charge - 0.1d,
-					p.getMz() + 1.0d/(double)charge + 0.1);
-
+					p.getMz() + 1.0d/charge - 0.1d,
+					p.getMz() + 1.0d/charge + 0.1);
 			if(diffRange.contains(newPoint.getMz())) {
-
 				dataPoints.add(newPoint);
 				return true;
 			}
