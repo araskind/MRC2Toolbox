@@ -19,7 +19,7 @@
  *
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.rqc;
+package edu.umich.med.mrc2.datoolbox.cpdmatch;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,7 +27,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
-import org.apache.commons.math3.stat.StatUtils;
+import org.apache.commons.math4.legacy.stat.descriptive.DescriptiveStatistics;
 
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.main.config.DefaultFormatStore;
@@ -44,6 +44,9 @@ public class CompoundMatchGroupObject {
 	private List<Double>mzValues;
 	private List<Double>rtValues;
 	private Map<String,Double>peakAreas;
+	private boolean hasMzOutliers;	
+	private boolean hasRTOutliers;
+
 	
 	private static final String nameSuffixPattern = "-[PN]-$";
 	
@@ -58,12 +61,20 @@ public class CompoundMatchGroupObject {
 	}
 	
 	public void finalizeObjectParameters() {
-		
-		double[] mzArr = mzValues.stream().mapToDouble(d -> d).toArray();
-		mz = StatUtils.percentile(mzArr, 50.0d);
-		
-		double[] rtArr = rtValues.stream().mapToDouble(d -> d).toArray();
-		rt = StatUtils.percentile(rtArr, 50.0d);
+
+		DescriptiveStatistics mzStats = new DescriptiveStatistics(mzValues.stream().mapToDouble(d -> d).toArray());
+		mz = mzStats.getPercentile(50.0d);
+		if(mzStats.getMax() - mzStats.getMin() > 0.05d)
+			hasMzOutliers = true;
+		else
+			hasMzOutliers = false;
+
+		DescriptiveStatistics rtStats = new DescriptiveStatistics(rtValues.stream().mapToDouble(d -> d).toArray());
+		rt = rtStats.getPercentile(50.0d);
+		if(rtStats.getMax() - rtStats.getMin() > 0.15d)
+			hasRTOutliers = true;
+		else
+			hasRTOutliers = false;
 		
 		if(featureNames.get(0).startsWith(DataPrefix.MS_LIBRARY_UNKNOWN_TARGET.getName())) {
 			feature = DataPrefix.MS_LIBRARY_UNKNOWN_TARGET.getName() 
@@ -74,6 +85,34 @@ public class CompoundMatchGroupObject {
 			feature = StringProcessingUtils.findLongestOverlap(featureNames).
 				replaceAll(nameSuffixPattern, "").trim();
 		}
+	}
+	
+	//	Find outliers using interquartile range (IQR) method
+	private boolean findRToutliersByIQR(DescriptiveStatistics rtStats) {
+		
+        double q1 = rtStats.getPercentile(25.0d); 
+        double q3 = rtStats.getPercentile(75.0d);        
+        double iqr = q3 - q1;
+        double lowerBound = q1 - (1.5 * iqr);
+        double upperBound = q3 + (1.5 * iqr);
+        
+        for (double val : rtStats.getValues()) {
+            if (val < lowerBound || val > upperBound)
+            	 return true;
+        }		
+		return false;
+	}
+	
+	private boolean findRToutliersByZscore(DescriptiveStatistics rtStats, double threshold) {
+		
+		double mean = rtStats.getMean();
+		double stdDev = rtStats.getStandardDeviation();
+        for (double val : rtStats.getValues()) {
+			double zScore = (val - mean) / stdDev;
+			if (Math.abs(zScore) > threshold)
+				return true;	
+        }		
+		return false;
 	}
 
 	public int getGroupId() {
@@ -111,6 +150,12 @@ public class CompoundMatchGroupObject {
 	public void setFeature(String feature) {
 		this.feature = feature;
 	}
-	
-	
+
+	public boolean mzOutliersPresent() {
+		return hasMzOutliers;
+	}
+
+	public boolean rtOutliersPresent() {
+		return hasRTOutliers;
+	}
 }

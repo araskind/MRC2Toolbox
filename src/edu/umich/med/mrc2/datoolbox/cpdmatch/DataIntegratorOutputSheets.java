@@ -19,38 +19,19 @@
  *
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.data.enums;
+package edu.umich.med.mrc2.datoolbox.cpdmatch;
 
-public enum CompoundMatcherField {
+public enum DataIntegratorOutputSheets {
 	
-	BATCH("Batch"),
-	MATCH_GROUP("Match Group"),
-	FEATURE("Feature"),
-	MONOISOTOPIC_MZ("Monoisotopic M/Z"),
-	RT("RT"),
-	OLD_RT("Old RT"),
-	MEDIAN_INTENSITY("Median Intensity"),
-	KMD("KMD"),
-	ISOTOPES("Isotopes"),
-	OTHER_ISOTOPES_IN_GROUP("Other Isotopes In Group"),
-	ANNOTATIONS("Annotations"),
-	OTHER_ANNOTATIONS_IN_GROUP("Other Annotations in Group"),
-	FURTHER_ANNOTATION("Further Annotation"),
-	DERIVATIONS("Derivations"),
-	DERIVED_MOLECULAR_MASS("Derived Molecular Mass"),
-	MASS_ERROR("Mass Error"),
-	FEATURE_GROUP_NUMBER("Feature Group Number"),
-	CHARGE_CARRIER("Charge Carrier"),
-	ADDUCT_NL("Adduct/NL"),
-	BIN("Bin"),
-	CORR_CLUSTER("Corr Cluster"),
-	REBIN_SUBCLUSTER("Rebin Subcluster"),
-	RT_SUBCLUSTER("RT Subcluster"),
+	SUMMARY("Summary"),
+	MATCH_GROUP_SUMMARY("Match Group Summary"),
+	UNAMBIGUOUS_MATCH_GROUPS("Unambiguous Match Groups"),
+	AMBIGUOUS_MATCH_GROUPS("Ambiguous Match Groups"),
 	;
 	
 	private final String uiName;
 
-	CompoundMatcherField(String uiName) {
+	DataIntegratorOutputSheets(String uiName) {
 		this.uiName = uiName;
 	}
 
@@ -63,9 +44,9 @@ public enum CompoundMatcherField {
 		return uiName;
 	}
 		
-	public static CompoundMatcherField getOptionByName(String name) {
+	public static DataIntegratorOutputSheets getOptionByName(String name) {
 
-		for(CompoundMatcherField source : CompoundMatcherField.values()) {
+		for(DataIntegratorOutputSheets source : DataIntegratorOutputSheets.values()) {
 
 			if(source.name().equals(name))
 				return source;
@@ -73,9 +54,9 @@ public enum CompoundMatcherField {
 		return null;
 	}
 	
-	public static CompoundMatcherField getOptionByUIName(String uiname) {
+	public static DataIntegratorOutputSheets getOptionByUIName(String uiname) {
 
-		for(CompoundMatcherField source : CompoundMatcherField.values()) {
+		for(DataIntegratorOutputSheets source : DataIntegratorOutputSheets.values()) {
 
 			if(source.getName().equals(uiname))
 				return source;

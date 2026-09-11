@@ -22,6 +22,9 @@
 package edu.umich.med.mrc2.datoolbox.gui.idtlims.dacq;
 
 import java.awt.BorderLayout;
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -45,7 +48,6 @@ import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.AbstractIDTrackerLimsPanel;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.IDTrackerLimsManagerPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
-import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTablePopupMenu;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
@@ -83,7 +85,7 @@ public class DockableAcquisitionMethodManagerPanel extends AbstractIDTrackerLims
 
 		methodTable = new AcquisitionMethodTable();
 		methodTable.addTablePopupMenu(
-				new BasicTablePopupMenu(null, methodTable, true));
+				new AcquisitionMethodTablePopupMenu(this, methodTable));
 		
 		JScrollPane designScrollPane = new JScrollPane(methodTable);
 		getContentPane().add(designScrollPane, BorderLayout.CENTER);
@@ -168,6 +170,20 @@ public class DockableAcquisitionMethodManagerPanel extends AbstractIDTrackerLims
 		if(command.equals(MainActionCommands.LINK_ACQUISITION_METHOD_TO_EXPERIMENT_COMMAND.getName()))
 			linkAcquisitionMethodToExperiment();
 
+		if(command.equals(MainActionCommands.COPY_GRADIENT_AS_STRING_COMMAND.getName()))
+			copyGradientAsString();
+	}
+
+	private void copyGradientAsString() {
+		
+		DataAcquisitionMethod method = methodTable.getSelectedMethod();
+		if(method != null && method.getChromatographicGradient() != null) {
+			
+			String gradientString = method.getChromatographicGradient().getGradientSummary();
+			StringSelection stringSelection = new StringSelection(gradientString);
+			Clipboard clpbrd = Toolkit.getDefaultToolkit().getSystemClipboard();
+			clpbrd.setContents(stringSelection, null);
+		}
 	}
 
 	private void linkAcquisitionMethodToExperiment() {

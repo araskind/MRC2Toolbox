@@ -773,6 +773,8 @@ public class MetabCombinerAlignmentScriptGenerator extends TemplateRbasedProject
 	}
 
 	private void createCombinedManifestBlock() {
+		
+		//	TODO ensure ms_mode is populated
 
 		rscriptParts.add("\n# Create combined clean manifest ####");
 		rscriptParts.add("\n## Read and combine original batch manifests ####\n");
@@ -782,7 +784,7 @@ public class MetabCombinerAlignmentScriptGenerator extends TemplateRbasedProject
 		rscriptParts.add("\tmanifest_file <- paste(\"./Manifests/\", manifest_file_list[i], sep = \"\")");
 		rscriptParts.add("\ttemp_data <- read.delim(manifest_file, check.names=F, stringsAsFactors = F)");
 		rscriptParts.add("\ttemp_data[] <- lapply(temp_data, function(x) as.character(x))");
-		rscriptParts.add("\ttemp_data$batch_override <- paste(\"Batch\", i)");
+		rscriptParts.add("\ttemp_data$batch_override <- paste(\"Batch\", str_pad(i, width = 2, side = \"left\", pad = \"0\"), sep = \"\")");
 		rscriptParts.add("\tmanifest_dataset <- bind_rows(manifest_dataset, temp_data)");
 		rscriptParts.add("}\n");
 		rscriptParts.add("## Remove files not present in aligned data from manifest, "

@@ -19,7 +19,7 @@
  *
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.rqc;
+package edu.umich.med.mrc2.datoolbox.cpdmatch;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -39,6 +39,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -55,29 +56,21 @@ import org.apache.poi.ss.usermodel.Workbook;
 import com.github.pjfanning.xlsx.StreamingReader;
 
 import edu.umich.med.mrc2.datoolbox.data.Adduct;
-import edu.umich.med.mrc2.datoolbox.data.CompoundIdentity;
 import edu.umich.med.mrc2.datoolbox.data.CompoundLibrary;
 import edu.umich.med.mrc2.datoolbox.data.LibraryMsFeature;
-import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
 import edu.umich.med.mrc2.datoolbox.data.compare.CompoundMatchGroupObjectComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
-import edu.umich.med.mrc2.datoolbox.data.enums.CompoundDatabaseEnum;
-import edu.umich.med.mrc2.datoolbox.data.enums.CompoundIdentificationConfidence;
-import edu.umich.med.mrc2.datoolbox.data.enums.CompoundMatchFullPicksFields;
-import edu.umich.med.mrc2.datoolbox.data.enums.CompoundMatcherField;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
-import edu.umich.med.mrc2.datoolbox.data.enums.PCDLFields;
 import edu.umich.med.mrc2.datoolbox.data.enums.QCANVASInputField;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
-import edu.umich.med.mrc2.datoolbox.database.idt.MSRTLibraryUtils;
 import edu.umich.med.mrc2.datoolbox.main.AdductManager;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.DefaultFormatStore;
 import edu.umich.med.mrc2.datoolbox.main.config.FilePreferencesFactory;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
-import edu.umich.med.mrc2.datoolbox.utils.DelimitedTextParser;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
+import edu.umich.med.mrc2.datoolbox.utils.PCDLUtils;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
 import edu.umich.med.mrc2.datoolbox.utils.TextUtils;
 
@@ -85,7 +78,7 @@ public class CompoundMatchDataExtractor {
 	
 	private static final Logger logger= LogManager.getLogger(CompoundMatchDataExtractor.class);
 
-	private static final String TARGET_SHEET = "Unambiguous Match Groups";
+	//private static final String TARGET_SHEET = "Unambiguous Match Groups";
 	private static final Pattern fileNamePattern = 
 			Pattern.compile(MRC2ToolBoxConfiguration.CORE_DATA_FILE_MASK_DEFAULT);
 	
@@ -105,23 +98,88 @@ public class CompoundMatchDataExtractor {
 		MRC2ToolBoxConfiguration.initConfiguration();
 		initDatabaseConnection();
 		
-		processEX01426RPNeg();
+		processEX01496RPPos();
 	}
 	
-	private static void processEX01426RPNeg() {
-		
-		File inputFile = new File("Y:\\DataAnalysis\\CPDMatch\\EX01426_RP_Neg_Data-Integrator-original-format.xlsx");
-		File fullPicksFile = new File("Y:\\DataAnalysis\\CPDMatch\\1426 RP Neg named full picks.xlsx");
-		File outputFile = new File("Y:\\DataAnalysis\\CPDMatch\\EX01426_RP_Neg_Data-Integrator-exported.txt");
-		File libraryFile = new File("Y:\\DataAnalysis\\CPDMatch\\RP-Neg with 1C IS MIx - Complete Library.txt"); //-CDK-compatible
+	private static void processEX01496RPNeg() {
+
+		File inputFile = new File("S:\\DataAnalysis\\EX01496 - Human EDTA Tranche 3 plasma X20001463K\\"
+				+ "A003 - Untargeted\\CompoundMatch\\EX01496_RP_NEG_merge_output_20260902.xlsx");
+		File fullPicksFile = new File("S:\\DataAnalysis\\EX01496 - Human EDTA Tranche 3 plasma X20001463K\\"
+				+ "A003 - Untargeted\\CompoundMatch\\1496 RP Neg-full picks.xlsx");
+		File outputFile = new File("S:\\DataAnalysis\\EX01496 - Human EDTA Tranche 3 plasma X20001463K\\"
+				+ "A003 - Untargeted\\CompoundMatch\\EX01496_RP_Neg_Data-Integrator-exported-20260910.txt");
+		File libraryFile = new File("Y:\\DataAnalysis\\CPDMatch\\RP-Neg with 1C IS MIx - Complete Library.txt");
 		rtError = 0.05d;
 		mzError = 7.00d;
 		adductList = new ArrayList<>();
-		adductList.add(AdductManager.getAdductByName("[M-H]-"));
-		parseCompoundMatchFile(inputFile, outputFile, libraryFile, fullPicksFile);
-		
+		adductList.add(AdductManager.getDefaultAdductForCharge(-1));
+		parseCompoundMatchFile(inputFile, outputFile, libraryFile, fullPicksFile);		
 	}
+	
+	private static void processEX01496RPPos() {
 
+		File inputFile = new File("S:\\DataAnalysis\\EX01496 - Human EDTA Tranche 3 plasma X20001463K\\"
+				+ "A003 - Untargeted\\CompoundMatch\\EX01496_RP_POS_merge_output_20260902.xlsx");
+		File fullPicksFile = new File("S:\\DataAnalysis\\EX01496 - Human EDTA Tranche 3 plasma X20001463K\\"
+				+ "A003 - Untargeted\\CompoundMatch\\1496 RP Pos-full picks.xlsx");
+		File outputFile = new File("S:\\DataAnalysis\\EX01496 - Human EDTA Tranche 3 plasma X20001463K\\"
+				+ "A003 - Untargeted\\CompoundMatch\\EX01496_RP_Pos_Data-Integrator-exported-20260910.txt");
+		File libraryFile = new File("Y:\\DataAnalysis\\CPDMatch\\RP-Pos with 1C IS MIx - Complete Library.txt");
+		rtError = 0.05d;
+		mzError = 7.00d;
+		adductList = new ArrayList<>();
+		adductList.add(AdductManager.getDefaultAdductForCharge(1));
+		parseCompoundMatchFile(inputFile, outputFile, libraryFile, fullPicksFile);		
+	}
+	
+	private static void processEX01426IONPNeg() {
+
+		File inputFile = new File("S:\\DataAnalysis\\EX01426 - Human EDTA Tranche 2 plasma W20001176L\\"
+				+ "A049 - Central carbon metabolism profiling\\CompoundMatch\\EX01426_IONP_NEG_merge_output_20260902.xlsx");
+		File fullPicksFile = new File("S:\\DataAnalysis\\EX01426 - Human EDTA Tranche 2 plasma W20001176L\\"
+				+ "A049 - Central carbon metabolism profiling\\CompoundMatch\\1426 IP FeaturePicker_named-full picks.xlsx");
+		File outputFile = new File("S:\\DataAnalysis\\EX01426 - Human EDTA Tranche 2 plasma W20001176L\\"
+				+ "A049 - Central carbon metabolism profiling\\CompoundMatch\\EX01426_IONP_Neg_Data-Integrator-exported-20260910.txt");
+		File libraryFile = new File("Y:\\DataAnalysis\\CPDMatch\\IP-Neg with 1C IS MIx - Complete Library.txt");
+		rtError = 0.05d;
+		mzError = 7.00d;
+		adductList = new ArrayList<>();
+		adductList.add(AdductManager.getDefaultAdductForCharge(-1));
+		parseCompoundMatchFile(inputFile, outputFile, libraryFile, fullPicksFile);		
+	}
+	
+	private static void processEX01426RPNeg() {
+
+		File inputFile = new File("S:\\DataAnalysis\\EX01426 - Human EDTA Tranche 2 plasma W20001176L\\"
+				+ "A003 - Untargeted\\CompoundMatch\\EX01426_RP_NEG_merge_output_20260902.xlsx");
+		File fullPicksFile = new File("S:\\DataAnalysis\\EX01426 - Human EDTA Tranche 2 plasma W20001176L\\"
+				+ "A003 - Untargeted\\CompoundMatch\\1426 RP Neg named full picks.xlsx");
+		File outputFile = new File("S:\\DataAnalysis\\EX01426 - Human EDTA Tranche 2 plasma W20001176L\\"
+				+ "A003 - Untargeted\\CompoundMatch\\EX01426_RP_Neg_Data-Integrator-exported-20260910.txt");
+		File libraryFile = new File("Y:\\DataAnalysis\\CPDMatch\\RP-Neg with 1C IS MIx - Complete Library.txt");
+		rtError = 0.05d;
+		mzError = 7.00d;
+		adductList = new ArrayList<>();
+		adductList.add(AdductManager.getDefaultAdductForCharge(-1));
+		parseCompoundMatchFile(inputFile, outputFile, libraryFile, fullPicksFile);		
+	}
+	
+	private static void processEX01426RPPos() {
+
+		File inputFile = new File("S:\\DataAnalysis\\EX01426 - Human EDTA Tranche 2 plasma W20001176L\\"
+				+ "A003 - Untargeted\\CompoundMatch\\EX01426_RP_POS_merge_output_20260902.xlsx");
+		File fullPicksFile = new File("S:\\DataAnalysis\\EX01426 - Human EDTA Tranche 2 plasma W20001176L\\"
+				+ "A003 - Untargeted\\CompoundMatch\\1426 RP Pos named full picks.xlsx");
+		File outputFile = new File("S:\\DataAnalysis\\EX01426 - Human EDTA Tranche 2 plasma W20001176L\\"
+				+ "A003 - Untargeted\\CompoundMatch\\EX01426_RP_Pos_Data-Integrator-exported-20260910.txt");
+		File libraryFile = new File("Y:\\DataAnalysis\\CPDMatch\\RP-Pos with 1C IS MIx - Complete Library.txt");
+		rtError = 0.05d;
+		mzError = 7.00d;
+		adductList = new ArrayList<>();
+		adductList.add(AdductManager.getDefaultAdductForCharge(1));
+		parseCompoundMatchFile(inputFile, outputFile, libraryFile, fullPicksFile);		
+	}
 	
 	private static void parseCompoundMatchFile(
 			File inputFile, File outputFile, File libraryFile, File fullPicksFile) {
@@ -133,7 +191,7 @@ public class CompoundMatchDataExtractor {
 
 			for (Sheet sheet : workbook) {
 
-				if (sheet.getSheetName().equalsIgnoreCase(TARGET_SHEET)) {
+				if (sheet.getSheetName().equalsIgnoreCase(DataIntegratorOutputSheets.UNAMBIGUOUS_MATCH_GROUPS.getName())) {
 					matchGroupsList = parseMatchGroupsSheet(sheet);	
 					break;
 				}
@@ -179,6 +237,30 @@ public class CompoundMatchDataExtractor {
 		reportParts.add("\n********************\n");
 		reportParts.add("UNMATCHED UNKNOWNS\n");
 		reportParts.addAll(umatched);
+		reportParts.add("\n********************\n");
+		
+		//	Add MZ and RT outliers
+		reportParts.add("FEATURES WITH M/Z OUTLIERS\n");
+		for(CompoundMatchGroupObject cmo : matchGroupsList) {
+			if(cmo.mzOutliersPresent())
+				reportParts.add(cmo.getFeature() + "\t" + cmo.getGroupId());
+		}	
+		reportParts.add("\n********************\n");
+		
+		reportParts.add("FEATURES WITH RT OUTLIERS\n");
+		for(CompoundMatchGroupObject cmo : matchGroupsList) {
+			if(cmo.rtOutliersPresent())
+				reportParts.add(cmo.getFeature() + "\t" + cmo.getGroupId());
+		}	
+		reportParts.add("\n********************\n");	
+		//	Add duplicate names
+		reportParts.add("DUPLICATE FEATURE NAMES\n");
+		Map<String, Long> countsByFeature = matchGroupsList.stream().map(o -> o.getFeature()).
+				collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+		for(Entry<String, Long>cbf : countsByFeature.entrySet()) {
+			if(cbf.getValue() > 1)
+				reportParts.add("Duplicate feature name: " + cbf.getKey());
+		}		
 		try {
 		    Files.write(reportPath, 
 		    		reportParts,
@@ -193,7 +275,7 @@ public class CompoundMatchDataExtractor {
 	private static void matchUnknowns(
 			List<CompoundMatchGroupObject> matchGroupsList, File libraryFile, Path reportPath) {
 
-		CompoundLibrary pcdlLibrary = parseTextLibrary(libraryFile);
+		CompoundLibrary pcdlLibrary = PCDLUtils.parsePCDLTextLibrary(libraryFile, adductList);
 		if(pcdlLibrary.getFeatures().isEmpty())
 			return;
 		
@@ -296,114 +378,7 @@ public class CompoundMatchDataExtractor {
 		return matches;
 	}
 
-	private static CompoundLibrary parseTextLibrary(File libraryFile) {
-		
-		CompoundLibrary pcdlLibrary = 
-				new CompoundLibrary(PathUtils.getBaseName(libraryFile.toPath()));
-		String[][] compoundDataArray = DelimitedTextParser.parseTextFile(
-				libraryFile, MRC2ToolBoxConfiguration.getTabDelimiter());
-				
-		Map<PCDLFields, Integer>dataFieldMap = createAndValidateFieldMap(compoundDataArray[0]);
-		if(dataFieldMap.isEmpty())
-			return pcdlLibrary;
-				
-		for(int i=1; i<compoundDataArray.length; i++) {
-			
-			double rt = 0.0d;
-			CompoundIdentity identity = null;
-			try {
-				identity = 
-						new CompoundIdentity(
-								compoundDataArray[i][dataFieldMap.get(PCDLFields.NAME)], 
-								compoundDataArray[i][dataFieldMap.get(PCDLFields.FORMULA)]);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			if(identity != null) {
-								
-				if(dataFieldMap.containsKey(PCDLFields.HMP)) {
-					
-					String hmdbId = compoundDataArray[i][dataFieldMap.get(PCDLFields.HMP)];
-					if(hmdbId != null && !hmdbId.isEmpty())
-						identity.addDbId(CompoundDatabaseEnum.HMDB, hmdbId);
-				}
-				if(dataFieldMap.containsKey(PCDLFields.PUBCHEM)) {
-					
-					String pubchemId = compoundDataArray[i][dataFieldMap.get(PCDLFields.PUBCHEM)];
-					if(pubchemId != null && !pubchemId.isEmpty())
-						identity.addDbId(CompoundDatabaseEnum.PUBCHEM, pubchemId);
-				}
-				if(dataFieldMap.containsKey(PCDLFields.LMP)) {
-					
-					String lipidMapsId = compoundDataArray[i][dataFieldMap.get(PCDLFields.LMP)];
-					if(lipidMapsId != null && !lipidMapsId.isEmpty())
-						identity.addDbId(CompoundDatabaseEnum.LIPIDMAPS, lipidMapsId);
-				}
-				if(dataFieldMap.containsKey(PCDLFields.INCHI_KEY)) {
-					
-					String inchiKey = compoundDataArray[i][dataFieldMap.get(PCDLFields.INCHI_KEY)];
-					if(inchiKey != null && !inchiKey.isEmpty())
-						identity.setInChiKey(inchiKey);
-				}
-				if(dataFieldMap.containsKey(PCDLFields.SMILES)) {
-					
-					String smiles = compoundDataArray[i][dataFieldMap.get(PCDLFields.SMILES)];
-					if(smiles != null && !smiles.isEmpty())
-						identity.setSmiles(smiles);
-				}
-				if(dataFieldMap.containsKey(PCDLFields.RETENTION_TIME)) {
-					
-					String rtString = compoundDataArray[i][dataFieldMap.get(PCDLFields.RETENTION_TIME)];
-					if(rtString != null && !rtString.isEmpty()) {
-
-						try {
-							rt = Double.valueOf(rtString);
-						} catch (NumberFormatException e) {
-							e.printStackTrace();
-						}
-					}
-				}
-				LibraryMsFeature newTarget = 
-						new LibraryMsFeature(identity.getName(), null, rt);
-				MsFeatureIdentity mid = new MsFeatureIdentity(
-						identity, CompoundIdentificationConfidence.ACCURATE_MASS_RT);
-				newTarget.setPrimaryIdentity(mid);
-				MSRTLibraryUtils.generateMassSpectrumFromAdducts(newTarget, adductList);
-				newTarget.setNeutralMass(identity.getExactMass());			
-				newTarget.setName(identity.getName());
-				if(newTarget.getName().toUpperCase().contains("[ISTD]"))
-					mid.setQcStandard(true);
-				
-				pcdlLibrary.addFeature(newTarget);	
-			}
-			
-		}
-		return pcdlLibrary;
-	}
 	
-	private static Map<PCDLFields, Integer> createAndValidateFieldMap(String[]header) {
-		
-		Map<PCDLFields, Integer>dataFieldMap = new TreeMap<PCDLFields, Integer>();
-		ArrayList<String>missingFields = new ArrayList<String>();
-		for(int i=0; i<header.length; i++) {
-			
-			PCDLFields f = PCDLFields.getOptionByUIName(header[i]);
-			if(f != null)
-				dataFieldMap.put(f, i);
-		}
-		
-		if(!dataFieldMap.containsKey(PCDLFields.NAME))
-			missingFields.add(PCDLFields.NAME.getName());
-
-		if(!dataFieldMap.containsKey(PCDLFields.FORMULA))
-			missingFields.add(PCDLFields.FORMULA.getName());
-		
-		if(!missingFields.isEmpty())
-			System.err.println("The following obligatory fields are missing form the input data:\n"
-					+ StringUtils.join(missingFields, ", "));
-
-		return dataFieldMap;			
-	}	
 
 	private static List<CompoundMatchGroupObject> parseMatchGroupsSheet(Sheet sheet) {
 		

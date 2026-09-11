@@ -25,7 +25,9 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 import org.apache.commons.lang.StringUtils;
 import org.ujmp.core.Matrix;
@@ -49,6 +51,38 @@ public class AgilentProfinderDetailedExportParser {
 		this.proFinderDetailedCsvExportFile = proFinderDetailedCsvExportFile;
 		quantitativeFiedldPrefixes = 
 				AgilentProFinderDetailedCSVexportColumns.getQuantitativeFiedldPrefixes();
+	}
+	
+	public String[] extractCompoundNamesOnly() {
+		
+		String[][] compoundDataArray = 
+				DelimitedTextParser.parseTextFile(proFinderDetailedCsvExportFile, ',');
+		if(!createAndValidateDetailedFieldMap(compoundDataArray[0], 
+				AgilentProFinderDetailedCSVexportColumns.AREA_PREFIX))
+			return null;
+		String[]extractedCompoundNames = new String[compoundDataArray.length-1];
+		int nameColIndex = dataFieldMap.get(AgilentProFinderDetailedCSVexportColumns.NAME);
+		for(int i=1; i<compoundDataArray.length; i++)			
+			extractedCompoundNames[i-1] = compoundDataArray[i][nameColIndex];
+		
+		return extractedCompoundNames;
+	}
+	
+	public Set<String>extractUndetectedCompounds(){
+		
+		Set<String>undetectedCompounds = new TreeSet<String>();
+		Matrix areaMatrix = extractDataOfType(AgilentProFinderDetailedCSVexportColumns.AREA_PREFIX);
+		Matrix featureMetadataMatrix = areaMatrix.getMetaDataDimensionMatrix(0);
+		long[]coord = new long[] {0,0};
+		for(long i=0; i<featureMetadataMatrix.getColumnCount(); i++) {
+			
+			coord[1] = i;
+			String compoundName = (String)featureMetadataMatrix.getAsObject(coord);
+			double[] featureData = areaMatrix.selectColumns(Ret.LINK, i).transpose().toDoubleArray()[0];
+			if(Arrays.stream(featureData).sum() <= 0.0d)
+				undetectedCompounds.add(compoundName);
+		}		
+		return undetectedCompounds;
 	}
 	
 	public Matrix extractDataOfType(AgilentProFinderDetailedCSVexportColumns prefixField) {

@@ -22,11 +22,13 @@
 package edu.umich.med.mrc2.datoolbox.data.lims;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.UUID;
 
+import org.apache.commons.lang.StringUtils;
 import org.jdom2.Element;
 
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
@@ -199,6 +201,34 @@ public class ChromatographicGradient implements Serializable, XmlStorable {
 				mpCount++;
 		}
 		return (mpCount != 0);
+	}
+	
+	public String getGradientSummary() {
+		
+		List<String> summary = new ArrayList<>();
+		List<String> stepSummary = new ArrayList<>();
+		for(ChromatographicGradientStep step : gradientSteps) {
+			
+			stepSummary.clear();
+			stepSummary.add(step.getStartTime() + " min");
+			stepSummary.add(DefaultFormatStore.getDecimalFormatWithPrecision(2).format(step.getFlowRate()) + " mL/min");
+			
+			if(step.getMobilePhaseStartingPercent()[0] > 0)
+				stepSummary.add(DefaultFormatStore.getDecimalFormatWithPrecision(1).format(step.getMobilePhaseStartingPercent()[0]) + "% A");
+
+			if(step.getMobilePhaseStartingPercent()[1] > 0)
+				stepSummary.add(DefaultFormatStore.getDecimalFormatWithPrecision(1).format(step.getMobilePhaseStartingPercent()[1]) + "% B");
+
+			if(step.getMobilePhaseStartingPercent()[2] > 0)
+				stepSummary.add(DefaultFormatStore.getDecimalFormatWithPrecision(1).format(step.getMobilePhaseStartingPercent()[2]) + "% C");
+
+			if(step.getMobilePhaseStartingPercent()[3] > 0)
+				stepSummary.add(DefaultFormatStore.getDecimalFormatWithPrecision(1).format(step.getMobilePhaseStartingPercent()[3]) + "% D");
+			
+			summary.add(StringUtils.join(stepSummary, ", "));
+		}
+		summary.add("Stop time: " + stopTime + " min");
+		return StringUtils.join(summary, "; ");
 	}
 	
 	@Override

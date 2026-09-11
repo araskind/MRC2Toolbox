@@ -1,0 +1,83 @@
+/*******************************************************************************
+ *
+ * (C) Copyright 2018-2020 MRC2 (http://mrc2.umich.edu).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * Contributors:
+ * Alexander Raskind (araskind@med.umich.edu)
+ *
+ ******************************************************************************/
+
+package edu.umich.med.mrc2.datoolbox.cpdmatch;
+
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+
+public class NamedCompoundMatchObject {
+
+	private int groupId;
+	private String compoundName;
+	private Map<Integer,String>batchFeatureMap;
+	private Map<Integer,String>batchAdductMap;
+	private boolean autoPick;
+	private double adjustedAveragePeakArea;
+	
+	public NamedCompoundMatchObject(int groupId, String compoundName, Set<Integer>batchNumbers ) {
+		super();
+		this.groupId = groupId;
+		this.compoundName = compoundName;
+		batchFeatureMap = new TreeMap<>();
+		for(Integer batch : batchNumbers)
+			batchFeatureMap.put(batch, null);
+		
+		batchAdductMap = new TreeMap<>();
+		for(Integer batch : batchNumbers)
+			batchAdductMap.put(batch, null);
+	}
+
+	public boolean isAutoPick() {
+		return autoPick;
+	}
+
+	public void setAutoPick(boolean autoPick) {
+		this.autoPick = autoPick;
+	}
+
+	public int getGroupId() {
+		return groupId;
+	}
+
+	public String getCompoundName() {
+		return compoundName;
+	}
+
+	public Map<Integer, String> getBatchFeatureMap() {
+		return batchFeatureMap;
+	}
+
+	public Map<Integer, String> getBatchAdductMap() {
+		return batchAdductMap;
+	}
+
+	public double getAdjustedAveragePeakArea() {
+		return adjustedAveragePeakArea;
+	}
+
+	public void setAdjustedAveragePeakArea(double adjustedAveragePeakArea) {
+		this.adjustedAveragePeakArea = adjustedAveragePeakArea;
+	}
+	
+	
+}

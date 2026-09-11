@@ -883,6 +883,7 @@ public enum MainActionCommands {
 	DELETE_ACQUISITION_METHOD_COMMAND("Delete acquisition method"),
 	DOWNLOAD_ACQUISITION_METHOD_COMMAND("Download acquisition method"),
 	LINK_ACQUISITION_METHOD_TO_EXPERIMENT_COMMAND("Add data acquisition method to experiment"),
+	COPY_GRADIENT_AS_STRING_COMMAND("Copy gradient as string"),
 	
 	//	Mobile phase editor
 	ADD_MOBILE_PHASE_DIALOG_COMMAND("Add mobile phase"),

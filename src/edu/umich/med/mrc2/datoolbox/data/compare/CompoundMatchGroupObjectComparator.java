@@ -21,7 +21,7 @@
 
 package edu.umich.med.mrc2.datoolbox.data.compare;
 
-import edu.umich.med.mrc2.datoolbox.rqc.CompoundMatchGroupObject;
+import edu.umich.med.mrc2.datoolbox.cpdmatch.CompoundMatchGroupObject;
 
 public class CompoundMatchGroupObjectComparator extends ObjectCompatrator<CompoundMatchGroupObject> {
 

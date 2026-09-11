@@ -19,7 +19,7 @@
  *
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.data.enums;
+package edu.umich.med.mrc2.datoolbox.cpdmatch;
 
 public enum CompoundMatchFullPicksFields {
 
