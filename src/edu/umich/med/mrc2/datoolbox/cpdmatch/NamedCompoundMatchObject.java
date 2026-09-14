@@ -21,18 +21,28 @@
 
 package edu.umich.med.mrc2.datoolbox.cpdmatch;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
+import org.apache.commons.math4.legacy.stat.descriptive.DescriptiveStatistics;
+
 public class NamedCompoundMatchObject {
 
 	private int groupId;
+	private double mz;
+	private double rt;
 	private String compoundName;
+	private String unknownName;
 	private Map<Integer,String>batchFeatureMap;
 	private Map<Integer,String>batchAdductMap;
 	private boolean autoPick;
-	private double adjustedAveragePeakArea;
+	private List<Double>mzValues;
+	private List<Double>rtValues;
+	private List<Double>medianAreaValues;
+	private int missingBatchesCount;
 	
 	public NamedCompoundMatchObject(int groupId, String compoundName, Set<Integer>batchNumbers ) {
 		super();
@@ -45,6 +55,31 @@ public class NamedCompoundMatchObject {
 		batchAdductMap = new TreeMap<>();
 		for(Integer batch : batchNumbers)
 			batchAdductMap.put(batch, null);
+		
+		mzValues = new ArrayList<>();
+		rtValues = new ArrayList<>();
+		medianAreaValues = new ArrayList<>();
+	}
+	
+	public NamedCompoundMatchObject(int groupId) {
+		super();
+		this.groupId = groupId;
+		batchFeatureMap = new TreeMap<>();
+		batchAdductMap = new TreeMap<>();
+		mzValues = new ArrayList<>();
+		rtValues = new ArrayList<>();
+		medianAreaValues = new ArrayList<>();
+	}
+	
+	public void finalizeObjectParameters() {
+
+		DescriptiveStatistics mzStats = 
+				new DescriptiveStatistics(mzValues.stream().mapToDouble(d -> d).toArray());
+		mz = mzStats.getPercentile(50.0d);
+
+		DescriptiveStatistics rtStats = 
+				new DescriptiveStatistics(rtValues.stream().mapToDouble(d -> d).toArray());
+		rt = rtStats.getPercentile(50.0d);
 	}
 
 	public boolean isAutoPick() {
@@ -71,12 +106,36 @@ public class NamedCompoundMatchObject {
 		return batchAdductMap;
 	}
 
-	public double getAdjustedAveragePeakArea() {
-		return adjustedAveragePeakArea;
+	public String getUnknownName() {
+		return unknownName;
 	}
 
-	public void setAdjustedAveragePeakArea(double adjustedAveragePeakArea) {
-		this.adjustedAveragePeakArea = adjustedAveragePeakArea;
+	public void setUnknownName(String unknownName) {
+		this.unknownName = unknownName;
+	}
+
+	public List<Double> getMzValues() {
+		return mzValues;
+	}
+
+	public List<Double> getRtValues() {
+		return rtValues;
+	}
+
+	public List<Double> getMedianAreaValues() {
+		return medianAreaValues;
+	}
+
+	public void setCompoundName(String compoundName) {
+		this.compoundName = compoundName;
+	}
+
+	public int getMissingBatchesCount() {
+		return missingBatchesCount;
+	}
+
+	public void setMissingBatchesCount(int missingBatchesCount) {
+		this.missingBatchesCount = missingBatchesCount;
 	}
 	
 	

@@ -38,6 +38,7 @@ public class CompoundMatchGroupObject {
 
 	private int groupId;
 	private String feature;
+	private String unknownName;
 	private double mz;
 	private double rt;
 	private List<String>featureNames;
@@ -46,7 +47,6 @@ public class CompoundMatchGroupObject {
 	private Map<String,Double>peakAreas;
 	private boolean hasMzOutliers;	
 	private boolean hasRTOutliers;
-
 	
 	private static final String nameSuffixPattern = "-[PN]-$";
 	
@@ -78,6 +78,9 @@ public class CompoundMatchGroupObject {
 		
 		if(featureNames.get(0).startsWith(DataPrefix.MS_LIBRARY_UNKNOWN_TARGET.getName())) {
 			feature = DataPrefix.MS_LIBRARY_UNKNOWN_TARGET.getName() 
+					+ DefaultFormatStore.getDefaultMZformat().format(mz) + "_"
+					+ DefaultFormatStore.getDefaultRTformat().format(rt);
+			unknownName = DataPrefix.MS_LIBRARY_UNKNOWN_TARGET.getName() 
 					+ DefaultFormatStore.getDefaultMZformat().format(mz) + "_"
 					+ DefaultFormatStore.getDefaultRTformat().format(rt);
 		}
@@ -157,5 +160,13 @@ public class CompoundMatchGroupObject {
 
 	public boolean rtOutliersPresent() {
 		return hasRTOutliers;
+	}
+
+	public String getUnknownName() {
+		return unknownName;
+	}
+
+	public void setUnknownName(String unknownName) {
+		this.unknownName = unknownName;
 	}
 }

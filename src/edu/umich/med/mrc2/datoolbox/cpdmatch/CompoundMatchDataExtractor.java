@@ -37,6 +37,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.function.Function;
@@ -98,7 +99,7 @@ public class CompoundMatchDataExtractor {
 		MRC2ToolBoxConfiguration.initConfiguration();
 		initDatabaseConnection();
 		
-		processEX01496RPPos();
+		processEX01426RPPos();
 	}
 	
 	private static void processEX01496RPNeg() {
@@ -172,7 +173,7 @@ public class CompoundMatchDataExtractor {
 		File fullPicksFile = new File("S:\\DataAnalysis\\EX01426 - Human EDTA Tranche 2 plasma W20001176L\\"
 				+ "A003 - Untargeted\\CompoundMatch\\1426 RP Pos named full picks.xlsx");
 		File outputFile = new File("S:\\DataAnalysis\\EX01426 - Human EDTA Tranche 2 plasma W20001176L\\"
-				+ "A003 - Untargeted\\CompoundMatch\\EX01426_RP_Pos_Data-Integrator-exported-20260910.txt");
+				+ "A003 - Untargeted\\CompoundMatch\\EX01426_RP_Pos_Data-Integrator-exported-20260914.txt");
 		File libraryFile = new File("Y:\\DataAnalysis\\CPDMatch\\RP-Pos with 1C IS MIx - Complete Library.txt");
 		rtError = 0.05d;
 		mzError = 7.00d;
@@ -386,7 +387,7 @@ public class CompoundMatchDataExtractor {
 		if(hasDuplicateFileNames(header))
 			return new ArrayList<>();
 		
-		Map<CompoundMatcherField, Integer> columnMap = getColumnMap(header);
+		Map<CompoundMatcherField, Integer> columnMap = CompoundMatcherUtils.getColumnMap4MatchGroupsSheet(header);
 		Map<String,Integer>rawFileMap = extractDataFileMap(header);	
 		Integer currentMatchGroup = null;
 		List<CompoundMatchGroupObject>matchGroupsList = new ArrayList<>();
@@ -443,10 +444,12 @@ public class CompoundMatchDataExtractor {
 	
 	private static void exportResults(List<CompoundMatchGroupObject> matchGroupsList, File outputFile) {
 		
-		List<CompoundMatchGroupObject>sortedList = matchGroupsList.stream().
+		List<CompoundMatchGroupObject>cleanList = 
+				removeUnknownsOverlappingWithManuallyPicked(matchGroupsList);
+		
+		List<CompoundMatchGroupObject>sortedList = cleanList.stream().
 				sorted(new CompoundMatchGroupObjectComparator(SortProperty.RT)).
 				collect(Collectors.toList());		
-		
 		
 		List<String> lines = new ArrayList<>();
 		String header = createExportHeader(sortedList.get(0));
@@ -489,6 +492,25 @@ public class CompoundMatchDataExtractor {
 		    e.printStackTrace();
 		}
 	}
+	
+	private static List<CompoundMatchGroupObject>removeUnknownsOverlappingWithManuallyPicked(
+			List<CompoundMatchGroupObject> matchGroupsList){
+		
+		List<CompoundMatchGroupObject>filteredList = new ArrayList<>();
+		List<CompoundMatchGroupObject> manualPicks = matchGroupsList.stream().
+				filter(f -> Objects.isNull(f.getUnknownName())).collect(Collectors.toList());
+		filteredList.addAll(manualPicks);
+		
+		Set<String> manualPickNames = manualPicks.stream().
+				map(f -> f.getFeature()).collect(Collectors.toSet());
+		List<CompoundMatchGroupObject> filteredUnknowns = matchGroupsList.stream().
+				filter(f -> !Objects.isNull(f.getUnknownName())).
+				filter(f -> !manualPickNames.contains(f.getFeature())).
+				collect(Collectors.toList());
+		filteredList.addAll(filteredUnknowns);
+
+		return filteredList;
+	}
 
 	private static String createExportHeader(CompoundMatchGroupObject compoundMatchGroupObject) {
 		
@@ -499,22 +521,6 @@ public class CompoundMatchDataExtractor {
 		parts.add("");
 		compoundMatchGroupObject.getPeakAreas().keySet().forEach(e -> parts.add(e));	
 		return StringUtils.join(parts, "\t");
-	}
-
-	private static Map<CompoundMatcherField,Integer>getColumnMap(Row header){
-
-		Map<CompoundMatcherField,Integer>columnMap = new TreeMap<CompoundMatcherField,Integer>();
-		int headerLength = header.getPhysicalNumberOfCells();
-		for (int i=0; i<headerLength; i++) {
-
-			Cell c = header.getCell(i);
-			for(CompoundMatcherField field : CompoundMatcherField.values()) {
-
-				if(c.getStringCellValue().equals(field.getName()))
-					columnMap.put(field, i);
-			}
-		}
-		return columnMap;
 	}
 	
 	private static Map<String,Integer>extractDataFileMap(Row header){

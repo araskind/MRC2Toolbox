@@ -24,6 +24,7 @@ package edu.umich.med.mrc2.datoolbox.utils;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -34,6 +35,7 @@ import org.ujmp.core.Matrix;
 import org.ujmp.core.calculation.Calculation.Ret;
 
 import edu.umich.med.mrc2.datoolbox.data.enums.AgilentProFinderDetailedCSVexportColumns;
+import edu.umich.med.mrc2.datoolbox.data.enums.MoTrPACQCSampleType;
 
 
 public class AgilentProfinderDetailedExportParser {
@@ -68,21 +70,57 @@ public class AgilentProfinderDetailedExportParser {
 		return extractedCompoundNames;
 	}
 	
-	public Set<String>extractUndetectedCompounds(){
+	public Set<String>extractUndetectedCompounds(
+			double maxPercentMissingPooled, 
+			double maxPercentMissingSample){
+		
+		Matrix areaMatrix = extractDataOfType(AgilentProFinderDetailedCSVexportColumns.AREA_PREFIX);
+		Set<String>undetectedCompounds = new TreeSet<String>();
+		
+		Matrix pooledMatrix = getAreaMatrixForSampleType(areaMatrix, MoTrPACQCSampleType.QC_DRIFT_CORRECTION);
+		undetectedCompounds.addAll(getUndetectedCompounds(pooledMatrix, maxPercentMissingPooled));
+		
+		Matrix sampleMatrix = getAreaMatrixForSampleType(areaMatrix, MoTrPACQCSampleType.REGULAR_SAMPLE);
+		undetectedCompounds.addAll(getUndetectedCompounds(sampleMatrix, maxPercentMissingSample));
+		
+		return undetectedCompounds;
+	}
+	
+	private Set<String>getUndetectedCompounds(Matrix areaMatrix, double maxPercentMissing) {
 		
 		Set<String>undetectedCompounds = new TreeSet<String>();
-		Matrix areaMatrix = extractDataOfType(AgilentProFinderDetailedCSVexportColumns.AREA_PREFIX);
 		Matrix featureMetadataMatrix = areaMatrix.getMetaDataDimensionMatrix(0);
 		long[]coord = new long[] {0,0};
+		int totalCount = (int)areaMatrix.getRowCount();
 		for(long i=0; i<featureMetadataMatrix.getColumnCount(); i++) {
 			
 			coord[1] = i;
 			String compoundName = (String)featureMetadataMatrix.getAsObject(coord);
 			double[] featureData = areaMatrix.selectColumns(Ret.LINK, i).transpose().toDoubleArray()[0];
-			if(Arrays.stream(featureData).sum() <= 0.0d)
+			long missingCount = Arrays.stream(featureData).filter(num -> num == 0).count();
+			double missing = (double)missingCount / (double)totalCount * 100.0d;
+			if(missing > maxPercentMissing)
 				undetectedCompounds.add(compoundName);
-		}		
+		}
 		return undetectedCompounds;
+	}
+		
+	private Matrix getAreaMatrixForSampleType(Matrix areaMatrix, MoTrPACQCSampleType sampleType) {
+
+		Matrix fileMetadataMatrix = areaMatrix.getMetaDataDimensionMatrix(1);
+		List<Long>sampleCoord = new ArrayList<>();
+		for(int i=0; i<fileMetadataMatrix.getRowCount(); i++) {
+			String df = (String) fileMetadataMatrix.getAsObject(new long[] {i,0});
+			if(sampleType.equals(MoTrPACQCSampleType.QC_DRIFT_CORRECTION) && df.contains("-CS00000MP"))
+				sampleCoord.add((long)i);
+			if(sampleType.equals(MoTrPACQCSampleType.REGULAR_SAMPLE) && df.contains("-S00"))
+				sampleCoord.add((long)i);
+		}
+		Matrix newFileMetadataMatrix = fileMetadataMatrix.selectRows(Ret.NEW, sampleCoord);
+		Matrix subset = areaMatrix.selectRows(Ret.NEW, sampleCoord);
+		subset.setMetaDataDimensionMatrix(0, areaMatrix.getMetaDataDimensionMatrix(0));
+		subset.setMetaDataDimensionMatrix(1, newFileMetadataMatrix);		
+		return subset;
 	}
 	
 	public Matrix extractDataOfType(AgilentProFinderDetailedCSVexportColumns prefixField) {

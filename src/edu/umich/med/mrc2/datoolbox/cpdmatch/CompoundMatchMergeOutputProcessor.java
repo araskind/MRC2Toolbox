@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -49,7 +50,6 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 
-import edu.umich.med.mrc2.datoolbox.data.Adduct;
 import edu.umich.med.mrc2.datoolbox.data.CompoundLibrary;
 import edu.umich.med.mrc2.datoolbox.data.LibraryMsFeature;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
@@ -63,9 +63,6 @@ import edu.umich.med.mrc2.datoolbox.utils.PCDLUtils;
 public class CompoundMatchMergeOutputProcessor {
 	
 	private static final Logger logger= LogManager.getLogger(CompoundMatchMergeOutputProcessor.class);
-	
-	private static Collection<Adduct> adductList;
-
 	public static void main(String[] args) {
 		
 		System.setProperty("java.util.prefs.PreferencesFactory", 
@@ -106,70 +103,186 @@ public class CompoundMatchMergeOutputProcessor {
 		File compoundMatchOutput = new File("S:\\DataAnalysis\\EX01496 - Human EDTA Tranche 3 plasma X20001463K\\"
 				+ "A003 - Untargeted\\CompoundMatch\\20260909\\POS\\merge_output_20260909_named.xlsx");
 		File customPCDL = new File("S:\\DataAnalysis\\EX01496 - Human EDTA Tranche 3 plasma X20001463K\\"
-				+ "A003 - Untargeted\\CompoundMatch\\20260909\\POS\\EX01496-RP-POS_customPCDL.txt");
-		adductList = new ArrayList<>();
-		adductList.add(AdductManager.getAdductByName("[M+H]+"));
-		adductList.add(AdductManager.getAdductByName("[M+Na]+"));
+				+ "A003 - Untargeted\\CompoundMatch\\20260909\\POS\\EX01496-RP-POS_customPCDL_40_60_missing.txt");
 		
-		createCustomPCDL(
+		CompoundMatchMergeOutputParametersObject params = new CompoundMatchMergeOutputParametersObject(
 				originalPCDL, 
 				referenceBatchProFinderResults, 
 				compoundMatchOutput, 
 				customPCDL);
+		params.getAdductSet().add(AdductManager.getAdductByName("[M+H]+"));
+		params.getAdductSet().add(AdductManager.getAdductByName("[M+Na]+"));
+		params.setMaxPercentMissingPooled(40.0d);
+		params.setMaxPercentMissingSample(60.0d);
+		
+		createCustomPCDLwithBackfill(params);
 	}
 	
-	private static void createCustomPCDL(
-			File originalPCDL, 
-			File referenceBatchProFinderResults, 
-			File compoundMatchOutput,
-			File customPCDL) {
-		CompoundLibrary pcdlLibrary = PCDLUtils.parsePCDLTextLibrary(originalPCDL, adductList);
+	private static void createCustomPCDLwithBackfill(CompoundMatchMergeOutputParametersObject params) {
+		
+//		CompoundLibrary pcdlLibrary = PCDLUtils.parsePCDLTextLibrary(
+//				params.getOriginalPCDL(), params.getAdductSet());
+//		AgilentProfinderDetailedExportParser parser = 
+//				new AgilentProfinderDetailedExportParser(params.getReferenceBatchProFinderResults());
+//		Set<String>proFinderUndetected = parser.extractUndetectedCompounds(
+//				params.getMaxPercentMissingPooled(), 
+//				params.getMaxPercentMissingSample());
+		Map<Integer,String>fullPicksMap = new TreeMap<Integer,String>();
+		List<NamedCompoundMatchObject>namedGroupsList = new ArrayList<NamedCompoundMatchObject>();
+		try (Workbook workbook = WorkbookFactory.create(params.getCompoundMatchOutput())){
+
+			fullPicksMap = extractFullPicksFromCompoundMatchOutput(workbook);
+			namedGroupsList = parseNamedMatchGroupsSheet(workbook);
+	
+		} catch (EncryptedDocumentException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		Collection<Integer> batchSet = namedGroupsList.stream().
+				flatMap(f -> f.getBatchFeatureMap().keySet().stream()).
+				collect(Collectors.toCollection(TreeSet::new));
+		int totalBatchCount = batchSet.size();
+		for(NamedCompoundMatchObject cmgo : namedGroupsList) {
+			
+			//	Add compound names
+			if(fullPicksMap.containsKey(cmgo.getGroupId()))
+				cmgo.setCompoundName(fullPicksMap.get(cmgo.getGroupId()));
+			
+			cmgo.setMissingBatchesCount(totalBatchCount - cmgo.getBatchFeatureMap().size());
+			
+			//	Fill in missing data for batches
+			for(int i : batchSet) {
+				
+				if(!cmgo.getBatchFeatureMap().containsKey(i))
+					cmgo.getBatchFeatureMap().put(i, null);
+				
+				if(!cmgo.getBatchAdductMap().containsKey(i))
+					cmgo.getBatchAdductMap().put(i, null);
+			}
+		}
+	}
+	
+	private static List<NamedCompoundMatchObject> parseNamedMatchGroupsSheet(Workbook workbook) {
+		
+		Sheet sheet = workbook.getSheet(CompoundMatchNamedOutputSheets.NAMED_MASS_GROUPS.getName());
+		Row header = sheet.getRow(1);
+		Map<CompoundMatchFullPicksFields, Integer> columnMap = 
+				CompoundMatcherUtils.getColumnMap4NamedMatchGroupsSheet(header);
+		
+		int matchGroupColumn = columnMap.get(CompoundMatchFullPicksFields.MATCH_GROUP);
+		int featureColumn = columnMap.get(CompoundMatchFullPicksFields.FEATURE_NAME);	
+		int batchColumn = columnMap.get(CompoundMatchFullPicksFields.BATCH);
+		int adductColumn = columnMap.get(CompoundMatchFullPicksFields.BINNER_ANNOTATION);
+		int mzColumn = columnMap.get(CompoundMatchFullPicksFields.MONOISOTOPIC_MZ);
+		int rtColumn = columnMap.get(CompoundMatchFullPicksFields.UNNAMED_RT);
+		
+		Map<Integer,Set<Integer>>matchGroupRowMap = 
+				getMatchGroupRowMap(sheet, matchGroupColumn);
+		
+		List<NamedCompoundMatchObject>matchGroupsList = new ArrayList<>();
+		for(Entry<Integer,Set<Integer>>entry : matchGroupRowMap.entrySet()) {
+			
+			NamedCompoundMatchObject cmgo = new NamedCompoundMatchObject(entry.getKey());
+			for(Integer rowNum : entry.getValue()) {
+				Row r = sheet.getRow(rowNum);
+				Integer batchNumber = (int)r.getCell(batchColumn).getNumericCellValue();
+				
+				String featureNameCM = r.getCell(featureColumn).getStringCellValue().trim();
+				String[]nameParts = featureNameCM.split("_");
+				if(nameParts.length>1) {
+					String featureName = nameParts[0] + "_" + nameParts[1];
+					cmgo.getBatchFeatureMap().put(batchNumber, featureName);
+				}
+				else {
+					cmgo.getBatchFeatureMap().put(batchNumber, featureNameCM);
+				}
+				String adductName = r.getCell(adductColumn).getStringCellValue().trim();
+				cmgo.getBatchAdductMap().put(batchNumber, adductName);
+				
+				double mz = r.getCell(mzColumn).getNumericCellValue();
+				double rt = r.getCell(rtColumn).getNumericCellValue();
+				cmgo.getMzValues().add(mz);
+				cmgo.getRtValues().add(rt);
+			}
+			cmgo.finalizeObjectParameters();
+			matchGroupsList.add(cmgo);
+		}
+		return matchGroupsList;
+	}
+	
+	private static Map<Integer,Set<Integer>>getMatchGroupRowMap(Sheet sheet, int matchGroupColumn) {
+		
+		Map<Integer,Set<Integer>>matchGroupRowMap = new TreeMap<>();
+			
+		for (Row r : sheet) {			
+			 Cell matchGroupCell = r.getCell(matchGroupColumn);
+			if(r.getRowNum() > 0 && matchGroupCell != null 
+					&& matchGroupCell.getCellType().equals(CellType.NUMERIC)) {
+							
+				Integer matchGroup = (int)matchGroupCell.getNumericCellValue();
+				if(matchGroup != null) {
+					
+					matchGroupRowMap.computeIfAbsent(matchGroup, v -> new TreeSet<>());
+					matchGroupRowMap.get(matchGroup).add(r.getRowNum());
+				}
+			}
+		}
+		return matchGroupRowMap;
+	}
+	
+	private static void createCustomPCDL(CompoundMatchMergeOutputParametersObject params) {
+		
+		CompoundLibrary pcdlLibrary = PCDLUtils.parsePCDLTextLibrary(
+				params.getOriginalPCDL(), params.getAdductSet());
 		AgilentProfinderDetailedExportParser parser = 
-				new AgilentProfinderDetailedExportParser(referenceBatchProFinderResults);
-		Set<String>proFinderUndetected = parser.extractUndetectedCompounds();
-		Set<String>fullPicksFromCompoundMatch = markAndExtractFullPicksFromCompoundMatchOutput(compoundMatchOutput);		
+				new AgilentProfinderDetailedExportParser(params.getReferenceBatchProFinderResults());
+		Set<String>proFinderUndetected = parser.extractUndetectedCompounds(
+				params.getMaxPercentMissingPooled(), 
+				params.getMaxPercentMissingSample());
+		Set<String>fullPicksFromCompoundMatch = 
+				markAndExtractFullPicksFromCompoundMatchOutput(params.getCompoundMatchOutput());		
 		List<LibraryMsFeature> customFeatureList = pcdlLibrary.getFeatures().stream().
 			filter(f -> !fullPicksFromCompoundMatch.contains(f.getName())).
 			filter(f -> !proFinderUndetected.contains(f.getName())).
 			collect(Collectors.toList());
 		
-		PCDLUtils.writePCDLLibrary(customFeatureList, customPCDL);
+		PCDLUtils.writePCDLLibrary(customFeatureList, params.getCustomPCDL());
 	}
 	
+	private static Map<Integer,String>extractFullPicksFromCompoundMatchOutput(Workbook workbook) {
+		
+		Map<Integer,String>fullPicks = new TreeMap<Integer,String>();
+		
+		Sheet compoundMatchesSheet = 
+				workbook.getSheet(CompoundMatchNamedOutputSheets.COMPOUND_MATCHES.getName());
+		fullPicks = extractFullPicksMapFromCompoundMatchesSheet(compoundMatchesSheet);				
+		return fullPicks;
+	}
+		
 	private static Set<String>markAndExtractFullPicksFromCompoundMatchOutput(File compoundMatchOutput) {
 		
-		Workbook workbook = null;
-		try {
-			workbook = WorkbookFactory.create(compoundMatchOutput);
+		Map<Integer,String>fullPicks = new TreeMap<Integer,String>();
+		try (Workbook workbook = WorkbookFactory.create(compoundMatchOutput)){
+
+			Sheet compoundMatchesSheet = 
+					workbook.getSheet(CompoundMatchNamedOutputSheets.COMPOUND_MATCHES.getName());
+			fullPicks = extractFullPicksMapFromCompoundMatchesSheet(compoundMatchesSheet);
+			
+			Sheet namedMassGroupsSheet = 
+					workbook.getSheet(CompoundMatchNamedOutputSheets.NAMED_MASS_GROUPS.getName());
+			markFullPicks(namedMassGroupsSheet, fullPicks);
+			
+			File outputFile = new File(compoundMatchOutput.getParentFile(), 
+					PathUtils.getBaseName(compoundMatchOutput.toPath()) + "_fullPicks.csv");
+			FormulaEvaluator evaluator = workbook.getCreationHelper().createFormulaEvaluator();
+			saveFullPicksAsCsv(namedMassGroupsSheet, outputFile, evaluator);
+			
 		} catch (EncryptedDocumentException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}				
-		
-		//	Extract full picks from compound match output
-		Map<Integer,String>fullPicks = new TreeMap<Integer,String>();
-		for (Sheet sheet : workbook) {
-
-			if (sheet.getSheetName().equalsIgnoreCase(CompoundMatchNamedOutputSheets.COMPOUND_MATCHES.getName())) {
-				fullPicks = parseCompoundMatchesSheet(sheet);	
-				break;
-			}
-		}
-		//	Mark full picks in compound match output Named Mass Groups sheet
-		for (Sheet sheet : workbook) {
-
-			if (sheet.getSheetName().equalsIgnoreCase(CompoundMatchNamedOutputSheets.NAMED_MASS_GROUPS.getName())) {
-				markFullPicks(sheet, fullPicks);
-				File outputFile = new File(compoundMatchOutput.getParentFile(), 
-						PathUtils.getBaseName(compoundMatchOutput.toPath()) + "_fullPicks.csv");
-				FormulaEvaluator evaluator = workbook.getCreationHelper().createFormulaEvaluator();
-				saveFullPicksAsCsv(sheet, outputFile, evaluator);
-				break;
-			}
-		}
+		}	
 		return fullPicks.values().stream().collect(TreeSet::new, TreeSet::add, TreeSet::addAll);
 	}
 	
@@ -238,7 +351,7 @@ public class CompoundMatchMergeOutputProcessor {
 
 
 
-	private static Map<Integer,String> parseCompoundMatchesSheet(Sheet sheet) {
+	private static Map<Integer,String> extractFullPicksMapFromCompoundMatchesSheet(Sheet sheet) {
 
 		Map<Integer,String>fullPicks = new TreeMap<Integer,String>();
 		for (Row r : sheet) {			
