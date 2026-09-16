@@ -33,14 +33,14 @@ public class CompoundMatcherUtils {
 		/* This utility class should not be instantiated */
 	}
 
-	public static Map<CompoundMatcherField,Integer>getColumnMap4MatchGroupsSheet(Row header){
+	public static Map<DataIntegratorMatchGroupFields,Integer>getColumnMap4MatchGroupsSheet(Row header){
 
-		Map<CompoundMatcherField,Integer>columnMap = new TreeMap<CompoundMatcherField,Integer>();
+		Map<DataIntegratorMatchGroupFields,Integer>columnMap = new TreeMap<DataIntegratorMatchGroupFields,Integer>();
 		int headerLength = header.getPhysicalNumberOfCells();
 		for (int i=0; i<headerLength; i++) {
 
 			Cell c = header.getCell(i);
-			for(CompoundMatcherField field : CompoundMatcherField.values()) {
+			for(DataIntegratorMatchGroupFields field : DataIntegratorMatchGroupFields.values()) {
 
 				if(c != null && c.getStringCellValue().equals(field.getName()))
 					columnMap.put(field, i);
@@ -57,6 +57,22 @@ public class CompoundMatcherUtils {
 
 			Cell c = header.getCell(i);
 			for(CompoundMatchFullPicksFields field : CompoundMatchFullPicksFields.values()) {
+
+				if(c != null && c.getStringCellValue().equals(field.getName()))
+					columnMap.put(field, i);
+			}
+		}
+		return columnMap;
+	}
+
+	public static Map<CompoundMatcherMappingFields, Integer> getColumnMap4MappingSheet(Row header) {
+
+		Map<CompoundMatcherMappingFields,Integer>columnMap = new TreeMap<CompoundMatcherMappingFields,Integer>();
+		int headerLength = header.getPhysicalNumberOfCells();
+		for (int i=0; i<headerLength; i++) {
+
+			Cell c = header.getCell(i);
+			for(CompoundMatcherMappingFields field : CompoundMatcherMappingFields.values()) {
 
 				if(c != null && c.getStringCellValue().equals(field.getName()))
 					columnMap.put(field, i);

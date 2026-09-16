@@ -21,7 +21,7 @@
 
 package edu.umich.med.mrc2.datoolbox.cpdmatch;
 
-public enum CompoundMatcherField {
+public enum DataIntegratorMatchGroupFields {
 	
 	BATCH("Batch"),
 	MATCH_GROUP("Match Group"),
@@ -50,7 +50,7 @@ public enum CompoundMatcherField {
 	
 	private final String uiName;
 
-	CompoundMatcherField(String uiName) {
+	DataIntegratorMatchGroupFields(String uiName) {
 		this.uiName = uiName;
 	}
 
@@ -63,9 +63,9 @@ public enum CompoundMatcherField {
 		return uiName;
 	}
 		
-	public static CompoundMatcherField getOptionByName(String name) {
+	public static DataIntegratorMatchGroupFields getOptionByName(String name) {
 
-		for(CompoundMatcherField source : CompoundMatcherField.values()) {
+		for(DataIntegratorMatchGroupFields source : DataIntegratorMatchGroupFields.values()) {
 
 			if(source.name().equals(name))
 				return source;
@@ -73,9 +73,9 @@ public enum CompoundMatcherField {
 		return null;
 	}
 	
-	public static CompoundMatcherField getOptionByUIName(String uiname) {
+	public static DataIntegratorMatchGroupFields getOptionByUIName(String uiname) {
 
-		for(CompoundMatcherField source : CompoundMatcherField.values()) {
+		for(DataIntegratorMatchGroupFields source : DataIntegratorMatchGroupFields.values()) {
 
 			if(source.getName().equals(uiname))
 				return source;

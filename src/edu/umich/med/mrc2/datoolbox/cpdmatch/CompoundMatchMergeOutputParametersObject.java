@@ -30,6 +30,7 @@ import edu.umich.med.mrc2.datoolbox.data.Adduct;
 public class CompoundMatchMergeOutputParametersObject {
 
 	private File originalPCDL;
+	private int referenceBatchNumber;
 	private File referenceBatchProFinderResults;
 	private File compoundMatchOutput;
 	private File customPCDL;
@@ -38,6 +39,7 @@ public class CompoundMatchMergeOutputParametersObject {
 	private double mzErrorForMissingLookup;
 	private double rtErrorForMissingLookup;
 	private Set<Adduct> adductSet;
+	int maxMissingBatches;
 	
 	public CompoundMatchMergeOutputParametersObject(
 			File originalPCDL, 
@@ -118,5 +120,21 @@ public class CompoundMatchMergeOutputParametersObject {
 
 	public Set<Adduct> getAdductSet() {
 		return adductSet;
+	}
+
+	public int getMaxMissingBatches() {
+		return maxMissingBatches;
+	}
+
+	public void setMaxMissingBatches(int maxMissingBatches) {
+		this.maxMissingBatches = maxMissingBatches;
+	}
+
+	public int getReferenceBatchNumber() {
+		return referenceBatchNumber;
+	}
+
+	public void setReferenceBatchNumber(int referenceBatchNumber) {
+		this.referenceBatchNumber = referenceBatchNumber;
 	}
 }

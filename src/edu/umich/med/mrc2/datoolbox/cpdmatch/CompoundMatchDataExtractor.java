@@ -387,15 +387,15 @@ public class CompoundMatchDataExtractor {
 		if(hasDuplicateFileNames(header))
 			return new ArrayList<>();
 		
-		Map<CompoundMatcherField, Integer> columnMap = CompoundMatcherUtils.getColumnMap4MatchGroupsSheet(header);
+		Map<DataIntegratorMatchGroupFields, Integer> columnMap = CompoundMatcherUtils.getColumnMap4MatchGroupsSheet(header);
 		Map<String,Integer>rawFileMap = extractDataFileMap(header);	
 		Integer currentMatchGroup = null;
 		List<CompoundMatchGroupObject>matchGroupsList = new ArrayList<>();
 		CompoundMatchGroupObject cmgo = null;
-		int featureColumn = columnMap.get(CompoundMatcherField.FEATURE);
-		int matchGroupColumn = columnMap.get(CompoundMatcherField.MATCH_GROUP);
-		int mzColumn = columnMap.get(CompoundMatcherField.MONOISOTOPIC_MZ);
-		int rtColumn = columnMap.get(CompoundMatcherField.RT);
+		int featureColumn = columnMap.get(DataIntegratorMatchGroupFields.FEATURE);
+		int matchGroupColumn = columnMap.get(DataIntegratorMatchGroupFields.MATCH_GROUP);
+		int mzColumn = columnMap.get(DataIntegratorMatchGroupFields.MONOISOTOPIC_MZ);
+		int rtColumn = columnMap.get(DataIntegratorMatchGroupFields.RT);
 		
 		for (Row r : sheet) {			
 			

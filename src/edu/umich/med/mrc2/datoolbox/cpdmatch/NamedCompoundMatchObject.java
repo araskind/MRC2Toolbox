@@ -22,12 +22,18 @@
 package edu.umich.med.mrc2.datoolbox.cpdmatch;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 import org.apache.commons.math4.legacy.stat.descriptive.DescriptiveStatistics;
+
+import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
+import edu.umich.med.mrc2.datoolbox.main.config.DefaultFormatStore;
 
 public class NamedCompoundMatchObject {
 
@@ -80,6 +86,10 @@ public class NamedCompoundMatchObject {
 		DescriptiveStatistics rtStats = 
 				new DescriptiveStatistics(rtValues.stream().mapToDouble(d -> d).toArray());
 		rt = rtStats.getPercentile(50.0d);
+		
+		unknownName = DataPrefix.MS_LIBRARY_UNKNOWN_TARGET.getName() 
+				+ DefaultFormatStore.getDefaultMZformat().format(mz) + "_"
+				+ DefaultFormatStore.getDefaultRTformat().format(rt);	
 	}
 
 	public boolean isAutoPick() {
@@ -138,5 +148,41 @@ public class NamedCompoundMatchObject {
 		this.missingBatchesCount = missingBatchesCount;
 	}
 	
+	public Set<Integer>getMissingBatches(){
+		return batchFeatureMap.entrySet().stream().
+				filter(e -> e.getValue() == null).
+				mapToInt(Entry::getKey).boxed().
+				collect(Collectors.toSet());
+	}
+
+	public double getMz() {
+		return mz;
+	}
+
+	public double getRt() {
+		return rt;
+	}
 	
+	public boolean hasDataForBatches(Collection<Integer>batchNumbers) {
+		
+		for(int i : batchNumbers) {
+			
+			if(batchFeatureMap.get(i) == null)
+				return false;
+		}
+		return true;
+	}
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
