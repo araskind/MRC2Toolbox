@@ -130,7 +130,7 @@ public class ProFinderResultsImportTaskTask extends DataWithLibraryImportAbstrac
 		taskDescription = "Parsing library data ...";
 		total = nameRetentionMap.size();
 		processed = 0;
-		basePCDLlibrary = BasePCDLutils.getPCDLbaseLibrary();
+		basePCDLlibrary = BasePCDLutils.getDefaultMasterLibrary();
 		library = new CompoundLibrary("ProFinder library for " + dataPipeline.getName()); 
 		unmatchedProFinderCompounds = new HashMap<String, Double>();
 		libFeatureNameIdMap = new HashMap<String, String>();

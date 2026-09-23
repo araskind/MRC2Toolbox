@@ -44,8 +44,15 @@ public class ConnectionManager {
 
 	/** get a connection 
 	 * @throws SQLException */
-	public static Connection getConnection() throws SQLException {				
-		return PooledConnectionManager.getConnection();
+	public static Connection getConnection() {
+		
+		Connection conn = null;
+		try {
+			conn = PooledConnectionManager.getConnection();
+		} catch (SQLException e) {
+			logger.error("Failed to establish database connection", e);
+		}
+		return conn;
 	}
 	
 	public static Connection getTestConnection() throws SQLException {
@@ -115,10 +122,15 @@ public class ConnectionManager {
 		}
 	}
 
-	public static void releaseConnection(Connection conn) throws SQLException {
+	public static void releaseConnection(Connection conn) {
 
-		if (tranConnection.get() == null)
-			conn.close();
+		if (tranConnection.get() == null) {
+			try {
+				conn.close();
+			} catch (SQLException e) {
+				logger.error("Failed to release database connection", e);
+			}
+		}
 	}
 
 	public static void rollbackTransaction() throws SQLException {

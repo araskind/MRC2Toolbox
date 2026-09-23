@@ -62,7 +62,6 @@ import edu.umich.med.mrc2.datoolbox.data.MassSpectrum;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsPoint;
 import edu.umich.med.mrc2.datoolbox.data.enums.MsLibraryFormat;
-import edu.umich.med.mrc2.datoolbox.database.idt.BasePCDLutils;
 import edu.umich.med.mrc2.datoolbox.database.idt.MSRTLibraryUtils;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignSubsetEvent;
@@ -74,7 +73,7 @@ import edu.umich.med.mrc2.datoolbox.gui.io.msms.ReferenceMSMSLibraryExportDialog
 import edu.umich.med.mrc2.datoolbox.gui.library.feditor.DockableLibraryFeatureEditorPanel;
 import edu.umich.med.mrc2.datoolbox.gui.library.manager.LibraryInfoDialog;
 import edu.umich.med.mrc2.datoolbox.gui.library.manager.LibraryManager;
-import edu.umich.med.mrc2.datoolbox.gui.library.manager.NewPCLDLfromBaseDialog;
+import edu.umich.med.mrc2.datoolbox.gui.library.manager.NewPCLDLfromMasterDialog;
 import edu.umich.med.mrc2.datoolbox.gui.library.upload.LibraryRtImportDialog;
 import edu.umich.med.mrc2.datoolbox.gui.main.DockableMRC2ToolboxPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
@@ -115,7 +114,8 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ItemList
 	private boolean showFeaturePending = false;
 	private String pendingFeatureId = null;
 	private LibraryRtImportDialog libraryRtImportDialog;
-	private NewPCLDLfromBaseDialog newPCLDLfromBaseDialog;
+	private NewPCLDLfromMasterDialog newPCLDLfromBaseDialog;
+	private ValidateOrImportExternalLibraryDialog validateAgainstMasterLibraryDialog;
 
 	private static final Icon componentIcon = GuiUtils.getIcon("editLibrary", 16);
 	private static final Icon libraryManagerIcon = GuiUtils.getIcon("libraryManager", 24);
@@ -261,17 +261,23 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ItemList
 		if (command.equals(MainActionCommands.SHOW_LIBRARY_MANAGER_COMMAND.getName()))
 			showLibraryManager();
 		
-		if (command.equals(MainActionCommands.PRESCAN_LIBRARY_COMPOUNDS_COMMAND.getName()))
-			prescanLibraryForImport(); 
+		if (command.equals(MainActionCommands.PRESCAN_LIBRARY_COMPOUNDS_AGAINST_DATABASE_COMMAND.getName()))
+			prescanLibraryForImportAgainstCompoundDatabase(); 
+		
+		if (command.equals(MainActionCommands.PRESCAN_LIBRARY_COMPOUNDS_AGAINST_MASTER_LIBRARY_COMMAND.getName()))
+			setupLibraryPrescanAgainstMasterLibrary();
+		
+		if (command.equals(MainActionCommands.RUN_PRESCAN_AGAINST_MASTER_LIBRARY_COMMAND.getName()))
+			prescanLibraryAgainstMaster();
 				
-		if (command.equals(MainActionCommands.SET_UP_PCDL_DATA_IMPORT_COMMAND.getName()))
-			setupPCDLdataImport();
+		if (command.equals(MainActionCommands.SET_UP_PCDL_DATA_IMPORT_INTO_ACTIVE_COMMAND.getName()))
+			setupPCDLdataImportIntoActiveLibrary();
 
-		if (command.equals(MainActionCommands.IMPORT_PCDL_COMPOUND_LIBRARY_COMMAND.getName()))
-			importPCDLLibrary();
+		if (command.equals(MainActionCommands.IMPORT_PCDL_COMPOUND_LIBRARY_INTO_ACTIVE_COMMAND.getName()))
+			importPCDLDataIntoActiveLibrary();
 		
 		if (command.equals(MainActionCommands.NEW_PCDL_LIBRARY_FROM_PCDL_TEXT_FILE_SETUP_COMMAND.getName()))
-			setupNewPCDLfromBase();
+			setupNewPCDLfromMasterLibrary();
 
 		if (command.equals(MainActionCommands.NEW_PCDL_LIBRARY_FROM_PCDL_TEXT_FILE_COMMAND.getName()))
 			createNewPCDLfromBase();
@@ -345,7 +351,7 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ItemList
 			loadLibrarySelectedFromMenu(event.getSource());
 	}
 
-	private void prescanLibraryForImport() {
+	private void prescanLibraryForImportAgainstCompoundDatabase() {
 		
 		JnaFileChooser fc = new JnaFileChooser(baseDirectory);
 		fc.setMode(JnaFileChooser.Mode.Files);
@@ -380,7 +386,27 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ItemList
 		}
 	}
 	
-	private void setupPCDLdataImport() {
+	private void setupLibraryPrescanAgainstMasterLibrary() {
+		
+		validateAgainstMasterLibraryDialog = new ValidateOrImportExternalLibraryDialog(this);
+		validateAgainstMasterLibraryDialog.setLocationRelativeTo(this.getContentPane());
+		validateAgainstMasterLibraryDialog.setVisible(true);
+	}	
+	
+	private void prescanLibraryAgainstMaster() {
+		
+		Collection<String>errors = validateAgainstMasterLibraryDialog.validateFormData();
+		if(!errors.isEmpty()){
+		    MessageDialog.showErrorMsg(
+		            StringUtils.join(errors, "\n"), validateAgainstMasterLibraryDialog);
+		    return;
+		}
+		
+		
+		validateAgainstMasterLibraryDialog.dispose();
+	}
+	
+	private void setupPCDLdataImportIntoActiveLibrary() {
 		
 		if (currentLibrary == null) {
 			MessageDialog.showErrorMsg(
@@ -388,57 +414,57 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ItemList
 					+ "in order to import data from file!");
 			return;
 		}		
-		JnaFileChooser fc = new JnaFileChooser(baseDirectory);
-		fc.setMode(JnaFileChooser.Mode.Files);
-		fc.addFilter("TAB-separated text files", "txt", "TXT", "tsv", "TSV");
-		fc.setTitle("Select library file to import");
-		fc.setMultiSelectionEnabled(false);
-		if (fc.showOpenDialog(SwingUtilities.getWindowAncestor(this.getContentPane()))) {		
-
-			libraryInfoDialog = new LibraryInfoDialog(this);
-			libraryInfoDialog.loadLibraryInfoAndDataForImport(
-					currentLibrary, fc.getSelectedFile());
-			baseDirectory = fc.getSelectedFile().getParentFile();
-			libraryInfoDialog.setLocationRelativeTo(this.getContentPane());
-			libraryInfoDialog.setVisible(true);
-		}		
+//		JnaFileChooser fc = new JnaFileChooser(baseDirectory);
+//		fc.setMode(JnaFileChooser.Mode.Files);
+//		fc.addFilter("TAB-separated text files", "txt", "TXT", "tsv", "TSV");
+//		fc.setTitle("Select library file to import");
+//		fc.setMultiSelectionEnabled(false);
+//		if (fc.showOpenDialog(SwingUtilities.getWindowAncestor(this.getContentPane()))) {		
+//
+//			libraryInfoDialog = new LibraryInfoDialog(this);
+//			libraryInfoDialog.loadLibraryInfoAndDataForImport(
+//					currentLibrary, fc.getSelectedFile());
+//			baseDirectory = fc.getSelectedFile().getParentFile();
+//			libraryInfoDialog.setLocationRelativeTo(this.getContentPane());
+//			libraryInfoDialog.setVisible(true);
+//		}		
 	}
 	
-	private void importPCDLLibrary() {
+	private void importPCDLDataIntoActiveLibrary() {
 		
-		Collection<String>errors = libraryInfoDialog.validateLibraryData();
-		if(!errors.isEmpty()) {
-			MessageDialog.showErrorMsg(StringUtils.join(errors, "\n"), libraryInfoDialog);
-			return;
-		}	
-		CompoundLibrary selected = libraryInfoDialog.getLibrary();
-		String libraryName = libraryInfoDialog.getLibraryName();
-		String libraryDescription = libraryInfoDialog.getLibraryDescription();
-		selected.setLibraryName(libraryName);
-		selected.setLibraryDescription(libraryDescription);
-		try {
-			MSRTLibraryUtils.updateLibraryInfo(selected);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		updateLibraryMenuAndLabel();
-		File inputFile = libraryInfoDialog.getInputLibraryFile();
-		Collection<Adduct> adductList = libraryInfoDialog.getSelectedAdducts();
-		
-		if(inputFile != null && inputFile.exists())
-			importLibraryFromFile(inputFile, adductList);
-			
-		libraryInfoDialog.savePreferences();
-		libraryInfoDialog.dispose();
+//		Collection<String>errors = libraryInfoDialog.validateLibraryData();
+//		if(!errors.isEmpty()) {
+//			MessageDialog.showErrorMsg(StringUtils.join(errors, "\n"), libraryInfoDialog);
+//			return;
+//		}	
+//		CompoundLibrary selected = libraryInfoDialog.getLibrary();
+//		String libraryName = libraryInfoDialog.getLibraryName();
+//		String libraryDescription = libraryInfoDialog.getLibraryDescription();
+//		selected.setLibraryName(libraryName);
+//		selected.setLibraryDescription(libraryDescription);
+//		try {
+//			MSRTLibraryUtils.updateLibraryInfo(selected);
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
+//		updateLibraryMenuAndLabel();
+//		File inputFile = libraryInfoDialog.getInputLibraryFile();
+//		Collection<Adduct> adductList = libraryInfoDialog.getSelectedAdducts();
+//		
+//		if(inputFile != null && inputFile.exists())
+//			importLibraryFromFile(inputFile, adductList);
+//			
+//		libraryInfoDialog.savePreferences();
+//		libraryInfoDialog.dispose();
 	}
 	
-	private void setupNewPCDLfromBase() {
+	private void setupNewPCDLfromMasterLibrary() {
 	
-		GetBasePCDLTask task = new GetBasePCDLTask();
-		IndeterminateProgressDialog idp = new IndeterminateProgressDialog(
-				"Loading basePCDL library ...", this.getContentPane(), task);
-		idp.setLocationRelativeTo(this.getContentPane());
-		idp.setVisible(true);
+//		GetBasePCDLTask task = new GetBasePCDLTask();
+//		IndeterminateProgressDialog idp = new IndeterminateProgressDialog(
+//				"Loading basePCDL library ...", this.getContentPane(), task);
+//		idp.setLocationRelativeTo(this.getContentPane());
+//		idp.setVisible(true);
 	}
 
 	private void createNewPCDLfromBase() {
@@ -465,32 +491,6 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ItemList
 		task.addTaskListener(this);
 		MRC2ToolBoxCore.getTaskController().addTask(task);		
 		newPCLDLfromBaseDialog.dispose();
-	}
-	
-	class GetBasePCDLTask extends LongUpdateTask {
-
-		private CompoundLibrary basePCDLlibrary;
-			
-		public GetBasePCDLTask() {
-			super();
-		}
-
-		@Override
-		public Void doInBackground() {
-			
-			basePCDLlibrary = BasePCDLutils.getPCDLbaseLibrary();			
-			return null;
-		}
-		
-	    @Override
-	    public void done() {
-	    	
-	    	super.done();
-			newPCLDLfromBaseDialog = new NewPCLDLfromBaseDialog(MsLibraryPanel.this);
-			newPCLDLfromBaseDialog.setBasePCDLlibrary(basePCDLlibrary);
-			newPCLDLfromBaseDialog.setLocationRelativeTo(MsLibraryPanel.this.getContentPane());
-			newPCLDLfromBaseDialog.setVisible(true);
-	    }
 	}
 
 	private void loadLibrarySelectedFromMenu(Object selectionEventSource) {

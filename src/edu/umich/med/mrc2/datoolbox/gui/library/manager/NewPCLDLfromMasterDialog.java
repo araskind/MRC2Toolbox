@@ -64,7 +64,7 @@ import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 
-public class NewPCLDLfromBaseDialog extends JDialog implements ActionListener, BackedByPreferences{
+public class NewPCLDLfromMasterDialog extends JDialog implements ActionListener, BackedByPreferences{
 
 	/**
 	 * 
@@ -88,7 +88,7 @@ public class NewPCLDLfromBaseDialog extends JDialog implements ActionListener, B
 	private JTextField pcdlBaseNameField;
 	private AdductSelectorPanel adductSelectorPanel;
 
-	public NewPCLDLfromBaseDialog(ActionListener listener) {
+	public NewPCLDLfromMasterDialog(ActionListener listener) {
 		super();
 		setSize(new Dimension(500, 500));
 		setPreferredSize(new Dimension(500, 500));
@@ -232,7 +232,7 @@ public class NewPCLDLfromBaseDialog extends JDialog implements ActionListener, B
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		// TODO Auto-generated method stub
+
 		if(e.getActionCommand().equals(BROWSE))
 			selectLibraryFile();
 	}

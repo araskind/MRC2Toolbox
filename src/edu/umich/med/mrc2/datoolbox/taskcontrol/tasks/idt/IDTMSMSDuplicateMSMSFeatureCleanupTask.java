@@ -425,7 +425,7 @@ public class IDTMSMSDuplicateMSMSFeatureCleanupTask extends AbstractTask {
 		ConnectionManager.releaseConnection(conn);
 	}
 	
-	private void attachAnnotations() throws Exception {
+	private void attachAnnotations() {
 
 		Connection conn = ConnectionManager.getConnection();
 		taskDescription = "Adding annotations ...";
@@ -433,17 +433,12 @@ public class IDTMSMSDuplicateMSMSFeatureCleanupTask extends AbstractTask {
 		processed = 0;
 		for(MSFeatureInfoBundle fb : features) {
 			
-			Collection<ObjectAnnotation>featureAnnotations = new ArrayList<ObjectAnnotation>();
-			try {
-				 featureAnnotations = AnnotationUtils.getObjectAnnotations(
-						 AnnotatedObjectType.MSMS_FEATURE, 
-						 fb.getMsFeature().getId(), conn);
-			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			Collection<ObjectAnnotation>featureAnnotations = new ArrayList<>();
+			 featureAnnotations = AnnotationUtils.getObjectAnnotations(
+					 AnnotatedObjectType.MSMS_FEATURE, 
+					 fb.getMsFeature().getId(), conn);
 			if(!featureAnnotations.isEmpty())
-				featureAnnotations.stream().forEach(a -> fb.getMsFeature().addAnnotation(a));
+				featureAnnotations.forEach(a -> fb.getMsFeature().addAnnotation(a));
 			
 			processed++;
 		}

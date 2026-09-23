@@ -212,9 +212,6 @@ public class MRC2ToolBoxConfiguration {
     public static final String COMPOUND_STANDARDIZER_PREFERENCES_NODE = "MRC2ToolBoxConfiguration.compoundStandardizerPreferences";
     public static final String TAUTOMER_GENERATOR_PREFERENCES_NODE = "MRC2ToolBoxConfiguration.tautomerGeneratorpreferences";
     public static final String ZWITTER_ION_GENERATOR_PREFERENCES_NODE = "MRC2ToolBoxConfiguration.zwitterIonGeneratorpreferences";
-
-    //	TODO temp fix to base PCDL library retrieval
-    public static final String BASE_PCDL_LIBRARY_ID =  "MSRTLIB00121";
     
 	//	Params
     private static NumberFormat mzFormat;

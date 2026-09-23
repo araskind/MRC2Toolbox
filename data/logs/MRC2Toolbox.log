@@ -1,13 +1,5 @@
-2026-09-16 10:18:43.848 [main] DEBUG org.apache.poi.openxml4j.opc.PackageRelationshipCollection - Parsing relationship: /xl/_rels/workbook.xml.rels
-2026-09-16 10:18:43.912 [main] DEBUG org.apache.poi.openxml4j.opc.PackageRelationshipCollection - Parsing relationship: /_rels/.rels
-2026-09-16 10:18:55.484 [main] DEBUG org.apache.poi.openxml4j.opc.ZipPackage - Save content types part
-2026-09-16 10:18:55.596 [main] DEBUG org.apache.poi.openxml4j.opc.ZipPackage - Save package relationships
-2026-09-16 10:18:55.618 [main] DEBUG org.apache.poi.openxml4j.opc.ZipPackage - Save part 'docProps/app.xml'
-2026-09-16 10:18:55.619 [main] DEBUG org.apache.poi.openxml4j.opc.ZipPackage - Save part 'docProps/core.xml'
-2026-09-16 10:18:55.627 [main] DEBUG org.apache.poi.openxml4j.opc.ZipPackage - Save part 'xl/sharedStrings.xml'
-2026-09-16 10:18:55.751 [main] DEBUG org.apache.poi.openxml4j.opc.ZipPackage - Save part 'xl/styles.xml'
-2026-09-16 10:18:55.755 [main] DEBUG org.apache.poi.openxml4j.opc.ZipPackage - Save part 'xl/workbook.xml'
-2026-09-16 10:18:55.767 [main] DEBUG org.apache.poi.openxml4j.opc.ZipPackage - Save part 'xl/worksheets/sheet1.xml'
-2026-09-16 10:18:55.775 [main] DEBUG org.apache.poi.openxml4j.opc.ZipPackage - Save part 'xl/worksheets/sheet2.xml'
-2026-09-16 10:18:55.779 [main] DEBUG org.apache.poi.openxml4j.opc.ZipPackage - Save part 'xl/worksheets/sheet3.xml'
-2026-09-16 10:18:55.797 [main] DEBUG org.apache.poi.openxml4j.opc.ZipPackage - Save part 'xl/worksheets/sheet4.xml'
+2026-09-23 17:06:43.130 [main] INFO  edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore - Statring the program
+2026-09-23 17:21:21.282 [main] INFO  edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore - Statring the program
+2026-09-23 18:07:30.780 [main] INFO  edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore - Statring the program
+2026-09-23 18:13:35.032 [main] INFO  edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore - Statring the program
+2026-09-23 18:15:20.847 [main] INFO  edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore - Statring the program

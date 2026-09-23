@@ -28,7 +28,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.File;
 import java.util.Collection;
 import java.util.TreeSet;
 
@@ -45,11 +44,11 @@ import javax.swing.WindowConstants;
 
 import org.apache.commons.lang.StringUtils;
 
-import edu.umich.med.mrc2.datoolbox.data.Adduct;
 import edu.umich.med.mrc2.datoolbox.data.CompoundLibrary;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.database.idt.MSRTLibraryUtils;
 import edu.umich.med.mrc2.datoolbox.gui.library.MsLibraryPanel;
+import edu.umich.med.mrc2.datoolbox.gui.library.manager.LibraryInfoDialog.LibraryAction;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.main.PanelList;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
@@ -188,14 +187,14 @@ public class LibraryManager extends JDialog implements ActionListener, TaskListe
 				break;
 			}
 		}
-		File inputFile = libraryInfoDialog.getInputLibraryFile();
-		Collection<Adduct> adductList = libraryInfoDialog.getSelectedAdducts();
-		
-		if(inputFile != null && inputFile.exists()) {
-			((MsLibraryPanel)MRC2ToolBoxCore.getMainWindow().
-					getPanel(PanelList.MS_LIBRARY)).importLibraryFromFile(inputFile, adductList);
-		}	
-		libraryInfoDialog.savePreferences();
+//		File inputFile = libraryInfoDialog.getInputLibraryFile();
+//		Collection<Adduct> adductList = libraryInfoDialog.getSelectedAdducts();
+//		
+//		if(inputFile != null && inputFile.exists()) {
+//			((MsLibraryPanel)MRC2ToolBoxCore.getMainWindow().
+//					getPanel(PanelList.MS_LIBRARY)).importLibraryFromFile(inputFile, adductList);
+//		}	
+//		libraryInfoDialog.savePreferences();
 		libraryInfoDialog.dispose();
 		dispose();
 	}
@@ -212,13 +211,8 @@ public class LibraryManager extends JDialog implements ActionListener, TaskListe
 		String libraryDescription = libraryInfoDialog.getLibraryDescription();
 		selected.setLibraryName(libraryName);
 		selected.setLibraryDescription(libraryDescription);
-		try {
-			MSRTLibraryUtils.updateLibraryInfo(selected);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		MSRTLibraryUtils.updateLibraryInfo(selected);
 		refreshLibraryListing();
-		libraryInfoDialog.savePreferences();
 		libraryInfoDialog.dispose();
 		((MsLibraryPanel)MRC2ToolBoxCore.getMainWindow().
 				getPanel(PanelList.MS_LIBRARY)).updateLibraryMenuAndLabel();
@@ -237,11 +231,7 @@ public class LibraryManager extends JDialog implements ActionListener, TaskListe
 		if (approve == JOptionPane.YES_OPTION) {
 
 			MRC2ToolBoxCore.getActiveMsLibraries().remove(selected);
-			try {
-				MSRTLibraryUtils.deleteLibrary(selected);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+			MSRTLibraryUtils.deleteLibrary(selected);
 			refreshLibraryListing();
 		}
 		((MsLibraryPanel)MRC2ToolBoxCore.getMainWindow().
@@ -250,9 +240,8 @@ public class LibraryManager extends JDialog implements ActionListener, TaskListe
 	
 	private void showNewLibraryDialog() {
 
-		libraryInfoDialog = new LibraryInfoDialog(this);
+		libraryInfoDialog = new LibraryInfoDialog(this, LibraryAction.CreateNew, null);
 		libraryInfoDialog.setLocationRelativeTo(this);
-		libraryInfoDialog.initNewLibrary();
 		libraryInfoDialog.setVisible(true);
 	}
 
@@ -262,9 +251,8 @@ public class LibraryManager extends JDialog implements ActionListener, TaskListe
 		if(selected == null)
 			return;
 
-		libraryInfoDialog = new LibraryInfoDialog(this);
+		libraryInfoDialog = new LibraryInfoDialog(this, LibraryAction.EditInfo, selected);
 		libraryInfoDialog.setLocationRelativeTo(this);
-		libraryInfoDialog.loadLibraryData(selected, false);
 		libraryInfoDialog.setVisible(true);
 	}
 	
@@ -274,9 +262,8 @@ public class LibraryManager extends JDialog implements ActionListener, TaskListe
 		if(selected == null)
 			return;
 		
-		libraryInfoDialog = new LibraryInfoDialog(this);
+		libraryInfoDialog = new LibraryInfoDialog(this, LibraryAction.Duplicate, selected);
 		libraryInfoDialog.setLocationRelativeTo(this);
-		libraryInfoDialog.loadLibraryData(selected, true);
 		libraryInfoDialog.setVisible(true);
 	}
 
@@ -302,7 +289,7 @@ public class LibraryManager extends JDialog implements ActionListener, TaskListe
 				libraryInfoDialog.getSelectedAdducts());
 		dlt.addTaskListener(this);
 		MRC2ToolBoxCore.getTaskController().addTask(dlt);
-		libraryInfoDialog.savePreferences();
+		//	libraryInfoDialog.savePreferences();
 		libraryInfoDialog.dispose();
 	}
 

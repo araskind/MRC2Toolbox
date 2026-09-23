@@ -22,6 +22,8 @@
 package edu.umich.med.mrc2.datoolbox.database.idt;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 
@@ -33,7 +35,6 @@ import edu.umich.med.mrc2.datoolbox.data.LibraryMsFeature;
 import edu.umich.med.mrc2.datoolbox.data.LibraryMsFeatureDbBundle;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
-import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 
 public class BasePCDLutils {
 	
@@ -42,23 +43,49 @@ public class BasePCDLutils {
 	private BasePCDLutils() {
 		/* This utility class should not be instantiated */
 	}
-
-	public static CompoundLibrary getPCDLbaseLibrary() {
+	
+	public static String getMasterLibraryID() throws SQLException {
 		
+		String masterLibraryID = null;
+		Connection conn = ConnectionManager.getConnection();
+		String query = "SELECT LIBRARY_ID FROM MS_LIBRARY WHERE IS_MASTER IS NOT NULL";
+		try(PreparedStatement ps = conn.prepareStatement(query)){
+			
+			try(ResultSet rs = ps.executeQuery()){
+				
+				while(rs.next())
+					masterLibraryID = rs.getString(1);
+			}
+		}
+		ConnectionManager.releaseConnection(conn);
+		return masterLibraryID;
+	}
+	
+	public static CompoundLibrary getDefaultMasterLibrary() {
+		
+		String masterLibraryID = null;
+		try {
+			masterLibraryID = getMasterLibraryID();
+		} catch (SQLException e) {
+			logger.error("Failed to get master library ID from the database", e);
+		}
+		if(masterLibraryID == null)
+			return null;
+		
+		return getMasterLibrary(masterLibraryID);
+	}
+
+	public static CompoundLibrary getMasterLibrary(String libId) {
+
 		CompoundLibrary basePCDLlibrary = MRC2ToolBoxCore.getActiveMsLibraries().stream().
-				filter(l -> l.getLibraryId().equals(MRC2ToolBoxConfiguration.BASE_PCDL_LIBRARY_ID)).
+				filter(l -> l.getLibraryId().equals(libId)).
 				findFirst().orElse(null);
 		if(basePCDLlibrary != null)
 			return basePCDLlibrary;
-		
-		try {
-			basePCDLlibrary = MSRTLibraryUtils.getLibrary(MRC2ToolBoxConfiguration.BASE_PCDL_LIBRARY_ID);
-		} catch (SQLException e) {
-			logger.error("Failed to get base PCDL library from the database", e);
-		}
+
+		basePCDLlibrary = MSRTLibraryUtils.getLibrary(libId);
 		if (basePCDLlibrary == null) 
 			return null;
-
 		try {
 			populateBasePCDLlibrary(basePCDLlibrary);
 		}
@@ -72,7 +99,7 @@ public class BasePCDLutils {
 		return basePCDLlibrary;
 	}
 	
-	private static void populateBasePCDLlibrary(CompoundLibrary basePCDLlibrary) throws SQLException {
+	public static void populateBasePCDLlibrary(CompoundLibrary basePCDLlibrary) throws SQLException {
 		
 		Connection conn = ConnectionManager.getConnection();
 		Collection<LibraryMsFeatureDbBundle>bundles =
@@ -92,6 +119,21 @@ public class BasePCDLutils {
 					basePCDLlibrary.addFeature(newTarget);
 				}
 			}
+		}
+		ConnectionManager.releaseConnection(conn);
+	}
+	
+	public static void setMasterLibrary(String newMasterLibraryId) throws SQLException {
+		
+		Connection conn = ConnectionManager.getConnection();
+		String query = "UPDATE MS_LIBRARY SET IS_MASTER = NULL";
+		try(PreparedStatement ps = conn.prepareStatement(query)){
+			ps.executeUpdate();
+		}
+		query = "UPDATE MS_LIBRARY SET IS_MASTER = 'Y' WHERE LIBRARY_ID = ?";
+		try(PreparedStatement ps = conn.prepareStatement(query)){
+			ps.setString(1, newMasterLibraryId);
+			ps.executeUpdate();
 		}
 		ConnectionManager.releaseConnection(conn);
 	}

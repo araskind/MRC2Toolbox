@@ -28,6 +28,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.UUID;
@@ -186,6 +187,19 @@ public class CompoundLibrary implements Serializable, Comparable<CompoundLibrary
 	public LibraryMsFeature getFeatureByNameIgnoreCase(String name) {
 		return libraryFeatures.stream().
 				filter(f -> f.getName().equalsIgnoreCase(name)).findFirst().orElse(null);
+	}
+	
+	public LibraryMsFeature getFeatureByNameOrEntryNameIgnoreCase(String name) {
+		
+		LibraryMsFeature match = libraryFeatures.stream().
+				filter(f -> f.getName().equalsIgnoreCase(name)).findFirst().orElse(null);
+		if(match == null)
+			 match = libraryFeatures.stream().
+			 	filter(f -> Objects.nonNull(f.getPrimaryIdentity())).
+				filter(f -> f.getPrimaryIdentity().getCompoundName().equalsIgnoreCase(name)).
+				findFirst().orElse(null);
+		
+		return match;
 	}
 	
 	public LibraryMsFeature getFeatureById(String targetId) {

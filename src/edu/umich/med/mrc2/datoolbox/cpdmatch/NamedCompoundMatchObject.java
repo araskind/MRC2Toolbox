@@ -172,6 +172,13 @@ public class NamedCompoundMatchObject {
 		}
 		return true;
 	}
+	
+	public double getAbsRelativeMZRTdifference(NamedCompoundMatchObject other) {
+		
+		double relMzDiff = Math.abs((mz - other.getMz()) / mz);
+		double relRtDiff = Math.abs((rt - other.getMz()) / rt);
+		return relMzDiff + relRtDiff;
+	}
 }
 
 

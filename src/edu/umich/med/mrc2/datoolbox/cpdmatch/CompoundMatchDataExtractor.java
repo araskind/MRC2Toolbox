@@ -99,7 +99,7 @@ public class CompoundMatchDataExtractor {
 		MRC2ToolBoxConfiguration.initConfiguration();
 		initDatabaseConnection();
 		
-		processEX01426RPPos();
+		processEX01496RPPos();
 	}
 	
 	private static void processEX01496RPNeg() {
@@ -119,14 +119,14 @@ public class CompoundMatchDataExtractor {
 	}
 	
 	private static void processEX01496RPPos() {
-
+		
 		File inputFile = new File("S:\\DataAnalysis\\EX01496 - Human EDTA Tranche 3 plasma X20001463K\\"
-				+ "A003 - Untargeted\\CompoundMatch\\EX01496_RP_POS_merge_output_20260902.xlsx");
+				+ "A003 - Untargeted\\CompoundMatch\\20260909\\POS\\EX01496_RP_POS_merge_output_picked_only_20260916_2.xlsx");
 		File fullPicksFile = new File("S:\\DataAnalysis\\EX01496 - Human EDTA Tranche 3 plasma X20001463K\\"
-				+ "A003 - Untargeted\\CompoundMatch\\1496 RP Pos-full picks.xlsx");
+				+ "A003 - Untargeted\\CompoundMatch\\20260909\\POS\\merge_output_20260909_named_fullPicks.xlsx");
 		File outputFile = new File("S:\\DataAnalysis\\EX01496 - Human EDTA Tranche 3 plasma X20001463K\\"
-				+ "A003 - Untargeted\\CompoundMatch\\EX01496_RP_Pos_Data-Integrator-exported-20260910.txt");
-		File libraryFile = new File("Y:\\DataAnalysis\\CPDMatch\\RP-Pos with 1C IS MIx - Complete Library.txt");
+				+ "A003 - Untargeted\\CompoundMatch\\20260909\\POS\\EX01496_RP_Pos_picked_only_Data-Integrator-exported-20260916-2.txt");
+		File libraryFile = new File("S:\\DataAnalysis\\CPDMatch\\RP-Pos with 1C IS MIx - Complete Library.txt");
 		rtError = 0.05d;
 		mzError = 7.00d;
 		adductList = new ArrayList<>();

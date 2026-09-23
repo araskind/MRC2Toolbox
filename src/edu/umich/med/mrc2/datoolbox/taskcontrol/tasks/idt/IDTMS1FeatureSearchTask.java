@@ -22,7 +22,6 @@
 package edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt;
 
 import java.io.BufferedInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -41,7 +40,6 @@ import java.util.stream.Collectors;
 import javax.swing.text.BadLocationException;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.interfaces.IChemModel;
 
 import edu.umich.med.mrc2.datoolbox.data.Adduct;
@@ -735,16 +733,7 @@ public class IDTMS1FeatureSearchTask extends AbstractTask {
 					fb.getMsFeature().addAnnotation(annotation);
 				}
 				rs.close();
-			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (BadLocationException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (CDKException e) {
+			} catch (SQLException | BadLocationException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}

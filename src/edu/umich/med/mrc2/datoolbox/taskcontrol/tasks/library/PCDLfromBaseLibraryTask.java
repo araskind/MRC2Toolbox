@@ -23,35 +23,25 @@ package edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.library;
 
 import java.io.File;
 import java.sql.Connection;
-import java.util.ArrayList;
+import java.sql.SQLException;
 import java.util.Collection;
-import java.util.Map;
-import java.util.TreeMap;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
 import edu.umich.med.mrc2.datoolbox.data.Adduct;
-import edu.umich.med.mrc2.datoolbox.data.CompoundIdentity;
 import edu.umich.med.mrc2.datoolbox.data.CompoundLibrary;
 import edu.umich.med.mrc2.datoolbox.data.LibraryMsFeature;
-import edu.umich.med.mrc2.datoolbox.data.enums.CompoundIdentificationConfidence;
-import edu.umich.med.mrc2.datoolbox.data.enums.PCDLFields;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.database.idt.MSRTLibraryUtils;
-import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
-import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
-import edu.umich.med.mrc2.datoolbox.utils.DelimitedTextParser;
 
-public class PCDLfromBaseLibraryTask extends AbstractTask {
+public class PCDLfromBaseLibraryTask extends PCDLAbstractTask {
 
-	private CompoundLibrary basePCDLlibrary;
-	private CompoundLibrary newLlibrary;
-	private File inputLibraryFile;
+	private static final Logger logger = LogManager.getLogger(PCDLfromBaseLibraryTask.class);
+	
 	private Collection<Adduct>selectedAdducts;
-	private Map<PCDLFields, Integer>dataFieldMap;
-	private Collection<CompoundIdentity>unmatchedFeatures = new ArrayList<CompoundIdentity>();
 	
 	public PCDLfromBaseLibraryTask(
 			CompoundLibrary basePCDLlibrary, 
@@ -59,7 +49,7 @@ public class PCDLfromBaseLibraryTask extends AbstractTask {
 			File inputLibraryFile,
 			Collection<Adduct> selectedAdducts) {
 		super();
-		this.basePCDLlibrary = basePCDLlibrary;
+		this.masterPCDLlibrary = basePCDLlibrary;
 		this.newLlibrary = newLlibrary;
 		this.inputLibraryFile = inputLibraryFile;
 		this.selectedAdducts = selectedAdducts;
@@ -73,16 +63,7 @@ public class PCDLfromBaseLibraryTask extends AbstractTask {
 			setStatus(TaskStatus.FINISHED);
 			return;
 		}
-		boolean dataValid = false;
-		try {
-			dataValid = parseTextLibrary();
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-			setStatus(TaskStatus.ERROR);
-			return;
-		}
-		if(!dataValid) {			
+		if(!parseTextLibrary()) {			
 			setStatus(TaskStatus.ERROR);
 			return;
 		}
@@ -92,8 +73,7 @@ public class PCDLfromBaseLibraryTask extends AbstractTask {
 			try {
 				newLibId = MSRTLibraryUtils.createNewLibrary(newLlibrary);
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.error("Failed to create new library in the database", e);
 			}
 			if(newLibId == null) {
 				errorMessage = "Failed to crete new library!";
@@ -103,8 +83,7 @@ public class PCDLfromBaseLibraryTask extends AbstractTask {
 			try {
 				writeFeaturesToDatabase();
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.error("Failed to write new library into the database", e);
 				setStatus(TaskStatus.ERROR);
 				return;
 			}
@@ -112,60 +91,7 @@ public class PCDLfromBaseLibraryTask extends AbstractTask {
 		setStatus(TaskStatus.FINISHED);
 	}
 	
-	private boolean parseTextLibrary() {
-		
-		String[][] compoundDataArray = DelimitedTextParser.parseTextFile(
-				inputLibraryFile, MRC2ToolBoxConfiguration.getTabDelimiter());
-		
-		taskDescription = "Creating new library entries ...";
-		total = compoundDataArray.length -1;
-		processed = 0;
-		
-		boolean dataValid = createAndValidateFieldMap(compoundDataArray[0]);
-		if(!dataValid)
-			return false;
-		
-		for(int i=1; i<compoundDataArray.length; i++) {
-			
-			String entryName = compoundDataArray[i][dataFieldMap.get(PCDLFields.NAME)];
-			LibraryMsFeature newLibFeature = basePCDLlibrary.getFeatureByName(entryName);
-			if(newLibFeature == null) {
-				
-				CompoundIdentity identity = 
-						new CompoundIdentity(
-								entryName, 
-								compoundDataArray[i][dataFieldMap.get(PCDLFields.FORMULA)]);
-				unmatchedFeatures.add(identity);
-			}
-			else {
-				double rt = 0.0d;
-				if(dataFieldMap.containsKey(PCDLFields.RETENTION_TIME)) {
-					
-					String rtString = compoundDataArray[i][dataFieldMap.get(PCDLFields.RETENTION_TIME)];
-					if(rtString != null && !rtString.isEmpty()) {
-						
-						try {
-							rt = Double.valueOf(rtString);
-						} catch (NumberFormatException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-					}
-					if(rt > 0.0d) {
-						newLibFeature.setRetentionTime(rt);
-						MSRTLibraryUtils.generateMassSpectrumFromAdducts(newLibFeature, selectedAdducts);
-						newLibFeature.getPrimaryIdentity().setConfidenceLevel(
-								CompoundIdentificationConfidence.ACCURATE_MASS_RT);
-						newLlibrary.addFeature(newLibFeature);
-					}					
-				}				
-			}
-			processed++;
-		}		
-		return true;
-	}
-	
-	private void writeFeaturesToDatabase() throws Exception {
+	private void writeFeaturesToDatabase() throws SQLException {
 
 		taskDescription = "Writing library to database ...";
 		total = newLlibrary.getFeatures().size();
@@ -178,61 +104,25 @@ public class PCDLfromBaseLibraryTask extends AbstractTask {
 			try {
 				MSRTLibraryUtils.loadLibraryFeature(lt, libId, conn);
 			} catch (Exception e) {
-				e.printStackTrace();
+				logger.error(String.format("Failed to insert in the database new library feature  %s", lt.getName()), e);
 			}
 			if(lt.getName().toUpperCase().contains("[ISTD]")) {
 				
 				try {
 					MSRTLibraryUtils.setTargetQcStatus(lt.getId(), true, conn);
 				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					logger.error(String.format("Failed to set target QC status in the database  %s", lt.getName()), e);
 				}
 			}
 			processed++;
 		}
 		ConnectionManager.releaseConnection(conn);
 	}
-
-	private boolean createAndValidateFieldMap(String[]header) {
-		
-		dataFieldMap = new TreeMap<PCDLFields, Integer>();
-		//	;
-		for(int i=0; i<header.length; i++) {
-			
-			PCDLFields f = PCDLFields.getOptionByUIName(header[i]);
-			if(f != null)
-				dataFieldMap.put(f, i);
-		}
-		ArrayList<String>missingFields = new ArrayList<String>();
-		if(!dataFieldMap.containsKey(PCDLFields.NAME))
-			missingFields.add(PCDLFields.NAME.getName());
-
-		if(!dataFieldMap.containsKey(PCDLFields.FORMULA))
-			missingFields.add(PCDLFields.FORMULA.getName());
-		
-		if(missingFields.isEmpty())
-			return true;
-		else {
-			errorMessage = 
-					"The following obligatory fields are missing form the input data:\n"
-					+ StringUtils.join(missingFields, ", ");
-			return false;
-		}		
-	}	
 	
 	@Override
 	public Task cloneTask() {
 
 		return new PCDLfromBaseLibraryTask(
-				basePCDLlibrary, newLlibrary, inputLibraryFile, selectedAdducts);
-	}
-
-	public Collection<CompoundIdentity> getUnmatchedFeatures() {
-		return unmatchedFeatures;
-	}
-
-	public CompoundLibrary getNewLlibrary() {
-		return newLlibrary;
+				masterPCDLlibrary, newLlibrary, inputLibraryFile, selectedAdducts);
 	}
 }

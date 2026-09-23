@@ -41,14 +41,12 @@ public class SQLUtils {
 	private SQLUtils() {
 		/* This utility class should not be instantiated */
 	}
-
 	
 	public static String getNextIdFromSequence(
 			String sequenceName,
 			DataPrefix prefix,
 			String padChar,
-			int padLength) throws SQLException {
-		
+			int padLength){
 		Connection conn = ConnectionManager.getConnection();
 		String nextId = getNextIdFromSequence(
 				conn, 
@@ -65,8 +63,7 @@ public class SQLUtils {
 			String sequenceName,
 			DataPrefix prefix,
 			String padChar,
-			int padLength) throws SQLException {
-
+			int padLength) {
 		return getNextIdFromSequence(
 				conn, 
 				MRC2ToolBoxConfiguration.getDatabaseType(),
@@ -82,7 +79,7 @@ public class SQLUtils {
 			String sequenceName,
 			DataPrefix prefix,
 			String padChar,
-			int padLength) throws SQLException {
+			int padLength) {
 		
 		String nexId = null;
 		if(dialect.equals(DatabseDialect.Oracle) ) {
@@ -91,13 +88,16 @@ public class SQLUtils {
 				"SELECT '" + prefix.getName() +
 				"' || LPAD(" + sequenceName + ".NEXTVAL, " + Integer.toString(padLength) +
 				", '" + padChar + "') AS NEXT_ID FROM DUAL";
-			PreparedStatement ps = conn.prepareStatement(query);
-			ResultSet rs = ps.executeQuery();
-			while(rs.next())
-				nexId = rs.getString("NEXT_ID");
-			
-			rs.close();
-			ps.close();	
+			try {
+				try(PreparedStatement ps = conn.prepareStatement(query)){
+					try(ResultSet rs = ps.executeQuery()){
+						while(rs.next())
+							nexId = rs.getString("NEXT_ID");				
+					}
+				}
+			} catch (SQLException e) {
+				logger.error(String.format("Failed to create next ID using sequence  %s", sequenceName), e);
+			}	
 			return nexId;
 		}
 		if(dialect.equals(DatabseDialect.PostgreSQL) ) {
@@ -106,13 +106,16 @@ public class SQLUtils {
 				"SELECT '" + prefix.getName() +
 				"' || LPAD( NEXTVAL('"+ sequenceName +"')::text, " + Integer.toString(padLength) +
 				", '" + padChar + "') AS NEXT_ID";
-			PreparedStatement ps = conn.prepareStatement(query);
-			ResultSet rs = ps.executeQuery();
-			while(rs.next())
-				nexId = rs.getString("NEXT_ID");
-			
-			rs.close();
-			ps.close();	
+			try {
+				try(PreparedStatement ps = conn.prepareStatement(query)){
+					try(ResultSet rs = ps.executeQuery()){
+						while(rs.next())
+							nexId = rs.getString("NEXT_ID");			
+					}
+				}
+			} catch (SQLException e) {
+				logger.error(String.format("Failed to create next ID using sequence  %s", sequenceName), e);
+			}
 			return nexId;
 		}
 		return nexId;

@@ -46,7 +46,6 @@ import javax.swing.text.BadLocationException;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
-import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.interfaces.IChemModel;
 
 import edu.umich.med.mrc2.datoolbox.data.Adduct;
@@ -1551,16 +1550,7 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 					fb.getMsFeature().addAnnotation(annotation);
 				}
 				rs.close();
-			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (BadLocationException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (CDKException e) {
+			} catch (SQLException | IOException | BadLocationException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}

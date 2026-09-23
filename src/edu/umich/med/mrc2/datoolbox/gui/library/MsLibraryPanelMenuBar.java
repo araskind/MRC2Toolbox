@@ -57,7 +57,8 @@ public class MsLibraryPanelMenuBar extends CommonMenuBar {
 	private static final Icon importLibraryIconSmall = GuiUtils.getIcon("importLibraryToDb", 16);
 	private static final Icon importPCDLLibraryIcon = GuiUtils.getIcon("importFromPCDL", 24);
 	private static final Icon newPCDLfromBaseIcon = GuiUtils.getIcon("newPCDLfromBase", 24);
-	private static final Icon prescanLibraryIcon = GuiUtils.getIcon("searchCompounds", 24);
+	private static final Icon prescanAgainstDatabaseIcon = GuiUtils.getIcon("searchDatabase", 24);
+	private static final Icon prescanAgainstLibraryIcon = GuiUtils.getIcon("searchLibrary", 24);
 	private static final Icon exportLibraryIcon = GuiUtils.getIcon("exportLibrary", 24);
 	private static final Icon exportLibraryIconSmall = GuiUtils.getIcon("exportLibrary", 16);
 	private static final Icon exportFilteredLibraryIcon = GuiUtils.getIcon("exportFilteredLibraryToFile", 24);
@@ -98,7 +99,8 @@ public class MsLibraryPanelMenuBar extends CommonMenuBar {
 	
 	//	Import
 	private JMenuItem
-		prescanLibraryMenuItem,
+		prescanLibraryAgainstDatabaseMenuItem,
+		prescanLibraryAgainstMasterMenuItem,
 		importLibraryMenuItem,
 		importPCDLLibraryMenuItem,
 		newPCDLfromBaseMenuItem,
@@ -161,16 +163,18 @@ public class MsLibraryPanelMenuBar extends CommonMenuBar {
 		//	Import
 		importMenu = new JMenu("Import");
 		importMenu.setIcon(importLibraryIconSmall);
-		
-		//
-		prescanLibraryMenuItem = addItem(importMenu, 
-				MainActionCommands.PRESCAN_LIBRARY_COMPOUNDS_COMMAND, 
-				prescanLibraryIcon);
 
+		prescanLibraryAgainstDatabaseMenuItem = addItem(importMenu, 
+				MainActionCommands.PRESCAN_LIBRARY_COMPOUNDS_AGAINST_DATABASE_COMMAND, 
+				prescanAgainstDatabaseIcon);
+		prescanLibraryAgainstMasterMenuItem = addItem(importMenu, 
+				MainActionCommands.PRESCAN_LIBRARY_COMPOUNDS_AGAINST_MASTER_LIBRARY_COMMAND, 
+				prescanAgainstLibraryIcon);
+		
 		importMenu.addSeparator();
 		
 		importPCDLLibraryMenuItem = addItem(importMenu, 
-				MainActionCommands.SET_UP_PCDL_DATA_IMPORT_COMMAND, 
+				MainActionCommands.SET_UP_PCDL_DATA_IMPORT_INTO_ACTIVE_COMMAND, 
 				importPCDLLibraryIcon);	
 		newPCDLfromBaseMenuItem = addItem(importMenu, 
 				MainActionCommands.NEW_PCDL_LIBRARY_FROM_PCDL_TEXT_FILE_SETUP_COMMAND, 

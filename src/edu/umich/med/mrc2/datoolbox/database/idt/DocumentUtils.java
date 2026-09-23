@@ -63,57 +63,73 @@ public class DocumentUtils {
 		return documentId;
 	}
 	
-	public static String insertDocument(
-			File documentFile, 
-			String documentTitle, 
-			DocumentFormat format, 
-			Connection conn) throws SQLException {
+	public static String checkIfDocumentWasUploadedBefore(File documentFile, Connection conn) {
 		
 		if(!documentFile.exists())
 			return null;
 		
 		String documentId = null;	
-		
-		//	Check if document already in database using MD5
-		String md5hash = FIOUtils.calculateFileChecksum(documentFile);
-		
+		String md5hash = FIOUtils.calculateFileChecksum(documentFile);		
 		String query  = "SELECT DOCUMENT_ID FROM DOCUMENTS WHERE DOCUMENT_HASH = ?";
-		try(PreparedStatement ps = conn.prepareStatement(query)){
-			ps.setString(1, md5hash);
-			ResultSet rs = ps.executeQuery();
-			while(rs.next())
-				documentId = rs.getString("DOCUMENT_ID");
-
-			rs.close();
+		try {
+			try(PreparedStatement ps = conn.prepareStatement(query)){
+				ps.setString(1, md5hash);
+				try(ResultSet rs = ps.executeQuery()){
+					while(rs.next())
+						documentId = rs.getString("DOCUMENT_ID");
+				}
+			}
+		} catch (SQLException e) {
+			logger.error("Failed to verify if document is already in the database", e);
 		}
+		return documentId;
+	}
+	
+	public static String insertDocument(
+			File documentFile, 
+			String documentTitle, 
+			DocumentFormat format, 
+			Connection conn) {
+		
+		if(!documentFile.exists())
+			return null;
+		
+		String documentId = checkIfDocumentWasUploadedBefore(documentFile, conn);
 		if(documentId != null)
 			return documentId;
-	
-		//	Insert new document record
+
 		documentId = SQLUtils.getNextIdFromSequence(conn, 
 				"DOCUMENTS_SEQ",
 				DataPrefix.DOCUMENT,
 				"0",
 				12);
-		query = 
+		if(documentId == null)
+			return null;
+		
+		String query = 
 			"INSERT INTO DOCUMENTS (DOCUMENT_ID, DOCUMENT_NAME, DOCUMENT_FORMAT, "
 			+ "DOCUMENT_CONTENTS, DOCUMENT_HASH) VALUES (?, ?, ?, ?, ?)";
-		try(PreparedStatement ps = conn.prepareStatement(query)){
-			ps.setString(1, documentId);
-			ps.setString(2, documentTitle);
-			ps.setString(3, format.name());
-			try(InputStream fis = Files.newInputStream(Paths.get(documentFile.getAbsolutePath()))){
-				ps.setBinaryStream(4, fis, (int) documentFile.length());
-				ps.setString(5, md5hash);		
-				ps.executeUpdate();
-			} catch (IOException e) {
-				logger.error(String.format("%s %s", "Failed to upload file", documentFile.getAbsolutePath()), e);
+		String md5hash = FIOUtils.calculateFileChecksum(documentFile);
+		try {
+			try(PreparedStatement ps = conn.prepareStatement(query)){
+				ps.setString(1, documentId);
+				ps.setString(2, documentTitle);
+				ps.setString(3, format.name());
+				try(InputStream fis = Files.newInputStream(Paths.get(documentFile.getAbsolutePath()))){
+					ps.setBinaryStream(4, fis, (int) documentFile.length());
+					ps.setString(5, md5hash);		
+					ps.executeUpdate();
+				} catch (IOException e) {
+					logger.error(String.format("%s %s", "Failed to upload file", documentFile.getAbsolutePath()), e);
+				}
 			}
+		} catch (SQLException e) {
+			logger.error(String.format("%s %s", "Failed to upload file", documentFile.getAbsolutePath()), e);
 		}			
 		return documentId;
 	}
 	
-	public static String getDocumentIdByFileHash(File documentFile) throws SQLException {	
+	public static String getDocumentIdByFileHash(File documentFile) {	
 		
 		String documentId = null;
 		Connection conn = ConnectionManager.getConnection();
@@ -122,23 +138,26 @@ public class DocumentUtils {
 		return documentId;
 	}			
 	
-	public static String getDocumentIdByFileHash(File documentFile, Connection conn) throws SQLException {	
+	public static String getDocumentIdByFileHash(File documentFile, Connection conn) {	
 		
 		String documentId = null;
 		String md5hash = FIOUtils.calculateFileChecksum(documentFile);		
 		String query  = "SELECT DOCUMENT_ID FROM DOCUMENTS WHERE DOCUMENT_HASH = ?";
-		try(PreparedStatement ps = conn.prepareStatement(query)){
-			ps.setString(1, md5hash);
-			ResultSet rs = ps.executeQuery();
-			while(rs.next())
-				documentId = rs.getString("DOCUMENT_ID");
-	
-			rs.close();
+		try {
+			try(PreparedStatement ps = conn.prepareStatement(query)){
+				ps.setString(1, md5hash);
+				try(ResultSet rs = ps.executeQuery()){
+				while(rs.next())
+					documentId = rs.getString("DOCUMENT_ID");	
+				}
+			}
+		} catch (SQLException e) {
+			logger.error(String.format("Failed to get document ID by file hash for %s", documentFile.getAbsolutePath()), e);
 		}
 		return documentId;
 	}
 		
-	public static String getDocumentFileNameIdById(String documentId) throws SQLException {	
+	public static String getDocumentFileNameIdById(String documentId) {	
 		
 		String documentFileName = null;
 		Connection conn = ConnectionManager.getConnection();
@@ -147,24 +166,26 @@ public class DocumentUtils {
 		return documentFileName;
 	}			
 	
-	public static String getDocumentFileNameIdById(String documentId, Connection conn) throws SQLException {	
+	public static String getDocumentFileNameIdById(String documentId, Connection conn) {	
 		
 		String documentFileName = null;
 		String query  = "SELECT DOCUMENT_NAME, DOCUMENT_FORMAT FROM DOCUMENTS WHERE DOCUMENT_ID = ?";
-		try(PreparedStatement ps = conn.prepareStatement(query)){
-			ps.setString(1, documentId);
-			ResultSet rs = ps.executeQuery();
-			while(rs.next())
-				documentFileName = rs.getString("DOCUMENT_NAME") + "." + rs.getString("DOCUMENT_FORMAT");
-
-			rs.close();
+		try {
+			try(PreparedStatement ps = conn.prepareStatement(query)){
+				ps.setString(1, documentId);
+				try(ResultSet rs = ps.executeQuery()){
+					while(rs.next())
+						documentFileName = rs.getString("DOCUMENT_NAME") + "." 
+								+ rs.getString("DOCUMENT_FORMAT");
+				}
+			}
+		} catch (SQLException e) {
+			logger.error(String.format("Failed to get file name for document ID %s", documentId), e);
 		}
 		return documentFileName;
 	}
 	
-	public static void updateDocumentTitle(
-			String documentTitle, 
-			String documentId) throws SQLException {		
+	public static void updateDocumentTitle(String documentTitle, String documentId) {		
 
 		Connection conn = ConnectionManager.getConnection();
 		updateDocumentTitle(documentTitle, documentId, conn);
@@ -172,19 +193,21 @@ public class DocumentUtils {
 	}
 	
 	public static void updateDocumentTitle(
-			String documentTitle, 
-			String documentId, 
-			Connection conn) throws SQLException {
+			String documentTitle, String documentId, Connection conn) {
 		
 		String query = "UPDATE DOCUMENTS SET DOCUMENT_NAME = ? WHERE DOCUMENT_ID = ?";
-		try(PreparedStatement ps = conn.prepareStatement(query)){
-			ps.setString(1, documentTitle);
-			ps.setString(2, documentId);
-			ps.executeUpdate();
+		try {
+			try(PreparedStatement ps = conn.prepareStatement(query)){
+				ps.setString(1, documentTitle);
+				ps.setString(2, documentId);
+				ps.executeUpdate();
+			}
+		} catch (SQLException e) {
+			logger.error(String.format("Failed to update title for document ID %s", documentId), e);
 		}
 	}
 	
-	public static void deleteDocument(String documentId) throws SQLException {		
+	public static void deleteDocument(String documentId) {		
 
 		Connection conn = ConnectionManager.getConnection();
 		deleteDocument(documentId, conn);
@@ -192,32 +215,39 @@ public class DocumentUtils {
 	}
 	
 	public static void deleteDocument(
-			String documentId, 
-			Connection conn) throws SQLException {
+			String documentId, Connection conn) {
 		
 		String query = "DELETE FROM DOCUMENTS WHERE DOCUMENT_ID = ?";
-		try(PreparedStatement ps = conn.prepareStatement(query)){
-			ps.setString(1, documentId);
-			ps.executeUpdate();
+		try {
+			try(PreparedStatement ps = conn.prepareStatement(query)){
+				ps.setString(1, documentId);
+				ps.executeUpdate();
+			}
+		} catch (SQLException e) {
+			logger.error(String.format("Failed to delete document for ID %s", documentId), e);
 		}
 	}
 
-	public static void saveDocumentToFile(String linkedDocumentId, File destinationFolder) throws SQLException {
+	public static void saveDocumentToFile(String documentId, File destinationFolder) {
 
 		Connection conn = ConnectionManager.getConnection();
 		String query = "SELECT DOCUMENT_NAME, DOCUMENT_FORMAT, "
 				+ "DOCUMENT_CONTENTS FROM DOCUMENTS WHERE DOCUMENT_ID = ?";
-		try(PreparedStatement ps = conn.prepareStatement(query)){
-			ps.setString(1, linkedDocumentId);
-			ResultSet rs = ps.executeQuery();
-			while(rs.next()) {
-	
-			   File documentFile = Paths.get(destinationFolder.getAbsolutePath(),
-					   rs.getString("DOCUMENT_NAME") + "." +
-					   rs.getString("DOCUMENT_FORMAT")).toFile();
-			   DatabaseUtils.writeBlobToFile(documentFile, rs.getBinaryStream("DOCUMENT_CONTENTS"));
+		try {
+			try(PreparedStatement ps = conn.prepareStatement(query)){
+				ps.setString(1, documentId);
+				try(ResultSet rs = ps.executeQuery()){
+					while(rs.next()) {
+			
+					   File documentFile = Paths.get(destinationFolder.getAbsolutePath(),
+							   rs.getString("DOCUMENT_NAME") + "." +
+							   rs.getString("DOCUMENT_FORMAT")).toFile();
+					   DatabaseUtils.writeBlobToFile(documentFile, rs.getBinaryStream("DOCUMENT_CONTENTS"));
+					}
+				}
 			}
-			rs.close();
+		} catch (SQLException e) {
+			logger.error(String.format("Failed to download document for ID %s", documentId), e);
 		}
 		ConnectionManager.releaseConnection(conn);
 	}

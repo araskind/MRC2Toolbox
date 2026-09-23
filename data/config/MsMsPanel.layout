@@ -100,7 +100,7 @@
 									<content delegate="SplitDockStationFactory">
 										<fullscreen-action>false</fullscreen-action>
 										<node nodeId="1600213797152" orientation="HORIZONTAL" divider="0.25">
-											<leaf id="2" nodeId="1600213797154">
+											<leaf id="1" nodeId="1600213797154">
 												<placeholders>
 													<placeholder>dock.single.DockableMsMsInfoPanel</placeholder>
 												</placeholders>
@@ -130,7 +130,7 @@
 														</entry>
 													</placeholder-map>
 												</leaf>
-												<leaf id="1" nodeId="1600214012085">
+												<leaf id="2" nodeId="1600214012085">
 													<placeholders>
 														<placeholder>dock.single.MsMsPanelAnnotations</placeholder>
 													</placeholders>
@@ -211,20 +211,20 @@
 									</children>
 								</child>
 								<child>
-									<layout factory="predefined" placeholder="dock.single.MsMsPanelAnnotations">
-										<replacement id="dockablesingle MsMsPanelAnnotations"/>
+									<layout factory="predefined" placeholder="dock.single.DockableMsMsInfoPanel">
+										<replacement id="dockablesingle DockableMsMsInfoPanel"/>
 										<delegate id="delegate_ccontrol backup factory id">
-											<id>MsMsPanelAnnotations</id>
+											<id>DockableMsMsInfoPanel</id>
 											<area/>
 										</delegate>
 									</layout>
 									<children ignore="false"/>
 								</child>
 								<child>
-									<layout factory="predefined" placeholder="dock.single.DockableMsMsInfoPanel">
-										<replacement id="dockablesingle DockableMsMsInfoPanel"/>
+									<layout factory="predefined" placeholder="dock.single.MsMsPanelAnnotations">
+										<replacement id="dockablesingle MsMsPanelAnnotations"/>
 										<delegate id="delegate_ccontrol backup factory id">
-											<id>DockableMsMsInfoPanel</id>
+											<id>MsMsPanelAnnotations</id>
 											<area/>
 										</delegate>
 									</layout>
