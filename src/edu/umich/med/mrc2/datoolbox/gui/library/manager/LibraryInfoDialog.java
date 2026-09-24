@@ -23,6 +23,7 @@ package edu.umich.med.mrc2.datoolbox.gui.library.manager;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
@@ -38,18 +39,15 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 
-import javax.swing.DefaultComboBoxModel;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRootPane;
-import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
@@ -63,11 +61,10 @@ import edu.umich.med.mrc2.datoolbox.data.CompoundLibrary;
 import edu.umich.med.mrc2.datoolbox.data.enums.AdductSubset;
 import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
-import edu.umich.med.mrc2.datoolbox.gui.library.feditor.AdductSelectionTable;
+import edu.umich.med.mrc2.datoolbox.gui.adducts.adduct.AdductSelectorPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
-import java.awt.Component;
 
 public class LibraryInfoDialog extends JDialog implements ItemListener{
 
@@ -80,15 +77,14 @@ public class LibraryInfoDialog extends JDialog implements ItemListener{
 	private JTextField nameTextField;
 	private JTextArea libraryDescriptionTextArea;
 	private JButton cancelButton, saveButton;
-	private JComboBox<Polarity>polarityComboBox;
 	private JLabel createDefaultAdductsLabel;
-	private AdductSelectionTable adductsTable;
-	private JComboBox<AdductSubset> adductSubsetComboBox;
 	private JCheckBox clearRtCheckBox;
 	private JCheckBox clearAnnotationsCheckBox;
 	private JLabel neutralPolarityWarningLabel;
 	private JCheckBox preserveSpectraOnCopyCheckBox;
-	private JLabel adductSubsetLabel;
+	private JLabel adductSubsetLabel;	
+	private AdductSelectorPanel adductSelectorPanel;
+	
 	private int rowCount;
 	private CompoundLibrary currentLibrary;
 	
@@ -212,40 +208,7 @@ public class LibraryInfoDialog extends JDialog implements ItemListener{
 		pack();
 	}
 	
-	private void createLibraryDuplicationBlock(JPanel panel) {		
-		
-		JLabel lblNewLabel = new JLabel("Polarity");
-		GridBagConstraints gbc_lblNewLabel = new GridBagConstraints();
-		gbc_lblNewLabel.anchor = GridBagConstraints.EAST;
-		gbc_lblNewLabel.insets = new Insets(0, 0, 5, 5);
-		gbc_lblNewLabel.gridx = 0;
-		gbc_lblNewLabel.gridy = rowCount;
-		panel.add(lblNewLabel, gbc_lblNewLabel);
-		
-		polarityComboBox = new JComboBox<Polarity>(
-				new DefaultComboBoxModel<Polarity>(Polarity.values()));
-		polarityComboBox.setSelectedIndex(-1);
-		polarityComboBox.addItemListener(this);
-		GridBagConstraints gbc_polarityComboBox = new GridBagConstraints();
-		gbc_polarityComboBox.insets = new Insets(0, 0, 5, 5);
-		gbc_polarityComboBox.fill = GridBagConstraints.HORIZONTAL;
-		gbc_polarityComboBox.gridx = 1;
-		gbc_polarityComboBox.gridy = rowCount;
-		panel.add(polarityComboBox, gbc_polarityComboBox);
-		
-		neutralPolarityWarningLabel = new JLabel("Create template library without spectra");
-		neutralPolarityWarningLabel.setForeground(Color.RED);
-		neutralPolarityWarningLabel.setFont(new Font("Tahoma", Font.BOLD, 12));
-		GridBagConstraints gbc_neutralPolarityWarningLabel = new GridBagConstraints();
-		gbc_neutralPolarityWarningLabel.anchor = GridBagConstraints.WEST;
-		gbc_neutralPolarityWarningLabel.gridwidth = 2;
-		gbc_neutralPolarityWarningLabel.insets = new Insets(0, 0, 5, 0);
-		gbc_neutralPolarityWarningLabel.gridx = 2;
-		gbc_neutralPolarityWarningLabel.gridy = rowCount;
-		panel.add(neutralPolarityWarningLabel, gbc_neutralPolarityWarningLabel);
-		neutralPolarityWarningLabel.setVisible(false);
-
-		rowCount++;
+	private void createLibraryDuplicationBlock(JPanel panel) {
 			
 		preserveSpectraOnCopyCheckBox = 
 				new JCheckBox("Preserve spectra when creating library copy");
@@ -270,45 +233,36 @@ public class LibraryInfoDialog extends JDialog implements ItemListener{
 		gbc_createDefaultAdductsCheckBox.gridy = rowCount;
 		panel.add(createDefaultAdductsLabel, gbc_createDefaultAdductsCheckBox);
 		
+		rowCount++;		
+		
+		neutralPolarityWarningLabel = new JLabel("Create template library without spectra");
+		neutralPolarityWarningLabel.setForeground(Color.RED);
+		neutralPolarityWarningLabel.setFont(new Font("Tahoma", Font.BOLD, 12));
+		GridBagConstraints gbc_neutralPolarityWarningLabel = new GridBagConstraints();
+		gbc_neutralPolarityWarningLabel.anchor = GridBagConstraints.WEST;
+		gbc_neutralPolarityWarningLabel.gridwidth = 2;
+		gbc_neutralPolarityWarningLabel.insets = new Insets(0, 0, 5, 0);
+		gbc_neutralPolarityWarningLabel.gridx = 2;
+		gbc_neutralPolarityWarningLabel.gridy = rowCount;
+		panel.add(neutralPolarityWarningLabel, gbc_neutralPolarityWarningLabel);
+		neutralPolarityWarningLabel.setVisible(false);
+
 		rowCount++;
 		
-		adductSubsetLabel = new JLabel("Adduct subset ");
-		GridBagConstraints gbc_lblNewLabel_2 = new GridBagConstraints();
-		gbc_lblNewLabel_2.insets = new Insets(0, 0, 5, 5);
-		gbc_lblNewLabel_2.anchor = GridBagConstraints.EAST;
-		gbc_lblNewLabel_2.gridx = 1;
-		gbc_lblNewLabel_2.gridy = rowCount;
-		panel.add(adductSubsetLabel, gbc_lblNewLabel_2);
-		
-		adductSubsetComboBox = new JComboBox<AdductSubset>(
-				new DefaultComboBoxModel<AdductSubset>(
-						new AdductSubset[] {
-								AdductSubset.MOST_COMMON, 
-								AdductSubset.COMPLETE_LIST
-						}));
-		adductSubsetComboBox.setSelectedItem(AdductSubset.MOST_COMMON);
-		adductSubsetComboBox.addItemListener(this);
-		GridBagConstraints gbc_comboBox = new GridBagConstraints();
-		gbc_comboBox.insets = new Insets(0, 0, 5, 5);
-		gbc_comboBox.fill = GridBagConstraints.HORIZONTAL;
-		gbc_comboBox.gridx = 2;
-		gbc_comboBox.gridy = rowCount;
-		panel.add(adductSubsetComboBox, gbc_comboBox);
-		
+		adductSelectorPanel = new AdductSelectorPanel(true);
+		GridBagConstraints gbc_adductSelectorPanel = new GridBagConstraints();
+		gbc_adductSelectorPanel.anchor = GridBagConstraints.WEST;
+		gbc_adductSelectorPanel.gridwidth = 4;
+		gbc_adductSelectorPanel.insets = new Insets(0, 0, 5, 0);
+		gbc_adductSelectorPanel.fill = GridBagConstraints.BOTH;
+		gbc_adductSelectorPanel.gridx = 0;
+		gbc_adductSelectorPanel.gridy = rowCount;
+		gbc_adductSelectorPanel.weighty = 1.0d;
+		panel.add(adductSelectorPanel, gbc_adductSelectorPanel);
+		adductSelectorPanel.addPolarityListener(this);
+				
 		rowCount++;
-		
-		adductsTable = new AdductSelectionTable();
-		GridBagConstraints gbc_scrollPane = new GridBagConstraints();
-		gbc_scrollPane.gridwidth = 4;
-		gbc_scrollPane.insets = new Insets(0, 0, 5, 0);
-		gbc_scrollPane.fill = GridBagConstraints.BOTH;
-		gbc_scrollPane.gridx = 0;
-		gbc_scrollPane.gridy = rowCount;
-		gbc_scrollPane.weighty = 1.0d;
-		panel.add( new JScrollPane(adductsTable), gbc_scrollPane);
-		
-		rowCount++;
-		
+			
 		clearRtCheckBox = new JCheckBox("Clear retention times");
 		GridBagConstraints gbc_clearRtCheckBox = new GridBagConstraints();
 		gbc_clearRtCheckBox.anchor = GridBagConstraints.WEST;
@@ -323,7 +277,20 @@ public class LibraryInfoDialog extends JDialog implements ItemListener{
 		gbc_clearAnnotationsCheckBox.insets = new Insets(0, 0, 0, 5);
 		gbc_clearAnnotationsCheckBox.gridx = 2;
 		gbc_clearAnnotationsCheckBox.gridy = rowCount;
+		
 		panel.add(clearAnnotationsCheckBox, gbc_clearAnnotationsCheckBox);
+		
+		rowCount++;
+				
+		adductSubsetLabel = new JLabel("   ");
+		GridBagConstraints gbc_lblNewLabel_2 = new GridBagConstraints();
+		gbc_adductSelectorPanel.insets = new Insets(0, 0, 5, 0);
+		gbc_adductSelectorPanel.fill = GridBagConstraints.BOTH;
+		gbc_lblNewLabel_2.anchor = GridBagConstraints.EAST;
+		gbc_lblNewLabel_2.gridx = 1;
+		gbc_lblNewLabel_2.gridy = rowCount;
+		gbc_lblNewLabel_2.weighty = 1.0d;
+		panel.add(adductSubsetLabel, gbc_lblNewLabel_2);
 	}
 	
 	private void configureForNewLibrary(){
@@ -345,15 +312,14 @@ public class LibraryInfoDialog extends JDialog implements ItemListener{
 				" Copy-" + MRC2ToolBoxConfiguration.getFileTimeStampFormat().format(new Date()));
 		libraryDescriptionTextArea.setText(currentLibrary.getLibraryDescription() + 
 				"\nCopy-" + MRC2ToolBoxConfiguration.getFileTimeStampFormat().format(new Date()));
-		polarityComboBox.setSelectedItem(currentLibrary.getPolarity());
+		adductSelectorPanel.setPolarity(currentLibrary.getPolarity());
 		
 		boolean isNeutral = currentLibrary.getPolarity().equals(Polarity.Neutral);
 		neutralPolarityWarningLabel.setVisible(isNeutral);
 		preserveSpectraOnCopyCheckBox.setEnabled(!isNeutral);
 		preserveSpectraOnCopyCheckBox.setSelected(!isNeutral);
 		if(!isNeutral)
-			adductsTable.setTableModelFromAdductListForPolarityAndSubset(
-					currentLibrary.getPolarity(), getAdductSubset());
+			adductSelectorPanel.setPolarity(currentLibrary.getPolarity());
 		
 		saveButton.setActionCommand(MainActionCommands.DUPLICATE_LIBRARY_COMMAND.getName());
 	}
@@ -381,11 +347,11 @@ public class LibraryInfoDialog extends JDialog implements ItemListener{
 	}
 	
 	public Polarity getPolarity() {
-		return (Polarity)polarityComboBox.getSelectedItem();
+		return adductSelectorPanel.getPolarity();
 	}
 	
 	public AdductSubset getAdductSubset() {
-		return (AdductSubset) adductSubsetComboBox.getSelectedItem();
+		return adductSelectorPanel.getAdductSubset();
 	}
 
 	public Collection<String>validateLibraryData(){ 
@@ -418,48 +384,37 @@ public class LibraryInfoDialog extends JDialog implements ItemListener{
 	@Override
 	public void itemStateChanged(ItemEvent e) {
 		
-		if(e.getSource().equals(preserveSpectraOnCopyCheckBox)) {
-			
+		if(e.getSource().equals(preserveSpectraOnCopyCheckBox))			
 			toggleAdductSelector(!preserveSpectraOnCopyCheckBox.isSelected());
-			return;
-		}
-		if (e.getStateChange() == ItemEvent.SELECTED) {
-			
-			if((e.getItem() instanceof Polarity 
-					|| e.getItem() instanceof AdductSubset)) {
-
-				adductsTable.setTableModelFromAdductListForPolarityAndSubset(
-						getPolarity(), getAdductSubset());
-			}
-			if(e.getItem() instanceof Polarity) {
-								
-				boolean isNeutral = getPolarity().equals(Polarity.Neutral);
-				if(preserveSpectraOnCopyCheckBox.isSelected() 
-						&& (isNeutral || !getPolarity().equals(currentLibrary.getPolarity())))
-					preserveSpectraOnCopyCheckBox.setSelected(false);
+		
+		if(e.getStateChange() == ItemEvent.SELECTED && e.getItem() instanceof Polarity) {
 				
-				preserveSpectraOnCopyCheckBox.setEnabled(
-						!(isNeutral || !getPolarity().equals(currentLibrary.getPolarity())));
+			boolean isNeutral = getPolarity().equals(Polarity.Neutral);
+			if(preserveSpectraOnCopyCheckBox.isSelected() 
+					&& (isNeutral || !getPolarity().equals(currentLibrary.getPolarity()))) {
+				preserveSpectraOnCopyCheckBox.setSelected(false);					
+			}
+			preserveSpectraOnCopyCheckBox.setEnabled(
+					!(isNeutral || !getPolarity().equals(currentLibrary.getPolarity())));
+
+			neutralPolarityWarningLabel.setVisible(isNeutral);
 			
-				toggleAdductSelector(!isNeutral);
-				neutralPolarityWarningLabel.setVisible(isNeutral);
-			}			
-		}
+			if(isNeutral)
+				adductSelectorPanel.clearAdductList();
+		}		
 	}
 	
-	private void toggleAdductSelector(boolean visible) {
+	private void toggleAdductSelector(boolean enabled) {
 		
-		adductSubsetComboBox.setEnabled(visible);
-		createDefaultAdductsLabel.setVisible(visible);
-		adductSubsetLabel.setVisible(visible);		
+		adductSelectorPanel.setVisible(enabled);
+		createDefaultAdductsLabel.setVisible(enabled);
+		adductSubsetLabel.setVisible(!enabled);
+		revalidate();
+		repaint();
 	}
 
 	public Collection<Adduct>getSelectedAdducts(){
-		
-		if(adductsTable.getSelectedAdducts().isEmpty())
-			return new ArrayList<>();
-		else
-			return adductsTable.getSelectedAdducts();
+		return adductSelectorPanel.getSelectedAdducts();
 	}
 	
 	public boolean clearRetention() {

@@ -62,15 +62,11 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.library.DuplicateLibraryTa
 
 public class LibraryManager extends JDialog implements ActionListener, TaskListener{
 
-	/**
-	 *
-	 */
 	private static final long serialVersionUID = 4092462690776270043L;
 	
 	private LibraryManagerToolbar toolbar;
 	private LibraryListingTable libraryListingTable;
 	private LibraryInfoDialog libraryInfoDialog;
-	private DuplicateLibraryDialog duplicateLibraryDialog;
 	private MsLibraryPanel parentPanel;
 
 	private Collection<CompoundLibrary>libList;

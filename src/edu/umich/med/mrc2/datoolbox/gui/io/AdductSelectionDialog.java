@@ -65,7 +65,7 @@ public class AdductSelectionDialog extends JDialog {
 		setResizable(true);
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		
-		adductSelectorPanel = new AdductSelectorPanel();
+		adductSelectorPanel = new AdductSelectorPanel(false);
 		getContentPane().add(adductSelectorPanel, BorderLayout.CENTER);
 		
 		JPanel buttonPanel = new JPanel();

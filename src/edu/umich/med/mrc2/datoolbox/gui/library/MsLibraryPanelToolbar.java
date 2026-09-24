@@ -97,8 +97,8 @@ public class MsLibraryPanelToolbar extends CommonToolbar {
 		addSeparator(buttonDimension);
 
 		importLibraryButton = GuiUtils.addButton(this, null, importLibraryIcon, commandListener,
-				MainActionCommands.IMPORT_COMPOUND_LIBRARY_COMMAND.getName(),
-				MainActionCommands.IMPORT_COMPOUND_LIBRARY_COMMAND.getName(), buttonDimension);
+				MainActionCommands.IMPORT_EXTERNAL_LIBRARY_COMMAND.getName(),
+				MainActionCommands.IMPORT_EXTERNAL_LIBRARY_COMMAND.getName(), buttonDimension);
 
 		importRtButton = GuiUtils.addButton(this, null, importRtIcon, commandListener,
 				MainActionCommands.IMPORT_LIBRARY_FEATURE_RT_DIALOG_COMMAND.getName(),

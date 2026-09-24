@@ -44,11 +44,11 @@ public class AdductSelectorPanel extends JPanel implements ItemListener {
 
 	private static final long serialVersionUID = -3669455891091965631L;
 
-	private JComboBox polarityComboBox;
+	private JComboBox<Polarity> polarityComboBox;
 	private AdductSelectionTable adductsTable;
 	private JComboBox<AdductSubset> adductSubsetComboBox;
 	
-	public AdductSelectorPanel() {
+	public AdductSelectorPanel(boolean includeNeutralPolarity) {
 		
 		super();
 		setBorder(new EmptyBorder(10, 10, 10, 10));
@@ -67,9 +67,11 @@ public class AdductSelectorPanel extends JPanel implements ItemListener {
 		gbc_lblNewLabel.gridy = 0;
 		add(lblNewLabel, gbc_lblNewLabel);
 		
-		polarityComboBox = new JComboBox<Polarity>(
-				new DefaultComboBoxModel<Polarity>(
-						new Polarity[] {Polarity.Positive, Polarity.Negative}));
+		DefaultComboBoxModel<Polarity> polaritySelectorModel = new DefaultComboBoxModel<>(
+				new Polarity[] {Polarity.Positive, Polarity.Negative});
+		if(includeNeutralPolarity)
+			polaritySelectorModel = new DefaultComboBoxModel<>(Polarity.values());		
+		polarityComboBox = new JComboBox<Polarity>(polaritySelectorModel);
 		polarityComboBox.setSelectedIndex(-1);
 		polarityComboBox.addItemListener(this);
 		GridBagConstraints gbc_polarityComboBox = new GridBagConstraints();
@@ -129,6 +131,10 @@ public class AdductSelectorPanel extends JPanel implements ItemListener {
 		return (Polarity)polarityComboBox.getSelectedItem();
 	}
 	
+	public void setPolarity(Polarity polarity) {
+		polarityComboBox.setSelectedItem(polarity);
+	}
+	
 	public AdductSubset getAdductSubset() {
 		return (AdductSubset) adductSubsetComboBox.getSelectedItem();
 	}
@@ -136,4 +142,23 @@ public class AdductSelectorPanel extends JPanel implements ItemListener {
 	public Collection<Adduct>getSelectedAdducts(){
 		return adductsTable.getSelectedAdducts();
 	}	
+	
+	public void addPolarityListener(ItemListener polarityListener) {
+		polarityComboBox.addItemListener(polarityListener);
+	}
+	
+	public void clearAdductList() {
+		adductsTable.clearTable();
+	}
 }
+
+
+
+
+
+
+
+
+
+
+
