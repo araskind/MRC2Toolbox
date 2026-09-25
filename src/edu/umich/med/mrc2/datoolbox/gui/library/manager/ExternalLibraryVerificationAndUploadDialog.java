@@ -51,7 +51,6 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRootPane;
 import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
@@ -65,6 +64,7 @@ import edu.umich.med.mrc2.datoolbox.data.enums.CompoundValidationType;
 import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.gui.adducts.adduct.AdductSelectorPanel;
+import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
@@ -79,29 +79,36 @@ public class ExternalLibraryVerificationAndUploadDialog extends JDialog implemen
 
 	private Preferences preferences;
 	public static final String BASE_DIRECTORY = "BASE_DIRECTORY";
+	public static final String COMPOUND_VALIDATION_TYPE = "COMPOUND_VALIDATION_TYPE";
+	public static final String CREATE_DEFAULT_ADDUCTS = "CREATE_DEFAULT_ADDUCTS";
+	public static final String DEFAULT_ADDUCTS_POLARITY = "DEFAULT_ADDUCTS_POLARITY";
+		
 	private File baseDirectory;
 	private File inputLibraryFile;
 	private CompoundLibrary masterLibrary;
+	private CompoundLibrary destinationLibrary;
+	private boolean validateCompoundsOnly;
 	
-	private JTextField nameTextField;
-	private JTextArea libraryDescriptionTextArea;
 	private JTextField libFileTextField;
 	private JCheckBox createDefaultAdductsCheckbox;
-	private JComboBox<CompoundValidationType> compoundVerificationTypeComboBox;
+	private JComboBox<CompoundValidationType> compoundValidationTypeComboBox;
 	private AdductSelectorPanel adductSelectorPanel;
 	private LibraryListingTable libraryListingTable;
 	private int rowCount;
 	private JLabel neutralPolarityWarningLabel;
-	private JLabel adductSubsetLabel;
+	private JLabel spacerLabel;
+	private JScrollPane libScroll;
+	private JButton btnSave;
 
-	public ExternalLibraryVerificationAndUploadDialog(ActionListener listener, boolean verifyOnly) {
+	public ExternalLibraryVerificationAndUploadDialog(
+			ActionListener listener, 
+			boolean validateCompoundsOnly, 
+			CompoundLibrary destinationLibrary) {
 		super();
-		int height = 800;
-		if(verifyOnly) 
-			height = 250;
-		
-		setSize(new Dimension(800, height));
-		setPreferredSize(new Dimension(800, height));
+		this.validateCompoundsOnly = validateCompoundsOnly;
+		this.destinationLibrary = destinationLibrary;
+		setSize(new Dimension(800, 800));
+		setPreferredSize(new Dimension(800, 800));
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		setModalityType(ModalityType.APPLICATION_MODAL);
 		getContentPane().setLayout(new BorderLayout(0, 0));
@@ -160,21 +167,25 @@ public class ExternalLibraryVerificationAndUploadDialog extends JDialog implemen
 		gbc_lblNewLabel_1.gridy = rowCount;
 		panel.add(lblNewLabel_1, gbc_lblNewLabel_1);
 		
-		compoundVerificationTypeComboBox = new JComboBox<>(
+		compoundValidationTypeComboBox = new JComboBox<>(
 				new DefaultComboBoxModel<>(CompoundValidationType.values()));
-		compoundVerificationTypeComboBox.setEditable(false);
+		compoundValidationTypeComboBox.setEditable(false);
+		compoundValidationTypeComboBox.addItemListener(this);
 		GridBagConstraints gbc_compoundVerificationTypeComboBox = new GridBagConstraints();
 		gbc_compoundVerificationTypeComboBox.insets = new Insets(0, 0, 5, 0);
 		gbc_compoundVerificationTypeComboBox.fill = GridBagConstraints.HORIZONTAL;
 		gbc_compoundVerificationTypeComboBox.gridx = 1;
 		gbc_compoundVerificationTypeComboBox.gridy = rowCount;
-		panel.add(compoundVerificationTypeComboBox, gbc_compoundVerificationTypeComboBox);
+		panel.add(compoundValidationTypeComboBox, gbc_compoundVerificationTypeComboBox);
 		
 		rowCount++;
 		
-		if(verifyOnly == false)
-			createAdductSelectionBlock(panel);
+		createMasterLibrarySelectionBlock(panel);
 		
+		if(validateCompoundsOnly == false) {
+			rowCount++;
+			createAdductSelectionBlock(panel);
+		}		
 		JPanel buttonPanel = new JPanel();
 		FlowLayout flowLayout = (FlowLayout) buttonPanel.getLayout();
 		flowLayout.setAlignment(FlowLayout.RIGHT);
@@ -186,7 +197,7 @@ public class ExternalLibraryVerificationAndUploadDialog extends JDialog implemen
 		btnCancel.addActionListener(e -> dispose());
 
 		//	TODO
-		JButton btnSave = new JButton("TODO");
+		btnSave = new JButton("TODO");
 		btnSave.setActionCommand("TODO");
 		btnSave.addActionListener(listener);
 		buttonPanel.add(btnSave);
@@ -201,20 +212,26 @@ public class ExternalLibraryVerificationAndUploadDialog extends JDialog implemen
 	private void createMasterLibrarySelectionBlock(JPanel parent) {
 		
 		libraryListingTable = new LibraryListingTable();
-		
+		libScroll = new JScrollPane(libraryListingTable);		
 		GridBagConstraints gbc_scrollPane = new GridBagConstraints();
-		gbc_scrollPane.gridwidth = 2;
+		gbc_scrollPane.gridwidth = 4;
 		gbc_scrollPane.insets = new Insets(0, 0, 5, 0);
 		gbc_scrollPane.fill = GridBagConstraints.BOTH;
 		gbc_scrollPane.gridx = 0;
-		gbc_scrollPane.gridy = 0;
-		parent.add(new JScrollPane(libraryListingTable), gbc_scrollPane);
+		gbc_scrollPane.gridy = rowCount;
+		gbc_scrollPane.weighty = 1.0d;
+		parent.add(libScroll, gbc_scrollPane);
+		
+		IDTDataCache.refreshMsRtLibraryList();		
+		libraryListingTable.setTableModelFromLibraryCollection(
+				IDTDataCache.getMsRtLibraryList(), null);
 	}
 	
 	private void createAdductSelectionBlock(JPanel panel) {
 		
 		createDefaultAdductsCheckbox = 
 				new JCheckBox("Create selected adducts when importing the library:");
+		createDefaultAdductsCheckbox.addItemListener(this);
 		GridBagConstraints gbc_createDefaultAdductsCheckBox = new GridBagConstraints();
 		gbc_createDefaultAdductsCheckBox.anchor = GridBagConstraints.WEST;
 		gbc_createDefaultAdductsCheckBox.gridwidth = 2;
@@ -248,18 +265,6 @@ public class ExternalLibraryVerificationAndUploadDialog extends JDialog implemen
 		gbc_adductSelectorPanel.weighty = 1.0d;
 		panel.add(adductSelectorPanel, gbc_adductSelectorPanel);
 		adductSelectorPanel.addPolarityListener(this);
-		
-		rowCount++;
-				
-		adductSubsetLabel = new JLabel("   ");
-		GridBagConstraints gbc_lblNewLabel_2 = new GridBagConstraints();
-		gbc_adductSelectorPanel.insets = new Insets(0, 0, 5, 0);
-		gbc_adductSelectorPanel.fill = GridBagConstraints.BOTH;
-		gbc_lblNewLabel_2.anchor = GridBagConstraints.EAST;
-		gbc_lblNewLabel_2.gridx = 1;
-		gbc_lblNewLabel_2.gridy = rowCount;
-		gbc_lblNewLabel_2.weighty = 1.0d;
-		panel.add(adductSubsetLabel, gbc_lblNewLabel_2);
 	}
 
 	@Override
@@ -301,14 +306,6 @@ public class ExternalLibraryVerificationAndUploadDialog extends JDialog implemen
 		}					
 	}
 
-	public String getLibraryDescription(){
-		return libraryDescriptionTextArea.getText().trim();
-	}
-
-	public String getLibraryName(){
-		return nameTextField.getText().trim();
-	}
-	
 	public Polarity getPolarity() {
 		return adductSelectorPanel.getPolarity();
 	}
@@ -324,6 +321,75 @@ public class ExternalLibraryVerificationAndUploadDialog extends JDialog implemen
 	public boolean createDefaultAdducts() {
 		return createDefaultAdductsCheckbox.isSelected();
 	}
+	public CompoundLibrary getBasePCDLlibrary() {
+		return masterLibrary;
+	}
+
+	public File getInputLibraryFile() {
+		return inputLibraryFile;
+	}
+		
+	public CompoundValidationType getCompoundValidationType() {
+		return (CompoundValidationType)compoundValidationTypeComboBox.getSelectedItem();
+	}
+
+	@Override
+	public void itemStateChanged(ItemEvent e) {
+
+		if(e.getSource().equals(createDefaultAdductsCheckbox))			
+			toggleAdductSelector(createDefaultAdductsCheckbox.isSelected());
+		
+		if(e.getStateChange() == ItemEvent.SELECTED) {
+			
+			if(e.getItem() instanceof Polarity) {
+				boolean isNeutral = getPolarity().equals(Polarity.Neutral);
+				neutralPolarityWarningLabel.setVisible(isNeutral);
+				
+				if(isNeutral)
+					adductSelectorPanel.clearAdductList();
+			}
+			if(e.getItem() instanceof CompoundValidationType) {
+				
+				if(e.getItem().equals(CompoundValidationType.AGAINST_COMPOUND_DATABASE))
+					configureForDatabaseValidation();
+				
+				if(e.getItem().equals(CompoundValidationType.AGAINST_MASTER_LIBRARY))
+					configureForMasterLibraryValidation();
+			}
+		}		
+	}
+	
+	private void toggleAdductSelector(boolean enable) {
+
+		adductSelectorPanel.configureAsActive(enable);
+		if(enable && getPolarity().equals(Polarity.Neutral))
+			neutralPolarityWarningLabel.setVisible(true);
+		if(!enable)
+			neutralPolarityWarningLabel.setVisible(false);		
+	}
+
+	private void configureForDatabaseValidation() {
+		
+		libScroll.setVisible(false);
+		btnSave.setText(MainActionCommands.VALIDATE_LIBRARY_COMPOUNDS_AGAINST_DATABASE_COMMAND.getName());
+		btnSave.setActionCommand(MainActionCommands.VALIDATE_LIBRARY_COMPOUNDS_AGAINST_DATABASE_COMMAND.getName());
+		revalidate();
+		repaint();	
+	}
+
+	private void configureForMasterLibraryValidation() {
+		
+		libScroll.setVisible(true);
+		btnSave.setText(MainActionCommands.VALIDATE_LIBRARY_COMPOUNDS_AGAINST_MASTER_LIBRARY_COMMAND.getName());
+		btnSave.setActionCommand(MainActionCommands.VALIDATE_LIBRARY_COMPOUNDS_AGAINST_MASTER_LIBRARY_COMMAND.getName());
+		revalidate();
+		repaint();
+	}	
+	
+	@Override
+	public void loadPreferences() {
+		loadPreferences(Preferences.userNodeForPackage(this.getClass()));		
+	}
 	
 	@Override
 	public void loadPreferences(Preferences preferences) {
@@ -331,12 +397,22 @@ public class ExternalLibraryVerificationAndUploadDialog extends JDialog implemen
 		this.preferences = preferences;
 		baseDirectory = Paths.get(preferences.get(BASE_DIRECTORY, 
 				MRC2ToolBoxConfiguration.getDefaultExperimentsDirectory())).toFile();
-	}
-
-	@Override
-	public void loadPreferences() {
-		loadPreferences(Preferences.userNodeForPackage(this.getClass()));		
-	}
+		CompoundValidationType validationType  = CompoundValidationType.getOptionByName(
+				preferences.get(COMPOUND_VALIDATION_TYPE,CompoundValidationType.AGAINST_MASTER_LIBRARY.name()));
+		compoundValidationTypeComboBox.setSelectedItem(validationType);
+		if(validationType.equals(CompoundValidationType.AGAINST_COMPOUND_DATABASE))
+			configureForDatabaseValidation();
+		
+		if(validationType.equals(CompoundValidationType.AGAINST_MASTER_LIBRARY))
+			configureForMasterLibraryValidation();		
+		
+		if(createDefaultAdductsCheckbox != null) {
+			createDefaultAdductsCheckbox.setSelected(preferences.getBoolean(CREATE_DEFAULT_ADDUCTS, false));
+			Polarity adductPolarity  = Polarity.getPolarityByCode(
+					preferences.get(DEFAULT_ADDUCTS_POLARITY, Polarity.Neutral.getCode()));
+			adductSelectorPanel.setPolarity(adductPolarity);
+		}
+	}	
 
 	@Override
 	public void savePreferences() {
@@ -344,70 +420,47 @@ public class ExternalLibraryVerificationAndUploadDialog extends JDialog implemen
 		preferences = Preferences.userNodeForPackage(this.getClass());
 		if(baseDirectory != null)
 			preferences.put(BASE_DIRECTORY, baseDirectory.getAbsolutePath());
+		
+		preferences.put(COMPOUND_VALIDATION_TYPE, getCompoundValidationType().name());
+		preferences.putBoolean(CREATE_DEFAULT_ADDUCTS, createDefaultAdducts());
+		preferences.put(DEFAULT_ADDUCTS_POLARITY, getPolarity().getCode());
 	}
 
-	public CompoundLibrary getBasePCDLlibrary() {
-		return masterLibrary;
-	}
+//	public static final String COMPOUND_VALIDATION_TYPE = "COMPOUND_VALIDATION_TYPE";
+//	public static final String CREATE_DEFAULT_ADDUCTS = "CREATE_DEFAULT_ADDUCTS";
 
-	public void setBasePCDLlibrary(CompoundLibrary basePCDLlibrary) {
-		this.masterLibrary = basePCDLlibrary;
-		//	compoundVerificationTypeComboBox.setText(basePCDLlibrary.getLibraryName());
-	}
-	
-	public Collection<String>validateLibraryData(){
-	    
+	public Collection<String> validateFormData(boolean validateCompoundsOnly) {
 	    Collection<String>errors = new ArrayList<String>();
 	    
-	    if(masterLibrary == null || masterLibrary.getFeatures().isEmpty())
-	        errors.add("Missing or empty base PCDL library.");
-	    
-	    String libName = getLibraryName();
-	    
-	    if(libName.isEmpty())
-	        errors.add("New library name can not be empty.");
-	    else {
-		    CompoundLibrary exitingLibrary = IDTDataCache.getMSRTLibraryByName(libName);
-		    if(exitingLibrary != null)
-		    	 errors.add("Library \"" + libName + "\" already exists.");
-	    }
-	    if(getSelectedAdducts().isEmpty())
-	        errors.add("Adduct list can not be empty.");
-	    	    
-	    if(getPolarity() == null)
-	    	errors.add("Library polarity not specified.");
+//	    if(masterLibrary == null || masterLibrary.getFeatures().isEmpty())
+//	        errors.add("Missing or empty base PCDL library.");
+//	    
+//	    String libName = getLibraryName();
+//	    
+//	    if(libName.isEmpty())
+//	        errors.add("New library name can not be empty.");
+//	    else {
+//		    CompoundLibrary exitingLibrary = IDTDataCache.getMSRTLibraryByName(libName);
+//		    if(exitingLibrary != null)
+//		    	 errors.add("Library \"" + libName + "\" already exists.");
+//	    }
+//	    if(getSelectedAdducts().isEmpty())
+//	        errors.add("Adduct list can not be empty.");
+//	    	    
+//	    if(getPolarity() == null)
+//	    	errors.add("Library polarity not specified.");
 	    
 	    if(inputLibraryFile == null || !inputLibraryFile.exists())
-	    	errors.add("Library file to import not selected.");
+	    	errors.add("Library file for import/verification not selected.");
 	    		    
 	    return errors;
 	}
 
-	public File getInputLibraryFile() {
-		return inputLibraryFile;
-	}
-
-	@Override
-	public void itemStateChanged(ItemEvent e) {
-
-		if(e.getSource().equals(createDefaultAdductsCheckbox))			
-			toggleAdductSelector(!createDefaultAdductsCheckbox.isSelected());
-		
-		if(e.getStateChange() == ItemEvent.SELECTED && e.getItem() instanceof Polarity) {
-			
-			boolean isNeutral = getPolarity().equals(Polarity.Neutral);
-			neutralPolarityWarningLabel.setVisible(isNeutral);
-			
-			if(isNeutral)
-				adductSelectorPanel.clearAdductList();
-		}		
-	}
-
-	private void toggleAdductSelector(boolean enabled) {
-
-		adductSelectorPanel.setVisible(enabled);
-		adductSubsetLabel.setVisible(!enabled);
-		revalidate();
-		repaint();		
+	public CompoundLibrary getDestinationLibrary() {
+		return destinationLibrary;
 	}
 }
+
+
+
+

@@ -55,7 +55,7 @@ public abstract class PCDLAbstractTask extends AbstractTask {
 	protected Map<PCDLFields, Integer>dataFieldMap;
 	protected Collection<CompoundIdentity>unmatchedFeatures = new ArrayList<CompoundIdentity>();
 	
-	protected void loadMasterLibrary() {
+	protected void fetchMasterLibraryFromDatabase(String libraryId) {
 		
 	}
 		

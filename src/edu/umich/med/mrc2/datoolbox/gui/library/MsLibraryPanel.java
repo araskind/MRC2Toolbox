@@ -53,7 +53,6 @@ import org.openscience.cdk.DefaultChemObjectBuilder;
 import org.openscience.cdk.interfaces.IMolecularFormula;
 import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator;
 
-import bibliothek.gui.dock.action.actions.SimpleButtonAction;
 import edu.umich.med.mrc2.datoolbox.data.Adduct;
 import edu.umich.med.mrc2.datoolbox.data.CompoundIdentity;
 import edu.umich.med.mrc2.datoolbox.data.CompoundLibrary;
@@ -61,6 +60,7 @@ import edu.umich.med.mrc2.datoolbox.data.LibraryMsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MassSpectrum;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsPoint;
+import edu.umich.med.mrc2.datoolbox.data.enums.CompoundValidationType;
 import edu.umich.med.mrc2.datoolbox.data.enums.MsLibraryFormat;
 import edu.umich.med.mrc2.datoolbox.database.idt.MSRTLibraryUtils;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignEvent;
@@ -162,84 +162,7 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ItemList
 
 	@Override
 	protected void initActions() {
-		
-		super.initActions();
-		
-		menuActions.add(GuiUtils.setupButtonAction(
-				MainActionCommands.SHOW_LIBRARY_MANAGER_COMMAND.getName(),
-				MainActionCommands.SHOW_LIBRARY_MANAGER_COMMAND.getName(), 
-				libraryManagerIcon, this));
-		
-		menuActions.addSeparator();	
-		
-		menuActions.add(GuiUtils.setupButtonAction(
-				MainActionCommands.CLOSE_LIBRARY_COMMAND.getName(),
-				MainActionCommands.CLOSE_LIBRARY_COMMAND.getName(), 
-				closeLibraryIcon, this));
-		
-		menuActions.addSeparator();	
-		
-		menuActions.add(GuiUtils.setupButtonAction(
-				MainActionCommands.IMPORT_EXTERNAL_LIBRARY_COMMAND.getName(),
-				MainActionCommands.IMPORT_EXTERNAL_LIBRARY_COMMAND.getName(), 
-				importLibraryIcon, this));
-		menuActions.add(GuiUtils.setupButtonAction(
-				MainActionCommands.IMPORT_LIBRARY_FEATURE_RT_DIALOG_COMMAND.getName(),
-				MainActionCommands.IMPORT_LIBRARY_FEATURE_RT_DIALOG_COMMAND.getName(), 
-				importRtIcon, this));
-		
-		menuActions.addSeparator();	
-				
-		menuActions.add(GuiUtils.setupButtonAction(
-				MainActionCommands.EXPORT_COMPOUND_LIBRARY_COMMAND.getName(),
-				MainActionCommands.EXPORT_COMPOUND_LIBRARY_COMMAND.getName(), 
-				exportLibraryIcon, this));
-		menuActions.add(GuiUtils.setupButtonAction(
-				MainActionCommands.EXPORT_FILTERED_COMPOUND_LIBRARY_COMMAND.getName(),
-				MainActionCommands.EXPORT_FILTERED_COMPOUND_LIBRARY_COMMAND.getName(), 
-				exportFilteredLibraryIcon, this));
-		
-		menuActions.addSeparator();	
-		
-		menuActions.add(GuiUtils.setupButtonAction(
-				MainActionCommands.CONVERT_LIBRARY_FOR_RECURSION_DIALOG_COMMAND.getName(),
-				MainActionCommands.CONVERT_LIBRARY_FOR_RECURSION_DIALOG_COMMAND.getName(), 
-				mergeLibrariesIcon, this));
-		
-		menuActions.addSeparator();	
-		
-		SimpleButtonAction newFeatureAction = GuiUtils.setupButtonAction(
-				MainActionCommands.NEW_LIBRARY_FEATURE_DIAOG_COMMAND.getName(),
-				MainActionCommands.NEW_LIBRARY_FEATURE_DIAOG_COMMAND.getName(), 
-				newFeatureIcon, this);
-		newFeatureAction.setEnabled(false);
-		menuActions.add(newFeatureAction);
-		
-		SimpleButtonAction editFeatureAction = GuiUtils.setupButtonAction(
-				MainActionCommands.EDIT_LIBRARY_FEATURE_DIALOG_COMMAND.getName(),
-				MainActionCommands.EDIT_LIBRARY_FEATURE_DIALOG_COMMAND.getName(), 
-				editFeatureIcon, this);
-		editFeatureAction.setEnabled(false);
-		menuActions.add(editFeatureAction);
-		
-		menuActions.add(GuiUtils.setupButtonAction(
-				MainActionCommands.DELETE_LIBRARY_FEATURE_COMMAND.getName(),
-				MainActionCommands.DELETE_LIBRARY_FEATURE_COMMAND.getName(), 
-				deleteFeatureIcon, this));
-		
-		menuActions.addSeparator();	
-		
-		menuActions.add(GuiUtils.setupButtonAction(
-				MainActionCommands.EXPORT_REFERENCE_MSMS_LIBRARY_COMMAND.getName(),
-				MainActionCommands.EXPORT_REFERENCE_MSMS_LIBRARY_COMMAND.getName(), 
-				libraryExportIcon, this));
-				
-		SimpleButtonAction importDecoyAction = GuiUtils.setupButtonAction(
-				MainActionCommands.IMPORT_DECOY_REFERENCE_MSMS_LIBRARY_COMMAND.getName(),
-				MainActionCommands.IMPORT_DECOY_REFERENCE_MSMS_LIBRARY_COMMAND.getName(), 
-				libraryImportIcon, this);
-		importDecoyAction.setEnabled(false);
-		menuActions.add(importDecoyAction);
+
 	}
 	
 	@Override
@@ -262,10 +185,10 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ItemList
 			setupExternalLibraryCompoundValidation();
 		
 		if (command.equals(MainActionCommands.VALIDATE_LIBRARY_COMPOUNDS_AGAINST_DATABASE_COMMAND.getName()))
-			validateLibraryAgainstCompoundDatabase(); 
+			validateLibraryCompounds(CompoundValidationType.AGAINST_COMPOUND_DATABASE); 
 		
 		if (command.equals(MainActionCommands.VALIDATE_LIBRARY_COMPOUNDS_AGAINST_MASTER_LIBRARY_COMMAND.getName()))
-			validateLibraryAgainstMasterLibrary();
+			validateLibraryCompounds(CompoundValidationType.AGAINST_MASTER_LIBRARY);
 				
 		if (command.equals(MainActionCommands.IMPORT_EXTERNAL_LIBRARY_COMMAND.getName()))
 			importLibrary();
@@ -951,14 +874,23 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ItemList
 	
 	private void setupExternalLibraryCompoundValidation() {
 		
+		externalLibraryVerificationAndUploadDialog = 
+				new ExternalLibraryVerificationAndUploadDialog(this, true, null);
+		externalLibraryVerificationAndUploadDialog.setLocationRelativeTo(this.getContentPane());
+		externalLibraryVerificationAndUploadDialog.setVisible(true);
 	}
 	
-	private void validateLibraryAgainstCompoundDatabase() {
+	private void validateLibraryCompounds(CompoundValidationType validationType) {
 		
-	}
-
-	private void validateLibraryAgainstMasterLibrary() {
+		Collection<String>errors = externalLibraryVerificationAndUploadDialog.validateFormData(true);
+		if(!errors.isEmpty()){
+		    MessageDialog.showErrorMsg(
+		            StringUtils.join(errors, "\n"), externalLibraryVerificationAndUploadDialog);
+		    return;
+		}
+		//	TODO init validaton;
 		
+		externalLibraryVerificationAndUploadDialog.dispose();
 	}
 	
 	private void importIDTrackerLibrary() {
@@ -987,15 +919,20 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ItemList
 					+ "in order to import data from file!");
 			return;
 		}
-		JnaFileChooser fc = new JnaFileChooser(baseDirectory);
-		fc.setMode(JnaFileChooser.Mode.Files);
-		fc.addFilter(MsLibraryFormat.CEF.getName(), MsLibraryFormat.CEF.getFileExtension());
-		fc.addFilter("Library Editor files", "xml", "XML");	
-		//	fc.addFilter("TAB-separated text files", "txt", "TXT", "tsv", "TSV");
-		fc.setTitle("Select library file to import");
-		fc.setMultiSelectionEnabled(false);
-		if (fc.showOpenDialog(SwingUtilities.getWindowAncestor(this.getContentPane())))			
-			importLibraryFromFile(fc.getSelectedFile(), null);		
+		externalLibraryVerificationAndUploadDialog = 
+				new ExternalLibraryVerificationAndUploadDialog(this, false, currentLibrary);
+		externalLibraryVerificationAndUploadDialog.setLocationRelativeTo(this.getContentPane());
+		externalLibraryVerificationAndUploadDialog.setVisible(true);
+		
+//		JnaFileChooser fc = new JnaFileChooser(baseDirectory);
+//		fc.setMode(JnaFileChooser.Mode.Files);
+//		fc.addFilter(MsLibraryFormat.CEF.getName(), MsLibraryFormat.CEF.getFileExtension());
+//		fc.addFilter("Library Editor files", "xml", "XML");	
+//		//	fc.addFilter("TAB-separated text files", "txt", "TXT", "tsv", "TSV");
+//		fc.setTitle("Select library file to import");
+//		fc.setMultiSelectionEnabled(false);
+//		if (fc.showOpenDialog(SwingUtilities.getWindowAncestor(this.getContentPane())))			
+//			importLibraryFromFile(fc.getSelectedFile(), null);		
 	}
 	
 	public void importLibraryFromFile(File inputFile, Collection<Adduct> adductList) {

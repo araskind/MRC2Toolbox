@@ -150,6 +150,15 @@ public class AdductSelectorPanel extends JPanel implements ItemListener {
 	public void clearAdductList() {
 		adductsTable.clearTable();
 	}
+
+	public void configureAsActive(boolean enable) {
+		polarityComboBox.setEnabled(enable);
+		adductSubsetComboBox.setEnabled(enable);
+		adductsTable.setEnabled(enable);
+		if(!enable) {
+			//	TODO Clear selected 
+		}
+	}
 }
 
 

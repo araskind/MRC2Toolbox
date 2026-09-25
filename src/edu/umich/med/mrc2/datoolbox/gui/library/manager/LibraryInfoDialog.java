@@ -82,7 +82,7 @@ public class LibraryInfoDialog extends JDialog implements ItemListener{
 	private JCheckBox clearAnnotationsCheckBox;
 	private JLabel neutralPolarityWarningLabel;
 	private JCheckBox preserveSpectraOnCopyCheckBox;
-	private JLabel adductSubsetLabel;	
+	private JLabel spacerLabel;	
 	private AdductSelectorPanel adductSelectorPanel;
 	
 	private int rowCount;
@@ -225,13 +225,13 @@ public class LibraryInfoDialog extends JDialog implements ItemListener{
 		
 		createDefaultAdductsLabel = 
 				new JLabel("Create selected adducts when duplicating the library:");
-		GridBagConstraints gbc_createDefaultAdductsCheckBox = new GridBagConstraints();
-		gbc_createDefaultAdductsCheckBox.anchor = GridBagConstraints.WEST;
-		gbc_createDefaultAdductsCheckBox.gridwidth = 3;
-		gbc_createDefaultAdductsCheckBox.insets = new Insets(0, 0, 5, 5);
-		gbc_createDefaultAdductsCheckBox.gridx = 0;
-		gbc_createDefaultAdductsCheckBox.gridy = rowCount;
-		panel.add(createDefaultAdductsLabel, gbc_createDefaultAdductsCheckBox);
+		GridBagConstraints gbc_createDefaultAdductsLabel = new GridBagConstraints();
+		gbc_createDefaultAdductsLabel.anchor = GridBagConstraints.WEST;
+		gbc_createDefaultAdductsLabel.gridwidth = 3;
+		gbc_createDefaultAdductsLabel.insets = new Insets(0, 0, 5, 5);
+		gbc_createDefaultAdductsLabel.gridx = 0;
+		gbc_createDefaultAdductsLabel.gridy = rowCount;
+		panel.add(createDefaultAdductsLabel, gbc_createDefaultAdductsLabel);
 		
 		rowCount++;		
 		
@@ -282,7 +282,7 @@ public class LibraryInfoDialog extends JDialog implements ItemListener{
 		
 		rowCount++;
 				
-		adductSubsetLabel = new JLabel("   ");
+		spacerLabel = new JLabel("   ");
 		GridBagConstraints gbc_lblNewLabel_2 = new GridBagConstraints();
 		gbc_adductSelectorPanel.insets = new Insets(0, 0, 5, 0);
 		gbc_adductSelectorPanel.fill = GridBagConstraints.BOTH;
@@ -290,7 +290,7 @@ public class LibraryInfoDialog extends JDialog implements ItemListener{
 		gbc_lblNewLabel_2.gridx = 1;
 		gbc_lblNewLabel_2.gridy = rowCount;
 		gbc_lblNewLabel_2.weighty = 1.0d;
-		panel.add(adductSubsetLabel, gbc_lblNewLabel_2);
+		panel.add(spacerLabel, gbc_lblNewLabel_2);
 	}
 	
 	private void configureForNewLibrary(){
@@ -408,7 +408,7 @@ public class LibraryInfoDialog extends JDialog implements ItemListener{
 		
 		adductSelectorPanel.setVisible(enabled);
 		createDefaultAdductsLabel.setVisible(enabled);
-		adductSubsetLabel.setVisible(!enabled);
+		spacerLabel.setVisible(!enabled);
 		revalidate();
 		repaint();
 	}

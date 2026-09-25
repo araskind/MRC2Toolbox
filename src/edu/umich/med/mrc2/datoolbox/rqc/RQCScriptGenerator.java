@@ -532,9 +532,7 @@ public class RQCScriptGenerator {
 		
 		String rScriptFileName = experimentId + "-" + assayType + 
 				"-SummaryQC-" + FIOUtils.getTimestamp() + ".R";
-		Path outputPath = Paths.get(
-				//rWorkingDir.getAbsolutePath()
-				"E:\\DataAnalysis\\_QC_SCRIPTS", rScriptFileName);
+		Path outputPath = Paths.get(rWorkingDir.getAbsolutePath(), rScriptFileName);
 		try {
 		    Files.write(outputPath, 
 		    		rscriptParts,
