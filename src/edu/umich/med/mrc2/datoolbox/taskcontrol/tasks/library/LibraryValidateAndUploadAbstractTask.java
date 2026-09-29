@@ -44,6 +44,7 @@ import edu.umich.med.mrc2.datoolbox.data.enums.CompoundValidationType;
 import edu.umich.med.mrc2.datoolbox.data.enums.PCDLFields;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.database.idt.MSRTLibraryUtils;
+import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 import edu.umich.med.mrc2.datoolbox.utils.DelimitedTextParser;
@@ -217,6 +218,7 @@ public abstract class LibraryValidateAndUploadAbstractTask extends DatabaseLibra
 			}
 			processed++;
 		}
+		MRC2ToolBoxCore.getActiveMsLibraries().add(targetUploadLlibrary);
 		ConnectionManager.releaseConnection(conn);
 	}
 	

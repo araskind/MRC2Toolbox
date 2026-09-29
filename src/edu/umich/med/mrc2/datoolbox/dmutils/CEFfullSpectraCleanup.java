@@ -35,7 +35,7 @@ public class CEFfullSpectraCleanup {
 
 	public static void main(String[] args) {
 
-		File ceFolder = new File("Y:\\DataAnalysis\\_Reports\\EX01607 - Motrpac Tranche 5 Muscle\\A049 - Central carbon metabolism profiling\\MFE\\NEG\\BATCH01");
+		File ceFolder = new File("Y:\\DataAnalysis\\_Reports\\EX01607 - Motrpac Tranche 5 Muscle\\A003 - Untargeted\\MFE\\NEG\\BATCH02");
 		cleanCefFiles(ceFolder);
 	}
 	

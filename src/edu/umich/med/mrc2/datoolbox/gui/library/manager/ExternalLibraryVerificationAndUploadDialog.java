@@ -285,6 +285,7 @@ public class ExternalLibraryVerificationAndUploadDialog extends JDialog implemen
 		fc.setMultiSelectionEnabled(false);
 		if (fc.showOpenDialog(SwingUtilities.getWindowAncestor(this.getContentPane()))) {		
 
+			inputLibraryFile = fc.getSelectedFile();
 			if (inputLibraryFile.getName().toLowerCase().endsWith(".txt")
 					|| inputLibraryFile.getName().toLowerCase().endsWith(".tsv")) {
 				inputLibraryFile = fc.getSelectedFile();
@@ -316,7 +317,8 @@ public class ExternalLibraryVerificationAndUploadDialog extends JDialog implemen
 	
 	public Collection<Adduct>getSelectedAdducts(){
 		
-		if(createDefaultAdductsCheckbox.isSelected())
+		if(createDefaultAdductsCheckbox != null 
+				&& createDefaultAdductsCheckbox.isSelected())
 			return adductSelectorPanel.getSelectedAdducts();
 		else 
 			return new ArrayList<>();
@@ -427,12 +429,13 @@ public class ExternalLibraryVerificationAndUploadDialog extends JDialog implemen
 			preferences.put(BASE_DIRECTORY, baseDirectory.getAbsolutePath());
 		
 		preferences.put(COMPOUND_VALIDATION_TYPE, getCompoundValidationType().name());
-		preferences.putBoolean(CREATE_DEFAULT_ADDUCTS, createDefaultAdducts());
-		preferences.put(DEFAULT_ADDUCTS_POLARITY, getPolarity().getCode());
+		
+		if(createDefaultAdductsCheckbox != null)
+			preferences.putBoolean(CREATE_DEFAULT_ADDUCTS, createDefaultAdducts());
+		
+		if(adductSelectorPanel != null)
+			preferences.put(DEFAULT_ADDUCTS_POLARITY, getPolarity().getCode());
 	}
-
-//	public static final String COMPOUND_VALIDATION_TYPE = "COMPOUND_VALIDATION_TYPE";
-//	public static final String CREATE_DEFAULT_ADDUCTS = "CREATE_DEFAULT_ADDUCTS";
 
 	public Collection<String> validateFormData(boolean validateCompoundsOnly) {
 	    Collection<String>errors = new ArrayList<String>();

@@ -124,10 +124,10 @@ public class InformationDialog extends JDialog implements ActionListener {
 
 	private void initGui(InfoDialogType type) {
 
-		setMaximumSize(new Dimension(1000, 800));
-		setPreferredSize(new Dimension(500, 300));
-		setSize(new Dimension(600, 400));
-		setResizable(false);
+		//setMaximumSize(new Dimension(1000, 800));
+		setPreferredSize(new Dimension(600, 480));
+		//setSize(new Dimension(600, 400));
+		//setResizable(false);
 		getContentPane().setLayout(new BorderLayout(0, 0));
 
 		JPanel panel = new JPanel();

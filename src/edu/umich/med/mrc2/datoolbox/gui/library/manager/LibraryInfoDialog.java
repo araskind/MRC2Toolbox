@@ -39,10 +39,12 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
@@ -83,10 +85,12 @@ public class LibraryInfoDialog extends JDialog implements ItemListener{
 	private JLabel neutralPolarityWarningLabel;
 	private JCheckBox preserveSpectraOnCopyCheckBox;
 	private JLabel spacerLabel;	
-	private AdductSelectorPanel adductSelectorPanel;
-	
+	private JComboBox<Polarity> newLibraryPolarityComboBox;
+	private AdductSelectorPanel adductSelectorPanel;	
 	private int rowCount;
+	
 	private CompoundLibrary currentLibrary;
+	private LibraryAction libraryAction;
 	
 	public enum LibraryAction{
 		CreateNew,
@@ -98,16 +102,17 @@ public class LibraryInfoDialog extends JDialog implements ItemListener{
 	public LibraryInfoDialog(
 			ActionListener listener, 
 			LibraryAction libraryAction,
-			CompoundLibrary library) {
+			CompoundLibrary currentLibrary) {
 
 		super();
-		currentLibrary = library;
+		this.currentLibrary = currentLibrary;
+		this.libraryAction = libraryAction;
 		
-		int height = 200;
+		int height = 250;
 		if(libraryAction.equals(LibraryAction.Duplicate))
 			height = 500;
 			
-		setSize(new Dimension(665, 658));
+		setSize(new Dimension(650, height));
 		setPreferredSize(new Dimension(650, height));
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		setModalityType(ModalityType.APPLICATION_MODAL);
@@ -165,6 +170,27 @@ public class LibraryInfoDialog extends JDialog implements ItemListener{
 		
 		rowCount++;
 		rowCount++;
+		
+		if(libraryAction.equals(LibraryAction.CreateNew)) {
+	
+			JLabel lblNewLibPolarity = new JLabel("New library polarity");
+			GridBagConstraints gbc_lblNewLibPolarity = new GridBagConstraints();
+			gbc_lblNewLibPolarity.anchor = GridBagConstraints.NORTH;
+			gbc_lblNewLibPolarity.insets = new Insets(0, 0, 5, 5);
+			gbc_lblNewLibPolarity.gridx = 0;
+			gbc_lblNewLibPolarity.gridy = rowCount;
+			panel.add(lblNewLibPolarity, gbc_lblNewLibPolarity);
+			
+			newLibraryPolarityComboBox = new JComboBox<Polarity>(new DefaultComboBoxModel<>(Polarity.values()));
+			GridBagConstraints gbc_newLibraryPolarityComboBox = new GridBagConstraints();
+			gbc_newLibraryPolarityComboBox.insets = new Insets(0, 0, 5, 0);
+			gbc_newLibraryPolarityComboBox.fill = GridBagConstraints.BOTH;
+			gbc_newLibraryPolarityComboBox.gridx = 1;
+			gbc_newLibraryPolarityComboBox.gridy = rowCount;
+			panel.add(newLibraryPolarityComboBox, gbc_newLibraryPolarityComboBox);
+			
+			rowCount++;
+		}
 		
 		if(libraryAction.equals(LibraryAction.Duplicate))
 			createLibraryDuplicationBlock(panel);
@@ -350,6 +376,10 @@ public class LibraryInfoDialog extends JDialog implements ItemListener{
 		return adductSelectorPanel.getPolarity();
 	}
 	
+	public Polarity getNewLibraryPolarity() {
+		return (Polarity)newLibraryPolarityComboBox.getSelectedItem();
+	}
+	
 	public AdductSubset getAdductSubset() {
 		return adductSelectorPanel.getAdductSubset();
 	}
@@ -363,8 +393,7 @@ public class LibraryInfoDialog extends JDialog implements ItemListener{
 		}
 		else {
 			//	Check for name conflict
-			Collection<CompoundLibrary> libList = 
-					IDTDataCache.getMsRtLibraryList();			
+			Collection<CompoundLibrary> libList = IDTDataCache.getMsRtLibraryList();			
 			for (CompoundLibrary l : libList) {
 				
 				if(l.getLibraryName().equals(name) 
@@ -373,10 +402,9 @@ public class LibraryInfoDialog extends JDialog implements ItemListener{
 				}				
 			}
 		}
-		if(!saveButton.getActionCommand().equals(
-				MainActionCommands.DUPLICATE_LIBRARY_COMMAND.getName())				
-				&& getPolarity() == null) {
-			errors.add("Library polarity must be specified");
+		if((libraryAction.equals(LibraryAction.Duplicate) && getPolarity() == null)
+			|| (libraryAction.equals(LibraryAction.CreateNew)  && getNewLibraryPolarity() == null)){							  
+				errors.add("Library polarity must be specified");
 		}
 		return errors;
 	}
@@ -388,19 +416,25 @@ public class LibraryInfoDialog extends JDialog implements ItemListener{
 			toggleAdductSelector(!preserveSpectraOnCopyCheckBox.isSelected());
 		
 		if(e.getStateChange() == ItemEvent.SELECTED && e.getItem() instanceof Polarity) {
-				
-			boolean isNeutral = getPolarity().equals(Polarity.Neutral);
-			if(preserveSpectraOnCopyCheckBox.isSelected() 
-					&& (isNeutral || !getPolarity().equals(currentLibrary.getPolarity()))) {
-				preserveSpectraOnCopyCheckBox.setSelected(false);					
-			}
-			preserveSpectraOnCopyCheckBox.setEnabled(
-					!(isNeutral || !getPolarity().equals(currentLibrary.getPolarity())));
-
-			neutralPolarityWarningLabel.setVisible(isNeutral);
 			
-			if(isNeutral)
-				adductSelectorPanel.clearAdductList();
+			if(e.getSource().equals(newLibraryPolarityComboBox)) {
+				boolean isNeutral = getNewLibraryPolarity().equals(Polarity.Neutral);
+				neutralPolarityWarningLabel.setVisible(isNeutral);
+			}
+			else {
+				boolean isNeutral = getPolarity().equals(Polarity.Neutral);
+				if(preserveSpectraOnCopyCheckBox.isSelected() 
+						&& (isNeutral || !getPolarity().equals(currentLibrary.getPolarity()))) {
+					preserveSpectraOnCopyCheckBox.setSelected(false);					
+				}
+				preserveSpectraOnCopyCheckBox.setEnabled(
+						!(isNeutral || !getPolarity().equals(currentLibrary.getPolarity())));
+
+				neutralPolarityWarningLabel.setVisible(isNeutral);
+				
+				if(isNeutral)
+					adductSelectorPanel.clearAdductList();
+			}
 		}		
 	}
 	
@@ -432,6 +466,10 @@ public class LibraryInfoDialog extends JDialog implements ItemListener{
 			return preserveSpectraOnCopyCheckBox.isSelected();
 		else
 			return false;
+	}
+
+	public LibraryAction getLibraryAction() {
+		return libraryAction;
 	}	
 }
 

@@ -1065,7 +1065,7 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ItemList
 				finalizePCDLTextLibraryImportTask((PCDLTextLibraryImportTask)e.getSource());	
 			
 			if (e.getSource().getClass().equals(ValidateAndUploadPCDLLibraryTask.class)) 
-				finalizePCDLfromBaseLibraryTask((ValidateAndUploadPCDLLibraryTask)e.getSource());
+				finalizeValidateAndUploadPCDLLibraryTask((ValidateAndUploadPCDLLibraryTask)e.getSource());
 			
 			if (e.getSource().getClass().equals(IDTraclerLibraryImportTask.class)) 
 				finalizeIDTraclerLibraryImportTask((IDTraclerLibraryImportTask)e.getSource());
@@ -1085,7 +1085,7 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ItemList
 		showPendingFeature();
 	}
 
-	private synchronized void finalizePCDLfromBaseLibraryTask(ValidateAndUploadPCDLLibraryTask task) {
+	private synchronized void finalizeValidateAndUploadPCDLLibraryTask(ValidateAndUploadPCDLLibraryTask task) {
 		
 		if(!task.getUnmatchedFeatures().isEmpty()) {
 			
@@ -1103,11 +1103,18 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ItemList
 			errorDialog.setVisible(true);
 		}
 		else {
-			LoadDatabaseLibraryTask loadLibTask = 
-					new LoadDatabaseLibraryTask(task.getNewLlibrary().getLibraryId());
-			loadLibTask.addTaskListener(this);
-			MRC2ToolBoxCore.getTaskController().addTask(loadLibTask);
+			if(!task.isValidateOnly()) {
+				LoadDatabaseLibraryTask loadLibTask = 
+						new LoadDatabaseLibraryTask(task.getNewLlibrary().getLibraryId());
+				loadLibTask.addTaskListener(this);
+				MRC2ToolBoxCore.getTaskController().addTask(loadLibTask);
+			}
+			else {
+				MessageDialog.showInfoMsg("Selected extaernal library compounds\n"
+						+ "successfully validated", this.getContentPane());
+			}
 		}
+		updateLibraryMenuAndLabel();
 	}
 
 	private synchronized void finalizePCDLTextLibraryImportTask(PCDLTextLibraryImportTask task) {
@@ -1385,7 +1392,7 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ItemList
 		} else
 			clearPanel();
 
-		updateLibraryMenuAndLabel() ;
+		updateLibraryMenuAndLabel();
 	}
 
 	@Override

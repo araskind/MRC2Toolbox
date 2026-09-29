@@ -193,12 +193,28 @@ public class CompoundLibrary implements Serializable, Comparable<CompoundLibrary
 		
 		LibraryMsFeature match = libraryFeatures.stream().
 				filter(f -> f.getName().equalsIgnoreCase(name)).findFirst().orElse(null);
-		if(match == null)
+		if(match == null) {
 			 match = libraryFeatures.stream().
 			 	filter(f -> Objects.nonNull(f.getPrimaryIdentity())).
 				filter(f -> f.getPrimaryIdentity().getCompoundName().equalsIgnoreCase(name)).
 				findFirst().orElse(null);
-		
+		}
+		if(match == null && name.indexOf('\\') >= 0) {
+			String altName = name.replace('\\', '/');
+			 match = libraryFeatures.stream().
+					 	filter(f -> Objects.nonNull(f.getPrimaryIdentity())).
+						filter(f -> (f.getName().equalsIgnoreCase(altName) 
+								||f.getPrimaryIdentity().getCompoundName().equalsIgnoreCase(altName))).
+						findFirst().orElse(null);
+		}	
+		if(match == null && name.indexOf('/') >= 0) {
+			String altName = name.replace('/', '\\');
+			 match = libraryFeatures.stream().
+					 	filter(f -> Objects.nonNull(f.getPrimaryIdentity())).
+						filter(f -> (f.getName().equalsIgnoreCase(altName) 
+								||f.getPrimaryIdentity().getCompoundName().equalsIgnoreCase(altName))).
+						findFirst().orElse(null);
+		}	
 		return match;
 	}
 	

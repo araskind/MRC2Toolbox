@@ -162,7 +162,7 @@ public class LibraryManager extends JDialog implements ActionListener, TaskListe
 				new CompoundLibrary(
 						libraryInfoDialog.getLibraryName(), 
 						libraryInfoDialog.getLibraryDescription());
-		newLibrary.setPolarity(libraryInfoDialog.getPolarity());
+		newLibrary.setPolarity(libraryInfoDialog.getNewLibraryPolarity());
 
 		String libId = null;
 		try {
@@ -183,14 +183,6 @@ public class LibraryManager extends JDialog implements ActionListener, TaskListe
 				break;
 			}
 		}
-//		File inputFile = libraryInfoDialog.getInputLibraryFile();
-//		Collection<Adduct> adductList = libraryInfoDialog.getSelectedAdducts();
-//		
-//		if(inputFile != null && inputFile.exists()) {
-//			((MsLibraryPanel)MRC2ToolBoxCore.getMainWindow().
-//					getPanel(PanelList.MS_LIBRARY)).importLibraryFromFile(inputFile, adductList);
-//		}	
-//		libraryInfoDialog.savePreferences();
 		libraryInfoDialog.dispose();
 		dispose();
 	}

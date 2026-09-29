@@ -34,6 +34,7 @@ import edu.umich.med.mrc2.datoolbox.data.CompoundLibrary;
 import edu.umich.med.mrc2.datoolbox.data.LibraryMsFeature;
 import edu.umich.med.mrc2.datoolbox.data.enums.CompoundValidationType;
 import edu.umich.med.mrc2.datoolbox.data.enums.PCDLFields;
+import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 
@@ -101,6 +102,7 @@ public class ValidateAndUploadPCDLLibraryTask extends LibraryValidateAndUploadAb
 			Collection<LibraryMsFeature> masterLibraryFeatures = 
 					fetchFeaturesForLibrary(masterLibrary.getLibraryId());
 			masterLibraryFeatures.forEach(masterLibrary::addFeature);
+			MRC2ToolBoxCore.getActiveMsLibraries().add(masterLibrary);
 		}
 		for(int i=1; i<compoundDataArray.length; i++) {
 			
