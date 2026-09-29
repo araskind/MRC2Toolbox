@@ -60,7 +60,6 @@ import edu.umich.med.mrc2.datoolbox.data.LibraryMsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MassSpectrum;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsPoint;
-import edu.umich.med.mrc2.datoolbox.data.enums.CompoundValidationType;
 import edu.umich.med.mrc2.datoolbox.data.enums.MsLibraryFormat;
 import edu.umich.med.mrc2.datoolbox.database.idt.MSRTLibraryUtils;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignEvent;
@@ -96,7 +95,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.library.IDTraclerLibraryIm
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.library.LibEditorImportTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.library.LoadDatabaseLibraryTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.library.PCDLTextLibraryImportTask;
-import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.library.PCDLfromBaseLibraryTask;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.library.ValidateAndUploadPCDLLibraryTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.msms.DecoyLibraryGenerationTask;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 
@@ -184,11 +183,11 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ItemList
 		if (command.equals(MainActionCommands.SETUP_EXTERNAL_LIBRARY_COMPOUND_VALIDATION_COMMAND.getName()))
 			setupExternalLibraryCompoundValidation();
 		
-		if (command.equals(MainActionCommands.VALIDATE_LIBRARY_COMPOUNDS_AGAINST_DATABASE_COMMAND.getName()))
-			validateLibraryCompounds(CompoundValidationType.AGAINST_COMPOUND_DATABASE); 
+		if (command.equals(MainActionCommands.VALIDATE_LIBRARY_COMPOUNDS_FOR_IMPORT_COMMAND.getName()))
+			validateAndImportLibraryCompounds(true);
 		
-		if (command.equals(MainActionCommands.VALIDATE_LIBRARY_COMPOUNDS_AGAINST_MASTER_LIBRARY_COMMAND.getName()))
-			validateLibraryCompounds(CompoundValidationType.AGAINST_MASTER_LIBRARY);
+		if (command.equals(MainActionCommands.VALIDATE_AND_IMPORT_LIBRARY_COMPOUNDS_COMMAND.getName()))
+			validateAndImportLibraryCompounds(false); 
 				
 		if (command.equals(MainActionCommands.IMPORT_EXTERNAL_LIBRARY_COMMAND.getName()))
 			importLibrary();
@@ -880,7 +879,7 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ItemList
 		externalLibraryVerificationAndUploadDialog.setVisible(true);
 	}
 	
-	private void validateLibraryCompounds(CompoundValidationType validationType) {
+	private void validateAndImportLibraryCompounds(boolean validateOnly) {
 		
 		Collection<String>errors = externalLibraryVerificationAndUploadDialog.validateFormData(true);
 		if(!errors.isEmpty()){
@@ -888,8 +887,30 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ItemList
 		            StringUtils.join(errors, "\n"), externalLibraryVerificationAndUploadDialog);
 		    return;
 		}
-		//	TODO init validaton;
-		
+		//	TODO Agilent Library Editor files
+		File inputLibraryFile = externalLibraryVerificationAndUploadDialog.getInputLibraryFile();			
+		if (inputLibraryFile.getName().toLowerCase().endsWith("mslibrary.xml")) {
+
+			MessageDialog.showWarningMsg(
+					"Library Editor files validation under development.", this.getContentPane());
+		}
+		//	TODO Agilent CEF files
+		if (inputLibraryFile.getName().toLowerCase().endsWith(".cef")) {
+			MessageDialog.showWarningMsg(
+					"CEF library validation under development.", this.getContentPane());
+		}
+		if (inputLibraryFile.getName().toLowerCase().endsWith(".txt")
+				|| inputLibraryFile.getName().toLowerCase().endsWith(".tsv")) {
+			ValidateAndUploadPCDLLibraryTask task = new ValidateAndUploadPCDLLibraryTask(
+					externalLibraryVerificationAndUploadDialog.getMasterLibrary(), 
+					externalLibraryVerificationAndUploadDialog.getDestinationLibrary(), 
+					externalLibraryVerificationAndUploadDialog.getInputLibraryFile(),
+					externalLibraryVerificationAndUploadDialog.getCompoundValidationType(),
+					validateOnly,
+					externalLibraryVerificationAndUploadDialog.getSelectedAdducts());
+			task.addTaskListener(this);
+			MRC2ToolBoxCore.getTaskController().addTask(task);
+		}
 		externalLibraryVerificationAndUploadDialog.dispose();
 	}
 	
@@ -1043,8 +1064,8 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ItemList
 			if (e.getSource().getClass().equals(PCDLTextLibraryImportTask.class)) 
 				finalizePCDLTextLibraryImportTask((PCDLTextLibraryImportTask)e.getSource());	
 			
-			if (e.getSource().getClass().equals(PCDLfromBaseLibraryTask.class)) 
-				finalizePCDLfromBaseLibraryTask((PCDLfromBaseLibraryTask)e.getSource());
+			if (e.getSource().getClass().equals(ValidateAndUploadPCDLLibraryTask.class)) 
+				finalizePCDLfromBaseLibraryTask((ValidateAndUploadPCDLLibraryTask)e.getSource());
 			
 			if (e.getSource().getClass().equals(IDTraclerLibraryImportTask.class)) 
 				finalizeIDTraclerLibraryImportTask((IDTraclerLibraryImportTask)e.getSource());
@@ -1064,7 +1085,7 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ItemList
 		showPendingFeature();
 	}
 
-	private synchronized void finalizePCDLfromBaseLibraryTask(PCDLfromBaseLibraryTask task) {
+	private synchronized void finalizePCDLfromBaseLibraryTask(ValidateAndUploadPCDLLibraryTask task) {
 		
 		if(!task.getUnmatchedFeatures().isEmpty()) {
 			

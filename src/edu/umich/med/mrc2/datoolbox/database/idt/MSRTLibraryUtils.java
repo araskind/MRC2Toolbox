@@ -37,7 +37,6 @@ import java.util.TreeSet;
 
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
-import org.openscience.cdk.exception.CDKException;
 
 import edu.umich.med.mrc2.datoolbox.data.Adduct;
 import edu.umich.med.mrc2.datoolbox.data.CompositeAdduct;
@@ -785,7 +784,7 @@ public class MSRTLibraryUtils {
 	}
 
 	public static void attachTandemMassSpectrum(
-			LibraryMsFeature newTarget, Connection conn) throws SQLException {
+			LibraryMsFeature newTarget, Connection conn) {
 
 		// Select tandem spectra
 		String query =
@@ -794,42 +793,44 @@ public class MSRTLibraryUtils {
 
 		try(PreparedStatement ps = conn.prepareStatement(query)){
 			ps.setString(1, newTarget.getId());
-			ResultSet result = ps.executeQuery();
-			while(result.next()) {
-	
-				TandemMassSpectrum msms = new TandemMassSpectrum(
-						result.getString("MSMS_TARGET_ID"),
-						result.getInt("MS_LEVEL"),
-						result.getDouble("FRAG_VOLTAGE"),
-						result.getDouble("CID_VALUE"),
-						newTarget.getPolarity());	//	TODO check if LibMsFeature polarity always not null
-	
-				populateTandemMs(msms, conn);
-				newTarget.getSpectrum().addTandemMs(msms);
+				try(ResultSet result = ps.executeQuery()){
+				while(result.next()) {
+		
+					TandemMassSpectrum msms = new TandemMassSpectrum(
+							result.getString("MSMS_TARGET_ID"),
+							result.getInt("MS_LEVEL"),
+							result.getDouble("FRAG_VOLTAGE"),
+							result.getDouble("CID_VALUE"),
+							newTarget.getPolarity());	//	TODO check if LibMsFeature polarity always not null		
+					populateTandemMs(msms, conn);
+					newTarget.getSpectrum().addTandemMs(msms);
+				}
 			}
-			result.close();
+		} catch (SQLException e) {
+			logger.error(String.format("Failed to attach tandem mass spectrum to target ID  %s", newTarget.getTargetId()), e);
 		}
 	}
 
-	public static void populateTandemMs(
-			TandemMassSpectrum msms, Connection conn) throws SQLException {
+	public static void populateTandemMs(TandemMassSpectrum msms, Connection conn) {
 
 		String query =
 			"SELECT MZ, INTENSITY, IS_PARENT FROM MSMS_LIBRARY_PEAK WHERE MSMS_TARGET_ID = ?";
 		try(PreparedStatement ps = conn.prepareStatement(query)){
-			ps.setString(1, msms.getId());
-			ResultSet result = ps.executeQuery();
-			while(result.next()) {
-	
-				MsPoint p = new MsPoint(
-						result.getDouble("MZ"),
-						result.getDouble("INTENSITY"));
-	
-				msms.getSpectrum().add(p);
-				if(result.getString("IS_PARENT") != null)
-					msms.setParent(p);
+				ps.setString(1, msms.getId());
+				try(ResultSet result = ps.executeQuery()){
+				while(result.next()) {
+		
+					MsPoint p = new MsPoint(
+							result.getDouble("MZ"),
+							result.getDouble("INTENSITY"));
+		
+					msms.getSpectrum().add(p);
+					if(result.getString("IS_PARENT") != null)
+						msms.setParent(p);
+				}
 			}
-			result.close();
+		} catch (SQLException e) {
+			logger.error(String.format("Failed to populate Tandem MS ID  %s", msms.getId()), e);
 		}
 	}
 
@@ -837,57 +838,49 @@ public class MSRTLibraryUtils {
 			LibraryMsFeature newTarget,
 			String cid,
 			boolean qcStandard,
-			Connection conn) throws SQLException {
+			Connection conn) {
 
 		String query =
 			"SELECT SOURCE_DB, PRIMARY_NAME, MOL_FORMULA, EXACT_MASS, SMILES, INCHI_KEY "+
 			"FROM COMPOUND_DATA D WHERE D.ACCESSION = ?";
 
-		try(PreparedStatement ps = conn.prepareStatement(query)){
+		try (PreparedStatement ps = conn.prepareStatement(query)) {
 			ps.setString(1, cid);
-			ResultSet cidrs = ps.executeQuery();
-	
-			while (cidrs.next()){
-	
-				CompoundDatabaseEnum dbSource =
-						CompoundDatabaseEnum.getCompoundDatabaseByName(cidrs.getString("SOURCE_DB"));
-	
-				CompoundIdentity identity = new CompoundIdentity(
-						dbSource,
-						cid,
-						cidrs.getString("PRIMARY_NAME"),
-						cidrs.getString("MOL_FORMULA"),
-						cidrs.getDouble("EXACT_MASS"),
-						cidrs.getString("SMILES"),
-						cidrs.getString("INCHI_KEY"));
-	
-				if(dbSource != null){
-	
-					//	TODO handle MSMS confidence
-					MsFeatureIdentity mid = new MsFeatureIdentity(identity,
-							CompoundIdentificationConfidence.ACCURATE_MASS_RT);
-					mid.setQcStandard(qcStandard);
-					mid.setIdentityName(newTarget.getName());
-					newTarget.setPrimaryIdentity(mid);
-					newTarget.setNeutralMass(identity.getExactMass());
-					newTarget.removeDefaultPrimaryIdentity();
-				}
-				else{	
-					logger.debug(String.format("%s %s", "Couldn't find source database for accession", cid));
+			try (ResultSet cidrs = ps.executeQuery()) {
+				while (cidrs.next()) {
+					CompoundDatabaseEnum dbSource = CompoundDatabaseEnum
+							.getCompoundDatabaseByName(cidrs.getString("SOURCE_DB"));
+					CompoundIdentity identity = new CompoundIdentity(dbSource, 
+																	cid, 
+																	cidrs.getString("PRIMARY_NAME"),
+																	cidrs.getString("MOL_FORMULA"), 
+																	cidrs.getDouble("EXACT_MASS"), 
+																	cidrs.getString("SMILES"),
+																	cidrs.getString("INCHI_KEY"));
+					if (dbSource != null) {
+						// TODO handle MSMS confidence
+						MsFeatureIdentity mid = new MsFeatureIdentity(identity,
+								CompoundIdentificationConfidence.ACCURATE_MASS_RT);
+						mid.setQcStandard(qcStandard);
+						mid.setIdentityName(newTarget.getName());
+						newTarget.setPrimaryIdentity(mid);
+						newTarget.setNeutralMass(identity.getExactMass());
+						newTarget.removeDefaultPrimaryIdentity();
+					} else {
+						logger.debug(String.format("%s %s", "Couldn't find source database for accession", cid));
+					}
 				}
 			}
-			cidrs.close();
+		} catch (SQLException e) {
+			logger.debug(String.format("Failed to attach compound id %s to feature id  %s", cid, newTarget.getTargetId()));
 		}
 	}
 
 	public static Map<String, MsFeatureIdentity>
-		getCompoundIdentitiesByTargetIds(Collection<String> libraryTargetIdList) throws SQLException{
+		getCompoundIdentitiesByTargetIds(Collection<String> libraryTargetIdList){
 
 		TreeMap<String, MsFeatureIdentity> identityMap = new TreeMap<String, MsFeatureIdentity>();
-
 		Connection conn = ConnectionManager.getConnection();
-		ResultSet rs = null;
-
 		String query =
 			"SELECT D.ACCESSION, D.SOURCE_DB, D.PRIMARY_NAME, "
 			+ "D.MOL_FORMULA, D.EXACT_MASS, D.SMILES, D.INCHI_KEY, "
@@ -895,49 +888,49 @@ public class MSRTLibraryUtils {
 			"FROM COMPOUND_DATA D, MS_LIBRARY_COMPONENT C "
 			+ "WHERE D.ACCESSION = C.ACCESSION AND C.TARGET_ID = ?";
 		try(PreparedStatement ps = conn.prepareStatement(query)){
-
 			for(String libraryTargetId : libraryTargetIdList) {
-	
-				ps.setString(1, libraryTargetId);
-				rs = ps.executeQuery();
-				while (rs.next()){
-	
-					CompoundDatabaseEnum dbSource =
-							CompoundDatabaseEnum.getCompoundDatabaseByName(rs.getString("SOURCE_DB"));
-	
-					CompoundIdentity identity = new CompoundIdentity(
-							dbSource,
-							rs.getString("ACCESSION"),
-							rs.getString("PRIMARY_NAME"),
-							rs.getString("MOL_FORMULA"),
-							rs.getDouble("EXACT_MASS"),
-							rs.getString("SMILES"),
-							rs.getString("INCHI_KEY"));
-	
-					MsFeatureIdentity msId = new MsFeatureIdentity(
-							identity, CompoundIdentificationConfidence.ACCURATE_MASS_RT);
-					msId.setIdSource(CompoundIdSource.LIBRARY);
-					MsRtLibraryMatch libMatch = new MsRtLibraryMatch(
-							rs.getString("LIBRARY_ID"), 			
-							libraryTargetId, 
-							rs.getString("NAME"), 
-							100.0d,
-							rs.getDouble("RETENTION_TIME"), 
-							null,
-							null);
-					
-					msId.setMsRtLibraryMatch(libMatch);
-					msId.setQcStandard(rs.getString("IS_QC") != null);
-					identityMap.put(libraryTargetId, msId);
+					ps.setString(1, libraryTargetId);
+					try(ResultSet rs = ps.executeQuery()){
+					while (rs.next()){
+		
+						CompoundDatabaseEnum dbSource =
+								CompoundDatabaseEnum.getCompoundDatabaseByName(rs.getString("SOURCE_DB"));
+		
+						CompoundIdentity identity = new CompoundIdentity(
+								dbSource,
+								rs.getString("ACCESSION"),
+								rs.getString("PRIMARY_NAME"),
+								rs.getString("MOL_FORMULA"),
+								rs.getDouble("EXACT_MASS"),
+								rs.getString("SMILES"),
+								rs.getString("INCHI_KEY"));
+		
+						MsFeatureIdentity msId = new MsFeatureIdentity(
+								identity, CompoundIdentificationConfidence.ACCURATE_MASS_RT);
+						msId.setIdSource(CompoundIdSource.LIBRARY);
+						MsRtLibraryMatch libMatch = new MsRtLibraryMatch(
+								rs.getString("LIBRARY_ID"), 			
+								libraryTargetId, 
+								rs.getString("NAME"), 
+								100.0d,
+								rs.getDouble("RETENTION_TIME"), 
+								null,
+								null);
+						
+						msId.setMsRtLibraryMatch(libMatch);
+						msId.setQcStandard(rs.getString("IS_QC") != null);
+						identityMap.put(libraryTargetId, msId);
+					}
 				}
-				rs.close();
 			}
+		} catch (SQLException e) {
+			logger.error("Failed to get compound identities by target IDs", e);
 		}
 		ConnectionManager.releaseConnection(conn);
 		return identityMap;
 	}
 
-	public static LibraryMsFeature getLibraryFeatureById(String targetId) throws SQLException, CDKException, IOException {
+	public static LibraryMsFeature getLibraryFeatureById(String targetId) {
 
 		Connection conn = ConnectionManager.getConnection();
 		LibraryMsFeatureDbBundle fBundle =  createFeatureBundleForFeature(targetId, conn);
@@ -964,7 +957,7 @@ public class MSRTLibraryUtils {
 		return null;
 	}
 
-	public static void attachAnnotations(LibraryMsFeature newTarget, Connection conn) throws SQLException, CDKException, IOException {
+	public static void attachAnnotations(LibraryMsFeature newTarget, Connection conn) {
 
 		Collection<ObjectAnnotation> annotations = AnnotationUtils.getObjectAnnotations(
 				AnnotatedObjectType.MS_LIB_FEATURE, newTarget.getId(), conn);
@@ -974,7 +967,7 @@ public class MSRTLibraryUtils {
 	}
 	
 	public static void addCompoundToLibrary(
-			String accession, String libraryId) throws SQLException{
+			String accession, String libraryId) {
 		
 		Connection conn = ConnectionManager.getConnection();
 		addCompoundToLibrary(accession, libraryId, conn);
@@ -982,7 +975,7 @@ public class MSRTLibraryUtils {
 	}
 	
 	public static void addCompoundToLibrary(
-			String accession, String libraryId, Connection conn) throws SQLException{
+			String accession, String libraryId, Connection conn) {
 
 		String query =
 			"INSERT INTO MS_LIBRARY_COMPONENT " +
@@ -993,18 +986,22 @@ public class MSRTLibraryUtils {
 				DataPrefix.MS_LIBRARY_TARGET,
 				"0",
 				7);
-		try(PreparedStatement ps = conn.prepareStatement(query)){
+		if(newId != null) {
+			try(PreparedStatement ps = conn.prepareStatement(query)){
 
-			java.sql.Date sqlCreated = new java.sql.Date(new Date().getTime());
-			java.sql.Date sqlModified = new java.sql.Date(new Date().getTime());
-			
-			ps.setString(1, newId);
-			ps.setString(2, accession);
-			ps.setDate(3, sqlCreated);
-			ps.setDate(4, sqlModified);
-			ps.setString(5, libraryId);
-			ps.setString(6, "Y");	//	Enable by default
-			ps.executeUpdate();
+				java.sql.Date sqlCreated = new java.sql.Date(new Date().getTime());
+				java.sql.Date sqlModified = new java.sql.Date(new Date().getTime());
+				
+				ps.setString(1, newId);
+				ps.setString(2, accession);
+				ps.setDate(3, sqlCreated);
+				ps.setDate(4, sqlModified);
+				ps.setString(5, libraryId);
+				ps.setString(6, "Y");	//	Enable by default
+				ps.executeUpdate();
+			} catch (SQLException e) {
+				logger.error(String.format("Failed to add compound with accession %s to library ID  %s", accession, libraryId), e);
+			}
 		}
 	}
 }

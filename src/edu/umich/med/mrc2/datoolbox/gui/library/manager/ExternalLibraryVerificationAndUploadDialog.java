@@ -85,9 +85,7 @@ public class ExternalLibraryVerificationAndUploadDialog extends JDialog implemen
 		
 	private File baseDirectory;
 	private File inputLibraryFile;
-	private CompoundLibrary masterLibrary;
 	private CompoundLibrary destinationLibrary;
-	private boolean validateCompoundsOnly;
 	
 	private JTextField libFileTextField;
 	private JCheckBox createDefaultAdductsCheckbox;
@@ -96,7 +94,6 @@ public class ExternalLibraryVerificationAndUploadDialog extends JDialog implemen
 	private LibraryListingTable libraryListingTable;
 	private int rowCount;
 	private JLabel neutralPolarityWarningLabel;
-	private JLabel spacerLabel;
 	private JScrollPane libScroll;
 	private JButton btnSave;
 
@@ -105,7 +102,6 @@ public class ExternalLibraryVerificationAndUploadDialog extends JDialog implemen
 			boolean validateCompoundsOnly, 
 			CompoundLibrary destinationLibrary) {
 		super();
-		this.validateCompoundsOnly = validateCompoundsOnly;
 		this.destinationLibrary = destinationLibrary;
 		setSize(new Dimension(800, 800));
 		setPreferredSize(new Dimension(800, 800));
@@ -182,7 +178,7 @@ public class ExternalLibraryVerificationAndUploadDialog extends JDialog implemen
 		
 		createMasterLibrarySelectionBlock(panel);
 		
-		if(validateCompoundsOnly == false) {
+		if(!validateCompoundsOnly) {
 			rowCount++;
 			createAdductSelectionBlock(panel);
 		}		
@@ -195,10 +191,14 @@ public class ExternalLibraryVerificationAndUploadDialog extends JDialog implemen
 		buttonPanel.add(btnCancel);
 		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
 		btnCancel.addActionListener(e -> dispose());
-
-		//	TODO
-		btnSave = new JButton("TODO");
-		btnSave.setActionCommand("TODO");
+		if(validateCompoundsOnly) {
+			btnSave = new JButton(MainActionCommands.VALIDATE_LIBRARY_COMPOUNDS_FOR_IMPORT_COMMAND.getName());
+			btnSave.setActionCommand(MainActionCommands.VALIDATE_LIBRARY_COMPOUNDS_FOR_IMPORT_COMMAND.getName());
+		}
+		else {
+			btnSave = new JButton(MainActionCommands.VALIDATE_AND_IMPORT_LIBRARY_COMPOUNDS_COMMAND.getName());
+			btnSave.setActionCommand(MainActionCommands.VALIDATE_AND_IMPORT_LIBRARY_COMPOUNDS_COMMAND.getName());
+		}
 		btnSave.addActionListener(listener);
 		buttonPanel.add(btnSave);
 		JRootPane rootPane = SwingUtilities.getRootPane(btnSave);
@@ -315,22 +315,31 @@ public class ExternalLibraryVerificationAndUploadDialog extends JDialog implemen
 	}
 	
 	public Collection<Adduct>getSelectedAdducts(){
-		return adductSelectorPanel.getSelectedAdducts();
+		
+		if(createDefaultAdductsCheckbox.isSelected())
+			return adductSelectorPanel.getSelectedAdducts();
+		else 
+			return new ArrayList<>();
 	}
 	
 	public boolean createDefaultAdducts() {
 		return createDefaultAdductsCheckbox.isSelected();
 	}
-	public CompoundLibrary getBasePCDLlibrary() {
-		return masterLibrary;
-	}
-
+	
 	public File getInputLibraryFile() {
 		return inputLibraryFile;
 	}
 		
 	public CompoundValidationType getCompoundValidationType() {
 		return (CompoundValidationType)compoundValidationTypeComboBox.getSelectedItem();
+	}
+	
+	public CompoundLibrary getDestinationLibrary() {
+		return destinationLibrary;
+	}
+	
+	public CompoundLibrary getMasterLibrary() {
+		return libraryListingTable.getSelectedLibrary();
 	}
 
 	@Override
@@ -371,8 +380,6 @@ public class ExternalLibraryVerificationAndUploadDialog extends JDialog implemen
 	private void configureForDatabaseValidation() {
 		
 		libScroll.setVisible(false);
-		btnSave.setText(MainActionCommands.VALIDATE_LIBRARY_COMPOUNDS_AGAINST_DATABASE_COMMAND.getName());
-		btnSave.setActionCommand(MainActionCommands.VALIDATE_LIBRARY_COMPOUNDS_AGAINST_DATABASE_COMMAND.getName());
 		revalidate();
 		repaint();	
 	}
@@ -380,8 +387,6 @@ public class ExternalLibraryVerificationAndUploadDialog extends JDialog implemen
 	private void configureForMasterLibraryValidation() {
 		
 		libScroll.setVisible(true);
-		btnSave.setText(MainActionCommands.VALIDATE_LIBRARY_COMPOUNDS_AGAINST_MASTER_LIBRARY_COMMAND.getName());
-		btnSave.setActionCommand(MainActionCommands.VALIDATE_LIBRARY_COMPOUNDS_AGAINST_MASTER_LIBRARY_COMMAND.getName());
 		revalidate();
 		repaint();
 	}	
@@ -454,10 +459,6 @@ public class ExternalLibraryVerificationAndUploadDialog extends JDialog implemen
 	    	errors.add("Library file for import/verification not selected.");
 	    		    
 	    return errors;
-	}
-
-	public CompoundLibrary getDestinationLibrary() {
-		return destinationLibrary;
 	}
 }
 
