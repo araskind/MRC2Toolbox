@@ -174,7 +174,7 @@ public class FIOUtils {
 		String ext = fileExtension.toLowerCase();
 		List<Path> result = null;
 		try (Stream<Path> walk = Files.walk(path)) {
-			result = walk.filter(p -> Files.isDirectory(p)).filter(p -> p.toString().toLowerCase().endsWith(ext))
+			result = walk.filter(Files::isDirectory).filter(p -> p.toString().toLowerCase().endsWith(ext))
 					.collect(Collectors.toList());
 		} catch (IOException e) {
 			e.printStackTrace();

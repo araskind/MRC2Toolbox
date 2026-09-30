@@ -27,7 +27,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
@@ -132,14 +132,14 @@ public class AgilentAcquisitionMethodParser {
 			for(int i=0; i<4; i++)
 				grad.setMobilePhase(mobilePhases[i], i);			
 		}	
-		Set<ChromatographicGradientStep>gradSteps = null;
+		SortedSet<ChromatographicGradientStep>gradSteps = null;
 		Element timeTableElement = pumpConfigElement.getChild("Timetable", ns);
 		if(timeTableElement != null) {
 			
 			gradSteps = parseTimetableElement(
 					timeTableElement, ns, startingFlowRate);
 			grad.getGradientSteps().addAll(gradSteps);
-		}
+		}		
 		//	When empty - isocratic method, read percentages from solvent composition
 		if(gradSteps == null || gradSteps.isEmpty()) {
 			
@@ -263,7 +263,7 @@ public class AgilentAcquisitionMethodParser {
 		return mobilePhases;
 	}
 	
-	private Set<ChromatographicGradientStep> parseTimetableElement(
+	private SortedSet<ChromatographicGradientStep> parseTimetableElement(
 			Element timeTableElement,
 			Namespace ns,
 			double startingFlowRate){
@@ -337,7 +337,7 @@ public class AgilentAcquisitionMethodParser {
 				entries.get(timeCode).add(newEntry);
 			}		
 		}
-		Set<ChromatographicGradientStep>gradSteps = 
+		SortedSet<ChromatographicGradientStep>gradSteps = 
 				new TreeSet<ChromatographicGradientStep>();
 		Map<String,Double>timeCodeMap = new HashMap<String,Double>();
 		for(String tc : entries.keySet())
@@ -381,23 +381,39 @@ public class AgilentAcquisitionMethodParser {
 			gradSteps.add(newStep);
 		}
 		//	Add zero time step
-		if(!gradSteps.isEmpty()) {
-			
-			ChromatographicGradientStep firstStep =
-					((TreeSet<ChromatographicGradientStep>)gradSteps).first();
-			if(firstStep.getStartTime() > 0) {
+		// Add first step (0 to first time in timetable, it's just a best guess
+		if(gradSteps != null && gradSteps.size() > 1) {
+
+			ChromatographicGradientStep[]gsArray = 
+					gradSteps.toArray(new ChromatographicGradientStep[gradSteps.size()]);
+			ChromatographicGradientStep fistStep = gsArray[0];
+			if(fistStep.getStartTime() > 0.0d) {
 				
-				ChromatographicGradientStep zeroStep = 
-						new ChromatographicGradientStep(
-						0.0d, 
-						startingFlowRate, 
-						firstStep.getMobilePhaseStartingPercent()[0],
-						firstStep.getMobilePhaseStartingPercent()[1], 
-						firstStep.getMobilePhaseStartingPercent()[2], 
-						firstStep.getMobilePhaseStartingPercent()[3]);
-				gradSteps.add(zeroStep);
-			}
-		}		
+				ChromatographicGradientStep lastStep = gsArray[gsArray.length-1];
+				ChromatographicGradientStep realFistStep = new ChromatographicGradientStep(0.0d, gsArray[1].getFlowRate());
+				for(int i=0; i < lastStep.getMobilePhaseStartingPercent().length; i++)
+					realFistStep.getMobilePhaseStartingPercent()[i] = lastStep.getMobilePhaseStartingPercent()[i];
+				
+				gradSteps.add(realFistStep);
+			}			
+		}
+//		if(!gradSteps.isEmpty()) {
+//			
+//			ChromatographicGradientStep firstStep =
+//					((TreeSet<ChromatographicGradientStep>)gradSteps).first();
+//			if(firstStep.getStartTime() > 0) {
+//				
+//				ChromatographicGradientStep zeroStep = 
+//						new ChromatographicGradientStep(
+//						0.0d, 
+//						startingFlowRate, 
+//						firstStep.getMobilePhaseStartingPercent()[0],
+//						firstStep.getMobilePhaseStartingPercent()[1], 
+//						firstStep.getMobilePhaseStartingPercent()[2], 
+//						firstStep.getMobilePhaseStartingPercent()[3]);
+//				gradSteps.add(zeroStep);
+//			}
+//		}		
 		return gradSteps;
 	}
 	

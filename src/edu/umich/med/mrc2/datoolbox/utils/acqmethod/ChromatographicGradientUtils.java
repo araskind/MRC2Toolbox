@@ -29,6 +29,10 @@ import edu.umich.med.mrc2.datoolbox.data.lims.MobilePhase;
 
 public class ChromatographicGradientUtils {
 	
+	private ChromatographicGradientUtils() {
+		/* This utility class should not be instantiated */
+	}
+	
 	public static final double eps = 0.00001d;
 
 	public static boolean gradientsEquivalent(
@@ -36,6 +40,9 @@ public class ChromatographicGradientUtils {
 			ChromatographicGradient gradTwo) {
 		
 		if(gradOne.getGradientSteps().size() != gradTwo.getGradientSteps().size())		
+			return false;
+		
+		if(gradOne.getColumnCompartmentTemperature() != gradTwo.getColumnCompartmentTemperature())
 			return false;
 		
 		if(!mobilePhaseSetsEquivalent(

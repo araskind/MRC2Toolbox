@@ -46,6 +46,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.compress.utils.FileNameUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.file.PathUtils;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.apache.commons.io.filefilter.FileFilterUtils;
 import org.apache.commons.io.filefilter.IOFileFilter;
@@ -802,7 +803,7 @@ public class AgilentAcquisitionMethodBatchUtils {
 		
 		for(Path mrPath : chromMethodList) {
 			
-			String acqName = FileNameUtils.getBaseName(mrPath.toString()) + ".m";
+			String acqName = PathUtils.getBaseName(mrPath) + ".m";
 			File methodFile = mrPath.toFile();
 			ExtractedAgilentAcquisitionMethodParser parser = 
 					new ExtractedAgilentAcquisitionMethodParser(methodFile);

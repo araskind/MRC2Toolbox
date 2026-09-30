@@ -57,7 +57,8 @@ public class ChromatographicGradient implements Serializable, XmlStorable {
 	public ChromatographicGradient() {
 		super();
 		id = DataPrefix.CROMATOGRAPHIC_GRADIENT.getName() + 
-				UUID.randomUUID().toString().substring(0, 6);
+				UUID.randomUUID().toString();
+		//.substring(0, 6); Probably doesn't matter since is replaced by sequenced ID in the database
 		mobilePhases = new MobilePhase[4];
 		gradientSteps = new TreeSet<ChromatographicGradientStep>();
 	}

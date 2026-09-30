@@ -243,7 +243,7 @@ public class ExtractedAgilentAcquisitionMethodParser {
 					|| parId.equals("SolventComposition_Channel2ExtendedSolventType_Parameter")) {
 				String solventName = sectionElements.get(i).getChildText("ParameterValue", ns);
 				if(solventName != null && !solventName.isEmpty() && solvents[channelIndex] != null)
-					solvents[channelIndex].setName(solventName);
+					solvents[channelIndex].setName(solventName.replaceFirst("V\\.\\d\\d", "").trim());
 			}
 			if(parId.equals("SolventComposition_Channel1UserName")
 					|| parId.equals("SolventComposition_Channel2UserName")) {
@@ -362,24 +362,39 @@ public class ExtractedAgilentAcquisitionMethodParser {
 		}
 		if(currentStep != null)
 			gradientSteps.add(currentStep);
-		
-		if(!gradientSteps.isEmpty()) {
-			
-			ChromatographicGradientStep firstStep =
-					((TreeSet<ChromatographicGradientStep>)gradientSteps).first();
-			if(firstStep.getStartTime() > 0) {
+		// Add first step (0 to first time in timetable, it's just a best guess
+		if(gradientSteps != null && gradientSteps.size() > 1) {
+
+			ChromatographicGradientStep[]gsArray = 
+					gradientSteps.toArray(new ChromatographicGradientStep[gradientSteps.size()]);
+			ChromatographicGradientStep fistStep = gsArray[0];
+			if(fistStep.getStartTime() > 0.0d) {
 				
-				ChromatographicGradientStep zeroStep = 
-						new ChromatographicGradientStep(
-						0.0d, 
-						flow, 
-						firstStep.getMobilePhaseStartingPercent()[0],
-						firstStep.getMobilePhaseStartingPercent()[1], 
-						firstStep.getMobilePhaseStartingPercent()[2], 
-						firstStep.getMobilePhaseStartingPercent()[3]);
-				gradientSteps.add(zeroStep);
-			}
+				ChromatographicGradientStep lastStep = gsArray[gsArray.length-1];
+				ChromatographicGradientStep realFistStep = new ChromatographicGradientStep(0.0d, gsArray[1].getFlowRate());
+				for(int i=0; i < lastStep.getMobilePhaseStartingPercent().length; i++)
+					realFistStep.getMobilePhaseStartingPercent()[i] = lastStep.getMobilePhaseStartingPercent()[i];
+				
+				gradientSteps.add(realFistStep);
+			}			
 		}
+//		if(!gradientSteps.isEmpty()) {
+//			
+//			ChromatographicGradientStep firstStep =
+//					((TreeSet<ChromatographicGradientStep>)gradientSteps).first();
+//			if(firstStep.getStartTime() > 0) {
+//				
+//				ChromatographicGradientStep zeroStep = 
+//						new ChromatographicGradientStep(
+//						0.0d, 
+//						flow, 
+//						firstStep.getMobilePhaseStartingPercent()[0],
+//						firstStep.getMobilePhaseStartingPercent()[1], 
+//						firstStep.getMobilePhaseStartingPercent()[2], 
+//						firstStep.getMobilePhaseStartingPercent()[3]);
+//				gradientSteps.add(zeroStep);
+//			}
+//		}
 		return gradientSteps;		
 	}
 
