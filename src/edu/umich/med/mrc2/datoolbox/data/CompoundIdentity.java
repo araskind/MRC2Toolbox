@@ -259,11 +259,10 @@ public class CompoundIdentity implements Serializable, Comparable<CompoundIdenti
         CompoundIdentity cid = (CompoundIdentity)cpdId;
 
         //	If the same database & ID return true
-        if(this.primaryDatabase != null && cid.getPrimaryDatabase() != null) {
-
-        	if(primaryDatabase.equals(cid.getPrimaryDatabase())
-        			&& this.getPrimaryDatabaseId().equals(cid.getPrimaryDatabaseId()))
-        		return true;
+        if(this.primaryDatabase != null && cid.getPrimaryDatabase() != null
+        		&& primaryDatabase.equals(cid.getPrimaryDatabase())
+        		&& this.getPrimaryDatabaseId().equals(cid.getPrimaryDatabaseId())) {
+        			return true;
         }
         if ((this.getPrimaryDatabaseId() == null) ? (cid.getPrimaryDatabaseId() != null) :
         	!this.getPrimaryDatabaseId().equals(cid.getPrimaryDatabaseId()))

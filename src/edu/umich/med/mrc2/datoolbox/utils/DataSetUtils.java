@@ -118,7 +118,7 @@ public class DataSetUtils {
 			subset = sourceMatrix.selectRows(Ret.NEW, fileCoordinates);
 		
 		if(featureCoordinates != null && fileCoordinates == null)
-			subset = sourceMatrix.selectColumns(Ret.LINK, featureCoordinates);
+			subset = sourceMatrix.selectColumns(Ret.NEW, featureCoordinates);
 		
 		if(subset != null) {
 			subset.setMetaDataDimensionMatrix(0, newFeatureMatrix);

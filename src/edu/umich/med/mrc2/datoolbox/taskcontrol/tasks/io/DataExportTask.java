@@ -644,7 +644,7 @@ public class DataExportTask extends AbstractTask {
 
 				AdductMatch tam = msf.getPrimaryIdentity().getMsRtLibraryMatch().getTopAdductMatch();
 				if(tam != null)
-					compoundName += " (" + tam.getLibraryMatch().getName() + ")";
+					compoundName += " " + tam.getLibraryMatch().getName();
 			}
 		}
 		double binnerMass =
@@ -831,8 +831,8 @@ public class DataExportTask extends AbstractTask {
 		Collection<String>dataToExport = new ArrayList<String>();
 		List<String>lineChunks = new ArrayList<String>();
 		//	lineChunks.add("FeatureID");
-		lineChunks.add("metabolite_name");
-		lineChunks.add("Name");
+		lineChunks.add(BinnerExportFields.FEATURE_NAME.getName());
+		lineChunks.add(BinnerExportFields.METABOLITE_NAME.getName());
 		for(MSFeatureSetStatisticalParameters o : MSFeatureSetStatisticalParameters.values())
 			lineChunks.add(o.getName());
 		
@@ -841,9 +841,20 @@ public class DataExportTask extends AbstractTask {
 		for(MsFeature feature :  featureList) {
 			
 			lineChunks.clear();
-			// lineChunks.add(feature.getId());
-			lineChunks.add(feature.getBicMetaboliteName());
 			lineChunks.add(feature.getName());
+			if(feature.isIdentified()){
+
+				String compoundName = feature.getPrimaryIdentity().getCompoundName();
+				if(feature.getPrimaryIdentity().getMsRtLibraryMatch() != null) {
+
+					AdductMatch tam = feature.getPrimaryIdentity().getMsRtLibraryMatch().getTopAdductMatch();
+					if(tam != null)
+						compoundName += " " + tam.getLibraryMatch().getName();
+				}
+				lineChunks.add(compoundName);
+			}
+			else
+				lineChunks.add(feature.getBicMetaboliteName());
 			
 			for(MSFeatureSetStatisticalParameters o : MSFeatureSetStatisticalParameters.values()) {
 				

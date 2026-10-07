@@ -440,27 +440,19 @@ public class ExternalLibraryVerificationAndUploadDialog extends JDialog implemen
 	public Collection<String> validateFormData(boolean validateCompoundsOnly) {
 	    Collection<String>errors = new ArrayList<String>();
 	    
-//	    if(masterLibrary == null || masterLibrary.getFeatures().isEmpty())
-//	        errors.add("Missing or empty base PCDL library.");
-//	    
-//	    String libName = getLibraryName();
-//	    
-//	    if(libName.isEmpty())
-//	        errors.add("New library name can not be empty.");
-//	    else {
-//		    CompoundLibrary exitingLibrary = IDTDataCache.getMSRTLibraryByName(libName);
-//		    if(exitingLibrary != null)
-//		    	 errors.add("Library \"" + libName + "\" already exists.");
-//	    }
-//	    if(getSelectedAdducts().isEmpty())
-//	        errors.add("Adduct list can not be empty.");
-//	    	    
-//	    if(getPolarity() == null)
-//	    	errors.add("Library polarity not specified.");
-	    
-	    if(inputLibraryFile == null || !inputLibraryFile.exists())
+	    if(getInputLibraryFile() == null || !getInputLibraryFile().exists())
 	    	errors.add("Library file for import/verification not selected.");
-	    		    
+	    	
+	    if(getCompoundValidationType().equals(CompoundValidationType.AGAINST_MASTER_LIBRARY)
+	    		&&  getMasterLibrary() == null) {
+	    	errors.add("Master library must be selected\n"
+	    			+ "when verification against the library is chosen.");
+	    }
+	    if(createDefaultAdducts() && !getPolarity().equals(Polarity.Neutral)
+	    		&& getSelectedAdducts().isEmpty()) {
+	    	errors.add("At least one adduct must be selected\n"
+	    			+ "when \"Create selected adducts\" checkbox is checked");
+	    }	    		    
 	    return errors;
 	}
 }

@@ -99,6 +99,7 @@ public class FeatureDataPanelMenuBar extends CommonMenuBar {
 	private static final Icon normalizedDataIcon = GuiUtils.getIcon("loess", 24);
 	private static final Icon loadPfaFileIcon = GuiUtils.getIcon("importFromProFinderPaf", 24);
 	private static final Icon matchCompoundsIcon = GuiUtils.getIcon("replaceCompound", 24);
+	private static final Icon cleanupLibSearchIcon = GuiUtils.getIcon("filterIdStatus", 24);
 	
 	// Menus
 	private JMenu
@@ -148,6 +149,7 @@ public class FeatureDataPanelMenuBar extends CommonMenuBar {
 	// Identification items
 	private JMenuItem
 		searchLibraryMenuItem,
+		cleanupLibraryResultsMenuItem,
 		searchDatabaseMenuItem,
 		showMissingIdsMenuItem,
 		clearIdentificationsMenuItem,
@@ -316,6 +318,12 @@ public class FeatureDataPanelMenuBar extends CommonMenuBar {
 		searchDatabaseMenuItem = addItem(identificationMenu, 
 				MainActionCommands.COMPOUND_DATABASE_SEARCH_SETUP_COMMAND, 
 				searchDatabaseIcon);
+		
+		identificationMenu.addSeparator();
+		
+		cleanupLibraryResultsMenuItem = addItem(identificationMenu, 
+				MainActionCommands.CLEANUP_LIBRARY_SEARCH_RESULTS_SETUP_COMMAND, 
+				cleanupLibSearchIcon);
 		
 		identificationMenu.addSeparator();
 		

@@ -625,7 +625,7 @@ public class MsFeatureCluster implements Serializable, XmlStorable {
 
 	public void removeFeatures(Collection<MsFeature> cfList) {
 
-		clusterFeatures.values().stream().forEach(c -> c.removeAll(cfList));
+		clusterFeatures.values().forEach(c -> c.removeAll(cfList));
 		for(DataPipeline dp : clusterFeatures.keySet())
 			updateStatisticsForDataPipeline(dp);	
 		

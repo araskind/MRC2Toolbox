@@ -943,17 +943,7 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ItemList
 		externalLibraryVerificationAndUploadDialog = 
 				new ExternalLibraryVerificationAndUploadDialog(this, false, currentLibrary);
 		externalLibraryVerificationAndUploadDialog.setLocationRelativeTo(this.getContentPane());
-		externalLibraryVerificationAndUploadDialog.setVisible(true);
-		
-//		JnaFileChooser fc = new JnaFileChooser(baseDirectory);
-//		fc.setMode(JnaFileChooser.Mode.Files);
-//		fc.addFilter(MsLibraryFormat.CEF.getName(), MsLibraryFormat.CEF.getFileExtension());
-//		fc.addFilter("Library Editor files", "xml", "XML");	
-//		//	fc.addFilter("TAB-separated text files", "txt", "TXT", "tsv", "TSV");
-//		fc.setTitle("Select library file to import");
-//		fc.setMultiSelectionEnabled(false);
-//		if (fc.showOpenDialog(SwingUtilities.getWindowAncestor(this.getContentPane())))			
-//			importLibraryFromFile(fc.getSelectedFile(), null);		
+		externalLibraryVerificationAndUploadDialog.setVisible(true);	
 	}
 	
 	public void importLibraryFromFile(File inputFile, Collection<Adduct> adductList) {

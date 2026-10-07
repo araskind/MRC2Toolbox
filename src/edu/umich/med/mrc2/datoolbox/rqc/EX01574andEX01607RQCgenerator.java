@@ -51,7 +51,7 @@ public class EX01574andEX01607RQCgenerator {
 		MRC2ToolBoxConfiguration.initConfiguration();
 
 		try {
-			generateSummaryQcScriptForEX01574and1607rpneg();
+			generateSummaryQcScriptForEX01574and1607ionpneg();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

@@ -89,9 +89,11 @@ import edu.umich.med.mrc2.datoolbox.gui.cpddatabase.DatabaseSearchSetupDialog;
 import edu.umich.med.mrc2.datoolbox.gui.datexp.DataExplorerPlotFrame;
 import edu.umich.med.mrc2.datoolbox.gui.datexp.msone.MultiMSFeatureQCPlotFrame;
 import edu.umich.med.mrc2.datoolbox.gui.dereplication.duplicates.DuplicateMergeDialog;
+import edu.umich.med.mrc2.datoolbox.gui.dereplication.duplicates.DuplicatesPanel;
 import edu.umich.med.mrc2.datoolbox.gui.expdesign.pools.ExperimentPooledSampleManagerDialog;
 import edu.umich.med.mrc2.datoolbox.gui.fdata.cleanup.FeatureCleanupParameters;
 import edu.umich.med.mrc2.datoolbox.gui.fdata.cleanup.FeatureDataCleanupDialog;
+import edu.umich.med.mrc2.datoolbox.gui.fdata.cleanup.LibrarySearchCleanupDialog;
 import edu.umich.med.mrc2.datoolbox.gui.fdata.corr.DockableCorrelationDataPanel;
 import edu.umich.med.mrc2.datoolbox.gui.fdata.noid.MissingIdentificationsDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idtable.DockableUniversalIdentificationResultsTable;
@@ -135,6 +137,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.derepl.FindDuplicateNamesTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.derepl.MergeDuplicateFeaturesTask;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.id.CleanupLibrarySerchResultsTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.integration.MsFeatureAveragingTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io.DataExportTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io.ImportBinnerAnnotationsForUntargetedDataTask;
@@ -204,6 +207,7 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 	private FeatureAveragingSetupDialog featureAveragingSetupDialog;
 	private MZDeltaAnalysisDialog mzDeltaAnalysisDialog;
 	private FilterFeaturesByMzRtListDialog filterFeaturesByMzRtListDialog;
+	private LibrarySearchCleanupDialog librarySearchCleanupDialog;
 
 	private static final Icon componentIcon = GuiUtils.getIcon("barChart", 16);
 	private static final Icon loadLibraryIcon = GuiUtils.getIcon("loadLibrary", 24);
@@ -536,7 +540,13 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 
 			if (command.equals(MainActionCommands.SEARCH_FEATURE_SET_AGAINST_LIBRARIES_COMMAND.getName()))
 				runLibrarySearch();
+			
+			if (command.equals(MainActionCommands.CLEANUP_LIBRARY_SEARCH_RESULTS_SETUP_COMMAND.getName()))
+				setupLibrarySerchResultsCleanup();
 
+			if (command.equals(MainActionCommands.CLEANUP_LIBRARY_SEARCH_RESULTS_COMMAND.getName()))
+				cleanupLibrarySerchResults();
+			
 			if (command.equals(MainActionCommands.SEARCH_FEATURE_SET_AGAINST_COMPOUND_DATABASE_COMMAND.getName()))
 				runDatabaseSearch();
 
@@ -1191,6 +1201,32 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 	private void runDatabaseSearch() {
 		// TODO Auto-generated method stub
 
+	}
+	
+	private void setupLibrarySerchResultsCleanup() {
+
+		librarySearchCleanupDialog = new LibrarySearchCleanupDialog(this);
+		librarySearchCleanupDialog.setLocationRelativeTo(this.getContentPane());
+		librarySearchCleanupDialog.setVisible(true);
+	}
+
+	private void cleanupLibrarySerchResults() {
+		
+		librarySearchCleanupDialog.getMaxPercentMissing();
+		librarySearchCleanupDialog.getMaxDistanceBetweenAdducts();		
+		librarySearchCleanupDialog.getMinPercentOfMinorAdduct();
+		librarySearchCleanupDialog.getMinCorrelationBetweenAdducts();
+		
+		CleanupLibrarySerchResultsTask task = new CleanupLibrarySerchResultsTask(
+				currentExperiment.getActiveFeatureSetForDataPipeline(activeDataPipeline).getFeatures(),
+				activeDataPipeline,
+				librarySearchCleanupDialog.getMaxPercentMissing(),
+				librarySearchCleanupDialog.getMaxDistanceBetweenAdducts(),
+				librarySearchCleanupDialog.getMinPercentOfMinorAdduct(),
+				librarySearchCleanupDialog.getMinCorrelationBetweenAdducts());
+		task.addTaskListener(this);
+		MRC2ToolBoxCore.getTaskController().addTask(task);
+		librarySearchCleanupDialog.dispose();
 	}
 
 	private void showDataImputationDialog() {
@@ -1941,11 +1977,25 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 				finalizeMsFeatureAveragingTask((MsFeatureAveragingTask)e.getSource());		
 			
 			if (e.getSource().getClass().equals(MZDeltaAnalysisTask.class))
-				finalizeMZDeltaAnalysisTask((MZDeltaAnalysisTask)e.getSource());	
+				finalizeMZDeltaAnalysisTask((MZDeltaAnalysisTask)e.getSource());
+			
+			if (e.getSource().getClass().equals(CleanupLibrarySerchResultsTask.class))
+				finalizeCleanupLibrarySerchResultsTask((CleanupLibrarySerchResultsTask)e.getSource());
+			
 		}
 		if (e.getStatus() == TaskStatus.CANCELED || e.getStatus() == TaskStatus.ERROR) {
 			MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
 			MainWindow.hideProgressDialog();
+		}
+	}
+
+	private void finalizeCleanupLibrarySerchResultsTask(CleanupLibrarySerchResultsTask task) {
+		
+		if(!task.getFeatureClusters().isEmpty()) {
+			DuplicatesPanel duplicatesPanel =  
+					(DuplicatesPanel)MRC2ToolBoxCore.getMainWindow().getPanel(PanelList.DUPLICATES);
+			duplicatesPanel.loadFeatureClusters(task.getFeatureClusters());
+			MRC2ToolBoxCore.getMainWindow().showPanel(PanelList.DUPLICATES);
 		}
 	}
 

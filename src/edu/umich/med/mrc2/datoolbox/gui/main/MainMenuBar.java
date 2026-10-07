@@ -356,7 +356,7 @@ public class MainMenuBar extends CommonMenuBar {
 		recentFeatureClusterDataSetsMenu.removeAll();
 	}
 
-	public void updateGuiWithRecentData() {
+	public synchronized void updateGuiWithRecentData() {
 
 		clearAllRecentItems();
 		

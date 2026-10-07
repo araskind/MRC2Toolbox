@@ -487,12 +487,14 @@ public enum MainActionCommands {
 	
 	MS_RT_LIBRARY_SEARCH_SETUP_COMMAND("MS/RT library search setup"),
 	COMPOUND_DATABASE_SEARCH_SETUP_COMMAND("Databse search setup"),
+	CLEANUP_LIBRARY_SEARCH_RESULTS_SETUP_COMMAND("Set up MS/RT library search results cleanup"),
 	
 	MS_RT_LIBRARY_SEARCH_SETUP_FOR_SELECTED_COMMAND("Search selected feature(s) against MS/RT libraries"),
 	COMPOUND_DATABASE_SEARCH_SETUP_FOR_SELECTED_COMMAND("Search selected feature(s) against compound database"),
 		
 	SEARCH_FEATURE_SET_AGAINST_LIBRARIES_COMMAND("Search features against MS/RT libraries"),
 	SEARCH_FEATURE_SET_AGAINST_COMPOUND_DATABASE_COMMAND("Search features against compound database"),
+	CLEANUP_LIBRARY_SEARCH_RESULTS_COMMAND("Cleanup MS/RT library search results"),
 	
 	SHOW_MISSING_IDENTIFICATIONS_COMMAND("Show missing identifications"),
 	CLEAR_IDENTIFICATIONS_COMMAND("Clear feature identifications"),
