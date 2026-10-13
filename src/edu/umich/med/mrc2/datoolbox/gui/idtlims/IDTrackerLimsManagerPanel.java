@@ -92,7 +92,6 @@ import edu.umich.med.mrc2.datoolbox.gui.utils.IndeterminateProgressDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.LongUpdateTask;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
-import edu.umich.med.mrc2.datoolbox.main.RecentDataManager;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
@@ -949,7 +948,6 @@ public class IDTrackerLimsManagerPanel extends DockableMRC2ToolboxPanel implemen
 	private synchronized void finalizeIDTrackerMetadataPullTask(IDTrackerMetadataPullTask task) {
 		
 		refreshPanelData();
-		RecentDataManager.readDataFromFile();
 		MRC2ToolBoxCore.getMainWindow().updateGuiWithRecentData();
 	}
 

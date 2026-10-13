@@ -21,18 +21,8 @@
 
 package edu.umich.med.mrc2.datoolbox.main;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.ByteBuffer;
-import java.nio.CharBuffer;
-import java.nio.charset.Charset;
-import java.nio.charset.CharsetDecoder;
-import java.nio.charset.CodingErrorAction;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
@@ -47,8 +37,6 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang.StringUtils;
 import org.jdom2.Document;
 import org.jdom2.Element;
-import org.jdom2.JDOMException;
-import org.jdom2.input.SAXBuilder;
 import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
 
@@ -60,6 +48,7 @@ import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.project.Project;
 import edu.umich.med.mrc2.datoolbox.project.ProjectType;
 import edu.umich.med.mrc2.datoolbox.utils.ProjectUtils;
+import edu.umich.med.mrc2.datoolbox.utils.XmlUtils;
 
 public class RecentDataManager {
 	
@@ -77,9 +66,8 @@ public class RecentDataManager {
 	private static LinkedList<MsFeatureInfoBundleCollection>featureCollections = new LinkedList<>();
 	private static LinkedList<IMSMSClusterDataSet>featureClusterDataSets = new LinkedList<>();
 
-	public RecentDataManager() {
+	private RecentDataManager() {
 		super();
-		readDataFromFile();		
 	}
 
 	public static void readDataFromFile() {
@@ -89,29 +77,8 @@ public class RecentDataManager {
 			saveDataToFile();
 			return;
 		}
-		SAXBuilder sax = new SAXBuilder();
-		Document doc = null;
-		
-		CharsetDecoder utf8Decoder = Charset.forName("UTF-8").newDecoder();
-		utf8Decoder.onMalformedInput(CodingErrorAction.REPLACE);
-		utf8Decoder.onUnmappableCharacter(CodingErrorAction.REPLACE);
-		utf8Decoder.replaceWith(" ");
-		try {
-			byte[] data = Files.readAllBytes(recentObjectFilePath);
-			ByteBuffer input = ByteBuffer.wrap(data);
-			CharBuffer output = utf8Decoder.decode(input);		
-			InputStream stream = new ByteArrayInputStream(output.toString().getBytes(StandardCharsets.UTF_8));
-			doc = sax.build(stream);
-		} catch (JDOMException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-			return;						
-		}
-		Element rootElement = doc.getRootElement();
-		
+		Document doc = XmlUtils.readXmlFile(dataFile);
+		Element rootElement = doc.getRootElement();		
 		String featureCollectionIdListString = 
 				rootElement.getChild(RECENT_FEATURE_COLLECTION_ELEMENT).getText();
 		Collection<String> featureCollectionIdList = 

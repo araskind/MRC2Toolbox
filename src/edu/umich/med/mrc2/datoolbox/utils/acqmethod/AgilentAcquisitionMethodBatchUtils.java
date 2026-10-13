@@ -1181,6 +1181,62 @@ public class AgilentAcquisitionMethodBatchUtils {
 			e.printStackTrace();
 		}
 	}
+	
+	public static Document getSCICDevicesDocumentFromAcqMethodReportFile(File acqMethodReportFile) {
+		
+		Document methodDocument = XmlUtils.readXmlFile(acqMethodReportFile);
+		Namespace ns = methodDocument.getRootElement().getNamespace();
+		Element mr = methodDocument.getRootElement().getChild("MethodReport", ns);
+		if(mr == null)
+			return null;
+		
+		Element rcDevicesXmlElement = mr.getChild("SCICDevicesXml", ns);
+		if(rcDevicesXmlElement == null 
+				|| rcDevicesXmlElement.getText() == null
+				|| rcDevicesXmlElement.getText().isEmpty()) {
+			return null;
+		}			
+		String rcDevicesXml = 
+				StringEscapeUtils.unescapeXml(rcDevicesXmlElement.getText()).
+				replace("<Value><Negative></Value>", "<Value>Negative</Value>").replace("<Value><Positive></Value>", "<Value>Positive</Value>");
+		
+		return XmlUtils.readXmlString(rcDevicesXml);
+	}
+	
+	public static void extractSCICDevicesDocumentFromAcqMethodReportFile(File acqMethodReportFile) {
+		
+		Document SCICDevicesDocument = getSCICDevicesDocumentFromAcqMethodReportFile(acqMethodReportFile);		
+		File output = Paths.get(acqMethodReportFile.getParent(), "SCICDevicesDocument.xml").toFile();
+		XmlUtils.writePrettyPrintXMLtoFile(SCICDevicesDocument, output);
+	}
+	
+	public static void writeSCICDevicesDocumentFromAcqMethodReportFileAsText(File acqMethodReportFile) {
+		
+		Document methodDocument = XmlUtils.readXmlFile(acqMethodReportFile);
+		Namespace ns = methodDocument.getRootElement().getNamespace();
+		Element mr = methodDocument.getRootElement().getChild("MethodReport", ns);
+		if(mr == null)
+			return;
+		
+		Element rcDevicesXmlElement = mr.getChild("SCICDevicesXml", ns);
+		if(rcDevicesXmlElement == null 
+				|| rcDevicesXmlElement.getText() == null
+				|| rcDevicesXmlElement.getText().isEmpty()) {
+			return;
+		}			
+		String rcDevicesXml = 
+				StringEscapeUtils.unescapeXml(rcDevicesXmlElement.getText());
+		Path destination = Paths.get(acqMethodReportFile.getParent(), "SCICDevicesDocument.xml");
+		try {
+			Files.writeString(destination,
+					rcDevicesXml, 
+					StandardCharsets.UTF_8, 
+					StandardOpenOption.CREATE,
+					StandardOpenOption.TRUNCATE_EXISTING);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}		
+	}
 }
 
 

@@ -27,8 +27,10 @@ import java.awt.event.ItemEvent;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.swing.DefaultListSelectionModel;
 import javax.swing.Icon;
@@ -58,6 +60,7 @@ import edu.umich.med.mrc2.datoolbox.gui.clustertree.DockableClusterTree;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignSubsetEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.FeatureSetEvent;
+import edu.umich.med.mrc2.datoolbox.gui.communication.FeatureSetListener;
 import edu.umich.med.mrc2.datoolbox.gui.communication.MsFeatureEvent;
 import edu.umich.med.mrc2.datoolbox.gui.dereplication.ClusterDisplayPanel;
 import edu.umich.med.mrc2.datoolbox.gui.dereplication.clustering.adductinterpret.AdductInterpreterDialog;
@@ -113,6 +116,8 @@ public class CorrelationResultsPanel extends ClusterDisplayPanel implements Char
 	private MassDifferenceExplorerDialog mdExplorerDialog;
 	private BinnerDataImportDialog binnerDataImportDialog;	
 	private BinnerProcessingSetupDialog binnerProcessingSetupDialog;
+
+	private NewFeatureSubsetFromClustersDialog newFeatureSubsetFromClustersDialog;
 
 	public CorrelationResultsPanel() {
 
@@ -321,8 +326,54 @@ public class CorrelationResultsPanel extends ClusterDisplayPanel implements Char
 
 		if (command.equals(MainActionCommands.GENERATE_BINNER_ANNOTATIONS_COMMAND.getName()))
 			runBinnerAnalysis();
+		
+		if (command.equals(MainActionCommands.CREATE_NEW_FEATURE_SUBSET_FROM_CLUSTERS_COMMAND.getName()))
+			createNewFeatureSubsetFromClusters();
+		
+		if (command.equals(MainActionCommands.ADD_NEW_FEATURE_SUBSET_TO_PROJECT_COMMAND.getName()))
+			addNewFeatureSubsetToProject();
 	}
 
+	private void createNewFeatureSubsetFromClusters() {
+		
+		if(activeClusterSet == null || activeClusterSet.getClusters().isEmpty())
+			return;
+		
+		newFeatureSubsetFromClustersDialog = new NewFeatureSubsetFromClustersDialog(this, activeClusterSet);
+		newFeatureSubsetFromClustersDialog.setLocationRelativeTo(this.getContentPane());
+		newFeatureSubsetFromClustersDialog.setVisible(true);	
+	}
+
+	private void addNewFeatureSubsetToProject() {
+		
+		Collection<String>errors = newFeatureSubsetFromClustersDialog.validateFormData();
+		if(!errors.isEmpty()){
+		    MessageDialog.showErrorMsg(
+		            StringUtils.join(errors, "\n"), newFeatureSubsetFromClustersDialog);
+		    return;
+		}
+		List<MsFeature> features = new ArrayList<>();
+		if(newFeatureSubsetFromClustersDialog.includeOnlyEnabled()) {
+			features = newFeatureSubsetFromClustersDialog.getActiveClusterSet().getClusters().
+				stream().flatMap(c -> c.getActiveFeatures().stream()).collect(Collectors.toList());
+		}
+		else {
+			features = newFeatureSubsetFromClustersDialog.getActiveClusterSet().getClusters().
+					stream().flatMap(c -> c.getFeatures().stream()).collect(Collectors.toList());
+		}
+		MsFeatureSet clusterFeatureSet = new MsFeatureSet(
+				newFeatureSubsetFromClustersDialog.getFeatureSetName(), features);
+				
+		clusterFeatureSet.addListener((FeatureSetListener) 
+				MRC2ToolBoxCore.getMainWindow().getPanel(PanelList.FEATURE_DATA));			
+		clusterFeatureSet.addListener(MRC2ToolBoxCore.getMainWindow().getExperimentSetupDraw().getFeatureSubsetPanel());
+		//	clusterFeatureSet.fireFeatureSetEvent(ParameterSetStatus.CREATED);
+		currentExperiment.addFeatureSetForDataPipeline(clusterFeatureSet, activeDataPipeline);
+		currentExperiment.setActiveFeatureSetForDataPipeline(clusterFeatureSet, activeDataPipeline);
+		MRC2ToolBoxCore.getMainWindow().showPanel(PanelList.FEATURE_DATA);
+		newFeatureSubsetFromClustersDialog.dispose();
+	}
+	
 	private void setupBinnerAnalysis() {
 
 		Set<DataFile> dataFiles = 
@@ -493,12 +544,10 @@ public class CorrelationResultsPanel extends ClusterDisplayPanel implements Char
 			MessageDialog.showErrorMsg("Feature subset '" + features.getName()
 					+ "' is locked and can not be modified!\n" + 
 					"Please select or create another feature set.");
-			return;
 		} else {
 			currentExperiment.getCorrelationClustersForDataPipeline(activeDataPipeline).
 				stream().flatMap(c -> c.getActiveFeatures().stream()).
 				forEach(f -> features.addFeature(f));
-
 			MRC2ToolBoxCore.getMainWindow().getExperimentSetupDraw().
 				setActiveFeatureSubset(features);
 		}
@@ -653,8 +702,9 @@ public class CorrelationResultsPanel extends ClusterDisplayPanel implements Char
 
 						if (!activeSet.isLocked())
 							activeSet.removeFeatures(c.getFeatures());
-
-						currentExperiment.getCorrelationClustersForDataPipeline(activeDataPipeline).remove(c);
+						if(currentExperiment.getCorrelationClustersForDataPipeline(activeDataPipeline) != null)
+							currentExperiment.getCorrelationClustersForDataPipeline(activeDataPipeline).remove(c);
+						
 						clusterTree.removeFeatureCluster(c);
 					}
 					activeSet.fireFeatureSetEvent(ParameterSetStatus.CHANGED);
@@ -824,7 +874,7 @@ public class CorrelationResultsPanel extends ClusterDisplayPanel implements Char
 
 		currentExperiment = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
 		Set<MsFeatureCluster> clusters = currentExperiment.getCorrelationClustersForDataPipeline(activeDataPipeline);
-		clusters.stream().forEach(c -> c.enableAllFeatures());
+		clusters.forEach(MsFeatureCluster::enableAllFeatures);
 		clearPanel();
 		loadFeatureClusters(clusters);
 	}
@@ -839,26 +889,8 @@ public class CorrelationResultsPanel extends ClusterDisplayPanel implements Char
 		fc.setMultiSelectionEnabled(false);
 		if (fc.showOpenDialog(SwingUtilities.getWindowAncestor(this.getContentPane())))			
 			return fc.getSelectedFile();
-		
-		return null;
-						
-//		JFileChooser chooser = new ImprovedFileChooser();
-//		File inputFile = null;
-//
-//		File projectsDir = new File(MRC2ToolBoxConfiguration.getDefaultProjectsDirectory());
-//		chooser.setCurrentDirectory(projectsDir);
-//
-//		chooser.setDialogTitle("Select Binner results file");
-//		chooser.setAcceptAllFileFilterUsed(false);
-//		chooser.setMultiSelectionEnabled(false);
-//		chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-//		FileNameExtensionFilter projectFileFilter = new FileNameExtensionFilter("Excel files", "xlsx");
-//		chooser.setFileFilter(projectFileFilter);
-//
-//		if (chooser.showOpenDialog(this.getContentPane()) == JFileChooser.APPROVE_OPTION)
-//			inputFile = chooser.getSelectedFile();
-//
-//		return inputFile;
+		else
+			return null;
 	}
 
 	@Override
@@ -891,9 +923,10 @@ public class CorrelationResultsPanel extends ClusterDisplayPanel implements Char
 
 		super.showClusterData(selectedCluster);
 
-		massDifferenceTable.setTableModelFromFeatureCluster(selectedCluster);
+		if(selectedCluster.getCorrelationMatrix() != null)
+			massDifferenceTable.setTableModelFromFeatureCluster(selectedCluster);
 
-		if (selectedCluster.getFeatures().size() < 100)
+		if (selectedCluster.getFeatures().size() < 100 && selectedCluster.getCorrelationMatrix() != null)
 			showCorrelationMatrix(selectedCluster);
 		else
 			heatMapFrame.clearPanel();
@@ -903,6 +936,9 @@ public class CorrelationResultsPanel extends ClusterDisplayPanel implements Char
 
 	public void showCorrelationMatrix(MsFeatureCluster cluster) {
 
+		if(cluster.getCorrelationMatrix() == null)
+			return;
+		
 		heatMapFrame.showCorrelationData(cluster);
 	}
 

@@ -128,6 +128,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskListener;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.gui.TaskProgressPanel;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.IDTrackerExperimentDataFetchTask;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.lims.StartupDataPullTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.project.OpenMetabolomicsProjectTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.project.OpenStoredRawDataAnalysisExperimentTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.project.SaveMetabolomicsProjectTask;
@@ -614,19 +615,21 @@ public class MainWindow extends JFrame
 		}
 		else {
 			MRC2ToolBoxCore.setIdTrackerUser(user);
-			MRC2ToolBoxCore.getMainWindow().setIdTrackerUser(user);
+			setIdTrackerUser(user);
 
-			((METLIMSPanel) MRC2ToolBoxCore.getMainWindow().
-					getPanel(PanelList.LIMS)).refreshLimsData();
+//			((METLIMSPanel)getPanel(PanelList.LIMS)).refreshLimsData();
+//			
+//			((IDTrackerLimsManagerPanel)getPanel(PanelList.ID_TRACKER_LIMS)).refreshIdTrackerdata();
 			
-			((IDTrackerLimsManagerPanel) MRC2ToolBoxCore.getMainWindow().
-					getPanel(PanelList.ID_TRACKER_LIMS)).refreshIdTrackerdata();
+			StartupDataPullTask task = new StartupDataPullTask();
+			task.addTaskListener(this);
+			MRC2ToolBoxCore.getTaskController().addTask(task);
 		
 			idtLogin.dispose();
 		}
 	}
 
-	public void updateGuiWithRecentData() {
+	public synchronized void updateGuiWithRecentData() {
 
 		mainMenuBar.updateGuiWithRecentData();		
 		experimentSetupDraw.updateGuiWithRecentData();
@@ -1371,11 +1374,25 @@ public class MainWindow extends JFrame
 				finalizeExperimentRawDataLoad((ExperimentRawDataFileOpenTask)e.getSource());
 				return;
 			}
+			if(e.getSource().getClass().equals(StartupDataPullTask.class)) {
+				finalizeStartupDataPullTask((StartupDataPullTask)e.getSource());
+				return;
+			}
 		}
 		if (e.getStatus() == TaskStatus.ERROR || e.getStatus() == TaskStatus.CANCELED) {
 			MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
 			hideProgressDialog();
 		}
+	}
+
+	private void finalizeStartupDataPullTask(StartupDataPullTask source) {
+
+		MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
+		hideProgressDialog();
+		((METLIMSPanel)getPanel(PanelList.LIMS)).refreshPanelData();		
+		((IDTrackerLimsManagerPanel)getPanel(PanelList.ID_TRACKER_LIMS)).refreshPanelData();
+		RecentDataManager.readDataFromFile();
+		updateGuiWithRecentData();
 	}
 
 	private synchronized void finalizeExperimentRawDataLoad(ExperimentRawDataFileOpenTask task) {

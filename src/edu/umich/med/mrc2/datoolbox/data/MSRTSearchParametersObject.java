@@ -38,6 +38,12 @@ public class MSRTSearchParametersObject {
 	private int maxHits;
 	private Collection<String>libraryIds;
 	
+	
+	public MSRTSearchParametersObject() {
+		super();
+		libraryIds = new TreeSet<String>();
+	}
+
 	public MSRTSearchParametersObject(
 			boolean clearPreviousResults,
 			double massError, 

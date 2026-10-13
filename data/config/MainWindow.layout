@@ -42,19 +42,6 @@
 												<key shared="false">
 													<placeholder>dock.single.ExperimentSetupDraw</placeholder>
 												</key>
-												<item key="convert" type="b">true</item>
-												<item key="convert-keys" type="a">
-													<item type="s">size</item>
-													<item type="s">index</item>
-													<item type="s">id</item>
-													<item type="s">placeholder</item>
-													<item type="s">hold</item>
-												</item>
-												<item key="dock.size" type="i">400</item>
-												<item key="dock.index" type="i">0</item>
-												<item key="dock.id" type="i">0</item>
-												<item key="dock.placeholder" type="s">dock.single.ExperimentSetupDraw</item>
-												<item key="dock.hold" type="b">false</item>
 											</entry>
 											<entry>
 												<key shared="false">
@@ -70,18 +57,7 @@
 									<type>dock.CContentArea.minimize</type>
 								</layout>
 							</adjacent>
-							<children ignore="false">
-								<child>
-									<layout factory="predefined" placeholder="dock.single.ExperimentSetupDraw">
-										<replacement id="dockablesingle ExperimentSetupDraw"/>
-										<delegate id="delegate_ccontrol backup factory id">
-											<id>ExperimentSetupDraw</id>
-											<area/>
-										</delegate>
-									</layout>
-									<children ignore="false"/>
-								</child>
-							</children>
+							<children ignore="false"/>
 						</root>
 						<root name="ccontrol south">
 							<layout factory="predefined">
@@ -266,24 +242,23 @@
 												</placeholders>
 											</leaf>
 											<node nodeId="1676064563113" orientation="HORIZONTAL" divider="0.1673379714390333">
-												<leaf id="-1" nodeId="1676064552084">
+												<leaf id="1" nodeId="1676064552084">
 													<placeholders>
 														<placeholder>dock.single.ExperimentSetupDraw</placeholder>
 													</placeholders>
 												</leaf>
 												<leaf id="0" nodeId="1672779039466">
 													<placeholders>
-														<placeholder>dock.single.MgfPanel</placeholder>
-														<placeholder>dock.single.DataIntegratorPanelClusterDisplayPanel</placeholder>
-														<placeholder>dock.single.CompoundCollectionsPanel</placeholder>
-														<placeholder>dock.single.RawDataExaminerPanel</placeholder>
-														<placeholder>dock.single.CorrelationResultsPanelClusterDisplayPanel</placeholder>
 														<placeholder>dock.single.WorklistPanel</placeholder>
 														<placeholder>dock.single.ExperimentDesignPanel</placeholder>
 														<placeholder>dock.single.DuplicatesPanelClusterDisplayPanel</placeholder>
+														<placeholder>dock.single.MgfPanel</placeholder>
 														<placeholder>dock.single.LabNoteBookPanel</placeholder>
 														<placeholder>dock.single.AutomatorPanel</placeholder>
 														<placeholder>dock.single.QCPanel</placeholder>
+														<placeholder>dock.single.DataIntegratorPanelClusterDisplayPanel</placeholder>
+														<placeholder>dock.single.CompoundCollectionsPanel</placeholder>
+														<placeholder>dock.single.RawDataExaminerPanel</placeholder>
 														<placeholder>dock.single.FeatureDataPanel</placeholder>
 														<placeholder>dock.single.METLIMSPanel</placeholder>
 													</placeholders>
@@ -369,7 +344,7 @@
 							<children ignore="false">
 								<child>
 									<layout factory="delegate_StackDockStationFactory">
-										<selected>3</selected>
+										<selected>1</selected>
 										<placeholders>
 											<version>0</version>
 											<format>dock.PlaceholderList</format>
@@ -461,6 +436,15 @@
 												<key shared="false">
 													<placeholder>dock.single.CorrelationResultsPanelClusterDisplayPanel</placeholder>
 												</key>
+												<item key="convert" type="b">true</item>
+												<item key="convert-keys" type="a">
+													<item type="s">index</item>
+													<item type="s">id</item>
+													<item type="s">placeholder</item>
+												</item>
+												<item key="dock.index" type="i">6</item>
+												<item key="dock.id" type="i">6</item>
+												<item key="dock.placeholder" type="s">dock.single.CorrelationResultsPanelClusterDisplayPanel</item>
 											</entry>
 											<entry>
 												<key shared="false">
@@ -472,8 +456,8 @@
 													<item type="s">id</item>
 													<item type="s">placeholder</item>
 												</item>
-												<item key="dock.index" type="i">6</item>
-												<item key="dock.id" type="i">6</item>
+												<item key="dock.index" type="i">7</item>
+												<item key="dock.id" type="i">7</item>
 												<item key="dock.placeholder" type="s">dock.single.MsLibraryPanel</item>
 											</entry>
 											<entry>
@@ -486,8 +470,8 @@
 													<item type="s">id</item>
 													<item type="s">placeholder</item>
 												</item>
-												<item key="dock.index" type="i">7</item>
-												<item key="dock.id" type="i">7</item>
+												<item key="dock.index" type="i">8</item>
+												<item key="dock.id" type="i">8</item>
 												<item key="dock.placeholder" type="s">dock.single.CompoundDatabasePanel</item>
 											</entry>
 											<entry>
@@ -500,8 +484,8 @@
 													<item type="s">id</item>
 													<item type="s">placeholder</item>
 												</item>
-												<item key="dock.index" type="i">8</item>
-												<item key="dock.id" type="i">8</item>
+												<item key="dock.index" type="i">9</item>
+												<item key="dock.id" type="i">9</item>
 												<item key="dock.placeholder" type="s">dock.single.IDWorkbenchPanel</item>
 											</entry>
 											<entry>
@@ -514,8 +498,8 @@
 													<item type="s">id</item>
 													<item type="s">placeholder</item>
 												</item>
-												<item key="dock.index" type="i">9</item>
-												<item key="dock.id" type="i">9</item>
+												<item key="dock.index" type="i">10</item>
+												<item key="dock.id" type="i">10</item>
 												<item key="dock.placeholder" type="s">dock.single.IDTrackerLimsManagerPanel</item>
 											</entry>
 											<entry>
@@ -543,8 +527,8 @@
 													<item type="s">id</item>
 													<item type="s">placeholder</item>
 												</item>
-												<item key="dock.index" type="i">10</item>
-												<item key="dock.id" type="i">10</item>
+												<item key="dock.index" type="i">11</item>
+												<item key="dock.id" type="i">11</item>
 												<item key="dock.placeholder" type="s">dock.single.MoTrPACDataTrackingPanel</item>
 											</entry>
 											<entry>
@@ -557,8 +541,8 @@
 													<item type="s">id</item>
 													<item type="s">placeholder</item>
 												</item>
-												<item key="dock.index" type="i">11</item>
-												<item key="dock.id" type="i">11</item>
+												<item key="dock.index" type="i">12</item>
+												<item key="dock.id" type="i">12</item>
 												<item key="dock.placeholder" type="s">dock.single.METLIMSPanel</item>
 											</entry>
 											<entry>
@@ -571,8 +555,8 @@
 													<item type="s">id</item>
 													<item type="s">placeholder</item>
 												</item>
-												<item key="dock.index" type="i">12</item>
-												<item key="dock.id" type="i">12</item>
+												<item key="dock.index" type="i">13</item>
+												<item key="dock.id" type="i">13</item>
 												<item key="dock.placeholder" type="s">dock.single.RawDataExaminerPanel</item>
 											</entry>
 											<entry>
@@ -638,6 +622,16 @@
 												<replacement id="dockablesingle DataIntegratorPanelClusterDisplayPanel"/>
 												<delegate id="delegate_ccontrol backup factory id">
 													<id>DataIntegratorPanelClusterDisplayPanel</id>
+													<area/>
+												</delegate>
+											</layout>
+											<children ignore="false"/>
+										</child>
+										<child>
+											<layout factory="predefined" placeholder="dock.single.CorrelationResultsPanelClusterDisplayPanel">
+												<replacement id="dockablesingle CorrelationResultsPanelClusterDisplayPanel"/>
+												<delegate id="delegate_ccontrol backup factory id">
+													<id>CorrelationResultsPanelClusterDisplayPanel</id>
 													<area/>
 												</delegate>
 											</layout>
@@ -714,6 +708,16 @@
 											<children ignore="false"/>
 										</child>
 									</children>
+								</child>
+								<child>
+									<layout factory="predefined" placeholder="dock.single.ExperimentSetupDraw">
+										<replacement id="dockablesingle ExperimentSetupDraw"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>ExperimentSetupDraw</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
 								</child>
 							</children>
 						</root>
@@ -834,32 +838,6 @@
 									<replacement id="dockablesingle LabNoteBookPanel"/>
 									<delegate id="delegate_ccontrol backup factory id">
 										<id>LabNoteBookPanel</id>
-										<area/>
-									</delegate>
-								</layout>
-								<children ignore="false"/>
-							</layout>
-						</child>
-						<child key="single CorrelationResultsPanelClusterDisplayPanel" root="ccontrol center" location="true">
-							<location>
-								<property factory="SplitDockPlaceholderProperty">
-									<placeholder>dock.single.CorrelationResultsPanelClusterDisplayPanel</placeholder>
-									<backup-path>
-										<node location="RIGHT" size="0.7217529039070749" id="1672779742083"/>
-										<node location="RIGHT" size="0.8171774768353528" id="1676064563113"/>
-										<leaf id="1672779039466"/>
-									</backup-path>
-								</property>
-								<property factory="StackDockPropertyFactory">
-									<index>5</index>
-									<placeholder>dock.single.CorrelationResultsPanelClusterDisplayPanel</placeholder>
-								</property>
-							</location>
-							<layout>
-								<layout factory="predefined" placeholder="dock.single.CorrelationResultsPanelClusterDisplayPanel">
-									<replacement id="dockablesingle CorrelationResultsPanelClusterDisplayPanel"/>
-									<delegate id="delegate_ccontrol backup factory id">
-										<id>CorrelationResultsPanelClusterDisplayPanel</id>
 										<area/>
 									</delegate>
 								</layout>
@@ -1200,10 +1178,10 @@
 								</property>
 							</properties>
 						</entry>
-						<entry id="single ExperimentSetupDraw" current="dock.mode.minimized">
+						<entry id="single ExperimentSetupDraw" current="dock.mode.normal">
 							<history>
-								<mode>dock.mode.normal</mode>
 								<mode>dock.mode.minimized</mode>
+								<mode>dock.mode.normal</mode>
 							</history>
 							<properties>
 								<property id="dock.mode.minimized">
@@ -1488,7 +1466,7 @@
 							<history/>
 							<properties/>
 						</entry>
-						<entry id="single CorrelationResultsPanelClusterDisplayPanel">
+						<entry id="single CorrelationResultsPanelClusterDisplayPanel" current="dock.mode.normal">
 							<history>
 								<mode>dock.mode.normal</mode>
 							</history>

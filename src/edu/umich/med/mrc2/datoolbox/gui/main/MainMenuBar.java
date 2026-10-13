@@ -370,9 +370,10 @@ public class MainMenuBar extends CommonMenuBar {
 			if(recentProjects != null && !recentProjects.isEmpty()) {
 
 				expCount = expCount + recentProjects.size();
-				for(ExperimentPointer ep : recentProjects)
-					recentExperimentsMenu.add(createMenuItemForRecentExperiment(ep));	
-				
+				for(ExperimentPointer ep : recentProjects) {
+					JMenuItem mi = createMenuItemForRecentExperiment(ep);
+					recentExperimentsMenu.add(mi);	
+				}
 				recentExperimentsMenu.addSeparator();
 			}
 		}
@@ -419,7 +420,7 @@ public class MainMenuBar extends CommonMenuBar {
 		}
 	}
 	
-	private JMenuItem createMenuItemForRecentExperiment(ExperimentPointer experiment) {
+	private synchronized JMenuItem createMenuItemForRecentExperiment(ExperimentPointer experiment) {
 
 		String title = "<html>" + WordUtils.wrap(experiment.getName(), 50, "<br />", true);
 		JMenuItem item = new JMenuItem(title);
@@ -443,7 +444,7 @@ public class MainMenuBar extends CommonMenuBar {
 			return null;
 	}
 	
-	private String getOpenCommandForRecentExperiment(ExperimentPointer ep) {
+	private synchronized String getOpenCommandForRecentExperiment(ExperimentPointer ep) {
 		
 		ProjectType type = ep.getProjectType();
 		String command = null;

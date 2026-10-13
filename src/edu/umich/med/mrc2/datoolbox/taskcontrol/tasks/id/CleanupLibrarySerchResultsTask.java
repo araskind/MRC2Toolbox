@@ -34,7 +34,9 @@ import org.ujmp.core.calculation.Calculation;
 import edu.umich.med.mrc2.datoolbox.data.Adduct;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureCluster;
+import edu.umich.med.mrc2.datoolbox.data.MsFeatureClusterSet;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
+import edu.umich.med.mrc2.datoolbox.data.MsFeatureSet;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
@@ -49,21 +51,21 @@ public class CleanupLibrarySerchResultsTask extends AbstractTask {
 	private int minPercentOfMinorAdduct;
 	private double minCorrelationBetweenAdducts;
 	private Collection<MsFeatureCluster>featureClusters;
-	private Collection<MsFeature>inputFeatures;
+	private MsFeatureSet msFeatureSet;
 	private DataPipeline dataPipeline;
 	private Matrix dataSubset;
 	private PearsonsCorrelation pearson;
 	private List<MsFeature> filteredFeatures;
 	
 	public CleanupLibrarySerchResultsTask(
-			Collection<MsFeature> inputFeatures,
+			MsFeatureSet msFeatureSet,
 			DataPipeline dataPipeline,
 			int maxPercentMissing, 
 			double maxDistanceBetweenAdducts,
 			int minPercentOfMinorAdduct, 
 			double minCorrelationBetweenAdducts) {
 		super();
-		this.inputFeatures = inputFeatures;
+		this.msFeatureSet = msFeatureSet;
 		this.dataPipeline = dataPipeline;
 		this.maxPercentMissing = maxPercentMissing;
 		this.maxDistanceBetweenAdducts = maxDistanceBetweenAdducts;
@@ -97,7 +99,7 @@ public class CleanupLibrarySerchResultsTask extends AbstractTask {
 	private void filterFeatures() {
 
 		double maxMissingness = maxPercentMissing / 100.0d;
-		filteredFeatures = inputFeatures.stream().
+		filteredFeatures = msFeatureSet.getFeatures().stream().
 			filter(MsFeature::isIdentified).
 			filter(f -> Objects.nonNull(f.getPrimaryIdentity().getMsRtLibraryMatch())).
 			filter(f -> Objects.nonNull(f.getStatsSummary())).
@@ -141,16 +143,17 @@ public class CleanupLibrarySerchResultsTask extends AbstractTask {
 								continue;
 							}
 							double corr = calculateFeatureCorrelation(topFeature, f);
-							if(corr < minCorrelationBetweenAdducts){
+							if(corr < minCorrelationBetweenAdducts)
 								toRemove.add(f);
-								continue;
-							}
 						}
 					}
 				}
 				if(!toRemove.isEmpty())
 					cluster.removeFeatures(toRemove);			
-			}			
+			}
+			if(cluster.getFeatures().size() > 1)
+				cluster.createCorrelationMatrix(false);
+			
 			processed++;
 		}		
 	}
@@ -222,7 +225,7 @@ public class CleanupLibrarySerchResultsTask extends AbstractTask {
 	public Task cloneTask() {
 
 		return new CleanupLibrarySerchResultsTask(
-				inputFeatures,
+				msFeatureSet,
 				dataPipeline,
 				maxPercentMissing, 
 				maxDistanceBetweenAdducts,
@@ -230,8 +233,11 @@ public class CleanupLibrarySerchResultsTask extends AbstractTask {
 				minCorrelationBetweenAdducts);
 	}
 
-	public Collection<MsFeatureCluster> getFeatureClusters() {
-		return featureClusters;
+	public MsFeatureClusterSet getFeatureClusterSet() {
+		
+		MsFeatureClusterSet cSet = new MsFeatureClusterSet("Clusters for " + msFeatureSet.getName());
+		cSet.addClusterCollection(featureClusters);
+		return cSet;
 	}
 
 }

@@ -747,7 +747,7 @@ public class DataAnalysisProject extends Project {
 
 		getFeatureClusterSets();
 		if(newSet.isActive())
-			featureClusterSetCollection.stream().forEach(s -> s.setActive(false));
+			featureClusterSetCollection.forEach(s -> s.setActive(false));
 
 		featureClusterSetCollection.add(newSet);
 	}
@@ -781,7 +781,7 @@ public class DataAnalysisProject extends Project {
 
 		Set<DataPipelineAlignmentResults>dpaResSet = getDataPipelineAlignmentResults();
 		if(!dpaResSet.isEmpty() && newSet.isActive())
-			dpaResSet.stream().forEach(s -> s.setActive(false));
+			dpaResSet.forEach(s -> s.setActive(false));
 
 		featureClusterSetCollection.add(newSet);
 	}

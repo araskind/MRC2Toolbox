@@ -53,10 +53,10 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.compress.utils.FileNameUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.file.PathUtils;
 import org.apache.commons.io.filefilter.FileFilterUtils;
 import org.apache.commons.io.filefilter.IOFileFilter;
 import org.apache.commons.io.filefilter.RegexFileFilter;
@@ -74,10 +74,8 @@ import edu.umich.med.mrc2.datoolbox.data.WorklistItem;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataExportFields;
 import edu.umich.med.mrc2.datoolbox.data.enums.MoTrPACRawDataManifestFields;
 import edu.umich.med.mrc2.datoolbox.data.enums.MoTrPACmetaboliteMetaDataFields;
-import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.ReferenceSamplesManager;
 import edu.umich.med.mrc2.datoolbox.main.config.DefaultFormatStore;
-import edu.umich.med.mrc2.datoolbox.main.config.FilePreferencesFactory;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.utils.CompressionUtils;
 import edu.umich.med.mrc2.datoolbox.utils.DelimitedTextParser;
@@ -100,7 +98,7 @@ public class MoTrPACUtils {
 	private static final DateFormat acquisitionDateFormat = 
 			new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
 	
-	private enum AssayModes {
+	public enum AssayModes {
 		
 		RPPOS("Waters-186003589", "_", 15), 
 		RPNEG("Waters-186003589", "_", 15), 
@@ -129,326 +127,8 @@ public class MoTrPACUtils {
 		}
 	}
 
-	public static void main(String[] args) {
-		
-		System.setProperty("java.util.prefs.PreferencesFactory", 
-				FilePreferencesFactory.class.getName());
-		System.setProperty(FilePreferencesFactory.SYSTEM_PROPERTY_FILE, 
-				MRC2ToolBoxCore.configDir + "MRC2ToolBoxPrefs.txt");
-		MRC2ToolBoxConfiguration.initConfiguration();
-		try {
-			createMoTrPACFileManifests1426();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-	
-	private static void createMoTrPACFileManifests1387() {
-		
-		String tissue ="T11";
-//		List<String>assayTypes = new ArrayList<>(Arrays.asList("IONPNEG", "RPNEG", "RPPOS"));
-		String assay = "IONPNEG";
-		String batchId = "BATCH1_20260306";
-		String processedFolderId = "PROCESSED_20260306";
-		String manifestDate = "20260513";
-		File parentDirectory = 
-				new File("Y:\\DataAnalysis\\_Reports\\EX01387 - Human Post Suspension Adipose powder H20000902J\\4BIC_UPLOAD\\HUMAN");		
-		try {
-			createMoTrPACTissueAssayManifestFile(
-					tissue,
-					assay,
-					parentDirectory,
-					batchId,
-					processedFolderId,
-					manifestDate,
-					false);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-	
-	private static void createMoTrPACFileManifests1426() {
-		
-		String tissue ="T02";
-//		List<String>assayTypes = new ArrayList<>(Arrays.asList("IONPNEG", "RPNEG", "RPPOS"));
-		String assay = "IONPNEG";
-		String batchId = "BATCH3_20260306";
-		String processedFolderId = "PROCESSED_20260306";
-		String manifestDate = "20260519";
-		File parentDirectory = 
-				new File("Y:\\DataAnalysis\\_Reports\\EX01426 - Human EDTA Tranche 2 plasma W20001176L\\4BIC_UPLOAD\\HUMAN");		
-		try {
-			createMoTrPACTissueAssayManifestFile(
-					tissue,
-					assay,
-					parentDirectory,
-					batchId,
-					processedFolderId,
-					manifestDate,
-					false);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-	
-	
-	private static void addExtractionDatesToManifestForEX01426IonpNeg() {
 
-        File completeManifestFile = new File("Y:\\DataAnalysis\\_Reports\\EX01426 - Human EDTA Tranche 2 plasma W20001176L\\"
-        		+ "A049 - Central carbon metabolism profiling\\QCaNVaS\\EX01426-IONP-NEG-Manifest-complete_uniqueControls.txt");        
-        File commonFileListFile = new File("Y:\\DataAnalysis\\_Reports\\EX01426 - Human EDTA Tranche 2 plasma W20001176L\\"
-        		+ "A049 - Central carbon metabolism profiling\\QCaNVaS\\EX01426-IONP-NEG-raw-file-list-with-blanks.txt");      
-        File batchManifestsBaseDir = new File("Y:\\DataAnalysis\\_Reports\\EX01426 - Human EDTA Tranche 2 plasma W20001176L\\"
-        		+ "A049 - Central carbon metabolism profiling\\QCaNVaS\\Manifests");
-        File extrtactionDatesMapFile = new File("Y:\\DataAnalysis\\_Reports\\EX01426 - Human EDTA Tranche 2 plasma W20001176L\\"
-        		+ "A049 - Central carbon metabolism profiling\\QCaNVaS\\EX01426-IONP-NEG-extraction-dates-list.txt");        
-        File columnChangeDatesFile = new File("Y:\\DataAnalysis\\_Reports\\EX01426 - Human EDTA Tranche 2 plasma W20001176L\\"
-        		+ "A049 - Central carbon metabolism profiling\\QCaNVaS\\EX01426-IONP-NEG-columnChangeTimes.txt");
-        AssayModes assayMode = AssayModes.IONPNEG;
-        int nextColumnId = 36;
-        
-        addExtractionDatesAndColumnIdsToManifest(
-        		completeManifestFile, 
-        		commonFileListFile,
-        		extrtactionDatesMapFile,
-        		batchManifestsBaseDir,
-        		columnChangeDatesFile,
-        		assayMode,
-        		nextColumnId);
-    }
-	
-	private static void addExtractionDatesToManifestForEX01426RNeg() {
-
-        File completeManifestFile = new File("Y:\\DataAnalysis\\_Reports\\EX01426 - Human EDTA Tranche 2 plasma W20001176L\\"
-        		+ "A003 - Untargeted\\QCaNVaS\\RP-NEG\\EX01426-RP-NEG-Manifest-complete_uniqueControls.txt");             
-        File commonFileListFile = new File("Y:\\DataAnalysis\\_Reports\\EX01426 - Human EDTA Tranche 2 plasma W20001176L\\"
-        		+ "A003 - Untargeted\\QCaNVaS\\RP-NEG\\EX01426-RP-NEG-raw-file-list.txt");             
-        File batchManifestsBaseDir = new File("Y:\\DataAnalysis\\_Reports\\EX01426 - Human EDTA Tranche 2 plasma W20001176L\\"
-        		+ "A003 - Untargeted\\QCaNVaS\\RP-NEG\\Manifests");       
-        File extrtactionDatesMapFile = new File("Y:\\DataAnalysis\\_Reports\\EX01426 - Human EDTA Tranche 2 plasma W20001176L\\"
-        		+ "A003 - Untargeted\\QCaNVaS\\RP-NEG\\EX01426-RP-NEG-extraction-date-list.txt");        
-        File columnChangeDatesFile = new File("Y:\\DataAnalysis\\_Reports\\EX01426 - Human EDTA Tranche 2 plasma W20001176L\\"
-        		+ "A049 - Central carbon metabolism profiling\\QCaNVaS\\EX01426-IONP-NEG-columnChangeTimes.txt");
-        AssayModes assayMode = AssayModes.RPNEG;
-        int nextColumnId = 40;
-        
-        addExtractionDatesAndColumnIdsToManifest(
-        		completeManifestFile, 
-        		commonFileListFile,
-        		extrtactionDatesMapFile,
-        		batchManifestsBaseDir,
-        		columnChangeDatesFile,
-        		assayMode,
-        		nextColumnId);
-    }
-	
-	private static void addExtractionDatesToManifestForEX01426RPOS() {
-
-        File completeManifestFile = new File("Y:\\DataAnalysis\\_Reports\\EX01426 - Human EDTA Tranche 2 plasma W20001176L\\"
-        		+ "A003 - Untargeted\\QCaNVaS\\RP-POS\\EX01426-RP-POS-Manifest-complete_uniqueControls.txt");             
-        File commonFileListFile = new File("Y:\\DataAnalysis\\_Reports\\EX01426 - Human EDTA Tranche 2 plasma W20001176L\\"
-        		+ "A003 - Untargeted\\QCaNVaS\\RP-POS\\EX01426-RP-POS-raw-file-list.txt");             
-        File batchManifestsBaseDir = new File("Y:\\DataAnalysis\\_Reports\\EX01426 - Human EDTA Tranche 2 plasma W20001176L\\"
-        		+ "A003 - Untargeted\\QCaNVaS\\RP-POS\\Manifests");       
-        File extrtactionDatesMapFile = new File("Y:\\DataAnalysis\\_Reports\\EX01426 - Human EDTA Tranche 2 plasma W20001176L\\"
-        		+ "A003 - Untargeted\\QCaNVaS\\RP-POS\\EX01426-RP-POS-extraction-date-list.txt");        
-        File columnChangeDatesFile = new File("Y:\\DataAnalysis\\_Reports\\EX01426 - Human EDTA Tranche 2 plasma W20001176L\\"
-        		+ "A049 - Central carbon metabolism profiling\\QCaNVaS\\EX01426-IONP-NEG-columnChangeTimes.txt");
-        AssayModes assayMode = AssayModes.RPNEG;
-        int nextColumnId = 40;
-        
-        addExtractionDatesAndColumnIdsToManifest(
-        		completeManifestFile, 
-        		commonFileListFile,
-        		extrtactionDatesMapFile,
-        		batchManifestsBaseDir,
-        		columnChangeDatesFile,
-        		assayMode,
-        		nextColumnId);
-    }
-	
-	private static void addExtractionDatesToManifestForEX01387IonpNeg() {
-
-        File completeManifestFile = new File("Y:\\DataAnalysis\\_Reports\\EX01387 - Human Post Suspension Adipose powder H20000902J\\"
-        		+ "4QCANVAS\\IONP-NEG\\EX01387-IONP-NEG-Manifest-complete_uniqueControls.txt");
-        File commonFileListFile = new File("Y:\\DataAnalysis\\_Reports\\EX01387 - Human Post Suspension Adipose powder H20000902J\\"
-        		+ "A049 - Central carbon metabolism profiling\\QCaNVaS_v0.8.0\\EX01387-IONP-NEG-raw-file-list-wblanks.txt");      
-        File batchManifestsBaseDir = new File("Y:\\DataAnalysis\\_Reports\\EX01387 - Human Post Suspension Adipose powder H20000902J\\"
-        		+ "4QCANVAS\\IONP-NEG\\Manifests");        
-        File extrtactionDatesMapFile = new File("Y:\\DataAnalysis\\_Reports\\EX01387 - Human Post Suspension Adipose powder H20000902J\\"
-        		+ "A049 - Central carbon metabolism profiling\\QCaNVaS_v0.8.0\\EX01387-IONP-NEG-extraction-dates-list.txt");
-        File columnChangeDatesFile = new File("Y:\\DataAnalysis\\_Reports\\EX01387 - Human Post Suspension Adipose powder H20000902J\\"
-        		+ "A049 - Central carbon metabolism profiling\\QCaNVaS_v0.8.0\\EX01387-IONP-NEG-columnChangeTimes.txt");
-        AssayModes assayMode = AssayModes.IONPNEG;
-        int nextColumnId = 36;
-        
-        addExtractionDatesAndColumnIdsToManifest(
-        		completeManifestFile, 
-        		commonFileListFile,
-        		extrtactionDatesMapFile,
-        		batchManifestsBaseDir,
-        		columnChangeDatesFile,
-        		assayMode,
-        		nextColumnId);
-    }
-
-	private static void addExtractionDatesToManifestForEX01355RpNeg() {
-        
-        File completeManifestFile = new File("Y:\\DataAnalysis\\_Reports\\EX01355 - Human Muscle Tranche 1 H20000820Y\\"
-        		+ "A003 - Untargeted\\QCaNVaS_v0.8.0\\RP-NEG\\Unnamed\\EX01355-RP-NEG-Manifest-complete_uniqueControls.txt");
-        File commonFileListFile = new File("Y:\\DataAnalysis\\_Reports\\EX01355 - Human Muscle Tranche 1 H20000820Y\\"
-        		+ "A003 - Untargeted\\QCaNVaS_v0.8.0\\RP-NEG\\EX01355-RP-NEG-raw-file-list.txt");
-        File batchManifestsBaseDir = new File("Y:\\DataAnalysis\\_Reports\\EX01355 - Human Muscle Tranche 1 H20000820Y\\"
-        		+ "A003 - Untargeted\\QCaNVaS_v0.8.0\\RP-NEG\\Manifests");        
-        File extrtactionDatesMapFile = new File("Y:\\DataAnalysis\\_Reports\\EX01355 - Human Muscle Tranche 1 H20000820Y\\"
-        		+ "A003 - Untargeted\\QCaNVaS_v0.8.0\\RP-NEG\\EX01355-RP-NEG-extraction-dates-list.txt");
-        File columnChangeDatesFile = new File("Y:\\DataAnalysis\\_Reports\\EX01355 - Human Muscle Tranche 1 H20000820Y\\"
-        		+ "A003 - Untargeted\\QCaNVaS_v0.8.0\\RP-NEG\\EX01355-RP-NEG-columnChangeTimes.txt");
-        AssayModes assayMode = AssayModes.RPNEG;
-        int nextColumnId = 35;
-        
-        addExtractionDatesAndColumnIdsToManifest(
-        		completeManifestFile, 
-        		commonFileListFile,
-        		extrtactionDatesMapFile,
-        		batchManifestsBaseDir,
-        		columnChangeDatesFile,
-        		assayMode,
-        		nextColumnId);
-    }
-	
-	private static void addExtractionDatesToManifestForEX01355RpPos() {
-        
-        File completeManifestFile = new File("Y:\\DataAnalysis\\_Reports\\EX01355 - Human Muscle Tranche 1 H20000820Y\\"
-        		+ "A003 - Untargeted\\QCaNVaS_v0.8.0\\RP-POS\\Unnamed\\EX01355-RP-POS-Manifest-complete_uniqueControls.txt");
-        File commonFileListFile = new File("Y:\\DataAnalysis\\_Reports\\EX01355 - Human Muscle Tranche 1 H20000820Y\\"
-        		+ "A003 - Untargeted\\QCaNVaS_v0.8.0\\RP-POS\\EX01355-RP-POS-raw-file-list.txt");
-        File extrtactionDatesMapFile = new File("Y:\\DataAnalysis\\_Reports\\EX01355 - Human Muscle Tranche 1 H20000820Y\\"
-        		+ "A003 - Untargeted\\QCaNVaS_v0.8.0\\RP-POS\\EX01355-RP-POS-extraction-dates-list.txt");
-        File batchManifestsBaseDir = new File("Y:\\DataAnalysis\\_Reports\\EX01355 - Human Muscle Tranche 1 H20000820Y\\"
-        		+ "A003 - Untargeted\\QCaNVaS_v0.8.0\\RP-POS\\Manifests");
-        File columnChangeDatesFile = new File("Y:\\DataAnalysis\\_Reports\\EX01355 - Human Muscle Tranche 1 H20000820Y\\"
-        		+ "A003 - Untargeted\\QCaNVaS_v0.8.0\\RP-POS\\EX01355-RP-POS-columnChangeTimes.txt");
-        AssayModes assayMode = AssayModes.RPPOS;
-        int nextColumnId = 35;
-        
-        addExtractionDatesAndColumnIdsToManifest(
-        		completeManifestFile, 
-        		commonFileListFile,
-        		extrtactionDatesMapFile,
-        		batchManifestsBaseDir,
-        		columnChangeDatesFile,
-        		assayMode,
-        		nextColumnId);
-    }
-	
-	private static void addExtractionDatesToManifestForEX01355IonPNeg() {
-		
-        File completeManifestFile = new File("Y:\\DataAnalysis\\_Reports\\EX01355 - Human Muscle Tranche 1 H20000820Y\\"
-        		+ "A049 - Central carbon metabolism profiling\\QCaNVaS_v0.8.0\\Unnamed\\EX01355-IONP-NEG-Manifest-complete_uniqueControls.txt");
-        File commonFileListFile = new File("Y:\\DataAnalysis\\_Reports\\EX01355 - Human Muscle Tranche 1 H20000820Y\\"
-        		+ "A049 - Central carbon metabolism profiling\\QCaNVaS_v0.8.0\\EX01355-IONP-NEG-raw-file-list.txt");
-        File extrtactionDatesMapFile = new File("Y:\\DataAnalysis\\_Reports\\EX01355 - Human Muscle Tranche 1 H20000820Y\\"
-        		+ "A049 - Central carbon metabolism profiling\\QCaNVaS_v0.8.0\\EX01355-IONP-NEG-extraction-dates-list.txt");
-        File batchManifestsBaseDir = new File("Y:\\DataAnalysis\\_Reports\\EX01355 - Human Muscle Tranche 1 H20000820Y\\"
-        		+ "A049 - Central carbon metabolism profiling\\QCaNVaS_v0.8.0\\Manifests");
-        File columnChangeDatesFile = new File("Y:\\DataAnalysis\\_Reports\\EX01355 - Human Muscle Tranche 1 H20000820Y\\"
-        		+ "A049 - Central carbon metabolism profiling\\QCaNVaS_v0.8.0\\EX01355-IONP-NEG-columnChangeTimes.txt");
-        AssayModes assayMode = AssayModes.IONPNEG;
-        int nextColumnId = 35;
-        
-        addExtractionDatesAndColumnIdsToManifest(
-        		completeManifestFile, 
-        		commonFileListFile,
-        		extrtactionDatesMapFile,
-        		batchManifestsBaseDir,
-        		columnChangeDatesFile,
-        		assayMode,
-        		nextColumnId);
-    }
-	
-	private static void addExtractionDatesToManifestForEX01409RpNeg() {
-        
-        File completeManifestFile = 
-        		new File("Y:\\DataAnalysis\\_Reports\\EX01409 - Human EDTA Tranche 1 plasma W20000960M\\"
-				+ "A003 - Untargeted\\QCaNVaS\\RP-NEG\\EX01409-RP-NEG-Manifest-complete_uniqueControls.txt");
-        File commonFileListFile = new File("Y:\\DataAnalysis\\_Reports\\EX01409 - Human EDTA Tranche 1 plasma W20000960M\\"
-        		+ "A003 - Untargeted\\QCaNVaS\\RP-NEG\\EX01409-RP-NEG-raw-file-list.txt");
-        File extrtactionDatesMapFile = new File("Y:\\DataAnalysis\\_Reports\\EX01409 - Human EDTA Tranche 1 plasma W20000960M\\"
-        + "A003 - Untargeted\\QCaNVaS\\RP-NEG\\EX01409-RP-NEG-extractionDatesMap.txt");
-        File batchManifestsBaseDir = new File("Y:\\DataAnalysis\\_Reports\\EX01409 - Human EDTA Tranche 1 plasma W20000960M\\"
-        		+ "A003 - Untargeted\\QCaNVaS\\RP-NEG\\Manifests");
-        File columnChangeDatesFile = new File("Y:\\DataAnalysis\\_Reports\\EX01409 - Human EDTA Tranche 1 plasma W20000960M\\"
-        		+ "A003 - Untargeted\\QCaNVaS\\RP-NEG\\EX01409-RP-NEG-columnChangeTimes.txt");
-        AssayModes assayMode = AssayModes.RPNEG;
-        int nextColumnId = 38;
-        
-        addExtractionDatesAndColumnIdsToManifest(
-        		completeManifestFile, 
-        		commonFileListFile,
-        		extrtactionDatesMapFile,
-        		batchManifestsBaseDir,
-        		columnChangeDatesFile,
-        		assayMode,
-        		nextColumnId);
-    }
-	
-	private static void addExtractionDatesToManifestForEX01409RpPos() {
-        
-        File completeManifestFile = 
-        		new File("Y:\\DataAnalysis\\_Reports\\EX01409 - Human EDTA Tranche 1 plasma W20000960M\\"
-        				+ "A003 - Untargeted\\QCaNVaS\\RP-POS\\EX01409-RP-POS-Manifest-complete_uniqueControls.txt");
-        File commonFileListFile = new File("Y:\\DataAnalysis\\_Reports\\EX01409 - Human EDTA Tranche 1 plasma W20000960M\\"
-        		+ "A003 - Untargeted\\QCaNVaS\\RP-POS\\EX01409-RP-POS-raw-file-list.txt");
-        File extrtactionDatesMapFile = new File("Y:\\DataAnalysis\\_Reports\\EX01409 - Human EDTA Tranche 1 plasma W20000960M\\"
-        		+ "A003 - Untargeted\\QCaNVaS\\RP-POS\\EX01409-RP-POS-extractionDatesMap.txt");
-        File batchManifestsBaseDir = new File("Y:\\DataAnalysis\\_Reports\\EX01409 - Human EDTA Tranche 1 plasma W20000960M\\"
-        		+ "A003 - Untargeted\\QCaNVaS\\RP-POS\\Manifests");
-        File columnChangeDatesFile = new File("Y:\\DataAnalysis\\_Reports\\EX01409 - Human EDTA Tranche 1 plasma W20000960M\\"
-        		+ "A003 - Untargeted\\QCaNVaS\\RP-POS\\EX01409-RP-POS-columnChangeTimes.txt");
-        AssayModes assayMode = AssayModes.RPPOS;
-        int nextColumnId = 38;
-        
-        addExtractionDatesAndColumnIdsToManifest(
-        		completeManifestFile, 
-        		commonFileListFile,
-        		extrtactionDatesMapFile,
-        		batchManifestsBaseDir,
-        		columnChangeDatesFile,
-        		assayMode,
-        		nextColumnId);
-    }
-	
-	private static void addExtractionDatesToManifestForEX01409IonPNeg() {
-        
-        File completeManifestFile = 
-        		new File("Y:\\DataAnalysis\\_Reports\\EX01409 - Human EDTA Tranche 1 plasma W20000960M\\"
-        				+ "A049 - Central carbon metabolism profiling\\QCaNVaS\\EX01409-IONP-NEG-Manifest-complete_uniqueControls.txt");
-        File commonFileListFile = new File("Y:\\DataAnalysis\\_Reports\\EX01409 - Human EDTA Tranche 1 plasma W20000960M\\"
-        		+ "A049 - Central carbon metabolism profiling\\QCaNVaS\\EX01409-IONP-NEG-raw-file-list.txt");
-        File extrtactionDatesMapFile = new File("Y:\\DataAnalysis\\_Reports\\EX01409 - Human EDTA Tranche 1 plasma W20000960M\\"
-        		+ "A049 - Central carbon metabolism profiling\\QCaNVaS\\EX01409-IONP-NEG-extractionDatesMap.txt");
-        File batchManifestsBaseDir = new File("Y:\\DataAnalysis\\_Reports\\EX01409 - Human EDTA Tranche 1 plasma W20000960M\\"
-        		+ "A049 - Central carbon metabolism profiling\\QCaNVaS\\Manifests");
-        File columnChangeDatesFile = new File("Y:\\DataAnalysis\\_Reports\\EX01409 - Human EDTA Tranche 1 plasma W20000960M\\"
-        		+ "A049 - Central carbon metabolism profiling\\QCaNVaS\\EX01409-IONP-NEG-columnChangeTimes.txt");
-        AssayModes assayMode = AssayModes.IONPNEG;
-        int nextColumnId = 38;
-        
-        addExtractionDatesAndColumnIdsToManifest(
-        		completeManifestFile, 
-        		commonFileListFile,
-        		extrtactionDatesMapFile,
-        		batchManifestsBaseDir,
-        		columnChangeDatesFile,
-        		assayMode,
-        		nextColumnId);
-    }
-	
-	private static void addExtractionDatesAndColumnIdsToManifest(
+	public static void addExtractionDatesAndColumnIdsToManifest(
 			File completeManifestFile,
 			File commonFileListFile,
 			File extrtactionDatesMapFile,
@@ -537,7 +217,7 @@ public class MoTrPACUtils {
 		}
 	}
 	
-	private static List<WorklistItem>parseBatchManifests(
+	public static List<WorklistItem>parseBatchManifests(
 			File extrtactionDatesMapFile,
 			File batchManifestsBaseDir) {
         List<WorklistItem>worklistItems = new ArrayList<>();
@@ -555,14 +235,14 @@ public class MoTrPACUtils {
         	File batchManifestFile = 
         			Paths.get(batchManifestsBaseDir.getAbsolutePath(), manifestName).toFile();
         	List<WorklistItem>batchWkl = parseCompleteManifest(batchManifestFile);
-			batchWkl.stream().forEach(wi -> wi.setProperty(
+			batchWkl.forEach(wi -> wi.setProperty(
 					MoTrPACRawDataManifestFields.MOTRPAC_EXTRACTION_DATE.getName(), extractionDateString));
 			worklistItems.addAll(batchWkl);
         }
         return worklistItems;
 	}
 	
-	private static List<WorklistItem>parseCompleteManifest(File completeManifestFile) {
+	public static List<WorklistItem>parseCompleteManifest(File completeManifestFile) {
         
         List<WorklistItem>worklistItems = new ArrayList<>();
         String[][] completeManifestData = null;
@@ -599,7 +279,7 @@ public class MoTrPACUtils {
         return worklistItems;
 	}
 	
-	private static void addColumnIdsToWorklistItems(
+	public static void addColumnIdsToWorklistItems(
 			List<WorklistItem> worklistItems,
 			File columnIdMapFile,
 			AssayModes assayMode,
@@ -650,12 +330,13 @@ public class MoTrPACUtils {
 		}
 	}
 	
-	private static void extractBatchRunDatesFromManifests() {
+	//	File manifestMap = new File("Y:\\DataAnalysis\\_Reports\\_MoTrPAC\\manifest_map.txt");
+	//	Path outputPath = Paths.get("Y:\\DataAnalysis\\_Reports\\_MoTrPAC\\BatchRunDates.txt");
+	public static void extractBatchRunDatesFromManifests(
+			File manifestMap,
+			File output) {
 		
 		Pattern pattern = Pattern.compile("BATCH\\d+", Pattern.CASE_INSENSITIVE);
-		
-		
-		File manifestMap = new File("Y:\\DataAnalysis\\_Reports\\_MoTrPAC\\manifest_map.txt");
 		String[][] manifestMapData = null;
 		try {
 			manifestMapData = DelimitedTextParser.parseTextFileWithEncoding(manifestMap, '\t');
@@ -702,10 +383,9 @@ public class MoTrPACUtils {
 			line.add(DefaultFormatStore.getDefaultTimeStampFormat().format(bmo.getRunStart()));
 			line.add(DefaultFormatStore.getDefaultTimeStampFormat().format(bmo.getRunEnd()));
 			dataListOutput.add(StringUtils.join(line, "\t"));		
-		}
-		Path outputPath = Paths.get("Y:\\DataAnalysis\\_Reports\\_MoTrPAC\\BatchRunDates.txt");
+		}		
 		try {
-		    Files.write(outputPath, 
+		    Files.write(output.toPath(), 
 		    		dataListOutput,
 		            StandardCharsets.UTF_8,
 		            StandardOpenOption.CREATE, 
@@ -715,7 +395,7 @@ public class MoTrPACUtils {
 		}
 	}
 	
-	private static NavigableSet<Date> extractDateSetFromManifest(Path manifestPath) {
+	public static NavigableSet<Date> extractDateSetFromManifest(Path manifestPath) {
 		
 		NavigableSet<Date>dateSet = new TreeSet<>();
 		String[][] manifestMapData = null;
@@ -748,7 +428,8 @@ public class MoTrPACUtils {
 		return dateSet;
 	}
 
-	private static void collectFilePathsForReupload() {
+	//	File rootFolder = new File("Y:\\DataAnalysis\\_Reports\\EX01263 - PASS 1A 1C 18mo P20000245T C20000316E\\4BIC\\20251016FIX\\PASS1A-18");
+	public static void collectFilePathsForReupload(File rootFolder) {
 		
 		List<String>lookupNames = new ArrayList<>(
 				List.of(
@@ -756,10 +437,6 @@ public class MoTrPACUtils {
 					//"results_metabolites_named_",
 					"file_manifest_2023"));
 		Set<Path>pathList = new TreeSet<>();
-		File rootFolder = new File(
-				"Y:\\DataAnalysis\\_Reports\\EX01263 - PASS 1A 1C 18mo P20000245T C20000316E\\"
-				+ "4BIC\\20251016FIX\\PASS1A-18");
-		
 		for(String lookupName : lookupNames)
 			pathList.addAll(FIOUtils.findFilesByNameStartingWith(rootFolder.toPath(), lookupName)) ;
 		
@@ -777,34 +454,8 @@ public class MoTrPACUtils {
 		}
 	}
 	
-	private static void renameProcessedDirs4EX01263() {
-		
-		File destinationDir = new File("Y:\\DataAnalysis\\_Reports\\"
-				+ "EX01263 - PASS 1A 1C 18mo P20000245T C20000316E\\4BIC\\20241023FIX\\PASS1A-18");
-		String oldName = "PROCESSED_20241101";
-		String newName = "PROCESSED_20241101";
-		renameProcessedDirs(destinationDir, oldName, newName);
-	}
-	
-	private static void renameProcessedDirs4EX01242() {
-		
-		File destinationDir = new File("Y:\\DataAnalysis\\_Reports\\"
-				+ "EX01242 - preCovid adipose Shipment W20000044X\\4BIC\\20241017FIX\\HUMAN\\T11");
-		String oldName = "PROCESSED_20220926";
-		String newName = "PROCESSED_20241031";
-		renameProcessedDirs(destinationDir, oldName, newName);
-	}
-	
-	private static void renameProcessedDirs4EX01117() {
-		
-		File destinationDir = new File("Y:\\DataAnalysis\\_Reports\\"
-				+ "EX01117 - MoTrPAC-1C\\4BIC\\20241023FIX\\PASS1A-06");
-		String oldName = "PROCESSED_20220926";
-		String newName = "PROCESSED_20241031";
-		renameProcessedDirs(destinationDir, oldName, newName);
-	}	
-	
-	private static void renameProcessedDirs(File destinationDir, String oldName, String newName) {
+
+	public static void renameProcessedDirs(File destinationDir, String oldName, String newName) {
 
 		Path newDirPath = Paths.get(destinationDir.getAbsolutePath());
 		List<Path>processedDirs = FIOUtils.findDirectoriesByName(newDirPath, oldName);
@@ -820,14 +471,16 @@ public class MoTrPACUtils {
 		}
 	}
 	
-	private static void collectAllMetaboliteNames() {
+	//	File[] experimentFolders = new File[] {
+	//			new File("Y:\\DataAnalysis\\_Reports\\EX01117 - MoTrPAC-1C\\4BIC\\20241023FIX\\PASS1A-06"),
+	//			new File("Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\4BIC\\20241017FIX\\HUMAN\\T02"),
+	//			new File("Y:\\DataAnalysis\\_Reports\\EX01242 - preCovid adipose Shipment W20000044X\\4BIC\\20241017FIX\\HUMAN\\T11"),
+	//			new File("Y:\\DataAnalysis\\_Reports\\EX01263 - PASS 1A 1C 18mo P20000245T C20000316E\\4BIC\\PASS1A-18"),
+	//	};
+	//	Path outputPath = Paths.get("E:\\DataAnalysis\\_MOTRPAC_DEVEL\\allMoTrPACnamed.txt");
+	public static void collectAllMetaboliteNames(Collection<File>experimentFolders, File outputFile) {
 		
-		File[] experimentFolders = new File[] {
-				new File("Y:\\DataAnalysis\\_Reports\\EX01117 - MoTrPAC-1C\\4BIC\\20241023FIX\\PASS1A-06"),
-				new File("Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\4BIC\\20241017FIX\\HUMAN\\T02"),
-				new File("Y:\\DataAnalysis\\_Reports\\EX01242 - preCovid adipose Shipment W20000044X\\4BIC\\20241017FIX\\HUMAN\\T11"),
-				new File("Y:\\DataAnalysis\\_Reports\\EX01263 - PASS 1A 1C 18mo P20000245T C20000316E\\4BIC\\PASS1A-18"),
-		};
+
 		TreeSet<String>allNames = new TreeSet<String>();
 		for(File experiment : experimentFolders) {
 			
@@ -852,9 +505,9 @@ public class MoTrPACUtils {
 					allNames.add(compoundMetaData[i][metabColumn]);								
 			}
 		}
-		Path outputPath = Paths.get("E:\\DataAnalysis\\_MOTRPAC_DEVEL\\allMoTrPACnamed.txt");
+		
 		try {
-		    Files.write(outputPath, 
+		    Files.write(outputFile.toPath(), 
 		    		allNames,
 		            StandardCharsets.UTF_8,
 		            StandardOpenOption.CREATE, 
@@ -864,9 +517,15 @@ public class MoTrPACUtils {
 		}		
 	}
 	
-	private static void fixRefMetNames() {
-		
-		File renameMapFile = new File("E:\\DataAnalysis\\_MOTRPAC_DEVEL\\RefmetNameReplacementMap.txt");
+	//	File renameMapFile = new File("E:\\DataAnalysis\\_MOTRPAC_DEVEL\\RefmetNameReplacementMap.txt");
+	//	File[] experimentFolders = new File[] {
+	//				new File("Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\4BIC\\20241017FIX\\HUMAN\\T02"),
+	//			new File("Y:\\DataAnalysis\\_Reports\\EX01117 - MoTrPAC-1C\\4BIC\\20241023FIX\\PASS1A-06"),
+	//			new File("Y:\\DataAnalysis\\_Reports\\EX01242 - preCovid adipose Shipment W20000044X\\4BIC\\20241017FIX\\HUMAN\\T11"),
+	//			new File("Y:\\DataAnalysis\\_Reports\\EX01263 - PASS 1A 1C 18mo P20000245T C20000316E\\4BIC\\20241023FIX\\PASS1A-18"),
+	//	};
+	public static void fixRefMetNames(Collection<File>experimentFolders, File renameMapFile) {
+				
 		String[][] renameData = DelimitedTextParser.parseTextFile(
 				renameMapFile, MRC2ToolBoxConfiguration.getTabDelimiter());
 		
@@ -874,12 +533,7 @@ public class MoTrPACUtils {
 		for(int i=0; i<renameData.length; i++) 
 			renameMap.put(renameData[i][0], renameData[i][1]);
 		
-		File[] experimentFolders = new File[] {
-				//	new File("Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\4BIC\\20241017FIX\\HUMAN\\T02"),
-//				new File("Y:\\DataAnalysis\\_Reports\\EX01117 - MoTrPAC-1C\\4BIC\\20241023FIX\\PASS1A-06"),
-//				new File("Y:\\DataAnalysis\\_Reports\\EX01242 - preCovid adipose Shipment W20000044X\\4BIC\\20241017FIX\\HUMAN\\T11"),
-				new File("Y:\\DataAnalysis\\_Reports\\EX01263 - PASS 1A 1C 18mo P20000245T C20000316E\\4BIC\\20241023FIX\\PASS1A-18"),
-		};
+
 		for(File experiment : experimentFolders) {
 			
 			//	Process metadata_metabolites_named_ ... files
@@ -967,19 +621,7 @@ public class MoTrPACUtils {
 		}		
 	}
 	
-	private static void createMultiTissueFixScriptGenInputMapForEX01263(){
-		
-		File partialInput = new File("Y:\\DataAnalysis\\_Reports\\EX01263 - PASS 1A 1C 18mo P20000245T C20000316E\\"
-				+ "4BIC\\PASS1A-18-interm\\QCANVAS\\MAIN\\fixInputInterm.txt");
-		File bicDataDir = new File("Y:\\DataAnalysis\\_Reports\\EX01263 - PASS 1A 1C 18mo P20000245T C20000316E\\"
-				+ "4BIC\\20241023FIX\\PASS1A-18");
-		File outputFile = new File("Y:\\DataAnalysis\\_Reports\\EX01263 - PASS 1A 1C 18mo P20000245T C20000316E\\"
-				+ "4BIC\\PASS1A-18-interm\\QCANVAS\\MAIN\\fixInputComplete.txt");
-		
-		createMultiTissueFixScriptGenInputMap(partialInput, bicDataDir, outputFile);
-	}
-	
-	private static void createMultiTissueFixScriptGenInputMap(File partialInput, File bicDataDir, File outputFile) {
+	public static void createMultiTissueFixScriptGenInputMap(File partialInput, File bicDataDir, File outputFile) {
 		
 		String[][] inputData = DelimitedTextParser.parseTextFile(
 				partialInput, MRC2ToolBoxConfiguration.getTabDelimiter());
@@ -1034,20 +676,8 @@ public class MoTrPACUtils {
 		    e.printStackTrace();
 		}
 	}
-	
-	private static void getFulPathsToQcanvasDirsForEX01263() {
-		
-		File dirNamesFile = new File("Y:\\DataAnalysis\\_Reports\\"
-				+ "EX01263 - PASS 1A 1C 18mo P20000245T C20000316E\\4BIC\\PASS1A-18-interm\\QCANVAS\\MAIN\\QCANVASdirList.txt");
-		File lookupDir = new File("Y:\\DataAnalysis\\_Reports\\"
-				+ "EX01263 - PASS 1A 1C 18mo P20000245T C20000316E\\4BIC\\PASS1A-18-interm\\QCANVAS\\MAIN");
-		File outputFile = new File("Y:\\DataAnalysis\\_Reports\\"
-				+ "EX01263 - PASS 1A 1C 18mo P20000245T C20000316E\\4BIC\\PASS1A-18-interm\\QCANVAS\\MAIN\\QCANVASdirMap.txt");
-		
-		getFulPathsToQcanvasDirs(dirNamesFile, lookupDir, outputFile);
-	}
-	
-	private static void getFulPathsToQcanvasDirs(File dirNamesFile, File lookupDir, File outputFile) {
+
+	public static void getFulPathsToQcanvasDirs(File dirNamesFile, File lookupDir, File outputFile) {
 		
 		String[][] inputData = DelimitedTextParser.parseTextFile(
 				dirNamesFile, MRC2ToolBoxConfiguration.getTabDelimiter());
@@ -1073,86 +703,9 @@ public class MoTrPACUtils {
 		    e.printStackTrace();
 		}
 	}
+
 	
-	private static void duplicateDataUploadDirectoryForResultsCorrection4PASS1A18() {
-		
-		File sourceDir = new File("Y:\\DataAnalysis\\_Reports\\"
-				+ "EX01263 - PASS 1A 1C 18mo P20000245T C20000316E\\4BIC\\PASS1A-18-FromBIC");
-		File destinationDir = new File("Y:\\DataAnalysis\\_Reports\\"
-				+ "EX01263 - PASS 1A 1C 18mo P20000245T C20000316E\\4BIC\\20241023FIX\\PASS1A-18");
-		String processingDateIdentifier = "20241101";
-		
-		duplicateDataUploadDirectoryForResultsCorrection(
-				sourceDir,
-				destinationDir,
-				processingDateIdentifier);
-	}	
-	
-	private static void duplicateDataUploadDirectoryForResultsCorrection4PASS1A06() {
-		
-		File sourceDir = new File("Y:\\DataAnalysis\\_Reports\\EX01117 - PASS 1C\\4BIC\\PASS06-FromBIC");
-		File destinationDir = new File("Y:\\DataAnalysis\\_Reports\\EX01117 - PASS 1C\\4BIC\\PASS06-20241017");
-		String processingDateIdentifier = "20241017";
-		
-		duplicateDataUploadDirectoryForResultsCorrection(
-				sourceDir,
-				destinationDir,
-				processingDateIdentifier);
-	}
-	
-	private static void duplicateDataUploadDirectoryForResultsCorrection4PreCovidAdipose() {
-		
-		File sourceDir = new File("Y:\\DataAnalysis\\_Reports\\"
-				+ "EX01242 - preCovid adipose Shipment W20000044X\\4BIC\\HUMAN\\T11-FromBIC");
-		File destinationDir = new File("Y:\\DataAnalysis\\_Reports\\"
-				+ "EX01242 - preCovid adipose Shipment W20000044X\\4BIC\\HUMAN\\T11-20241031");
-		String processingDateIdentifier = "20241031";
-		
-		duplicateDataUploadDirectoryForResultsCorrection(
-				sourceDir,
-				destinationDir,
-				processingDateIdentifier);
-	}	
-	
-	private static void duplicateDataUploadDirectoryForResultsCorrection4PreCovidMuscle() {
-		
-		File sourceDir = new File("Y:\\DataAnalysis\\_Reports\\EX01094-tmp\\T06-FromBIC");
-		File destinationDir = new File("Y:\\DataAnalysis\\_Reports\\EX01094-tmp\\T06-20241017");
-		String processingDateIdentifier = "20241017";
-		
-		duplicateDataUploadDirectoryForResultsCorrection(
-				sourceDir,
-				destinationDir,
-				processingDateIdentifier);
-	}
-	
-	private static void duplicateDataUploadDirectoryForResultsCorrection4PreCovidPlasma() {
-		
-		File sourceDir = new File("Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\4BIC\\HUMAN\\T02-FromBIC");
-		File destinationDir = new File("Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\4BIC\\HUMAN\\T02-20241031");
-		String processingDateIdentifier = "20241031";
-		
-		duplicateDataUploadDirectoryForResultsCorrection(
-				sourceDir,
-				destinationDir,
-				processingDateIdentifier);
-	}
-	
-	private static void duplicateDataUploadDirectoryForResultsCorrectionNoTruncExcludeOldBatch4Pass1A06() {
-		
-		File sourceDir = new File("Y:\\DataAnalysis\\_Reports\\EX01117 - PASS 1C\\4BIC\\PASS1A-06-fromBIC");
-		File destinationDir = new File("Y:\\DataAnalysis\\_Reports\\EX01117 - PASS 1C\\4BIC\\20241023FIX\\PASS1A-06");
-		String processingDateIdentifier = "20241030";
-		String excludeBatchIdentifier = "BATCH1_20190909";
-		
-		duplicateDataUploadDirectoryForResultsCorrectionNoTruncExcludeOldBatch(
-				sourceDir,
-				destinationDir,
-				processingDateIdentifier,
-				excludeBatchIdentifier);
-	}
-	
-	private static void duplicateDataUploadDirectoryForResultsCorrectionNoTruncExcludeOldBatch(
+	public static void duplicateDataUploadDirectoryForResultsCorrectionNoTruncExcludeOldBatch(
 			File sourceDir,
 			File destinationDir,
 			String processingDateIdentifier,
@@ -1186,7 +739,7 @@ public class MoTrPACUtils {
 		}
 	}
 	
-	private static void duplicateDataUploadDirectoryForResultsCorrection(
+	public static void duplicateDataUploadDirectoryForResultsCorrection(
 			File sourceDir,
 			File destinationDir,
 			String processingDateIdentifier) {
@@ -1231,47 +784,7 @@ public class MoTrPACUtils {
 		}
 	}
 		
-	private static void createMoTrPACFileManifests1263Heart() {
-		
-		List<String>tissueTypes = new ArrayList<String>(Arrays.asList("T31"));
-		File parentDirectory = 
-				new File("Y:\\DataAnalysis\\_Reports\\EX01263 - PASS 1A 1C 18mo P20000245T C20000316E\\4BIC\\20251016FIX\\PASS1A-18");
-		String batchDateIdentifier = "BATCH1_20230710";
-		String processingDateIdentifier = "PROCESSED_20230710";
-		createMoTrPACFileManifest(
-				tissueTypes, 
-				parentDirectory,
-				batchDateIdentifier,
-				processingDateIdentifier,
-				"20251112",
-				false);
-	}
-	
-	private static void createMoTrPACFileManifests4Pass1A18() {
-		
-		List<String>tissueTypes = Arrays.asList(
-				"T31",
-				"T55",
-				"T58",
-				"T59",
-				"T66",
-				"T68",
-				"T69",
-				"T70");
-		File parentDirectory = 
-				new File("Y:\\DataAnalysis\\_Reports\\EX01263 - PASS 1A 1C 18mo P20000245T C20000316E\\4BIC\\20251016FIX\\PASS1A-18");
-		String batchDateIdentifier = "BATCH1_20230710";
-		String processingDateIdentifier = "PROCESSED_20230710";
-		createMoTrPACFileManifest(
-				tissueTypes, 
-				parentDirectory,
-				batchDateIdentifier,
-				processingDateIdentifier,
-				"20251112",
-				false);
-	}
-		
-	private static void createMotrpacDataUploadDirectoryStructure(
+	public static void createMotrpacDataUploadDirectoryStructure(
 			List<String>tissueTypes, 
 			File parentDirectory,
 			String batchDateIdentifier,
@@ -1293,7 +806,7 @@ public class MoTrPACUtils {
 		}
 	}
 	
-	private static void createMoTrPACFileManifest(
+	public static void createMoTrPACFileManifest(
 			List<String>tissueTypes, 
 			File parentDirectory,
 			String batchId,
@@ -1448,7 +961,7 @@ public class MoTrPACUtils {
 		FileUtils.writeStringToFile(manifestFile, checkSumData.toString(), Charset.defaultCharset());
 	}
 	
-	private static void compressRawDataFromMutibatchRun(
+	public static void compressRawDataFromMutibatchRun(
 			String includeFileListFile, 
 			List<String>sourceFolders, 
 			String destinationFolder) {
@@ -1498,7 +1011,7 @@ public class MoTrPACUtils {
 		}		
 	}
 	
-	private static void writeMetaboliteMetadataFile(
+	public static void writeMetaboliteMetadataFile(
 			Collection<Map<MoTrPACmetaboliteMetaDataFields,String>>metaboliteMetadata,
 			Path metaboliteMetadataFilePath) {
 		
@@ -1533,7 +1046,7 @@ public class MoTrPACUtils {
 		}
 	}
 	
-	private static Collection<Map<MoTrPACmetaboliteMetaDataFields,String>>
+	public static Collection<Map<MoTrPACmetaboliteMetaDataFields,String>>
 			parseMetaboliteMetadataFile(File metaboliteMetadataFile) throws Exception{
 		
 		Collection<Map<MoTrPACmetaboliteMetaDataFields,String>>metaboliteMetadata = 
@@ -1571,117 +1084,7 @@ public class MoTrPACUtils {
 		}
 		return metaboliteMetadata;
 	}
-	
-	private static void createMotrpacDataUploadDirectoryStructure4PreCovidAdipose() {
-		
-		List<String>tissueTypes = new ArrayList<String>(Arrays.asList("T11"));
-		File parentDirectory = new File("Y:\\DataAnalysis\\_Reports\\EX01242 - preCovid adipose Shipment W20000044X\\4BIC\\Interm");
-		String batchDateIdentifier = "20230202";
-		String processingDateIdentifier = "20230202";
-		String studyPhase = "HUMAN-PRECOVID";
-		createMotrpacDataUploadDirectoryStructure(
-				tissueTypes, 
-				 parentDirectory,
-				 batchDateIdentifier,
-				 processingDateIdentifier,
-				 studyPhase);
-	}
-	
-	private static void createMoTrPACFileManifests4PreCovidAdipose() {
-		
-		List<String>tissueTypes = new ArrayList<String>(Arrays.asList("T11"));
-		File parentDirectory = 
-				new File("Y:\\DataAnalysis\\_Reports\\EX01242 - preCovid adipose Shipment W20000044X\\4BIC\\HUMAN");
-		String batchDateIdentifier = "BATCH1_20230202";
-		String processingDateIdentifier = "PROCESSED_20230202";
-		createMoTrPACFileManifest(
-				tissueTypes, 
-				parentDirectory,
-				batchDateIdentifier,
-				processingDateIdentifier,
-				"20230617",
-				false);
-	}
-	
-	private static void createMoTrPACFileManifestsEX01387Adipose() {
-		
-		List<String>tissueTypes = new ArrayList<String>(Arrays.asList("T11"));
-		File parentDirectory = 
-				new File("Y:\\DataAnalysis\\_Reports\\EX01387 - Human Post Suspension Adipose powder H20000902J\\4BIC_UPLOAD\\HUMAN");
-		String batchDateIdentifier = "BATCH1_20260306";
-		String processingDateIdentifier = "PROCESSED_20260306";
-		createMoTrPACFileManifest(
-				tissueTypes, 
-				parentDirectory,
-				batchDateIdentifier,
-				processingDateIdentifier,
-				"20260511",
-				false);
-	}
-	
-	private static void createMotrpacDataUploadDirectoryStructure4PreCovidPlasma() {
-		
-		List<String>tissueTypes = new ArrayList<String>(Arrays.asList("T02"));
-		File parentDirectory = new File("Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\4BIC\\Interm2");
-		String batchDateIdentifier = "20230124";
-		String processingDateIdentifier = "20241016";
-		String studyPhase = "HUMAN-PRECOVID";
-		createMotrpacDataUploadDirectoryStructure(
-				tissueTypes, 
-				 parentDirectory,
-				 batchDateIdentifier,
-				 processingDateIdentifier,
-				 studyPhase);
-	}
-	
-	private static void createMotrpacDataUploadDirectoryStructure4PreCovidMuscle() {
-		
-		List<String>tissueTypes = new ArrayList<String>(Arrays.asList("T06"));
-		File parentDirectory = new File("Y:\\DataAnalysis\\_Reports\\EX01094 - MoTrPAC Muscle "
-				+ "PreCOVID-20210219\\4Upload\\_4BIC\\_BACKUP_20230617\\");
-		String batchDateIdentifier = "20220404";
-		String processingDateIdentifier = "20220404";
-		String studyPhase = "HUMAN-PRECOVID";
-		createMotrpacDataUploadDirectoryStructure(
-			 tissueTypes, 
-			 parentDirectory,
-			 batchDateIdentifier,
-			 processingDateIdentifier,
-			 studyPhase);
-	}
-	
-	private static void createMoTrPACFileManifests4PreCovidMuscle() {
-		
-		List<String>tissueTypes = new ArrayList<String>(Arrays.asList("T06"));
-		File parentDirectory = 
-				new File("Y:\\DataAnalysis\\_Reports\\EX01094 - MoTrPAC Muscle PreCOVID-20210219\\4Upload\\_4BIC\\HUMAN");
-		String batchDateIdentifier = "BATCH1_20221014";
-		String processingDateIdentifier = "PROCESSED_20221014";
-		createMoTrPACFileManifest(
-				tissueTypes, 
-				parentDirectory,
-				batchDateIdentifier,
-				processingDateIdentifier,
-				"20230617",
-				false);
-	}
-		
-	private static void createMoTrPACFileManifests4PreCovidPlasma() {
-		
-		List<String>tissueTypes = new ArrayList<String>(Arrays.asList("T02"));
-		File parentDirectory = 
-				new File("Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\4BIC\\HUMAN");
-		String batchDateIdentifier = "BATCH1_20230124";
-		String processingDateIdentifier = "PROCESSED_20230616";
-		createMoTrPACFileManifest(
-				tissueTypes, 
-				parentDirectory,
-				batchDateIdentifier,
-				processingDateIdentifier,
-				"20230616",
-				false);
-	}
-	
+
 	private static void compressMoTrPACPreCovidMuscleRawDataFiles() throws IOException {
 		
 		//	Excluded list
@@ -1781,276 +1184,6 @@ public class MoTrPACUtils {
 		}
 	}
 
-	private static void createPass1ACMotrpacDataUploadDirectoryStructure() {
-		
-		List<String>tissueTypes = new ArrayList<String>(
-				Arrays.asList(
-						"T31 - Plasma",
-						"T55 - Muscle",
-						"T58 - Heart",
-						"T59 - Kidney",
-						"T66 - Lung",
-						"T68 - Liver",
-						"T69 - Adipose brown",
-						"T70 - Adipose white"));
-		List<String>assayTypes = new ArrayList<String>(Arrays.asList("IONPNEG", "RPNEG", "RPPOS"));		
-		File parentDirectory = new File(
-				"Y:\\DataAnalysis\\_Reports\\EX01117 - PASS 1C\\4BIC\\PASS1AC\\_FINALS");
-		String studyPhase = "PASS1A-06";
-		try {
-			LIMSReportingUtils.createMotrpacDataUploadDirectoryStructure(
-					tissueTypes, 
-					assayTypes, 
-					parentDirectory,
-					1,
-					"20210603",
-					"20220926",
-					studyPhase);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-	
-	private static void createManifestsDirectoryStructure() {
-		
-		List<String>tissueTypes = new ArrayList<String>(
-				Arrays.asList(
-						"T31 - Plasma",
-						"T55 - Muscle",
-						"T58 - Heart",
-						"T59 - Kidney",
-						"T66 - Lung",
-						"T68 - Liver",
-						"T69 - Adipose brown",
-						"T70 - Adipose white"));
-		List<String>assayTypes = new ArrayList<String>(Arrays.asList("IONPNEG", "RPNEG", "RPPOS"));
-		File parentDirectory = new File("Y:\\DataAnalysis\\_Reports\\EX01117 - PASS 1C Shipment ANI870 10082\\4BIC\\PASS1AC\\Manifests");
-		for(String tissue : tissueTypes) {
-			
-			for(String assay : assayTypes) {
-				
-				try {
-					Files.createDirectories(
-							Paths.get(parentDirectory.getAbsolutePath(), tissue, assay));
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
-		}
-	}
-	
-	private static void createRawDataVaultDirectoryStructure() {
-		
-		List<String>tissueTypes = new ArrayList<String>(
-				Arrays.asList(
-						"T31 - Plasma",
-						"T55 - Muscle",
-						"T58 - Heart",
-						"T59 - Kidney",
-						"T66 - Lung",
-						"T68 - Liver",
-						"T69 - Adipose brown",
-						"T70 - Adipose white"));
-		List<String>assayTypes = new ArrayList<String>(Arrays.asList("IONPNEG", "RPNEG", "RPPOS"));
-		File parentDirectory = new File("Y:\\DataAnalysis\\_Reports\\EX01117 - PASS 1C Shipment ANI870 10082\\4BIC\\PASS1AC\\RAW_AC");
-		for(String tissue : tissueTypes) {
-			
-			for(String assay : assayTypes) {
-				
-				try {
-					Files.createDirectories(
-							Paths.get(parentDirectory.getAbsolutePath(), tissue, assay));
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
-		}
-	}	
-
-	private static void createMoTrPACFileManifest() throws IOException {
-		
-		List<String>tissueTypes = new ArrayList<>(
-				Arrays.asList(
-						"T31 - Plasma",
-						"T55 - Muscle",
-						"T58 - Heart",
-						"T59 - Kidney",
-						"T66 - Lung",
-						"T68 - Liver",
-						"T69 - Adipose brown",
-						"T70 - Adipose white"));
-		List<String>assayTypes = 
-				new ArrayList<>(Arrays.asList("IONPNEG" ,"RPNEG", "RPPOS"));
-		File parentDirectory = 
-				new File("Y:\\DataAnalysis\\_Reports\\EX01117 - PASS 1C\\4BIC\\PASS1A-06");	
-		String batchId = "BATCH1_20210603";	
-		String processedFolderId  = "PROCESSED_20210806";
-		for(String tissue : tissueTypes) {
-			
-			for(String assay : assayTypes) {
-				
-				StringBuffer checkSumData = new StringBuffer();
-				checkSumData.append("file_name,md5\n");
-				Path processedPath = Paths.get(parentDirectory.getAbsolutePath(), tissue, assay, batchId, processedFolderId);
-				Path namedDirPath = Paths.get(processedPath.toString(), "NAMED");
-				List<Path> pathList = Files.find(namedDirPath,
-						1, (filePath, fileAttr) -> (filePath.toString().toLowerCase().endsWith(".txt"))).
-					collect(Collectors.toList());
-				for(Path filePath : pathList) {
-					String zipHash = DigestUtils.sha256Hex(
-							new FileInputStream(filePath.toString()));
-					String localPath = processedFolderId + File.separator + "NAMED" + File.separator + filePath.toFile().getName();
-					checkSumData.append(localPath + "," + zipHash + "\n");
-				}
-				Path unnamedDirPath = Paths.get(processedPath.toString(), "UNNAMED");
-				pathList = Files.find(unnamedDirPath,
-						1, (filePath, fileAttr) -> (filePath.toString().toLowerCase().endsWith(".txt"))).
-					collect(Collectors.toList());
-				for(Path filePath : pathList) {
-					String zipHash = DigestUtils.sha256Hex(
-							new FileInputStream(filePath.toString()));
-					String localPath = processedFolderId + File.separator + "UNNAMED" + File.separator + filePath.toFile().getName();
-					checkSumData.append(localPath + "," + zipHash + "\n");
-				}
-				pathList = Files.find(processedPath,
-						1, (filePath, fileAttr) -> (filePath.toString().toLowerCase().contains("metadata_failedsamples_"))).
-					collect(Collectors.toList());
-				for(Path filePath : pathList) {
-					String zipHash = DigestUtils.sha256Hex(
-							new FileInputStream(filePath.toString()));
-					String localPath = processedFolderId + File.separator + filePath.toFile().getName();
-					checkSumData.append(localPath + "," + zipHash + "\n");
-				}
-				Path rawChecksumPathPath = Paths.get(parentDirectory.getAbsolutePath(), tissue, assay, batchId, "RAW", " checksum.txt");
-				List<String> zipCs = Files.readAllLines(rawChecksumPathPath);
-				for(int i=1; i<zipCs.size(); i++) {
-					String[]parts = zipCs.get(i).split("\t");
-					checkSumData.append(parts[0].replace(".zip", "") + "," + parts[1] + "\n");
-				}
-				File manifestFile = Paths.get(parentDirectory.getAbsolutePath(), tissue, assay, batchId, "file_manifest_20220208.csv").toFile();
-				FileUtils.writeStringToFile(manifestFile, checkSumData.toString(), Charset.defaultCharset());
-			}
-		}
-	}
-	
-	private static void compressMoTrPACRawDataFiles() {
-		
-		List<String>tissueTypes = new ArrayList<String>(
-				Arrays.asList(
-						"T69 - Adipose brown",
-						"T70 - Adipose white",
-						"T58 - Heart",
-						"T59 - Kidney",
-						"T68 - Liver",
-						"T66 - Lung",
-						"T55 - Muscle",
-						"T31 - Plasma"));
-		List<String>assayTypes = new ArrayList<String>(Arrays.asList("IONPNEG", "RPNEG", "RPPOS"));
-		File parentDirectory = new File("Y:\\DataAnalysis\\_Reports\\EX01117 - PASS 1C\\4BIC\\PASS1AC");	
-		File rawBaseDir = new File("Y:\\DataAnalysis\\_Reports\\EX01117 - PASS 1C\\4BIC\\PASS1AC\\RAW_AC");	
-		try {
-			String batchId = "BATCH1_20210603";	
-			String processedFolderId  = "PROCESSED_20210806";
-			for(String tissue : tissueTypes) {
-							
-				for(String assay : assayTypes) {
-					
-					Path zippedRawFilesDirPath = Paths.get(parentDirectory.getAbsolutePath(), tissue, assay, batchId, "RAW");
-					Path namedDirPath = Paths.get(parentDirectory.getAbsolutePath(), tissue, assay, batchId, processedFolderId, "NAMED");
-					Path sampleInfo = Files.find(namedDirPath, Integer.MAX_VALUE, (p, basicFileAttributes) ->
-			                        p.getFileName().toString().startsWith("metadata_sample_")).findFirst().orElse(null);
-					if(sampleInfo != null) {
-						
-						Collection<String>toCompress = new TreeSet<String>();
-						Collection<String>processed = new TreeSet<String>();
-						TreeMap<File,Long> fileSizeMap = new TreeMap<File,Long>();
-						TreeMap<File,String> fileHashMap = new TreeMap<File,String>();
-						File manifest = Paths.get(zippedRawFilesDirPath.toString(), "manifest_" + assay + ".txt").toFile();
-						File checkSumFile = Paths.get(zippedRawFilesDirPath.toString(), " checksum.txt").toFile();
-						FileUtils.copyFile(sampleInfo.toFile(), manifest);						
-						String[][] manifestData = null;
-						try {
-							manifestData = DelimitedTextParser.parseTextFileWithEncoding(manifest, MRC2ToolBoxConfiguration.getTabDelimiter());
-						} catch (IOException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-						if (manifestData != null) {
-							String[] header = manifestData[0];
-							int fileNameColumn = -1;
-							for(int i=0; i<header.length; i++) {
-								if(header[i].equals("raw_file")) {
-									fileNameColumn = i;
-									break;
-								}
-							}							
-							for(int i=1; i<manifestData.length; i++) 
-								toCompress.add(manifestData[i][fileNameColumn]);
-							
-							System.out.println(sampleInfo.getFileName().toString());
-						}
-						Path rawDataDirectory = Paths.get(rawBaseDir.getAbsolutePath(), tissue, assay);
-						List<Path> pathList = Files.find(rawDataDirectory,
-								1, (filePath, fileAttr) -> (filePath.toString().toLowerCase().endsWith(".d"))).
-							collect(Collectors.toList());
-						for(Path rdp : pathList) {
-							
-							FileUtils.deleteDirectory(Paths.get(rdp.toString(), "Results").toFile());
-							String rawFileName = FilenameUtils.getBaseName(rdp.toString());
-							if(toCompress.contains(rawFileName)) {
-								
-								File destination = Paths.get(zippedRawFilesDirPath.toString(),
-										FilenameUtils.getBaseName(rdp.toString()) + ".zip").toFile();
-								CompressionUtils.zipFolder(rdp.toFile(), destination);
-								if(destination.exists()) {
-									try {
-										String zipHash = DigestUtils.sha256Hex(
-												new FileInputStream(destination.getAbsolutePath()));
-
-										fileHashMap.put(destination, zipHash);
-									} catch (FileNotFoundException e1) {
-										// TODO Auto-generated catch block
-										e1.printStackTrace();
-									} catch (IOException e1) {
-										// TODO Auto-generated catch block
-										e1.printStackTrace();
-									}
-									fileSizeMap.put(destination, destination.length());
-									processed.add(rawFileName);
-								}								
-							}
-						}
-						@SuppressWarnings({ "unchecked" })
-						Collection<String> missing = CollectionUtils.removeAll(toCompress, processed);
-						if(!missing.isEmpty()) {
-							System.out.println("Missing files in " + zippedRawFilesDirPath.toString());
-							for(String m : missing)
-								System.out.println(m);
-						}					
-						//	Write checksum file
-						StringBuffer checkSumData = new StringBuffer();
-						checkSumData.append("File name\t");
-						checkSumData.append("SHA256\t");
-						checkSumData.append("Size\n");
-						for(Entry<File, String> entry : fileHashMap.entrySet()) {
-							
-							if(fileSizeMap.get(entry.getKey()) != null) {
-								
-								checkSumData.append(entry.getKey().getName() +"\t");
-								checkSumData.append(entry.getValue() +"\t");
-								checkSumData.append(Long.toString(fileSizeMap.get(entry.getKey())) + "\n");
-							}
-						}
-						FileUtils.writeStringToFile(checkSumFile, checkSumData.toString(), Charset.defaultCharset());
-					}
-				}
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
 	
 	private static void fixMetaboliteNames() throws Exception {
 		
@@ -2305,56 +1438,7 @@ public class MoTrPACUtils {
 			}			
 		}
 	}
-	
-	private static void compressRawDataFromEX01190() {
-		
-		String includeFileListFile = 
-				"Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\4BIC\\Interm\\T02\\IONPNEG\\BATCH1_20230124\\RAW\\EX01190-IONPNEG-file-list.txt"; 
-		
-		List<String>sourceFolders = new ArrayList<String>();
-		sourceFolders.add(
-				"Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\A049 - Central carbon metabolism profiling\\Raw data\\NEG\\BATCH-01");
-		sourceFolders.add(
-				"Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\A049 - Central carbon metabolism profiling\\Raw data\\NEG\\BATCH-02");
-		sourceFolders.add(
-				"Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\A049 - Central carbon metabolism profiling\\Raw data\\NEG\\BATCH-03");
-		sourceFolders.add(
-				"Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\A049 - Central carbon metabolism profiling\\Raw data\\NEG\\BATCH-04");
-		sourceFolders.add(
-				"Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\A049 - Central carbon metabolism profiling\\Raw data\\NEG\\BATCH-05");
-		sourceFolders.add(
-				"Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\A049 - Central carbon metabolism profiling\\Raw data\\NEG\\BATCH-06");
-		sourceFolders.add(
-				"Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\A049 - Central carbon metabolism profiling\\Raw data\\NEG\\BATCH-07");
-		sourceFolders.add(
-				"Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\A049 - Central carbon metabolism profiling\\Raw data\\NEG\\BATCH-08");
-		sourceFolders.add(
-				"Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\A049 - Central carbon metabolism profiling\\Raw data\\NEG\\BATCH-09");
-		sourceFolders.add(
-				"Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\A049 - Central carbon metabolism profiling\\Raw data\\NEG\\BATCH-10");
-		sourceFolders.add(
-				"Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\A049 - Central carbon metabolism profiling\\Raw data\\NEG\\BATCH-11");
-		sourceFolders.add(
-				"Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\A049 - Central carbon metabolism profiling\\Raw data\\NEG\\BATCH-12");
-		sourceFolders.add(
-				"Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\A049 - Central carbon metabolism profiling\\Raw data\\NEG\\BATCH-13");
-		
-		String destinationFolder = 
-				"Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\4BIC\\T02\\IONPNEG\\BATCH1_20230124\\RAW";
-		
-		compressRawDataFromMutibatchRun(
-				includeFileListFile, 
-				sourceFolders, 
-				destinationFolder);
-	}
-	
-	public static void extractRefmetDisrepanciesForAllExperiments() {
-		
-		File logLocationList = new File("E:\\DataAnalysis\\_MOTRPAC_DEVEL\\QC-log-locations.txt");
-		File output = new File("E:\\DataAnalysis\\_MOTRPAC_DEVEL\\RefmetDisrepancies_20241031_2.txt");
-		extractRefmetDisrepancies(logLocationList, output);
-	}
-	
+
 	public static void extractRefmetDisrepancies(File logLocationList, File output) {
 		
 		List<String> logLocations = new ArrayList<String>();
@@ -2491,7 +1575,7 @@ public class MoTrPACUtils {
 			lines.add(StringUtils.join(nextLine, "\t"));
 		}
 		Path outputPath = Paths.get(runManifestFile.getParent(), 
-				FileNameUtils.getBaseName(runManifestFile.getName()) + "_uniqueControls.txt");
+				PathUtils.getBaseName(runManifestFile.toPath()) + "_uniqueControls.txt");
 		try {
 		    Files.write(outputPath, 
 		    		lines,
@@ -2503,7 +1587,7 @@ public class MoTrPACUtils {
 		}
 	}
 	
-	private static Map<String,String> getMailFemailControlsMap() {
+	public static Map<String,String> getMailFemailControlsMap() {
 		
 		Map<String,String>sampleNameMap = new TreeMap<>();
 		sampleNameMap.put("CSMR81030","QC-Reference-Female");
@@ -2512,40 +1596,6 @@ public class MoTrPACUtils {
 		sampleNameMap.put("CSMR81010","QC-Reference-Male");
 		return sampleNameMap;
 	}
-	
-	
-//	File[]mFiles = new File[] {
-//			new File("Y:\\DataAnalysis\\_Reports\\EX01355 - Human Muscle Tranche 1 H20000820Y\\A003 - Untargeted\\QCaNVaS_v0.8.0\\Unnamed\\RP-NEG\\EX01355-RP-NEG-Manifest-complete.txt"),
-//			new File("Y:\\DataAnalysis\\_Reports\\EX01355 - Human Muscle Tranche 1 H20000820Y\\A003 - Untargeted\\QCaNVaS_v0.8.0\\Unnamed\\RP-POS\\EX01355-RP-POS-Manifest-complete.txt"),
-//			new File("Y:\\DataAnalysis\\_Reports\\EX01355 - Human Muscle Tranche 1 H20000820Y\\A049 - Central carbon metabolism profiling\\QCaNVaS_v0.8.0\\Unnamed\\EX01355-IONP-NEG-Manifest-complete.txt"),
-//			new File("Y:\\DataAnalysis\\_Reports\\EX01387 - Human Post Suspension Adipose powder H20000902J\\4QCANVAS\\IONP-NEG\\EX01387-IONP-NEG-Manifest-complete.txt"),
-//			new File("Y:\\DataAnalysis\\_Reports\\EX01387 - Human Post Suspension Adipose powder H20000902J\\4QCANVAS\\RP-POS\\EX01387-RP-POS-Manifest-complete.txt"),
-//			new File("Y:\\DataAnalysis\\_Reports\\EX01409 - Human EDTA Tranche 1 plasma W20000960M\\A003 - Untargeted\\QCaNVaS\\RP-NEG\\EX01409-RP-NEG-Manifest-complete.txt"),
-//			new File("Y:\\DataAnalysis\\_Reports\\EX01409 - Human EDTA Tranche 1 plasma W20000960M\\A003 - Untargeted\\QCaNVaS\\RP-POS\\EX01409-RP-POS-Manifest-complete.txt"),
-//			new File("Y:\\DataAnalysis\\_Reports\\EX01409 - Human EDTA Tranche 1 plasma W20000960M\\A049 - Central carbon metabolism profiling\\QCaNVaS\\EX01409-IONP-NEG-Manifest-complete.txt"),
-//			new File("Y:\\DataAnalysis\\_Reports\\EX01426 - Human EDTA Tranche 2 plasma W20001176L\\A003 - Untargeted\\QCaNVaS\\RP-NEG\\EX01426-RP-NEG-Manifest-complete.txt"),
-//			new File("Y:\\DataAnalysis\\_Reports\\EX01426 - Human EDTA Tranche 2 plasma W20001176L\\A003 - Untargeted\\QCaNVaS\\RP-POS\\EX01426-RP-POS-Manifest-complete.txt"),
-//			new File("Y:\\DataAnalysis\\_Reports\\EX01426 - Human EDTA Tranche 2 plasma W20001176L\\A049 - Central carbon metabolism profiling\\QCaNVaS\\EX01426-IONP-NEG-Manifest-complete.txt"),
-//			new File("Y:\\DataAnalysis\\_Reports\\EX01496 - Human EDTA Tranche 3 plasma X20001463K\\A003 - Untargeted\\QCaNVaS\\RP-NEG\\EX01496-RP-NEG-Manifest-complete.txt"),
-//			new File("Y:\\DataAnalysis\\_Reports\\EX01496 - Human EDTA Tranche 3 plasma X20001463K\\A003 - Untargeted\\QCaNVaS\\RP-POS\\EX01496-RP-POS-Manifest-complete.txt"),
-//			new File("Y:\\DataAnalysis\\_Reports\\EX01496 - Human EDTA Tranche 3 plasma X20001463K\\A049 - Central carbon metabolism profiling\\QCaNVaS\\EX01496-IONP-NEG-Manifest-complete.txt"),
-//			new File("Y:\\DataAnalysis\\_Reports\\EX01526 - Human EDTA Tranche 4 plasma H20001805E\\A003 - Untargeted\\QCaNVaS\\RP-NEG\\EX01526-RP-NEG-Manifest-complete.txt"),
-//			new File("Y:\\DataAnalysis\\_Reports\\EX01526 - Human EDTA Tranche 4 plasma H20001805E\\A003 - Untargeted\\QCaNVaS\\RP-POS\\EX01526-RP-POS-Manifest-complete.txt"),
-//			new File("Y:\\DataAnalysis\\_Reports\\EX01526 - Human EDTA Tranche 4 plasma H20001805E\\A049 - Central carbon metabolism profiling\\QCaNVaS\\EX01526-IONP-NEG-Manifest-complete.txt"),
-//	};
-//	for(File runManifestFile : mFiles) {
-//		
-//		try {
-//			createUniqueSampleIdsForControlsAndOrderSamples(runManifestFile);
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		}
-//	}
-	
-	
-	// File parentDir = new File("Y:\\DataAnalysis\\_Reports\\EX01094 - MoTrPAC Muscle PreCOVID-20210219\\4Upload\\_4BIC\\HUMAN");
-	//	File parentDir = new File("Y:\\DataAnalysis\\_Reports\\EX01117 - PASS 1C\\4BIC\\PASS1A-06\\_FINALS");
-	
 }
 
 

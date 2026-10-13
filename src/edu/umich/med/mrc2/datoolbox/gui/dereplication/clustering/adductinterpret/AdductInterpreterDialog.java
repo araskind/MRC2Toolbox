@@ -461,7 +461,7 @@ public class AdductInterpreterDialog extends JDialog implements ActionListener, 
 					((DefaultComboBoxModel<Adduct>) adductComboBox.getModel());
 					for (int j = 0; j < model.getSize(); j++) {
 
-						if (((Adduct) model.getElementAt(j)).getName().equals(mod.getName())) {
+						if ((model.getElementAt(j)).getName().equals(mod.getName())) {
 
 							adductComboBox.setSelectedIndex(j);
 							selectedModification = (Adduct) model.getElementAt(j);

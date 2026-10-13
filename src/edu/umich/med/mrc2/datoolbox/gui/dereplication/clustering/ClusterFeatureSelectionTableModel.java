@@ -46,7 +46,8 @@ public class ClusterFeatureSelectionTableModel extends BasicTableModel {
 	public static final String FEATURE_COLUMN = "Name";
 	public static final String COMPOUND_NAME_COLUMN = "Identification";
 	public static final String ANNOTATION_COLUMN = "Annotation";
-	public static final String CHEM_MOD_COLUMN = "Form";
+	public static final String CHEM_MOD_COLUMN = "Adduct Obs";
+	public static final String CHEM_MOD_LIBRARY_COLUMN = "Adduct Lib";
 	public static final String RETENTION_COLUMN = "RT";
 	public static final String NEUTRAL_MASS_COLUMN = "Neutral mass";
 	public static final String BASE_PEAK_COLUMN = "Base peak";
@@ -74,6 +75,7 @@ public class ClusterFeatureSelectionTableModel extends BasicTableModel {
 			new ColumnContext(COMPOUND_NAME_COLUMN, "Compound name", String.class, false),
 			new ColumnContext(ANNOTATION_COLUMN, ANNOTATION_COLUMN, String.class, false),
 			new ColumnContext(CHEM_MOD_COLUMN, "Adduct", Adduct.class, false),
+			new ColumnContext(CHEM_MOD_LIBRARY_COLUMN, "Adduct based on library match", Adduct.class, false),
 			new ColumnContext(RETENTION_COLUMN, "Retention time", Double.class, false),
 			new ColumnContext(NEUTRAL_MASS_COLUMN, NEUTRAL_MASS_COLUMN, Double.class, false),
 			new ColumnContext(BASE_PEAK_COLUMN, "Base peak M/Z", Double.class, false),
@@ -113,15 +115,24 @@ public class ClusterFeatureSelectionTableModel extends BasicTableModel {
 				String binAnnot = "";
 				if( cf.getBinnerAnnotation() != null)
 					binAnnot = cf.getBinnerAnnotation().getAnnotation();
+				
+				Adduct chmodObserved = null;
+				Adduct chmodLibrary = null;
+				if (cf.getSpectrum() != null)
+					chmodObserved = cf.getSpectrum().getPrimaryAdduct();
 
+				if(cf.getPrimaryIdentity() != null && cf.getPrimaryIdentity().getMsRtLibraryMatch() != null)
+					chmodLibrary = cf.getPrimaryIdentity().getMsRtLibraryMatch().getTopAdductMatch().getLibraryMatch();
+				
 				Object[] obj = {
 					cf.equals(currentCluster.getPrimaryFeature()),
-					entry.getValue(),
+					featureCluster.isFeatureEnabled(cf),
 					cf.getQualityScore(),
 					cf,
 					compoundName,
 					binAnnot,
-					cf.getDefaultChemicalModification(),
+					chmodObserved,
+					chmodLibrary,
 					cf.getRetentionTime(),
 					cf.getNeutralMass(),
 					cf.getMonoisotopicMz(),

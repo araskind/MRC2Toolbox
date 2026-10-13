@@ -70,14 +70,15 @@ public class MassDifferenceTableModel extends BasicTableModel {
 	}
 
 	public void setTableModelFromFeatureCluster(MsFeatureCluster selectedCluster) {
-
-		setRowCount(0);
 		setTableModelFromFeatures(selectedCluster.getFeatures(), selectedCluster);
 	}
 
 	public void setTableModelFromFeatures(Collection<MsFeature> clusterFeatures, MsFeatureCluster activeCluster) {
 
 		setRowCount(0);
+		if(activeCluster.getCorrelationMatrix() == null)
+			return;
+		
 		List<Object[]>rowData = new ArrayList<Object[]>();
 		MsFeature[] features = clusterFeatures.toArray(new MsFeature[clusterFeatures.size()]);
 
@@ -89,7 +90,7 @@ public class MassDifferenceTableModel extends BasicTableModel {
 
 					double delta = 0.0d;
 					double corr = 0.0d;
-					HashSet<Adduct> mods = new HashSet<Adduct>();
+					HashSet<Adduct> mods = new HashSet<>();
 					delta = features[j].getMonoisotopicMz() - features[i].getMonoisotopicMz();
 					corr = activeCluster.getCorrelation(features[i], features[j]);
 					mods = activeCluster.getModificationsForFeaturePair(features[j], features[i]);

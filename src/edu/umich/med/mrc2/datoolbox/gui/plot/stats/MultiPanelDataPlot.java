@@ -31,6 +31,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.TreeMap;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jfree.chart.ChartFactory;
@@ -325,6 +326,9 @@ public class MultiPanelDataPlot extends TwoDimQCPlot{
 	public void clearPlotPanel(){
 
 		clearPlotMatrix();	
+		if(plottedFeaturesMap != null)
+			plottedFeaturesMap.clear();
+		
 		plotParameters = null;
 	}
 
@@ -360,7 +364,7 @@ public class MultiPanelDataPlot extends TwoDimQCPlot{
 		if(pfm == null || pfm.isEmpty())
 			return;
 		
-		plottedFeaturesMap = pfm;
+		plottedFeaturesMap = new TreeMap<>(pfm);
 		updateParametersFromControls();
 		if(plotParameters.getExperiment() == null || plotParameters.getActiveDesign() == null)
 			return;

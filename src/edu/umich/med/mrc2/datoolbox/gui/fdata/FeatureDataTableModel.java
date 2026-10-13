@@ -52,8 +52,8 @@ public class FeatureDataTableModel extends BasicTableModel {
 	public static final String COMPOUND_NAME_COLUMN = "Identification";
 	public static final String DATABSE_LINK_COLUMN = "DBID";
 	public static final String AMBIGUITY_COLUMN = "Ambig.";
-	public static final String CHEM_MOD_OBSERVED_COLUMN = "Form (Obs)";
-	public static final String CHEM_MOD_LIBRARY_COLUMN = "Form (Lib)";
+	public static final String CHEM_MOD_OBSERVED_COLUMN = "Adduct Obs";
+	public static final String CHEM_MOD_LIBRARY_COLUMN = "Adduct Lib";
 	public static final String BINNER_ANNOTATION_COLUMN = "Binner";
 	public static final String REJECT_COLUMN = "Reject";
 	public static final String SCORE_COLUMN = "Score";

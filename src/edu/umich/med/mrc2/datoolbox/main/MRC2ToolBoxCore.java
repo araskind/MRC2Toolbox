@@ -162,6 +162,7 @@ public final class MRC2ToolBoxCore {
 				//	logger.error("Failed to create GUI!", e);
 			}
         }
+        RecentDataManager.readDataFromFile();
         mainWindow.showIdTrackerLogin();
 	}
 	

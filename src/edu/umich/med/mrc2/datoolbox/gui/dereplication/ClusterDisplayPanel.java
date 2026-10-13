@@ -539,9 +539,10 @@ public abstract class ClusterDisplayPanel extends DockableMRC2ToolboxPanel
 
 			ClusterTree tree = (ClusterTree)e.getSource();
 
-			if (tree.getClickedObject() instanceof MsFeatureCluster)
+			if (tree.getClickedObject() instanceof MsFeatureCluster) {
+				MsFeatureCluster old = activeCluster;
 				activeCluster = (MsFeatureCluster) tree.getClickedObject();
-
+			}
 			if (tree.getClickedObject() instanceof MsFeature)
 				activeCluster = (MsFeatureCluster) tree.getClusterForSelectedFeature();
 		}

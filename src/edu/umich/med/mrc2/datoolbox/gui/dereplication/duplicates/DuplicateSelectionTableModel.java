@@ -43,7 +43,8 @@ public class DuplicateSelectionTableModel extends BasicTableModel {
 //	public static final String DATA_COLUMN = "Data";
 	public static final String FEATURE_COLUMN = "Name";
 	public static final String COMPOUND_NAME_COLUMN = "Identification";
-	public static final String CHEM_MOD_LIBRARY_COLUMN = "Form (Lib)";
+	public static final String CHEM_MOD_COLUMN = "Adduct Obs";
+	public static final String CHEM_MOD_LIBRARY_COLUMN = "Adduct Lib";
 	public static final String SCORE_COLUMN = "Score";
 	public static final String RETENTION_COLUMN = "RT lib.";
 	public static final String OBSERVED_RETENTION_COLUMN = "RT observed";
@@ -68,7 +69,8 @@ public class DuplicateSelectionTableModel extends BasicTableModel {
 //			new ColumnContext(DATA_COLUMN, Boolean.class, true),
 			new ColumnContext(FEATURE_COLUMN, "Feature name", MsFeature.class, false),
 			new ColumnContext(COMPOUND_NAME_COLUMN, "Compound name", String.class, false),
-			new ColumnContext(CHEM_MOD_LIBRARY_COLUMN, "Adduct (based on library / FbF match)", Adduct.class, false),
+			new ColumnContext(CHEM_MOD_COLUMN, "Adduct", Adduct.class, false),
+			new ColumnContext(CHEM_MOD_LIBRARY_COLUMN, "Adduct based on library match", Adduct.class, false),
 			new ColumnContext(SCORE_COLUMN, SCORE_COLUMN, Double.class, false),
 			new ColumnContext(RETENTION_COLUMN, "Retention time from library / FbF match", Double.class, false),
 			new ColumnContext(OBSERVED_RETENTION_COLUMN, "Retention time observed (median across all samples)", Double.class, false),
@@ -108,15 +110,21 @@ public class DuplicateSelectionTableModel extends BasicTableModel {
 				if(cf.getPrimaryIdentity() != null)
 					compoundName = cf.getPrimaryIdentity().getCompoundName();
 
+				Adduct chmodObserved = null;
 				Adduct chmodLibrary = null;
-				if(cf.getSpectrum() != null)
-					chmodLibrary = cf.getSpectrum().getPrimaryAdduct();
+				if (cf.getSpectrum() != null)
+					chmodObserved = cf.getSpectrum().getPrimaryAdduct();
+
+				if(cf.getPrimaryIdentity() != null && cf.getPrimaryIdentity().getMsRtLibraryMatch() != null)
+					chmodLibrary = cf.getPrimaryIdentity().getMsRtLibraryMatch().getTopAdductMatch().getLibraryMatch();
+
 
 				Object[] obj = {
 					cf.equals(activeCluster.getPrimaryFeature()),
 					//	currentCluster.isFeatureEnabled(cf),
 					cf,
 					compoundName,
+					chmodObserved,
 					chmodLibrary,
 					cf.getQualityScore() / 100.0d,
 					cf.getRetentionTime(),

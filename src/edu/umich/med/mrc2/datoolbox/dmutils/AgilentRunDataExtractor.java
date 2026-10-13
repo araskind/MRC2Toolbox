@@ -24,15 +24,16 @@ package edu.umich.med.mrc2.datoolbox.dmutils;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -79,18 +80,73 @@ public class AgilentRunDataExtractor {
 	
 	public static void main(String[] args) {
 
-		File rootFolder = new File("Z:\\Reference Data\\Individual Standards run on QTOFs\\LC10_LC2-IonP");
-		File excelReportFile = new File("Z:\\Reference Data\\Individual Standards run on QTOFs\\LC10_LC2-IonP\\MethodReport.xlsx");
-		gradientMap = new HashMap<>();
-		chromatographicGradientList = new ArrayList<>();
-		System.out.println("Extracting data\n**************\n");
-		Worklist worklist = extractRunData(rootFolder);
-		System.out.println("\nWriting the report\\n**************\\n");
+//		File rootFolder = new File("Z:\\Reference Data\\Individual Standards run on QTOFs\\LC10_LC2-IonP");
+		File rootFolder = new File("S:\\DataAnalysis\\__Standards");
+		
+//		File excelReportFile = new File("Z:\\Reference Data\\Individual Standards run on QTOFs\\LC10_LC2-IonP\\MethodReport.xlsx");
+//		gradientMap = new HashMap<>();
+//		chromatographicGradientList = new ArrayList<>();
+//		System.out.println("Extracting data\n**************\n");
+//		Worklist worklist = extractRunData(rootFolder);
+//		System.out.println("\nWriting the report\\n**************\\n");
+//		try {
+//			//	createReport(worklist, excelReportFile);.
+//			
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//		extractSampleSCICDevicesFile();
+		
+		 extractPolarityData(rootFolder);
+	}
+	
+	private static void extractSampleSCICDevicesFile() {
+
+		 File reportFile = new File("Z:\\Reference Data\\Individual Standards run on QTOFs\\LC10_LC2-IonP\\2-OH butyrate-01.d\\AcqData\\AcqMethod.xml");
+		 //AgilentAcquisitionMethodBatchUtils.extractSCICDevicesDocumentFromAcqMethodReportFile(reportFile);
+		 String pol = extractPolarity(reportFile);
+		 System.out.println("***\n" + pol + "***");
+	}
+	
+	private static String extractPolarity(File acqMethodFile) {
+		
+		if(!acqMethodFile.exists())
+			return null;
+		
+		Document scicDevicesDocument = 
+				AgilentAcquisitionMethodBatchUtils.getSCICDevicesDocumentFromAcqMethodReportFile(acqMethodFile);
+		for(Element sectionInfoElement : scicDevicesDocument.getRootElement().getChildren("SectionInfo")) {
+			
+			if(sectionInfoElement.getChildText("ID").equals("ionPolarity"))
+				return sectionInfoElement.getChildText("Value");
+		}
+		return null;
+	}
+	
+	private static void extractPolarityData(File rootFolder) {
+		
+		List<String>polarityMap = new ArrayList<>();
+		List<Path> dataFilesList = FIOUtils.findDirectoriesByExtension(rootFolder.toPath(), ".D");
+		for (Path dataFilePath : dataFilesList) {
+			
+			File df = dataFilePath.toFile();
+			File acqMethodFile = Paths.get(df.getAbsolutePath(), "AcqData", "AcqMethod.xml").toFile();
+			String polarity =  extractPolarity(acqMethodFile);
+			if(polarity == null)
+				polarity = "";
+			
+			polarityMap.add(dataFilePath.toString() + "\t" + polarity);
+		}
+		Path outputPath = Paths.get(rootFolder.getAbsolutePath(), "DataFilePolarityMap.txt");
 		try {
-			createReport(worklist, excelReportFile);
+		    Files.write(outputPath, 
+		    		polarityMap,
+		            StandardCharsets.UTF_8,
+		            StandardOpenOption.CREATE, 
+		            StandardOpenOption.TRUNCATE_EXISTING);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		    e.printStackTrace();
 		}
 	}
 	
@@ -103,6 +159,7 @@ public class AgilentRunDataExtractor {
 			String baseName = FilenameUtils.getBaseName(df.getName());
 			File sampleInfoFile = Paths.get(df.getAbsolutePath(), "AcqData", "sample_info.xml").toFile();
 			File peakBinaryFile = Paths.get(df.getAbsolutePath(), "AcqData", "MSPeak.bin").toFile();
+			File acqMethodFile = Paths.get(df.getAbsolutePath(), "AcqData", "AcqMethod.xml").toFile();
 			if (!peakBinaryFile.exists()) {
 				peakBinaryFile = Paths.get(df.getAbsolutePath(), "AcqData", "MSProfile.bin").toFile();
 			}
@@ -116,7 +173,6 @@ public class AgilentRunDataExtractor {
 				}
 				String runGradientId = addNewUniqueGradient(newGradient);
 				gradientMap.put(runData, runGradientId);
-
 			}
 		}
 		return worklist;

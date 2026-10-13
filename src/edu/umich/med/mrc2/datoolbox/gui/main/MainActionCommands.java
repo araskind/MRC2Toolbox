@@ -357,6 +357,8 @@ public enum MainActionCommands {
 	BATCH_ANNOTATE_CLUSTERS_COMMAND("Annotate all clusters"),
 	ANNOTATE_MASS_DIFFERENCES_COMMAND("Annotate mass differences"),
 	EXTRACT_MASS_DIFFERENCES_COMMAND("Extract mass differences"),
+	CREATE_NEW_FEATURE_SUBSET_FROM_CLUSTERS_COMMAND("Create new feature subset from clusters"),
+	ADD_NEW_FEATURE_SUBSET_TO_PROJECT_COMMAND("Add new feature subset to project"),
 
 	// Feature list and cluster commands
 	ASSIGN_FEATURE_ANNOTATION_COMMAND("Assign annotation"),

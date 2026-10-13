@@ -100,12 +100,22 @@ public class DockableMassDifferenceTable extends DefaultSingleCDockable {
 		@Override
 		public Void doInBackground() {
 
-			if (selectedCluster != null && featureList == null)
-				massDifferenceTable.setTableModelFromFeatureCluster(selectedCluster);
-			
-			if (selectedCluster != null && featureList != null)
-				massDifferenceTable.setTableModelFromFeatures(featureList, selectedCluster);
-
+			if (selectedCluster != null && featureList == null) {
+				try {
+					massDifferenceTable.setTableModelFromFeatureCluster(selectedCluster);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			if (selectedCluster != null && featureList != null) {
+				try {
+					massDifferenceTable.setTableModelFromFeatures(featureList, selectedCluster);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
 			return null;
 		}
 	}

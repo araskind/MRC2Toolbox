@@ -19,7 +19,7 @@
  *
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.library;
+package edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.id;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -49,10 +49,11 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskListener;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.library.LoadDatabaseLibraryTask;
 import edu.umich.med.mrc2.datoolbox.utils.MSRTSearchUtils;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 
-public class LibrarySearchTask  extends AbstractTask implements TaskListener{
+public class MSRTLibrarySearchTask  extends AbstractTask implements TaskListener{
 
 	private boolean clearPreviousResults;
 	private Collection<CompoundLibrary>targetLibraries;
@@ -69,38 +70,16 @@ public class LibrarySearchTask  extends AbstractTask implements TaskListener{
 	private boolean relaxMinorIsotopeError;
 	private Map<Polarity, List<LibraryMsFeature>>polarityMap;
 	private boolean librariesLoaded;
+	private MSRTSearchParametersObject spo;
 
-	public LibrarySearchTask(
-			Collection<CompoundLibrary> targetLibraries,
-			Collection<MsFeature> inputFeatures,
-			double massAccuracy,
-			MassErrorType massErrorType,
-			double rtWindow,
-			boolean useCustomRtWindows,
-			int maxHits,
-			boolean ignoreAddudctMatching,
-			boolean relaxMinorIsotopeError) {
-
-		this.targetLibraries = targetLibraries;
-		this.inputFeatures = inputFeatures;
-		this.massAccuracy = massAccuracy;
-		this.massErrorType = massErrorType;
-		this.rtWindow = rtWindow;
-		this.useCustomRtWindows = useCustomRtWindows;
-		this.maxHits = maxHits;
-		this.ignoreAddudctMatching = ignoreAddudctMatching;
-		this.relaxMinorIsotopeError = relaxMinorIsotopeError;
-
-		librariesLoaded = true;		
-	}
-
-	public LibrarySearchTask(
+	public MSRTLibrarySearchTask(
 			Collection<MsFeature> featuresToSearch, 
 			MSRTSearchParametersObject spo) {
 		
-		this.clearPreviousResults = spo.isClearPreviousResults();
-		this.targetLibraryIds = spo.getLibraryIds();
 		this.inputFeatures = featuresToSearch;
+		this.spo = spo;
+		this.clearPreviousResults = spo.isClearPreviousResults();
+		this.targetLibraryIds = spo.getLibraryIds();		
 		this.massAccuracy = spo.getMassError();
 		this.massErrorType = spo.getMassErrorType();
 		this.rtWindow = spo.getRetentionWindow();
@@ -329,17 +308,7 @@ public class LibrarySearchTask  extends AbstractTask implements TaskListener{
 
 	@Override
 	public Task cloneTask() {
-
-		return new LibrarySearchTask(
-				targetLibraries,
-				inputFeatures,
-				massAccuracy,
-				massErrorType,
-				rtWindow,
-				useCustomRtWindows,
-				maxHits,
-				ignoreAddudctMatching,
-				relaxMinorIsotopeError);
+		return new MSRTLibrarySearchTask(inputFeatures, spo);
 	}
 
 	public Collection<MsFeature> getIdentifiedFeatures() {

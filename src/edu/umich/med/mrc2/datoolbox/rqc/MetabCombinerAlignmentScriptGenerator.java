@@ -200,8 +200,9 @@ public class MetabCombinerAlignmentScriptGenerator extends TemplateRbasedProject
 		rscriptParts.add("library(metabCombiner)");
 		rscriptParts.add("library(dplyr)");
 		rscriptParts.add("library(purrr)");
-		rscriptParts.add("library(ggplot2)\n");
-		
+		rscriptParts.add("library(stringr)");
+		rscriptParts.add("library(data.table)");
+		rscriptParts.add("library(ggplot2)\n");	
 		rscriptParts.add("project_name <- \"" + parametersObject.getProjectTitle() + "\"");
 	}
 	

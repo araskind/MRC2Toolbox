@@ -61,7 +61,9 @@ public class CorrelationPanelMenuBar extends CommonMenuBar {
 	private static final Icon batchAssignAnnotationsIcon = GuiUtils.getIcon("calculateAnnotation", 24);
 	private static final Icon recalculateCorrelationsIcon = GuiUtils.getIcon("recalculateCorrelations", 24);
 	private static final Icon binnerAnalysisIcon = GuiUtils.getIcon("setupBinnerAnnotations", 24);
-
+	private static final Icon newFeatureSubsetIcon = GuiUtils.getIcon("newFeatureSubset", 24);
+	//	TODO add icon for Export menu
+	
 	// Menus
 	private JMenu
 		clusteringMenu,
@@ -94,6 +96,10 @@ public class CorrelationPanelMenuBar extends CommonMenuBar {
 	private JMenuItem
 		heatmapMenuItem,
 		massDiffsInBinnerMenuItem;
+
+	private JMenu exportMenu;
+
+	private JMenuItem createMsFeatureSetMenuItem;
 	
 	public CorrelationPanelMenuBar(ActionListener listener) {
 
@@ -175,6 +181,13 @@ public class CorrelationPanelMenuBar extends CommonMenuBar {
 				exploreDeltasIcon);
 		
 		add(graphicsMenu);
+		
+		exportMenu = new JMenu("Export");
+		createMsFeatureSetMenuItem = addItem(exportMenu, 
+				MainActionCommands.CREATE_NEW_FEATURE_SUBSET_FROM_CLUSTERS_COMMAND, 
+				newFeatureSubsetIcon);
+		
+		add(exportMenu);
 	}
 
 	public void updateMenuFromExperiment(DataAnalysisProject currentProject, DataPipeline activePipeline) {

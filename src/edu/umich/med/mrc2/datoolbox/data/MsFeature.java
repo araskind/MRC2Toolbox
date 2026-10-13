@@ -161,8 +161,7 @@ public class MsFeature implements AnnotatedObject, Serializable, XmlStorable {
 		active = source.isActive();
 		qualityScore = source.getQualityScore();
 		identifications = new HashSet<>(source.getIdentifications());
-		source.getIdentifications().stream().
-			forEach(i -> identifications.add(new MsFeatureIdentity(i)));
+		source.getIdentifications().forEach(i -> identifications.add(new MsFeatureIdentity(i)));
 		for(MsFeatureIdentity msfid : identifications) {
 			if(msfid.equals(source.getPrimaryIdentity()))
 				setPrimaryIdentity(msfid);
