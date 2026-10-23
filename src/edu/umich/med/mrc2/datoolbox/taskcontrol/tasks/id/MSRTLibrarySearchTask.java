@@ -26,11 +26,13 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import edu.umich.med.mrc2.datoolbox.data.AdductMatch;
+import edu.umich.med.mrc2.datoolbox.data.CompoundIdentity;
 import edu.umich.med.mrc2.datoolbox.data.CompoundLibrary;
 import edu.umich.med.mrc2.datoolbox.data.LibraryMsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MSRTSearchParametersObject;
@@ -105,6 +107,7 @@ public class MSRTLibrarySearchTask  extends AbstractTask implements TaskListener
 		
 		if(librariesLoaded) {
 			searchLibraries();
+			reassignPrimaryIdsBasedOnLibraryElutionOrder();
 			setStatus(TaskStatus.FINISHED);
 		}
 	}
@@ -149,7 +152,6 @@ public class MSRTLibrarySearchTask  extends AbstractTask implements TaskListener
 		}
 		if(librariesToLoad.isEmpty()) {
 			librariesLoaded = true;
-			return;
 		}
 		else {
 			for(String libId : librariesToLoad) {
@@ -204,6 +206,70 @@ public class MSRTLibrarySearchTask  extends AbstractTask implements TaskListener
 
 			processed++;
 		}
+	}
+	
+	private void reassignPrimaryIdsBasedOnLibraryElutionOrder() {
+		
+		List<MsFeature> ambiguousFeatures = identifiedFeatures.stream().
+				filter(f -> Objects.nonNull(f.getPrimaryIdentity().getMsRtLibraryMatch())).
+				filter(f -> f.getMSRTIdentifications().size() > 1).
+				collect(Collectors.toList());
+		if(ambiguousFeatures.isEmpty())
+			return;
+		
+		// Find other features with the same primary ID
+		for(MsFeature af : ambiguousFeatures) {
+			
+			CompoundIdentity primCid = af.getPrimaryIdentity().getCompoundIdentity();
+			List<MsFeature> sameCid = identifiedFeatures.stream().
+				filter(f -> !Objects.equals(af, f)).
+				filter(f -> Objects.equals(af.getPolarity(), f.getPolarity())).
+				filter(f -> Objects.nonNull(f.getPrimaryIdentity().getMsRtLibraryMatch())).
+				filter(f -> Objects.equals(f.getPrimaryIdentity().getCompoundIdentity(),primCid)).
+				collect(Collectors.toList());
+			if(!sameCid.isEmpty()) {
+				
+				List<MsFeatureIdentity>betterIds = new ArrayList<>();
+				for(MsFeature ref : sameCid) {
+					
+					MsFeatureIdentity betterId = findBetterMatchingId(af, ref);
+					if(betterId != null)
+						betterIds.add(betterId);
+				}
+				if(betterIds.size() == 1) {
+					af.setPrimaryIdentity(betterIds.get(0));
+				}
+				if(betterIds.size() > 1) {
+					MsFeatureIdentity bestId = MSRTSearchUtils.getIDwithClosestRT(betterIds, af.getObservedRetentionTime());
+					if(bestId != null)
+						af.setPrimaryIdentity(bestId);
+				}
+			}
+		}
+	}
+	
+	private MsFeatureIdentity findBetterMatchingId(MsFeature ambiguous, MsFeature ref) {
+		
+		MsFeatureIdentity betterMatch = null;
+		double observedDeltaRt = ambiguous.getObservedRetentionTime() - ref.getObservedRetentionTime();
+		double expectedRefRt = ref.getPrimaryIdentity().getMsRtLibraryMatch().getExpectedRetention();		
+		MsFeatureIdentity currentPrimary = ambiguous.getPrimaryIdentity();
+		List<MsFeatureIdentity> candidateIds = ambiguous.getMSRTIdentifications().stream().
+				filter(i -> !Objects.equals(currentPrimary, i)).collect(Collectors.toList());
+		double deltaDiff = 1000000.0d;
+		for(MsFeatureIdentity candidate : candidateIds) {
+			
+			double expectedDeltaRt = candidate.getMsRtLibraryMatch().getExpectedRetention() - expectedRefRt;			
+			if(expectedDeltaRt * observedDeltaRt > 0) {
+				
+				double newDeltaDiff = Math.abs(Math.abs(expectedDeltaRt) - Math.abs(observedDeltaRt));
+				if(newDeltaDiff < deltaDiff) {
+					betterMatch = candidate;
+					deltaDiff = newDeltaDiff;
+				}				
+			}
+		}
+		return betterMatch;
 	}
 
 	public Collection<MsFeature> getInputFeatures() {

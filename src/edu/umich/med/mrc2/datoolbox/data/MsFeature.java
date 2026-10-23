@@ -484,6 +484,14 @@ public class MsFeature implements AnnotatedObject, Serializable, XmlStorable {
 	public double getRetentionTime() {
 		return retentionTime;
 	}
+	
+	public double getObservedRetentionTime() {
+		
+		if(statsSummary != null && statsSummary.getMedianObservedRetention() > 0)
+				return statsSummary.getMedianObservedRetention();
+		else				
+			return retentionTime;
+	}
 
 	public double getSampleMedianArea() {
 		return statsSummary.getSampleMedian();

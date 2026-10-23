@@ -53,7 +53,8 @@ public class MFESummarizer {
 //		File outputFile = new File("Y:\\DataAnalysis\\_Reports\\EX01496 - Human EDTA Tranche 3 plasma X20001463K\\"
 //				+ "A049 - Central carbon metabolism profiling\\MFE\\NEG\\EX01496-IONP-NEG-MFE-HC-counts.txt");
 		
-		File mfeDir = new File("Y:\\_QUALTMP\\EX01558\\RP-POS\\BATCH03");
+		File mfeDir = new File("Y:\\DataAnalysis\\_Reports\\EX01607 - Motrpac Tranche 5 Muscle\\"
+				+ "A003 - Untargeted\\MFE\\POS\\BATCH05");
 		try {
 			readMFEfeatureCounts(mfeDir);
 		} catch (Exception e) {

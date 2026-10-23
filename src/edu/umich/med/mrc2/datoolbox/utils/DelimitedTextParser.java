@@ -63,6 +63,29 @@ public class DelimitedTextParser {
 		return parsedFile;
 	}
 	
+	public static String[][] parseTabSeparatedFile(File fileToParse) {
+
+		String[][] parsedFile = null;
+		FileReader dbFileReader = null;
+		if (fileToParse.exists()) {
+
+			try {
+				dbFileReader = new FileReader(fileToParse);
+				parsedFile = CSVParser.parse(dbFileReader, TAB_DELIMITER);
+			} catch (FileNotFoundException e) {
+
+				e.printStackTrace();
+			} catch (BadDelimiterException e) {
+
+				e.printStackTrace();
+			} catch (IOException e) {
+
+				e.printStackTrace();
+			}
+		}
+		return parsedFile;
+	}
+	
 	public static String[][] parseTextFile(File fileToParse, char delimiter) {
 
 		String[][] parsedFile = null;

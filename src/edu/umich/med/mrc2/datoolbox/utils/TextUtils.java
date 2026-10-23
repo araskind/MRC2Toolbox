@@ -22,6 +22,8 @@
 package edu.umich.med.mrc2.datoolbox.utils;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -39,6 +41,9 @@ import java.util.prefs.Preferences;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 import java.util.stream.Collectors;
+
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVPrinter;
 
 public class TextUtils {
 	
@@ -261,6 +266,20 @@ public class TextUtils {
 		return names.stream()
                 .filter(n -> !seen.add(n))
                 .collect(Collectors.toSet());
+	}
+	
+	public static void write2DstringArrayToCSV(String[][]data, File csvFile) {
+		
+		try (FileWriter writer = new FileWriter(csvFile);
+				CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT)) {
+
+			for (String[] row : data) {
+				csvPrinter.printRecord((Object[]) row);
+			}
+			csvPrinter.flush();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 }
 

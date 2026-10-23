@@ -140,23 +140,37 @@ public class MsFeatureIdentityComparator extends ObjectCompatrator<MsFeatureIden
 				result = Double.compare(o2.getEntropyBasedScore(), o1.getEntropyBasedScore());	//	Higher score - better match
 			
 			if(result == 0) {
-						
-				Entry<CompoundDatabaseEnum, String>hr1 = 
-						o1.getCompoundIdentity().getTopRankingDatabaseId();
-				Entry<CompoundDatabaseEnum, String>hr2 = 
-						o2.getCompoundIdentity().getTopRankingDatabaseId();
 				
-				if(hr1 != null && hr2 == null)	// Ranked database before unranked in ASC sort
+				if(o1.getIdSource().equals(CompoundIdSource.UNKNOWN) 
+						&& !o2.getIdSource().equals(CompoundIdSource.UNKNOWN)) {
 					result = -1;
-				
-				if(hr1 == null && hr2 != null)	// Unranked database after ranked in ASC sort
+				}
+				else if(!o1.getIdSource().equals(CompoundIdSource.UNKNOWN) 
+						&& o2.getIdSource().equals(CompoundIdSource.UNKNOWN)) {
 					result = 1;
-				
-				if(hr1 != null && hr2 != null) {
+				}
+				else if(o1.getIdSource().equals(CompoundIdSource.UNKNOWN) 
+						&& o2.getIdSource().equals(CompoundIdSource.UNKNOWN)) {
+					result = 0;
+				}
+				else {
+					Entry<CompoundDatabaseEnum, String>hr1 = 
+							o1.getCompoundIdentity().getTopRankingDatabaseId();
+					Entry<CompoundDatabaseEnum, String>hr2 = 
+							o2.getCompoundIdentity().getTopRankingDatabaseId();
 					
-					result = compoundDatabaseRankSorter.compare(hr1.getKey(), hr2.getKey());
-					if(result == 0)
-						result = hr1.getValue().compareToIgnoreCase(hr2.getValue());
+					if(hr1 != null && hr2 == null)	// Ranked database before unranked in ASC sort
+						result = -1;
+					
+					if(hr1 == null && hr2 != null)	// Unranked database after ranked in ASC sort
+						result = 1;
+					
+					if(hr1 != null && hr2 != null) {
+						
+						result = compoundDatabaseRankSorter.compare(hr1.getKey(), hr2.getKey());
+						if(result == 0)
+							result = hr1.getValue().compareToIgnoreCase(hr2.getValue());
+					}
 				}
 			}
 			if (direction == SortDirection.ASC)

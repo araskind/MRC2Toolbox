@@ -47,6 +47,7 @@ import edu.umich.med.mrc2.datoolbox.gui.communication.MsFeatureEvent;
 import edu.umich.med.mrc2.datoolbox.gui.lims.experiment.DockableExperimentListingTable;
 import edu.umich.med.mrc2.datoolbox.gui.main.DockableMRC2ToolboxPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
+import edu.umich.med.mrc2.datoolbox.gui.main.MainWindow;
 import edu.umich.med.mrc2.datoolbox.gui.main.PanelList;
 import edu.umich.med.mrc2.datoolbox.gui.mptrack.ref.MotrpacReferenceDataDialog;
 import edu.umich.med.mrc2.datoolbox.gui.mptrack.report.CreateUploadDirectoryStructureDialog;
@@ -91,6 +92,9 @@ public class MoTrPACDataTrackingPanel extends DockableMRC2ToolboxPanel implement
 	private MoTrPACRawDataCompressionSetupDialog motrpacRawDataCompressionSetupDialog;
 	private boolean limsDataLoaded;
 	private MoTrPACManifestForUploadDialog motrpacManifestForUploadDialog;
+	
+	private int compressionTaskCounter;
+	private int compressionTasksCompleted;
 
 	public MoTrPACDataTrackingPanel() {
 		
@@ -235,14 +239,18 @@ public class MoTrPACDataTrackingPanel extends DockableMRC2ToolboxPanel implement
 		}
 		Collection<AgilentDataCompressionTask>tasks = 
 				motrpacRawDataCompressionSetupDialog.getCompressionTasks();
+		compressionTaskCounter = tasks.size();
+		compressionTasksCompleted = 0;
 		
 		if(!tasks.isEmpty()) {
-			
-			for(AgilentDataCompressionTask task : tasks) {
-				MRC2ToolBoxCore.getTaskController().addTask(task);
-			}	
+
 			motrpacRawDataCompressionSetupDialog.savePreferences();
 			motrpacRawDataCompressionSetupDialog.dispose();
+			
+			for(AgilentDataCompressionTask task : tasks) {
+				task.addTaskListener(this);
+				MRC2ToolBoxCore.getTaskController().addTask(task);
+			}	
 		}			
 	}
 	
@@ -321,10 +329,22 @@ public class MoTrPACDataTrackingPanel extends DockableMRC2ToolboxPanel implement
 
 			((AbstractTask) e.getSource()).removeTaskListener(this);
 			if(e.getSource().getClass().equals(MotrpacLimsDataPullTask.class))
-				finalizeMotrpacLimsDataPullTask((MotrpacLimsDataPullTask)e.getSource());			
+				finalizeMotrpacLimsDataPullTask((MotrpacLimsDataPullTask)e.getSource());	
+			
+			if(e.getSource().getClass().equals(AgilentDataCompressionTask.class))
+				finalizeAgilentDataCompressionTask((AgilentDataCompressionTask)e.getSource());	
 		}
 	}
 	
+	private void finalizeAgilentDataCompressionTask(AgilentDataCompressionTask source) {
+
+		compressionTasksCompleted++;
+		if(compressionTasksCompleted == compressionTaskCounter) {
+			MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
+			MainWindow.hideProgressDialog();
+		}
+	}
+
 	private synchronized void finalizeMotrpacLimsDataPullTask(MotrpacLimsDataPullTask task) {
 		
 		refreshPanels();

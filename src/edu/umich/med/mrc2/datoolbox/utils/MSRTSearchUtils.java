@@ -21,7 +21,10 @@
 
 package edu.umich.med.mrc2.datoolbox.utils;
 
-import java.util.Set;
+import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
@@ -38,20 +41,22 @@ public class MSRTSearchUtils {
 			return null;
 		}
 		else {
-			if(parentFeature.getStatsSummary() != null) {
-				if(parentFeature.getStatsSummary().getMedianObservedRetention() > 0)
-					return parentFeature.getStatsSummary().getMedianObservedRetention() - expectedRt;
-				else
-					return parentFeature.getRetentionTime() - expectedRt;
-			}
-			else
-				return parentFeature.getRetentionTime() - expectedRt;
+			return parentFeature.getObservedRetentionTime() - expectedRt;
 		}
 	}
 	
 	public static MsFeatureIdentity getIDwithClosestRT(MsFeature parentFeature) {
-
-		Set<MsFeatureIdentity> msRTidList = parentFeature.getMSRTIdentifications();
+		
+		return getIDwithClosestRT(
+				parentFeature.getIdentifications(), 
+				parentFeature.getObservedRetentionTime());
+	}
+	
+	public static MsFeatureIdentity getIDwithClosestRT(Collection<MsFeatureIdentity> idList, double observedRt) {
+		
+		List<MsFeatureIdentity> msRTidList = idList.stream().
+				filter(i -> Objects.nonNull(i.getMsRtLibraryMatch())).
+				collect(Collectors.toList());
 		if(msRTidList.isEmpty())
 			return null;
 		
@@ -64,7 +69,7 @@ public class MSRTSearchUtils {
 			double diff = 1000000.0d;
 			for(MsFeatureIdentity id : msRTidList) {
 				
-				Double signedShift = calculateRetentionShift(parentFeature, id);
+				Double signedShift = observedRt - id.getMsRtLibraryMatch().getExpectedRetention();
 				if(signedShift != null) {
 					
 					double shift = Math.abs(signedShift);
@@ -75,7 +80,16 @@ public class MSRTSearchUtils {
 				}
 			}
 			return bestId;
-		}		
+		}
 		return null;
 	}
 }
+
+
+
+
+
+
+
+
+

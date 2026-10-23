@@ -22,7 +22,6 @@
 package edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.mp;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -37,17 +36,22 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.file.PathUtils;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
+import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskListener;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
-import edu.umich.med.mrc2.datoolbox.utils.CompressionUtils;
 
-public class AgilentDataCompressionTask extends AbstractTask {
+public class AgilentDataCompressionTask extends AbstractTask implements TaskListener{
 
+	private static final Logger logger = LogManager.getLogger(AgilentDataCompressionTask.class);
+	
 	private File inputFileList;
 	private Collection<String>inputFileNames;
 	private Collection<String>processedFileNames;
@@ -56,6 +60,7 @@ public class AgilentDataCompressionTask extends AbstractTask {
 	private Collection<Path>rawFilesPathList;
 	private String assayName;
 	private Collection<String>fileCheckSums;
+	private int compressedCount;
 		
 	public AgilentDataCompressionTask(
 			File inputFileList, 
@@ -68,6 +73,7 @@ public class AgilentDataCompressionTask extends AbstractTask {
 		this.destinationDir = destinationDir;
 		this.assayName = assayName;
 		fileCheckSums = new ArrayList<>();
+		compressedCount = 0;
 	}
 
 	@Override
@@ -95,21 +101,6 @@ public class AgilentDataCompressionTask extends AbstractTask {
 			setStatus(TaskStatus.ERROR);
 			return;
 		}
-		try {
-			writeLog();
-		} catch (Exception e) {
-			e.printStackTrace();
-			setStatus(TaskStatus.ERROR);
-			return;
-		}
-		try {
-			writeCheckSumFile();
-		} catch (Exception e) {
-			e.printStackTrace();
-			setStatus(TaskStatus.ERROR);
-			return;
-		}
-		setStatus(TaskStatus.FINISHED);
 	}
 	
 	private void parseInputFileNamesList() {
@@ -130,6 +121,7 @@ public class AgilentDataCompressionTask extends AbstractTask {
 		total = rawDataDirectories.size();
 		processed = 0;
 		rawFilesPathList = new TreeSet<>();
+		Set<Path>completePathList = new TreeSet<>();
 		for(File sourceDir : rawDataDirectories) {
 			
 			if(isCanceled())
@@ -145,63 +137,70 @@ public class AgilentDataCompressionTask extends AbstractTask {
 				e2.printStackTrace();
 			}
 			if(pathList != null && !pathList.isEmpty())
-				rawFilesPathList.addAll(pathList);
+				completePathList.addAll(pathList);
 			
 			processed++;
 		}
+		for(Path rawFilePath : completePathList) {
+			
+			String rawFileName = PathUtils.getBaseName(rawFilePath);
+			if(inputFileNames.contains(rawFileName))
+				rawFilesPathList.add(rawFilePath);
+		}		
 	}
 	
 	private void compressFiles() {
 		
 		taskDescription = "Compressing raw data for " + assayName;
-		total = inputFileNames.size();
-		processed = 0;
+		total = 100;
+		processed = 20;
 		
-		processedFileNames = new TreeSet<>();
-		
-		Path destinationPath = Paths.get(destinationDir.getAbsolutePath());
-		
+		processedFileNames = new TreeSet<>();		
+		Path destinationPath = Paths.get(destinationDir.getAbsolutePath());		
 		for(Path rawFilePath : rawFilesPathList) {
 			
 			if(isCanceled())
 				return;
 			
-			String pathString = rawFilePath.toString();		
-			String rawFileName = FilenameUtils.getBaseName(pathString);
-			
-			if(inputFileNames.contains(rawFileName)) {
-				
-				try {
-					FileUtils.deleteDirectory(Paths.get(pathString, "Results").toFile());
-				} catch (IOException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-				File destination = Paths.get(destinationPath.toString(),
-						FilenameUtils.getBaseName(pathString) + ".zip").toFile();
-				try {
-					CompressionUtils.zipFolder(rawFilePath.toFile(), destination);
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				if(destination.exists()) {
-					
-					processedFileNames.add(rawFileName);
-					
-					//	Checksum
-					String zipHash = "";
-					try {
-						zipHash = DigestUtils.sha256Hex(new FileInputStream(destination));
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-					fileCheckSums.add("RAW/" + destination.getName() + "," + zipHash);
-				}
-				processed++;
-			}			
+			CompressAgilentDataFileTask task = 
+					new CompressAgilentDataFileTask(destinationPath, rawFilePath);
+			task.addTaskListener(this);
+			MRC2ToolBoxCore.getTaskController().addTask(task);		
 		}
+	}
+	
+	@Override
+	public void statusChanged(TaskEvent e) {
+		
+	    if (e.getStatus() == TaskStatus.FINISHED) {
+
+	        ((AbstractTask)e.getSource()).removeTaskListener(this);
+
+	        if (e.getSource().getClass().equals(CompressAgilentDataFileTask.class)) {
+
+	        	compressedCount++;
+	        	CompressAgilentDataFileTask task = (CompressAgilentDataFileTask)e.getSource();
+	        	processedFileNames.add(task.getRawFileName());
+	        	fileCheckSums.add("RAW/" + task.getDestination().getName() + "," + task.getCheckSum());        	
+	        	if(compressedCount == rawFilesPathList.size()) {
+	        		try {
+	        			writeLog();
+	        		} catch (Exception ex) {
+	        			ex.printStackTrace();
+	        			setStatus(TaskStatus.ERROR);
+	        			return;
+	        		}
+	        		try {
+	        			writeCheckSumFile();
+	        		} catch (Exception ex) {
+	        			ex.printStackTrace();
+	        			setStatus(TaskStatus.ERROR);
+	        			return;
+	        		}
+	        		setStatus(TaskStatus.FINISHED);
+	        	}	        		
+	        }
+	    }	
 	}
 	
 	private void writeLog() {
@@ -254,4 +253,5 @@ public class AgilentDataCompressionTask extends AbstractTask {
 				 destinationDir,
 				 assayName);
 	}
+
 }

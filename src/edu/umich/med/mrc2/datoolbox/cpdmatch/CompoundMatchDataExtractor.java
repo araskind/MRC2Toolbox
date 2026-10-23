@@ -99,18 +99,36 @@ public class CompoundMatchDataExtractor {
 		MRC2ToolBoxConfiguration.initConfiguration();
 		initDatabaseConnection();
 		
-		processEX01496RPPos();
+		processEX01496RPPosWithNa();
+	}
+	
+	private static void processEX01496IONPNeg() {
+
+		File inputFile = new File("S:\\DataAnalysis\\EX01496 - Human EDTA Tranche 3 plasma X20001463K\\"
+				+ "A049 - Central carbon metabolism profiling\\CompoundMatch\\_IONPNEG\\EX01496_IONP_NEG_merge_output_picked_only_20261020.xlsx");
+		File fullPicksFile = new File("S:\\DataAnalysis\\EX01496 - Human EDTA Tranche 3 plasma X20001463K\\"
+				+ "A049 - Central carbon metabolism profiling\\CompoundMatch\\1496 IP-FeaturePicker-full picks.xlsx");
+		File outputFile = new File("S:\\DataAnalysis\\EX01496 - Human EDTA Tranche 3 plasma X20001463K\\"
+				+ "A049 - Central carbon metabolism profiling\\CompoundMatch\\_IONPNEG\\EX01426_IONP_Neg_Data-Integrator-exported-correctPCDL-20261020.txt");
+//		File libraryFile = new File("Y:\\DataAnalysis\\CPDMatch\\EX01426\\IP-Neg with 1C IS MIx - Complete Library.txt");
+		File libraryFile = new File("Y:\\DataAnalysis\\CPDMatch\\EX01496\\EX01496 IP w 1C IS mix - Complete Library.txt");
+		rtError = 0.05d;
+		mzError = 7.00d;
+		adductList = new ArrayList<>();
+		adductList.add(AdductManager.getDefaultAdductForCharge(-1));
+		parseCompoundMatchFile(inputFile, outputFile, libraryFile, fullPicksFile);		
 	}
 	
 	private static void processEX01496RPNeg() {
 
 		File inputFile = new File("S:\\DataAnalysis\\EX01496 - Human EDTA Tranche 3 plasma X20001463K\\"
-				+ "A003 - Untargeted\\CompoundMatch\\EX01496_RP_NEG_merge_output_20260902.xlsx");
+				+ "A003 - Untargeted\\CompoundMatch\\_NEG\\EX01496_RP_NEG_merge_output_picked_only_20261014.xlsx");
 		File fullPicksFile = new File("S:\\DataAnalysis\\EX01496 - Human EDTA Tranche 3 plasma X20001463K\\"
 				+ "A003 - Untargeted\\CompoundMatch\\1496 RP Neg-full picks.xlsx");
 		File outputFile = new File("S:\\DataAnalysis\\EX01496 - Human EDTA Tranche 3 plasma X20001463K\\"
-				+ "A003 - Untargeted\\CompoundMatch\\EX01496_RP_Neg_Data-Integrator-exported-20260910.txt");
-		File libraryFile = new File("Y:\\DataAnalysis\\CPDMatch\\RP-Neg with 1C IS MIx - Complete Library.txt");
+				+ "A003 - Untargeted\\CompoundMatch\\_NEG\\EX01496_RP_Neg_Data-Integrator-exported-correctPCDL-20261015.txt");
+		//	File libraryFile = new File("Y:\\DataAnalysis\\CPDMatch\\RP-Neg with 1C IS MIx - Complete Library.txt");
+		File libraryFile = new File("Y:\\DataAnalysis\\CPDMatch\\EX01496\\EX01496 RP NEG w 1C IS mix - Complete Library.txt");
 		rtError = 0.05d;
 		mzError = 7.00d;
 		adductList = new ArrayList<>();
@@ -119,14 +137,15 @@ public class CompoundMatchDataExtractor {
 	}
 	
 	private static void processEX01496RPPos() {
-		
+
 		File inputFile = new File("S:\\DataAnalysis\\EX01496 - Human EDTA Tranche 3 plasma X20001463K\\"
-				+ "A003 - Untargeted\\CompoundMatch\\20260909\\POS\\EX01496_RP_POS_merge_output_picked_only_20260916_2.xlsx");
+				+ "A003 - Untargeted\\CompoundMatch\\_POS\\EX01496_RP_POS_merge_output_picked_only_20261014.xlsx");
 		File fullPicksFile = new File("S:\\DataAnalysis\\EX01496 - Human EDTA Tranche 3 plasma X20001463K\\"
-				+ "A003 - Untargeted\\CompoundMatch\\20260909\\POS\\merge_output_20260909_named_fullPicks.xlsx");
+				+ "A003 - Untargeted\\CompoundMatch\\1496 RP Pos-full picks.xlsx");
 		File outputFile = new File("S:\\DataAnalysis\\EX01496 - Human EDTA Tranche 3 plasma X20001463K\\"
-				+ "A003 - Untargeted\\CompoundMatch\\20260909\\POS\\EX01496_RP_Pos_picked_only_Data-Integrator-exported-20260916-2.txt");
-		File libraryFile = new File("S:\\DataAnalysis\\CPDMatch\\RP-Pos with 1C IS MIx - Complete Library.txt");
+				+ "A003 - Untargeted\\CompoundMatch\\_POS\\EX01496_RP_Pos_picked_only_Data-Integrator-exported-correctPCDL-20261015.txt");
+		//File libraryFile = new File("S:\\DataAnalysis\\CPDMatch\\RP-Pos with 1C IS MIx - Complete Library.txt");
+		File libraryFile = new File("Y:\\DataAnalysis\\CPDMatch\\EX01496\\EX01496 RP POS w 1C IS mix - Complete Library.txt");
 		rtError = 0.05d;
 		mzError = 7.00d;
 		adductList = new ArrayList<>();
@@ -134,19 +153,21 @@ public class CompoundMatchDataExtractor {
 		parseCompoundMatchFile(inputFile, outputFile, libraryFile, fullPicksFile);		
 	}
 	
-	private static void processEX01426IONPNeg() {
+	private static void processEX01496RPPosWithNa() {
 
-		File inputFile = new File("S:\\DataAnalysis\\EX01426 - Human EDTA Tranche 2 plasma W20001176L\\"
-				+ "A049 - Central carbon metabolism profiling\\CompoundMatch\\EX01426_IONP_NEG_merge_output_20260902.xlsx");
-		File fullPicksFile = new File("S:\\DataAnalysis\\EX01426 - Human EDTA Tranche 2 plasma W20001176L\\"
-				+ "A049 - Central carbon metabolism profiling\\CompoundMatch\\1426 IP FeaturePicker_named-full picks.xlsx");
-		File outputFile = new File("S:\\DataAnalysis\\EX01426 - Human EDTA Tranche 2 plasma W20001176L\\"
-				+ "A049 - Central carbon metabolism profiling\\CompoundMatch\\EX01426_IONP_Neg_Data-Integrator-exported-20260910.txt");
-		File libraryFile = new File("Y:\\DataAnalysis\\CPDMatch\\IP-Neg with 1C IS MIx - Complete Library.txt");
+		File inputFile = new File("S:\\DataAnalysis\\EX01496 - Human EDTA Tranche 3 plasma X20001463K\\"
+				+ "A003 - Untargeted\\CompoundMatch\\_POS\\EX01496_RP_POS_merge_output_picked_only_20261014.xlsx");
+		File fullPicksFile = new File("S:\\DataAnalysis\\EX01496 - Human EDTA Tranche 3 plasma X20001463K\\"
+				+ "A003 - Untargeted\\CompoundMatch\\1496 RP Pos-full picks.xlsx");
+		File outputFile = new File("S:\\DataAnalysis\\EX01496 - Human EDTA Tranche 3 plasma X20001463K\\"
+				+ "A003 - Untargeted\\CompoundMatch\\_POS\\EX01496_RP_Pos_picked_only_Data-Integrator-exported-correctPCDL-20261020-withNa.txt");
+		//File libraryFile = new File("S:\\DataAnalysis\\CPDMatch\\RP-Pos with 1C IS MIx - Complete Library.txt");
+		File libraryFile = new File("Y:\\DataAnalysis\\CPDMatch\\EX01496\\EX01496 RP POS w 1C IS mix - Complete Library.txt");
 		rtError = 0.05d;
 		mzError = 7.00d;
 		adductList = new ArrayList<>();
-		adductList.add(AdductManager.getDefaultAdductForCharge(-1));
+		adductList.add(AdductManager.getDefaultAdductForCharge(1));
+		adductList.add(AdductManager.getAdductByName("[M+Na]+"));
 		parseCompoundMatchFile(inputFile, outputFile, libraryFile, fullPicksFile);		
 	}
 	
@@ -205,7 +226,7 @@ public class CompoundMatchDataExtractor {
 					Paths.get(inputFile.toPath().getParent().toString(), 
 							PathUtils.getBaseName(inputFile.toPath()) + "_unk_match_report.txt");
 			
-			//	matchUnknowns(matchGroupsList, libraryFile, reportPath);
+		//	matchUnknowns(matchGroupsList, libraryFile, reportPath);
 			matchByFullPicks(matchGroupsList, fullPicksFile, reportPath);
 			exportResults(matchGroupsList, outputFile);
 		}

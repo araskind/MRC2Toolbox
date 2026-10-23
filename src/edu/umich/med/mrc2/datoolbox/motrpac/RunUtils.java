@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -50,6 +51,7 @@ import edu.umich.med.mrc2.datoolbox.motrpac.MoTrPACUtils.AssayModes;
 import edu.umich.med.mrc2.datoolbox.utils.CompressionUtils;
 import edu.umich.med.mrc2.datoolbox.utils.DelimitedTextParser;
 import edu.umich.med.mrc2.datoolbox.utils.LIMSReportingUtils;
+import edu.umich.med.mrc2.datoolbox.utils.TextUtils;
 
 public class RunUtils {
 
@@ -62,11 +64,158 @@ public class RunUtils {
 				MRC2ToolBoxCore.configDir + "MRC2ToolBoxPrefs.txt");
 		MRC2ToolBoxConfiguration.initConfiguration();
 		try {
-			addExtractionDatesToManifestForEX01387RpNeg();
+			addExtractionDatesToManifestForEX01496IONPNeg();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}	
+	
+	private static void addExtractionDatesToManifestForEX01496IONPNeg() {
+
+        File completeManifestFile = new File("Y:\\DataAnalysis\\_Reports\\EX01496 - Human EDTA Tranche 3 plasma X20001463K\\"
+        		+ "A049 - Central carbon metabolism profiling\\QCaNVaS\\EX01496-IONP-NEG-Manifest-complete-filtered-20261020_uniqueControls.txt");
+        File commonFileListFile = new File("Y:\\DataAnalysis\\_Reports\\EX01496 - Human EDTA Tranche 3 plasma X20001463K\\"
+        		+ "A049 - Central carbon metabolism profiling\\QCaNVaS\\EX01496-IONP-NEG-raw-file-list-with-blanks.txt");
+        File batchManifestsBaseDir = new File("Y:\\DataAnalysis\\_Reports\\EX01496 - Human EDTA Tranche 3 plasma X20001463K\\"
+        		+ "A049 - Central carbon metabolism profiling\\QCaNVaS\\Manifests");            
+        File extrtactionDatesMapFile = new File("Y:\\DataAnalysis\\_Reports\\EX01496 - Human EDTA Tranche 3 plasma X20001463K\\"
+        		+ "A049 - Central carbon metabolism profiling\\QCaNVaS\\EX01496-IONP-NEG-extraction-dates-list.txt");
+        File columnChangeDatesFile = new File("Y:\\DataAnalysis\\_Reports\\EX01496 - Human EDTA Tranche 3 plasma X20001463K\\"
+        		+ "A049 - Central carbon metabolism profiling\\QCaNVaS\\EX01496-IONP-NEG-columnChangeTimes.txt");
+        AssayModes assayMode = AssayModes.IONPNEG;
+        int nextColumnId = 38;
+        
+        MoTrPACUtils.addExtractionDatesAndColumnIdsToManifest(
+        		completeManifestFile, 
+        		commonFileListFile,
+        		extrtactionDatesMapFile,
+        		batchManifestsBaseDir,
+        		columnChangeDatesFile,
+        		assayMode,
+        		nextColumnId);
+    }
+	
+	private static void createUniqueSampleIdsForControlsAndOrderSamplesEX01496IONPNeg() {
+		File runManifestFile = new File("Y:\\DataAnalysis\\_Reports\\EX01496 - Human EDTA Tranche 3 plasma X20001463K\\"
+				+ "A049 - Central carbon metabolism profiling\\QCaNVaS\\EX01496-IONP-NEG-Manifest-complete-filtered-20261020.txt");
+		MoTrPACUtils.createUniqueSampleIdsForControlsAndOrderSamples(runManifestFile);
 	}
+	
+	private static void correctEX01496ionpnegBatch7fileNames() {
+		
+		File proFinderDataFile = new File("S:\\DataAnalysis\\EX01496 - Human EDTA Tranche 3 plasma X20001463K\\"
+				+ "A049 - Central carbon metabolism profiling\\CompoundMatch\\Profinder exports\\EX01496-IP Neg-B07-Custom PCDL results.csv");
+		File renameMapFile = new File ("Y:\\DataAnalysis\\_Reports\\EX01496 - Human EDTA Tranche 3 plasma X20001463K\\"
+				+ "A049 - Central carbon metabolism profiling\\QCaNVaS\\EX01496-IONP-NEG-B7-file-rename_map.txt");
+		File proFinderRenamedDataFile = new File("S:\\DataAnalysis\\EX01496 - Human EDTA Tranche 3 plasma X20001463K\\"
+				+ "A049 - Central carbon metabolism profiling\\CompoundMatch\\Profinder exports\\EX01496-IP Neg-B07-Custom PCDL results-batch7renamed.csv");
+		
+		String[][]proFinderData = DelimitedTextParser.parseCSVFile(proFinderDataFile);
+		String[][] renameMapData = DelimitedTextParser.parseTabSeparatedFile(renameMapFile);
+		Map<String,String>renameMap = new TreeMap<>();
+		for(int i=0; i<renameMapData.length; i++)
+			renameMap.put(renameMapData[i][0], renameMapData[i][1]);
+
+		for(int i=0; i<proFinderData[0].length; i++) {
+			
+			for(Entry<String,String>me : renameMap.entrySet()) {
+				
+				if(proFinderData[0][i].contains(me.getKey()))					
+					proFinderData[0][i] = proFinderData[0][i].replace(me.getKey(), me.getValue());
+				
+			}
+		}
+		TextUtils.write2DstringArrayToCSV(proFinderData, proFinderRenamedDataFile);
+	}
+	
+	private static void addExtractionDatesToManifestForEX01496RpNeg() {
+
+        File completeManifestFile = new File("Y:\\DataAnalysis\\_Reports\\EX01496 - Human EDTA Tranche 3 plasma X20001463K\\"
+        		+ "A003 - Untargeted\\QCaNVaS\\RP-NEG\\EX01496-RP-NEG-Manifest-complete_uniqueControls_filtered4named.txt");
+        File commonFileListFile = new File("Y:\\DataAnalysis\\_Reports\\EX01496 - Human EDTA Tranche 3 plasma X20001463K\\"
+        		+ "A003 - Untargeted\\QCaNVaS\\RP-NEG\\EX01496-RP-NEG-raw-file-list-with-blanks.txt");
+        File batchManifestsBaseDir = new File("Y:\\DataAnalysis\\_Reports\\EX01496 - Human EDTA Tranche 3 plasma X20001463K\\"
+        		+ "A003 - Untargeted\\QCaNVaS\\RP-NEG\\Manifests");        
+        File extrtactionDatesMapFile = new File("Y:\\DataAnalysis\\_Reports\\EX01496 - Human EDTA Tranche 3 plasma X20001463K\\"
+        		+ "A003 - Untargeted\\QCaNVaS\\RP-NEG\\EX01496-RP-NEG-extraction-dates-list.txt");
+        File columnChangeDatesFile = new File("Y:\\DataAnalysis\\_Reports\\EX01496 - Human EDTA Tranche 3 plasma X20001463K\\"
+        		+ "A003 - Untargeted\\QCaNVaS\\RP-NEG\\EX01496-RP-NEG-columnChangeTimes.txt");
+        AssayModes assayMode = AssayModes.RPNEG;
+        int nextColumnId = 43;
+        
+        MoTrPACUtils.addExtractionDatesAndColumnIdsToManifest(
+        		completeManifestFile, 
+        		commonFileListFile,
+        		extrtactionDatesMapFile,
+        		batchManifestsBaseDir,
+        		columnChangeDatesFile,
+        		assayMode,
+        		nextColumnId);
+    }
+	
+	private static void createUniqueSampleIdsForControlsAndOrderSamplesEX01496RpNeg() {
+		
+		File runManifestFile = new File("Y:\\DataAnalysis\\_Reports\\EX01496 - Human EDTA Tranche 3 plasma X20001463K\\"
+				+ "A003 - Untargeted\\Documents\\NEG\\Alignment\\NormalCutoff\\All\\MetabCombinerMultiBatchAlignment-20261016_153944\\MergedManifest.txt");
+		MoTrPACUtils.createUniqueSampleIdsForControlsAndOrderSamples(runManifestFile);
+	}
+	
+	private static void addExtractionDatesToManifestForEX01496RpPos() {
+
+        File completeManifestFile = new File("Y:\\DataAnalysis\\_Reports\\EX01496 - Human EDTA Tranche 3 plasma X20001463K\\"
+        		+ "A003 - Untargeted\\QCaNVaS\\RP-POS\\EX01496-RP-POS-Manifest-complete_uniqueControls_filtered4named.txt");
+        File commonFileListFile = new File("Y:\\DataAnalysis\\_Reports\\EX01496 - Human EDTA Tranche 3 plasma X20001463K\\"
+        		+ "A003 - Untargeted\\QCaNVaS\\RP-POS\\EX01496-RP-POS-raw-file-list-with-blanks.txt");
+        File batchManifestsBaseDir = new File("Y:\\DataAnalysis\\_Reports\\EX01496 - Human EDTA Tranche 3 plasma X20001463K\\"
+        		+ "A003 - Untargeted\\Documents\\POS\\Alignment\\NormalCutoff\\All\\Manifests");        
+        File extrtactionDatesMapFile = new File("Y:\\DataAnalysis\\_Reports\\EX01496 - Human EDTA Tranche 3 plasma X20001463K\\"
+        		+ "A003 - Untargeted\\QCaNVaS\\RP-POS\\EX01496-RP-POS-extraction-dates-list.txt");
+        File columnChangeDatesFile = new File("Y:\\DataAnalysis\\_Reports\\EX01496 - Human EDTA Tranche 3 plasma X20001463K\\"
+        		+ "A003 - Untargeted\\QCaNVaS\\RP-POS\\EX01496-RP-POS-columnChangeTimes.txt");
+        AssayModes assayMode = AssayModes.RPPOS;
+        int nextColumnId = 43;
+        
+        MoTrPACUtils.addExtractionDatesAndColumnIdsToManifest(
+        		completeManifestFile, 
+        		commonFileListFile,
+        		extrtactionDatesMapFile,
+        		batchManifestsBaseDir,
+        		columnChangeDatesFile,
+        		assayMode,
+        		nextColumnId);
+    }
+	
+	private static void createUniqueSampleIdsForControlsAndOrderSamplesEX01387RpPos() {
+		
+		File runManifestFile = new File("Y:\\DataAnalysis\\_Reports\\EX01387 - Human Post Suspension Adipose powder H20000902J\\"
+				+ "A003 - Untargeted\\Documents\\POS\\4Alignment\\MetabCombinerMultiBatchAlignment-20261012_130924\\MergedCleanManifest.txt");
+		MoTrPACUtils.createUniqueSampleIdsForControlsAndOrderSamples(runManifestFile);
+	}
+	
+	private static void addExtractionDatesToManifestForEX01387RpPos() {
+
+        File completeManifestFile = new File("Y:\\DataAnalysis\\_Reports\\EX01387 - Human Post Suspension Adipose powder H20000902J\\"
+        		+ "A003 - Untargeted\\Documents\\POS\\4Alignment\\MetabCombinerMultiBatchAlignment-20261012_130924\\MergedCleanManifest_uniqueControls.txt");
+        File commonFileListFile = new File("Y:\\DataAnalysis\\_Reports\\EX01387 - Human Post Suspension Adipose powder H20000902J\\"
+        		+ "A003 - Untargeted\\Documents\\POS\\4Alignment\\MetabCombinerMultiBatchAlignment-20261012_130924\\EX01387_RP_POS_raw_file_list.txt");
+        File batchManifestsBaseDir = new File("Y:\\DataAnalysis\\_Reports\\EX01387 - Human Post Suspension Adipose powder H20000902J\\"
+        		+ "A003 - Untargeted\\Documents\\POS\\4Alignment\\MetabCombinerMultiBatchAlignment-20261012_130924\\Manifests");        
+        File extrtactionDatesMapFile = new File("Y:\\DataAnalysis\\_Reports\\EX01387 - Human Post Suspension Adipose powder H20000902J\\"
+        		+ "A003 - Untargeted\\Documents\\POS\\4Alignment\\MetabCombinerMultiBatchAlignment-20261012_130924\\Manifests\\EX01387-RP-POS-extraction-dates-list.txt");
+        File columnChangeDatesFile = new File("Y:\\DataAnalysis\\_Reports\\EX01387 - Human Post Suspension Adipose powder H20000902J\\"
+        		+ "A003 - Untargeted\\Documents\\POS\\4Alignment\\MetabCombinerMultiBatchAlignment-20261012_130924\\Manifests\\EX01387-RP-POS-columnChangeTimes.txt");
+        AssayModes assayMode = AssayModes.RPPOS;
+        int nextColumnId = 36;
+        
+        MoTrPACUtils.addExtractionDatesAndColumnIdsToManifest(
+        		completeManifestFile, 
+        		commonFileListFile,
+        		extrtactionDatesMapFile,
+        		batchManifestsBaseDir,
+        		columnChangeDatesFile,
+        		assayMode,
+        		nextColumnId);
+    }
 	
 	private static void createUniqueSampleIdsForControlsAndOrderSamplesEX01387RpNeg() {
 		
@@ -99,6 +248,30 @@ public class RunUtils {
         		assayMode,
         		nextColumnId);
     }
+	
+	private static void compressRawDataFromEX01387RpNeg() {
+
+		String includeFileListFile = 
+				"Y:\\DataAnalysis\\_Reports\\EX01387 - Human Post Suspension Adipose powder H20000902J\\"
+				+ "A003 - Untargeted\\Documents\\NEG\\4Alignment\\MetabCombinerMultiBatchAlignment-20261012_121447\\EX01387_RP_NEG_raw_file_list.txt"; 
+		
+		List<String>sourceFolders = new ArrayList<String>();
+		sourceFolders.add(
+				"Y:\\DataAnalysis\\_Reports\\EX01387 - Human Post Suspension Adipose powder H20000902J\\A003 - Untargeted\\Raw data\\NEG\\BATCH01-LC8");
+		sourceFolders.add(
+				"Y:\\DataAnalysis\\_Reports\\EX01387 - Human Post Suspension Adipose powder H20000902J\\A003 - Untargeted\\Raw data\\NEG\\BATCH02\\V2");
+		sourceFolders.add(
+				"Y:\\DataAnalysis\\_Reports\\EX01387 - Human Post Suspension Adipose powder H20000902J\\A003 - Untargeted\\Raw data\\NEG\\BATCH03");
+		sourceFolders.add(
+				"Y:\\DataAnalysis\\_Reports\\EX01387 - Human Post Suspension Adipose powder H20000902J\\A003 - Untargeted\\Raw data\\NEG\\BATCH04");				
+		String destinationFolder = 
+				"Y:\\DataAnalysis\\_Reports\\EX01387 - Human Post Suspension Adipose powder H20000902J\\4BIC_UPLOAD\\HUMAN\\T11\\RPNEG\\BATCH1_20260306\\RAW";
+		
+		MoTrPACUtils.compressRawDataFromMutibatchRun(
+				includeFileListFile, 
+				sourceFolders, 
+				destinationFolder);
+	}
 	
 	private static void createMoTrPACFileManifests1387() {
 		
