@@ -126,32 +126,32 @@ public class CompressionUtils {
         archiveStream.close();
     }
     
-    public void extractZip(String zipFilePath, String extractDirectory) {
+    public static void extractZip(Path zipFilePath, Path extractDirectory) {
     	
         InputStream inputStream = null;
         try {
-            Path filePath = Paths.get(zipFilePath);
-            inputStream = Files.newInputStream(filePath);
+            inputStream = Files.newInputStream(zipFilePath);
             ArchiveStreamFactory archiveStreamFactory = new ArchiveStreamFactory();
-            ArchiveInputStream archiveInputStream = 
-            		archiveStreamFactory.createArchiveInputStream(ArchiveStreamFactory.ZIP, inputStream);
-            ArchiveEntry archiveEntry = null;
-            while((archiveEntry = archiveInputStream.getNextEntry()) != null) {
-                Path path = Paths.get(extractDirectory, archiveEntry.getName());
-                File file = path.toFile();
-                if(archiveEntry.isDirectory()) {
-                    if(!file.isDirectory()) {
-                        file.mkdirs();
-                    }
-                } else {
-                    File parent = file.getParentFile();
-                    if(!parent.isDirectory()) {
-                        parent.mkdirs();
-                    }
-                    try (OutputStream outputStream = Files.newOutputStream(path)) {
-                        IOUtils.copy(archiveInputStream, outputStream);
-                    }
-                }
+            try(ArchiveInputStream<ArchiveEntry> archiveInputStream = 
+            		archiveStreamFactory.createArchiveInputStream(ArchiveStreamFactory.ZIP, inputStream)){
+	            ArchiveEntry archiveEntry = null;
+	            while((archiveEntry = archiveInputStream.getNextEntry()) != null) {
+	                Path path = Paths.get(extractDirectory.toString(), archiveEntry.getName());
+	                File file = path.toFile();
+	                if(archiveEntry.isDirectory()) {
+	                    if(!file.isDirectory()) {
+	                        file.mkdirs();
+	                    }
+	                } else {
+	                    File parent = file.getParentFile();
+	                    if(!parent.isDirectory()) {
+	                        parent.mkdirs();
+	                    }
+	                    try (OutputStream outputStream = Files.newOutputStream(path)) {
+	                        IOUtils.copy(archiveInputStream, outputStream);
+	                    }
+	                }
+	            }
             }
         } catch (IOException e) {
             e.printStackTrace();

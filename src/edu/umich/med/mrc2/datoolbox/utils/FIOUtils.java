@@ -30,6 +30,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -408,6 +409,23 @@ public class FIOUtils {
 			}
 		}
 	}
+	
+    public static void deleteDirectory(Path path) throws IOException {
+    	
+        if (!Files.exists(path)) 
+            return;
+                
+        try (Stream<Path> walk = Files.walk(path)) {
+            walk.sorted(Comparator.reverseOrder())
+                .forEach(p -> {
+                    try {
+                        Files.delete(p);
+                    } catch (IOException e) {
+                        System.err.printf("Failed to delete %s: %s%n", p, e.getMessage());
+                    }
+                });
+        }
+    }
 }
 
 

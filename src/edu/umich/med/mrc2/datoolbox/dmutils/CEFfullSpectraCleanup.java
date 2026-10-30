@@ -35,7 +35,7 @@ public class CEFfullSpectraCleanup {
 
 	public static void main(String[] args) {
 
-		File ceFolder = new File("Y:\\_QUALTMP\\EX01607\\IONP-NEG\\BATCH04\\_NEW");
+		File ceFolder = new File("Y:\\_QUALTMP\\EX01607\\RP-NEG\\BATCH06");
 		cleanCefFiles(ceFolder);
 	}
 	
