@@ -36,6 +36,7 @@ import edu.umich.med.mrc2.datoolbox.data.MsFeatureCluster;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
 import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
+import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTableModel;
 import edu.umich.med.mrc2.datoolbox.gui.tables.ColumnContext;
@@ -144,6 +145,9 @@ public class FeatureDataTableModel extends BasicTableModel {
 				if(cf.getPrimaryIdentity() != null) {
 					
 					compoundName = cf.getPrimaryIdentity().getIdentityName();
+					if(compoundName != null && compoundName.startsWith(DataPrefix.MS_LIBRARY_UNKNOWN_TARGET.getName()))
+						compoundName = null;
+							
 					if(cf.getPrimaryIdentity().getMsRtLibraryMatch() != null)
 						chmodLibrary = cf.getPrimaryIdentity().getMsRtLibraryMatch().getTopAdductMatch().getLibraryMatch();
 				}

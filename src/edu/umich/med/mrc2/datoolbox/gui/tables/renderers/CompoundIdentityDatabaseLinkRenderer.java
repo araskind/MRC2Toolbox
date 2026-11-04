@@ -36,6 +36,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 
 import edu.umich.med.mrc2.datoolbox.data.CompoundIdentity;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
+import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 
 public class CompoundIdentityDatabaseLinkRenderer  extends DefaultTableCellRenderer 
 			implements MouseListener, MouseMotionListener  {
@@ -74,7 +75,10 @@ public class CompoundIdentityDatabaseLinkRenderer  extends DefaultTableCellRende
 		if(value instanceof MsFeatureIdentity)
 			id = ((MsFeatureIdentity)value).getCompoundIdentity();
 		
-		if(id == null) {
+		if(id == null 
+				|| (id.getName() != null 
+				&& id.getName().startsWith(DataPrefix.MS_LIBRARY_UNKNOWN_TARGET.getName()))
+				) {
 			setText("");
 			return this;
 		}

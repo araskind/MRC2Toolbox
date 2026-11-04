@@ -212,10 +212,17 @@ public abstract class CEFProcessingTask extends AbstractTask {
 					feature.getPrimaryIdentity().setScoreCarryOver(id.getScoreCarryOver());
 					feature.setTargetId(dbId);
 				}
-			}	
+			}
 			feature.setTopScoreIdAsDefault();
+			//	For old data 
+			if(feature.getTargetId() == null)
+				feature.setTargetId(feature.getPrimaryIdentity().getCompoundIdentity().getPrimaryDatabaseId());
 		}
 		return feature;
+	}
+	
+	protected void assignTargetIdToLegacyFormatFeature(MsFeature feature) {
+		
 	}
 	
 	protected void parseSpectra(Element cpdElement,  MsFeature feature) throws DataConversionException {

@@ -354,13 +354,17 @@ public class DataPipelineDefinitionPanel extends JPanel
 	}
 	
 	public void fireDataPipelineEvent() {
-		
+		 
 		if(eventListeners == null){
 			eventListeners = ConcurrentHashMap.newKeySet();
 			return;
 		}
-		DataPipelineEvent event = new DataPipelineEvent(getUnverifiedDataPipeline());
-		eventListeners.stream().forEach(l -> l.dataPipelineChanged(event));		
+		DataPipeline dp = getUnverifiedDataPipeline();
+		if(dp == null)
+			return;
+		
+		DataPipelineEvent event = new DataPipelineEvent(dp);
+		eventListeners.forEach(l -> l.dataPipelineChanged(event));		
 	}
 	
 	public String getName() {
@@ -410,6 +414,10 @@ public class DataPipelineDefinitionPanel extends JPanel
 	}
 	
 	public DataPipeline getUnverifiedDataPipeline() {
+		
+		if(getName() == null || getAssay() == null 
+				|| acquisitionMethod == null || dataExtractionMethod == null)
+			return null;
 		
 		DataPipeline dpl = new DataPipeline(
 				getName(), getAssay(), acquisitionMethod, dataExtractionMethod);

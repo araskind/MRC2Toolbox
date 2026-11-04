@@ -24,10 +24,13 @@ package edu.umich.med.mrc2.datoolbox.gui.rgen.mcr;
 import java.io.File;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import org.jdom2.Attribute;
 import org.jdom2.Element;
@@ -77,6 +80,10 @@ public class RMultibatchAnalysisInputObject implements XmlStorable{
 
 	public File getDataFile(SummaryInputColumns fileType) {
 		return filesMap.get(fileType);
+	}
+	
+	public Collection<File>getAllDataFiles(){
+		return filesMap.values().stream().filter(Objects::nonNull).collect(Collectors.toSet());
 	}
 	
 	public void setDataFile(SummaryInputColumns fileType, File inputDataFile) {

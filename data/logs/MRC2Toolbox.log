@@ -1,3 +1,21 @@
-2026-10-23 13:05:55.941 [main] INFO  edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore - Statring the program
-2026-10-23 13:25:17.826 [main] INFO  edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore - Statring the program
-2026-10-23 14:47:55.997 [main] INFO  edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore - Statring the program
+2026-11-04 12:33:28.014 [main] INFO  edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore - Statring the program
+2026-11-04 13:06:27.382 [main] INFO  edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore - Statring the program
+2026-11-04 14:48:19.949 [main] INFO  edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore - Statring the program
+2026-11-04 14:49:43.093 [Thread executing task null] ERROR edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache - Failed to load Stock Sample List from the database
+java.util.ConcurrentModificationException
+	at java.base/java.util.TreeMap$KeySpliterator.tryAdvance(TreeMap.java:3133)
+	at java.base/java.util.stream.ReferencePipeline.forEachWithCancel(ReferencePipeline.java:147)
+	at java.base/java.util.stream.AbstractPipeline.copyIntoWithCancel(AbstractPipeline.java:588)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:574)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.FindOps$FindOp.evaluateSequential(FindOps.java:150)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.findFirst(ReferencePipeline.java:683)
+	at edu.umich.med.mrc2.datoolbox.database.lims.LIMSDataCache.getExperimentById(LIMSDataCache.java:332)
+	at edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils.getStockSampleList(IDTUtils.java:465)
+	at edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache.getStockSamples(IDTDataCache.java:529)
+	at edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache.refreshStockSampleList(IDTDataCache.java:262)
+	at edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.IDTrackerMetadataPullTask.run(IDTrackerMetadataPullTask.java:72)
+	at edu.umich.med.mrc2.datoolbox.taskcontrol.impl.WorkerThread.run(WorkerThread.java:53)
+2026-11-04 15:07:53.242 [main] INFO  edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore - Statring the program
+2026-11-04 15:50:49.203 [main] INFO  edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore - Statring the program

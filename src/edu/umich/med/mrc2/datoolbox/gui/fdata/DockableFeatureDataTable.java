@@ -166,10 +166,20 @@ public class DockableFeatureDataTable extends DefaultSingleCDockable{
 		public Void doInBackground() {
 
 			if (selectedCluster != null)
-				featureDataTable.setTableModelFromFeatureCluster(selectedCluster);
+				try {
+					featureDataTable.setTableModelFromFeatureCluster(selectedCluster);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			
 			if (featureMap != null)
-				featureDataTable.setTableModelFromFeatureMap(featureMap);
+				try {
+					featureDataTable.setTableModelFromFeatureMap(featureMap);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 
 			return null;
 		}

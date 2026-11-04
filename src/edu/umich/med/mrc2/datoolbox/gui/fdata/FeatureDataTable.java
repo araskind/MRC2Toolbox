@@ -242,14 +242,19 @@ public class FeatureDataTable extends BasicFeatureTable {
 
 			public void run() {
 
-				JTable table = thf.getTable();
-				thf.setTable(null);
-				model.removeTableModelListener(table);
-				((FeatureDataTableModel)model).setTableModelFromFeatureMap(featureMap);
-				model.addTableModelListener(table);
-				model.fireTableDataChanged();
-				thf.setTable(table);
-				adjustColumns();
+				try {
+					JTable table = thf.getTable();
+					thf.setTable(null);
+					model.removeTableModelListener(table);
+					((FeatureDataTableModel)model).setTableModelFromFeatureMap(featureMap);
+					model.addTableModelListener(table);
+					model.fireTableDataChanged();
+					thf.setTable(table);
+					adjustColumns();
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 		};
 		try {

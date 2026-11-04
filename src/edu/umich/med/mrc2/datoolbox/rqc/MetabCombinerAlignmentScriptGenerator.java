@@ -196,7 +196,8 @@ public class MetabCombinerAlignmentScriptGenerator extends TemplateRbasedProject
 				
 		rscriptParts.add("# MetabCombiner alignment of multiple batches of untargeted data " + 
 				DefaultFormatStore.getDefaultTimeStampFormat().format(new Date())+ " ####\n");
-		rscriptParts.add("setwd(dirname(rstudioapi::getActiveDocumentContext()$path))\n");	
+		rscriptParts.add("library(this.path)");
+		rscriptParts.add("setwd(this.path::here())\n");
 		rscriptParts.add("library(metabCombiner)");
 		rscriptParts.add("library(dplyr)");
 		rscriptParts.add("library(purrr)");

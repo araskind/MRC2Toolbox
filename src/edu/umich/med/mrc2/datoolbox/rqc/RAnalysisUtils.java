@@ -24,6 +24,7 @@ package edu.umich.med.mrc2.datoolbox.rqc;
 import java.io.File;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -55,6 +56,7 @@ public class RAnalysisUtils {
 			if(column != null)
 				inputColumnMap.put(column, i);
 		}
+		List<SummaryInputColumns>allColumns = new ArrayList<>();
 		for(SummaryInputColumns oc : obligatoryColumns) {
             
             if(!inputColumnMap.containsKey(oc)) {
@@ -62,22 +64,22 @@ public class RAnalysisUtils {
                 return new TreeSet<>();
             }
         }
+		allColumns.addAll(obligatoryColumns);
 		if(!selectableColumns.isEmpty()) {
 			int countSelectable = 0;
 			for(SummaryInputColumns sc : selectableColumns) {
 	            
-	            if(inputColumnMap.containsKey(sc))
+	            if(inputColumnMap.containsKey(sc)) {
 	                countSelectable++;
+	                allColumns.add(sc);
+	            }
 			}
 			if (countSelectable == 0) {
 
 				errorList.add("None of the selectable columns are present in data input map file!");
-				return new TreeSet<>();
+				return new HashSet<>();
 			}
 		}
-		List<SummaryInputColumns>allColumns = new ArrayList<>();
-		allColumns.addAll(obligatoryColumns);
-		allColumns.addAll(selectableColumns);
 		for(int i=1; i<mcInputData.length; i++) {
 			
 			RMultibatchAnalysisInputObject mcio = new RMultibatchAnalysisInputObject();
@@ -89,7 +91,7 @@ public class RAnalysisUtils {
 
 					errorList.add("Missing data in the input file for "
 									+ oc.name() + " on line " + Integer.toString(i + 1) + "!");
-					return new TreeSet<>();
+					return new HashSet<>();
 				}
 				if (oc.isFactor()) 
 					mcio.setProperty(oc, value);

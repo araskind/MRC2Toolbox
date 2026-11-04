@@ -538,7 +538,10 @@ public class MsFeature implements AnnotatedObject, Serializable, XmlStorable {
 	public boolean isIdentified() {
 		
 		if(primaryIdentity == null 
-				|| primaryIdentity.getCompoundIdentity() == null)
+				|| primaryIdentity.getCompoundIdentity() == null
+				|| primaryIdentity.getCompoundIdentity().getName() == null
+				|| primaryIdentity.getCompoundIdentity().getName().startsWith(DataPrefix.MS_LIBRARY_UNKNOWN_TARGET.getName())
+				)
 			return false;
 		else
 			return true;

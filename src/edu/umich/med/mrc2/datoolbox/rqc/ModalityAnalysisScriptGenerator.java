@@ -48,9 +48,12 @@ public class ModalityAnalysisScriptGenerator extends TemplateRbasedProjectGenera
 	public static final String HIGH_PROBABILITY_DATA_OBJECT_SUFFIX = ".data.high.prob";
 	public static final String MODE_STATS_SUFFIX = ".mod.stats";
 	public static final String OUTPUT_SUFFIX = ".MZRT.modality.stats";
-	public static final String OUTPUT_FILE_SUFFIX = "_RTMZ_modality_analysis_";
+	public static final String OUTPUT_FILE_SUFFIX = "_MZRT_modality_analysis_";
 	public static final String PEAKS_SUFFIX = ".mod.peaks";
 	public static final String R_FOLDER_SEPARATOR = "/";
+	public static final String INPUT_DATA_DIRECTORY = "InputData";
+	public static final String COMBINED_STATISTICS_DIRECTORY = "CombinedStats";
+	public static final String PARAMETER_STATISTICS_DIRECTORY = "ParameterStats";
 	
 	public static final List<SummaryInputColumns> requiredProperties = 
 			Arrays.asList(
@@ -82,8 +85,7 @@ public class ModalityAnalysisScriptGenerator extends TemplateRbasedProjectGenera
 
 	public void createMultiBatchMZRTDistributionModalityAnalysisScript() {
 
-		createProjectDirectoryStructure();
-		
+		createProjectDirectoryStructure();		
 		File dataDir = parameters.getProjectParentDirectory();
 		initRscript();
 		
@@ -113,12 +115,14 @@ public class ModalityAnalysisScriptGenerator extends TemplateRbasedProjectGenera
 			rscriptParts.add("\n#### Generate output ####");
 			String resultsObject = dataObjectPrefix + OUTPUT_SUFFIX;
 			rscriptParts.add(resultsObject + " <-  merge(" 
-					+ rtResultsObjectName + ", " + mzResultsObjectName+ ", by = 0, all = T)");
-			rscriptParts.add("colnames(" + resultsObject + ")[1] <- \"Feature\"");
+					+ rtResultsObjectName + ", " + mzResultsObjectName+ ", all = T)");
+			//	rscriptParts.add("colnames(" + resultsObject + ")[1] <- \"Feature\"");
 			rscriptParts.add(resultsObject + " <- right_join(" + metaDataObject 
-					+ ", " + resultsObject + ") %>% arrange(MZ,RT)");
+					+ ", " + resultsObject + ") %>% arrange(p.value." + 
+					SummaryInputColumns.RT_VALUES.getRName() + ", p.value." + 
+					SummaryInputColumns.MZ_VALUES.getRName() + ")");
 			
-			String outputFileName =
+			String outputFileName = COMBINED_STATISTICS_DIRECTORY + R_FOLDER_SEPARATOR +
 					sdio.getProperty(SummaryInputColumns.EXPERIMENT) + "_" + 
 					sdio.getProperty(SummaryInputColumns.BATCH) +
 					OUTPUT_FILE_SUFFIX + FIOUtils.getTimestamp()+ ".txt";
@@ -136,21 +140,57 @@ public class ModalityAnalysisScriptGenerator extends TemplateRbasedProjectGenera
 		try {
 			Files.createDirectories(newProjectPath);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		Path inputDataPath = Paths.get(newProjectPath.toString(), INPUT_DATA_DIRECTORY);
+		try {
+			Files.createDirectories(inputDataPath);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		Path completeStatsPath = Paths.get(newProjectPath.toString(), COMBINED_STATISTICS_DIRECTORY);
+		try {
+			Files.createDirectories(completeStatsPath);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}		
+		Path filteredStatsPath = Paths.get(newProjectPath.toString(), PARAMETER_STATISTICS_DIRECTORY);
+		try {
+			Files.createDirectories(filteredStatsPath);
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		projectFolder = newProjectPath.toFile();
 		parameters.setProjectDirectory(projectFolder);
 		scriptFile = Paths.get(newProjectPath.toString(), 
 				SCRIPT_FILE_PREFIX + FIOUtils.getTimestamp() + ".R" ).toFile();
+		
+		copyDataFilesToProject(inputDataPath);
+	}
+	
+	protected void copyDataFilesToProject(Path inputDataPath) {
+
+		for(RMultibatchAnalysisInputObject sdio : parameters.getMetabCombinerFileInputObjectSet()) {
+			
+			for(File df : sdio.getAllDataFiles()) {
+				
+				Path destination = Paths.get(inputDataPath.toString(), df.getName());
+				try {
+					Files.copy(df.toPath(), destination);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}		
 	}
 	
 	protected void initRscript() {
 		
-		String workDirForR = parameters.getProjectDirectory().getAbsolutePath().replaceAll("\\\\", "/");
+		//	String workDirForR = parameters.getProjectDirectory().getAbsolutePath().replaceAll("\\\\", "/");
 		rscriptParts.add("# Find features with multimodal distribution of RT and MZ values ####\n");
-		rscriptParts.add("setwd(\"" + workDirForR + "\")\n");
-
+		rscriptParts.add("library(this.path)");
+		rscriptParts.add("setwd(this.path::here())\n");
 		rscriptParts.add("library(dplyr)");
 		rscriptParts.add("library(purrr)");
 		rscriptParts.add("library(broom)");
@@ -185,7 +225,7 @@ public class ModalityAnalysisScriptGenerator extends TemplateRbasedProjectGenera
 		
 		rscriptParts.add("\n### Select only samples and pools ####");
 		String designObject = dataObjectPrefix + DESIGN_OBJECT_SUFFIX;
-		String filePath = sdio.getFile(SummaryInputColumns.MANIFEST).getAbsolutePath();
+		String filePath = INPUT_DATA_DIRECTORY + R_FOLDER_SEPARATOR + sdio.getFile(SummaryInputColumns.MANIFEST).getName();
 		rscriptParts.add(designObject + " <- read.delim(r'(" + filePath + ")', check.names=FALSE)");
 		String validSamplesObject = dataObjectPrefix + VALID_SAMPLES_LIST_SUFFIX;
 		rscriptParts.add(validSamplesObject + " <- " + designObject + 
@@ -219,7 +259,7 @@ public class ModalityAnalysisScriptGenerator extends TemplateRbasedProjectGenera
 		rscriptParts.add("\n#### Analyze " + parameter.getName() + " for multimodal distribution ####");
 		String paramDataObject = dataObjectPrefix + "." + parameter.getRName();		
 		String dataObjectIn = paramDataObject + INPUT_DATA_SUFFIX;
-		String filePath = sdio.getFile(parameter).getAbsolutePath();
+		String filePath = INPUT_DATA_DIRECTORY + R_FOLDER_SEPARATOR + sdio.getFile(parameter).getName();
 		
 		rscriptParts.add(dataObjectIn + " <- read.delim(r'(" + filePath + ")', check.names=FALSE)");
 		rscriptParts.add(paramDataObject + " <- " + dataObjectIn + "[,-c(1:9)]");
@@ -253,24 +293,24 @@ public class ModalityAnalysisScriptGenerator extends TemplateRbasedProjectGenera
 				HIGH_PROBABILITY_DATA_OBJECT_SUFFIX;
 		String pValueCutoffString = Double.toString(parameters.getpValueCutoff());
 		
-		rscriptParts.add(highProbListObject + " <- " + modStatsObject + " %>% filter(p.value.rt < 0.001)");
+		rscriptParts.add(highProbListObject + " <- " + modStatsObject + " %>% filter(p.value." + parameter.getRName() + " < " + pValueCutoffString + ")");
 		rscriptParts.add(highProbDataObject + " <- " + paramDataObjectClean + 
 				"[row.names(" + paramDataObjectClean + ") %in% rownames(" + highProbListObject + "),]");
 		String peaksObject = paramDataObject + PEAKS_SUFFIX; 
 		rscriptParts.add(peaksObject + " <- as.data.frame(t(future_apply(" + highProbDataObject + 
 				", 1, possibly(findLocModes, otherwise = peaks.empty.list))))");
-		rscriptParts.add("colnames(" + peaksObject + ") <- c(\"RT.low\", \"Valley\", \"RT.high\")");
+		rscriptParts.add("colnames(" + peaksObject + ") <- c(\"" + parameter.getRName() + ".low\", \"Valley\", \"" + parameter.getRName() + ".high\")");
 		rscriptParts.add(peaksObject + " <- " + peaksObject + 
-				" %>% mutate(Delta.RT = RT.high - RT.low) "
+				" %>% mutate(Delta." + parameter.getRName() + " = " + parameter.getRName() + ".high - " + parameter.getRName() + ".low) "
 				+ "%>% mutate(across(where(is.numeric), \\(x) round(x, digits = 4)))");
 		
 		rscriptParts.add("setDT(" + modStatsObject + ", keep.rownames = \"Feature\")");
-		String modStatsOutputFileName = modStatsObject.replaceAll("\\.", "_") + ".txt";
+		String modStatsOutputFileName = PARAMETER_STATISTICS_DIRECTORY + R_FOLDER_SEPARATOR + modStatsObject.replaceAll("\\.", "_") + ".txt";
 		rscriptParts.add("write.table(" + modStatsObject + ", file = \"" + 
 				modStatsOutputFileName + "\", quote = F, sep = \"\\t\", na = \"\", row.names = F)");
 		
 		rscriptParts.add("setDT(" + peaksObject + ", keep.rownames = \"Feature\")");
-		String peaksOutputFileName = peaksObject.replaceAll("\\.", "_") + ".txt";
+		String peaksOutputFileName = PARAMETER_STATISTICS_DIRECTORY + R_FOLDER_SEPARATOR + peaksObject.replaceAll("\\.", "_") + ".txt";
 		rscriptParts.add("write.table(" + peaksObject + ", file = \"" + 
 				peaksOutputFileName + "\", quote = F, sep = \"\\t\", na = \"\", row.names = F)");
 		

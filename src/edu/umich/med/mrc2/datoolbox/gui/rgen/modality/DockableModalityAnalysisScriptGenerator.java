@@ -320,7 +320,7 @@ public class DockableModalityAnalysisScriptGenerator extends DefaultSingleCDocka
 
 	private void cleartInputFiles() {
 
-		if(!inputFileListingTable.getAllFiles(SummaryInputColumns.PEAK_AREAS).isEmpty()) {
+		if(!inputFileListingTable.getAllFiles(SummaryInputColumns.MANIFEST).isEmpty()) {
 			
 			int res = MessageDialog.showChoiceWithWarningMsg(
 					"Do you want to clear input data table?", 
