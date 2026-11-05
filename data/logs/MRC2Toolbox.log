@@ -19,3 +19,4 @@ java.util.ConcurrentModificationException
 	at edu.umich.med.mrc2.datoolbox.taskcontrol.impl.WorkerThread.run(WorkerThread.java:53)
 2026-11-04 15:07:53.242 [main] INFO  edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore - Statring the program
 2026-11-04 15:50:49.203 [main] INFO  edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore - Statring the program
+2026-11-04 16:46:53.810 [main] INFO  edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore - Statring the program

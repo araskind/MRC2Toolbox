@@ -107,7 +107,7 @@
 											</leaf>
 											<node nodeId="1625777775420" orientation="VERTICAL" divider="0.25">
 												<node nodeId="1625777789474" orientation="HORIZONTAL" divider="0.6322541233964569">
-													<leaf id="2" nodeId="1625776299521">
+													<leaf id="3" nodeId="1625776299521">
 														<placeholders>
 															<placeholder>dock.single.DockableMoTrPACStudyManagerPanel</placeholder>
 														</placeholders>
@@ -121,7 +121,7 @@
 															</entry>
 														</placeholder-map>
 													</leaf>
-													<leaf id="3" nodeId="1625777789472">
+													<leaf id="1" nodeId="1625777789472">
 														<placeholders>
 															<placeholder>dock.single.DockableMotrpacStudyAssayListingPanel</placeholder>
 														</placeholders>
@@ -143,13 +143,13 @@
 																</entry>
 															</placeholder-map>
 														</leaf>
-														<leaf id="4" nodeId="1625777793655">
+														<leaf id="2" nodeId="1625777793655">
 															<placeholders>
 																<placeholder>dock.single.DockableMoTrPACTissueCodeListingPanel</placeholder>
 															</placeholders>
 														</leaf>
 													</node>
-													<leaf id="1" nodeId="1625777784724">
+													<leaf id="4" nodeId="1625777784724">
 														<placeholders>
 															<placeholder>dock.single.DockableMoTrPACReportListingPanel</placeholder>
 														</placeholders>
@@ -177,10 +177,20 @@
 									<children ignore="false"/>
 								</child>
 								<child>
-									<layout factory="predefined" placeholder="dock.single.DockableMoTrPACReportListingPanel">
-										<replacement id="dockablesingle DockableMoTrPACReportListingPanel"/>
+									<layout factory="predefined" placeholder="dock.single.DockableMotrpacStudyAssayListingPanel">
+										<replacement id="dockablesingle DockableMotrpacStudyAssayListingPanel"/>
 										<delegate id="delegate_ccontrol backup factory id">
-											<id>DockableMoTrPACReportListingPanel</id>
+											<id>DockableMotrpacStudyAssayListingPanel</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
+								</child>
+								<child>
+									<layout factory="predefined" placeholder="dock.single.DockableMoTrPACTissueCodeListingPanel">
+										<replacement id="dockablesingle DockableMoTrPACTissueCodeListingPanel"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>DockableMoTrPACTissueCodeListingPanel</id>
 											<area/>
 										</delegate>
 									</layout>
@@ -197,20 +207,10 @@
 									<children ignore="false"/>
 								</child>
 								<child>
-									<layout factory="predefined" placeholder="dock.single.DockableMotrpacStudyAssayListingPanel">
-										<replacement id="dockablesingle DockableMotrpacStudyAssayListingPanel"/>
+									<layout factory="predefined" placeholder="dock.single.DockableMoTrPACReportListingPanel">
+										<replacement id="dockablesingle DockableMoTrPACReportListingPanel"/>
 										<delegate id="delegate_ccontrol backup factory id">
-											<id>DockableMotrpacStudyAssayListingPanel</id>
-											<area/>
-										</delegate>
-									</layout>
-									<children ignore="false"/>
-								</child>
-								<child>
-									<layout factory="predefined" placeholder="dock.single.DockableMoTrPACTissueCodeListingPanel">
-										<replacement id="dockablesingle DockableMoTrPACTissueCodeListingPanel"/>
-										<delegate id="delegate_ccontrol backup factory id">
-											<id>DockableMoTrPACTissueCodeListingPanel</id>
+											<id>DockableMoTrPACReportListingPanel</id>
 											<area/>
 										</delegate>
 									</layout>

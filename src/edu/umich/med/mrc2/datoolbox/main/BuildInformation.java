@@ -1,16 +1,16 @@
 package edu.umich.med.mrc2.datoolbox.main;
 
 public final class BuildInformation {
+
+	public static final String versionNumber = "2";
+	public static final String revisionNumber = "2.1.01";
+	public static final String timeStamp = "11-04-2026 16:48";
+	public static final StartupConfiguration programConfiguration = 
+			StartupConfiguration.COMPLETE_TOOLBOX;
 	
 	private BuildInformation() {
 		/* This utility class should not be instantiated */
 	}
-
-	public static final String versionNumber = "2";
-	public static final String revisionNumber = "2.0.06";
-	public static final String timeStamp = "03-10-2026 11:57";
-	public static final StartupConfiguration programConfiguration = 
-			StartupConfiguration.COMPLETE_TOOLBOX;
 	
 	public static String getProgramName() {
 		return programConfiguration.getName() + " Version " + revisionNumber + " (" + timeStamp + ")";

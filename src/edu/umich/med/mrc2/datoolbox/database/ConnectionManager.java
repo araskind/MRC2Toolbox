@@ -31,6 +31,7 @@ import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
+import edu.umich.med.mrc2.datoolbox.data.enums.DatabseDialect;
 
 public class ConnectionManager {
 	
@@ -57,6 +58,20 @@ public class ConnectionManager {
 	
 	public static Connection getTestConnection() throws SQLException {
 		
+		if(MRC2ToolBoxConfiguration.getDatabaseType().equals(DatabseDialect.Oracle)) {
+			try {
+				Class.forName("oracle.jdbc.driver.OracleDriver");
+			} catch (ClassNotFoundException e) {
+				logger.error("Oracle JDBC Driver not found in classpath!", e);
+			}
+		}
+		if(MRC2ToolBoxConfiguration.getDatabaseType().equals(DatabseDialect.PostgreSQL)) {
+			try {
+				Class.forName("org.postgresql.Driver");
+			} catch (ClassNotFoundException e) {
+				logger.error("PostGre JDBC Driver not found in classpath!", e);
+			}
+		}
 		return DriverManager.getConnection(
 				MRC2ToolBoxConfiguration.getDatabaseConnectionString(),
 				MRC2ToolBoxConfiguration.getDatabaseUserName(), 
