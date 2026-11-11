@@ -111,7 +111,10 @@ public class LibraryExportTask extends CEFProcessingTask {
 
 		if(libraryFormat.equals(MsLibraryFormat.CEF)){
 			try {
-				writeCefLibrary(libraryFeatureListForExport, combineAdducts);
+				writeCefLibrary(
+						libraryFeatureListForExport, 
+						combineAdducts, 
+						outputCefFile);
 			} catch (Exception e) {
 				reportErrorAndExit(e);
 				return;				

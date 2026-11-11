@@ -51,8 +51,8 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.openscience.cdk.DefaultChemObjectBuilder;
 import org.openscience.cdk.aromaticity.Aromaticity;
 import org.openscience.cdk.aromaticity.ElectronDonation;
@@ -75,7 +75,6 @@ import org.openscience.cdk.tools.CDKHydrogenAdder;
 import org.openscience.cdk.tools.ProteinBuilderTool;
 import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator;
-import org.slf4j.LoggerFactory;
 
 import com.epam.indigo.Indigo;
 import com.epam.indigo.IndigoInchi;
@@ -110,7 +109,7 @@ public class CompoundDatabaseScripts {
 	
 	public static String dataDir = "." + File.separator + "data" + File.separator;
 	public static String configDir = dataDir + "config" + File.separator;
-	public static org.slf4j.Logger logger;	
+	public static Logger logger;	
 	public static final String pubchemCidUrl = "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/";
 	public static final IChemObjectBuilder builder = SilentChemObjectBuilder.getInstance();
 	public static final SmilesParser smipar = new SmilesParser(builder);
@@ -126,11 +125,8 @@ public class CompoundDatabaseScripts {
 				FilePreferencesFactory.class.getName());
 		System.setProperty(FilePreferencesFactory.SYSTEM_PROPERTY_FILE, 
 				MRC2ToolBoxCore.configDir + "MRC2ToolBoxPrefs.txt");
-		
-		//	Configure logging
-		File file = new File(configDir + "log4j2.xml");
-		((LoggerContext) LogManager.getContext(false)).setConfigLocation(file.toURI());			
-		logger = LoggerFactory.getLogger(CompoundDatabaseScripts.class);
+				
+		logger = LogManager.getLogger(CompoundDatabaseScripts.class);
 		logger.info("Statring the program");
 		MRC2ToolBoxConfiguration.initConfiguration();	
 		String logDirPath = "E:\\DataAnalysis\\Databases\\_LATEST";

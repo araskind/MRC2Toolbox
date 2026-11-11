@@ -124,6 +124,13 @@ public class MassSpectrum implements Serializable, XmlStorable {
 		findPrimaryAdduct();
 	}
 	
+	public void removeSpectrumForAdduct(Adduct adduct){
+
+		NavigableSet<MsPoint> pointsToRemove = adductMap.remove(adduct);
+		msPoints.removeAll(pointsToRemove);
+		findPrimaryAdduct();
+	}
+	
 	private void findPrimaryAdduct() {
 		
 		double maxIntensity = 0.0d;

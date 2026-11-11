@@ -30,8 +30,8 @@ import java.sql.SQLException;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
-import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.data.enums.DatabseDialect;
+import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 
 public class ConnectionManager {
 	

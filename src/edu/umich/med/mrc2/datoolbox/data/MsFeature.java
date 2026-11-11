@@ -153,7 +153,7 @@ public class MsFeature implements AnnotatedObject, Serializable, XmlStorable {
 
 		id = source.getId();
 		name = source.getName();
-		spectrum = source.getSpectrum();
+		spectrum = new MassSpectrum(source.getSpectrum(), true);
 		polarity = source.getPolarity();
 		retentionTime = source.getRetentionTime();
 		rtRange = new Range(source.getRtRange());

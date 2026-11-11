@@ -22,9 +22,10 @@
 package edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.library;
 
 import java.io.File;
-import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Set;
 import java.util.TreeSet;
 import java.util.UUID;
 
@@ -32,32 +33,21 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jdom2.Document;
 import org.jdom2.Element;
-import org.openscience.cdk.formula.MolecularFormulaGenerator;
-import org.openscience.cdk.formula.MolecularFormulaRange;
-import org.openscience.cdk.interfaces.IChemObjectBuilder;
-import org.openscience.cdk.interfaces.IMolecularFormula;
-import org.openscience.cdk.silent.SilentChemObjectBuilder;
-import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator;
 
 import edu.umich.med.mrc2.datoolbox.data.Adduct;
 import edu.umich.med.mrc2.datoolbox.data.LibraryMsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsPoint;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
-import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
 import edu.umich.med.mrc2.datoolbox.data.enums.MsLibraryFormat;
-import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
-import edu.umich.med.mrc2.datoolbox.msmsscore.MSMSScoreCalculator;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.cef.CEFProcessingTask;
-import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 import edu.umich.med.mrc2.datoolbox.utils.XmlUtils;
-import edu.umich.med.mrc2.datoolbox.utils.isopat.IsotopicPatternUtils;
 
 public class ConvertCefLibraryForRecursionTask extends CEFProcessingTask {
 
 	private boolean combineAdducts;
-	private TreeSet<String> unmatchedAdducts;
+	private Collection<LibraryMsFeature>excludedFeatures;
 
 	public ConvertCefLibraryForRecursionTask(			
 			File sourceLibraryFile,
@@ -88,24 +78,20 @@ public class ConvertCefLibraryForRecursionTask extends CEFProcessingTask {
 			setStatus(TaskStatus.ERROR);
 			return;
 		}
-		try {
-			filterFeaturesByIsotopicPatternQuality();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		try {
-			writeCefLibrary(
-					libraryFeatureListForExport,
-					combineAdducts);
-		} catch (Exception e) {
-			e.printStackTrace();
-			setStatus(TaskStatus.ERROR);
-			return;
-		}
+		filterFeaturesByIsotopicPatternQuality();
+
+		taskDescription = "Writing out CEF library ... ";
+		writeCefLibrary(
+				libraryFeatureListForExport,
+				combineAdducts,
+				outputCefFile);
+
+		if(!excludedFeatures.isEmpty())
+			writeExcludedCef();
+				
 		setStatus(TaskStatus.FINISHED);
 	}
-	
+
 	private void filterFeaturesByIsotopicPatternQuality() {
 		
 		taskDescription = 
@@ -113,83 +99,65 @@ public class ConvertCefLibraryForRecursionTask extends CEFProcessingTask {
 		total = libraryFeatureListForExport.size();
 		processed = 0;
 		Collection<LibraryMsFeature>filtered = new HashSet<LibraryMsFeature>();
-		double error = 0.3d;
-		MolecularFormulaRange ranges = 
-				IsotopicPatternUtils.createElementRanges4SimpleIsoPatternScoring();
-		IChemObjectBuilder builder = SilentChemObjectBuilder.getInstance();
-		MolecularFormulaGenerator mfg = null;
-		//	Adduct adduct = AdductManager.getDefaultAdductForPolarity(Polarity.Neutral);
-		NumberFormat mzFormat = MRC2ToolBoxConfiguration.getMzFormat();
-		
-		//	Debug only
-//		Map<Range,Collection<LibraryMsFeature>>featuresByScore = 
-//				new TreeMap<Range,Collection<LibraryMsFeature>>();
-//		featuresByScore.put(new Range(-1.0d, 0.1d), new HashSet<LibraryMsFeature>());
-//		featuresByScore.put(new Range(0.1d, 0.3d), new HashSet<LibraryMsFeature>());
-//		featuresByScore.put(new Range(0.3d, 0.5d), new HashSet<LibraryMsFeature>());
-//		featuresByScore.put(new Range(0.5d, 0.7d), new HashSet<LibraryMsFeature>());
-//		featuresByScore.put(new Range(0.7d, 1.1d), new HashSet<LibraryMsFeature>());
-		//	End debug
-		
+		excludedFeatures = new ArrayList<>();
+		Set<Adduct>toRemove = new HashSet<>();
+		Set<Adduct>toRemoveFromExcluded = new HashSet<>();
 		for(LibraryMsFeature msf : libraryFeatureListForExport) {
 			
-			mfg = new MolecularFormulaGenerator(
-					builder, msf.getNeutralMass() - error, 
-					msf.getNeutralMass() + error, ranges);
-			IMolecularFormula firstFormula = mfg.getNextFormula();
-			if(firstFormula == null) {
-				
-				System.out.println("No formula for\t" + msf.getName());
-				processed++;
-				continue;
-			}
-			firstFormula = MolecularFormulaManipulator.getMolecularFormula(
-					MolecularFormulaManipulator.getString(firstFormula),builder);
-			
+			toRemove.clear();
+			toRemoveFromExcluded.clear();
 			for(Adduct adduct : msf.getSpectrum().getAdducts()){
-
-				Collection<MsPoint> msPoints = 
-						MsUtils.calculateIsotopeDistribution(firstFormula, adduct, true);
 				
-				double score = MSMSScoreCalculator.calculateEntropyBasedMatchScore(
-						msPoints, msf.getSpectrum().getMsPointsForAdduct(adduct), 350.0, MassErrorType.mDa, 
-						MSMSScoreCalculator.DEFAULT_MS_REL_INT_NOISE_CUTOFF);
-				
-				//	Debug only
-//				for(Entry<Range,Collection<LibraryMsFeature>>fEntry : featuresByScore.entrySet()) {
-//					
-//					if(fEntry.getKey().containsExcludingUpperBorder(score))
-//						fEntry.getValue().add(msf);
-//				}							
-				//	End debug
+				if(msf.getSpectrum().getMsPointsForAdduct(adduct).size() < 2)
+					toRemove.add(adduct);
+				else {
+					if(!isIsotopicPatternLikely(msf.getSpectrum().getMsForAdduct(adduct))) {
+						toRemove.add(adduct);
+					}
+					else {
+						toRemoveFromExcluded.add(adduct);
+					}
+				}
 			}
-			filtered.add(msf);
+			if(!toRemove.isEmpty()) {
+				
+				LibraryMsFeature copy = new LibraryMsFeature(msf);
+				for(Adduct adduct : toRemoveFromExcluded)
+					copy.getSpectrum().removeSpectrumForAdduct(adduct);
+				
+				excludedFeatures.add(copy);
+					
+				for(Adduct adduct : toRemove)					
+					msf.getSpectrum().removeSpectrumForAdduct(adduct);
+			}
+			if(!msf.getSpectrum().getAdducts().isEmpty())
+				filtered.add(msf);
+						
 			processed++;
 		}
-
-		//	Debug only
-//		for(Entry<Range,Collection<LibraryMsFeature>>fEntry : featuresByScore.entrySet()) {
-//			
-//			String outName = "featuresForScoreRange_" + 
-//					MRC2ToolBoxConfiguration.getPpmFormat().format(fEntry.getKey().getMin()) + "_" + 
-//					MRC2ToolBoxConfiguration.getPpmFormat().format(fEntry.getKey().getMax()) + ".cef";
-//			File outputFile = new File(outputCefFile.getParent(), outName);
-//			try {
-//				writeDebugCefLibrary(fEntry.getValue(), outputFile);
-//			} catch (Exception e) {
-//				e.printStackTrace();
-//				setStatus(TaskStatus.ERROR);
-//				return;
-//			}
-//		}
-		//	End debug
-		
 		libraryFeatureListForExport = filtered;
+	}
+	
+	private boolean isIsotopicPatternLikely(MsPoint[]pattern) {
+		
+		if(pattern[0].getIntensity() < pattern[1].getIntensity())
+			return false;
+		
+		//	For now just check for long alternating intensity patterns
+		if(pattern.length > 4) {
+			
+			for(int i=1; i<pattern.length-1; i++) {
+				
+				if(pattern[i].getIntensity() < pattern[i+1].getIntensity())
+					return false;
+			}
+		}		
+		return true;
 	}
 	
 	protected void writeDebugCefLibrary(
 			Collection<LibraryMsFeature>exportTargetList,
-			File outputFile) throws Exception {
+			File outputFile) {
 
 		total = exportTargetList.size();
 		processed = 0;
@@ -204,15 +172,10 @@ public class ConvertCefLibraryForRecursionTask extends CEFProcessingTask {
 		cefRoot.addContent(compoundListElement);
 
 		for(LibraryMsFeature lt : exportTargetList){
-			
-			if(lt.getSpectrum() == null) {
-				System.err.println(lt.getName() + " has no spectrum.");
-				continue;
-			}
+
 			boolean createNewId = false;
 			for(Adduct adduct : lt.getSpectrum().getAdducts()){
 
-				//	TODO make this check optional
 				if(lt.getSpectrum().getMsForAdduct(adduct).length > 1){
 
 					Element compound = createCefCompoundElement(lt, adduct, createNewId);
@@ -230,6 +193,19 @@ public class ConvertCefLibraryForRecursionTask extends CEFProcessingTask {
 		XmlUtils.writePrettyPrintXMLtoFile(exportedLibraryDocument, outputFile);
 	}
 	
+	private void writeExcludedCef() {
+		
+		taskDescription = "Writing out rejected features... ";
+		total = 100;
+		processed = 80;
+		String outputPath = FilenameUtils.removeExtension(outputCefFile.getAbsolutePath()) 
+				+ "_rejected_features." + MsLibraryFormat.CEF.getFileExtension();
+		
+		writeCefLibrary(
+				excludedFeatures,
+				true,
+				new File(outputPath));
+	}
 	
 	@Override
 	public Task cloneTask() {

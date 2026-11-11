@@ -600,7 +600,8 @@ public abstract class CEFProcessingTask extends AbstractTask {
 	
 	protected void writeCefLibrary(
 			Collection<LibraryMsFeature>exportTargetList,
-			boolean combineAdducts) throws Exception {
+			boolean combineAdducts,
+			File destination) {
 
 		total = exportTargetList.size();
 		processed = 0;
@@ -639,12 +640,13 @@ public abstract class CEFProcessingTask extends AbstractTask {
 			}
 			processed++;
 		}
-		String extension = FilenameUtils.getExtension(outputCefFile.getAbsolutePath());
+		String extension = FilenameUtils.getExtension(destination.getAbsolutePath());
 		if(!extension.equalsIgnoreCase(MsLibraryFormat.CEF.getFileExtension()))
-			outputCefFile = new File(FilenameUtils.removeExtension(outputCefFile.getAbsolutePath()) + "."
+			destination = new File(FilenameUtils.removeExtension(outputCefFile.getAbsolutePath()) + "."
 					+ MsLibraryFormat.CEF.getFileExtension());
 
-		XmlUtils.writePrettyPrintXMLtoFile(exportedLibraryDocument, outputCefFile);
+		processed = 80;
+		XmlUtils.writePrettyPrintXMLtoFile(exportedLibraryDocument, destination);
 	}
 	
 	protected Element createCefCompoundElement(
@@ -801,7 +803,7 @@ public abstract class CEFProcessingTask extends AbstractTask {
 		}
 		libraryFeatureListForExport = 
 				new ArrayList<LibraryMsFeature>();
-		inputFeatureList.stream().
+		inputFeatureList.
 			forEach(f -> libraryFeatureListForExport.add(new LibraryMsFeature(f)));
 		libraryFeatureListForExport = libraryFeatureListForExport.stream().
 				sorted(new MsFeatureComparator(SortProperty.RT)).

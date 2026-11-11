@@ -24,13 +24,13 @@ package edu.umich.med.mrc2.datoolbox.utils;
 import java.io.IOException;
 import java.io.PrintStream;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
 public class SysStreamsLogger {
 
-	private static Logger sysOutLogger = LoggerFactory.getLogger("SYSOUT");
-	private static Logger sysErrLogger = LoggerFactory.getLogger("SYSERR");
+	private static Logger sysOutLogger = LogManager.getLogger("SYSOUT");
+	private static Logger sysErrLogger = LogManager.getLogger("SYSERR");
 
 	public static final PrintStream sysout = System.out;
 	public static final PrintStream syserr = System.err;

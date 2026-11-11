@@ -40,9 +40,8 @@ import org.apache.commons.jcs3.JCS;
 import org.apache.commons.jcs3.access.CacheAccess;
 import org.apache.commons.jcs3.access.exception.CacheException;
 import org.apache.commons.jcs3.engine.control.CompositeCacheManager;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.core.LoggerContext;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.DatabaseConnectionSetupDialog;
@@ -63,7 +62,7 @@ public class DbParserCore {
 	public static String tmpDir = dataDir + "tmp" + File.separator;
 	
 	private static DbParserTaskControllerImpl taskController;
-	private static org.slf4j.Logger logger;
+	private static Logger logger;
 	
 	private static CompositeCacheManager compositeCacheManager;
 	private static Properties cacheProps;
@@ -92,11 +91,8 @@ public class DbParserCore {
 				FilePreferencesFactory.class.getName());
 		System.setProperty(FilePreferencesFactory.SYSTEM_PROPERTY_FILE, 
 				MRC2ToolBoxCore.configDir + "MRC2ToolBoxPrefs.txt");
-		
-		//	Configure logging
-		File file = new File(configDir + "log4j2.xml");
-		((LoggerContext) LogManager.getContext(false)).setConfigLocation(file.toURI());			
-		logger = LoggerFactory.getLogger(MRC2ToolBoxCore.class);
+				
+		logger = LogManager.getLogger(MRC2ToolBoxCore.class);
 		logger.info("Statring the program");
 				
 		MRC2ToolBoxConfiguration.initConfiguration();
