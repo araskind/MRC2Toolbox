@@ -60,6 +60,9 @@ public class ChromatographicGradientTableModel extends BasicTableModel {
 	public void setTableModelFromGradient(ChromatographicGradient gradient) {
 
 		setRowCount(0);
+		if(gradient == null)
+			return;
+		
 		Set<ChromatographicGradientStep> steps = gradient.getGradientSteps();
 		if(steps.isEmpty())
 			return;

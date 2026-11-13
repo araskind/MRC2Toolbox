@@ -52,7 +52,17 @@ public class ChromatographicGradientComparator extends ObjectCompatrator<Chromat
 				return result;
 			else
 				return -result;
+			
+		case Name:
+			
+			if(p1.getName() != null && p2.getName() != null)
+				result = p1.getName().compareTo(p2.getName());
 
+			if (direction == SortDirection.ASC)
+				return result;
+			else
+				return -result;
+			
 		default:
 			break;
 		}

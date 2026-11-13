@@ -51,11 +51,15 @@ public class IDTrackerLimsManagerMenuBar extends CommonMenuBar {
 	private static final Icon loadAvgMS1DataFileIcon = GuiUtils.getIcon("importTextfile", 24);
 	private static final Icon importBinnerDataIcon = GuiUtils.getIcon("importBins", 24);
 	private static final Icon scanCefIcon = GuiUtils.getIcon("scanCef", 24);
-	private static final Icon wizardIcon = GuiUtils.getIcon("wizard", 24);
+	private static final Icon wizardIcon = GuiUtils.getIcon("wizard", 24);	
+	private static final Icon toolsIconSmall = GuiUtils.getIcon("tools", 16);
+	private static final Icon gradientIcon = GuiUtils.getIcon("gradient", 24);
+	
 	// Menus
 	private JMenu
 		limsMenu,
-		dataLoadMenu;
+		dataLoadMenu,
+		toolsMenu;
 
 	// LIMS items
 	private JMenuItem
@@ -70,6 +74,9 @@ public class IDTrackerLimsManagerMenuBar extends CommonMenuBar {
 		uploadMSMSFromCefMenuItem,
 		uploadMS1FromCefMenuItem,
 		uploadBinnerDataMenuItem;
+	
+	//	Tools items
+	private JMenuItem showGradientComparatorMenuItem;
 
 	public IDTrackerLimsManagerMenuBar(ActionListener listener) {
 
@@ -121,6 +128,12 @@ public class IDTrackerLimsManagerMenuBar extends CommonMenuBar {
 				importBinnerDataIcon);
 		uploadBinnerDataMenuItem.setEnabled(false);
 		
+		toolsMenu = new JMenu("Tools");
+		toolsMenu.setIcon(toolsIconSmall);
+		showGradientComparatorMenuItem = addItem(toolsMenu, 
+				MainActionCommands.SHOW_GRADIENT_COMPARATOR_COMMAND, 
+				gradientIcon);
+		add(toolsMenu);
 		//	add(dataLoadMenu);		
 	}
 

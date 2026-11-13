@@ -1482,7 +1482,9 @@ public enum MainActionCommands {
 	SHOW_ADDUCT_SELECTOR("Show adduct selector"),
 	SELECT_ADDUCTS("Select adducts"),
 	
-	//	
+	//	Gradient comparator
+	SHOW_GRADIENT_COMPARATOR_COMMAND("Show gradients comparator"),
+	LOAD_GRADIENTSFROM_FILE_COMMAND("Load gradients from file"),
 	
 	//	Debug 
 	GET_DATA_MATRIX_FOR_FEATURE_SET_AND_DESIGN("Get matrix for feature subset"),

@@ -162,10 +162,15 @@ public class MobilePhase implements Serializable, Comparable<MobilePhase>, XmlSt
 		
 		Element mobilePhaseElement = 
 			new Element(ObjectNames.MobilePhase.name());
-		mobilePhaseElement.setAttribute(
-			CommonFields.Id.name(), id);
-		mobilePhaseElement.setAttribute(
-			CommonFields.Name.name(), name);
+		if(id == null)
+			mobilePhaseElement.setAttribute(CommonFields.Id.name(), CommonFields.NULL.name());
+		else
+			mobilePhaseElement.setAttribute(CommonFields.Id.name(), id);
+		
+		if(name == null)
+			mobilePhaseElement.setAttribute(CommonFields.Name.name(), CommonFields.NULL.name());
+		else
+			mobilePhaseElement.setAttribute(CommonFields.Name.name(), name);
 
 		mobilePhaseElement.setAttribute(
 				MobilePhaseFields.starPcnt.name(), 

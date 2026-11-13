@@ -34,6 +34,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -77,30 +78,43 @@ public class AgilentRunDataExtractor {
 	private static Map<WorklistItem,String>gradientMap;
 	private static List<ChromatographicGradient>chromatographicGradientList;
 	private static final String GRADIENT_ID = "Gradient ID";
+	private static final String GRADIENT_LIST = "GradientList";
+	private static final String RUN_POLARITY = "Run polarity";
 	
 	public static void main(String[] args) {
 
-//		File rootFolder = new File("Z:\\Reference Data\\Individual Standards run on QTOFs\\LC10_LC2-IonP");
-		File rootFolder = new File("S:\\DataAnalysis\\__Standards");
-		
-//		File excelReportFile = new File("Z:\\Reference Data\\Individual Standards run on QTOFs\\LC10_LC2-IonP\\MethodReport.xlsx");
-//		gradientMap = new HashMap<>();
-//		chromatographicGradientList = new ArrayList<>();
-//		System.out.println("Extracting data\n**************\n");
-//		Worklist worklist = extractRunData(rootFolder);
-//		System.out.println("\nWriting the report\\n**************\\n");
-//		try {
-//			//	createReport(worklist, excelReportFile);.
-//			
-//		} catch (IOException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//		extractSampleSCICDevicesFile();
-		
-		 extractPolarityData(rootFolder);
+		File rootFolder = new File("Z:\\Reference Data\\Individual Standards run on QTOFs");		
+		File excelReportFile = new File("Z:\\Reference Data\\Individual Standards run on QTOFs\\MethodReport-20261112.xlsx");
+		gradientMap = new HashMap<>();
+		chromatographicGradientList = new ArrayList<>();
+		System.out.println("Extracting data\n**************\n");
+		Worklist worklist = extractRunData(rootFolder);
+		System.out.println("\nWriting the report\n**************\n");
+		try {
+			createReport(worklist, excelReportFile);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		writeGradientCollection(excelReportFile);
+		//	extractSampleSCICDevicesFile();	
+		//	extractPolarityData(rootFolder);
 	}
 	
+	
+	private static void writeGradientCollection(File excelReportFile) {
+		
+		Document exportedGradientsDocument = new Document();
+        Element gradRoot = new Element(GRADIENT_LIST);
+        gradRoot.setAttribute("version", "1.0.0.0");
+        for(ChromatographicGradient grad : chromatographicGradientList)
+        	gradRoot.addContent(grad.getXmlElement());
+         
+        exportedGradientsDocument.addContent(gradRoot);
+		String gradientCollectionFile = FilenameUtils.removeExtension(
+				excelReportFile.getAbsolutePath()) + "_gradient_list.xml";
+		XmlUtils.writePrettyPrintXMLtoFile(exportedGradientsDocument, new File(gradientCollectionFile));
+	}
+
 	private static void extractSampleSCICDevicesFile() {
 
 		 File reportFile = new File("Z:\\Reference Data\\Individual Standards run on QTOFs\\LC10_LC2-IonP\\2-OH butyrate-01.d\\AcqData\\AcqMethod.xml");
@@ -165,6 +179,10 @@ public class AgilentRunDataExtractor {
 			}
 			if (sampleInfoFile.exists()) {
 				WorklistItem runData = extractRunData(sampleInfoFile, peakBinaryFile, baseName, dataFilePath);
+				String polarity = extractPolarity(acqMethodFile);
+				if(polarity != null)
+					runData.setProperty(RUN_POLARITY, polarity);
+				
 				worklist.addItem(runData);
 				ChromatographicGradient newGradient = extractChromatographicGradient(runData);
 				if (newGradient == null) {
@@ -202,10 +220,11 @@ public class AgilentRunDataExtractor {
 					AgilentSampleInfoFields.DATA_FILE.getName(), 
 					AgilentSampleInfoFields.INSTRUMENTNAME.getName(),
 					AgilentSampleInfoFields.METHOD.getName(),
+					RUN_POLARITY,
 					GRADIENT_ID,
 					AgilentSampleInfoFields.ACQUISITION_TIME.getName(),
 					AgilentSampleInfoFields.PEAK_BINARY_FILE_SIZE.getName(),
-					};
+				};
 			for(int i=0; i<headerColumns.length; i++) {
 				Cell cell = row.createCell(i);
 				cell.setCellValue(headerColumns[i]);
@@ -221,14 +240,20 @@ public class AgilentRunDataExtractor {
 				instCell.setCellValue(wli.getProperty(headerColumns[1]));
 				Cell methodCell = itemRow.createCell(2);
 				methodCell.setCellValue(wli.getProperty(headerColumns[2]));
-				Cell gradCell = itemRow.createCell(3);				
-				gradCell.setCellValue(gradientMap.get(wli));
-				Cell injTimeCell = itemRow.createCell(4);
+				Cell polarityCell = itemRow.createCell(3);
+				if(wli.getProperty(headerColumns[3]) != null)
+					polarityCell.setCellValue(wli.getProperty(headerColumns[3]));
+				else
+					polarityCell.setCellValue("");
+				
+				Cell gradCell = itemRow.createCell(4);				
+				gradCell.setCellValue(gradientMap.get(wli));				
+				Cell injTimeCell = itemRow.createCell(5);
 				injTimeCell.setCellValue(wli.getTimeStamp());
 				injTimeCell.setCellStyle(timestampStyle);
-				Cell sizeCell = itemRow.createCell(5);
-				if(wli.getProperty(headerColumns[5]) != null) {
-					sizeCell.setCellValue(Integer.parseInt(wli.getProperty(headerColumns[5])));
+				Cell sizeCell = itemRow.createCell(6);
+				if(wli.getProperty(headerColumns[6]) != null) {
+					sizeCell.setCellValue(Integer.parseInt(wli.getProperty(headerColumns[6])));
 					sizeCell.setCellStyle(fileSizeStyle);					
 				}
 				else
@@ -337,7 +362,7 @@ public class AgilentRunDataExtractor {
 				return cg.getId();
 		}
 		String newId = DataPrefix.CROMATOGRAPHIC_GRADIENT.getName() +
-				"_" + String.format("%05d", (chromatographicGradientList.size() + 1));
+				"_" + String.format("%05d", (chromatographicGradientList.size() + 29)); // to merge with first folder
 		newGradient.setId(newId);
 		chromatographicGradientList.add(newGradient);
 		return newGradient.getId();	
@@ -359,12 +384,16 @@ public class AgilentRunDataExtractor {
 		else {
 			File methodReport =
 					Paths.get(runData.getProperty(AgilentSampleInfoFields.DATA_FILE.getName()), "AcqData", "AcqMethod.xml").toFile();
-			File rcDevicesXmlOutput = Paths.get(methodReport.getParent(), "RCDevices.xml").toFile();
-			AgilentAcquisitionMethodBatchUtils.extractRCDevicesXmlFromAcqMethodReport(methodReport, rcDevicesXmlOutput);
-			
-			ExtractedAgilentAcquisitionMethodParser emp = new ExtractedAgilentAcquisitionMethodParser(rcDevicesXmlOutput);
-			emp.setDoNotMatchMobilePhases(true);
-			return emp.extractChromatographicGradientFromFile();
+			if(methodReport.exists()) {
+				File rcDevicesXmlOutput = Paths.get(methodReport.getParent(), "RCDevices.xml").toFile();
+				AgilentAcquisitionMethodBatchUtils.extractRCDevicesXmlFromAcqMethodReport(methodReport, rcDevicesXmlOutput);
+				
+				ExtractedAgilentAcquisitionMethodParser emp = new ExtractedAgilentAcquisitionMethodParser(rcDevicesXmlOutput);
+				emp.setDoNotMatchMobilePhases(true);
+				return emp.extractChromatographicGradientFromFile();
+			}
+			else
+				return null;
 		}
 	}
 		

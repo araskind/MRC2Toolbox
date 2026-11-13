@@ -129,4 +129,20 @@ public class GradientChartPanel extends MasterPlotPanel {
 		plot.setDataset(dataSet);
 	}
 
+	public void plotGradientPair(
+			ChromatographicGradient activeGradientOne, 
+			ChromatographicGradient activeGradientTwo,
+			GradientPlotParameters plotParams) {
+		
+		removeAllDataSets();
+		
+		// TODO Auto-generated method stub
+		if(activeGradientOne != null)
+			showGradient(activeGradientOne);
+		else {
+			if(activeGradientTwo != null)
+				showGradient(activeGradientTwo);
+		}
+		
+	}
 }

@@ -63,6 +63,7 @@ import edu.umich.med.mrc2.datoolbox.gui.communication.MsFeatureEvent;
 import edu.umich.med.mrc2.datoolbox.gui.dereplication.clustering.BinnerDataImportDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.column.DockableChromatographicColumnManagerPanel;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.dacq.DockableAcquisitionMethodManagerPanel;
+import edu.umich.med.mrc2.datoolbox.gui.idtlims.dacq.grad.GradientComparatorFrame;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.dacq.mobph.DockableMobilePhaseManagerPanel;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.dataimport.IDTrackerMultiFileMSMSDataImportDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.dataimport.IDtrackerAverageMsOneImportDialog;
@@ -140,6 +141,8 @@ public class IDTrackerLimsManagerPanel extends DockableMRC2ToolboxPanel implemen
 	private CefMsMsPrescanSetupDialog cefMsMsPrescanSetupDialog;
 	private IDTrackerDataLoadWizard idTrackerDataLoadWizard;
 	private BinnerDataImportDialog binnerDataImportDialog;
+	
+	private GradientComparatorFrame gradientComparatorFrame;
 
 	public enum ImportType {
 		MS1, IDDA;
@@ -334,9 +337,24 @@ public class IDTrackerLimsManagerPanel extends DockableMRC2ToolboxPanel implemen
 			showBinnerReportImportDialog();	
 		
 		if (command.equals(MainActionCommands.IMPORT_BINNER_DATA_COMMAND.getName()))
-			importBinnerData();		
+			importBinnerData();	
+		
+		if (command.equals(MainActionCommands.SHOW_GRADIENT_COMPARATOR_COMMAND.getName()))
+			showGradientComparatorFrame();	
 	}
 	
+	private void showGradientComparatorFrame() {
+
+		if(gradientComparatorFrame != null 
+				&& gradientComparatorFrame.isVisible()) {
+			gradientComparatorFrame.toFront();
+			return;
+		}		
+		gradientComparatorFrame = new GradientComparatorFrame();
+		gradientComparatorFrame.setLocationRelativeTo(this.getContentPane());
+		gradientComparatorFrame.setVisible(true);
+	}
+
 	private void showBinnerReportImportDialog() {
 		
 		LIMSExperiment experiment = getSelectedExperiment();
