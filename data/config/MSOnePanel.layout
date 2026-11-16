@@ -105,12 +105,12 @@
 									<content delegate="SplitDockStationFactory">
 										<fullscreen-action>false</fullscreen-action>
 										<node nodeId="1600213796575" orientation="HORIZONTAL" divider="0.3503419253024724">
-											<leaf id="1" nodeId="1600213796579">
+											<leaf id="0" nodeId="1600213796579">
 												<placeholders>
 													<placeholder>dock.single.DockableAductSelector</placeholder>
 												</placeholders>
 											</leaf>
-											<leaf id="0" nodeId="1600213796583">
+											<leaf id="1" nodeId="1600213796583">
 												<placeholders>
 													<placeholder>dock.single.DockableMSOneDataEditorPanelDockableSpectumPlot</placeholder>
 												</placeholders>
@@ -143,6 +143,16 @@
 								</layout>
 							</adjacent>
 							<children ignore="false">
+								<child>
+									<layout factory="predefined" placeholder="dock.single.DockableAductSelector">
+										<replacement id="dockablesingle DockableAductSelector"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>DockableAductSelector</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
+								</child>
 								<child>
 									<layout factory="delegate_StackDockStationFactory">
 										<selected>0</selected>
@@ -201,16 +211,6 @@
 											<children ignore="false"/>
 										</child>
 									</children>
-								</child>
-								<child>
-									<layout factory="predefined" placeholder="dock.single.DockableAductSelector">
-										<replacement id="dockablesingle DockableAductSelector"/>
-										<delegate id="delegate_ccontrol backup factory id">
-											<id>DockableAductSelector</id>
-											<area/>
-										</delegate>
-									</layout>
-									<children ignore="false"/>
 								</child>
 							</children>
 						</root>

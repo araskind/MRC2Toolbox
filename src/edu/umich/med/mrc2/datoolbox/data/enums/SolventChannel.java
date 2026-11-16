@@ -22,9 +22,30 @@
 package edu.umich.med.mrc2.datoolbox.data.enums;
 
 public enum SolventChannel {
-	A,
-	B,
-	C,
-	D,
+		
+	A(0),
+	B(1),
+	C(2),
+	D(3),
 	;
+	
+	private final Integer position;
+	
+	SolventChannel(int position){
+		this.position = position;
+	}
+
+	public Integer getPosition() {
+		return position;
+	}
+
+	public static String getChannelByPosition(int position) {
+		
+		for(SolventChannel c : SolventChannel.values()) {
+			
+			if(c.getPosition() == position)
+				return c.name();
+		}
+		return null;
+	}
 }

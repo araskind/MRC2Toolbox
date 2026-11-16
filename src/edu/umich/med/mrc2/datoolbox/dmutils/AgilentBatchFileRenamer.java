@@ -50,9 +50,9 @@ public class AgilentBatchFileRenamer {
 	public static void main(String[] args) {
 		
 		File sourceDirectory = 
-				new File("\\\\uhmetbrespr3\\Data\\_QUALTMP\\EX01622\\LC9\\pos-16min");
+				new File("Y:\\_QUALTMP\\EX01622\\IONP-NEG-LC10\\2-ul");
 		File renameMapFile = new File(
-				"\\\\uhmetbrespr3\\Data\\_QUALTMP\\EX01622\\LC9\\pos-16min\\rename_map.txt");
+				"Y:\\_QUALTMP\\EX01622\\IONP-NEG-LC10\\2-ul\\rename_map.txt");
 		batchDFileRename(sourceDirectory, renameMapFile);
 	}	
 	

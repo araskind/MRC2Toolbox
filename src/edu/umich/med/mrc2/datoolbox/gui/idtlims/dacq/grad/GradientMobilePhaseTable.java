@@ -43,6 +43,7 @@ public class GradientMobilePhaseTable extends BasicTable {
 		columnModel.getColumnById(GradientMobilePhaseTableModel.MOBILE_PHASE_DESCRIPTION_COLUMN)
 			.setCellRenderer(new WordWrapCellRenderer());
 		columnModel.getColumnById(GradientMobilePhaseTableModel.CHANNEL).setWidth(80);
+		columnModel.getColumnById(GradientMobilePhaseTableModel.CHANNEL).setMinWidth(80);
 		columnModel.getColumnById(GradientMobilePhaseTableModel.CHANNEL).setMaxWidth(80);
 		fixedWidthColumns.add(model.getColumnIndex(GradientMobilePhaseTableModel.CHANNEL));		
 		finalizeLayout();
@@ -54,7 +55,7 @@ public class GradientMobilePhaseTable extends BasicTable {
 	public void setTableModelFromMobilePhaseArray(MobilePhase[]phases) {
 
 		((GradientMobilePhaseTableModel)model).setTableModelFromMobilePhaseArray(phases);
-		adjustColumns();
+		//	adjustColumns();
 	}
 
 	public MobilePhase getSelectedMobilePhase() {

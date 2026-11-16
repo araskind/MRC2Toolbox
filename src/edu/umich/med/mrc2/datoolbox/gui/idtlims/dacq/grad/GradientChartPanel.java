@@ -24,6 +24,7 @@ package edu.umich.med.mrc2.datoolbox.gui.idtlims.dacq.grad;
 import java.awt.Color;
 
 import org.jfree.chart.ChartFactory;
+import org.jfree.chart.axis.AxisLocation;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.DatasetRenderingOrder;
 import org.jfree.chart.plot.PlotOrientation;
@@ -32,7 +33,7 @@ import org.jfree.chart.ui.RectangleInsets;
 
 import edu.umich.med.mrc2.datoolbox.data.lims.ChromatographicGradient;
 import edu.umich.med.mrc2.datoolbox.gui.plot.MasterPlotPanel;
-import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.ChromatographicGradientDataSet;
+import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.ChromatographicGradientCompositionDataSet;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 
 public class GradientChartPanel extends MasterPlotPanel {
@@ -41,7 +42,7 @@ public class GradientChartPanel extends MasterPlotPanel {
 	 * 
 	 */
 	private static final long serialVersionUID = 2416827203428639664L;
-	private NumberAxis xAxis, yAxis;
+	private NumberAxis timeAxis, solventCompositionAxis, flowAxis;
 	private Color markerColor;
 
 	public GradientChartPanel() {
@@ -64,19 +65,23 @@ public class GradientChartPanel extends MasterPlotPanel {
 	@Override
 	protected void initAxes() {
 		
-		xAxis = (NumberAxis) plot.getDomainAxis();
-		xAxis.setLabel("Elution time");
-		xAxis.setNumberFormatOverride(MRC2ToolBoxConfiguration.getRtFormat());				
+		timeAxis = (NumberAxis) plot.getDomainAxis();
+		timeAxis.setLabel("Elution time");
+		timeAxis.setNumberFormatOverride(MRC2ToolBoxConfiguration.getRtFormat());				
 
-		xAxis.setUpperMargin(0.05);
-		xAxis.setLowerMargin(0.001);
-		xAxis.setTickLabelInsets(new RectangleInsets(0, 0, 20, 20));
+		timeAxis.setUpperMargin(0.05);
+		timeAxis.setLowerMargin(0.001);
+		timeAxis.setTickLabelInsets(new RectangleInsets(0, 0, 20, 20));
 
-		yAxis = (NumberAxis) plot.getRangeAxis();
-		yAxis.setLabel("Mobile phase %");
-		yAxis.setNumberFormatOverride(MRC2ToolBoxConfiguration.getPpmFormat());
-		yAxis.setUpperMargin(0.1);
-		yAxis.setLowerMargin(0.1);	
+		solventCompositionAxis = (NumberAxis) plot.getRangeAxis();
+		solventCompositionAxis.setLabel("Mobile phase %");
+		solventCompositionAxis.setNumberFormatOverride(MRC2ToolBoxConfiguration.getPpmFormat());
+		solventCompositionAxis.setUpperMargin(0.1);
+		solventCompositionAxis.setLowerMargin(0.1);	
+		
+		flowAxis = new NumberAxis("Flow, ml/min");
+		plot.setRangeAxis(1, flowAxis);
+		plot.setRangeAxisLocation(1, AxisLocation.TOP_OR_RIGHT);
 	}
 
 	@Override
@@ -124,8 +129,8 @@ public class GradientChartPanel extends MasterPlotPanel {
 	
 	public void showGradient(ChromatographicGradient gradient) {
 
-		ChromatographicGradientDataSet dataSet = 
-				new ChromatographicGradientDataSet(gradient);
+		ChromatographicGradientCompositionDataSet dataSet = 
+				new ChromatographicGradientCompositionDataSet(gradient);
 		plot.setDataset(dataSet);
 	}
 
@@ -135,14 +140,21 @@ public class GradientChartPanel extends MasterPlotPanel {
 			GradientPlotParameters plotParams) {
 		
 		removeAllDataSets();
-		
-		// TODO Auto-generated method stub
-		if(activeGradientOne != null)
-			showGradient(activeGradientOne);
-		else {
-			if(activeGradientTwo != null)
-				showGradient(activeGradientTwo);
+		if(plotParams.isShowSolventPercent()) {
+			
+			ChromatographicGradientCompositionDataSet compositionDataSet = 
+					new ChromatographicGradientCompositionDataSet(
+							activeGradientOne, activeGradientTwo, plotParams);
+			plot.setDataset(0, compositionDataSet);
 		}
-		
+		if(plotParams.isShowFlowRate()) {
+			
+		}
+//		if(activeGradientOne != null)
+//			showGradient(activeGradientOne);
+//		else {
+//			if(activeGradientTwo != null)
+//				showGradient(activeGradientTwo);
+//		}		
 	}
 }

@@ -106,13 +106,13 @@
 														<placeholder>dock.single.MsLibraryPanelDockableLibraryFeatureTable</placeholder>
 													</placeholders>
 												</leaf>
-												<leaf id="0" nodeId="1600213797669">
+												<leaf id="1" nodeId="1600213797669">
 													<placeholders>
 														<placeholder>dock.single.MsLibraryPanelDockableMolStructurePanel</placeholder>
 													</placeholders>
 												</leaf>
 											</node>
-											<leaf id="1" nodeId="1600213797671">
+											<leaf id="0" nodeId="1600213797671">
 												<placeholders>
 													<placeholder>dock.single.DockableLibraryFeatureEditorPanel</placeholder>
 												</placeholders>
@@ -128,20 +128,20 @@
 							</adjacent>
 							<children ignore="false">
 								<child>
-									<layout factory="predefined" placeholder="dock.single.MsLibraryPanelDockableMolStructurePanel">
-										<replacement id="dockablesingle MsLibraryPanelDockableMolStructurePanel"/>
+									<layout factory="predefined" placeholder="dock.single.DockableLibraryFeatureEditorPanel">
+										<replacement id="dockablesingle DockableLibraryFeatureEditorPanel"/>
 										<delegate id="delegate_ccontrol backup factory id">
-											<id>MsLibraryPanelDockableMolStructurePanel</id>
+											<id>DockableLibraryFeatureEditorPanel</id>
 											<area/>
 										</delegate>
 									</layout>
 									<children ignore="false"/>
 								</child>
 								<child>
-									<layout factory="predefined" placeholder="dock.single.DockableLibraryFeatureEditorPanel">
-										<replacement id="dockablesingle DockableLibraryFeatureEditorPanel"/>
+									<layout factory="predefined" placeholder="dock.single.MsLibraryPanelDockableMolStructurePanel">
+										<replacement id="dockablesingle MsLibraryPanelDockableMolStructurePanel"/>
 										<delegate id="delegate_ccontrol backup factory id">
-											<id>DockableLibraryFeatureEditorPanel</id>
+											<id>MsLibraryPanelDockableMolStructurePanel</id>
 											<area/>
 										</delegate>
 									</layout>

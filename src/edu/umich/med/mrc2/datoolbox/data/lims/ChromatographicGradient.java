@@ -306,9 +306,14 @@ public class ChromatographicGradient implements Serializable, XmlStorable {
 				break;
 			}
 			Element mobilePhaseElement = mobilePhaseList.get(i);
-			if(mobilePhaseElement.getAttributeValue(
-					CommonFields.Id.name()).equals(CommonFields.NULL.name())){
-				mobilePhases[i] = null;
+			if(mobilePhaseElement.getAttributeValue(CommonFields.Id.name()).equals(CommonFields.NULL.name())){
+				
+				if(mobilePhaseElement.getAttribute(CommonFields.Name.name()) != null 
+						&& !mobilePhaseElement.getAttributeValue(CommonFields.Name.name()).isEmpty()) {
+					mobilePhases[i] = new MobilePhase(mobilePhaseElement);
+				}
+				else
+					mobilePhases[i] = null;
 			}
 			else {
 				mobilePhases[i] = new MobilePhase(mobilePhaseElement);

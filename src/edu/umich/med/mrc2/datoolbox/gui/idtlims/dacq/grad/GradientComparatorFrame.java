@@ -39,6 +39,8 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.prefs.Preferences;
 
 import javax.swing.DefaultListSelectionModel;
@@ -62,14 +64,21 @@ import javax.swing.border.TitledBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
+import org.apache.commons.lang.StringUtils;
 import org.jdom2.Document;
 import org.jdom2.Element;
 
 import edu.umich.med.mrc2.datoolbox.data.enums.SolventChannel;
 import edu.umich.med.mrc2.datoolbox.data.lims.ChromatographicGradient;
+import edu.umich.med.mrc2.datoolbox.data.lims.MobilePhase;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
+import edu.umich.med.mrc2.datoolbox.gui.utils.IndeterminateProgressDialog;
+import edu.umich.med.mrc2.datoolbox.gui.utils.InfoDialogType;
+import edu.umich.med.mrc2.datoolbox.gui.utils.InformationDialog;
+import edu.umich.med.mrc2.datoolbox.gui.utils.LongUpdateTask;
 import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
@@ -97,10 +106,6 @@ public class GradientComparatorFrame extends JFrame
 	private GradientMobilePhaseTable mobilePhaseTableTwo;
 	private GradientListingTable gradientListingTableOne;
 	private GradientListingTable gradientListingTableTwo;
-		
-	private Collection<ChromatographicGradient>gradientList;
-	private ChromatographicGradient activeGradientOne;
-	private ChromatographicGradient activeGradientTwo;
 	
 	private JCheckBox solventPercentCheckBox;
 	private JCheckBox flowRateCheckBox;
@@ -109,6 +114,10 @@ public class GradientComparatorFrame extends JFrame
 	private JCheckBox channelCcheckBox;
 	private JCheckBox channelDcheckBox;
 	
+	private Collection<ChromatographicGradient>gradientList;
+	private Set<String>missingMobilePhases;
+	private ChromatographicGradient activeGradientOne;
+	private ChromatographicGradient activeGradientTwo;
 	private File baseDirectory;
 	
 	public GradientComparatorFrame() throws HeadlessException {
@@ -347,8 +356,61 @@ public class GradientComparatorFrame extends JFrame
 	}
 
 	private void importGradientsFromXMLFile(File gradientListFile) {
+		
+		ImportGradientsTask task = new ImportGradientsTask(gradientListFile);
+		IndeterminateProgressDialog idp = 
+				new IndeterminateProgressDialog(
+						"Importing gradients ...", this, task);
+		idp.setLocationRelativeTo(this.getContentPane());
+		idp.setVisible(true);
+	}
+	
+	class ImportGradientsTask extends LongUpdateTask {
+		/*
+			* Main task. Executed in background thread.
+			*/
+		private File gradientListFile;
+
+		public ImportGradientsTask(File gradientListFile) {
+			this.gradientListFile = gradientListFile;
+		}
+
+		@Override
+		public Void doInBackground() {
+
+			try {
+				readGradiients(gradientListFile);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			return null;
+		}
+
+		@Override
+		public void done() {
+			super.done();
+			if(!missingMobilePhases.isEmpty()) {
+				InformationDialog id = new InformationDialog(
+						"Unknown mobile phases detected", 
+						"The following mobile phases were not matched to the database by name or synonym", 
+						StringUtils.join(missingMobilePhases, "\n"), 
+						InfoDialogType.ERROR);
+				id.setLocationRelativeTo(GradientComparatorFrame.this);
+				id.setVisible(true);
+			}
+			else {
+				gradientListingTableOne.setTableModelFromGradientCollection(gradientList);
+				gradientListingTableTwo.setTableModelFromGradientCollection(gradientList);
+			}
+		}
+	}
+	
+	private void readGradiients(File gradientListFile) {
+		
 		clearPanel();
 		gradientList = new ArrayList<>();
+		missingMobilePhases = new TreeSet<>();
 		Document gradientListDocument = XmlUtils.readXmlFile(gradientListFile);
 		List<Element> gradientElementList = 
 				gradientListDocument.getRootElement().getChildren(ObjectNames.ChromatographicGradient.name());
@@ -364,8 +426,24 @@ public class GradientComparatorFrame extends JFrame
 			if(grad != null)
 				gradientList.add(grad);
 		}
-		gradientListingTableOne.setTableModelFromGradientCollection(gradientList);
-		gradientListingTableTwo.setTableModelFromGradientCollection(gradientList);
+		//	Get mobile phases
+		for(ChromatographicGradient grad : gradientList) {
+			
+			MobilePhase[]mpAssigned = new MobilePhase[4];		
+			for(int i=0; i<4; i++) {
+				
+				if(grad.getMobilePhases()[i] != null) {
+					MobilePhase mpStd =  IDTDataCache.getMobilePhaseByNameOrSynonym(grad.getMobilePhases()[i].getName());
+					if(mpStd == null) 
+						missingMobilePhases.add(grad.getMobilePhases()[i].getName());				
+					else 
+						mpAssigned[i] = mpStd;
+				}
+			}
+			for(int i=0; i<4; i++) {
+				grad.setMobilePhase(mpAssigned[i], i);
+			}
+		}
 	}
 
 	public void clearPanel() {		
@@ -425,7 +503,7 @@ public class GradientComparatorFrame extends JFrame
 		plotParams.setChannelVisibility(SolventChannel.A, channelAcheckBox.isSelected());
 		plotParams.setChannelVisibility(SolventChannel.B, channelBcheckBox.isSelected());
 		plotParams.setChannelVisibility(SolventChannel.C, channelCcheckBox.isSelected());
-		plotParams.setChannelVisibility(SolventChannel.A, channelDcheckBox.isSelected());
+		plotParams.setChannelVisibility(SolventChannel.D, channelDcheckBox.isSelected());
 		
 		gradientChartPanel.plotGradientPair(activeGradientOne, activeGradientTwo, plotParams);
 	}

@@ -23,6 +23,8 @@ package edu.umich.med.mrc2.datoolbox.gui.idtlims.dacq.grad;
 
 import java.util.EnumMap;
 import java.util.Map;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import edu.umich.med.mrc2.datoolbox.data.enums.SolventChannel;
 
@@ -59,5 +61,16 @@ public class GradientPlotParameters {
 	
 	public boolean getChannelVisibility(SolventChannel channel) {
 		return showChannels.get(channel);
-	}	
+	}
+	
+	public SortedSet<Integer>getChannelsToPlot(){
+		
+		TreeSet<Integer>usedChannells = new TreeSet<Integer>();
+		for(SolventChannel c : SolventChannel.values()) {
+			
+			if(showChannels.get(c) )
+				usedChannells.add(c.getPosition());
+		}
+		return usedChannells;
+	}			
 }
