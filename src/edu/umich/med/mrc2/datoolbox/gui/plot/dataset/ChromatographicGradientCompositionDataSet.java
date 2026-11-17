@@ -29,6 +29,7 @@ import java.util.TreeSet;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
+import edu.umich.med.mrc2.datoolbox.data.enums.ChromatographicGradientParameter;
 import edu.umich.med.mrc2.datoolbox.data.enums.SolventChannel;
 import edu.umich.med.mrc2.datoolbox.data.lims.ChromatographicGradient;
 import edu.umich.med.mrc2.datoolbox.data.lims.ChromatographicGradientStep;
@@ -59,10 +60,52 @@ public class ChromatographicGradientCompositionDataSet extends XYSeriesCollectio
 	public ChromatographicGradientCompositionDataSet(
 			ChromatographicGradient activeGradientOne,
 			ChromatographicGradient activeGradientTwo, 
-			GradientPlotParameters plotParams) {
+			GradientPlotParameters plotParams,
+			ChromatographicGradientParameter valueToPlot) {
 		
 		seriesNameMap = new TreeMap<Integer,String>();
 		SortedSet<Integer>channelsToPlot = plotParams.getChannelsToPlot();
+		if(valueToPlot.equals(ChromatographicGradientParameter.SolventComposition))
+			populateSolventCompositionsDataSet(activeGradientOne, activeGradientTwo, channelsToPlot);
+		
+		if(valueToPlot.equals(ChromatographicGradientParameter.FlowRate))
+			populateFlowRatesDataSet(activeGradientOne, activeGradientTwo);			
+	}
+	
+	private void populateFlowRatesDataSet(ChromatographicGradient activeGradientOne,
+			ChromatographicGradient activeGradientTwo) {
+
+		if(activeGradientOne != null) {
+			
+			String seriesName = "[" + activeGradientOne.getId() + "] flow rate";
+			seriesNameMap.put(0, seriesName);
+			XYSeries flowSeries = new XYSeries(seriesName);		
+			for(ChromatographicGradientStep step : activeGradientOne.getGradientSteps())
+				flowSeries.add(step.getStartTime(), step.getFlowRate());
+			
+			addSeries(flowSeries);	
+		}
+		if(activeGradientTwo != null) {
+			
+			if(activeGradientOne != null && activeGradientTwo.equals(activeGradientOne)) {
+				return;
+			}
+			else {
+				String seriesName = "[" + activeGradientTwo.getId() + "] flow rate";
+				seriesNameMap.put(1, seriesName);
+				XYSeries flowSeries = new XYSeries(seriesName);	
+				for(ChromatographicGradientStep step : activeGradientTwo.getGradientSteps())
+					flowSeries.add(step.getStartTime(), step.getFlowRate());
+				
+				addSeries(flowSeries);	
+			}
+		}
+	}
+
+	private void populateSolventCompositionsDataSet(
+			ChromatographicGradient activeGradientOne,
+			ChromatographicGradient activeGradientTwo,
+			Set<Integer>channelsToPlot) {
 		
 		if(activeGradientOne != null) {
 			
@@ -72,7 +115,7 @@ public class ChromatographicGradientCompositionDataSet extends XYSeriesCollectio
 				String seriesName = "[" + activeGradientOne.getId() + "] %" + SolventChannel.getChannelByPosition(i);
 				seriesNameMap.put(i, seriesName);
 				XYSeries gradSeries = new XYSeries(seriesName);
-				for(ChromatographicGradientStep step : activeGradientOne.getGradientSteps())
+				for(ChromatographicGradientStep step : activeGradientOne.getGradientSteps()) 
 					gradSeries.add(step.getStartTime(), step.getMobilePhaseStartingPercent()[i]);
 				
 				addSeries(gradSeries);			

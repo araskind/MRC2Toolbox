@@ -31,6 +31,7 @@ import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.ui.RectangleEdge;
 import org.jfree.chart.ui.RectangleInsets;
 
+import edu.umich.med.mrc2.datoolbox.data.enums.ChromatographicGradientParameter;
 import edu.umich.med.mrc2.datoolbox.data.lims.ChromatographicGradient;
 import edu.umich.med.mrc2.datoolbox.gui.plot.MasterPlotPanel;
 import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.ChromatographicGradientCompositionDataSet;
@@ -144,17 +145,21 @@ public class GradientChartPanel extends MasterPlotPanel {
 			
 			ChromatographicGradientCompositionDataSet compositionDataSet = 
 					new ChromatographicGradientCompositionDataSet(
-							activeGradientOne, activeGradientTwo, plotParams);
+							activeGradientOne, 
+							activeGradientTwo, 
+							plotParams, 
+							ChromatographicGradientParameter.SolventComposition);
 			plot.setDataset(0, compositionDataSet);
 		}
 		if(plotParams.isShowFlowRate()) {
 			
+			ChromatographicGradientCompositionDataSet compositionDataSet = 
+					new ChromatographicGradientCompositionDataSet(
+							activeGradientOne, 
+							activeGradientTwo, 
+							plotParams, 
+							ChromatographicGradientParameter.FlowRate);
+			plot.setDataset(1, compositionDataSet);
 		}
-//		if(activeGradientOne != null)
-//			showGradient(activeGradientOne);
-//		else {
-//			if(activeGradientTwo != null)
-//				showGradient(activeGradientTwo);
-//		}		
 	}
 }
