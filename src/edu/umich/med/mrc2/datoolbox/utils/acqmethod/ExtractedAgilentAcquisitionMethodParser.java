@@ -78,6 +78,9 @@ public class ExtractedAgilentAcquisitionMethodParser {
 	
 	public String extractInstrumentTypeFromFile() {
 
+		if(rcDevicesXmlFile == null)
+			return null;
+		
 		List<String>deviceOptions = new ArrayList<String>();
 		deviceOptions.add("QQQ");
 		deviceOptions.add("Q-TOF");

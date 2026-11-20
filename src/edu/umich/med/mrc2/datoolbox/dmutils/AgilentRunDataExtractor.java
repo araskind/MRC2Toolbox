@@ -38,7 +38,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.FilenameUtils;
@@ -56,7 +58,6 @@ import org.jdom2.Document;
 import org.jdom2.Element;
 
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
-import edu.umich.med.mrc2.datoolbox.data.Worklist;
 import edu.umich.med.mrc2.datoolbox.data.WorklistItem;
 import edu.umich.med.mrc2.datoolbox.data.compare.ChromatographicGradientComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
@@ -83,23 +84,54 @@ public class AgilentRunDataExtractor {
 	
 	public static void main(String[] args) {
 
-		File rootFolder = new File("Z:\\Reference Data\\Individual Standards run on QTOFs");		
-		File excelReportFile = new File("Z:\\Reference Data\\Individual Standards run on QTOFs\\MethodReport-20261112.xlsx");
+//		File rootFolder = new File("Z:\\Reference Data\\Individual Standards run on QTOFs");		
+//		File excelReportFile = new File("Z:\\Reference Data\\Individual Standards run on QTOFs\\MethodReport-20261112.xlsx");
+//		gradientMap = new HashMap<>();
+//		chromatographicGradientList = new ArrayList<>();
+//		System.out.println("Extracting data\n**************\n");
+//		Worklist worklist = extractRunData(rootFolder);
+//		System.out.println("\nWriting the report\n**************\n");
+//		try {
+//			createReport(worklist, excelReportFile);
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
+//		writeGradientCollection(excelReportFile);
+		//	extractSampleSCICDevicesFile();	
+		//	extractPolarityData(rootFolder);
+		
+		extractDataFromMultipleFolders();
+	}
+	
+	private static void extractDataFromMultipleFolders() {
+		
+		Set<File>sourceFolders = new TreeSet<>();		
+		sourceFolders.add(new File("S:\\DataAnalysis\\__Standards"));
+		sourceFolders.add(new File("S:\\DataAnalysis\\__Standards-Organizing"));
+		sourceFolders.add(new File("Z:\\Reference Data\\Individual Standards run on QTOFs"));
+		sourceFolders.add(new File("Z:\\Reference Data\\Individual Standards run on QQQ\\Bile Acids QQQ\\Bile Acids"));
+		sourceFolders.add(new File("Y:\\_QUALTMP\\MetaSci"));
+		
 		gradientMap = new HashMap<>();
 		chromatographicGradientList = new ArrayList<>();
-		System.out.println("Extracting data\n**************\n");
-		Worklist worklist = extractRunData(rootFolder);
+		
+		List<WorklistItem> worklist = new ArrayList<>();
+		for(File sf : sourceFolders) {
+			
+			System.out.println("Extracting data from "+ sf.getAbsolutePath() +"\n**************\n");
+			List<WorklistItem> sfWorklist = extractRunData(sf);
+			worklist.addAll(sfWorklist);
+			System.out.println("\n**************\n");
+		}
 		System.out.println("\nWriting the report\n**************\n");
+		File excelReportFile = new File("S:\\DataAnalysis\\__Standards\\_CombinedMethodReports\\MethodReport4MultipleLocations-20261120.xlsx");
 		try {
 			createReport(worklist, excelReportFile);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		writeGradientCollection(excelReportFile);
-		//	extractSampleSCICDevicesFile();	
-		//	extractPolarityData(rootFolder);
 	}
-	
 	
 	private static void writeGradientCollection(File excelReportFile) {
 		
@@ -130,6 +162,9 @@ public class AgilentRunDataExtractor {
 		
 		Document scicDevicesDocument = 
 				AgilentAcquisitionMethodBatchUtils.getSCICDevicesDocumentFromAcqMethodReportFile(acqMethodFile);
+		if(scicDevicesDocument == null)
+			return null;
+		
 		for(Element sectionInfoElement : scicDevicesDocument.getRootElement().getChildren("SectionInfo")) {
 			
 			if(sectionInfoElement.getChildText("ID").equals("ionPolarity"))
@@ -164,9 +199,9 @@ public class AgilentRunDataExtractor {
 		}
 	}
 	
-	private static Worklist extractRunData(File rootFolder) {
+	private static List<WorklistItem> extractRunData(File rootFolder) {
 
-		Worklist worklist = new Worklist();
+		List<WorklistItem>worklist = new ArrayList<>();
 		List<Path> dataFilesList = FIOUtils.findDirectoriesByExtension(rootFolder.toPath(), ".D");
 		for (Path dataFilePath : dataFilesList) {
 			File df = dataFilePath.toFile();
@@ -183,7 +218,7 @@ public class AgilentRunDataExtractor {
 				if(polarity != null)
 					runData.setProperty(RUN_POLARITY, polarity);
 				
-				worklist.addItem(runData);
+				worklist.add(runData);
 				ChromatographicGradient newGradient = extractChromatographicGradient(runData);
 				if (newGradient == null) {
 					System.out.println("Failed to extract gradient from " + df.getAbsolutePath());
@@ -196,7 +231,7 @@ public class AgilentRunDataExtractor {
 		return worklist;
 	}
 	
-	private static void createReport(Worklist worklist, File excelReportFile) throws IOException {
+	private static void createReport(List<WorklistItem>worklist, File excelReportFile) throws IOException {
 		
 		try (Workbook workbook = new XSSFWorkbook()) {
 			
@@ -231,7 +266,7 @@ public class AgilentRunDataExtractor {
 				cell.setCellStyle(headerStyle);
 			}
 			int rowCount = 1;
-			for(WorklistItem wli : worklist.getWorklistItems()) {
+			for(WorklistItem wli : worklist) {
 				
 				Row itemRow = worklistSheet.createRow(rowCount);
 				Cell dfCell = itemRow.createCell(0);
@@ -362,7 +397,7 @@ public class AgilentRunDataExtractor {
 				return cg.getId();
 		}
 		String newId = DataPrefix.CROMATOGRAPHIC_GRADIENT.getName() +
-				"_" + String.format("%05d", (chromatographicGradientList.size() + 29)); // to merge with first folder
+				"_" + String.format("%05d", (chromatographicGradientList.size() + 1));
 		newGradient.setId(newId);
 		chromatographicGradientList.add(newGradient);
 		return newGradient.getId();	
@@ -386,8 +421,10 @@ public class AgilentRunDataExtractor {
 					Paths.get(runData.getProperty(AgilentSampleInfoFields.DATA_FILE.getName()), "AcqData", "AcqMethod.xml").toFile();
 			if(methodReport.exists()) {
 				File rcDevicesXmlOutput = Paths.get(methodReport.getParent(), "RCDevices.xml").toFile();
-				AgilentAcquisitionMethodBatchUtils.extractRCDevicesXmlFromAcqMethodReport(methodReport, rcDevicesXmlOutput);
+				if(rcDevicesXmlOutput == null || !rcDevicesXmlOutput.exists())
+					return null;
 				
+				AgilentAcquisitionMethodBatchUtils.extractRCDevicesXmlFromAcqMethodReport(methodReport, rcDevicesXmlOutput);				
 				ExtractedAgilentAcquisitionMethodParser emp = new ExtractedAgilentAcquisitionMethodParser(rcDevicesXmlOutput);
 				emp.setDoNotMatchMobilePhases(true);
 				return emp.extractChromatographicGradientFromFile();
