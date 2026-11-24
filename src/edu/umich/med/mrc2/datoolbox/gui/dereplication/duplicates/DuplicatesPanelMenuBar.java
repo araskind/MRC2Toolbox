@@ -46,11 +46,13 @@ public class DuplicatesPanelMenuBar extends CommonMenuBar {
 	protected static final Icon resetFilterIcon = GuiUtils.getIcon("resetFilter", 24);
 	private static final Icon clearDuplicatesIcon = GuiUtils.getIcon("clearDuplicates", 24);
 	private static final Icon exportDuplicatesIcon = GuiUtils.getIcon("saveDuplicates", 24);
-	private static final Icon exportDuplicatesIconSmall = GuiUtils.getIcon("saveDuplicates", 16);
 	private static final Icon showDuplicatesIcon = GuiUtils.getIcon("findDuplicates", 24);
 	private static final Icon showDuplicatesIconSmall = GuiUtils.getIcon("findDuplicates", 16);
 	private static final Icon checkDuplicateNamesIcon = GuiUtils.getIcon("checkDuplicateNames", 24);
 
+	private static final Icon exportIconSmall = GuiUtils.getIcon("export", 16);
+	private static final Icon exportMetabCombinerIcon = GuiUtils.getIcon("exportMetabCombiner", 24);
+	
 	// Menus
 	private JMenu
 		analysisMenu,
@@ -110,7 +112,7 @@ public class DuplicatesPanelMenuBar extends CommonMenuBar {
 		
 		//	Export
 		exportMenu = new JMenu("Export");
-		exportMenu.setIcon(exportDuplicatesIconSmall);
+		exportMenu.setIcon(exportIconSmall);
 
 		exportDuplicatesMenuItem = addItem(exportMenu, 
 				MainActionCommands.EXPORT_DUPLICATES_COMMAND, 

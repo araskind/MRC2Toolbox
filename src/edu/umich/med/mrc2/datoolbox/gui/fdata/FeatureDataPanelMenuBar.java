@@ -82,7 +82,8 @@ public class FeatureDataPanelMenuBar extends CommonMenuBar {
 	private static final Icon exportMetabCombinerIcon = GuiUtils.getIcon("exportMetabCombiner", 24);	
 	private static final Icon exportResultsIconSmall = GuiUtils.getIcon("export", 16);
 	private static final Icon exportExcelIcon = GuiUtils.getIcon("excel", 24);
-	private static final Icon exportMwTabIcon = GuiUtils.getIcon("mwTabReport", 24);
+	private static final Icon exportMwTabIcon = GuiUtils.getIcon("mwTabReport", 24);	
+	private static final Icon export4QCANVASIcon = GuiUtils.getIcon("export4QCANVAS", 24);
 	private static final Icon dataFileToolsIcon = GuiUtils.getIcon("dataFileTools", 24);	
 	private static final Icon exportMzRtStatsIcon = GuiUtils.getIcon("exportMZRT", 24);	
 	private static final Icon exportPeakWidthStatsIcon = GuiUtils.getIcon("smoothChromatogram", 24);	
@@ -157,17 +158,16 @@ public class FeatureDataPanelMenuBar extends CommonMenuBar {
 	
 	// Export items
 	private JMenuItem
+		exportDialogMenuItem,
 		exportForBinnerAnalysisMenuItem,
 		exportForMPPAnalysisMenuItem,
 		exportForRAnalysisMenuItem,
-		exportMzRtStatsMenuItem,
-		exportPeakWidthStatsMenuItem,
+		exportForMetabCombinerMenuItem,
+		exportForQCANVASMenuItem,
 		exportAllStatsMenuItem,
-		exportDialogMenuItem,
 		exportIntegratedReportMenuItem,
-		exportMWTabReportMenuItem,
-		exportMetabCombinerMenuItem;
-		
+		exportMWTabReportMenuItem;
+	
 	// Utils items
 	private JMenuItem
 		sendProjectToTrackerMenuItem,
@@ -358,19 +358,14 @@ public class FeatureDataPanelMenuBar extends CommonMenuBar {
 		exportForRAnalysisMenuItem = addItem(exportMenu, 
 				MainActionCommands.EXPORT_RESULTS_4R_COMMAND, 
 				exportResults4RIcon);
-		exportMetabCombinerMenuItem = addItem(exportMenu, 
+		exportForMetabCombinerMenuItem = addItem(exportMenu, 
 				MainActionCommands.EXPORT_RESULTS_4METAB_COMBINER_COMMAND, 
-				exportMetabCombinerIcon);
+				exportMetabCombinerIcon);		
+		exportForQCANVASMenuItem = addItem(exportMenu, 
+				MainActionCommands.EXPORT_RESULTS_4QCANVAS_COMMAND, 
+				export4QCANVASIcon);
 		
 		exportMenu.addSeparator();
-		
-//		exportMzRtStatsMenuItem = addItem(exportMenu, 
-//				MainActionCommands.EXPORT_MZRT_STATISTICS_COMMAND, 
-//				exportMzRtStatsIcon);
-//		
-//		exportPeakWidthStatsMenuItem = addItem(exportMenu, 
-//				MainActionCommands.EXPORT_PEAK_WIDTH_STATISTICS_COMMAND, 
-//				exportPeakWidthStatsIcon);
 		
 		exportAllStatsMenuItem = addItem(exportMenu, 
 				MainActionCommands.EXPORT_ALL_FEATURE_STATISTICS_COMMAND, 

@@ -75,6 +75,7 @@ import edu.umich.med.mrc2.datoolbox.data.enums.MPPExportFields;
 import edu.umich.med.mrc2.datoolbox.data.enums.MSFeatureSetStatisticalParameters;
 import edu.umich.med.mrc2.datoolbox.data.enums.MetabCombinerExportFields;
 import edu.umich.med.mrc2.datoolbox.data.enums.MissingExportType;
+import edu.umich.med.mrc2.datoolbox.data.enums.QCANVASInputField;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.main.AdductManager;
@@ -214,6 +215,16 @@ public class DataExportTask extends AbstractTask {
 		if (exportType.equals(MainActionCommands.EXPORT_RESULTS_4METAB_COMBINER_COMMAND)) {
 			try {
 				writeMetabCombinerExportFile();
+				setStatus(TaskStatus.FINISHED);
+			} catch (Exception e) {
+				e.printStackTrace();
+				setStatus(TaskStatus.ERROR);
+				return;
+			}
+		}
+		if (exportType.equals(MainActionCommands.EXPORT_RESULTS_4QCANVAS_COMMAND)) {
+			try {
+				writeQCANVASExportFile();
 				setStatus(TaskStatus.FINISHED);
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -734,6 +745,82 @@ public class DataExportTask extends AbstractTask {
 		return header;
 	}
 	
+	private void writeQCANVASExportFile() {
+		
+		taskDescription = "Writing data export file for QCaNVaS ...";
+		total = msFeatureSet4export.size();
+		processed = 0;
+		
+		Map<ExperimentalSample, Map<DataPipeline, DataFile[]>>sampleFileMap = 
+				DataExportUtils.createSampleFileMapForDataPipeline(
+						currentExperiment, experimentDesignSubset, dataPipeline, namingField);
+		
+		ArrayList<String>output = new ArrayList<String>();
+		
+		String[] header = createQCaNVaSExportHeader(sampleFileMap);	
+		int featureColumnIndex = getQCaNVaSfeatureColumnIndex(header);
+		output.add(StringUtils.join(header, columnSeparator));	
+
+		Map<DataFile, Integer> fileColumnMap = 
+				DataExportUtils.createFileColumnMap(sampleFileMap, metadataColumnCount);
+
+		final Matrix dataMatrix = currentExperiment.getDataMatrixForDataPipeline(dataPipeline);
+		MsFeature[] featureList = msFeatureSet4export.stream().
+				sorted(new MsFeatureComparator(SortProperty.RT)).toArray(size -> new MsFeature[size]);
+
+		for( MsFeature msf : featureList){
+			String[] line = new String[header.length];
+			line[featureColumnIndex] = msf.getName();
+			addQuantDataForFeature(msf, dataMatrix, sampleFileMap, fileColumnMap, line);
+			output.add(StringUtils.join(line, columnSeparator));
+			processed++;
+		}
+		try {
+			Files.write(exportFile.toPath(), 
+					output, 
+					StandardCharsets.UTF_8,
+					StandardOpenOption.CREATE, 
+					StandardOpenOption.TRUNCATE_EXISTING);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private int getQCaNVaSfeatureColumnIndex(String[]qCanvasHeader) {
+		
+		int index = -1;
+		for(int i=0; i<QCANVASInputField.values().length; i++) {
+			
+			if(qCanvasHeader[i].equals(QCANVASInputField.FEATURE.getName()))
+				return i;
+		}		
+		return index;
+	}
+
+	private String[] createQCaNVaSExportHeader(Map<ExperimentalSample, Map<DataPipeline, DataFile[]>> sampleFileMap) {
+		
+		String[] columnList =
+				DataExportUtils.createSampleColumnNameArrayForDataPipeline(
+						sampleFileMap, namingField, dataPipeline);
+		
+		String[] header = new String[columnList.length + QCANVASInputField.values().length];
+		int columnCount = 0;
+		for(QCANVASInputField val : QCANVASInputField.values()) {
+			header[columnCount] = val.getName();
+			columnCount++;
+		}
+		metadataColumnCount = QCANVASInputField.values().length;			
+		for(String columnName : columnList) {
+			
+			if(replaceSpecialCharacters)
+				header[++columnCount] = 
+					columnName.replaceAll(FIOUtils.punctuationReplacementPattern, "-");
+			else
+				header[++columnCount] = columnName;
+		}
+		return header;
+	}
+
 	private void writeMetabCombinerExportFile() {
 		
 		taskDescription = "Writing data export file for MetabCombiner ...";

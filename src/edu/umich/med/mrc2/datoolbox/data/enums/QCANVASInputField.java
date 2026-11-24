@@ -31,6 +31,7 @@ public enum QCANVASInputField {
 	AVERAGE_RT("Average RT"),
 	AVERAGE_OLD_RT("Average Old RT"),
 	MEDIAN_MEDIAN_INTENSITY("Median Median Intensity"),
+	SPACER(""),
 	;
 	
 	private final String uiName;

@@ -300,6 +300,7 @@ public enum MainActionCommands {
 	SELECT_DATA_EXPORT_FILE_COMMAND("Set data export file"),
 	EXPORT_RESULTS_4R_COMMAND("Export results for R"),
 	EXPORT_RESULTS_4METAB_COMBINER_COMMAND("Export results for MetabCombiner"),
+	EXPORT_RESULTS_4QCANVAS_COMMAND("Export results for QCaNVaS"),
 	EXPORT_RESULTS_4MPP_COMMAND("Export results for MPP"),
 	EXPORT_RESULTS_4METSCAPE_COMMAND("Export results for MetScape"),
 	EXPORT_RESULTS_4BINNER_COMMAND("Export results for Binner"),

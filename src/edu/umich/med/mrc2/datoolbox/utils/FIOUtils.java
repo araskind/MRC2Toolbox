@@ -324,6 +324,9 @@ public class FIOUtils {
 		if (type.equals(MainActionCommands.EXPORT_RESULTS_4METAB_COMBINER_COMMAND))
 			typeString = "_4MetabCombiner_";
 		
+		if (type.equals(MainActionCommands.EXPORT_RESULTS_4QCANVAS_COMMAND))
+			typeString = "_4QCaNVaS_";
+		
 		if (type.equals(MainActionCommands.EXPORT_RESULTS_4METSCAPE_COMMAND))
 			typeString = "_4MetScape_";
 

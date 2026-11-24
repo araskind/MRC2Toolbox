@@ -33,6 +33,7 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -71,6 +72,7 @@ import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
+import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
@@ -100,12 +102,12 @@ public class DataExportDialog extends JDialog
 	public static final String USE_BINNER_ANNOTATIONS = "USE_BINNER_ANNOTATIONS";
 	public static final String REPLACE_SPEC_CHARS = "REPLACE_SPEC_CHARS";
 	
-	
-	private static final MainActionCommands[] exportTypes = new MainActionCommands[] {
+	private static final MainActionCommands[] exportTypes = {
 			MainActionCommands.EXPORT_RESULTS_4R_COMMAND,
 			MainActionCommands.EXPORT_RESULTS_4MPP_COMMAND,
 			MainActionCommands.EXPORT_RESULTS_4BINNER_COMMAND,
 			MainActionCommands.EXPORT_RESULTS_4METAB_COMBINER_COMMAND,
+			MainActionCommands.EXPORT_RESULTS_4QCANVAS_COMMAND,
 			MainActionCommands.EXPORT_RESULTS_FOR_METABOLOMICS_WORKBENCH_COMMAND,
 			MainActionCommands.EXPORT_RESULTS_4METSCAPE_COMMAND,
 			MainActionCommands.EXPORT_DUPLICATES_COMMAND,
@@ -119,14 +121,14 @@ public class DataExportDialog extends JDialog
 	private FileNameExtensionFilter txtFilter;
 	private JCheckBox exportManifestCheckBox;	
 	private JCheckBox replaceSpecCharsCheckBox;
+	private JCheckBox useBinnerAnnotationsCheckBox;
 	private JButton btnSave;
 
 	private MsFeatureSet activeFeatureSet;
 	private MsFeatureClusterSet activeClusterSet;
 	private File baseDirectory;
 	private File exportFile;
-	private JCheckBox useBinnerAnnotationsCheckBox;
-	
+		
 	public DataExportDialog() {		
 		this(MainActionCommands.EXPORT_RESULTS_4BINNER_COMMAND);
 	}
@@ -327,7 +329,14 @@ public class DataExportDialog extends JDialog
 	private void exportData() {
 		
 		exportFile = null;
-		JnaFileChooser fc = new JnaFileChooser(baseDirectory);
+		File currentDir = baseDirectory;		
+		try {
+			currentDir = baseDirectory.getCanonicalFile();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		JnaFileChooser fc = new JnaFileChooser(currentDir);
 		fc.setMode(JnaFileChooser.Mode.Files);
 		fc.addFilter("Text files", "txt", "TXT");
 		fc.setTitle("Export metabolomics experiment data to text file:");
