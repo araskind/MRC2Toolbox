@@ -76,6 +76,7 @@ public enum ObjectNames {
 	MSMSClusterDataSet,
 	MSMSClusteringParameterSet,
 	MSMSSearchParameterSet,
+	MSRTSearchParameters,
 	Manufacturer,
 	MassAnalyzerType,
 	MetabolomicsExperiment,

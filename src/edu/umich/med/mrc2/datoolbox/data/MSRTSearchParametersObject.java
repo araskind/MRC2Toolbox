@@ -22,11 +22,17 @@
 package edu.umich.med.mrc2.datoolbox.data;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.TreeSet;
 
-import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
+import org.jdom2.Element;
 
-public class MSRTSearchParametersObject {
+import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
+import edu.umich.med.mrc2.datoolbox.project.store.MSRTSearchParametersFields;
+import edu.umich.med.mrc2.datoolbox.project.store.ObjectNames;
+import edu.umich.med.mrc2.datoolbox.project.store.XmlStorable;
+
+public class MSRTSearchParametersObject implements XmlStorable{
 
 	private boolean clearPreviousResults;
 	private double massError;
@@ -36,8 +42,7 @@ public class MSRTSearchParametersObject {
 	private double retentionWindow;
 	private boolean useCustomRtWindow;
 	private int maxHits;
-	private Collection<String>libraryIds;
-	
+	private final Collection<String>libraryIds;
 	
 	public MSRTSearchParametersObject() {
 		super();
@@ -137,5 +142,85 @@ public class MSRTSearchParametersObject {
 
 	public void setClearPreviousResults(boolean clearPreviousResults) {
 		this.clearPreviousResults = clearPreviousResults;
+	}
+
+	@Override
+	public Element getXmlElement() {
+
+		Element msRTSearchParametersElement = 
+				new Element(ObjectNames.MSRTSearchParameters.name());
+		
+		msRTSearchParametersElement.setAttribute(
+				MSRTSearchParametersFields.clearPreviousResults.name(), 
+				Boolean.toString(clearPreviousResults));
+		
+		msRTSearchParametersElement.setAttribute(
+				MSRTSearchParametersFields.massError.name(), 
+				Double.toString(massError));
+		
+		msRTSearchParametersElement.setAttribute(
+				MSRTSearchParametersFields.massErrorType.name(), massErrorType.name());
+		
+		msRTSearchParametersElement.setAttribute(
+				MSRTSearchParametersFields.retentionWindow.name(), 
+				Double.toString(retentionWindow));
+		
+		msRTSearchParametersElement.setAttribute(
+				MSRTSearchParametersFields.relaxMassErrorForMinorIsotopes.name(), 
+				Boolean.toString(relaxMassErrorForMinorIsotopes));
+		
+		msRTSearchParametersElement.setAttribute(
+				MSRTSearchParametersFields.ignoreAdductType.name(), 
+				Boolean.toString(ignoreAdductType));
+		
+		msRTSearchParametersElement.setAttribute(
+				MSRTSearchParametersFields.useCustomRtWindow.name(), 
+				Boolean.toString(useCustomRtWindow));
+		
+		msRTSearchParametersElement.setAttribute(
+				MSRTSearchParametersFields.maxHits.name(), 
+				Integer.toString(maxHits));
+		
+		Element libraryListElement = 
+				new Element(MSRTSearchParametersFields.libraryIdList.name());
+		for(String libId : libraryIds) {
+			
+			Element libraryElement = new Element(MSRTSearchParametersFields.libraryId.name()); 
+			libraryElement.setText(libId);
+			libraryListElement.addContent(libraryElement);
+		}
+		msRTSearchParametersElement.addContent(libraryListElement);
+		
+		return msRTSearchParametersElement;
 	}	
+	
+	public MSRTSearchParametersObject(Element msRTSearchParametersElement) {
+		
+		this.clearPreviousResults = Boolean.parseBoolean(msRTSearchParametersElement.getAttributeValue(
+						MSRTSearchParametersFields.clearPreviousResults.name()));
+		this.massError = Double.parseDouble(msRTSearchParametersElement.getAttributeValue(
+						MSRTSearchParametersFields.massError.name()));
+		this.massErrorType = MassErrorType.getTypeByName(MSRTSearchParametersFields.massErrorType.name()) ;
+		this.relaxMassErrorForMinorIsotopes = Boolean.parseBoolean(msRTSearchParametersElement.getAttributeValue(
+						MSRTSearchParametersFields.relaxMassErrorForMinorIsotopes.name()));
+		this.ignoreAdductType = Boolean.parseBoolean(msRTSearchParametersElement.getAttributeValue(
+						MSRTSearchParametersFields.ignoreAdductType.name()));
+		this.retentionWindow = Double.parseDouble(msRTSearchParametersElement.getAttributeValue(
+						MSRTSearchParametersFields.retentionWindow.name()));
+		this.useCustomRtWindow = Boolean.parseBoolean(msRTSearchParametersElement.getAttributeValue(
+						MSRTSearchParametersFields.useCustomRtWindow.name()));
+		this.maxHits = Integer.parseInt(msRTSearchParametersElement.getAttributeValue(
+						MSRTSearchParametersFields.maxHits.name()));
+		libraryIds = new TreeSet<String>();
+		List<Element>libIdElementList = msRTSearchParametersElement.getChild(
+				MSRTSearchParametersFields.libraryIdList.name()).
+				getChildren(MSRTSearchParametersFields.libraryId.name());
+		for(Element libIdElement : libIdElementList)
+			libraryIds.add(libIdElement.getText());
+	}
 }
+
+
+
+
+

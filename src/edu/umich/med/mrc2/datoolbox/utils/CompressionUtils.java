@@ -58,6 +58,10 @@ import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
 public class CompressionUtils {
+	
+	private CompressionUtils() {
+		/* This utility class should not be instantiated */
+	}
 
 	private static final Logger logger = LogManager.getLogger(CompressionUtils.class);
 
@@ -66,7 +70,7 @@ public class CompressionUtils {
 	 * bytes
 	 *
 	 */
-	public static byte[] decompress(byte compressedBytes[]) throws DataFormatException {
+	public static byte[] decompress(byte[] compressedBytes) throws DataFormatException {
 
 		Inflater decompresser = new Inflater();
 		decompresser.setInput(compressedBytes);
@@ -77,7 +81,7 @@ public class CompressionUtils {
 
 		while (resultLength > 0) {
 
-			byte previousResult[] = resultTotal;
+			byte[] previousResult = resultTotal;
 			resultTotal = new byte[resultTotal.length + resultLength];
 			System.arraycopy(previousResult, 0, resultTotal, 0, previousResult.length);
 			System.arraycopy(resultBuffer, 0, resultTotal, previousResult.length, resultLength);
@@ -95,7 +99,7 @@ public class CompressionUtils {
      * @throws IOException      if the io fails
      * @throws ArchiveException if creating or adding to the archive fails
      */
-    public static void zipFolder(File source, File destination) throws IOException, ArchiveException {
+    public static void zipFolder(File source, File destination) throws IOException {
 
     	if (source == null || !source.exists())
             return;
@@ -154,7 +158,7 @@ public class CompressionUtils {
 	            }
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error(String.format("Failed to extract archive  %s", zipFilePath.toString()), e);
         }
     }
 
@@ -182,20 +186,19 @@ public class CompressionUtils {
                 }
             }
         } catch (FileNotFoundException e) {
-        	logger.error(String.format("%s %s", "Failed to extract data from", archive.getAbsolutePath()), e);
+        	logger.error(String.format("Failed to extract data from %s", archive.getAbsolutePath()), e);
 		} catch (IOException e1) {
-			logger.error(String.format("%s %s", "Failed to extract  data from", archive.getAbsolutePath()), e1);
+			logger.error(String.format("Failed to extract  data from %s", archive.getAbsolutePath()), e1);
 		}
 		Path path = Paths.get(archive.getAbsolutePath());
 	    try {
 			Files.delete(path);
 		} catch (IOException e2) {
-			logger.error(String.format("%s %s", "Failed to delete archive", archive.getAbsolutePath()), e2);
+			logger.error(String.format("Failed to delete archive %s", archive.getAbsolutePath()), e2);
 		}		
 	}
 	
-    public static void zipFile(File source, File destination) 
-    		throws IOException, ArchiveException {
+    public static void zipFile(File source, File destination) throws IOException {
 
     	if (source == null || !source.exists())
             return;
@@ -274,7 +277,7 @@ public class CompressionUtils {
             bufferedOutputStream.close();
             outputStream.close();
         } catch (IOException e) {
-            e.printStackTrace();
+        	logger.error(String.format("Failed to compress folder  %s", fileOrDirectoryToZip), e);
         }
     }
     
@@ -295,25 +298,20 @@ public class CompressionUtils {
             bufferedOutputStream.close();
             outputStream.close();
         } catch (IOException e) {
-            e.printStackTrace();
+        	logger.error("Failed to create archive from multiple files", e);
         }
     }
 
     private static void addFileToZipStream(
-    		ZipArchiveOutputStream zipArchiveOutputStream, 
-    		File fileToZip, 
-    		String base) throws IOException {
+    		ZipArchiveOutputStream zipArchiveOutputStream, File fileToZip, String base) throws IOException{
         String entryName = base + fileToZip.getName();
         ZipArchiveEntry zipArchiveEntry = new ZipArchiveEntry(fileToZip, entryName);
         zipArchiveOutputStream.putArchiveEntry(zipArchiveEntry);
         if(fileToZip.isFile()) {
-            FileInputStream fileInputStream = null;
-            try {
-                fileInputStream = new FileInputStream(fileToZip);
+            
+            try (FileInputStream fileInputStream = new FileInputStream(fileToZip)){
                 IOUtils.copy(fileInputStream, zipArchiveOutputStream);
                 zipArchiveOutputStream.closeArchiveEntry();
-            } finally {
-                IOUtils.closeQuietly(fileInputStream);
             }
         } else {
             zipArchiveOutputStream.closeArchiveEntry();

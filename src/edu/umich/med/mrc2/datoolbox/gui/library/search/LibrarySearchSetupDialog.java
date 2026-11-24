@@ -33,6 +33,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
@@ -51,6 +52,7 @@ import javax.swing.JPanel;
 import javax.swing.JRootPane;
 import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
+import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingUtilities;
@@ -70,27 +72,28 @@ import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
+import edu.umich.med.mrc2.datoolbox.main.config.DefaultFormatStore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 
 public class LibrarySearchSetupDialog extends JDialog implements BackedByPreferences{
 
-	/**
-	 *
-	 */
 	private static final long serialVersionUID = 4926779789933757918L;
-
-	private LibSearchLibraryTable libraryTable;
+	private static final Icon searchLibraryIcon = GuiUtils.getIcon("searchLibrary", 32);
+		
+	private final Collection<MsFeature>featuresToSearch;
+	
 	private JFormattedTextField massErrorTextField;
-	private JComboBox massErrorTypeComboBox;
+	private JComboBox<MassErrorType> massErrorTypeComboBox;
 	private JFormattedTextField rtWindowTextField;
-	private Preferences preferences;
 	private JCheckBox ignoreAddudctTypeCheckBox;
 	private JCheckBox relaxMassErrorCheckBox;
-	private Collection<MsFeature>featuresToSearch;
 	private JSpinner maxHitsSpinner;
 	private JCheckBox useCustomRtWindowsCheckBox;
 	private JCheckBox clearPrevResultsCheckBox;
-
+	private JTextField resultNameTextField;
+	private LibSearchLibraryTable libraryTable;
+	
+	private Preferences preferences;
 	public static final String CLEAR_EXISTING_RESULTS = "CLEAR_EXISTING_RESULTS";
 	public static final String MASS_ERROR_VALUE = "MASS_ERROR_VALUE";
 	public static final String MASS_ERROR_TYPE = "MASS_ERROR_TYPE";
@@ -100,31 +103,92 @@ public class LibrarySearchSetupDialog extends JDialog implements BackedByPrefere
 	public static final String RELAX_MASS_ERROR = "RELAX_MASS_ERROR";
 	public static final String USE_CUSTOM_RT_WINDOWS = "USE_CUSTOM_RT_WINDOWS";
 
-	private static final Icon searchLibraryIcon = GuiUtils.getIcon("searchLibrary", 32);
-
 	public LibrarySearchSetupDialog(
 			ActionListener listener,
 			Collection<MsFeature>featuresToSearch) {
 
 		super(MRC2ToolBoxCore.getMainWindow(), "Setup library search", true);
 		setIconImage(((ImageIcon) searchLibraryIcon).getImage());
-		setSize(new Dimension(640, 480));
-		setPreferredSize(new Dimension(640, 480));
+		setPreferredSize(new Dimension(640, 640));
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		getContentPane().setLayout(new BorderLayout(0, 0));
 		
 		this.featuresToSearch = featuresToSearch;
 
+		createSearchParametersPanel(true);
+		addLibraryTable();
+		addButtonBlock(listener);
+
+		loadPreferences();
+		populateLibraryTable();
+		pack();
+	}
+	
+	public LibrarySearchSetupDialog(MSRTSearchParametersObject searchParameters) {
+		
+		super(MRC2ToolBoxCore.getMainWindow(), "Library search parameters", true);
+		setIconImage(((ImageIcon) searchLibraryIcon).getImage());
+		setPreferredSize(new Dimension(640, 640));
+		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+		getContentPane().setLayout(new BorderLayout(0, 0));
+		
+		this.featuresToSearch = new ArrayList<>();
+		createSearchParametersPanel(false);
+		addLibraryTable();
+		loadSearcParameters(searchParameters);
+		pack();
+	}
+
+	private void addButtonBlock(ActionListener listener) {
+		
+		JPanel panel_1 = new JPanel();
+		panel_1.setBorder(null);
+		getContentPane().add(panel_1, BorderLayout.SOUTH);
+		panel_1.setLayout(new FlowLayout(FlowLayout.RIGHT, 5, 5));
+
+		JButton cancelButton = new JButton("Cancel");
+		panel_1.add(cancelButton);
+
+		JButton searchButton = new JButton("Search");
+		searchButton.setAlignmentY(Component.CENTER_ALIGNMENT);
+		searchButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+		searchButton.setActionCommand(
+				MainActionCommands.SEARCH_FEATURE_SET_AGAINST_LIBRARIES_COMMAND.getName());
+		searchButton.addActionListener(listener);
+		panel_1.add(searchButton);
+
+		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
+		cancelButton.addActionListener(e -> dispose());
+
+		JRootPane rootPane = SwingUtilities.getRootPane(searchButton);
+		rootPane.registerKeyboardAction(al -> dispose(), stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
+		rootPane.setDefaultButton(searchButton);
+	}
+	
+	private void addLibraryTable() {
+		
+		JScrollPane scrollPane = new JScrollPane();
+		scrollPane.setBorder(new CompoundBorder(new EmptyBorder(10, 10, 10, 10), 
+				new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED, new Color(255, 255, 255), 
+						new Color(160, 160, 160)), "Library selector", 
+						TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0))));
+		libraryTable = new LibSearchLibraryTable();
+		scrollPane.setViewportView(libraryTable);		
+		getContentPane().add(scrollPane, BorderLayout.CENTER);
+	}
+	
+	private void createSearchParametersPanel(boolean showResultsNameField) {
+		
 		JPanel panel = new JPanel();
 		panel.setBorder(new CompoundBorder(new EmptyBorder(10, 10, 10, 10), 
 				new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED, new Color(255, 255, 255), 
 						new Color(160, 160, 160)), "Search parameters", 
 						TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0))));
 		GridBagLayout gbl_panel = new GridBagLayout();
-		gbl_panel.columnWidths = new int[]{89, 0, 52, 0, 0};
-		gbl_panel.rowHeights = new int[]{0, 0, 0, 0, 0, 0};
+		gbl_panel.columnWidths = new int[]{89, 79, 80, 0, 0};
+		gbl_panel.rowHeights = new int[]{0, 0, 0, 0, 0, 0, 0};
 		gbl_panel.columnWeights = new double[]{0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
-		gbl_panel.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
+		gbl_panel.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
 		panel.setLayout(gbl_panel);
 		
 		clearPrevResultsCheckBox = 
@@ -220,57 +284,77 @@ public class LibrarySearchSetupDialog extends JDialog implements BackedByPrefere
 
 		ignoreAddudctTypeCheckBox = new JCheckBox("Ignore addudct type");
 		GridBagConstraints gbc_ignoreAddudctTypeCheckBox = new GridBagConstraints();
-		gbc_ignoreAddudctTypeCheckBox.insets = new Insets(0, 0, 0, 5);
+		gbc_ignoreAddudctTypeCheckBox.anchor = GridBagConstraints.WEST;
+		gbc_ignoreAddudctTypeCheckBox.gridwidth = 2;
+		gbc_ignoreAddudctTypeCheckBox.insets = new Insets(0, 0, 5, 5);
 		gbc_ignoreAddudctTypeCheckBox.gridx = 1;
 		gbc_ignoreAddudctTypeCheckBox.gridy = 4;
 		panel.add(ignoreAddudctTypeCheckBox, gbc_ignoreAddudctTypeCheckBox);
 
 		relaxMassErrorCheckBox = new JCheckBox("Relax mass error for minor isotopes");
 		GridBagConstraints gbc_relaxMassErrorCheckBox = new GridBagConstraints();
+		gbc_relaxMassErrorCheckBox.insets = new Insets(0, 0, 5, 0);
 		gbc_relaxMassErrorCheckBox.anchor = GridBagConstraints.WEST;
-		gbc_relaxMassErrorCheckBox.gridwidth = 2;
-		gbc_relaxMassErrorCheckBox.gridx = 2;
+		gbc_relaxMassErrorCheckBox.gridx = 3;
 		gbc_relaxMassErrorCheckBox.gridy = 4;
 		panel.add(relaxMassErrorCheckBox, gbc_relaxMassErrorCheckBox);
 		
 		getContentPane().add(panel, BorderLayout.NORTH);
-
-		JScrollPane scrollPane = new JScrollPane();
-		scrollPane.setBorder(new CompoundBorder(new EmptyBorder(10, 10, 10, 10), 
-				new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED, new Color(255, 255, 255), 
-						new Color(160, 160, 160)), "Library selector", 
-						TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0))));
-		libraryTable = new LibSearchLibraryTable();
-		scrollPane.setViewportView(libraryTable);
 		
-		getContentPane().add(scrollPane, BorderLayout.CENTER);
-
-		JPanel panel_1 = new JPanel();
-		panel_1.setBorder(null);
-		getContentPane().add(panel_1, BorderLayout.SOUTH);
-		panel_1.setLayout(new FlowLayout(FlowLayout.RIGHT, 5, 5));
-
-		JButton cancelButton = new JButton("Cancel");
-		panel_1.add(cancelButton);
-
-		JButton searchButton = new JButton("Search");
-		searchButton.setAlignmentY(Component.CENTER_ALIGNMENT);
-		searchButton.setAlignmentX(Component.CENTER_ALIGNMENT);
-		searchButton.setActionCommand(
-				MainActionCommands.SEARCH_FEATURE_SET_AGAINST_LIBRARIES_COMMAND.getName());
-		searchButton.addActionListener(listener);
-		panel_1.add(searchButton);
-
-		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
-		cancelButton.addActionListener(e -> dispose());
-
-		JRootPane rootPane = SwingUtilities.getRootPane(searchButton);
-		rootPane.registerKeyboardAction(al -> dispose(), stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
-		rootPane.setDefaultButton(searchButton);
-
-		loadPreferences();
-		populateLibraryTable();
-		pack();
+		JLabel lblNewLabel = new JLabel("Results name");
+		GridBagConstraints gbc_resultNameabel = new GridBagConstraints();
+		gbc_resultNameabel.anchor = GridBagConstraints.EAST;
+		gbc_resultNameabel.insets = new Insets(0, 0, 0, 5);
+		gbc_resultNameabel.gridx = 0;
+		gbc_resultNameabel.gridy = 5;
+		panel.add(lblNewLabel, gbc_resultNameabel);
+		
+		if(showResultsNameField) {
+			resultNameTextField = new JTextField();
+			GridBagConstraints gbc_resultNameTextField = new GridBagConstraints();
+			gbc_resultNameTextField.gridwidth = 3;
+			gbc_resultNameTextField.insets = new Insets(0, 0, 0, 5);
+			gbc_resultNameTextField.fill = GridBagConstraints.HORIZONTAL;
+			gbc_resultNameTextField.gridx = 1;
+			gbc_resultNameTextField.gridy = 5;
+			panel.add(resultNameTextField, gbc_resultNameTextField);
+			resultNameTextField.setColumns(10);
+			resultNameTextField.setText("MSRT library search " + 
+					DefaultFormatStore.getDefaultTimeStampFormat().format(new Date()));
+		}
+	}
+	
+	public void loadSearcParameters(MSRTSearchParametersObject searchParameters) {
+		
+		clearPrevResultsCheckBox.setSelected(searchParameters.isClearPreviousResults());
+		massErrorTextField.setText(Double.toString(searchParameters.getMassError()));
+		massErrorTypeComboBox.setSelectedItem(searchParameters.getMassErrorType());
+		rtWindowTextField.setText(Double.toString(searchParameters.getRetentionWindow()));
+		useCustomRtWindowsCheckBox.setSelected(searchParameters.isUseCustomRtWindow());
+		maxHitsSpinner.setValue(searchParameters.getMaxHits());
+		ignoreAddudctTypeCheckBox.setSelected(searchParameters.isIgnoreAdductType());
+		relaxMassErrorCheckBox.setSelected(searchParameters.isRelaxMassErrorForMinorIsotopes());
+		
+		Collection<CompoundLibrary> libraryCollection = new ArrayList<>();
+		for(String libId : searchParameters.getLibraryIds()) {
+			CompoundLibrary lib = IDTDataCache.getMSRTLibraryById(libId);
+			if(lib != null)
+				libraryCollection.add(lib);			
+		}
+		libraryTable.setTableModelFromLibraryCollection(libraryCollection);
+	}
+	
+	public void disableParameterEditing() {
+		
+		clearPrevResultsCheckBox.setEnabled(false);
+		massErrorTextField.setEnabled(false);
+		massErrorTypeComboBox.setEnabled(false);
+		rtWindowTextField.setEnabled(false);
+		useCustomRtWindowsCheckBox.setEnabled(false);
+		maxHitsSpinner.setEnabled(false);
+		ignoreAddudctTypeCheckBox.setEnabled(false);
+		relaxMassErrorCheckBox.setEnabled(false);
+		//	libraryTable.setDefaultEditor(Object.class, null); // ? why this throws exception?
 	}
 
 	@Override
@@ -385,6 +469,9 @@ public class LibrarySearchSetupDialog extends JDialog implements BackedByPrefere
 		if(getRetentionWindow() <= 0.0d)
 			errors.add("MRT window must be > 0");
 		
+		if(getResultFeatureSetName().isEmpty())
+			errors.add("Please give a name to the search result");
+		
 		return errors;
 	}
 	
@@ -405,6 +492,10 @@ public class LibrarySearchSetupDialog extends JDialog implements BackedByPrefere
 			spo.addLibraryId(l.getLibraryId());
 		
 		return spo;
+	}
+	
+	public String getResultFeatureSetName() {
+		return resultNameTextField.getText().trim();
 	}
 }
 

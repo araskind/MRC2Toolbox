@@ -21,16 +21,19 @@
 
 package edu.umich.med.mrc2.datoolbox.data.enums;
 
+import edu.umich.med.mrc2.datoolbox.data.MSRTSearchParametersObject;
 import edu.umich.med.mrc2.datoolbox.gui.fdata.cleanup.FeatureCleanupParameters;
 
 public enum  FeatureSetProperties {
 
-	FILTERING_PARAMETERS("Filtering parameters", FeatureCleanupParameters.class);
+	FILTERING_PARAMETERS("Filtering parameters", FeatureCleanupParameters.class),
+	MS_RT_LIBRARY_SEARCH_PARAMETERS("MS/RT library search parameters", MSRTSearchParametersObject.class),
+	;
 
 	private final String uiName;
-	private final Class clazz;
+	private final Class<?> clazz;
 
-	FeatureSetProperties(String uiName, Class clazz) {
+	FeatureSetProperties(String uiName, Class<?> clazz) {
 		this.uiName = uiName;
 		this.clazz = clazz;
 	}
@@ -39,7 +42,7 @@ public enum  FeatureSetProperties {
 		return uiName;
 	}
 	
-	public Class getClazz() {
+	public Class<?> getClazz() {
 		return clazz;
 	}
 

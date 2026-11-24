@@ -34,6 +34,8 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.jdom2.Element;
 
 import edu.umich.med.mrc2.datoolbox.data.enums.FeatureSetProperties;
@@ -46,10 +48,9 @@ import edu.umich.med.mrc2.datoolbox.project.store.XmlStorable;
 
 public abstract class FeatureSet implements Serializable, Comparable<FeatureSet>, Renamable, XmlStorable{
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 7949191254093826935L;
+	private static final Logger logger = LogManager.getLogger(FeatureSet.class);
+	
 	protected String featureSetName;
 	protected boolean active;
 	protected boolean locked;
@@ -58,7 +59,7 @@ public abstract class FeatureSet implements Serializable, Comparable<FeatureSet>
 	protected boolean suppressEvents;
 	protected Map<FeatureSetProperties,XmlStorable>properties;
 	
-	public FeatureSet(String name) {
+	protected FeatureSet(String name) {
 
 		this.featureSetName = name;
 		active = false;
@@ -258,43 +259,30 @@ public abstract class FeatureSet implements Serializable, Comparable<FeatureSet>
 			String propertyClazzName = 
 					propertyElement.getAttributeValue(CommonFields.Id.name());
 			
-			Class<?> MyPropertyClass = null;
+			Class<?> myPropertyClass = null;
 			try {
-				MyPropertyClass = Class.forName(propertyClazzName);
+				myPropertyClass = Class.forName(propertyClazzName);
 			} catch (ClassNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.error(String.format("Class  %s not found", propertyClazzName), e);
 			}
-			if(MyPropertyClass != null 
-					&& XmlStorable.class.isAssignableFrom(MyPropertyClass)) {
+			if(myPropertyClass != null 
+					&& XmlStorable.class.isAssignableFrom(myPropertyClass)) {
 				
 				Constructor<?> xmlElementConstructor = null;
 				try {
-					xmlElementConstructor = MyPropertyClass.getConstructor(Element.class);
-				} catch (NoSuchMethodException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (SecurityException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					xmlElementConstructor = myPropertyClass.getConstructor(Element.class);
+				} catch (NoSuchMethodException | SecurityException e) {
+					logger.error(String.format("Failed to get constructor "
+							+ "with XML Element argument for %s class", propertyClazzName), e);
 				}
 				if(xmlElementConstructor != null) {
 					
 					XmlStorable propValue = null;
 					try {
 						propValue = (XmlStorable) xmlElementConstructor.newInstance(propertyElement.getChildren().get(0));
-					} catch (InstantiationException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					} catch (IllegalAccessException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					} catch (IllegalArgumentException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					} catch (InvocationTargetException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+					} catch (InstantiationException | IllegalAccessException |
+							IllegalArgumentException | InvocationTargetException e) {
+						logger.error(String.format("Failed to instantiate class %s from XML element", propertyClazzName), e);
 					}
 					if(propValue != null)
 						properties.put(property, propValue);

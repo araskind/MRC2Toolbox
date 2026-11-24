@@ -24,7 +24,8 @@ package edu.umich.med.mrc2.datoolbox.data.enums;
 public enum DataTypeForImport {
 
 	AGILENT_UNTARGETED("Agilent untargeted", "Library & data files in CEF format"),
-	AGILENT_PROFINDER_TARGETED("Agilent targeted (ProFinder)", "Library as simple CSV, data as ProFinder archive"),
+	PROFINDER_WITH_DATABASE_LIBRARY("Agilent ProFinder with library", "Data from ProFinder archive,  library from database"),
+	PROFINDER_ONLY("Agilent ProFinder archive only", "Data and compound information from ProFinder archive"),
 	GENERIC_TARGETED("Generic targeted", "Library and data in a single text file"),
 	;
 	

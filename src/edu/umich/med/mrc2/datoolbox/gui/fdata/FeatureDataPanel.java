@@ -54,7 +54,6 @@ import edu.umich.med.mrc2.datoolbox.data.BinnerAnnotation;
 import edu.umich.med.mrc2.datoolbox.data.CompoundLibrary;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignSubset;
-import edu.umich.med.mrc2.datoolbox.data.MSRTSearchParametersObject;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureCluster;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureClusterSet;
@@ -429,7 +428,7 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 			setupCompoundNameVerification();
 		
 		if (command.equals(MainActionCommands.LOAD_DATA_FROM_PROFINDER_PFA_COMMAND.getName()))
-			showMultifileDataLoader(null, DataTypeForImport.AGILENT_PROFINDER_TARGETED);
+			showMultifileDataLoader(null, DataTypeForImport.PROFINDER_WITH_DATABASE_LIBRARY);
 
 		if (command.equals(MainActionCommands.LOAD_TARGETED_DATA_FROM_PLAIN_TEXT_COMMAND.getName()))
 			showMultifileDataLoader(null, DataTypeForImport.GENERIC_TARGETED);
@@ -1187,11 +1186,10 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 			if(res != JOptionPane.YES_OPTION)
 				return;
 		}
-		MSRTSearchParametersObject spo = 
-				librarySearchSetupDialog.getMSRTSearchParameters();
-		Collection<MsFeature> featuresToSearch = 
-				librarySearchSetupDialog.getFeaturesToSearch();
-		MSRTLibrarySearchTask lst = new MSRTLibrarySearchTask(featuresToSearch, spo);
+		MSRTLibrarySearchTask lst = new MSRTLibrarySearchTask(			
+				librarySearchSetupDialog.getFeaturesToSearch(),
+				librarySearchSetupDialog.getMSRTSearchParameters(),
+				librarySearchSetupDialog.getResultFeatureSetName());
 		lst.addTaskListener(this);
 		MRC2ToolBoxCore.getTaskController().addTask(lst);
 		librarySearchSetupDialog.savePreferences();
@@ -2280,12 +2278,12 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 		}
 	}
 
-	private synchronized void reviewLibrarySearchResults(MSRTLibrarySearchTask lst) {
+	private synchronized void reviewLibrarySearchResults(MSRTLibrarySearchTask task) {
 		
 		MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
 		MainWindow.hideProgressDialog();
 
-		if (lst.getIdentifiedFeatures().isEmpty()) {
+		if (task.getIdentifiedFeatures().isEmpty()) {
 
 			MessageDialog.showWarningMsg(
 					"No identifications found in addition to existing ones", 
@@ -2293,8 +2291,15 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 			featureDataTable.getTable().getSelectionModel().addListSelectionListener(this);
 			return;
 		}
-		setTableModelFromFeatureMap(
-				Collections.singletonMap(activeDataPipeline, lst.getIdentifiedFeatures()));
+		MsFeatureSet searchResults = new MsFeatureSet(task.getResultName(), task.getIdentifiedFeatures());
+		searchResults.setProperty(FeatureSetProperties.MS_RT_LIBRARY_SEARCH_PARAMETERS, task.getSpo());
+		currentExperiment.addFeatureSetForDataPipeline(searchResults, activeDataPipeline);
+		MRC2ToolBoxCore.getMainWindow().getExperimentSetupDraw().
+			getFeatureSubsetPanel().addSetListeners(searchResults);		
+		MetabolomicsProjectUtils.switchActiveMsFeatureSet(searchResults);
+		
+//		setTableModelFromFeatureMap(
+//				Collections.singletonMap(activeDataPipeline, lst.getIdentifiedFeatures()));
 	}
 
 	@Override

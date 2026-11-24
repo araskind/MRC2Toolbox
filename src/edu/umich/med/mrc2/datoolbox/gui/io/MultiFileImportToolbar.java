@@ -230,7 +230,7 @@ public class MultiFileImportToolbar extends CommonToolbar {
 		if(importType.equals(DataTypeForImport.AGILENT_UNTARGETED))
 			updateInterfaceForAgilentUntargetedImport();
 		
-		if(importType.equals(DataTypeForImport.AGILENT_PROFINDER_TARGETED))
+		if(importType.equals(DataTypeForImport.PROFINDER_WITH_DATABASE_LIBRARY))
 			updateInterfaceForProFinderImport();
 		
 		if(importType.equals(DataTypeForImport.GENERIC_TARGETED))

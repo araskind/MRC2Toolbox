@@ -611,7 +611,7 @@ public class DataAnalysisProject extends Project {
 		if(!featureSetMap.get(pipeline).contains(activeSet))
 			featureSetMap.get(pipeline).add(activeSet);
 		
-		featureSetMap.get(pipeline).stream().forEach(s -> {
+		featureSetMap.get(pipeline).forEach(s -> {
 			s.setSuppressEvents(true);
 			s.setActive(false);
 			s.setSuppressEvents(false);

@@ -57,29 +57,33 @@ import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 
 public class MSRTLibrarySearchTask  extends AbstractTask implements TaskListener{
 
-	private boolean clearPreviousResults;
-	private Collection<CompoundLibrary>targetLibraries;
-	private Collection<String>targetLibraryIds;
-	private Collection<String>librariesToLoad;
-	private Collection<MsFeature>inputFeatures;
-	private Collection<MsFeature>identifiedFeatures;
-	private double massAccuracy;
-	private MassErrorType massErrorType;
-	private double rtWindow;
-	private boolean useCustomRtWindows;
-	private int maxHits;
-	private boolean ignoreAddudctMatching;
-	private boolean relaxMinorIsotopeError;
+	private final boolean clearPreviousResults;
+	private final Collection<CompoundLibrary>targetLibraries;
+	private final Collection<String>targetLibraryIds;
+	private final Collection<String>librariesToLoad;
+	private final Collection<MsFeature>inputFeatures;
+	private final double massAccuracy;
+	private final MassErrorType massErrorType;
+	private final double rtWindow;
+	private final boolean useCustomRtWindows;
+	private final int maxHits;
+	private final boolean ignoreAddudctMatching;
+	private final boolean relaxMinorIsotopeError;
+	private final MSRTSearchParametersObject spo;	
+	private final String resultName;
+	private final  Collection<MsFeature>identifiedFeatures;
+	
 	private Map<Polarity, List<LibraryMsFeature>>polarityMap;
 	private boolean librariesLoaded;
-	private MSRTSearchParametersObject spo;
 
 	public MSRTLibrarySearchTask(
 			Collection<MsFeature> featuresToSearch, 
-			MSRTSearchParametersObject spo) {
+			MSRTSearchParametersObject spo,
+			String resultName) {
 		
 		this.inputFeatures = featuresToSearch;
 		this.spo = spo;
+		this.resultName = resultName;
 		this.clearPreviousResults = spo.isClearPreviousResults();
 		this.targetLibraryIds = spo.getLibraryIds();		
 		this.massAccuracy = spo.getMassError();
@@ -92,6 +96,8 @@ public class MSRTLibrarySearchTask  extends AbstractTask implements TaskListener
 				spo.isRelaxMassErrorForMinorIsotopes();
 		targetLibraries = new ArrayList<CompoundLibrary>();
 		librariesLoaded = false;
+		librariesToLoad = new TreeSet<String>();
+		identifiedFeatures = new HashSet<MsFeature>();
 	}
 
 	@Override
@@ -139,7 +145,7 @@ public class MSRTLibrarySearchTask  extends AbstractTask implements TaskListener
 		total = 100;
 		processed = 20;
 		
-		librariesToLoad = new TreeSet<String>();
+		
 		for(String libId : targetLibraryIds) {
 			
 			CompoundLibrary activeLib = MRC2ToolBoxCore.getActiveMsLibraries().
@@ -179,7 +185,7 @@ public class MSRTLibrarySearchTask  extends AbstractTask implements TaskListener
 				.filter(f -> f.isActive())
 				.collect(Collectors.groupingBy(LibraryMsFeature::getPolarity));
 
-		identifiedFeatures = new HashSet<MsFeature>();
+		
 		for(MsFeature f : inputFeatures) {
 
 			taskDescription = "Looking up " + f.getName() + " ...";
@@ -374,7 +380,7 @@ public class MSRTLibrarySearchTask  extends AbstractTask implements TaskListener
 
 	@Override
 	public Task cloneTask() {
-		return new MSRTLibrarySearchTask(inputFeatures, spo);
+		return new MSRTLibrarySearchTask(inputFeatures, spo, resultName);
 	}
 
 	public Collection<MsFeature> getIdentifiedFeatures() {
@@ -405,6 +411,14 @@ public class MSRTLibrarySearchTask  extends AbstractTask implements TaskListener
 			searchLibraries();
 			setStatus(TaskStatus.FINISHED);
 		}
+	}
+
+	public MSRTSearchParametersObject getSpo() {
+		return spo;
+	}
+
+	public String getResultName() {
+		return resultName;
 	}
 }
 

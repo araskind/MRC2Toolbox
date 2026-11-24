@@ -47,7 +47,6 @@ import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignSubsetEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.FeatureSetEvent;
-import edu.umich.med.mrc2.datoolbox.gui.communication.FeatureSetListener;
 import edu.umich.med.mrc2.datoolbox.gui.communication.MsFeatureEvent;
 import edu.umich.med.mrc2.datoolbox.gui.fdata.FeatureDataPanel;
 import edu.umich.med.mrc2.datoolbox.gui.library.LibraryExportDialog;
@@ -198,8 +197,7 @@ public class FeatureSubsetPanel extends DockableMRC2ToolboxPanel {
 	public void addSetListeners(MsFeatureSet newSet) {
 
 		newSet.addListener(this);
-		newSet.addListener((FeatureSetListener) 
-				MRC2ToolBoxCore.getMainWindow().getPanel(PanelList.FEATURE_DATA));
+		newSet.addListener(MRC2ToolBoxCore.getMainWindow().getPanel(PanelList.FEATURE_DATA));
 
 		// TODO link other panels if necessary
 	}

@@ -35,12 +35,14 @@ import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 import javax.swing.table.TableRowSorter;
 
+import edu.umich.med.mrc2.datoolbox.data.MSRTSearchParametersObject;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureSet;
 import edu.umich.med.mrc2.datoolbox.data.compare.NameComparator;
 import edu.umich.med.mrc2.datoolbox.data.enums.FeatureSetProperties;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.gui.fdata.cleanup.FeatureCleanupParameters;
 import edu.umich.med.mrc2.datoolbox.gui.fdata.cleanup.FeatureDataCleanupDialog;
+import edu.umich.med.mrc2.datoolbox.gui.library.search.LibrarySearchSetupDialog;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.RadioButtonRenderer;
@@ -91,6 +93,7 @@ public class FeatureSubsetTable extends BasicTable {
 		this.addMouseListener(
 
 		        new MouseAdapter(){
+		          @Override
 		          public void mouseClicked(MouseEvent e){
 
 		            if (e.getClickCount() == 2)
@@ -101,6 +104,7 @@ public class FeatureSubsetTable extends BasicTable {
 		finalizeLayout();
 	}
 	
+	@Override
 	public void actionPerformed(ActionEvent event) {
 		
 		String command = event.getActionCommand();
@@ -130,6 +134,9 @@ public class FeatureSubsetTable extends BasicTable {
 		
 		if(FeatureCleanupParameters.class.isAssignableFrom(propertyObject.getClass()))			
 			showFeatureCleanupParameters((FeatureCleanupParameters)propertyObject);		
+		
+		if(MSRTSearchParametersObject.class.isAssignableFrom(propertyObject.getClass()))			
+			showMSRTSearchParameters((MSRTSearchParametersObject)propertyObject);			
 	}
 
 	private void showFeatureCleanupParameters(FeatureCleanupParameters propertyObject) {
@@ -140,6 +147,14 @@ public class FeatureSubsetTable extends BasicTable {
 		featureDataCleanupDialog.setEditable(false);
 		featureDataCleanupDialog.setLocationRelativeTo(MRC2ToolBoxCore.getMainWindow().getContentPane());
 		featureDataCleanupDialog.setVisible(true);
+	}
+	
+	private void showMSRTSearchParameters(MSRTSearchParametersObject propertyObject) {
+		
+		LibrarySearchSetupDialog searchParamsDialog = new LibrarySearchSetupDialog(propertyObject);
+		searchParamsDialog.disableParameterEditing();
+		searchParamsDialog.setLocationRelativeTo(MRC2ToolBoxCore.getMainWindow().getContentPane());
+		searchParamsDialog.setVisible(true);
 	}
 
 	private void addFeatureSetPropertiesPopup() {

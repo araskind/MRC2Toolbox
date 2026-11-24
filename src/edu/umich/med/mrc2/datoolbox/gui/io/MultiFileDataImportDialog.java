@@ -33,16 +33,13 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -71,11 +68,11 @@ import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 
-import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
-import org.apache.commons.compress.archivers.zip.ZipFile;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
 import edu.umich.med.mrc2.datoolbox.data.Adduct;
 import edu.umich.med.mrc2.datoolbox.data.CompoundLibrary;
@@ -120,6 +117,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io.MultiCefDataAddTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io.MultiCefImportTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io.ProFinderResultsImportTaskTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io.TargetedDataMatrixImportTask;
+import edu.umich.med.mrc2.datoolbox.utils.CompressionUtils;
 import edu.umich.med.mrc2.datoolbox.utils.DataImportUtils;
 import edu.umich.med.mrc2.datoolbox.utils.DelimitedTextParser;
 import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
@@ -131,7 +129,8 @@ public class MultiFileDataImportDialog extends JDialog
 	 *
 	 */
 	private static final long serialVersionUID = -1605053468969470610L;
-
+	private static final Logger logger = LogManager.getLogger(MultiFileDataImportDialog.class);
+	
 	private static final Icon importMultifileIcon = GuiUtils.getIcon("importMultifile", 32);
 	private static final Icon openIcon = GuiUtils.getIcon("open", 16);
 	//detailedCsv
@@ -174,10 +173,7 @@ public class MultiFileDataImportDialog extends JDialog
 	private DataExtractionMethodEditorDialog dataExtractionMethodEditorDialog;
 	private AdductSelectionDialog adductSelectionDialog;
 	private TargetedDataFileSelectionDialog targetedDataFileSelectionDialog;
-
-	//	private JTextField dataFileTextField;
 	private Collection<Adduct> selectedAdducts;
-	//	private String[]compoundNames;
 	private int linesToSkipAfterHeader;
 	private String featureColumn;
 	private String retentionColumn;
@@ -290,37 +286,6 @@ public class MultiFileDataImportDialog extends JDialog
 		gbc_btnNewButton_2.gridx = 2;
 		gbc_btnNewButton_2.gridy = 1;
 		libChooserPanel.add(selectPFdetailedCsvButton, gbc_btnNewButton_2);
-		
-		/*
-		JLabel dataFileLabel = new JLabel("Data file: ");
-		GridBagConstraints gbc_dataFileLabel = new GridBagConstraints();
-		gbc_dataFileLabel.anchor = GridBagConstraints.EAST;
-		gbc_dataFileLabel.insets = new Insets(0, 0, 5, 5);
-		gbc_dataFileLabel.gridx = 0;
-		gbc_dataFileLabel.gridy = 2;
-		libChooserPanel.add(dataFileLabel, gbc_dataFileLabel);
-		
-		dataFileTextField = new JTextField();
-		dataFileTextField.setEditable(false);
-		GridBagConstraints gbc_dataFileTextField = new GridBagConstraints();
-		gbc_dataFileTextField.insets = new Insets(0, 0, 5, 5);
-		gbc_dataFileTextField.fill = GridBagConstraints.HORIZONTAL;
-		gbc_dataFileTextField.gridx = 1;
-		gbc_dataFileTextField.gridy = 2;
-		libChooserPanel.add(dataFileTextField, gbc_dataFileTextField);
-		dataFileTextField.setColumns(10);
-		
-		JButton btnNewButton_1 = new JButton(openIcon);
-		btnNewButton_1.setActionCommand(
-				MainActionCommands.SELECT_INPUT_LIBRARY_COMMAND.getName());
-		btnNewButton_1.addActionListener(this);	
-		
-		GridBagConstraints gbc_btnNewButton_1 = new GridBagConstraints();
-		gbc_btnNewButton_1.insets = new Insets(0, 0, 5, 0);
-		gbc_btnNewButton_1.gridx = 2;
-		gbc_btnNewButton_1.gridy = 2;
-		libChooserPanel.add(btnNewButton_1, gbc_btnNewButton_1);
-		*/
 		
 		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);		
 		dataPipelineDefinitionPanel = 
@@ -502,8 +467,7 @@ public class MultiFileDataImportDialog extends JDialog
 					selectedMethod, dataExtractionMethodEditorDialog.getMethodFile());
 			IDTDataCache.getDataExtractionMethods().add(selectedMethod);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("Failed to add new data extraction method", e);
 		}
 		dataExtractionMethodEditorDialog.savePreferences();
 		dataExtractionMethodEditorDialog.dispose();
@@ -546,8 +510,7 @@ public class MultiFileDataImportDialog extends JDialog
 					newMethod, methodData.getMethodFile());
 			IDTDataCache.getAcquisitionMethods().add(newMethod);		
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("Failed to add new acquisition method", e);
 		}		
 		acquisitionMethodEditorDialog.dispose();
 	}
@@ -702,26 +665,21 @@ public class MultiFileDataImportDialog extends JDialog
 						Paths.get(proFinderArchiveFile.getParentFile().getAbsolutePath(), 
 						FilenameUtils.getBaseName(proFinderArchiveFile.getName() + 
 						"_" + FIOUtils.getTimestamp())));			
-			} catch (IOException e1) {
-				e1.printStackTrace();
+			} catch (IOException e) {
+				logger.error("Unable to create temporary directory", e);
 			}
-			if(pfaTempDirPath == null) {
+			if(pfaTempDirPath == null || !pfaTempDirPath.toFile().exists()) {
 				MessageDialog.showErrorMsg("Unable to create temporary directory.");
 				return null;
 			}	
 			pfaTempDir = pfaTempDirPath.toFile();
 			dataFileDirectory = proFinderArchiveFile.getParentFile();
 			savePreferences();
-			
-			Collection<File> cefFiles = null;
-			try {
-				cefFiles = extractFile(proFinderArchiveFile, pfaTempDir);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			if(cefFiles != null && !cefFiles.isEmpty()) {
-				
-				File[] resultFiles = cefFiles.toArray(new File[cefFiles.size()]);
+
+			CompressionUtils.extractZip(proFinderArchiveFile.toPath(), pfaTempDir.toPath());
+			Collection<Path> cefFiles = FIOUtils.findFilesByExtension(pfaTempDirPath, "cef");		
+			if(!cefFiles.isEmpty()) {				
+				File[] resultFiles = cefFiles.stream().map(s -> s.toFile()).toArray(size -> new File[size]);
 				addResultsToNewPipeline(pipeline, resultFiles);
 				pfaLoaded = true;
 			}
@@ -731,44 +689,12 @@ public class MultiFileDataImportDialog extends JDialog
 				try {
 					FileUtils.deleteDirectory(pfaTempDir);
 				} catch (IOException e) {
-					e.printStackTrace();
+					logger.error(String.format("Unable to delete temporary directory %s", pfaTempDir.getAbsolutePath()), e);
 				}
 				return null;
 			}	
 			return null;
 		}
-			
-	    private Collection<File> extractFile(File zipFile, File destinationDir) throws Exception {
-	    	
-	    	Collection<File>cefFiles = new TreeSet<>();
-	        byte[] buffer = new byte[4096];
-	        ZipFile zf = new ZipFile(zipFile);
-	        Enumeration<ZipArchiveEntry> entries = zf.getEntries();
-	        while(entries.hasMoreElements()) {
-	        	
-	            ZipArchiveEntry ze = entries.nextElement();
-	            String zefilename = ze.getName();
-	            if(zefilename.toLowerCase().endsWith(".cef")) {
-	            	
-	                System.out.println("Extracting file: " + zefilename);
-	                File extfile = Paths.get(destinationDir.getAbsolutePath(), zefilename).toFile();
-	                InputStream zis = zf.getInputStream(ze);
-	                FileOutputStream fos = new FileOutputStream(extfile);
-	                try {
-	                    int numBytes;
-	                    while ((numBytes = zis.read(buffer, 0, buffer.length)) != -1)
-	                        fos.write(buffer, 0, numBytes);
-	                }
-	                finally {
-	                    fos.close();
-	                    zis.close();
-	                    cefFiles.add(extfile);
-	                }
-	            }
-	        }
-	        zf.close();
-	        return cefFiles;
-	    }
 	}
 
 	public synchronized void clearPanel() {
@@ -823,7 +749,7 @@ public class MultiFileDataImportDialog extends JDialog
 			if(dataTypeForImport.equals(DataTypeForImport.AGILENT_UNTARGETED))
 				initiateUntargetedDataImport(dataToImport, importPipeline);
 			
-			if(dataTypeForImport.equals(DataTypeForImport.AGILENT_PROFINDER_TARGETED))
+			if(dataTypeForImport.equals(DataTypeForImport.PROFINDER_WITH_DATABASE_LIBRARY))
 				initiateProFinderDataImport(dataToImport, importPipeline);
 			
 			if(dataTypeForImport.equals(DataTypeForImport.GENERIC_TARGETED))
@@ -897,7 +823,7 @@ public class MultiFileDataImportDialog extends JDialog
 		if(dataTypeForImport.equals(DataTypeForImport.AGILENT_UNTARGETED))
 			validateInputDataForAgilentUntargetedImport();
 
-		if(dataTypeForImport.equals(DataTypeForImport.AGILENT_PROFINDER_TARGETED))
+		if(dataTypeForImport.equals(DataTypeForImport.PROFINDER_WITH_DATABASE_LIBRARY))
 			validateInputDataForAgilentProFinderImport();
 		
 //		if(dataTypeForImport.equals(DataTypeForImport.GENERIC_TARGETED))
@@ -1214,7 +1140,7 @@ public class MultiFileDataImportDialog extends JDialog
 		if(importType.equals(DataTypeForImport.AGILENT_UNTARGETED))
 			updateInterfaceForAgilentUntargetedImport();
 		
-		if(importType.equals(DataTypeForImport.AGILENT_PROFINDER_TARGETED))
+		if(importType.equals(DataTypeForImport.PROFINDER_WITH_DATABASE_LIBRARY))
 			updateInterfaceForProFinderImport();
 		
 		if(importType.equals(DataTypeForImport.GENERIC_TARGETED))
